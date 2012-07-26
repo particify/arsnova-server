@@ -17,6 +17,51 @@
   		<version>1.7.2</version>
   		<type>war</type>
   	</dependency>
+  	<dependency>
+  		<groupId>org.springframework.security</groupId>
+  		<artifactId>spring-security-web</artifactId>
+  		<version>3.0.7.RELEASE</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.springframework.security</groupId>
+  		<artifactId>spring-security-cas-client</artifactId>
+  		<version>3.0.7.RELEASE</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.springframework.security</groupId>
+  		<artifactId>spring-security-config</artifactId>
+  		<version>3.0.7.RELEASE</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.springframework.security</groupId>
+  		<artifactId>spring-security-openid</artifactId>
+  		<version>3.0.7.RELEASE</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.springframework.social</groupId>
+  		<artifactId>spring-social-facebook</artifactId>
+  		<version>1.0.1.RELEASE</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.springframework.social</groupId>
+  		<artifactId>spring-social-twitter</artifactId>
+  		<version>1.0.2.RELEASE</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.springframework</groupId>
+  		<artifactId>spring-webmvc</artifactId>
+  		<version>3.0.7.RELEASE</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>jstl</groupId>
+  		<artifactId>jstl</artifactId>
+  		<version>1.2</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>cglib</groupId>
+  		<artifactId>cglib</artifactId>
+  		<version>2.2.2</version>
+  	</dependency>
   </dependencies>
   <build>
   	<plugins>

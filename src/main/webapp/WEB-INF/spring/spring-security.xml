@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sec="http://www.springframework.org/schema/security"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+	<context:component-scan base-package="de.thm.arsnova" />
+	<context:annotation-config />
+	
+	<sec:http entry-point-ref="casEntryPoint" disable-url-rewriting="true">
+		<sec:intercept-url pattern="/j_spring_security_check" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<sec:intercept-url pattern="/doCasLogin" access="ROLE_USER" />
+		<sec:custom-filter ref="casFilter" position="CAS_FILTER" />
+		<sec:openid-login user-service-ref="openidUserDetailsService" default-target-url="http://localhost:8080/arsnova/doOpenIdLogin" />
+	</sec:http>
+
+	<bean id="casFilter"
+		class="org.springframework.security.cas.web.CasAuthenticationFilter">
+		<property name="authenticationManager" ref="casAuthManager" />
+	</bean>
+
+	<bean id="casEntryPoint"
+		class="org.springframework.security.cas.web.CasAuthenticationEntryPoint">
+		<property name="loginUrl" value="https://cas.thm.de/cas/login" />
+		<property name="serviceProperties" ref="serviceProperties" />
+	</bean>
+
+	<sec:authentication-manager alias="casAuthManager">
+		<sec:authentication-provider ref="casAuthProvider" />
+	</sec:authentication-manager>
+
+	<!-- TODO: Replace local URL with real world url / parameter? -->
+	<bean id="serviceProperties" class="org.springframework.security.cas.ServiceProperties">
+		<property name="service" value="http://localhost:8080/arsnova/j_spring_cas_security_check" />
+		<property name="sendRenew" value="false" />
+	</bean>
+
+	<bean id="casAuthProvider"
+		class="org.springframework.security.cas.authentication.CasAuthenticationProvider"
+		p:serviceProperties-ref="serviceProperties" p:key="casAuthProviderKey">
+		<property name="authenticationUserDetailsService">
+			<bean class="de.thm.arsnova.CasUserDetailsService" />
+		</property>
+		<property name="ticketValidator">
+			<bean class="org.jasig.cas.client.validation.Cas20ProxyTicketValidator">
+				<constructor-arg value="https://cas.thm.de/cas" />
+			</bean>
+		</property>
+	</bean>
+</beans>
