@@ -18,6 +18,7 @@
 	<mvc:resources mapping="/dijit/**" location="/dijit/"/>
 	<mvc:resources mapping="/dojox/**" location="/dojox/"/>
 	<mvc:resources mapping="/app/**" location="/app/"/>
+	<mvc:resources mapping="/views/**" location="/views/"/>
 	
 	<mvc:annotation-driven />
 
