@@ -17,6 +17,32 @@
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 	<servlet>
+        <servlet-name>
+			wsMessage
+        </servlet-name>
+        <servlet-class>
+			de.thm.arsnova.websockets.Message
+        </servlet-class>
+        <!--
+	      <init-param>
+	        <param-name>byteBufferMaxSize</param-name>
+	        <param-value>20971520</param-value>
+	      </init-param>
+	      <init-param>
+	        <param-name>charBufferMaxSize</param-name>
+	        <param-value>20971520</param-value>
+	      </init-param>
+        -->
+    </servlet>
+    <servlet-mapping>
+	    <servlet-name>
+			wsMessage
+        </servlet-name>
+        <url-pattern>
+			/websocket/message
+        </url-pattern>
+    </servlet-mapping>
+	<servlet>
 		<servlet-name>arsnova</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
