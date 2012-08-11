@@ -27,7 +27,7 @@
 		<sec:openid-login user-service-ref="openidUserDetailsService"
 			default-target-url="${security.openid-target-url}" />
 	</sec:http>
-
+	
 	<bean id="casFilter"
 		class="org.springframework.security.cas.web.CasAuthenticationFilter">
 		<property name="authenticationManager" ref="casAuthManager" />

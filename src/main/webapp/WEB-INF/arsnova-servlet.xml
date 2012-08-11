@@ -14,8 +14,8 @@
 	<mvc:resources mapping="/**.html" location="/" />
 	<mvc:resources mapping="/**.png" location="/"/>
 	<mvc:resources mapping="/**.manifest" location="/"/>
-	<mvc:resources mapping="/config.json" location="/"/>
-	<mvc:resources mapping="/config.xml" location="/"/>
+	<mvc:resources mapping="/**.json" location="/"/>
+	<mvc:resources mapping="/**.xml" location="/"/>
 	<mvc:resources mapping="/dojo/**" location="/dojo/"/>
 	<mvc:resources mapping="/dijit/**" location="/dijit/"/>
 	<mvc:resources mapping="/dojox/**" location="/dojox/"/>
