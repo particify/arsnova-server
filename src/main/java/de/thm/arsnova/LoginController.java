@@ -19,16 +19,23 @@ public class LoginController {
 		return new ModelAndView("redirect:/#auth/checkCasLogin/" + user.getUsername());
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/openIdLogin")
-	public ModelAndView openIdLogin() {
-		return new ModelAndView("openidlogin");
-	}
-	
 	@RequestMapping(method = RequestMethod.GET, value = "/doOpenIdLogin")
 	public ModelAndView doOpenIdLogin() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		User user = (User) authentication.getPrincipal();
-		String userHash = new ShaPasswordEncoder(256).encodePassword(user.getUsername(), "");
+
+		String userHash = null;
+		
+		try {
+			User user = (User) authentication.getPrincipal();
+			userHash = new ShaPasswordEncoder(256).encodePassword(user.getUsername(), "");
+		} catch (ClassCastException e) {
+			// Principal is of type String
+			userHash = new ShaPasswordEncoder(256).encodePassword(
+				(String)authentication.getPrincipal(),
+				""
+			);
+		}
+
 		return new ModelAndView("redirect:/#auth/checkCasLogin/" + userHash);
 	}
 	
