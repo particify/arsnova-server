@@ -7,9 +7,14 @@
 	<packaging>war</packaging>
 	<repositories>
 		<repository>
-			<id>deployment</id>
+			<id>thmrepo</id>
 			<name>THM Maven Repository</name>
-			<url>https://maven.mni.thm.de/content/repositories</url>
+			<url>http://maven.mni.thm.de/content/repositories</url>
+		</repository>
+		<repository>
+			<id>thmmirror</id>
+			<name>THM Maven Mirror</name>
+			<url>http://maven.mni.thm.de/content/groups/public</url>
 		</repository>
 	</repositories>
 	<dependencies>
