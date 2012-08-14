@@ -9,7 +9,7 @@
 		<repository>
 			<id>deployment</id>
 			<name>THM Maven Repository</name>
-			<url>https://scm.mni.thm.de/maven/content/repositories</url>
+			<url>https://maven.mni.thm.de/content/repositories</url>
 		</repository>
 	</repositories>
 	<dependencies>
