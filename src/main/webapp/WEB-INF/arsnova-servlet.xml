@@ -24,6 +24,7 @@
 	<mvc:resources mapping="/lib/**" location="/lib/"/>
 	<mvc:resources mapping="/resources/**" location="/resources/"/>
 	<mvc:resources mapping="/screenshots/**" location="/screenshots/"/>
+        <mvc:resources mapping="/templates/**" location="/templates/"/>
 	
 	<mvc:annotation-driven />
 
