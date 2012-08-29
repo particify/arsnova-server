@@ -12,3 +12,33 @@ Both versions of ARSnova will be deployed alongside each other, so you get to ch
 
 You will need to do some configuration work upfront. Currently, you need to create a file named `config.properties` inside the `src/main/webapp` folder. The easiest way of doing this is to copy the provided `config.properties.example` and to rename it accordingly. These defaults should get you started.
 
+## Server configuration
+
+In order to build up a full featured server installation containing ARSnova2 and CouchDB you have to install at least the following services:
+ * Apache Tomcat 7.0.29 (or newer)
+ * Apache Webserver 2.2 or newer with buildin mod_proxy, mod_proxy_ajp and mod_proxy_http
+ * Apache CouchDB
+ 
+Make sure all services are installed. Next step is to configure the Apache Webserver. Find the configuration file or create a new one for use with a virtal host. This depends on your needs. At least you should have a configuration containing these settings:
+
+<Location /couchdb/>
+ ProxyPass http://127.0.0.1:5984/
+ ProxyPassReverse http://127.0.0.1:5984/
+</Location> 
+<Location />
+ ProxyPass ajp://127.0.0.1:8009/
+ ProxyPassReverse ajp://127.0.0.1:8009/
+</Location>
+
+This will redirect all requests for "/couchdb/..." to your Apache CouchDB server, running on port 5984.
+All other requests will be send to your Apache Tomcat servelt container, using AJP running on port 8009.
+
+To enable the needed Apache Webserver simply type:
+
+# a2enmod proxy
+# a2enmod proxy_ajp
+# a2enmod proxy_http
+
+The configuration is ready for development usage. 
+
+Finally you should (re)start all services. ARSnova2 is now listening on HTTP port 80.
