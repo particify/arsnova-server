@@ -18,6 +18,8 @@
  */
 package de.thm.arsnova;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,10 +33,16 @@ import org.springframework.web.servlet.ModelAndView;
 public class LoginController {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/doCasLogin")
-	public ModelAndView doCasLogin() {
+	public ModelAndView doCasLogin(HttpServletRequest request) {
+		String referer = request.getHeader("referer");
+		String target = "";
+		if (referer.endsWith("dojo-index.html")) {
+			target = "dojo-index.html";
+		}
+		
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		User user = (User) authentication.getPrincipal();
-		return new ModelAndView("redirect:/#auth/checkCasLogin/" + user.getUsername());
+		return new ModelAndView("redirect:/" + target + "#auth/checkCasLogin/" + user.getUsername());
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/doOpenIdLogin")
