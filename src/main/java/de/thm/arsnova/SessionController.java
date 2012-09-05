@@ -18,13 +18,17 @@
  */
 package de.thm.arsnova;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.services.ISessionService;
@@ -39,6 +43,24 @@ public class SessionController {
 	public Session getSession(@PathVariable String sessionkey, HttpServletResponse response) {
 		Session session = sessionService.getSession(sessionkey);
 		if (session != null) return session;
+		
+		response.setStatus(HttpStatus.NOT_FOUND.value());
+		return null;
+	}
+	
+	@RequestMapping(value="/session/{sessionkey}/feedback", method=RequestMethod.GET)
+	public List<Integer> getFeedback(@PathVariable String sessionkey, HttpServletResponse response) {
+		List<Integer> feedback = sessionService.getFeedback(sessionkey);
+		if (feedback != null) return feedback;
+		
+		response.setStatus(HttpStatus.NOT_FOUND.value());
+		return null;
+	}
+	
+	@RequestMapping(value="/session/{sessionkey}/feedback", method=RequestMethod.POST)
+	public List<Integer> postFeedback(@PathVariable String sessionkey, @RequestBody int value, HttpServletResponse response) {
+		List<Integer> feedback = sessionService.getFeedback(sessionkey);
+		if (feedback != null) return feedback;
 		
 		response.setStatus(HttpStatus.NOT_FOUND.value());
 		return null;

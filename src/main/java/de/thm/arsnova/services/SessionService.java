@@ -19,6 +19,8 @@
 package de.thm.arsnova.services;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.sf.json.JSONObject;
 
@@ -36,15 +38,15 @@ import de.thm.arsnova.entities.Session;
 public class SessionService implements ISessionService {
 
 	private final com.fourspaces.couchdb.Session session = new com.fourspaces.couchdb.Session("localhost", 5984);
-	public static final Logger logger = LoggerFactory
-			.getLogger(SessionService.class);
-
+	private final Database database = session.getDatabase("arsnova");
+	
+	public static final Logger logger = LoggerFactory.getLogger(SessionService.class);
+	
 	@Override
 	public Session getSession(String keyword) {
-		Database db = session.getDatabase("arsnova");
 		View view = new View("session/by_keyword");
 		view.setKey(URLEncoder.encode("\""+keyword+"\""));
-		ViewResults results = db.view(view);
+		ViewResults results = database.view(view);
 
 		if (results.getJSONArray("rows").optJSONObject(0) == null) return null;
 		
@@ -55,4 +57,37 @@ public class SessionService implements ISessionService {
 		return null;
 	}
 
+	@Override
+	public List<Integer> getFeedback(String keyword) {
+		String sessionId = this.getSessionId(keyword);
+		if (sessionId == null) return null;
+		
+		View view = new View("understanding/by_session");
+		view.setGroup(true);
+		view.setStartKey(URLEncoder.encode("[\""+sessionId+"\"]"));
+		view.setEndKey(URLEncoder.encode("[\""+sessionId+"\"],{}"));
+		ViewResults results = database.view(view);
+		
+		//if (results.getJSONArray("rows").optJSONObject(0) == null) return null;
+		
+		logger.info("Feedback: {}", results.getJSONObject("rows"));
+		
+		return null;
+	}
+	
+	@Override
+	public void postFeedback(String keyword, int value) {
+				
+	}
+	
+	private String getSessionId(String keyword) {
+		View view = new View("session/by_keyword");
+		view.setKey(URLEncoder.encode("\""+keyword+"\""));
+		ViewResults results = database.view(view);
+
+		if (results.getJSONArray("rows").optJSONObject(0) == null) return null;
+		
+		return results.getJSONArray("rows").optJSONObject(0).optJSONObject("value").getString("_id");
+	}
+	
 }
