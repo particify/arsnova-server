@@ -1,3 +1,7 @@
 security.openid-target-url=http://localhost:8080/arsnova-war/doOpenIdLogin
 security.cas-check-url=http://localhost:8080/arsnova-war/j_spring_cas_security_check
 security.cas-service-url=https://cas.thm.de/cas
+
+couchdb.host=localhost
+couchdb.port=5984
+couchdb.name=arsnova

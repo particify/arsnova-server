@@ -12,28 +12,48 @@
 	<context:annotation-config />
 
 	<mvc:resources mapping="/**.html" location="/" />
-	<mvc:resources mapping="/**.png" location="/"/>
-	<mvc:resources mapping="/**.manifest" location="/"/>
-	<mvc:resources mapping="/**.json" location="/"/>
-	<mvc:resources mapping="/**.xml" location="/"/>
-	<mvc:resources mapping="/dojo/**" location="/dojo/"/>
-	<mvc:resources mapping="/dijit/**" location="/dijit/"/>
-	<mvc:resources mapping="/dojox/**" location="/dojox/"/>
-	<mvc:resources mapping="/app/**" location="/app/"/>
-	<mvc:resources mapping="/views/**" location="/views/"/>
-	<mvc:resources mapping="/lib/**" location="/lib/"/>
-	<mvc:resources mapping="/resources/**" location="/resources/"/>
-	<mvc:resources mapping="/screenshots/**" location="/screenshots/"/>
-        <mvc:resources mapping="/templates/**" location="/templates/"/>
-	
+	<mvc:resources mapping="/**.png" location="/" />
+	<mvc:resources mapping="/**.manifest" location="/" />
+	<mvc:resources mapping="/**.json" location="/" />
+	<mvc:resources mapping="/**.xml" location="/" />
+	<mvc:resources mapping="/dojo/**" location="/dojo/" />
+	<mvc:resources mapping="/dijit/**" location="/dijit/" />
+	<mvc:resources mapping="/dojox/**" location="/dojox/" />
+	<mvc:resources mapping="/app/**" location="/app/" />
+	<mvc:resources mapping="/views/**" location="/views/" />
+	<mvc:resources mapping="/lib/**" location="/lib/" />
+	<mvc:resources mapping="/resources/**" location="/resources/" />
+	<mvc:resources mapping="/screenshots/**" location="/screenshots/" />
+	<mvc:resources mapping="/templates/**" location="/templates/" />
+
 	<mvc:annotation-driven />
 
-	<bean id="viewResolver"
-		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="viewClass"
-			value="org.springframework.web.servlet.view.JstlView" />
-		<property name="prefix" value="/WEB-INF/views/" />
-		<property name="suffix" value=".jsp" />
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<bean
+					class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter" />
+			</list>
+		</property>
+	</bean>
+
+	<bean
+		class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="mediaTypes">
+			<map>
+				<entry key="json" value="application/json" />
+			</map>
+		</property>
+
+		<property name="defaultViews">
+			<list>
+				<bean
+					class="org.springframework.web.servlet.view.json.MappingJacksonJsonView" />
+			</list>
+		</property>
 	</bean>
 
 </beans>
