@@ -72,7 +72,7 @@ public class LoginController {
 		return new ModelAndView("redirect:/#auth/checkCasLogin/" + userHash);
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/doOpenIdLogin")
+	@RequestMapping(method = RequestMethod.GET, value = "/doGuestLogin")
 	public ModelAndView doGuestLogin() {
 		return null;
 	}

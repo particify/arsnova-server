@@ -26,8 +26,6 @@ public class SessionController {
 		Session session = sessionService.getSession(sessionkey);
 		if (session != null) return session;
 		
-		authenticationService.getUsername();
-		
 		response.setStatus(HttpStatus.NOT_FOUND.value());
 		return null;
 	}
