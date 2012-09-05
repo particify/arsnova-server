@@ -31,7 +31,10 @@ public class SessionService implements ISessionService {
 		if (results.getJSONArray("rows").optJSONObject(0) == null) return null;
 		
 		Session result = (Session)JSONObject.toBean(results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"), Session.class);
-		return result;
+		
+		if (result.isActive()) return result;
+		
+		return null;
 	}
 
 }
