@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 THM Web Media
+ * Copyright (C) 2012 THM webMedia
  * 
  * This file is part of ARSnova.
  *
