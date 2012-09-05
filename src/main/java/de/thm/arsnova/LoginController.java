@@ -20,6 +20,8 @@ package de.thm.arsnova;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,6 +34,8 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class LoginController {
 	
+	public static final Logger logger = LoggerFactory.getLogger(LoginController.class); 
+	
 	@RequestMapping(method = RequestMethod.GET, value = "/doCasLogin")
 	public ModelAndView doCasLogin(HttpServletRequest request) {
 		String referer = request.getHeader("referer");
@@ -42,6 +46,8 @@ public class LoginController {
 		
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		User user = (User) authentication.getPrincipal();
+		
+		logger.info("CAS Login for: " + user.getUsername());
 		return new ModelAndView("redirect:/" + target + "#auth/checkCasLogin/" + user.getUsername());
 	}
 	
@@ -61,7 +67,8 @@ public class LoginController {
 				""
 			);
 		}
-
+		
+		logger.info("OpenID Login for user with hash " + userHash);
 		return new ModelAndView("redirect:/#auth/checkCasLogin/" + userHash);
 	}
 	
