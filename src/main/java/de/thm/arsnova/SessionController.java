@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.services.IAuthenticationService;
 import de.thm.arsnova.services.ISessionService;
 
 @Controller
