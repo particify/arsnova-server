@@ -72,13 +72,8 @@ public class LoginController {
 		return new ModelAndView("redirect:/#auth/checkCasLogin/" + userHash);
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/doFacebookLogin")
-	public ModelAndView doFacebookLogin() {
-		return new ModelAndView("redirect:/#auth/checkCasLogin/");
-	}
-	
-	@RequestMapping(method = RequestMethod.GET, value = "/doTwitterLogin")
-	public ModelAndView doTwitterLogin() {
-		return new ModelAndView("redirect:/#auth/checkCasLogin/");
+	@RequestMapping(method = RequestMethod.GET, value = "/doOpenIdLogin")
+	public ModelAndView doGuestLogin() {
+		return null;
 	}
 }
