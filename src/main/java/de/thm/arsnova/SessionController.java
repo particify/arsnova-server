@@ -18,9 +18,6 @@ public class SessionController {
 	@Autowired
 	ISessionService sessionService;
 	
-	@Autowired
-	IAuthenticationService authenticationService;
-	
 	@RequestMapping("/session/{sessionkey}")
 	public Session getSession(@PathVariable String sessionkey, HttpServletResponse response) {
 		Session session = sessionService.getSession(sessionkey);
