@@ -26,6 +26,9 @@ import net.sf.json.JSONObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import com.fourspaces.couchdb.Database;
@@ -58,9 +61,10 @@ public class SessionService implements ISessionService {
 				results.getJSONArray("rows").optJSONObject(0)
 						.optJSONObject("value"), Session.class);
 
-		if (result.isActive())
+		if (result.isActive() || result.getCreator().equals(this.actualUserName())) {
 			return result;
-
+		}
+		
 		return null;
 	}
 
@@ -136,5 +140,14 @@ public class SessionService implements ISessionService {
 
 	private String currentTimestamp() {
 		return Long.toString(System.currentTimeMillis());
+	}
+	
+	private String actualUserName() {
+		try {
+			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			User user = (User) authentication.getPrincipal();
+			return user.getUsername();
+		} catch (ClassCastException e) {}
+		return null;
 	}
 }
