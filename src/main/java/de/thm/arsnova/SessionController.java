@@ -18,8 +18,6 @@
  */
 package de.thm.arsnova;
 
-import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.services.ISessionService;
 
@@ -49,8 +48,8 @@ public class SessionController {
 	}
 	
 	@RequestMapping(value="/session/{sessionkey}/feedback", method=RequestMethod.GET)
-	public List<Integer> getFeedback(@PathVariable String sessionkey, HttpServletResponse response) {
-		List<Integer> feedback = sessionService.getFeedback(sessionkey);
+	public Feedback getFeedback(@PathVariable String sessionkey, HttpServletResponse response) {
+		Feedback feedback = sessionService.getFeedback(sessionkey);
 		if (feedback != null) return feedback;
 		
 		response.setStatus(HttpStatus.NOT_FOUND.value());
@@ -58,11 +57,7 @@ public class SessionController {
 	}
 	
 	@RequestMapping(value="/session/{sessionkey}/feedback", method=RequestMethod.POST)
-	public List<Integer> postFeedback(@PathVariable String sessionkey, @RequestBody int value, HttpServletResponse response) {
-		List<Integer> feedback = sessionService.getFeedback(sessionkey);
-		if (feedback != null) return feedback;
-		
-		response.setStatus(HttpStatus.NOT_FOUND.value());
-		return null;
+	public boolean postFeedback(@PathVariable String sessionkey, @RequestBody int value, HttpServletResponse response) {
+		return false;
 	}
 }

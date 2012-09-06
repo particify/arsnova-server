@@ -32,62 +32,109 @@ import com.fourspaces.couchdb.Database;
 import com.fourspaces.couchdb.View;
 import com.fourspaces.couchdb.ViewResults;
 
+import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
 
 @Service
 public class SessionService implements ISessionService {
 
-	private final com.fourspaces.couchdb.Session session = new com.fourspaces.couchdb.Session("localhost", 5984);
+	private final com.fourspaces.couchdb.Session session = new com.fourspaces.couchdb.Session(
+			"localhost", 5984);
 	private final Database database = session.getDatabase("arsnova");
-	
-	public static final Logger logger = LoggerFactory.getLogger(SessionService.class);
-	
+
+	public static final Logger logger = LoggerFactory
+			.getLogger(SessionService.class);
+
 	@Override
 	public Session getSession(String keyword) {
 		View view = new View("session/by_keyword");
-		view.setKey(URLEncoder.encode("\""+keyword+"\""));
+		view.setKey(URLEncoder.encode("\"" + keyword + "\""));
 		ViewResults results = database.view(view);
 
-		if (results.getJSONArray("rows").optJSONObject(0) == null) return null;
-		
-		Session result = (Session)JSONObject.toBean(results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"), Session.class);
-		
-		if (result.isActive()) return result;
-		
+		if (results.getJSONArray("rows").optJSONObject(0) == null)
+			return null;
+
+		Session result = (Session) JSONObject.toBean(
+				results.getJSONArray("rows").optJSONObject(0)
+						.optJSONObject("value"), Session.class);
+
+		if (result.isActive())
+			return result;
+
 		return null;
 	}
 
 	@Override
-	public List<Integer> getFeedback(String keyword) {
+	public Feedback getFeedback(String keyword) {
 		String sessionId = this.getSessionId(keyword);
-		if (sessionId == null) return null;
-		
+		if (sessionId == null)
+			return null;
+
+		logger.info("Time: {}", this.currentTimestamp());
+
 		View view = new View("understanding/by_session");
 		view.setGroup(true);
-		view.setStartKey(URLEncoder.encode("[\""+sessionId+"\"]"));
-		view.setEndKey(URLEncoder.encode("[\""+sessionId+"\"],{}"));
-		ViewResults results = database.view(view);
-		
-		//if (results.getJSONArray("rows").optJSONObject(0) == null) return null;
-		
-		logger.info("Feedback: {}", results.getJSONObject("rows"));
-		
-		return null;
-	}
-	
-	@Override
-	public void postFeedback(String keyword, int value) {
-				
-	}
-	
-	private String getSessionId(String keyword) {
-		View view = new View("session/by_keyword");
-		view.setKey(URLEncoder.encode("\""+keyword+"\""));
+		view.setStartKey(URLEncoder.encode("[\"" + sessionId + "\"]"));
+		view.setEndKey(URLEncoder.encode("[\"" + sessionId + "\",{}]"));
 		ViewResults results = database.view(view);
 
-		if (results.getJSONArray("rows").optJSONObject(0) == null) return null;
+		logger.info("Feedback: {}", results.getJSONArray("rows"));
+
+		int values[] = { 0, 0, 0, 0 };
+		List<Integer> result = new ArrayList<Integer>();
 		
-		return results.getJSONArray("rows").optJSONObject(0).optJSONObject("value").getString("_id");
+		try {
+			for (int i = 0; i <= 3; i++) {
+				String key = results.getJSONArray("rows").optJSONObject(i)
+						.optJSONArray("key").getString(1);
+				if (key.equals("Bitte schneller"))
+					values[0] = results.getJSONArray("rows").optJSONObject(i)
+							.getInt("value");
+				if (key.equals("Kann folgen"))
+					values[1] = results.getJSONArray("rows").optJSONObject(i)
+							.getInt("value");
+				if (key.equals("Zu schnell"))
+					values[2] = results.getJSONArray("rows").optJSONObject(i)
+							.getInt("value");
+				if (key.equals("Nicht mehr dabei"))
+					values[3] = results.getJSONArray("rows").optJSONObject(i)
+							.getInt("value");
+			}
+		} catch (Exception e) {
+			return new Feedback(
+					values[0],
+					values[1],
+					values[2],
+					values[3]
+			);
+		}
+
+		return new Feedback(
+				values[0],
+				values[1],
+				values[2],
+				values[3]
+		);
 	}
-	
+
+	@Override
+	public void postFeedback(String keyword, int value) {
+
+	}
+
+	private String getSessionId(String keyword) {
+		View view = new View("session/by_keyword");
+		view.setKey(URLEncoder.encode("\"" + keyword + "\""));
+		ViewResults results = database.view(view);
+
+		if (results.getJSONArray("rows").optJSONObject(0) == null)
+			return null;
+
+		return results.getJSONArray("rows").optJSONObject(0)
+				.optJSONObject("value").getString("_id");
+	}
+
+	private String currentTimestamp() {
+		return Long.toString(System.currentTimeMillis());
+	}
 }
