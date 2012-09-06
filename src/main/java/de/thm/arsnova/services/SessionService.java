@@ -18,6 +18,7 @@
  */
 package de.thm.arsnova.services;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import com.fourspaces.couchdb.Database;
+import com.fourspaces.couchdb.Document;
 import com.fourspaces.couchdb.View;
 import com.fourspaces.couchdb.ViewResults;
 
@@ -122,8 +124,40 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
-	public void postFeedback(String keyword, int value) {
-
+	public boolean postFeedback(String keyword, int value) {
+		String sessionId = this.getSessionId(keyword);
+		if (sessionId == null) return false;
+		
+		Document feedback = new Document();
+		feedback.put("type", "understanding");
+		feedback.put("user", this.actualUserName());
+		feedback.put("sessionId", sessionId);
+		feedback.put("timestamp", System.currentTimeMillis());
+		
+		switch (value) {
+			case 0:
+				feedback.put("value", "Bitte schneller");
+				break;
+			case 1:
+				feedback.put("value", "Kann folgen");
+				break;
+			case 2:
+				feedback.put("value", "Zu schnell");
+				break;
+			case 3:
+				feedback.put("value", "Nicht mehr dabei");
+				break;
+			default:
+				return false;
+		}
+		
+		try {
+			database.saveDocument(feedback);
+		} catch (IOException e) {
+			return false;
+		}
+		
+		return true;
 	}
 
 	private String getSessionId(String keyword) {

@@ -57,7 +57,12 @@ public class SessionController {
 	}
 	
 	@RequestMapping(value="/session/{sessionkey}/feedback", method=RequestMethod.POST)
-	public boolean postFeedback(@PathVariable String sessionkey, @RequestBody int value, HttpServletResponse response) {
-		return false;
+	public String postFeedback(@PathVariable String sessionkey, @RequestBody int value, HttpServletResponse response) {
+		if (sessionService.postFeedback(sessionkey, value)) {
+			response.setStatus(HttpStatus.CREATED.value());
+			return null;
+		}
+		response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
+		return null;
 	}
 }

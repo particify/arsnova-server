@@ -26,6 +26,6 @@ public interface ISessionService {
 
 	public Session getSession(String keyword);
 	public Feedback getFeedback(String keyword);
-	public void postFeedback(String keyword, int value);
+	public boolean postFeedback(String keyword, int value);
 	
 }
