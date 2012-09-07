@@ -22,11 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
@@ -36,7 +34,6 @@ import org.springframework.security.core.authority.GrantedAuthorityImpl;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.token.Sha512DigestUtils;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,7 +43,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class LoginController {
-	
 	
 	public static final Logger logger = LoggerFactory.getLogger(LoginController.class); 
 	
@@ -59,6 +55,9 @@ public class LoginController {
 		}
 		
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if(authentication == null) {
+			return null;
+		}
 		User user = (User) authentication.getPrincipal();
 		
 		logger.info("CAS Login for: " + user.getUsername());
