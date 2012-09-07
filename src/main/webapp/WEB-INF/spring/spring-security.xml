@@ -20,7 +20,6 @@
 		<sec:openid-login user-service-ref="openidUserDetailsService"
 			default-target-url="${security.openid-target-url}" />
     	<sec:custom-filter ref="singleSignOutFilter" before="CAS_FILTER"/>
-		<sec:logout invalidate-session="true" logout-url="/logout" />
     	<sec:custom-filter ref="requestSingleLogoutFilter" before="LOGOUT_FILTER"/>    
     </sec:http>
 
@@ -58,12 +57,10 @@
 	<bean id="requestSingleLogoutFilter"
 	    class="org.springframework.security.web.authentication.logout.LogoutFilter"
 	    p:filterProcessesUrl="/j_spring_cas_security_logout" >
+		<constructor-arg value="${security.cas-server-url}/logout?url=${security.arsnova-url}"/>
 	    <constructor-arg>
-	        <bean class="org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler"
-	            p:targetUrlParameter="${security.cas-server-url}/logout?service=${security.arsnova-url}" />
-	    </constructor-arg>
-	    <constructor-arg>
-	        <bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler" />
+	      <bean class=
+	          "org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
 	    </constructor-arg>
 	</bean>
 </beans>

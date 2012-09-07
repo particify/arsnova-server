@@ -26,14 +26,17 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
+import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.token.Sha512DigestUtils;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -94,6 +97,16 @@ public class LoginController {
 			return null;			
 		}
 		return authentication.getPrincipal().toString();
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/logout")
+	public ModelAndView doLogout(final HttpServletRequest request) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		request.getSession().invalidate();
+		if(auth instanceof CasAuthenticationToken) {
+			return new ModelAndView("redirect:/j_spring_cas_security_logout");
+		}
+		return new ModelAndView("redirect:/");
 	}
 	
 	private String hashUser() {
