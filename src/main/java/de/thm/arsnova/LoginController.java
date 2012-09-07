@@ -18,21 +18,32 @@
  */
 package de.thm.arsnova;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.GrantedAuthorityImpl;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.token.Sha512DigestUtils;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class LoginController {
+	
 	
 	public static final Logger logger = LoggerFactory.getLogger(LoginController.class); 
 	
@@ -40,7 +51,7 @@ public class LoginController {
 	public ModelAndView doCasLogin(HttpServletRequest request) {
 		String referer = request.getHeader("referer");
 		String target = "";
-		if (referer.endsWith("dojo-index.html")) {
+		if (referer != null && referer.endsWith("dojo-index.html")) {
 			target = "dojo-index.html";
 		}
 		
@@ -53,10 +64,41 @@ public class LoginController {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/doOpenIdLogin")
 	public ModelAndView doOpenIdLogin() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-		String userHash = null;
+		String userHash = hashUser();
 		
+		logger.info("OpenID Login for user with hash " + userHash);
+		return new ModelAndView("redirect:/#auth/checkCasLogin/" + userHash);
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/doGuestLogin")
+	public ModelAndView doGuestLogin(final HttpServletRequest request) {
+		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+		authorities.add(new GrantedAuthorityImpl("ROLE_GUEST"));
+		String username = "Guest" + Sha512DigestUtils.shaHex(request.getSession().getId()).substring(0, 10);
+		User user = new User(username, "", true, true, true, true, authorities);
+		Authentication token = new UsernamePasswordAuthenticationToken(user, null, authorities);
+		
+		SecurityContextHolder.getContext().setAuthentication(token);
+		request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
+
+		String userHash = hashUser();
+		logger.info("Guest Login for user " + user);
+		return new ModelAndView("redirect:/#auth/checkCasLogin/" + userHash);
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/whoami")
+	@ResponseBody
+	public String whoami() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if(authentication == null || authentication.getPrincipal() == null) {
+			return null;			
+		}
+		return authentication.getPrincipal().toString();
+	}
+	
+	private String hashUser() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String userHash;
 		try {
 			User user = (User) authentication.getPrincipal();
 			userHash = new ShaPasswordEncoder(256).encodePassword(user.getUsername(), "");
@@ -67,13 +109,6 @@ public class LoginController {
 				""
 			);
 		}
-		
-		logger.info("OpenID Login for user with hash " + userHash);
-		return new ModelAndView("redirect:/#auth/checkCasLogin/" + userHash);
-	}
-	
-	@RequestMapping(method = RequestMethod.GET, value = "/doGuestLogin")
-	public ModelAndView doGuestLogin() {
-		return null;
+		return userHash;
 	}
 }
