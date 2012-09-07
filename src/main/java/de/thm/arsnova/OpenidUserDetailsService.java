@@ -35,8 +35,6 @@ public class OpenidUserDetailsService implements UserDetailsService {
 		final List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
 		grantedAuthorities.add(new GrantedAuthorityImpl("ROLE_USER"));
     	
-		System.out.println(openIdIdentifier);
-		
     	return new User(openIdIdentifier, "", true, true, true, true, grantedAuthorities);
     }
 }

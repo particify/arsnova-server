@@ -37,8 +37,6 @@ public class CasUserDetailsService extends AbstractCasAssertionUserDetailsServic
 		final List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
 		grantedAuthorities.add(new GrantedAuthorityImpl("ROLE_USER"));
 		
-		System.out.println(assertion.getPrincipal().getName());
-		
 		return new User(assertion.getPrincipal().getName(), "", true, true, true, true, grantedAuthorities);
 	}
 }
