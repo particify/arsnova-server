@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sec="http://www.springframework.org/schema/security"
-	xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
 	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
@@ -10,55 +12,47 @@
 	<context:component-scan base-package="de.thm.arsnova" />
 	<context:annotation-config />
 
-	<bean
-		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="ignoreUnresolvablePlaceholders" value="false" />
-		<property name="locations">
-			<value>config.properties</value>
-		</property>
-	</bean>
-
-	<sec:http entry-point-ref="casEntryPoint"
-		disable-url-rewriting="true">
+	<sec:http entry-point-ref="casEntryPoint" disable-url-rewriting="true">
 		<sec:intercept-url pattern="/j_spring_security_check"
 			access="IS_AUTHENTICATED_ANONYMOUSLY" />
 		<sec:intercept-url pattern="/doCasLogin" access="ROLE_USER" />
-		<sec:custom-filter ref="casFilter" position="CAS_FILTER" />
+		<sec:custom-filter ref="casAuthenticationFilter" position="CAS_FILTER" />
 		<sec:openid-login user-service-ref="openidUserDetailsService"
 			default-target-url="${security.openid-target-url}" />
+		<sec:logout invalidate-session="true" logout-url="/logout" logout-success-url="/j_spring_cas_security_logout"/>
+    	<sec:custom-filter ref="singleSignOutFilter" before="CAS_FILTER"/>
+    	<sec:anonymous enabled="false" />
 	</sec:http>
+
+	<sec:authentication-manager alias="casAuthenticationManager">
+		<sec:authentication-provider ref="casAuthenticationProvider" />
+	</sec:authentication-manager>	
 	
-	<bean id="casFilter"
-		class="org.springframework.security.cas.web.CasAuthenticationFilter">
-		<property name="authenticationManager" ref="casAuthManager" />
-	</bean>
+	<bean id="casAuthenticationFilter"
+		class="org.springframework.security.cas.web.CasAuthenticationFilter"
+		p:authenticationManager-ref="casAuthenticationManager" />
 
 	<bean id="casEntryPoint"
-		class="org.springframework.security.cas.web.CasAuthenticationEntryPoint">
-		<property name="loginUrl" value="https://cas.thm.de/cas/login" />
-		<property name="serviceProperties" ref="serviceProperties" />
-	</bean>
+		class="org.springframework.security.cas.web.CasAuthenticationEntryPoint"
+		p:loginUrl="${security.cas-server-url}/login"
+		p:serviceProperties-ref="casServiceProperties" />
+	
+	<bean id="casServiceProperties" 
+		class="org.springframework.security.cas.ServiceProperties"
+	    p:service="${security.cas-check-url}"
+	    p:sendRenew="false" />
 
-	<sec:authentication-manager alias="casAuthManager">
-		<sec:authentication-provider ref="casAuthProvider" />
-	</sec:authentication-manager>
-
-	<!-- TODO: Replace local URL with real world url / parameter? -->
-	<bean id="serviceProperties" class="org.springframework.security.cas.ServiceProperties">
-		<property name="service" value="${security.cas-check-url}" />
-		<property name="sendRenew" value="false" />
-	</bean>
-
-	<bean id="casAuthProvider"
+	<bean id="casAuthenticationProvider"
 		class="org.springframework.security.cas.authentication.CasAuthenticationProvider"
-		p:serviceProperties-ref="serviceProperties" p:key="casAuthProviderKey">
-		<property name="authenticationUserDetailsService">
-			<bean class="de.thm.arsnova.CasUserDetailsService" />
-		</property>
-		<property name="ticketValidator">
-			<bean class="org.jasig.cas.client.validation.Cas20ProxyTicketValidator">
-				<constructor-arg value="${security.cas-service-url}" />
-			</bean>
-		</property>
+		p:key="casAuthProviderKey"
+		p:serviceProperties-ref="casServiceProperties"		
+		p:authenticationUserDetailsService-ref="casUserDetailsService" 
+		p:ticketValidator-ref="casTicketValidator" />
+
+	<bean id="casUserDetailsService" class="de.thm.arsnova.CasUserDetailsService" />
+	<bean id="casTicketValidator" class="org.jasig.cas.client.validation.Cas20ProxyTicketValidator">
+		<constructor-arg value="${security.cas-server-url}" />
 	</bean>
+
+	<bean id="singleSignOutFilter" class="org.jasig.cas.client.session.SingleSignOutFilter" />	  
 </beans>
