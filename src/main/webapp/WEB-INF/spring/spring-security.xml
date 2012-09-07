@@ -19,18 +19,18 @@
 		<sec:custom-filter ref="casAuthenticationFilter" position="CAS_FILTER" />
 		<sec:openid-login user-service-ref="openidUserDetailsService"
 			default-target-url="${security.openid-target-url}" />
-		<sec:logout invalidate-session="true" logout-url="/logout" logout-success-url="/j_spring_cas_security_logout"/>
     	<sec:custom-filter ref="singleSignOutFilter" before="CAS_FILTER"/>
-    	<sec:anonymous enabled="false" />
-	</sec:http>
+		<sec:logout invalidate-session="true" logout-url="/logout" />
+    	<sec:custom-filter ref="requestSingleLogoutFilter" before="LOGOUT_FILTER"/>    
+    </sec:http>
 
-	<sec:authentication-manager alias="casAuthenticationManager">
+	<sec:authentication-manager alias="authenticationManager">
 		<sec:authentication-provider ref="casAuthenticationProvider" />
 	</sec:authentication-manager>	
 	
 	<bean id="casAuthenticationFilter"
 		class="org.springframework.security.cas.web.CasAuthenticationFilter"
-		p:authenticationManager-ref="casAuthenticationManager" />
+		p:authenticationManager-ref="authenticationManager" />
 
 	<bean id="casEntryPoint"
 		class="org.springframework.security.cas.web.CasAuthenticationEntryPoint"
@@ -48,11 +48,22 @@
 		p:serviceProperties-ref="casServiceProperties"		
 		p:authenticationUserDetailsService-ref="casUserDetailsService" 
 		p:ticketValidator-ref="casTicketValidator" />
-
+	
 	<bean id="casUserDetailsService" class="de.thm.arsnova.CasUserDetailsService" />
 	<bean id="casTicketValidator" class="org.jasig.cas.client.validation.Cas20ProxyTicketValidator">
 		<constructor-arg value="${security.cas-server-url}" />
 	</bean>
 
-	<bean id="singleSignOutFilter" class="org.jasig.cas.client.session.SingleSignOutFilter" />	  
+	<bean id="singleSignOutFilter" class="org.jasig.cas.client.session.SingleSignOutFilter" />
+	<bean id="requestSingleLogoutFilter"
+	    class="org.springframework.security.web.authentication.logout.LogoutFilter"
+	    p:filterProcessesUrl="/j_spring_cas_security_logout" >
+	    <constructor-arg>
+	        <bean class="org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler"
+	            p:targetUrlParameter="${security.cas-server-url}/logout?service=${security.arsnova-url}" />
+	    </constructor-arg>
+	    <constructor-arg>
+	        <bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler" />
+	    </constructor-arg>
+	</bean>
 </beans>
