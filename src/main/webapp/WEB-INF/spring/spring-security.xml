@@ -124,9 +124,8 @@
 	    </constructor-arg>
 	</bean>
 
-	<bean id="successHandler" class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler"
-	    p:alwaysUseDefaultTargetUrl="false"
-	    p:defaultTargetUrl="/#auth/checkLogin"/>
+	<bean id="successHandler" class="de.thm.arsnova.LoginAuthenticationSucessHandler"
+	    p:targetUrl="#auth/checkLogin"/>
 
     <bean id="failureHandler"
         class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">

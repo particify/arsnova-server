@@ -75,6 +75,7 @@ public class LoginController {
 	@RequestMapping(method = RequestMethod.GET, value = "/doLogin")
 	public ModelAndView doLogin(@RequestParam("type") String type, HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException {
+		request.getSession().setAttribute("ars-referer", request.getHeader("referer"));
 		if("cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);
 		} else if("twitter".equals(type)) {
