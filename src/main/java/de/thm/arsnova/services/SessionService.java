@@ -195,4 +195,11 @@ public class SessionService implements ISessionService {
 		} catch (ClassCastException e) {}
 		return null;
 	}
+
+	public String generateKeyword() {
+		// Generates a number between >=low and <high, so our keyword has exactly 8 digits.
+		final int low = 10000000;
+		final int high = 100000000;
+		return String.valueOf((int)(Math.random() * (high - low) + low));
+	}
 }
