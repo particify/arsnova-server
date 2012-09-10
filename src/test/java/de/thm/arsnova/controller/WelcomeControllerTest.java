@@ -19,27 +19,22 @@
 package de.thm.arsnova.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.servlet.ModelAndView;
 
 import de.thm.arsnova.AbstractSpringContextTestBase;
 
-@ContextConfiguration(locations = "file:src/main/webapp/WEB-INF/arsnova-servlet.xml")
-@RunWith(SpringJUnit4ClassRunner.class)
 public class WelcomeControllerTest extends AbstractSpringContextTestBase {
 
 	@Before
 	public void setUp() throws Exception {
 		this.request = new MockHttpServletRequest();
 		this.response = new MockHttpServletResponse();
-
 	}
 	
 	@Test
@@ -48,8 +43,8 @@ public class WelcomeControllerTest extends AbstractSpringContextTestBase {
         request.setRequestURI("/");
 
         final ModelAndView mav = handle(request, response);
+        assertNotNull(mav);
         assertEquals("redirect:/index.html", mav.getViewName());
-	}
-	
+	}	
 	
 }

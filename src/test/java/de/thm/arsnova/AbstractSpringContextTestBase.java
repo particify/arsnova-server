@@ -23,17 +23,22 @@ import static org.junit.Assert.assertNotNull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.junit.runner.RunWith;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
-import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+@ContextConfiguration(locations={"file:src/main/webapp/WEB-INF/arsnova-servlet.xml", "file:src/main/webapp/WEB-INF/spring/spring-main.xml"})
+@RunWith(SpringJUnit4ClassRunner.class)
 public class AbstractSpringContextTestBase extends AbstractJUnit4SpringContextTests {
 	
 	protected MockHttpServletRequest request;
@@ -41,7 +46,7 @@ public class AbstractSpringContextTestBase extends AbstractJUnit4SpringContextTe
 	
 	protected ModelAndView handle(HttpServletRequest request, HttpServletResponse response)
             throws Exception {
-        final HandlerMapping handlerMapping = applicationContext.getBean(DefaultAnnotationHandlerMapping.class);
+        final HandlerMapping handlerMapping = applicationContext.getBean(RequestMappingHandlerMapping.class);
         final HandlerExecutionChain handler = handlerMapping.getHandler(request);
         assertNotNull("No handler found for request, check you request mapping", handler);
 
@@ -56,7 +61,7 @@ public class AbstractSpringContextTestBase extends AbstractJUnit4SpringContextTe
                 return null;
             }
         }
-        HandlerAdapter handlerAdapter = applicationContext.getBean(AnnotationMethodHandlerAdapter.class);;
+        HandlerAdapter handlerAdapter = applicationContext.getBean(RequestMappingHandlerAdapter.class);;
         final ModelAndView mav = handlerAdapter.handle(request, response, controller);
         return mav;
     }

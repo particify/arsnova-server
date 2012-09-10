@@ -22,18 +22,12 @@ package de.thm.arsnova;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  * Unit test to verify Spring context wiring.
  *
  */
-@ContextConfiguration(locations="file:src/main/webapp/WEB-INF/arsnova-servlet.xml")
-@RunWith(SpringJUnit4ClassRunner.class)
-public class WiringTest extends AbstractJUnit4SpringContextTests {
+public class WiringTest extends AbstractSpringContextTestBase {
 
     @Test
     public void testWiring() throws Exception {
