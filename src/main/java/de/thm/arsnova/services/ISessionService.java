@@ -27,5 +27,6 @@ public interface ISessionService {
 	public Session getSession(String keyword);
 	public Feedback getFeedback(String keyword);
 	public boolean postFeedback(String keyword, int value);
+	public boolean sessionKeyAvailable(String keyword);
 	
 }

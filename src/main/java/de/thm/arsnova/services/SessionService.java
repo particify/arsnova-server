@@ -31,6 +31,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fourspaces.couchdb.Database;
 import com.fourspaces.couchdb.Document;
@@ -160,6 +162,15 @@ public class SessionService implements ISessionService {
 		return true;
 	}
 
+	@Override
+	@Transactional(isolation=Isolation.READ_COMMITTED)
+	public boolean sessionKeyAvailable(String keyword) {
+		View view = new View("session/by_keyword");
+		ViewResults results = database.view(view);
+		
+		return ! results.containsKey(keyword);
+	}
+	
 	private String getSessionId(String keyword) {
 		View view = new View("session/by_keyword");
 		view.setKey(URLEncoder.encode("\"" + keyword + "\""));
