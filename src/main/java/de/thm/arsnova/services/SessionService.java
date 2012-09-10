@@ -71,6 +71,25 @@ public class SessionService implements ISessionService {
 		
 		return null;
 	}
+	
+	@Override
+	public Session saveSession(Session session) {
+		
+		Document sessionDocument = new Document();
+		sessionDocument.put("type","session");
+		sessionDocument.put("name", session.getName());
+		sessionDocument.put("shortName", session.getShortName());
+		sessionDocument.put("keyword", this.generateKeyword());
+		sessionDocument.put("creator", this.actualUserName());
+		sessionDocument.put("active", true);
+		try {
+			database.saveDocument(sessionDocument);
+		} catch (IOException e) {
+			return null;
+		}
+		
+		return this.getSession(sessionDocument.getString("keyword"));
+	}
 
 	@Override
 	public Feedback getFeedback(String keyword) {
@@ -196,10 +215,13 @@ public class SessionService implements ISessionService {
 		return null;
 	}
 
+	@Override
 	public String generateKeyword() {
-		// Generates a number between >=low and <high, so our keyword has exactly 8 digits.
 		final int low = 10000000;
 		final int high = 100000000;
-		return String.valueOf((int)(Math.random() * (high - low) + low));
+		String keyword = String.valueOf((int)(Math.random() * (high - low) + low));
+		
+		if (this.sessionKeyAvailable(keyword)) return keyword;
+		return generateKeyword();
 	}
 }
