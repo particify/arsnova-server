@@ -7,8 +7,8 @@ security.facebook.secret=e3f38cfc72bb63e35641b637081a6177
 security.twitter.key=bmk6i12UPjxEUPwtxAuQ
 security.twitter.secret=k3E52IJIYEUoeTWAakGldoyFYAS0OIEtDj050UzBrFw
 
-security.google.key=110959746118.apps.googleusercontent.com
-security.google.secret=CkzUJZswY8rjWCCYnHVovyGA
+security.google.key=564933073000.apps.googleusercontent.com
+security.google.secret=Cgr28WN7btc04BJRpzmWe9k6
 
 
 couchdb.host=localhost
