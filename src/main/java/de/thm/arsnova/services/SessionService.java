@@ -27,6 +27,7 @@ import net.sf.json.JSONObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -45,18 +46,34 @@ import de.thm.arsnova.entities.Session;
 @Service
 public class SessionService implements ISessionService {
 
-	private final com.fourspaces.couchdb.Session session = new com.fourspaces.couchdb.Session(
-			"localhost", 5984);
-	private final Database database = session.getDatabase("arsnova");
+	private String databaseHost;
+	private int databasePort;
+	private String databaseName;
+	
+	private Database database;
+	
+	public static final Logger logger = LoggerFactory.getLogger(SessionService.class);
 
-	public static final Logger logger = LoggerFactory
-			.getLogger(SessionService.class);
+	@Value("#{props['couchdb.host']}")
+	public final void setDatabaseHost(String databaseHost) {
+		this.databaseHost = databaseHost;
+	}
+	
+	@Value("#{props['couchdb.port']}")
+	public final void setDatabasePort(String databasePort) {
+		this.databasePort = Integer.parseInt(databasePort);
+	}
+	
+	@Value("#{props['couchdb.name']}")
+	public final void setDatabaseName(String databaseName) {
+		this.databaseName = databaseName;
+	}
 
 	@Override
 	public Session getSession(String keyword) {
 		View view = new View("session/by_keyword");
 		view.setKey(URLEncoder.encode("\"" + keyword + "\""));
-		ViewResults results = database.view(view);
+		ViewResults results = this.getDatabase().view(view);
 
 		if (results.getJSONArray("rows").optJSONObject(0) == null)
 			return null;
@@ -103,7 +120,7 @@ public class SessionService implements ISessionService {
 		view.setGroup(true);
 		view.setStartKey(URLEncoder.encode("[\"" + sessionId + "\"]"));
 		view.setEndKey(URLEncoder.encode("[\"" + sessionId + "\",{}]"));
-		ViewResults results = database.view(view);
+		ViewResults results = this.getDatabase().view(view);
 
 		logger.info("Feedback: {}", results.getJSONArray("rows"));
 
@@ -173,7 +190,7 @@ public class SessionService implements ISessionService {
 		}
 		
 		try {
-			database.saveDocument(feedback);
+			this.getDatabase().saveDocument(feedback);
 		} catch (IOException e) {
 			return false;
 		}
@@ -185,7 +202,7 @@ public class SessionService implements ISessionService {
 	@Transactional(isolation=Isolation.READ_COMMITTED)
 	public boolean sessionKeyAvailable(String keyword) {
 		View view = new View("session/by_keyword");
-		ViewResults results = database.view(view);
+		ViewResults results = this.getDatabase().view(view);
 		
 		return ! results.containsKey(keyword);
 	}
@@ -193,7 +210,7 @@ public class SessionService implements ISessionService {
 	private String getSessionId(String keyword) {
 		View view = new View("session/by_keyword");
 		view.setKey(URLEncoder.encode("\"" + keyword + "\""));
-		ViewResults results = database.view(view);
+		ViewResults results = this.getDatabase().view(view);
 
 		if (results.getJSONArray("rows").optJSONObject(0) == null)
 			return null;
@@ -223,5 +240,29 @@ public class SessionService implements ISessionService {
 		
 		if (this.sessionKeyAvailable(keyword)) return keyword;
 		return generateKeyword();
+	}
+	
+	private Database getDatabase() {
+		if (database == null) {
+			try {
+				com.fourspaces.couchdb.Session session = new com.fourspaces.couchdb.Session(
+						databaseHost,
+						databasePort
+					);
+					
+				database = session.getDatabase(databaseName);
+			} catch (Exception e) {
+				logger.error(
+					"Cannot connect to CouchDB database '"
+					+ databaseName
+					+"' on host '"
+					+ databaseHost
+					+ "' using port "
+					+ databasePort
+				);
+			}
+		}
+		
+		return database;
 	}
 }

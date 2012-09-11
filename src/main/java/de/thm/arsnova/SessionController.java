@@ -38,7 +38,7 @@ public class SessionController {
 	@Autowired
 	ISessionService sessionService;
 	
-	@RequestMapping("/session/{sessionkey}")
+	@RequestMapping(value="/session/{sessionkey}", method=RequestMethod.GET)
 	public Session getSession(@PathVariable String sessionkey, HttpServletResponse response) {
 		Session session = sessionService.getSession(sessionkey);
 		if (session != null) return session;
