@@ -47,6 +47,18 @@ public class SessionController {
 		return null;
 	}
 	
+	@RequestMapping(value="/session", method=RequestMethod.POST)
+	public Session postNewSession(@RequestBody Session session, HttpServletResponse response) {
+		Session newSession = sessionService.saveSession(session);
+		if (session != null) {
+			response.setStatus(HttpStatus.CREATED.value());
+			return newSession;
+		}
+
+		response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
+		return null;
+	}
+	
 	@RequestMapping(value="/session/{sessionkey}/feedback", method=RequestMethod.GET)
 	public Feedback getFeedback(@PathVariable String sessionkey, HttpServletResponse response) {
 		Feedback feedback = sessionService.getFeedback(sessionkey);

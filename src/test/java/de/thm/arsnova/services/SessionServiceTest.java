@@ -18,17 +18,16 @@
  */
 package de.thm.arsnova.services;
 
-import de.thm.arsnova.entities.Feedback;
-import de.thm.arsnova.entities.Session;
+import static org.junit.Assert.*;
 
+import org.junit.Test;
 
-public interface ISessionService {
-
-	public Session getSession(String keyword);
-	public Session saveSession(Session session);
-	public Feedback getFeedback(String keyword);
-	public boolean postFeedback(String keyword, int value);
-	public boolean sessionKeyAvailable(String keyword);
-	public String generateKeyword();
+public class SessionServiceTest {
 	
+	@Test
+	public void shouldGenerateSessionKeyword() {
+		SessionService session = new SessionService();
+		System.out.println(session.generateKeyword());
+		assertTrue(session.generateKeyword().matches("^[0-9]{8}$"));
+	}
 }

@@ -31,6 +31,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fourspaces.couchdb.Database;
 import com.fourspaces.couchdb.Document;
@@ -68,6 +70,25 @@ public class SessionService implements ISessionService {
 		}
 		
 		return null;
+	}
+	
+	@Override
+	public Session saveSession(Session session) {
+		
+		Document sessionDocument = new Document();
+		sessionDocument.put("type","session");
+		sessionDocument.put("name", session.getName());
+		sessionDocument.put("shortName", session.getShortName());
+		sessionDocument.put("keyword", this.generateKeyword());
+		sessionDocument.put("creator", this.actualUserName());
+		sessionDocument.put("active", true);
+		try {
+			database.saveDocument(sessionDocument);
+		} catch (IOException e) {
+			return null;
+		}
+		
+		return this.getSession(sessionDocument.getString("keyword"));
 	}
 
 	@Override
@@ -160,6 +181,15 @@ public class SessionService implements ISessionService {
 		return true;
 	}
 
+	@Override
+	@Transactional(isolation=Isolation.READ_COMMITTED)
+	public boolean sessionKeyAvailable(String keyword) {
+		View view = new View("session/by_keyword");
+		ViewResults results = database.view(view);
+		
+		return ! results.containsKey(keyword);
+	}
+	
 	private String getSessionId(String keyword) {
 		View view = new View("session/by_keyword");
 		view.setKey(URLEncoder.encode("\"" + keyword + "\""));
@@ -183,5 +213,15 @@ public class SessionService implements ISessionService {
 			return user.getUsername();
 		} catch (ClassCastException e) {}
 		return null;
+	}
+
+	@Override
+	public String generateKeyword() {
+		final int low = 10000000;
+		final int high = 100000000;
+		String keyword = String.valueOf((int)(Math.random() * (high - low) + low));
+		
+		if (this.sessionKeyAvailable(keyword)) return keyword;
+		return generateKeyword();
 	}
 }
