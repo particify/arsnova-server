@@ -92,4 +92,27 @@ public class LoginControllerTest extends AbstractSpringContextTestBase {
 		assertEquals("Guest1234567890", ((User)mav.getModel().get("user")).getUsername());
 	}
 
+	@Test
+	public void testLogoutWithoutRedirect() throws Exception {
+		request.setMethod("GET");
+		request.setRequestURI("/logout");
+		final ModelAndView mav = handle(request, response);
+		assertNotNull(mav);
+		assertNotNull(mav.getView());
+		RedirectView view = (RedirectView) mav.getView();
+		assertEquals("/", view.getUrl());
+	}
+	
+	@Test
+	public void testLogoutWithRedirect() throws Exception {
+		request.setMethod("GET");
+		request.setRequestURI("/logout");
+		request.addHeader("referer", "/dojo-index.html");
+
+		final ModelAndView mav = handle(request, response);
+		assertNotNull(mav);
+		assertNotNull(mav.getView());
+		RedirectView view = (RedirectView) mav.getView();
+		assertEquals("/dojo-index.html", view.getUrl());
+	}
 }

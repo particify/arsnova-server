@@ -115,12 +115,12 @@ public class LoginController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/logout")
-	public ModelAndView doLogout(final HttpServletRequest request) {
+	public View doLogout(final HttpServletRequest request) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		request.getSession().invalidate();
 		if (auth instanceof CasAuthenticationToken) {
-			return new ModelAndView("redirect:/j_spring_cas_security_logout");
+			return new RedirectView("/j_spring_cas_security_logout");
 		}
-		return new ModelAndView("redirect:/");
+		return new RedirectView(request.getHeader("referer") != null ? request.getHeader("referer") : "/" );
 	}
 }
