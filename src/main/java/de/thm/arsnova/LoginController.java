@@ -104,7 +104,7 @@ public class LoginController {
 
 			SecurityContextHolder.getContext().setAuthentication(token);
 			request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
-			return new RedirectView(referer != null ? referer : "/" + "#auth/checkLogin");
+			return new RedirectView((referer != null ? referer : "/") + "#auth/checkLogin");
 		}
 		return null;
 	}
