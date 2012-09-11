@@ -5,6 +5,7 @@ import org.scribe.up.profile.facebook.FacebookProfile;
 import org.scribe.up.profile.google.Google2Profile;
 import org.scribe.up.profile.twitter.TwitterProfile;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 public class User {
 	
@@ -28,6 +29,10 @@ public class User {
 
 	public User(AnonymousAuthenticationToken token) {
 		setUsername("anonymous");
+	}
+
+	public User(UsernamePasswordAuthenticationToken token) {
+		setUsername(token.getName());
 	}
 
 	public String getUsername() {

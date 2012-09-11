@@ -47,6 +47,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.view.RedirectView;
 
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.IUserService;
@@ -69,35 +71,40 @@ public class LoginController {
 	@Autowired
 	IUserService userService;
 	
-	public static final Logger logger = LoggerFactory
-			.getLogger(LoginController.class);
+	public static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
 	@RequestMapping(method = RequestMethod.GET, value = "/doLogin")
-	public ModelAndView doLogin(@RequestParam("type") String type, HttpServletRequest request, HttpServletResponse response)
+	public View doLogin(@RequestParam("type") String type, @RequestParam(value="user", required=false) String guestName, HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException {
-		request.getSession().setAttribute("ars-referer", request.getHeader("referer"));
+		String referer = request.getHeader("referer");
+		request.getSession().setAttribute("ars-referer", referer);
 		if("cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);
 		} else if("twitter".equals(type)) {
 			String authUrl = twitterProvider.getAuthorizationUrl(new HttpUserSession(request));
-			return new ModelAndView("redirect:" + authUrl);
+			return new RedirectView(authUrl);
 		} else if("facebook".equals(type)) {
 			String authUrl = facebookProvider.getAuthorizationUrl(new HttpUserSession(request));
-			return new ModelAndView("redirect:" + authUrl);
+			return new RedirectView(authUrl);
 		} else if("google".equals(type)) {
 			String authUrl = googleProvider.getAuthorizationUrl(new HttpUserSession(request));
-			return new ModelAndView("redirect:" + authUrl);
+			return new RedirectView(authUrl);
 		} else if("guest".equals(type)) {
 			List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 			authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
-			String username = "Guest" + Sha512DigestUtils.shaHex(request.getSession().getId()).substring(0, 10);
+			String username = "";
+			if(guestName != null && guestName.startsWith("Guest") && guestName.length() == 15) {
+				username = guestName;
+			} else {
+				username = "Guest" + Sha512DigestUtils.shaHex(request.getSession().getId()).substring(0, 10);	
+			}		
 			org.springframework.security.core.userdetails.User user = 
 					new org.springframework.security.core.userdetails.User(username, "", true, true, true, true, authorities);
 			Authentication token = new UsernamePasswordAuthenticationToken(user, null, authorities);
 
 			SecurityContextHolder.getContext().setAuthentication(token);
 			request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
-			return new ModelAndView("redirect:/#auth/checkLogin");
+			return new RedirectView(referer != null ? referer : "/" + "#auth/checkLogin");
 		}
 		return null;
 	}
