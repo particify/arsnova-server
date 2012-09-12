@@ -16,7 +16,7 @@
 			<url>http://maven.mni.thm.de/content/repositories</url>
 		</repository>
 		<repository>
-			<id>thmrepo</id>
+			<id>thmreposnapshots</id>
 			<name>THM Maven Snapshot Repository</name>
 			<url>http://maven.mni.thm.de/content/repositories/snapshots</url>
 		</repository>		

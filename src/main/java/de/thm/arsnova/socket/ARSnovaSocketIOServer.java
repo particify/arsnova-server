@@ -43,7 +43,7 @@ public class ARSnovaSocketIOServer {
 					public void onData(SocketIOClient client, Feedback data) {
 						logger.info("setFeedback.onData: Client: {}, message: {}", new Object[] {client, data});
 						sessionService.postFeedback(data.getSessionkey(), data.getValue());
-						server.getBroadcastOperations().sendEvent("updateFeedback", data);
+						server.getBroadcastOperations().sendEvent("updateFeedback", sessionService.getFeedback(data.getSessionkey()));
 					}
 		});
 
