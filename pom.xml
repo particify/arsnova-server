@@ -21,7 +21,7 @@
 			<url>http://maven.mni.thm.de/content/groups/public</url>
 		</repository>
 		<repository>
-			<id>sonatype-snapshots</id>
+			<id>sonatypesnapshots</id>
 			<name>Sonatype Snapshot Repository</name>
 			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
 		</repository>
@@ -138,6 +138,16 @@
 			<artifactId>spring-security-oauth-client</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty</artifactId>
+			<version>3.5.7.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>com.corundumstudio.socketio</groupId>
+			<artifactId>netty-socketio</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -154,6 +164,17 @@
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>7.6.5.v20120716</version>
+				<!-- 
+				<configuration>
+	            	<scanIntervalSeconds>5</scanIntervalSeconds>
+		            <webApp>
+		                <contextPath>/</contextPath>
+		                <baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
+		                    <resourcesAsCSV>src/main/webapp,../arsnova-js/src/main/webapp,../arsnova-legacy-js/src/main/webapp,../dojo-war/src/main/webapp</resourcesAsCSV>
+		                </baseResource>
+		            </webApp>
+	        	</configuration>
+	        	 -->
 			</plugin>
 		</plugins>
 	</build>
