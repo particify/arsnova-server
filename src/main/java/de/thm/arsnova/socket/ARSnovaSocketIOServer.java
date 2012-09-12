@@ -42,7 +42,7 @@ public class ARSnovaSocketIOServer {
 					@Override
 					public void onData(SocketIOClient client, Feedback data) {
 						logger.info("setFeedback.onData: Client: {}, message: {}", new Object[] {client, data});
-						sessionService.postFeedback(data.getKeyword(), data.getValue());
+						sessionService.postFeedback(data.getSessionkey(), data.getValue());
 						server.getBroadcastOperations().sendEvent("updateFeedback", data);
 					}
 		});
