@@ -14,6 +14,9 @@
 			<id>thmrepo</id>
 			<name>THM Maven Repository</name>
 			<url>http://maven.mni.thm.de/content/repositories</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 		<repository>
 			<id>thmmirror</id>
