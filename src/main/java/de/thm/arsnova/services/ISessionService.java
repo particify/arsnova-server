@@ -20,6 +20,7 @@ package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.User;
 
 
 public interface ISessionService {
@@ -27,8 +28,9 @@ public interface ISessionService {
 	public Session getSession(String keyword);
 	public Session saveSession(Session session);
 	public Feedback getFeedback(String keyword);
-	public boolean postFeedback(String keyword, int value);
+	public boolean postFeedback(String keyword, int value, User user);
 	public boolean sessionKeyAvailable(String keyword);
 	public String generateKeyword();
-	
+	public void addUserToSessionMap(String username, String keyword);
+	public boolean isUserInSession(User user, String keyword);
 }

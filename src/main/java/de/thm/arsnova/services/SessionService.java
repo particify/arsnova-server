@@ -22,11 +22,14 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.sf.json.JSONObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -46,11 +49,16 @@ import de.thm.arsnova.entities.Session;
 @Service
 public class SessionService implements ISessionService {
 
+	@Autowired
+	IUserService userService;
+	
 	private String databaseHost;
 	private int databasePort;
 	private String databaseName;
 	
 	private Database database;
+	
+	private Map<String, String> user2session = new ConcurrentHashMap<String, String>();
 	
 	public static final Logger logger = LoggerFactory.getLogger(SessionService.class);
 
@@ -83,6 +91,7 @@ public class SessionService implements ISessionService {
 						.optJSONObject("value"), Session.class);
 
 		if (result.isActive() || result.getCreator().equals(this.actualUserName())) {
+			this.addUserToSessionMap(this.actualUserName(), keyword);
 			return result;
 		}
 		
@@ -162,13 +171,13 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
-	public boolean postFeedback(String keyword, int value) {
+	public boolean postFeedback(String keyword, int value, de.thm.arsnova.entities.User user) {
 		String sessionId = this.getSessionId(keyword);
 		if (sessionId == null) return false;
 		
 		Document feedback = new Document();
 		feedback.put("type", "understanding");
-		feedback.put("user", this.actualUserName());
+		feedback.put("user", user.getUsername());
 		feedback.put("sessionId", sessionId);
 		feedback.put("timestamp", System.currentTimeMillis());
 		
@@ -205,6 +214,17 @@ public class SessionService implements ISessionService {
 		ViewResults results = this.getDatabase().view(view);
 		
 		return ! results.containsKey(keyword);
+	}
+	
+	@Override
+	public boolean isUserInSession(de.thm.arsnova.entities.User user, String keyword) {
+		if (keyword == null) return false;
+		return (this.user2session.get(user.getUsername()).equals(keyword));
+	}
+	
+	@Override
+	public void addUserToSessionMap(String username, String keyword) {
+		this.user2session.put(username, keyword);	
 	}
 	
 	private String getSessionId(String keyword) {
