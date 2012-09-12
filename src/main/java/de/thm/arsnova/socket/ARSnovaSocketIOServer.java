@@ -1,5 +1,8 @@
 package de.thm.arsnova.socket;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,7 @@ import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
 
+import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.socket.message.Feedback;
 
@@ -22,6 +26,8 @@ public class ARSnovaSocketIOServer {
 	
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	
+	private final Map<String, User> session2user = new ConcurrentHashMap<String, User>();
+	
 	private int portNumber;
 	private final Configuration config;
 	private SocketIOServer server;
@@ -29,6 +35,7 @@ public class ARSnovaSocketIOServer {
 
 	public ARSnovaSocketIOServer() {
 		config = new Configuration();
+
 	}
 
 	public void startServer() throws Exception {
@@ -46,8 +53,14 @@ public class ARSnovaSocketIOServer {
 					@Override
 					public void onData(SocketIOClient client, Feedback data) {
 						logger.info("setFeedback.onData: Client: {}, message: {}", new Object[] {client, data});
-						sessionService.postFeedback(data.getSessionkey(), data.getValue());
-						server.getBroadcastOperations().sendEvent("updateFeedback", sessionService.getFeedback(data.getSessionkey()));
+						User u = session2user.get(client.getSessionId().toString());
+						if(u == null || sessionService.isUserInSession(u, data.getSessionkey()) == false) {
+							return;
+						}
+						sessionService.postFeedback(data.getSessionkey(), data.getValue(), u);
+						de.thm.arsnova.entities.Feedback fb = sessionService.getFeedback(data.getSessionkey());
+						logger.info("fb: {}", fb);
+						server.getBroadcastOperations().sendEvent("updateFeedback", fb.getValues());
 					}
 		});
 
@@ -87,5 +100,9 @@ public class ARSnovaSocketIOServer {
 	@Required
 	public void setPortNumber(int portNumber) {
 		this.portNumber = portNumber;
+	}
+
+	public boolean authorize(String session, User user) {
+		return session2user.put(session, user) != null;		
 	}
 }
