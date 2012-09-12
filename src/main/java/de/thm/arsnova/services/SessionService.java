@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.sf.json.JSONObject;
@@ -58,7 +57,7 @@ public class SessionService implements ISessionService {
 	
 	private Database database;
 	
-	private Map<String, String> user2session = new ConcurrentHashMap<String, String>();
+	private static final ConcurrentHashMap<String, String> user2session = new ConcurrentHashMap<String, String>();
 	
 	public static final Logger logger = LoggerFactory.getLogger(SessionService.class);
 
@@ -219,12 +218,15 @@ public class SessionService implements ISessionService {
 	@Override
 	public boolean isUserInSession(de.thm.arsnova.entities.User user, String keyword) {
 		if (keyword == null) return false;
-		return (this.user2session.get(user.getUsername()).equals(keyword));
+		String session = user2session.get(user.getUsername());
+		if(session == null) return false;
+		return keyword.equals(session);
 	}
 	
 	@Override
+	@Transactional(isolation=Isolation.READ_COMMITTED)
 	public void addUserToSessionMap(String username, String keyword) {
-		this.user2session.put(username, keyword);	
+		user2session.putIfAbsent(username, keyword);	
 	}
 	
 	private String getSessionId(String keyword) {

@@ -51,14 +51,12 @@ public class ARSnovaSocketIOServer {
 				new DataListener<Feedback>() {
 					@Override
 					public void onData(SocketIOClient client, Feedback data) {
-						logger.info("setFeedback.onData: Client: {}, message: {}", new Object[] {client, data});
 						User u = session2user.get(client.getSessionId().toString());
 						if(u == null || sessionService.isUserInSession(u, data.getSessionkey()) == false) {
 							return;
 						}
 						sessionService.postFeedback(data.getSessionkey(), data.getValue(), u);
 						de.thm.arsnova.entities.Feedback fb = sessionService.getFeedback(data.getSessionkey());
-						logger.info("fb: {}", fb);
 						server.getBroadcastOperations().sendEvent("updateFeedback", fb.getValues());
 					}
 		});

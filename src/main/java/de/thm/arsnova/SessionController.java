@@ -20,8 +20,13 @@ package de.thm.arsnova;
 
 import javax.servlet.http.HttpServletResponse;
 
+import net.sf.json.JSONObject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,12 +35,33 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.services.ISessionService;
+import de.thm.arsnova.services.IUserService;
+import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Controller
 public class SessionController {
 	
+	public static final Logger logger = LoggerFactory.getLogger(SessionController.class);
+	
 	@Autowired
 	ISessionService sessionService;
+	
+	@Autowired
+	IUserService userService;
+	
+	@Autowired
+	ARSnovaSocketIOServer server;
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/authorize")
+	public void authorize(@RequestBody Object sessionObject, HttpServletResponse response) {
+		String sessionkey = (String) JSONObject.fromObject(sessionObject).get("session");
+		if(sessionkey == null) {
+			return;
+		}		
+		logger.info("authorize session: " + sessionkey + ", user is:  " + userService.getUser(SecurityContextHolder.getContext().getAuthentication()));
+		boolean result = server.authorize(sessionkey, userService.getUser(SecurityContextHolder.getContext().getAuthentication()));
+		response.setStatus(result ? HttpStatus.CREATED.value() : HttpStatus.UNAUTHORIZED.value());
+	}
 	
 	@RequestMapping(value="/session/{sessionkey}", method=RequestMethod.GET)
 	public Session getSession(@PathVariable String sessionkey, HttpServletResponse response) {

@@ -26,8 +26,7 @@
 	<context:component-scan base-package="de.thm.arsnova" />
 	<context:annotation-config />
 
-	<bean id="socketServer" class="de.thm.arsnova.socket.ARSnovaSocketIOServer" init-method="startServer" destroy-method="stopServer">
-        <property name="portNumber" value="18018"></property>
-	</bean>
+	<bean id="socketServer" class="de.thm.arsnova.socket.ARSnovaSocketIOServer" init-method="startServer" destroy-method="stopServer" scope="singleton"
+		p:portNumber="18018" />
 
 </beans>
