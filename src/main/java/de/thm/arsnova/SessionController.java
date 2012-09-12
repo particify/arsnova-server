@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.services.ISessionService;
 
@@ -55,25 +54,6 @@ public class SessionController {
 			return newSession;
 		}
 
-		response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
-		return null;
-	}
-	
-	@RequestMapping(value="/session/{sessionkey}/feedback", method=RequestMethod.GET)
-	public Feedback getFeedback(@PathVariable String sessionkey, HttpServletResponse response) {
-		Feedback feedback = sessionService.getFeedback(sessionkey);
-		if (feedback != null) return feedback;
-		
-		response.setStatus(HttpStatus.NOT_FOUND.value());
-		return null;
-	}
-	
-	@RequestMapping(value="/session/{sessionkey}/feedback", method=RequestMethod.POST)
-	public String postFeedback(@PathVariable String sessionkey, @RequestBody int value, HttpServletResponse response) {
-		if (sessionService.postFeedback(sessionkey, value)) {
-			response.setStatus(HttpStatus.CREATED.value());
-			return null;
-		}
 		response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
 		return null;
 	}
