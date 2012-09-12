@@ -127,8 +127,7 @@
 	<bean id="successHandler" class="de.thm.arsnova.LoginAuthenticationSucessHandler"
 	    p:targetUrl="#auth/checkLogin"/>
 
-    <bean id="failureHandler"
-        class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
-        <property name="defaultFailureUrl" value="/login.jsp" />
-    </bean>
+    <bean id="failureHandler" class="de.thm.arsnova.LoginAuthenticationFailureHandler"
+        p:defaultFailureUrl="/index.html" />
+    
 </beans>
