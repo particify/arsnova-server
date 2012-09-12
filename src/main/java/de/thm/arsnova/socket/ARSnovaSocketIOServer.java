@@ -35,7 +35,6 @@ public class ARSnovaSocketIOServer {
 
 	public ARSnovaSocketIOServer() {
 		config = new Configuration();
-
 	}
 
 	public void startServer() throws Exception {
