@@ -14,10 +14,12 @@
 			<id>thmrepo</id>
 			<name>THM Maven Repository</name>
 			<url>http://maven.mni.thm.de/content/repositories</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
 		</repository>
+		<repository>
+			<id>thmrepo</id>
+			<name>THM Maven Snapshot Repository</name>
+			<url>http://maven.mni.thm.de/content/repositories/snapshots</url>
+		</repository>		
 		<repository>
 			<id>thmmirror</id>
 			<name>THM Maven Mirror</name>
