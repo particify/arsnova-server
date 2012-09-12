@@ -13,7 +13,6 @@ import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
 
 import de.thm.arsnova.services.ISessionService;
-import de.thm.arsnova.socket.message.Authorize;
 import de.thm.arsnova.socket.message.Feedback;
 
 public class ARSnovaSocketIOServer {
@@ -33,8 +32,13 @@ public class ARSnovaSocketIOServer {
 	}
 
 	public void startServer() throws Exception {
+		/**
+		 * hack: listen to ipv4 adresses
+		 */
+		System.setProperty("java.net.preferIPv4Stack" , "true");
+		
 		config.setPort(portNumber);
-		config.setHostname("localhost");
+		config.setHostname("0.0.0.0");
 		server = new SocketIOServer(config);
 
 		server.addEventListener("setFeedback", Feedback.class,
