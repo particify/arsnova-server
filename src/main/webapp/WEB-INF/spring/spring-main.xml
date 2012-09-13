@@ -15,6 +15,7 @@
 	    <property name="locations" >
 			<list>
                 <value>config.properties</value>
+                <value>file:///etc/arsnova.config</value>
             </list>
 		</property>
 	</bean>
