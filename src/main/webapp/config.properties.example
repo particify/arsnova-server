@@ -1,5 +1,18 @@
-security.arsnova-url=http://localhost:8080/arsnova-war
+security.arsnova-url=http://localhost:8080
 security.cas-server-url=https://cas.thm.de/cas
+
+security.facebook.key=318531508227494
+security.facebook.secret=e3f38cfc72bb63e35641b637081a6177
+
+security.twitter.key=PEVtidSG0HzSrxVRPpsCXw
+security.twitter.secret=mC0HOvxiEgqwdDWCcDoy3q75nUQPu1bYRp1ncHWGd0
+
+security.google.key=110959746118.apps.googleusercontent.com
+security.google.secret=CkzUJZswY8rjWCCYnHVovyGA
+
+security.ssl=false
+security.keystore=/etc/arsnova.thm.de.jks
+security.storepass=arsnova
 
 couchdb.host=localhost
 couchdb.port=5984
