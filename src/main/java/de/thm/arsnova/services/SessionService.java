@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.sf.json.JSONObject;
@@ -224,9 +225,20 @@ public class SessionService implements ISessionService {
 	}
 	
 	@Override
+	public List<String> getUsersInSession(String keyword) {
+		List<String> result = new ArrayList<String>();
+		for(Entry<String, String> e : user2session.entrySet()) {
+			if(e.getValue().equals(keyword)) {
+				result.add(e.getKey());
+			}
+		}
+		return result;
+	}	
+	
+	@Override
 	@Transactional(isolation=Isolation.READ_COMMITTED)
 	public void addUserToSessionMap(String username, String keyword) {
-		user2session.putIfAbsent(username, keyword);	
+		user2session.put(username, keyword);	
 	}
 	
 	private String getSessionId(String keyword) {

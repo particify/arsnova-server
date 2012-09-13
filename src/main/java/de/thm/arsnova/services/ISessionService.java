@@ -18,6 +18,8 @@
  */
 package de.thm.arsnova.services;
 
+import java.util.List;
+
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
@@ -33,4 +35,5 @@ public interface ISessionService {
 	public String generateKeyword();
 	public void addUserToSessionMap(String username, String keyword);
 	public boolean isUserInSession(User user, String keyword);
+	public List<String> getUsersInSession(String keyword);
 }

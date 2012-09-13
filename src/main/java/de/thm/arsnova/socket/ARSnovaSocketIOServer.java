@@ -3,6 +3,7 @@ package de.thm.arsnova.socket;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -66,13 +67,29 @@ public class ARSnovaSocketIOServer {
 				new DataListener<Feedback>() {
 					@Override
 					public void onData(SocketIOClient client, Feedback data) {
+						/**
+						 * do a check if user is in the session, for which he would give a feedback
+						 */
 						User u = session2user.get(client.getSessionId().toString());
 						if(u == null || sessionService.isUserInSession(u, data.getSessionkey()) == false) {
 							return;
 						}
 						sessionService.postFeedback(data.getSessionkey(), data.getValue(), u);
+						
+						/**
+						 * collect a list of users which are in the current session
+						 * iterate over all connected clients and if send feedback, 
+						 * if user is in current session
+						 */
+						List<String> users = sessionService.getUsersInSession(data.getSessionkey());
 						de.thm.arsnova.entities.Feedback fb = sessionService.getFeedback(data.getSessionkey());
-						server.getBroadcastOperations().sendEvent("updateFeedback", fb.getValues());
+						
+						for(SocketIOClient c : server.getAllClients()) {
+							u = session2user.get(c.getSessionId().toString());
+							if(u != null && users.contains(u.getUsername())) {
+								c.sendEvent("updateFeedback", fb.getValues());
+							}
+						}
 					}
 		});
 
