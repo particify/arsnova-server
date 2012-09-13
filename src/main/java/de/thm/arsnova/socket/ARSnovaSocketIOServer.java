@@ -1,5 +1,8 @@
 package de.thm.arsnova.socket;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,6 +32,9 @@ public class ARSnovaSocketIOServer {
 	private final Map<String, User> session2user = new ConcurrentHashMap<String, User>();
 	
 	private int portNumber;
+	private boolean useSSL = false;
+	private String keystore;
+	private String storepass;
 	private final Configuration config;
 	private SocketIOServer server;
 
@@ -45,6 +51,15 @@ public class ARSnovaSocketIOServer {
 		
 		config.setPort(portNumber);
 		config.setHostname("0.0.0.0");
+		if(useSSL) {
+			try {
+				InputStream stream = new FileInputStream(keystore);
+				config.setKeyStore(stream);
+				config.setKeyStorePassword(storepass);
+			} catch(FileNotFoundException e) {
+				logger.error("Keystore {} not found on filesystem", keystore);
+			}
+		}
 		server = new SocketIOServer(config);
 
 		server.addEventListener("setFeedback", Feedback.class,
@@ -97,6 +112,33 @@ public class ARSnovaSocketIOServer {
 	@Required
 	public void setPortNumber(int portNumber) {
 		this.portNumber = portNumber;
+	}
+
+	public String getStorepass() {
+		return storepass;
+	}
+
+	@Required
+	public void setStorepass(String storepass) {
+		this.storepass = storepass;
+	}
+
+	public String getKeystore() {
+		return keystore;
+	}
+
+	@Required
+	public void setKeystore(String keystore) {
+		this.keystore = keystore;
+	}
+
+	public boolean isUseSSL() {
+		return useSSL;
+	}
+
+	@Required
+	public void setUseSSL(boolean useSSL) {
+		this.useSSL = useSSL;
 	}
 
 	public boolean authorize(String session, User user) {

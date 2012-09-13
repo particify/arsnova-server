@@ -27,6 +27,9 @@
 	<context:annotation-config />
 
 	<bean id="socketServer" class="de.thm.arsnova.socket.ARSnovaSocketIOServer" init-method="startServer" destroy-method="stopServer" scope="singleton"
-		p:portNumber="18018" />
+		p:portNumber="10443"
+		p:useSSL="${security.ssl}"
+		p:keystore="${security.keystore}"
+		p:storepass="${security.storepass}" />
 
 </beans>
