@@ -37,7 +37,7 @@ public class ARSnovaSocketIOServer {
 	
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	
-	private final Map<String, User> session2user = new ConcurrentHashMap<String, User>();
+	private final Map<String, User> socketid2user = new ConcurrentHashMap<String, User>();
 	
 	private int portNumber;
 	private boolean useSSL = false;
@@ -77,7 +77,7 @@ public class ARSnovaSocketIOServer {
 						/**
 						 * do a check if user is in the session, for which he would give a feedback
 						 */
-						User u = session2user.get(client.getSessionId().toString());
+						User u = socketid2user.get(client.getSessionId().toString());
 						if(u == null || sessionService.isUserInSession(u, data.getSessionkey()) == false) {
 							return;
 						}
@@ -92,7 +92,7 @@ public class ARSnovaSocketIOServer {
 						de.thm.arsnova.entities.Feedback fb = sessionService.getFeedback(data.getSessionkey());
 						
 						for(SocketIOClient c : server.getAllClients()) {
-							u = session2user.get(c.getSessionId().toString());
+							u = socketid2user.get(c.getSessionId().toString());
 							if(u != null && users.contains(u.getUsername())) {
 								c.sendEvent("updateFeedback", fb.getValues());
 							}
@@ -166,7 +166,7 @@ public class ARSnovaSocketIOServer {
 	}
 
 	public boolean authorize(String session, User user) {
-		return session2user.put(session, user) != null;		
+		return socketid2user.put(session, user) != null;		
 	}
 	
 	public void reportDeletedFeedback(String username, Set<String> arsSessions) {
@@ -188,7 +188,7 @@ public class ARSnovaSocketIOServer {
 
 	private String findConnectionIdForUser(String username) {
 		String connectionId = "";
-		for (Map.Entry<String, User> e : session2user.entrySet()) {
+		for (Map.Entry<String, User> e : socketid2user.entrySet()) {
 			User u = e.getValue();
 			if (u.getUsername().equals(username)) {
 				connectionId = e.getKey();
