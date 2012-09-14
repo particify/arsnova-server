@@ -27,8 +27,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.sf.json.JSONObject;
@@ -40,7 +40,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +51,7 @@ import com.fourspaces.couchdb.ViewResults;
 
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.User;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
@@ -380,12 +380,10 @@ public class SessionService implements ISessionService {
 	}
 	
 	private String actualUserName() {
-		try {
-			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-			User user = (User) authentication.getPrincipal();
-			return user.getUsername();
-		} catch (ClassCastException e) {}
-		return null;
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		User user = userService.getUser(authentication);
+		if(user == null) return null;
+		return user.getUsername();
 	}
 
 	@Override
