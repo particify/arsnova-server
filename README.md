@@ -10,7 +10,10 @@ Both versions of ARSnova will be deployed alongside each other, so you get to ch
 
 ## Deployment
 
-You will need to do some configuration work upfront. Currently, you need to create a file named `config.properties` inside the `src/main/webapp` folder. The easiest way of doing this is to copy the provided `config.properties.example` and to rename it accordingly. These defaults should get you started.
+You will need to do some configuration work upfront.
+
+ * Add a new directory "arsnova" in /etc and create a copy of arsnova.properties.example named arsnova.properties in this directory.
+ * Change settings to match your environment
 
 ## Server configuration
 
