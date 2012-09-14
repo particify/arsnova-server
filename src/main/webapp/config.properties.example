@@ -1,6 +1,0 @@
-security.arsnova-url=http://localhost:8080/arsnova-war
-security.cas-server-url=https://cas.thm.de/cas
-
-couchdb.host=localhost
-couchdb.port=5984
-couchdb.name=arsnova
