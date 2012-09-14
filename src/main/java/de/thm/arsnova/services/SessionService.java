@@ -19,9 +19,15 @@
 package de.thm.arsnova.services;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.sf.json.JSONObject;
@@ -30,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -44,12 +51,16 @@ import com.fourspaces.couchdb.ViewResults;
 
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
 public class SessionService implements ISessionService {
 
 	@Autowired
 	IUserService userService;
+	
+	@Autowired
+	ARSnovaSocketIOServer server;
 	
 	private String databaseHost;
 	private int databasePort;
@@ -75,6 +86,72 @@ public class SessionService implements ISessionService {
 	public final void setDatabaseName(String databaseName) {
 		this.databaseName = databaseName;
 	}
+	
+	/**
+	 * This method cleans up old feedback votes at the scheduled interval.
+	 */
+	@Override
+	@Scheduled(fixedDelay=5000)
+	public void cleanFeedbackVotes() {
+		final long timelimitInMillis = /*10 * 60 **/ 10000;
+		final long maxAllowedTimeInMillis = System.currentTimeMillis() - timelimitInMillis;
+		
+		Map<String, Set<String>> affectedUsers = new HashMap<String, Set<String>>();
+		Set<String> allAffectedSessions = new HashSet<String>();
+		
+		List<Document> results = findFeedbackForDeletion(maxAllowedTimeInMillis);
+		for (Document d : results) {
+			try {
+				// Read the required document data
+				Document feedback = this.getDatabase().getDocument(d.getId());
+				String arsInternalSessionId = feedback.getString("sessionId");
+				String user = feedback.getString("user");
+				
+				// Store user and session data for later. We need this to communicate the changes back to the users.
+				Set<String> affectedArsSessions = affectedUsers.get(user);
+				if (affectedArsSessions == null) {
+					affectedArsSessions = new HashSet<String>();
+				}
+				affectedArsSessions.add(getSessionKeyword(arsInternalSessionId));
+				affectedUsers.put(user, affectedArsSessions);
+				allAffectedSessions.addAll(affectedArsSessions);
+				
+				this.database.deleteDocument(feedback);
+				logger.debug("Cleaning up Feedback document " + d.getId());
+			} catch (IOException e) {
+				logger.error("Could not delete Feedback document " + d.getId());
+			}
+		}
+		if (!results.isEmpty()) {
+			broadcastFeedbackChanges(affectedUsers, allAffectedSessions);
+		}
+	}
+	
+	/**
+	 * 
+	 * @param affectedUsers The user whose feedback got deleted along with all affected session keywords
+	 * @param allAffectedSessions For convenience, this represents the union of all session keywords mentioned above.
+	 */
+	private void broadcastFeedbackChanges(Map<String, Set<String>> affectedUsers, Set<String> allAffectedSessions) {
+		for (Map.Entry<String, Set<String>> e : affectedUsers.entrySet()) {
+			// Is this user registered with a socket connection?
+			String connectedSocket = user2session.get(e.getKey());
+			if (connectedSocket != null) {
+				this.server.reportDeletedFeedback(e.getKey(), e.getValue());
+			}
+		}
+		this.server.reportUpdatedFeedbackForSessions(allAffectedSessions);
+	}
+
+	private List<Document> findFeedbackForDeletion(final long maxAllowedTimeInMillis) {
+		View cleanupFeedbackView = new View("understanding/cleanup");
+		cleanupFeedbackView.setStartKey("null");
+		cleanupFeedbackView.setEndKey(String.valueOf(maxAllowedTimeInMillis));
+		ViewResults feedbackForCleanup = this.getDatabase().view(cleanupFeedbackView);
+		return feedbackForCleanup.getResults();
+	}
+	
+	
 
 	@Override
 	public Session getSession(String keyword) {
@@ -173,28 +250,30 @@ public class SessionService implements ISessionService {
 	public boolean postFeedback(String keyword, int value, de.thm.arsnova.entities.User user) {
 		String sessionId = this.getSessionId(keyword);
 		if (sessionId == null) return false;
+		if (!(value >= 0 && value <= 3)) return false;
 		
 		Document feedback = new Document();
-		feedback.put("type", "understanding");
-		feedback.put("user", user.getUsername());
-		feedback.put("sessionId", sessionId);
-		feedback.put("timestamp", System.currentTimeMillis());
+		List<Document> postedFeedback = findPreviousFeedback(sessionId, user);
 		
-		switch (value) {
-			case 0:
-				feedback.put("value", "Bitte schneller");
+		// Feedback can only be posted once. If there already is some feedback, we need to update it.
+		if (!postedFeedback.isEmpty()) {
+			for (Document f : postedFeedback) {
+				// Use the first found feedback and update value and timestamp
+				try {
+					feedback = this.getDatabase().getDocument(f.getId());
+					feedback.put("value", feedbackValueToString(value));
+					feedback.put("timestamp", System.currentTimeMillis());
+				} catch (IOException e) {
+					return false;
+				}
 				break;
-			case 1:
-				feedback.put("value", "Kann folgen");
-				break;
-			case 2:
-				feedback.put("value", "Zu schnell");
-				break;
-			case 3:
-				feedback.put("value", "Nicht mehr dabei");
-				break;
-			default:
-				return false;
+			}
+		} else {
+			feedback.put("type", "understanding");
+			feedback.put("user", user.getUsername());
+			feedback.put("sessionId", sessionId);
+			feedback.put("timestamp", System.currentTimeMillis());
+			feedback.put("value", feedbackValueToString(value));
 		}
 		
 		try {
@@ -204,6 +283,32 @@ public class SessionService implements ISessionService {
 		}
 		
 		return true;
+	}
+	
+	private List<Document> findPreviousFeedback(String sessionId, de.thm.arsnova.entities.User user) {
+		View view = new View("understanding/by_user");
+		try {
+			view.setKey(URLEncoder.encode("[\"" + sessionId + "\", \"" + user.getUsername() + "\"]", "UTF-8"));
+		} catch(UnsupportedEncodingException e) {
+			return Collections.<Document>emptyList();
+		}
+		ViewResults results = this.getDatabase().view(view);
+		return results.getResults();
+	}
+	
+	private String feedbackValueToString(int value) {
+		switch (value) {
+			case 0:
+				return "Bitte schneller";
+			case 1:
+				return "Kann folgen";
+			case 2:
+				return "Zu schnell";
+			case 3:
+				return "Nicht mehr dabei";
+			default:
+				return "";
+		}
 	}
 
 	@Override
@@ -239,6 +344,23 @@ public class SessionService implements ISessionService {
 
 		return results.getJSONArray("rows").optJSONObject(0)
 				.optJSONObject("value").getString("_id");
+	}
+	
+	private String getSessionKeyword(String internalSessionId) {
+		try {
+			View view = new View("session/by_id");
+			view.setKey(URLEncoder.encode("\"" + internalSessionId + "\"", "UTF-8"));
+			ViewResults results = this.getDatabase().view(view);
+			for (Document d : results.getResults()) {
+				Document arsSession = this.getDatabase().getDocument(d.getId());
+				return arsSession.get("keyword").toString();
+			}
+		} catch (UnsupportedEncodingException e) {
+			return "";
+		} catch (IOException e) {
+			return "";
+		}
+		return "";
 	}
 
 	private String currentTimestamp() {
