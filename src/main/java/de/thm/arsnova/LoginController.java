@@ -118,6 +118,7 @@ public class LoginController {
 	public View doLogout(final HttpServletRequest request) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		request.getSession().invalidate();
+		SecurityContextHolder.clearContext();
 		if (auth instanceof CasAuthenticationToken) {
 			return new RedirectView("/j_spring_cas_security_logout");
 		}

@@ -116,14 +116,17 @@
     
 	<bean id="requestSingleLogoutFilter"
 	    class="org.springframework.security.web.authentication.logout.LogoutFilter"
-	    p:filterProcessesUrl="/j_spring_cas_security_logout" >
-		<constructor-arg value="${security.cas-server-url}/logout?url=${security.arsnova-url}"/>
-	    <constructor-arg>
-	      <bean class=
-	          "org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
-	    </constructor-arg>
+	    p:filterProcessesUrl="/j_spring_cas_security_logout">
+	    <constructor-arg ref="casLogoutSuccessHandler" />
+		<constructor-arg>
+	      <bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
+	    </constructor-arg>	    
 	</bean>
 
+	<bean id="casLogoutSuccessHandler" class="de.thm.arsnova.CASLogoutSuccessHandler"
+	    p:casUrl="${security.cas-server-url}"
+	    p:defaultTarget="${security.arsnova-url}"/>
+	
 	<bean id="successHandler" class="de.thm.arsnova.LoginAuthenticationSucessHandler"
 	    p:targetUrl="#auth/checkLogin"/>
 
