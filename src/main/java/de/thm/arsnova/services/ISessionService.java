@@ -27,6 +27,7 @@ import de.thm.arsnova.entities.User;
 
 public interface ISessionService {
 
+	public void cleanFeedbackVotes();
 	public Session getSession(String keyword);
 	public Session saveSession(Session session);
 	public Feedback getFeedback(String keyword);

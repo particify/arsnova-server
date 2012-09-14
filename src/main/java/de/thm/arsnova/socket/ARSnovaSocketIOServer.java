@@ -5,19 +5,26 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang.NotImplementedException;
+import org.apache.http.MethodNotSupportedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 
+import com.corundumstudio.socketio.AckCallback;
+import com.corundumstudio.socketio.ClientOperations;
 import com.corundumstudio.socketio.Configuration;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
+import com.corundumstudio.socketio.parser.Packet;
 
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
@@ -160,5 +167,97 @@ public class ARSnovaSocketIOServer {
 
 	public boolean authorize(String session, User user) {
 		return session2user.put(session, user) != null;		
+	}
+	
+	public void reportDeletedFeedback(String username, Set<String> arsSessions) {
+		String connectionId = findConnectionIdForUser(username);
+		if (connectionId == "") {
+			return;
+		}
+		
+		UUID connectionUuid = UUID.fromString(connectionId);
+		for (SocketIOClient client : server.getAllClients()) {
+			// Find the client whose feedback has been deleted and send a message.
+			if (client.getSessionId().compareTo(connectionUuid) == 0) {
+				ClientOperations clientOp = new ARSnovaClientOperations(client);
+				clientOp.sendEvent("removedFeedback", arsSessions);
+				break;
+			}
+		}
+	}
+
+	private String findConnectionIdForUser(String username) {
+		String connectionId = "";
+		for (Map.Entry<String, User> e : session2user.entrySet()) {
+			User u = e.getValue();
+			if (u.getUsername().equals(username)) {
+				connectionId = e.getKey();
+				break;
+			}
+		}
+		return connectionId;
+	}
+	
+	
+	public void reportUpdatedFeedbackForSessions(Set<String> allAffectedSessions) {
+		for (String sessionKey : allAffectedSessions) {
+			de.thm.arsnova.entities.Feedback fb = sessionService.getFeedback(sessionKey);
+			server.getBroadcastOperations().sendEvent("updateFeedback", fb.getValues());
+		}
+	}
+	
+	private static class ARSnovaClientOperations implements ClientOperations {
+		
+		private final SocketIOClient client;
+		
+		public ARSnovaClientOperations(SocketIOClient client) {
+			this.client = client;
+		}
+		
+		@Override
+		public void disconnect() {
+			throw new NotImplementedException();
+		}
+
+		@Override
+		public void send(Packet arg0) {
+			throw new NotImplementedException();
+		}
+
+		@Override
+		public void send(Packet arg0, AckCallback arg1) {
+			throw new NotImplementedException();
+		}
+
+		@Override
+		public void sendEvent(String eventName, Object data) {
+			client.sendEvent(eventName, data);
+		}
+
+		@Override
+		public void sendEvent(String arg0, Object arg1, AckCallback arg2) {
+			throw new NotImplementedException();
+		}
+
+		@Override
+		public void sendJsonObject(Object arg0) {
+			throw new NotImplementedException();
+		}
+
+		@Override
+		public void sendJsonObject(Object arg0, AckCallback arg1) {
+			throw new NotImplementedException();
+		}
+
+		@Override
+		public void sendMessage(String arg0) {
+			throw new NotImplementedException();
+		}
+
+		@Override
+		public void sendMessage(String arg0, AckCallback arg1) {
+			throw new NotImplementedException();
+		}
+		
 	}
 }
