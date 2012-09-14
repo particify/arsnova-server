@@ -18,6 +18,8 @@
  */
 package de.thm.arsnova;
 
+import java.util.UUID;
+
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.json.JSONObject;
@@ -59,7 +61,7 @@ public class SessionController {
 			return;
 		}		
 		logger.info("authorize session: " + sessionkey + ", user is:  " + userService.getUser(SecurityContextHolder.getContext().getAuthentication()));
-		boolean result = server.authorize(sessionkey, userService.getUser(SecurityContextHolder.getContext().getAuthentication()));
+		boolean result = server.authorize(UUID.fromString(sessionkey), userService.getUser(SecurityContextHolder.getContext().getAuthentication()));
 		response.setStatus(result ? HttpStatus.CREATED.value() : HttpStatus.UNAUTHORIZED.value());
 	}
 	

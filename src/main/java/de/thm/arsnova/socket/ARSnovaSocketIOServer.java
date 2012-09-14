@@ -10,7 +10,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.apache.http.MethodNotSupportedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +36,7 @@ public class ARSnovaSocketIOServer {
 	
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	
-	private final Map<String, User> socketid2user = new ConcurrentHashMap<String, User>();
+	private final Map<UUID, User> socketid2user = new ConcurrentHashMap<UUID, User>();
 	
 	private int portNumber;
 	private boolean useSSL = false;
@@ -77,7 +76,7 @@ public class ARSnovaSocketIOServer {
 						/**
 						 * do a check if user is in the session, for which he would give a feedback
 						 */
-						User u = socketid2user.get(client.getSessionId().toString());
+						User u = socketid2user.get(client.getSessionId());
 						if(u == null || sessionService.isUserInSession(u, data.getSessionkey()) == false) {
 							return;
 						}
@@ -92,7 +91,7 @@ public class ARSnovaSocketIOServer {
 						de.thm.arsnova.entities.Feedback fb = sessionService.getFeedback(data.getSessionkey());
 						
 						for(SocketIOClient c : server.getAllClients()) {
-							u = socketid2user.get(c.getSessionId().toString());
+							u = socketid2user.get(c.getSessionId());
 							if(u != null && users.contains(u.getUsername())) {
 								c.sendEvent("updateFeedback", fb.getValues());
 							}
@@ -114,6 +113,7 @@ public class ARSnovaSocketIOServer {
 	        @Override
 	        public void onDisconnect(SocketIOClient client) {
 	        	logger.info("addDisconnectListener.onDisconnect: Client: {}", new Object[] {client});
+	        	socketid2user.remove(client.getSessionId());
 	        }
 	    });
 		
@@ -165,20 +165,19 @@ public class ARSnovaSocketIOServer {
 		this.useSSL = useSSL;
 	}
 
-	public boolean authorize(String session, User user) {
+	public boolean authorize(UUID session, User user) {
 		return socketid2user.put(session, user) != null;		
 	}
 	
 	public void reportDeletedFeedback(String username, Set<String> arsSessions) {
-		String connectionId = findConnectionIdForUser(username);
-		if (connectionId == "") {
+		UUID connectionId = findConnectionIdForUser(username);
+		if (connectionId == null) {
 			return;
 		}
 		
-		UUID connectionUuid = UUID.fromString(connectionId);
 		for (SocketIOClient client : server.getAllClients()) {
 			// Find the client whose feedback has been deleted and send a message.
-			if (client.getSessionId().compareTo(connectionUuid) == 0) {
+			if (client.getSessionId().compareTo(connectionId) == 0) {
 				ClientOperations clientOp = new ARSnovaClientOperations(client);
 				clientOp.sendEvent("removedFeedback", arsSessions);
 				break;
@@ -186,16 +185,14 @@ public class ARSnovaSocketIOServer {
 		}
 	}
 
-	private String findConnectionIdForUser(String username) {
-		String connectionId = "";
-		for (Map.Entry<String, User> e : socketid2user.entrySet()) {
+	private UUID findConnectionIdForUser(String username) {
+		for (Map.Entry<UUID, User> e : socketid2user.entrySet()) {
 			User u = e.getValue();
 			if (u.getUsername().equals(username)) {
-				connectionId = e.getKey();
-				break;
+				return e.getKey();
 			}
 		}
-		return connectionId;
+		return null;
 	}
 	
 	
