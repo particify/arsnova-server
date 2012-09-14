@@ -178,8 +178,7 @@ public class ARSnovaSocketIOServer {
 		for (SocketIOClient client : server.getAllClients()) {
 			// Find the client whose feedback has been deleted and send a message.
 			if (client.getSessionId().compareTo(connectionId) == 0) {
-				ClientOperations clientOp = new ARSnovaClientOperations(client);
-				clientOp.sendEvent("removedFeedback", arsSessions);
+				client.sendEvent("removedFeedback", arsSessions);
 				break;
 			}
 		}
@@ -201,60 +200,5 @@ public class ARSnovaSocketIOServer {
 			de.thm.arsnova.entities.Feedback fb = sessionService.getFeedback(sessionKey);
 			server.getBroadcastOperations().sendEvent("updateFeedback", fb.getValues());
 		}
-	}
-	
-	private static class ARSnovaClientOperations implements ClientOperations {
-		
-		private final SocketIOClient client;
-		
-		public ARSnovaClientOperations(SocketIOClient client) {
-			this.client = client;
-		}
-		
-		@Override
-		public void disconnect() {
-			throw new NotImplementedException();
-		}
-
-		@Override
-		public void send(Packet arg0) {
-			throw new NotImplementedException();
-		}
-
-		@Override
-		public void send(Packet arg0, AckCallback arg1) {
-			throw new NotImplementedException();
-		}
-
-		@Override
-		public void sendEvent(String eventName, Object data) {
-			client.sendEvent(eventName, data);
-		}
-
-		@Override
-		public void sendEvent(String arg0, Object arg1, AckCallback arg2) {
-			throw new NotImplementedException();
-		}
-
-		@Override
-		public void sendJsonObject(Object arg0) {
-			throw new NotImplementedException();
-		}
-
-		@Override
-		public void sendJsonObject(Object arg0, AckCallback arg1) {
-			throw new NotImplementedException();
-		}
-
-		@Override
-		public void sendMessage(String arg0) {
-			throw new NotImplementedException();
-		}
-
-		@Override
-		public void sendMessage(String arg0, AckCallback arg1) {
-			throw new NotImplementedException();
-		}
-		
 	}
 }
