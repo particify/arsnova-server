@@ -31,6 +31,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
 import org.slf4j.Logger;
@@ -121,6 +122,8 @@ public class SessionService implements ISessionService {
 				logger.debug("Cleaning up Feedback document " + d.getId());
 			} catch (IOException e) {
 				logger.error("Could not delete Feedback document " + d.getId());
+			} catch (JSONException e) {
+				logger.error("Could not delete Feedback document {}, error is: {} ", new Object[] {d.getId(), e});
 			}
 		}
 		if (!results.isEmpty()) {
