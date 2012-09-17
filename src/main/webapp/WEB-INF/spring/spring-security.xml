@@ -9,10 +9,6 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
 
-	<context:component-scan base-package="de.thm.arsnova" />
-	<context:annotation-config />
-	
-	
     <security:authentication-manager alias="authenticationManager">
         <security:authentication-provider ref="facebookAuthProvider" />
         <security:authentication-provider ref="twitterAuthProvider" />

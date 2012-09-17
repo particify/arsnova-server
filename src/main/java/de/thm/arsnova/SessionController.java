@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.services.ISessionService;
@@ -66,6 +67,7 @@ public class SessionController {
 	}
 	
 	@RequestMapping(value="/session/{sessionkey}", method=RequestMethod.GET)
+	@ResponseBody
 	public Session getSession(@PathVariable String sessionkey, HttpServletResponse response) {
 		Session session = sessionService.getSession(sessionkey);
 		if (session != null) return session;
@@ -75,6 +77,7 @@ public class SessionController {
 	}
 	
 	@RequestMapping(value="/session", method=RequestMethod.POST)
+	@ResponseBody
 	public Session postNewSession(@RequestBody Session session, HttpServletResponse response) {
 		Session newSession = sessionService.saveSession(session);
 		if (session != null) {
