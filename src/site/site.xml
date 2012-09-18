@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<project name="ARSNova" xmlns="http://maven.apache.org/DECORATION/1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.0 http://maven.apache.org/xsd/decoration-1.0.0.xsd">
+
+	<skin>
+		<groupId>org.apache.maven.skins</groupId>
+		<artifactId>maven-fluido-skin</artifactId>
+		<version>1.2.1</version>
+	</skin>
+
+	<custom>
+		<fluidoSkin>
+			<topBarEnabled>true</topBarEnabled>
+			<topBar>
+			
+			</topBar>
+			<sideBarEnabled>false</sideBarEnabled>
+			<profile>release</profile>
+			<ohloh>
+				<projectId>arsnova</projectId>
+				<widget>stats</widget>
+			</ohloh>
+			<facebookLike />
+			<googlePlusOne />
+		</fluidoSkin>
+	</custom>
+
+	<bannerLeft>
+		<name>ARSNova</name>
+		<src>arsnova.png</src>
+		<href>http://ars.thm.de/</href>
+	</bannerLeft>
+
+	<bannerRight>
+		<src>thm_logo.png</src>
+	</bannerRight>
+
+	<body>
+		<head>
+			<link rel="stylesheet" type="text/css" href="css/thm-theme.css" />
+		</head>
+		<links>
+			<item name="THM" href="http://www.thm.de/" />
+		</links>
+		<menu name="Overview">
+			<item name="Introduction" href="index.html" />
+			<item name="Dependencies" href="dependencies.html" />
+			<item name="The Team" href="team-list.html" />
+		</menu>
+		<menu name="Further Information">
+			<item name="Gitorious" href="https://scm.thm.de/arsnova" />
+			<item name="Issue Tracking" href="issue-tracking.html" />
+			<item name="Continuous Integration" href="integration.html" />
+			<item name="Source Repository" href="source-repository.html" />
+		</menu>
+		
+	</body>
+</project>

@@ -1,0 +1,9 @@
+@CHARSET "UTF-8";
+
+.poweredBy {
+	display: none;
+}
+
+#banner {
+	margin: 4px 0;
+}
