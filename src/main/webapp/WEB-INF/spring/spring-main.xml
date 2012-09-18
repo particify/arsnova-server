@@ -2,9 +2,12 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:p="http://www.springframework.org/schema/p" xmlns:util="http://www.springframework.org/schema/util"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
-		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.1.xsd">
 
 	<bean id="propertyPlaceholderConfigurer"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
@@ -16,14 +19,48 @@
 			</list>
 		</property>
 	</bean>
-
-	<util:properties id="props"
-		location="file:///etc/arsnova/arsnova.properties" />
-
+	
 	<import resource="spring-security.xml" />
 
 	<context:component-scan base-package="de.thm.arsnova" />
-	<context:annotation-config />
+	<mvc:annotation-driven />
+	<mvc:resources mapping="/**" location="/" />
+
+	<task:annotation-driven />
+	
+	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter" />
+			</list>
+		</property>
+	</bean>
+
+	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="mediaTypes">
+			<map>
+			 	<entry key="html" value="text/html"/>  
+				<entry key="json" value="application/json" />
+			</map>
+		</property>
+		<property name="viewResolvers">  
+			<list>  
+				<bean class="org.springframework.web.servlet.view.UrlBasedViewResolver">  
+					<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>  
+					<property name="prefix" value="/WEB-INF/jsp/"/>  
+					<property name="suffix" value=".jsp"/>  
+				</bean>  
+		    </list>  
+		</property>  
+		<property name="defaultViews">  
+			<list>  
+				<bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView">  
+					<property name="prefixJson" value="false"/>  
+				</bean>  
+			</list>  
+		</property>  
+	</bean>  
 
 	<bean id="socketServer" class="de.thm.arsnova.socket.ARSnovaSocketIOServer"
 		init-method="startServer" destroy-method="stopServer" scope="singleton"

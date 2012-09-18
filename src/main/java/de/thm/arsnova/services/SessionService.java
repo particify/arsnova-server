@@ -74,18 +74,21 @@ public class SessionService implements ISessionService {
 	
 	public static final Logger logger = LoggerFactory.getLogger(SessionService.class);
 
-	@Value("#{props['couchdb.host']}")
+	@Value("${couchdb.host}")
 	public final void setDatabaseHost(String databaseHost) {
+		logger.info(databaseHost);
 		this.databaseHost = databaseHost;
 	}
 	
-	@Value("#{props['couchdb.port']}")
+	@Value("${couchdb.port}")
 	public final void setDatabasePort(String databasePort) {
+		logger.info(databasePort);
 		this.databasePort = Integer.parseInt(databasePort);
 	}
 	
-	@Value("#{props['couchdb.name']}")
+	@Value("${couchdb.name}")
 	public final void setDatabaseName(String databaseName) {
+		logger.info(databaseName);
 		this.databaseName = databaseName;
 	}
 	
