@@ -54,37 +54,41 @@ public class SessionService implements ISessionService {
 	private static final ConcurrentHashMap<String, String> user2session = new ConcurrentHashMap<String, String>();
 	
 	@Autowired
-	IDatabaseDao sessionDao;
+	IDatabaseDao databaseDao;
+	
+	public void setDatabaseDao(IDatabaseDao databaseDao) {
+		this.databaseDao = databaseDao;
+	}
 	
 	@Override
 	@Scheduled(fixedDelay=5000)
 	public void cleanFeedbackVotes() {
-		sessionDao.cleanFeedbackVotes(cleanupFeedbackDelay);		
+		databaseDao.cleanFeedbackVotes(cleanupFeedbackDelay);		
 	}
 
 	@Override
 	public Session getSession(String keyword) {
-		return sessionDao.getSession(keyword);
+		return databaseDao.getSession(keyword);
 	}
 
 	@Override
 	public Session saveSession(Session session) {
-		return sessionDao.saveSession(session);
+		return databaseDao.saveSession(session);
 	}
 
 	@Override
 	public Feedback getFeedback(String keyword) {
-		return sessionDao.getFeedback(keyword);
+		return databaseDao.getFeedback(keyword);
 	}
 
 	@Override
 	public boolean saveFeedback(String keyword, int value, User user) {
-		return sessionDao.saveFeedback(keyword, value, user);
+		return databaseDao.saveFeedback(keyword, value, user);
 	}
 
 	@Override
 	public boolean sessionKeyAvailable(String keyword) {
-		return sessionDao.sessionKeyAvailable(keyword);
+		return databaseDao.sessionKeyAvailable(keyword);
 	}
 
 	@Override

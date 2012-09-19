@@ -215,6 +215,7 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
 			<version>${org.springframework-version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -238,6 +239,12 @@
 			<groupId>com.corundumstudio.socketio</groupId>
 			<artifactId>netty-socketio</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<version>1</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	<build>
@@ -273,6 +280,17 @@
 				<version>3.1</version>
 				<configuration>
 					<locales>en</locales>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.12.2</version>
+				<configuration>
+					<includes>
+						<include>**/SessionControllerTest.java</include>
+						<include>**/SessionServiceTest.java</include>
+					</includes>
 				</configuration>
 			</plugin>
 		</plugins>
