@@ -64,6 +64,12 @@ public class SessionService implements ISessionService {
 	@Autowired
 	ARSnovaSocketIOServer server;
 	
+	/**
+	 * minutes, after which the feedback is deleted
+	 */
+	@Value("${feedback.cleanup}")
+	private int cleanupFeedbackDelay;
+	
 	private String databaseHost;
 	private int databasePort;
 	private String databaseName;
@@ -98,7 +104,7 @@ public class SessionService implements ISessionService {
 	@Override
 	@Scheduled(fixedDelay=5000)
 	public void cleanFeedbackVotes() {
-		final long timelimitInMillis = /*10 * 60 **/ 10000;
+		final long timelimitInMillis = 60000 * cleanupFeedbackDelay;
 		final long maxAllowedTimeInMillis = System.currentTimeMillis() - timelimitInMillis;
 		
 		Map<String, Set<String>> affectedUsers = new HashMap<String, Set<String>>();
