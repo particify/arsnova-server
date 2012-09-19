@@ -12,11 +12,11 @@
 
 	<custom>
 		<fluidoSkin>
-			<topBarEnabled>true</topBarEnabled>
+			<topBarEnabled>false</topBarEnabled>
 			<topBar>
 			
 			</topBar>
-			<sideBarEnabled>false</sideBarEnabled>
+			<sideBarEnabled>true</sideBarEnabled>
 			<profile>release</profile>
 			<ohloh>
 				<projectId>arsnova</projectId>
@@ -47,6 +47,8 @@
 		<menu name="Overview">
 			<item name="Introduction" href="index.html" />
 			<item name="Dependencies" href="dependencies.html" />
+			<item name="Installation" href="installation.html" />
+			<item name="License" href="license.html" />
 			<item name="The Team" href="team-list.html" />
 		</menu>
 		<menu name="Further Information">

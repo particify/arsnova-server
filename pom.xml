@@ -23,26 +23,31 @@
 			<name>Julian Hochstetter</name>
 			<organization>Technische Hochschule Mittelhessen</organization>
 			<organizationUrl>http://www.thm.de</organizationUrl>
+			<email>julian.hochstetter@mni.thm.de</email>
 		</developer>
 		<developer>
 			<name>Jan Kammer</name>
 			<organization>Technische Hochschule Mittelhessen</organization>
 			<organizationUrl>http://www.thm.de</organizationUrl>
+			<email>jan.kammer@mni.thm.de</email>
 		</developer>
 		<developer>
 			<name>Daniel Knapp</name>
 			<organization>Technische Hochschule Mittelhessen</organization>
 			<organizationUrl>http://www.thm.de</organizationUrl>
+			<email>daniel.knapp@mni.thm.de</email>
 		</developer>
 		<developer>
 			<name>Christoph Thelen</name>
 			<organization>Technische Hochschule Mittelhessen</organization>
 			<organizationUrl>http://www.thm.de</organizationUrl>
+			<email>christoph.thelen@mni.thm.de</email>
 		</developer>
 		<developer>
 			<name>Paul-Christian Volkmer</name>
 			<organization>Technische Hochschule Mittelhessen</organization>
 			<organizationUrl>http://www.thm.de</organizationUrl>
+			<email>paul-christian.volkmer@mni.thm.de</email>
 		</developer>
 	</developers>
 	
