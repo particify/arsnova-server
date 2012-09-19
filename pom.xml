@@ -287,10 +287,6 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.12.2</version>
 				<configuration>
-					<includes>
-						<include>**/SessionControllerTest.java</include>
-						<include>**/SessionServiceTest.java</include>
-					</includes>
 				</configuration>
 			</plugin>
 		</plugins>
