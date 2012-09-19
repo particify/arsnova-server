@@ -3,27 +3,24 @@ package de.thm.arsnova.socket;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 
-import com.corundumstudio.socketio.AckCallback;
-import com.corundumstudio.socketio.ClientOperations;
 import com.corundumstudio.socketio.Configuration;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
-import com.corundumstudio.socketio.parser.Packet;
 
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
@@ -36,7 +33,7 @@ public class ARSnovaSocketIOServer {
 	
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	
-	private final Map<UUID, User> socketid2user = new ConcurrentHashMap<UUID, User>();
+	private final ConcurrentHashMap<UUID, User> socketid2user = new ConcurrentHashMap<UUID, User>();
 	
 	private int portNumber;
 	private boolean useSSL = false;
@@ -170,28 +167,27 @@ public class ARSnovaSocketIOServer {
 	}
 	
 	public void reportDeletedFeedback(String username, Set<String> arsSessions) {
-		UUID connectionId = findConnectionIdForUser(username);
-		if (connectionId == null) {
+		List<UUID> connectionIds = findConnectionIdForUser(username);
+		if (connectionIds.isEmpty()) {
 			return;
 		}
 		
 		for (SocketIOClient client : server.getAllClients()) {
 			// Find the client whose feedback has been deleted and send a message.
-			if (client.getSessionId().compareTo(connectionId) == 0) {
+			if(connectionIds.contains(client.getSessionId())) {
 				client.sendEvent("removedFeedback", arsSessions);
-				break;
 			}
 		}
 	}
 
-	private UUID findConnectionIdForUser(String username) {
-		for (Map.Entry<UUID, User> e : socketid2user.entrySet()) {
-			User u = e.getValue();
-			if (u.getUsername().equals(username)) {
-				return e.getKey();
+	private List<UUID> findConnectionIdForUser(String username) {
+		List<UUID> result = new ArrayList<UUID>();
+		for (Entry<UUID, User> e : socketid2user.entrySet()) {
+			if (e.getValue().getUsername().equals(username)) {
+				result.add(e.getKey());
 			}
 		}
-		return null;
+		return result;
 	}
 	
 	
