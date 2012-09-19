@@ -37,8 +37,12 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-@ContextConfiguration(locations={"file:src/main/webapp/WEB-INF/arsnova-servlet.xml", "file:src/main/webapp/WEB-INF/spring/spring-main.xml"})
 @RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations={
+		"file:src/main/webapp/WEB-INF/arsnova-servlet.xml",
+		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
+		"file:src/test/resources/test-config.xml"
+})
 public class AbstractSpringContextTestBase extends AbstractJUnit4SpringContextTests {
 	
 	protected MockHttpServletRequest request;

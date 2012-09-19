@@ -17,28 +17,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.thm.arsnova.services;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+package de.thm.arsnova.dao;
 
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
-
-public interface ISessionService {
-
-	public void cleanFeedbackVotes();
+public interface IDatabaseDao {
+	public void cleanFeedbackVotes(int cleanupFeedbackDelay);
 	public Session getSession(String keyword);
 	public Session saveSession(Session session);
 	public Feedback getFeedback(String keyword);
 	public boolean saveFeedback(String keyword, int value, User user);
 	public boolean sessionKeyAvailable(String keyword);
-	public String generateKeyword();
-	public void addUserToSessionMap(String username, String keyword);
-	public boolean isUserInSession(User user, String keyword);
-	public List<String> getUsersInSession(String keyword);
-	public void broadcastFeedbackChanges(Map<String, Set<String>> affectedUsers, Set<String> allAffectedSessions);
 }

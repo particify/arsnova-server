@@ -77,7 +77,7 @@ public class ARSnovaSocketIOServer {
 						if(u == null || sessionService.isUserInSession(u, data.getSessionkey()) == false) {
 							return;
 						}
-						sessionService.postFeedback(data.getSessionkey(), data.getValue(), u);
+						sessionService.saveFeedback(data.getSessionkey(), data.getValue(), u);
 						
 						/**
 						 * collect a list of users which are in the current session
