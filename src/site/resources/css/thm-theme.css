@@ -1,0 +1,22 @@
+@CHARSET "UTF-8";
+
+.poweredBy {
+	display: none;
+}
+
+#banner {
+	margin: 4px 0;
+}
+
+body > div > hr {
+	display: none;
+}
+
+footer > div {
+	position: relative;
+}
+
+footer > div .row {
+	position: absolute;
+	bottom: 8px;
+}
