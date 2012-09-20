@@ -20,7 +20,6 @@ package de.thm.arsnova.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import javax.inject.Inject;
 
@@ -42,7 +41,6 @@ import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAda
 import org.springframework.web.servlet.view.RedirectView;
 
 import de.thm.arsnova.LoginController;
-import de.thm.arsnova.entities.User;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations={
@@ -102,20 +100,15 @@ public class LoginControllerTest {
 		assertEquals("Guest1234567890", auth.getName());
 	}
 	
-
-	/*
 	@Test
 	public void testUser() throws Exception {
 		request.setMethod("GET");
 		request.setRequestURI("/whoami");
 
-		final ModelAndView mav = handlerAdapter.handle(request, response, loginController);
-
-		assertNotNull(mav);
-		assertTrue(mav.getModel().containsKey("user"));
-		assertEquals(mav.getModel().get("user").getClass(), User.class);
-		assertEquals("Guest1234567890", ((User)mav.getModel().get("user")).getUsername());
-	}*/
+		handlerAdapter.handle(request, response, loginController);
+		assertNotNull(response);
+		assertEquals(response.getContentAsString(),"{\"username\":\"Guest1234567890\"}");
+	}
 
 	@Test
 	public void testLogoutWithoutRedirect() throws Exception {
