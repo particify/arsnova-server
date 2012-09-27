@@ -67,7 +67,12 @@ public class Session {
 		this.active = active;
 	}
 	
-	public void set_id(String id) {}
-	public void set_rev(String rev) {}
+	public void set_id(String id) {
+		_id = id;
+	}
+	public String get_id() {
+		return _id;
+	}
 	
+	public void set_rev(String rev) {}
 }

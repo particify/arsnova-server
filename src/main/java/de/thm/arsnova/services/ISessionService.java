@@ -27,6 +27,8 @@ import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
+import de.thm.arsnova.socket.message.Question;
+
 
 public interface ISessionService {
 
@@ -41,4 +43,6 @@ public interface ISessionService {
 	public boolean isUserInSession(User user, String keyword);
 	public List<String> getUsersInSession(String keyword);
 	public void broadcastFeedbackChanges(Map<String, Set<String>> affectedUsers, Set<String> allAffectedSessions);
+	
+	public boolean saveQuestion(Question question);
 }

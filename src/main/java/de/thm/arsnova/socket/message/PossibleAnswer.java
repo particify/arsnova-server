@@ -16,22 +16,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package de.thm.arsnova.socket.message;
 
-package de.thm.arsnova.dao;
+public class PossibleAnswer {
 
-import de.thm.arsnova.entities.Feedback;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.User;
-import de.thm.arsnova.socket.message.Question;
-
-public interface IDatabaseDao {
-	public void cleanFeedbackVotes(int cleanupFeedbackDelay);
-	public Session getSessionFromKeyword(String keyword);
-	public Session getSession(String keyword);
-	public Session saveSession(Session session);
-	public Feedback getFeedback(String keyword);
-	public boolean saveFeedback(String keyword, int value, User user);
-	public boolean sessionKeyAvailable(String keyword);
+	private String text;
+	private boolean correct;
 	
-	public boolean saveQuestion(Session session, Question question);
+	public String getText() {
+		return text;
+	}
+	
+	public void setText(String text) {
+		this.text = text;
+	}
+	
+	public boolean isCorrect() {
+		return correct;
+	}
+	
+	public void setCorrect(boolean correct) {
+		this.correct = correct;
+	}
+
+	@Override
+	public String toString() {
+		return "PossibleAnswer [text=" + text + ", correct=" + correct + "]";
+	}
 }

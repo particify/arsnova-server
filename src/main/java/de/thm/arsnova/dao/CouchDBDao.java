@@ -53,6 +53,7 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
+import de.thm.arsnova.socket.message.Question;
 
 @Component
 public class CouchDBDao implements IDatabaseDao {
@@ -145,23 +146,30 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public Session getSession(String keyword) {
-		View view = new View("session/by_keyword");
-		view.setKey(URLEncoder.encode("\"" + keyword + "\""));
-		ViewResults results = this.getDatabase().view(view);
-
-		if (results.getJSONArray("rows").optJSONObject(0) == null)
-			return null;
-
-		Session result = (Session) JSONObject.toBean(
-				results.getJSONArray("rows").optJSONObject(0)
-						.optJSONObject("value"), Session.class);
-
+		Session result = this.getSessionFromKeyword(keyword);
 		if (result.isActive() || result.getCreator().equals(this.actualUserName())) {
 			sessionService.addUserToSessionMap(this.actualUserName(), keyword);
 			return result;
 		}
 		
 		return null;
+	}
+	
+	@Override
+	public Session getSessionFromKeyword(String keyword) {
+		try {
+			View view = new View("session/by_keyword");
+			view.setKey(URLEncoder.encode("\"" + keyword + "\"", "UTF-8"));
+			ViewResults results = this.getDatabase().view(view);
+	
+			if (results.getJSONArray("rows").optJSONObject(0) == null)
+				return null;
+	
+			return (Session) JSONObject.toBean(
+					results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"), Session.class);
+		} catch (UnsupportedEncodingException e) {
+			return null;
+		}
 	}
 	
 	@Override
@@ -372,5 +380,26 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		
 		return database;
+	}
+
+	@Override
+	public boolean saveQuestion(Session session, Question question) {
+		Document q = new Document();
+		q.put("type", "skill_question");
+		q.put("questionType", question.getQuestionType());
+		q.put("sessionId", session.get_id());
+		q.put("subject", question.getSubject());
+		q.put("text", question.getText());
+		q.put("active", question.isActive());
+		q.put("number", 0); // TODO: This number has to get incremented automatically
+		q.put("releasedFor", question.getReleasedFor());
+		q.put("possibleAnswers", question.getPossibleAnswers());
+		q.put("noCorrect", question.isNoCorrect());
+		try {
+			database.saveDocument(q);
+		} catch (IOException e) {
+			logger.error("Could not save question {}", question);
+		}
+		return false;
 	}
 }

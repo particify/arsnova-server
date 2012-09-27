@@ -25,6 +25,7 @@ import com.corundumstudio.socketio.listener.DisconnectListener;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.socket.message.Feedback;
+import de.thm.arsnova.socket.message.Question;
 
 public class ARSnovaSocketIOServer {
 
@@ -95,9 +96,13 @@ public class ARSnovaSocketIOServer {
 						}
 					}
 		});
-
 		
-		
+		server.addEventListener("arsnova/question/create", Question.class, new DataListener<Question>(){
+			@Override
+			public void onData(SocketIOClient client, Question question) {
+				sessionService.saveQuestion(question);
+			}
+		});
 		
 		server.addConnectListener(new ConnectListener() {
 	        @Override

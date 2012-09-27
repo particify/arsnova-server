@@ -38,6 +38,7 @@ import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
+import de.thm.arsnova.socket.message.Question;
 
 @Service
 public class SessionService implements ISessionService {
@@ -140,5 +141,11 @@ public class SessionService implements ISessionService {
 		
 		if (this.sessionKeyAvailable(keyword)) return keyword;
 		return generateKeyword();
+	}
+
+	@Override
+	public boolean saveQuestion(Question question) {
+		Session session = this.databaseDao.getSessionFromKeyword(question.getSession());
+		return this.databaseDao.saveQuestion(session, question);
 	}
 }
