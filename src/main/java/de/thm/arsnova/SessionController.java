@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
@@ -61,9 +62,10 @@ public class SessionController {
 		if(sessionkey == null) {
 			return;
 		}		
-		logger.info("authorize session: " + sessionkey + ", user is:  " + userService.getUser(SecurityContextHolder.getContext().getAuthentication()));
-		boolean result = server.authorize(UUID.fromString(sessionkey), userService.getUser(SecurityContextHolder.getContext().getAuthentication()));
-		response.setStatus(result ? HttpStatus.CREATED.value() : HttpStatus.UNAUTHORIZED.value());
+		User u = userService.getUser(SecurityContextHolder.getContext().getAuthentication());
+		logger.info("authorize session: " + sessionkey + ", user is:  " + u);
+		response.setStatus(u != null ? HttpStatus.CREATED.value() : HttpStatus.UNAUTHORIZED.value());
+		server.authorize(UUID.fromString(sessionkey), u);
 	}
 	
 	@RequestMapping(value="/session/{sessionkey}", method=RequestMethod.GET)
