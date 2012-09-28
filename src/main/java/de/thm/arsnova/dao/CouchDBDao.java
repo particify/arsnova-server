@@ -147,6 +147,9 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public Session getSession(String keyword) {
 		Session result = this.getSessionFromKeyword(keyword);
+		if(result == null) {
+			return null;
+		}
 		if (result.isActive() || result.getCreator().equals(this.actualUserName())) {
 			sessionService.addUserToSessionMap(this.actualUserName(), keyword);
 			return result;
