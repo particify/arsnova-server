@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.socket.message.Question;
 
 @Component
 @Scope("singleton")
@@ -17,6 +18,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	private Map<String, Session> stubSessions = new ConcurrentHashMap<String, Session>();
 	private Map<String, Feedback> stubFeedbacks = new ConcurrentHashMap<String, Feedback>();
+	private Map<Session, Question> stubQuestions = new ConcurrentHashMap<Session, Question>();
 	
 	public StubDatabaseDao() {
 		fillWithDummySessions();
@@ -93,6 +95,17 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public boolean sessionKeyAvailable(String keyword) {
 		System.out.println(stubSessions.get(keyword));
 		return (stubSessions.get(keyword) == null);
+	}
+
+	@Override
+	public Session getSessionFromKeyword(String keyword) {
+		return stubSessions.get(keyword);
+	}
+
+	@Override
+	public boolean saveQuestion(Session session, Question question) {
+		stubQuestions.put(session, question);
+		return stubQuestions.get(session) != null;
 	}
 
 }
