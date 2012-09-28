@@ -167,8 +167,8 @@ public class ARSnovaSocketIOServer {
 		this.useSSL = useSSL;
 	}
 
-	public boolean authorize(UUID session, User user) {
-		return socketid2user.put(session, user) != null;		
+	public void authorize(UUID session, User user) {
+		socketid2user.put(session, user);
 	}
 	
 	public void reportDeletedFeedback(String username, Set<String> arsSessions) {
