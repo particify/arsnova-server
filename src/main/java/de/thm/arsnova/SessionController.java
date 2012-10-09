@@ -90,4 +90,15 @@ public class SessionController {
 		response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
 		return null;
 	}
+	
+	@RequestMapping(value="/socketurl", method=RequestMethod.GET)
+	@ResponseBody
+	public String getSocketUrl() {
+		StringBuilder url = new StringBuilder();
+		
+		url.append(server.isUseSSL() ? "https://" : "http://");
+		url.append(server.getHostIp() + ":" + server.getPortNumber());
+		
+		return url.toString();
+	}
 }

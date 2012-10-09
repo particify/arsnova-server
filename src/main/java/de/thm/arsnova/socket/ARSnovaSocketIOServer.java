@@ -37,13 +37,13 @@ public class ARSnovaSocketIOServer {
 	private final ConcurrentHashMap<UUID, User> socketid2user = new ConcurrentHashMap<UUID, User>();
 	
 	private int portNumber;
+	private String hostIp;
 	private boolean useSSL = false;
 	private String keystore;
 	private String storepass;
 	private final Configuration config;
 	private SocketIOServer server;
-
-
+	
 	public ARSnovaSocketIOServer() {
 		config = new Configuration();
 	}
@@ -55,7 +55,7 @@ public class ARSnovaSocketIOServer {
 		System.setProperty("java.net.preferIPv4Stack" , "true");
 		
 		config.setPort(portNumber);
-		config.setHostname("0.0.0.0");
+		config.setHostname(hostIp);
 		if(useSSL) {
 			try {
 				InputStream stream = new FileInputStream(keystore);
@@ -140,6 +140,14 @@ public class ARSnovaSocketIOServer {
 		this.portNumber = portNumber;
 	}
 
+	public String getHostIp() {
+		return hostIp;
+	}
+
+	public void setHostIp(String hostIp) {
+		this.hostIp = hostIp;
+	}
+	
 	public String getStorepass() {
 		return storepass;
 	}
