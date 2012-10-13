@@ -42,6 +42,7 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
+import de.thm.arsnova.socket.message.Question;
 
 @Controller
 public class SessionController {
@@ -124,6 +125,24 @@ public class SessionController {
 
 		response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
 		return null;
+	}
+
+	
+	@RequestMapping(value="/session/{sessionkey}/question", method=RequestMethod.POST)
+	@ResponseBody
+	public void postQuestion(@PathVariable String sessionkey, @RequestBody Question question, HttpServletResponse response) {
+		if (! sessionkey.equals(question.getSession())) {
+			response.setStatus(HttpStatus.PRECONDITION_FAILED.value());
+			return;
+		}
+		
+		if (sessionService.saveQuestion(question)) {
+			response.setStatus(HttpStatus.CREATED.value());
+			return;
+		}
+		
+		response.setStatus(HttpStatus.BAD_REQUEST.value());
+		return;
 	}
 	
 	@RequestMapping(value="/socketurl", method=RequestMethod.GET)
