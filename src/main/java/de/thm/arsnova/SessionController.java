@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
@@ -75,6 +76,40 @@ public class SessionController {
 		if (session != null) return session;
 		
 		response.setStatus(HttpStatus.NOT_FOUND.value());
+		return null;
+	}
+	
+	@RequestMapping(value="/session/{sessionkey}/feedback", method=RequestMethod.GET)
+	@ResponseBody
+	public Feedback getFeedback(@PathVariable String sessionkey, HttpServletResponse response) {
+		Feedback feedback = sessionService.getFeedback(sessionkey);
+		if (feedback != null) return feedback;
+		
+		response.setStatus(HttpStatus.NOT_FOUND.value());
+		return null;
+	}
+	
+	@RequestMapping(value="/session/{sessionkey}/feedback", method=RequestMethod.POST)
+	@ResponseBody
+	public Feedback postFeedback(@PathVariable String sessionkey, @RequestBody int value, HttpServletResponse response) {
+		User user = userService.getUser(SecurityContextHolder.getContext().getAuthentication());
+		if (user == null) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return null;
+		}
+		if (sessionService.saveFeedback(sessionkey, value, user)) {
+			Feedback feedback = sessionService.getFeedback(sessionkey);
+			if (feedback != null) {
+				// TODO: Broadcast feedback changes via websocket
+				response.setStatus(HttpStatus.CREATED.value());
+				return feedback;
+			}
+			
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			return null;
+		}
+		
+		response.setStatus(HttpStatus.BAD_REQUEST.value());
 		return null;
 	}
 	
