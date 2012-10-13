@@ -20,3 +20,6 @@ feedback.cleanup=10
 couchdb.host=localhost
 couchdb.port=5984
 couchdb.name=arsnova
+
+socketio.ip=0.0.0.0
+socketio.port=10443
