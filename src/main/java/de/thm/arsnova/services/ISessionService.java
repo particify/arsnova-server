@@ -26,7 +26,6 @@ import java.util.Set;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
-
 import de.thm.arsnova.socket.message.Question;
 
 
@@ -46,4 +45,5 @@ public interface ISessionService {
 	
 	public List<Session> getMySessions(String username);
 	public boolean saveQuestion(Question question);
+	public List<Question> getSkillQuestions(String sessionkey);
 }

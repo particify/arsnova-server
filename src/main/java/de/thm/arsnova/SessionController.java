@@ -42,6 +42,7 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
+import de.thm.arsnova.socket.message.Question;
 
 @Controller
 public class SessionController {
@@ -107,6 +108,20 @@ public class SessionController {
 		}
 		return sessions;
 	}
+	
+	@RequestMapping(value="/getSkillQuestions/{sessionkey}", method=RequestMethod.GET)
+	@ResponseBody
+	public List<Question> getSkillQuestions(@PathVariable String sessionkey, HttpServletResponse response) {
+		List<Question> questions = sessionService.getSkillQuestions(sessionkey);
+		if(questions == null || questions.isEmpty()) {
+			response.setStatus(HttpStatus.NOT_FOUND.value());
+			return null;
+		}
+		logger.info(questions.toString());
+		return questions;
+	}
+	
+	
 	
 	@RequestMapping(value="/socketurl", method=RequestMethod.GET)
 	@ResponseBody

@@ -22,6 +22,7 @@ import java.util.List;
 
 public class Question {
 
+	private String type;
 	private String questionType;
 	private String subject;
 	private String text;
@@ -30,6 +31,16 @@ public class Question {
 	private List<PossibleAnswer> possibleAnswers;
 	private boolean noCorrect;
 	private String session;
+	private int number;	
+	
+	
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
 	
 	public String getQuestionType() {
 		return questionType;
@@ -87,6 +98,14 @@ public class Question {
 		this.noCorrect = noCorrect;
 	}
 	
+	public String getSessionId() {
+		return session;
+	}
+
+	public void setSessionId(String session) {
+		this.session = session;
+	}
+	
 	public String getSession() {
 		return session;
 	}
@@ -95,8 +114,17 @@ public class Question {
 		this.session = session;
 	}
 
+	public int getNumber() {
+		return number;
+	}
+
+	public void setNumber(int number) {
+		this.number = number;
+	}
+
 	@Override
 	public String toString() {
-		return "Question type '" + this.questionType + "': " + this.subject + ";\n" + this.text;
+		return "Question type '" + this.questionType + "': " + this.subject + ";\n" + this.text +
+				this.possibleAnswers;
 	}
 }

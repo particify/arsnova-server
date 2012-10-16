@@ -30,9 +30,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.sf.ezmorph.Morpher;
+import net.sf.ezmorph.MorpherRegistry;
+import net.sf.ezmorph.bean.BeanMorpher;
+import net.sf.ezmorph.bean.MorphDynaBean;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
+import net.sf.json.util.JSONUtils;
 
+import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.beanutils.DynaClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +60,7 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
+import de.thm.arsnova.socket.message.PossibleAnswer;
 import de.thm.arsnova.socket.message.Question;
 
 @Component
@@ -176,6 +184,38 @@ public class CouchDBDao implements IDatabaseDao {
 			return null;
 		}
 	}
+	
+	@Override
+	public List<Question> getSkillQuestions(String session) {		
+		try {
+			View view = new View("skill_question/by_session");
+			view.setStartKey("[" + URLEncoder.encode("\"" + session + "\"", "UTF-8") + "]");
+			view.setEndKey("[" + URLEncoder.encode("\"" + session + "\",{}", "UTF-8") + "]");
+
+			ViewResults questions = this.getDatabase().view(view);
+	
+			List<Question> result = new ArrayList<Question>();
+			logger.info(questions.toString());
+			MorpherRegistry morpherRegistry = JSONUtils.getMorpherRegistry();
+			Morpher dynaMorpher = new BeanMorpher(PossibleAnswer.class, morpherRegistry); 
+			morpherRegistry.registerMorpher(dynaMorpher);
+			for (Document d : questions.getResults()) {
+				Question q = (Question) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Question.class);
+				List<PossibleAnswer> answers = new ArrayList<PossibleAnswer>();
+				for(Object answer : q.getPossibleAnswers()) {
+					PossibleAnswer a = (PossibleAnswer) morpherRegistry.morph(PossibleAnswer.class, answer);
+					answers.add(a);
+				}
+				q.setPossibleAnswers(answers);
+				result.add(q);
+			}
+			
+			return result;
+		} catch (UnsupportedEncodingException e) {
+			return null;
+		}
+	}
+	
 	
 	@Override
 	public Session getSessionFromKeyword(String keyword) {

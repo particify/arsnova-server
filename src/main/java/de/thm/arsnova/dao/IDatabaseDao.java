@@ -37,4 +37,5 @@ public interface IDatabaseDao {
 	public boolean sessionKeyAvailable(String keyword);
 	
 	public boolean saveQuestion(Session session, Question question);
+	List<Question> getSkillQuestions(String session);
 }
