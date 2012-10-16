@@ -195,9 +195,9 @@ public class CouchDBDao implements IDatabaseDao {
 			ViewResults questions = this.getDatabase().view(view);
 	
 			List<Question> result = new ArrayList<Question>();
-			logger.info(questions.toString());
+			
 			MorpherRegistry morpherRegistry = JSONUtils.getMorpherRegistry();
-			Morpher dynaMorpher = new BeanMorpher(PossibleAnswer.class, morpherRegistry); 
+			Morpher dynaMorpher = new BeanMorpher(PossibleAnswer.class, morpherRegistry);
 			morpherRegistry.registerMorpher(dynaMorpher);
 			for (Document d : questions.getResults()) {
 				Question q = (Question) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Question.class);

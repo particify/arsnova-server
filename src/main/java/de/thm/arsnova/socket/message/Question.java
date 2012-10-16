@@ -32,6 +32,7 @@ public class Question {
 	private boolean noCorrect;
 	private String session;
 	private int number;	
+	private int duration;
 	
 	
 	public String getType() {
@@ -120,6 +121,14 @@ public class Question {
 
 	public void setNumber(int number) {
 		this.number = number;
+	}
+
+	public int getDuration() {
+		return duration;
+	}
+
+	public void setDuration(int duration) {
+		this.duration = duration;
 	}
 
 	@Override

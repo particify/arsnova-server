@@ -117,7 +117,6 @@ public class SessionController {
 			response.setStatus(HttpStatus.NOT_FOUND.value());
 			return null;
 		}
-		logger.info(questions.toString());
 		return questions;
 	}
 	
