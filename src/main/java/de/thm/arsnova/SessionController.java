@@ -121,6 +121,11 @@ public class SessionController {
 		return questions;
 	}
 	
+	@RequestMapping(value="/getSkillQuestionCount/{sessionkey}", method=RequestMethod.GET)
+	@ResponseBody
+	public int getSkillQuestionCount(@PathVariable String sessionkey, HttpServletResponse response) {
+		return sessionService.getSkillQuestionCount(sessionkey);
+	}
 	
 	
 	@RequestMapping(value="/socketurl", method=RequestMethod.GET)

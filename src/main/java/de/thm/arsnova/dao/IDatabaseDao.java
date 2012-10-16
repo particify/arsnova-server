@@ -38,4 +38,5 @@ public interface IDatabaseDao {
 	
 	public boolean saveQuestion(Session session, Question question);
 	List<Question> getSkillQuestions(String session, String sort);
+	public int getSkillQuestionCount(String sessionkey);
 }

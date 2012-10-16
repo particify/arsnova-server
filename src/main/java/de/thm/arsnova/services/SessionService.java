@@ -82,6 +82,11 @@ public class SessionService implements ISessionService {
 	}
 	
 	@Override
+	public int getSkillQuestionCount(String sessionkey) {
+		return databaseDao.getSkillQuestionCount(sessionkey);
+	}
+	
+	@Override
 	public Session saveSession(Session session) {
 		return databaseDao.saveSession(session);
 	}

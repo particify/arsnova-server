@@ -224,6 +224,23 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 	}
 	
+	@Override
+	public int getSkillQuestionCount(String sessionkey) {
+		try {
+			View view = new View("skill_question/count_by_session");
+			view.setKey(URLEncoder.encode("\"" + sessionkey + "\"", "UTF-8"));
+			ViewResults results = this.getDatabase().view(view);
+	
+			if (results.getJSONArray("rows").optJSONObject(0) == null) {
+				return 0;
+			}
+			
+			return results.getJSONArray("rows").optJSONObject(0).optInt("value");
+			
+		} catch (UnsupportedEncodingException e) {
+			return 0;
+		}
+	}
 	
 	@Override
 	public Session getSessionFromKeyword(String keyword) {
