@@ -186,14 +186,22 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 	
 	@Override
-	public List<Question> getSkillQuestions(String session) {		
+	public List<Question> getSkillQuestions(String session, String sort) {
+		String viewName = "";
+		if(sort != null && sort.equals("text")) {
+			viewName = "skill_question/by_session_sorted_by_subject_and_text";
+		} else {
+			viewName = "skill_question/by_session";
+		}
 		try {
-			View view = new View("skill_question/by_session");
+			View view = new View(viewName);
 			view.setStartKey("[" + URLEncoder.encode("\"" + session + "\"", "UTF-8") + "]");
 			view.setEndKey("[" + URLEncoder.encode("\"" + session + "\",{}", "UTF-8") + "]");
 
 			ViewResults questions = this.getDatabase().view(view);
-	
+			if(questions == null || questions.isEmpty()) {
+				return null;
+			}
 			List<Question> result = new ArrayList<Question>();
 			
 			MorpherRegistry morpherRegistry = JSONUtils.getMorpherRegistry();

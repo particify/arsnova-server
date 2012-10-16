@@ -45,5 +45,5 @@ public interface ISessionService {
 	
 	public List<Session> getMySessions(String username);
 	public boolean saveQuestion(Question question);
-	public List<Question> getSkillQuestions(String sessionkey);
+	public List<Question> getSkillQuestions(String sessionkey, String sort);
 }

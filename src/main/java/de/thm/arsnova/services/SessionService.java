@@ -77,8 +77,8 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
-	public List<Question> getSkillQuestions(String sessionkey) {
-		return databaseDao.getSkillQuestions(sessionkey);
+	public List<Question> getSkillQuestions(String sessionkey, String sort) {
+		return databaseDao.getSkillQuestions(sessionkey, sort);
 	}
 	
 	@Override
