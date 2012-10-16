@@ -127,6 +127,17 @@ public class SessionController {
 		return null;
 	}
 
+	@RequestMapping(value="/session/{sessionkey}/question/{questionId}", method=RequestMethod.GET)
+	@ResponseBody
+	public Question getQuestion(@PathVariable String sessionkey, @PathVariable String questionId, HttpServletResponse response) {
+		Question question = sessionService.getQuestion(questionId);
+		if (question != null && question.getSession().equals(sessionkey)) {
+			return question;
+		}
+		
+		response.setStatus(HttpStatus.NOT_FOUND.value());
+		return null;
+	}
 	
 	@RequestMapping(value="/session/{sessionkey}/question", method=RequestMethod.POST)
 	@ResponseBody

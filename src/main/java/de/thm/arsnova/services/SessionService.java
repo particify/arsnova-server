@@ -148,4 +148,9 @@ public class SessionService implements ISessionService {
 		Session session = this.databaseDao.getSessionFromKeyword(question.getSession());
 		return this.databaseDao.saveQuestion(session, question);
 	}
+	
+	@Override
+	public Question getQuestion(String id) {
+		return databaseDao.getQuestion(id);
+	}
 }

@@ -405,4 +405,26 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		return false;
 	}
+	
+	
+	@Override
+	public Question getQuestion(String id) {
+		try {
+			View view = new View("skill_question/by_id");
+			view.setKey(URLEncoder.encode("\"" + id + "\"", "UTF-8"));
+			ViewResults results = this.getDatabase().view(view);
+			
+			if (results.getJSONArray("rows").optJSONObject(0) == null) {
+				return null;
+			}
+			
+			return (Question) JSONObject.toBean(
+					results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
+					Question.class
+			);
+		} catch (IOException e) {
+			logger.error("Could not get question with id {}", id);
+		}
+		return null;
+	}
 }
