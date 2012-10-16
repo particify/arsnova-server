@@ -51,6 +51,8 @@ import com.fourspaces.couchdb.ViewResults;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.ForbiddenException;
+import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.message.Question;
@@ -148,14 +150,14 @@ public class CouchDBDao implements IDatabaseDao {
 	public Session getSession(String keyword) {
 		Session result = this.getSessionFromKeyword(keyword);
 		if(result == null) {
-			return null;
+			throw new NotFoundException();
 		}
 		if (result.isActive() || result.getCreator().equals(this.actualUserName())) {
 			sessionService.addUserToSessionMap(this.actualUserName(), keyword);
 			return result;
 		}
 		
-		return null;
+		throw new ForbiddenException();
 	}
 	
 	@Override

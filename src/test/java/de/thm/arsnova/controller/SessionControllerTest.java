@@ -1,6 +1,7 @@
 package de.thm.arsnova.controller;
 
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import javax.inject.Inject;
@@ -19,6 +20,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 
 import de.thm.arsnova.SessionController;
+import de.thm.arsnova.exceptions.NotFoundException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations={
@@ -45,16 +47,30 @@ public class SessionControllerTest {
 	}
 	
 	@Test
-	public void testShouldNotGetMissingSession() {
+	public void testShouldNotGetUnknownSession() {
 		request.setMethod("GET");
-		request.setRequestURI("/session/12345678");
+		request.setRequestURI("/session/00000000");
 		try {
 			final ModelAndView mav = handlerAdapter.handle(request, response, sessionController);
 			assertNull(mav);
+			assertTrue(response.getStatus() == 404);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("An exception occured");
 		}
-		
-	}
+ 	}
+	
+	@Test
+	public void testShouldNotGetForbiddenSession() {
+		request.setMethod("GET");
+		request.setRequestURI("/session/99999999");
+		try {
+			final ModelAndView mav = handlerAdapter.handle(request, response, sessionController);
+			assertNull(mav);
+			assertTrue(response.getStatus() == 403);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("An exception occured");
+		}
+ 	}
 }
