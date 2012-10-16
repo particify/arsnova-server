@@ -18,6 +18,7 @@
  */
 package de.thm.arsnova;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
@@ -89,6 +90,22 @@ public class SessionController {
 
 		response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
 		return null;
+	}
+	
+	@RequestMapping(value="/mySessions", method=RequestMethod.GET)
+	@ResponseBody
+	public List<Session> getMySession(HttpServletResponse response) {
+		String username = userService.getUser(SecurityContextHolder.getContext().getAuthentication()).getUsername();
+		if(username == null) {
+			response.setStatus(HttpStatus.NOT_FOUND.value());
+			return null;
+		}
+		List<Session> sessions = sessionService.getMySessions(username);
+		if (sessions == null || sessions.isEmpty()) {
+			response.setStatus(HttpStatus.NOT_FOUND.value());
+			return null;
+		}
+		return sessions;
 	}
 	
 	@RequestMapping(value="/socketurl", method=RequestMethod.GET)

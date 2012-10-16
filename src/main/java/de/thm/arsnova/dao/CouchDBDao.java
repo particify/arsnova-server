@@ -159,6 +159,25 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 	
 	@Override
+	public List<Session> getMySessions(String username) {
+		try {
+			View view = new View("session/by_creator");
+			view.setStartKey("[" + URLEncoder.encode("\"" + username + "\"", "UTF-8") + "]");
+			view.setEndKey("[" + URLEncoder.encode("\"" + username + "\",{}", "UTF-8") + "]");
+
+			ViewResults sessions = this.getDatabase().view(view);
+	
+			List<Session> result = new ArrayList<Session>();
+			for (Document d : sessions.getResults()) {
+				result.add((Session) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Session.class));
+			}
+			return result;
+		} catch (UnsupportedEncodingException e) {
+			return null;
+		}
+	}
+	
+	@Override
 	public Session getSessionFromKeyword(String keyword) {
 		try {
 			View view = new View("session/by_keyword");

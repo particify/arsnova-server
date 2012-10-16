@@ -19,6 +19,8 @@
 
 package de.thm.arsnova.dao;
 
+import java.util.List;
+
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
@@ -28,6 +30,7 @@ public interface IDatabaseDao {
 	public void cleanFeedbackVotes(int cleanupFeedbackDelay);
 	public Session getSessionFromKeyword(String keyword);
 	public Session getSession(String keyword);
+	public List<Session> getMySessions(String username);
 	public Session saveSession(Session session);
 	public Feedback getFeedback(String keyword);
 	public boolean saveFeedback(String keyword, int value, User user);

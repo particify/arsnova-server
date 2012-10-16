@@ -71,6 +71,10 @@ public class SessionService implements ISessionService {
 	public Session getSession(String keyword) {
 		return databaseDao.getSession(keyword);
 	}
+	@Override
+	public List<Session> getMySessions(String username) {
+		return databaseDao.getMySessions(username);
+	}
 
 	@Override
 	public Session saveSession(Session session) {

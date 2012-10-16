@@ -44,5 +44,6 @@ public interface ISessionService {
 	public List<String> getUsersInSession(String keyword);
 	public void broadcastFeedbackChanges(Map<String, Set<String>> affectedUsers, Set<String> allAffectedSessions);
 	
+	public List<Session> getMySessions(String username);
 	public boolean saveQuestion(Question question);
 }
