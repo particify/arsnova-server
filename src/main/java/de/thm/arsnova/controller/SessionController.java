@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.entities.Feedback;
@@ -170,5 +171,17 @@ public class SessionController extends AbstractController {
 			return null;
 		}
 		return sessions;
+	}
+	
+	@RequestMapping(value="/getSkillQuestions/{sessionkey}", method=RequestMethod.GET)
+	@ResponseBody
+	public List<Question> getSkillQuestions(@PathVariable String sessionkey, @RequestParam(value="sort", required=false) String sort, HttpServletResponse response) {
+		List<Question> questions = sessionService.getSkillQuestions(sessionkey, sort);
+		if(questions == null || questions.isEmpty()) {
+			response.setStatus(HttpStatus.NOT_FOUND.value());
+			return null;
+		}
+		logger.info(questions.toString());
+		return questions;
 	}
 }

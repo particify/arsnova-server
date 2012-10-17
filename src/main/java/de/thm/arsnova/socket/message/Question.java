@@ -20,9 +20,6 @@ package de.thm.arsnova.socket.message;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-@JsonIgnoreProperties({"_id", "_rev"})
 public class Question {
 
 	private String type;
