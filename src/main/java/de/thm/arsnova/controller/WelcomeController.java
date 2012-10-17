@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-public class WelcomeController {
+public class WelcomeController extends AbstractController {
 	@RequestMapping(method = RequestMethod.GET, value = "/")
 	public ModelAndView home(HttpServletRequest request) {
 		String referer = request.getHeader("referer");

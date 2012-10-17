@@ -199,8 +199,7 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public Feedback getFeedback(String keyword) {
 		String sessionId = this.getSessionId(keyword);
-		if (sessionId == null)
-			return null;
+		if (sessionId == null) throw new NotFoundException();
 
 		logger.info("Time: {}", this.currentTimestamp());
 
@@ -209,11 +208,10 @@ public class CouchDBDao implements IDatabaseDao {
 		view.setStartKey(URLEncoder.encode("[\"" + sessionId + "\"]"));
 		view.setEndKey(URLEncoder.encode("[\"" + sessionId + "\",{}]"));
 		ViewResults results = this.getDatabase().view(view);
-
+		
 		logger.info("Feedback: {}", results.getJSONArray("rows"));
 
 		int values[] = { 0, 0, 0, 0 };
-		List<Integer> result = new ArrayList<Integer>();
 		
 		try {
 			for (int i = 0; i <= 3; i++) {
@@ -233,12 +231,7 @@ public class CouchDBDao implements IDatabaseDao {
 							.getInt("value");
 			}
 		} catch (Exception e) {
-			return new Feedback(
-					values[0],
-					values[1],
-					values[2],
-					values[3]
-			);
+			throw new NotFoundException();
 		}
 
 		return new Feedback(

@@ -54,7 +54,7 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.IUserService;
 
 @Controller
-public class LoginController {
+public class LoginController extends AbstractController {
 
 	@Autowired
 	TwitterProvider twitterProvider;

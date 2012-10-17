@@ -79,7 +79,13 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public Feedback getFeedback(String keyword) {
-		return stubFeedbacks.get(keyword);
+		// Magic keyword for forbidden session
+		if (keyword.equals("99999999")) throw new ForbiddenException();
+		
+		Feedback feedback = stubFeedbacks.get(keyword);
+		if (feedback == null) throw new NotFoundException();
+		
+		return feedback;
 	}
 
 	@Override

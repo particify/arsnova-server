@@ -39,15 +39,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.exceptions.ForbiddenException;
-import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 import de.thm.arsnova.socket.message.Question;
 
 @Controller
-public class SessionController {
+public class SessionController extends AbstractController {
 	
 	public static final Logger logger = LoggerFactory.getLogger(SessionController.class);
 	
@@ -74,26 +72,14 @@ public class SessionController {
 	
 	@RequestMapping(value="/session/{sessionkey}", method=RequestMethod.GET)
 	@ResponseBody
-	public Session getSession(@PathVariable String sessionkey, HttpServletResponse response) {
-		try {
-			Session session = sessionService.getSession(sessionkey);
-			if (session != null) return session;
-		} catch (NotFoundException e) {
-			response.setStatus(HttpStatus.NOT_FOUND.value());
-		} catch (ForbiddenException e) {
-			response.setStatus(HttpStatus.FORBIDDEN.value());
-		}
-		return null;
+	public Session getSession(@PathVariable String sessionkey) {
+		return sessionService.getSession(sessionkey);
 	}
 	
 	@RequestMapping(value="/session/{sessionkey}/feedback", method=RequestMethod.GET)
 	@ResponseBody
-	public Feedback getFeedback(@PathVariable String sessionkey, HttpServletResponse response) {
-		Feedback feedback = sessionService.getFeedback(sessionkey);
-		if (feedback != null) return feedback;
-		
-		response.setStatus(HttpStatus.NOT_FOUND.value());
-		return null;
+	public Feedback getFeedback(@PathVariable String sessionkey) {
+		return sessionService.getFeedback(sessionkey);
 	}
 	
 	@RequestMapping(value="/session/{sessionkey}/feedback", method=RequestMethod.POST)

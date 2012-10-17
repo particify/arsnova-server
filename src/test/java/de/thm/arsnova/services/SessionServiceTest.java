@@ -27,6 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import de.thm.arsnova.exceptions.NotFoundException;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations={
 		"file:src/main/webapp/WEB-INF/arsnova-servlet.xml",
@@ -40,7 +42,13 @@ public class SessionServiceTest {
 
 	@Test
 	public void testShouldFail() {
-		if (sessionService.getFeedback("00000000") != null) fail("Result is not null");
+		try {
+			sessionService.getFeedback("00000000");
+		} catch (NotFoundException e) {
+			return;
+		}
+		
+		fail("Expected exception 'NotFoundException' did not occure");
 	}
 	
 	@Test
