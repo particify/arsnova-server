@@ -21,6 +21,8 @@ import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAda
 
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.services.StubUserService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {
@@ -37,6 +39,9 @@ public class SessionControllerTest {
 
 	@Autowired
 	private SessionController sessionController;
+	
+	@Autowired
+	private StubUserService userService;
 
 	@Before
 	public void setUp() {
@@ -48,6 +53,8 @@ public class SessionControllerTest {
 
 	@Test
 	public void testShouldNotGetUnknownSession() {
+		userService.setUserAuthenticated(true);
+		
 		request.setMethod("GET");
 		request.setRequestURI("/session/00000000");
 		try {
@@ -67,6 +74,8 @@ public class SessionControllerTest {
 
 	@Test
 	public void testShouldNotGetForbiddenSession() {
+		userService.setUserAuthenticated(true);
+		
 		request.setMethod("GET");
 		request.setRequestURI("/session/99999999");
 		try {
@@ -86,6 +95,8 @@ public class SessionControllerTest {
 	
 	@Test
 	public void testShouldNotGetFeedbackForUnknownSession() {
+		userService.setUserAuthenticated(true);
+		
 		request.setMethod("GET");
 		request.setRequestURI("/session/00000000/feedback");
 		try {
@@ -101,5 +112,26 @@ public class SessionControllerTest {
 		}
 
 		fail("Expected exception 'NotFoundException' did not occure");
+	}
+	
+	@Test
+	public void testShouldNotGetSessionIfUnauthorized() {
+		userService.setUserAuthenticated(false);
+		
+		request.setMethod("GET");
+		request.setRequestURI("/session/00000000");
+		try {
+			final ModelAndView mav = handlerAdapter.handle(request, response,
+					sessionController);
+			assertNull(mav);
+			assertTrue(response.getStatus() == 403);
+		} catch (UnauthorizedException e) {
+			return;
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("An exception occured");
+		}
+
+		fail("Expected exception 'UnauthorizedException' did not occure");
 	}
 }

@@ -40,6 +40,8 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.view.RedirectView;
 
+import de.thm.arsnova.services.StubUserService;
+
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations={
@@ -57,6 +59,9 @@ public class LoginControllerTest {
 	
 	@Autowired
 	private LoginController loginController;
+	
+	@Autowired
+	private StubUserService userService;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -101,12 +106,14 @@ public class LoginControllerTest {
 	
 	@Test
 	public void testUser() throws Exception {
+		userService.setUserAuthenticated(true);
+		
 		request.setMethod("GET");
 		request.setRequestURI("/whoami");
 
 		handlerAdapter.handle(request, response, loginController);
 		assertNotNull(response);
-		assertEquals(response.getContentAsString(),"{\"username\":\"Guest1234567890\"}");
+		assertEquals(response.getContentAsString(),"{\"username\":\"ptsr00\"}");
 	}
 
 	@Test

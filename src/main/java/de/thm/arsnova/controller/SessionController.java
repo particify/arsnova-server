@@ -86,10 +86,6 @@ public class SessionController extends AbstractController {
 	@ResponseBody
 	public Feedback postFeedback(@PathVariable String sessionkey, @RequestBody int value, HttpServletResponse response) {
 		User user = userService.getUser(SecurityContextHolder.getContext().getAuthentication());
-		if (user == null) {
-			response.setStatus(HttpStatus.UNAUTHORIZED.value());
-			return null;
-		}
 		if (sessionService.saveFeedback(sessionkey, value, user)) {
 			Feedback feedback = sessionService.getFeedback(sessionkey);
 			if (feedback != null) {

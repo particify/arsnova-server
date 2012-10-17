@@ -39,10 +39,14 @@ public class SessionServiceTest {
 
 	@Autowired
 	ISessionService sessionService;
+	
+	@Autowired
+	StubUserService userService;
 
 	@Test
 	public void testShouldFail() {
 		try {
+			userService.setUserAuthenticated(true);
 			sessionService.getFeedback("00000000");
 		} catch (NotFoundException e) {
 			return;

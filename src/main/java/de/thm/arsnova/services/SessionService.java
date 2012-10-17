@@ -87,6 +87,7 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
+	@Authenticated
 	public boolean saveFeedback(String keyword, int value, User user) {
 		return databaseDao.saveFeedback(keyword, value, user);
 	}
@@ -148,12 +149,14 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
+	@Authenticated
 	public boolean saveQuestion(Question question) {
 		Session session = this.databaseDao.getSessionFromKeyword(question.getSession());
 		return this.databaseDao.saveQuestion(session, question);
 	}
 	
 	@Override
+	@Authenticated
 	public Question getQuestion(String id) {
 		return databaseDao.getQuestion(id);
 	}
