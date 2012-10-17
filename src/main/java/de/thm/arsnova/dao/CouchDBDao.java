@@ -179,7 +179,9 @@ public class CouchDBDao implements IDatabaseDao {
 	
 			List<Session> result = new ArrayList<Session>();
 			for (Document d : sessions.getResults()) {
-				result.add((Session) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Session.class));
+				Session session = (Session) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Session.class);
+				session.set_id(d.getId());
+				result.add(session);
 			}
 			return result;
 		} catch (UnsupportedEncodingException e) {
