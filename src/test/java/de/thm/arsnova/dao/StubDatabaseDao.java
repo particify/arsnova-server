@@ -4,12 +4,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.ForbiddenException;
+import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.socket.message.Question;
 
 @Component
@@ -19,6 +23,8 @@ public class StubDatabaseDao implements IDatabaseDao {
 	private Map<String, Session> stubSessions = new ConcurrentHashMap<String, Session>();
 	private Map<String, Feedback> stubFeedbacks = new ConcurrentHashMap<String, Feedback>();
 	private Map<Session, Question> stubQuestions = new ConcurrentHashMap<Session, Question>();
+	
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 	
 	public StubDatabaseDao() {
 		fillWithDummySessions();
@@ -56,7 +62,13 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public Session getSession(String keyword) {
-		return stubSessions.get(keyword);
+		// Magic keyword for forbidden session
+		if (keyword.equals("99999999")) throw new ForbiddenException();
+		
+		Session session = stubSessions.get(keyword);
+		if (session == null) throw new NotFoundException();
+
+		return session;
 	}
 
 	@Override
@@ -67,7 +79,13 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public Feedback getFeedback(String keyword) {
-		return stubFeedbacks.get(keyword);
+		// Magic keyword for forbidden session
+		if (keyword.equals("99999999")) throw new ForbiddenException();
+		
+		Feedback feedback = stubFeedbacks.get(keyword);
+		if (feedback == null) throw new NotFoundException();
+		
+		return feedback;
 	}
 
 	@Override
@@ -109,8 +127,8 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Session> getMySessions(String username) {
-		// TODO Auto-generated method stub
+	public Question getQuestion(String id) {
+		// Simply ... no such question ;-)
 		return null;
 	}
 

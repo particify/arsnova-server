@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import de.thm.arsnova.annotation.Authenticated;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
@@ -68,9 +69,11 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
+	@Authenticated
 	public Session getSession(String keyword) {
 		return databaseDao.getSession(keyword);
 	}
+
 	@Override
 	public List<Session> getMySessions(String username) {
 		return databaseDao.getMySessions(username);
@@ -87,16 +90,19 @@ public class SessionService implements ISessionService {
 	}
 	
 	@Override
+	@Authenticated
 	public Session saveSession(Session session) {
 		return databaseDao.saveSession(session);
 	}
 
 	@Override
+	@Authenticated
 	public Feedback getFeedback(String keyword) {
 		return databaseDao.getFeedback(keyword);
 	}
 
 	@Override
+	@Authenticated
 	public boolean saveFeedback(String keyword, int value, User user) {
 		return databaseDao.saveFeedback(keyword, value, user);
 	}
@@ -158,8 +164,15 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
+	@Authenticated
 	public boolean saveQuestion(Question question) {
 		Session session = this.databaseDao.getSessionFromKeyword(question.getSession());
 		return this.databaseDao.saveQuestion(session, question);
+	}
+	
+	@Override
+	@Authenticated
+	public Question getQuestion(String id) {
+		return databaseDao.getQuestion(id);
 	}
 }

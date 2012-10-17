@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova;
+package de.thm.arsnova.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,7 +47,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -55,7 +54,7 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.IUserService;
 
 @Controller
-public class LoginController {
+public class LoginController extends AbstractController {
 
 	@Autowired
 	TwitterProvider twitterProvider;

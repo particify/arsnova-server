@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova;
+package de.thm.arsnova.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-public class WelcomeController {
+public class WelcomeController extends AbstractController {
 	@RequestMapping(method = RequestMethod.GET, value = "/")
 	public ModelAndView home(HttpServletRequest request) {
 		String referer = request.getHeader("referer");

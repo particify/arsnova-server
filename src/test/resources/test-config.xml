@@ -6,10 +6,15 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
 
 	<bean id="sessionService" class="de.thm.arsnova.services.SessionService">
-		<property name="databaseDao" ref="databaseDao"></property>
+		<property name="databaseDao" ref="databaseDao" />
 	</bean>
 	
 	<bean id="databaseDao" class="de.thm.arsnova.dao.StubDatabaseDao">
 	</bean>
 
+	<bean id="authorizationAdviser" class="de.thm.arsnova.aop.AuthorizationAdviser">
+		<property name="userService" ref="userService" />
+	</bean>
+
+	<bean id="userService" class="de.thm.arsnova.services.StubUserService" />
 </beans>

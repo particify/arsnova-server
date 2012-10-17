@@ -58,6 +58,8 @@ import com.fourspaces.couchdb.ViewResults;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.ForbiddenException;
+import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.message.PossibleAnswer;
@@ -156,14 +158,14 @@ public class CouchDBDao implements IDatabaseDao {
 	public Session getSession(String keyword) {
 		Session result = this.getSessionFromKeyword(keyword);
 		if(result == null) {
-			return null;
+			throw new NotFoundException();
 		}
 		if (result.isActive() || result.getCreator().equals(this.actualUserName())) {
 			sessionService.addUserToSessionMap(this.actualUserName(), keyword);
 			return result;
 		}
 		
-		return null;
+		throw new ForbiddenException();
 	}
 	
 	@Override
@@ -281,8 +283,7 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public Feedback getFeedback(String keyword) {
 		String sessionId = this.getSessionId(keyword);
-		if (sessionId == null)
-			return null;
+		if (sessionId == null) throw new NotFoundException();
 
 		logger.info("Time: {}", this.currentTimestamp());
 
@@ -291,11 +292,10 @@ public class CouchDBDao implements IDatabaseDao {
 		view.setStartKey(URLEncoder.encode("[\"" + sessionId + "\"]"));
 		view.setEndKey(URLEncoder.encode("[\"" + sessionId + "\",{}]"));
 		ViewResults results = this.getDatabase().view(view);
-
+		
 		logger.info("Feedback: {}", results.getJSONArray("rows"));
 
 		int values[] = { 0, 0, 0, 0 };
-		List<Integer> result = new ArrayList<Integer>();
 		
 		try {
 			for (int i = 0; i <= 3; i++) {
@@ -315,12 +315,7 @@ public class CouchDBDao implements IDatabaseDao {
 							.getInt("value");
 			}
 		} catch (Exception e) {
-			return new Feedback(
-					values[0],
-					values[1],
-					values[2],
-					values[3]
-			);
+			throw new NotFoundException();
 		}
 
 		return new Feedback(
@@ -488,5 +483,27 @@ public class CouchDBDao implements IDatabaseDao {
 			logger.error("Could not save question {}", question);
 		}
 		return false;
+	}
+	
+	
+	@Override
+	public Question getQuestion(String id) {
+		try {
+			View view = new View("skill_question/by_id");
+			view.setKey(URLEncoder.encode("\"" + id + "\"", "UTF-8"));
+			ViewResults results = this.getDatabase().view(view);
+			
+			if (results.getJSONArray("rows").optJSONObject(0) == null) {
+				return null;
+			}
+			
+			return (Question) JSONObject.toBean(
+					results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
+					Question.class
+			);
+		} catch (IOException e) {
+			logger.error("Could not get question with id {}", id);
+		}
+		return null;
 	}
 }
