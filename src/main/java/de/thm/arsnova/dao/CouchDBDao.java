@@ -186,7 +186,12 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 	
 	@Override
-	public List<Question> getSkillQuestions(String session, String sort) {
+	public List<Question> getSkillQuestions(String sessionKeyword, String sort) {
+		Session session = this.getSessionFromKeyword(sessionKeyword);
+		if (session == null) {
+			return null;
+		}
+		
 		String viewName = "";
 		if(sort != null && sort.equals("text")) {
 			viewName = "skill_question/by_session_sorted_by_subject_and_text";
@@ -195,9 +200,9 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		try {
 			View view = new View(viewName);
-			view.setStartKey("[" + URLEncoder.encode("\"" + session + "\"", "UTF-8") + "]");
-			view.setEndKey("[" + URLEncoder.encode("\"" + session + "\",{}", "UTF-8") + "]");
-
+			view.setStartKey("[" + URLEncoder.encode("\"" + session.get_id() + "\"", "UTF-8") + "]");
+			view.setEndKey("[" + URLEncoder.encode("\"" + session.get_id() + "\",{}", "UTF-8") + "]");
+			
 			ViewResults questions = this.getDatabase().view(view);
 			if(questions == null || questions.isEmpty()) {
 				return null;
