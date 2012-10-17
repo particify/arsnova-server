@@ -19,8 +19,6 @@ import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 
-import de.thm.arsnova.SessionController;
-import de.thm.arsnova.exceptions.NotFoundException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations={

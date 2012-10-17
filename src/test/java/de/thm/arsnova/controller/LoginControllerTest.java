@@ -40,7 +40,6 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.view.RedirectView;
 
-import de.thm.arsnova.LoginController;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations={
