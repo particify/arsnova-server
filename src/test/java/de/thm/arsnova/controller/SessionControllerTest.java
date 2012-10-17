@@ -94,6 +94,51 @@ public class SessionControllerTest {
 	}
 	
 	@Test
+	public void testShouldNotGetSessionIfUnauthorized() {
+		userService.setUserAuthenticated(false);
+		
+		request.setMethod("GET");
+		request.setRequestURI("/session/00000000");
+		try {
+			final ModelAndView mav = handlerAdapter.handle(request, response,
+					sessionController);
+			assertNull(mav);
+			assertTrue(response.getStatus() == 401);
+		} catch (UnauthorizedException e) {
+			return;
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("An exception occured");
+		}
+
+		fail("Expected exception 'UnauthorizedException' did not occure");
+	}
+	
+	@Test
+	public void testShouldCreateSessionIfUnauthorized() {
+		userService.setUserAuthenticated(false);
+		
+		request.setMethod("POST");
+		request.setRequestURI("/session");
+		request.setContentType("application/json");
+		request.setContent("{}".getBytes());
+		
+		try {
+			final ModelAndView mav = handlerAdapter.handle(request, response,
+					sessionController);
+			assertNull(mav);
+			assertTrue(response.getStatus() == 401);
+		} catch (UnauthorizedException e) {
+			return;
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("An exception occured");
+		}
+
+		fail("Expected exception 'UnauthorizedException' did not occure");
+	}
+
+	@Test
 	public void testShouldNotGetFeedbackForUnknownSession() {
 		userService.setUserAuthenticated(true);
 		
@@ -115,11 +160,35 @@ public class SessionControllerTest {
 	}
 	
 	@Test
-	public void testShouldNotGetSessionIfUnauthorized() {
+	public void testShouldNotGetFeedbackIfUnauthorized() {
 		userService.setUserAuthenticated(false);
 		
 		request.setMethod("GET");
-		request.setRequestURI("/session/00000000");
+		request.setRequestURI("/session/00000000/feedback");
+		try {
+			final ModelAndView mav = handlerAdapter.handle(request, response,
+					sessionController);
+			assertNull(mav);
+			assertTrue(response.getStatus() == 401);
+		} catch (UnauthorizedException e) {
+			return;
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("An exception occured");
+		}
+
+		fail("Expected exception 'UnauthorizedException' did not occure");
+	}
+	
+	@Test
+	public void testShouldNotSaveFeedbackIfUnauthorized() {
+		userService.setUserAuthenticated(false);
+		
+		request.setMethod("POST");
+		request.setRequestURI("/session/00000000/feedback");
+		request.setContentType("application/json");
+		request.setContent("0".getBytes());
+		
 		try {
 			final ModelAndView mav = handlerAdapter.handle(request, response,
 					sessionController);
