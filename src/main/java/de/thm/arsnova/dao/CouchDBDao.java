@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,8 +35,10 @@ import net.sf.ezmorph.Morpher;
 import net.sf.ezmorph.MorpherRegistry;
 import net.sf.ezmorph.bean.BeanMorpher;
 import net.sf.ezmorph.bean.MorphDynaBean;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
+import net.sf.json.JsonConfig;
 import net.sf.json.util.JSONUtils;
 
 import org.apache.commons.beanutils.DynaBean;
@@ -218,12 +221,8 @@ public class CouchDBDao implements IDatabaseDao {
 			morpherRegistry.registerMorpher(dynaMorpher);
 			for (Document d : questions.getResults()) {
 				Question q = (Question) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Question.class);
-				List<PossibleAnswer> answers = new ArrayList<PossibleAnswer>();
-				for(Object answer : q.getPossibleAnswers()) {
-					PossibleAnswer a = (PossibleAnswer) morpherRegistry.morph(PossibleAnswer.class, answer);
-					answers.add(a);
-				}
-				q.setPossibleAnswers(answers);
+				Collection<PossibleAnswer> answers = JSONArray.toCollection(d.getJSONObject().getJSONObject("value").getJSONArray("possibleAnswers"), PossibleAnswer.class);
+				q.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
 				result.add(q);
 			}
 			
