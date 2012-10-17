@@ -331,6 +331,11 @@
 					</formats>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>aspectj-maven-plugin</artifactId>
+				<version>1.4</version>
+			</plugin>
 		</plugins>
 	</build>
 
