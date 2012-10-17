@@ -5,14 +5,14 @@
 	<artifactId>arsnova-war</artifactId>
 	<version>2.0.0-SNAPSHOT</version>
 	<packaging>war</packaging>
-	
+
 	<properties>
 		<org.springframework-version>3.1.2.RELEASE</org.springframework-version>
 		<org.springframework.security-version>3.1.0.RELEASE</org.springframework.security-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.url>https://scm.thm.de/arsnova</project.url>
 	</properties>
-	
+
 	<developers>
 		<developer>
 			<name>Klaus Quibeldey-Cirkel</name>
@@ -50,7 +50,7 @@
 			<email>paul-christian.volkmer@mni.thm.de</email>
 		</developer>
 	</developers>
-	
+
 	<distributionManagement>
 		<site>
 			<id>website</id>
@@ -71,16 +71,16 @@
 	<scm>
 		<url>https://scm.thm.de/arsnova/arsnova-war</url>
 		<connection>scm:git://scm.thm.de/arsnova/arsnova-war.git</connection>
-        <developerConnection>scm:ssh://gitorious@scm.thm.de/arsnova/arsnova-war.git</developerConnection>
+		<developerConnection>scm:ssh://gitorious@scm.thm.de/arsnova/arsnova-war.git</developerConnection>
 	</scm>
-	
+
 	<licenses>
 		<license>
 			<name>GNU General Public License v3.0 or later</name>
 			<url>http://www.gnu.org/licenses/gpl.txt</url>
 		</license>
 	</licenses>
-	
+
 	<reporting>
 		<plugins>
 			<plugin>
@@ -89,11 +89,11 @@
 				<version>2.4</version>
 				<configuration>
 
-        		</configuration>
+				</configuration>
 			</plugin>
 		</plugins>
 	</reporting>
-	
+
 	<repositories>
 		<repository>
 			<id>thmrepo</id>
@@ -104,7 +104,7 @@
 			<id>thmreposnapshots</id>
 			<name>THM Maven Snapshot Repository</name>
 			<url>http://maven.mni.thm.de/content/repositories/snapshots</url>
-		</repository>		
+		</repository>
 		<repository>
 			<id>thmmirror</id>
 			<name>THM Maven Mirror</name>
@@ -116,7 +116,7 @@
 			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
 		</repository>
 	</repositories>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>de.thm.arsnova</groupId>
@@ -204,7 +204,7 @@
 			<groupId>couchdb4j</groupId>
 			<artifactId>couchdb4j</artifactId>
 			<version>0.3.0-i386-1</version>
-			
+
 		</dependency>
 		<dependency>
 			<groupId>net.sf.ezmorph</groupId>
@@ -268,9 +268,9 @@
 			<version>1.7.1</version>
 		</dependency>
 		<dependency>
-			<groupId>aspectj</groupId>
+			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjweaver</artifactId>
-			<version>1.5.4</version>
+			<version>1.7.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -287,23 +287,17 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
+					
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>7.6.5.v20120716</version>
-				<!-- 
-				<configuration>
-	            	<scanIntervalSeconds>5</scanIntervalSeconds>
-		            <webApp>
-		                <contextPath>/</contextPath>
-		                <baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
-		                    <resourcesAsCSV>src/main/webapp,../arsnova-js/src/main/webapp,../arsnova-legacy-js/src/main/webapp,../dojo-war/src/main/webapp</resourcesAsCSV>
-		                </baseResource>
-		            </webApp>
-	        	</configuration>
-	        	 -->
+				<!-- <configuration> <scanIntervalSeconds>5</scanIntervalSeconds> <webApp> 
+					<contextPath>/</contextPath> <baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection"> 
+					<resourcesAsCSV>src/main/webapp,../arsnova-js/src/main/webapp,../arsnova-legacy-js/src/main/webapp,../dojo-war/src/main/webapp</resourcesAsCSV> 
+					</baseResource> </webApp> </configuration> -->
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

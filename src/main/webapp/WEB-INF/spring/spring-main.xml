@@ -29,7 +29,11 @@
 
 	<context:component-scan base-package="de.thm.arsnova" />
 	<context:annotation-config />
-	
+
+	<aop:aspectj-autoproxy>
+		<aop:include name="authorizationAdviser" />
+	</aop:aspectj-autoproxy>
+
 	<mvc:annotation-driven />
 	<mvc:resources mapping="/**" location="/" />
 
