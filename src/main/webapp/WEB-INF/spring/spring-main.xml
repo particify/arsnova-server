@@ -32,7 +32,7 @@
 	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
 		<property name="messageConverters">
 			<list>
-				<bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter" />
+				<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter" />
 			</list>
 		</property>
 	</bean>
@@ -55,7 +55,7 @@
 		</property>  
 		<property name="defaultViews">  
 			<list>  
-				<bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView">  
+				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView">  
 					<property name="prefixJson" value="false"/>  
 				</bean>  
 			</list>  

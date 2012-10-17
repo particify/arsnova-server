@@ -108,4 +108,22 @@ public class StubDatabaseDao implements IDatabaseDao {
 		return stubQuestions.get(session) != null;
 	}
 
+	@Override
+	public List<Session> getMySessions(String username) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Question> getSkillQuestions(String session, String sort) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getSkillQuestionCount(String sessionkey) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

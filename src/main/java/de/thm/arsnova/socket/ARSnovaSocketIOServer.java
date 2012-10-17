@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 
+import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.Configuration;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
@@ -70,7 +71,7 @@ public class ARSnovaSocketIOServer {
 		server.addEventListener("setFeedback", Feedback.class,
 				new DataListener<Feedback>() {
 					@Override
-					public void onData(SocketIOClient client, Feedback data) {
+					public void onData(SocketIOClient client, Feedback data, AckRequest ackSender) {
 						/**
 						 * do a check if user is in the session, for which he would give a feedback
 						 */
@@ -99,7 +100,7 @@ public class ARSnovaSocketIOServer {
 		
 		server.addEventListener("arsnova/question/create", Question.class, new DataListener<Question>(){
 			@Override
-			public void onData(SocketIOClient client, Question question) {
+			public void onData(SocketIOClient client, Question question, AckRequest ackSender) {
 				sessionService.saveQuestion(question);
 			}
 		});
