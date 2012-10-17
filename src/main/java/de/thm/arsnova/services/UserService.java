@@ -7,13 +7,11 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Service;
 
 import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationToken;
 
 import de.thm.arsnova.entities.User;
 
-@Service
 public class UserService implements IUserService {
 
 	@Override

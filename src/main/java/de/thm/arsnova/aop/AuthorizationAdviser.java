@@ -27,6 +27,8 @@ public class AuthorizationAdviser {
 	public void checkAuthorization(Authenticated authenticated, Object object) {
 		User u = userService.getUser(SecurityContextHolder.getContext().getAuthentication());
 		if (u == null) throw new UnauthorizedException();
+		// TODO: For unauthorized users e.g. after logout there is still a user object with username 'anonymous'
+		if (u.getUsername().equals("anonymous")) throw new UnauthorizedException();
 	}
 	
 	/** This method checks if the user is enlisted in current ARSnova session
