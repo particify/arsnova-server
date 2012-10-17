@@ -2,7 +2,6 @@ package de.thm.arsnova.controller;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import javax.inject.Inject;
 
@@ -51,71 +50,44 @@ public class SessionControllerTest {
 				.getBean(AnnotationMethodHandlerAdapter.class);
 	}
 
-	@Test
-	public void testShouldNotGetUnknownSession() {
+	@Test(expected=NotFoundException.class)
+	public void testShouldNotGetUnknownSession() throws Exception {
 		userService.setUserAuthenticated(true);
 		
 		request.setMethod("GET");
 		request.setRequestURI("/session/00000000");
-		try {
-			final ModelAndView mav = handlerAdapter.handle(request, response,
-					sessionController);
-			assertNull(mav);
-			assertTrue(response.getStatus() == 404);
-		} catch (NotFoundException e) {
-			return;
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("An exception occured");
-		}
-
-		fail("Expected exception 'NotFoundException' did not occure");
+		final ModelAndView mav = handlerAdapter.handle(request, response, sessionController);
+		
+		assertNull(mav);
+		assertTrue(response.getStatus() == 404);
 	}
 
-	@Test
-	public void testShouldNotGetForbiddenSession() {
+	@Test(expected=ForbiddenException.class)
+	public void testShouldNotGetForbiddenSession() throws Exception {
 		userService.setUserAuthenticated(true);
 		
 		request.setMethod("GET");
 		request.setRequestURI("/session/99999999");
-		try {
-			final ModelAndView mav = handlerAdapter.handle(request, response,
-					sessionController);
-			assertNull(mav);
-			assertTrue(response.getStatus() == 403);
-		} catch (ForbiddenException e) {
-			return;
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("An exception occured");
-		}
+		final ModelAndView mav = handlerAdapter.handle(request, response, sessionController);
 
-		fail("Expected exception 'ForbiddenException' did not occure");
+		assertNull(mav);
+		assertTrue(response.getStatus() == 403);
 	}
 	
-	@Test
-	public void testShouldNotGetSessionIfUnauthorized() {
+	@Test(expected=UnauthorizedException.class)
+	public void testShouldNotGetSessionIfUnauthorized() throws Exception {
 		userService.setUserAuthenticated(false);
 		
 		request.setMethod("GET");
 		request.setRequestURI("/session/00000000");
-		try {
-			final ModelAndView mav = handlerAdapter.handle(request, response,
-					sessionController);
-			assertNull(mav);
-			assertTrue(response.getStatus() == 401);
-		} catch (UnauthorizedException e) {
-			return;
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("An exception occured");
-		}
-
-		fail("Expected exception 'UnauthorizedException' did not occure");
+		final ModelAndView mav = handlerAdapter.handle(request, response, sessionController);
+		
+		assertNull(mav);
+		assertTrue(response.getStatus() == 401);
 	}
 	
-	@Test
-	public void testShouldCreateSessionIfUnauthorized() {
+	@Test(expected=UnauthorizedException.class)
+	public void testShouldCreateSessionIfUnauthorized() throws Exception {
 		userService.setUserAuthenticated(false);
 		
 		request.setMethod("POST");
@@ -123,84 +95,47 @@ public class SessionControllerTest {
 		request.setContentType("application/json");
 		request.setContent("{}".getBytes());
 		
-		try {
-			final ModelAndView mav = handlerAdapter.handle(request, response,
-					sessionController);
-			assertNull(mav);
-			assertTrue(response.getStatus() == 401);
-		} catch (UnauthorizedException e) {
-			return;
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("An exception occured");
-		}
-
-		fail("Expected exception 'UnauthorizedException' did not occure");
+		final ModelAndView mav = handlerAdapter.handle(request, response, sessionController);
+		
+		assertNull(mav);
+		assertTrue(response.getStatus() == 401);
 	}
 
-	@Test
-	public void testShouldNotGetFeedbackForUnknownSession() {
+	@Test(expected=NotFoundException.class)
+	public void testShouldNotGetFeedbackForUnknownSession() throws Exception {
 		userService.setUserAuthenticated(true);
 		
 		request.setMethod("GET");
 		request.setRequestURI("/session/00000000/feedback");
-		try {
-			final ModelAndView mav = handlerAdapter.handle(request, response,
-					sessionController);
-			assertNull(mav);
-			assertTrue(response.getStatus() == 404);
-		} catch (NotFoundException e) {
-			return;
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("An exception occured");
-		}
-
-		fail("Expected exception 'NotFoundException' did not occure");
+		final ModelAndView mav = handlerAdapter.handle(request, response, sessionController);
+		
+		assertNull(mav);
+		assertTrue(response.getStatus() == 404);
 	}
 	
-	@Test
-	public void testShouldNotGetFeedbackIfUnauthorized() {
+	@Test(expected=UnauthorizedException.class)
+	public void testShouldNotGetFeedbackIfUnauthorized() throws Exception {
 		userService.setUserAuthenticated(false);
 		
 		request.setMethod("GET");
 		request.setRequestURI("/session/00000000/feedback");
-		try {
-			final ModelAndView mav = handlerAdapter.handle(request, response,
-					sessionController);
-			assertNull(mav);
-			assertTrue(response.getStatus() == 401);
-		} catch (UnauthorizedException e) {
-			return;
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("An exception occured");
-		}
-
-		fail("Expected exception 'UnauthorizedException' did not occure");
+		final ModelAndView mav = handlerAdapter.handle(request, response, sessionController);
+		
+		assertNull(mav);
+		assertTrue(response.getStatus() == 401);
 	}
 	
-	@Test
-	public void testShouldNotSaveFeedbackIfUnauthorized() {
+	@Test(expected=UnauthorizedException.class)
+	public void testShouldNotSaveFeedbackIfUnauthorized() throws Exception {
 		userService.setUserAuthenticated(false);
 		
 		request.setMethod("POST");
 		request.setRequestURI("/session/00000000/feedback");
 		request.setContentType("application/json");
 		request.setContent("0".getBytes());
+		final ModelAndView mav = handlerAdapter.handle(request, response, sessionController);
 		
-		try {
-			final ModelAndView mav = handlerAdapter.handle(request, response,
-					sessionController);
-			assertNull(mav);
-			assertTrue(response.getStatus() == 401);
-		} catch (UnauthorizedException e) {
-			return;
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("An exception occured");
-		}
-
-		fail("Expected exception 'UnauthorizedException' did not occure");
+		assertNull(mav);
+		assertTrue(response.getStatus() == 401);
 	}
 }
