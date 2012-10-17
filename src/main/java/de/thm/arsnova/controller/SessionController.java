@@ -18,6 +18,7 @@
  */
 package de.thm.arsnova.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
@@ -153,5 +154,21 @@ public class SessionController extends AbstractController {
 		url.append(server.getHostIp() + ":" + server.getPortNumber());
 		
 		return url.toString();
+	}
+	
+	@RequestMapping(value="/mySessions", method=RequestMethod.GET)
+	@ResponseBody
+	public List<Session> getMySession(HttpServletResponse response) {
+		String username = userService.getUser(SecurityContextHolder.getContext().getAuthentication()).getUsername();
+		if(username == null) {
+			response.setStatus(HttpStatus.NOT_FOUND.value());
+			return null;
+		}
+		List<Session> sessions = sessionService.getMySessions(username);
+		if (sessions == null || sessions.isEmpty()) {
+			response.setStatus(HttpStatus.NOT_FOUND.value());
+			return null;
+		}
+		return sessions;
 	}
 }
