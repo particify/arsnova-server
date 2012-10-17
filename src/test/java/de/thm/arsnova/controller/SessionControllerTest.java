@@ -124,7 +124,7 @@ public class SessionControllerTest {
 			final ModelAndView mav = handlerAdapter.handle(request, response,
 					sessionController);
 			assertNull(mav);
-			assertTrue(response.getStatus() == 403);
+			assertTrue(response.getStatus() == 401);
 		} catch (UnauthorizedException e) {
 			return;
 		} catch (Exception e) {

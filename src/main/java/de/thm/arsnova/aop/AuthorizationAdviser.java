@@ -18,9 +18,24 @@ public class AuthorizationAdviser {
 		userService = uService;
 	}
 	
+	/** This method checks if the user has a valid authorization from security context 
+	 * 
+	 * @param authenticated
+	 * @param object
+	 */
 	@Before("execution(public * de.thm.arsnova.services.*.*(..)) && @annotation(authenticated) && this(object)")
 	public void checkAuthorization(Authenticated authenticated, Object object) {
 		User u = userService.getUser(SecurityContextHolder.getContext().getAuthentication());
 		if (u == null) throw new UnauthorizedException();
+	}
+	
+	/** This method checks if the user is enlisted in current ARSnova session
+	 *
+	 * @param authenticated
+	 * @param object
+	 */
+	@Before("execution(public * de.thm.arsnova.services.*.*(..)) && @annotation(authenticated) && this(object)")
+	public void checkSessionMembership(Authenticated authenticated, Object object) {
+		//TODO: Implement check based on session membership lists
 	}
 }
