@@ -322,7 +322,12 @@ public class CouchDBDao implements IDatabaseDao {
 							.getInt("value");
 			}
 		} catch (Exception e) {
-			throw new NotFoundException();
+			return new Feedback(
+					values[0],
+					values[1],
+					values[2],
+					values[3]
+			);
 		}
 
 		return new Feedback(
