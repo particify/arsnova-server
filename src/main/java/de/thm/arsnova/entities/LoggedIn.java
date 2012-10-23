@@ -1,0 +1,162 @@
+/*
+ * Copyright (C) 2012 THM webMedia
+ * 
+ * This file is part of ARSnova.
+ *
+ * ARSnova is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * ARSnova is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package de.thm.arsnova.entities;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class LoggedIn {
+	
+	private String _id;
+	private String _rev;
+	private String type;
+	private String user;
+	private String sessionId;
+	private long timestamp;
+	private List<VisitedSession> visitedSessions = new ArrayList<VisitedSession>();
+	
+	public LoggedIn() {
+		this.type = "logged_in";
+		this.timestamp = System.currentTimeMillis();
+	}
+	
+	public void addVisitedSession(Session s) {
+		if (!isAlreadyVisited(s)) {
+			this.visitedSessions.add(new VisitedSession(s));
+		}
+	}
+	
+	private boolean isAlreadyVisited(Session s) {
+		for (VisitedSession vs : this.visitedSessions) {
+			if (vs._id.equals(s.get_id())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public String get_id() {
+		return _id;
+	}
+
+	public void set_id(String _id) {
+		this._id = _id;
+	}
+
+	public String get_rev() {
+		return _rev;
+	}
+
+	public void set_rev(String _rev) {
+		this._rev = _rev;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getUser() {
+		return user;
+	}
+
+	public void setUser(String user) {
+		this.user = user;
+	}
+
+	public String getSessionId() {
+		return sessionId;
+	}
+
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
+	}
+
+	public long getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
+	}
+
+	public List<VisitedSession> getVisitedSessions() {
+		return visitedSessions;
+	}
+
+	public void setVisitedSessions(List<VisitedSession> visitedSessions) {
+		this.visitedSessions = visitedSessions;
+	}
+
+	@Override
+	public String toString() {
+		return "LoggedIn [_id=" + _id + ", _rev=" + _rev + ", type=" + type
+				+ ", user=" + user + ", sessionId=" + sessionId
+				+ ", timestamp=" + timestamp + ", visitedSessions="
+				+ visitedSessions + "]";
+	}
+
+	public static class VisitedSession {
+		private String _id;
+		private String name;
+		private String keyword;
+		
+		public VisitedSession() {}
+		
+		public VisitedSession(Session s) {
+			this._id = s.get_id();
+			this.name = s.getName();
+			this.keyword = s.getKeyword();
+		}
+
+		public String get_id() {
+			return _id;
+		}
+
+		public void set_id(String _id) {
+			this._id = _id;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getKeyword() {
+			return keyword;
+		}
+
+		public void setKeyword(String keyword) {
+			this.keyword = keyword;
+		}
+
+		@Override
+		public String toString() {
+			return "VisitedSession [_id=" + _id + ", name=" + name
+					+ ", keyword=" + keyword + "]";
+		}
+	}
+}
