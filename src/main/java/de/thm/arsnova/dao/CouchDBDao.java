@@ -55,6 +55,8 @@ import com.fourspaces.couchdb.View;
 import com.fourspaces.couchdb.ViewResults;
 
 import de.thm.arsnova.entities.Feedback;
+import de.thm.arsnova.entities.LoggedIn;
+import de.thm.arsnova.entities.LoggedIn.VisitedSession;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.ForbiddenException;
@@ -512,5 +514,42 @@ public class CouchDBDao implements IDatabaseDao {
 			logger.error("Could not get question with id {}", id);
 		}
 		return null;
+	}
+	
+	@Override
+	public LoggedIn registerAsOnlineUser(User u, Session s) {
+		try {
+			View view = new View("logged_in/all");
+			view.setKey(URLEncoder.encode("\"" + u.getUsername() + "\"", "UTF-8"));
+			ViewResults results = this.getDatabase().view(view);
+			
+			LoggedIn loggedIn = new LoggedIn();
+			if (results.getJSONArray("rows").optJSONObject(0) != null) {
+				loggedIn = (LoggedIn) JSONObject.toBean(
+						results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
+						LoggedIn.class);
+			}
+			
+			loggedIn.setUser(u.getUsername());
+			loggedIn.setSessionId(s.get_id());
+			loggedIn.addVisitedSession(s);
+			
+			JSONObject json = JSONObject.fromObject(loggedIn);
+			Document doc = new Document(json);
+			if (doc.getId() == "") {
+				// If this is a new user without a logged_in document, we have to remove the following
+				// pre-filled fields. Otherwise, CouchDB will take these empty fields as genuine
+				// identifiers, and will throw errors afterwards.
+				doc.remove("_id");
+				doc.remove("_rev");
+			}
+			this.getDatabase().saveDocument(doc);
+			
+			return (LoggedIn) JSONObject.toBean(doc.getJSONObject(), LoggedIn.class);
+		} catch (UnsupportedEncodingException e) {
+			return null;
+		} catch (IOException e) {
+			return null;
+		}
 	}
 }

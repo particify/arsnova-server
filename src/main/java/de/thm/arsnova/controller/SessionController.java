@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.entities.Feedback;
+import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
@@ -101,6 +102,20 @@ public class SessionController extends AbstractController {
 		}
 		
 		response.setStatus(HttpStatus.BAD_REQUEST.value());
+		return null;
+	}
+	
+	@RequestMapping(value="/session/{key}/online", method=RequestMethod.POST)
+	@ResponseBody
+	public LoggedIn registerAsOnlineUser(@PathVariable String key, @RequestBody String sessionkey, HttpServletResponse response) {
+		User user = userService.getUser(SecurityContextHolder.getContext().getAuthentication());
+		LoggedIn loggedIn = sessionService.registerAsOnlineUser(user, sessionkey);
+		if (loggedIn != null) {
+			response.setStatus(HttpStatus.CREATED.value());
+			return loggedIn;
+		}
+		
+		response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 		return null;
 	}
 	
