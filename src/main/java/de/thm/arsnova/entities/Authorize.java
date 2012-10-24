@@ -1,4 +1,4 @@
-package de.thm.arsnova.socket.message;
+package de.thm.arsnova.entities;
 
 public class Authorize {
 	private String user;

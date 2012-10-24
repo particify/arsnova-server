@@ -172,7 +172,7 @@ public class SessionController extends AbstractController {
 		return url.toString();
 	}
 	
-	@RequestMapping(value="/mySessions", method=RequestMethod.GET)
+	@RequestMapping(value={"/mySessions","/session/mysessions"}, method=RequestMethod.GET)
 	@ResponseBody
 	public List<Session> getMySession(HttpServletResponse response) {
 		String username = userService.getUser(SecurityContextHolder.getContext().getAuthentication()).getUsername();

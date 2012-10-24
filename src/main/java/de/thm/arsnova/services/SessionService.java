@@ -36,11 +36,11 @@ import org.springframework.transaction.annotation.Transactional;
 import de.thm.arsnova.annotation.Authenticated;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Feedback;
+import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
-import de.thm.arsnova.socket.message.Question;
 
 @Service
 public class SessionService implements ISessionService {
