@@ -57,6 +57,12 @@ public class FeedbackController extends AbstractController {
 		return sessionService.getFeedback(sessionkey);
 	}
 	
+	@RequestMapping(value="/session/{sessionkey}/feedback/count", method=RequestMethod.GET)
+	@ResponseBody
+	public int getFeedbackCount(@PathVariable String sessionkey) {
+		return sessionService.getFeedbackCount(sessionkey);
+	}
+	
 	@RequestMapping(value="/session/{sessionkey}/feedback", method=RequestMethod.POST)
 	@ResponseBody
 	public Feedback postFeedback(@PathVariable String sessionkey, @RequestBody int value, HttpServletResponse response) {

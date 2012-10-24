@@ -98,6 +98,14 @@ public class SessionService implements ISessionService {
 	public Feedback getFeedback(String keyword) {
 		return databaseDao.getFeedback(keyword);
 	}
+	
+	@Override
+	@Authenticated
+	public int getFeedbackCount(String keyword) {
+		Feedback feedback = databaseDao.getFeedback(keyword);
+		List<Integer> values = feedback.getValues();
+		return values.get(0) + values.get(1) + values.get(2) + values.get(3);
+	}
 
 	@Override
 	@Authenticated
