@@ -69,8 +69,6 @@ import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
-import de.thm.arsnova.socket.message.PossibleAnswer;
-import de.thm.arsnova.socket.message.Question;
 
 @Component
 public class CouchDBDao implements IDatabaseDao {
@@ -520,5 +518,46 @@ public class CouchDBDao implements IDatabaseDao {
 			logger.error("Could not get question with id {}", id);
 		}
 		return null;
+	}
+	
+	@Override
+	public LoggedIn registerAsOnlineUser(User u, Session s) {
+		try {
+			View view = new View("logged_in/all");
+			view.setKey(URLEncoder.encode("\"" + u.getUsername() + "\"", "UTF-8"));
+			ViewResults results = this.getDatabase().view(view);
+			
+			LoggedIn loggedIn = new LoggedIn();
+			if (results.getJSONArray("rows").optJSONObject(0) != null) {
+				JSONObject json = results.getJSONArray("rows").optJSONObject(0).optJSONObject("value");
+				loggedIn = (LoggedIn) JSONObject.toBean(json, LoggedIn.class);
+				Collection<VisitedSession> visitedSessions = JSONArray.toCollection(json.getJSONArray("visitedSessions"), VisitedSession.class);
+				loggedIn.setVisitedSessions(new ArrayList<VisitedSession>(visitedSessions));
+			}
+			
+			loggedIn.setUser(u.getUsername());
+			loggedIn.setSessionId(s.get_id());
+			loggedIn.addVisitedSession(s);
+			
+			JSONObject json = JSONObject.fromObject(loggedIn);
+			Document doc = new Document(json);
+			if (doc.getId() == "") {
+				// If this is a new user without a logged_in document, we have to remove the following
+				// pre-filled fields. Otherwise, CouchDB will take these empty fields as genuine
+				// identifiers, and will throw errors afterwards.
+				doc.remove("_id");
+				doc.remove("_rev");
+			}
+			this.getDatabase().saveDocument(doc);
+			
+			LoggedIn l = (LoggedIn) JSONObject.toBean(doc.getJSONObject(), LoggedIn.class);
+			Collection<VisitedSession> visitedSessions = JSONArray.toCollection(doc.getJSONObject().getJSONArray("visitedSessions"), VisitedSession.class);
+			l.setVisitedSessions(new ArrayList<VisitedSession>(visitedSessions));
+			return l;
+		} catch (UnsupportedEncodingException e) {
+			return null;
+		} catch (IOException e) {
+			return null;
+		}
 	}
 }

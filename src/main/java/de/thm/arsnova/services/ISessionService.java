@@ -47,6 +47,7 @@ public interface ISessionService {
 	public List<Session> getMySessions(String username);
 	public boolean saveQuestion(Question question);
 	public Question getQuestion(String id);
+	public LoggedIn registerAsOnlineUser(User user, String sessionkey);
 	public List<Question> getSkillQuestions(String sessionkey, String sort);
 	public int getSkillQuestionCount(String sessionkey);
 }
