@@ -112,7 +112,7 @@ public class LoginController extends AbstractController {
 	@RequestMapping(method = RequestMethod.GET, value = "/whoami")
 	@ResponseBody
 	public User whoami() {
-		return userService.getUser(SecurityContextHolder.getContext().getAuthentication());
+		return userService.getCurrentUser();
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/logout")

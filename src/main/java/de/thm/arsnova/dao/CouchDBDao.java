@@ -159,8 +159,10 @@ public class CouchDBDao implements IDatabaseDao {
 		if(result == null) {
 			throw new NotFoundException();
 		}
-		if (result.isActive() || result.getCreator().equals(this.actualUserName())) {
-			sessionService.addUserToSessionMap(this.actualUserName(), keyword);
+		if (
+				result.isActive() 
+				|| result.getCreator().equals(userService.getCurrentUser().getUsername())
+		) {
 			return result;
 		}
 		
@@ -441,8 +443,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 	
 	private String actualUserName() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		User user = userService.getUser(authentication);
+		User user = userService.getCurrentUser();
 		if(user == null) return null;
 		return user.getUsername();
 	}

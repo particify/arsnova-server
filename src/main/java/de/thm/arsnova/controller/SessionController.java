@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,20 +58,20 @@ public class SessionController extends AbstractController {
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/authorize")
 	public void authorize(@RequestBody Object sessionObject, HttpServletResponse response) {
-		String sessionkey = (String) JSONObject.fromObject(sessionObject).get("session");
-		if(sessionkey == null) {
+		String socketid = (String) JSONObject.fromObject(sessionObject).get("session");
+		if(socketid == null) {
 			return;
 		}		
-		User u = userService.getUser(SecurityContextHolder.getContext().getAuthentication());
-		logger.info("authorize session: " + sessionkey + ", user is:  " + u);
+		User u = userService.getCurrentUser();
+		logger.info("authorize session: " + socketid + ", user is:  " + u);
 		response.setStatus(u != null ? HttpStatus.CREATED.value() : HttpStatus.UNAUTHORIZED.value());
-		server.authorize(UUID.fromString(sessionkey), u);
+		userService.putUser2SessionID(UUID.fromString(socketid), u);
 	}
 	
 	@RequestMapping(value="/session/{sessionkey}", method=RequestMethod.GET)
 	@ResponseBody
-	public Session getSession(@PathVariable String sessionkey) {
-		return sessionService.getSession(sessionkey);
+	public Session joinSession(@PathVariable String sessionkey) {
+		return sessionService.joinSession(sessionkey);
 	}
 	
 	@RequestMapping(value="/session", method=RequestMethod.POST)
@@ -102,7 +101,7 @@ public class SessionController extends AbstractController {
 	@RequestMapping(value={"/mySessions","/session/mysessions"}, method=RequestMethod.GET)
 	@ResponseBody
 	public List<Session> getMySession(HttpServletResponse response) {
-		String username = userService.getUser(SecurityContextHolder.getContext().getAuthentication()).getUsername();
+		String username = userService.getCurrentUser().getUsername();
 		if(username == null) {
 			response.setStatus(HttpStatus.NOT_FOUND.value());
 			return null;

@@ -2,7 +2,6 @@ package de.thm.arsnova.aop;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import de.thm.arsnova.annotation.Authenticated;
 import de.thm.arsnova.entities.User;
@@ -25,7 +24,7 @@ public class AuthorizationAdviser {
 	 */
 	@Before("execution(public * de.thm.arsnova.services.*.*(..)) && @annotation(authenticated) && this(object)")
 	public void checkAuthorization(Authenticated authenticated, Object object) {
-		User u = userService.getUser(SecurityContextHolder.getContext().getAuthentication());
+		User u = userService.getCurrentUser();
 		if (u == null) throw new UnauthorizedException();
 		// TODO: For unauthorized users e.g. after logout there is still a user object with username 'anonymous'
 		if (u.getUsername().equals("anonymous")) throw new UnauthorizedException();
