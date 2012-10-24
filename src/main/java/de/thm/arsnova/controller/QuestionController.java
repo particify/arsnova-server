@@ -34,10 +34,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import de.thm.arsnova.entities.Question;
+
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
-import de.thm.arsnova.socket.message.Question;
+
 
 @Controller
 public class QuestionController extends AbstractController {
