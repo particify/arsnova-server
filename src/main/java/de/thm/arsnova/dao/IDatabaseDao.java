@@ -22,6 +22,7 @@ package de.thm.arsnova.dao;
 import java.util.List;
 
 import de.thm.arsnova.entities.Feedback;
+import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.socket.message.Question;
@@ -40,4 +41,6 @@ public interface IDatabaseDao {
 	public Question getQuestion(String id);
 	List<Question> getSkillQuestions(String session, String sort);
 	public int getSkillQuestionCount(String sessionkey);
+	
+	public LoggedIn registerAsOnlineUser(User u, Session s);
 }

@@ -27,6 +27,7 @@ public class Session {
 	private String keyword;
 	private String creator;
 	private boolean active;
+	private long lastOwnerActivity;
 	private String _id;
 	private String _rev;
 	
@@ -67,6 +68,12 @@ public class Session {
 		this.active = active;
 	}
 	
+	public long getLastOwnerActivity() {
+		return lastOwnerActivity;
+	}
+	public void setLastOwnerActivity(long lastOwnerActivity) {
+		this.lastOwnerActivity = lastOwnerActivity;
+	}
 	public void set_id(String id) {
 		_id = id;
 	}
