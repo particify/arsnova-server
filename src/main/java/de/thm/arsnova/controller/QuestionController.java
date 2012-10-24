@@ -19,17 +19,13 @@
 package de.thm.arsnova.controller;
 
 import java.util.List;
-import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
-
-import net.sf.json.JSONObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,17 +34,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 import de.thm.arsnova.socket.message.Question;
 
 @Controller
-public class SessionController extends AbstractController {
+public class QuestionController extends AbstractController {
 	
-	public static final Logger logger = LoggerFactory.getLogger(SessionController.class);
+	public static final Logger logger = LoggerFactory.getLogger(QuestionController.class);
 	
 	@Autowired
 	ISessionService sessionService;
@@ -58,37 +52,6 @@ public class SessionController extends AbstractController {
 	
 	@Autowired
 	ARSnovaSocketIOServer server;
-	
-	@RequestMapping(method = RequestMethod.POST, value = "/authorize")
-	public void authorize(@RequestBody Object sessionObject, HttpServletResponse response) {
-		String sessionkey = (String) JSONObject.fromObject(sessionObject).get("session");
-		if(sessionkey == null) {
-			return;
-		}		
-		User u = userService.getUser(SecurityContextHolder.getContext().getAuthentication());
-		logger.info("authorize session: " + sessionkey + ", user is:  " + u);
-		response.setStatus(u != null ? HttpStatus.CREATED.value() : HttpStatus.UNAUTHORIZED.value());
-		server.authorize(UUID.fromString(sessionkey), u);
-	}
-	
-	@RequestMapping(value="/session/{sessionkey}", method=RequestMethod.GET)
-	@ResponseBody
-	public Session getSession(@PathVariable String sessionkey) {
-		return sessionService.getSession(sessionkey);
-	}
-	
-	@RequestMapping(value="/session", method=RequestMethod.POST)
-	@ResponseBody
-	public Session postNewSession(@RequestBody Session session, HttpServletResponse response) {
-		Session newSession = sessionService.saveSession(session);
-		if (session != null) {
-			response.setStatus(HttpStatus.CREATED.value());
-			return newSession;
-		}
-
-		response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
-		return null;
-	}
 
 	@RequestMapping(value="/session/{sessionkey}/question/{questionId}", method=RequestMethod.GET)
 	@ResponseBody
@@ -119,34 +82,13 @@ public class SessionController extends AbstractController {
 		return;
 	}
 	
-	@RequestMapping(value="/socketurl", method=RequestMethod.GET)
-	@ResponseBody
-	public String getSocketUrl() {
-		StringBuilder url = new StringBuilder();
-		
-		url.append(server.isUseSSL() ? "https://" : "http://");
-		url.append(server.getHostIp() + ":" + server.getPortNumber());
-		
-		return url.toString();
-	}
-	
-	@RequestMapping(value="/mySessions", method=RequestMethod.GET)
-	@ResponseBody
-	public List<Session> getMySession(HttpServletResponse response) {
-		String username = userService.getUser(SecurityContextHolder.getContext().getAuthentication()).getUsername();
-		if(username == null) {
-			response.setStatus(HttpStatus.NOT_FOUND.value());
-			return null;
-		}
-		List<Session> sessions = sessionService.getMySessions(username);
-		if (sessions == null || sessions.isEmpty()) {
-			response.setStatus(HttpStatus.NOT_FOUND.value());
-			return null;
-		}
-		return sessions;
-	}
-	
-	@RequestMapping(value="/getSkillQuestions/{sessionkey}", method=RequestMethod.GET)
+	@RequestMapping(
+		value={
+				"/getSkillQuestions/{sessionkey}",
+				"/session/{sessionkey}/skillquestions"
+		},
+		method=RequestMethod.GET
+	)
 	@ResponseBody
 	public List<Question> getSkillQuestions(@PathVariable String sessionkey, @RequestParam(value="sort", required=false) String sort, HttpServletResponse response) {
 		List<Question> questions = sessionService.getSkillQuestions(sessionkey, sort);
