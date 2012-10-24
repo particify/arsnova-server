@@ -87,6 +87,19 @@ public class SessionControllerTest {
 	}
 	
 	@Test(expected=UnauthorizedException.class)
+	public void testShouldNotGetSessionIfAnonymous() throws Exception {
+		userService.setUserAuthenticated(false);
+		userService.useAnonymousUser();
+		
+		request.setMethod("GET");
+		request.setRequestURI("/session/00000000");
+		final ModelAndView mav = handlerAdapter.handle(request, response, sessionController);
+		
+		assertNull(mav);
+		assertTrue(response.getStatus() == 401);
+	}
+	
+	@Test(expected=UnauthorizedException.class)
 	public void testShouldCreateSessionIfUnauthorized() throws Exception {
 		userService.setUserAuthenticated(false);
 		

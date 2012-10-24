@@ -19,19 +19,14 @@
 
 package de.thm.arsnova.services;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 
 import de.thm.arsnova.annotation.Authenticated;
 import de.thm.arsnova.dao.IDatabaseDao;
@@ -54,10 +49,11 @@ public class SessionService implements ISessionService {
 	@Value("${feedback.cleanup}")
 	private int cleanupFeedbackDelay;
 	
-	private static final ConcurrentHashMap<String, String> user2session = new ConcurrentHashMap<String, String>();
-	
 	@Autowired
 	IDatabaseDao databaseDao;
+	
+	@Autowired
+	IUserService userService;
 	
 	public void setDatabaseDao(IDatabaseDao databaseDao) {
 		this.databaseDao = databaseDao;
@@ -71,7 +67,8 @@ public class SessionService implements ISessionService {
 
 	@Override
 	@Authenticated
-	public Session getSession(String keyword) {
+	public Session joinSession(String keyword) {
+		userService.addCurrentUserToSessionMap(keyword);
 		return databaseDao.getSession(keyword);
 	}
 
@@ -113,31 +110,6 @@ public class SessionService implements ISessionService {
 		return databaseDao.sessionKeyAvailable(keyword);
 	}
 
-	@Override
-	public boolean isUserInSession(de.thm.arsnova.entities.User user, String keyword) {
-		if (keyword == null) return false;
-		String session = user2session.get(user.getUsername());
-		if(session == null) return false;
-		return keyword.equals(session);
-	}
-	
-	@Override
-	public List<String> getUsersInSession(String keyword) {
-		List<String> result = new ArrayList<String>();
-		for(Entry<String, String> e : user2session.entrySet()) {
-			if(e.getValue().equals(keyword)) {
-				result.add(e.getKey());
-			}
-		}
-		return result;
-	}	
-	
-	@Override
-	@Transactional(isolation=Isolation.READ_COMMITTED)
-	public void addUserToSessionMap(String username, String keyword) {
-		user2session.put(username, keyword);	
-	}
-
 	/**
 	 * 
 	 * @param affectedUsers The user whose feedback got deleted along with all affected session keywords
@@ -146,7 +118,7 @@ public class SessionService implements ISessionService {
 	public void broadcastFeedbackChanges(Map<String, Set<String>> affectedUsers, Set<String> allAffectedSessions) {
 		for (Map.Entry<String, Set<String>> e : affectedUsers.entrySet()) {
 			// Is this user registered with a socket connection?
-			String connectedSocket = user2session.get(e.getKey());
+			String connectedSocket = userService.getSessionForUser(e.getKey());
 			if (connectedSocket != null) {
 				this.server.reportDeletedFeedback(e.getKey(), e.getValue());
 			}

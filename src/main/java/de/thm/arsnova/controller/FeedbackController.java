@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -61,7 +60,7 @@ public class FeedbackController extends AbstractController {
 	@RequestMapping(value="/session/{sessionkey}/feedback", method=RequestMethod.POST)
 	@ResponseBody
 	public Feedback postFeedback(@PathVariable String sessionkey, @RequestBody int value, HttpServletResponse response) {
-		User user = userService.getUser(SecurityContextHolder.getContext().getAuthentication());
+		User user = userService.getCurrentUser();
 		if (sessionService.saveFeedback(sessionkey, value, user)) {
 			Feedback feedback = sessionService.getFeedback(sessionkey);
 			if (feedback != null) {

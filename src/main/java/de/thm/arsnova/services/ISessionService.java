@@ -33,15 +33,12 @@ import de.thm.arsnova.entities.User;
 public interface ISessionService {
 
 	public void cleanFeedbackVotes();
-	public Session getSession(String keyword);
+	public Session joinSession(String keyword);
 	public Session saveSession(Session session);
 	public Feedback getFeedback(String keyword);
 	public boolean saveFeedback(String keyword, int value, User user);
 	public boolean sessionKeyAvailable(String keyword);
 	public String generateKeyword();
-	public void addUserToSessionMap(String username, String keyword);
-	public boolean isUserInSession(User user, String keyword);
-	public List<String> getUsersInSession(String keyword);
 	public void broadcastFeedbackChanges(Map<String, Set<String>> affectedUsers, Set<String> allAffectedSessions);
 	
 	public List<Session> getMySessions(String username);
