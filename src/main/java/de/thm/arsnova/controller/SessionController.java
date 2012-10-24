@@ -82,7 +82,7 @@ public class SessionController extends AbstractController {
 	@RequestMapping(value="/session/{sessionkey}/online", method=RequestMethod.POST)
 	@ResponseBody
 	public LoggedIn registerAsOnlineUser(@PathVariable String sessionkey, HttpServletResponse response) {
-		User user = userService.getUser(SecurityContextHolder.getContext().getAuthentication());
+		User user = userService.getCurrentUser();
 		LoggedIn loggedIn = sessionService.registerAsOnlineUser(user, sessionkey);
 		if (loggedIn != null) {
 			response.setStatus(HttpStatus.CREATED.value());

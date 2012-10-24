@@ -152,7 +152,7 @@ public class SessionService implements ISessionService {
 	@Override
 	@Authenticated
 	public LoggedIn registerAsOnlineUser(User user, String sessionkey) {
-		Session session = this.getSession(sessionkey);
+		Session session = this.joinSession(sessionkey);
 		if (session == null) return null;
 		
 		return databaseDao.registerAsOnlineUser(user, session);
