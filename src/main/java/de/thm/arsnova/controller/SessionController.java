@@ -35,7 +35,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.entities.Session;
@@ -43,7 +42,6 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
-import de.thm.arsnova.socket.message.Question;
 
 @Controller
 public class SessionController extends AbstractController {
@@ -90,35 +88,6 @@ public class SessionController extends AbstractController {
 		return null;
 	}
 
-	@RequestMapping(value="/session/{sessionkey}/question/{questionId}", method=RequestMethod.GET)
-	@ResponseBody
-	public Question getQuestion(@PathVariable String sessionkey, @PathVariable String questionId, HttpServletResponse response) {
-		Question question = sessionService.getQuestion(questionId);
-		if (question != null && question.getSession().equals(sessionkey)) {
-			return question;
-		}
-		
-		response.setStatus(HttpStatus.NOT_FOUND.value());
-		return null;
-	}
-	
-	@RequestMapping(value="/session/{sessionkey}/question", method=RequestMethod.POST)
-	@ResponseBody
-	public void postQuestion(@PathVariable String sessionkey, @RequestBody Question question, HttpServletResponse response) {
-		if (! sessionkey.equals(question.getSession())) {
-			response.setStatus(HttpStatus.PRECONDITION_FAILED.value());
-			return;
-		}
-		
-		if (sessionService.saveQuestion(question)) {
-			response.setStatus(HttpStatus.CREATED.value());
-			return;
-		}
-		
-		response.setStatus(HttpStatus.BAD_REQUEST.value());
-		return;
-	}
-	
 	@RequestMapping(value="/socketurl", method=RequestMethod.GET)
 	@ResponseBody
 	public String getSocketUrl() {
@@ -130,7 +99,7 @@ public class SessionController extends AbstractController {
 		return url.toString();
 	}
 	
-	@RequestMapping(value="/mySessions", method=RequestMethod.GET)
+	@RequestMapping(value={"/mySessions","/session/mysessions"}, method=RequestMethod.GET)
 	@ResponseBody
 	public List<Session> getMySession(HttpServletResponse response) {
 		String username = userService.getUser(SecurityContextHolder.getContext().getAuthentication()).getUsername();
@@ -144,17 +113,5 @@ public class SessionController extends AbstractController {
 			return null;
 		}
 		return sessions;
-	}
-	
-	@RequestMapping(value="/getSkillQuestions/{sessionkey}", method=RequestMethod.GET)
-	@ResponseBody
-	public List<Question> getSkillQuestions(@PathVariable String sessionkey, @RequestParam(value="sort", required=false) String sort, HttpServletResponse response) {
-		List<Question> questions = sessionService.getSkillQuestions(sessionkey, sort);
-		if(questions == null || questions.isEmpty()) {
-			response.setStatus(HttpStatus.NOT_FOUND.value());
-			return null;
-		}
-		logger.info(questions.toString());
-		return questions;
 	}
 }
