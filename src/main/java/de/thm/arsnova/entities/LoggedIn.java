@@ -34,7 +34,7 @@ public class LoggedIn {
 	
 	public LoggedIn() {
 		this.type = "logged_in";
-		this.timestamp = System.currentTimeMillis();
+		this.updateTimestamp();
 	}
 	
 	public void addVisitedSession(Session s) {
@@ -50,6 +50,10 @@ public class LoggedIn {
 			}
 		}
 		return false;
+	}
+	
+	public void updateTimestamp() {
+		this.timestamp = System.currentTimeMillis();
 	}
 
 	public String get_id() {

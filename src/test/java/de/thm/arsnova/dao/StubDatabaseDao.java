@@ -157,4 +157,10 @@ public class StubDatabaseDao implements IDatabaseDao {
 		return null;
 	}
 
+	@Override
+	public void updateSessionOwnerActivity(Session session) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -539,6 +539,7 @@ public class CouchDBDao implements IDatabaseDao {
 			loggedIn.setUser(u.getUsername());
 			loggedIn.setSessionId(s.get_id());
 			loggedIn.addVisitedSession(s);
+			loggedIn.updateTimestamp();
 			
 			JSONObject json = JSONObject.fromObject(loggedIn);
 			Document doc = new Document(json);
@@ -559,6 +560,18 @@ public class CouchDBDao implements IDatabaseDao {
 			return null;
 		} catch (IOException e) {
 			return null;
+		}
+	}
+
+	@Override
+	public void updateSessionOwnerActivity(Session session) {
+		try {
+			session.setLastOwnerActivity(System.currentTimeMillis());
+			JSONObject json = JSONObject.fromObject(session);
+			this.getDatabase().saveDocument(new Document(json));
+		} catch (IOException e) {
+			logger.error("Failed to update lastOwnerActivity for Session {}", session);
+			return;
 		}
 	}
 }

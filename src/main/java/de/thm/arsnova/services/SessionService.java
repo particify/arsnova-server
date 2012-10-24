@@ -173,6 +173,10 @@ public class SessionService implements ISessionService {
 		Session session = this.joinSession(sessionkey);
 		if (session == null) return null;
 		
+		if (session.getCreator().equals(user.getUsername())) {
+			databaseDao.updateSessionOwnerActivity(session);
+		}
+		
 		return databaseDao.registerAsOnlineUser(user, session);
 	}
 }

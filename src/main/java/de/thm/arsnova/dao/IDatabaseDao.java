@@ -43,4 +43,5 @@ public interface IDatabaseDao {
 	public int getSkillQuestionCount(String sessionkey);
 	
 	public LoggedIn registerAsOnlineUser(User u, Session s);
+	public void updateSessionOwnerActivity(Session session);
 }

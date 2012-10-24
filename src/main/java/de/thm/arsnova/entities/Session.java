@@ -80,6 +80,10 @@ public class Session {
 	public String get_id() {
 		return _id;
 	}
-	
-	public void set_rev(String rev) {}
+	public void set_rev(String rev) {
+		_rev = rev;
+	}
+	public String get_rev() {
+		return _rev;
+	}
 }
