@@ -45,7 +45,7 @@ public class LoggedIn {
 	
 	private boolean isAlreadyVisited(Session s) {
 		for (VisitedSession vs : this.visitedSessions) {
-			if (vs._id.equals(s.get_id())) {
+			if (vs.get_id().equals(s.get_id())) {
 				return true;
 			}
 		}
@@ -114,49 +114,5 @@ public class LoggedIn {
 				+ ", user=" + user + ", sessionId=" + sessionId
 				+ ", timestamp=" + timestamp + ", visitedSessions="
 				+ visitedSessions + "]";
-	}
-
-	public static class VisitedSession {
-		private String _id;
-		private String name;
-		private String keyword;
-		
-		public VisitedSession() {}
-		
-		public VisitedSession(Session s) {
-			this._id = s.get_id();
-			this.name = s.getName();
-			this.keyword = s.getKeyword();
-		}
-
-		public String get_id() {
-			return _id;
-		}
-
-		public void set_id(String _id) {
-			this._id = _id;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		public String getKeyword() {
-			return keyword;
-		}
-
-		public void setKeyword(String keyword) {
-			this.keyword = keyword;
-		}
-
-		@Override
-		public String toString() {
-			return "VisitedSession [_id=" + _id + ", name=" + name
-					+ ", keyword=" + keyword + "]";
-		}
 	}
 }

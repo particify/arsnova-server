@@ -56,9 +56,9 @@ import com.fourspaces.couchdb.ViewResults;
 
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.LoggedIn;
-import de.thm.arsnova.entities.LoggedIn.VisitedSession;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.VisitedSession;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.ISessionService;
@@ -545,7 +545,10 @@ public class CouchDBDao implements IDatabaseDao {
 			}
 			this.getDatabase().saveDocument(doc);
 			
-			return (LoggedIn) JSONObject.toBean(doc.getJSONObject(), LoggedIn.class);
+			LoggedIn l = (LoggedIn) JSONObject.toBean(doc.getJSONObject(), LoggedIn.class);
+			Collection<VisitedSession> visitedSessions = JSONArray.toCollection(doc.getJSONObject().getJSONArray("visitedSessions"), VisitedSession.class);
+			l.setVisitedSessions(new ArrayList<VisitedSession>(visitedSessions));
+			return l;
 		} catch (UnsupportedEncodingException e) {
 			return null;
 		} catch (IOException e) {
