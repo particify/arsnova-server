@@ -525,9 +525,10 @@ public class CouchDBDao implements IDatabaseDao {
 			
 			LoggedIn loggedIn = new LoggedIn();
 			if (results.getJSONArray("rows").optJSONObject(0) != null) {
-				loggedIn = (LoggedIn) JSONObject.toBean(
-						results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
-						LoggedIn.class);
+				JSONObject json = results.getJSONArray("rows").optJSONObject(0).optJSONObject("value");
+				loggedIn = (LoggedIn) JSONObject.toBean(json, LoggedIn.class);
+				Collection<VisitedSession> visitedSessions = JSONArray.toCollection(json.getJSONArray("visitedSessions"), VisitedSession.class);
+				loggedIn.setVisitedSessions(new ArrayList<VisitedSession>(visitedSessions));
 			}
 			
 			loggedIn.setUser(u.getUsername());
