@@ -18,7 +18,6 @@ import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 
-import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.StubUserService;
@@ -28,7 +27,7 @@ import de.thm.arsnova.services.StubUserService;
 		"file:src/main/webapp/WEB-INF/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
 		"file:src/test/resources/test-config.xml" })
-public class SessionControllerTest {
+public class FeedbackControllerTest {
 
 	@Inject
 	private ApplicationContext applicationContext;
@@ -37,7 +36,7 @@ public class SessionControllerTest {
 	private HandlerAdapter handlerAdapter;
 
 	@Autowired
-	private SessionController sessionController;
+	private FeedbackController feedbackController;
 	
 	@Autowired
 	private StubUserService userService;
@@ -51,51 +50,38 @@ public class SessionControllerTest {
 	}
 
 	@Test(expected=NotFoundException.class)
-	public void testShouldNotGetUnknownSession() throws Exception {
+	public void testShouldNotGetFeedbackForUnknownSession() throws Exception {
 		userService.setUserAuthenticated(true);
 		
 		request.setMethod("GET");
-		request.setRequestURI("/session/00000000");
-		final ModelAndView mav = handlerAdapter.handle(request, response, sessionController);
+		request.setRequestURI("/session/00000000/feedback");
+		final ModelAndView mav = handlerAdapter.handle(request, response, feedbackController);
 		
 		assertNull(mav);
 		assertTrue(response.getStatus() == 404);
 	}
-
-	@Test(expected=ForbiddenException.class)
-	public void testShouldNotGetForbiddenSession() throws Exception {
-		userService.setUserAuthenticated(true);
-		
-		request.setMethod("GET");
-		request.setRequestURI("/session/99999999");
-		final ModelAndView mav = handlerAdapter.handle(request, response, sessionController);
-
-		assertNull(mav);
-		assertTrue(response.getStatus() == 403);
-	}
 	
 	@Test(expected=UnauthorizedException.class)
-	public void testShouldNotGetSessionIfUnauthorized() throws Exception {
+	public void testShouldNotGetFeedbackIfUnauthorized() throws Exception {
 		userService.setUserAuthenticated(false);
 		
 		request.setMethod("GET");
-		request.setRequestURI("/session/00000000");
-		final ModelAndView mav = handlerAdapter.handle(request, response, sessionController);
+		request.setRequestURI("/session/00000000/feedback");
+		final ModelAndView mav = handlerAdapter.handle(request, response, feedbackController);
 		
 		assertNull(mav);
 		assertTrue(response.getStatus() == 401);
 	}
 	
 	@Test(expected=UnauthorizedException.class)
-	public void testShouldCreateSessionIfUnauthorized() throws Exception {
+	public void testShouldNotSaveFeedbackIfUnauthorized() throws Exception {
 		userService.setUserAuthenticated(false);
 		
 		request.setMethod("POST");
-		request.setRequestURI("/session");
+		request.setRequestURI("/session/00000000/feedback");
 		request.setContentType("application/json");
-		request.setContent("{}".getBytes());
-		
-		final ModelAndView mav = handlerAdapter.handle(request, response, sessionController);
+		request.setContent("0".getBytes());
+		final ModelAndView mav = handlerAdapter.handle(request, response, feedbackController);
 		
 		assertNull(mav);
 		assertTrue(response.getStatus() == 401);
