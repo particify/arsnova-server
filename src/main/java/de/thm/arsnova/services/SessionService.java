@@ -109,6 +109,16 @@ public class SessionService implements ISessionService {
 
 	@Override
 	@Authenticated
+	public int getAverageFeedback(String sessionkey) {
+		Feedback feedback = databaseDao.getFeedback(sessionkey);
+		List<Integer> values = feedback.getValues();
+		int count = values.get(0) + values.get(1) + values.get(2) + values.get(3);
+		int sum = values.get(1) + (values.get(2) * 2) + (values.get(3) * 3);
+		return sum / count;
+	}
+	
+	@Override
+	@Authenticated
 	public boolean saveFeedback(String keyword, int value, User user) {
 		return databaseDao.saveFeedback(keyword, value, user);
 	}

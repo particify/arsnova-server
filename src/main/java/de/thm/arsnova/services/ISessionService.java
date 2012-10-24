@@ -37,6 +37,7 @@ public interface ISessionService {
 	public Session saveSession(Session session);
 	public Feedback getFeedback(String keyword);
 	public int getFeedbackCount(String keyword);
+	public int getAverageFeedback(String sessionkey);
 	public boolean saveFeedback(String keyword, int value, User user);
 	public boolean sessionKeyAvailable(String keyword);
 	public String generateKeyword();
