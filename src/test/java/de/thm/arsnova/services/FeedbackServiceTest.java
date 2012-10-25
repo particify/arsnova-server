@@ -78,9 +78,15 @@ public class FeedbackServiceTest {
 	}
 
 	@Test
+	public void testShouldReturnZeroFeedbackCountForNoFeedbackAtAll() {
+		userService.setUserAuthenticated(true);
+		assertEquals(0, feedbackService.getFeedbackCount("12345678"));
+	}
+	
+	@Test(expected = NotFoundException.class)
 	public void testShouldReturnAverageFeedbackForNoFeedbackAtAll() {
 		userService.setUserAuthenticated(true);
-		assertEquals(0, feedbackService.getAverageFeedback("12345678"), 0);
+		feedbackService.getAverageFeedback("12345678");
 	}
 	
 	@Test

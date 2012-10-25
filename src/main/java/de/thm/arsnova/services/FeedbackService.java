@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
@@ -81,11 +82,11 @@ public class FeedbackService implements IFeedbackService {
 		double sum = values.get(1) + (values.get(2) * 2) + (values.get(3) * 3);
 
 		if (count == 0)
-			return 0;
+			throw new NotFoundException();
 
 		return sum / count;
 	}
-	
+
 	@Override
 	public long getAverageFeedbackRounded(String sessionkey) {
 		return Math.round(this.getAverageFeedback(sessionkey));
