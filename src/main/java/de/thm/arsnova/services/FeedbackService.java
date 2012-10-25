@@ -98,7 +98,6 @@ public class FeedbackService implements IFeedbackService {
 	 * @param allAffectedSessions For convenience, this represents the union of all session keywords mentioned above.
 	 */
 	@Override
-	@Authenticated
 	public void broadcastFeedbackChanges(Map<String, Set<String>> affectedUsers, Set<String> allAffectedSessions) {
 		for (Map.Entry<String, Set<String>> e : affectedUsers.entrySet()) {
 			// Is this user registered with a socket connection?

@@ -71,22 +71,6 @@ public class SessionService implements ISessionService {
 	public boolean sessionKeyAvailable(String keyword) {
 		return databaseDao.sessionKeyAvailable(keyword);
 	}
-
-	/**
-	 * 
-	 * @param affectedUsers The user whose feedback got deleted along with all affected session keywords
-	 * @param allAffectedSessions For convenience, this represents the union of all session keywords mentioned above.
-	 */
-	public void broadcastFeedbackChanges(Map<String, Set<String>> affectedUsers, Set<String> allAffectedSessions) {
-		for (Map.Entry<String, Set<String>> e : affectedUsers.entrySet()) {
-			// Is this user registered with a socket connection?
-			String connectedSocket = userService.getSessionForUser(e.getKey());
-			if (connectedSocket != null) {
-				this.server.reportDeletedFeedback(e.getKey(), e.getValue());
-			}
-		}
-		this.server.reportUpdatedFeedbackForSessions(allAffectedSessions);
-	}
 	
 	@Override
 	public String generateKeyword() {
