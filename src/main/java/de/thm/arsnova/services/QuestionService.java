@@ -47,8 +47,8 @@ public class QuestionService implements IQuestionService {
 	}
 	
 	@Override
-	public List<Question> getSkillQuestions(String sessionkey, String sort) {
-		return databaseDao.getSkillQuestions(sessionkey, sort);
+	public List<Question> getSkillQuestions(String sessionkey) {
+		return databaseDao.getSkillQuestions(sessionkey);
 	}
 	
 	@Override

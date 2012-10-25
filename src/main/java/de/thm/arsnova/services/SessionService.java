@@ -60,7 +60,7 @@ public class SessionService implements ISessionService {
 	public List<Session> getMySessions(String username) {
 		return databaseDao.getMySessions(username);
 	}
-
+	
 	@Override
 	@Authenticated
 	public Session saveSession(Session session) {

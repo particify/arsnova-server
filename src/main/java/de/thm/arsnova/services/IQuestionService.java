@@ -27,6 +27,6 @@ import de.thm.arsnova.entities.Question;
 public interface IQuestionService {
 	public boolean saveQuestion(Question question);
 	public Question getQuestion(String id);
-	public List<Question> getSkillQuestions(String sessionkey, String sort);
+	public List<Question> getSkillQuestions(String sessionkey);
 	public int getSkillQuestionCount(String sessionkey);
 }

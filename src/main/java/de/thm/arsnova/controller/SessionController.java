@@ -36,13 +36,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import de.thm.arsnova.entities.Feedback;
+import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
-
 
 @Controller
 public class SessionController extends AbstractController {
@@ -103,7 +104,6 @@ public class SessionController extends AbstractController {
 		return null;
 	}
 
-
 	@RequestMapping(value="/socketurl", method=RequestMethod.GET)
 	@ResponseBody
 	public String getSocketUrl() {
@@ -130,5 +130,4 @@ public class SessionController extends AbstractController {
 		}
 		return sessions;
 	}
-
 }

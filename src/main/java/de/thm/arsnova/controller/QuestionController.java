@@ -91,8 +91,8 @@ public class QuestionController extends AbstractController {
 		method=RequestMethod.GET
 	)
 	@ResponseBody
-	public List<Question> getSkillQuestions(@PathVariable String sessionkey, @RequestParam(value="sort", required=false) String sort, HttpServletResponse response) {
-		List<Question> questions = questionService.getSkillQuestions(sessionkey, sort);
+	public List<Question> getSkillQuestions(@PathVariable String sessionkey, HttpServletResponse response) {
+		List<Question> questions = questionService.getSkillQuestions(sessionkey);
 		if(questions == null || questions.isEmpty()) {
 			response.setStatus(HttpStatus.NOT_FOUND.value());
 			return null;
