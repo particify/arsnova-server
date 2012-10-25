@@ -68,4 +68,10 @@ public class QuestionService implements IQuestionService {
 	public Question getQuestion(String id) {
 		return databaseDao.getQuestion(id);
 	}
+	
+	@Override
+	@Authenticated
+	public List<String> getQuestionIds(String sessionKey) {
+		return databaseDao.getQuestionIds(sessionKey);
+	}
 }

@@ -163,4 +163,10 @@ public class StubDatabaseDao implements IDatabaseDao {
 		
 	}
 
+	@Override
+	public List<String> getQuestionIds(String sessionKey) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

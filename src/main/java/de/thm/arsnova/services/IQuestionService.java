@@ -29,4 +29,5 @@ public interface IQuestionService {
 	public Question getQuestion(String id);
 	public List<Question> getSkillQuestions(String sessionkey);
 	public int getSkillQuestionCount(String sessionkey);
+	public List<String> getQuestionIds(String sessionKey);
 }

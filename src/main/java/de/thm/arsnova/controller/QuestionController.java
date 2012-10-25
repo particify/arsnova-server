@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
@@ -99,5 +100,17 @@ public class QuestionController extends AbstractController {
 		}
 		logger.info(questions.toString());
 		return questions;
+	}
+	
+	@RequestMapping("/session/{sessionKey}/questionids")
+	@ResponseBody
+	public List<String> getQuestionIds(@PathVariable String sessionKey, HttpServletResponse response) {
+		List<String> questions = questionService.getQuestionIds(sessionKey);
+		if(questions == null || questions.isEmpty()) {
+			throw new NotFoundException();
+		}
+		logger.info(questions.toString());
+		return questions;
+		
 	}
 }

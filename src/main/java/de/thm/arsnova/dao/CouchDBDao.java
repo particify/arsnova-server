@@ -160,6 +160,7 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public Session getSession(String keyword) {
 		Session result = this.getSessionFromKeyword(keyword);
+		
 		if(result == null) {
 			throw new NotFoundException();
 		}
@@ -252,10 +253,11 @@ public class CouchDBDao implements IDatabaseDao {
 			View view = new View("session/by_keyword");
 			view.setKey(URLEncoder.encode("\"" + keyword + "\"", "UTF-8"));
 			ViewResults results = this.getDatabase().view(view);
-	
-			if (results.getJSONArray("rows").optJSONObject(0) == null)
+			
+			if (results.getJSONArray("rows").optJSONObject(0) == null) {
 				return null;
-	
+			}
+			
 			return (Session) JSONObject.toBean(
 					results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"), Session.class);
 		} catch (UnsupportedEncodingException e) {
@@ -565,5 +567,39 @@ public class CouchDBDao implements IDatabaseDao {
 			logger.error("Failed to update lastOwnerActivity for Session {}", session);
 			return;
 		}
+	}
+	
+	@Override
+	public List<String> getQuestionIds(String sessionKey) {
+		User u = userService.getCurrentUser();
+		View view;
+		if(u.getType().equals("thm")) {
+			view = new View("skill_question/by_session_only_id_for_thm");
+		} else {
+			view = new View("skill_question/by_session_only_id_for_all");
+		}
+		
+		String sessionId = getSessionId(sessionKey);
+		if(sessionId == null) {
+			throw new NotFoundException();
+		}
+		
+		try {
+			view.setKey(URLEncoder.encode("\"" + sessionId + "\"", "UTF-8"));
+			ViewResults results = this.getDatabase().view(view);
+			if (results.getJSONArray("rows").optJSONObject(0) == null) {
+				return null;
+			}
+			
+			List<String> ids = new ArrayList<String>();
+			for(Document d : results.getResults()) {
+				ids.add(d.getId());
+			}
+			return ids;
+			
+		} catch (IOException e) {
+			logger.error("Could not get list of question ids of session {}", sessionKey);
+		}
+		return null;
 	}
 }
