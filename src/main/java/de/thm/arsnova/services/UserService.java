@@ -1,16 +1,28 @@
 package de.thm.arsnova.services;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.scribe.up.profile.facebook.FacebookProfile;
 import org.scribe.up.profile.google.Google2Profile;
 import org.scribe.up.profile.twitter.TwitterProfile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
@@ -24,11 +36,13 @@ import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationToken
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 
-public class UserService implements IUserService {
+public class UserService implements IUserService, InitializingBean, DisposableBean {
 
+	public static final Logger logger = LoggerFactory.getLogger(UserService.class);
+	
 	private static final ConcurrentHashMap<UUID, User> socketid2user = new ConcurrentHashMap<UUID, User>();
 	private static final ConcurrentHashMap<String, String> user2session = new ConcurrentHashMap<String, String>();
-
+	
 	
 	@Override
 	public User getCurrentUser() {
@@ -117,5 +131,54 @@ public class UserService implements IUserService {
 	@Override
 	public String getSessionForUser(String username) {
 		return user2session.get(username);
+	}
+
+	@Override
+	public void afterPropertiesSet() {
+		try {
+			File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+			File store = new File(tmpDir, "arsnova.bin");
+			if(!store.exists()) {
+				return;
+			}
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(store));
+			Hashtable<String, Map<?, ?>> map = (Hashtable<String, Map<?, ?>>) ois.readObject();
+			ois.close();
+			Map<UUID, User> s2u = (Map<UUID, User>) map.get("socketid2user");
+			Map<String, String> u2s = (Map<String, String>) map.get("user2session");
+			
+			logger.info("load from store: {}", map);
+			
+			socketid2user.putAll(s2u);
+			user2session.putAll(u2s);
+			
+		} catch (IOException e) {
+			logger.error("IOException during restoring UserService", e);
+		} catch (ClassNotFoundException e) {
+			logger.error("ClassNotFoundException during restoring UserService", e);
+		}
+	}
+	
+	@Override
+	public void destroy() {
+		Hashtable<String, Map<?, ?>> map = new Hashtable<String, Map<?, ?>>();
+		map.put("socketid2user", socketid2user);
+		map.put("user2session", user2session);
+		
+		try {
+			File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+			File store = new File(tmpDir, "arsnova.bin");
+			if(!store.exists()) {
+				store.createNewFile();
+			}
+			OutputStream file = new FileOutputStream (store); 
+			ObjectOutputStream objOut = new ObjectOutputStream(file);
+			objOut.writeObject(map);
+			objOut.close();
+			file.close();
+			logger.info("saved to store: {}", map);
+		} catch (IOException e) {
+			logger.error("IOException while saving UserService", e);
+		}
 	}
 }
