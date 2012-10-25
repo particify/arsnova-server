@@ -33,4 +33,5 @@ public interface IFeedbackService {
 	public long getAverageFeedback(String sessionkey);
 	public boolean saveFeedback(String keyword, int value, User user);
 	public void broadcastFeedbackChanges(Map<String, Set<String>> affectedUsers, Set<String> allAffectedSessions);
+	public Integer getMyFeedback(String keyword, User user);
 }

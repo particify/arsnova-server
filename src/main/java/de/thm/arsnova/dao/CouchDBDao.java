@@ -286,51 +286,38 @@ public class CouchDBDao implements IDatabaseDao {
 	public Feedback getFeedback(String keyword) {
 		String sessionId = this.getSessionId(keyword);
 		if (sessionId == null) throw new NotFoundException();
-
-		logger.info("Time: {}", this.currentTimestamp());
-
+		
 		View view = new View("understanding/by_session");
 		view.setGroup(true);
 		view.setStartKey(URLEncoder.encode("[\"" + sessionId + "\"]"));
 		view.setEndKey(URLEncoder.encode("[\"" + sessionId + "\",{}]"));
 		ViewResults results = this.getDatabase().view(view);
 		
-		logger.info("Feedback: {}", results.getJSONArray("rows"));
+		return this.createFeedbackObject(results);
+	}
 
+	private Feedback createFeedbackObject(ViewResults results) {
 		int values[] = { 0, 0, 0, 0 };
+		JSONArray rows = results.getJSONArray("rows");
 		
 		try {
 			for (int i = 0; i <= 3; i++) {
-				String key = results.getJSONArray("rows").optJSONObject(i)
-						.optJSONArray("key").getString(1);
+				String key = rows.optJSONObject(i).optJSONArray("key").getString(1);
+				JSONObject feedback = rows.optJSONObject(i);
+				
 				if (key.equals("Bitte schneller"))
-					values[0] = results.getJSONArray("rows").optJSONObject(i)
-							.getInt("value");
+					values[0] = feedback.getInt("value");
 				if (key.equals("Kann folgen"))
-					values[1] = results.getJSONArray("rows").optJSONObject(i)
-							.getInt("value");
+					values[1] = feedback.getInt("value");
 				if (key.equals("Zu schnell"))
-					values[2] = results.getJSONArray("rows").optJSONObject(i)
-							.getInt("value");
+					values[2] = feedback.getInt("value");
 				if (key.equals("Nicht mehr dabei"))
-					values[3] = results.getJSONArray("rows").optJSONObject(i)
-							.getInt("value");
+					values[3] = feedback.getInt("value");
 			}
 		} catch (Exception e) {
-			return new Feedback(
-					values[0],
-					values[1],
-					values[2],
-					values[3]
-			);
+			return new Feedback(values[0], values[1], values[2], values[3]);
 		}
-
-		return new Feedback(
-				values[0],
-				values[1],
-				values[2],
-				values[3]
-		);
+		return new Feedback(values[0], values[1], values[2], values[3]);
 	}
 
 	@Override
@@ -396,6 +383,18 @@ public class CouchDBDao implements IDatabaseDao {
 			default:
 				return null;
 		}
+	}
+	
+	private int feedbackValueFromString(String value) {
+		if (value.equals("Bitte schneller"))
+			return 0;
+		if (value.equals("Kann folgen"))
+			return 1;
+		if (value.equals("Zu schnell"))
+			return 2;
+		if (value.equals("Nicht mehr dabei"))
+			return 3;
+		return Integer.MIN_VALUE;
 	}
 
 	@Override
@@ -564,6 +563,28 @@ public class CouchDBDao implements IDatabaseDao {
 		} catch (IOException e) {
 			logger.error("Failed to update lastOwnerActivity for Session {}", session);
 			return;
+		}
+	}
+
+	@Override
+	public Integer getMyFeedback(String keyword, User user) {
+		try {
+			String sessionId = this.getSessionId(keyword);
+			if (sessionId == null) throw new NotFoundException();
+			
+			View view = new View("understanding/by_user");
+			view.setKey(URLEncoder.encode("[\"" + sessionId + "\", \"" + user.getUsername() + "\"]", "UTF-8"));
+			ViewResults results = this.getDatabase().view(view);
+			JSONArray rows = results.getJSONArray("rows");
+			
+			if (rows.size() == 0) {
+				return null;
+			}
+			
+			JSONObject json = rows.optJSONObject(0).optJSONObject("value");
+			return this.feedbackValueFromString(json.getString("value"));
+		} catch (UnsupportedEncodingException e) {
+			return null;
 		}
 	}
 }

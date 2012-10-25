@@ -109,4 +109,9 @@ public class FeedbackService implements IFeedbackService {
 		}
 		this.server.reportUpdatedFeedbackForSessions(allAffectedSessions);
 	}
+
+	@Override
+	public Integer getMyFeedback(String keyword, User user) {
+		return this.databaseDao.getMyFeedback(keyword, user);
+	}
 }

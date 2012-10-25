@@ -57,6 +57,17 @@ public class FeedbackController extends AbstractController {
 		return feedbackService.getFeedback(sessionkey);
 	}
 	
+	@RequestMapping(value="/session/{sessionkey}/myfeedback", method=RequestMethod.GET)
+	@ResponseBody
+	public Integer getMyFeedback(@PathVariable String sessionkey, HttpServletResponse response) {
+		Integer value = feedbackService.getMyFeedback(sessionkey, userService.getCurrentUser());
+		if (value != null && value >= 0 && value <= 3) {
+			return value;
+		}
+		response.setStatus(HttpStatus.NOT_FOUND.value());
+		return null;
+	}
+	
 	@RequestMapping(value="/session/{sessionkey}/feedbackcount", method=RequestMethod.GET)
 	@ResponseBody
 	public int getFeedbackCount(@PathVariable String sessionkey) {
