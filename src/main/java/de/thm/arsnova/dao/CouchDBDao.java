@@ -109,7 +109,7 @@ public class CouchDBDao implements IDatabaseDao {
 	 */
 	@Override
 	public void cleanFeedbackVotes(int cleanupFeedbackDelay) {
-		final long timelimitInMillis = 60000 * cleanupFeedbackDelay;
+		final long timelimitInMillis = 60000 * (long) cleanupFeedbackDelay;
 		final long maxAllowedTimeInMillis = System.currentTimeMillis() - timelimitInMillis;
 		
 		Map<String, Set<String>> affectedUsers = new HashMap<String, Set<String>>();
@@ -535,7 +535,7 @@ public class CouchDBDao implements IDatabaseDao {
 			
 			JSONObject json = JSONObject.fromObject(loggedIn);
 			Document doc = new Document(json);
-			if (doc.getId() == "") {
+			if (doc.getId().isEmpty()) {
 				// If this is a new user without a logged_in document, we have to remove the following
 				// pre-filled fields. Otherwise, CouchDB will take these empty fields as genuine
 				// identifiers, and will throw errors afterwards.
