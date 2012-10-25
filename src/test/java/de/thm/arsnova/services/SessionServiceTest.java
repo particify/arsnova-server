@@ -19,12 +19,19 @@
 package de.thm.arsnova.services;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.exceptions.UnauthorizedException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations={
@@ -44,5 +51,48 @@ public class SessionServiceTest {
 	public void testShouldGenerateSessionKeyword() {
 		System.out.println(sessionService.generateKeyword());
 		assertTrue(sessionService.generateKeyword().matches("^[0-9]{8}$"));
+	}
+	
+	@Test(expected=NotFoundException.class)
+	public void testShouldFindNonExistantSession() {
+		userService.setUserAuthenticated(true);
+		sessionService.joinSession("00000000");
+	}
+	
+	@Test(expected=UnauthorizedException.class)
+	public void testShouldNotReturnSessionIfUnauthorized() {
+		userService.setUserAuthenticated(false);
+		sessionService.joinSession("12345678");
+	}
+	
+	@Test(expected=UnauthorizedException.class)
+	public void testShouldNotSaveSessionIfUnauthorized() {
+		userService.setUserAuthenticated(false);
+		
+		Session session = new Session();
+		session.setActive(true);
+		session.setCreator("ptsr00");
+		session.setKeyword("11111111");
+		session.setName("TestSessionX");
+		session.setShortName("TSX");
+		sessionService.saveSession(session);
+		
+		userService.setUserAuthenticated(true);
+		
+		assertNull(sessionService.joinSession("11111111"));
+	}
+	
+	@Test
+	public void testShouldSaveSession() {
+		userService.setUserAuthenticated(true);
+		
+		Session session = new Session();
+		session.setActive(true);
+		session.setCreator("ptsr00");
+		session.setKeyword("11111111");
+		session.setName("TestSessionX");
+		session.setShortName("TSX");
+		sessionService.saveSession(session);
+		assertNotNull(sessionService.joinSession("11111111"));
 	}
 }

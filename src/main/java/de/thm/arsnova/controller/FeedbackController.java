@@ -65,7 +65,7 @@ public class FeedbackController extends AbstractController {
 	
 	@RequestMapping(value="/session/{sessionkey}/averagefeedback", method=RequestMethod.GET)
 	@ResponseBody
-	public int getAverageFeedback(@PathVariable String sessionkey) {
+	public long getAverageFeedback(@PathVariable String sessionkey) {
 		return feedbackService.getAverageFeedback(sessionkey);
 	}
 	

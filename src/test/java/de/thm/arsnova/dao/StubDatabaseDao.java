@@ -21,9 +21,9 @@ import de.thm.arsnova.exceptions.NotFoundException;
 @Scope("singleton")
 public class StubDatabaseDao implements IDatabaseDao {
 
-	private Map<String, Session> stubSessions = new ConcurrentHashMap<String, Session>();
-	private Map<String, Feedback> stubFeedbacks = new ConcurrentHashMap<String, Feedback>();
-	private Map<Session, Question> stubQuestions = new ConcurrentHashMap<Session, Question>();
+	private static Map<String, Session> stubSessions = new ConcurrentHashMap<String, Session>();
+	private static Map<String, Feedback> stubFeedbacks = new ConcurrentHashMap<String, Feedback>();
+	private static Map<Session, Question> stubQuestions = new ConcurrentHashMap<Session, Question>();
 	
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	
@@ -40,7 +40,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 		session.setName("TestSession1");
 		session.setShortName("TS1");
 		
-		this.stubSessions.put("12345678", session);
+		stubSessions.put("12345678", session);
 		
 		session.setActive(true);
 		session.setCreator("ptsr00");
@@ -48,7 +48,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 		session.setName("TestSession2");
 		session.setShortName("TS2");
 		
-		this.stubSessions.put("87654321", session);
+		stubSessions.put("87654321", session);
 	}
 	
 	private void fillWithDummyFeedbacks() {
