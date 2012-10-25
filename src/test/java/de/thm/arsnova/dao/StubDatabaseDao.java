@@ -134,7 +134,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Question> getSkillQuestions(String session, String sort) {
+	public List<Question> getSkillQuestions(String session) {
 		// TODO Auto-generated method stub
 		return null;
 	}

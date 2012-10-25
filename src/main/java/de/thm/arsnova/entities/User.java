@@ -1,5 +1,7 @@
 package de.thm.arsnova.entities;
 
+import java.io.Serializable;
+
 import org.jasig.cas.client.authentication.AttributePrincipal;
 import org.scribe.up.profile.facebook.FacebookProfile;
 import org.scribe.up.profile.google.Google2Profile;
@@ -7,8 +9,8 @@ import org.scribe.up.profile.twitter.TwitterProfile;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
-public class User {
-	
+public class User implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private String username;
 
 	public User(Google2Profile profile) {
@@ -45,6 +47,17 @@ public class User {
 	
 	public String toString() {
 		return "User, username: " + this.username;
+	}
+	@Override
+	public int hashCode() {
+		return username.hashCode();
+	}
+	
+	
+	@Override
+	public boolean equals(Object obj) {
+		User other = (User) obj;
+		return this.username.equals(other.username);
 	}
 
 }

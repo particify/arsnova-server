@@ -197,7 +197,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 	
 	@Override
-	public List<Question> getSkillQuestions(String sessionKeyword, String sort) {
+	public List<Question> getSkillQuestions(String sessionKeyword) {
 		Session session = this.getSessionFromKeyword(sessionKeyword);
 		if (session == null) {
 			return null;
@@ -210,7 +210,7 @@ public class CouchDBDao implements IDatabaseDao {
 			viewName = "skill_question/by_session";
 		}
 		try {
-			View view = new View(viewName);
+			View view = new View("skill_question/by_session_sorted_by_subject_and_text");
 			view.setStartKey("[" + URLEncoder.encode("\"" + session.get_id() + "\"", "UTF-8") + "]");
 			view.setEndKey("[" + URLEncoder.encode("\"" + session.get_id() + "\",{}", "UTF-8") + "]");
 			
