@@ -19,7 +19,6 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 
 import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.StubUserService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -60,33 +59,5 @@ public class FeedbackControllerTest {
 
 		assertNull(mav);
 		assertTrue(response.getStatus() == 404);
-	}
-
-	@Test(expected = UnauthorizedException.class)
-	public void testShouldNotGetFeedbackIfUnauthorized() throws Exception {
-		userService.setUserAuthenticated(false);
-
-		request.setMethod("GET");
-		request.setRequestURI("/session/00000000/feedback");
-		final ModelAndView mav = handlerAdapter.handle(request, response,
-				feedbackController);
-
-		assertNull(mav);
-		assertTrue(response.getStatus() == 401);
-	}
-
-	@Test(expected = UnauthorizedException.class)
-	public void testShouldNotSaveFeedbackIfUnauthorized() throws Exception {
-		userService.setUserAuthenticated(false);
-
-		request.setMethod("POST");
-		request.setRequestURI("/session/00000000/feedback");
-		request.setContentType("application/json");
-		request.setContent("0".getBytes());
-		final ModelAndView mav = handlerAdapter.handle(request, response,
-				feedbackController);
-
-		assertNull(mav);
-		assertTrue(response.getStatus() == 401);
 	}
 }
