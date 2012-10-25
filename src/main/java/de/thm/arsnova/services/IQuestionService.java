@@ -21,16 +21,12 @@ package de.thm.arsnova.services;
 
 import java.util.List;
 
-import de.thm.arsnova.entities.LoggedIn;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.Question;
 
 
-public interface ISessionService {
-	public Session joinSession(String keyword);
-	public Session saveSession(Session session);
-	public boolean sessionKeyAvailable(String keyword);
-	public String generateKeyword();	
-	public List<Session> getMySessions(String username);
-	public LoggedIn registerAsOnlineUser(User user, String sessionkey);
+public interface IQuestionService {
+	public boolean saveQuestion(Question question);
+	public Question getQuestion(String id);
+	public List<Question> getSkillQuestions(String sessionkey, String sort);
+	public int getSkillQuestionCount(String sessionkey);
 }

@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.services.ISessionService;
+import de.thm.arsnova.services.IFeedbackService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
@@ -43,7 +43,7 @@ public class FeedbackController extends AbstractController {
 	public static final Logger logger = LoggerFactory.getLogger(FeedbackController.class);
 	
 	@Autowired
-	ISessionService sessionService;
+	IFeedbackService feedbackService;
 	
 	@Autowired
 	IUserService userService;
@@ -54,27 +54,27 @@ public class FeedbackController extends AbstractController {
 	@RequestMapping(value="/session/{sessionkey}/feedback", method=RequestMethod.GET)
 	@ResponseBody
 	public Feedback getFeedback(@PathVariable String sessionkey) {
-		return sessionService.getFeedback(sessionkey);
+		return feedbackService.getFeedback(sessionkey);
 	}
 	
 	@RequestMapping(value="/session/{sessionkey}/feedbackcount", method=RequestMethod.GET)
 	@ResponseBody
 	public int getFeedbackCount(@PathVariable String sessionkey) {
-		return sessionService.getFeedbackCount(sessionkey);
+		return feedbackService.getFeedbackCount(sessionkey);
 	}
 	
 	@RequestMapping(value="/session/{sessionkey}/averagefeedback", method=RequestMethod.GET)
 	@ResponseBody
 	public int getAverageFeedback(@PathVariable String sessionkey) {
-		return sessionService.getAverageFeedback(sessionkey);
+		return feedbackService.getAverageFeedback(sessionkey);
 	}
 	
 	@RequestMapping(value="/session/{sessionkey}/feedback", method=RequestMethod.POST)
 	@ResponseBody
 	public Feedback postFeedback(@PathVariable String sessionkey, @RequestBody int value, HttpServletResponse response) {
 		User user = userService.getCurrentUser();
-		if (sessionService.saveFeedback(sessionkey, value, user)) {
-			Feedback feedback = sessionService.getFeedback(sessionkey);
+		if (feedbackService.saveFeedback(sessionkey, value, user)) {
+			Feedback feedback = feedbackService.getFeedback(sessionkey);
 			if (feedback != null) {
 				// TODO: Broadcast feedback changes via websocket
 				response.setStatus(HttpStatus.CREATED.value());

@@ -35,8 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.entities.Question;
-
-import de.thm.arsnova.services.ISessionService;
+import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
@@ -47,7 +46,7 @@ public class QuestionController extends AbstractController {
 	public static final Logger logger = LoggerFactory.getLogger(QuestionController.class);
 	
 	@Autowired
-	ISessionService sessionService;
+	IQuestionService questionService;
 	
 	@Autowired
 	IUserService userService;
@@ -58,7 +57,7 @@ public class QuestionController extends AbstractController {
 	@RequestMapping(value="/session/{sessionkey}/question/{questionId}", method=RequestMethod.GET)
 	@ResponseBody
 	public Question getQuestion(@PathVariable String sessionkey, @PathVariable String questionId, HttpServletResponse response) {
-		Question question = sessionService.getQuestion(questionId);
+		Question question = questionService.getQuestion(questionId);
 		if (question != null && question.getSession().equals(sessionkey)) {
 			return question;
 		}
@@ -75,7 +74,7 @@ public class QuestionController extends AbstractController {
 			return;
 		}
 		
-		if (sessionService.saveQuestion(question)) {
+		if (questionService.saveQuestion(question)) {
 			response.setStatus(HttpStatus.CREATED.value());
 			return;
 		}
@@ -93,7 +92,7 @@ public class QuestionController extends AbstractController {
 	)
 	@ResponseBody
 	public List<Question> getSkillQuestions(@PathVariable String sessionkey, @RequestParam(value="sort", required=false) String sort, HttpServletResponse response) {
-		List<Question> questions = sessionService.getSkillQuestions(sessionkey, sort);
+		List<Question> questions = questionService.getSkillQuestions(sessionkey, sort);
 		if(questions == null || questions.isEmpty()) {
 			response.setStatus(HttpStatus.NOT_FOUND.value());
 			return null;

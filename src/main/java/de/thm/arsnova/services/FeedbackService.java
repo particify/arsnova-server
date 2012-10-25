@@ -24,20 +24,27 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.annotation.Authenticated;
 import de.thm.arsnova.dao.IDatabaseDao;
-import de.thm.arsnova.entities.LoggedIn;
-import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
-public class SessionService implements ISessionService {
+public class FeedbackService implements IFeedbackService {
 
 	@Autowired
 	ARSnovaSocketIOServer server;
+	
+	/**
+	 * minutes, after which the feedback is deleted
+	 */
+	@Value("${feedback.cleanup}")
+	private int cleanupFeedbackDelay;
 	
 	@Autowired
 	IDatabaseDao databaseDao;
@@ -50,26 +57,39 @@ public class SessionService implements ISessionService {
 	}
 	
 	@Override
-	@Authenticated
-	public Session joinSession(String keyword) {
-		userService.addCurrentUserToSessionMap(keyword);
-		return databaseDao.getSession(keyword);
-	}
-
-	@Override
-	public List<Session> getMySessions(String username) {
-		return databaseDao.getMySessions(username);
+	@Scheduled(fixedDelay=5000)
+	public void cleanFeedbackVotes() {
+		databaseDao.cleanFeedbackVotes(cleanupFeedbackDelay);		
 	}
 
 	@Override
 	@Authenticated
-	public Session saveSession(Session session) {
-		return databaseDao.saveSession(session);
+	public Feedback getFeedback(String keyword) {
+		return databaseDao.getFeedback(keyword);
+	}
+	
+	@Override
+	@Authenticated
+	public int getFeedbackCount(String keyword) {
+		Feedback feedback = databaseDao.getFeedback(keyword);
+		List<Integer> values = feedback.getValues();
+		return values.get(0) + values.get(1) + values.get(2) + values.get(3);
 	}
 
 	@Override
-	public boolean sessionKeyAvailable(String keyword) {
-		return databaseDao.sessionKeyAvailable(keyword);
+	@Authenticated
+	public int getAverageFeedback(String sessionkey) {
+		Feedback feedback = databaseDao.getFeedback(sessionkey);
+		List<Integer> values = feedback.getValues();
+		int count = values.get(0) + values.get(1) + values.get(2) + values.get(3);
+		int sum = values.get(1) + (values.get(2) * 2) + (values.get(3) * 3);
+		return sum / count;
+	}
+	
+	@Override
+	@Authenticated
+	public boolean saveFeedback(String keyword, int value, User user) {
+		return databaseDao.saveFeedback(keyword, value, user);
 	}
 
 	/**
@@ -86,28 +106,5 @@ public class SessionService implements ISessionService {
 			}
 		}
 		this.server.reportUpdatedFeedbackForSessions(allAffectedSessions);
-	}
-	
-	@Override
-	public String generateKeyword() {
-		final int low = 10000000;
-		final int high = 100000000;
-		String keyword = String.valueOf((int)(Math.random() * (high - low) + low));
-		
-		if (this.sessionKeyAvailable(keyword)) return keyword;
-		return generateKeyword();
-	}
-
-	@Override
-	@Authenticated
-	public LoggedIn registerAsOnlineUser(User user, String sessionkey) {
-		Session session = this.joinSession(sessionkey);
-		if (session == null) return null;
-		
-		if (session.getCreator().equals(user.getUsername())) {
-			databaseDao.updateSessionOwnerActivity(session);
-		}
-		
-		return databaseDao.registerAsOnlineUser(user, session);
 	}
 }

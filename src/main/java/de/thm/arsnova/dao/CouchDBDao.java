@@ -34,21 +34,15 @@ import java.util.Set;
 import net.sf.ezmorph.Morpher;
 import net.sf.ezmorph.MorpherRegistry;
 import net.sf.ezmorph.bean.BeanMorpher;
-import net.sf.ezmorph.bean.MorphDynaBean;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
-import net.sf.json.JsonConfig;
 import net.sf.json.util.JSONUtils;
 
-import org.apache.commons.beanutils.DynaBean;
-import org.apache.commons.beanutils.DynaClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,14 +53,15 @@ import com.fourspaces.couchdb.View;
 import com.fourspaces.couchdb.ViewResults;
 
 import de.thm.arsnova.entities.Feedback;
+import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.PossibleAnswer;
 import de.thm.arsnova.entities.Question;
-import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.VisitedSession;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.services.IFeedbackService;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 
@@ -74,6 +69,9 @@ import de.thm.arsnova.services.IUserService;
 public class CouchDBDao implements IDatabaseDao {
 	@Autowired
 	IUserService userService;
+	
+	@Autowired
+	IFeedbackService feedbackService;
 	
 	@Autowired
 	ISessionService sessionService;
@@ -143,7 +141,7 @@ public class CouchDBDao implements IDatabaseDao {
 			}
 		}
 		if (!results.isEmpty()) {
-			sessionService.broadcastFeedbackChanges(affectedUsers, allAffectedSessions);
+			feedbackService.broadcastFeedbackChanges(affectedUsers, allAffectedSessions);
 		}
 	}
 	

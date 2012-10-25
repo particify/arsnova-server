@@ -19,18 +19,18 @@
 
 package de.thm.arsnova.services;
 
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import de.thm.arsnova.entities.LoggedIn;
-import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.User;
 
 
-public interface ISessionService {
-	public Session joinSession(String keyword);
-	public Session saveSession(Session session);
-	public boolean sessionKeyAvailable(String keyword);
-	public String generateKeyword();	
-	public List<Session> getMySessions(String username);
-	public LoggedIn registerAsOnlineUser(User user, String sessionkey);
+public interface IFeedbackService {
+	public void cleanFeedbackVotes();
+	public Feedback getFeedback(String keyword);
+	public int getFeedbackCount(String keyword);
+	public int getAverageFeedback(String sessionkey);
+	public boolean saveFeedback(String keyword, int value, User user);
+	public void broadcastFeedbackChanges(Map<String, Set<String>> affectedUsers, Set<String> allAffectedSessions);
 }

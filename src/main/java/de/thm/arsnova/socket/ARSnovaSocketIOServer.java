@@ -24,14 +24,18 @@ import com.corundumstudio.socketio.listener.DisconnectListener;
 
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.services.ISessionService;
+import de.thm.arsnova.services.IFeedbackService;
+import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.message.Feedback;
 
 public class ARSnovaSocketIOServer {
 
 	@Autowired
-	private ISessionService sessionService;
+	private IFeedbackService feedbackService;
+	
+	@Autowired
+	private IQuestionService questionService;
 	
 	@Autowired
 	private IUserService userService;
@@ -80,7 +84,7 @@ public class ARSnovaSocketIOServer {
 						if(u == null || userService.isUserInSession(u, data.getSessionkey()) == false) {
 							return;
 						}
-						sessionService.saveFeedback(data.getSessionkey(), data.getValue(), u);
+						feedbackService.saveFeedback(data.getSessionkey(), data.getValue(), u);
 						
 						/**
 						 * collect a list of users which are in the current session
@@ -88,7 +92,7 @@ public class ARSnovaSocketIOServer {
 						 * if user is in current session
 						 */
 						List<String> users = userService.getUsersInSession(data.getSessionkey());
-						de.thm.arsnova.entities.Feedback fb = sessionService.getFeedback(data.getSessionkey());
+						de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(data.getSessionkey());
 						
 						for(SocketIOClient c : server.getAllClients()) {
 							u = userService.getUser2SessionID(c.getSessionId());
@@ -102,7 +106,7 @@ public class ARSnovaSocketIOServer {
 		server.addEventListener("arsnova/question/create", Question.class, new DataListener<Question>(){
 			@Override
 			public void onData(SocketIOClient client, Question question, AckRequest ackSender) {
-				sessionService.saveQuestion(question);
+				questionService.saveQuestion(question);
 			}
 		});
 		
@@ -204,7 +208,7 @@ public class ARSnovaSocketIOServer {
 	
 	public void reportUpdatedFeedbackForSessions(Set<String> allAffectedSessions) {
 		for (String sessionKey : allAffectedSessions) {
-			de.thm.arsnova.entities.Feedback fb = sessionService.getFeedback(sessionKey);
+			de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
 			server.getBroadcastOperations().sendEvent("updateFeedback", fb.getValues());
 		}
 	}
