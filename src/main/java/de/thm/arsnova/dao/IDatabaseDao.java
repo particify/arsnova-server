@@ -44,4 +44,5 @@ public interface IDatabaseDao {
 	
 	public LoggedIn registerAsOnlineUser(User u, Session s);
 	public void updateSessionOwnerActivity(Session session);
+	public Integer getMyFeedback(String keyword, User user);
 }
