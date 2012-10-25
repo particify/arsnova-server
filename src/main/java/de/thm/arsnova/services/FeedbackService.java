@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import de.thm.arsnova.annotation.Authenticated;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.User;
@@ -63,13 +62,11 @@ public class FeedbackService implements IFeedbackService {
 	}
 
 	@Override
-	@Authenticated
 	public Feedback getFeedback(String keyword) {
 		return databaseDao.getFeedback(keyword);
 	}
 
 	@Override
-	@Authenticated
 	public int getFeedbackCount(String keyword) {
 		Feedback feedback = databaseDao.getFeedback(keyword);
 		List<Integer> values = feedback.getValues();
@@ -77,7 +74,6 @@ public class FeedbackService implements IFeedbackService {
 	}
 
 	@Override
-	@Authenticated
 	public long getAverageFeedback(String sessionkey) {
 		Feedback feedback = databaseDao.getFeedback(sessionkey);
 		List<Integer> values = feedback.getValues();
@@ -88,7 +84,6 @@ public class FeedbackService implements IFeedbackService {
 	}
 
 	@Override
-	@Authenticated
 	public boolean saveFeedback(String keyword, int value, User user) {
 		return databaseDao.saveFeedback(keyword, value, user);
 	}
