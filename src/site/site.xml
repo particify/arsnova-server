@@ -50,8 +50,8 @@
 			<item name="The Team" href="team-list.html" />
 		</menu>
 		<menu name="Documentation">
-			<item name="Dependencies" href="dependencies.html" />
 			<item name="Installation" href="installation.html" />
+			<item name="Dependencies" href="dependencies.html" />
 			<item name="API Docs" href="apidocs/index.html" />
 		</menu>
 		<menu name="Further Information">
