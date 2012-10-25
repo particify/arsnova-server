@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -82,19 +83,19 @@ public class FeedbackServiceTest {
 		userService.setUserAuthenticated(true);
 		assertEquals(0, feedbackService.getFeedbackCount("12345678"));
 	}
-	
-	@Test(expected = NotFoundException.class)
+
+	@Test(expected = NoContentException.class)
 	public void testShouldReturnAverageFeedbackForNoFeedbackAtAll() {
 		userService.setUserAuthenticated(true);
 		feedbackService.getAverageFeedback("12345678");
 	}
-	
+
 	@Test
 	public void testShouldReturnAverageFeedbackRounded() {
 		userService.setUserAuthenticated(true);
 		assertEquals(2, feedbackService.getAverageFeedbackRounded("18273645"));
 	}
-	
+
 	@Test
 	public void testShouldReturnAverageFeedbackNotRounded() {
 		userService.setUserAuthenticated(true);

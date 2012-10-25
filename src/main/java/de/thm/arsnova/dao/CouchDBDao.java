@@ -84,8 +84,7 @@ public class CouchDBDao implements IDatabaseDao {
 
 	//
 
-	public static final Logger logger = LoggerFactory
-			.getLogger(CouchDBDao.class);
+	public static final Logger logger = LoggerFactory.getLogger(CouchDBDao.class);
 
 	@Value("${couchdb.host}")
 	public final void setDatabaseHost(String databaseHost) {
@@ -111,8 +110,7 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public void cleanFeedbackVotes(int cleanupFeedbackDelay) {
 		final long timelimitInMillis = 60000 * (long) cleanupFeedbackDelay;
-		final long maxAllowedTimeInMillis = System.currentTimeMillis()
-				- timelimitInMillis;
+		final long maxAllowedTimeInMillis = System.currentTimeMillis() - timelimitInMillis;
 
 		Map<String, Set<String>> affectedUsers = new HashMap<String, Set<String>>();
 		Set<String> allAffectedSessions = new HashSet<String>();
@@ -131,8 +129,7 @@ public class CouchDBDao implements IDatabaseDao {
 				if (affectedArsSessions == null) {
 					affectedArsSessions = new HashSet<String>();
 				}
-				affectedArsSessions
-						.add(getSessionKeyword(arsInternalSessionId));
+				affectedArsSessions.add(getSessionKeyword(arsInternalSessionId));
 				affectedUsers.put(user, affectedArsSessions);
 				allAffectedSessions.addAll(affectedArsSessions);
 
@@ -141,24 +138,19 @@ public class CouchDBDao implements IDatabaseDao {
 			} catch (IOException e) {
 				logger.error("Could not delete Feedback document " + d.getId());
 			} catch (JSONException e) {
-				logger.error(
-						"Could not delete Feedback document {}, error is: {} ",
-						new Object[] { d.getId(), e });
+				logger.error("Could not delete Feedback document {}, error is: {} ", new Object[] { d.getId(), e });
 			}
 		}
 		if (!results.isEmpty()) {
-			feedbackService.broadcastFeedbackChanges(affectedUsers,
-					allAffectedSessions);
+			feedbackService.broadcastFeedbackChanges(affectedUsers, allAffectedSessions);
 		}
 	}
 
-	private List<Document> findFeedbackForDeletion(
-			final long maxAllowedTimeInMillis) {
+	private List<Document> findFeedbackForDeletion(final long maxAllowedTimeInMillis) {
 		View cleanupFeedbackView = new View("understanding/cleanup");
 		cleanupFeedbackView.setStartKey("null");
 		cleanupFeedbackView.setEndKey(String.valueOf(maxAllowedTimeInMillis));
-		ViewResults feedbackForCleanup = this.getDatabase().view(
-				cleanupFeedbackView);
+		ViewResults feedbackForCleanup = this.getDatabase().view(cleanupFeedbackView);
 		return feedbackForCleanup.getResults();
 	}
 
@@ -168,9 +160,7 @@ public class CouchDBDao implements IDatabaseDao {
 		if (result == null) {
 			throw new NotFoundException();
 		}
-		if (result.isActive()
-				|| result.getCreator().equals(
-						userService.getCurrentUser().getUsername())) {
+		if (result.isActive() || result.getCreator().equals(userService.getCurrentUser().getUsername())) {
 			return result;
 		}
 
@@ -181,18 +171,14 @@ public class CouchDBDao implements IDatabaseDao {
 	public List<Session> getMySessions(String username) {
 		try {
 			View view = new View("session/by_creator");
-			view.setStartKey("["
-					+ URLEncoder.encode("\"" + username + "\"", "UTF-8") + "]");
-			view.setEndKey("["
-					+ URLEncoder.encode("\"" + username + "\",{}", "UTF-8")
-					+ "]");
+			view.setStartKey("[" + URLEncoder.encode("\"" + username + "\"", "UTF-8") + "]");
+			view.setEndKey("[" + URLEncoder.encode("\"" + username + "\",{}", "UTF-8") + "]");
 
 			ViewResults sessions = this.getDatabase().view(view);
 
 			List<Session> result = new ArrayList<Session>();
 			for (Document d : sessions.getResults()) {
-				Session session = (Session) JSONObject.toBean(d.getJSONObject()
-						.getJSONObject("value"), Session.class);
+				Session session = (Session) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Session.class);
 				session.set_id(d.getId());
 				result.add(session);
 			}
@@ -205,19 +191,13 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public List<Question> getSkillQuestions(String sessionKeyword) {
 		Session session = this.getSessionFromKeyword(sessionKeyword);
-		if (session == null) {
-			return null;
-		}
+		if (session == null)
+			throw new NotFoundException();
 
 		try {
-			View view = new View(
-					"skill_question/by_session_sorted_by_subject_and_text");
-			view.setStartKey("["
-					+ URLEncoder.encode("\"" + session.get_id() + "\"", "UTF-8")
-					+ "]");
-			view.setEndKey("["
-					+ URLEncoder.encode("\"" + session.get_id() + "\",{}",
-							"UTF-8") + "]");
+			View view = new View("skill_question/by_session_sorted_by_subject_and_text");
+			view.setStartKey("[" + URLEncoder.encode("\"" + session.get_id() + "\"", "UTF-8") + "]");
+			view.setEndKey("[" + URLEncoder.encode("\"" + session.get_id() + "\",{}", "UTF-8") + "]");
 
 			ViewResults questions = this.getDatabase().view(view);
 			if (questions == null || questions.isEmpty()) {
@@ -226,16 +206,12 @@ public class CouchDBDao implements IDatabaseDao {
 			List<Question> result = new ArrayList<Question>();
 
 			MorpherRegistry morpherRegistry = JSONUtils.getMorpherRegistry();
-			Morpher dynaMorpher = new BeanMorpher(PossibleAnswer.class,
-					morpherRegistry);
+			Morpher dynaMorpher = new BeanMorpher(PossibleAnswer.class, morpherRegistry);
 			morpherRegistry.registerMorpher(dynaMorpher);
 			for (Document d : questions.getResults()) {
-				Question q = (Question) JSONObject.toBean(d.getJSONObject()
-						.getJSONObject("value"), Question.class);
-				Collection<PossibleAnswer> answers = JSONArray.toCollection(
-						d.getJSONObject().getJSONObject("value")
-								.getJSONArray("possibleAnswers"),
-						PossibleAnswer.class);
+				Question q = (Question) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Question.class);
+				Collection<PossibleAnswer> answers = JSONArray.toCollection(d.getJSONObject().getJSONObject("value")
+						.getJSONArray("possibleAnswers"), PossibleAnswer.class);
 				q.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
 				result.add(q);
 			}
@@ -257,8 +233,7 @@ public class CouchDBDao implements IDatabaseDao {
 				return 0;
 			}
 
-			return results.getJSONArray("rows").optJSONObject(0)
-					.optInt("value");
+			return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 
 		} catch (UnsupportedEncodingException e) {
 			return 0;
@@ -275,8 +250,8 @@ public class CouchDBDao implements IDatabaseDao {
 			if (results.getJSONArray("rows").optJSONObject(0) == null)
 				return null;
 
-			return (Session) JSONObject.toBean(results.getJSONArray("rows")
-					.optJSONObject(0).optJSONObject("value"), Session.class);
+			return (Session) JSONObject.toBean(results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
+					Session.class);
 		} catch (UnsupportedEncodingException e) {
 			return null;
 		}
@@ -322,8 +297,7 @@ public class CouchDBDao implements IDatabaseDao {
 
 		try {
 			for (int i = 0; i <= 3; i++) {
-				String key = rows.optJSONObject(i).optJSONArray("key")
-						.getString(1);
+				String key = rows.optJSONObject(i).optJSONArray("key").getString(1);
 				JSONObject feedback = rows.optJSONObject(i);
 
 				if (key.equals("Bitte schneller"))
@@ -342,8 +316,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public boolean saveFeedback(String keyword, int value,
-			de.thm.arsnova.entities.User user) {
+	public boolean saveFeedback(String keyword, int value, de.thm.arsnova.entities.User user) {
 		String sessionId = this.getSessionId(keyword);
 		if (sessionId == null)
 			return false;
@@ -384,13 +357,10 @@ public class CouchDBDao implements IDatabaseDao {
 		return true;
 	}
 
-	private List<Document> findPreviousFeedback(String sessionId,
-			de.thm.arsnova.entities.User user) {
+	private List<Document> findPreviousFeedback(String sessionId, de.thm.arsnova.entities.User user) {
 		View view = new View("understanding/by_user");
 		try {
-			view.setKey(URLEncoder.encode(
-					"[\"" + sessionId + "\", \"" + user.getUsername() + "\"]",
-					"UTF-8"));
+			view.setKey(URLEncoder.encode("[\"" + sessionId + "\", \"" + user.getUsername() + "\"]", "UTF-8"));
 		} catch (UnsupportedEncodingException e) {
 			return Collections.<Document> emptyList();
 		}
@@ -442,15 +412,13 @@ public class CouchDBDao implements IDatabaseDao {
 		if (results.getJSONArray("rows").optJSONObject(0) == null)
 			return null;
 
-		return results.getJSONArray("rows").optJSONObject(0)
-				.optJSONObject("value").getString("_id");
+		return results.getJSONArray("rows").optJSONObject(0).optJSONObject("value").getString("_id");
 	}
 
 	private String getSessionKeyword(String internalSessionId) {
 		try {
 			View view = new View("session/by_id");
-			view.setKey(URLEncoder.encode("\"" + internalSessionId + "\"",
-					"UTF-8"));
+			view.setKey(URLEncoder.encode("\"" + internalSessionId + "\"", "UTF-8"));
 			ViewResults results = this.getDatabase().view(view);
 			for (Document d : results.getResults()) {
 				Document arsSession = this.getDatabase().getDocument(d.getId());
@@ -478,13 +446,10 @@ public class CouchDBDao implements IDatabaseDao {
 	private Database getDatabase() {
 		if (database == null) {
 			try {
-				com.fourspaces.couchdb.Session session = new com.fourspaces.couchdb.Session(
-						databaseHost, databasePort);
-
+				com.fourspaces.couchdb.Session session = new com.fourspaces.couchdb.Session(databaseHost, databasePort);
 				database = session.getDatabase(databaseName);
 			} catch (Exception e) {
-				logger.error("Cannot connect to CouchDB database '"
-						+ databaseName + "' on host '" + databaseHost
+				logger.error("Cannot connect to CouchDB database '" + databaseName + "' on host '" + databaseHost
 						+ "' using port " + databasePort);
 			}
 		}
@@ -525,8 +490,10 @@ public class CouchDBDao implements IDatabaseDao {
 				return null;
 			}
 
-			return (Question) JSONObject.toBean(results.getJSONArray("rows")
-					.optJSONObject(0).optJSONObject("value"), Question.class);
+			return (Question) JSONObject.toBean(
+					results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
+					Question.class
+			);
 		} catch (IOException e) {
 			logger.error("Could not get question with id {}", id);
 		}
@@ -537,20 +504,16 @@ public class CouchDBDao implements IDatabaseDao {
 	public LoggedIn registerAsOnlineUser(User u, Session s) {
 		try {
 			View view = new View("logged_in/all");
-			view.setKey(URLEncoder.encode("\"" + u.getUsername() + "\"",
-					"UTF-8"));
+			view.setKey(URLEncoder.encode("\"" + u.getUsername() + "\"", "UTF-8"));
 			ViewResults results = this.getDatabase().view(view);
 
 			LoggedIn loggedIn = new LoggedIn();
 			if (results.getJSONArray("rows").optJSONObject(0) != null) {
-				JSONObject json = results.getJSONArray("rows").optJSONObject(0)
-						.optJSONObject("value");
+				JSONObject json = results.getJSONArray("rows").optJSONObject(0).optJSONObject("value");
 				loggedIn = (LoggedIn) JSONObject.toBean(json, LoggedIn.class);
-				Collection<VisitedSession> visitedSessions = JSONArray
-						.toCollection(json.getJSONArray("visitedSessions"),
-								VisitedSession.class);
-				loggedIn.setVisitedSessions(new ArrayList<VisitedSession>(
-						visitedSessions));
+				Collection<VisitedSession> visitedSessions = JSONArray.toCollection(
+						json.getJSONArray("visitedSessions"), VisitedSession.class);
+				loggedIn.setVisitedSessions(new ArrayList<VisitedSession>(visitedSessions));
 			}
 
 			loggedIn.setUser(u.getUsername());
@@ -571,12 +534,9 @@ public class CouchDBDao implements IDatabaseDao {
 			}
 			this.getDatabase().saveDocument(doc);
 
-			LoggedIn l = (LoggedIn) JSONObject.toBean(doc.getJSONObject(),
-					LoggedIn.class);
-			Collection<VisitedSession> visitedSessions = JSONArray
-					.toCollection(
-							doc.getJSONObject().getJSONArray("visitedSessions"),
-							VisitedSession.class);
+			LoggedIn l = (LoggedIn) JSONObject.toBean(doc.getJSONObject(), LoggedIn.class);
+			Collection<VisitedSession> visitedSessions = JSONArray.toCollection(
+					doc.getJSONObject().getJSONArray("visitedSessions"), VisitedSession.class);
 			l.setVisitedSessions(new ArrayList<VisitedSession>(visitedSessions));
 			return l;
 		} catch (UnsupportedEncodingException e) {
@@ -593,8 +553,7 @@ public class CouchDBDao implements IDatabaseDao {
 			JSONObject json = JSONObject.fromObject(session);
 			this.getDatabase().saveDocument(new Document(json));
 		} catch (IOException e) {
-			logger.error("Failed to update lastOwnerActivity for Session {}",
-					session);
+			logger.error("Failed to update lastOwnerActivity for Session {}", session);
 			return;
 		}
 	}
@@ -607,9 +566,7 @@ public class CouchDBDao implements IDatabaseDao {
 				throw new NotFoundException();
 
 			View view = new View("understanding/by_user");
-			view.setKey(URLEncoder.encode(
-					"[\"" + sessionId + "\", \"" + user.getUsername() + "\"]",
-					"UTF-8"));
+			view.setKey(URLEncoder.encode("[\"" + sessionId + "\", \"" + user.getUsername() + "\"]", "UTF-8"));
 			ViewResults results = this.getDatabase().view(view);
 			JSONArray rows = results.getJSONArray("rows");
 

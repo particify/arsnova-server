@@ -1,20 +1,20 @@
 package de.thm.arsnova.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import de.thm.arsnova.entities.Feedback;
-import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.LoggedIn;
+import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.ForbiddenException;
+import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 
 @Component
@@ -23,11 +23,12 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	private static Map<String, Session> stubSessions = new ConcurrentHashMap<String, Session>();
 	private static Map<String, Feedback> stubFeedbacks = new ConcurrentHashMap<String, Feedback>();
-	private static Map<Session, Question> stubQuestions = new ConcurrentHashMap<Session, Question>();
+	private static Map<String, List<Question>> stubQuestions = new ConcurrentHashMap<String, List<Question>>();
 
 	public StubDatabaseDao() {
 		fillWithDummySessions();
 		fillWithDummyFeedbacks();
+		fillWithDummyQuestions();
 	}
 
 	private void fillWithDummySessions() {
@@ -53,6 +54,12 @@ public class StubDatabaseDao implements IDatabaseDao {
 		stubFeedbacks.put("12345678", new Feedback(0, 0, 0, 0));
 		stubFeedbacks.put("87654321", new Feedback(2, 3, 5, 7));
 		stubFeedbacks.put("18273645", new Feedback(2, 3, 5, 11));
+	}
+
+	private void fillWithDummyQuestions() {
+		List<Question> questions = new ArrayList<Question>();
+		questions.add(new Question());
+		stubQuestions.put("12345678", questions);
 	}
 
 	@Override
@@ -103,8 +110,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 		List<Integer> values = sessionFeedback.getValues();
 		values.set(value, values.get(value) + 1);
 
-		sessionFeedback = new Feedback(values.get(0), values.get(1),
-				values.get(2), values.get(3));
+		sessionFeedback = new Feedback(values.get(0), values.get(1), values.get(2), values.get(3));
 
 		stubFeedbacks.put(keyword, sessionFeedback);
 
@@ -124,7 +130,9 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public boolean saveQuestion(Session session, Question question) {
-		stubQuestions.put(session, question);
+		List<Question> questions = stubQuestions.get(session.get_id());
+		questions.add(question);
+		stubQuestions.put(session.get_id(), questions);
 		return stubQuestions.get(session) != null;
 	}
 
@@ -136,14 +144,17 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public List<Question> getSkillQuestions(String session) {
-		// TODO Auto-generated method stub
-		return null;
+		if (getSession(session) == null)
+			throw new NotFoundException();
+		List<Question> questions = stubQuestions.get(session);
+		if (questions == null)
+			throw new NoContentException();
+		return questions;
 	}
 
 	@Override
 	public int getSkillQuestionCount(String sessionkey) {
-		// TODO Auto-generated method stub
-		return 0;
+		return stubQuestions.get(sessionkey).size();
 	}
 
 	@Override

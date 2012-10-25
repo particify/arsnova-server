@@ -28,6 +28,7 @@ import de.thm.arsnova.annotation.Authenticated;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
@@ -47,11 +48,16 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
+	@Authenticated
 	public List<Question> getSkillQuestions(String sessionkey) {
-		return databaseDao.getSkillQuestions(sessionkey);
+		List<Question> result = databaseDao.getSkillQuestions(sessionkey);
+		if (result == null || result.size() == 0)
+			throw new NoContentException();
+		return result;
 	}
 
 	@Override
+	@Authenticated
 	public int getSkillQuestionCount(String sessionkey) {
 		return databaseDao.getSkillQuestionCount(sessionkey);
 	}
