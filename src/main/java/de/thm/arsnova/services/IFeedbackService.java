@@ -30,7 +30,7 @@ public interface IFeedbackService {
 	public void cleanFeedbackVotes();
 	public Feedback getFeedback(String keyword);
 	public int getFeedbackCount(String keyword);
-	public int getAverageFeedback(String sessionkey);
+	public long getAverageFeedback(String sessionkey);
 	public boolean saveFeedback(String keyword, int value, User user);
 	public void broadcastFeedbackChanges(Map<String, Set<String>> affectedUsers, Set<String> allAffectedSessions);
 }

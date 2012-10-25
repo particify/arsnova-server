@@ -78,7 +78,7 @@ public class FeedbackService implements IFeedbackService {
 
 	@Override
 	@Authenticated
-	public int getAverageFeedback(String sessionkey) {
+	public long getAverageFeedback(String sessionkey) {
 		Feedback feedback = databaseDao.getFeedback(sessionkey);
 		List<Integer> values = feedback.getValues();
 		int count = values.get(0) + values.get(1) + values.get(2) + values.get(3);
@@ -97,6 +97,8 @@ public class FeedbackService implements IFeedbackService {
 	 * @param affectedUsers The user whose feedback got deleted along with all affected session keywords
 	 * @param allAffectedSessions For convenience, this represents the union of all session keywords mentioned above.
 	 */
+	@Override
+	@Authenticated
 	public void broadcastFeedbackChanges(Map<String, Set<String>> affectedUsers, Set<String> allAffectedSessions) {
 		for (Map.Entry<String, Set<String>> e : affectedUsers.entrySet()) {
 			// Is this user registered with a socket connection?
