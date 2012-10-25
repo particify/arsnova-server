@@ -31,8 +31,10 @@ public interface IFeedbackService {
 	public Feedback getFeedback(String keyword);
 
 	public int getFeedbackCount(String keyword);
-
+	
 	public long getAverageFeedback(String sessionkey);
+
+	public long getAverageFeedbackRounded(String sessionkey);
 
 	public boolean saveFeedback(String keyword, int value, User user);
 

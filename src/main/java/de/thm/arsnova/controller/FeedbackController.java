@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.entities.Feedback;
@@ -40,8 +41,7 @@ import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 @Controller
 public class FeedbackController extends AbstractController {
 
-	public static final Logger logger = LoggerFactory
-			.getLogger(FeedbackController.class);
+	public static final Logger logger = LoggerFactory.getLogger(FeedbackController.class);
 
 	@Autowired
 	IFeedbackService feedbackService;
@@ -60,10 +60,8 @@ public class FeedbackController extends AbstractController {
 
 	@RequestMapping(value = "/session/{sessionkey}/myfeedback", method = RequestMethod.GET)
 	@ResponseBody
-	public Integer getMyFeedback(@PathVariable String sessionkey,
-			HttpServletResponse response) {
-		Integer value = feedbackService.getMyFeedback(sessionkey,
-				userService.getCurrentUser());
+	public Integer getMyFeedback(@PathVariable String sessionkey, HttpServletResponse response) {
+		Integer value = feedbackService.getMyFeedback(sessionkey, userService.getCurrentUser());
 		if (value != null && value >= 0 && value <= 3) {
 			return value;
 		}
@@ -79,14 +77,19 @@ public class FeedbackController extends AbstractController {
 
 	@RequestMapping(value = "/session/{sessionkey}/averagefeedback", method = RequestMethod.GET)
 	@ResponseBody
-	public long getAverageFeedback(@PathVariable String sessionkey) {
-		return feedbackService.getAverageFeedback(sessionkey);
+	public long getAverageFeedback(
+			@PathVariable String sessionkey,
+			@RequestParam(value = "precise", required = false) boolean preciseValue
+	) {
+		if (preciseValue) {
+			return feedbackService.getAverageFeedback(sessionkey);
+		}
+		return feedbackService.getAverageFeedbackRounded(sessionkey);
 	}
 
 	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.POST)
 	@ResponseBody
-	public Feedback postFeedback(@PathVariable String sessionkey,
-			@RequestBody int value, HttpServletResponse response) {
+	public Feedback postFeedback(@PathVariable String sessionkey, @RequestBody int value, HttpServletResponse response) {
 		User user = userService.getCurrentUser();
 		if (feedbackService.saveFeedback(sessionkey, value, user)) {
 			Feedback feedback = feedbackService.getFeedback(sessionkey);

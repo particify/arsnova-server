@@ -85,6 +85,11 @@ public class FeedbackService implements IFeedbackService {
 
 		return sum / count;
 	}
+	
+	@Override
+	public long getAverageFeedbackRounded(String sessionkey) {
+		return (long) Math.round(this.getAverageFeedback(sessionkey));
+	}
 
 	@Override
 	public boolean saveFeedback(String keyword, int value, User user) {
