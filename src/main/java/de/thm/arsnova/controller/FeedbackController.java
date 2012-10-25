@@ -39,50 +39,54 @@ import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Controller
 public class FeedbackController extends AbstractController {
-	
-	public static final Logger logger = LoggerFactory.getLogger(FeedbackController.class);
-	
+
+	public static final Logger logger = LoggerFactory
+			.getLogger(FeedbackController.class);
+
 	@Autowired
 	IFeedbackService feedbackService;
-	
+
 	@Autowired
 	IUserService userService;
-	
+
 	@Autowired
 	ARSnovaSocketIOServer server;
-	
-	@RequestMapping(value="/session/{sessionkey}/feedback", method=RequestMethod.GET)
+
+	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.GET)
 	@ResponseBody
 	public Feedback getFeedback(@PathVariable String sessionkey) {
 		return feedbackService.getFeedback(sessionkey);
 	}
-	
-	@RequestMapping(value="/session/{sessionkey}/myfeedback", method=RequestMethod.GET)
+
+	@RequestMapping(value = "/session/{sessionkey}/myfeedback", method = RequestMethod.GET)
 	@ResponseBody
-	public Integer getMyFeedback(@PathVariable String sessionkey, HttpServletResponse response) {
-		Integer value = feedbackService.getMyFeedback(sessionkey, userService.getCurrentUser());
+	public Integer getMyFeedback(@PathVariable String sessionkey,
+			HttpServletResponse response) {
+		Integer value = feedbackService.getMyFeedback(sessionkey,
+				userService.getCurrentUser());
 		if (value != null && value >= 0 && value <= 3) {
 			return value;
 		}
 		response.setStatus(HttpStatus.NOT_FOUND.value());
 		return null;
 	}
-	
-	@RequestMapping(value="/session/{sessionkey}/feedbackcount", method=RequestMethod.GET)
+
+	@RequestMapping(value = "/session/{sessionkey}/feedbackcount", method = RequestMethod.GET)
 	@ResponseBody
 	public int getFeedbackCount(@PathVariable String sessionkey) {
 		return feedbackService.getFeedbackCount(sessionkey);
 	}
-	
-	@RequestMapping(value="/session/{sessionkey}/averagefeedback", method=RequestMethod.GET)
+
+	@RequestMapping(value = "/session/{sessionkey}/averagefeedback", method = RequestMethod.GET)
 	@ResponseBody
 	public long getAverageFeedback(@PathVariable String sessionkey) {
 		return feedbackService.getAverageFeedback(sessionkey);
 	}
-	
-	@RequestMapping(value="/session/{sessionkey}/feedback", method=RequestMethod.POST)
+
+	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.POST)
 	@ResponseBody
-	public Feedback postFeedback(@PathVariable String sessionkey, @RequestBody int value, HttpServletResponse response) {
+	public Feedback postFeedback(@PathVariable String sessionkey,
+			@RequestBody int value, HttpServletResponse response) {
 		User user = userService.getCurrentUser();
 		if (feedbackService.saveFeedback(sessionkey, value, user)) {
 			Feedback feedback = feedbackService.getFeedback(sessionkey);
@@ -91,11 +95,11 @@ public class FeedbackController extends AbstractController {
 				response.setStatus(HttpStatus.CREATED.value());
 				return feedback;
 			}
-			
+
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 			return null;
 		}
-		
+
 		response.setStatus(HttpStatus.BAD_REQUEST.value());
 		return null;
 	}

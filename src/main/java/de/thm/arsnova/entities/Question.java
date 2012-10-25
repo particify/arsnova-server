@@ -31,13 +31,12 @@ public class Question {
 	private List<PossibleAnswer> possibleAnswers;
 	private boolean noCorrect;
 	private String session;
-	
-	private int number;	
+
+	private int number;
 	private int duration;
 	private String _id;
 	private String _rev;
-	
-	
+
 	public String getType() {
 		return type;
 	}
@@ -45,7 +44,7 @@ public class Question {
 	public void setType(String type) {
 		this.type = type;
 	}
-	
+
 	public String getQuestionType() {
 		return questionType;
 	}
@@ -101,7 +100,7 @@ public class Question {
 	public void setNoCorrect(boolean noCorrect) {
 		this.noCorrect = noCorrect;
 	}
-	
+
 	public String getSessionId() {
 		return session;
 	}
@@ -109,7 +108,7 @@ public class Question {
 	public void setSessionId(String session) {
 		this.session = session;
 	}
-	
+
 	public String getSession() {
 		return session;
 	}
@@ -152,7 +151,7 @@ public class Question {
 
 	@Override
 	public String toString() {
-		return "Question type '" + this.questionType + "': " + this.subject + ";\n" + this.text +
-				this.possibleAnswers;
+		return "Question type '" + this.questionType + "': " + this.subject
+				+ ";\n" + this.text + this.possibleAnswers;
 	}
 }

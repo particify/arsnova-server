@@ -30,13 +30,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CasUserDetailsService extends AbstractCasAssertionUserDetailsService {
-	
+public class CasUserDetailsService extends
+		AbstractCasAssertionUserDetailsService {
+
 	@Override
 	protected UserDetails loadUserDetails(Assertion assertion) {
 		final List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
 		grantedAuthorities.add(new GrantedAuthorityImpl("ROLE_USER"));
-		
-		return new User(assertion.getPrincipal().getName(), "", true, true, true, true, grantedAuthorities);
+
+		return new User(assertion.getPrincipal().getName(), "", true, true,
+				true, true, grantedAuthorities);
 	}
 }

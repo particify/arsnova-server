@@ -34,16 +34,15 @@ import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations={
+@ContextConfiguration(locations = {
 		"file:src/main/webapp/WEB-INF/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
-		"file:src/test/resources/test-config.xml"
-})
+		"file:src/test/resources/test-config.xml" })
 public class SessionServiceTest {
 
 	@Autowired
 	ISessionService sessionService;
-	
+
 	@Autowired
 	StubUserService userService;
 
@@ -52,23 +51,23 @@ public class SessionServiceTest {
 		System.out.println(sessionService.generateKeyword());
 		assertTrue(sessionService.generateKeyword().matches("^[0-9]{8}$"));
 	}
-	
-	@Test(expected=NotFoundException.class)
+
+	@Test(expected = NotFoundException.class)
 	public void testShouldFindNonExistantSession() {
 		userService.setUserAuthenticated(true);
 		sessionService.joinSession("00000000");
 	}
-	
-	@Test(expected=UnauthorizedException.class)
+
+	@Test(expected = UnauthorizedException.class)
 	public void testShouldNotReturnSessionIfUnauthorized() {
 		userService.setUserAuthenticated(false);
 		sessionService.joinSession("12345678");
 	}
-	
-	@Test(expected=UnauthorizedException.class)
+
+	@Test(expected = UnauthorizedException.class)
 	public void testShouldNotSaveSessionIfUnauthorized() {
 		userService.setUserAuthenticated(false);
-		
+
 		Session session = new Session();
 		session.setActive(true);
 		session.setCreator("ptsr00");
@@ -76,16 +75,16 @@ public class SessionServiceTest {
 		session.setName("TestSessionX");
 		session.setShortName("TSX");
 		sessionService.saveSession(session);
-		
+
 		userService.setUserAuthenticated(true);
-		
+
 		assertNull(sessionService.joinSession("11111111"));
 	}
-	
+
 	@Test
 	public void testShouldSaveSession() {
 		userService.setUserAuthenticated(true);
-		
+
 		Session session = new Session();
 		session.setActive(true);
 		session.setCreator("ptsr00");

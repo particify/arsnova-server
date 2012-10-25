@@ -24,10 +24,11 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
-public class LoginAuthenticationSucessHandler extends SimpleUrlAuthenticationSuccessHandler {
+public class LoginAuthenticationSucessHandler extends
+		SimpleUrlAuthenticationSuccessHandler {
 
 	private String targetUrl;
-	
+
 	@Override
 	protected String determineTargetUrl(HttpServletRequest request,
 			HttpServletResponse response) {
@@ -38,7 +39,7 @@ public class LoginAuthenticationSucessHandler extends SimpleUrlAuthenticationSuc
 		String referer = (String) session.getAttribute("ars-referer");
 		return referer + targetUrl;
 	}
-	
+
 	public void setTargetUrl(String targetUrl) {
 		this.targetUrl = targetUrl;
 	}

@@ -14,18 +14,19 @@ public class AbstractController {
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ExceptionHandler(NotFoundException.class)
 	public void handleNotFoundException(Exception e, HttpServletRequest request) {
-		
+
 	}
-	
+
 	@ResponseStatus(HttpStatus.FORBIDDEN)
 	@ExceptionHandler(ForbiddenException.class)
 	public void handleForbiddenException(Exception e, HttpServletRequest request) {
-		
+
 	}
-	
+
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	@ExceptionHandler(UnauthorizedException.class)
-	public void handleUnauthorizedException(Exception e, HttpServletRequest request) {
-		
+	public void handleUnauthorizedException(Exception e,
+			HttpServletRequest request) {
+
 	}
 }

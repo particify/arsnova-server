@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Feedback {
 	private List<Integer> values;
-	
+
 	public Feedback(int a, int b, int c, int d) {
 		values = new ArrayList<Integer>();
 		values.add(a);
@@ -13,7 +13,7 @@ public class Feedback {
 		values.add(c);
 		values.add(d);
 	}
-	
+
 	public List<Integer> getValues() {
 		return values;
 	}

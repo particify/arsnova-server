@@ -15,8 +15,9 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 
 public class CASLogoutSuccessHandler implements LogoutSuccessHandler {
 
-	public static final Logger logger = LoggerFactory.getLogger(CASLogoutSuccessHandler.class);
-	
+	public static final Logger logger = LoggerFactory
+			.getLogger(CASLogoutSuccessHandler.class);
+
 	private String casUrl;
 	private String defaultTarget;
 
@@ -26,14 +27,15 @@ public class CASLogoutSuccessHandler implements LogoutSuccessHandler {
 	public void onLogoutSuccess(HttpServletRequest request,
 			HttpServletResponse response, Authentication authentication)
 			throws IOException, ServletException {
-		
+
 		String referer = request.getHeader("referer");
-        if (response.isCommitted()) {
-            logger.info("Response has already been committed. Unable to redirect to target");
-            return;
-        }
-		redirectStrategy.sendRedirect(request, response, 
-				(casUrl + "/logout?url=") + (referer != null ? referer : defaultTarget));
+		if (response.isCommitted()) {
+			logger.info("Response has already been committed. Unable to redirect to target");
+			return;
+		}
+		redirectStrategy.sendRedirect(request, response,
+				(casUrl + "/logout?url=")
+						+ (referer != null ? referer : defaultTarget));
 
 	}
 

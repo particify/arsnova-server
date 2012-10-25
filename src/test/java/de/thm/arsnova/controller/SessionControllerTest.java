@@ -38,7 +38,7 @@ public class SessionControllerTest {
 
 	@Autowired
 	private SessionController sessionController;
-	
+
 	@Autowired
 	private StubUserService userService;
 
@@ -50,66 +50,71 @@ public class SessionControllerTest {
 				.getBean(AnnotationMethodHandlerAdapter.class);
 	}
 
-	@Test(expected=NotFoundException.class)
+	@Test(expected = NotFoundException.class)
 	public void testShouldNotGetUnknownSession() throws Exception {
 		userService.setUserAuthenticated(true);
-		
+
 		request.setMethod("GET");
 		request.setRequestURI("/session/00000000");
-		final ModelAndView mav = handlerAdapter.handle(request, response, sessionController);
-		
+		final ModelAndView mav = handlerAdapter.handle(request, response,
+				sessionController);
+
 		assertNull(mav);
 		assertTrue(response.getStatus() == 404);
 	}
 
-	@Test(expected=ForbiddenException.class)
+	@Test(expected = ForbiddenException.class)
 	public void testShouldNotGetForbiddenSession() throws Exception {
 		userService.setUserAuthenticated(true);
-		
+
 		request.setMethod("GET");
 		request.setRequestURI("/session/99999999");
-		final ModelAndView mav = handlerAdapter.handle(request, response, sessionController);
+		final ModelAndView mav = handlerAdapter.handle(request, response,
+				sessionController);
 
 		assertNull(mav);
 		assertTrue(response.getStatus() == 403);
 	}
-	
-	@Test(expected=UnauthorizedException.class)
+
+	@Test(expected = UnauthorizedException.class)
 	public void testShouldNotGetSessionIfUnauthorized() throws Exception {
 		userService.setUserAuthenticated(false);
-		
+
 		request.setMethod("GET");
 		request.setRequestURI("/session/00000000");
-		final ModelAndView mav = handlerAdapter.handle(request, response, sessionController);
-		
+		final ModelAndView mav = handlerAdapter.handle(request, response,
+				sessionController);
+
 		assertNull(mav);
 		assertTrue(response.getStatus() == 401);
 	}
-	
-	@Test(expected=UnauthorizedException.class)
+
+	@Test(expected = UnauthorizedException.class)
 	public void testShouldNotGetSessionIfAnonymous() throws Exception {
 		userService.setUserAuthenticated(false);
 		userService.useAnonymousUser();
-		
+
 		request.setMethod("GET");
 		request.setRequestURI("/session/00000000");
-		final ModelAndView mav = handlerAdapter.handle(request, response, sessionController);
-		
+		final ModelAndView mav = handlerAdapter.handle(request, response,
+				sessionController);
+
 		assertNull(mav);
 		assertTrue(response.getStatus() == 401);
 	}
-	
-	@Test(expected=UnauthorizedException.class)
+
+	@Test(expected = UnauthorizedException.class)
 	public void testShouldCreateSessionIfUnauthorized() throws Exception {
 		userService.setUserAuthenticated(false);
-		
+
 		request.setMethod("POST");
 		request.setRequestURI("/session");
 		request.setContentType("application/json");
 		request.setContent("{}".getBytes());
-		
-		final ModelAndView mav = handlerAdapter.handle(request, response, sessionController);
-		
+
+		final ModelAndView mav = handlerAdapter.handle(request, response,
+				sessionController);
+
 		assertNull(mav);
 		assertTrue(response.getStatus() == 401);
 	}

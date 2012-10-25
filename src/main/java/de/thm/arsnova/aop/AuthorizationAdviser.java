@@ -12,12 +12,14 @@ import de.thm.arsnova.services.IUserService;
 public class AuthorizationAdviser {
 
 	static IUserService userService;
-	
+
 	public void setUserService(IUserService uService) {
 		userService = uService;
 	}
-	
-	/** This method checks if the user has a valid authorization from security context 
+
+	/**
+	 * This method checks if the user has a valid authorization from security
+	 * context
 	 * 
 	 * @param authenticated
 	 * @param object
@@ -25,18 +27,23 @@ public class AuthorizationAdviser {
 	@Before("execution(public * de.thm.arsnova.services.*.*(..)) && @annotation(authenticated) && this(object)")
 	public void checkAuthorization(Authenticated authenticated, Object object) {
 		User u = userService.getCurrentUser();
-		if (u == null) throw new UnauthorizedException();
-		// TODO: For unauthorized users e.g. after logout there is still a user object with username 'anonymous'
-		if (u.getUsername().equals("anonymous")) throw new UnauthorizedException();
+		if (u == null)
+			throw new UnauthorizedException();
+		// TODO: For unauthorized users e.g. after logout there is still a user
+		// object with username 'anonymous'
+		if (u.getUsername().equals("anonymous"))
+			throw new UnauthorizedException();
 	}
-	
-	/** This method checks if the user is enlisted in current ARSnova session
-	 *
+
+	/**
+	 * This method checks if the user is enlisted in current ARSnova session
+	 * 
 	 * @param authenticated
 	 * @param object
 	 */
 	@Before("execution(public * de.thm.arsnova.services.*.*(..)) && @annotation(authenticated) && this(object)")
-	public void checkSessionMembership(Authenticated authenticated, Object object) {
-		//TODO: Implement check based on session membership lists
+	public void checkSessionMembership(Authenticated authenticated,
+			Object object) {
+		// TODO: Implement check based on session membership lists
 	}
 }

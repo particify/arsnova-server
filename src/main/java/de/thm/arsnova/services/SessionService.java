@@ -38,17 +38,17 @@ public class SessionService implements ISessionService {
 
 	@Autowired
 	ARSnovaSocketIOServer server;
-	
+
 	@Autowired
 	IDatabaseDao databaseDao;
-	
+
 	@Autowired
 	IUserService userService;
-	
+
 	public void setDatabaseDao(IDatabaseDao databaseDao) {
 		this.databaseDao = databaseDao;
 	}
-	
+
 	@Override
 	@Authenticated
 	public Session joinSession(String keyword) {
@@ -60,7 +60,7 @@ public class SessionService implements ISessionService {
 	public List<Session> getMySessions(String username) {
 		return databaseDao.getMySessions(username);
 	}
-	
+
 	@Override
 	@Authenticated
 	public Session saveSession(Session session) {
@@ -71,14 +71,16 @@ public class SessionService implements ISessionService {
 	public boolean sessionKeyAvailable(String keyword) {
 		return databaseDao.sessionKeyAvailable(keyword);
 	}
-	
+
 	@Override
 	public String generateKeyword() {
 		final int low = 10000000;
 		final int high = 100000000;
-		String keyword = String.valueOf((int)(Math.random() * (high - low) + low));
-		
-		if (this.sessionKeyAvailable(keyword)) return keyword;
+		String keyword = String
+				.valueOf((int) (Math.random() * (high - low) + low));
+
+		if (this.sessionKeyAvailable(keyword))
+			return keyword;
 		return generateKeyword();
 	}
 
@@ -86,12 +88,13 @@ public class SessionService implements ISessionService {
 	@Authenticated
 	public LoggedIn registerAsOnlineUser(User user, String sessionkey) {
 		Session session = this.joinSession(sessionkey);
-		if (session == null) return null;
-		
+		if (session == null)
+			return null;
+
 		if (session.getCreator().equals(user.getUsername())) {
 			databaseDao.updateSessionOwnerActivity(session);
 		}
-		
+
 		return databaseDao.registerAsOnlineUser(user, session);
 	}
 }

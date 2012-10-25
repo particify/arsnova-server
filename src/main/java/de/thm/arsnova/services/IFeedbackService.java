@@ -25,13 +25,20 @@ import java.util.Set;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.User;
 
-
 public interface IFeedbackService {
 	public void cleanFeedbackVotes();
+
 	public Feedback getFeedback(String keyword);
+
 	public int getFeedbackCount(String keyword);
+
 	public long getAverageFeedback(String sessionkey);
+
 	public boolean saveFeedback(String keyword, int value, User user);
-	public void broadcastFeedbackChanges(Map<String, Set<String>> affectedUsers, Set<String> allAffectedSessions);
+
+	public void broadcastFeedbackChanges(
+			Map<String, Set<String>> affectedUsers,
+			Set<String> allAffectedSessions);
+
 	public Integer getMyFeedback(String keyword, User user);
 }

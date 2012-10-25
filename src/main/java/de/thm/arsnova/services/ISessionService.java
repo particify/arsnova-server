@@ -25,12 +25,16 @@ import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
-
 public interface ISessionService {
 	public Session joinSession(String keyword);
+
 	public Session saveSession(Session session);
+
 	public boolean sessionKeyAvailable(String keyword);
-	public String generateKeyword();	
+
+	public String generateKeyword();
+
 	public List<Session> getMySessions(String username);
+
 	public LoggedIn registerAsOnlineUser(User user, String sessionkey);
 }

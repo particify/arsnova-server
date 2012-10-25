@@ -35,34 +35,35 @@ public class QuestionService implements IQuestionService {
 
 	@Autowired
 	ARSnovaSocketIOServer server;
-	
+
 	@Autowired
 	IDatabaseDao databaseDao;
-	
+
 	@Autowired
 	IUserService userService;
-	
+
 	public void setDatabaseDao(IDatabaseDao databaseDao) {
 		this.databaseDao = databaseDao;
 	}
-	
+
 	@Override
 	public List<Question> getSkillQuestions(String sessionkey) {
 		return databaseDao.getSkillQuestions(sessionkey);
 	}
-	
+
 	@Override
 	public int getSkillQuestionCount(String sessionkey) {
 		return databaseDao.getSkillQuestionCount(sessionkey);
 	}
-	
+
 	@Override
 	@Authenticated
 	public boolean saveQuestion(Question question) {
-		Session session = this.databaseDao.getSessionFromKeyword(question.getSession());
+		Session session = this.databaseDao.getSessionFromKeyword(question
+				.getSession());
 		return this.databaseDao.saveQuestion(session, question);
 	}
-	
+
 	@Override
 	@Authenticated
 	public Question getQuestion(String id) {

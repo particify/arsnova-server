@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LoggedIn {
-	
+
 	private String _id;
 	private String _rev;
 	private String type;
@@ -31,18 +31,18 @@ public class LoggedIn {
 	private String sessionId;
 	private long timestamp;
 	private List<VisitedSession> visitedSessions = new ArrayList<VisitedSession>();
-	
+
 	public LoggedIn() {
 		this.type = "logged_in";
 		this.updateTimestamp();
 	}
-	
+
 	public void addVisitedSession(Session s) {
 		if (!isAlreadyVisited(s)) {
 			this.visitedSessions.add(new VisitedSession(s));
 		}
 	}
-	
+
 	private boolean isAlreadyVisited(Session s) {
 		for (VisitedSession vs : this.visitedSessions) {
 			if (vs.get_id().equals(s.get_id())) {
@@ -51,7 +51,7 @@ public class LoggedIn {
 		}
 		return false;
 	}
-	
+
 	public void updateTimestamp() {
 		this.timestamp = System.currentTimeMillis();
 	}

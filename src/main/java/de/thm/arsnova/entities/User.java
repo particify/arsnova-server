@@ -44,19 +44,20 @@ public class User implements Serializable {
 	public void setUsername(String username) {
 		this.username = username;
 	}
-	
+
 	public String toString() {
 		return "User, username: " + this.username;
 	}
+
 	@Override
 	public int hashCode() {
 		return username.hashCode();
 	}
-	
-	
+
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null || ! obj.getClass().equals(this.getClass())) return false;
+		if (obj == null || !obj.getClass().equals(this.getClass()))
+			return false;
 		User other = (User) obj;
 		return this.username.equals(other.username);
 	}

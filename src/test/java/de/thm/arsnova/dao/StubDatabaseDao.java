@@ -24,14 +24,14 @@ public class StubDatabaseDao implements IDatabaseDao {
 	private static Map<String, Session> stubSessions = new ConcurrentHashMap<String, Session>();
 	private static Map<String, Feedback> stubFeedbacks = new ConcurrentHashMap<String, Feedback>();
 	private static Map<Session, Question> stubQuestions = new ConcurrentHashMap<Session, Question>();
-	
+
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-	
+
 	public StubDatabaseDao() {
 		fillWithDummySessions();
 		fillWithDummyFeedbacks();
 	}
-	
+
 	private void fillWithDummySessions() {
 		Session session = new Session();
 		session.setActive(true);
@@ -39,35 +39,37 @@ public class StubDatabaseDao implements IDatabaseDao {
 		session.setKeyword("12345678");
 		session.setName("TestSession1");
 		session.setShortName("TS1");
-		
+
 		stubSessions.put("12345678", session);
-		
+
 		session.setActive(true);
 		session.setCreator("ptsr00");
 		session.setKeyword("87654321");
 		session.setName("TestSession2");
 		session.setShortName("TS2");
-		
+
 		stubSessions.put("87654321", session);
 	}
-	
+
 	private void fillWithDummyFeedbacks() {
 		stubFeedbacks.put("12345678", new Feedback(0, 0, 0, 0));
 		stubFeedbacks.put("87654321", new Feedback(2, 3, 5, 7));
 	}
-	
+
 	@Override
 	public void cleanFeedbackVotes(int cleanupFeedbackDelay) {
-		stubSessions.clear();		
+		stubSessions.clear();
 	}
 
 	@Override
 	public Session getSession(String keyword) {
 		// Magic keyword for forbidden session
-		if (keyword.equals("99999999")) throw new ForbiddenException();
-		
+		if (keyword.equals("99999999"))
+			throw new ForbiddenException();
+
 		Session session = stubSessions.get(keyword);
-		if (session == null) throw new NotFoundException();
+		if (session == null)
+			throw new NotFoundException();
 
 		return session;
 	}
@@ -81,11 +83,13 @@ public class StubDatabaseDao implements IDatabaseDao {
 	@Override
 	public Feedback getFeedback(String keyword) {
 		// Magic keyword for forbidden session
-		if (keyword.equals("99999999")) throw new ForbiddenException();
-		
+		if (keyword.equals("99999999"))
+			throw new ForbiddenException();
+
 		Feedback feedback = stubFeedbacks.get(keyword);
-		if (feedback == null) throw new NotFoundException();
-		
+		if (feedback == null)
+			throw new NotFoundException();
+
 		return feedback;
 	}
 
@@ -94,19 +98,17 @@ public class StubDatabaseDao implements IDatabaseDao {
 		if (stubFeedbacks.get(keyword) == null) {
 			stubFeedbacks.put(keyword, new Feedback(0, 0, 0, 0));
 		}
-		
+
 		Feedback sessionFeedback = stubFeedbacks.get(keyword);
-		
+
 		List<Integer> values = sessionFeedback.getValues();
 		values.set(value, values.get(value) + 1);
-		
-		sessionFeedback = new Feedback(values.get(0), values.get(1), values.get(2), values.get(3));
-		
-		stubFeedbacks.put(
-			keyword,
-			sessionFeedback
-		);
-		
+
+		sessionFeedback = new Feedback(values.get(0), values.get(1),
+				values.get(2), values.get(3));
+
+		stubFeedbacks.put(keyword, sessionFeedback);
+
 		return true;
 	}
 
@@ -144,7 +146,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-	
+
 	@Override
 	public List<Session> getMySessions(String username) {
 		// TODO Auto-generated method stub
@@ -160,7 +162,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	@Override
 	public void updateSessionOwnerActivity(Session session) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override

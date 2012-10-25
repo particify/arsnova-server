@@ -39,27 +39,27 @@ public class FeedbackService implements IFeedbackService {
 
 	@Autowired
 	ARSnovaSocketIOServer server;
-	
+
 	/**
 	 * minutes, after which the feedback is deleted
 	 */
 	@Value("${feedback.cleanup}")
 	private int cleanupFeedbackDelay;
-	
+
 	@Autowired
 	IDatabaseDao databaseDao;
-	
+
 	@Autowired
 	IUserService userService;
-	
+
 	public void setDatabaseDao(IDatabaseDao databaseDao) {
 		this.databaseDao = databaseDao;
 	}
-	
+
 	@Override
-	@Scheduled(fixedDelay=5000)
+	@Scheduled(fixedDelay = 5000)
 	public void cleanFeedbackVotes() {
-		databaseDao.cleanFeedbackVotes(cleanupFeedbackDelay);		
+		databaseDao.cleanFeedbackVotes(cleanupFeedbackDelay);
 	}
 
 	@Override
@@ -67,7 +67,7 @@ public class FeedbackService implements IFeedbackService {
 	public Feedback getFeedback(String keyword) {
 		return databaseDao.getFeedback(keyword);
 	}
-	
+
 	@Override
 	@Authenticated
 	public int getFeedbackCount(String keyword) {
@@ -81,11 +81,12 @@ public class FeedbackService implements IFeedbackService {
 	public long getAverageFeedback(String sessionkey) {
 		Feedback feedback = databaseDao.getFeedback(sessionkey);
 		List<Integer> values = feedback.getValues();
-		int count = values.get(0) + values.get(1) + values.get(2) + values.get(3);
+		int count = values.get(0) + values.get(1) + values.get(2)
+				+ values.get(3);
 		int sum = values.get(1) + (values.get(2) * 2) + (values.get(3) * 3);
 		return sum / count;
 	}
-	
+
 	@Override
 	@Authenticated
 	public boolean saveFeedback(String keyword, int value, User user) {
@@ -94,11 +95,17 @@ public class FeedbackService implements IFeedbackService {
 
 	/**
 	 * 
-	 * @param affectedUsers The user whose feedback got deleted along with all affected session keywords
-	 * @param allAffectedSessions For convenience, this represents the union of all session keywords mentioned above.
+	 * @param affectedUsers
+	 *            The user whose feedback got deleted along with all affected
+	 *            session keywords
+	 * @param allAffectedSessions
+	 *            For convenience, this represents the union of all session
+	 *            keywords mentioned above.
 	 */
 	@Override
-	public void broadcastFeedbackChanges(Map<String, Set<String>> affectedUsers, Set<String> allAffectedSessions) {
+	public void broadcastFeedbackChanges(
+			Map<String, Set<String>> affectedUsers,
+			Set<String> allAffectedSessions) {
 		for (Map.Entry<String, Set<String>> e : affectedUsers.entrySet()) {
 			// Is this user registered with a socket connection?
 			String connectedSocket = userService.getSessionForUser(e.getKey());
