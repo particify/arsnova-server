@@ -203,12 +203,6 @@ public class CouchDBDao implements IDatabaseDao {
 			return null;
 		}
 		
-		String viewName = "";
-		if(sort != null && sort.equals("text")) {
-			viewName = "skill_question/by_session_sorted_by_subject_and_text";
-		} else {
-			viewName = "skill_question/by_session";
-		}
 		try {
 			View view = new View("skill_question/by_session_sorted_by_subject_and_text");
 			view.setStartKey("[" + URLEncoder.encode("\"" + session.get_id() + "\"", "UTF-8") + "]");
