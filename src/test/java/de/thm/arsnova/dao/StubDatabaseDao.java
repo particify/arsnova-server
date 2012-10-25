@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.ForbiddenException;
@@ -133,7 +134,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Question> getSkillQuestions(String session, String sort) {
+	public List<Question> getSkillQuestions(String session) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -146,6 +147,12 @@ public class StubDatabaseDao implements IDatabaseDao {
 	
 	@Override
 	public List<Session> getMySessions(String username) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public LoggedIn registerAsOnlineUser(User u, Session s) {
 		// TODO Auto-generated method stub
 		return null;
 	}

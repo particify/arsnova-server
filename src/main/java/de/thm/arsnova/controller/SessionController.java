@@ -34,13 +34,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import de.thm.arsnova.entities.Feedback;
+import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
+
 
 @Controller
 public class SessionController extends AbstractController {
@@ -74,6 +79,20 @@ public class SessionController extends AbstractController {
 		return sessionService.joinSession(sessionkey);
 	}
 	
+	@RequestMapping(value="/session/{sessionkey}/online", method=RequestMethod.POST)
+	@ResponseBody
+	public LoggedIn registerAsOnlineUser(@PathVariable String sessionkey, HttpServletResponse response) {
+		User user = userService.getCurrentUser();
+		LoggedIn loggedIn = sessionService.registerAsOnlineUser(user, sessionkey);
+		if (loggedIn != null) {
+			response.setStatus(HttpStatus.CREATED.value());
+			return loggedIn;
+		}
+		
+		response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+		return null;
+	}
+	
 	@RequestMapping(value="/session", method=RequestMethod.POST)
 	@ResponseBody
 	public Session postNewSession(@RequestBody Session session, HttpServletResponse response) {
@@ -86,6 +105,7 @@ public class SessionController extends AbstractController {
 		response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
 		return null;
 	}
+
 
 	@RequestMapping(value="/socketurl", method=RequestMethod.GET)
 	@ResponseBody
@@ -113,4 +133,5 @@ public class SessionController extends AbstractController {
 		}
 		return sessions;
 	}
+
 }

@@ -23,6 +23,7 @@ import java.util.List;
 
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
@@ -38,6 +39,8 @@ public interface IDatabaseDao {
 	
 	public boolean saveQuestion(Session session, Question question);
 	public Question getQuestion(String id);
-	List<Question> getSkillQuestions(String session, String sort);
+	List<Question> getSkillQuestions(String session);
 	public int getSkillQuestionCount(String sessionkey);
+	
+	public LoggedIn registerAsOnlineUser(User u, Session s);
 }

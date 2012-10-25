@@ -32,6 +32,7 @@ import de.thm.arsnova.annotation.Authenticated;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
@@ -77,8 +78,8 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
-	public List<Question> getSkillQuestions(String sessionkey, String sort) {
-		return databaseDao.getSkillQuestions(sessionkey, sort);
+	public List<Question> getSkillQuestions(String sessionkey) {
+		return databaseDao.getSkillQuestions(sessionkey);
 	}
 	
 	@Override
@@ -146,5 +147,14 @@ public class SessionService implements ISessionService {
 	@Authenticated
 	public Question getQuestion(String id) {
 		return databaseDao.getQuestion(id);
+	}
+
+	@Override
+	@Authenticated
+	public LoggedIn registerAsOnlineUser(User user, String sessionkey) {
+		Session session = this.joinSession(sessionkey);
+		if (session == null) return null;
+		
+		return databaseDao.registerAsOnlineUser(user, session);
 	}
 }

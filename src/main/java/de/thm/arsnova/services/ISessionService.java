@@ -25,6 +25,7 @@ import java.util.Set;
 
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
@@ -43,6 +44,7 @@ public interface ISessionService {
 	public List<Session> getMySessions(String username);
 	public boolean saveQuestion(Question question);
 	public Question getQuestion(String id);
-	public List<Question> getSkillQuestions(String sessionkey, String sort);
+	public LoggedIn registerAsOnlineUser(User user, String sessionkey);
+	public List<Question> getSkillQuestions(String sessionkey);
 	public int getSkillQuestionCount(String sessionkey);
 }
