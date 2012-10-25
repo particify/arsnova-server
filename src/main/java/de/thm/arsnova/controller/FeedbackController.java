@@ -75,16 +75,20 @@ public class FeedbackController extends AbstractController {
 		return feedbackService.getFeedbackCount(sessionkey);
 	}
 
+	@RequestMapping(value = "/session/{sessionkey}/roundedaveragefeedback", method = RequestMethod.GET)
+	@ResponseBody
+	public long getAverageFeedbackRounded(
+		@PathVariable String sessionkey
+	) {
+		return feedbackService.getAverageFeedbackRounded(sessionkey);
+	}
+	
 	@RequestMapping(value = "/session/{sessionkey}/averagefeedback", method = RequestMethod.GET)
 	@ResponseBody
-	public long getAverageFeedback(
-			@PathVariable String sessionkey,
-			@RequestParam(value = "precise", required = false) boolean preciseValue
+	public double getAverageFeedback(
+		@PathVariable String sessionkey
 	) {
-		if (preciseValue) {
-			return feedbackService.getAverageFeedback(sessionkey);
-		}
-		return feedbackService.getAverageFeedbackRounded(sessionkey);
+		return feedbackService.getAverageFeedback(sessionkey);
 	}
 
 	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.POST)

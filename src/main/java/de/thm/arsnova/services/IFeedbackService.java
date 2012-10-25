@@ -32,7 +32,7 @@ public interface IFeedbackService {
 
 	public int getFeedbackCount(String keyword);
 	
-	public long getAverageFeedback(String sessionkey);
+	public double getAverageFeedback(String sessionkey);
 
 	public long getAverageFeedbackRounded(String sessionkey);
 

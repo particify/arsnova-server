@@ -78,14 +78,20 @@ public class FeedbackServiceTest {
 	}
 
 	@Test
-	public void testShouldReturnAverageFeedback() {
-		userService.setUserAuthenticated(true);
-		assertEquals(2, feedbackService.getAverageFeedback("87654321"));
-	}
-
-	@Test
 	public void testShouldReturnAverageFeedbackForNoFeedbackAtAll() {
 		userService.setUserAuthenticated(true);
-		assertEquals(0, feedbackService.getAverageFeedback("12345678"));
+		assertEquals(0, feedbackService.getAverageFeedback("12345678"), 0);
+	}
+	
+	@Test
+	public void testShouldReturnAverageFeedbackRounded() {
+		userService.setUserAuthenticated(true);
+		assertEquals(2, feedbackService.getAverageFeedbackRounded("18273645"));
+	}
+	
+	@Test
+	public void testShouldReturnAverageFeedbackNotRounded() {
+		userService.setUserAuthenticated(true);
+		assertEquals(2.1904, feedbackService.getAverageFeedback("18273645"), 0.001);
 	}
 }

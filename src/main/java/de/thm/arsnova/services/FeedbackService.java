@@ -74,11 +74,11 @@ public class FeedbackService implements IFeedbackService {
 	}
 
 	@Override
-	public long getAverageFeedback(String sessionkey) {
+	public double getAverageFeedback(String sessionkey) {
 		Feedback feedback = databaseDao.getFeedback(sessionkey);
 		List<Integer> values = feedback.getValues();
-		int count = values.get(0) + values.get(1) + values.get(2) + values.get(3);
-		int sum = values.get(1) + (values.get(2) * 2) + (values.get(3) * 3);
+		double count = values.get(0) + values.get(1) + values.get(2) + values.get(3);
+		double sum = values.get(1) + (values.get(2) * 2) + (values.get(3) * 3);
 
 		if (count == 0)
 			return 0;
@@ -88,7 +88,7 @@ public class FeedbackService implements IFeedbackService {
 	
 	@Override
 	public long getAverageFeedbackRounded(String sessionkey) {
-		return (long) Math.round(this.getAverageFeedback(sessionkey));
+		return Math.round(this.getAverageFeedback(sessionkey));
 	}
 
 	@Override

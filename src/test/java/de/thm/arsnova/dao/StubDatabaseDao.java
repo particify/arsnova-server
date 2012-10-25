@@ -25,8 +25,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	private static Map<String, Feedback> stubFeedbacks = new ConcurrentHashMap<String, Feedback>();
 	private static Map<Session, Question> stubQuestions = new ConcurrentHashMap<Session, Question>();
 
-	private final Logger logger = LoggerFactory.getLogger(getClass());
-
 	public StubDatabaseDao() {
 		fillWithDummySessions();
 		fillWithDummyFeedbacks();
@@ -54,6 +52,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	private void fillWithDummyFeedbacks() {
 		stubFeedbacks.put("12345678", new Feedback(0, 0, 0, 0));
 		stubFeedbacks.put("87654321", new Feedback(2, 3, 5, 7));
+		stubFeedbacks.put("18273645", new Feedback(2, 3, 5, 11));
 	}
 
 	@Override
