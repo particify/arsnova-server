@@ -13,20 +13,13 @@ import de.thm.arsnova.exceptions.UnauthorizedException;
 public class AbstractController {
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ExceptionHandler(NotFoundException.class)
-	public void handleNotFoundException(Exception e, HttpServletRequest request) {
-
-	}
+	public void handleNotFoundException(final Exception e, HttpServletRequest request) {}
 
 	@ResponseStatus(HttpStatus.FORBIDDEN)
 	@ExceptionHandler(ForbiddenException.class)
-	public void handleForbiddenException(Exception e, HttpServletRequest request) {
-
-	}
+	public void handleForbiddenException(final Exception e, HttpServletRequest request) {}
 
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	@ExceptionHandler(UnauthorizedException.class)
-	public void handleUnauthorizedException(Exception e,
-			HttpServletRequest request) {
-
-	}
+	public void handleUnauthorizedException(final Exception e, HttpServletRequest request) {}
 }

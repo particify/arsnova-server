@@ -11,7 +11,7 @@ import de.thm.arsnova.services.IUserService;
 @Aspect
 public class AuthorizationAdviser {
 
-	static IUserService userService;
+	private static IUserService userService;
 
 	public void setUserService(IUserService uService) {
 		userService = uService;
@@ -42,8 +42,7 @@ public class AuthorizationAdviser {
 	 * @param object
 	 */
 	@Before("execution(public * de.thm.arsnova.services.*.*(..)) && @annotation(authenticated) && this(object)")
-	public void checkSessionMembership(Authenticated authenticated,
-			Object object) {
+	public void checkSessionMembership(Authenticated authenticated, Object object) {
 		// TODO: Implement check based on session membership lists
 	}
 }

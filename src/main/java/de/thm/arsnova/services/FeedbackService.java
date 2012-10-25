@@ -77,9 +77,12 @@ public class FeedbackService implements IFeedbackService {
 	public long getAverageFeedback(String sessionkey) {
 		Feedback feedback = databaseDao.getFeedback(sessionkey);
 		List<Integer> values = feedback.getValues();
-		int count = values.get(0) + values.get(1) + values.get(2)
-				+ values.get(3);
+		int count = values.get(0) + values.get(1) + values.get(2) + values.get(3);
 		int sum = values.get(1) + (values.get(2) * 2) + (values.get(3) * 3);
+
+		if (count == 0)
+			return 0;
+
 		return sum / count;
 	}
 
@@ -98,9 +101,7 @@ public class FeedbackService implements IFeedbackService {
 	 *            keywords mentioned above.
 	 */
 	@Override
-	public void broadcastFeedbackChanges(
-			Map<String, Set<String>> affectedUsers,
-			Set<String> allAffectedSessions) {
+	public void broadcastFeedbackChanges(Map<String, Set<String>> affectedUsers, Set<String> allAffectedSessions) {
 		for (Map.Entry<String, Set<String>> e : affectedUsers.entrySet()) {
 			// Is this user registered with a socket connection?
 			String connectedSocket = userService.getSessionForUser(e.getKey());

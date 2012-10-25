@@ -33,7 +33,8 @@ import de.thm.arsnova.exceptions.NotFoundException;
 @ContextConfiguration(locations = {
 		"file:src/main/webapp/WEB-INF/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
-		"file:src/test/resources/test-config.xml" })
+		"file:src/test/resources/test-config.xml"
+})
 public class FeedbackServiceTest {
 
 	@Autowired
@@ -52,14 +53,10 @@ public class FeedbackServiceTest {
 	public void testShouldReturnFeedback() {
 		userService.setUserAuthenticated(true);
 		assertNotNull(feedbackService.getFeedback("87654321"));
-		assertEquals(2, (int) feedbackService.getFeedback("87654321")
-				.getValues().get(0));
-		assertEquals(3, (int) feedbackService.getFeedback("87654321")
-				.getValues().get(1));
-		assertEquals(5, (int) feedbackService.getFeedback("87654321")
-				.getValues().get(2));
-		assertEquals(7, (int) feedbackService.getFeedback("87654321")
-				.getValues().get(3));
+		assertEquals(2, (int) feedbackService.getFeedback("87654321").getValues().get(0));
+		assertEquals(3, (int) feedbackService.getFeedback("87654321").getValues().get(1));
+		assertEquals(5, (int) feedbackService.getFeedback("87654321").getValues().get(2));
+		assertEquals(7, (int) feedbackService.getFeedback("87654321").getValues().get(3));
 	}
 
 	@Test(expected = NotFoundException.class)
@@ -84,5 +81,11 @@ public class FeedbackServiceTest {
 	public void testShouldReturnAverageFeedback() {
 		userService.setUserAuthenticated(true);
 		assertEquals(2, feedbackService.getAverageFeedback("87654321"));
+	}
+
+	@Test
+	public void testShouldReturnAverageFeedbackForNoFeedbackAtAll() {
+		userService.setUserAuthenticated(true);
+		assertEquals(0, feedbackService.getAverageFeedback("12345678"));
 	}
 }
