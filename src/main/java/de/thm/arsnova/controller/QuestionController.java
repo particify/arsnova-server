@@ -113,4 +113,10 @@ public class QuestionController extends AbstractController {
 		return questions;
 		
 	}
+	
+	@RequestMapping(value="/session/{sessionKey}/questions/{questiondId}", method=RequestMethod.DELETE)
+	@ResponseBody
+	public void deleteAnswersAndQuestion(@PathVariable String sessionKey, @PathVariable String questionId, HttpServletResponse response) {
+		questionService.deleteQuestion(sessionKey, questionId);
+	}
 }

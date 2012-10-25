@@ -61,6 +61,7 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.VisitedSession;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.IFeedbackService;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
@@ -601,5 +602,34 @@ public class CouchDBDao implements IDatabaseDao {
 			logger.error("Could not get list of question ids of session {}", sessionKey);
 		}
 		return null;
+	}
+
+	@Override
+	public void deleteQuestion(String sessionKey, String questionId) {
+		Session s = this.getSessionFromKeyword(sessionKey);
+		try {
+			Document question = this.getDatabase().getDocument(questionId);
+			if(!question.getString("sessionId").equals(s.get_id())) {
+				throw new UnauthorizedException();
+			}
+		} catch (IOException e) {
+			logger.error("could not find question {}", questionId);
+		}
+		
+		try {
+			View view = new View("answer/cleanup");
+			view.setKey(URLEncoder.encode("\"" + questionId + "\"", "UTF-8"));
+			ViewResults results = this.getDatabase().view(view);	
+			
+			for(Document d : results.getResults()) {
+				Document answer = this.getDatabase().getDocument(d.getId());
+				this.getDatabase().deleteDocument(answer);
+			}
+			Document question = this.getDatabase().getDocument(questionId);
+			this.getDatabase().deleteDocument(question);
+			
+		} catch(Exception e) {
+			logger.error("Could not delete question and its answers with id {}", questionId);
+		} 
 	}
 }

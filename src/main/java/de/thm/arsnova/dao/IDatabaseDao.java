@@ -45,4 +45,5 @@ public interface IDatabaseDao {
 	public LoggedIn registerAsOnlineUser(User u, Session s);
 	public void updateSessionOwnerActivity(Session session);
 	public List<String> getQuestionIds(String sessionKey);
+	public void deleteQuestion(String sessionKey, String questionId);
 }

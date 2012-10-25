@@ -30,4 +30,5 @@ public interface IQuestionService {
 	public List<Question> getSkillQuestions(String sessionkey);
 	public int getSkillQuestionCount(String sessionkey);
 	public List<String> getQuestionIds(String sessionKey);
+	public void deleteQuestion(String sessionKey, String questionId);
 }

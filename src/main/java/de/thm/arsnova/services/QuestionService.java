@@ -74,4 +74,11 @@ public class QuestionService implements IQuestionService {
 	public List<String> getQuestionIds(String sessionKey) {
 		return databaseDao.getQuestionIds(sessionKey);
 	}
+
+	@Override
+	@Authenticated
+	public void deleteQuestion(String sessionKey, String questionId) {
+		databaseDao.deleteQuestion(sessionKey, questionId);
+		
+	}
 }

@@ -169,4 +169,10 @@ public class StubDatabaseDao implements IDatabaseDao {
 		return null;
 	}
 
+	@Override
+	public void deleteQuestion(String sessionKey, String questionId) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
