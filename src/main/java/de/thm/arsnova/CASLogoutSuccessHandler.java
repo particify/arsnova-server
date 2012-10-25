@@ -15,8 +15,7 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 
 public class CASLogoutSuccessHandler implements LogoutSuccessHandler {
 
-	public static final Logger logger = LoggerFactory
-			.getLogger(CASLogoutSuccessHandler.class);
+	public static final Logger LOGGER = LoggerFactory.getLogger(CASLogoutSuccessHandler.class);
 
 	private String casUrl;
 	private String defaultTarget;
@@ -24,26 +23,28 @@ public class CASLogoutSuccessHandler implements LogoutSuccessHandler {
 	private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
 	@Override
-	public void onLogoutSuccess(HttpServletRequest request,
-			HttpServletResponse response, Authentication authentication)
-			throws IOException, ServletException {
-
+	public final void onLogoutSuccess(
+			final HttpServletRequest request,
+			final HttpServletResponse response,
+			final Authentication authentication
+	) throws IOException, ServletException {
 		String referer = request.getHeader("referer");
 		if (response.isCommitted()) {
-			logger.info("Response has already been committed. Unable to redirect to target");
+			LOGGER.info("Response has already been committed. Unable to redirect to target");
 			return;
 		}
-		redirectStrategy.sendRedirect(request, response,
-				(casUrl + "/logout?url=")
-						+ (referer != null ? referer : defaultTarget));
-
+		redirectStrategy.sendRedirect(
+				request,
+				response,
+				(casUrl + "/logout?url=") + (referer != null ? referer : defaultTarget)
+		);
 	}
 
-	public void setCasUrl(String casUrl) {
-		this.casUrl = casUrl;
+	public final void setCasUrl(final String newCasUrl) {
+		casUrl = newCasUrl;
 	}
 
-	public void setDefaultTarget(String defaultTarget) {
-		this.defaultTarget = defaultTarget;
+	public final void setDefaultTarget(final String newDefaultTarget) {
+		defaultTarget = newDefaultTarget;
 	}
 }

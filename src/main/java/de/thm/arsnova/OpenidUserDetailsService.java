@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2012 THM webMedia
- * 
+ *
  * This file is part of ARSnova.
  *
  * ARSnova is free software: you can redistribute it and/or modify
@@ -31,11 +31,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class OpenidUserDetailsService implements UserDetailsService {
 
-	public UserDetails loadUserByUsername(String openIdIdentifier) {
+	public final UserDetails loadUserByUsername(final String openIdIdentifier) {
 		final List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
 		grantedAuthorities.add(new GrantedAuthorityImpl("ROLE_USER"));
 
-		return new User(openIdIdentifier, "", true, true, true, true,
-				grantedAuthorities);
+		return new User(
+				openIdIdentifier,
+				"",
+				true,
+				true,
+				true,
+				true,
+				grantedAuthorities
+		);
 	}
 }
