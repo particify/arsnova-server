@@ -65,8 +65,8 @@ public class QuestionService implements IQuestionService {
 	
 	@Override
 	@Authenticated
-	public Question getQuestion(String id) {
-		return databaseDao.getQuestion(id);
+	public Question getQuestion(String id, String sessionKey) {
+		return databaseDao.getQuestion(id, sessionKey);
 	}
 	
 	@Override
@@ -80,5 +80,11 @@ public class QuestionService implements IQuestionService {
 	public void deleteQuestion(String sessionKey, String questionId) {
 		databaseDao.deleteQuestion(sessionKey, questionId);
 		
+	}
+
+	@Override
+	@Authenticated
+	public List<String> getUnAnsweredQuestions(String sessionKey) {
+		return databaseDao.getUnAnsweredQuestions(sessionKey);
 	}
 }

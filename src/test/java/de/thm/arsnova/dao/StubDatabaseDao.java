@@ -10,8 +10,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import de.thm.arsnova.entities.Feedback;
-import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.LoggedIn;
+import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.ForbiddenException;
@@ -128,7 +128,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public Question getQuestion(String id) {
+	public Question getQuestion(String id, String sesseionKey) {
 		// Simply ... no such question ;-)
 		return null;
 	}
@@ -173,6 +173,12 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public void deleteQuestion(String sessionKey, String questionId) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public List<String> getUnAnsweredQuestions(String sessionKey) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

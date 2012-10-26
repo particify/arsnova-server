@@ -152,7 +152,7 @@ public class Question {
 
 	@Override
 	public String toString() {
-		return "Question type '" + this.questionType + "': " + this.subject + ";\n" + this.text +
+		return "Question type '" + this.questionType + "': " + this.subject + ", session: " + session + ";\n" + this.text +
 				this.possibleAnswers;
 	}
 }

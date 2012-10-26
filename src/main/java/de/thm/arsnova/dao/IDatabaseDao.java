@@ -22,8 +22,8 @@ package de.thm.arsnova.dao;
 import java.util.List;
 
 import de.thm.arsnova.entities.Feedback;
-import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.LoggedIn;
+import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
@@ -38,7 +38,7 @@ public interface IDatabaseDao {
 	public boolean sessionKeyAvailable(String keyword);
 	
 	public boolean saveQuestion(Session session, Question question);
-	public Question getQuestion(String id);
+	public Question getQuestion(String id, String sessionKey);
 	List<Question> getSkillQuestions(String session);
 	public int getSkillQuestionCount(String sessionkey);
 	
@@ -46,4 +46,5 @@ public interface IDatabaseDao {
 	public void updateSessionOwnerActivity(Session session);
 	public List<String> getQuestionIds(String sessionKey);
 	public void deleteQuestion(String sessionKey, String questionId);
+	public List<String> getUnAnsweredQuestions(String sessionKey);
 }

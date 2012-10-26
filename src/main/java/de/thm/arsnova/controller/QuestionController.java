@@ -31,7 +31,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.entities.Question;
@@ -58,11 +57,10 @@ public class QuestionController extends AbstractController {
 	@RequestMapping(value="/session/{sessionkey}/question/{questionId}", method=RequestMethod.GET)
 	@ResponseBody
 	public Question getQuestion(@PathVariable String sessionkey, @PathVariable String questionId, HttpServletResponse response) {
-		Question question = questionService.getQuestion(questionId);
-		if (question != null && question.getSession().equals(sessionkey)) {
+		Question question = questionService.getQuestion(questionId, sessionkey);
+		if (question != null) {
 			return question;
-		}
-		
+		}		
 		response.setStatus(HttpStatus.NOT_FOUND.value());
 		return null;
 	}
@@ -102,7 +100,7 @@ public class QuestionController extends AbstractController {
 		return questions;
 	}
 	
-	@RequestMapping("/session/{sessionKey}/questionids")
+	@RequestMapping(value="/session/{sessionKey}/questionids", method=RequestMethod.GET)
 	@ResponseBody
 	public List<String> getQuestionIds(@PathVariable String sessionKey, HttpServletResponse response) {
 		List<String> questions = questionService.getQuestionIds(sessionKey);
@@ -110,13 +108,23 @@ public class QuestionController extends AbstractController {
 			throw new NotFoundException();
 		}
 		logger.info(questions.toString());
-		return questions;
-		
+		return questions;		
 	}
 	
-	@RequestMapping(value="/session/{sessionKey}/questions/{questiondId}", method=RequestMethod.DELETE)
+	@RequestMapping(value="/session/{sessionKey}/questions/{questionId}", method=RequestMethod.DELETE)
 	@ResponseBody
 	public void deleteAnswersAndQuestion(@PathVariable String sessionKey, @PathVariable String questionId, HttpServletResponse response) {
 		questionService.deleteQuestion(sessionKey, questionId);
+	}
+	
+	@RequestMapping(value="/session/{sessionKey}/questions/unanswered", method=RequestMethod.GET)
+	@ResponseBody
+	public List<String> getUnAnsweredSkillQuestions(@PathVariable String sessionKey, HttpServletResponse response) {
+		List<String> answers = questionService.getUnAnsweredQuestions(sessionKey);
+		if(answers == null || answers.isEmpty()) {
+			throw new NotFoundException();
+		}
+		logger.info(answers.toString());
+		return answers;
 	}
 }

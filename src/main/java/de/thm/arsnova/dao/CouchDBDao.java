@@ -496,7 +496,11 @@ public class CouchDBDao implements IDatabaseDao {
 	
 	
 	@Override
-	public Question getQuestion(String id) {
+	public Question getQuestion(String id, String sessionKey) {
+		Session s = this.getSessionFromKeyword(sessionKey);
+		if(s == null) {
+			throw new NotFoundException();
+		}
 		try {
 			View view = new View("skill_question/by_id");
 			view.setKey(URLEncoder.encode("\"" + id + "\"", "UTF-8"));
@@ -506,10 +510,16 @@ public class CouchDBDao implements IDatabaseDao {
 				return null;
 			}
 			
-			return (Question) JSONObject.toBean(
-					results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
-					Question.class
-			);
+			Question q = (Question) JSONObject.toBean(results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"), Question.class);
+			JSONArray possibleAnswers = results.getJSONArray("rows").optJSONObject(0).optJSONObject("value").getJSONArray("possibleAnswers");
+			Collection<PossibleAnswer> answers = JSONArray.toCollection(possibleAnswers, PossibleAnswer.class);
+			q.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
+			
+			if(s.get_id().equals(q.getSessionId())) {
+				return q;
+			} else {
+				throw new UnauthorizedException();
+			}
 		} catch (IOException e) {
 			logger.error("Could not get question with id {}", id);
 		}
@@ -631,5 +641,44 @@ public class CouchDBDao implements IDatabaseDao {
 		} catch(Exception e) {
 			logger.error("Could not delete question and its answers with id {}", questionId);
 		} 
+	}
+
+	@Override
+	public List<String> getUnAnsweredQuestions(String sessionKey) {
+		User user = userService.getCurrentUser();
+		if(user == null) {
+			throw new UnauthorizedException();
+		}
+		
+		Session s = this.getSessionFromKeyword(sessionKey);
+		if(s == null) {
+			throw new NotFoundException();
+		}
+		
+		try {
+			View view = new View("answer/by_user");
+			view.setKey("[" + URLEncoder.encode("\"" + user.getUsername() + "\",\"" + s.get_id()+ "\"", "UTF-8") + "]");
+			ViewResults anseweredQuestions = this.getDatabase().view(view);
+
+			List<String> answered = new ArrayList<String>();
+			for (Document d : anseweredQuestions.getResults()) {
+				answered.add(d.getString("value"));
+			}
+
+			List<String> questions = this.getQuestionIds(sessionKey);
+			List<String> unanswered = new ArrayList<String>();
+			for(String questionId : questions) {
+				if(!answered.contains(questionId)) {
+					unanswered.add(questionId);
+				}
+			}
+			return unanswered;
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		return null;
 	}
 }
