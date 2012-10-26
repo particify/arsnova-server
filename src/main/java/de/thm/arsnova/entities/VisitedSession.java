@@ -19,45 +19,46 @@
 package de.thm.arsnova.entities;
 
 public class VisitedSession {
-		private String _id;
-		private String name;
-		private String keyword;
-		
-		public VisitedSession() {}
-		
-		public VisitedSession(Session s) {
-			this._id = s.get_id();
-			this.name = s.getName();
-			this.keyword = s.getKeyword();
-		}
+	private String _id;
+	private String name;
+	private String keyword;
 
-		public String get_id() {
-			return _id;
-		}
-
-		public void set_id(String _id) {
-			this._id = _id;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		public String getKeyword() {
-			return keyword;
-		}
-
-		public void setKeyword(String keyword) {
-			this.keyword = keyword;
-		}
-
-		@Override
-		public String toString() {
-			return "VisitedSession [_id=" + _id + ", name=" + name
-					+ ", keyword=" + keyword + "]";
-		}
+	public VisitedSession() {
 	}
+
+	public VisitedSession(Session s) {
+		this._id = s.get_id();
+		this.name = s.getName();
+		this.keyword = s.getKeyword();
+	}
+
+	public String get_id() {
+		return _id;
+	}
+
+	public void set_id(String _id) {
+		this._id = _id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getKeyword() {
+		return keyword;
+	}
+
+	public void setKeyword(String keyword) {
+		this.keyword = keyword;
+	}
+
+	@Override
+	public String toString() {
+		return "VisitedSession [_id=" + _id + ", name=" + name + ", keyword="
+				+ keyword + "]";
+	}
+}

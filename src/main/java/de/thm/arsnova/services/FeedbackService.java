@@ -28,10 +28,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import de.thm.arsnova.annotation.Authenticated;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
@@ -39,37 +39,35 @@ public class FeedbackService implements IFeedbackService {
 
 	@Autowired
 	ARSnovaSocketIOServer server;
-	
+
 	/**
 	 * minutes, after which the feedback is deleted
 	 */
 	@Value("${feedback.cleanup}")
 	private int cleanupFeedbackDelay;
-	
+
 	@Autowired
 	IDatabaseDao databaseDao;
-	
+
 	@Autowired
 	IUserService userService;
-	
+
 	public void setDatabaseDao(IDatabaseDao databaseDao) {
 		this.databaseDao = databaseDao;
 	}
-	
+
 	@Override
-	@Scheduled(fixedDelay=5000)
+	@Scheduled(fixedDelay = 5000)
 	public void cleanFeedbackVotes() {
-		databaseDao.cleanFeedbackVotes(cleanupFeedbackDelay);		
+		databaseDao.cleanFeedbackVotes(cleanupFeedbackDelay);
 	}
 
 	@Override
-	@Authenticated
 	public Feedback getFeedback(String keyword) {
 		return databaseDao.getFeedback(keyword);
 	}
-	
+
 	@Override
-	@Authenticated
 	public int getFeedbackCount(String keyword) {
 		Feedback feedback = databaseDao.getFeedback(keyword);
 		List<Integer> values = feedback.getValues();
@@ -77,28 +75,38 @@ public class FeedbackService implements IFeedbackService {
 	}
 
 	@Override
-	@Authenticated
-	public long getAverageFeedback(String sessionkey) {
+	public double getAverageFeedback(String sessionkey) {
 		Feedback feedback = databaseDao.getFeedback(sessionkey);
 		List<Integer> values = feedback.getValues();
-		int count = values.get(0) + values.get(1) + values.get(2) + values.get(3);
-		int sum = values.get(1) + (values.get(2) * 2) + (values.get(3) * 3);
+		double count = values.get(0) + values.get(1) + values.get(2) + values.get(3);
+		double sum = values.get(1) + (values.get(2) * 2) + (values.get(3) * 3);
+
+		if (count == 0)
+			throw new NoContentException();
+
 		return sum / count;
 	}
-	
+
 	@Override
-	@Authenticated
+	public long getAverageFeedbackRounded(String sessionkey) {
+		return Math.round(this.getAverageFeedback(sessionkey));
+	}
+
+	@Override
 	public boolean saveFeedback(String keyword, int value, User user) {
 		return databaseDao.saveFeedback(keyword, value, user);
 	}
 
 	/**
 	 * 
-	 * @param affectedUsers The user whose feedback got deleted along with all affected session keywords
-	 * @param allAffectedSessions For convenience, this represents the union of all session keywords mentioned above.
+	 * @param affectedUsers
+	 *            The user whose feedback got deleted along with all affected
+	 *            session keywords
+	 * @param allAffectedSessions
+	 *            For convenience, this represents the union of all session
+	 *            keywords mentioned above.
 	 */
 	@Override
-	@Authenticated
 	public void broadcastFeedbackChanges(Map<String, Set<String>> affectedUsers, Set<String> allAffectedSessions) {
 		for (Map.Entry<String, Set<String>> e : affectedUsers.entrySet()) {
 			// Is this user registered with a socket connection?
@@ -108,5 +116,10 @@ public class FeedbackService implements IFeedbackService {
 			}
 		}
 		this.server.reportUpdatedFeedbackForSessions(allAffectedSessions);
+	}
+
+	@Override
+	public Integer getMyFeedback(String keyword, User user) {
+		return this.databaseDao.getMyFeedback(keyword, user);
 	}
 }

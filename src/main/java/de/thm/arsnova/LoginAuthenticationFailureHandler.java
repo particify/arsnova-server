@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2012 THM webMedia
- * 
+ *
  * This file is part of ARSnova.
  *
  * ARSnova is free software: you can redistribute it and/or modify
@@ -30,25 +30,27 @@ import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 
-public class LoginAuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
-	
+public class LoginAuthenticationFailureHandler extends
+		SimpleUrlAuthenticationFailureHandler {
+
 	private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 	private String defaultFailureUrl;
-	
+
 	@Override
-	public void onAuthenticationFailure(HttpServletRequest request,
-			HttpServletResponse response, AuthenticationException exception)
-			throws IOException, ServletException {
-		
+	public final void onAuthenticationFailure(
+			final HttpServletRequest request,
+			final HttpServletResponse response,
+			final AuthenticationException exception
+	) throws IOException, ServletException {
 		HttpSession session = request.getSession();
 		if (session != null && session.getAttribute("ars-referer") != null) {
 			defaultFailureUrl = (String) session.getAttribute("ars-referer");
 		}
-		
+
 		redirectStrategy.sendRedirect(request, response, defaultFailureUrl);
 	}
-	
-	public void setDefaultFailureUrl(String defaultFailureUrl) {
+
+	public final void setDefaultFailureUrl(final String defaultFailureUrl) {
 		this.defaultFailureUrl = defaultFailureUrl;
 	}
 

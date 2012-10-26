@@ -23,13 +23,18 @@ import java.util.List;
 
 import de.thm.arsnova.entities.Question;
 
-
 public interface IQuestionService {
 	public boolean saveQuestion(Question question);
+
 	public Question getQuestion(String id, String sessionkey);
+
 	public List<Question> getSkillQuestions(String sessionkey);
+
 	public int getSkillQuestionCount(String sessionkey);
+
 	public List<String> getQuestionIds(String sessionKey);
+
 	public void deleteQuestion(String sessionKey, String questionId);
+
 	public List<String> getUnAnsweredQuestions(String sessionKey);
 }

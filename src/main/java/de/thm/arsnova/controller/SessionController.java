@@ -47,53 +47,60 @@ import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Controller
 public class SessionController extends AbstractController {
-	
-	public static final Logger logger = LoggerFactory.getLogger(SessionController.class);
-	
+
+	public static final Logger logger = LoggerFactory
+			.getLogger(SessionController.class);
+
 	@Autowired
 	ISessionService sessionService;
-	
+
 	@Autowired
 	IUserService userService;
-	
+
 	@Autowired
 	ARSnovaSocketIOServer server;
-	
+
 	@RequestMapping(method = RequestMethod.POST, value = "/authorize")
-	public void authorize(@RequestBody Object sessionObject, HttpServletResponse response) {
-		String socketid = (String) JSONObject.fromObject(sessionObject).get("session");
-		if(socketid == null) {
+	public void authorize(@RequestBody Object sessionObject,
+			HttpServletResponse response) {
+		String socketid = (String) JSONObject.fromObject(sessionObject).get(
+				"session");
+		if (socketid == null) {
 			return;
-		}		
+		}
 		User u = userService.getCurrentUser();
 		logger.info("authorize session: " + socketid + ", user is:  " + u);
-		response.setStatus(u != null ? HttpStatus.CREATED.value() : HttpStatus.UNAUTHORIZED.value());
+		response.setStatus(u != null ? HttpStatus.CREATED.value()
+				: HttpStatus.UNAUTHORIZED.value());
 		userService.putUser2SessionID(UUID.fromString(socketid), u);
 	}
-	
-	@RequestMapping(value="/session/{sessionkey}", method=RequestMethod.GET)
+
+	@RequestMapping(value = "/session/{sessionkey}", method = RequestMethod.GET)
 	@ResponseBody
 	public Session joinSession(@PathVariable String sessionkey) {
 		return sessionService.joinSession(sessionkey);
 	}
-	
-	@RequestMapping(value="/session/{sessionkey}/online", method=RequestMethod.POST)
+
+	@RequestMapping(value = "/session/{sessionkey}/online", method = RequestMethod.POST)
 	@ResponseBody
-	public LoggedIn registerAsOnlineUser(@PathVariable String sessionkey, HttpServletResponse response) {
+	public LoggedIn registerAsOnlineUser(@PathVariable String sessionkey,
+			HttpServletResponse response) {
 		User user = userService.getCurrentUser();
-		LoggedIn loggedIn = sessionService.registerAsOnlineUser(user, sessionkey);
+		LoggedIn loggedIn = sessionService.registerAsOnlineUser(user,
+				sessionkey);
 		if (loggedIn != null) {
 			response.setStatus(HttpStatus.CREATED.value());
 			return loggedIn;
 		}
-		
+
 		response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 		return null;
 	}
-	
-	@RequestMapping(value="/session", method=RequestMethod.POST)
+
+	@RequestMapping(value = "/session", method = RequestMethod.POST)
 	@ResponseBody
-	public Session postNewSession(@RequestBody Session session, HttpServletResponse response) {
+	public Session postNewSession(@RequestBody Session session,
+			HttpServletResponse response) {
 		Session newSession = sessionService.saveSession(session);
 		if (session != null) {
 			response.setStatus(HttpStatus.CREATED.value());
@@ -104,22 +111,22 @@ public class SessionController extends AbstractController {
 		return null;
 	}
 
-	@RequestMapping(value="/socketurl", method=RequestMethod.GET)
+	@RequestMapping(value = "/socketurl", method = RequestMethod.GET)
 	@ResponseBody
 	public String getSocketUrl() {
 		StringBuilder url = new StringBuilder();
-		
+
 		url.append(server.isUseSSL() ? "https://" : "http://");
 		url.append(server.getHostIp() + ":" + server.getPortNumber());
-		
+
 		return url.toString();
 	}
-	
-	@RequestMapping(value={"/mySessions","/session/mysessions"}, method=RequestMethod.GET)
+
+	@RequestMapping(value = { "/mySessions", "/session/mysessions" }, method = RequestMethod.GET)
 	@ResponseBody
 	public List<Session> getMySession(HttpServletResponse response) {
 		String username = userService.getCurrentUser().getUsername();
-		if(username == null) {
+		if (username == null) {
 			response.setStatus(HttpStatus.NOT_FOUND.value());
 			return null;
 		}

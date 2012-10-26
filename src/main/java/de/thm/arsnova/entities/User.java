@@ -63,14 +63,16 @@ public class User implements Serializable {
 	public String toString() {
 		return "User, username: " + this.username + ", type: " + this.type;
 	}
+
 	@Override
 	public int hashCode() {
-		return username.concat(type).hashCode();
+		return username.hashCode();
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null || ! obj.getClass().equals(this.getClass())) return false;
+		if (obj == null || !obj.getClass().equals(this.getClass()))
+			return false;
 		User other = (User) obj;
 		return this.username.equals(other.username) && this.type.equals(other.type);
 	}

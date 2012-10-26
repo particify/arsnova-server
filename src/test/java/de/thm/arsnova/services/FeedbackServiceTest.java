@@ -18,8 +18,8 @@
  */
 package de.thm.arsnova.services;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,11 +27,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.exceptions.UnauthorizedException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations={
+@ContextConfiguration(locations = {
 		"file:src/main/webapp/WEB-INF/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
 		"file:src/test/resources/test-config.xml"
@@ -40,22 +40,16 @@ public class FeedbackServiceTest {
 
 	@Autowired
 	IFeedbackService feedbackService;
-	
+
 	@Autowired
 	StubUserService userService;
 
-	@Test(expected=NotFoundException.class)
+	@Test(expected = NotFoundException.class)
 	public void testShouldFindFeedbackForNonExistantSession() {
 		userService.setUserAuthenticated(true);
 		feedbackService.getFeedback("00000000");
 	}
-	
-	@Test(expected=UnauthorizedException.class)
-	public void testShouldNotReturnFeedbackIfUnauthorized() {
-		userService.setUserAuthenticated(false);
-		feedbackService.getFeedback("00000000");
-	}
-	
+
 	@Test
 	public void testShouldReturnFeedback() {
 		userService.setUserAuthenticated(true);
@@ -65,40 +59,46 @@ public class FeedbackServiceTest {
 		assertEquals(5, (int) feedbackService.getFeedback("87654321").getValues().get(2));
 		assertEquals(7, (int) feedbackService.getFeedback("87654321").getValues().get(3));
 	}
-	
-	@Test(expected=NotFoundException.class)
+
+	@Test(expected = NotFoundException.class)
 	public void testShouldFindFeedbackCountForNonExistantSession() {
 		userService.setUserAuthenticated(true);
 		feedbackService.getFeedbackCount("00000000");
 	}
-	
-	@Test(expected=UnauthorizedException.class)
-	public void testShouldNotReturnFeedbackCountIfUnauthorized() {
-		userService.setUserAuthenticated(false);
-		feedbackService.getFeedbackCount("00000000");
-	}
-	
+
 	@Test
 	public void testShouldReturnFeedbackCount() {
 		userService.setUserAuthenticated(true);
 		assertEquals(17, feedbackService.getFeedbackCount("87654321"));
 	}
-	
-	@Test(expected=NotFoundException.class)
+
+	@Test(expected = NotFoundException.class)
 	public void testShouldFindAverageFeedbackForNonExistantSession() {
 		userService.setUserAuthenticated(true);
 		feedbackService.getAverageFeedback("00000000");
 	}
-	
-	@Test(expected=UnauthorizedException.class)
-	public void testShouldNotReturnAverageFeedbackIfUnauthorized() {
-		userService.setUserAuthenticated(false);
-		feedbackService.getAverageFeedback("00000000");
-	}
-	
+
 	@Test
-	public void testShouldReturnAverageFeedback() {
+	public void testShouldReturnZeroFeedbackCountForNoFeedbackAtAll() {
 		userService.setUserAuthenticated(true);
-		assertEquals(2, feedbackService.getAverageFeedback("87654321"));
+		assertEquals(0, feedbackService.getFeedbackCount("12345678"));
+	}
+
+	@Test(expected = NoContentException.class)
+	public void testShouldReturnAverageFeedbackForNoFeedbackAtAll() {
+		userService.setUserAuthenticated(true);
+		feedbackService.getAverageFeedback("12345678");
+	}
+
+	@Test
+	public void testShouldReturnAverageFeedbackRounded() {
+		userService.setUserAuthenticated(true);
+		assertEquals(2, feedbackService.getAverageFeedbackRounded("18273645"));
+	}
+
+	@Test
+	public void testShouldReturnAverageFeedbackNotRounded() {
+		userService.setUserAuthenticated(true);
+		assertEquals(2.1904, feedbackService.getAverageFeedback("18273645"), 0.001);
 	}
 }

@@ -22,29 +22,46 @@ package de.thm.arsnova.dao;
 import java.util.List;
 
 import de.thm.arsnova.entities.Feedback;
-import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
 public interface IDatabaseDao {
 	public void cleanFeedbackVotes(int cleanupFeedbackDelay);
+
 	public Session getSessionFromKeyword(String keyword);
+
 	public Session getSession(String keyword);
+
 	public List<Session> getMySessions(String username);
+
 	public Session saveSession(Session session);
+
 	public Feedback getFeedback(String keyword);
+
 	public boolean saveFeedback(String keyword, int value, User user);
+
 	public boolean sessionKeyAvailable(String keyword);
-	
+
 	public boolean saveQuestion(Session session, Question question);
+
 	public Question getQuestion(String id, String sessionKey);
+
 	List<Question> getSkillQuestions(String session);
+
 	public int getSkillQuestionCount(String sessionkey);
-	
+
 	public LoggedIn registerAsOnlineUser(User u, Session s);
+
 	public void updateSessionOwnerActivity(Session session);
+
+	public Integer getMyFeedback(String keyword, User user);
+
 	public List<String> getQuestionIds(String sessionKey);
+
 	public void deleteQuestion(String sessionKey, String questionId);
+
 	public List<String> getUnAnsweredQuestions(String sessionKey);
+
 }

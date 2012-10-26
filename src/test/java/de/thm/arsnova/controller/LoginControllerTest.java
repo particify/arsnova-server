@@ -42,13 +42,11 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import de.thm.arsnova.services.StubUserService;
 
-
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations={
+@ContextConfiguration(locations = {
 		"file:src/main/webapp/WEB-INF/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
-		"file:src/test/resources/test-config.xml"
-})
+		"file:src/test/resources/test-config.xml" })
 public class LoginControllerTest {
 
 	@Inject
@@ -56,18 +54,19 @@ public class LoginControllerTest {
 	private MockHttpServletRequest request;
 	private MockHttpServletResponse response;
 	private HandlerAdapter handlerAdapter;
-	
+
 	@Autowired
 	private LoginController loginController;
-	
+
 	@Autowired
 	private StubUserService userService;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		this.request = new MockHttpServletRequest();
 		this.response = new MockHttpServletResponse();
-		handlerAdapter = applicationContext.getBean(AnnotationMethodHandlerAdapter.class);
+		handlerAdapter = applicationContext
+				.getBean(AnnotationMethodHandlerAdapter.class);
 	}
 
 	@Test
@@ -76,16 +75,18 @@ public class LoginControllerTest {
 		request.setRequestURI("/doLogin");
 		request.addParameter("type", "guest");
 
-		final ModelAndView mav = handlerAdapter.handle(request, response, loginController);
+		final ModelAndView mav = handlerAdapter.handle(request, response,
+				loginController);
 
 		assertNotNull(mav);
 		assertNotNull(mav.getView());
 		RedirectView view = (RedirectView) mav.getView();
 		assertEquals("/#auth/checkLogin", view.getUrl());
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		Authentication auth = SecurityContextHolder.getContext()
+				.getAuthentication();
 		assertEquals(auth.getClass(), UsernamePasswordAuthenticationToken.class);
 	}
-	
+
 	@Test
 	public void testReuseGuestLogin() throws Exception {
 		request.setMethod("GET");
@@ -93,21 +94,23 @@ public class LoginControllerTest {
 		request.addParameter("type", "guest");
 		request.addParameter("user", "Guest1234567890");
 
-		final ModelAndView mav = handlerAdapter.handle(request, response, loginController);
+		final ModelAndView mav = handlerAdapter.handle(request, response,
+				loginController);
 
 		assertNotNull(mav);
 		assertNotNull(mav.getView());
 		RedirectView view = (RedirectView) mav.getView();
 		assertEquals("/#auth/checkLogin", view.getUrl());
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		Authentication auth = SecurityContextHolder.getContext()
+				.getAuthentication();
 		assertEquals(auth.getClass(), UsernamePasswordAuthenticationToken.class);
 		assertEquals("Guest1234567890", auth.getName());
 	}
-	
+
 	@Test
 	public void testUser() throws Exception {
 		userService.setUserAuthenticated(true);
-		
+
 		request.setMethod("GET");
 		request.setRequestURI("/whoami");
 
@@ -120,20 +123,22 @@ public class LoginControllerTest {
 	public void testLogoutWithoutRedirect() throws Exception {
 		request.setMethod("GET");
 		request.setRequestURI("/logout");
-		final ModelAndView mav = handlerAdapter.handle(request, response, loginController);
+		final ModelAndView mav = handlerAdapter.handle(request, response,
+				loginController);
 		assertNotNull(mav);
 		assertNotNull(mav.getView());
 		RedirectView view = (RedirectView) mav.getView();
 		assertEquals("/", view.getUrl());
 	}
-	
+
 	@Test
 	public void testLogoutWithRedirect() throws Exception {
 		request.setMethod("GET");
 		request.setRequestURI("/logout");
 		request.addHeader("referer", "/dojo-index.html");
 
-		final ModelAndView mav = handlerAdapter.handle(request, response, loginController);
+		final ModelAndView mav = handlerAdapter.handle(request, response,
+				loginController);
 		assertNotNull(mav);
 		assertNotNull(mav.getView());
 		RedirectView view = (RedirectView) mav.getView();

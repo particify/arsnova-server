@@ -18,19 +18,18 @@
  */
 package de.thm.arsnova;
 
-
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 /**
  * Unit test to verify Spring context wiring.
- *
+ * 
  */
 public class WiringTest extends AbstractSpringContextTestBase {
 
-    @Test
-    public void testWiring() throws Exception {
-        assertTrue(applicationContext.getBeanDefinitionCount() > 0);
-    }
+	@Test
+	public void testWiring() throws Exception {
+		assertTrue(applicationContext.getBeanDefinitionCount() > 0);
+	}
 }

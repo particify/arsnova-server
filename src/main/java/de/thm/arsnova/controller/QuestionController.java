@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.entities.Question;
@@ -39,60 +40,60 @@ import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
-
 @Controller
 public class QuestionController extends AbstractController {
-	
-	public static final Logger logger = LoggerFactory.getLogger(QuestionController.class);
-	
+
+	public static final Logger logger = LoggerFactory
+			.getLogger(QuestionController.class);
+
 	@Autowired
 	IQuestionService questionService;
-	
+
 	@Autowired
 	IUserService userService;
-	
+
 	@Autowired
 	ARSnovaSocketIOServer server;
 
-	@RequestMapping(value="/session/{sessionkey}/question/{questionId}", method=RequestMethod.GET)
+	@RequestMapping(value = "/session/{sessionkey}/question/{questionId}", method = RequestMethod.GET)
 	@ResponseBody
-	public Question getQuestion(@PathVariable String sessionkey, @PathVariable String questionId, HttpServletResponse response) {
+	public Question getQuestion(@PathVariable String sessionkey,
+			@PathVariable String questionId, HttpServletResponse response) {
 		Question question = questionService.getQuestion(questionId, sessionkey);
 		if (question != null) {
 			return question;
-		}		
+		}
+
 		response.setStatus(HttpStatus.NOT_FOUND.value());
 		return null;
 	}
-	
-	@RequestMapping(value="/session/{sessionkey}/question", method=RequestMethod.POST)
+
+	@RequestMapping(value = "/session/{sessionkey}/question", method = RequestMethod.POST)
 	@ResponseBody
-	public void postQuestion(@PathVariable String sessionkey, @RequestBody Question question, HttpServletResponse response) {
-		if (! sessionkey.equals(question.getSession())) {
+	public void postQuestion(@PathVariable String sessionkey,
+			@RequestBody Question question, HttpServletResponse response) {
+		if (!sessionkey.equals(question.getSession())) {
 			response.setStatus(HttpStatus.PRECONDITION_FAILED.value());
 			return;
 		}
-		
+
 		if (questionService.saveQuestion(question)) {
 			response.setStatus(HttpStatus.CREATED.value());
 			return;
 		}
-		
+
 		response.setStatus(HttpStatus.BAD_REQUEST.value());
 		return;
 	}
-	
-	@RequestMapping(
-		value={
-				"/getSkillQuestions/{sessionkey}",
-				"/session/{sessionkey}/skillquestions"
-		},
-		method=RequestMethod.GET
-	)
+
+	@RequestMapping(value = { "/getSkillQuestions/{sessionkey}",
+			"/session/{sessionkey}/skillquestions" }, method = RequestMethod.GET)
 	@ResponseBody
-	public List<Question> getSkillQuestions(@PathVariable String sessionkey, HttpServletResponse response) {
-		List<Question> questions = questionService.getSkillQuestions(sessionkey);
-		if(questions == null || questions.isEmpty()) {
+	public List<Question> getSkillQuestions(@PathVariable String sessionkey,
+			HttpServletResponse response) {
+		List<Question> questions = questionService
+				.getSkillQuestions(sessionkey);
+		if (questions == null || questions.isEmpty()) {
 			response.setStatus(HttpStatus.NOT_FOUND.value());
 			return null;
 		}

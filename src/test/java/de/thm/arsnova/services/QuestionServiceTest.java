@@ -18,9 +18,6 @@
  */
 package de.thm.arsnova.services;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
@@ -29,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 
@@ -37,61 +33,32 @@ import de.thm.arsnova.exceptions.UnauthorizedException;
 @ContextConfiguration(locations = {
 		"file:src/main/webapp/WEB-INF/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
-		"file:src/test/resources/test-config.xml" })
-public class SessionServiceTest {
+		"file:src/test/resources/test-config.xml"
+})
+public class QuestionServiceTest {
 
 	@Autowired
-	ISessionService sessionService;
+	IQuestionService questionService;
 
 	@Autowired
 	StubUserService userService;
 
-	@Test
-	public void testShouldGenerateSessionKeyword() {
-		System.out.println(sessionService.generateKeyword());
-		assertTrue(sessionService.generateKeyword().matches("^[0-9]{8}$"));
+	@Test(expected = UnauthorizedException.class)
+	public void testShouldNotReturnQuestionsIfNotAuthenticated() {
+		userService.setUserAuthenticated(false);
+		questionService.getSkillQuestions("12345678");
+
 	}
 
 	@Test(expected = NotFoundException.class)
-	public void testShouldFindNonExistantSession() {
+	public void testShouldFindQuestionsForNonExistantSession() {
 		userService.setUserAuthenticated(true);
-		sessionService.joinSession("00000000");
-	}
-
-	@Test(expected = UnauthorizedException.class)
-	public void testShouldNotReturnSessionIfUnauthorized() {
-		userService.setUserAuthenticated(false);
-		sessionService.joinSession("12345678");
-	}
-
-	@Test(expected = UnauthorizedException.class)
-	public void testShouldNotSaveSessionIfUnauthorized() {
-		userService.setUserAuthenticated(false);
-
-		Session session = new Session();
-		session.setActive(true);
-		session.setCreator("ptsr00");
-		session.setKeyword("11111111");
-		session.setName("TestSessionX");
-		session.setShortName("TSX");
-		sessionService.saveSession(session);
-
-		userService.setUserAuthenticated(true);
-
-		assertNull(sessionService.joinSession("11111111"));
+		questionService.getSkillQuestions("00000000");
 	}
 
 	@Test
-	public void testShouldSaveSession() {
+	public void testShouldFindQuestions() {
 		userService.setUserAuthenticated(true);
-
-		Session session = new Session();
-		session.setActive(true);
-		session.setCreator("ptsr00");
-		session.setKeyword("11111111");
-		session.setName("TestSessionX");
-		session.setShortName("TSX");
-		sessionService.saveSession(session);
-		assertNotNull(sessionService.joinSession("11111111"));
+		assertEquals(1, questionService.getSkillQuestionCount("12345678"));
 	}
 }

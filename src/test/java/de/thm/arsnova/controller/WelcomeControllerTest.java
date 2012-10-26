@@ -36,15 +36,15 @@ public class WelcomeControllerTest extends AbstractSpringContextTestBase {
 		this.request = new MockHttpServletRequest();
 		this.response = new MockHttpServletResponse();
 	}
-	
+
 	@Test
 	public void testIndexPage() throws Exception {
 		request.setMethod("GET");
-        request.setRequestURI("/");
+		request.setRequestURI("/");
 
-        final ModelAndView mav = handle(request, response);
-        assertNotNull(mav);
-        assertEquals("redirect:/index.html", mav.getViewName());
-	}	
-	
+		final ModelAndView mav = handle(request, response);
+		assertNotNull(mav);
+		assertEquals("redirect:/index.html", mav.getViewName());
+	}
+
 }

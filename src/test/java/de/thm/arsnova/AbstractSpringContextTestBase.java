@@ -38,35 +38,43 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations={
+@ContextConfiguration(locations = {
 		"file:src/main/webapp/WEB-INF/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
-		"file:src/test/resources/test-config.xml"
-})
-public class AbstractSpringContextTestBase extends AbstractJUnit4SpringContextTests {
-	
+		"file:src/test/resources/test-config.xml" })
+public class AbstractSpringContextTestBase extends
+		AbstractJUnit4SpringContextTests {
+
 	protected MockHttpServletRequest request;
 	protected MockHttpServletResponse response;
-	
-	protected ModelAndView handle(HttpServletRequest request, HttpServletResponse response)
-            throws Exception {
-        final HandlerMapping handlerMapping = applicationContext.getBean(RequestMappingHandlerMapping.class);
-        final HandlerExecutionChain handler = handlerMapping.getHandler(request);
-        assertNotNull("No handler found for request, check you request mapping", handler);
 
-        final Object controller = handler.getHandler();
-        // if you want to override any injected attributes do it here
+	protected ModelAndView handle(HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+		final HandlerMapping handlerMapping = applicationContext
+				.getBean(RequestMappingHandlerMapping.class);
+		final HandlerExecutionChain handler = handlerMapping
+				.getHandler(request);
+		assertNotNull(
+				"No handler found for request, check you request mapping",
+				handler);
 
-        final HandlerInterceptor[] interceptors =
-            handlerMapping.getHandler(request).getInterceptors();
-        for (HandlerInterceptor interceptor : interceptors) {
-            final boolean carryOn = interceptor.preHandle(request, response, controller);
-            if (!carryOn) {
-                return null;
-            }
-        }
-        HandlerAdapter handlerAdapter = applicationContext.getBean(RequestMappingHandlerAdapter.class);;
-        final ModelAndView mav = handlerAdapter.handle(request, response, controller);
-        return mav;
-    }
+		final Object controller = handler.getHandler();
+		// if you want to override any injected attributes do it here
+
+		final HandlerInterceptor[] interceptors = handlerMapping.getHandler(
+				request).getInterceptors();
+		for (HandlerInterceptor interceptor : interceptors) {
+			final boolean carryOn = interceptor.preHandle(request, response,
+					controller);
+			if (!carryOn) {
+				return null;
+			}
+		}
+		HandlerAdapter handlerAdapter = applicationContext
+				.getBean(RequestMappingHandlerAdapter.class);
+		;
+		final ModelAndView mav = handlerAdapter.handle(request, response,
+				controller);
+		return mav;
+	}
 }
