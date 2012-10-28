@@ -2,6 +2,7 @@ package de.thm.arsnova.controller;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import javax.inject.Inject;
 
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 
+import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.StubUserService;
 
@@ -25,7 +27,8 @@ import de.thm.arsnova.services.StubUserService;
 @ContextConfiguration(locations = {
 		"file:src/main/webapp/WEB-INF/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
-		"file:src/test/resources/test-config.xml" })
+		"file:src/test/resources/test-config.xml"
+})
 public class FeedbackControllerTest {
 
 	@Inject
@@ -44,8 +47,7 @@ public class FeedbackControllerTest {
 	public void setUp() {
 		this.request = new MockHttpServletRequest();
 		this.response = new MockHttpServletResponse();
-		handlerAdapter = applicationContext
-				.getBean(AnnotationMethodHandlerAdapter.class);
+		handlerAdapter = applicationContext.getBean(AnnotationMethodHandlerAdapter.class);
 	}
 
 	@Test(expected = NotFoundException.class)
@@ -54,10 +56,33 @@ public class FeedbackControllerTest {
 
 		request.setMethod("GET");
 		request.setRequestURI("/session/00000000/feedback");
-		final ModelAndView mav = handlerAdapter.handle(request, response,
-				feedbackController);
+		final ModelAndView mav = handlerAdapter.handle(request, response, feedbackController);
 
 		assertNull(mav);
 		assertTrue(response.getStatus() == 404);
+	}
+
+	@Test(expected = NoContentException.class)
+	public void testShouldNotGetAverageFeedbackContentForSessionWithoutFeedback() throws Exception {
+		userService.setUserAuthenticated(true);
+
+		request.setMethod("GET");
+		request.setRequestURI("/session/12345678/averagefeedback");
+		final ModelAndView mav = handlerAdapter.handle(request, response, feedbackController);
+
+		assertNull(mav);
+		assertTrue(response.getStatus() == 204);
+	}
+
+	@Test
+	public void testShouldNotGetCorrectFeedbackCountForSessionWithoutFeedback() throws Exception {
+		userService.setUserAuthenticated(true);
+
+		request.setMethod("GET");
+		request.setRequestURI("/session/12345678/feedbackcount");
+		handlerAdapter.handle(request, response, feedbackController);
+
+		assertTrue(response.getStatus() == 200);
+		assertEquals("0", response.getContentAsString());
 	}
 }

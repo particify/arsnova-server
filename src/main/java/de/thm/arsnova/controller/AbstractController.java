@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import de.thm.arsnova.exceptions.ForbiddenException;
+import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 
@@ -27,7 +28,7 @@ public class AbstractController {
 	}
 
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	@ExceptionHandler(UnauthorizedException.class)
+	@ExceptionHandler(NoContentException.class)
 	public void handleNoContentException(final Exception e, HttpServletRequest request) {
 	}
 }
