@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.services.IUserService;
@@ -129,6 +130,19 @@ public class QuestionController extends AbstractController {
 		return answers;
 	}
 	
+	/**
+	 * returns a JSON document which represents the given answer of a question.
+	 * @param sessionKey
+	 *            Session Keyword to which the question belongs to
+	 * @param questionId
+	 *            CouchDB Question ID for which the given answer should be
+	 *            retrieved
+	 * @return JSON Document of {@link Answer} or {@link NotFoundException} 
+	 * @throws NotFoundException if
+	 *         wrong session, wrong question or no answer was given by the
+	 *         current user
+	 * @throws ForbiddenException if not logged in
+	 */
 	@RequestMapping(value="/session/{sessionKey}/question/{questionId}/myanswer", method=RequestMethod.GET)
 	@ResponseBody
 	public Answer getMyAnswer(@PathVariable String sessionKey, @PathVariable String questionId, HttpServletResponse response) {
