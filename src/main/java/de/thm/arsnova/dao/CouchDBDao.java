@@ -755,4 +755,23 @@ public class CouchDBDao implements IDatabaseDao {
 		
 		return null;
 	}
+	
+	@Override
+	public int getAnswerCount(String sessionKey, String questionId) {
+		Session s = this.getSessionFromKeyword(sessionKey);
+		if(s == null) {
+			throw new NotFoundException();
+		}
+		
+		try {
+			View view = new View("skill_question/count_answers_by_question");
+			view.setKey(URLEncoder.encode("\"" + questionId + "\"", "UTF-8"));
+			view.setGroup(true);
+			ViewResults results = this.getDatabase().view(view);
+			return results.getJSONArray("rows").optJSONObject(0).optInt("value");
+		} catch (UnsupportedEncodingException e) {
+			logger.error("Error while retrieving answer count", e);
+		}		
+		return 0;
+	}
 }

@@ -179,4 +179,24 @@ public class QuestionController extends AbstractController {
 		}
 		return answers;
 	}
+	
+	/**
+	 * 
+	 * @param sessionKey
+	 *            Session Keyword to which the question belongs to
+	 * @param questionId
+	 *            CouchDB Question ID for which the given answers should be
+	 *            retrieved
+	 * @return count of answers for given question id 
+	 * @throws NotFoundException
+	 *             if wrong session or wrong question
+	 * @throws ForbiddenException
+	 *             if not logged in
+	 */
+	@RequestMapping(value="/session/{sessionKey}/question/{questionId}/answercount", method=RequestMethod.GET)
+	@ResponseBody
+	public int getAnswerCount(@PathVariable String sessionKey, @PathVariable String questionId, HttpServletResponse response) {
+		return questionService.getAnswerCount(sessionKey, questionId);
+	}
+	
 }

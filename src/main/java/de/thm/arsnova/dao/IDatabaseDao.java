@@ -69,4 +69,6 @@ public interface IDatabaseDao {
 
 	public List<Answer> getAnswers(String sessionKey, String questionId);
 
+	public int getAnswerCount(String sessionKey, String questionId);
+
 }
