@@ -1,17 +1,6 @@
 package de.thm.arsnova.entities;
 
-import java.util.ArrayList;
-import java.util.List;
 
-/*
-"type":"skill_question_answer",
-"sessionId":"61d33ea2ec73acefbba898c3510325c9",
-"questionId":"61d33ea2ec73acefbba898c351040280",
-"answerText":"2500 $",
-"user":"jhtr80"
-}}
-
-*/
 public class Answer {
 	
 	private String _id;
@@ -20,7 +9,9 @@ public class Answer {
 	private String sessionId;
 	private String questionId;
 	private String answerText;
+	private String answerSubject;
 	private String user;
+	private int answerCount;
 
 	public Answer() {
 		this.type = "skill_question_answer";
@@ -74,6 +65,14 @@ public class Answer {
 		this.answerText = answerText;
 	}
 
+	public String getAnswerSubject() {
+		return answerSubject;
+	}
+
+	public void setAnswerSubject(String answerSubject) {
+		this.answerSubject = answerSubject;
+	}
+
 	public String getUser() {
 		return user;
 	}
@@ -82,11 +81,21 @@ public class Answer {
 		this.user = user;
 	}
 
+	public int getAnswerCount() {
+		return answerCount;
+	}
+
+	public void setAnswerCount(int answerCount) {
+		this.answerCount = answerCount;
+	}
+
 	@Override
 	public String toString() {
 		return "Answer type:'" + type + "'" +
 				", session: " + sessionId + 
 				", question: " + questionId +
+				", subject: " + answerSubject +
+				", answerCount: " + answerCount +
 				", answer: " + answerText + 
 				", user: " + user;
 	}

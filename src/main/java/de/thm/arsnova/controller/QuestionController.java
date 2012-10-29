@@ -152,4 +152,31 @@ public class QuestionController extends AbstractController {
 		}
 		return answer;
 	}
+	
+	/**
+	 * returns a list of {@link Answer}s encoded as a JSON document for a given
+	 * question id. In this case only {@link Answer} <tt>questionId</tt>,
+	 * <tt>answerText</tt>, <tt>answerSubject</tt> and <tt>answerCount</tt>
+	 * properties are set
+	 * 
+	 * @param sessionKey
+	 *            Session Keyword to which the question belongs to
+	 * @param questionId
+	 *            CouchDB Question ID for which the given answers should be
+	 *            retrieved
+	 * @return List<{@link Answer}> or {@link NotFoundException}
+	 * @throws NotFoundException
+	 *             if wrong session, wrong question or no answers was given
+	 * @throws ForbiddenException
+	 *             if not logged in
+	 */
+	@RequestMapping(value="/session/{sessionKey}/question/{questionId}/answers", method=RequestMethod.GET)
+	@ResponseBody
+	public List<Answer> getAnswers(@PathVariable String sessionKey, @PathVariable String questionId, HttpServletResponse response) {
+		List<Answer> answers = questionService.getAnswers(sessionKey, questionId);
+		if(answers == null || answers.isEmpty()) {
+			throw new NotFoundException();
+		}
+		return answers;
+	}
 }

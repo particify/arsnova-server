@@ -100,4 +100,10 @@ public class QuestionService implements IQuestionService {
 	public Answer getMyAnswer(String sessionKey, String questionId) {
 		return databaseDao.getMyAnswer(sessionKey, questionId);
 	}
+
+	@Override
+	@Authenticated
+	public List<Answer> getAnswers(String sessionKey, String questionId) {
+		return databaseDao.getAnswers(sessionKey, questionId);
+	}
 }

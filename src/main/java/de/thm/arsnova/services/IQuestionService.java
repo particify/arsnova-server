@@ -40,4 +40,6 @@ public interface IQuestionService {
 	public List<String> getUnAnsweredQuestions(String sessionKey);
 
 	public Answer getMyAnswer(String sessionKey, String questionId);
+
+	public List<Answer> getAnswers(String sessionKey, String questionId);
 }

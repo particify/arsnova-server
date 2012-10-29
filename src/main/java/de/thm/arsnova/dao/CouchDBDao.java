@@ -717,7 +717,40 @@ public class CouchDBDao implements IDatabaseDao {
 			return (Answer) JSONObject.toBean(results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
 					Answer.class);
 		} catch (UnsupportedEncodingException e) {
-			logger.error("Error while retrieving unansweredquestions", e);
+			logger.error("Error while retrieving answer for user {} and question {}, {}", new Object[]{user, questionId, e});
+		}
+		
+		return null;
+	}
+	
+	@Override
+	public List<Answer> getAnswers(String sessionKey, String questionId) {
+		Session s = this.getSessionFromKeyword(sessionKey);
+		if(s == null) {
+			throw new NotFoundException();
+		}
+		
+		try {
+			View view = new View("skill_question/count_answers");
+			view.setStartKey("[" + URLEncoder.encode("\"" + questionId + "\"", "UTF-8") + "]");
+			view.setEndKey("[" + URLEncoder.encode("\"" + questionId + "\",{}", "UTF-8") + "]");
+			view.setGroup(true);
+			ViewResults results = this.getDatabase().view(view);
+			if(results.getResults().isEmpty()) {
+				throw new NotFoundException();
+			}
+			List<Answer> answers = new ArrayList<Answer>();
+			for(Document d : results.getResults()) {
+				Answer a = new Answer();
+				a.setAnswerCount(d.getInt("value"));
+				a.setQuestionId(d.getJSONObject().getJSONArray("key").getString(0));
+				a.setAnswerText(d.getJSONObject().getJSONArray("key").getString(1));
+				a.setAnswerSubject(d.getJSONObject().getJSONArray("key").getString(2));
+				answers.add(a);
+			}
+			return answers;
+		} catch (UnsupportedEncodingException e) {
+			logger.error("Error while retrieving answers", e);
 		}
 		
 		return null;
