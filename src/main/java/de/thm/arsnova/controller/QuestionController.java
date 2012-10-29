@@ -31,9 +31,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IQuestionService;
@@ -127,5 +127,15 @@ public class QuestionController extends AbstractController {
 		}
 		logger.info(answers.toString());
 		return answers;
+	}
+	
+	@RequestMapping(value="/session/{sessionKey}/question/{questionId}/myanswer", method=RequestMethod.GET)
+	@ResponseBody
+	public Answer getMyAnswer(@PathVariable String sessionKey, @PathVariable String questionId, HttpServletResponse response) {
+		Answer answer = questionService.getMyAnswer(sessionKey, questionId);
+		if(answer == null) {
+			throw new NotFoundException();
+		}
+		return answer;
 	}
 }

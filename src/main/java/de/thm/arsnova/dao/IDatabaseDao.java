@@ -21,6 +21,7 @@ package de.thm.arsnova.dao;
 
 import java.util.List;
 
+import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.LoggedIn;
@@ -63,5 +64,7 @@ public interface IDatabaseDao {
 	public void deleteQuestion(String sessionKey, String questionId);
 
 	public List<String> getUnAnsweredQuestions(String sessionKey);
+
+	public Answer getMyAnswer(String sessionKey, String questionId);
 
 }

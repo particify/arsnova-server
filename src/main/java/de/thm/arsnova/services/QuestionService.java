@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.annotation.Authenticated;
 import de.thm.arsnova.dao.IDatabaseDao;
+import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.exceptions.NoContentException;
@@ -92,5 +93,11 @@ public class QuestionService implements IQuestionService {
 	@Authenticated
 	public List<String> getUnAnsweredQuestions(String sessionKey) {
 		return databaseDao.getUnAnsweredQuestions(sessionKey);
+	}
+
+	@Override
+	@Authenticated
+	public Answer getMyAnswer(String sessionKey, String questionId) {
+		return databaseDao.getMyAnswer(sessionKey, questionId);
 	}
 }

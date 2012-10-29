@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Question;
@@ -195,6 +196,12 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public List<String> getUnAnsweredQuestions(String sessionKey) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Answer getMyAnswer(String sessionKey, String questionId) {
 		// TODO Auto-generated method stub
 		return null;
 	}

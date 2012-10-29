@@ -52,6 +52,7 @@ import com.fourspaces.couchdb.Document;
 import com.fourspaces.couchdb.View;
 import com.fourspaces.couchdb.ViewResults;
 
+import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.PossibleAnswer;
@@ -688,10 +689,37 @@ public class CouchDBDao implements IDatabaseDao {
 			}
 			return unanswered;
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error while retrieving unansweredquestions", e);
 		}
 		
+		
+		return null;
+	}
+
+	@Override
+	public Answer getMyAnswer(String sessionKey, String questionId) {		
+		User user = userService.getCurrentUser();
+		if(user == null) {
+			throw new UnauthorizedException();
+		}
+		
+		Session s = this.getSessionFromKeyword(sessionKey);
+		if(s == null) {
+			throw new NotFoundException();
+		}
+		
+		try {
+			View view = new View("answer/by_question_and_user");
+			view.setKey("[" + URLEncoder.encode("\"" + questionId + "\",\"" + user.getUsername() + "\"", "UTF-8") + "]");
+			ViewResults results = this.getDatabase().view(view);
+			if(results.getResults().isEmpty()) {
+				throw new NotFoundException();
+			}
+			return (Answer) JSONObject.toBean(results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
+					Answer.class);
+		} catch (UnsupportedEncodingException e) {
+			logger.error("Error while retrieving unansweredquestions", e);
+		}
 		
 		return null;
 	}
