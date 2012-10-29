@@ -206,4 +206,16 @@ public class StubDatabaseDao implements IDatabaseDao {
 		return null;
 	}
 
+	@Override
+	public List<Answer> getAnswers(String sessionKey, String questionId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getAnswerCount(String sessionKey, String questionId) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }
