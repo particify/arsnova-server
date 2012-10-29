@@ -36,19 +36,16 @@ import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationToken
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 
-public class UserService implements IUserService, InitializingBean,
-		DisposableBean {
+public class UserService implements IUserService, InitializingBean, DisposableBean {
 
-	public static final Logger logger = LoggerFactory
-			.getLogger(UserService.class);
+	public static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
 	private static final ConcurrentHashMap<UUID, User> socketid2user = new ConcurrentHashMap<UUID, User>();
 	private static final ConcurrentHashMap<String, String> user2session = new ConcurrentHashMap<String, String>();
 
 	@Override
 	public User getCurrentUser() {
-		Authentication authentication = SecurityContextHolder.getContext()
-				.getAuthentication();
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication == null || authentication.getPrincipal() == null) {
 			return null;
 		}
@@ -58,16 +55,13 @@ public class UserService implements IUserService, InitializingBean,
 		if (authentication instanceof OAuthAuthenticationToken) {
 			OAuthAuthenticationToken token = (OAuthAuthenticationToken) authentication;
 			if (token.getUserProfile() instanceof Google2Profile) {
-				Google2Profile profile = (Google2Profile) token
-						.getUserProfile();
+				Google2Profile profile = (Google2Profile) token.getUserProfile();
 				user = new User(profile);
 			} else if (token.getUserProfile() instanceof TwitterProfile) {
-				TwitterProfile profile = (TwitterProfile) token
-						.getUserProfile();
+				TwitterProfile profile = (TwitterProfile) token.getUserProfile();
 				user = new User(profile);
 			} else if (token.getUserProfile() instanceof FacebookProfile) {
-				FacebookProfile profile = (FacebookProfile) token
-						.getUserProfile();
+				FacebookProfile profile = (FacebookProfile) token.getUserProfile();
 				user = new User(profile);
 			}
 		} else if (authentication instanceof CasAuthenticationToken) {
@@ -150,14 +144,11 @@ public class UserService implements IUserService, InitializingBean,
 			if (!store.exists()) {
 				return;
 			}
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(
-					store));
-			Hashtable<String, Map<?, ?>> map = (Hashtable<String, Map<?, ?>>) ois
-					.readObject();
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(store));
+			Hashtable<String, Map<?, ?>> map = (Hashtable<String, Map<?, ?>>) ois.readObject();
 			ois.close();
 			Map<UUID, User> s2u = (Map<UUID, User>) map.get("socketid2user");
-			Map<String, String> u2s = (Map<String, String>) map
-					.get("user2session");
+			Map<String, String> u2s = (Map<String, String>) map.get("user2session");
 
 			logger.info("load from store: {}", map);
 
@@ -167,8 +158,7 @@ public class UserService implements IUserService, InitializingBean,
 		} catch (IOException e) {
 			logger.error("IOException during restoring UserService", e);
 		} catch (ClassNotFoundException e) {
-			logger.error("ClassNotFoundException during restoring UserService",
-					e);
+			logger.error("ClassNotFoundException during restoring UserService", e);
 		}
 	}
 
@@ -182,7 +172,9 @@ public class UserService implements IUserService, InitializingBean,
 			File tmpDir = new File(System.getProperty("java.io.tmpdir"));
 			File store = new File(tmpDir, "arsnova.bin");
 			if (!store.exists()) {
-				store.createNewFile();
+				if (! store.createNewFile()) {
+					logger.info("Could not create store file");
+				}
 			}
 			OutputStream file = new FileOutputStream(store);
 			ObjectOutputStream objOut = new ObjectOutputStream(file);

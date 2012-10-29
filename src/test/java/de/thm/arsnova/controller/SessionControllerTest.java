@@ -27,7 +27,8 @@ import de.thm.arsnova.services.StubUserService;
 @ContextConfiguration(locations = {
 		"file:src/main/webapp/WEB-INF/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
-		"file:src/test/resources/test-config.xml" })
+		"file:src/test/resources/test-config.xml"
+})
 public class SessionControllerTest {
 
 	@Inject

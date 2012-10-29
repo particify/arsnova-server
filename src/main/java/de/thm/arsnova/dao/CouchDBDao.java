@@ -436,10 +436,6 @@ public class CouchDBDao implements IDatabaseDao {
 		return null;
 	}
 
-	private String currentTimestamp() {
-		return Long.toString(System.currentTimeMillis());
-	}
-
 	private String actualUserName() {
 		User user = userService.getCurrentUser();
 		if (user == null)
@@ -653,8 +649,11 @@ public class CouchDBDao implements IDatabaseDao {
 			Document question = this.getDatabase().getDocument(questionId);
 			this.getDatabase().deleteDocument(question);
 			
-		} catch(Exception e) {
-			logger.error("Could not delete question and its answers with id {}", questionId);
+		} catch(IOException e) {
+			logger.error(
+				"IOException: Could not delete question and its answers with id {}. Connection to CouchDB available?",
+				questionId
+			);
 		} 
 	}
 

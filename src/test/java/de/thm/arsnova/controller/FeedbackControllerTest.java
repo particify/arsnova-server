@@ -85,4 +85,16 @@ public class FeedbackControllerTest {
 		assertTrue(response.getStatus() == 200);
 		assertEquals("0", response.getContentAsString());
 	}
+	
+	@Test
+	public void testShouldReturnFeedback() throws Exception {
+		userService.setUserAuthenticated(true);
+
+		request.setMethod("GET");
+		request.setRequestURI("/session/87654321/feedback");
+		handlerAdapter.handle(request, response, feedbackController);
+
+		assertTrue(response.getStatus() == 200);
+		assertEquals("{\"values\":[2,3,5,7]}", response.getContentAsString());
+	}
 }
