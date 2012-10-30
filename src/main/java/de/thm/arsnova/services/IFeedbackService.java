@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2012 THM webMedia
- * 
+ *
  * This file is part of ARSnova.
  *
  * ARSnova is free software: you can redistribute it and/or modify
@@ -26,21 +26,19 @@ import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.User;
 
 public interface IFeedbackService {
-	public void cleanFeedbackVotes();
+	void cleanFeedbackVotes();
 
-	public Feedback getFeedback(String keyword);
+	Feedback getFeedback(String keyword);
 
-	public int getFeedbackCount(String keyword);
-	
-	public double getAverageFeedback(String sessionkey);
+	int getFeedbackCount(String keyword);
 
-	public long getAverageFeedbackRounded(String sessionkey);
+	double getAverageFeedback(String sessionkey);
 
-	public boolean saveFeedback(String keyword, int value, User user);
+	long getAverageFeedbackRounded(String sessionkey);
 
-	public void broadcastFeedbackChanges(
-			Map<String, Set<String>> affectedUsers,
-			Set<String> allAffectedSessions);
+	boolean saveFeedback(String keyword, int value, User user);
 
-	public Integer getMyFeedback(String keyword, User user);
+	void broadcastFeedbackChanges(Map<String, Set<String>> affectedUsers, Set<String> allAffectedSessions);
+
+	Integer getMyFeedback(String keyword, User user);
 }

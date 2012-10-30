@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2012 THM webMedia
- * 
+ *
  * This file is part of ARSnova.
  *
  * ARSnova is free software: you can redistribute it and/or modify
@@ -25,23 +25,23 @@ import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Question;
 
 public interface IQuestionService {
-	public boolean saveQuestion(Question question);
+	boolean saveQuestion(Question question);
 
-	public Question getQuestion(String id, String sessionkey);
+	Question getQuestion(String id, String sessionkey);
 
-	public List<Question> getSkillQuestions(String sessionkey);
+	List<Question> getSkillQuestions(String sessionkey);
 
-	public int getSkillQuestionCount(String sessionkey);
+	int getSkillQuestionCount(String sessionkey);
 
-	public List<String> getQuestionIds(String sessionKey);
+	List<String> getQuestionIds(String sessionKey);
 
-	public void deleteQuestion(String sessionKey, String questionId);
+	void deleteQuestion(String sessionKey, String questionId);
 
-	public List<String> getUnAnsweredQuestions(String sessionKey);
+	List<String> getUnAnsweredQuestions(String sessionKey);
 
-	public Answer getMyAnswer(String sessionKey, String questionId);
+	Answer getMyAnswer(String sessionKey, String questionId);
 
-	public List<Answer> getAnswers(String sessionKey, String questionId);
+	List<Answer> getAnswers(String sessionKey, String questionId);
 
-	public int getAnswerCount(String sessionKey, String questionId);
+	int getAnswerCount(String sessionKey, String questionId);
 }

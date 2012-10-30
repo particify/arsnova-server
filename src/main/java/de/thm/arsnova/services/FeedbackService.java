@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2012 THM webMedia
- * 
+ *
  * This file is part of ARSnova.
  *
  * ARSnova is free software: you can redistribute it and/or modify
@@ -37,8 +37,10 @@ import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 @Service
 public class FeedbackService implements IFeedbackService {
 
+	private static final int DEFAULT_SCHEDULER_DELAY = 5000;
+
 	@Autowired
-	ARSnovaSocketIOServer server;
+	private ARSnovaSocketIOServer server;
 
 	/**
 	 * minutes, after which the feedback is deleted
@@ -47,58 +49,61 @@ public class FeedbackService implements IFeedbackService {
 	private int cleanupFeedbackDelay;
 
 	@Autowired
-	IDatabaseDao databaseDao;
+	private IDatabaseDao databaseDao;
 
 	@Autowired
-	IUserService userService;
+	private IUserService userService;
 
-	public void setDatabaseDao(IDatabaseDao databaseDao) {
-		this.databaseDao = databaseDao;
+	public final void setDatabaseDao(final IDatabaseDao newDatabaseDao) {
+		this.databaseDao = newDatabaseDao;
 	}
 
 	@Override
-	@Scheduled(fixedDelay = 5000)
-	public void cleanFeedbackVotes() {
+	@Scheduled(fixedDelay = DEFAULT_SCHEDULER_DELAY)
+	public final void cleanFeedbackVotes() {
 		databaseDao.cleanFeedbackVotes(cleanupFeedbackDelay);
 	}
 
 	@Override
-	public Feedback getFeedback(String keyword) {
+	public final Feedback getFeedback(final String keyword) {
 		return databaseDao.getFeedback(keyword);
 	}
 
 	@Override
-	public int getFeedbackCount(String keyword) {
+	public final int getFeedbackCount(final String keyword) {
 		Feedback feedback = databaseDao.getFeedback(keyword);
 		List<Integer> values = feedback.getValues();
-		return values.get(0) + values.get(1) + values.get(2) + values.get(3);
+		return values.get(Feedback.FEEDBACK_FASTER) + values.get(Feedback.FEEDBACK_OK)
+				+ values.get(Feedback.FEEDBACK_SLOWER) + values.get(Feedback.FEEDBACK_AWAY);
 	}
 
 	@Override
-	public double getAverageFeedback(String sessionkey) {
+	public final double getAverageFeedback(final String sessionkey) {
 		Feedback feedback = databaseDao.getFeedback(sessionkey);
 		List<Integer> values = feedback.getValues();
-		double count = values.get(0) + values.get(1) + values.get(2) + values.get(3);
-		double sum = values.get(1) + (values.get(2) * 2) + (values.get(3) * 3);
+		double count = values.get(Feedback.FEEDBACK_FASTER) + values.get(Feedback.FEEDBACK_OK)
+				+ values.get(Feedback.FEEDBACK_SLOWER) + values.get(Feedback.FEEDBACK_AWAY);
+		double sum = values.get(Feedback.FEEDBACK_OK) + (values.get(Feedback.FEEDBACK_SLOWER) * 2)
+				+ (values.get(Feedback.FEEDBACK_AWAY) * 3);
 
-		if (count == 0)
+		if (count == 0) {
 			throw new NoContentException();
-
+		}
 		return sum / count;
 	}
 
 	@Override
-	public long getAverageFeedbackRounded(String sessionkey) {
+	public final long getAverageFeedbackRounded(final String sessionkey) {
 		return Math.round(this.getAverageFeedback(sessionkey));
 	}
 
 	@Override
-	public boolean saveFeedback(String keyword, int value, User user) {
+	public final boolean saveFeedback(final String keyword, final int value, final User user) {
 		return databaseDao.saveFeedback(keyword, value, user);
 	}
 
 	/**
-	 * 
+	 *
 	 * @param affectedUsers
 	 *            The user whose feedback got deleted along with all affected
 	 *            session keywords
@@ -107,7 +112,10 @@ public class FeedbackService implements IFeedbackService {
 	 *            keywords mentioned above.
 	 */
 	@Override
-	public void broadcastFeedbackChanges(Map<String, Set<String>> affectedUsers, Set<String> allAffectedSessions) {
+	public final void broadcastFeedbackChanges(
+			final Map<String, Set<String>> affectedUsers,
+			final Set<String> allAffectedSessions
+	) {
 		for (Map.Entry<String, Set<String>> e : affectedUsers.entrySet()) {
 			// Is this user registered with a socket connection?
 			String connectedSocket = userService.getSessionForUser(e.getKey());
@@ -119,7 +127,7 @@ public class FeedbackService implements IFeedbackService {
 	}
 
 	@Override
-	public Integer getMyFeedback(String keyword, User user) {
+	public final Integer getMyFeedback(final String keyword, final User user) {
 		return this.databaseDao.getMyFeedback(keyword, user);
 	}
 }
