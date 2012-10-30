@@ -218,4 +218,10 @@ public class StubDatabaseDao implements IDatabaseDao {
 		return 0;
 	}
 
+	@Override
+	public List<Answer> getFreetextAnswers(String sessionKey, String questionId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

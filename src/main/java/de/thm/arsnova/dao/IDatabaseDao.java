@@ -70,4 +70,6 @@ public interface IDatabaseDao {
 	List<Answer> getAnswers(String sessionKey, String questionId);
 
 	int getAnswerCount(String sessionKey, String questionId);
+
+	List<Answer> getFreetextAnswers(String sessionKey, String questionId);
 }

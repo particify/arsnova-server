@@ -792,4 +792,34 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		return 0;
 	}
+	
+	@Override
+	public List<Answer> getFreetextAnswers(String sessionKey, String questionId) {
+		Session s = this.getSessionFromKeyword(sessionKey);
+		if (s == null) {
+			throw new NotFoundException();
+		}
+
+		try {
+			View view = new View("skill_question/freetext_answers");
+			view.setKey(URLEncoder.encode("\"" + questionId + "\"", "UTF-8"));
+			ViewResults results = this.getDatabase().view(view);
+			if (results.getResults().isEmpty()) {
+				throw new NotFoundException();
+			}
+			List<Answer> answers = new ArrayList<Answer>();
+			for (Document d : results.getResults()) {
+				Answer a = (Answer) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Answer.class);
+				a.setSessionId(s.get_id());
+				a.setQuestionId(questionId);
+				answers.add(a);
+			}
+			return answers;
+			
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.error("Error while retrieving freetext answers", e);
+		}
+		
+		return null;
+	}
 }
