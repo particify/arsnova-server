@@ -413,6 +413,10 @@
 						</zipUrlInstaller>
 					</container>
 					<configuration>
+						<properties>
+							<cargo.servlet.port>8081</cargo.servlet.port>
+							<cargo.tomcat.ajp.port>8010</cargo.tomcat.ajp.port>
+						</properties>
 						<deployables>
 							<deployable>
 								<groupId>de.thm.arsnova</groupId>
