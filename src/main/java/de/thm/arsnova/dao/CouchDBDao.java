@@ -134,7 +134,10 @@ public class CouchDBDao implements IDatabaseDao {
 			} catch (IOException e) {
 				LOGGER.error("Could not delete Feedback document " + d.getId());
 			} catch (JSONException e) {
-				LOGGER.error("Could not delete Feedback document {}, error is: {} ", new Object[] {d.getId(), e});
+				LOGGER.error(
+						"Could not delete Feedback document {}, error is: {} ",
+						new Object[] {d.getId(), e}
+				);
 			}
 		}
 		if (!results.isEmpty()) {
@@ -174,7 +177,10 @@ public class CouchDBDao implements IDatabaseDao {
 
 			List<Session> result = new ArrayList<Session>();
 			for (Document d : sessions.getResults()) {
-				Session session = (Session) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Session.class);
+				Session session = (Session) JSONObject.toBean(
+						d.getJSONObject().getJSONObject("value"),
+						Session.class
+				);
 				session.set_id(d.getId());
 				result.add(session);
 			}
@@ -204,12 +210,18 @@ public class CouchDBDao implements IDatabaseDao {
 			MorpherRegistry morpherRegistry = JSONUtils.getMorpherRegistry();
 			Morpher dynaMorpher = new BeanMorpher(PossibleAnswer.class, morpherRegistry);
 			morpherRegistry.registerMorpher(dynaMorpher);
-			for (Document d : questions.getResults()) {
-				Question q = (Question) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Question.class);
-				Collection<PossibleAnswer> answers = JSONArray.toCollection(d.getJSONObject().getJSONObject("value")
-						.getJSONArray("possibleAnswers"), PossibleAnswer.class);
-				q.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
-				result.add(q);
+			for (Document document : questions.getResults()) {
+				Question question = (Question) JSONObject.toBean(
+						document.getJSONObject().getJSONObject("value"),
+						Question.class
+				);
+				Collection<PossibleAnswer> answers = JSONArray.toCollection(
+						document.getJSONObject().getJSONObject("value")
+							.getJSONArray("possibleAnswers"),
+						PossibleAnswer.class
+				);
+				question.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
+				result.add(question);
 			}
 
 			return result;
@@ -246,8 +258,10 @@ public class CouchDBDao implements IDatabaseDao {
 			if (results.getJSONArray("rows").optJSONObject(0) == null) {
 				return null;
 			}
-			return (Session) JSONObject.toBean(results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
-					Session.class);
+			return (Session) JSONObject.toBean(
+					results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
+					Session.class
+			);
 		} catch (UnsupportedEncodingException e) {
 			return null;
 		}
@@ -290,7 +304,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	private Feedback createFeedbackObject(final ViewResults results) {
-		int values[] = {0, 0, 0, 0};
+		int[] values = {0, 0, 0, 0};
 		JSONArray rows = results.getJSONArray("rows");
 
 		try {
@@ -328,7 +342,11 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final boolean saveFeedback(final String keyword, final int value, final de.thm.arsnova.entities.User user) {
+	public final boolean saveFeedback(
+			final String keyword,
+			final int value,
+			final de.thm.arsnova.entities.User user
+	) {
 		String sessionId = this.getSessionId(keyword);
 		if (sessionId == null) {
 			return false;
@@ -374,7 +392,12 @@ public class CouchDBDao implements IDatabaseDao {
 	private List<Document> findPreviousFeedback(final String sessionId, final de.thm.arsnova.entities.User user) {
 		View view = new View("understanding/by_user");
 		try {
-			view.setKey(URLEncoder.encode("[\"" + sessionId + "\", \"" + user.getUsername() + "\"]", "UTF-8"));
+			view.setKey(
+					URLEncoder.encode(
+							"[\"" + sessionId + "\",\"" + user.getUsername() + "\"]",
+							"UTF-8"
+					)
+			);
 		} catch (UnsupportedEncodingException e) {
 			return Collections.<Document> emptyList();
 		}
@@ -460,11 +483,17 @@ public class CouchDBDao implements IDatabaseDao {
 	private Database getDatabase() {
 		if (database == null) {
 			try {
-				com.fourspaces.couchdb.Session session = new com.fourspaces.couchdb.Session(databaseHost, databasePort);
+				com.fourspaces.couchdb.Session session = new com.fourspaces.couchdb.Session(
+						databaseHost,
+						databasePort
+				);
 				database = session.getDatabase(databaseName);
 			} catch (Exception e) {
-				LOGGER.error("Cannot connect to CouchDB database '" + databaseName + "' on host '" + databaseHost
-						+ "' using port " + databasePort);
+				LOGGER.error(
+						"Cannot connect to CouchDB database '" + databaseName
+						+ "' on host '" + databaseHost
+						+ "' using port " + databasePort
+				);
 			}
 		}
 
@@ -480,7 +509,7 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("subject", question.getSubject());
 		q.put("text", question.getText());
 		q.put("active", question.isActive());
-		q.put("number", 0); // TODO: This number has to get incremented
+		q.put("number", 0); // TODO This number has to get incremented
 							// automatically
 		q.put("releasedFor", question.getReleasedFor());
 		q.put("possibleAnswers", question.getPossibleAnswers());
@@ -509,10 +538,15 @@ public class CouchDBDao implements IDatabaseDao {
 			}
 
 			Question q = (Question) JSONObject.toBean(
-					results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"), Question.class);
+					results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
+					Question.class
+			);
 			JSONArray possibleAnswers = results.getJSONArray("rows").optJSONObject(0).optJSONObject("value")
 					.getJSONArray("possibleAnswers");
-			Collection<PossibleAnswer> answers = JSONArray.toCollection(possibleAnswers, PossibleAnswer.class);
+			Collection<PossibleAnswer> answers = JSONArray.toCollection(
+					possibleAnswers,
+					PossibleAnswer.class
+			);
 			q.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
 
 			if (s.get_id().equals(q.getSessionId())) {
@@ -593,7 +627,12 @@ public class CouchDBDao implements IDatabaseDao {
 			}
 
 			View view = new View("understanding/by_user");
-			view.setKey(URLEncoder.encode("[\"" + sessionId + "\", \"" + user.getUsername() + "\"]", "UTF-8"));
+			view.setKey(
+					URLEncoder.encode(
+							"[\"" + sessionId + "\", \"" + user.getUsername() + "\"]",
+							"UTF-8"
+					)
+			);
 			ViewResults results = this.getDatabase().view(view);
 			JSONArray rows = results.getJSONArray("rows");
 
@@ -668,8 +707,10 @@ public class CouchDBDao implements IDatabaseDao {
 
 		} catch (IOException e) {
 			LOGGER.error(
-					"IOException: Could not delete question and its answers with id {}. Connection to CouchDB available?",
-					questionId);
+				"IOException: Could not delete question and its answers with id {}."
+				+ " Connection to CouchDB available?",
+				questionId
+			);
 		}
 	}
 
@@ -687,7 +728,13 @@ public class CouchDBDao implements IDatabaseDao {
 
 		try {
 			View view = new View("answer/by_user");
-			view.setKey("[" + URLEncoder.encode("\"" + user.getUsername() + "\",\"" + s.get_id() + "\"", "UTF-8") + "]");
+			view.setKey(
+					"[" + URLEncoder.encode(
+							"\"" + user.getUsername() + "\",\"" + s.get_id() + "\"",
+							"UTF-8"
+					)
+					+ "]"
+			);
 			ViewResults anseweredQuestions = this.getDatabase().view(view);
 
 			List<String> answered = new ArrayList<String>();
@@ -724,13 +771,21 @@ public class CouchDBDao implements IDatabaseDao {
 
 		try {
 			View view = new View("answer/by_question_and_user");
-			view.setKey("[" + URLEncoder.encode("\"" + questionId + "\",\"" + user.getUsername() + "\"", "UTF-8") + "]");
+			view.setKey(
+					"[" + URLEncoder.encode(
+							"\"" + questionId + "\",\"" + user.getUsername() + "\"",
+							"UTF-8"
+					)
+					+ "]"
+			);
 			ViewResults results = this.getDatabase().view(view);
 			if (results.getResults().isEmpty()) {
 				throw new NotFoundException();
 			}
-			return (Answer) JSONObject.toBean(results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
-					Answer.class);
+			return (Answer) JSONObject.toBean(
+					results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
+					Answer.class
+			);
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.error(
 					"Error while retrieving answer for user {} and question {}, {}",
@@ -789,6 +844,27 @@ public class CouchDBDao implements IDatabaseDao {
 			return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.error("Error while retrieving answer count", e);
+		}
+		return 0;
+	}
+
+	@Override
+	public final int getActiveUsers(final long since) {
+		try {
+			View view = new View("statistic/count_active_users");
+			view.setStartKey(String.valueOf(since));
+			ViewResults results = this.getDatabase().view(view);
+			LOGGER.info("getActiveUsers() {}", results);
+			if (
+					results == null
+					|| results.getResults().isEmpty()
+					|| results.getJSONArray("rows").size() == 0
+			) {
+				return 0;
+			}
+			return results.getJSONArray("rows").optJSONObject(0).getInt("value");
+		} catch (Exception e) {
+			LOGGER.error("Error while retrieving active users count", e);
 		}
 		return 0;
 	}

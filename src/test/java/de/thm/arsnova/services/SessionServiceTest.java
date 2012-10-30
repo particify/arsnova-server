@@ -40,10 +40,10 @@ import de.thm.arsnova.exceptions.UnauthorizedException;
 public class SessionServiceTest {
 
 	@Autowired
-	ISessionService sessionService;
+	private ISessionService sessionService;
 
 	@Autowired
-	StubUserService userService;
+	private StubUserService userService;
 
 	@Test
 	public void testShouldGenerateSessionKeyword() {

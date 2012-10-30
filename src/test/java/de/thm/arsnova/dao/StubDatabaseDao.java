@@ -1,6 +1,7 @@
 package de.thm.arsnova.dao;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -218,4 +219,9 @@ public class StubDatabaseDao implements IDatabaseDao {
 		return 0;
 	}
 
+	@Override
+	public int getActiveUsers(long since) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }
