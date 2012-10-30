@@ -11,6 +11,7 @@ public class Answer {
 	private String answerText;
 	private String answerSubject;
 	private String user;
+	private long timestamp;
 	private int answerCount;
 
 	public Answer() {
@@ -65,11 +66,28 @@ public class Answer {
 		this.answerText = answerText;
 	}
 
+	public final String getText() {
+		return answerText;
+	}
+
+	public final void setText(final String answerText) {
+		this.answerText = answerText;
+	}
+
+	
 	public final String getAnswerSubject() {
 		return answerSubject;
 	}
 
 	public final void setAnswerSubject(final String answerSubject) {
+		this.answerSubject = answerSubject;
+	}
+	
+	public final String getSubject() {
+		return answerSubject;
+	}
+
+	public final void setSubject(final String answerSubject) {
 		this.answerSubject = answerSubject;
 	}
 
@@ -79,6 +97,14 @@ public class Answer {
 
 	public final void setUser(final String user) {
 		this.user = user;
+	}
+
+	public long getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
 	}
 
 	public final int getAnswerCount() {

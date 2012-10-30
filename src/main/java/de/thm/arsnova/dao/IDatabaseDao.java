@@ -23,8 +23,8 @@ import java.util.List;
 
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Feedback;
-import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.LoggedIn;
+import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
@@ -70,4 +70,8 @@ public interface IDatabaseDao {
 	List<Answer> getAnswers(String sessionKey, String questionId);
 
 	int getAnswerCount(String sessionKey, String questionId);
+
+	List<Answer> getFreetextAnswers(String sessionKey, String questionId);
+
+	int getActiveUsers(long since);
 }

@@ -1,6 +1,7 @@
 package de.thm.arsnova.dao;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -214,6 +215,18 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public int getAnswerCount(String sessionKey, String questionId) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public List<Answer> getFreetextAnswers(String sessionKey, String questionId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public int getActiveUsers(long since) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
