@@ -37,120 +37,120 @@ public class Question {
 	private String _id;
 	private String _rev;
 
-	public String getType() {
+	public final String getType() {
 		return type;
 	}
 
-	public void setType(String type) {
+	public final void setType(final String type) {
 		this.type = type;
 	}
 
-	public String getQuestionType() {
+	public final String getQuestionType() {
 		return questionType;
 	}
 
-	public void setQuestionType(String questionType) {
+	public final void setQuestionType(final String questionType) {
 		this.questionType = questionType;
 	}
 
-	public String getSubject() {
+	public final String getSubject() {
 		return subject;
 	}
 
-	public void setSubject(String subject) {
+	public final void setSubject(final String subject) {
 		this.subject = subject;
 	}
 
-	public String getText() {
+	public final String getText() {
 		return text;
 	}
 
-	public void setText(String text) {
+	public final void setText(final String text) {
 		this.text = text;
 	}
 
-	public boolean isActive() {
+	public final boolean isActive() {
 		return active;
 	}
 
-	public void setActive(boolean active) {
+	public final void setActive(final boolean active) {
 		this.active = active;
 	}
 
-	public String getReleasedFor() {
+	public final String getReleasedFor() {
 		return releasedFor;
 	}
 
-	public void setReleasedFor(String releasedFor) {
+	public final void setReleasedFor(final String releasedFor) {
 		this.releasedFor = releasedFor;
 	}
 
-	public List<PossibleAnswer> getPossibleAnswers() {
+	public final List<PossibleAnswer> getPossibleAnswers() {
 		return possibleAnswers;
 	}
 
-	public void setPossibleAnswers(List<PossibleAnswer> possibleAnswers) {
+	public final void setPossibleAnswers(final List<PossibleAnswer> possibleAnswers) {
 		this.possibleAnswers = possibleAnswers;
 	}
 
-	public boolean isNoCorrect() {
+	public final boolean isNoCorrect() {
 		return noCorrect;
 	}
 
-	public void setNoCorrect(boolean noCorrect) {
+	public final void setNoCorrect(final boolean noCorrect) {
 		this.noCorrect = noCorrect;
 	}
 
-	public String getSessionId() {
+	public final String getSessionId() {
 		return session;
 	}
 
-	public void setSessionId(String session) {
+	public final void setSessionId(final String session) {
 		this.session = session;
 	}
 
-	public String getSession() {
+	public final String getSession() {
 		return session;
 	}
 
-	public void setSession(String session) {
+	public final void setSession(final String session) {
 		this.session = session;
 	}
 
-	public int getNumber() {
+	public final int getNumber() {
 		return number;
 	}
 
-	public void setNumber(int number) {
+	public final void setNumber(final int number) {
 		this.number = number;
 	}
 
-	public int getDuration() {
+	public final int getDuration() {
 		return duration;
 	}
 
-	public void setDuration(int duration) {
+	public final void setDuration(final int duration) {
 		this.duration = duration;
 	}
 
-	public String get_id() {
+	public final String get_id() {
 		return _id;
 	}
 
-	public void set_id(String _id) {
+	public final void set_id(final String _id) {
 		this._id = _id;
 	}
 
-	public String get_rev() {
+	public final String get_rev() {
 		return _rev;
 	}
 
-	public void set_rev(String _rev) {
+	public final void set_rev(final String _rev) {
 		this._rev = _rev;
 	}
 
 	@Override
-	public String toString() {
+	public final String toString() {
 		return "Question type '" + this.questionType + "': " + this.subject + ";\n" + this.text +
 				this.possibleAnswers;
 	}

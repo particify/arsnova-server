@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2012 THM webMedia
- * 
+ *
  * This file is part of ARSnova.
  *
  * ARSnova is free software: you can redistribute it and/or modify
@@ -26,15 +26,15 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
 public interface ISessionService {
-	public Session joinSession(String keyword);
+	Session joinSession(String keyword);
 
-	public Session saveSession(Session session);
+	Session saveSession(Session session);
 
-	public boolean sessionKeyAvailable(String keyword);
+	boolean sessionKeyAvailable(String keyword);
 
-	public String generateKeyword();
+	String generateKeyword();
 
-	public List<Session> getMySessions(String username);
+	List<Session> getMySessions(String username);
 
-	public LoggedIn registerAsOnlineUser(User user, String sessionkey);
+	LoggedIn registerAsOnlineUser(User user, String sessionkey);
 }
