@@ -105,6 +105,14 @@ public class CouchDBDao implements IDatabaseDao {
 		logger.info(databaseName);
 		this.databaseName = databaseName;
 	}
+	
+	public void setSessionService(ISessionService sessionService) {
+		this.sessionService = sessionService;
+	}
+	
+	public void setUserService(IUserService userService) {
+		this.userService = userService;
+	}
 
 	/**
 	 * This method cleans up old feedback votes at the scheduled interval.
