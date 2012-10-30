@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2012 THM webMedia
- * 
+ *
  * This file is part of ARSnova.
  *
  * ARSnova is free software: you can redistribute it and/or modify
@@ -35,33 +35,30 @@ import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.IFeedbackService;
 import de.thm.arsnova.services.IUserService;
-import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Controller
 public class FeedbackController extends AbstractController {
 
-	public static final Logger logger = LoggerFactory.getLogger(FeedbackController.class);
+	public static final Logger LOGGER = LoggerFactory.getLogger(FeedbackController.class);
 
 	@Autowired
-	IFeedbackService feedbackService;
+	private IFeedbackService feedbackService;
 
 	@Autowired
-	IUserService userService;
-
-	@Autowired
-	ARSnovaSocketIOServer server;
+	private IUserService userService;
 
 	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.GET)
 	@ResponseBody
-	public Feedback getFeedback(@PathVariable String sessionkey) {
+	public final Feedback getFeedback(@PathVariable final String sessionkey) {
 		return feedbackService.getFeedback(sessionkey);
 	}
 
 	@RequestMapping(value = "/session/{sessionkey}/myfeedback", method = RequestMethod.GET)
 	@ResponseBody
-	public Integer getMyFeedback(@PathVariable String sessionkey, HttpServletResponse response) {
+	public final Integer getMyFeedback(@PathVariable final String sessionkey, final HttpServletResponse response) {
 		Integer value = feedbackService.getMyFeedback(sessionkey, userService.getCurrentUser());
-		if (value != null && value >= 0 && value <= 3) {
+
+		if (value != null && value >= Feedback.MIN_FEEDBACK_TYPE && value <= Feedback.MAX_FEEDBACK_TYPE) {
 			return value;
 		}
 		response.setStatus(HttpStatus.NOT_FOUND.value());
@@ -70,29 +67,29 @@ public class FeedbackController extends AbstractController {
 
 	@RequestMapping(value = "/session/{sessionkey}/feedbackcount", method = RequestMethod.GET)
 	@ResponseBody
-	public int getFeedbackCount(@PathVariable String sessionkey) {
+	public final int getFeedbackCount(@PathVariable final String sessionkey) {
 		return feedbackService.getFeedbackCount(sessionkey);
 	}
 
 	@RequestMapping(value = "/session/{sessionkey}/roundedaveragefeedback", method = RequestMethod.GET)
 	@ResponseBody
-	public long getAverageFeedbackRounded(
-		@PathVariable String sessionkey
-	) {
+	public final long getAverageFeedbackRounded(@PathVariable final String sessionkey) {
 		return feedbackService.getAverageFeedbackRounded(sessionkey);
 	}
-	
+
 	@RequestMapping(value = "/session/{sessionkey}/averagefeedback", method = RequestMethod.GET)
 	@ResponseBody
-	public double getAverageFeedback(
-		@PathVariable String sessionkey
-	) {
+	public final double getAverageFeedback(@PathVariable final String sessionkey) {
 		return feedbackService.getAverageFeedback(sessionkey);
 	}
 
 	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.POST)
 	@ResponseBody
-	public Feedback postFeedback(@PathVariable String sessionkey, @RequestBody int value, HttpServletResponse response) {
+	public final Feedback postFeedback(
+			@PathVariable final String sessionkey,
+			@RequestBody final int value,
+			final HttpServletResponse response
+	) {
 		User user = userService.getCurrentUser();
 		if (feedbackService.saveFeedback(sessionkey, value, user)) {
 			Feedback feedback = feedbackService.getFeedback(sessionkey);

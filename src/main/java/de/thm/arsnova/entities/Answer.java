@@ -17,87 +17,87 @@ public class Answer {
 		this.type = "skill_question_answer";
 	}
 	
-	public String get_id() {
+	public final String get_id() {
 		return _id;
 	}
 
-	public void set_id(String _id) {
+	public final void set_id(String _id) {
 		this._id = _id;
 	}
 
-	public String get_rev() {
+	public final String get_rev() {
 		return _rev;
 	}
 
-	public void set_rev(String _rev) {
+	public final void set_rev(final String _rev) {
 		this._rev = _rev;
 	}
 
-	public String getType() {
+	public final String getType() {
 		return type;
 	}
 
-	public void setType(String type) {
+	public final void setType(final String type) {
 		this.type = type;
 	}
 
-	public String getSessionId() {
+	public final String getSessionId() {
 		return sessionId;
 	}
 
-	public void setSessionId(String sessionId) {
+	public final void setSessionId(final String sessionId) {
 		this.sessionId = sessionId;
 	}
 
-	public String getQuestionId() {
+	public final String getQuestionId() {
 		return questionId;
 	}
 
-	public void setQuestionId(String questionId) {
+	public final void setQuestionId(final String questionId) {
 		this.questionId = questionId;
 	}
 
-	public String getAnswerText() {
+	public final String getAnswerText() {
 		return answerText;
 	}
 
-	public void setAnswerText(String answerText) {
+	public final void setAnswerText(final String answerText) {
 		this.answerText = answerText;
 	}
 
-	public String getAnswerSubject() {
+	public final String getAnswerSubject() {
 		return answerSubject;
 	}
 
-	public void setAnswerSubject(String answerSubject) {
+	public final void setAnswerSubject(final String answerSubject) {
 		this.answerSubject = answerSubject;
 	}
 
-	public String getUser() {
+	public final String getUser() {
 		return user;
 	}
 
-	public void setUser(String user) {
+	public final void setUser(final String user) {
 		this.user = user;
 	}
 
-	public int getAnswerCount() {
+	public final int getAnswerCount() {
 		return answerCount;
 	}
 
-	public void setAnswerCount(int answerCount) {
+	public final void setAnswerCount(final int answerCount) {
 		this.answerCount = answerCount;
 	}
 
 	@Override
-	public String toString() {
-		return "Answer type:'" + type + "'" +
-				", session: " + sessionId + 
-				", question: " + questionId +
-				", subject: " + answerSubject +
-				", answerCount: " + answerCount +
-				", answer: " + answerText + 
-				", user: " + user;
+	public final String toString() {
+		return "Answer type:'" + type + "'"
+				+ ", session: " + sessionId 
+				+ ", question: " + questionId
+				+ ", subject: " + answerSubject
+				+ ", answerCount: " + answerCount
+				+ ", answer: " + answerText
+				+ ", user: " + user;
 	}
 
 }

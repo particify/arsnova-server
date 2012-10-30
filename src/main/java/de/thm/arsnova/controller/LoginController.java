@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2012 THM webMedia
- * 
+ *
  * This file is part of ARSnova.
  *
  * ARSnova is free software: you can redistribute it and/or modify
@@ -56,91 +56,80 @@ import de.thm.arsnova.services.IUserService;
 @Controller
 public class LoginController extends AbstractController {
 
+	private static final int MAX_USERNAME_LENGTH = 15;
+	
 	@Autowired
-	TwitterProvider twitterProvider;
+	private TwitterProvider twitterProvider;
 
 	@Autowired
-	Google2Provider googleProvider;
+	private Google2Provider googleProvider;
 
 	@Autowired
-	FacebookProvider facebookProvider;
+	private FacebookProvider facebookProvider;
 
 	@Autowired
-	CasAuthenticationEntryPoint casEntryPoint;
+	private CasAuthenticationEntryPoint casEntryPoint;
 
 	@Autowired
-	IUserService userService;
+	private IUserService userService;
 
-	public static final Logger logger = LoggerFactory
-			.getLogger(LoginController.class);
+	public static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
 
 	@RequestMapping(method = RequestMethod.GET, value = "/doLogin")
-	public View doLogin(@RequestParam("type") String type,
-			@RequestParam(value = "user", required = false) String guestName,
-			HttpServletRequest request, HttpServletResponse response)
-			throws IOException, ServletException {
+	public final View doLogin(
+			@RequestParam("type") final String type,
+			@RequestParam(value = "user", required = false) final String guestName,
+			final HttpServletRequest request,
+			final HttpServletResponse response
+	) throws IOException, ServletException {
 		String referer = request.getHeader("referer");
 		request.getSession().setAttribute("ars-referer", referer);
 		if ("cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);
 		} else if ("twitter".equals(type)) {
-			String authUrl = twitterProvider
-					.getAuthorizationUrl(new HttpUserSession(request));
+			String authUrl = twitterProvider.getAuthorizationUrl(new HttpUserSession(request));
 			return new RedirectView(authUrl);
 		} else if ("facebook".equals(type)) {
-			String authUrl = facebookProvider
-					.getAuthorizationUrl(new HttpUserSession(request));
+			String authUrl = facebookProvider.getAuthorizationUrl(new HttpUserSession(request));
 			return new RedirectView(authUrl);
 		} else if ("google".equals(type)) {
-			String authUrl = googleProvider
-					.getAuthorizationUrl(new HttpUserSession(request));
+			String authUrl = googleProvider.getAuthorizationUrl(new HttpUserSession(request));
 			return new RedirectView(authUrl);
 		} else if ("guest".equals(type)) {
 			List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 			authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
 			String username = "";
-			if (guestName != null && guestName.startsWith("Guest")
-					&& guestName.length() == 15) {
+			if (guestName != null && guestName.startsWith("Guest") && guestName.length() == MAX_USERNAME_LENGTH) {
 				username = guestName;
 			} else {
-				username = "Guest"
-						+ Sha512DigestUtils
-								.shaHex(request.getSession().getId())
-								.substring(0, 10);
+				username = "Guest" + Sha512DigestUtils.shaHex(request.getSession().getId()).substring(0, 10);
 			}
 			org.springframework.security.core.userdetails.User user = new org.springframework.security.core.userdetails.User(
 					username, "", true, true, true, true, authorities);
-			Authentication token = new UsernamePasswordAuthenticationToken(
-					user, null, authorities);
+			Authentication token = new UsernamePasswordAuthenticationToken(user, null, authorities);
 
 			SecurityContextHolder.getContext().setAuthentication(token);
-			request.getSession(true)
-					.setAttribute(
-							HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-							SecurityContextHolder.getContext());
-			return new RedirectView((referer != null ? referer : "/")
-					+ "#auth/checkLogin");
+			request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+					SecurityContextHolder.getContext());
+			return new RedirectView((referer != null ? referer : "/") + "#auth/checkLogin");
 		}
 		return null;
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/whoami")
 	@ResponseBody
-	public User whoami() {
+	public final User whoami() {
 		return userService.getCurrentUser();
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/logout")
-	public View doLogout(final HttpServletRequest request) {
-		Authentication auth = SecurityContextHolder.getContext()
-				.getAuthentication();
+	public final View doLogout(final HttpServletRequest request) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		request.getSession().invalidate();
 		SecurityContextHolder.clearContext();
 		if (auth instanceof CasAuthenticationToken) {
 			return new RedirectView("/j_spring_cas_security_logout");
 		}
-		return new RedirectView(
-				request.getHeader("referer") != null ? request
-						.getHeader("referer") : "/");
+		return new RedirectView(request.getHeader("referer") != null ? request.getHeader("referer") : "/");
 	}
 }

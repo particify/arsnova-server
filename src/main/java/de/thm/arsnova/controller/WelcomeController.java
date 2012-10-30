@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2012 THM webMedia
- * 
+ *
  * This file is part of ARSnova.
  *
  * ARSnova is free software: you can redistribute it and/or modify
@@ -28,7 +28,7 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class WelcomeController extends AbstractController {
 	@RequestMapping(method = RequestMethod.GET, value = "/")
-	public ModelAndView home(HttpServletRequest request) {
+	public final ModelAndView home(final HttpServletRequest request) {
 		String referer = request.getHeader("referer");
 		String target = "index.html";
 		if (referer != null && referer.endsWith("dojo-index.html")) {

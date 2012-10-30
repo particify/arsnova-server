@@ -50,8 +50,8 @@ public class LoginAuthenticationFailureHandler extends
 		redirectStrategy.sendRedirect(request, response, defaultFailureUrl);
 	}
 
-	public final void setDefaultFailureUrl(final String defaultFailureUrl) {
-		this.defaultFailureUrl = defaultFailureUrl;
+	public final void setDefaultFailureUrl(final String failureUrl) {
+		this.defaultFailureUrl = failureUrl;
 	}
 
 }
