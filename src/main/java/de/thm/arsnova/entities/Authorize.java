@@ -4,24 +4,24 @@ public class Authorize {
 	private String user;
 	private String socketid;
 
-	public String getUser() {
+	public final String getUser() {
 		return user;
 	}
 
-	public void setUser(String user) {
+	public final void setUser(final String user) {
 		this.user = user;
 	}
 
-	public String getSocketid() {
+	public final String getSocketid() {
 		return socketid;
 	}
 
-	public void setSocketid(String socketid) {
+	public final void setSocketid(final String socketid) {
 		this.socketid = socketid;
 	}
 
 	@Override
-	public String toString() {
+	public final String toString() {
 		return "user: " + user + ", socketid: " + socketid;
 
 	}

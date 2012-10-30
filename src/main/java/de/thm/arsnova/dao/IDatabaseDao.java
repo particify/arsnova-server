@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2012 THM webMedia
- * 
+ *
  * This file is part of ARSnova.
  *
  * ARSnova is free software: you can redistribute it and/or modify
@@ -29,46 +29,45 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
 public interface IDatabaseDao {
-	public void cleanFeedbackVotes(int cleanupFeedbackDelay);
+	void cleanFeedbackVotes(int cleanupFeedbackDelay);
 
-	public Session getSessionFromKeyword(String keyword);
+	Session getSessionFromKeyword(String keyword);
 
-	public Session getSession(String keyword);
+	Session getSession(String keyword);
 
-	public List<Session> getMySessions(String username);
+	List<Session> getMySessions(String username);
 
-	public Session saveSession(Session session);
+	Session saveSession(Session session);
 
-	public Feedback getFeedback(String keyword);
+	Feedback getFeedback(String keyword);
 
-	public boolean saveFeedback(String keyword, int value, User user);
+	boolean saveFeedback(String keyword, int value, User user);
 
-	public boolean sessionKeyAvailable(String keyword);
+	boolean sessionKeyAvailable(String keyword);
 
-	public boolean saveQuestion(Session session, Question question);
+	boolean saveQuestion(Session session, Question question);
 
-	public Question getQuestion(String id, String sessionKey);
+	Question getQuestion(String id, String sessionKey);
 
 	List<Question> getSkillQuestions(String session);
 
-	public int getSkillQuestionCount(String sessionkey);
+	int getSkillQuestionCount(String sessionkey);
 
-	public LoggedIn registerAsOnlineUser(User u, Session s);
+	LoggedIn registerAsOnlineUser(User u, Session s);
 
-	public void updateSessionOwnerActivity(Session session);
+	void updateSessionOwnerActivity(Session session);
 
-	public Integer getMyFeedback(String keyword, User user);
+	Integer getMyFeedback(String keyword, User user);
 
-	public List<String> getQuestionIds(String sessionKey);
+	List<String> getQuestionIds(String sessionKey);
 
-	public void deleteQuestion(String sessionKey, String questionId);
+	void deleteQuestion(String sessionKey, String questionId);
 
-	public List<String> getUnAnsweredQuestions(String sessionKey);
+	List<String> getUnAnsweredQuestions(String sessionKey);
 
-	public Answer getMyAnswer(String sessionKey, String questionId);
+	Answer getMyAnswer(String sessionKey, String questionId);
 
-	public List<Answer> getAnswers(String sessionKey, String questionId);
+	List<Answer> getAnswers(String sessionKey, String questionId);
 
-	public int getAnswerCount(String sessionKey, String questionId);
-
+	int getAnswerCount(String sessionKey, String questionId);
 }

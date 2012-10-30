@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2012 THM webMedia
- * 
+ *
  * This file is part of ARSnova.
  *
  * ARSnova is free software: you can redistribute it and/or modify
@@ -38,28 +38,22 @@ import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IQuestionService;
-import de.thm.arsnova.services.IUserService;
-import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Controller
 public class QuestionController extends AbstractController {
 
-	public static final Logger logger = LoggerFactory
-			.getLogger(QuestionController.class);
+	public static final Logger LOGGER = LoggerFactory.getLogger(QuestionController.class);
 
 	@Autowired
-	IQuestionService questionService;
-
-	@Autowired
-	IUserService userService;
-
-	@Autowired
-	ARSnovaSocketIOServer server;
+	private IQuestionService questionService;
 
 	@RequestMapping(value = "/session/{sessionkey}/question/{questionId}", method = RequestMethod.GET)
 	@ResponseBody
-	public Question getQuestion(@PathVariable String sessionkey,
-			@PathVariable String questionId, HttpServletResponse response) {
+	public final Question getQuestion(
+			@PathVariable final String sessionkey,
+			@PathVariable final String questionId,
+			final HttpServletResponse response
+	) {
 		Question question = questionService.getQuestion(questionId, sessionkey);
 		if (question != null) {
 			return question;
@@ -71,8 +65,11 @@ public class QuestionController extends AbstractController {
 
 	@RequestMapping(value = "/session/{sessionkey}/question", method = RequestMethod.POST)
 	@ResponseBody
-	public void postQuestion(@PathVariable String sessionkey,
-			@RequestBody Question question, HttpServletResponse response) {
+	public final void postQuestion(
+			@PathVariable final String sessionkey,
+			@RequestBody final Question question,
+			final HttpServletResponse response
+	) {
 		if (!sessionkey.equals(question.getSession())) {
 			response.setStatus(HttpStatus.PRECONDITION_FAILED.value());
 			return;
@@ -87,78 +84,94 @@ public class QuestionController extends AbstractController {
 		return;
 	}
 
-	@RequestMapping(value = { "/getSkillQuestions/{sessionkey}",
-			"/session/{sessionkey}/skillquestions" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/getSkillQuestions/{sessionkey}", "/session/{sessionkey}/skillquestions" }, method = RequestMethod.GET)
 	@ResponseBody
-	public List<Question> getSkillQuestions(@PathVariable String sessionkey,
-			HttpServletResponse response) {
-		List<Question> questions = questionService
-				.getSkillQuestions(sessionkey);
+	public final List<Question> getSkillQuestions(
+			@PathVariable final String sessionkey,
+			final HttpServletResponse response
+	) {
+		List<Question> questions = questionService.getSkillQuestions(sessionkey);
 		if (questions == null || questions.isEmpty()) {
 			response.setStatus(HttpStatus.NOT_FOUND.value());
 			return null;
 		}
-		logger.info(questions.toString());
+		LOGGER.info(questions.toString());
 		return questions;
 	}
-	
-	@RequestMapping(value="/session/{sessionKey}/questionids", method=RequestMethod.GET)
+
+	@RequestMapping(value = "/session/{sessionKey}/questionids", method = RequestMethod.GET)
 	@ResponseBody
-	public List<String> getQuestionIds(@PathVariable String sessionKey, HttpServletResponse response) {
+	public final List<String> getQuestionIds(
+			@PathVariable final String sessionKey,
+			final HttpServletResponse response
+	) {
 		List<String> questions = questionService.getQuestionIds(sessionKey);
-		if(questions == null || questions.isEmpty()) {
+		if (questions == null || questions.isEmpty()) {
 			throw new NotFoundException();
 		}
-		logger.info(questions.toString());
-		return questions;		
+		LOGGER.info(questions.toString());
+		return questions;
 	}
-	
-	@RequestMapping(value="/session/{sessionKey}/questions/{questionId}", method=RequestMethod.DELETE)
+
+	@RequestMapping(value = "/session/{sessionKey}/questions/{questionId}", method = RequestMethod.DELETE)
 	@ResponseBody
-	public void deleteAnswersAndQuestion(@PathVariable String sessionKey, @PathVariable String questionId, HttpServletResponse response) {
+	public final void deleteAnswersAndQuestion(
+			@PathVariable final String sessionKey,
+			@PathVariable final String questionId,
+			final HttpServletResponse response
+	) {
 		questionService.deleteQuestion(sessionKey, questionId);
 	}
-	
-	@RequestMapping(value="/session/{sessionKey}/questions/unanswered", method=RequestMethod.GET)
+
+	@RequestMapping(value = "/session/{sessionKey}/questions/unanswered", method = RequestMethod.GET)
 	@ResponseBody
-	public List<String> getUnAnsweredSkillQuestions(@PathVariable String sessionKey, HttpServletResponse response) {
+	public final List<String> getUnAnsweredSkillQuestions(
+			@PathVariable final String sessionKey,
+			final HttpServletResponse response
+	) {
 		List<String> answers = questionService.getUnAnsweredQuestions(sessionKey);
-		if(answers == null || answers.isEmpty()) {
+		if (answers == null || answers.isEmpty()) {
 			throw new NotFoundException();
 		}
-		logger.info(answers.toString());
+		LOGGER.info(answers.toString());
 		return answers;
 	}
-	
+
 	/**
 	 * returns a JSON document which represents the given answer of a question.
+	 *
 	 * @param sessionKey
 	 *            Session Keyword to which the question belongs to
 	 * @param questionId
 	 *            CouchDB Question ID for which the given answer should be
 	 *            retrieved
-	 * @return JSON Document of {@link Answer} or {@link NotFoundException} 
-	 * @throws NotFoundException if
-	 *         wrong session, wrong question or no answer was given by the
-	 *         current user
-	 * @throws ForbiddenException if not logged in
+	 * @return JSON Document of {@link Answer} or {@link NotFoundException}
+	 * @throws NotFoundException
+	 *             if wrong session, wrong question or no answer was given by
+	 *             the current user
+	 * @throws ForbiddenException
+	 *             if not logged in
 	 */
-	@RequestMapping(value="/session/{sessionKey}/question/{questionId}/myanswer", method=RequestMethod.GET)
+	@RequestMapping(value = "/session/{sessionKey}/question/{questionId}/myanswer", method = RequestMethod.GET)
 	@ResponseBody
-	public Answer getMyAnswer(@PathVariable String sessionKey, @PathVariable String questionId, HttpServletResponse response) {
+	public final Answer getMyAnswer(
+			@PathVariable final String sessionKey,
+			@PathVariable final String questionId,
+			final HttpServletResponse response
+	) {
 		Answer answer = questionService.getMyAnswer(sessionKey, questionId);
-		if(answer == null) {
+		if (answer == null) {
 			throw new NotFoundException();
 		}
 		return answer;
 	}
-	
+
 	/**
 	 * returns a list of {@link Answer}s encoded as a JSON document for a given
 	 * question id. In this case only {@link Answer} <tt>questionId</tt>,
 	 * <tt>answerText</tt>, <tt>answerSubject</tt> and <tt>answerCount</tt>
 	 * properties are set
-	 * 
+	 *
 	 * @param sessionKey
 	 *            Session Keyword to which the question belongs to
 	 * @param questionId
@@ -170,33 +183,41 @@ public class QuestionController extends AbstractController {
 	 * @throws ForbiddenException
 	 *             if not logged in
 	 */
-	@RequestMapping(value="/session/{sessionKey}/question/{questionId}/answers", method=RequestMethod.GET)
+	@RequestMapping(value = "/session/{sessionKey}/question/{questionId}/answers", method = RequestMethod.GET)
 	@ResponseBody
-	public List<Answer> getAnswers(@PathVariable String sessionKey, @PathVariable String questionId, HttpServletResponse response) {
+	public final List<Answer> getAnswers(
+			@PathVariable final String sessionKey,
+			@PathVariable final String questionId,
+			final HttpServletResponse response
+	) {
 		List<Answer> answers = questionService.getAnswers(sessionKey, questionId);
-		if(answers == null || answers.isEmpty()) {
+		if (answers == null || answers.isEmpty()) {
 			throw new NotFoundException();
 		}
 		return answers;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param sessionKey
 	 *            Session Keyword to which the question belongs to
 	 * @param questionId
 	 *            CouchDB Question ID for which the given answers should be
 	 *            retrieved
-	 * @return count of answers for given question id 
+	 * @return count of answers for given question id
 	 * @throws NotFoundException
 	 *             if wrong session or wrong question
 	 * @throws ForbiddenException
 	 *             if not logged in
 	 */
-	@RequestMapping(value="/session/{sessionKey}/question/{questionId}/answercount", method=RequestMethod.GET)
+	@RequestMapping(value = "/session/{sessionKey}/question/{questionId}/answercount", method = RequestMethod.GET)
 	@ResponseBody
-	public int getAnswerCount(@PathVariable String sessionKey, @PathVariable String questionId, HttpServletResponse response) {
+	public final int getAnswerCount(
+			@PathVariable final String sessionKey,
+			@PathVariable final String questionId,
+			final HttpServletResponse response
+	) {
 		return questionService.getAnswerCount(sessionKey, questionId);
 	}
-	
+
 }
