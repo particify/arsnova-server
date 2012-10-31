@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2012 THM webMedia
- * 
+ *
  * This file is part of ARSnova.
  *
  * ARSnova is free software: you can redistribute it and/or modify
@@ -20,8 +20,6 @@
 package de.thm.arsnova.services;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,66 +29,63 @@ import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
 public class SessionService implements ISessionService {
 
 	@Autowired
-	ARSnovaSocketIOServer server;
+	private IDatabaseDao databaseDao;
 
 	@Autowired
-	IDatabaseDao databaseDao;
+	private IUserService userService;
 
-	@Autowired
-	IUserService userService;
-
-	public void setDatabaseDao(IDatabaseDao databaseDao) {
-		this.databaseDao = databaseDao;
+	public void setDatabaseDao(final IDatabaseDao newDatabaseDao) {
+		this.databaseDao = newDatabaseDao;
 	}
 
 	@Override
 	@Authenticated
-	public Session joinSession(String keyword) {
+	public final Session joinSession(final String keyword) {
 		userService.addCurrentUserToSessionMap(keyword);
 		return databaseDao.getSession(keyword);
 	}
 
 	@Override
-	public List<Session> getMySessions(String username) {
+	public final List<Session> getMySessions(final String username) {
 		return databaseDao.getMySessions(username);
 	}
 
 	@Override
 	@Authenticated
-	public Session saveSession(Session session) {
+	public final Session saveSession(final Session session) {
 		return databaseDao.saveSession(session);
 	}
 
 	@Override
-	public boolean sessionKeyAvailable(String keyword) {
+	public final boolean sessionKeyAvailable(final String keyword) {
 		return databaseDao.sessionKeyAvailable(keyword);
 	}
 
 	@Override
-	public String generateKeyword() {
+	public final String generateKeyword() {
 		final int low = 10000000;
 		final int high = 100000000;
 		String keyword = String
 				.valueOf((int) (Math.random() * (high - low) + low));
 
-		if (this.sessionKeyAvailable(keyword))
+		if (this.sessionKeyAvailable(keyword)) {
 			return keyword;
+		}
 		return generateKeyword();
 	}
 
 	@Override
 	@Authenticated
-	public LoggedIn registerAsOnlineUser(User user, String sessionkey) {
+	public final LoggedIn registerAsOnlineUser(final User user, final String sessionkey) {
 		Session session = this.joinSession(sessionkey);
-		if (session == null)
+		if (session == null) {
 			return null;
-
+		}
 		if (session.getCreator().equals(user.getUsername())) {
 			databaseDao.updateSessionOwnerActivity(session);
 		}

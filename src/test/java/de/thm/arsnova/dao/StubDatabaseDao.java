@@ -1,7 +1,6 @@
 package de.thm.arsnova.dao;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,6 +25,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	private static Map<String, Session> stubSessions = new ConcurrentHashMap<String, Session>();
 	private static Map<String, Feedback> stubFeedbacks = new ConcurrentHashMap<String, Feedback>();
 	private static Map<String, List<Question>> stubQuestions = new ConcurrentHashMap<String, List<Question>>();
+	private static Map<String, User> stubUsers = new ConcurrentHashMap<String, User>();
 
 	public StubDatabaseDao() {
 		fillWithDummySessions();
@@ -167,8 +167,9 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public LoggedIn registerAsOnlineUser(User u, Session s) {
-		// TODO Auto-generated method stub
-		return null;
+		stubUsers.put(s.getKeyword(), u);
+		System.out.println("X");
+		return new LoggedIn();
 	}
 
 	@Override
@@ -227,8 +228,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	
 	@Override
 	public int getActiveUsers(long since) {
-		// TODO Auto-generated method stub
-		return 0;
+		return stubUsers.size();
 	}
 
 }

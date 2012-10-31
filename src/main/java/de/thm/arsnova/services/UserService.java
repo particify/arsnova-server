@@ -38,7 +38,7 @@ import de.thm.arsnova.exceptions.UnauthorizedException;
 
 public class UserService implements IUserService, InitializingBean, DisposableBean {
 
-	public static final Logger logger = LoggerFactory.getLogger(UserService.class);
+	public static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
 	private static final ConcurrentHashMap<UUID, User> socketid2user = new ConcurrentHashMap<UUID, User>();
 	private static final ConcurrentHashMap<String, String> user2session = new ConcurrentHashMap<String, String>();
@@ -150,15 +150,15 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 			Map<UUID, User> s2u = (Map<UUID, User>) map.get("socketid2user");
 			Map<String, String> u2s = (Map<String, String>) map.get("user2session");
 
-			logger.info("load from store: {}", map);
+			LOGGER.info("load from store: {}", map);
 
 			socketid2user.putAll(s2u);
 			user2session.putAll(u2s);
 
 		} catch (IOException e) {
-			logger.error("IOException during restoring UserService", e);
+			LOGGER.error("IOException during restoring UserService", e);
 		} catch (ClassNotFoundException e) {
-			logger.error("ClassNotFoundException during restoring UserService", e);
+			LOGGER.error("ClassNotFoundException during restoring UserService", e);
 		}
 	}
 
@@ -173,7 +173,7 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 			File store = new File(tmpDir, "arsnova.bin");
 			if (!store.exists()) {
 				if (! store.createNewFile()) {
-					logger.info("Could not create store file");
+					LOGGER.info("Could not create store file");
 				}
 			}
 			OutputStream file = new FileOutputStream(store);
@@ -181,9 +181,9 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 			objOut.writeObject(map);
 			objOut.close();
 			file.close();
-			logger.info("saved to store: {}", map);
+			LOGGER.info("saved to store: {}", map);
 		} catch (IOException e) {
-			logger.error("IOException while saving UserService", e);
+			LOGGER.error("IOException while saving UserService", e);
 		}
 	}
 }

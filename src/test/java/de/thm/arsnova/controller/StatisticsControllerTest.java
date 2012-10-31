@@ -46,13 +46,13 @@ public class StatisticsControllerTest {
 	}
 
 	@Test
-	public final void testShouldNotGetUnknownSession() throws Exception {
+	public final void testShouldGetCurrentOnlineUsers() throws Exception {
 		userService.setUserAuthenticated(true);
 
 		request.setMethod("GET");
 		request.setRequestURI("/statistics/activeusercount");
 		handlerAdapter.handle(request, response, statisticsController);
 
-		assertEquals("0", response.getContentAsString());
+		assertEquals("1", response.getContentAsString());
 	}
 }

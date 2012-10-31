@@ -1,7 +1,9 @@
 package de.thm.arsnova.services;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
+import de.thm.arsnova.dao.StubDatabaseDao;
 import de.thm.arsnova.entities.User;
 
 public class StubUserService extends UserService {
