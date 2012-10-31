@@ -222,7 +222,13 @@
 			<groupId>couchdb4j</groupId>
 			<artifactId>couchdb4j</artifactId>
 			<version>0.3.0-i386-1</version>
-
+			<exclusions>
+				<!-- Exclude httpclient: Selenium loads a more current version -->
+				<exclusion>
+					<groupId>org.apache.httpcomponents</groupId>
+					<artifactId>httpclient</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.ezmorph</groupId>
@@ -295,6 +301,11 @@
 			<artifactId>spring-aspects</artifactId>
 			<version>${org.springframework-version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<version>2.25.0</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -305,7 +316,7 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
-					
+
 				</configuration>
 			</plugin>
 			<plugin>
@@ -330,6 +341,9 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.12.2</version>
 				<configuration>
+					<excludes>
+						<exclude>**/Selenium*.java</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -355,6 +369,82 @@
 				<configuration>
 					<configLocation>ARSnova-checkstyle-checker.xml</configLocation>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.tomcat.maven</groupId>
+				<artifactId>tomcat7-maven-plugin</artifactId>
+				<version>2.0</version>
+				<configuration>
+					<url>http://localhost:8080/manager/text</url>
+					<server>arsnova</server>
+					<path>/arsnova-war</path>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.12.4</version>
+				<configuration>
+					<includes>
+						<include>**/Selenium*.java</include>
+					</includes>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.cargo</groupId>
+				<artifactId>cargo-maven2-plugin</artifactId>
+				<version>1.2.0</version>
+				<configuration>
+					<container>
+						<containerId>tomcat7x</containerId>
+						<zipUrlInstaller>
+							<url>http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.16/bin/apache-tomcat-7.0.16.zip
+							</url>
+							<downloadDir>${project.build.directory}/downloads</downloadDir>
+							<extractDir>${project.build.directory}/extracts</extractDir>
+						</zipUrlInstaller>
+					</container>
+					<configuration>
+						<properties>
+							<cargo.servlet.port>8081</cargo.servlet.port>
+							<cargo.tomcat.ajp.port>8010</cargo.tomcat.ajp.port>
+						</properties>
+						<deployables>
+							<deployable>
+								<groupId>de.thm.arsnova</groupId>
+								<artifactId>arsnova-war</artifactId>
+								<type>war</type>
+								<properties>
+									<context>arsnova-war</context>
+								</properties>
+							</deployable>
+						</deployables>
+					</configuration>
+				</configuration>
+				<executions>
+					<execution>
+						<id>start-tomcat</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>start</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>stop-tomcat</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
