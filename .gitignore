@@ -3,3 +3,4 @@
 .settings/*
 target/*
 chromedriver.log
+.checkstyle

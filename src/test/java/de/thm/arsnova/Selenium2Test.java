@@ -1,32 +1,39 @@
 package de.thm.arsnova;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Properties;
 
-import org.junit.*;
-import org.openqa.selenium.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.html5.LocalStorage;
-import org.openqa.selenium.support.ui.*;
-import org.springframework.core.io.*;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 
 import de.thm.arsnova.dao.CouchDBDao;
 import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.services.*;
+import de.thm.arsnova.services.SessionService;
+import de.thm.arsnova.services.StubUserService;
 
 public class Selenium2Test {
 
-	ARSnovaChromeDriver driver;
-	Properties properties;
+	private ARSnovaChromeDriver driver;
+	private Properties properties;
 
-	CouchDBDao couchdbDao;
-	SessionService sessionService;
-	StubUserService userService;
+	private CouchDBDao couchdbDao;
+	private SessionService sessionService;
+	private StubUserService userService;
 
 	@Before
-	public void setUp() throws IOException {
+	public final void setUp() throws IOException {
 		Resource resource = new FileSystemResource("/etc/arsnova/arsnova.properties");
 		properties = PropertiesLoaderUtils.loadProperties(resource);
 
@@ -49,17 +56,14 @@ public class Selenium2Test {
 	}
 
 	@After
-	public void tearDown() {
+	public final void tearDown() {
 		driver.close();
 		driver.quit();
 	}
 
 	@Test
-	public void studentGuestShouldBeAbleToJoinSession() {
-		Session session = new Session();
-		session.setName("selenium test session");
-		session.setShortName("selenium");
-		session = couchdbDao.saveSession(session);
+	public final void studentGuestShouldSeeFeedbackButtonsAfterJoiningSession() {
+		Session session = couchdbDao.saveSession(createSession());
 
 		WebElement studentRoleButton = waitForElement(By.id("ext-gen1047"));
 		studentRoleButton.click();
@@ -77,11 +81,23 @@ public class Selenium2Test {
 	}
 
 	private WebElement waitForElement(final By by) {
-		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
+		final long timeoutInSecs = 10;
+		(new WebDriverWait(driver, timeoutInSecs)).until(new ExpectedCondition<Boolean>() {
 			public Boolean apply(final WebDriver d) {
 				return d.findElement(by) != null;
 			}
 		});
 		return driver.findElement(by);
+	}
+
+	private Session createSession() {
+		return createNamedSession(null, null);
+	}
+
+	private Session createNamedSession(final String name, final String shortName) {
+		Session session = new Session();
+		session.setName(name != null ? name : "selenium test session");
+		session.setShortName(shortName != null ? shortName : "selenium");
+		return session;
 	}
 }
