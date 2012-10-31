@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import javax.inject.Inject;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 
+import de.thm.arsnova.dao.StubDatabaseDao;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.StubUserService;
@@ -40,6 +42,14 @@ public class QuestionControllerTest {
 	
 	@Autowired
 	private StubUserService userService;
+	
+	@Autowired
+	private StubDatabaseDao databaseDao;
+
+	@After
+	public final void cleanup() {
+		databaseDao.cleanupTestData();
+	}
 
 	@Before
 	public void setUp() {

@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNotNull;
 
 import javax.inject.Inject;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,6 +41,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.view.RedirectView;
 
+import de.thm.arsnova.dao.StubDatabaseDao;
 import de.thm.arsnova.services.StubUserService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -60,6 +62,14 @@ public class LoginControllerTest {
 
 	@Autowired
 	private StubUserService userService;
+	
+	@Autowired
+	private StubDatabaseDao databaseDao;
+
+	@After
+	public final void cleanup() {
+		databaseDao.cleanupTestData();
+	}
 
 	@Before
 	public void setUp() throws Exception {

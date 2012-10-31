@@ -2,6 +2,7 @@ package de.thm.arsnova.services;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,11 @@ public class StatisticsServiceTest {
 	@Autowired
 	private StubDatabaseDao databaseDao;
 
+	@After
+	public final void cleanup() {
+		databaseDao.cleanupTestData();
+	}
+	
 	@Test
 	public final void testShouldReturnNoActiveUsers() {
 		int actual = statisticsService.countActiveUsers();

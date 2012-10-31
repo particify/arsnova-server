@@ -16,8 +16,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 
-import de.thm.arsnova.services.StubUserService;
-
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {
 		"file:src/main/webapp/WEB-INF/arsnova-servlet.xml",
@@ -35,9 +33,6 @@ public class StatisticsControllerTest {
 	@Autowired
 	private StatisticsController statisticsController;
 
-	@Autowired
-	private StubUserService userService;
-
 	@Before
 	public final void setUp() {
 		this.request = new MockHttpServletRequest();
@@ -47,12 +42,10 @@ public class StatisticsControllerTest {
 
 	@Test
 	public final void testShouldGetCurrentOnlineUsers() throws Exception {
-		userService.setUserAuthenticated(true);
-
 		request.setMethod("GET");
 		request.setRequestURI("/statistics/activeusercount");
 		handlerAdapter.handle(request, response, statisticsController);
 
-		assertEquals("1", response.getContentAsString());
+		assertEquals("0", response.getContentAsString());
 	}
 }

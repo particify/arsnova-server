@@ -33,6 +33,17 @@ public class StubDatabaseDao implements IDatabaseDao {
 		fillWithDummyQuestions();
 	}
 
+	public void cleanupTestData() {
+		stubSessions.clear();
+		stubFeedbacks.clear();
+		stubQuestions.clear();
+		stubUsers.clear();
+		
+		fillWithDummySessions();
+		fillWithDummyFeedbacks();
+		fillWithDummyQuestions();
+	}
+	
 	private void fillWithDummySessions() {
 		Session session = new Session();
 		session.setActive(true);
@@ -121,7 +132,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public boolean sessionKeyAvailable(String keyword) {
-		System.out.println(stubSessions.get(keyword));
 		return (stubSessions.get(keyword) == null);
 	}
 
@@ -168,7 +178,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	@Override
 	public LoggedIn registerAsOnlineUser(User u, Session s) {
 		stubUsers.put(s.getKeyword(), u);
-		System.out.println("X");
 		return new LoggedIn();
 	}
 
