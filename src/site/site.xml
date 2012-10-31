@@ -57,6 +57,7 @@
 		<menu name="Further Information">
 			<item name="Gitorious" href="https://scm.thm.de/arsnova" />
 			<item name="Issue Tracking" href="issue-tracking.html" />
+			<item name="Sonar" href="https://scm.thm.de/sonar/dashboard/index/de.thm.arsnova:arsnova-war" />
 			<item name="Continuous Integration" href="integration.html" />
 			<item name="Source Repository" href="source-repository.html" />
 			<item name="Metrics" href="cobertura/index.html" />
