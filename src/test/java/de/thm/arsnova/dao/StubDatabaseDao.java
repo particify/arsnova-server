@@ -240,4 +240,10 @@ public class StubDatabaseDao implements IDatabaseDao {
 		return stubUsers.size();
 	}
 
+	@Override
+	public int countActiveUsers(Session session, long since) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }
