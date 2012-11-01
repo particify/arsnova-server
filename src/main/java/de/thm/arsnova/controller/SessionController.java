@@ -92,6 +92,15 @@ public class SessionController extends AbstractController {
 		return null;
 	}
 
+	@RequestMapping(value = "/session/{sessionkey}/activeusercount", method = RequestMethod.GET)
+	@ResponseBody
+	public final int countActiveUsers(
+			@PathVariable final String sessionkey,
+			final HttpServletResponse response
+	) {
+		return sessionService.countActiveUsers(sessionkey);
+	}
+
 	@RequestMapping(value = "/session", method = RequestMethod.POST)
 	@ResponseBody
 	public final Session postNewSession(@RequestBody final Session session, final HttpServletResponse response) {

@@ -99,13 +99,13 @@ public class CouchDBDao implements IDatabaseDao {
 	public final void setDatabaseName(final String newDatabaseName) {
 		this.databaseName = newDatabaseName;
 	}
-	
-	public void setSessionService(ISessionService sessionService) {
-		this.sessionService = sessionService;
+
+	public final void setSessionService(final ISessionService service) {
+		this.sessionService = service;
 	}
-	
-	public void setUserService(IUserService userService) {
-		this.userService = userService;
+
+	public final void setUserService(final IUserService service) {
+		this.userService = service;
 	}
 
 	/**
@@ -857,17 +857,13 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final int getActiveUsers(final long since) {
+	public final int countActiveUsers(final long since) {
 		try {
 			View view = new View("statistic/count_active_users");
 			view.setStartKey(String.valueOf(since));
 			ViewResults results = this.getDatabase().view(view);
 			LOGGER.info("getActiveUsers() {}", results);
-			if (
-					results == null
-					|| results.getResults().isEmpty()
-					|| results.getJSONArray("rows").size() == 0
-			) {
+			if (isEmptyResults(results)) {
 				return 0;
 			}
 			return results.getJSONArray("rows").optJSONObject(0).getInt("value");
@@ -876,7 +872,27 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		return 0;
 	}
-	
+
+	@Override
+	public final int countActiveUsers(Session session, long since) {
+		try {
+			View view = new View("logged_in/count");
+			view.setStartKey(URLEncoder.encode("[\"" + session.get_id() + "\", " + String.valueOf(since) + "]", "UTF-8"));
+			view.setEndKey(URLEncoder.encode("[\"" + session.get_id() + "\", {}]", "UTF-8"));
+			ViewResults results = this.getDatabase().view(view);
+			if (isEmptyResults(results)) {
+				return 0;
+			}
+			return results.getJSONArray("rows").optJSONObject(0).getInt("value");
+		} catch (UnsupportedEncodingException e) {
+			return 0;
+		}
+	}
+
+	private boolean isEmptyResults(ViewResults results) {
+		return results == null || results.getResults().isEmpty() || results.getJSONArray("rows").size() == 0;
+	}
+
 	@Override
 	public List<Answer> getFreetextAnswers(String sessionKey, String questionId) {
 		Session s = this.getSessionFromKeyword(sessionKey);
@@ -899,11 +915,9 @@ public class CouchDBDao implements IDatabaseDao {
 				answers.add(a);
 			}
 			return answers;
-			
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.error("Error while retrieving freetext answers", e);
 		}
-		
 		return null;
 	}
 }

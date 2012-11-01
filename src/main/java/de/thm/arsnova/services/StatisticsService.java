@@ -16,6 +16,6 @@ public class StatisticsService implements IStatisticsService {
 	@Override
 	public final int countActiveUsers() {
 		long since = System.currentTimeMillis() - SINCEDURATION;
-		return databaseDao.getActiveUsers(since);
+		return databaseDao.countActiveUsers(since);
 	}
 }
