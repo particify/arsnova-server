@@ -50,4 +50,6 @@ public interface IQuestionService {
 	List<Answer> getMytAnswers(String sessionKey);
 
 	int getTotalAnswerCount(String sessionKey);
+
+	int getInterposedCount(String sessionKey);
 }

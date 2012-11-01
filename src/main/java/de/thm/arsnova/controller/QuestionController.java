@@ -248,7 +248,13 @@ public class QuestionController extends AbstractController {
 		return questionService.getTotalAnswerCount(sessionKey);
 	}
 	
-	
-	
+	@RequestMapping(value = "/session/{sessionKey}/interposedcount", method = RequestMethod.GET)
+	@ResponseBody
+	public final int getInterposedCount(
+			@PathVariable final String sessionKey,
+			final HttpServletResponse response
+	) {
+		return questionService.getInterposedCount(sessionKey);
+	}
 
 }

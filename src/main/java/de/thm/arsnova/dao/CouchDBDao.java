@@ -954,6 +954,31 @@ public class CouchDBDao implements IDatabaseDao {
 			View view = new View("skill_question/count_answers_by_session");
 			view.setKey(URLEncoder.encode("\"" + s.get_id() + "\"", "UTF-8"));
 			ViewResults results = this.getDatabase().view(view);
+			if(results.size() == 0) {
+				return 0;
+			}
+			return results.getJSONArray("rows").optJSONObject(0).optInt("value");
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.error("Error while retrieving total answer count", e);
+		}
+		return 0;
+	}
+	
+	@Override
+	public int getInterposedCount(String sessionKey) {
+		Session s = this.getSessionFromKeyword(sessionKey);
+		if (s == null) {
+			throw new NotFoundException();
+		}
+
+		try {
+			View view = new View("interposed_question/count_by_session");
+			view.setKey(URLEncoder.encode("\"" + s.get_id() + "\"", "UTF-8"));
+			view.setGroup(true);
+			ViewResults results = this.getDatabase().view(view);
+			if(results.size() == 0 || results.getResults().size() == 0) {
+				return 0;
+			}
 			return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.error("Error while retrieving total answer count", e);
