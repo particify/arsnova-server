@@ -204,10 +204,24 @@ public class CouchDBDao implements IDatabaseDao {
 		if (session == null) {
 			throw new NotFoundException();
 		}
+		
+		User user = this.userService.getCurrentUser();
+		View view = null;
+
 		try {
-			View view = new View("skill_question/by_session_sorted_by_subject_and_text");
-			view.setStartKey("[" + URLEncoder.encode("\"" + session.get_id() + "\"", "UTF-8") + "]");
-			view.setEndKey("[" + URLEncoder.encode("\"" + session.get_id() + "\",{}", "UTF-8") + "]");
+			if(session.getCreator().equals(user.getUsername())) {
+				view = new View("skill_question/by_session_sorted_by_subject_and_text");
+				view.setStartKey("[" + URLEncoder.encode("\"" + session.get_id() + "\"", "UTF-8") + "]");
+				view.setEndKey("[" + URLEncoder.encode("\"" + session.get_id() + "\",{}", "UTF-8") + "]");
+
+			} else {
+				if(user.getType().equals(User.THM)) {
+					view = new View("skill_question/by_session_for_thm");
+				} else {
+					view = new View("skill_question/by_session_for_all");
+				}
+				view.setKey(URLEncoder.encode("\"" + session.get_id() + "\"", "UTF-8"));
+			}
 
 			ViewResults questions = this.getDatabase().view(view);
 			if (questions == null || questions.isEmpty()) {

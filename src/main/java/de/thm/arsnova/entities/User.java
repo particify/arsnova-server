@@ -10,38 +10,47 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 public class User implements Serializable {
+	public static final String GOOGLE = "google";
+	public static final String TWITTER = "twitter";
+	public static final String FACEBOOK = "facebook";
+	public static final String THM = "thm";
+	public static final String LDAP = "ldap";
+	public static final String ANONYMOUS = "anonymous";
+	
+	
+	
 	private static final long serialVersionUID = 1L;
 	private String username;
 	private String type;
 
 	public User(Google2Profile profile) {
 		setUsername(profile.getEmail());
-		setType("google");
+		setType(User.GOOGLE);
 	}
 
 	public User(TwitterProfile profile) {
 		setUsername(profile.getScreenName());
-		setType("twitter");
+		setType(User.TWITTER);
 	}
 
 	public User(FacebookProfile profile) {
 		setUsername(profile.getLink());
-		setType("facebook");
+		setType(User.FACEBOOK);
 	}
 
 	public User(AttributePrincipal principal) {
 		setUsername(principal.getName());
-		setType("thm");
+		setType(User.THM);
 	}
 
 	public User(AnonymousAuthenticationToken token) {
-		setUsername("anonymous");
-		setType("anonymous");
+		setUsername(User.ANONYMOUS);
+		setType(User.ANONYMOUS);
 	}
 
 	public User(UsernamePasswordAuthenticationToken token) {
 		setUsername(token.getName());
-		setType("ldap");
+		setType(LDAP);
 	}
 
 	public String getUsername() {
