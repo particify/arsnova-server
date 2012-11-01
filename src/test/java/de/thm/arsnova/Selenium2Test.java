@@ -68,7 +68,6 @@ public class Selenium2Test {
 		driver.quit();
 	}
 
-	@Ignore
 	@Test
 	public final void studentGuestShouldPostFeedback() {
 		Session session = couchdbDao.saveSession(createSession());
