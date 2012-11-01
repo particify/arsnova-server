@@ -118,4 +118,28 @@ public class QuestionService implements IQuestionService {
 	public List<Answer> getFreetextAnswers(String sessionKey, String questionId) {
 		return databaseDao.getFreetextAnswers(sessionKey, questionId);
 	}
+	
+	@Override
+	@Authenticated
+	public List<Answer> getMytAnswers(String sessionKey) {
+		return databaseDao.getMyAnswers(sessionKey);
+	}
+	
+	@Override
+	@Authenticated
+	public int getTotalAnswerCount(String sessionKey) {
+		return databaseDao.getTotalAnswerCount(sessionKey);
+	}
+	
+	@Override
+	@Authenticated
+	public int getInterposedCount(String sessionKey) {
+		return databaseDao.getInterposedCount(sessionKey);
+	}
+	
+	@Override
+	@Authenticated
+	public List<Question> getInterposedQuestions(String sessionKey) {
+		return databaseDao.getInterposedQuestions(sessionKey);
+	}
 }

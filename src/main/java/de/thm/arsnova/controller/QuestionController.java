@@ -230,5 +230,40 @@ public class QuestionController extends AbstractController {
 		return questionService.getFreetextAnswers(sessionKey, questionId);
 	}
 	
+	@RequestMapping(value = "/session/{sessionKey}/myanswers", method = RequestMethod.GET)
+	@ResponseBody
+	public final List<Answer> getMyAnswers(
+			@PathVariable final String sessionKey,
+			final HttpServletResponse response
+	) {
+		return questionService.getMytAnswers(sessionKey);
+	}
+	
+	@RequestMapping(value = "/session/{sessionKey}/answercount", method = RequestMethod.GET)
+	@ResponseBody
+	public final int getTotalAnswerCount(
+			@PathVariable final String sessionKey,
+			final HttpServletResponse response
+	) {
+		return questionService.getTotalAnswerCount(sessionKey);
+	}
+	
+	@RequestMapping(value = "/session/{sessionKey}/interposedcount", method = RequestMethod.GET)
+	@ResponseBody
+	public final int getInterposedCount(
+			@PathVariable final String sessionKey,
+			final HttpServletResponse response
+	) {
+		return questionService.getInterposedCount(sessionKey);
+	}
+	
+	@RequestMapping(value = "/session/{sessionKey}/interposed", method = RequestMethod.GET)
+	@ResponseBody
+	public final List<Question> getInterposedQuestions(
+			@PathVariable final String sessionKey,
+			final HttpServletResponse response
+	) {
+		return questionService.getInterposedQuestions(sessionKey);
+	}
 
 }

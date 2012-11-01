@@ -46,4 +46,12 @@ public interface IQuestionService {
 	int getAnswerCount(String sessionKey, String questionId);
 
 	List<Answer> getFreetextAnswers(String sessionKey, String questionId);
+
+	List<Answer> getMytAnswers(String sessionKey);
+
+	int getTotalAnswerCount(String sessionKey);
+
+	int getInterposedCount(String sessionKey);
+
+	List<Question> getInterposedQuestions(String sessionKey);
 }
