@@ -239,5 +239,11 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public int getActiveUsers(long since) {
 		return stubUsers.size();
 	}
+	
+	@Override
+	public List<Answer> getMyAnswers(String sessionKey) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

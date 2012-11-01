@@ -906,4 +906,40 @@ public class CouchDBDao implements IDatabaseDao {
 		
 		return null;
 	}
+	
+	@Override
+	public List<Answer> getMyAnswers(String sessionKey) {
+		Session s = this.getSessionFromKeyword(sessionKey);
+		if (s == null) {
+			throw new NotFoundException();
+		}
+		
+		User user = userService.getCurrentUser();
+		if(user == null) {
+			throw new UnauthorizedException();
+		}
+		
+		try {
+			View view = new View("answer/by_user_and_session");
+			view.setKey("[" + URLEncoder.encode("\"" + user.getUsername() + "\",\"" + s.get_id() + "\"", "UTF-8") + "]");
+			ViewResults results = this.getDatabase().view(view);
+			if (results.getResults().isEmpty()) {
+				throw new NotFoundException();
+			}
+			List<Answer> answers = new ArrayList<Answer>();
+			for (Document d : results.getResults()) {
+				Answer a = (Answer) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Answer.class);
+				a.set_id(d.getId());
+				a.setSessionId(s.get_id());
+				answers.add(a);
+			}
+			return answers;
+			
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.error("Error while retrieving user answers", e);
+		}
+		
+		
+		return null;
+	}
 }

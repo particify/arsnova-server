@@ -230,5 +230,14 @@ public class QuestionController extends AbstractController {
 		return questionService.getFreetextAnswers(sessionKey, questionId);
 	}
 	
+	@RequestMapping(value = "/session/{sessionKey}/myanswers", method = RequestMethod.GET)
+	@ResponseBody
+	public final List<Answer> getMyAnswers(
+			@PathVariable final String sessionKey,
+			final HttpServletResponse response
+	) {
+		return questionService.getMytAnswers(sessionKey);
+	}
+	
 
 }
