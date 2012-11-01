@@ -57,7 +57,7 @@ import de.thm.arsnova.services.IUserService;
 public class LoginController extends AbstractController {
 
 	private static final int MAX_USERNAME_LENGTH = 15;
-	
+
 	@Autowired
 	private TwitterProvider twitterProvider;
 

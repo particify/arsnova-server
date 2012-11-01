@@ -2,7 +2,7 @@ package de.thm.arsnova.entities;
 
 
 public class Answer {
-	
+
 	private String _id;
 	private String _rev;
 	private String type;
@@ -17,7 +17,7 @@ public class Answer {
 	public Answer() {
 		this.type = "skill_question_answer";
 	}
-	
+
 	public final String get_id() {
 		return _id;
 	}
@@ -74,7 +74,7 @@ public class Answer {
 		this.answerText = answerText;
 	}
 
-	
+
 	public final String getAnswerSubject() {
 		return answerSubject;
 	}
@@ -82,7 +82,7 @@ public class Answer {
 	public final void setAnswerSubject(final String answerSubject) {
 		this.answerSubject = answerSubject;
 	}
-	
+
 	public final String getSubject() {
 		return answerSubject;
 	}
@@ -118,7 +118,7 @@ public class Answer {
 	@Override
 	public final String toString() {
 		return "Answer type:'" + type + "'"
-				+ ", session: " + sessionId 
+				+ ", session: " + sessionId
 				+ ", question: " + questionId
 				+ ", subject: " + answerSubject
 				+ ", answerCount: " + answerCount
