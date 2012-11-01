@@ -239,5 +239,16 @@ public class QuestionController extends AbstractController {
 		return questionService.getMytAnswers(sessionKey);
 	}
 	
+	@RequestMapping(value = "/session/{sessionKey}/answercount", method = RequestMethod.GET)
+	@ResponseBody
+	public final int getTotalAnswerCount(
+			@PathVariable final String sessionKey,
+			final HttpServletResponse response
+	) {
+		return questionService.getTotalAnswerCount(sessionKey);
+	}
+	
+	
+	
 
 }

@@ -124,4 +124,9 @@ public class QuestionService implements IQuestionService {
 	public List<Answer> getMytAnswers(String sessionKey) {
 		return databaseDao.getMyAnswers(sessionKey);
 	}
+	
+	@Override
+	public int getTotalAnswerCount(String sessionKey) {
+		return databaseDao.getTotalAnswerCount(sessionKey);
+	}
 }
