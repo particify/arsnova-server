@@ -236,7 +236,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 	
 	@Override
-	public int getActiveUsers(long since) {
+	public int countActiveUsers(long since) {
 		return stubUsers.size();
 	}
 

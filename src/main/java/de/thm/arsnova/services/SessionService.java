@@ -33,6 +33,8 @@ import de.thm.arsnova.entities.User;
 @Service
 public class SessionService implements ISessionService {
 
+	private static final int DURATION_IN_MILLIS = 3 * 60 * 1000;
+	
 	@Autowired
 	private IDatabaseDao databaseDao;
 
@@ -91,5 +93,12 @@ public class SessionService implements ISessionService {
 		}
 
 		return databaseDao.registerAsOnlineUser(user, session);
+	}
+
+	@Override
+	public int countActiveUsers(String sessionkey) {
+		final long since = System.currentTimeMillis() - DURATION_IN_MILLIS;
+		Session session = databaseDao.getSessionFromKeyword(sessionkey);
+		return databaseDao.countActiveUsers(session, since);
 	}
 }
