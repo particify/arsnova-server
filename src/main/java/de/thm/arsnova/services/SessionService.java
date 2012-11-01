@@ -34,7 +34,7 @@ import de.thm.arsnova.entities.User;
 public class SessionService implements ISessionService {
 
 	private static final int DURATION_IN_MILLIS = 3 * 60 * 1000;
-	
+
 	@Autowired
 	private IDatabaseDao databaseDao;
 
