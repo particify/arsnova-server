@@ -99,13 +99,13 @@ public class CouchDBDao implements IDatabaseDao {
 	public final void setDatabaseName(final String newDatabaseName) {
 		this.databaseName = newDatabaseName;
 	}
-	
-	public void setSessionService(ISessionService sessionService) {
-		this.sessionService = sessionService;
+
+	public final void setSessionService(final ISessionService service) {
+		this.sessionService = service;
 	}
-	
-	public void setUserService(IUserService userService) {
-		this.userService = userService;
+
+	public final void setUserService(final IUserService service) {
+		this.userService = service;
 	}
 
 	/**
@@ -899,11 +899,9 @@ public class CouchDBDao implements IDatabaseDao {
 				answers.add(a);
 			}
 			return answers;
-			
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.error("Error while retrieving freetext answers", e);
 		}
-		
 		return null;
 	}
 }
