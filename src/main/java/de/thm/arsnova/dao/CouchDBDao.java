@@ -981,8 +981,40 @@ public class CouchDBDao implements IDatabaseDao {
 			}
 			return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("Error while retrieving total answer count", e);
+			LOGGER.error("Error while retrieving interposed question count", e);
 		}
 		return 0;
+	}
+	
+	@Override
+	public List<Question> getInterposedQuestions(String sessionKey) {
+		Session s = this.getSessionFromKeyword(sessionKey);
+		if (s == null) {
+			throw new NotFoundException();
+		}
+		
+		try {
+			View view = new View("interposed_question/by_session");
+			view.setKey(URLEncoder.encode("\"" + s.get_id() + "\"", "UTF-8"));
+			ViewResults questions = this.getDatabase().view(view);
+			if (questions == null || questions.isEmpty()) {
+				return null;
+			}
+			List<Question> result = new ArrayList<Question>();
+			for (Document document : questions.getResults()) {
+				Question question = (Question) JSONObject.toBean(
+						document.getJSONObject().getJSONObject("value"),
+						Question.class
+				);
+				question.setQuestionType("interposed_question");
+				question.setSession(s.get_id());
+				result.add(question);
+			}
+
+			return result;
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.error("Error while retrieving interposed questions", e);
+		}
+		return null;
 	}
 }

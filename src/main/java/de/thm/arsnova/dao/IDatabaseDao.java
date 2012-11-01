@@ -80,4 +80,6 @@ public interface IDatabaseDao {
 	int getTotalAnswerCount(String sessionKey);
 
 	int getInterposedCount(String sessionKey);
+
+	List<Question> getInterposedQuestions(String sessionKey);
 }

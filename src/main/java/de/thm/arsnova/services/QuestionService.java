@@ -136,4 +136,10 @@ public class QuestionService implements IQuestionService {
 	public int getInterposedCount(String sessionKey) {
 		return databaseDao.getInterposedCount(sessionKey);
 	}
+	
+	@Override
+	@Authenticated
+	public List<Question> getInterposedQuestions(String sessionKey) {
+		return databaseDao.getInterposedQuestions(sessionKey);
+	}
 }

@@ -52,4 +52,6 @@ public interface IQuestionService {
 	int getTotalAnswerCount(String sessionKey);
 
 	int getInterposedCount(String sessionKey);
+
+	List<Question> getInterposedQuestions(String sessionKey);
 }

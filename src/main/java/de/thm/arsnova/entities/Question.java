@@ -23,7 +23,6 @@ import java.util.List;
 public class Question {
 
 	private String type;
-	private String questionType;
 	private String subject;
 	private String text;
 	private boolean active;
@@ -31,7 +30,7 @@ public class Question {
 	private List<PossibleAnswer> possibleAnswers;
 	private boolean noCorrect;
 	private String session;
-
+	private long timestamp;
 	private int number;
 	private int duration;
 	private String _id;
@@ -46,11 +45,11 @@ public class Question {
 	}
 
 	public final String getQuestionType() {
-		return questionType;
+		return type;
 	}
 
 	public final void setQuestionType(final String questionType) {
-		this.questionType = questionType;
+		this.type = questionType;
 	}
 
 	public final String getSubject() {
@@ -117,6 +116,14 @@ public class Question {
 		this.session = session;
 	}
 
+	public final long getTimestamp() {
+		return timestamp;
+	}
+
+	public final void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
+	}
+
 	public final int getNumber() {
 		return number;
 	}
@@ -151,7 +158,7 @@ public class Question {
 
 	@Override
 	public final String toString() {
-		return "Question type '" + this.questionType + "': " + this.subject + ";\n" + this.text +
+		return "Question type '" + this.type + "': " + this.subject + ";\n" + this.text +
 				this.possibleAnswers;
 	}
 }

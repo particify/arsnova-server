@@ -256,5 +256,14 @@ public class QuestionController extends AbstractController {
 	) {
 		return questionService.getInterposedCount(sessionKey);
 	}
+	
+	@RequestMapping(value = "/session/{sessionKey}/interposed", method = RequestMethod.GET)
+	@ResponseBody
+	public final List<Question> getInterposedQuestions(
+			@PathVariable final String sessionKey,
+			final HttpServletResponse response
+	) {
+		return questionService.getInterposedQuestions(sessionKey);
+	}
 
 }

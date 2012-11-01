@@ -257,5 +257,11 @@ public class StubDatabaseDao implements IDatabaseDao {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+	
+	@Override
+	public List<Question> getInterposedQuestions(String sessionKey) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }
