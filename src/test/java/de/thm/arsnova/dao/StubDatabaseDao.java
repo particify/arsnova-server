@@ -237,7 +237,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 	
 	@Override
-	public int getActiveUsers(long since) {
+	public int countActiveUsers(long since) {
 		return stubUsers.size();
 	}
 	
@@ -281,6 +281,12 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public List<FoodVote> getFoodVote() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public int countActiveUsers(Session session, long since) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

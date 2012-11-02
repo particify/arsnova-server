@@ -16,9 +16,7 @@ public class User implements Serializable {
 	public static final String THM = "thm";
 	public static final String LDAP = "ldap";
 	public static final String ANONYMOUS = "anonymous";
-	
-	
-	
+
 	private static final long serialVersionUID = 1L;
 	private String username;
 	private String type;
@@ -60,7 +58,7 @@ public class User implements Serializable {
 	public void setUsername(String username) {
 		this.username = username;
 	}
-	
+
 	public String getType() {
 		return type;
 	}

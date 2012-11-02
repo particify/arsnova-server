@@ -74,7 +74,9 @@ public interface IDatabaseDao {
 
 	List<Answer> getFreetextAnswers(String sessionKey, String questionId);
 
-	int getActiveUsers(long since);
+	int countActiveUsers(long since);
+
+	int countActiveUsers(Session session, long since);
 
 	List<Answer> getMyAnswers(String sessionKey);
 

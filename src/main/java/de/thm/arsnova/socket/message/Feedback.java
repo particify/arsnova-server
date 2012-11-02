@@ -25,5 +25,4 @@ public class Feedback {
 	public String toString() {
 		return "Feedback, sessionkey: " + sessionkey + ", value: " + value;
 	}
-
 }

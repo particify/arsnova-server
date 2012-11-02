@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2012 THM webMedia
- * 
+ *
  * This file is part of ARSnova.
  *
  * ARSnova is free software: you can redistribute it and/or modify

@@ -35,7 +35,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Question;
-import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IQuestionService;
 
@@ -84,7 +83,10 @@ public class QuestionController extends AbstractController {
 		return;
 	}
 
-	@RequestMapping(value = { "/getSkillQuestions/{sessionkey}", "/session/{sessionkey}/skillquestions" }, method = RequestMethod.GET)
+	@RequestMapping(
+			value = { "/getSkillQuestions/{sessionkey}", "/session/{sessionkey}/skillquestions" },
+			method = RequestMethod.GET
+	)
 	@ResponseBody
 	public final List<Question> getSkillQuestions(
 			@PathVariable final String sessionkey,
@@ -219,7 +221,7 @@ public class QuestionController extends AbstractController {
 	) {
 		return questionService.getAnswerCount(sessionKey, questionId);
 	}
-	
+
 	@RequestMapping(value = "/session/{sessionKey}/question/{questionId}/freetextanswers", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<Answer> getFreetextAnswers(
@@ -229,7 +231,7 @@ public class QuestionController extends AbstractController {
 	) {
 		return questionService.getFreetextAnswers(sessionKey, questionId);
 	}
-	
+
 	@RequestMapping(value = "/session/{sessionKey}/myanswers", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<Answer> getMyAnswers(
@@ -238,7 +240,7 @@ public class QuestionController extends AbstractController {
 	) {
 		return questionService.getMytAnswers(sessionKey);
 	}
-	
+
 	@RequestMapping(value = "/session/{sessionKey}/answercount", method = RequestMethod.GET)
 	@ResponseBody
 	public final int getTotalAnswerCount(
@@ -247,7 +249,7 @@ public class QuestionController extends AbstractController {
 	) {
 		return questionService.getTotalAnswerCount(sessionKey);
 	}
-	
+
 	@RequestMapping(value = "/session/{sessionKey}/interposedcount", method = RequestMethod.GET)
 	@ResponseBody
 	public final int getInterposedCount(
@@ -256,7 +258,7 @@ public class QuestionController extends AbstractController {
 	) {
 		return questionService.getInterposedCount(sessionKey);
 	}
-	
+
 	@RequestMapping(value = "/session/{sessionKey}/interposed", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<Question> getInterposedQuestions(
