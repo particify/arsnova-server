@@ -22,9 +22,11 @@ package de.thm.arsnova.dao;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -54,6 +56,7 @@ import com.fourspaces.couchdb.ViewResults;
 
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Feedback;
+import de.thm.arsnova.entities.FoodVote;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.PossibleAnswer;
 import de.thm.arsnova.entities.Question;
@@ -1030,5 +1033,82 @@ public class CouchDBDao implements IDatabaseDao {
 			LOGGER.error("Error while retrieving interposed questions", e);
 		}
 		return null;
+	}
+	
+	@Override
+	public void vote(String menu) {
+		User u = this.userService.getCurrentUser();
+		if(u == null) {
+			throw new UnauthorizedException();
+		}
+		
+		String date = new SimpleDateFormat("dd-mm-yyyyy").format(new Date());		
+		try {
+			View view = new View("food_vote/get_user_vote");
+			view.setKey("[" + URLEncoder.encode("\"" + date + "\",\"" + u.getUsername() + "\"", "UTF-8") + "]");
+			ViewResults results = this.getDatabase().view(view);
+			
+			if(results.getResults().isEmpty()) {
+				Document vote = new Document();
+				vote.put("type", "food_vote");
+				vote.put("name", menu);
+				vote.put("user", u.getUsername());
+				vote.put("day", date);
+				this.database.saveDocument(vote);
+			} else {
+				Document vote = results.getResults().get(0);
+				vote.put("name", menu);
+				this.database.saveDocument(vote);	
+			}
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.error("Error while retrieving user food vote", e);
+		} catch (IOException e) {
+			LOGGER.error("Error while saving user food vote", e);
+		}
+	}
+	
+	@Override
+	public List<FoodVote> getFoodVote() {
+		List<FoodVote> foodVotes = new ArrayList<FoodVote>();
+		String date = new SimpleDateFormat("dd-mm-yyyyy").format(new Date());
+		try {
+			View view = new View("food_vote/count_by_day");
+			view.setStartKey("[" + URLEncoder.encode("\"" + date + "\"", "UTF-8") + "]");
+			view.setEndKey("[" + URLEncoder.encode("\"" + date + "\",{}", "UTF-8") + "]");
+			view.setGroup(true);
+			ViewResults results = this.getDatabase().view(view);
+			for(Document d : results.getResults()) {
+				FoodVote vote = new FoodVote();
+				vote.setCount(d.getJSONObject().optInt("value"));
+				vote.setDay(date);
+				vote.setName(d.getJSONObject().getJSONArray("key").getString(1));
+				foodVotes.add(vote);
+			}
+			
+			return foodVotes;
+			
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.error("Error while retrieving food vote count", e);
+		}
+		return foodVotes;
+	}
+	
+	@Override
+	public int getFoodVoteCount() {
+		String date = new SimpleDateFormat("dd-mm-yyyyy").format(new Date());
+		try {
+			View view = new View("food_vote/count_by_day");
+			view.setStartKey("[" + URLEncoder.encode("\"" + date + "\"", "UTF-8") + "]");
+			view.setEndKey("[" + URLEncoder.encode("\"" + date + "\",{}", "UTF-8") + "]");
+			view.setGroup(false);
+			ViewResults results = this.getDatabase().view(view);
+			if(results.size() == 0 || results.getResults().size() == 0) {
+				return 0;
+			}
+			return results.getJSONArray("rows").optJSONObject(0).optInt("value");
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.error("Error while retrieving food vote count", e);
+		}
+		return 0;
 	}
 }

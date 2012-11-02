@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Feedback;
+import de.thm.arsnova.entities.FoodVote;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
@@ -260,6 +261,24 @@ public class StubDatabaseDao implements IDatabaseDao {
 	
 	@Override
 	public List<Question> getInterposedQuestions(String sessionKey) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public void vote(String menu) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int getFoodVoteCount() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public List<FoodVote> getFoodVote() {
 		// TODO Auto-generated method stub
 		return null;
 	}
