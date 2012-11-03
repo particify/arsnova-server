@@ -19,6 +19,7 @@
 
 package de.thm.arsnova.services;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -99,7 +100,13 @@ public class FeedbackService implements IFeedbackService {
 
 	@Override
 	public final boolean saveFeedback(final String keyword, final int value, final User user) {
-		return databaseDao.saveFeedback(keyword, value, user);
+		boolean result = databaseDao.saveFeedback(keyword, value, user);
+		if (result) {
+			HashSet<String> set = new HashSet<String>();
+			set.add(keyword);
+			this.server.reportUpdatedFeedbackForSessions(set);
+		}
+		return result;
 	}
 
 	/**
