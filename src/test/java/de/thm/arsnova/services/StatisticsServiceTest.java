@@ -3,6 +3,7 @@ package de.thm.arsnova.services;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,14 @@ public class StatisticsServiceTest {
 	@Autowired
 	private StubDatabaseDao databaseDao;
 
+	@Before
+	public final void startup() {
+		// Create new session to be appended to the existing two sessions
+		Session session = new Session();
+		session.setKeyword("1111222");
+		databaseDao.saveSession(session);
+	}
+	
 	@After
 	public final void cleanup() {
 		databaseDao.cleanupTestData();
@@ -48,5 +57,11 @@ public class StatisticsServiceTest {
 
 		int actual = statisticsService.countActiveUsers();
 		assertEquals(1, actual);
+	}
+	
+	@Test
+	public final void testShouldReturnCorrectSessionCount() {
+		int actual = statisticsService.countSessions();
+		assertEquals(3, actual);
 	}
 }

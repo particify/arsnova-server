@@ -91,4 +91,6 @@ public interface IDatabaseDao {
 	int getFoodVoteCount();
 
 	List<FoodVote> getFoodVote();
+
+	int countSessions();
 }

@@ -48,4 +48,13 @@ public class StatisticsControllerTest {
 
 		assertEquals("0", response.getContentAsString());
 	}
+	
+	@Test
+	public final void testShouldGetSessionCount() throws Exception {
+		request.setMethod("GET");
+		request.setRequestURI("/statistics/sessioncount");
+		handlerAdapter.handle(request, response, statisticsController);
+
+		assertEquals("2", response.getContentAsString());
+	}
 }

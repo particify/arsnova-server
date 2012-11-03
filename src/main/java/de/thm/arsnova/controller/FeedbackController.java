@@ -94,7 +94,6 @@ public class FeedbackController extends AbstractController {
 		if (feedbackService.saveFeedback(sessionkey, value, user)) {
 			Feedback feedback = feedbackService.getFeedback(sessionkey);
 			if (feedback != null) {
-				// TODO: Broadcast feedback changes via websocket
 				response.setStatus(HttpStatus.CREATED.value());
 				return feedback;
 			}

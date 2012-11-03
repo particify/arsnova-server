@@ -19,4 +19,10 @@ public class StatisticsController {
 	public final int countActiveUsers() {
 		return statisticsService.countActiveUsers();
 	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/statistics/sessioncount")
+	@ResponseBody
+	public final int countSessions() {
+		return statisticsService.countSessions();
+	}
 }

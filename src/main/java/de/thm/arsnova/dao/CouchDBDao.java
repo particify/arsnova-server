@@ -1123,4 +1123,20 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		return 0;
 	}
+	
+	@Override
+	public int countSessions() {
+		try {
+			View view = new View("session/count");
+			ViewResults results = this.getDatabase().view(view);
+			if (isEmptyResults(results)) {
+				return 0;
+			}
+			return results.getJSONArray("rows").optJSONObject(0).getInt("value");
+		} catch (Exception e) {
+			LOGGER.error("Error while retrieving session count", e);
+		}
+		
+		return 0;
+	}
 }

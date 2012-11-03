@@ -101,6 +101,11 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
+	public int countSessions() {
+		return stubSessions.size();
+	}
+	
+	@Override
 	public Feedback getFeedback(String keyword) {
 		// Magic keyword for forbidden session
 		if (keyword.equals("99999999"))
