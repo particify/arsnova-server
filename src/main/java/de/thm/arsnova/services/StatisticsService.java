@@ -25,7 +25,7 @@ public class StatisticsService implements IStatisticsService {
 		Statistics statistics = new Statistics();
 		statistics.setOpenSessions(databaseDao.countOpenSessions());
 		statistics.setClosedSessions(databaseDao.countClosedSessions());
-		statistics.setAnsers(databaseDao.countAnswers());
+		statistics.setAnswers(databaseDao.countAnswers());
 		statistics.setQuestions(databaseDao.countQuestions());
 		statistics.setActiveUsers(databaseDao.countActiveUsers(DURATION_IN_MILLIS));
 		return statistics;

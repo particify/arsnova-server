@@ -65,7 +65,7 @@ public class StatisticsControllerTest {
 		request.setRequestURI("/statistics");
 		handlerAdapter.handle(request, response, statisticsController);
 		
-		String expected = "{\"ansers\":0,\"questions\":0,\"openSessions\":2,\"closedSessions\":0,\"activeUsers\":0}";
+		String expected = "{\"answers\":0,\"questions\":0,\"openSessions\":2,\"closedSessions\":0,\"activeUsers\":0}";
 		assertEquals(expected, response.getContentAsString());
 	}
 }

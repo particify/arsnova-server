@@ -2,17 +2,17 @@ package de.thm.arsnova.entities;
 
 public class Statistics {
 
-	private int ansers;
+	private int answers;
 	private int questions;
 	private int openSessions;
 	private int closedSessions;
 	private int activeUsers;
 
-	public int getAnsers() {
-		return ansers;
+	public int getAnswers() {
+		return answers;
 	}
-	public void setAnsers(int ansers) {
-		this.ansers = ansers;
+	public void setAnswers(int ansers) {
+		this.answers = ansers;
 	}
 
 	public int getQuestions() {
