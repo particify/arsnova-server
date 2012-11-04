@@ -20,7 +20,7 @@ public class StatisticsController {
 	public final Statistics getStatistics() {
 		return statisticsService.getStatistics();
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics/activeusercount")
 	@ResponseBody
 	public final int countActiveUsers() {

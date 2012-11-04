@@ -954,7 +954,9 @@ public class CouchDBDao implements IDatabaseDao {
 
 		try {
 			View view = new View("answer/by_user_and_session");
-			view.setKey("[" + URLEncoder.encode("\"" + user.getUsername() + "\",\"" + s.get_id() + "\"", "UTF-8") + "]");
+			view.setKey(
+				"[" + URLEncoder.encode("\"" + user.getUsername() + "\",\"" + s.get_id() + "\"", "UTF-8") + "]"
+			);
 			ViewResults results = this.getDatabase().view(view);
 			if (results.getResults().isEmpty()) {
 				throw new NotFoundException();
@@ -1046,21 +1048,21 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public void vote(String menu) {
 		User u = this.userService.getCurrentUser();
-		if(u == null) {
+		if (u == null) {
 			throw new UnauthorizedException();
 		}
-		
-		String date = new SimpleDateFormat("dd-mm-yyyyy").format(new Date());		
+
+		String date = new SimpleDateFormat("dd-mm-yyyyy").format(new Date());
 		try {
 			View view = new View("food_vote/get_user_vote");
 			view.setKey("[" + URLEncoder.encode("\"" + date + "\",\"" + u.getUsername() + "\"", "UTF-8") + "]");
 			ViewResults results = this.getDatabase().view(view);
-			
-			if(results.getResults().isEmpty()) {
+
+			if (results.getResults().isEmpty()) {
 				Document vote = new Document();
 				vote.put("type", "food_vote");
 				vote.put("name", menu);
@@ -1070,7 +1072,7 @@ public class CouchDBDao implements IDatabaseDao {
 			} else {
 				Document vote = results.getResults().get(0);
 				vote.put("name", menu);
-				this.database.saveDocument(vote);	
+				this.database.saveDocument(vote);
 			}
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.error("Error while retrieving user food vote", e);
@@ -1078,7 +1080,7 @@ public class CouchDBDao implements IDatabaseDao {
 			LOGGER.error("Error while saving user food vote", e);
 		}
 	}
-	
+
 	@Override
 	public List<FoodVote> getFoodVote() {
 		List<FoodVote> foodVotes = new ArrayList<FoodVote>();
@@ -1089,22 +1091,21 @@ public class CouchDBDao implements IDatabaseDao {
 			view.setEndKey("[" + URLEncoder.encode("\"" + date + "\",{}", "UTF-8") + "]");
 			view.setGroup(true);
 			ViewResults results = this.getDatabase().view(view);
-			for(Document d : results.getResults()) {
+			for (Document d : results.getResults()) {
 				FoodVote vote = new FoodVote();
 				vote.setCount(d.getJSONObject().optInt("value"));
 				vote.setDay(date);
 				vote.setName(d.getJSONObject().getJSONArray("key").getString(1));
 				foodVotes.add(vote);
 			}
-			
+
 			return foodVotes;
-			
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.error("Error while retrieving food vote count", e);
 		}
 		return foodVotes;
 	}
-	
+
 	@Override
 	public int getFoodVoteCount() {
 		String date = new SimpleDateFormat("dd-mm-yyyyy").format(new Date());
@@ -1114,7 +1115,7 @@ public class CouchDBDao implements IDatabaseDao {
 			view.setEndKey("[" + URLEncoder.encode("\"" + date + "\",{}", "UTF-8") + "]");
 			view.setGroup(false);
 			ViewResults results = this.getDatabase().view(view);
-			if(results.size() == 0 || results.getResults().size() == 0) {
+			if (results.size() == 0 || results.getResults().size() == 0) {
 				return 0;
 			}
 			return results.getJSONArray("rows").optJSONObject(0).optInt("value");
@@ -1123,33 +1124,33 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		return 0;
 	}
-	
+
 	@Override
 	public int countSessions() {
 		return sessionsCountValue("openSessions")
 				+ sessionsCountValue("closedSessions");
 	}
-	
+
 	@Override
 	public int countClosedSessions() {
 		return sessionsCountValue("closedSessions");
 	}
-	
+
 	@Override
 	public int countOpenSessions() {
 		return sessionsCountValue("openSessions");
 	}
-	
+
 	@Override
 	public int countAnswers() {
 		return sessionsCountValue("anwers");
 	}
-	
+
 	@Override
 	public int countQuestions() {
 		return sessionsCountValue("questions");
 	}
-	
+
 	private int sessionsCountValue(String key) {
 		try {
 			View view = new View("session/count");
@@ -1158,11 +1159,11 @@ public class CouchDBDao implements IDatabaseDao {
 			if (isEmptyResults(results)) {
 				return 0;
 			}
-			
-			int result = 0; 
-			
+
+			int result = 0;
+
 			JSONArray rows = results.getJSONArray("rows");
-			for(int i = 0; i < rows.size(); i++) {
+			for (int i = 0; i < rows.size(); i++) {
 				JSONObject row = rows.getJSONObject(i);
 				if (
 					row.getString("key").equals(key)
@@ -1174,7 +1175,6 @@ public class CouchDBDao implements IDatabaseDao {
 		} catch (Exception e) {
 			LOGGER.error("Error while retrieving session count", e);
 		}
-		
 		return 0;
 	}
 }
