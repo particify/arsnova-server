@@ -1143,7 +1143,7 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public int countAnswers() {
-		return sessionsCountValue("anwers");
+		return sessionsCountValue("answers");
 	}
 
 	@Override
@@ -1153,16 +1153,17 @@ public class CouchDBDao implements IDatabaseDao {
 
 	private int sessionsCountValue(String key) {
 		try {
-			View view = new View("session/count");
+			View view = new View("statistic/count_sessions");
 			view.setGroup(true);
+
 			ViewResults results = this.getDatabase().view(view);
 			if (isEmptyResults(results)) {
 				return 0;
 			}
 
 			int result = 0;
-
 			JSONArray rows = results.getJSONArray("rows");
+
 			for (int i = 0; i < rows.size(); i++) {
 				JSONObject row = rows.getJSONObject(i);
 				if (
