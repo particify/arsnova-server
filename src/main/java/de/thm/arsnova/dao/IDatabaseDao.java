@@ -93,4 +93,12 @@ public interface IDatabaseDao {
 	List<FoodVote> getFoodVote();
 
 	int countSessions();
+
+	int countOpenSessions();
+
+	int countClosedSessions();
+
+	int countAnswers();
+
+	int countQuestions();
 }

@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import de.thm.arsnova.dao.StubDatabaseDao;
 import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.Statistics;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {
@@ -35,6 +36,7 @@ public class StatisticsServiceTest {
 		// Create new session to be appended to the existing two sessions
 		Session session = new Session();
 		session.setKeyword("1111222");
+		session.setActive(false);
 		databaseDao.saveSession(session);
 	}
 	
@@ -60,8 +62,9 @@ public class StatisticsServiceTest {
 	}
 	
 	@Test
-	public final void testShouldReturnCorrectSessionCount() {
-		int actual = statisticsService.countSessions();
-		assertEquals(3, actual);
+	public final void testShouldReturnStatistics() {
+		Statistics actual = statisticsService.getStatistics();
+		assertEquals(2, actual.getOpenSessions());
+		assertEquals(1, actual.getClosedSessions());
 	}
 }

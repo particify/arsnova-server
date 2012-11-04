@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.dao.IDatabaseDao;
+import de.thm.arsnova.entities.Statistics;
 
 @Service
 public class StatisticsService implements IStatisticsService {
@@ -20,7 +21,12 @@ public class StatisticsService implements IStatisticsService {
 	}
 	
 	@Override
-	public final int countSessions() {
-		return databaseDao.countSessions();
+	public Statistics getStatistics() {
+		Statistics statistics = new Statistics();
+		statistics.setOpenSessions(databaseDao.countOpenSessions());
+		statistics.setClosedSessions(databaseDao.countClosedSessions());
+		statistics.setAnsers(databaseDao.countAnswers());
+		statistics.setQuestions(databaseDao.countQuestions());
+		return statistics;
 	}
 }

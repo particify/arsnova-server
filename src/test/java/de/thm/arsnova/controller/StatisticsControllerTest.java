@@ -57,4 +57,15 @@ public class StatisticsControllerTest {
 
 		assertEquals("2", response.getContentAsString());
 	}
+	
+	@Test
+	public final void testShouldGetStatistics() throws Exception {
+		request.setMethod("GET");
+		request.setRequestURI("/statistics");
+		handlerAdapter.handle(request, response, statisticsController);
+		
+		String expected = "{\"ansers\":0,\"questions\":0,\"openSessions\":2,\"closedSessions\":0}";
+		
+		assertEquals(expected, response.getContentAsString());
+	}
 }

@@ -1126,13 +1126,51 @@ public class CouchDBDao implements IDatabaseDao {
 	
 	@Override
 	public int countSessions() {
+		return sessionsCountValue("openSessions")
+				+ sessionsCountValue("closedSessions");
+	}
+	
+	@Override
+	public int countClosedSessions() {
+		return sessionsCountValue("closedSessions");
+	}
+	
+	@Override
+	public int countOpenSessions() {
+		return sessionsCountValue("openSessions");
+	}
+	
+	@Override
+	public int countAnswers() {
+		return sessionsCountValue("anwers");
+	}
+	
+	@Override
+	public int countQuestions() {
+		return sessionsCountValue("questions");
+	}
+	
+	private int sessionsCountValue(String key) {
 		try {
 			View view = new View("session/count");
+			view.setGroup(true);
 			ViewResults results = this.getDatabase().view(view);
 			if (isEmptyResults(results)) {
 				return 0;
 			}
-			return results.getJSONArray("rows").optJSONObject(0).getInt("value");
+			
+			int result = 0; 
+			
+			JSONArray rows = results.getJSONArray("rows");
+			for(int i = 0; i < rows.size(); i++) {
+				JSONObject row = rows.getJSONObject(i);
+				if (
+					row.getString("key").equals(key)
+				) {
+					result += row.getInt("value");
+				}
+			}
+			return result;
 		} catch (Exception e) {
 			LOGGER.error("Error while retrieving session count", e);
 		}

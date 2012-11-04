@@ -106,6 +106,24 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 	
 	@Override
+	public int countOpenSessions() {
+		int result = 0;
+		for (Session session : stubSessions.values()) {
+			if (session.isActive()) result++;
+		}
+		return result;
+	}
+	
+	@Override
+	public int countClosedSessions() {
+		int result = 0;
+		for (Session session : stubSessions.values()) {
+			if (! session.isActive()) result++;
+		}
+		return result;
+	}
+	
+	@Override
 	public Feedback getFeedback(String keyword) {
 		// Magic keyword for forbidden session
 		if (keyword.equals("99999999"))
@@ -294,4 +312,15 @@ public class StubDatabaseDao implements IDatabaseDao {
 		return 0;
 	}
 
+	@Override
+	public int countAnswers() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int countQuestions() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }
