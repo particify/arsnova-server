@@ -892,6 +892,7 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public final int countActiveUsers(Session session, long since) {
+		if (session == null) throw new NotFoundException();
 		try {
 			View view = new View("logged_in/count");
 			view.setStartKey(
