@@ -30,19 +30,12 @@ import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.exceptions.NoContentException;
-import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
 public class QuestionService implements IQuestionService {
 
 	@Autowired
-	ARSnovaSocketIOServer server;
-
-	@Autowired
-	IDatabaseDao databaseDao;
-
-	@Autowired
-	IUserService userService;
+	private IDatabaseDao databaseDao;
 
 	public void setDatabaseDao(IDatabaseDao databaseDao) {
 		this.databaseDao = databaseDao;
@@ -52,8 +45,9 @@ public class QuestionService implements IQuestionService {
 	@Authenticated
 	public List<Question> getSkillQuestions(String sessionkey) {
 		List<Question> result = databaseDao.getSkillQuestions(sessionkey);
-		if (result == null || result.size() == 0)
+		if (result == null || result.size() == 0) {
 			throw new NoContentException();
+		}
 		return result;
 	}
 

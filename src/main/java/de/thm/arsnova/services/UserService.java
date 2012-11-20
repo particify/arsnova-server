@@ -75,8 +75,9 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 			user = new User(token);
 		}
 
-		if (user == null || user.getUsername().equals("anonymous"))
+		if (user == null || user.getUsername().equals("anonymous")) {
 			throw new UnauthorizedException();
+		}
 
 		return user;
 	}
