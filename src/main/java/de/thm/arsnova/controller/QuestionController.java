@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IQuestionService;
@@ -261,11 +262,33 @@ public class QuestionController extends AbstractController {
 
 	@RequestMapping(value = "/session/{sessionKey}/interposed", method = RequestMethod.GET)
 	@ResponseBody
-	public final List<Question> getInterposedQuestions(
+	public final List<InterposedQuestion> getInterposedQuestions(
 			@PathVariable final String sessionKey,
 			final HttpServletResponse response
 	) {
 		return questionService.getInterposedQuestions(sessionKey);
+	}
+	
+	
+	@RequestMapping(value = "/session/{sessionkey}/interposed", method = RequestMethod.POST)
+	@ResponseBody
+	public final void postInterposedQuestion(
+			@PathVariable final String sessionkey,
+			@RequestBody final InterposedQuestion question,
+			final HttpServletResponse response
+	) {
+		if (!sessionkey.equals(question.getSession())) {
+			response.setStatus(HttpStatus.PRECONDITION_FAILED.value());
+			return;
+		}
+
+		if (questionService.saveQuestion(question)) {
+			response.setStatus(HttpStatus.CREATED.value());
+			return;
+		}
+
+		response.setStatus(HttpStatus.BAD_REQUEST.value());
+		return;
 	}
 
 }

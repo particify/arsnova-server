@@ -57,6 +57,7 @@ import com.fourspaces.couchdb.ViewResults;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.FoodVote;
+import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.PossibleAnswer;
 import de.thm.arsnova.entities.Question;
@@ -541,8 +542,27 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("noCorrect", question.isNoCorrect());
 		try {
 			database.saveDocument(q);
+			return true;
 		} catch (IOException e) {
 			LOGGER.error("Could not save question {}", question);
+		}
+		return false;
+	}
+	
+	@Override
+	public final boolean saveQuestion(final Session session, final InterposedQuestion question) {
+		Document q = new Document();
+		q.put("type", "interposed_question");
+		q.put("sessionId", session.get_id());
+		q.put("subject", question.getSubject());
+		q.put("text", question.getText());
+		q.put("timestamp", System.currentTimeMillis());
+		q.put("read", false);
+		try {
+			database.saveDocument(q);
+			return true;
+		} catch (IOException e) {
+			LOGGER.error("Could not save interposed question {}", question);
 		}
 		return false;
 	}
@@ -1020,7 +1040,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Question> getInterposedQuestions(String sessionKey) {
+	public List<InterposedQuestion> getInterposedQuestions(String sessionKey) {
 		Session s = this.getSessionFromKeyword(sessionKey);
 		if (s == null) {
 			throw new NotFoundException();
@@ -1033,14 +1053,15 @@ public class CouchDBDao implements IDatabaseDao {
 			if (questions == null || questions.isEmpty()) {
 				return null;
 			}
-			List<Question> result = new ArrayList<Question>();
+			List<InterposedQuestion> result = new ArrayList<InterposedQuestion>();
+			LOGGER.debug("{}", questions.getResults());
 			for (Document document : questions.getResults()) {
-				Question question = (Question) JSONObject.toBean(
+				InterposedQuestion question = (InterposedQuestion) JSONObject.toBean(
 						document.getJSONObject().getJSONObject("value"),
-						Question.class
+						InterposedQuestion.class
 				);
-				question.setQuestionType("interposed_question");
-				question.setSession(s.get_id());
+				question.setSession(sessionKey);
+				question.set_id(document.getId());
 				result.add(question);
 			}
 			return result;

@@ -22,10 +22,13 @@ package de.thm.arsnova.services;
 import java.util.List;
 
 import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.Question;
 
 public interface IQuestionService {
 	boolean saveQuestion(Question question);
+	
+	boolean saveQuestion(InterposedQuestion question);
 
 	Question getQuestion(String id, String sessionkey);
 
@@ -53,5 +56,6 @@ public interface IQuestionService {
 
 	int getInterposedCount(String sessionKey);
 
-	List<Question> getInterposedQuestions(String sessionKey);
+	List<InterposedQuestion> getInterposedQuestions(String sessionKey);
+
 }
