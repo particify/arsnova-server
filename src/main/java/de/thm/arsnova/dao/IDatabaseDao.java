@@ -101,4 +101,6 @@ public interface IDatabaseDao {
 	int countAnswers();
 
 	int countQuestions();
+
+	Question getInterposedQuestion(String sessionKey, String documentId);
 }
