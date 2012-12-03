@@ -99,12 +99,19 @@ public class ARSnovaSocketIOServer {
 						 */
 						List<String> users = userService.getUsersInSession(data
 								.getSessionkey());
+						
+						logger.info(u.toString());
+						logger.info(users.toString());
+						logger.info(data.getSessionkey());
+						
 						de.thm.arsnova.entities.Feedback fb = feedbackService
 								.getFeedback(data.getSessionkey());
 
 						for (SocketIOClient c : server.getAllClients()) {
 							u = userService.getUser2SocketId(c.getSessionId());
 							if (u != null && users.contains(u.getUsername())) {
+								logger.info("sending out to client {}, username is: {}, current session is: {}", 
+										new Object[] {c.getSessionId(), u.getUsername(), data.getSessionkey()});
 								c.sendEvent("updateFeedback", fb.getValues());
 							}
 						}
