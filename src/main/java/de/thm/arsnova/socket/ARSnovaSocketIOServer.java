@@ -82,7 +82,7 @@ public class ARSnovaSocketIOServer {
 						 * do a check if user is in the session, for which he
 						 * would give a feedback
 						 */
-						User u = userService.getUser2SessionID(client
+						User u = userService.getUser2SocketId(client
 								.getSessionId());
 						if (u == null
 								|| userService.isUserInSession(u,
@@ -103,7 +103,7 @@ public class ARSnovaSocketIOServer {
 								.getFeedback(data.getSessionkey());
 
 						for (SocketIOClient c : server.getAllClients()) {
-							u = userService.getUser2SessionID(c.getSessionId());
+							u = userService.getUser2SocketId(c.getSessionId());
 							if (u != null && users.contains(u.getUsername())) {
 								c.sendEvent("updateFeedback", fb.getValues());
 							}
@@ -133,7 +133,7 @@ public class ARSnovaSocketIOServer {
 			public void onDisconnect(SocketIOClient client) {
 				logger.info("addDisconnectListener.onDisconnect: Client: {}",
 						new Object[] { client });
-				userService.removeUser2SessionID(client.getSessionId());
+				userService.removeUser2SocketId(client.getSessionId());
 			}
 		});
 
@@ -210,7 +210,7 @@ public class ARSnovaSocketIOServer {
 
 	private List<UUID> findConnectionIdForUser(String username) {
 		List<UUID> result = new ArrayList<UUID>();
-		for (Entry<UUID, User> e : userService.users2Session()) {
+		for (Entry<UUID, User> e : userService.socketId2User()) {
 			if (e.getValue().getUsername().equals(username)) {
 				result.add(e.getKey());
 			}

@@ -83,23 +83,23 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 	}
 
 	@Override
-	public User getUser2SessionID(UUID sessionID) {
-		return socketid2user.get(sessionID);
+	public User getUser2SocketId(UUID socketId) {
+		return socketid2user.get(socketId);
 	}
 
 	@Override
-	public void putUser2SessionID(UUID sessionID, User user) {
-		socketid2user.put(sessionID, user);
+	public void putUser2SocketId(UUID socketId, User user) {
+		socketid2user.put(socketId, user);
 	}
 
 	@Override
-	public Set<Map.Entry<UUID, User>> users2Session() {
+	public Set<Map.Entry<UUID, User>> socketId2User() {
 		return socketid2user.entrySet();
 	}
 
 	@Override
-	public void removeUser2SessionID(UUID sessionID) {
-		socketid2user.remove(sessionID);
+	public void removeUser2SocketId(UUID socketId) {
+		socketid2user.remove(socketId);
 	}
 
 	@Override
