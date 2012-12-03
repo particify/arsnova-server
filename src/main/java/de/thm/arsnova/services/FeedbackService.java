@@ -102,9 +102,7 @@ public class FeedbackService implements IFeedbackService {
 	public final boolean saveFeedback(final String keyword, final int value, final User user) {
 		boolean result = databaseDao.saveFeedback(keyword, value, user);
 		if (result) {
-			HashSet<String> set = new HashSet<String>();
-			set.add(keyword);
-			this.server.reportUpdatedFeedbackForSessions(set);
+			this.server.reportUpdatedFeedbackForSession(keyword);
 		}
 		return result;
 	}
@@ -130,7 +128,10 @@ public class FeedbackService implements IFeedbackService {
 				this.server.reportDeletedFeedback(e.getKey(), e.getValue());
 			}
 		}
-		this.server.reportUpdatedFeedbackForSessions(allAffectedSessions);
+		for(String session : allAffectedSessions) {
+			this.server.reportUpdatedFeedbackForSession(session);	
+		}
+		
 	}
 
 	@Override

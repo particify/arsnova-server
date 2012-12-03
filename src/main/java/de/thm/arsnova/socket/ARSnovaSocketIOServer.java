@@ -91,30 +91,11 @@ public class ARSnovaSocketIOServer {
 						}
 						feedbackService.saveFeedback(data.getSessionkey(),
 								data.getValue(), u);
-
+						
 						/**
-						 * collect a list of users which are in the current
-						 * session iterate over all connected clients and if
-						 * send feedback, if user is in current session
+						 * send feedback back to clients
 						 */
-						List<String> users = userService.getUsersInSession(data
-								.getSessionkey());
-						
-						logger.info(u.toString());
-						logger.info(users.toString());
-						logger.info(data.getSessionkey());
-						
-						de.thm.arsnova.entities.Feedback fb = feedbackService
-								.getFeedback(data.getSessionkey());
-
-						for (SocketIOClient c : server.getAllClients()) {
-							u = userService.getUser2SocketId(c.getSessionId());
-							if (u != null && users.contains(u.getUsername())) {
-								logger.info("sending out to client {}, username is: {}, current session is: {}", 
-										new Object[] {c.getSessionId(), u.getUsername(), data.getSessionkey()});
-								c.sendEvent("updateFeedback", fb.getValues());
-							}
-						}
+						reportUpdatedFeedbackForSession(data.getSessionkey());
 					}
 				});
 
@@ -225,12 +206,22 @@ public class ARSnovaSocketIOServer {
 		return result;
 	}
 
-	public void reportUpdatedFeedbackForSessions(Set<String> allAffectedSessions) {
-		for (String sessionKey : allAffectedSessions) {
-			de.thm.arsnova.entities.Feedback fb = feedbackService
-					.getFeedback(sessionKey);
-			server.getBroadcastOperations().sendEvent("updateFeedback",
-					fb.getValues());
+	public void reportUpdatedFeedbackForSession(String session) {
+		/**
+		 * collect a list of users which are in the current
+		 * session iterate over all connected clients and if
+		 * send feedback, if user is in current session
+		 */
+		List<String> users = userService.getUsersInSession(session);
+		de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(session);
+
+		for (SocketIOClient c : server.getAllClients()) {
+			User u = userService.getUser2SocketId(c.getSessionId());
+			if (u != null && users.contains(u.getUsername())) {
+				logger.info("sending out to client {}, username is: {}, current session is: {}", 
+						new Object[] {c.getSessionId(), u.getUsername(), session});
+				c.sendEvent("updateFeedback", fb.getValues());
+			}
 		}
 	}
 }
