@@ -73,54 +73,44 @@ public class ARSnovaSocketIOServer {
 		}
 		server = new SocketIOServer(config);
 
-		server.addEventListener("setFeedback", Feedback.class,
-				new DataListener<Feedback>() {
-					@Override
-					public void onData(SocketIOClient client, Feedback data,
-							AckRequest ackSender) {
-						/**
-						 * do a check if user is in the session, for which he
-						 * would give a feedback
-						 */
-						User u = userService.getUser2SocketId(client
-								.getSessionId());
-						if (u == null
-								|| userService.isUserInSession(u,
-										data.getSessionkey()) == false) {
-							return;
-						}
-						feedbackService.saveFeedback(data.getSessionkey(),
-								data.getValue(), u);
-						
-						/**
-						 * send feedback back to clients
-						 */
-						reportUpdatedFeedbackForSession(data.getSessionkey());
-					}
-				});
+		server.addEventListener("setFeedback", Feedback.class, new DataListener<Feedback>() {
+			@Override
+			public void onData(SocketIOClient client, Feedback data, AckRequest ackSender) {
+				/**
+				 * do a check if user is in the session, for which he would give
+				 * a feedback
+				 */
+				User u = userService.getUser2SocketId(client.getSessionId());
+				if (u == null || userService.isUserInSession(u, data.getSessionkey()) == false) {
+					return;
+				}
+				feedbackService.saveFeedback(data.getSessionkey(), data.getValue(), u);
 
-		server.addEventListener("arsnova/question/create", Question.class,
-				new DataListener<Question>() {
-					@Override
-					public void onData(SocketIOClient client,
-							Question question, AckRequest ackSender) {
-						questionService.saveQuestion(question);
-					}
-				});
+				/**
+				 * send feedback back to clients
+				 */
+				reportUpdatedFeedbackForSession(data.getSessionkey());
+			}
+		});
+
+		server.addEventListener("arsnova/question/create", Question.class, new DataListener<Question>() {
+			@Override
+			public void onData(SocketIOClient client, Question question, AckRequest ackSender) {
+				questionService.saveQuestion(question);
+			}
+		});
 
 		server.addConnectListener(new ConnectListener() {
 			@Override
 			public void onConnect(SocketIOClient client) {
-				logger.info("addConnectListener.onConnect: Client: {}",
-						new Object[] { client });
+				logger.info("addConnectListener.onConnect: Client: {}", new Object[] { client });
 			}
 		});
 
 		server.addDisconnectListener(new DisconnectListener() {
 			@Override
 			public void onDisconnect(SocketIOClient client) {
-				logger.info("addDisconnectListener.onDisconnect: Client: {}",
-						new Object[] { client });
+				logger.info("addDisconnectListener.onDisconnect: Client: {}", new Object[] { client });
 				userService.removeUser2SocketId(client.getSessionId());
 			}
 		});
@@ -208,9 +198,9 @@ public class ARSnovaSocketIOServer {
 
 	public void reportUpdatedFeedbackForSession(String session) {
 		/**
-		 * collect a list of users which are in the current
-		 * session iterate over all connected clients and if
-		 * send feedback, if user is in current session
+		 * collect a list of users which are in the current session iterate over
+		 * all connected clients and if send feedback, if user is in current
+		 * session
 		 */
 		List<String> users = userService.getUsersInSession(session);
 		de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(session);
@@ -218,8 +208,8 @@ public class ARSnovaSocketIOServer {
 		for (SocketIOClient c : server.getAllClients()) {
 			User u = userService.getUser2SocketId(c.getSessionId());
 			if (u != null && users.contains(u.getUsername())) {
-				logger.info("sending out to client {}, username is: {}, current session is: {}", 
-						new Object[] {c.getSessionId(), u.getUsername(), session});
+				logger.info("sending out to client {}, username is: {}, current session is: {}",
+						new Object[] { c.getSessionId(), u.getUsername(), session });
 				c.sendEvent("updateFeedback", fb.getValues());
 			}
 		}
