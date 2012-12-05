@@ -29,13 +29,13 @@ import de.thm.arsnova.entities.User;
 public interface IUserService {
 	User getCurrentUser();
 
-	User getUser2SessionID(UUID sessionID);
+	User getUser2SocketId(UUID socketId);
 
-	void putUser2SessionID(UUID sessionID, User user);
+	void putUser2SocketId(UUID socketId, User user);
 
-	void removeUser2SessionID(UUID sessionID);
+	void removeUser2SocketId(UUID socketId);
 
-	Set<Map.Entry<UUID, User>> users2Session();
+	Set<Map.Entry<UUID, User>> socketId2User();
 
 	boolean isUserInSession(User user, String keyword);
 

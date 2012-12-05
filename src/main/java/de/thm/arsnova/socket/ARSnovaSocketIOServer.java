@@ -82,7 +82,7 @@ public class ARSnovaSocketIOServer {
 						 * do a check if user is in the session, for which he
 						 * would give a feedback
 						 */
-						User u = userService.getUser2SessionID(client
+						User u = userService.getUser2SocketId(client
 								.getSessionId());
 						if (u == null
 								|| userService.isUserInSession(u,
@@ -91,23 +91,11 @@ public class ARSnovaSocketIOServer {
 						}
 						feedbackService.saveFeedback(data.getSessionkey(),
 								data.getValue(), u);
-
+						
 						/**
-						 * collect a list of users which are in the current
-						 * session iterate over all connected clients and if
-						 * send feedback, if user is in current session
+						 * send feedback back to clients
 						 */
-						List<String> users = userService.getUsersInSession(data
-								.getSessionkey());
-						de.thm.arsnova.entities.Feedback fb = feedbackService
-								.getFeedback(data.getSessionkey());
-
-						for (SocketIOClient c : server.getAllClients()) {
-							u = userService.getUser2SessionID(c.getSessionId());
-							if (u != null && users.contains(u.getUsername())) {
-								c.sendEvent("updateFeedback", fb.getValues());
-							}
-						}
+						reportUpdatedFeedbackForSession(data.getSessionkey());
 					}
 				});
 
@@ -133,7 +121,7 @@ public class ARSnovaSocketIOServer {
 			public void onDisconnect(SocketIOClient client) {
 				logger.info("addDisconnectListener.onDisconnect: Client: {}",
 						new Object[] { client });
-				userService.removeUser2SessionID(client.getSessionId());
+				userService.removeUser2SocketId(client.getSessionId());
 			}
 		});
 
@@ -210,7 +198,7 @@ public class ARSnovaSocketIOServer {
 
 	private List<UUID> findConnectionIdForUser(String username) {
 		List<UUID> result = new ArrayList<UUID>();
-		for (Entry<UUID, User> e : userService.users2Session()) {
+		for (Entry<UUID, User> e : userService.socketId2User()) {
 			if (e.getValue().getUsername().equals(username)) {
 				result.add(e.getKey());
 			}
@@ -218,12 +206,22 @@ public class ARSnovaSocketIOServer {
 		return result;
 	}
 
-	public void reportUpdatedFeedbackForSessions(Set<String> allAffectedSessions) {
-		for (String sessionKey : allAffectedSessions) {
-			de.thm.arsnova.entities.Feedback fb = feedbackService
-					.getFeedback(sessionKey);
-			server.getBroadcastOperations().sendEvent("updateFeedback",
-					fb.getValues());
+	public void reportUpdatedFeedbackForSession(String session) {
+		/**
+		 * collect a list of users which are in the current
+		 * session iterate over all connected clients and if
+		 * send feedback, if user is in current session
+		 */
+		List<String> users = userService.getUsersInSession(session);
+		de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(session);
+
+		for (SocketIOClient c : server.getAllClients()) {
+			User u = userService.getUser2SocketId(c.getSessionId());
+			if (u != null && users.contains(u.getUsername())) {
+				logger.info("sending out to client {}, username is: {}, current session is: {}", 
+						new Object[] {c.getSessionId(), u.getUsername(), session});
+				c.sendEvent("updateFeedback", fb.getValues());
+			}
 		}
 	}
 }

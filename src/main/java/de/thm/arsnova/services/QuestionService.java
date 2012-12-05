@@ -27,22 +27,16 @@ import org.springframework.stereotype.Service;
 import de.thm.arsnova.annotation.Authenticated;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.exceptions.NoContentException;
-import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
 public class QuestionService implements IQuestionService {
 
 	@Autowired
-	ARSnovaSocketIOServer server;
-
-	@Autowired
-	IDatabaseDao databaseDao;
-
-	@Autowired
-	IUserService userService;
+	private IDatabaseDao databaseDao;
 
 	public void setDatabaseDao(IDatabaseDao databaseDao) {
 		this.databaseDao = databaseDao;
@@ -52,8 +46,9 @@ public class QuestionService implements IQuestionService {
 	@Authenticated
 	public List<Question> getSkillQuestions(String sessionkey) {
 		List<Question> result = databaseDao.getSkillQuestions(sessionkey);
-		if (result == null || result.size() == 0)
+		if (result == null || result.size() == 0) {
 			throw new NoContentException();
+		}
 		return result;
 	}
 
@@ -70,6 +65,14 @@ public class QuestionService implements IQuestionService {
 		return this.databaseDao.saveQuestion(session, question);
 	}
 
+	@Override
+	@Authenticated
+	public boolean saveQuestion(InterposedQuestion question) {
+		Session session = this.databaseDao.getSessionFromKeyword(question.getSession());
+		return this.databaseDao.saveQuestion(session, question);
+	}
+
+	
 	@Override
 	@Authenticated
 	public Question getQuestion(String id, String sessionKey) {
@@ -139,7 +142,7 @@ public class QuestionService implements IQuestionService {
 	
 	@Override
 	@Authenticated
-	public List<Question> getInterposedQuestions(String sessionKey) {
+	public List<InterposedQuestion> getInterposedQuestions(String sessionKey) {
 		return databaseDao.getInterposedQuestions(sessionKey);
 	}
 	

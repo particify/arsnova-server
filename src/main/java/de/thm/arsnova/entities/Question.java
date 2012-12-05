@@ -23,6 +23,7 @@ import java.util.List;
 public class Question {
 
 	private String type;
+	private String questionType;
 	private String subject;
 	private String text;
 	private boolean active;
@@ -45,11 +46,11 @@ public class Question {
 	}
 
 	public final String getQuestionType() {
-		return type;
+		return questionType;
 	}
 
 	public final void setQuestionType(final String questionType) {
-		this.type = questionType;
+		this.questionType = questionType;
 	}
 
 	public final String getSubject() {

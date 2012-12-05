@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.FoodVote;
+import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
@@ -283,7 +284,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 	
 	@Override
-	public List<Question> getInterposedQuestions(String sessionKey) {
+	public List<InterposedQuestion> getInterposedQuestions(String sessionKey) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -322,5 +323,11 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public int countQuestions() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public boolean saveQuestion(Session session, InterposedQuestion question) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

@@ -66,7 +66,9 @@ public class SessionController extends AbstractController {
 		User u = userService.getCurrentUser();
 		LOGGER.info("authorize session: " + socketid + ", user is:  " + u);
 		response.setStatus(u != null ? HttpStatus.CREATED.value() : HttpStatus.UNAUTHORIZED.value());
-		userService.putUser2SessionID(UUID.fromString(socketid), u);
+		if(u != null) {
+			userService.putUser2SocketId(UUID.fromString(socketid), u);	
+		}		
 	}
 
 	@RequestMapping(value = "/session/{sessionkey}", method = RequestMethod.GET)
