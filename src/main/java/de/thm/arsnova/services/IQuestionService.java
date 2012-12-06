@@ -19,8 +19,6 @@
 
 package de.thm.arsnova.services;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.List;
 
 import de.thm.arsnova.entities.Answer;

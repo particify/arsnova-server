@@ -151,6 +151,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
+	@Authenticated
 	public InterposedQuestion readInterposedQuestion(String sessionKey, String questionId) {
 		try {
 			InterposedQuestion question = databaseDao.getInterposedQuestion(questionId);

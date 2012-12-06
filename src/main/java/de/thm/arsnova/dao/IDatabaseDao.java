@@ -49,7 +49,7 @@ public interface IDatabaseDao {
 	boolean sessionKeyAvailable(String keyword);
 
 	boolean saveQuestion(Session session, Question question);
-	
+
 	boolean saveQuestion(Session session, InterposedQuestion question);
 
 	Question getQuestion(String id, String sessionKey);
@@ -109,5 +109,4 @@ public interface IDatabaseDao {
 	InterposedQuestion getInterposedQuestion(String questionId) throws IOException;
 
 	void markInterposedQuestionAsRead(InterposedQuestion question) throws IOException;
-
 }
