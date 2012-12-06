@@ -27,7 +27,7 @@ public class InterposedQuestion {
 	private String type;
 	private String subject;
 	private String text;
-	private String session;
+	private String sessionId;
 	private long timestamp;
 	private boolean read;
 
@@ -67,11 +67,11 @@ public class InterposedQuestion {
 	public void setText(String text) {
 		this.text = text;
 	}
-	public String getSession() {
-		return session;
+	public String getSessionId() {
+		return sessionId;
 	}
-	public void setSession(String session) {
-		this.session = session;
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
 	}
 	public long getTimestamp() {
 		return timestamp;

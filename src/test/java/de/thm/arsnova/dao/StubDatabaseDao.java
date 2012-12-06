@@ -1,5 +1,6 @@
 package de.thm.arsnova.dao;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -329,5 +330,17 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public boolean saveQuestion(Session session, InterposedQuestion question) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public InterposedQuestion getInterposedQuestion(String questionId) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void markInterposedQuestionAsRead(InterposedQuestion question) throws IOException {
+		// TODO Auto-generated method stub
+		
 	}
 }

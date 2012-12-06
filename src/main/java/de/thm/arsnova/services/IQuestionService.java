@@ -19,6 +19,8 @@
 
 package de.thm.arsnova.services;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 import de.thm.arsnova.entities.Answer;
@@ -27,7 +29,7 @@ import de.thm.arsnova.entities.Question;
 
 public interface IQuestionService {
 	boolean saveQuestion(Question question);
-	
+
 	boolean saveQuestion(InterposedQuestion question);
 
 	Question getQuestion(String id, String sessionkey);
@@ -57,5 +59,7 @@ public interface IQuestionService {
 	int getInterposedCount(String sessionKey);
 
 	List<InterposedQuestion> getInterposedQuestions(String sessionKey);
+
+	InterposedQuestion readInterposedQuestion(String sessionKey, String questionId);
 
 }

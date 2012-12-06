@@ -268,8 +268,17 @@ public class QuestionController extends AbstractController {
 	) {
 		return questionService.getInterposedQuestions(sessionKey);
 	}
-	
-	
+
+	@RequestMapping(value = "/session/{sessionKey}/interposed/{questionId}", method = RequestMethod.GET)
+	@ResponseBody
+	public final InterposedQuestion getInterposedQuestions(
+			@PathVariable final String sessionKey,
+			@PathVariable final String questionId,
+			final HttpServletResponse response
+	) {
+		return questionService.readInterposedQuestion(sessionKey, questionId);
+	}
+
 	@RequestMapping(value = "/session/{sessionkey}/interposed", method = RequestMethod.POST)
 	@ResponseBody
 	public final void postInterposedQuestion(
@@ -277,7 +286,7 @@ public class QuestionController extends AbstractController {
 			@RequestBody final InterposedQuestion question,
 			final HttpServletResponse response
 	) {
-		if (!sessionkey.equals(question.getSession())) {
+		if (!sessionkey.equals(question.getSessionId())) {
 			response.setStatus(HttpStatus.PRECONDITION_FAILED.value());
 			return;
 		}
@@ -289,6 +298,16 @@ public class QuestionController extends AbstractController {
 
 		response.setStatus(HttpStatus.BAD_REQUEST.value());
 		return;
+	}
+	
+	@RequestMapping(value = "/session/{sessionkey}/interposed/{questionId}", method = RequestMethod.DELETE)
+	@ResponseBody
+	public final void deleteInterposedQuestion(
+			@PathVariable final String sessionkey,
+			@PathVariable final String questionId,
+			final HttpServletResponse response
+	) {
+		questionService.deleteQuestion(sessionkey, questionId);
 	}
 
 }

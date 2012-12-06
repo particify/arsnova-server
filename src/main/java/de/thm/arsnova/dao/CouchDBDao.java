@@ -481,20 +481,12 @@ public class CouchDBDao implements IDatabaseDao {
 		return results.getJSONArray("rows").optJSONObject(0).optJSONObject("value").getString("_id");
 	}
 
-	private String getSessionKeyword(final String internalSessionId) {
-		try {
-			View view = new View("session/by_id");
-			view.setKey(URLEncoder.encode("\"" + internalSessionId + "\"", "UTF-8"));
-			ViewResults results = this.getDatabase().view(view);
-			for (Document d : results.getResults()) {
-				Document arsSession = this.getDatabase().getDocument(d.getId());
-				return arsSession.get("keyword").toString();
-			}
-		} catch (UnsupportedEncodingException e) {
-			return null;
-		} catch (IOException e) {
-			return null;
+	private String getSessionKeyword(final String internalSessionId) throws IOException {
+		Document document = this.getDatabase().getDocument(internalSessionId);
+		if (document.has("keyword")) {
+			return (String) document.get("keyword");
 		}
+		LOGGER.error("No session found for internal id: {}", internalSessionId);
 		return null;
 	}
 
@@ -1066,7 +1058,7 @@ public class CouchDBDao implements IDatabaseDao {
 						document.getJSONObject().getJSONObject("value"),
 						InterposedQuestion.class
 				);
-				question.setSession(sessionKey);
+				question.setSessionId(sessionKey);
 				question.set_id(document.getId());
 				result.add(question);
 			}
@@ -1205,5 +1197,24 @@ public class CouchDBDao implements IDatabaseDao {
 			LOGGER.error("Error while retrieving session count", e);
 		}
 		return 0;
+	}
+
+	@Override
+	public InterposedQuestion getInterposedQuestion(String questionId) throws IOException {
+		Document document = this.getDatabase().getDocument(questionId);
+		InterposedQuestion question = (InterposedQuestion) JSONObject.toBean(
+				document.getJSONObject(),
+				InterposedQuestion.class
+		);
+		question.setSessionId(getSessionKeyword(question.getSessionId()));
+		return question;
+	}
+
+	@Override
+	public void markInterposedQuestionAsRead(InterposedQuestion question) throws IOException {
+		question.setRead(true);
+		Document document = this.getDatabase().getDocument(question.get_id());
+		document.put("read", question.isRead());
+		this.getDatabase().saveDocument(document);
 	}
 }

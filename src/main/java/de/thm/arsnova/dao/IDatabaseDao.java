@@ -19,6 +19,7 @@
 
 package de.thm.arsnova.dao;
 
+import java.io.IOException;
 import java.util.List;
 
 import de.thm.arsnova.entities.Answer;
@@ -104,5 +105,9 @@ public interface IDatabaseDao {
 	int countAnswers();
 
 	int countQuestions();
+
+	InterposedQuestion getInterposedQuestion(String questionId) throws IOException;
+
+	void markInterposedQuestionAsRead(InterposedQuestion question) throws IOException;
 
 }
