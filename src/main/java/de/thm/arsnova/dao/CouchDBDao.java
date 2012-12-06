@@ -1079,10 +1079,11 @@ public class CouchDBDao implements IDatabaseDao {
 	
 	public Question getInterposedQuestion(String sessionKey, String documentId) {
 		try {
-			Document document = this.getDatabase().getDocument(documentId);
 			
+			Document document = this.getDatabase().getDocument(documentId);
+			LOGGER.error("bla test" + document.toString());
 			if(document != null) {
-				Question question = (Question) JSONObject.toBean(document.getJSONObject().getJSONObject("value"), Question.class);
+				Question question = (Question) JSONObject.toBean(document.getJSONObject(), Question.class);
 				question.setQuestionType("interposed_question");
 				
 				return question;

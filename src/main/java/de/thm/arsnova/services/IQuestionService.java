@@ -56,8 +56,6 @@ public interface IQuestionService {
 
 	int getInterposedCount(String sessionKey);
 
-	List<Question> getInterposedQuestions(String sessionKey);
-
 	Question getInterposedQuestion(String sessionKey, String documentId);
 
 	List<InterposedQuestion> getInterposedQuestions(String sessionKey);

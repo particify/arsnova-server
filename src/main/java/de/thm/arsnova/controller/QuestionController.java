@@ -269,7 +269,6 @@ public class QuestionController extends AbstractController {
 		return questionService.getInterposedQuestions(sessionKey);
 	}
 	
-<<<<<<< HEAD
 	@RequestMapping(value = "/session/{sessionKey}/interposed/{documentId}", method = RequestMethod.GET)
 	@ResponseBody
 	public final Question getInterposedQuestion(
@@ -278,7 +277,7 @@ public class QuestionController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		return questionService.getInterposedQuestion(sessionKey, documentId);
-=======
+	}
 	
 	@RequestMapping(value = "/session/{sessionkey}/interposed", method = RequestMethod.POST)
 	@ResponseBody
@@ -299,7 +298,6 @@ public class QuestionController extends AbstractController {
 
 		response.setStatus(HttpStatus.BAD_REQUEST.value());
 		return;
->>>>>>> 83eba294f9a7f8a8250127f8b5673aff0fc04663
 	}
 
 }
