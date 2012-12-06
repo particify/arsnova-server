@@ -29,6 +29,8 @@ public class StubDatabaseDao implements IDatabaseDao {
 	private static Map<String, Feedback> stubFeedbacks = new ConcurrentHashMap<String, Feedback>();
 	private static Map<String, List<Question>> stubQuestions = new ConcurrentHashMap<String, List<Question>>();
 	private static Map<String, User> stubUsers = new ConcurrentHashMap<String, User>();
+	
+	public InterposedQuestion interposedQuestion;
 
 	public StubDatabaseDao() {
 		fillWithDummySessions();
@@ -56,7 +58,8 @@ public class StubDatabaseDao implements IDatabaseDao {
 		session.setShortName("TS1");
 
 		stubSessions.put("12345678", session);
-
+		
+		session = new Session();
 		session.setActive(true);
 		session.setCreator("ptsr00");
 		session.setKeyword("87654321");
@@ -334,13 +337,11 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public InterposedQuestion getInterposedQuestion(String questionId) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		return this.interposedQuestion;
 	}
 
 	@Override
 	public void markInterposedQuestionAsRead(InterposedQuestion question) throws IOException {
-		// TODO Auto-generated method stub
-		
+		this.interposedQuestion.setRead(true);
 	}
 }

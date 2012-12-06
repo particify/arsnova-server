@@ -9,18 +9,19 @@ public class StubUserService extends UserService {
 	private User stubUser = null;
 	
 	public void setUserAuthenticated(boolean isAuthenticated) {
+		this.setUserAuthenticated(isAuthenticated, "ptsr00");
+	}
+	
+	public void setUserAuthenticated(boolean isAuthenticated, String username) {
 		if (isAuthenticated) {
-			stubUser = new User(
-					new UsernamePasswordAuthenticationToken("ptsr00", "testpassword")
-			);
+			stubUser = new User(new UsernamePasswordAuthenticationToken(username, "testpassword"));
 			return;
 		}
 		stubUser = null;
 	}
 
 	public void useAnonymousUser() {
-		stubUser = new User(new UsernamePasswordAuthenticationToken(
-				"anonymous", ""));
+		stubUser = new User(new UsernamePasswordAuthenticationToken("anonymous", ""));
 	}
 
 	@Override

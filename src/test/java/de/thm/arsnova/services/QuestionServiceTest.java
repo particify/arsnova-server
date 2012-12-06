@@ -18,7 +18,7 @@
  */
 package de.thm.arsnova.services;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import org.junit.After;
 import org.junit.Test;
@@ -28,6 +28,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import de.thm.arsnova.dao.StubDatabaseDao;
+import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 
@@ -70,5 +71,33 @@ public class QuestionServiceTest {
 	public void testShouldFindQuestions() {
 		userService.setUserAuthenticated(true);
 		assertEquals(1, questionService.getSkillQuestionCount("12345678"));
+	}
+	
+	@Test
+	public void testShouldMarkInterposedQuestionAsReadIfSessionCreator() throws Exception {
+		userService.setUserAuthenticated(true);
+		InterposedQuestion theQ = new InterposedQuestion();
+		theQ.setRead(false);
+		theQ.set_id("the internal id");
+		theQ.setSessionId("12345678");
+		databaseDao.interposedQuestion = theQ;
+		
+		questionService.readInterposedQuestion(theQ.getSessionId(), theQ.get_id());
+		
+		assertTrue(theQ.isRead());
+	}
+	
+	@Test
+	public void testShouldNotMarkInterposedQuestionAsReadIfRegularUser() throws Exception {
+		userService.setUserAuthenticated(true, "regular user");
+		InterposedQuestion theQ = new InterposedQuestion();
+		theQ.setRead(false);
+		theQ.set_id("the internal id");
+		theQ.setSessionId("12345678");
+		databaseDao.interposedQuestion = theQ;
+		
+		questionService.readInterposedQuestion(theQ.getSessionId(), theQ.get_id());
+		
+		assertFalse(theQ.isRead());
 	}
 }
