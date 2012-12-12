@@ -39,7 +39,7 @@ public interface IUserService {
 
 	boolean isUserInSession(User user, String keyword);
 
-	List<String> getUsersInSession(String keyword);
+	List<User> getUsersInSession(String keyword);
 
 	void addCurrentUserToSessionMap(String keyword);
 

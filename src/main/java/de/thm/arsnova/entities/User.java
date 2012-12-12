@@ -67,13 +67,20 @@ public class User implements Serializable {
 		this.type = type;
 	}
 
+	@Override
 	public String toString() {
-		return "User, username: " + this.username + ", type: " + this.type;
+		return "User [username=" + username + ", type=" + type + "]";
 	}
 
 	@Override
 	public int hashCode() {
-		return username.hashCode();
+		// See http://stackoverflow.com/a/113600
+		final int theAnswer = 42;
+		final int theOthers = 37;
+
+		int result = theAnswer;
+		result = theOthers * result + this.username.hashCode();
+		return theOthers * result + this.type.hashCode();
 	}
 
 	@Override

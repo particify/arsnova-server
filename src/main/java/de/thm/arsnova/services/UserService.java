@@ -41,7 +41,7 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 	public static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
 	private static final ConcurrentHashMap<UUID, User> socketid2user = new ConcurrentHashMap<UUID, User>();
-	private static final ConcurrentHashMap<String, String> user2session = new ConcurrentHashMap<String, String>();
+	private static final ConcurrentHashMap<User, String> user2session = new ConcurrentHashMap<User, String>();
 
 	@Override
 	public User getCurrentUser() {
@@ -106,16 +106,16 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 	public boolean isUserInSession(User user, String keyword) {
 		if (keyword == null)
 			return false;
-		String session = user2session.get(user.getUsername());
+		String session = user2session.get(user);
 		if (session == null)
 			return false;
 		return keyword.equals(session);
 	}
 
 	@Override
-	public List<String> getUsersInSession(String keyword) {
-		List<String> result = new ArrayList<String>();
-		for (Entry<String, String> e : user2session.entrySet()) {
+	public List<User> getUsersInSession(String keyword) {
+		List<User> result = new ArrayList<User>();
+		for (Entry<User, String> e : user2session.entrySet()) {
 			if (e.getValue().equals(keyword)) {
 				result.add(e.getKey());
 			}
@@ -129,7 +129,7 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 		User user = getCurrentUser();
 		if (user == null)
 			throw new UnauthorizedException();
-		user2session.put(user.getUsername(), keyword);
+		user2session.put(user, keyword);
 	}
 
 	@Override
@@ -149,7 +149,7 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 			Hashtable<String, Map<?, ?>> map = (Hashtable<String, Map<?, ?>>) ois.readObject();
 			ois.close();
 			Map<UUID, User> s2u = (Map<UUID, User>) map.get("socketid2user");
-			Map<String, String> u2s = (Map<String, String>) map.get("user2session");
+			Map<User, String> u2s = (Map<User, String>) map.get("user2session");
 
 			LOGGER.info("load from store: {}", map);
 

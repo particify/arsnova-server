@@ -202,12 +202,12 @@ public class ARSnovaSocketIOServer {
 		 * all connected clients and if send feedback, if user is in current
 		 * session
 		 */
-		List<String> users = userService.getUsersInSession(session);
+		List<User> users = userService.getUsersInSession(session);
 		de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(session);
 
 		for (SocketIOClient c : server.getAllClients()) {
 			User u = userService.getUser2SocketId(c.getSessionId());
-			if (u != null && users.contains(u.getUsername())) {
+			if (u != null && users.contains(u)) {
 				logger.info("sending out to client {}, username is: {}, current session is: {}",
 						new Object[] { c.getSessionId(), u.getUsername(), session });
 				c.sendEvent("updateFeedback", fb.getValues());
