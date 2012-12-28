@@ -104,8 +104,10 @@ public class LoginController extends AbstractController {
 			} else {
 				username = "Guest" + Sha512DigestUtils.shaHex(request.getSession().getId()).substring(0, 10);
 			}
-			org.springframework.security.core.userdetails.User user = new org.springframework.security.core.userdetails.User(
-					username, "", true, true, true, true, authorities);
+			org.springframework.security.core.userdetails.User user = 
+					new org.springframework.security.core.userdetails.User(
+							username, "", true, true, true, true, authorities
+					);
 			Authentication token = new UsernamePasswordAuthenticationToken(user, null, authorities);
 
 			SecurityContextHolder.getContext().setAuthentication(token);

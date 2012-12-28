@@ -30,48 +30,7 @@
 	<context:component-scan base-package="de.thm.arsnova" />
 	<context:annotation-config />
 
-	<aop:aspectj-autoproxy>
-		<aop:include name="authorizationAdviser" />
-	</aop:aspectj-autoproxy>
-
-	<mvc:annotation-driven />
-	<mvc:resources mapping="/**" location="/" />
-
 	<task:annotation-driven />
-	
-	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
-	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
-		<property name="messageConverters">
-			<list>
-				<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter" />
-			</list>
-		</property>
-	</bean>
-
-	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
-		<property name="mediaTypes">
-			<map>
-			 	<entry key="html" value="text/html"/>  
-				<entry key="json" value="application/json" />
-			</map>
-		</property>
-		<property name="viewResolvers">  
-			<list>  
-				<bean class="org.springframework.web.servlet.view.UrlBasedViewResolver">  
-					<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>  
-					<property name="prefix" value="/WEB-INF/jsp/"/>  
-					<property name="suffix" value=".jsp"/>  
-				</bean>  
-		    </list>  
-		</property>  
-		<property name="defaultViews">  
-			<list>  
-				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView">  
-					<property name="prefixJson" value="false"/>  
-				</bean>  
-			</list>  
-		</property>  
-	</bean>  
 
 	<bean id="socketServer" class="de.thm.arsnova.socket.ARSnovaSocketIOServer"
 		init-method="startServer" destroy-method="stopServer" scope="singleton"
