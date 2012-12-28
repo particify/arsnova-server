@@ -134,9 +134,12 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 
 	@Override
 	public String getSessionForUser(String username) {
-		return user2session.get(username);
+		for (Entry<User, String> entry  : user2session.entrySet()) {
+			if (entry.getKey().getUsername().equals(username)) return entry.getValue();
+		}
+		return null;
 	}
-
+	
 	@Override
 	public void afterPropertiesSet() {
 		try {
