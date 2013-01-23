@@ -26,7 +26,7 @@ import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.Question;
 
 public interface IQuestionService {
-	boolean saveQuestion(Question question);
+	Question saveQuestion(Question question);
 
 	boolean saveQuestion(InterposedQuestion question);
 

@@ -63,25 +63,29 @@ public class QuestionController extends AbstractController {
 		return null;
 	}
 
-	@RequestMapping(value = "/session/{sessionkey}/question", method = RequestMethod.POST)
+	@RequestMapping(
+			value = "/session/{sessionkey}/question", 
+			method = RequestMethod.POST
+			)
 	@ResponseBody
-	public final void postQuestion(
+	public final Question postQuestion(
 			@PathVariable final String sessionkey,
 			@RequestBody final Question question,
 			final HttpServletResponse response
 	) {
 		if (!sessionkey.equals(question.getSession())) {
 			response.setStatus(HttpStatus.PRECONDITION_FAILED.value());
-			return;
+			return null;
 		}
 
-		if (questionService.saveQuestion(question)) {
+		if (questionService.saveQuestion(question) != null) {
 			response.setStatus(HttpStatus.CREATED.value());
-			return;
+			return question;
 		}
 
 		response.setStatus(HttpStatus.BAD_REQUEST.value());
-		return;
+		
+		return null;
 	}
 
 	@RequestMapping(

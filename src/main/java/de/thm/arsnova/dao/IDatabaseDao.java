@@ -22,6 +22,8 @@ package de.thm.arsnova.dao;
 import java.io.IOException;
 import java.util.List;
 
+import com.fourspaces.couchdb.Document;
+
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.FoodVote;
@@ -48,7 +50,7 @@ public interface IDatabaseDao {
 
 	boolean sessionKeyAvailable(String keyword);
 
-	boolean saveQuestion(Session session, Question question);
+	Document saveQuestion(Session session, Question question);
 
 	boolean saveQuestion(Session session, InterposedQuestion question);
 

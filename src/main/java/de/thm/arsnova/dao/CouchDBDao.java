@@ -519,7 +519,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final boolean saveQuestion(final Session session, final Question question) {
+	public final Document saveQuestion(final Session session, final Question question) {
 		Document q = new Document();
 		q.put("type", "skill_question");
 		q.put("questionType", question.getQuestionType());
@@ -533,12 +533,12 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("possibleAnswers", question.getPossibleAnswers());
 		q.put("noCorrect", question.isNoCorrect());
 		try {
-			database.saveDocument(q);
-			return true;
+			database.saveDocument(q, null);
+			return q;
 		} catch (IOException e) {
 			LOGGER.error("Could not save question {}", question);
 		}
-		return false;
+		return null;
 	}
 	
 	@Override

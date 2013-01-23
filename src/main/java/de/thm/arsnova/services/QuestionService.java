@@ -25,6 +25,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fourspaces.couchdb.Document;
+
 import de.thm.arsnova.annotation.Authenticated;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Answer;
@@ -66,9 +68,13 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@Authenticated
-	public boolean saveQuestion(Question question) {
+	public Question saveQuestion(Question question) {
 		Session session = this.databaseDao.getSessionFromKeyword(question.getSession());
-		return this.databaseDao.saveQuestion(session, question);
+		
+		Document d = this.databaseDao.saveQuestion(session, question);
+		question.set_id(d.getId());
+		question.set_rev(d.getRev());
+		return question;
 	}
 
 	@Override
