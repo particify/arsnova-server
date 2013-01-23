@@ -50,7 +50,7 @@ public interface IDatabaseDao {
 
 	boolean sessionKeyAvailable(String keyword);
 
-	Document saveQuestion(Session session, Question question);
+	Question saveQuestion(Session session, Question question);
 
 	boolean saveQuestion(Session session, InterposedQuestion question);
 

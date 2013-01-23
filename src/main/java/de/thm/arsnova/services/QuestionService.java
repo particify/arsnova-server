@@ -69,12 +69,8 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public Question saveQuestion(Question question) {
-		Session session = this.databaseDao.getSessionFromKeyword(question.getSession());
-		
-		Document d = this.databaseDao.saveQuestion(session, question);
-		question.set_id(d.getId());
-		question.set_rev(d.getRev());
-		return question;
+		Session session = this.databaseDao.getSessionFromKeyword(question.getSession());		
+		return this.databaseDao.saveQuestion(session, question);
 	}
 
 	@Override
