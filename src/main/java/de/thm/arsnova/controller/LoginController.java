@@ -80,6 +80,7 @@ public class LoginController extends AbstractController {
 	public final View doLogin(
 			@RequestParam("type") final String type,
 			@RequestParam(value = "user", required = false) final String guestName,
+			@RequestParam(value = "referer", required = false) final String forcedReferer,
 			final HttpServletRequest request,
 			final HttpServletResponse response
 	) throws IOException, ServletException {
@@ -87,7 +88,7 @@ public class LoginController extends AbstractController {
 		if (referer == null) {
 			/* Use a url from a request parameter as referer as long as the url is not absolute (to prevent
 			 * abuse of the redirection). */
-			if (null == (referer = request.getParameter("referer")) && UrlUtils.isAbsoluteUrl(referer)) {
+			if (null == (referer = forcedReferer) && UrlUtils.isAbsoluteUrl(referer)) {
 				referer = "/";
 			}
 		}
