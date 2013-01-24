@@ -88,7 +88,7 @@ public class LoginController extends AbstractController {
 		if (referer == null) {
 			/* Use a url from a request parameter as referer as long as the url is not absolute (to prevent
 			 * abuse of the redirection). */
-			if (null == (referer = forcedReferer) && UrlUtils.isAbsoluteUrl(referer)) {
+			if (null == (referer = forcedReferer) || UrlUtils.isAbsoluteUrl(referer)) {
 				referer = "/";
 			}
 		}
