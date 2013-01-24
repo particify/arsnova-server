@@ -188,11 +188,12 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public boolean saveQuestion(Session session, Question question) {
+	public Question saveQuestion(Session session, Question question) {
 		List<Question> questions = stubQuestions.get(session.get_id());
 		questions.add(question);
 		stubQuestions.put(session.get_id(), questions);
-		return stubQuestions.get(session) != null;
+
+		return question;
 	}
 
 	@Override
