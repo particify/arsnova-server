@@ -42,6 +42,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.token.Sha512DigestUtils;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.util.UrlUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -79,10 +80,18 @@ public class LoginController extends AbstractController {
 	public final View doLogin(
 			@RequestParam("type") final String type,
 			@RequestParam(value = "user", required = false) final String guestName,
+			@RequestParam(value = "referer", required = false) final String forcedReferer,
 			final HttpServletRequest request,
 			final HttpServletResponse response
 	) throws IOException, ServletException {
 		String referer = request.getHeader("referer");
+		if (referer == null) {
+			/* Use a url from a request parameter as referer as long as the url is not absolute (to prevent
+			 * abuse of the redirection). */
+			if (null == (referer = forcedReferer) || UrlUtils.isAbsoluteUrl(referer)) {
+				referer = "/";
+			}
+		}
 		request.getSession().setAttribute("ars-referer", referer);
 		if ("cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);
@@ -113,7 +122,7 @@ public class LoginController extends AbstractController {
 			SecurityContextHolder.getContext().setAuthentication(token);
 			request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
 					SecurityContextHolder.getContext());
-			return new RedirectView((referer != null ? referer : "/") + "#auth/checkLogin");
+			return new RedirectView(referer + "#auth/checkLogin");
 		}
 		return null;
 	}
