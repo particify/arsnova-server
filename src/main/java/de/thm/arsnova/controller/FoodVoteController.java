@@ -45,7 +45,7 @@ public class FoodVoteController extends AbstractController {
 	@Autowired
 	private IFoodService foodService;
 
-	@RequestMapping(value = "/canteen/vote", method = RequestMethod.POST)
+	@RequestMapping(value = "/canteen/menu/vote", method = RequestMethod.POST)
 	public final void setFoodVote(
 			@RequestBody final Object menu,
 			final HttpServletResponse response
@@ -54,13 +54,13 @@ public class FoodVoteController extends AbstractController {
 		foodService.vote(menustring);
 	}
 	
-	@RequestMapping(value = "/canteen/foodvote", method = RequestMethod.GET)
+	@RequestMapping(value = "/canteen/menu/vote", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<FoodVote> getFoodVote() {
 		return foodService.getFoodVote();
 	}
 
-	@RequestMapping(value = "/canteen/foodvotecount", method = RequestMethod.GET)
+	@RequestMapping(value = "/canteen/menu/vote/count", method = RequestMethod.GET)
 	@ResponseBody
 	public final int getFoodVoteCount() {
 		return foodService.getFoodVoteCount();
