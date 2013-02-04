@@ -57,7 +57,7 @@ public class SessionController extends AbstractController {
 	@Autowired
 	private ARSnovaSocketIOServer server;
 
-	@RequestMapping(method = RequestMethod.POST, value = "/authorize")
+	@RequestMapping(method = RequestMethod.POST, value = "/socket/assign")
 	public final void authorize(@RequestBody final Object sessionObject, final HttpServletResponse response) {
 		String socketid = (String) JSONObject.fromObject(sessionObject).get("session");
 		if (socketid == null) {
@@ -65,7 +65,7 @@ public class SessionController extends AbstractController {
 		}
 		User u = userService.getCurrentUser();
 		LOGGER.info("authorize session: " + socketid + ", user is:  " + u);
-		response.setStatus(u != null ? HttpStatus.CREATED.value() : HttpStatus.UNAUTHORIZED.value());
+		response.setStatus(u != null ? HttpStatus.NO_CONTENT.value() : HttpStatus.UNAUTHORIZED.value());
 		if(u != null) {
 			userService.putUser2SocketId(UUID.fromString(socketid), u);	
 		}		
@@ -116,7 +116,7 @@ public class SessionController extends AbstractController {
 		return null;
 	}
 
-	@RequestMapping(value = "/socketurl", method = RequestMethod.GET)
+	@RequestMapping(value = "/socket/url", method = RequestMethod.GET)
 	@ResponseBody
 	public final String getSocketUrl() {
 		StringBuilder url = new StringBuilder();
