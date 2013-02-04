@@ -36,7 +36,10 @@ public interface ISessionService {
 
 	List<Session> getMySessions(String username);
 
+	List<Session> getMyVisitedSessions(User currentUser);
+
 	LoggedIn registerAsOnlineUser(User user, String sessionkey);
 
 	int countActiveUsers(String sessionkey);
+
 }

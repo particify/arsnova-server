@@ -142,4 +142,15 @@ public class SessionController extends AbstractController {
 		}
 		return sessions;
 	}
+
+	@RequestMapping(value = "/session/visitedsessions", method = RequestMethod.GET)
+	@ResponseBody
+	public final List<Session> getMyVisitedSession(final HttpServletResponse response) {
+		List<Session> sessions = sessionService.getMyVisitedSessions(userService.getCurrentUser());
+		if (sessions == null || sessions.isEmpty()) {
+			response.setStatus(HttpStatus.NO_CONTENT.value());
+			return null;
+		}
+		return sessions;
+	}
 }

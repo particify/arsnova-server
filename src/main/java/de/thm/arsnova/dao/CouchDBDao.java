@@ -1237,4 +1237,33 @@ public class CouchDBDao implements IDatabaseDao {
 		document.put("read", question.isRead());
 		this.getDatabase().saveDocument(document);
 	}
+
+	@Override
+	public List<Session> getMyVisitedSessions(User user) {
+		try {
+			View view = new View("logged_in/visited_sessions_by_user");
+			view.setKey(URLEncoder.encode("\"" + user.getUsername() + "\"", "UTF-8"));
+			ViewResults sessions = this.getDatabase().view(view);
+			List<Session> allSessions = new ArrayList<Session>();
+			for (Document d : sessions.getResults()) {
+				@SuppressWarnings("unchecked")
+				Collection<Session> visitedSessions =  JSONArray.toCollection(
+						d.getJSONObject().getJSONArray("value"),
+						Session.class
+				);
+				allSessions.addAll(visitedSessions);
+			}
+			// Do these sessions still exist?
+			List<Session> result = new ArrayList<Session>();
+			for (Session s : allSessions) {
+				Session session = this.getSessionFromKeyword(s.getKeyword());
+				if (session != null) {
+					result.add(session);
+				}
+			}
+			return result;
+		} catch (UnsupportedEncodingException e) {
+			return null;
+		}
+	}
 }

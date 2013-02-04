@@ -111,4 +111,6 @@ public interface IDatabaseDao {
 	InterposedQuestion getInterposedQuestion(String questionId) throws IOException;
 
 	void markInterposedQuestionAsRead(InterposedQuestion question) throws IOException;
+
+	List<Session> getMyVisitedSessions(User user);
 }

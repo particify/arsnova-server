@@ -58,6 +58,11 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
+	public final List<Session> getMyVisitedSessions(final User user) {
+		return databaseDao.getMyVisitedSessions(user);
+	}
+
+	@Override
 	@Authenticated
 	public final Session saveSession(final Session session) {
 		return databaseDao.saveSession(session);

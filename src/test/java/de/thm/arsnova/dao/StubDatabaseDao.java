@@ -363,4 +363,10 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public void markInterposedQuestionAsRead(InterposedQuestion question) throws IOException {
 		this.interposedQuestion.setRead(true);
 	}
+
+	@Override
+	public List<Session> getMyVisitedSessions(User user) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
