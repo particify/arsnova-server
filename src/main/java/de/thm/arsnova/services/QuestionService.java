@@ -31,6 +31,7 @@ import de.thm.arsnova.annotation.Authenticated;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
@@ -144,6 +145,13 @@ public class QuestionService implements IQuestionService {
 	@Authenticated
 	public int getInterposedCount(String sessionKey) {
 		return databaseDao.getInterposedCount(sessionKey);
+	}
+
+	@Override
+	@Authenticated
+	public InterposedReadingCount getInterposedReadingCount(String sessionKey) {
+		Session session = this.databaseDao.getSessionFromKeyword(sessionKey);
+		return databaseDao.getInterposedReadingCount(session);
 	}
 
 	@Override

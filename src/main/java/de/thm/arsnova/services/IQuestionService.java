@@ -23,6 +23,7 @@ import java.util.List;
 
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
 
 public interface IQuestionService {
@@ -55,6 +56,8 @@ public interface IQuestionService {
 	int getTotalAnswerCount(String sessionKey);
 
 	int getInterposedCount(String sessionKey);
+
+	InterposedReadingCount getInterposedReadingCount(String sessionKey);
 
 	List<InterposedQuestion> getInterposedQuestions(String sessionKey);
 

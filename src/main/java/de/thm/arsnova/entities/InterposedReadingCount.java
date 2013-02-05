@@ -16,30 +16,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package de.thm.arsnova.entities;
 
-package de.thm.arsnova.services;
+public class InterposedReadingCount {
 
-import java.util.List;
+	private int read;
+	private int unread;
 
-import de.thm.arsnova.entities.LoggedIn;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.User;
+	public InterposedReadingCount(int readCount, int unreadCount) {
+		this.read = readCount;
+		this.unread = unreadCount;
+	}
 
-public interface ISessionService {
-	Session joinSession(String keyword);
+	public InterposedReadingCount() {
+		this.read = 0;
+		this.unread = 0;
+	}
 
-	Session saveSession(Session session);
+	public int getRead() {
+		return read;
+	}
 
-	boolean sessionKeyAvailable(String keyword);
+	public void setRead(int read) {
+		this.read = read;
+	}
 
-	String generateKeyword();
+	public int getUnread() {
+		return unread;
+	}
 
-	List<Session> getMySessions(String username);
+	public void setUnread(int unread) {
+		this.unread = unread;
+	}
 
-	List<Session> getMyVisitedSessions(User currentUser);
-
-	LoggedIn registerAsOnlineUser(User user, String sessionkey);
-
-	int countActiveUsers(String sessionkey);
-
+	public int getTotal() {
+		return getRead() + getUnread();
+	}
 }

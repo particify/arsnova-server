@@ -31,6 +31,7 @@ import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.FoodVote;
 import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
@@ -362,5 +363,17 @@ public class StubDatabaseDao implements IDatabaseDao {
 	@Override
 	public void markInterposedQuestionAsRead(InterposedQuestion question) throws IOException {
 		this.interposedQuestion.setRead(true);
+	}
+
+	@Override
+	public List<Session> getMyVisitedSessions(User user) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public InterposedReadingCount getInterposedReadingCount(Session session) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

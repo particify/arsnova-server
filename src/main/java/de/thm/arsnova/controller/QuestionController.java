@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IQuestionService;
@@ -104,6 +105,12 @@ public class QuestionController extends AbstractController {
 		}
 		LOGGER.info(questions.toString());
 		return questions;
+	}
+
+	@RequestMapping(value = "/session/{sessionkey}/skillquestioncount", method = RequestMethod.GET)
+	@ResponseBody
+	public final int getSkillQuestionCount(@PathVariable final String sessionkey, final HttpServletResponse response) {
+		return questionService.getSkillQuestionCount(sessionkey);
 	}
 
 	@RequestMapping(value = "/session/{sessionKey}/questionids", method = RequestMethod.GET)
@@ -262,6 +269,15 @@ public class QuestionController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		return questionService.getInterposedCount(sessionKey);
+	}
+
+	@RequestMapping(value = "/session/{sessionKey}/interposedreadingcount", method = RequestMethod.GET)
+	@ResponseBody
+	public final InterposedReadingCount getUnreadInterposedCount(
+			@PathVariable final String sessionKey,
+			final HttpServletResponse response
+	) {
+		return questionService.getInterposedReadingCount(sessionKey);
 	}
 
 	@RequestMapping(value = "/session/{sessionKey}/interposed", method = RequestMethod.GET)

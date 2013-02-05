@@ -58,6 +58,7 @@ import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.FoodVote;
 import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.PossibleAnswer;
 import de.thm.arsnova.entities.Question;
@@ -1009,7 +1010,7 @@ public class CouchDBDao implements IDatabaseDao {
 			View view = new View("skill_question/count_answers_by_session");
 			view.setKey(URLEncoder.encode("\"" + s.get_id() + "\"", "UTF-8"));
 			ViewResults results = this.getDatabase().view(view);
-			if (results.size() == 0) {
+			if (results.getResults().size() == 0) {
 				return 0;
 			}
 			return results.getJSONArray("rows").optJSONObject(0).optInt("value");
@@ -1039,6 +1040,26 @@ public class CouchDBDao implements IDatabaseDao {
 			LOGGER.error("Error while retrieving interposed question count", e);
 		}
 		return 0;
+	}
+
+	@Override
+	public InterposedReadingCount getInterposedReadingCount(Session session) {
+		try {
+			View view = new View("interposed_question/count_by_session_reading");
+			view.setStartKey(URLEncoder.encode("[\"" + session.get_id() + "\"]", "UTF-8"));
+			view.setEndKey(URLEncoder.encode("[\"" + session.get_id() + "\", {}]", "UTF-8"));
+			view.setGroup(true);
+			ViewResults results = this.getDatabase().view(view);
+			if (results.size() == 0 || results.getResults().size() == 0) {
+				return new InterposedReadingCount();
+			}
+			int read = results.getJSONArray("rows").optJSONObject(0).optInt("value");
+			int unread = results.getJSONArray("rows").optJSONObject(1).optInt("value");
+			return new InterposedReadingCount(read, unread);
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.error("Error while retrieving interposed question count", e);
+		}
+		return new InterposedReadingCount();
 	}
 
 	@Override
@@ -1236,5 +1257,34 @@ public class CouchDBDao implements IDatabaseDao {
 		Document document = this.getDatabase().getDocument(question.get_id());
 		document.put("read", question.isRead());
 		this.getDatabase().saveDocument(document);
+	}
+
+	@Override
+	public List<Session> getMyVisitedSessions(User user) {
+		try {
+			View view = new View("logged_in/visited_sessions_by_user");
+			view.setKey(URLEncoder.encode("\"" + user.getUsername() + "\"", "UTF-8"));
+			ViewResults sessions = this.getDatabase().view(view);
+			List<Session> allSessions = new ArrayList<Session>();
+			for (Document d : sessions.getResults()) {
+				@SuppressWarnings("unchecked")
+				Collection<Session> visitedSessions =  JSONArray.toCollection(
+						d.getJSONObject().getJSONArray("value"),
+						Session.class
+				);
+				allSessions.addAll(visitedSessions);
+			}
+			// Do these sessions still exist?
+			List<Session> result = new ArrayList<Session>();
+			for (Session s : allSessions) {
+				Session session = this.getSessionFromKeyword(s.getKeyword());
+				if (session != null) {
+					result.add(session);
+				}
+			}
+			return result;
+		} catch (UnsupportedEncodingException e) {
+			return null;
+		}
 	}
 }
