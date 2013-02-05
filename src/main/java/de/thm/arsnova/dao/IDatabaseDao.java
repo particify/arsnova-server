@@ -22,8 +22,6 @@ package de.thm.arsnova.dao;
 import java.io.IOException;
 import java.util.List;
 
-import com.fourspaces.couchdb.Document;
-
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.FoodVote;
@@ -67,11 +65,11 @@ public interface IDatabaseDao {
 
 	Integer getMyFeedback(String keyword, User user);
 
-	List<String> getQuestionIds(String sessionKey);
+	List<String> getQuestionIds(Session session, User user);
 
 	void deleteQuestion(String sessionKey, String questionId);
 
-	List<String> getUnAnsweredQuestions(String sessionKey);
+	List<String> getUnAnsweredQuestions(Session session, User user);
 
 	Answer getMyAnswer(String sessionKey, String questionId);
 

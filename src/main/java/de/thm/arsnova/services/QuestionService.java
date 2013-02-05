@@ -37,6 +37,7 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.exceptions.UnauthorizedException;
 
 @Service
 public class QuestionService implements IQuestionService {
@@ -90,7 +91,15 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public List<String> getQuestionIds(String sessionKey) {
-		return databaseDao.getQuestionIds(sessionKey);
+		User user = userService.getCurrentUser();
+		if (user == null) {
+			throw new UnauthorizedException();
+		}
+		Session session = databaseDao.getSessionFromKeyword(sessionKey);
+		if (session == null) {
+			throw new NotFoundException();
+		}
+		return databaseDao.getQuestionIds(session, user);
 	}
 
 	@Override
@@ -102,7 +111,15 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public List<String> getUnAnsweredQuestions(String sessionKey) {
-		return databaseDao.getUnAnsweredQuestions(sessionKey);
+		User user = userService.getCurrentUser();
+		if (user == null) {
+			throw new UnauthorizedException();
+		}
+		Session session = databaseDao.getSessionFromKeyword(sessionKey);
+		if (session == null) {
+			throw new NotFoundException();
+		}
+		return databaseDao.getUnAnsweredQuestions(session, user);
 	}
 
 	@Override

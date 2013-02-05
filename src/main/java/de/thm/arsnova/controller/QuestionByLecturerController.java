@@ -143,9 +143,9 @@ public class QuestionByLecturerController extends AbstractController {
 	) {
 		List<String> answers = questionService.getUnAnsweredQuestions(sessionKey);
 		if (answers == null || answers.isEmpty()) {
-			throw new NotFoundException();
+			response.setStatus(HttpStatus.NO_CONTENT.value());
+			return null;
 		}
-		LOGGER.info(answers.toString());
 		return answers;
 	}
 

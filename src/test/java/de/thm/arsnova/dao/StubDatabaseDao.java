@@ -243,21 +243,9 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<String> getQuestionIds(String sessionKey) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public void deleteQuestion(String sessionKey, String questionId) {
 		// TODO Auto-generated method stub
 		
-	}
-
-	@Override
-	public List<String> getUnAnsweredQuestions(String sessionKey) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -373,6 +361,18 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public InterposedReadingCount getInterposedReadingCount(Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getQuestionIds(Session session, User user) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getUnAnsweredQuestions(Session session, User user) {
 		// TODO Auto-generated method stub
 		return null;
 	}
