@@ -28,6 +28,7 @@ import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.FoodVote;
 import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
@@ -89,6 +90,8 @@ public interface IDatabaseDao {
 	int getTotalAnswerCount(String sessionKey);
 
 	int getInterposedCount(String sessionKey);
+
+	InterposedReadingCount getInterposedReadingCount(Session session);
 
 	List<InterposedQuestion> getInterposedQuestions(String sessionKey);
 
