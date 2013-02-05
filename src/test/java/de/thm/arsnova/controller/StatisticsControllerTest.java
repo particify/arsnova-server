@@ -14,7 +14,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.servlet.HandlerAdapter;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -62,7 +61,7 @@ public class StatisticsControllerTest {
 	@Test
 	public final void testShouldGetStatistics() throws Exception {
 		request.setMethod("GET");
-		request.setRequestURI("/statistics");
+		request.setRequestURI("/statistics/");
 		handlerAdapter.handle(request, response, statisticsController);
 		
 		String expected = "{\"answers\":0,\"questions\":0,\"openSessions\":2,\"closedSessions\":0,\"activeUsers\":0}";
