@@ -19,11 +19,8 @@
 package de.thm.arsnova.controller;
 
 import java.util.List;
-import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
-
-import net.sf.json.JSONObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +38,6 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
-import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Controller
 public class SessionController extends AbstractController {
@@ -53,23 +49,6 @@ public class SessionController extends AbstractController {
 
 	@Autowired
 	private IUserService userService;
-
-	@Autowired
-	private ARSnovaSocketIOServer server;
-
-	@RequestMapping(method = RequestMethod.POST, value = "/socket/assign")
-	public final void authorize(@RequestBody final Object sessionObject, final HttpServletResponse response) {
-		String socketid = (String) JSONObject.fromObject(sessionObject).get("session");
-		if (socketid == null) {
-			return;
-		}
-		User u = userService.getCurrentUser();
-		LOGGER.info("authorize session: " + socketid + ", user is:  " + u);
-		response.setStatus(u != null ? HttpStatus.NO_CONTENT.value() : HttpStatus.UNAUTHORIZED.value());
-		if(u != null) {
-			userService.putUser2SocketId(UUID.fromString(socketid), u);	
-		}		
-	}
 
 	@RequestMapping(value = "/session/{sessionkey}", method = RequestMethod.GET)
 	@ResponseBody
@@ -114,17 +93,6 @@ public class SessionController extends AbstractController {
 
 		response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
 		return null;
-	}
-
-	@RequestMapping(value = "/socket/url", method = RequestMethod.GET)
-	@ResponseBody
-	public final String getSocketUrl() {
-		StringBuilder url = new StringBuilder();
-
-		url.append(server.isUseSSL() ? "https://" : "http://");
-		url.append(server.getHostIp() + ":" + server.getPortNumber());
-
-		return url.toString();
 	}
 
 	@RequestMapping(value = { "/mySessions", "/session/mysessions" }, method = RequestMethod.GET)
