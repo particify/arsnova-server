@@ -350,6 +350,7 @@
 				<configuration>
 					<excludes>
 						<exclude>**/Selenium*.java</exclude>
+						<exclude>**/HttpRestApiTest.java</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
