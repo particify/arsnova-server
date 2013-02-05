@@ -194,6 +194,8 @@ public class CouchDBDao implements IDatabaseDao {
 						d.getJSONObject().getJSONObject("value"),
 						Session.class
 				);
+				session.setCreator(d.getJSONObject().getJSONArray("key").getString(0));
+				session.setName(d.getJSONObject().getJSONArray("key").getString(1));
 				session.set_id(d.getId());
 				result.add(session);
 			}
