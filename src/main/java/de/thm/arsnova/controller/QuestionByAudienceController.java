@@ -110,7 +110,7 @@ public class QuestionByAudienceController extends AbstractController {
 			@PathVariable final String questionId,
 			final HttpServletResponse response
 	) {
-		questionService.deleteQuestion(sessionkey, questionId);
+		questionService.deleteQuestion(questionId);
 	}
 
 }

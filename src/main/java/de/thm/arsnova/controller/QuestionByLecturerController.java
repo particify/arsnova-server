@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.entities.Answer;
@@ -39,6 +40,7 @@ import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IQuestionService;
 
 @Controller
+@RequestMapping("/question/bylecturer")
 public class QuestionByLecturerController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(QuestionByLecturerController.class);
@@ -46,14 +48,13 @@ public class QuestionByLecturerController extends AbstractController {
 	@Autowired
 	private IQuestionService questionService;
 
-	@RequestMapping(value = "/session/{sessionkey}/question/{questionId}", method = RequestMethod.GET)
+	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
 	@ResponseBody
 	public final Question getQuestion(
-			@PathVariable final String sessionkey,
 			@PathVariable final String questionId,
 			final HttpServletResponse response
 	) {
-		Question question = questionService.getQuestion(questionId, sessionkey);
+		Question question = questionService.getQuestion(questionId);
 		if (question != null) {
 			return question;
 		}
@@ -63,19 +64,14 @@ public class QuestionByLecturerController extends AbstractController {
 	}
 
 	@RequestMapping(
-			value = "/session/{sessionkey}/question", 
+			value = "/", 
 			method = RequestMethod.POST
 			)
 	@ResponseBody
 	public final Question postQuestion(
-			@PathVariable final String sessionkey,
 			@RequestBody final Question question,
 			final HttpServletResponse response
 	) {
-		if (!sessionkey.equals(question.getSession())) {
-			response.setStatus(HttpStatus.PRECONDITION_FAILED.value());
-			return null;
-		}
 
 		if (questionService.saveQuestion(question) != null) {
 			response.setStatus(HttpStatus.CREATED.value());
@@ -88,12 +84,12 @@ public class QuestionByLecturerController extends AbstractController {
 	}
 
 	@RequestMapping(
-			value = { "/getSkillQuestions/{sessionkey}", "/session/{sessionkey}/skillquestions" },
+			value = { "/list" },
 			method = RequestMethod.GET
 	)
 	@ResponseBody
 	public final List<Question> getSkillQuestions(
-			@PathVariable final String sessionkey,
+			@RequestParam final String sessionkey,
 			final HttpServletResponse response
 	) {
 		List<Question> questions = questionService.getSkillQuestions(sessionkey);
@@ -105,16 +101,16 @@ public class QuestionByLecturerController extends AbstractController {
 		return questions;
 	}
 
-	@RequestMapping(value = "/session/{sessionkey}/skillquestioncount", method = RequestMethod.GET)
+	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	@ResponseBody
-	public final int getSkillQuestionCount(@PathVariable final String sessionkey, final HttpServletResponse response) {
+	public final int getSkillQuestionCount(@RequestParam final String sessionkey, final HttpServletResponse response) {
 		return questionService.getSkillQuestionCount(sessionkey);
 	}
 
-	@RequestMapping(value = "/session/{sessionKey}/questionids", method = RequestMethod.GET)
+	@RequestMapping(value = "/ids", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<String> getQuestionIds(
-			@PathVariable final String sessionKey,
+			@RequestParam final String sessionKey,
 			final HttpServletResponse response
 	) {
 		List<String> questions = questionService.getQuestionIds(sessionKey);
@@ -125,20 +121,19 @@ public class QuestionByLecturerController extends AbstractController {
 		return questions;
 	}
 
-	@RequestMapping(value = "/session/{sessionKey}/questions/{questionId}", method = RequestMethod.DELETE)
+	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)
 	@ResponseBody
 	public final void deleteAnswersAndQuestion(
-			@PathVariable final String sessionKey,
 			@PathVariable final String questionId,
 			final HttpServletResponse response
 	) {
-		questionService.deleteQuestion(sessionKey, questionId);
+		questionService.deleteQuestion(questionId);
 	}
 
-	@RequestMapping(value = "/session/{sessionKey}/questions/unanswered", method = RequestMethod.GET)
+	@RequestMapping(value = "/unanswered", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<String> getUnAnsweredSkillQuestions(
-			@PathVariable final String sessionKey,
+			@RequestParam final String sessionKey,
 			final HttpServletResponse response
 	) {
 		List<String> answers = questionService.getUnAnsweredQuestions(sessionKey);
@@ -164,14 +159,13 @@ public class QuestionByLecturerController extends AbstractController {
 	 * @throws ForbiddenException
 	 *             if not logged in
 	 */
-	@RequestMapping(value = "/session/{sessionKey}/question/{questionId}/myanswer", method = RequestMethod.GET)
+	@RequestMapping(value = "/{questionId}/myanswer", method = RequestMethod.GET)
 	@ResponseBody
 	public final Answer getMyAnswer(
-			@PathVariable final String sessionKey,
 			@PathVariable final String questionId,
 			final HttpServletResponse response
 	) {
-		Answer answer = questionService.getMyAnswer(sessionKey, questionId);
+		Answer answer = questionService.getMyAnswer(questionId);
 		if (answer == null) {
 			throw new NotFoundException();
 		}
@@ -195,14 +189,13 @@ public class QuestionByLecturerController extends AbstractController {
 	 * @throws ForbiddenException
 	 *             if not logged in
 	 */
-	@RequestMapping(value = "/session/{sessionKey}/question/{questionId}/answers", method = RequestMethod.GET)
+	@RequestMapping(value = "/{questionId}/answers", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<Answer> getAnswers(
-			@PathVariable final String sessionKey,
 			@PathVariable final String questionId,
 			final HttpServletResponse response
 	) {
-		List<Answer> answers = questionService.getAnswers(sessionKey, questionId);
+		List<Answer> answers = questionService.getAnswers(questionId);
 		if (answers == null || answers.isEmpty()) {
 			throw new NotFoundException();
 		}
@@ -222,39 +215,37 @@ public class QuestionByLecturerController extends AbstractController {
 	 * @throws ForbiddenException
 	 *             if not logged in
 	 */
-	@RequestMapping(value = "/session/{sessionKey}/question/{questionId}/answercount", method = RequestMethod.GET)
+	@RequestMapping(value = "/{questionId}/answercount", method = RequestMethod.GET)
 	@ResponseBody
 	public final int getAnswerCount(
-			@PathVariable final String sessionKey,
 			@PathVariable final String questionId,
 			final HttpServletResponse response
 	) {
-		return questionService.getAnswerCount(sessionKey, questionId);
+		return questionService.getAnswerCount(questionId);
 	}
 
-	@RequestMapping(value = "/session/{sessionKey}/question/{questionId}/freetextanswers", method = RequestMethod.GET)
+	@RequestMapping(value = "/{questionId}/freetextanswers", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<Answer> getFreetextAnswers(
-			@PathVariable final String sessionKey,
 			@PathVariable final String questionId,
 			final HttpServletResponse response
 	) {
-		return questionService.getFreetextAnswers(sessionKey, questionId);
+		return questionService.getFreetextAnswers(questionId);
 	}
 
-	@RequestMapping(value = "/session/{sessionKey}/myanswers", method = RequestMethod.GET)
+	@RequestMapping(value = "/myanswers", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<Answer> getMyAnswers(
-			@PathVariable final String sessionKey,
+			@RequestParam final String sessionKey,
 			final HttpServletResponse response
 	) {
 		return questionService.getMytAnswers(sessionKey);
 	}
 
-	@RequestMapping(value = "/session/{sessionKey}/answercount", method = RequestMethod.GET)
+	@RequestMapping(value = "/answercount", method = RequestMethod.GET)
 	@ResponseBody
 	public final int getTotalAnswerCount(
-			@PathVariable final String sessionKey,
+			@RequestParam final String sessionKey,
 			final HttpServletResponse response
 	) {
 		return questionService.getTotalAnswerCount(sessionKey);

@@ -83,8 +83,8 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@Authenticated
-	public Question getQuestion(String id, String sessionKey) {
-		return databaseDao.getQuestion(id, sessionKey);
+	public Question getQuestion(String id) {
+		return databaseDao.getQuestion(id);
 	}
 
 	@Override
@@ -95,8 +95,8 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@Authenticated
-	public void deleteQuestion(String sessionKey, String questionId) {
-		databaseDao.deleteQuestion(sessionKey, questionId);
+	public void deleteQuestion(String questionId) {
+		databaseDao.deleteQuestion(questionId);
 	}
 
 	@Override
@@ -107,26 +107,26 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@Authenticated
-	public Answer getMyAnswer(String sessionKey, String questionId) {
-		return databaseDao.getMyAnswer(sessionKey, questionId);
+	public Answer getMyAnswer(String questionId) {
+		return databaseDao.getMyAnswer(questionId);
 	}
 
 	@Override
 	@Authenticated
-	public List<Answer> getAnswers(String sessionKey, String questionId) {
-		return databaseDao.getAnswers(sessionKey, questionId);
+	public List<Answer> getAnswers(String questionId) {
+		return databaseDao.getAnswers(questionId);
 	}
 
 	@Override
 	@Authenticated
-	public int getAnswerCount(String sessionKey, String questionId) {
-		return databaseDao.getAnswerCount(sessionKey, questionId);
+	public int getAnswerCount(String questionId) {
+		return databaseDao.getAnswerCount(questionId);
 	}
 
 	@Override
 	@Authenticated
-	public List<Answer> getFreetextAnswers(String sessionKey, String questionId) {
-		return databaseDao.getFreetextAnswers(sessionKey, questionId);
+	public List<Answer> getFreetextAnswers(String questionId) {
+		return databaseDao.getFreetextAnswers(questionId);
 	}
 
 	@Override

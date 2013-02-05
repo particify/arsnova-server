@@ -567,11 +567,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final Question getQuestion(final String id, final String sessionKey) {
-		Session s = this.getSessionFromKeyword(sessionKey);
-		if (s == null) {
-			throw new NotFoundException();
-		}
+	public final Question getQuestion(final String id) {
 		try {
 			View view = new View("skill_question/by_id");
 			view.setKey(URLEncoder.encode("\"" + id + "\"", "UTF-8"));
@@ -593,11 +589,7 @@ public class CouchDBDao implements IDatabaseDao {
 			);
 			q.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
 
-			if (s.get_id().equals(q.getSessionId())) {
-				return q;
-			} else {
-				throw new UnauthorizedException();
-			}
+			return q;
 		} catch (IOException e) {
 			LOGGER.error("Could not get question with id {}", id);
 		}
@@ -732,13 +724,9 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final void deleteQuestion(final String sessionKey, final String questionId) {
-		Session s = this.getSessionFromKeyword(sessionKey);
+	public final void deleteQuestion(final String questionId) {
 		try {
 			Document question = this.getDatabase().getDocument(questionId);
-			if (!question.getString("sessionId").equals(s.get_id())) {
-				throw new UnauthorizedException();
-			}
 		} catch (IOException e) {
 			LOGGER.error("could not find question {}", questionId);
 		}
@@ -808,15 +796,10 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final Answer getMyAnswer(final String sessionKey, final String questionId) {
+	public final Answer getMyAnswer(final String questionId) {
 		User user = userService.getCurrentUser();
 		if (user == null) {
 			throw new UnauthorizedException();
-		}
-
-		Session s = this.getSessionFromKeyword(sessionKey);
-		if (s == null) {
-			throw new NotFoundException();
 		}
 
 		try {
@@ -847,12 +830,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final List<Answer> getAnswers(final String sessionKey, final String questionId) {
-		Session s = this.getSessionFromKeyword(sessionKey);
-		if (s == null) {
-			throw new NotFoundException();
-		}
-
+	public final List<Answer> getAnswers(final String questionId) {
 		try {
 			View view = new View("skill_question/count_answers");
 			view.setStartKey("[" + URLEncoder.encode("\"" + questionId + "\"", "UTF-8") + "]");
@@ -880,12 +858,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final int getAnswerCount(final String sessionKey, final String questionId) {
-		Session s = this.getSessionFromKeyword(sessionKey);
-		if (s == null) {
-			throw new NotFoundException();
-		}
-
+	public final int getAnswerCount(final String questionId) {
 		try {
 			View view = new View("skill_question/count_answers_by_question");
 			view.setKey(URLEncoder.encode("\"" + questionId + "\"", "UTF-8"));
@@ -939,12 +912,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Answer> getFreetextAnswers(String sessionKey, String questionId) {
-		Session s = this.getSessionFromKeyword(sessionKey);
-		if (s == null) {
-			throw new NotFoundException();
-		}
-
+	public List<Answer> getFreetextAnswers(String questionId) {
 		try {
 			View view = new View("skill_question/freetext_answers");
 			view.setKey(URLEncoder.encode("\"" + questionId + "\"", "UTF-8"));
@@ -955,7 +923,6 @@ public class CouchDBDao implements IDatabaseDao {
 			List<Answer> answers = new ArrayList<Answer>();
 			for (Document d : results.getResults()) {
 				Answer a = (Answer) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Answer.class);
-				a.setSessionId(s.get_id());
 				a.setQuestionId(questionId);
 				answers.add(a);
 			}

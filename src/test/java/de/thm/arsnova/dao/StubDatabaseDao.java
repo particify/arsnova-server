@@ -198,7 +198,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public Question getQuestion(String id, String sesseionKey) {
+	public Question getQuestion(String id) {
 		// Simply ... no such question ;-)
 		return null;
 	}
@@ -249,7 +249,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public void deleteQuestion(String sessionKey, String questionId) {
+	public void deleteQuestion(String questionId) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -261,25 +261,25 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public Answer getMyAnswer(String sessionKey, String questionId) {
+	public Answer getMyAnswer(String questionId) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Answer> getAnswers(String sessionKey, String questionId) {
+	public List<Answer> getAnswers(String questionId) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public int getAnswerCount(String sessionKey, String questionId) {
+	public int getAnswerCount(String questionId) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public List<Answer> getFreetextAnswers(String sessionKey, String questionId) {
+	public List<Answer> getFreetextAnswers(String questionId) {
 		// TODO Auto-generated method stub
 		return null;
 	}

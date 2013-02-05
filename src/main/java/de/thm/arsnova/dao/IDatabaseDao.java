@@ -55,7 +55,7 @@ public interface IDatabaseDao {
 
 	boolean saveQuestion(Session session, InterposedQuestion question);
 
-	Question getQuestion(String id, String sessionKey);
+	Question getQuestion(String id);
 
 	List<Question> getSkillQuestions(String session);
 
@@ -69,17 +69,17 @@ public interface IDatabaseDao {
 
 	List<String> getQuestionIds(String sessionKey);
 
-	void deleteQuestion(String sessionKey, String questionId);
+	void deleteQuestion(String questionId);
 
 	List<String> getUnAnsweredQuestions(String sessionKey);
 
-	Answer getMyAnswer(String sessionKey, String questionId);
+	Answer getMyAnswer(String questionId);
 
-	List<Answer> getAnswers(String sessionKey, String questionId);
+	List<Answer> getAnswers(String questionId);
 
-	int getAnswerCount(String sessionKey, String questionId);
+	int getAnswerCount(String questionId);
 
-	List<Answer> getFreetextAnswers(String sessionKey, String questionId);
+	List<Answer> getFreetextAnswers(String questionId);
 
 	int countActiveUsers(long since);
 
