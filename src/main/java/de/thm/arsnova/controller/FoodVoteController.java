@@ -60,10 +60,10 @@ public class FoodVoteController extends AbstractController {
 		return foodService.getFoodVote();
 	}
 
-	@RequestMapping(value = "/canteen/menu/vote/count", method = RequestMethod.GET)
+	@RequestMapping(value = "/canteen/menu/vote/count", method = RequestMethod.GET, produces = "text/plain")
 	@ResponseBody
-	public final int getFoodVoteCount() {
-		return foodService.getFoodVoteCount();
+	public final String getFoodVoteCount() {
+		return Integer.toString(foodService.getFoodVoteCount());
 	}
 	
 	

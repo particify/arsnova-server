@@ -21,16 +21,16 @@ public class StatisticsController {
 		return statisticsService.getStatistics();
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/statistics/activeusercount")
+	@RequestMapping(method = RequestMethod.GET, value = "/statistics/activeusercount", produces = "text/plain")
 	@ResponseBody
-	public final int countActiveUsers() {
-		return statisticsService.countActiveUsers();
+	public final String countActiveUsers() {
+		return Integer.toString(statisticsService.countActiveUsers());
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/statistics/sessioncount")
+	@RequestMapping(method = RequestMethod.GET, value = "/statistics/sessioncount", produces = "text/plain")
 	@ResponseBody
-	public final int countSessions() {
-		return statisticsService.getStatistics().getOpenSessions()
-				+ statisticsService.getStatistics().getClosedSessions();
+	public final String countSessions() {
+		return Integer.toString(statisticsService.getStatistics().getOpenSessions()
+				+ statisticsService.getStatistics().getClosedSessions());
 	}
 }
