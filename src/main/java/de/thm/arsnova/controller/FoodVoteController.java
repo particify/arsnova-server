@@ -37,6 +37,7 @@ import de.thm.arsnova.entities.FoodVote;
 import de.thm.arsnova.services.IFoodService;
 
 @Controller
+@RequestMapping("/canteen/menu/vote")
 public class FoodVoteController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory
@@ -45,7 +46,7 @@ public class FoodVoteController extends AbstractController {
 	@Autowired
 	private IFoodService foodService;
 
-	@RequestMapping(value = "/canteen/menu/vote", method = RequestMethod.POST)
+	@RequestMapping(value = "/", method = RequestMethod.POST)
 	public final void setFoodVote(
 			@RequestBody final Object menu,
 			final HttpServletResponse response
@@ -54,13 +55,13 @@ public class FoodVoteController extends AbstractController {
 		foodService.vote(menustring);
 	}
 	
-	@RequestMapping(value = "/canteen/menu/vote", method = RequestMethod.GET)
+	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<FoodVote> getFoodVote() {
 		return foodService.getFoodVote();
 	}
 
-	@RequestMapping(value = "/canteen/menu/vote/count", method = RequestMethod.GET, produces = "text/plain")
+	@RequestMapping(value = "/count", method = RequestMethod.GET, produces = "text/plain")
 	@ResponseBody
 	public final String getFoodVoteCount() {
 		return Integer.toString(foodService.getFoodVoteCount());

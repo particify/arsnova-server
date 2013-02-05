@@ -10,24 +10,25 @@ import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.services.IStatisticsService;
 
 @Controller
+@RequestMapping("/statistics")
 public class StatisticsController {
 
 	@Autowired
 	private IStatisticsService statisticsService;
 
-	@RequestMapping(method = RequestMethod.GET, value = "/statistics")
+	@RequestMapping(method = RequestMethod.GET, value = "/")
 	@ResponseBody
 	public final Statistics getStatistics() {
 		return statisticsService.getStatistics();
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/statistics/activeusercount", produces = "text/plain")
+	@RequestMapping(method = RequestMethod.GET, value = "/activeusercount", produces = "text/plain")
 	@ResponseBody
 	public final String countActiveUsers() {
 		return Integer.toString(statisticsService.countActiveUsers());
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/statistics/sessioncount", produces = "text/plain")
+	@RequestMapping(method = RequestMethod.GET, value = "/sessioncount", produces = "text/plain")
 	@ResponseBody
 	public final String countSessions() {
 		return Integer.toString(statisticsService.getStatistics().getOpenSessions()
