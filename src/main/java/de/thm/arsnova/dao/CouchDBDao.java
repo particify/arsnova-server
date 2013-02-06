@@ -1253,12 +1253,15 @@ public class CouchDBDao implements IDatabaseDao {
 			ViewResults sessions = this.getDatabase().view(view);
 			List<Session> allSessions = new ArrayList<Session>();
 			for (Document d : sessions.getResults()) {
-				@SuppressWarnings("unchecked")
-				Collection<Session> visitedSessions =  JSONArray.toCollection(
+				// Not all users have visited sessions
+				if (d.getJSONObject().optJSONArray("value") != null) {
+					@SuppressWarnings("unchecked")
+					Collection<Session> visitedSessions =  JSONArray.toCollection(
 						d.getJSONObject().getJSONArray("value"),
 						Session.class
-				);
-				allSessions.addAll(visitedSessions);
+					);
+					allSessions.addAll(visitedSessions);
+				}
 			}
 			// Do these sessions still exist?
 			List<Session> result = new ArrayList<Session>();
