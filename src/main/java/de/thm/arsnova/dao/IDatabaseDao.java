@@ -57,7 +57,7 @@ public interface IDatabaseDao {
 
 	List<Question> getSkillQuestions(String session);
 
-	int getSkillQuestionCount(String sessionkey);
+	int getSkillQuestionCount(Session session);
 
 	LoggedIn registerAsOnlineUser(User u, Session s);
 

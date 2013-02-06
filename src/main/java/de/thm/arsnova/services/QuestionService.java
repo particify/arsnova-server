@@ -63,7 +63,8 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public int getSkillQuestionCount(String sessionkey) {
-		return databaseDao.getSkillQuestionCount(sessionkey);
+		Session session = this.databaseDao.getSessionFromKeyword(sessionkey);
+		return databaseDao.getSkillQuestionCount(session);
 	}
 
 	@Override

@@ -260,10 +260,10 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final int getSkillQuestionCount(final String sessionkey) {
+	public final int getSkillQuestionCount(final Session session) {
 		try {
 			View view = new View("skill_question/count_by_session");
-			view.setKey(URLEncoder.encode("\"" + sessionkey + "\"", "UTF-8"));
+			view.setKey(URLEncoder.encode("\"" + session.get_id() + "\"", "UTF-8"));
 			ViewResults results = this.getDatabase().view(view);
 
 			if (results.getJSONArray("rows").optJSONObject(0) == null) {

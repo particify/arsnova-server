@@ -214,8 +214,8 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public int getSkillQuestionCount(String sessionkey) {
-		return stubQuestions.get(sessionkey).size();
+	public int getSkillQuestionCount(Session session) {
+		return stubQuestions.get(session.getKeyword()).size();
 	}
 
 	@Override
