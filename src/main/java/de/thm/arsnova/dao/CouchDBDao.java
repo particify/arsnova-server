@@ -260,10 +260,10 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final int getSkillQuestionCount(final String sessionkey) {
+	public final int getSkillQuestionCount(final Session session) {
 		try {
 			View view = new View("skill_question/count_by_session");
-			view.setKey(URLEncoder.encode("\"" + sessionkey + "\"", "UTF-8"));
+			view.setKey(URLEncoder.encode("\"" + session.get_id() + "\"", "UTF-8"));
 			ViewResults results = this.getDatabase().view(view);
 
 			if (results.getJSONArray("rows").optJSONObject(0) == null) {
@@ -690,25 +690,19 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final List<String> getQuestionIds(final String sessionKey) {
-		User u = userService.getCurrentUser();
+	public final List<String> getQuestionIds(final Session session, final User user) {
 		View view;
-		if (u.getType().equals("thm")) {
+		if (user.getType().equals("thm")) {
 			view = new View("skill_question/by_session_only_id_for_thm");
 		} else {
 			view = new View("skill_question/by_session_only_id_for_all");
 		}
 
-		String sessionId = getSessionId(sessionKey);
-		if (sessionId == null) {
-			throw new NotFoundException();
-		}
-
 		try {
-			view.setKey(URLEncoder.encode("\"" + sessionId + "\"", "UTF-8"));
+			view.setKey(URLEncoder.encode("\"" + session.get_id() + "\"", "UTF-8"));
 			ViewResults results = this.getDatabase().view(view);
-			if (results.getJSONArray("rows").optJSONObject(0) == null) {
-				return null;
+			if (results.getResults().size() == 0) {
+				return new ArrayList<String>();
 			}
 
 			List<String> ids = new ArrayList<String>();
@@ -718,9 +712,9 @@ public class CouchDBDao implements IDatabaseDao {
 			return ids;
 
 		} catch (IOException e) {
-			LOGGER.error("Could not get list of question ids of session {}", sessionKey);
+			LOGGER.error("Could not get list of question ids of session {}", session.getKeyword());
 		}
-		return null;
+		return new ArrayList<String>();
 	}
 
 	@Override
@@ -753,22 +747,12 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final List<String> getUnAnsweredQuestions(final String sessionKey) {
-		User user = userService.getCurrentUser();
-		if (user == null) {
-			throw new UnauthorizedException();
-		}
-
-		Session s = this.getSessionFromKeyword(sessionKey);
-		if (s == null) {
-			throw new NotFoundException();
-		}
-
+	public final List<String> getUnAnsweredQuestions(final Session session, final User user) {
 		try {
 			View view = new View("answer/by_user");
 			view.setKey(
 					"[" + URLEncoder.encode(
-							"\"" + user.getUsername() + "\",\"" + s.get_id() + "\"",
+							"\"" + user.getUsername() + "\",\"" + session.get_id() + "\"",
 							"UTF-8"
 					)
 					+ "]"
@@ -780,7 +764,7 @@ public class CouchDBDao implements IDatabaseDao {
 				answered.add(d.getString("value"));
 			}
 
-			List<String> questions = this.getQuestionIds(sessionKey);
+			List<String> questions = this.getQuestionIds(session, user);
 			List<String> unanswered = new ArrayList<String>();
 			for (String questionId : questions) {
 				if (!answered.contains(questionId)) {
@@ -1238,12 +1222,15 @@ public class CouchDBDao implements IDatabaseDao {
 			ViewResults sessions = this.getDatabase().view(view);
 			List<Session> allSessions = new ArrayList<Session>();
 			for (Document d : sessions.getResults()) {
-				@SuppressWarnings("unchecked")
-				Collection<Session> visitedSessions =  JSONArray.toCollection(
+				// Not all users have visited sessions
+				if (d.getJSONObject().optJSONArray("value") != null) {
+					@SuppressWarnings("unchecked")
+					Collection<Session> visitedSessions =  JSONArray.toCollection(
 						d.getJSONObject().getJSONArray("value"),
 						Session.class
-				);
-				allSessions.addAll(visitedSessions);
+					);
+					allSessions.addAll(visitedSessions);
+				}
 			}
 			// Do these sessions still exist?
 			List<Session> result = new ArrayList<Session>();
