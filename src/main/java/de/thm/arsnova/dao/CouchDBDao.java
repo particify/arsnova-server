@@ -923,6 +923,8 @@ public class CouchDBDao implements IDatabaseDao {
 			List<Answer> answers = new ArrayList<Answer>();
 			for (Document d : results.getResults()) {
 				Answer a = (Answer) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Answer.class);
+				/* TODO: check if the following line is needed */
+				// a.setSessionId(s.get_id());
 				a.setQuestionId(questionId);
 				answers.add(a);
 			}
