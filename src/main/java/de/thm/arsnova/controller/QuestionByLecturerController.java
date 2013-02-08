@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.entities.Answer;
@@ -86,6 +87,55 @@ public class QuestionByLecturerController extends AbstractController {
 		
 		return null;
 	}
+
+	@RequestMapping(
+			value = "/session/{sessionkey}/question/{questionId}", 
+			method = RequestMethod.PUT
+			)
+	@ResponseBody
+	public final void updateQuestion(
+			@PathVariable final String sessionkey,
+			@PathVariable final String questionId,
+			@RequestBody final Question question,
+			final HttpServletResponse response
+	) {
+		response.setStatus(HttpStatus.NO_CONTENT.value());
+		
+		/* TODO: Not yet implemented! The following code ist copy and pasted from postQuestion */
+		/*
+		if (!sessionkey.equals(question.getSession())) {
+			response.setStatus(HttpStatus.PRECONDITION_FAILED.value());
+			return null;
+		}
+
+		if (questionService.saveQuestion(question) != null) {
+			response.setStatus(HttpStatus.CREATED.value());
+			return question;
+		}
+
+		response.setStatus(HttpStatus.BAD_REQUEST.value());
+		
+		return null;
+		*/
+	}
+
+
+	@RequestMapping(
+			value = "/session/{sessionkey}/question/{questionId}/publish", 
+			method = RequestMethod.POST
+			)
+	@ResponseBody
+	public final void publishQuestion(
+			@PathVariable final String sessionkey,
+			@PathVariable final String questionId,
+			@RequestParam(required = false) final Boolean publish,
+			@RequestBody final Question question,
+			final HttpServletResponse response
+	) {
+		/* TODO: Not yet implemented! */
+		response.setStatus(HttpStatus.NO_CONTENT.value());
+	}
+	
 
 	@RequestMapping(
 			value = { "/getSkillQuestions/{sessionkey}", "/session/{sessionkey}/skillquestions" },
