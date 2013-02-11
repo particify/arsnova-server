@@ -75,6 +75,7 @@
 	</error-page>
 
 	<session-config>
-		<session-timeout>0</session-timeout>
+		<!-- delete sessions after 24 hours -->
+		<session-timeout>1440</session-timeout>
 	</session-config>
 </web-app>
