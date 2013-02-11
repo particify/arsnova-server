@@ -873,6 +873,9 @@ public class CouchDBDao implements IDatabaseDao {
 			view.setKey(URLEncoder.encode("\"" + questionId + "\"", "UTF-8"));
 			view.setGroup(true);
 			ViewResults results = this.getDatabase().view(view);
+			if (results.getResults().size() == 0) {
+				return 0;
+			}
 			return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.error("Error while retrieving answer count", e);
