@@ -153,16 +153,17 @@ public class QuestionByLecturerController extends AbstractController {
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	@ResponseBody
 	public final int getSkillQuestionCount(@RequestParam final String sessionkey, final HttpServletResponse response) {
+		LOGGER.debug(sessionkey);
 		return questionService.getSkillQuestionCount(sessionkey);
 	}
 
 	@RequestMapping(value = "/ids", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<String> getQuestionIds(
-			@RequestParam final String sessionKey,
+			@RequestParam final String sessionkey,
 			final HttpServletResponse response
 	) {
-		List<String> questions = questionService.getQuestionIds(sessionKey);
+		List<String> questions = questionService.getQuestionIds(sessionkey);
 		if (questions == null || questions.isEmpty()) {
 			throw new NotFoundException();
 		}
@@ -182,10 +183,10 @@ public class QuestionByLecturerController extends AbstractController {
 	@RequestMapping(value = "/unanswered", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<String> getUnAnsweredSkillQuestions(
-			@RequestParam final String sessionKey,
+			@RequestParam final String sessionkey,
 			final HttpServletResponse response
 	) {
-		List<String> answers = questionService.getUnAnsweredQuestions(sessionKey);
+		List<String> answers = questionService.getUnAnsweredQuestions(sessionkey);
 		if (answers == null || answers.isEmpty()) {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
 			return null;
@@ -285,19 +286,19 @@ public class QuestionByLecturerController extends AbstractController {
 	@RequestMapping(value = "/myanswers", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<Answer> getMyAnswers(
-			@RequestParam final String sessionKey,
+			@RequestParam final String sessionkey,
 			final HttpServletResponse response
 	) {
-		return questionService.getMytAnswers(sessionKey);
+		return questionService.getMytAnswers(sessionkey);
 	}
 
 	@RequestMapping(value = "/answercount", method = RequestMethod.GET)
 	@ResponseBody
 	public final int getTotalAnswerCount(
-			@RequestParam final String sessionKey,
+			@RequestParam final String sessionkey,
 			final HttpServletResponse response
 	) {
-		return questionService.getTotalAnswerCount(sessionKey);
+		return questionService.getTotalAnswerCount(sessionkey);
 	}
 
 }
