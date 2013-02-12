@@ -72,10 +72,20 @@ public class LegacyController extends AbstractController {
 		
 		return String.format("forward:/question/bylecturer/answercount?sessionkey=%s", sessionKey);
 	}
+
+	@RequestMapping(value = "/session/{sessionKey}/unanswered")
+	public final String redirectQuestionByLecturerUnnsweredCount(
+			@PathVariable final String sessionKey,
+			final HttpServletResponse response
+	) {
+		response.addHeader("X-Deprecated-API", "1");
+		
+		return String.format("forward:/question/bylecturer/answercount?sessionkey=%s", sessionKey);
+	}
 	
 	/* generalized routes */
 
-	@RequestMapping(value = "/session/{sessionKey}/question/{arg1}")
+	@RequestMapping(value = { "/session/{sessionKey}/question/{arg1}", "/session/{sessionKey}/questions/{arg1}" })
 	public final String redirectQuestionByLecturerWithOneArgument(
 			@PathVariable final String sessionKey,
 			@PathVariable final String arg1,
@@ -86,7 +96,7 @@ public class LegacyController extends AbstractController {
 		return String.format("forward:/question/bylecturer/%s?sessionkey=%s", arg1, sessionKey);
 	}
 
-	@RequestMapping(value = "/session/{sessionKey}/question/{arg1}/{arg2}")
+	@RequestMapping(value = { "/session/{sessionKey}/question/{arg1}/{arg2}", "/session/{sessionKey}/questions/{arg1}/{arg2}" })
 	public final String redirectQuestionByLecturerWithTwoArguments(
 			@PathVariable final String sessionKey,
 			@PathVariable final String arg1,
