@@ -218,17 +218,15 @@ public class CouchDBDao implements IDatabaseDao {
 		try {
 			if (session.getCreator().equals(user.getUsername())) {
 				view = new View("skill_question/by_session_sorted_by_subject_and_text");
-				view.setStartKey("[" + URLEncoder.encode("\"" + session.get_id() + "\"", "UTF-8") + "]");
-				view.setEndKey("[" + URLEncoder.encode("\"" + session.get_id() + "\",{}", "UTF-8") + "]");
-
 			} else {
 				if (user.getType().equals(User.THM)) {
-					view = new View("skill_question/by_session_for_thm");
+					view = new View("skill_question/by_session_for_thm_full");
 				} else {
-					view = new View("skill_question/by_session_for_all");
+					view = new View("skill_question/by_session_for_all_full");
 				}
-				view.setKey(URLEncoder.encode("\"" + session.get_id() + "\"", "UTF-8"));
 			}
+			view.setStartKey("[" + URLEncoder.encode("\"" + session.get_id() + "\"", "UTF-8") + "]");
+			view.setEndKey("[" + URLEncoder.encode("\"" + session.get_id() + "\",{}", "UTF-8") + "]");
 
 			ViewResults questions = this.getDatabase().view(view);
 			if (questions == null || questions.isEmpty()) {
@@ -848,6 +846,9 @@ public class CouchDBDao implements IDatabaseDao {
 			view.setKey(URLEncoder.encode("\"" + questionId + "\"", "UTF-8"));
 			view.setGroup(true);
 			ViewResults results = this.getDatabase().view(view);
+			if (results.getResults().size() == 0) {
+				return 0;
+			}
 			return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.error("Error while retrieving answer count", e);
@@ -937,10 +938,10 @@ public class CouchDBDao implements IDatabaseDao {
 				"[" + URLEncoder.encode("\"" + user.getUsername() + "\",\"" + s.get_id() + "\"", "UTF-8") + "]"
 			);
 			ViewResults results = this.getDatabase().view(view);
-			if (results.getResults().isEmpty()) {
-				throw new NotFoundException();
-			}
 			List<Answer> answers = new ArrayList<Answer>();
+			if (results.getResults().isEmpty()) {
+				return answers;
+			}
 			for (Document d : results.getResults()) {
 				Answer a = (Answer) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Answer.class);
 				a.set_id(d.getId());

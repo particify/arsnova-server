@@ -84,6 +84,55 @@ public class QuestionByLecturerController extends AbstractController {
 	}
 
 	@RequestMapping(
+			value = "/session/{sessionkey}/question/{questionId}", 
+			method = RequestMethod.PUT
+			)
+	@ResponseBody
+	public final void updateQuestion(
+			@PathVariable final String sessionkey,
+			@PathVariable final String questionId,
+			@RequestBody final Question question,
+			final HttpServletResponse response
+	) {
+		response.setStatus(HttpStatus.NO_CONTENT.value());
+		
+		/* TODO: Not yet implemented! The following code ist copy and pasted from postQuestion */
+		/*
+		if (!sessionkey.equals(question.getSession())) {
+			response.setStatus(HttpStatus.PRECONDITION_FAILED.value());
+			return null;
+		}
+
+		if (questionService.saveQuestion(question) != null) {
+			response.setStatus(HttpStatus.CREATED.value());
+			return question;
+		}
+
+		response.setStatus(HttpStatus.BAD_REQUEST.value());
+		
+		return null;
+		*/
+	}
+
+
+	@RequestMapping(
+			value = "/session/{sessionkey}/question/{questionId}/publish", 
+			method = RequestMethod.POST
+			)
+	@ResponseBody
+	public final void publishQuestion(
+			@PathVariable final String sessionkey,
+			@PathVariable final String questionId,
+			@RequestParam(required = false) final Boolean publish,
+			@RequestBody final Question question,
+			final HttpServletResponse response
+	) {
+		/* TODO: Not yet implemented! */
+		response.setStatus(HttpStatus.NO_CONTENT.value());
+	}
+	
+
+	@RequestMapping(
 			value = { "/list" },
 			method = RequestMethod.GET
 	)

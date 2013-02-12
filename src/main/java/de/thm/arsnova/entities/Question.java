@@ -34,6 +34,7 @@ public class Question {
 	private long timestamp;
 	private int number;
 	private int duration;
+	private boolean showStatistic; // sic
 	private String _id;
 	private String _rev;
 
@@ -139,6 +140,14 @@ public class Question {
 
 	public final void setDuration(final int duration) {
 		this.duration = duration;
+	}
+
+	public boolean isShowStatistic() {
+		return showStatistic;
+	}
+
+	public void setShowStatistic(boolean showStatistic) {
+		this.showStatistic = showStatistic;
 	}
 
 	public final String get_id() {
