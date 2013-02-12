@@ -32,9 +32,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.InterposedReadingCount;
+import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.exceptions.PreconditionFailedException;
 import de.thm.arsnova.services.IQuestionService;
 
 @Controller
@@ -84,23 +87,21 @@ public class QuestionByAudienceController extends AbstractController {
 
 	@RequestMapping(value = "/session/{sessionkey}/interposed", method = RequestMethod.POST)
 	@ResponseBody
+	@ResponseStatus(HttpStatus.CREATED)
 	public final void postInterposedQuestion(
 			@PathVariable final String sessionkey,
 			@RequestBody final InterposedQuestion question,
 			final HttpServletResponse response
 	) {
 		if (!sessionkey.equals(question.getSessionId())) {
-			response.setStatus(HttpStatus.PRECONDITION_FAILED.value());
-			return;
+			throw new PreconditionFailedException();
 		}
 
 		if (questionService.saveQuestion(question)) {
-			response.setStatus(HttpStatus.CREATED.value());
 			return;
 		}
 
-		response.setStatus(HttpStatus.BAD_REQUEST.value());
-		return;
+		throw new BadRequestException();
 	}
 	
 	@RequestMapping(value = "/session/{sessionkey}/interposed/{questionId}", method = RequestMethod.DELETE)
@@ -112,5 +113,4 @@ public class QuestionByAudienceController extends AbstractController {
 	) {
 		questionService.deleteQuestion(questionId);
 	}
-
 }

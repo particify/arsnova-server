@@ -32,10 +32,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.NoContentException;
+import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 
@@ -58,6 +61,7 @@ public class SessionController extends AbstractController {
 
 	@RequestMapping(value = "/session/{sessionkey}/online", method = RequestMethod.POST)
 	@ResponseBody
+	@ResponseStatus(HttpStatus.CREATED)
 	public final LoggedIn registerAsOnlineUser(
 			@PathVariable final String sessionkey,
 			final HttpServletResponse response
@@ -65,12 +69,10 @@ public class SessionController extends AbstractController {
 		User user = userService.getCurrentUser();
 		LoggedIn loggedIn = sessionService.registerAsOnlineUser(user, sessionkey);
 		if (loggedIn != null) {
-			response.setStatus(HttpStatus.CREATED.value());
 			return loggedIn;
 		}
 
-		response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-		return null;
+		throw new RuntimeException();
 	}
 
 	@RequestMapping(value = "/session/{sessionkey}/activeusercount", method = RequestMethod.GET)
@@ -84,10 +86,10 @@ public class SessionController extends AbstractController {
 
 	@RequestMapping(value = "/session", method = RequestMethod.POST)
 	@ResponseBody
+	@ResponseStatus(HttpStatus.CREATED)
 	public final Session postNewSession(@RequestBody final Session session, final HttpServletResponse response) {
 		Session newSession = sessionService.saveSession(session);
 		if (session != null) {
-			response.setStatus(HttpStatus.CREATED.value());
 			return newSession;
 		}
 
@@ -100,13 +102,11 @@ public class SessionController extends AbstractController {
 	public final List<Session> getMySession(final HttpServletResponse response) {
 		String username = userService.getCurrentUser().getUsername();
 		if (username == null) {
-			response.setStatus(HttpStatus.NOT_FOUND.value());
-			return null;
+			throw new NotFoundException();
 		}
 		List<Session> sessions = sessionService.getMySessions(username);
 		if (sessions == null || sessions.isEmpty()) {
-			response.setStatus(HttpStatus.NOT_FOUND.value());
-			return null;
+			throw new NotFoundException();
 		}
 		return sessions;
 	}
@@ -116,8 +116,7 @@ public class SessionController extends AbstractController {
 	public final List<Session> getMyVisitedSession(final HttpServletResponse response) {
 		List<Session> sessions = sessionService.getMyVisitedSessions(userService.getCurrentUser());
 		if (sessions == null || sessions.isEmpty()) {
-			response.setStatus(HttpStatus.NO_CONTENT.value());
-			return null;
+			throw new NoContentException();
 		}
 		return sessions;
 	}
