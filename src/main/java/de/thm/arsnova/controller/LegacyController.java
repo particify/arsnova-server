@@ -18,7 +18,6 @@
  */
 package de.thm.arsnova.controller;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
@@ -37,25 +36,41 @@ public class LegacyController extends AbstractController {
 	@RequestMapping(value = "/session/{sessionKey}/question")
 	public final String redirectQuestionByLecturer(
 			@PathVariable final String sessionKey,
-			HttpServletRequest request,
 			final HttpServletResponse response
 	) {
-		request.setAttribute("sessionkey", sessionKey);
 		response.addHeader("X-Deprecated-API", "1");
 		
-		return "forward:/question/bylecturer/";
+		return String.format("forward:/question/bylecturer/?sessionkey=%s", sessionKey);
 	}
 
 	@RequestMapping(value = "/session/{sessionKey}/skillquestions")
 	public final String redirectQuestionByLecturerList(
 			@PathVariable final String sessionKey,
-			HttpServletRequest request,
 			final HttpServletResponse response
 	) {
-		request.setAttribute("sessionkey", sessionKey);
 		response.addHeader("X-Deprecated-API", "1");
 		
-		return "forward:/question/bylecturer/list";
+		return String.format("forward:/question/bylecturer/list?sessionkey=%s", sessionKey);
+	}
+
+	@RequestMapping(value = "/session/{sessionKey}/skillquestioncount")
+	public final String redirectQuestionByLecturerCount(
+			@PathVariable final String sessionKey,
+			final HttpServletResponse response
+	) {
+		response.addHeader("X-Deprecated-API", "1");
+		
+		return String.format("forward:/question/bylecturer/count?sessionkey=%s", sessionKey);
+	}
+
+	@RequestMapping(value = "/session/{sessionKey}/answercount")
+	public final String redirectQuestionByLecturerAnswerCount(
+			@PathVariable final String sessionKey,
+			final HttpServletResponse response
+	) {
+		response.addHeader("X-Deprecated-API", "1");
+		
+		return String.format("forward:/question/bylecturer/answercount?sessionkey=%s", sessionKey);
 	}
 	
 	/* generalized routes */
@@ -64,13 +79,11 @@ public class LegacyController extends AbstractController {
 	public final String redirectQuestionByLecturerWithOneArgument(
 			@PathVariable final String sessionKey,
 			@PathVariable final String arg1,
-			HttpServletRequest request,
 			final HttpServletResponse response
 	) {
-		request.setAttribute("sessionkey", sessionKey);
 		response.addHeader("X-Deprecated-API", "1");
 		
-		return String.format("forward:/question/bylecturer/%s", arg1);
+		return String.format("forward:/question/bylecturer/%s?sessionkey=%s", arg1, sessionKey);
 	}
 
 	@RequestMapping(value = "/session/{sessionKey}/question/{arg1}/{arg2}")
@@ -78,13 +91,11 @@ public class LegacyController extends AbstractController {
 			@PathVariable final String sessionKey,
 			@PathVariable final String arg1,
 			@PathVariable final String arg2,
-			HttpServletRequest request,
 			final HttpServletResponse response
 	) {
-		request.setAttribute("sessionkey", sessionKey);
 		response.addHeader("X-Deprecated-API", "1");
 		
-		return String.format("forward:/question/bylecturer/%s/%s", arg1, arg2);
+		return String.format("forward:/question/bylecturer/%s/%s?sessionkey=%s", arg1, arg2, sessionKey);
 	}
 
 }
