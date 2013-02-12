@@ -46,5 +46,4 @@ public class WelcomeControllerTest extends AbstractSpringContextTestBase {
 		assertNotNull(mav);
 		assertEquals("redirect:/index.html", mav.getViewName());
 	}
-
 }
