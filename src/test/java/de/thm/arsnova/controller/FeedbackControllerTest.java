@@ -1,8 +1,8 @@
 package de.thm.arsnova.controller;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
 
 import javax.inject.Inject;
 
@@ -27,7 +27,7 @@ import de.thm.arsnova.services.StubUserService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {
-		"file:src/main/webapp/WEB-INF/arsnova-servlet.xml",
+		"file:src/main/webapp/WEB-INF/spring/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
 		"file:src/test/resources/test-config.xml"
 })

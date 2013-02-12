@@ -19,6 +19,7 @@
 	    <property name="favorParameter" value="true" />
 	    <property name="mediaTypes" >
 	        <value>
+	        	html=text/html
 	          	json=application/json
 	        </value>
 	    </property>
@@ -31,6 +32,7 @@
 	<mvc:annotation-driven />
 	<mvc:resources mapping="/**" location="/" />
 	
+	<!-- -->
 	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
 	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
 		<property name="messageConverters">
@@ -42,6 +44,7 @@
 			</list>
 		</property>
 	</bean>
+	<!-- -->
 
 	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
 		<property name="viewResolvers">  

@@ -27,7 +27,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class WelcomeController extends AbstractController {
-	@RequestMapping(method = RequestMethod.GET, value = "/")
+	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public final ModelAndView home(final HttpServletRequest request) {
 		String referer = request.getHeader("referer");
 		String target = "index.html";
