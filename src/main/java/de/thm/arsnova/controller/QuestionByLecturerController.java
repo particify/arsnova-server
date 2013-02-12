@@ -96,7 +96,7 @@ public class QuestionByLecturerController extends AbstractController {
 	) {
 		response.setStatus(HttpStatus.NO_CONTENT.value());
 		
-		/* TODO: Not yet implemented! The following code ist copy and pasted from postQuestion */
+		/* TODO: Not yet implemented! The following code has been copy-and-pasted from postQuestion */
 		/*
 		if (!sessionkey.equals(question.getSession())) {
 			response.setStatus(HttpStatus.PRECONDITION_FAILED.value());
