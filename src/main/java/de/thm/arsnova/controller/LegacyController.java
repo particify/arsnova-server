@@ -83,7 +83,7 @@ public class LegacyController extends AbstractController {
 		return String.format("forward:/question/bylecturer/answercount?sessionkey=%s", sessionKey);
 	}
 
-	@RequestMapping(value = "/session/{sessionKey}/myansers")
+	@RequestMapping(value = "/session/{sessionKey}/myanswers")
 	public final String redirectQuestionByLecturerMyAnswers(
 			@PathVariable final String sessionKey,
 			final HttpServletResponse response
