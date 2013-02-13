@@ -37,6 +37,7 @@ public class Question {
 	private int number;
 	private int duration;
 	private boolean showStatistic; // sic
+	private boolean showAnswer;
 	private String _id;
 	private String _rev;
 
@@ -158,6 +159,14 @@ public class Question {
 
 	public void setShowStatistic(boolean showStatistic) {
 		this.showStatistic = showStatistic;
+	}
+
+	public boolean isShowAnswer() {
+		return showAnswer;
+	}
+
+	public void setShowAnswer(boolean showAnswer) {
+		this.showAnswer = showAnswer;
 	}
 
 	public final String get_id() {

@@ -137,6 +137,20 @@ public class QuestionByLecturerController extends AbstractController {
 		}
 		this.questionService.update(question);
 	}
+	
+	@RequestMapping(value = "/{questionId}/publishcorrectanswer", method = RequestMethod.POST)
+	@ResponseBody
+	public final void publishCorrectAnswer(
+			@PathVariable final String questionId,
+			@RequestParam(required = false) final Boolean showCorrectAnswer,
+			@RequestBody final Question question,
+			final HttpServletResponse response
+	) {
+		if (showCorrectAnswer != null) {
+			question.setShowAnswer(showCorrectAnswer);
+		}
+		this.questionService.update(question);
+	}
 
 	@RequestMapping(
 			value = { "/list" },

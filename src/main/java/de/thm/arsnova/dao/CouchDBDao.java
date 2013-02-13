@@ -536,12 +536,12 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("releasedFor", question.getReleasedFor());
 		q.put("possibleAnswers", question.getPossibleAnswers());
 		q.put("noCorrect", question.isNoCorrect());
+		q.put("showStatistic", question.isShowStatistic());
+		q.put("showAnswer", question.isShowAnswer());
 		try {
 			database.saveDocument(q, null);
-			
 			question.set_id(q.getId());
 			question.set_rev(q.getRev());
-			
 			return question;
 		} catch (IOException e) {
 			LOGGER.error("Could not save question {}", question);
@@ -560,6 +560,7 @@ public class CouchDBDao implements IDatabaseDao {
 			q.put("possibleAnswers", question.getPossibleAnswers());
 			q.put("noCorrect", question.isNoCorrect());
 			q.put("showStatistic", question.isShowStatistic());
+			q.put("showAnswer", question.isShowAnswer());
 			
 			this.database.saveDocument(q);
 			question.set_rev(q.getRev());
