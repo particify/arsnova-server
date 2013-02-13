@@ -86,7 +86,7 @@ public class QuestionByLecturerController extends AbstractController {
 	}
 
 	@RequestMapping(
-			value = "/session/{sessionkey}/question/{questionId}", 
+			value = "/question/bylecturer/{questionId}", 
 			method = RequestMethod.PUT
 			)
 	@ResponseBody
@@ -118,7 +118,7 @@ public class QuestionByLecturerController extends AbstractController {
 
 
 	@RequestMapping(
-			value = "/session/{sessionkey}/question/{questionId}/publish", 
+			value = "/question/bylecturer/{questionId}/publish", 
 			method = RequestMethod.POST
 			)
 	@ResponseBody
