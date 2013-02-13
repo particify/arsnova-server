@@ -105,6 +105,16 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public void deleteQuestion(String questionId) {
+		Question question = databaseDao.getQuestion(questionId);
+		if (question == null) {
+			throw new NotFoundException();
+		}
+		
+		User user = userService.getCurrentUser();
+		Session session = databaseDao.getSession(question.getSessionKeyword());
+		if (user == null || session == null || !session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
 		databaseDao.deleteQuestion(questionId);
 	}
 
