@@ -86,7 +86,6 @@ public class QuestionByLecturerController extends AbstractController {
 			)
 	@ResponseBody
 	public final void updateQuestion(
-			@PathVariable final String sessionkey,
 			@PathVariable final String questionId,
 			@RequestBody final Question question,
 			final HttpServletResponse response
@@ -111,22 +110,39 @@ public class QuestionByLecturerController extends AbstractController {
 		*/
 	}
 
-
 	@RequestMapping(
-			value = "/question/bylecturer/{questionId}/publish", 
+			value = "/{questionId}/publish",
 			method = RequestMethod.POST
 			)
 	@ResponseBody
 	public final void publishQuestion(
-			@PathVariable final String sessionkey,
 			@PathVariable final String questionId,
 			@RequestParam(required = false) final Boolean publish,
 			@RequestBody final Question question,
 			final HttpServletResponse response
 	) {
-		throw new NoContentException();
+		if (publish != null) {
+			question.setActive(publish);
+		}
+		this.questionService.update(question);
 	}
 	
+	@RequestMapping(
+			value = "/{questionId}/publishstatistics",
+			method = RequestMethod.POST
+			)
+	@ResponseBody
+	public final void publishStatistics(
+			@PathVariable final String questionId,
+			@RequestParam(required = false) final Boolean showStatistics,
+			@RequestBody final Question question,
+			final HttpServletResponse response
+	) {
+		if (showStatistics != null) {
+			question.setShowStatistic(showStatistics);
+		}
+		this.questionService.update(question);
+	}
 
 	@RequestMapping(
 			value = { "/list" },

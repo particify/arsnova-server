@@ -376,4 +376,10 @@ public class StubDatabaseDao implements IDatabaseDao {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public void updateQuestion(Question question) {
+		// TODO Auto-generated method stub
+		
+	}
 }

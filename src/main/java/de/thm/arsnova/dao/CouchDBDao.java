@@ -545,7 +545,26 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		return null;
 	}
-	
+
+	@Override
+	public final void updateQuestion(final Question question) {
+		try {
+			Document q = this.database.getDocument(question.get_id());
+			q.put("subject", question.getSubject());
+			q.put("text", question.getText());
+			q.put("active", question.isActive());
+			q.put("releasedFor", question.getReleasedFor());
+			q.put("possibleAnswers", question.getPossibleAnswers());
+			q.put("noCorrect", question.isNoCorrect());
+			q.put("showStatistic", question.isShowStatistic());
+			
+			this.database.saveDocument(q);
+			question.set_rev(q.getRev());
+		} catch (IOException e) {
+			LOGGER.error("Could not update question {}", question);
+		}
+	}
+
 	@Override
 	public final boolean saveQuestion(final Session session, final InterposedQuestion question) {
 		Document q = new Document();

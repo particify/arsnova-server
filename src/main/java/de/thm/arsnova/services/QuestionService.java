@@ -193,4 +193,9 @@ public class QuestionService implements IQuestionService {
 			throw new NotFoundException();
 		}
 	}
+
+	@Override
+	public void update(Question question) {
+		this.databaseDao.updateQuestion(question);
+	}
 }
