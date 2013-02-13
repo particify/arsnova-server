@@ -816,7 +816,7 @@ public class CouchDBDao implements IDatabaseDao {
 			);
 			ViewResults results = this.getDatabase().view(view);
 			if (results.getResults().isEmpty()) {
-				throw new NotFoundException();
+				return null;
 			}
 			return (Answer) JSONObject.toBean(
 					results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
@@ -1262,5 +1262,24 @@ public class CouchDBDao implements IDatabaseDao {
 		} catch (UnsupportedEncodingException e) {
 			return null;
 		}
+	}
+
+	@Override
+	public Answer saveAnswer(Answer answer, User user) {
+		try {
+			Document a = new Document();
+			a.put("type", "skill_question_answer");
+			a.put("sessionId", answer.getSessionId());
+			a.put("questionId", answer.getQuestionId());
+			a.put("answerText", answer.getAnswerText());
+			a.put("user", user.getUsername());
+			this.database.saveDocument(a);
+			answer.set_id(a.getId());
+			answer.set_rev(a.getRev());
+			return answer;
+		} catch (IOException e) {
+			LOGGER.error("Could not save answer {}", answer);
+		}
+		return null;
 	}
 }

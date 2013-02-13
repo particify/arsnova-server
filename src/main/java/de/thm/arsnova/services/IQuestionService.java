@@ -67,4 +67,6 @@ public interface IQuestionService {
 
 	void deleteAnswers(String questionId);
 
+	Answer saveAnswer(Answer answer);
+
 }

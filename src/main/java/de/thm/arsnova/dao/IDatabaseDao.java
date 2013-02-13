@@ -118,4 +118,6 @@ public interface IDatabaseDao {
 	void updateQuestion(Question question);
 
 	void deleteAnswers(Question question);
+
+	Answer saveAnswer(Answer answer, User user);
 }

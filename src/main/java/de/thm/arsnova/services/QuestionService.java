@@ -234,4 +234,12 @@ public class QuestionService implements IQuestionService {
 		}
 		this.databaseDao.updateQuestion(question);
 	}
+
+	@Override
+	@Authenticated
+	public Answer saveAnswer(Answer answer) {
+		// TODO: Sanity checks...
+		User user = userService.getCurrentUser();
+		return this.databaseDao.saveAnswer(answer, user);
+	}
 }
