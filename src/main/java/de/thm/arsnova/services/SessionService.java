@@ -78,6 +78,14 @@ public class SessionService implements ISessionService {
 	@Override
 	@Authenticated
 	public final Session saveSession(final Session session) {
+		if (connectorClient != null) {
+			if (! connectorClient.getMembership(
+				userService.getCurrentUser().getUsername(), session.getCourseId()).isMember()
+			) {
+				throw new ForbiddenException();
+			}
+		}
+		
 		return databaseDao.saveSession(session);
 	}
 
