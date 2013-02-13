@@ -67,7 +67,7 @@ public interface IDatabaseDao {
 
 	List<String> getQuestionIds(Session session, User user);
 
-	void deleteQuestion(String questionId);
+	void deleteQuestion(Question question);
 
 	List<String> getUnAnsweredQuestions(Session session, User user);
 
@@ -116,4 +116,6 @@ public interface IDatabaseDao {
 	List<Session> getMyVisitedSessions(User user);
 
 	void updateQuestion(Question question);
+
+	void deleteAnswers(Question question);
 }

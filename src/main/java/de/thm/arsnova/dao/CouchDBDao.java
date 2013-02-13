@@ -739,31 +739,29 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final void deleteQuestion(final String questionId) {
+	public final void deleteQuestion(final Question question) {
 		try {
-			Document question = this.getDatabase().getDocument(questionId);
+			this.deleteAnswers(question);
+			Document q = this.getDatabase().getDocument(question.get_id());
+			this.getDatabase().deleteDocument(q);
 		} catch (IOException e) {
-			LOGGER.error("could not find question {}", questionId);
+			LOGGER.error("IOException: Could not delete question {}", question.get_id());
 		}
-
+	}
+	
+	@Override
+	public final void deleteAnswers(final Question question) {
 		try {
 			View view = new View("answer/cleanup");
-			view.setKey(URLEncoder.encode("\"" + questionId + "\"", "UTF-8"));
+			view.setKey(URLEncoder.encode("\"" + question.get_id() + "\"", "UTF-8"));
 			ViewResults results = this.getDatabase().view(view);
-
+	
 			for (Document d : results.getResults()) {
 				Document answer = this.getDatabase().getDocument(d.getId());
 				this.getDatabase().deleteDocument(answer);
 			}
-			Document question = this.getDatabase().getDocument(questionId);
-			this.getDatabase().deleteDocument(question);
-
 		} catch (IOException e) {
-			LOGGER.error(
-				"IOException: Could not delete question and its answers with id {}."
-				+ " Connection to CouchDB available?",
-				questionId
-			);
+			LOGGER.error("IOException: Could not delete answers for question {}", question.get_id());
 		}
 	}
 

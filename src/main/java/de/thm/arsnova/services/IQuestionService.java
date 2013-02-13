@@ -65,4 +65,6 @@ public interface IQuestionService {
 
 	void update(Question question);
 
+	void deleteAnswers(String questionId);
+
 }

@@ -271,6 +271,15 @@ public class QuestionByLecturerController extends AbstractController {
 		return answers;
 	}
 
+	@RequestMapping(value = "/{questionId}/answers", method = RequestMethod.DELETE)
+	@ResponseBody
+	public final void deleteAnswers(
+			@PathVariable final String questionId,
+			final HttpServletResponse response
+	) {
+		questionService.deleteAnswers(questionId);
+	}
+
 	/**
 	 *
 	 * @param sessionKey
