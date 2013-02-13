@@ -61,6 +61,6 @@ public interface IQuestionService {
 
 	List<InterposedQuestion> getInterposedQuestions(String sessionKey);
 
-	InterposedQuestion readInterposedQuestion(String sessionKey, String questionId);
+	InterposedQuestion readInterposedQuestion(String questionId);
 
 }

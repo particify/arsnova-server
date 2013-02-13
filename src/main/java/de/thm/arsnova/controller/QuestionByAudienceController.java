@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.entities.InterposedQuestion;
@@ -38,6 +39,7 @@ import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.services.IQuestionService;
 
 @Controller
+@RequestMapping("/question/byaudience")
 public class QuestionByAudienceController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(QuestionByAudienceController.class);
@@ -45,47 +47,47 @@ public class QuestionByAudienceController extends AbstractController {
 	@Autowired
 	private IQuestionService questionService;
 
-	@RequestMapping(value = "/session/{sessionKey}/interposedcount", method = RequestMethod.GET)
+	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	@ResponseBody
 	public final int getInterposedCount(
-			@PathVariable final String sessionKey,
+			@RequestParam final String sessionkey,
 			final HttpServletResponse response
 	) {
-		return questionService.getInterposedCount(sessionKey);
+		return questionService.getInterposedCount(sessionkey);
 	}
 
-	@RequestMapping(value = "/session/{sessionKey}/interposedreadingcount", method = RequestMethod.GET)
+	@RequestMapping(value = "/readcount", method = RequestMethod.GET)
 	@ResponseBody
 	public final InterposedReadingCount getUnreadInterposedCount(
-			@PathVariable final String sessionKey,
+			@RequestParam final String sessionkey,
 			final HttpServletResponse response
 	) {
-		return questionService.getInterposedReadingCount(sessionKey);
+		return questionService.getInterposedReadingCount(sessionkey);
 	}
 
-	@RequestMapping(value = "/session/{sessionKey}/interposed", method = RequestMethod.GET)
+	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<InterposedQuestion> getInterposedQuestions(
-			@PathVariable final String sessionKey,
+			@RequestParam final String sessionkey,
 			final HttpServletResponse response
 	) {
-		return questionService.getInterposedQuestions(sessionKey);
+		return questionService.getInterposedQuestions(sessionkey);
 	}
 
-	@RequestMapping(value = "/session/{sessionKey}/interposed/{questionId}", method = RequestMethod.GET)
+	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
 	@ResponseBody
 	public final InterposedQuestion getInterposedQuestions(
-			@PathVariable final String sessionKey,
+			@RequestParam final String sessionkey,
 			@PathVariable final String questionId,
 			final HttpServletResponse response
 	) {
-		return questionService.readInterposedQuestion(sessionKey, questionId);
+		return questionService.readInterposedQuestion(questionId);
 	}
 
-	@RequestMapping(value = "/session/{sessionkey}/interposed", method = RequestMethod.POST)
+	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseBody
 	public final void postInterposedQuestion(
-			@PathVariable final String sessionkey,
+			@RequestParam final String sessionkey,
 			@RequestBody final InterposedQuestion question,
 			final HttpServletResponse response
 	) {
@@ -103,10 +105,9 @@ public class QuestionByAudienceController extends AbstractController {
 		return;
 	}
 	
-	@RequestMapping(value = "/session/{sessionkey}/interposed/{questionId}", method = RequestMethod.DELETE)
+	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)
 	@ResponseBody
 	public final void deleteInterposedQuestion(
-			@PathVariable final String sessionkey,
 			@PathVariable final String questionId,
 			final HttpServletResponse response
 	) {
