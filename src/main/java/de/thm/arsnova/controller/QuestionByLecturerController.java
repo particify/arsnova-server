@@ -67,10 +67,7 @@ public class QuestionByLecturerController extends AbstractController {
 		throw new NotFoundException();
 	}
 
-	@RequestMapping(
-			value = "/", 
-			method = RequestMethod.POST
-			)
+	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.CREATED)
 	public final Question postQuestion(@RequestBody final Question question, final HttpServletResponse response) {
@@ -103,7 +100,7 @@ public class QuestionByLecturerController extends AbstractController {
 		}
 		this.questionService.update(question);
 	}
-	
+
 	@RequestMapping(value = "/{questionId}/publishstatistics", method = RequestMethod.POST)
 	@ResponseBody
 	public final void publishStatistics(
@@ -117,7 +114,7 @@ public class QuestionByLecturerController extends AbstractController {
 		}
 		this.questionService.update(question);
 	}
-	
+
 	@RequestMapping(value = "/{questionId}/publishcorrectanswer", method = RequestMethod.POST)
 	@ResponseBody
 	public final void publishCorrectAnswer(
