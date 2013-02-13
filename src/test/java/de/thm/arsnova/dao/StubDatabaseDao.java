@@ -376,4 +376,16 @@ public class StubDatabaseDao implements IDatabaseDao {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public String getCourseId(String keyword) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean isCourseSession(String keyword) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
