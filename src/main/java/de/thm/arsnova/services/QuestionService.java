@@ -178,13 +178,10 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@Authenticated
-	public InterposedQuestion readInterposedQuestion(String sessionKey, String questionId) {
+	public InterposedQuestion readInterposedQuestion(String questionId) {
 		try {
 			InterposedQuestion question = databaseDao.getInterposedQuestion(questionId);
-			Session session = this.databaseDao.getSessionFromKeyword(sessionKey);
-			if (session == null || !session.getKeyword().equals(question.getSessionId())) {
-				throw new NotFoundException();
-			}
+			Session session = this.databaseDao.getSessionFromKeyword(question.getSessionId());
 
 			User user = this.userService.getCurrentUser();
 			if (session.isCreator(user)) {

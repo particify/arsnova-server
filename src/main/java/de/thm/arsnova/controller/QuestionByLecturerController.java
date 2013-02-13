@@ -18,6 +18,7 @@
  */
 package de.thm.arsnova.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -215,7 +216,8 @@ public class QuestionByLecturerController extends AbstractController {
 	) {
 		Answer answer = questionService.getMyAnswer(questionId);
 		if (answer == null) {
-			throw new NotFoundException();
+			response.setStatus(HttpStatus.NO_CONTENT.value());
+			return null;
 		}
 		return answer;
 	}
@@ -244,8 +246,8 @@ public class QuestionByLecturerController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		List<Answer> answers = questionService.getAnswers(questionId);
-		if (answers == null || answers.isEmpty()) {
-			throw new NotFoundException();
+		if (answers == null) {
+			return new ArrayList<Answer>();
 		}
 		return answers;
 	}

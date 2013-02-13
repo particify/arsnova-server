@@ -821,9 +821,6 @@ public class CouchDBDao implements IDatabaseDao {
 			view.setEndKey("[" + URLEncoder.encode("\"" + questionId + "\",{}", "UTF-8") + "]");
 			view.setGroup(true);
 			ViewResults results = this.getDatabase().view(view);
-			if (results.getResults().isEmpty()) {
-				throw new NotFoundException();
-			}
 			List<Answer> answers = new ArrayList<Answer>();
 			for (Document d : results.getResults()) {
 				Answer a = new Answer();
@@ -837,7 +834,6 @@ public class CouchDBDao implements IDatabaseDao {
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.error("Error while retrieving answers", e);
 		}
-
 		return null;
 	}
 
