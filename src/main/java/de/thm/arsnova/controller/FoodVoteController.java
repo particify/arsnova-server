@@ -66,7 +66,4 @@ public class FoodVoteController extends AbstractController {
 	public final String getFoodVoteCount() {
 		return Integer.toString(foodService.getFoodVoteCount());
 	}
-	
-	
-
 }

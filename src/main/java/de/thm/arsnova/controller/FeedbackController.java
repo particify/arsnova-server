@@ -30,9 +30,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IFeedbackService;
 import de.thm.arsnova.services.IUserService;
 
@@ -61,8 +63,7 @@ public class FeedbackController extends AbstractController {
 		if (value != null && value >= Feedback.MIN_FEEDBACK_TYPE && value <= Feedback.MAX_FEEDBACK_TYPE) {
 			return value;
 		}
-		response.setStatus(HttpStatus.NOT_FOUND.value());
-		return null;
+		throw new NotFoundException();
 	}
 
 	@RequestMapping(value = "/session/{sessionkey}/feedbackcount", method = RequestMethod.GET)
@@ -85,6 +86,7 @@ public class FeedbackController extends AbstractController {
 
 	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.POST)
 	@ResponseBody
+	@ResponseStatus(HttpStatus.CREATED)
 	public final Feedback postFeedback(
 			@PathVariable final String sessionkey,
 			@RequestBody final int value,
@@ -94,15 +96,11 @@ public class FeedbackController extends AbstractController {
 		if (feedbackService.saveFeedback(sessionkey, value, user)) {
 			Feedback feedback = feedbackService.getFeedback(sessionkey);
 			if (feedback != null) {
-				response.setStatus(HttpStatus.CREATED.value());
 				return feedback;
 			}
-
-			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-			return null;
+			throw new RuntimeException();
 		}
 
-		response.setStatus(HttpStatus.BAD_REQUEST.value());
-		return null;
+		throw new NotFoundException();
 	}
 }

@@ -33,9 +33,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.exceptions.ForbiddenException;
+import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IQuestionService;
 
@@ -59,8 +63,7 @@ public class QuestionByLecturerController extends AbstractController {
 			return question;
 		}
 
-		response.setStatus(HttpStatus.NOT_FOUND.value());
-		return null;
+		throw new NotFoundException();
 	}
 
 	@RequestMapping(
@@ -68,19 +71,17 @@ public class QuestionByLecturerController extends AbstractController {
 			method = RequestMethod.POST
 			)
 	@ResponseBody
+	@ResponseStatus(HttpStatus.CREATED)
 	public final Question postQuestion(
 			@RequestBody final Question question,
 			final HttpServletResponse response
 	) {
 
 		if (questionService.saveQuestion(question) != null) {
-			response.setStatus(HttpStatus.CREATED.value());
 			return question;
 		}
 
-		response.setStatus(HttpStatus.BAD_REQUEST.value());
-		
-		return null;
+		throw new BadRequestException();
 	}
 
 	@RequestMapping(
@@ -94,7 +95,7 @@ public class QuestionByLecturerController extends AbstractController {
 			@RequestBody final Question question,
 			final HttpServletResponse response
 	) {
-		response.setStatus(HttpStatus.NO_CONTENT.value());
+		throw new NoContentException();
 		
 		/* TODO: Not yet implemented! The following code has been copy-and-pasted from postQuestion */
 		/*
@@ -127,8 +128,7 @@ public class QuestionByLecturerController extends AbstractController {
 			@RequestBody final Question question,
 			final HttpServletResponse response
 	) {
-		/* TODO: Not yet implemented! */
-		response.setStatus(HttpStatus.NO_CONTENT.value());
+		throw new NoContentException();
 	}
 	
 
@@ -143,8 +143,7 @@ public class QuestionByLecturerController extends AbstractController {
 	) {
 		List<Question> questions = questionService.getSkillQuestions(sessionkey);
 		if (questions == null || questions.isEmpty()) {
-			response.setStatus(HttpStatus.NOT_FOUND.value());
-			return null;
+			throw new NotFoundException();
 		}
 		LOGGER.info(questions.toString());
 		return questions;
@@ -188,8 +187,7 @@ public class QuestionByLecturerController extends AbstractController {
 	) {
 		List<String> answers = questionService.getUnAnsweredQuestions(sessionkey);
 		if (answers == null || answers.isEmpty()) {
-			response.setStatus(HttpStatus.NO_CONTENT.value());
-			return null;
+			throw new NoContentException();
 		}
 		return answers;
 	}

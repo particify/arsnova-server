@@ -6,9 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.exceptions.PreconditionFailedException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 
 public class AbstractController {
@@ -30,5 +32,15 @@ public class AbstractController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@ExceptionHandler(NoContentException.class)
 	public void handleNoContentException(final Exception e, final HttpServletRequest request) {
+	}
+	
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	@ExceptionHandler(BadRequestException.class)
+	public void handleBadRequestException(final Exception e, final HttpServletRequest request) {
+	}
+	
+	@ResponseStatus(HttpStatus.PRECONDITION_FAILED)
+	@ExceptionHandler(PreconditionFailedException.class)
+	public void handlePreconditionFailedException(final Exception e, final HttpServletRequest request) {
 	}
 }
