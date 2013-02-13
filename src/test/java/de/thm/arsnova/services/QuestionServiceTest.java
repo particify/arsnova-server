@@ -82,7 +82,7 @@ public class QuestionServiceTest {
 		theQ.setSessionId("12345678");
 		databaseDao.interposedQuestion = theQ;
 		
-		questionService.readInterposedQuestion(theQ.getSessionId(), theQ.get_id());
+		questionService.readInterposedQuestion(theQ.get_id());
 		
 		assertTrue(theQ.isRead());
 	}
@@ -96,7 +96,7 @@ public class QuestionServiceTest {
 		theQ.setSessionId("12345678");
 		databaseDao.interposedQuestion = theQ;
 		
-		questionService.readInterposedQuestion(theQ.getSessionId(), theQ.get_id());
+		questionService.readInterposedQuestion(theQ.get_id());
 		
 		assertFalse(theQ.isRead());
 	}
