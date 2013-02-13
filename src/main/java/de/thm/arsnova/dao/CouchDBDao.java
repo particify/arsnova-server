@@ -248,11 +248,14 @@ public class CouchDBDao implements IDatabaseDao {
 						PossibleAnswer.class
 				);
 				question.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
+				question.setSessionKeyword(this.getSessionKeyword(question.getSessionId()));
 				result.add(question);
 			}
 
 			return result;
 		} catch (UnsupportedEncodingException e) {
+			return null;
+		} catch (IOException e) {
 			return null;
 		}
 	}
