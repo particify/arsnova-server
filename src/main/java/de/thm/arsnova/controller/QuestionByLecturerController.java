@@ -80,34 +80,14 @@ public class QuestionByLecturerController extends AbstractController {
 		throw new BadRequestException();
 	}
 
-	@RequestMapping(
-			value = "/question/bylecturer/{questionId}", 
-			method = RequestMethod.PUT
-			)
+	@RequestMapping(value = "/{questionId}", method = RequestMethod.PUT)
 	@ResponseBody
 	public final void updateQuestion(
 			@PathVariable final String questionId,
 			@RequestBody final Question question,
 			final HttpServletResponse response
 	) {
-		throw new NoContentException();
-		
-		/* TODO: Not yet implemented! The following code has been copy-and-pasted from postQuestion */
-		/*
-		if (!sessionkey.equals(question.getSession())) {
-			response.setStatus(HttpStatus.PRECONDITION_FAILED.value());
-			return null;
-		}
-
-		if (questionService.saveQuestion(question) != null) {
-			response.setStatus(HttpStatus.CREATED.value());
-			return question;
-		}
-
-		response.setStatus(HttpStatus.BAD_REQUEST.value());
-		
-		return null;
-		*/
+		this.questionService.update(question);
 	}
 
 	@RequestMapping(value = "/{questionId}/publish", method = RequestMethod.POST)

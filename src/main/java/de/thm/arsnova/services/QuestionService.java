@@ -109,7 +109,7 @@ public class QuestionService implements IQuestionService {
 		if (question == null) {
 			throw new NotFoundException();
 		}
-		
+
 		User user = userService.getCurrentUser();
 		Session session = databaseDao.getSession(question.getSessionKeyword());
 		if (user == null || session == null || !session.isCreator(user)) {
@@ -117,7 +117,6 @@ public class QuestionService implements IQuestionService {
 		}
 		databaseDao.deleteQuestion(question);
 	}
-	
 
 	@Override
 	@Authenticated
@@ -126,7 +125,7 @@ public class QuestionService implements IQuestionService {
 		if (question == null) {
 			throw new NotFoundException();
 		}
-		
+
 		User user = userService.getCurrentUser();
 		Session session = databaseDao.getSession(question.getSessionKeyword());
 		if (user == null || session == null || !session.isCreator(user)) {
@@ -222,7 +221,17 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
+	@Authenticated
 	public void update(Question question) {
+		if (databaseDao.getQuestion(question.get_id()) == null) {
+			throw new NotFoundException();
+		}
+
+		User user = userService.getCurrentUser();
+		Session session = databaseDao.getSession(question.getSessionKeyword());
+		if (user == null || session == null || !session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
 		this.databaseDao.updateQuestion(question);
 	}
 }
