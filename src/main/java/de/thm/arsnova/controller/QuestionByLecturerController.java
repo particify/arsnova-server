@@ -110,10 +110,7 @@ public class QuestionByLecturerController extends AbstractController {
 		*/
 	}
 
-	@RequestMapping(
-			value = "/{questionId}/publish",
-			method = RequestMethod.POST
-			)
+	@RequestMapping(value = "/{questionId}/publish", method = RequestMethod.POST)
 	@ResponseBody
 	public final void publishQuestion(
 			@PathVariable final String questionId,
@@ -127,10 +124,7 @@ public class QuestionByLecturerController extends AbstractController {
 		this.questionService.update(question);
 	}
 	
-	@RequestMapping(
-			value = "/{questionId}/publishstatistics",
-			method = RequestMethod.POST
-			)
+	@RequestMapping(value = "/{questionId}/publishstatistics", method = RequestMethod.POST)
 	@ResponseBody
 	public final void publishStatistics(
 			@PathVariable final String questionId,
