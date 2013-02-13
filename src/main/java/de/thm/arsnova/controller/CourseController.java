@@ -39,7 +39,7 @@ public class CourseController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(CourseController.class);
 
-	@Autowired
+	@Autowired(required=false)
 	private ConnectorClient connectorClient;
 
 	@Autowired

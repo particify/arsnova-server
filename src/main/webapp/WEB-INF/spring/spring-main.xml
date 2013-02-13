@@ -45,11 +45,11 @@
 
 	<!-- Example of connector client configuration -->
 	<!-- Uncomment bean definition to activate connector -->
-	<!-- -->
-	<bean id="moodleClient" scope="singleton" class="de.thm.arsnova.connector.client.ConnectorClientImpl">
+	<!--
+	<bean id="connectorClient" scope="singleton" class="de.thm.arsnova.connector.client.ConnectorClientImpl">
 		<property name="serviceLocation" value="${connector.uri}"></property>
 		<property name="username" value="${connector.username}"></property>
 		<property name="password" value="${connector.password}"></property>
 	</bean>
-	<!-- -->
+	-->
 </beans>
