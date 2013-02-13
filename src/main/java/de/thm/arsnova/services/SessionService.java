@@ -78,7 +78,7 @@ public class SessionService implements ISessionService {
 	@Override
 	@Authenticated
 	public final Session saveSession(final Session session) {
-		if (connectorClient != null) {
+		if (connectorClient != null && session.getCourseId() != null) {
 			if (! connectorClient.getMembership(
 				userService.getCurrentUser().getUsername(), session.getCourseId()).isMember()
 			) {
