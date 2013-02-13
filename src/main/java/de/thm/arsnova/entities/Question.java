@@ -30,7 +30,9 @@ public class Question {
 	private String releasedFor;
 	private List<PossibleAnswer> possibleAnswers;
 	private boolean noCorrect;
-	private String session;
+	// TODO: We currently need both sessionId and sessionKeyword, but sessionKeyword will not be persisted.
+	private String sessionId;
+	private String sessionKeyword;
 	private long timestamp;
 	private int number;
 	private int duration;
@@ -103,19 +105,27 @@ public class Question {
 	}
 
 	public final String getSessionId() {
-		return session;
+		return sessionId;
 	}
 
-	public final void setSessionId(final String session) {
-		this.session = session;
+	public final void setSessionId(final String sessionId) {
+		this.sessionId = sessionId;
 	}
 
 	public final String getSession() {
-		return session;
+		return sessionId;
 	}
 
 	public final void setSession(final String session) {
-		this.session = session;
+		this.sessionId = session;
+	}
+	
+	public final String getSessionKeyword() {
+		return this.sessionKeyword;
+	}
+	
+	public final void setSessionKeyword(final String keyword) {
+		this.sessionKeyword = keyword;
 	}
 
 	public final long getTimestamp() {

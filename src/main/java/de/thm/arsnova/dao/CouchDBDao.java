@@ -586,7 +586,7 @@ public class CouchDBDao implements IDatabaseDao {
 					PossibleAnswer.class
 			);
 			q.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
-
+			q.setSessionKeyword(this.getSessionKeyword(q.getSessionId()));
 			return q;
 		} catch (IOException e) {
 			LOGGER.error("Could not get question with id {}", id);

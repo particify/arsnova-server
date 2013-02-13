@@ -73,15 +73,10 @@ public class QuestionByLecturerController extends AbstractController {
 			)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.CREATED)
-	public final Question postQuestion(
-			@RequestBody final Question question,
-			final HttpServletResponse response
-	) {
-
+	public final Question postQuestion(@RequestBody final Question question, final HttpServletResponse response) {
 		if (questionService.saveQuestion(question) != null) {
 			return question;
 		}
-
 		throw new BadRequestException();
 	}
 
