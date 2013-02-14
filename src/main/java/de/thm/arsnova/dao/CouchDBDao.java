@@ -298,6 +298,25 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
+	public final Session getSessionFromId(final String sessionId) {
+		try {
+			View view = new View("session/by_id");
+			view.setKey(URLEncoder.encode("\"" + sessionId + "\"", "UTF-8"));
+			ViewResults results = this.getDatabase().view(view);
+
+			if (results.getJSONArray("rows").optJSONObject(0) == null) {
+				return null;
+			}
+			return (Session) JSONObject.toBean(
+					results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
+					Session.class
+			);
+		} catch (UnsupportedEncodingException e) {
+			return null;
+		}
+	}
+
+	@Override
 	public final Session saveSession(final Session session) {
 
 		Document sessionDocument = new Document();
@@ -1300,5 +1319,14 @@ public class CouchDBDao implements IDatabaseDao {
 			LOGGER.error("Could not save answer {}", answer);
 		}
 		return null;
+	}
+
+	@Override
+	public void deleteAnswer(String answerId) {
+		try {
+			this.database.deleteDocument(this.database.getDocument(answerId));
+		} catch (IOException e) {
+			LOGGER.error("Could not delete answer {} because of {}", answerId, e.getMessage());
+		}
 	}
 }

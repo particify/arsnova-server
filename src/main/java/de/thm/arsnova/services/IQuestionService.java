@@ -71,4 +71,6 @@ public interface IQuestionService {
 
 	Answer updateAnswer(Answer answer);
 
+	void deleteAnswer(String questionId, String answerId);
+
 }

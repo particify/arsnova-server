@@ -397,4 +397,15 @@ public class StubDatabaseDao implements IDatabaseDao {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public Session getSessionFromId(String sessionId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void deleteAnswer(String answerId) {
+		// TODO Auto-generated method stub
+	}
 }

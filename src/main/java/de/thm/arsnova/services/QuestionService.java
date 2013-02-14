@@ -258,4 +258,19 @@ public class QuestionService implements IQuestionService {
 		}
 		return this.databaseDao.updateAnswer(answer);
 	}
+
+	@Override
+	@Authenticated
+	public void deleteAnswer(String questionId, String answerId) {
+		Question question = this.databaseDao.getQuestion(questionId);
+		if (question == null) {
+			throw new NotFoundException();
+		}
+		User user = userService.getCurrentUser();
+		Session session = this.databaseDao.getSessionFromId(question.getSessionId());
+		if (user == null || session == null || !session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
+		this.databaseDao.deleteAnswer(answerId);
+	}
 }

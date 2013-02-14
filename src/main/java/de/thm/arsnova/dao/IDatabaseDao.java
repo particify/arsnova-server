@@ -122,4 +122,8 @@ public interface IDatabaseDao {
 	Answer saveAnswer(Answer answer, User user);
 
 	Answer updateAnswer(Answer answer);
+
+	Session getSessionFromId(String sessionId);
+
+	void deleteAnswer(String answerId);
 }
