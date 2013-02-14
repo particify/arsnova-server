@@ -1271,7 +1271,9 @@ public class CouchDBDao implements IDatabaseDao {
 			a.put("type", "skill_question_answer");
 			a.put("sessionId", answer.getSessionId());
 			a.put("questionId", answer.getQuestionId());
+			a.put("answerSubject", answer.getAnswerSubject());
 			a.put("answerText", answer.getAnswerText());
+			a.put("timestamp", answer.getTimestamp());
 			a.put("user", user.getUsername());
 			this.database.saveDocument(a);
 			answer.set_id(a.getId());
