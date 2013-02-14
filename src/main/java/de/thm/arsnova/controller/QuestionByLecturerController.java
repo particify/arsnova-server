@@ -257,6 +257,16 @@ public class QuestionByLecturerController extends AbstractController {
 		return questionService.saveAnswer(answer);
 	}
 
+	@RequestMapping(value = "/{questionId}/answer/{answerId}", method = RequestMethod.PUT)
+	@ResponseBody
+	public final Answer updateAnswer(
+			@PathVariable final String questionId,
+			@RequestBody final Answer answer,
+			final HttpServletResponse response
+		) {
+		return questionService.updateAnswer(answer);
+	}
+
 	@RequestMapping(value = "/{questionId}/answers", method = RequestMethod.DELETE)
 	@ResponseBody
 	public final void deleteAnswers(

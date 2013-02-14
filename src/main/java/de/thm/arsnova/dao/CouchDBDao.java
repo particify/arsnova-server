@@ -561,7 +561,6 @@ public class CouchDBDao implements IDatabaseDao {
 			q.put("noCorrect", question.isNoCorrect());
 			q.put("showStatistic", question.isShowStatistic());
 			q.put("showAnswer", question.isShowAnswer());
-			
 			this.database.saveDocument(q);
 			question.set_rev(q.getRev());
 		} catch (IOException e) {
@@ -925,8 +924,8 @@ public class CouchDBDao implements IDatabaseDao {
 			List<Answer> answers = new ArrayList<Answer>();
 			for (Document d : results.getResults()) {
 				Answer a = (Answer) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Answer.class);
-				/* TODO: check if the following line is needed */
-				// a.setSessionId(s.get_id());
+				a.setAnswerSubject(d.getJSONObject().getJSONObject("value").getString("subject"));
+				a.setAnswerText(d.getJSONObject().getJSONObject("value").getString("text"));
 				a.setQuestionId(questionId);
 				answers.add(a);
 			}
@@ -962,6 +961,8 @@ public class CouchDBDao implements IDatabaseDao {
 			for (Document d : results.getResults()) {
 				Answer a = (Answer) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Answer.class);
 				a.set_id(d.getId());
+				a.set_rev(d.getRev());
+				a.setUser(user.getUsername());
 				a.setSessionId(s.get_id());
 				answers.add(a);
 			}
@@ -1277,6 +1278,22 @@ public class CouchDBDao implements IDatabaseDao {
 			a.put("user", user.getUsername());
 			this.database.saveDocument(a);
 			answer.set_id(a.getId());
+			answer.set_rev(a.getRev());
+			return answer;
+		} catch (IOException e) {
+			LOGGER.error("Could not save answer {}", answer);
+		}
+		return null;
+	}
+
+	@Override
+	public Answer updateAnswer(Answer answer) {
+		try {
+			Document a = this.database.getDocument(answer.get_id());
+			a.put("answerSubject", answer.getAnswerSubject());
+			a.put("answerText", answer.getAnswerText());
+			a.put("timestamp", answer.getTimestamp());
+			this.database.saveDocument(a);
 			answer.set_rev(a.getRev());
 			return answer;
 		} catch (IOException e) {

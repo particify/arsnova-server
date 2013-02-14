@@ -238,8 +238,24 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public Answer saveAnswer(Answer answer) {
-		// TODO: Sanity checks...
 		User user = userService.getCurrentUser();
+		if (user == null) {
+			throw new UnauthorizedException();
+		}
+		Question question = this.getQuestion(answer.getQuestionId());
+		if (question == null) {
+			throw new NotFoundException();
+		}
 		return this.databaseDao.saveAnswer(answer, user);
+	}
+
+	@Override
+	@Authenticated
+	public Answer updateAnswer(Answer answer) {
+		User user = userService.getCurrentUser();
+		if (user == null || !user.getUsername().equals(answer.getUser())) {
+			throw new UnauthorizedException();
+		}
+		return this.databaseDao.updateAnswer(answer);
 	}
 }

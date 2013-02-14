@@ -243,12 +243,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public void deleteQuestion(String questionId) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public Answer getMyAnswer(String questionId) {
 		// TODO Auto-generated method stub
 		return null;
@@ -380,6 +374,27 @@ public class StubDatabaseDao implements IDatabaseDao {
 	@Override
 	public void updateQuestion(Question question) {
 		// TODO Auto-generated method stub
-		
+	}
+
+	@Override
+	public void deleteQuestion(Question question) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void deleteAnswers(Question question) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public Answer saveAnswer(Answer answer, User user) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Answer updateAnswer(Answer answer) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

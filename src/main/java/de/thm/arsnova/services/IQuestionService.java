@@ -69,4 +69,6 @@ public interface IQuestionService {
 
 	Answer saveAnswer(Answer answer);
 
+	Answer updateAnswer(Answer answer);
+
 }

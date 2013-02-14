@@ -66,28 +66,11 @@ public class Answer {
 		this.answerText = answerText;
 	}
 
-	public final String getText() {
-		return answerText;
-	}
-
-	public final void setText(final String answerText) {
-		this.answerText = answerText;
-	}
-
-
 	public final String getAnswerSubject() {
 		return answerSubject;
 	}
 
 	public final void setAnswerSubject(final String answerSubject) {
-		this.answerSubject = answerSubject;
-	}
-
-	public final String getSubject() {
-		return answerSubject;
-	}
-
-	public final void setSubject(final String answerSubject) {
 		this.answerSubject = answerSubject;
 	}
 
