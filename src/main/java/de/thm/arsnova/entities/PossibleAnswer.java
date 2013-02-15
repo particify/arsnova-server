@@ -20,8 +20,17 @@ package de.thm.arsnova.entities;
 
 public class PossibleAnswer {
 
+	private String id;
 	private String text;
 	private boolean correct;
+
+	public String getId() {
+		return this.id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
 
 	public String getText() {
 		return text;
@@ -41,6 +50,6 @@ public class PossibleAnswer {
 
 	@Override
 	public String toString() {
-		return "PossibleAnswer [text=" + text + ", correct=" + correct + "]";
+		return "PossibleAnswer [id=" + id + ", text=" + text + ", correct=" + correct + "]";
 	}
 }

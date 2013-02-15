@@ -120,11 +120,11 @@ public class Question {
 	public final void setSession(final String session) {
 		this.sessionId = session;
 	}
-	
+
 	public final String getSessionKeyword() {
 		return this.sessionKeyword;
 	}
-	
+
 	public final void setSessionKeyword(final String keyword) {
 		this.sessionKeyword = keyword;
 	}
@@ -187,7 +187,6 @@ public class Question {
 
 	@Override
 	public final String toString() {
-		return "Question type '" + this.type + "': " + this.subject + ";\n" 
-				+ this.text	+ this.possibleAnswers;
+		return "Question type '" + this.type + "': " + this.subject + ";\n" + this.text + this.possibleAnswers;
 	}
 }
