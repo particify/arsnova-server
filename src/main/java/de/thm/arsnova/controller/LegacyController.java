@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class LegacyController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(LegacyController.class);
-	
+
 	/* specific routes */
 
 	@RequestMapping(value = "/session/{sessionKey}/question")
@@ -39,7 +39,6 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		
 		return String.format("forward:/question/bylecturer/?sessionkey=%s", sessionKey);
 	}
 
@@ -49,7 +48,6 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		
 		return String.format("forward:/question/bylecturer/list?sessionkey=%s", sessionKey);
 	}
 
@@ -59,7 +57,6 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		
 		return String.format("forward:/question/bylecturer/count?sessionkey=%s", sessionKey);
 	}
 
@@ -69,7 +66,6 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		
 		return String.format("forward:/question/bylecturer/answercount?sessionkey=%s", sessionKey);
 	}
 
@@ -79,7 +75,6 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		
 		return String.format("forward:/question/bylecturer/answercount?sessionkey=%s", sessionKey);
 	}
 
@@ -89,7 +84,6 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		
 		return String.format("forward:/question/bylecturer/myanswers?sessionkey=%s", sessionKey);
 	}
 
@@ -99,7 +93,6 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		
 		return String.format("forward:/question/byaudience/?sessionkey=%s", sessionKey);
 	}
 
@@ -109,7 +102,6 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		
 		return String.format("forward:/question/byaudience/count?sessionkey=%s", sessionKey);
 	}
 
@@ -119,10 +111,9 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		
 		return String.format("forward:/question/byaudience/readcount?sessionkey=%s", sessionKey);
 	}
-	
+
 	/* generalized routes */
 
 	@RequestMapping(value = { "/session/{sessionKey}/question/{arg1}", "/session/{sessionKey}/questions/{arg1}" })
@@ -132,11 +123,12 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		
 		return String.format("forward:/question/bylecturer/%s?sessionkey=%s", arg1, sessionKey);
 	}
 
-	@RequestMapping(value = { "/session/{sessionKey}/question/{arg1}/{arg2}", "/session/{sessionKey}/questions/{arg1}/{arg2}" })
+	@RequestMapping(
+			value = { "/session/{sessionKey}/question/{arg1}/{arg2}", "/session/{sessionKey}/questions/{arg1}/{arg2}" }
+	)
 	public final String redirectQuestionByLecturerWithTwoArguments(
 			@PathVariable final String sessionKey,
 			@PathVariable final String arg1,
@@ -144,7 +136,6 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		
 		return String.format("forward:/question/bylecturer/%s/%s?sessionkey=%s", arg1, arg2, sessionKey);
 	}
 
@@ -155,7 +146,6 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		
 		return String.format("forward:/question/byaudience/%s?sessionkey=%s", arg1, sessionKey);
 	}
 
@@ -167,7 +157,6 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		
 		return String.format("forward:/question/byaudience/%s/%s?sessionkey=%s", arg1, arg2, sessionKey);
 	}
 
