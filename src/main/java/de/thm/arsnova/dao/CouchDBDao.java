@@ -760,13 +760,17 @@ public class CouchDBDao implements IDatabaseDao {
 	public final void deleteQuestion(final Question question) {
 		try {
 			this.deleteAnswers(question);
-			Document q = this.getDatabase().getDocument(question.get_id());
-			this.getDatabase().deleteDocument(q);
+			this.deleteDocument(question.get_id());
 		} catch (IOException e) {
 			LOGGER.error("IOException: Could not delete question {}", question.get_id());
 		}
 	}
-	
+
+	private void deleteDocument(final String documentId) throws IOException {
+		Document d = this.getDatabase().getDocument(documentId);
+		this.getDatabase().deleteDocument(d);
+	}
+
 	@Override
 	public final void deleteAnswers(final Question question) {
 		try {
@@ -775,8 +779,7 @@ public class CouchDBDao implements IDatabaseDao {
 			ViewResults results = this.getDatabase().view(view);
 	
 			for (Document d : results.getResults()) {
-				Document answer = this.getDatabase().getDocument(d.getId());
-				this.getDatabase().deleteDocument(answer);
+				this.deleteDocument(d.getId());
 			}
 		} catch (IOException e) {
 			LOGGER.error("IOException: Could not delete answers for question {}", question.get_id());
@@ -1047,7 +1050,10 @@ public class CouchDBDao implements IDatabaseDao {
 				return new InterposedReadingCount();
 			}
 			int read = results.getJSONArray("rows").optJSONObject(0).optInt("value");
-			int unread = results.getJSONArray("rows").optJSONObject(1).optInt("value");
+			int unread = 0;
+			if (results.getJSONArray("rows").optJSONObject(1) != null) {
+				unread = results.getJSONArray("rows").optJSONObject(1).optInt("value");
+			}
 			return new InterposedReadingCount(read, unread);
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.error("Error while retrieving interposed question count", e);
@@ -1234,22 +1240,29 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public InterposedQuestion getInterposedQuestion(String questionId) throws IOException {
-		Document document = this.getDatabase().getDocument(questionId);
-		InterposedQuestion question = (InterposedQuestion) JSONObject.toBean(
-				document.getJSONObject(),
-				InterposedQuestion.class
-		);
-		question.setSessionId(getSessionKeyword(question.getSessionId()));
-		return question;
+	public InterposedQuestion getInterposedQuestion(String questionId) {
+		try {
+			Document document = this.getDatabase().getDocument(questionId);
+			InterposedQuestion question = (InterposedQuestion) JSONObject.toBean(document.getJSONObject(),
+					InterposedQuestion.class);
+			question.setSessionId(getSessionKeyword(question.getSessionId()));
+			return question;
+		} catch (IOException e) {
+			LOGGER.error("Could not load interposed question {}", questionId);
+		}
+		return null;
 	}
 
 	@Override
-	public void markInterposedQuestionAsRead(InterposedQuestion question) throws IOException {
-		question.setRead(true);
-		Document document = this.getDatabase().getDocument(question.get_id());
-		document.put("read", question.isRead());
-		this.getDatabase().saveDocument(document);
+	public void markInterposedQuestionAsRead(InterposedQuestion question) {
+		try {
+			question.setRead(true);
+			Document document = this.getDatabase().getDocument(question.get_id());
+			document.put("read", question.isRead());
+			this.getDatabase().saveDocument(document);
+		} catch (IOException e) {
+			LOGGER.error("Coulg not mark interposed question as read {}", question.get_id());
+		}
 	}
 
 	@Override
@@ -1327,6 +1340,15 @@ public class CouchDBDao implements IDatabaseDao {
 			this.database.deleteDocument(this.database.getDocument(answerId));
 		} catch (IOException e) {
 			LOGGER.error("Could not delete answer {} because of {}", answerId, e.getMessage());
+		}
+	}
+
+	@Override
+	public void deleteInterposedQuestion(InterposedQuestion question) {
+		try {
+			this.deleteDocument(question.get_id());
+		} catch (IOException e) {
+			LOGGER.error("Could not delete interposed question {} because of {}", question.get_id(), e.getMessage());
 		}
 	}
 }

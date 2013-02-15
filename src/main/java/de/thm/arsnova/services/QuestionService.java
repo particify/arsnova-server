@@ -117,6 +117,21 @@ public class QuestionService implements IQuestionService {
 		}
 		databaseDao.deleteQuestion(question);
 	}
+	
+	@Override
+	@Authenticated
+	public void deleteInterposedQuestion(String questionId) {
+		InterposedQuestion question = databaseDao.getInterposedQuestion(questionId);
+		if (question == null) {
+			throw new NotFoundException();
+		}
+		User user = userService.getCurrentUser();
+		Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
+		if (user == null || session == null || !session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
+		databaseDao.deleteInterposedQuestion(question);
+	}
 
 	@Override
 	@Authenticated
@@ -206,18 +221,17 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public InterposedQuestion readInterposedQuestion(String questionId) {
-		try {
-			InterposedQuestion question = databaseDao.getInterposedQuestion(questionId);
-			Session session = this.databaseDao.getSessionFromKeyword(question.getSessionId());
-
-			User user = this.userService.getCurrentUser();
-			if (session.isCreator(user)) {
-				this.databaseDao.markInterposedQuestionAsRead(question);
-			}
-			return question;
-		} catch (IOException e) {
+		InterposedQuestion question = databaseDao.getInterposedQuestion(questionId);
+		if (question == null) {
 			throw new NotFoundException();
 		}
+		Session session = this.databaseDao.getSessionFromKeyword(question.getSessionId());
+
+		User user = this.userService.getCurrentUser();
+		if (session.isCreator(user)) {
+			this.databaseDao.markInterposedQuestionAsRead(question);
+		}
+		return question;
 	}
 
 	@Override

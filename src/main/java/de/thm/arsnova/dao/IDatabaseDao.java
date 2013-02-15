@@ -109,9 +109,9 @@ public interface IDatabaseDao {
 
 	int countQuestions();
 
-	InterposedQuestion getInterposedQuestion(String questionId) throws IOException;
+	InterposedQuestion getInterposedQuestion(String questionId);
 
-	void markInterposedQuestionAsRead(InterposedQuestion question) throws IOException;
+	void markInterposedQuestionAsRead(InterposedQuestion question);
 
 	List<Session> getMyVisitedSessions(User user);
 
@@ -126,4 +126,6 @@ public interface IDatabaseDao {
 	Session getSessionFromId(String sessionId);
 
 	void deleteAnswer(String answerId);
+
+	void deleteInterposedQuestion(InterposedQuestion question);
 }

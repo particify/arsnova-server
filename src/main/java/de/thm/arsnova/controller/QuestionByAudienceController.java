@@ -105,13 +105,13 @@ public class QuestionByAudienceController extends AbstractController {
 
 		throw new BadRequestException();
 	}
-	
+
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)
 	@ResponseBody
 	public final void deleteInterposedQuestion(
 			@PathVariable final String questionId,
 			final HttpServletResponse response
 	) {
-		questionService.deleteQuestion(questionId);
+		questionService.deleteInterposedQuestion(questionId);
 	}
 }

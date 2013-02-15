@@ -338,12 +338,12 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public InterposedQuestion getInterposedQuestion(String questionId) throws IOException {
+	public InterposedQuestion getInterposedQuestion(String questionId) {
 		return this.interposedQuestion;
 	}
 
 	@Override
-	public void markInterposedQuestionAsRead(InterposedQuestion question) throws IOException {
+	public void markInterposedQuestionAsRead(InterposedQuestion question) {
 		this.interposedQuestion.setRead(true);
 	}
 
@@ -406,6 +406,11 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public void deleteAnswer(String answerId) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void deleteInterposedQuestion(InterposedQuestion question) {
 		// TODO Auto-generated method stub
 	}
 }

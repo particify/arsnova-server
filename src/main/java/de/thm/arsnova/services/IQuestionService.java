@@ -73,4 +73,6 @@ public interface IQuestionService {
 
 	void deleteAnswer(String questionId, String answerId);
 
+	void deleteInterposedQuestion(String questionId);
+
 }
