@@ -141,14 +141,12 @@ public class QuestionByLecturerController extends AbstractController {
 		if (questions == null || questions.isEmpty()) {
 			throw new NotFoundException();
 		}
-		LOGGER.info(questions.toString());
 		return questions;
 	}
 
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	@ResponseBody
 	public final int getSkillQuestionCount(@RequestParam final String sessionkey, final HttpServletResponse response) {
-		LOGGER.debug(sessionkey);
 		return questionService.getSkillQuestionCount(sessionkey);
 	}
 
@@ -162,7 +160,6 @@ public class QuestionByLecturerController extends AbstractController {
 		if (questions == null || questions.isEmpty()) {
 			throw new NotFoundException();
 		}
-		LOGGER.info(questions.toString());
 		return questions;
 	}
 
