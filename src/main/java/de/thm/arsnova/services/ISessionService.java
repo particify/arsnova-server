@@ -41,5 +41,4 @@ public interface ISessionService {
 	LoggedIn registerAsOnlineUser(User user, String sessionkey);
 
 	int countActiveUsers(String sessionkey);
-
 }

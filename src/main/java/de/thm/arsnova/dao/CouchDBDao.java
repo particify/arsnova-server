@@ -54,6 +54,7 @@ import com.fourspaces.couchdb.Document;
 import com.fourspaces.couchdb.View;
 import com.fourspaces.couchdb.ViewResults;
 
+import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.FoodVote;
@@ -1254,5 +1255,65 @@ public class CouchDBDao implements IDatabaseDao {
 	public boolean isCourseSession(String keyword) {
 		return (this.getSession(keyword).getCourseId() != null) &&
 				(this.getSession(keyword).getCourseType() != null);
+	}
+	
+	@Override
+	public List<Session> getCourseSessions(List<Course> courses) {
+		ExtendedView view = new ExtendedView("logged_in/available_moodlesessions");
+		view.setCourseIdKeys(courses);
+		
+		ViewResults sessions = this.getDatabase().view(view);
+
+		List<Session> result = new ArrayList<Session>();
+		for (Document d : sessions.getResults()) {
+			Session session = (Session) JSONObject.toBean(
+					d.getJSONObject().getJSONObject("value"),
+					Session.class
+			);
+			session.setCreator(d.getJSONObject().getJSONArray("key").getString(0));
+			session.setName(d.getJSONObject().getJSONArray("key").getString(1));
+			session.set_id(d.getId());
+			result.add(session);
+		}
+		return result;
+	}
+	
+	private class ExtendedView extends View {
+
+		private String keys;
+		
+		public ExtendedView(String fullname) {
+			super(fullname);
+		}
+		
+		public void setKeys(String newKeys) {
+			this.keys = newKeys;
+		}
+		
+		public void setCourseIdKeys(List<Course> courses) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("[");
+			for (int i = 0; i < courses.size() - 1; i++) {
+				sb.append("\"" + courses.get(i).getId() + "\",");
+			}
+			sb.append("\"" + courses.get(courses.size() - 1).getId() + "\"");
+			sb.append("]");
+			this.setKeys(sb.toString());
+		}
+		
+		public String getQueryString() {
+			StringBuilder query = new StringBuilder();
+			query.append(super.getQueryString());
+			if (this.keys != null) {
+				if (query.toString().isEmpty()) {
+					query.append("&");
+				}
+
+				query.append("keys=" + this.keys);
+			}
+			
+			if (query.toString().isEmpty()) return null;
+			return query.toString();
+		}
 	}
 }

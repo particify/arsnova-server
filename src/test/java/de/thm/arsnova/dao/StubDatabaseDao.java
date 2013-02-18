@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.FoodVote;
@@ -387,5 +388,11 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public boolean isCourseSession(String keyword) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	
+	@Override
+	public List<Session> getCourseSessions(List<Course> courses) {
+
+		return null;
 	}
 }

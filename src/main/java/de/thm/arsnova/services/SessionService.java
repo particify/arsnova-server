@@ -19,7 +19,9 @@
 
 package de.thm.arsnova.services;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -67,9 +69,28 @@ public class SessionService implements ISessionService {
 
 	@Override
 	public final List<Session> getMySessions(final String username) {
-		return databaseDao.getMySessions(username);
+		List<Session> mySessions = databaseDao.getMySessions(username);
+		if (connectorClient == null) {
+			return mySessions;
+		}
+		
+		List<Session> courseSessions = databaseDao.getCourseSessions(
+			connectorClient.getCourses(username).getCourse()
+		);
+		
+		Map<String, Session> allAvailableSessions = new HashMap<String, Session>();
+		
+		for (Session session : mySessions) {
+			allAvailableSessions.put(session.get_id(), session);
+		}
+		
+		for (Session session : courseSessions) {
+			allAvailableSessions.put(session.get_id(), session);
+		}
+		
+		return (List<Session>) allAvailableSessions.values();
 	}
-
+	
 	@Override
 	public final List<Session> getMyVisitedSessions(final User user) {
 		return databaseDao.getMyVisitedSessions(user);
