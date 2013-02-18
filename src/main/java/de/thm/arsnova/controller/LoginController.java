@@ -76,26 +76,33 @@ public class LoginController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
 
-	/* TODO: Make this method more flexible. Parameters for success and failure urls
-	 * could replace the use of the referer.
-	 */
 	@RequestMapping(value = "/doLogin", method = RequestMethod.GET)
 	public final View doLogin(
 			@RequestParam("type") final String type,
 			@RequestParam(value = "user", required = false) final String guestName,
 			@RequestParam(value = "referer", required = false) final String forcedReferer,
+			@RequestParam(value = "successurl", required = false) final String successUrl,
+			@RequestParam(value = "failureurl", required = false) final String failureUrl,
 			final HttpServletRequest request,
 			final HttpServletResponse response
 	) throws IOException, ServletException {
 		String referer = request.getHeader("referer");
-		if (referer == null) {
+		if (null != forcedReferer && !UrlUtils.isAbsoluteUrl(referer)) {
 			/* Use a url from a request parameter as referer as long as the url is not absolute (to prevent
 			 * abuse of the redirection). */
-			if (null == (referer = forcedReferer) || UrlUtils.isAbsoluteUrl(referer)) {
-				referer = "/";
-			}
+			referer = forcedReferer;
 		}
-		request.getSession().setAttribute("ars-referer", referer);
+		if (null == referer) {
+			referer = "/";
+		}
+		
+		request.getSession().setAttribute("ars-login-success-url", 
+			null == successUrl ? referer + "#auth/checkLogin" : successUrl
+		);
+		request.getSession().setAttribute("ars-login-failure-url", 
+			null == failureUrl ? referer : failureUrl
+		);
+		
 		if ("cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);
 		} else if ("twitter".equals(type)) {
@@ -125,7 +132,7 @@ public class LoginController extends AbstractController {
 			SecurityContextHolder.getContext().setAuthentication(token);
 			request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
 					SecurityContextHolder.getContext());
-			return new RedirectView(referer + "#auth/checkLogin");
+			return new RedirectView(null == successUrl ? referer + "#auth/checkLogin" : successUrl);
 		}
 		return null;
 	}

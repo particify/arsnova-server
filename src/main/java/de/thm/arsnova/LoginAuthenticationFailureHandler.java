@@ -25,6 +25,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
@@ -34,7 +36,9 @@ public class LoginAuthenticationFailureHandler extends
 		SimpleUrlAuthenticationFailureHandler {
 
 	private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-	private String defaultFailureUrl;
+	private String failureUrl;
+
+	public static final Logger LOGGER = LoggerFactory.getLogger(LoginAuthenticationFailureHandler.class);
 
 	@Override
 	public final void onAuthenticationFailure(
@@ -43,15 +47,15 @@ public class LoginAuthenticationFailureHandler extends
 			final AuthenticationException exception
 	) throws IOException, ServletException {
 		HttpSession session = request.getSession();
-		if (session != null && session.getAttribute("ars-referer") != null) {
-			defaultFailureUrl = (String) session.getAttribute("ars-referer");
+		if (session != null && session.getAttribute("ars-login-failure-url") != null) {
+			failureUrl = (String) session.getAttribute("ars-login-failure-url");
 		}
 
-		redirectStrategy.sendRedirect(request, response, defaultFailureUrl);
+		redirectStrategy.sendRedirect(request, response, failureUrl);
 	}
 
 	public final void setDefaultFailureUrl(final String failureUrl) {
-		this.defaultFailureUrl = failureUrl;
+		this.failureUrl = failureUrl;
 	}
 
 }

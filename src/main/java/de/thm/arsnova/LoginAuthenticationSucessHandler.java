@@ -22,6 +22,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
 public class LoginAuthenticationSucessHandler extends
@@ -29,17 +31,20 @@ public class LoginAuthenticationSucessHandler extends
 
 	private String targetUrl;
 
+	public static final Logger LOGGER = LoggerFactory.getLogger(LoginAuthenticationSucessHandler.class);
+
 	@Override
 	protected final String determineTargetUrl(
 			final HttpServletRequest request,
 			final HttpServletResponse response
 	) {
 		HttpSession session = request.getSession();
-		if (session == null || session.getAttribute("ars-referer") == null) {
+		if (session == null || session.getAttribute("ars-login-success-url") == null) {
 			return targetUrl;
 		}
-		String referer = (String) session.getAttribute("ars-referer");
-		return referer + targetUrl;
+		String redirect = (String) session.getAttribute("ars-login-success-url");
+		
+		return redirect;
 	}
 
 	public final void setTargetUrl(final String newTargetUrl) {
