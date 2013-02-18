@@ -76,6 +76,9 @@ public class LoginController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
 
+	/* TODO: Make this method more flexible. Parameters for success and failure urls
+	 * could replace the use of the referer.
+	 */
 	@RequestMapping(value = "/doLogin", method = RequestMethod.GET)
 	public final View doLogin(
 			@RequestParam("type") final String type,
