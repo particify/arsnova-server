@@ -39,7 +39,7 @@ public interface IDatabaseDao {
 
 	Session getSession(String keyword);
 
-	List<Session> getMySessions(String username);
+	List<Session> getMySessions(User user);
 
 	Session saveSession(Session session);
 

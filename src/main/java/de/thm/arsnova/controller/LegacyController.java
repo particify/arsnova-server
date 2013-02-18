@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
 public class LegacyController extends AbstractController {
@@ -32,6 +33,24 @@ public class LegacyController extends AbstractController {
 	public static final Logger LOGGER = LoggerFactory.getLogger(LegacyController.class);
 
 	/* specific routes */
+
+	@RequestMapping(value = "/session/mysessions", method = RequestMethod.GET)
+	public final String redirectSessionMy(
+			final HttpServletResponse response
+	) {
+		response.addHeader("X-Deprecated-API", "1");
+		
+		return "forward:/session/?filter=owned";
+	}
+
+	@RequestMapping(value = "/session/visitedsessions", method = RequestMethod.GET)
+	public final String redirectSessionVisited(
+			final HttpServletResponse response
+	) {
+		response.addHeader("X-Deprecated-API", "1");
+		
+		return "forward:/session/?filter=visited";
+	}
 
 	@RequestMapping(value = "/session/{sessionKey}/question")
 	public final String redirectQuestionByLecturer(
@@ -42,7 +61,7 @@ public class LegacyController extends AbstractController {
 		return String.format("forward:/question/bylecturer/?sessionkey=%s", sessionKey);
 	}
 
-	@RequestMapping(value = "/session/{sessionKey}/skillquestions")
+	@RequestMapping(value = "/session/{sessionKey}/skillquestions", method = RequestMethod.GET)
 	public final String redirectQuestionByLecturerList(
 			@PathVariable final String sessionKey,
 			final HttpServletResponse response
@@ -51,7 +70,7 @@ public class LegacyController extends AbstractController {
 		return String.format("forward:/question/bylecturer/list?sessionkey=%s", sessionKey);
 	}
 
-	@RequestMapping(value = "/session/{sessionKey}/skillquestioncount")
+	@RequestMapping(value = "/session/{sessionKey}/skillquestioncount", method = RequestMethod.GET)
 	public final String redirectQuestionByLecturerCount(
 			@PathVariable final String sessionKey,
 			final HttpServletResponse response
@@ -60,7 +79,7 @@ public class LegacyController extends AbstractController {
 		return String.format("forward:/question/bylecturer/count?sessionkey=%s", sessionKey);
 	}
 
-	@RequestMapping(value = "/session/{sessionKey}/answercount")
+	@RequestMapping(value = "/session/{sessionKey}/answercount", method = RequestMethod.GET)
 	public final String redirectQuestionByLecturerAnswerCount(
 			@PathVariable final String sessionKey,
 			final HttpServletResponse response
@@ -69,7 +88,7 @@ public class LegacyController extends AbstractController {
 		return String.format("forward:/question/bylecturer/answercount?sessionkey=%s", sessionKey);
 	}
 
-	@RequestMapping(value = "/session/{sessionKey}/unanswered")
+	@RequestMapping(value = "/session/{sessionKey}/unanswered", method = RequestMethod.GET)
 	public final String redirectQuestionByLecturerUnnsweredCount(
 			@PathVariable final String sessionKey,
 			final HttpServletResponse response
@@ -78,7 +97,7 @@ public class LegacyController extends AbstractController {
 		return String.format("forward:/question/bylecturer/answercount?sessionkey=%s", sessionKey);
 	}
 
-	@RequestMapping(value = "/session/{sessionKey}/myanswers")
+	@RequestMapping(value = "/session/{sessionKey}/myanswers", method = RequestMethod.GET)
 	public final String redirectQuestionByLecturerMyAnswers(
 			@PathVariable final String sessionKey,
 			final HttpServletResponse response
@@ -96,7 +115,7 @@ public class LegacyController extends AbstractController {
 		return String.format("forward:/question/byaudience/?sessionkey=%s", sessionKey);
 	}
 
-	@RequestMapping(value = "/session/{sessionKey}/interposedcount")
+	@RequestMapping(value = "/session/{sessionKey}/interposedcount", method = RequestMethod.GET)
 	public final String redirectQuestionByAudienceCount(
 			@PathVariable final String sessionKey,
 			final HttpServletResponse response
@@ -105,7 +124,7 @@ public class LegacyController extends AbstractController {
 		return String.format("forward:/question/byaudience/count?sessionkey=%s", sessionKey);
 	}
 
-	@RequestMapping(value = "/session/{sessionKey}/interposedreadingcount")
+	@RequestMapping(value = "/session/{sessionKey}/interposedreadingcount", method = RequestMethod.GET)
 	public final String redirectQuestionByAudienceReadCount(
 			@PathVariable final String sessionKey,
 			final HttpServletResponse response

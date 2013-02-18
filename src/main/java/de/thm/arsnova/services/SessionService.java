@@ -53,8 +53,8 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
-	public final List<Session> getMySessions(final String username) {
-		return databaseDao.getMySessions(username);
+	public final List<Session> getMySessions(final User user) {
+		return databaseDao.getMySessions(user);
 	}
 
 	@Override

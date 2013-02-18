@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -43,6 +44,7 @@ import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 
 @Controller
+@RequestMapping("/session")
 public class SessionController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(SessionController.class);
@@ -53,13 +55,13 @@ public class SessionController extends AbstractController {
 	@Autowired
 	private IUserService userService;
 
-	@RequestMapping(value = "/session/{sessionkey}", method = RequestMethod.GET)
+	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.GET)
 	@ResponseBody
 	public final Session joinSession(@PathVariable final String sessionkey) {
 		return sessionService.joinSession(sessionkey);
 	}
 
-	@RequestMapping(value = "/session/{sessionkey}/online", method = RequestMethod.POST)
+	@RequestMapping(value = "/{sessionkey}/online", method = RequestMethod.POST)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.CREATED)
 	public final LoggedIn registerAsOnlineUser(
@@ -75,7 +77,7 @@ public class SessionController extends AbstractController {
 		throw new RuntimeException();
 	}
 
-	@RequestMapping(value = "/session/{sessionkey}/activeusercount", method = RequestMethod.GET)
+	@RequestMapping(value = "/{sessionkey}/activeusercount", method = RequestMethod.GET)
 	@ResponseBody
 	public final int countActiveUsers(
 			@PathVariable final String sessionkey,
@@ -84,7 +86,7 @@ public class SessionController extends AbstractController {
 		return sessionService.countActiveUsers(sessionkey);
 	}
 
-	@RequestMapping(value = "/session", method = RequestMethod.POST)
+	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.CREATED)
 	public final Session postNewSession(@RequestBody final Session session, final HttpServletResponse response) {
@@ -97,27 +99,32 @@ public class SessionController extends AbstractController {
 		return null;
 	}
 
-	@RequestMapping(value = { "/mySessions", "/session/mysessions" }, method = RequestMethod.GET)
+	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@ResponseBody
-	public final List<Session> getMySession(final HttpServletResponse response) {
-		String username = userService.getCurrentUser().getUsername();
-		if (username == null) {
-			throw new NotFoundException();
+	public final List<Session> getSessions(
+			@RequestParam final String filter,
+			final HttpServletResponse response
+	) {
+		User user = userService.getCurrentUser();
+		List<Session> sessions = null;
+		
+		/* TODO: Could @Authorized annotation be used instead of this check? */
+		if (null == user) {
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			
+			return null;
 		}
-		List<Session> sessions = sessionService.getMySessions(username);
+		
+		if ("owned".equals(filter)) {
+			sessions = sessionService.getMySessions(user);
+		} else if ("visited".equals(filter)) {
+			sessions = sessionService.getMyVisitedSessions(userService.getCurrentUser());
+		}
+		
 		if (sessions == null || sessions.isEmpty()) {
-			throw new NotFoundException();
+			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
 		}
-		return sessions;
-	}
-
-	@RequestMapping(value = "/session/visitedsessions", method = RequestMethod.GET)
-	@ResponseBody
-	public final List<Session> getMyVisitedSession(final HttpServletResponse response) {
-		List<Session> sessions = sessionService.getMyVisitedSessions(userService.getCurrentUser());
-		if (sessions == null || sessions.isEmpty()) {
-			throw new NoContentException();
-		}
+		
 		return sessions;
 	}
 }

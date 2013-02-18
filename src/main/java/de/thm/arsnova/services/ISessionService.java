@@ -34,7 +34,7 @@ public interface ISessionService {
 
 	String generateKeyword();
 
-	List<Session> getMySessions(String username);
+	List<Session> getMySessions(User user);
 
 	List<Session> getMyVisitedSessions(User currentUser);
 
