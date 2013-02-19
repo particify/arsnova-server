@@ -1400,6 +1400,11 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		
 		public void setCourseIdKeys(List<Course> courses) {
+			if (courses.isEmpty()) {
+				this.keys = "[]";
+				return;
+			}
+			
 			StringBuilder sb = new StringBuilder();
 			sb.append("[");
 			for (int i = 0; i < courses.size() - 1; i++) {
