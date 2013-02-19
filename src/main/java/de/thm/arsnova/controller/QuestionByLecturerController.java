@@ -44,7 +44,7 @@ import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IQuestionService;
 
 @Controller
-@RequestMapping("/question/bylecturer")
+@RequestMapping("/lecturerquestion")
 public class QuestionByLecturerController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(QuestionByLecturerController.class);
@@ -129,7 +129,7 @@ public class QuestionByLecturerController extends AbstractController {
 	}
 
 	@RequestMapping(
-			value = { "/list" },
+			value = { "/" },
 			method = RequestMethod.GET
 	)
 	@ResponseBody
@@ -139,7 +139,9 @@ public class QuestionByLecturerController extends AbstractController {
 	) {
 		List<Question> questions = questionService.getSkillQuestions(sessionkey);
 		if (questions == null || questions.isEmpty()) {
-			throw new NotFoundException();
+			response.setStatus(HttpStatus.NO_CONTENT.value());
+			
+			return null;
 		}
 		return questions;
 	}
@@ -150,6 +152,8 @@ public class QuestionByLecturerController extends AbstractController {
 		return questionService.getSkillQuestionCount(sessionkey);
 	}
 
+	/*
+	 * TODO: is this used anywhere?
 	@RequestMapping(value = "/ids", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<String> getQuestionIds(
@@ -162,6 +166,7 @@ public class QuestionByLecturerController extends AbstractController {
 		}
 		return questions;
 	}
+	*/
 
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)
 	@ResponseBody
@@ -231,7 +236,7 @@ public class QuestionByLecturerController extends AbstractController {
 	 * @throws ForbiddenException
 	 *             if not logged in
 	 */
-	@RequestMapping(value = "/{questionId}/answers", method = RequestMethod.GET)
+	@RequestMapping(value = "/{questionId}/answer/", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<Answer> getAnswers(
 			@PathVariable final String questionId,
@@ -244,7 +249,7 @@ public class QuestionByLecturerController extends AbstractController {
 		return answers;
 	}
 
-	@RequestMapping(value = "/{questionId}/answer", method = RequestMethod.POST)
+	@RequestMapping(value = "/{questionId}/answer/", method = RequestMethod.POST)
 	@ResponseBody
 	public final Answer saveAnswer(
 			@PathVariable final String questionId,
@@ -275,7 +280,7 @@ public class QuestionByLecturerController extends AbstractController {
 		questionService.deleteAnswer(questionId, answerId);
 	}
 
-	@RequestMapping(value = "/{questionId}/answers", method = RequestMethod.DELETE)
+	@RequestMapping(value = "/{questionId}/answer/", method = RequestMethod.DELETE)
 	@ResponseBody
 	public final void deleteAnswers(
 			@PathVariable final String questionId,
@@ -306,7 +311,7 @@ public class QuestionByLecturerController extends AbstractController {
 		return questionService.getAnswerCount(questionId);
 	}
 
-	@RequestMapping(value = "/{questionId}/freetextanswers", method = RequestMethod.GET)
+	@RequestMapping(value = "/{questionId}/freetextanswer/", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<Answer> getFreetextAnswers(
 			@PathVariable final String questionId,

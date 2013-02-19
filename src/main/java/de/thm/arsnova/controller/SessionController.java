@@ -38,8 +38,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.exceptions.NoContentException;
-import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 
@@ -102,7 +100,8 @@ public class SessionController extends AbstractController {
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<Session> getSessions(
-			@RequestParam final String filter,
+			@RequestParam(value = "ownedonly", defaultValue = "false") final boolean ownedOnly,
+			@RequestParam(value = "visitedonly", defaultValue = "false") final boolean visitedOnly,
 			final HttpServletResponse response
 	) {
 		User user = userService.getCurrentUser();
@@ -115,10 +114,15 @@ public class SessionController extends AbstractController {
 			return null;
 		}
 		
-		if ("owned".equals(filter)) {
+		/* TODO: implement all parameter combinations, implement use of user parameter */
+		if (ownedOnly && !visitedOnly) {
 			sessions = sessionService.getMySessions(user);
-		} else if ("visited".equals(filter)) {
+		} else if (visitedOnly && !ownedOnly) {
 			sessions = sessionService.getMyVisitedSessions(userService.getCurrentUser());
+		} else {
+			response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
+			
+			return null;
 		}
 		
 		if (sessions == null || sessions.isEmpty()) {
@@ -126,5 +130,99 @@ public class SessionController extends AbstractController {
 		}
 		
 		return sessions;
+	}
+	
+	/* internal redirections */
+
+	@RequestMapping(value = "/{sessionKey}/lecturerquestion")
+	public final String redirectLecturerQuestion(
+			@PathVariable final String sessionKey,
+			final HttpServletResponse response
+	) {
+		response.addHeader("X-Forwarded", "1");
+		
+		return String.format("forward:/lecturerquestion/?sessionkey=%s", sessionKey);
+	}
+
+	@RequestMapping(value = "/{sessionKey}/lecturerquestion/{arg1}")
+	public final String redirectLecturerQuestionWithOneArgument(
+			@PathVariable final String sessionKey,
+			@PathVariable final String arg1,
+			final HttpServletResponse response
+	) {
+		response.addHeader("X-Forwarded", "1");
+		
+		return String.format("forward:/lecturerquestion/%s/?sessionkey=%s", arg1, sessionKey);
+	}
+
+	@RequestMapping(value = "/{sessionKey}/lecturerquestion/{arg1}/{arg2}")
+	public final String redirectLecturerQuestionWithTwoArguments(
+			@PathVariable final String sessionKey,
+			@PathVariable final String arg1,
+			@PathVariable final String arg2,
+			final HttpServletResponse response
+	) {
+		response.addHeader("X-Forwarded", "1");
+		
+		return String.format("forward:/lecturerquestion/%s/%s/?sessionkey=%s", arg1, arg2, sessionKey);
+	}
+
+	@RequestMapping(value = "/{sessionKey}/lecturerquestion/{arg1}/{arg2}/{arg3}")
+	public final String redirectLecturerQuestionWithThreeArguments(
+			@PathVariable final String sessionKey,
+			@PathVariable final String arg1,
+			@PathVariable final String arg2,
+			@PathVariable final String arg3,
+			final HttpServletResponse response
+	) {
+		response.addHeader("X-Forwarded", "1");
+		
+		return String.format("forward:/lecturerquestion/%s/%s/%s/?sessionkey=%s", arg1, arg2, arg3, sessionKey);
+	}
+
+	@RequestMapping(value = "/{sessionKey}/audiencequestion")
+	public final String redirectAudienceQuestion(
+			@PathVariable final String sessionKey,
+			final HttpServletResponse response
+	) {
+		response.addHeader("X-Forwarded", "1");
+		
+		return String.format("forward:/audiencequestion/?sessionkey=%s", sessionKey);
+	}
+
+	@RequestMapping(value = "/{sessionKey}/audiencequestion/{arg1}")
+	public final String redirectAudienceQuestionWithOneArgument(
+			@PathVariable final String sessionKey,
+			@PathVariable final String arg1,
+			final HttpServletResponse response
+	) {
+		response.addHeader("X-Forwarded", "1");
+		
+		return String.format("forward:/audiencequestion/%s/?sessionkey=%s", arg1, sessionKey);
+	}
+
+	@RequestMapping(value = "/{sessionKey}/audiencequestion/{arg1}/{arg2}")
+	public final String redirectAudienceQuestionWithTwoArguments(
+			@PathVariable final String sessionKey,
+			@PathVariable final String arg1,
+			@PathVariable final String arg2,
+			final HttpServletResponse response
+	) {
+		response.addHeader("X-Forwarded", "1");
+		
+		return String.format("forward:/audiencequestion/%s/%s/?sessionkey=%s", arg1, arg2, sessionKey);
+	}
+
+	@RequestMapping(value = "/{sessionKey}/audiencequestion/{arg1}/{arg2}/{arg3}")
+	public final String redirectAudienceQuestionWithThreeArguments(
+			@PathVariable final String sessionKey,
+			@PathVariable final String arg1,
+			@PathVariable final String arg2,
+			@PathVariable final String arg3,
+			final HttpServletResponse response
+	) {
+		response.addHeader("X-Forwarded", "1");
+		
+		return String.format("forward:/audiencequestion/%s/%s/%s/?sessionkey=%s", arg1, arg2, arg3, sessionKey);
 	}
 }

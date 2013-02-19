@@ -40,7 +40,7 @@ public class LegacyController extends AbstractController {
 	) {
 		response.addHeader("X-Deprecated-API", "1");
 		
-		return "forward:/session/?filter=owned";
+		return "forward:/session/?ownedonly=true";
 	}
 
 	@RequestMapping(value = "/session/visitedsessions", method = RequestMethod.GET)
@@ -49,7 +49,7 @@ public class LegacyController extends AbstractController {
 	) {
 		response.addHeader("X-Deprecated-API", "1");
 		
-		return "forward:/session/?filter=visited";
+		return "forward:/session/?visitedonly=true";
 	}
 
 	@RequestMapping(value = "/session/{sessionKey}/question")
@@ -58,7 +58,7 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		return String.format("forward:/question/bylecturer/?sessionkey=%s", sessionKey);
+		return String.format("forward:/lecturerquestion/?sessionkey=%s", sessionKey);
 	}
 
 	@RequestMapping(value = "/session/{sessionKey}/skillquestions", method = RequestMethod.GET)
@@ -67,7 +67,7 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		return String.format("forward:/question/bylecturer/list?sessionkey=%s", sessionKey);
+		return String.format("forward:/lecturerquestion/?sessionkey=%s", sessionKey);
 	}
 
 	@RequestMapping(value = "/session/{sessionKey}/skillquestioncount", method = RequestMethod.GET)
@@ -76,7 +76,7 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		return String.format("forward:/question/bylecturer/count?sessionkey=%s", sessionKey);
+		return String.format("forward:/lecturerquestion/count?sessionkey=%s", sessionKey);
 	}
 
 	@RequestMapping(value = "/session/{sessionKey}/answercount", method = RequestMethod.GET)
@@ -85,7 +85,7 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		return String.format("forward:/question/bylecturer/answercount?sessionkey=%s", sessionKey);
+		return String.format("forward:/lecturerquestion/answercount?sessionkey=%s", sessionKey);
 	}
 
 	@RequestMapping(value = "/session/{sessionKey}/unanswered", method = RequestMethod.GET)
@@ -94,7 +94,7 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		return String.format("forward:/question/bylecturer/answercount?sessionkey=%s", sessionKey);
+		return String.format("forward:/lecturerquestion/answercount?sessionkey=%s", sessionKey);
 	}
 
 	@RequestMapping(value = "/session/{sessionKey}/myanswers", method = RequestMethod.GET)
@@ -103,7 +103,7 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		return String.format("forward:/question/bylecturer/myanswers?sessionkey=%s", sessionKey);
+		return String.format("forward:/lecturerquestion/myanswers?sessionkey=%s", sessionKey);
 	}
 
 	@RequestMapping(value = "/session/{sessionKey}/interposed")
@@ -112,7 +112,7 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		return String.format("forward:/question/byaudience/?sessionkey=%s", sessionKey);
+		return String.format("forward:/audiencequestion/?sessionkey=%s", sessionKey);
 	}
 
 	@RequestMapping(value = "/session/{sessionKey}/interposedcount", method = RequestMethod.GET)
@@ -121,7 +121,7 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		return String.format("forward:/question/byaudience/count?sessionkey=%s", sessionKey);
+		return String.format("forward:/audiencequestion/count?sessionkey=%s", sessionKey);
 	}
 
 	@RequestMapping(value = "/session/{sessionKey}/interposedreadingcount", method = RequestMethod.GET)
@@ -130,7 +130,7 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		return String.format("forward:/question/byaudience/readcount?sessionkey=%s", sessionKey);
+		return String.format("forward:/audiencequestion/readcount?sessionkey=%s", sessionKey);
 	}
 
 	/* generalized routes */
@@ -142,7 +142,7 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		return String.format("forward:/question/bylecturer/%s?sessionkey=%s", arg1, sessionKey);
+		return String.format("forward:/lecturerquestion/%s/?sessionkey=%s", arg1, sessionKey);
 	}
 
 	@RequestMapping(
@@ -155,7 +155,7 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		return String.format("forward:/question/bylecturer/%s/%s?sessionkey=%s", arg1, arg2, sessionKey);
+		return String.format("forward:/lecturerquestion/%s/%s/?sessionkey=%s", arg1, arg2, sessionKey);
 	}
 
 	@RequestMapping(value = "/session/{sessionKey}/interposed/{arg1}")
@@ -165,7 +165,7 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		return String.format("forward:/question/byaudience/%s?sessionkey=%s", arg1, sessionKey);
+		return String.format("forward:/audiencequestion/%s/?sessionkey=%s", arg1, sessionKey);
 	}
 
 	@RequestMapping(value = "/session/{sessionKey}/interposed/{arg1}/{arg2}")
@@ -176,7 +176,7 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		return String.format("forward:/question/byaudience/%s/%s?sessionkey=%s", arg1, arg2, sessionKey);
+		return String.format("forward:/audiencequestion/%s/%s/?sessionkey=%s", arg1, arg2, sessionKey);
 	}
 
 }

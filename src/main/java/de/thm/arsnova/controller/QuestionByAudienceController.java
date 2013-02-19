@@ -42,7 +42,7 @@ import de.thm.arsnova.exceptions.PreconditionFailedException;
 import de.thm.arsnova.services.IQuestionService;
 
 @Controller
-@RequestMapping("/question/byaudience")
+@RequestMapping("/audiencequestion")
 public class QuestionByAudienceController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(QuestionByAudienceController.class);
