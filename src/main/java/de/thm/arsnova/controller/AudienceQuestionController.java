@@ -43,9 +43,9 @@ import de.thm.arsnova.services.IQuestionService;
 
 @Controller
 @RequestMapping("/audiencequestion")
-public class QuestionByAudienceController extends AbstractController {
+public class AudienceQuestionController extends AbstractController {
 
-	public static final Logger LOGGER = LoggerFactory.getLogger(QuestionByAudienceController.class);
+	public static final Logger LOGGER = LoggerFactory.getLogger(AudienceQuestionController.class);
 
 	@Autowired
 	private IQuestionService questionService;

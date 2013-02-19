@@ -30,7 +30,7 @@ import de.thm.arsnova.services.StubUserService;
 		"file:src/main/webapp/WEB-INF/spring/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
 		"file:src/test/resources/test-config.xml" })
-public class QuestionByLecturerControllerTest {
+public class LecturerQuestionControllerTest {
 
 	@Inject
 	private ApplicationContext applicationContext;
@@ -39,7 +39,7 @@ public class QuestionByLecturerControllerTest {
 	private HandlerAdapter handlerAdapter;
 
 	@Autowired
-	private QuestionByLecturerController questionByLecturerController;
+	private LecturerQuestionController lecturerQuestionController;
 	
 	@Autowired
 	private StubUserService userService;
@@ -68,7 +68,7 @@ public class QuestionByLecturerControllerTest {
 		
 		request.setMethod("GET");
 		request.setRequestURI("/session/00000000/questionids");
-		final ModelAndView mav = handlerAdapter.handle(request, response, questionByLecturerController);
+		final ModelAndView mav = handlerAdapter.handle(request, response, lecturerQuestionController);
 		
 		assertNull(mav);
 		assertTrue(response.getStatus() == 404);
@@ -82,7 +82,7 @@ public class QuestionByLecturerControllerTest {
 		
 		request.setMethod("GET");
 		request.setRequestURI("/session/00000000/questionids");
-		final ModelAndView mav = handlerAdapter.handle(request, response, questionByLecturerController);
+		final ModelAndView mav = handlerAdapter.handle(request, response, lecturerQuestionController);
 		
 		assertNull(mav);
 		assertTrue(response.getStatus() == 401);
