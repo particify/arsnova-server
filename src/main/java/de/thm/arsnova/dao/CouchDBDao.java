@@ -1412,12 +1412,19 @@ public class CouchDBDao implements IDatabaseDao {
 			}
 			sb.append("\"" + courses.get(courses.size() - 1).getId() + "\"");
 			sb.append("]");
-			this.setKeys(sb.toString());
+			try {
+				this.setKeys(URLEncoder.encode(sb.toString(), "UTF-8"));
+			}
+			catch (UnsupportedEncodingException e) {
+				LOGGER.error("Error while encoding course ID keys", e);
+			}
 		}
 		
 		public String getQueryString() {
 			StringBuilder query = new StringBuilder();
-			query.append(super.getQueryString());
+			if (super.getQueryString() != null) {
+				query.append(super.getQueryString());
+			}
 			if (this.keys != null) {
 				if (query.toString().isEmpty()) {
 					query.append("&");
