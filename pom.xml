@@ -313,6 +313,11 @@
 			<artifactId>httpclient</artifactId>
 			<version>4.2.2</version>
 		</dependency>
+		<dependency>
+			<groupId>de.thm.arsnova.connector</groupId>
+			<artifactId>connector-client</artifactId>
+			<version>[0.12,)</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

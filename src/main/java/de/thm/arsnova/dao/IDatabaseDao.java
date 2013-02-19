@@ -22,6 +22,7 @@ package de.thm.arsnova.dao;
 import java.io.IOException;
 import java.util.List;
 
+import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.FoodVote;
@@ -128,4 +129,10 @@ public interface IDatabaseDao {
 	void deleteAnswer(String answerId);
 
 	void deleteInterposedQuestion(InterposedQuestion question);
+
+	String getCourseId(String keyword);
+
+	boolean isCourseSession(String keyword);
+
+	List<Session> getCourseSessions(List<Course> courses);
 }

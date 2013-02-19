@@ -19,16 +19,20 @@
 
 package de.thm.arsnova.services;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.annotation.Authenticated;
+import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.ForbiddenException;
 
 @Service
 public class SessionService implements ISessionService {
@@ -40,6 +44,9 @@ public class SessionService implements ISessionService {
 
 	@Autowired
 	private IUserService userService;
+	
+	@Autowired(required=false)
+	private ConnectorClient connectorClient;
 
 	public void setDatabaseDao(final IDatabaseDao newDatabaseDao) {
 		this.databaseDao = newDatabaseDao;
@@ -48,15 +55,42 @@ public class SessionService implements ISessionService {
 	@Override
 	@Authenticated
 	public final Session joinSession(final String keyword) {
-		userService.addCurrentUserToSessionMap(keyword);
-		return databaseDao.getSession(keyword);
+		Session session = databaseDao.getSession(keyword);
+		
+		if (connectorClient != null && databaseDao.isCourseSession(keyword)) {
+			String courseid = databaseDao.getCourseId(keyword);
+			if (! connectorClient.getMembership(userService.getCurrentUser().getUsername(), courseid).isMember()) {
+				throw new ForbiddenException();
+			}
+		}
+		
+		return session;
 	}
 
 	@Override
 	public final List<Session> getMySessions(final User user) {
-		return databaseDao.getMySessions(user);
+		List<Session> mySessions = databaseDao.getMySessions(user);
+		if (connectorClient == null) {
+			return mySessions;
+		}
+		
+		List<Session> courseSessions = databaseDao.getCourseSessions(
+			connectorClient.getCourses(user.getUsername()).getCourse()
+		);
+		
+		Map<String, Session> allAvailableSessions = new HashMap<String, Session>();
+		
+		for (Session session : mySessions) {
+			allAvailableSessions.put(session.get_id(), session);
+		}
+		
+		for (Session session : courseSessions) {
+			allAvailableSessions.put(session.get_id(), session);
+		}
+		
+		return (List<Session>) allAvailableSessions.values();
 	}
-
+	
 	@Override
 	public final List<Session> getMyVisitedSessions(final User user) {
 		return databaseDao.getMyVisitedSessions(user);
@@ -65,6 +99,14 @@ public class SessionService implements ISessionService {
 	@Override
 	@Authenticated
 	public final Session saveSession(final Session session) {
+		if (connectorClient != null && session.getCourseId() != null) {
+			if (! connectorClient.getMembership(
+				userService.getCurrentUser().getUsername(), session.getCourseId()).isMember()
+			) {
+				throw new ForbiddenException();
+			}
+		}
+		
 		return databaseDao.saveSession(session);
 	}
 

@@ -27,6 +27,9 @@ public class Session {
 	private String creator;
 	private boolean active;
 	private long lastOwnerActivity;
+	private String courseType;
+	private String courseId;
+
 	private String _id;
 	private String _rev;
 
@@ -104,5 +107,21 @@ public class Session {
 	
 	public boolean isCreator(User user) {
 		return user.getUsername().equals(this.creator);
+	}
+	
+	public String getCourseType() {
+		return courseType;
+	}
+
+	public void setCourseType(String courseType) {
+		this.courseType = courseType;
+	}
+
+	public String getCourseId() {
+		return courseId;
+	}
+
+	public void setCourseId(String courseId) {
+		this.courseId = courseId;
 	}
 }
