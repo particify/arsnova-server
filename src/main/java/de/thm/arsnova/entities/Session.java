@@ -124,4 +124,8 @@ public class Session {
 	public void setCourseId(String courseId) {
 		this.courseId = courseId;
 	}
+
+	public boolean isCourseSession() {
+		return (this.getCourseId() != null) && (!this.getCourseId().isEmpty());
+	}
 }

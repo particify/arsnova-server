@@ -130,9 +130,5 @@ public interface IDatabaseDao {
 
 	void deleteInterposedQuestion(InterposedQuestion question);
 
-	String getCourseId(String keyword);
-
-	boolean isCourseSession(String keyword);
-
 	List<Session> getCourseSessions(List<Course> courses);
 }

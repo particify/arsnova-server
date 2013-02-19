@@ -393,11 +393,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 		return null;
 	}
 
-	public String getCourseId(String keyword) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	@Override
 	public Answer updateAnswer(Answer answer) {
 		// TODO Auto-generated method stub
@@ -418,11 +413,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	@Override
 	public void deleteInterposedQuestion(InterposedQuestion question) {
 		// TODO Auto-generated method stub
-	}
-	
-	public boolean isCourseSession(String keyword) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 	
 	@Override

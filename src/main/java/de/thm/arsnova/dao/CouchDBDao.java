@@ -1356,17 +1356,6 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 	
 	@Override
-	public String getCourseId(String keyword) {
-		return this.getSession(keyword).getCourseId();
-	}
-	
-	@Override
-	public boolean isCourseSession(String keyword) {
-		return (this.getSession(keyword).getCourseId() != null) &&
-				(this.getSession(keyword).getCourseType() != null);
-	}
-	
-	@Override
 	public List<Session> getCourseSessions(List<Course> courses) {
 		ExtendedView view = new ExtendedView("logged_in/available_moodlesessions");
 		view.setCourseIdKeys(courses);

@@ -58,8 +58,8 @@ public class SessionService implements ISessionService {
 	public final Session joinSession(final String keyword) {
 		Session session = databaseDao.getSession(keyword);
 		
-		if (connectorClient != null && databaseDao.isCourseSession(keyword)) {
-			String courseid = databaseDao.getCourseId(keyword);
+		if (connectorClient != null && session.isCourseSession()) {
+			String courseid = session.getCourseId();
 			if (! connectorClient.getMembership(userService.getCurrentUser().getUsername(), courseid).isMember()) {
 				throw new ForbiddenException();
 			}
