@@ -52,6 +52,7 @@ public class FeedbackServiceTest {
 	@After
 	public final void cleanup() {
 		databaseDao.cleanupTestData();
+		userService.setUserAuthenticated(false);
 	}
 
 	@Test(expected = NotFoundException.class)

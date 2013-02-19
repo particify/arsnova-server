@@ -55,10 +55,13 @@ public class StatisticsServiceTest {
 	public final void testShouldReturnCurrentActiveUsers() {
 		Session session = new Session();
 		session.setKeyword("1278127812");
+		
+		userService.setUserAuthenticated(true);
 		databaseDao.registerAsOnlineUser(userService.getCurrentUser(), session);
 
 		int actual = statisticsService.countActiveUsers();
 		assertEquals(1, actual);
+		userService.setUserAuthenticated(false);
 	}
 	
 	@Test

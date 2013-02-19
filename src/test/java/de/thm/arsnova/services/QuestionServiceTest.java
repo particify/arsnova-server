@@ -52,6 +52,7 @@ public class QuestionServiceTest {
 	@After
 	public final void cleanup() {
 		databaseDao.cleanupTestData();
+		userService.setUserAuthenticated(false);
 	}
 
 	@Test(expected = UnauthorizedException.class)
