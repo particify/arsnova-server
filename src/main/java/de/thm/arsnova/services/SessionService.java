@@ -19,6 +19,7 @@
 
 package de.thm.arsnova.services;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,7 +89,7 @@ public class SessionService implements ISessionService {
 			allAvailableSessions.put(session.get_id(), session);
 		}
 		
-		return (List<Session>) allAvailableSessions.values();
+		return new ArrayList<Session>(allAvailableSessions.values());
 	}
 	
 	@Override
