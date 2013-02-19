@@ -18,7 +18,6 @@
  */
 package de.thm.arsnova.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -31,7 +30,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
@@ -61,33 +60,8 @@ public class CourseController extends AbstractController {
 		
 		if (connectorClient == null) {
 			throw new NotFoundException();
-		}		
-		
+		}
+
 		return connectorClient.getCourses(username).getCourse();
-	}
-	
-	@RequestMapping(value = "/mycoursesessions", method = RequestMethod.GET)
-	@ResponseBody
-	public final List<Session> myCourseSessions() {
-		String username = userService.getCurrentUser().getUsername();
-		
-		if (username == null) {
-			throw new UnauthorizedException();
-		}
-		
-		List<Session> sessions = sessionService.getMySessions(username);
-		List<Course> courses = this.myCourses();
-		
-		List<Session> result = new ArrayList<Session>();
-		
-		for (Session session : sessions) {
-			for (Course course : courses) {
-				if (session.getCourseId().equals(course.getId())) {
-					result.add(session);
-				}
-			}
-		}
-		
-		return result;
 	}
 }
