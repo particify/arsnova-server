@@ -119,7 +119,7 @@ public class SessionControllerTest {
 		userService.setUserAuthenticated(false);
 
 		request.setMethod("POST");
-		request.setRequestURI("/session");
+		request.setRequestURI("/session/");
 		request.setContentType("application/json");
 		request.setContent("{}".getBytes());
 

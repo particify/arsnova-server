@@ -219,7 +219,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Session> getMySessions(String username) {
+	public List<Session> getMySessions(User user) {
 		// TODO Auto-generated method stub
 		return null;
 	}
