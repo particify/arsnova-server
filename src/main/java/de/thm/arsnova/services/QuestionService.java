@@ -209,6 +209,9 @@ public class QuestionService implements IQuestionService {
 	@Authenticated
 	public InterposedReadingCount getInterposedReadingCount(String sessionKey) {
 		Session session = this.databaseDao.getSessionFromKeyword(sessionKey);
+		if (session == null) {
+			throw new NotFoundException();
+		}
 		return databaseDao.getInterposedReadingCount(session);
 	}
 
