@@ -71,7 +71,7 @@ public class CourseController extends AbstractController {
 		return result;
 	}
 
-	private class CourseNameComperator implements Comparator<Course> {
+	private static class CourseNameComperator implements Comparator<Course> {
 		@Override
 		public int compare(Course course1, Course course2) {
 			return course1.getFullname().compareToIgnoreCase(course2.getFullname());

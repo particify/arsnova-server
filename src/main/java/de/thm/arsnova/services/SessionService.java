@@ -155,7 +155,7 @@ public class SessionService implements ISessionService {
 		return databaseDao.countActiveUsers(session, since);
 	}
 	
-	private class SessionNameComperator implements Comparator<Session> {
+	public static class SessionNameComperator implements Comparator<Session> {
 		@Override
 		public int compare(Session session1, Session session2) {
 			return session1.getName().compareToIgnoreCase(session2.getName());
