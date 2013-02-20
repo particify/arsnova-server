@@ -20,6 +20,8 @@
 package de.thm.arsnova.services;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +91,10 @@ public class SessionService implements ISessionService {
 			allAvailableSessions.put(session.get_id(), session);
 		}
 		
-		return new ArrayList<Session>(allAvailableSessions.values());
+		List<Session> result = new ArrayList<Session>(allAvailableSessions.values());
+		Collections.sort(result, new SessionNameComperator());
+		
+		return result;
 	}
 	
 	@Override
@@ -148,5 +153,12 @@ public class SessionService implements ISessionService {
 		final long since = System.currentTimeMillis() - DURATION_IN_MILLIS;
 		Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		return databaseDao.countActiveUsers(session, since);
+	}
+	
+	private class SessionNameComperator implements Comparator<Session> {
+		@Override
+		public int compare(Session session1, Session session2) {
+			return session1.getName().compareToIgnoreCase(session2.getName());
+		}
 	}
 }

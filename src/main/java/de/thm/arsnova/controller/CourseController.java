@@ -18,6 +18,8 @@
  */
 package de.thm.arsnova.controller;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -38,14 +40,15 @@ import de.thm.arsnova.services.IUserService;
 @Controller
 public class CourseController extends AbstractController {
 
-	public static final Logger LOGGER = LoggerFactory.getLogger(CourseController.class);
+	public static final Logger LOGGER = LoggerFactory
+			.getLogger(CourseController.class);
 
-	@Autowired(required=false)
+	@Autowired(required = false)
 	private ConnectorClient connectorClient;
 
 	@Autowired
 	private IUserService userService;
-	
+
 	@Autowired
 	private ISessionService sessionService;
 
@@ -53,15 +56,25 @@ public class CourseController extends AbstractController {
 	@ResponseBody
 	public final List<Course> myCourses() {
 		String username = userService.getCurrentUser().getUsername();
-		
+
 		if (username == null) {
 			throw new UnauthorizedException();
 		}
-		
+
 		if (connectorClient == null) {
 			throw new NotFoundException();
 		}
 
-		return connectorClient.getCourses(username).getCourse();
+		List<Course> result = connectorClient.getCourses(username).getCourse();
+		Collections.sort(result, new CourseNameComperator());
+		
+		return result;
+	}
+
+	private class CourseNameComperator implements Comparator<Course> {
+		@Override
+		public int compare(Course course1, Course course2) {
+			return course1.getFullname().compareToIgnoreCase(course2.getFullname());
+		}
 	}
 }
