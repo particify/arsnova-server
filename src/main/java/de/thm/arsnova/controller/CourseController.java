@@ -18,6 +18,7 @@
  */
 package de.thm.arsnova.controller;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -71,7 +72,9 @@ public class CourseController extends AbstractController {
 		return result;
 	}
 
-	private static class CourseNameComperator implements Comparator<Course> {
+	private static class CourseNameComperator implements Comparator<Course>, Serializable {
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public int compare(Course course1, Course course2) {
 			return course1.getFullname().compareToIgnoreCase(course2.getFullname());

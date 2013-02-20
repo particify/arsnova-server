@@ -19,6 +19,7 @@
 
 package de.thm.arsnova.services;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -155,7 +156,9 @@ public class SessionService implements ISessionService {
 		return databaseDao.countActiveUsers(session, since);
 	}
 	
-	public static class SessionNameComperator implements Comparator<Session> {
+	public static class SessionNameComperator implements Comparator<Session>, Serializable{
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public int compare(Session session1, Session session2) {
 			return session1.getName().compareToIgnoreCase(session2.getName());
