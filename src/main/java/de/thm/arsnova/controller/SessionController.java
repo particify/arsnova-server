@@ -18,6 +18,7 @@
  */
 package de.thm.arsnova.controller;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -40,6 +41,8 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
+import de.thm.arsnova.services.SessionService.SessionNameComperator;
+import de.thm.arsnova.services.SessionService.SessionShortNameComperator;
 
 @Controller
 @RequestMapping("/session")
@@ -102,6 +105,7 @@ public class SessionController extends AbstractController {
 	public final List<Session> getSessions(
 			@RequestParam(value = "ownedonly", defaultValue = "false") final boolean ownedOnly,
 			@RequestParam(value = "visitedonly", defaultValue = "false") final boolean visitedOnly,
+			@RequestParam(value="sortby", defaultValue="name") final String sortby,
 			final HttpServletResponse response
 	) {
 		User user = userService.getCurrentUser();
@@ -127,6 +131,12 @@ public class SessionController extends AbstractController {
 		
 		if (sessions == null || sessions.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+		}
+		
+		if (sortby != null && sortby.equals("shortname")) {
+			Collections.sort(sessions, new SessionShortNameComperator());
+		} else {
+			Collections.sort(sessions, new SessionNameComperator());
 		}
 		
 		return sessions;

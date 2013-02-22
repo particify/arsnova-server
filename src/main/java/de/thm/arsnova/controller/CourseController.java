@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.connector.client.ConnectorClient;
@@ -55,7 +56,9 @@ public class CourseController extends AbstractController {
 
 	@RequestMapping(value = "/mycourses", method = RequestMethod.GET)
 	@ResponseBody
-	public final List<Course> myCourses() {
+	public final List<Course> myCourses(
+			@RequestParam(value="sortby", defaultValue="name") String sortby
+	) {
 		String username = userService.getCurrentUser().getUsername();
 
 		if (username == null) {
@@ -67,7 +70,12 @@ public class CourseController extends AbstractController {
 		}
 
 		List<Course> result = connectorClient.getCourses(username).getCourse();
-		Collections.sort(result, new CourseNameComperator());
+		
+		if (sortby != null && sortby.equals("shortname")) {
+			Collections.sort(result, new CourseShortNameComperator());
+		} else {
+			Collections.sort(result, new CourseNameComperator());
+		}
 		
 		return result;
 	}
@@ -78,6 +86,15 @@ public class CourseController extends AbstractController {
 		@Override
 		public int compare(Course course1, Course course2) {
 			return course1.getFullname().compareToIgnoreCase(course2.getFullname());
+		}
+	}
+	
+	private static class CourseShortNameComperator implements Comparator<Course>, Serializable {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public int compare(Course course1, Course course2) {
+			return course1.getShortname().compareToIgnoreCase(course2.getShortname());
 		}
 	}
 }

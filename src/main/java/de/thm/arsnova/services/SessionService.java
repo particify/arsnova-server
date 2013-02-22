@@ -93,7 +93,6 @@ public class SessionService implements ISessionService {
 		}
 		
 		List<Session> result = new ArrayList<Session>(allAvailableSessions.values());
-		Collections.sort(result, new SessionNameComperator());
 		
 		return result;
 	}
@@ -162,6 +161,15 @@ public class SessionService implements ISessionService {
 		@Override
 		public int compare(Session session1, Session session2) {
 			return session1.getName().compareToIgnoreCase(session2.getName());
+		}
+	}
+	
+	public static class SessionShortNameComperator implements Comparator<Session>, Serializable{
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public int compare(Session session1, Session session2) {
+			return session1.getShortName().compareToIgnoreCase(session2.getShortName());
 		}
 	}
 }
