@@ -59,6 +59,7 @@ public class SessionService implements ISessionService {
 	@Override
 	@Authenticated
 	public final Session joinSession(final String keyword) {
+		userService.addCurrentUserToSessionMap(keyword);
 		Session session = databaseDao.getSession(keyword);
 		
 		if (connectorClient != null && session.isCourseSession()) {
