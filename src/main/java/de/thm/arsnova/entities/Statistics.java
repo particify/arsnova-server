@@ -11,8 +11,8 @@ public class Statistics {
 	public int getAnswers() {
 		return answers;
 	}
-	public void setAnswers(int ansers) {
-		this.answers = ansers;
+	public void setAnswers(int answers) {
+		this.answers = answers;
 	}
 
 	public int getQuestions() {
