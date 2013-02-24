@@ -19,6 +19,7 @@
 package de.thm.arsnova.controller;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
+import de.thm.arsnova.connector.model.UserRole;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.ISessionService;
@@ -57,7 +59,7 @@ public class CourseController extends AbstractController {
 	@RequestMapping(value = "/mycourses", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<Course> myCourses(
-			@RequestParam(value="sortby", defaultValue="name") String sortby
+			@RequestParam(value="sortby", defaultValue="name") final String sortby
 	) {
 		String username = userService.getCurrentUser().getUsername();
 
@@ -69,7 +71,16 @@ public class CourseController extends AbstractController {
 			throw new NotFoundException();
 		}
 
-		List<Course> result = connectorClient.getCourses(username).getCourse();
+		List<Course> result = new ArrayList<Course>();
+		
+		for (Course course : connectorClient.getCourses(username).getCourse()) {
+			if (
+					course.getMembership().isMember()
+					&& course.getMembership().getUserrole().equals(UserRole.MANAGER)
+			) {
+				result.add(course);
+			}
+		}
 		
 		if (sortby != null && sortby.equals("shortname")) {
 			Collections.sort(result, new CourseShortNameComperator());
