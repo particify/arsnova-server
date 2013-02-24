@@ -76,7 +76,7 @@ public class CourseController extends AbstractController {
 		for (Course course : connectorClient.getCourses(username).getCourse()) {
 			if (
 					course.getMembership().isMember()
-					&& course.getMembership().getUserrole().equals(UserRole.MANAGER)
+					&& course.getMembership().getUserrole().equals(UserRole.TEACHER)
 			) {
 				result.add(course);
 			}
