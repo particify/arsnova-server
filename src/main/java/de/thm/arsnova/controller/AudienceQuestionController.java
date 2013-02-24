@@ -79,8 +79,7 @@ public class AudienceQuestionController extends AbstractController {
 
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
 	@ResponseBody
-	public final InterposedQuestion getInterposedQuestions(
-			@RequestParam final String sessionkey,
+	public final InterposedQuestion getInterposedQuestion(
 			@PathVariable final String questionId,
 			final HttpServletResponse response
 	) {
