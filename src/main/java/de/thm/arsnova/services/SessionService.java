@@ -64,7 +64,7 @@ public class SessionService implements ISessionService {
 		
 		if (connectorClient != null && session.isCourseSession()) {
 			String courseid = session.getCourseId();
-			if (! connectorClient.getMembership(userService.getCurrentUser().getUsername(), courseid).isMember()) {
+			if (!connectorClient.getMembership(userService.getCurrentUser().getUsername(), courseid).isMember()) {
 				throw new ForbiddenException();
 			}
 		}
@@ -107,7 +107,7 @@ public class SessionService implements ISessionService {
 	@Authenticated
 	public final Session saveSession(final Session session) {
 		if (connectorClient != null && session.getCourseId() != null) {
-			if (! connectorClient.getMembership(
+			if (!connectorClient.getMembership(
 				userService.getCurrentUser().getUsername(), session.getCourseId()).isMember()
 			) {
 				throw new ForbiddenException();
@@ -156,7 +156,7 @@ public class SessionService implements ISessionService {
 		return databaseDao.countActiveUsers(session, since);
 	}
 	
-	public static class SessionNameComperator implements Comparator<Session>, Serializable{
+	public static class SessionNameComperator implements Comparator<Session>, Serializable {
 		private static final long serialVersionUID = 1L;
 
 		@Override

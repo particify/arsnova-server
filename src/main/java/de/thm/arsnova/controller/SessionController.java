@@ -105,7 +105,7 @@ public class SessionController extends AbstractController {
 	public final List<Session> getSessions(
 			@RequestParam(value = "ownedonly", defaultValue = "false") final boolean ownedOnly,
 			@RequestParam(value = "visitedonly", defaultValue = "false") final boolean visitedOnly,
-			@RequestParam(value="sortby", defaultValue="name") final String sortby,
+			@RequestParam(value = "sortby", defaultValue = "name") final String sortby,
 			final HttpServletResponse response
 	) {
 		User user = userService.getCurrentUser();
@@ -114,7 +114,6 @@ public class SessionController extends AbstractController {
 		/* TODO: Could @Authorized annotation be used instead of this check? */
 		if (null == user) {
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			
 			return null;
 		}
 		
@@ -125,12 +124,12 @@ public class SessionController extends AbstractController {
 			sessions = sessionService.getMyVisitedSessions(userService.getCurrentUser());
 		} else {
 			response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
-			
 			return null;
 		}
 		
 		if (sessions == null || sessions.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+			return null;
 		}
 		
 		if (sortby != null && sortby.equals("shortname")) {

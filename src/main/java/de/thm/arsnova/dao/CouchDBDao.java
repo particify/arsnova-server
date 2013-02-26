@@ -650,11 +650,10 @@ public class CouchDBDao implements IDatabaseDao {
 				JSONObject json = results.getJSONArray("rows").optJSONObject(0).optJSONObject("value");
 				loggedIn = (LoggedIn) JSONObject.toBean(json, LoggedIn.class);
 				JSONArray vs = json.optJSONArray("visitedSessions");
-				if(vs != null) {
-					Collection<VisitedSession> visitedSessions = JSONArray.toCollection(vs,
-							VisitedSession.class);
-					loggedIn.setVisitedSessions(new ArrayList<VisitedSession>(visitedSessions));	
-				}				
+				if (vs != null) {
+					Collection<VisitedSession> visitedSessions = JSONArray.toCollection(vs, VisitedSession.class);
+					loggedIn.setVisitedSessions(new ArrayList<VisitedSession>(visitedSessions));
+				}
 			}
 
 			loggedIn.setUser(user.getUsername());
@@ -677,10 +676,9 @@ public class CouchDBDao implements IDatabaseDao {
 
 			LoggedIn l = (LoggedIn) JSONObject.toBean(doc.getJSONObject(), LoggedIn.class);
 			JSONArray vs = doc.getJSONObject().optJSONArray("visitedSessions");
-			if(vs != null) {
-				Collection<VisitedSession> visitedSessions = JSONArray.toCollection(vs,
-						VisitedSession.class);
-				l.setVisitedSessions(new ArrayList<VisitedSession>(visitedSessions));	
+			if (vs != null) {
+				Collection<VisitedSession> visitedSessions = JSONArray.toCollection(vs, VisitedSession.class);
+				l.setVisitedSessions(new ArrayList<VisitedSession>(visitedSessions));
 			}
 			return l;
 		} catch (UnsupportedEncodingException e) {
