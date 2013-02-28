@@ -21,6 +21,7 @@ package de.thm.arsnova.services;
 
 import java.util.List;
 
+import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
@@ -41,4 +42,6 @@ public interface ISessionService {
 	LoggedIn registerAsOnlineUser(User user, String sessionkey);
 
 	int countActiveUsers(String sessionkey);
+
+	int countSessions(List<Course> courses);
 }

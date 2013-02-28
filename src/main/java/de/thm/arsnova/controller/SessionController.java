@@ -18,6 +18,7 @@
  */
 package de.thm.arsnova.controller;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
@@ -91,13 +93,26 @@ public class SessionController extends AbstractController {
 	@ResponseBody
 	@ResponseStatus(HttpStatus.CREATED)
 	public final Session postNewSession(@RequestBody final Session session, final HttpServletResponse response) {
+		if (session != null && session.isCourseSession()) {
+			List<Course> courses = new ArrayList<Course>();
+			Course course = new Course();
+			course.setId(session.getCourseId());
+			courses.add(course);
+			int sessionCount = sessionService.countSessions(courses);
+			if (sessionCount > 0) {
+				String appendix = " (" + String.valueOf(sessionCount + 1) + ")";
+				session.setName(session.getName() + appendix);
+				session.setShortName(session.getShortName() + appendix);
+			}
+		}
 		Session newSession = sessionService.saveSession(session);
-		if (session != null) {
-			return newSession;
+
+		if (newSession == null) {
+			response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
+			return null;
 		}
 
-		response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
-		return null;
+		return newSession;
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)

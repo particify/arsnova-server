@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.annotation.Authenticated;
 import de.thm.arsnova.connector.client.ConnectorClient;
+import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
@@ -172,5 +173,14 @@ public class SessionService implements ISessionService {
 		public int compare(Session session1, Session session2) {
 			return session1.getShortName().compareToIgnoreCase(session2.getShortName());
 		}
+	}
+
+	@Override
+	public int countSessions(List<Course> courses) {
+		List<Session> sessions = databaseDao.getCourseSessions(courses);
+		if (sessions == null) {
+			return 0;
+		}
+		return sessions.size();
 	}
 }
