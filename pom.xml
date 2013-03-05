@@ -101,6 +101,7 @@
 				<version>2.5.2</version>
 				<configuration></configuration>
 			</plugin>
+			<!--
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
@@ -109,6 +110,7 @@
 					<configLocation>ARSnova-checkstyle-checker.xml</configLocation>
 				</configuration>
 			</plugin>
+			-->
 		</plugins>
 	</reporting>
 
