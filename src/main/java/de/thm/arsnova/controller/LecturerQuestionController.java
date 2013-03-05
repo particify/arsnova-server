@@ -149,6 +149,8 @@ public class LecturerQuestionController extends AbstractController {
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	@ResponseBody
 	public final int getSkillQuestionCount(@RequestParam final String sessionkey, final HttpServletResponse response) {
+		response.addHeader("X-Deprecated-API", "1");
+		
 		return questionService.getSkillQuestionCount(sessionkey);
 	}
 
@@ -187,6 +189,9 @@ public class LecturerQuestionController extends AbstractController {
 		if (answers == null || answers.isEmpty()) {
 			throw new NoContentException();
 		}
+		
+		response.addHeader("X-Deprecated-API", "1");
+		
 		return answers;
 	}
 
@@ -216,6 +221,9 @@ public class LecturerQuestionController extends AbstractController {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
 			return null;
 		}
+		
+		response.addHeader("X-Deprecated-API", "1");
+		
 		return answer;
 	}
 
@@ -308,6 +316,8 @@ public class LecturerQuestionController extends AbstractController {
 			@PathVariable final String questionId,
 			final HttpServletResponse response
 	) {
+		response.addHeader("X-Deprecated-API", "1");
+		
 		return questionService.getAnswerCount(questionId);
 	}
 
@@ -326,6 +336,8 @@ public class LecturerQuestionController extends AbstractController {
 			@RequestParam final String sessionkey,
 			final HttpServletResponse response
 	) {
+		response.addHeader("X-Deprecated-API", "1");
+		
 		return questionService.getMytAnswers(sessionkey);
 	}
 
@@ -335,6 +347,8 @@ public class LecturerQuestionController extends AbstractController {
 			@RequestParam final String sessionkey,
 			final HttpServletResponse response
 	) {
+		response.addHeader("X-Deprecated-API", "1");
+		
 		return questionService.getTotalAnswerCount(sessionkey);
 	}
 

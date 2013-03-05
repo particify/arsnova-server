@@ -71,6 +71,8 @@ public class SessionController extends AbstractController {
 			@PathVariable final String sessionkey,
 			final HttpServletResponse response
 	) {
+		response.addHeader("X-Deprecated-API", "1");
+		
 		User user = userService.getCurrentUser();
 		LoggedIn loggedIn = sessionService.registerAsOnlineUser(user, sessionkey);
 		if (loggedIn != null) {
@@ -86,6 +88,8 @@ public class SessionController extends AbstractController {
 			@PathVariable final String sessionkey,
 			final HttpServletResponse response
 	) {
+		response.addHeader("X-Deprecated-API", "1");
+		
 		return sessionService.countActiveUsers(sessionkey);
 	}
 

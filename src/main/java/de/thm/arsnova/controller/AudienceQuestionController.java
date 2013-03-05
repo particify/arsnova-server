@@ -56,6 +56,8 @@ public class AudienceQuestionController extends AbstractController {
 			@RequestParam final String sessionkey,
 			final HttpServletResponse response
 	) {
+		response.addHeader("X-Deprecated-API", "1");
+		
 		return questionService.getInterposedCount(sessionkey);
 	}
 
@@ -65,6 +67,8 @@ public class AudienceQuestionController extends AbstractController {
 			@RequestParam final String sessionkey,
 			final HttpServletResponse response
 	) {
+		response.addHeader("X-Deprecated-API", "1");
+		
 		return questionService.getInterposedReadingCount(sessionkey);
 	}
 
