@@ -43,11 +43,11 @@ public class LoginAuthenticationSucessHandler extends
 			return targetUrl;
 		}
 		String redirect = (String) session.getAttribute("ars-login-success-url");
-		
+
 		return redirect;
 	}
 
-	public final void setTargetUrl(final String newTargetUrl) {
-		this.targetUrl = newTargetUrl;
+	public final void setTargetUrl(final String url) {
+		targetUrl = url;
 	}
 }

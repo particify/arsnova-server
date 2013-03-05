@@ -39,7 +39,7 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		
+
 		return "forward:/session/?ownedonly=true";
 	}
 
@@ -48,7 +48,7 @@ public class LegacyController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		
+
 		return "forward:/session/?visitedonly=true";
 	}
 

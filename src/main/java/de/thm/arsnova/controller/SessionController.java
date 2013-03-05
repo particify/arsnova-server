@@ -72,7 +72,7 @@ public class SessionController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		
+
 		User user = userService.getCurrentUser();
 		LoggedIn loggedIn = sessionService.registerAsOnlineUser(user, sessionkey);
 		if (loggedIn != null) {
@@ -89,7 +89,7 @@ public class SessionController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		
+
 		return sessionService.countActiveUsers(sessionkey);
 	}
 
@@ -129,14 +129,14 @@ public class SessionController extends AbstractController {
 	) {
 		User user = userService.getCurrentUser();
 		List<Session> sessions = null;
-		
-		/* TODO: Could @Authorized annotation be used instead of this check? */
+
+		/* TODO Could @Authorized annotation be used instead of this check? */
 		if (null == user) {
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			return null;
 		}
-		
-		/* TODO: implement all parameter combinations, implement use of user parameter */
+
+		/* TODO implement all parameter combinations, implement use of user parameter */
 		if (ownedOnly && !visitedOnly) {
 			sessions = sessionService.getMySessions(user);
 		} else if (visitedOnly && !ownedOnly) {
@@ -145,21 +145,21 @@ public class SessionController extends AbstractController {
 			response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
 			return null;
 		}
-		
+
 		if (sessions == null || sessions.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
 			return null;
 		}
-		
+
 		if (sortby != null && sortby.equals("shortname")) {
 			Collections.sort(sessions, new SessionShortNameComperator());
 		} else {
 			Collections.sort(sessions, new SessionNameComperator());
 		}
-		
+
 		return sessions;
 	}
-	
+
 	/* internal redirections */
 
 	@RequestMapping(value = "/{sessionKey}/lecturerquestion")
@@ -168,7 +168,7 @@ public class SessionController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Forwarded", "1");
-		
+
 		return String.format("forward:/lecturerquestion/?sessionkey=%s", sessionKey);
 	}
 
@@ -179,7 +179,7 @@ public class SessionController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Forwarded", "1");
-		
+
 		return String.format("forward:/lecturerquestion/%s/?sessionkey=%s", arg1, sessionKey);
 	}
 
@@ -191,7 +191,7 @@ public class SessionController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Forwarded", "1");
-		
+
 		return String.format("forward:/lecturerquestion/%s/%s/?sessionkey=%s", arg1, arg2, sessionKey);
 	}
 
@@ -204,7 +204,7 @@ public class SessionController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Forwarded", "1");
-		
+
 		return String.format("forward:/lecturerquestion/%s/%s/%s/?sessionkey=%s", arg1, arg2, arg3, sessionKey);
 	}
 
@@ -214,7 +214,7 @@ public class SessionController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Forwarded", "1");
-		
+
 		return String.format("forward:/audiencequestion/?sessionkey=%s", sessionKey);
 	}
 
@@ -225,7 +225,7 @@ public class SessionController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Forwarded", "1");
-		
+
 		return String.format("forward:/audiencequestion/%s/?sessionkey=%s", arg1, sessionKey);
 	}
 
@@ -237,7 +237,7 @@ public class SessionController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Forwarded", "1");
-		
+
 		return String.format("forward:/audiencequestion/%s/%s/?sessionkey=%s", arg1, arg2, sessionKey);
 	}
 
@@ -250,7 +250,7 @@ public class SessionController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Forwarded", "1");
-		
+
 		return String.format("forward:/audiencequestion/%s/%s/%s/?sessionkey=%s", arg1, arg2, arg3, sessionKey);
 	}
 }

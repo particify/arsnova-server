@@ -59,9 +59,9 @@ public class SocketController extends AbstractController {
 		User u = userService.getCurrentUser();
 		LOGGER.info("authorize session: " + socketid + ", user is:  " + u);
 		response.setStatus(u != null ? HttpStatus.NO_CONTENT.value() : HttpStatus.UNAUTHORIZED.value());
-		if(u != null) {
-			userService.putUser2SocketId(UUID.fromString(socketid), u);	
-		}		
+		if (u != null) {
+			userService.putUser2SocketId(UUID.fromString(socketid), u);
+		}
 	}
 
 	@RequestMapping(value = "/url", method = RequestMethod.GET)

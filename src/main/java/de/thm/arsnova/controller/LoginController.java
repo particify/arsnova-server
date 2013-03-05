@@ -95,14 +95,14 @@ public class LoginController extends AbstractController {
 		if (null == referer) {
 			referer = "/";
 		}
-		
-		request.getSession().setAttribute("ars-login-success-url", 
+
+		request.getSession().setAttribute("ars-login-success-url",
 			null == successUrl ? referer + "#auth/checkLogin" : successUrl
 		);
-		request.getSession().setAttribute("ars-login-failure-url", 
+		request.getSession().setAttribute("ars-login-failure-url",
 			null == failureUrl ? referer : failureUrl
 		);
-		
+
 		if ("cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);
 		} else if ("twitter".equals(type)) {
@@ -123,7 +123,7 @@ public class LoginController extends AbstractController {
 			} else {
 				username = "Guest" + Sha512DigestUtils.shaHex(request.getSession().getId()).substring(0, 10);
 			}
-			org.springframework.security.core.userdetails.User user = 
+			org.springframework.security.core.userdetails.User user =
 					new org.springframework.security.core.userdetails.User(
 							username, "", true, true, true, true, authorities
 					);

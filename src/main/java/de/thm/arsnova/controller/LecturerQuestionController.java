@@ -140,7 +140,7 @@ public class LecturerQuestionController extends AbstractController {
 		List<Question> questions = questionService.getSkillQuestions(sessionkey);
 		if (questions == null || questions.isEmpty()) {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
-			
+
 			return null;
 		}
 		return questions;
@@ -150,12 +150,12 @@ public class LecturerQuestionController extends AbstractController {
 	@ResponseBody
 	public final int getSkillQuestionCount(@RequestParam final String sessionkey, final HttpServletResponse response) {
 		response.addHeader("X-Deprecated-API", "1");
-		
+
 		return questionService.getSkillQuestionCount(sessionkey);
 	}
 
 	/*
-	 * TODO: is this used anywhere?
+	 * TODO is this used anywhere?
 	@RequestMapping(value = "/ids", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<String> getQuestionIds(
@@ -189,9 +189,8 @@ public class LecturerQuestionController extends AbstractController {
 		if (answers == null || answers.isEmpty()) {
 			throw new NoContentException();
 		}
-		
 		response.addHeader("X-Deprecated-API", "1");
-		
+
 		return answers;
 	}
 
@@ -221,9 +220,9 @@ public class LecturerQuestionController extends AbstractController {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
 			return null;
 		}
-		
+
 		response.addHeader("X-Deprecated-API", "1");
-		
+
 		return answer;
 	}
 
@@ -317,7 +316,7 @@ public class LecturerQuestionController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		
+
 		return questionService.getAnswerCount(questionId);
 	}
 
@@ -337,7 +336,7 @@ public class LecturerQuestionController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		
+
 		return questionService.getMytAnswers(sessionkey);
 	}
 
@@ -348,7 +347,7 @@ public class LecturerQuestionController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
-		
+
 		return questionService.getTotalAnswerCount(sessionkey);
 	}
 

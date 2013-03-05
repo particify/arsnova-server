@@ -27,7 +27,7 @@ public class StatisticsController {
 	@ResponseBody
 	public final String countActiveUsers(HttpServletResponse response) {
 		response.addHeader("X-Deprecated-API", "1");
-		
+
 		return Integer.toString(statisticsService.countActiveUsers());
 	}
 
@@ -35,7 +35,7 @@ public class StatisticsController {
 	@ResponseBody
 	public final String countSessions(HttpServletResponse response) {
 		response.addHeader("X-Deprecated-API", "1");
-		
+
 		return Integer.toString(statisticsService.getStatistics().getOpenSessions()
 				+ statisticsService.getStatistics().getClosedSessions());
 	}

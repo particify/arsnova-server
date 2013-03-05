@@ -54,7 +54,7 @@ public class FoodVoteController extends AbstractController {
 		String menustring = JSONObject.fromObject(menu).getString("menu");
 		foodService.vote(menustring);
 	}
-	
+
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<FoodVote> getFoodVote() {
