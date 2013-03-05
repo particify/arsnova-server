@@ -76,7 +76,7 @@ public class LoginController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
 
-	@RequestMapping(value = "/doLogin", method = RequestMethod.GET)
+	@RequestMapping(value = { "/auth/login", "/doLogin" }, method = RequestMethod.GET)
 	public final View doLogin(
 			@RequestParam("type") final String type,
 			@RequestParam(value = "user", required = false) final String guestName,
@@ -137,13 +137,13 @@ public class LoginController extends AbstractController {
 		return null;
 	}
 
-	@RequestMapping(value = "/whoami", method = RequestMethod.GET)
+	@RequestMapping(value = { "/auth/", "/whoami" }, method = RequestMethod.GET)
 	@ResponseBody
 	public final User whoami() {
 		return userService.getCurrentUser();
 	}
 
-	@RequestMapping(value = "/logout", method = RequestMethod.GET)
+	@RequestMapping(value = { "/auth/logout", "/logout" }, method = RequestMethod.GET)
 	public final View doLogout(final HttpServletRequest request) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		request.getSession().invalidate();
