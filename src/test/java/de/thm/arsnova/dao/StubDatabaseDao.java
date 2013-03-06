@@ -419,4 +419,10 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public List<Session> getCourseSessions(List<Course> courses) {
 		return null;
 	}
+
+	@Override
+	public Session lockSession(Session session, Boolean lock) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
