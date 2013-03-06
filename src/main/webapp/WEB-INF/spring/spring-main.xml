@@ -53,5 +53,5 @@
 		<property name="password" value="${connector.password}"></property>
 	</bean>
 	
-	<http:access-control allow-origin="https://homepages.thm.de,https://homepages-fb.thm.de" allow-methods="GET" />
+	<http:access-control allow-origin="*" allow-methods="GET" />
 </beans>
