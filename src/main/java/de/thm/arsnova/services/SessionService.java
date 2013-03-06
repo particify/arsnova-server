@@ -183,4 +183,10 @@ public class SessionService implements ISessionService {
 		}
 		return sessions.size();
 	}
+
+	@Override
+	public Session setActive(String sessionkey, Boolean lock) {
+		Session session = databaseDao.getSessionFromKeyword(sessionkey);
+		return databaseDao.lockSession(session, lock);
+	}
 }

@@ -131,4 +131,6 @@ public interface IDatabaseDao {
 	void deleteInterposedQuestion(InterposedQuestion question);
 
 	List<Session> getCourseSessions(List<Course> courses);
+
+	Session lockSession(Session session, Boolean lock);
 }

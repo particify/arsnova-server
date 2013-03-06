@@ -44,4 +44,6 @@ public interface ISessionService {
 	int countActiveUsers(String sessionkey);
 
 	int countSessions(List<Course> courses);
+
+	Session setActive(String sessionkey, Boolean lock);
 }

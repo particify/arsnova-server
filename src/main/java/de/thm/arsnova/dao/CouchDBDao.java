@@ -1421,4 +1421,18 @@ public class CouchDBDao implements IDatabaseDao {
 			return query.toString();
 		}
 	}
+
+	@Override
+	public Session lockSession(Session session, Boolean lock) {
+		try {
+			Document s = this.database.getDocument(session.get_id());
+			s.put("active", lock);
+			this.database.saveDocument(s);
+			session.set_rev(s.getRev());
+			return session;
+		} catch (IOException e) {
+			LOGGER.error("Could not lock session {}", session);
+		}
+		return null;
+	}
 }
