@@ -81,7 +81,7 @@
 	</error-page>
 
 	<session-config>
-		<!-- delete sessions after 24 hours -->
-		<session-timeout>1440</session-timeout>
+		<!-- delete sessions after 6 hours -->
+		<session-timeout>360</session-timeout>
 	</session-config>
 </web-app>
