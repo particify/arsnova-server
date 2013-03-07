@@ -28,6 +28,7 @@ import de.thm.arsnova.services.IFeedbackService;
 import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.message.Feedback;
+import de.thm.arsnova.socket.message.Session;
 
 public class ARSnovaSocketIOServer {
 
@@ -93,6 +94,13 @@ public class ARSnovaSocketIOServer {
 			}
 		});
 
+		server.addEventListener("setSession", Session.class, new DataListener<Session>() {
+			@Override
+			public void onData(SocketIOClient client, Session session, AckRequest ackSender) {
+				userService.addUserToSessionBySocketId(client.getSessionId(), session.getKeyword());
+			}
+		});
+
 		server.addEventListener("arsnova/question/create", Question.class, new DataListener<Question>() {
 			@Override
 			public void onData(SocketIOClient client, Question question, AckRequest ackSender) {
@@ -111,6 +119,7 @@ public class ARSnovaSocketIOServer {
 			@Override
 			public void onDisconnect(SocketIOClient client) {
 				logger.info("addDisconnectListener.onDisconnect: Client: {}", new Object[] { client });
+				userService.removeUserFromSessionBySocketId(client.getSessionId());
 				userService.removeUser2SocketId(client.getSessionId());
 			}
 		});

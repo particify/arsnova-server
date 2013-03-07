@@ -41,7 +41,12 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 	public static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
 	private static final ConcurrentHashMap<UUID, User> socketid2user = new ConcurrentHashMap<UUID, User>();
+
+	/* used for Socket.IO online check solution (new) */
 	private static final ConcurrentHashMap<User, String> user2session = new ConcurrentHashMap<User, String>();
+
+	/* used for HTTP polling online check solution (legacy) */
+	private static final ConcurrentHashMap<User, String> user2sessionLegacy = new ConcurrentHashMap<User, String>();
 
 	@Override
 	public User getCurrentUser() {
@@ -106,7 +111,7 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 	public boolean isUserInSession(User user, String keyword) {
 		if (keyword == null)
 			return false;
-		String session = user2session.get(user);
+		String session = user2sessionLegacy.get(user);
 		if (session == null)
 			return false;
 		return keyword.equals(session);
@@ -120,6 +125,12 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 				result.add(e.getKey());
 			}
 		}
+		for (Entry<User, String> e : user2sessionLegacy.entrySet()) {
+			if (e.getValue().equals(keyword)) {
+				result.add(e.getKey());
+			}
+		}
+
 		return result;
 	}
 
@@ -129,12 +140,25 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 		User user = getCurrentUser();
 		if (user == null)
 			throw new UnauthorizedException();
+		user2sessionLegacy.put(user, keyword);
+	}
+
+	@Override
+	@Transactional(isolation = Isolation.READ_COMMITTED)
+	public void addUserToSessionBySocketId(UUID socketId, String keyword) {
+		User user = socketid2user.get(socketId);
 		user2session.put(user, keyword);
 	}
 
 	@Override
+	@Transactional(isolation = Isolation.READ_COMMITTED)
+	public void removeUserFromSessionBySocketId(UUID socketId) {
+		user2session.remove(socketId);
+	}
+
+	@Override
 	public String getSessionForUser(String username) {
-		for (Entry<User, String> entry  : user2session.entrySet()) {
+		for (Entry<User, String> entry  : user2sessionLegacy.entrySet()) {
 			if (entry.getKey().getUsername().equals(username)) return entry.getValue();
 		}
 		return null;
@@ -157,7 +181,7 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 			LOGGER.info("load from store: {}", map);
 
 			socketid2user.putAll(s2u);
-			user2session.putAll(u2s);
+			user2sessionLegacy.putAll(u2s);
 
 		} catch (IOException e) {
 			LOGGER.error("IOException during restoring UserService", e);
@@ -170,7 +194,7 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 	public void destroy() {
 		Hashtable<String, Map<?, ?>> map = new Hashtable<String, Map<?, ?>>();
 		map.put("socketid2user", socketid2user);
-		map.put("user2session", user2session);
+		map.put("user2session", user2sessionLegacy);
 
 		try {
 			File tmpDir = new File(System.getProperty("java.io.tmpdir"));
