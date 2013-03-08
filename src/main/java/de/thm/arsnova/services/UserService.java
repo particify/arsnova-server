@@ -140,6 +140,7 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 		User user = getCurrentUser();
 		if (user == null)
 			throw new UnauthorizedException();
+		LOGGER.info("Mapping user " + user.getUsername() + " to session " + keyword + " [legacy].");
 		user2sessionLegacy.put(user, keyword);
 	}
 
@@ -147,6 +148,7 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public void addUserToSessionBySocketId(UUID socketId, String keyword) {
 		User user = socketid2user.get(socketId);
+		LOGGER.info("Mapping user " + user.getUsername() + " to session " + keyword + ".");
 		user2session.put(user, keyword);
 	}
 
@@ -158,9 +160,17 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 
 	@Override
 	public String getSessionForUser(String username) {
-		for (Entry<User, String> entry  : user2sessionLegacy.entrySet()) {
-			if (entry.getKey().getUsername().equals(username)) return entry.getValue();
+		for (Entry<User, String> entry  : user2session.entrySet()) {
+			if (entry.getKey().getUsername().equals(username)) {
+				return entry.getValue();
+			}
 		}
+		for (Entry<User, String> entry  : user2sessionLegacy.entrySet()) {
+			if (entry.getKey().getUsername().equals(username)) {
+				return entry.getValue();
+			}
+		}
+
 		return null;
 	}
 	
