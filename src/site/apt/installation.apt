@@ -53,6 +53,24 @@ Server configuration
  
 +---------------------------+
 
- The configuration is ready for development usage. 
+ The configuration is ready for development usage. You should (re)start all services. ARSnova2 is now listening on HTTP port 80.
 
- Finally you should (re)start all services. ARSnova2 is now listening on HTTP port 80.
+Make environment usable for productive usage
+
+ If you intend to use ARSnova in productive environment, you will have to change a setting in your Tomcat installation.
+ Look for your Tomcat configuration directory and change the file "context.xml" to match this example:
+ 
+ +---------------------------+
+ 
+<Context>
+	<Manager pathname="<...your_tomcat_installation...>/sessions/arsnova.ser"/>
+</Context> 
+ 
+ +---------------------------+
+ 
+ This will enable session persistance across restarts as described {{{http://tomcat.apache.org/tomcat-7.0-doc/config/manager.html#Special_Features}here}}.
+
+ To protect requests and responses you should use HTTPS and configure your Apache Webserver installation to redirect all traffic according to this
+ {{{http://wiki.apache.org/httpd/RedirectSSL}example}}.
+
+ Finally you should (re)start all services. ARSnova2 is now listening on HTTP port 80 and 443.
