@@ -66,6 +66,7 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 			usernames.size(), user2sessionLegacy.size()
 		);
 		for (Entry<User, String> e : user2sessionLegacy.entrySet()) {
+			LOGGER.debug("entry: {}", e);
 			User key = e.getKey();
 			LOGGER.debug("key: {}", key);
 			String username = key.getUsername();
