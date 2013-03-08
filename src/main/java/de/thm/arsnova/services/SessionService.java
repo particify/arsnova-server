@@ -26,6 +26,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,7 +64,34 @@ public class SessionService implements ISessionService {
 
 	@Override
 	@Authenticated
+	public final Session joinSession(final String keyword, UUID socketId) {
+		/* Socket.IO solution */
+
+		Session session = databaseDao.getSession(keyword);
+		User user = userService.getUser2SocketId(socketId);
+
+		userService.addUserToSessionBySocketId(socketId, keyword);
+
+		if (session.getCreator().equals(user.getUsername())) {
+			databaseDao.updateSessionOwnerActivity(session);
+		}
+		databaseDao.registerAsOnlineUser(user, session);
+
+		if (connectorClient != null && session.isCourseSession()) {
+			String courseid = session.getCourseId();
+			if (!connectorClient.getMembership(user.getUsername(), courseid).isMember()) {
+				throw new ForbiddenException();
+			}
+		}
+
+		return session;
+	}
+
+	@Override
+	@Authenticated
 	public final Session joinSession(final String keyword) {
+		/* HTTP polling solution (legacy) */
+
 		userService.addCurrentUserToSessionMap(keyword);
 		socketIoServer.reportActiveUserCountForSession(keyword);
 
@@ -144,6 +172,8 @@ public class SessionService implements ISessionService {
 	@Override
 	@Authenticated
 	public final LoggedIn registerAsOnlineUser(final User user, final String sessionkey) {
+		/* HTTP polling solution (legacy) */
+		
 		Session session = this.joinSession(sessionkey);
 		if (session == null) {
 			return null;

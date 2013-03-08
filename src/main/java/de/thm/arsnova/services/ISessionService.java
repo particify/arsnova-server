@@ -20,6 +20,7 @@
 package de.thm.arsnova.services;
 
 import java.util.List;
+import java.util.UUID;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.LoggedIn;
@@ -46,4 +47,6 @@ public interface ISessionService {
 	int countSessions(List<Course> courses);
 
 	Session setActive(String sessionkey, Boolean lock);
+
+	Session joinSession(String keyword, UUID socketId);
 }
