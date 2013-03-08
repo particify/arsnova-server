@@ -91,7 +91,7 @@ public class SessionController extends AbstractController {
 	) {
 		response.addHeader("X-Deprecated-API", "1");
 
-		return sessionService.countActiveUsers(sessionkey);
+		return userService.getUsersInSessionCount(sessionkey);
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.POST)
