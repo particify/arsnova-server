@@ -23,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
@@ -33,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationToken;
 
+import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 
@@ -47,6 +50,28 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 
 	/* used for HTTP polling online check solution (legacy) */
 	private static final ConcurrentHashMap<User, String> user2sessionLegacy = new ConcurrentHashMap<User, String>();
+
+	@Autowired
+	private IDatabaseDao databaseDao;
+
+	private static final int DEFAULT_SCHEDULER_DELAY_MS = 60000;
+
+	private static final int MAX_USER_INACTIVE_SECONDS = 120;
+
+	@Scheduled(fixedDelay = DEFAULT_SCHEDULER_DELAY_MS)
+	public final void removeInactiveUsersFromLegacyMap() {
+		List<String> usernames = databaseDao.getInactiveUsers(MAX_USER_INACTIVE_SECONDS);
+		LOGGER.info(
+			"Inactive users count: {}, user2sessionLegacy count: {}",
+			usernames.size(), user2sessionLegacy.size()
+		);
+		for (Entry<User, String> e : user2sessionLegacy.entrySet()) {
+			if (usernames.contains(e.getKey().getUsername())) {
+				LOGGER.debug("Removing user {} from user2sessionLegacy", e.getKey());
+				user2sessionLegacy.remove(e.getKey());
+			}
+		}
+	}
 
 	@Override
 	public User getCurrentUser() {
@@ -132,6 +157,11 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 		}
 
 		return result;
+	}
+
+	@Override
+	public int getUsersInSessionCount(String keyword) {
+		return getUsersInSession(keyword).size();
 	}
 
 	@Override

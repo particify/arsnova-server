@@ -48,4 +48,6 @@ public interface IUserService {
 	void addUserToSessionBySocketId(UUID socketId, String keyword);
 
 	void removeUserFromSessionBySocketId(UUID socketId);
+
+	int getUsersInSessionCount(String keyword);
 }
