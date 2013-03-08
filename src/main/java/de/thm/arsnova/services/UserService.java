@@ -185,7 +185,8 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public void removeUserFromSessionBySocketId(UUID socketId) {
-		user2session.remove(socketId);
+		User user = socketid2user.get(socketId);
+		user2session.remove(user);
 	}
 
 	@Override
