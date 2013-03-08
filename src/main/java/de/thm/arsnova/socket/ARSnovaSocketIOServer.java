@@ -225,7 +225,7 @@ public class ARSnovaSocketIOServer {
 	 * @param client
 	 */
 	public void reportSessionDataToClient(String sessionKey, SocketIOClient client) {
-		broadcastInSession(sessionKey, "updateActiveUserCount", sessionService.countActiveUsers(sessionKey));
+		client.sendEvent("updateActiveUserCount", sessionService.countActiveUsers(sessionKey));
 		de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
 		client.sendEvent("updateFeedback", fb.getValues());
 	}
