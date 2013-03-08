@@ -105,6 +105,7 @@ public class ARSnovaSocketIOServer {
 			public void onData(SocketIOClient client, Session session, AckRequest ackSender) {
 				userService.addUserToSessionBySocketId(client.getSessionId(), session.getKeyword());
 				reportActiveUserCountForSession(session.getKeyword());
+				reportSessionDataToClient(session.getKeyword(), client);
 			}
 		});
 
@@ -214,6 +215,21 @@ public class ARSnovaSocketIOServer {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Currently only sends the feedback data to the client. Should be used for all
+	 * relevant Socket.IO data, the client needs to know after joining a session.
+	 *
+	 * @param sessionKey
+	 * @param client
+	 */
+	public void reportSessionDataToClient(String sessionKey, SocketIOClient client) {
+		de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
+		client.sendEvent("updateFeedback", fb.getValues());
+
+		/* updateActiveUserCount does not need to be send since it is broadcasted
+		 * after the client joined the session */
 	}
 
 	public void reportUpdatedFeedbackForSession(String sessionKey) {
