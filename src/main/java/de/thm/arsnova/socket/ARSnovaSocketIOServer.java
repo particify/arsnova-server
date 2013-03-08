@@ -26,8 +26,10 @@ import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.IFeedbackService;
 import de.thm.arsnova.services.IQuestionService;
+import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.message.Feedback;
+import de.thm.arsnova.socket.message.Session;
 
 public class ARSnovaSocketIOServer {
 
@@ -40,6 +42,9 @@ public class ARSnovaSocketIOServer {
 	@Autowired
 	private IUserService userService;
 
+	@Autowired
+	private ISessionService sessionService;
+
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private int portNumber;
@@ -49,6 +54,8 @@ public class ARSnovaSocketIOServer {
 	private String storepass;
 	private final Configuration config;
 	private SocketIOServer server;
+	
+	private int lastActiveUserCount = 0;
 
 	public ARSnovaSocketIOServer() {
 		config = new Configuration();
@@ -93,6 +100,15 @@ public class ARSnovaSocketIOServer {
 			}
 		});
 
+		server.addEventListener("setSession", Session.class, new DataListener<Session>() {
+			@Override
+			public void onData(SocketIOClient client, Session session, AckRequest ackSender) {
+				userService.addUserToSessionBySocketId(client.getSessionId(), session.getKeyword());
+				reportActiveUserCountForSession(session.getKeyword());
+				reportSessionDataToClient(session.getKeyword(), client);
+			}
+		});
+
 		server.addEventListener("arsnova/question/create", Question.class, new DataListener<Question>() {
 			@Override
 			public void onData(SocketIOClient client, Question question, AckRequest ackSender) {
@@ -111,6 +127,11 @@ public class ARSnovaSocketIOServer {
 			@Override
 			public void onDisconnect(SocketIOClient client) {
 				logger.info("addDisconnectListener.onDisconnect: Client: {}", new Object[] { client });
+				String sessionKey = userService.getSessionForUser(
+					userService.getUser2SocketId(client.getSessionId()).getUsername()
+				);
+				reportActiveUserCountForSession(sessionKey);
+				userService.removeUserFromSessionBySocketId(client.getSessionId());
 				userService.removeUser2SocketId(client.getSessionId());
 			}
 		});
@@ -196,21 +217,51 @@ public class ARSnovaSocketIOServer {
 		return result;
 	}
 
-	public void reportUpdatedFeedbackForSession(String session) {
+	/**
+	 * Currently only sends the feedback data to the client. Should be used for all
+	 * relevant Socket.IO data, the client needs to know after joining a session.
+	 *
+	 * @param sessionKey
+	 * @param client
+	 */
+	public void reportSessionDataToClient(String sessionKey, SocketIOClient client) {
+		de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
+		client.sendEvent("updateFeedback", fb.getValues());
+
+		/* updateActiveUserCount does not need to be send since it is broadcasted
+		 * after the client joined the session */
+	}
+
+	public void reportUpdatedFeedbackForSession(String sessionKey) {
+		de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
+		broadcastInSession(sessionKey, "updateFeedback", fb.getValues());
+	}
+
+	public void reportActiveUserCountForSession(String sessionKey) {
+		int count = sessionService.countActiveUsers(sessionKey);
+		if (count == lastActiveUserCount) {
+			return;
+		}
+		lastActiveUserCount = count;
+		broadcastInSession(sessionKey, "updateActiveUserCount", count);
+	}
+
+	public void broadcastInSession(String sessionKey, String eventName, Object data) {
+		logger.info("Broadcasting " + eventName + " for session " + sessionKey + ".");
+
 		/**
 		 * collect a list of users which are in the current session iterate over
 		 * all connected clients and if send feedback, if user is in current
 		 * session
 		 */
-		List<User> users = userService.getUsersInSession(session);
-		de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(session);
+		List<User> users = userService.getUsersInSession(sessionKey);
 
 		for (SocketIOClient c : server.getAllClients()) {
 			User u = userService.getUser2SocketId(c.getSessionId());
 			if (u != null && users.contains(u)) {
 				logger.info("sending out to client {}, username is: {}, current session is: {}",
-						new Object[] { c.getSessionId(), u.getUsername(), session });
-				c.sendEvent("updateFeedback", fb.getValues());
+						new Object[] { c.getSessionId(), u.getUsername(), sessionKey });
+				c.sendEvent(eventName, data);
 			}
 		}
 	}

@@ -38,6 +38,7 @@ import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.ForbiddenException;
+import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
 public class SessionService implements ISessionService {
@@ -49,7 +50,10 @@ public class SessionService implements ISessionService {
 
 	@Autowired
 	private IUserService userService;
-	
+
+	@Autowired
+	private ARSnovaSocketIOServer socketIoServer;
+
 	@Autowired(required=false)
 	private ConnectorClient connectorClient;
 
@@ -61,15 +65,16 @@ public class SessionService implements ISessionService {
 	@Authenticated
 	public final Session joinSession(final String keyword) {
 		userService.addCurrentUserToSessionMap(keyword);
+		socketIoServer.reportActiveUserCountForSession(keyword);
+
 		Session session = databaseDao.getSession(keyword);
-		
 		if (connectorClient != null && session.isCourseSession()) {
 			String courseid = session.getCourseId();
 			if (!connectorClient.getMembership(userService.getCurrentUser().getUsername(), courseid).isMember()) {
 				throw new ForbiddenException();
 			}
 		}
-		
+
 		return session;
 	}
 

@@ -44,4 +44,8 @@ public interface IUserService {
 	void addCurrentUserToSessionMap(String keyword);
 
 	String getSessionForUser(String username);
+
+	void addUserToSessionBySocketId(UUID socketId, String keyword);
+
+	void removeUserFromSessionBySocketId(UUID socketId);
 }
