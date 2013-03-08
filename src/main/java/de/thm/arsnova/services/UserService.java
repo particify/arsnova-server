@@ -66,7 +66,11 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 			usernames.size(), user2sessionLegacy.size()
 		);
 		for (Entry<User, String> e : user2sessionLegacy.entrySet()) {
-			if (usernames.contains(e.getKey().getUsername())) {
+			User key = e.getKey();
+			LOGGER.debug("key: {}", key);
+			String username = key.getUsername();
+			LOGGER.debug("username: {}", username);
+			if (usernames.contains(username)) {
 				LOGGER.debug("Removing user {} from user2sessionLegacy", e.getKey());
 				user2sessionLegacy.remove(e.getKey());
 			}
