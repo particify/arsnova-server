@@ -54,6 +54,8 @@ public class ARSnovaSocketIOServer {
 	private String storepass;
 	private final Configuration config;
 	private SocketIOServer server;
+	
+	private int lastActiveUserCount = 0;
 
 	public ARSnovaSocketIOServer() {
 		config = new Configuration();
@@ -221,6 +223,10 @@ public class ARSnovaSocketIOServer {
 
 	public void reportActiveUserCountForSession(String sessionKey) {
 		int count = sessionService.countActiveUsers(sessionKey);
+		if (count == lastActiveUserCount) {
+			return;
+		}
+		lastActiveUserCount = count;
 		broadcastInSession(sessionKey, "updateActiveUserCount", count);
 	}
 
