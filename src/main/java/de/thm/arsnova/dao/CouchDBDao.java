@@ -1370,7 +1370,31 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		return result;
 	}
-	
+
+	@Override
+	public final List<String> getInactiveUsers(int timeDifference) {
+		try {
+			long inactiveBeforeTimestamp = new Date().getTime() - timeDifference * 1000;
+
+			View view = new View("logged_in/by_and_only_timestamp_and_username");
+			view.setEndKey("[" + URLEncoder.encode(String.valueOf(inactiveBeforeTimestamp) + ",{}", "UTF-8") + "]");
+			LOGGER.debug("View: {}", view.getFullName());
+			ViewResults results = this.getDatabase().view(view);
+			LOGGER.debug("Result count: {}", String.valueOf(results.size()));
+
+			List<String> result = new ArrayList<String>();
+			for (Document d : results.getResults()) {
+				LOGGER.debug("key: {}", d.getString("key"));
+				result.add(d.getJSONObject().getJSONArray("key").getString(1));
+			}
+
+			return result;
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.error("Error while retrieving inactive users", e);
+		}
+		return null;
+	}
+
 	private class ExtendedView extends View {
 
 		private String keys;
