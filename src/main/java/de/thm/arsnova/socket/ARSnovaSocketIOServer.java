@@ -112,13 +112,6 @@ public class ARSnovaSocketIOServer {
 			}
 		});
 
-		server.addEventListener("arsnova/question/create", Question.class, new DataListener<Question>() {
-			@Override
-			public void onData(SocketIOClient client, Question question, AckRequest ackSender) {
-				questionService.saveQuestion(question);
-			}
-		});
-
 		server.addConnectListener(new ConnectListener() {
 			@Override
 			public void onConnect(SocketIOClient client) {
