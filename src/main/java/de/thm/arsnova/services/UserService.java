@@ -191,6 +191,11 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public void removeUserFromSessionBySocketId(UUID socketId) {
 		User user = socketid2user.get(socketId);
+		if (null == user) {
+			LOGGER.warn("null == user for socket {}", socketId);
+
+			return;
+		}
 		user2session.remove(user);
 	}
 
