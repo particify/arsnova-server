@@ -38,8 +38,13 @@ import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationToken
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 public class UserService implements IUserService, InitializingBean, DisposableBean {
+
+	private static final int DEFAULT_SCHEDULER_DELAY_MS = 60000;
+
+	private static final int MAX_USER_INACTIVE_SECONDS = 120;
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
@@ -54,13 +59,13 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 	@Autowired
 	private IDatabaseDao databaseDao;
 
-	private static final int DEFAULT_SCHEDULER_DELAY_MS = 60000;
-
-	private static final int MAX_USER_INACTIVE_SECONDS = 120;
+	@Autowired
+	private ARSnovaSocketIOServer socketIoServer;
 
 	@Scheduled(fixedDelay = DEFAULT_SCHEDULER_DELAY_MS)
 	public final void removeInactiveUsersFromLegacyMap() {
 		List<String> usernames = databaseDao.getInactiveUsers(MAX_USER_INACTIVE_SECONDS);
+		Set<String> affectedSessions = new HashSet<String>();
 		LOGGER.info(
 			"Inactive users count: {}, user2sessionLegacy count: {}",
 			usernames.size(), user2sessionLegacy.size()
@@ -72,9 +77,14 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 			String username = key.getUsername();
 			LOGGER.debug("username: {}", username);
 			if (usernames.contains(username)) {
+				affectedSessions.add(e.getValue());
 				LOGGER.debug("Removing user {} from user2sessionLegacy", e.getKey());
 				user2sessionLegacy.remove(e.getKey());
 			}
+		}
+		
+		for (String sessionKeyword : affectedSessions) {
+			socketIoServer.reportActiveUserCountForSession(sessionKeyword);
 		}
 	}
 
