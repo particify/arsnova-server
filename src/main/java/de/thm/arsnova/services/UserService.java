@@ -64,10 +64,10 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 
 	@Scheduled(fixedDelay = DEFAULT_SCHEDULER_DELAY_MS)
 	public final void removeInactiveUsersFromLegacyMap() {
-		List<String> usernames = databaseDao.getInactiveUsers(MAX_USER_INACTIVE_SECONDS);
+		List<String> usernames = databaseDao.getActiveUsers(MAX_USER_INACTIVE_SECONDS);
 		Set<String> affectedSessions = new HashSet<String>();
 		LOGGER.info(
-			"Inactive users count: {}, user2sessionLegacy count: {}",
+			"Active users in database: {}, active users in memory (user2sessionLegacy): {}",
 			usernames.size(), user2sessionLegacy.size()
 		);
 		for (Entry<User, String> e : user2sessionLegacy.entrySet()) {
@@ -76,8 +76,12 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 			LOGGER.debug("key: {}", key);
 			String username = key.getUsername();
 			LOGGER.debug("username: {}", username);
-			if (usernames.contains(username)) {
-				affectedSessions.add(e.getValue());
+			if (!usernames.contains(username)) {
+				if (null != e.getValue()) {
+					affectedSessions.add(e.getValue());
+				} else {
+					LOGGER.warn("Session for user {} is null", key);
+				}
 				LOGGER.debug("Removing user {} from user2sessionLegacy", e.getKey());
 				user2sessionLegacy.remove(e.getKey());
 			}

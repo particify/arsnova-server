@@ -427,7 +427,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<String> getInactiveUsers(int timeDifference) {
+	public List<String> getActiveUsers(int timeDifference) {
 		// TODO Auto-generated method stub
 		return null;
 	}

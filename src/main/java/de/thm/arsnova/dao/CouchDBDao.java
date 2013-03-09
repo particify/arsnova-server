@@ -1376,14 +1376,14 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final List<String> getInactiveUsers(int timeDifference) {
+	public final List<String> getActiveUsers(int timeDifference) {
 		try {
 			long inactiveBeforeTimestamp = new Date().getTime() - timeDifference * 1000;
 
 			View view = new View("logged_in/by_and_only_timestamp_and_username");
-			view.setEndKey("[" + URLEncoder.encode(String.valueOf(inactiveBeforeTimestamp) + ",{}", "UTF-8") + "]");
+			view.setStartKey("[" + URLEncoder.encode(String.valueOf(inactiveBeforeTimestamp), "UTF-8") + "]");
 			ViewResults results = this.getDatabase().view(view);
-			LOGGER.debug("getInactiveUsers result count: {}", String.valueOf(results.size()));
+			LOGGER.debug("getActiveUsers result count: {}", String.valueOf(results.size()));
 
 			List<String> result = new ArrayList<String>();
 			for (Document d : results.getResults()) {
@@ -1392,7 +1392,7 @@ public class CouchDBDao implements IDatabaseDao {
 
 			return result;
 		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("Error while retrieving inactive users", e);
+			LOGGER.error("Error while retrieving active users", e);
 		}
 		return null;
 	}

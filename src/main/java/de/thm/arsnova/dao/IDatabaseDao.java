@@ -134,5 +134,5 @@ public interface IDatabaseDao {
 
 	Session lockSession(Session session, Boolean lock);
 
-	List<String> getInactiveUsers(int timeDifference);
+	List<String> getActiveUsers(int timeDifference);
 }
