@@ -1378,13 +1378,11 @@ public class CouchDBDao implements IDatabaseDao {
 
 			View view = new View("logged_in/by_and_only_timestamp_and_username");
 			view.setEndKey("[" + URLEncoder.encode(String.valueOf(inactiveBeforeTimestamp) + ",{}", "UTF-8") + "]");
-			LOGGER.debug("View: {}", view.getFullName());
 			ViewResults results = this.getDatabase().view(view);
-			LOGGER.debug("Result count: {}", String.valueOf(results.size()));
+			LOGGER.debug("getInactiveUsers result count: {}", String.valueOf(results.size()));
 
 			List<String> result = new ArrayList<String>();
 			for (Document d : results.getResults()) {
-				LOGGER.debug("key: {}", d.getString("key"));
 				result.add(d.getJSONObject().getJSONArray("key").getString(1));
 			}
 
