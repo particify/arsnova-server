@@ -265,7 +265,7 @@ public class ARSnovaSocketIOServer {
 		 * all connected clients and if send feedback, if user is in current
 		 * session
 		 */
-		List<User> users = userService.getUsersInSession(sessionKey);
+		Set<User> users = userService.getUsersInSession(sessionKey);
 
 		for (SocketIOClient c : server.getAllClients()) {
 			User u = userService.getUser2SocketId(c.getSessionId());

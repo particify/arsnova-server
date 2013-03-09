@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -148,8 +148,8 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 	}
 
 	@Override
-	public List<User> getUsersInSession(String keyword) {
-		List<User> result = new ArrayList<User>();
+	public Set<User> getUsersInSession(String keyword) {
+		Set<User> result = new HashSet<User>();
 		for (Entry<User, String> e : user2session.entrySet()) {
 			if (e.getValue().equals(keyword)) {
 				result.add(e.getKey());
