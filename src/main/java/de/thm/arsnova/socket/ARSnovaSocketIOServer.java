@@ -95,8 +95,9 @@ public class ARSnovaSocketIOServer {
 
 				/**
 				 * send feedback back to clients
+				 * disabled since broadcast is already called in feedbackService.saveFeedback
 				 */
-				reportUpdatedFeedbackForSession(data.getSessionkey());
+				//reportUpdatedFeedbackForSession(data.getSessionkey());
 			}
 		});
 
@@ -104,6 +105,8 @@ public class ARSnovaSocketIOServer {
 			@Override
 			public void onData(SocketIOClient client, Session session, AckRequest ackSender) {
 				sessionService.joinSession(session.getKeyword(), client.getSessionId());
+				/* active user count has to be sent to the client since the broadcast is
+				 * not always sent as long as the polling solution is active simultaneously */
 				reportActiveUserCountForSession(session.getKeyword());
 				reportSessionDataToClient(session.getKeyword(), client);
 			}
@@ -236,11 +239,13 @@ public class ARSnovaSocketIOServer {
 	}
 
 	public void reportActiveUserCountForSession(String sessionKey) {
+		/* This check is needed as long as the HTTP polling solution is active simultaneously. */
 		int count = sessionService.countActiveUsers(sessionKey);
 		if (count == lastActiveUserCount) {
 			return;
 		}
 		lastActiveUserCount = count;
+
 		broadcastInSession(sessionKey, "updateActiveUserCount", count);
 	}
 
