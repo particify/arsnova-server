@@ -21,12 +21,17 @@
 package de.thm.arsnova.entities;
 
 public class InterposedQuestion {
-	
+
 	private String _id;
 	private String _rev;
 	private String type;
 	private String subject;
 	private String text;
+	/* FIXME sessionId actually is used to hold the sessionKey.
+	 * This really needs to be changed because it leads to a lot
+	 * of confusion. It can not be easily changed without a lot of
+	 * refactoring since the client application depends on the
+	 * current naming */
 	private String sessionId;
 	private long timestamp;
 	private boolean read;
