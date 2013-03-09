@@ -333,9 +333,9 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public boolean saveQuestion(Session session, InterposedQuestion question) {
+	public InterposedQuestion saveQuestion(Session session, InterposedQuestion question) {
 		// TODO Auto-generated method stub
-		return false;
+		return null;
 	}
 
 	@Override
