@@ -198,7 +198,7 @@ public class ARSnovaSocketIOServer {
 			// Find the client whose feedback has been deleted and send a
 			// message.
 			if (connectionIds.contains(client.getSessionId())) {
-				client.sendEvent("removedFeedback", arsSessions);
+				client.sendEvent("feedbackReset", arsSessions);
 			}
 		}
 	}
@@ -221,14 +221,14 @@ public class ARSnovaSocketIOServer {
 	 * @param client
 	 */
 	public void reportSessionDataToClient(String sessionKey, SocketIOClient client) {
-		client.sendEvent("updateActiveUserCount", userService.getUsersInSessionCount(sessionKey));
+		client.sendEvent("activeUserCountData", userService.getUsersInSessionCount(sessionKey));
 		de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
-		client.sendEvent("updateFeedback", fb.getValues());
+		client.sendEvent("feedbackData", fb.getValues());
 	}
 
 	public void reportUpdatedFeedbackForSession(String sessionKey) {
 		de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
-		broadcastInSession(sessionKey, "updateFeedback", fb.getValues());
+		broadcastInSession(sessionKey, "feedbackData", fb.getValues());
 	}
 
 	public void reportActiveUserCountForSession(String sessionKey) {
@@ -239,10 +239,25 @@ public class ARSnovaSocketIOServer {
 		}
 		lastActiveUserCount = count;
 
-		broadcastInSession(sessionKey, "updateActiveUserCount", count);
+		broadcastInSession(sessionKey, "activeUserCountData", count);
+	}
+
+	public void reportAnswersToLecturerQuestionAvailable(String sessionKey, String lecturerQuestionId) {
+		broadcastInSession(sessionKey, "answersToLecQuestionAvail", lecturerQuestionId);
+	}
+
+	public void reportAudienceQuestionAvailable(String sessionKey, String audienceQuestionId) {
+		/* TODO role handling implementation, send this only to users with role lecturer */
+		broadcastInSession(sessionKey, "audQuestionAvail", audienceQuestionId);
+	}
+
+	public void reportLecturerQuestionAvailable(String sessionKey, String lecturerQuestionId) {
+		/* TODO role handling implementation, send this only to users with role audience */
+		broadcastInSession(sessionKey, "lecQuestionAvail", lecturerQuestionId);
 	}
 
 	public void broadcastInSession(String sessionKey, String eventName, Object data) {
+		/* TODO role handling implementation */
 		logger.info("Broadcasting " + eventName + " for session " + sessionKey + ".");
 
 		/**

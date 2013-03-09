@@ -591,7 +591,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final boolean saveQuestion(final Session session, final InterposedQuestion question) {
+	public final InterposedQuestion saveQuestion(final Session session, final InterposedQuestion question) {
 		Document q = new Document();
 		q.put("type", "interposed_question");
 		q.put("sessionId", session.get_id());
@@ -601,11 +601,15 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("read", false);
 		try {
 			database.saveDocument(q);
-			return true;
+			question.set_id(q.getId());
+			question.set_rev(q.getRev());
+
+			return question;
 		} catch (IOException e) {
 			LOGGER.error("Could not save interposed question {}", question);
 		}
-		return false;
+
+		return null;
 	}
 
 	@Override

@@ -36,6 +36,7 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
 public class QuestionService implements IQuestionService {
@@ -45,6 +46,9 @@ public class QuestionService implements IQuestionService {
 
 	@Autowired
 	private IUserService userService;
+
+	@Autowired
+	private ARSnovaSocketIOServer socketIoServer;
 
 	public void setDatabaseDao(IDatabaseDao databaseDao) {
 		this.databaseDao = databaseDao;
@@ -72,14 +76,20 @@ public class QuestionService implements IQuestionService {
 	public Question saveQuestion(Question question) {
 		Session session = this.databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		question.setSessionId(session.get_id());
-		return this.databaseDao.saveQuestion(session, question);
+		Question result = this.databaseDao.saveQuestion(session, question);
+		socketIoServer.reportLecturerQuestionAvailable(result.getSessionKeyword(), result.get_id());
+
+		return result;
 	}
 
 	@Override
 	@Authenticated
 	public boolean saveQuestion(InterposedQuestion question) {
 		Session session = this.databaseDao.getSessionFromKeyword(question.getSessionId());
-		return this.databaseDao.saveQuestion(session, question);
+		InterposedQuestion result = this.databaseDao.saveQuestion(session, question);
+		socketIoServer.reportAudienceQuestionAvailable(result.getSessionId(), result.get_id());
+
+		return null != result;
 	}
 
 	@Override
@@ -263,6 +273,9 @@ public class QuestionService implements IQuestionService {
 		if (question == null) {
 			throw new NotFoundException();
 		}
+
+		socketIoServer.reportAnswersToLecturerQuestionAvailable(question.getSessionKeyword(), question.get_id());
+
 		return this.databaseDao.saveAnswer(answer, user);
 	}
 
@@ -273,6 +286,10 @@ public class QuestionService implements IQuestionService {
 		if (user == null || !user.getUsername().equals(answer.getUser())) {
 			throw new UnauthorizedException();
 		}
+
+		Question question = this.getQuestion(answer.getQuestionId());
+		socketIoServer.reportAnswersToLecturerQuestionAvailable(question.getSessionKeyword(), question.get_id());
+
 		return this.databaseDao.updateAnswer(answer);
 	}
 
@@ -289,5 +306,7 @@ public class QuestionService implements IQuestionService {
 			throw new UnauthorizedException();
 		}
 		this.databaseDao.deleteAnswer(answerId);
+
+		socketIoServer.reportAnswersToLecturerQuestionAvailable(question.getSessionKeyword(), question.get_id());
 	}
 }

@@ -52,7 +52,7 @@ public interface IDatabaseDao {
 
 	Question saveQuestion(Session session, Question question);
 
-	boolean saveQuestion(Session session, InterposedQuestion question);
+	InterposedQuestion saveQuestion(Session session, InterposedQuestion question);
 
 	Question getQuestion(String id);
 
