@@ -39,6 +39,7 @@ import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.ForbiddenException;
+import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
@@ -64,10 +65,13 @@ public class SessionService implements ISessionService {
 
 	@Override
 	@Authenticated
-	public final Session joinSession(final String keyword, UUID socketId) {
+	public final Session joinSession(final String keyword, final UUID socketId) {
 		/* Socket.IO solution */
 
 		Session session = databaseDao.getSession(keyword);
+		if (null == session) {
+			throw new NotFoundException();
+		}
 		User user = userService.getUser2SocketId(socketId);
 
 		userService.addUserToSessionBySocketId(socketId, keyword);
@@ -92,10 +96,14 @@ public class SessionService implements ISessionService {
 	public final Session joinSession(final String keyword) {
 		/* HTTP polling solution (legacy) */
 
+		Session session = databaseDao.getSession(keyword);
+		if (null == session) {
+			throw new NotFoundException();
+		}
+
 		userService.addCurrentUserToSessionMap(keyword);
 		socketIoServer.reportActiveUserCountForSession(keyword);
 
-		Session session = databaseDao.getSession(keyword);
 		if (connectorClient != null && session.isCourseSession()) {
 			String courseid = session.getCourseId();
 			if (!connectorClient.getMembership(userService.getCurrentUser().getUsername(), courseid).isMember()) {
@@ -173,7 +181,7 @@ public class SessionService implements ISessionService {
 	@Authenticated
 	public final LoggedIn registerAsOnlineUser(final User user, final String sessionkey) {
 		/* HTTP polling solution (legacy) */
-		
+
 		Session session = this.joinSession(sessionkey);
 		if (session == null) {
 			return null;
