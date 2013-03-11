@@ -28,7 +28,7 @@
 	</custom>
 
 	<bannerLeft>
-		<name>ARSNova</name>
+		<name>ARSnova</name>
 		<src>arsnova.png</src>
 		<href>https://arsnova.thm.de/</href>
 	</bannerLeft>
@@ -51,6 +51,7 @@
 		</menu>
 		<menu name="Documentation">
 			<item name="Installation" href="installation.html" />
+			<item name="Development" href="development.html" />
 			<item name="Dependencies" href="dependencies.html" />
 			<item name="API Docs" href="apidocs/index.html" />
 		</menu>

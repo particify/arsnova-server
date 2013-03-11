@@ -1,7 +1,7 @@
  -----
- ARSNova landingpage
+ Installation Instructions
  -----
- SCM-Helpdesk
+ ARSnova Developers
  -----
  -----
 
@@ -60,13 +60,13 @@ Make environment usable for productive usage
  If you intend to use ARSnova in productive environment, you will have to change a setting in your Tomcat installation.
  Look for your Tomcat configuration directory and change the file "context.xml" to match this example:
  
- +---------------------------+
++---------------------------+
  
 <Context>
 	<Manager pathname="<...your_tomcat_installation...>/sessions/arsnova.ser"/>
 </Context> 
  
- +---------------------------+
++---------------------------+
  
  This will enable session persistance across restarts as described {{{http://tomcat.apache.org/tomcat-7.0-doc/config/manager.html#Special_Features}here}}.
 
