@@ -342,10 +342,16 @@
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>7.6.5.v20120716</version>
-				<configuration> <scanIntervalSeconds>1</scanIntervalSeconds> <webApp> 
-					<contextPath>/</contextPath> <baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection"> 
-					<resourcesAsCSV>src/main/webapp,../arsnova-js/src/main/webapp,../arsnova-legacy-js/src/main/webapp</resourcesAsCSV> 
-					</baseResource> </webApp> </configuration>
+				<configuration>
+					<scanIntervalSeconds>1</scanIntervalSeconds>
+					<webApp> 
+						<contextPath>/</contextPath>
+						<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
+							<resourcesAsCSV>src/main/webapp,../arsnova-js/src/main/webapp,../arsnova-legacy-js/src/main/webapp</resourcesAsCSV> 
+						</baseResource>
+						<overrideDescriptor>src/main/webapp/WEB-INF/web-dev.xml</overrideDescriptor>
+					</webApp>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
