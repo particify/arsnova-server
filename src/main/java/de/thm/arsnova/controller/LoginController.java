@@ -87,7 +87,7 @@ public class LoginController extends AbstractController {
 			final HttpServletResponse response
 	) throws IOException, ServletException {
 		String referer = request.getHeader("referer");
-		if (null != forcedReferer && !UrlUtils.isAbsoluteUrl(referer)) {
+		if (null != forcedReferer && null != referer && !UrlUtils.isAbsoluteUrl(referer)) {
 			/* Use a url from a request parameter as referer as long as the url is not absolute (to prevent
 			 * abuse of the redirection). */
 			referer = forcedReferer;
