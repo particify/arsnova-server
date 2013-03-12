@@ -136,9 +136,14 @@ public class ARSnovaSocketIOServer {
 	}
 
 	public void stopServer() throws Exception {
-		logger.debug("In stopServer method of class: {}", getClass().getName());
-		for (SocketIOClient client : server.getAllClients()) {
-			client.disconnect();
+		logger.trace("In stopServer method of class: {}", getClass().getName());
+		try {
+			for (SocketIOClient client : server.getAllClients()) {
+				client.disconnect();
+			}
+		} catch (Exception e) {
+			/* If exceptions are not caught they could prevent the Socket.IO server from shutting down. */
+			logger.error("Exception caught on Socket.IO shutdown: {}", e.getStackTrace());
 		}
 		server.stop();
 
