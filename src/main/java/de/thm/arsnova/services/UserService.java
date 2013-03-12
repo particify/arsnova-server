@@ -73,10 +73,7 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 		for (Entry<User, String> e : user2sessionLegacy.entrySet()) {
 			LOGGER.debug("entry: {}", e);
 			User key = e.getKey();
-			LOGGER.debug("key: {}", key);
-			String username = key.getUsername();
-			LOGGER.debug("username: {}", username);
-			if (!usernames.contains(username)) {
+			if (!usernames.contains(key.getUsername())) {
 				if (null != e.getValue()) {
 					affectedSessions.add(e.getValue());
 				} else {
@@ -86,7 +83,7 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 				user2sessionLegacy.remove(e.getKey());
 			}
 		}
-		
+
 		for (String sessionKeyword : affectedSessions) {
 			socketIoServer.reportActiveUserCountForSession(sessionKeyword);
 		}
