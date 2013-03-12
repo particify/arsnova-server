@@ -97,9 +97,6 @@ public class SessionService implements ISessionService {
 		/* HTTP polling solution (legacy) */
 
 		Session session = databaseDao.getSession(keyword);
-		if (null == session) {
-			throw new NotFoundException();
-		}
 
 		userService.addCurrentUserToSessionMap(keyword);
 		socketIoServer.reportActiveUserCountForSession(keyword);
