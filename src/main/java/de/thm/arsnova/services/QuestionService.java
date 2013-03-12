@@ -87,9 +87,14 @@ public class QuestionService implements IQuestionService {
 	public boolean saveQuestion(InterposedQuestion question) {
 		Session session = this.databaseDao.getSessionFromKeyword(question.getSessionId());
 		InterposedQuestion result = this.databaseDao.saveQuestion(session, question);
-		socketIoServer.reportAudienceQuestionAvailable(result.getSessionId(), result.get_id());
 
-		return null != result;
+		if (null != result) {
+			socketIoServer.reportAudienceQuestionAvailable(result.getSessionId(), result.get_id());
+
+			return true;
+		}
+
+		return false;
 	}
 
 	@Override
