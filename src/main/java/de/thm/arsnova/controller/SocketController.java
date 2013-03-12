@@ -20,6 +20,7 @@ package de.thm.arsnova.controller;
 
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.json.JSONObject;
@@ -66,11 +67,11 @@ public class SocketController extends AbstractController {
 
 	@RequestMapping(value = "/url", method = RequestMethod.GET)
 	@ResponseBody
-	public final String getSocketUrl() {
+	public final String getSocketUrl(final HttpServletRequest request) {
 		StringBuilder url = new StringBuilder();
 
 		url.append(server.isUseSSL() ? "https://" : "http://");
-		url.append(server.getHostIp() + ":" + server.getPortNumber());
+		url.append(request.getServerName() + ":" + server.getPortNumber());
 
 		return url.toString();
 	}
