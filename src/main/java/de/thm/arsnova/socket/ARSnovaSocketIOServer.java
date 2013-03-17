@@ -115,20 +115,23 @@ public class ARSnovaSocketIOServer {
 		server.addConnectListener(new ConnectListener() {
 			@Override
 			public void onConnect(SocketIOClient client) {
-				logger.info("addConnectListener.onConnect: Client: {}", new Object[] { client });
+				logger.info("Client {} connected.", client.getSessionId());
 			}
 		});
 
 		server.addDisconnectListener(new DisconnectListener() {
 			@Override
 			public void onDisconnect(SocketIOClient client) {
-				logger.info("addDisconnectListener.onDisconnect: Client: {}", new Object[] { client });
-				String sessionKey = userService.getSessionForUser(
-					userService.getUser2SocketId(client.getSessionId()).getUsername()
-				);
-				reportActiveUserCountForSession(sessionKey);
+				logger.info("Client {} disconnected.", client.getSessionId());
+				String username = userService.getUser2SocketId(client.getSessionId()).getUsername();
+				String sessionKey = userService.getSessionForUser(username);
+				logger.info("Removing disconnected user {} (session key: {}).", username, sessionKey);
 				userService.removeUserFromSessionBySocketId(client.getSessionId());
 				userService.removeUser2SocketId(client.getSessionId());
+				if (null != sessionKey) {
+					/* user disconnected before joining a session */
+					reportActiveUserCountForSession(sessionKey);
+				}
 			}
 		});
 
@@ -238,7 +241,7 @@ public class ARSnovaSocketIOServer {
 
 	public void reportActiveUserCountForSession(String sessionKey) {
 		/* This check is needed as long as the HTTP polling solution is active simultaneously. */
-		int count = sessionService.countActiveUsers(sessionKey);
+		int count = userService.getUsersInSessionCount(sessionKey);
 		if (count == lastActiveUserCount) {
 			return;
 		}
@@ -275,7 +278,7 @@ public class ARSnovaSocketIOServer {
 		for (SocketIOClient c : server.getAllClients()) {
 			User u = userService.getUser2SocketId(c.getSessionId());
 			if (u != null && users.contains(u)) {
-				logger.info("sending out to client {}, username is: {}, current session is: {}",
+				logger.debug("sending out to client {}, username is: {}, current session is: {}",
 						new Object[] { c.getSessionId(), u.getUsername(), sessionKey });
 				c.sendEvent(eventName, data);
 			}

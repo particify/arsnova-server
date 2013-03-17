@@ -43,7 +43,7 @@ import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 @RequestMapping("/socket")
 public class SocketController extends AbstractController {
 
-	public static final Logger LOGGER = LoggerFactory.getLogger(SessionController.class);
+	public static final Logger LOGGER = LoggerFactory.getLogger(SocketController.class);
 
 	@Autowired
 	private IUserService userService;
@@ -58,7 +58,7 @@ public class SocketController extends AbstractController {
 			return;
 		}
 		User u = userService.getCurrentUser();
-		LOGGER.info("authorize session: " + socketid + ", user is:  " + u);
+		LOGGER.info("Mapping socket {} to user {}.", socketid, u.getUsername());
 		response.setStatus(u != null ? HttpStatus.NO_CONTENT.value() : HttpStatus.UNAUTHORIZED.value());
 		if (u != null) {
 			userService.putUser2SocketId(UUID.fromString(socketid), u);
