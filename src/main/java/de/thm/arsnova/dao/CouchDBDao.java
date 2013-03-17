@@ -350,7 +350,7 @@ public class CouchDBDao implements IDatabaseDao {
 		view.setEndKey(URLEncoder.encode("[\"" + sessionId + "\",{}]"));
 		ViewResults results = this.getDatabase().view(view);
 
-		LOGGER.info("Feedback: {}", results.getJSONArray("rows"));
+		LOGGER.debug("Feedback: {}", results.getJSONArray("rows"));
 
 		return this.createFeedbackObject(results);
 	}
