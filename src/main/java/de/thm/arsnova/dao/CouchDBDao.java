@@ -905,7 +905,6 @@ public class CouchDBDao implements IDatabaseDao {
 			View view = new View("statistic/count_active_users");
 			view.setStartKey(String.valueOf(since));
 			ViewResults results = this.getDatabase().view(view);
-			LOGGER.info("getActiveUsers() {}", results);
 			if (isEmptyResults(results)) {
 				return 0;
 			}
