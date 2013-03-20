@@ -279,9 +279,10 @@ public class QuestionService implements IQuestionService {
 			throw new NotFoundException();
 		}
 
+		Answer result = this.databaseDao.saveAnswer(answer, user);
 		socketIoServer.reportAnswersToLecturerQuestionAvailable(question.getSessionKeyword(), question.get_id());
 
-		return this.databaseDao.saveAnswer(answer, user);
+		return result;
 	}
 
 	@Override
@@ -293,9 +294,10 @@ public class QuestionService implements IQuestionService {
 		}
 
 		Question question = this.getQuestion(answer.getQuestionId());
+		Answer result = this.databaseDao.updateAnswer(answer);
 		socketIoServer.reportAnswersToLecturerQuestionAvailable(question.getSessionKeyword(), question.get_id());
 
-		return this.databaseDao.updateAnswer(answer);
+		return result;
 	}
 
 	@Override
