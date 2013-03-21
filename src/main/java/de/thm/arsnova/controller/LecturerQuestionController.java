@@ -247,9 +247,20 @@ public class LecturerQuestionController extends AbstractController {
 	@ResponseBody
 	public final List<Answer> getAnswers(
 			@PathVariable final String questionId,
+			@RequestParam(value = "piround", required = false) final Integer piRound,
 			final HttpServletResponse response
 	) {
-		List<Answer> answers = questionService.getAnswers(questionId);
+		List<Answer> answers = null;
+		if (null == piRound) {
+			answers = questionService.getAnswers(questionId);
+		} else {
+			if (piRound < 1 || piRound > 2) {
+				response.setStatus(HttpStatus.BAD_REQUEST.value());
+
+				return null;
+			}
+			answers = questionService.getAnswers(questionId, piRound);
+		}
 		if (answers == null) {
 			return new ArrayList<Answer>();
 		}
