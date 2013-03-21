@@ -53,7 +53,7 @@ public interface IQuestionService {
 
 	List<Answer> getFreetextAnswers(String questionId);
 
-	List<Answer> getMytAnswers(String sessionKey);
+	List<Answer> getMyAnswers(String sessionKey);
 
 	int getTotalAnswerCount(String sessionKey);
 

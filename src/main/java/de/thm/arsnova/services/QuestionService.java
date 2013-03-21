@@ -228,7 +228,7 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@Authenticated
-	public List<Answer> getMytAnswers(String sessionKey) {
+	public List<Answer> getMyAnswers(String sessionKey) {
 		/* TODO Peer Instruction implementation needed */
 		return databaseDao.getMyAnswers(sessionKey);
 	}

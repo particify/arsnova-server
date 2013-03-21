@@ -337,7 +337,7 @@ public class LecturerQuestionController extends AbstractController {
 	) {
 		response.addHeader("X-Deprecated-API", "1");
 
-		return questionService.getMytAnswers(sessionkey);
+		return questionService.getMyAnswers(sessionkey);
 	}
 
 	@RequestMapping(value = "/answercount", method = RequestMethod.GET)
