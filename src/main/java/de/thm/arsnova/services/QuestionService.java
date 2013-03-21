@@ -20,7 +20,10 @@
 package de.thm.arsnova.services;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -229,8 +232,25 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public List<Answer> getMyAnswers(String sessionKey) {
-		/* TODO Peer Instruction implementation needed */
-		return databaseDao.getMyAnswers(sessionKey);
+		List<Answer> answers = databaseDao.getMyAnswers(sessionKey);
+		Map<String, Answer> questionIdToAnswer = new HashMap<String, Answer>();
+		for (Answer answer : answers) {
+			Answer mappedAnswer = questionIdToAnswer.get(answer.getQuestionId());
+			if (null == mappedAnswer || answer.getPiRound() > mappedAnswer.getPiRound()) {
+				/* Since it is not known to which type of question the answer belongs, it
+				 * will be assumed that all answers with subject AND text being set will be
+				 * of the type free text. An alternative would be to fetch all questions of
+				 * the session and check the questionType property but that approach would
+				 * cost additional resources. */
+				boolean freeText = null != answer.getAnswerSubject() && null != answer.getAnswerText();
+				if (!freeText && 0 == answer.getPiRound()) {
+					answer.setPiRound(1);
+				}
+				questionIdToAnswer.put(answer.getQuestionId(), answer);
+			}
+		}
+
+		return new ArrayList<Answer>(questionIdToAnswer.values());
 	}
 
 	@Override
