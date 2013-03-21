@@ -244,13 +244,13 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public Answer getMyAnswer(String questionId) {
+	public Answer getMyAnswer(String questionId, int piRound) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Answer> getAnswers(String questionId) {
+	public List<Answer> getAnswers(String questionId, int piRound) {
 		// TODO Auto-generated method stub
 		return null;
 	}

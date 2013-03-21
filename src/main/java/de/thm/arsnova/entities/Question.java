@@ -36,6 +36,7 @@ public class Question {
 	private long timestamp;
 	private int number;
 	private int duration;
+	private int piRound;
 	private boolean showStatistic; // sic
 	private boolean showAnswer;
 	private String _id;
@@ -151,6 +152,14 @@ public class Question {
 
 	public final void setDuration(final int duration) {
 		this.duration = duration;
+	}
+
+	public int getPiRound() {
+		return piRound;
+	}
+
+	public void setPiRound(int piRound) {
+		this.piRound = piRound;
 	}
 
 	public boolean isShowStatistic() {

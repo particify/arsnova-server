@@ -72,9 +72,9 @@ public interface IDatabaseDao {
 
 	List<String> getUnAnsweredQuestions(Session session, User user);
 
-	Answer getMyAnswer(String questionId);
+	Answer getMyAnswer(String questionId, int piRound);
 
-	List<Answer> getAnswers(String questionId);
+	List<Answer> getAnswers(String questionId, int piRound);
 
 	int getAnswerCount(String questionId);
 

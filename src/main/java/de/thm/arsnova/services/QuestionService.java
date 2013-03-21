@@ -76,6 +76,13 @@ public class QuestionService implements IQuestionService {
 	public Question saveQuestion(Question question) {
 		Session session = this.databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		question.setSessionId(session.get_id());
+
+		if ("freetext".equals(question.getQuestionType())) {
+			question.setPiRound(0);
+		} else if (question.getPiRound() < 1 || question.getPiRound() > 2) {
+			question.setPiRound(1);
+		}
+
 		Question result = this.databaseDao.saveQuestion(session, question);
 		socketIoServer.reportLecturerQuestionAvailable(result.getSessionKeyword(), result.get_id());
 
@@ -100,7 +107,13 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public Question getQuestion(String id) {
-		return databaseDao.getQuestion(id);
+		Question result = databaseDao.getQuestion(id);
+		if (!"freetext".equals(result.getQuestionType()) && 0 == result.getPiRound()) {
+			/* needed for legacy questions whose piRound property has not been set */
+			result.setPiRound(1);
+		}
+
+		return result;
 	}
 
 	@Override
@@ -181,15 +194,26 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public Answer getMyAnswer(String questionId) {
-		return databaseDao.getMyAnswer(questionId);
+		Question question = getQuestion(questionId);
+
+		return databaseDao.getMyAnswer(questionId, question.getPiRound());
+	}
+
+	@Override
+	@Authenticated
+	public List<Answer> getAnswers(String questionId, int piRound) {
+		return databaseDao.getAnswers(questionId, piRound);
 	}
 
 	@Override
 	@Authenticated
 	public List<Answer> getAnswers(String questionId) {
-		return databaseDao.getAnswers(questionId);
+		Question question = getQuestion(questionId);
+
+		return getAnswers(questionId, question.getPiRound());
 	}
 
+	/* TODO add implementation for piRound */
 	@Override
 	@Authenticated
 	public int getAnswerCount(String questionId) {
@@ -205,6 +229,7 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public List<Answer> getMytAnswers(String sessionKey) {
+		/* TODO Peer Instruction implementation needed */
 		return databaseDao.getMyAnswers(sessionKey);
 	}
 
@@ -255,7 +280,8 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public void update(Question question) {
-		if (databaseDao.getQuestion(question.get_id()) == null) {
+		Question oldQuestion = databaseDao.getQuestion(question.get_id());
+		if (null == oldQuestion) {
 			throw new NotFoundException();
 		}
 
@@ -264,6 +290,13 @@ public class QuestionService implements IQuestionService {
 		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
+
+		if ("freetext".equals(question.getQuestionType())) {
+			question.setPiRound(0);
+		} else if (question.getPiRound() < 1 || question.getPiRound() > 2) {
+			question.setPiRound(oldQuestion.getPiRound() > 0 ? oldQuestion.getPiRound() : 1);
+		}
+
 		this.databaseDao.updateQuestion(question);
 	}
 
@@ -277,6 +310,12 @@ public class QuestionService implements IQuestionService {
 		Question question = this.getQuestion(answer.getQuestionId());
 		if (question == null) {
 			throw new NotFoundException();
+		}
+
+		if ("freetext".equals(question.getQuestionType())) {
+			answer.setPiRound(0);
+		} else {
+			answer.setPiRound(question.getPiRound());
 		}
 
 		Answer result = this.databaseDao.saveAnswer(answer, user);

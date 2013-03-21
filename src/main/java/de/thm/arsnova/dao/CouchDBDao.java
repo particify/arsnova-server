@@ -250,6 +250,10 @@ public class CouchDBDao implements IDatabaseDao {
 				);
 				question.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
 				question.setSessionKeyword(this.getSessionKeyword(question.getSessionId()));
+				if (!"freetext".equals(question.getQuestionType()) && 0 == question.getPiRound()) {
+					/* needed for legacy questions whose piRound property has not been set */
+					question.setPiRound(1);
+				}
 				result.add(question);
 			}
 
@@ -558,6 +562,7 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("releasedFor", question.getReleasedFor());
 		q.put("possibleAnswers", question.getPossibleAnswers());
 		q.put("noCorrect", question.isNoCorrect());
+		q.put("piRound", question.getPiRound());
 		q.put("showStatistic", question.isShowStatistic());
 		q.put("showAnswer", question.isShowAnswer());
 		try {
@@ -581,6 +586,7 @@ public class CouchDBDao implements IDatabaseDao {
 			q.put("releasedFor", question.getReleasedFor());
 			q.put("possibleAnswers", question.getPossibleAnswers());
 			q.put("noCorrect", question.isNoCorrect());
+			q.put("piRound", question.getPiRound());
 			q.put("showStatistic", question.isShowStatistic());
 			q.put("showAnswer", question.isShowAnswer());
 			this.database.saveDocument(q);
@@ -825,21 +831,39 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final Answer getMyAnswer(final String questionId) {
+	public final Answer getMyAnswer(final String questionId, int piRound) {
 		User user = userService.getCurrentUser();
 		if (user == null) {
 			throw new UnauthorizedException();
 		}
 
 		try {
-			View view = new View("answer/by_question_and_user");
-			view.setKey(
-					"[" + URLEncoder.encode(
-							"\"" + questionId + "\",\"" + user.getUsername() + "\"",
-							"UTF-8"
-					)
-					+ "]"
-			);
+			View view = new View("answer/by_question_and_user_and_piround");
+			if (2 == piRound) {
+				view.setKey(
+						"[" + URLEncoder.encode(
+								"\"" + questionId + "\",\"" + user.getUsername() + "\",2",
+								"UTF-8"
+						)
+						+ "]"
+				);
+			} else {
+				/* needed for legacy questions whose piRound property has not been set */
+				view.setStartKey(
+						"[" + URLEncoder.encode(
+								"\"" + questionId + "\",\"" + user.getUsername() + "\"",
+								"UTF-8"
+						)
+						+ "]"
+				);
+				view.setEndKey(
+						"[" + URLEncoder.encode(
+								"\"" + questionId + "\",\"" + user.getUsername() + "\",1",
+								"UTF-8"
+						)
+						+ "]"
+				);
+			}
 			ViewResults results = this.getDatabase().view(view);
 			if (results.getResults().isEmpty()) {
 				return null;
@@ -859,11 +883,11 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final List<Answer> getAnswers(final String questionId) {
+	public final List<Answer> getAnswers(final String questionId, int piRound) {
 		try {
-			View view = new View("skill_question/count_answers");
-			view.setStartKey("[" + URLEncoder.encode("\"" + questionId + "\"", "UTF-8") + "]");
-			view.setEndKey("[" + URLEncoder.encode("\"" + questionId + "\",{}", "UTF-8") + "]");
+			View view = new View("skill_question/count_answers_by_question_and_piround");
+			view.setStartKey("[" + URLEncoder.encode("\"" + questionId + "\"," + piRound, "UTF-8") + "]");
+			view.setEndKey("[" + URLEncoder.encode("\"" + questionId + "\"," + piRound + ",{}", "UTF-8") + "]");
 			view.setGroup(true);
 			ViewResults results = this.getDatabase().view(view);
 			List<Answer> answers = new ArrayList<Answer>();
@@ -871,8 +895,8 @@ public class CouchDBDao implements IDatabaseDao {
 				Answer a = new Answer();
 				a.setAnswerCount(d.getInt("value"));
 				a.setQuestionId(d.getJSONObject().getJSONArray("key").getString(0));
-				a.setAnswerText(d.getJSONObject().getJSONArray("key").getString(1));
-				a.setAnswerSubject(d.getJSONObject().getJSONArray("key").getString(2));
+				a.setPiRound(d.getJSONObject().getJSONArray("key").getInt(1));
+				a.setAnswerText(d.getJSONObject().getJSONArray("key").getString(2));
 				answers.add(a);
 			}
 			return answers;
@@ -1312,6 +1336,7 @@ public class CouchDBDao implements IDatabaseDao {
 			a.put("answerText", answer.getAnswerText());
 			a.put("timestamp", answer.getTimestamp());
 			a.put("user", user.getUsername());
+			a.put("piRound", answer.getPiRound());
 			this.database.saveDocument(a);
 			answer.set_id(a.getId());
 			answer.set_rev(a.getRev());

@@ -10,6 +10,7 @@ public class Answer {
 	private String questionId;
 	private String answerText;
 	private String answerSubject;
+	private int piRound;
 	private String user;
 	private long timestamp;
 	private int answerCount;
@@ -72,6 +73,14 @@ public class Answer {
 
 	public final void setAnswerSubject(final String answerSubject) {
 		this.answerSubject = answerSubject;
+	}
+
+	public int getPiRound() {
+		return piRound;
+	}
+
+	public void setPiRound(int piRound) {
+		this.piRound = piRound;
 	}
 
 	public final String getUser() {
