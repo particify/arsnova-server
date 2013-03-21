@@ -886,8 +886,22 @@ public class CouchDBDao implements IDatabaseDao {
 	public final List<Answer> getAnswers(final String questionId, int piRound) {
 		try {
 			View view = new View("skill_question/count_answers_by_question_and_piround");
-			view.setStartKey("[" + URLEncoder.encode("\"" + questionId + "\"," + piRound, "UTF-8") + "]");
-			view.setEndKey("[" + URLEncoder.encode("\"" + questionId + "\"," + piRound + ",{}", "UTF-8") + "]");
+			if (2 == piRound) {
+				view.setKey("[" + URLEncoder.encode(
+					"\"" + questionId + "\",2",
+					"UTF-8"
+				) + "]");
+			} else {
+				/* needed for legacy questions whose piRound property has not been set */
+				view.setStartKey("[" + URLEncoder.encode(
+					"\"" + questionId + "\"",
+					"UTF-8"
+				) + "]");
+				view.setEndKey("[" + URLEncoder.encode(
+					"\"" + questionId + "\",1",
+					"UTF-8"
+				) + "]");
+			}
 			view.setGroup(true);
 			ViewResults results = this.getDatabase().view(view);
 			List<Answer> answers = new ArrayList<Answer>();
@@ -895,7 +909,7 @@ public class CouchDBDao implements IDatabaseDao {
 				Answer a = new Answer();
 				a.setAnswerCount(d.getInt("value"));
 				a.setQuestionId(d.getJSONObject().getJSONArray("key").getString(0));
-				a.setPiRound(d.getJSONObject().getJSONArray("key").getInt(1));
+				a.setPiRound(piRound);
 				a.setAnswerText(d.getJSONObject().getJSONArray("key").getString(2));
 				answers.add(a);
 			}
