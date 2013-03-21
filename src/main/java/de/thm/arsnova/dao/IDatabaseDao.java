@@ -116,7 +116,7 @@ public interface IDatabaseDao {
 
 	List<Session> getMyVisitedSessions(User user);
 
-	void updateQuestion(Question question);
+	Question updateQuestion(Question question);
 
 	void deleteAnswers(Question question);
 

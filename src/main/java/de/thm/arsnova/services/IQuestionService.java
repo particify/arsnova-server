@@ -65,7 +65,7 @@ public interface IQuestionService {
 
 	InterposedQuestion readInterposedQuestion(String questionId);
 
-	void update(Question question);
+	Question update(Question question);
 
 	void deleteAnswers(String questionId);
 

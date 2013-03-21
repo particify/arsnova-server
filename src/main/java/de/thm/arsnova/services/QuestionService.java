@@ -300,7 +300,7 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@Authenticated
-	public void update(Question question) {
+	public Question update(Question question) {
 		Question oldQuestion = databaseDao.getQuestion(question.get_id());
 		if (null == oldQuestion) {
 			throw new NotFoundException();
@@ -318,7 +318,7 @@ public class QuestionService implements IQuestionService {
 			question.setPiRound(oldQuestion.getPiRound() > 0 ? oldQuestion.getPiRound() : 1);
 		}
 
-		this.databaseDao.updateQuestion(question);
+		return this.databaseDao.updateQuestion(question);
 	}
 
 	@Override

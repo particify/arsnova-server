@@ -577,7 +577,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final void updateQuestion(final Question question) {
+	public final Question updateQuestion(final Question question) {
 		try {
 			Document q = this.database.getDocument(question.get_id());
 			q.put("subject", question.getSubject());
@@ -591,9 +591,13 @@ public class CouchDBDao implements IDatabaseDao {
 			q.put("showAnswer", question.isShowAnswer());
 			this.database.saveDocument(q);
 			question.set_rev(q.getRev());
+
+			return question;
 		} catch (IOException e) {
 			LOGGER.error("Could not update question {}", question);
 		}
+
+		return null;
 	}
 
 	@Override
