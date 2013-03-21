@@ -232,25 +232,26 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public List<Answer> getMyAnswers(String sessionKey) {
+		List<Question> questions = getSkillQuestions(sessionKey);
+		Map<String, Question> questionIdToQuestion = new HashMap<String, Question>();
+		for (Question question : questions) {
+			questionIdToQuestion.put(question.get_id(), question);
+		}
+
+		/* filter answers by active piRound per question */
 		List<Answer> answers = databaseDao.getMyAnswers(sessionKey);
-		Map<String, Answer> questionIdToAnswer = new HashMap<String, Answer>();
+		List<Answer> filteredAnswers = new ArrayList<Answer>();
 		for (Answer answer : answers) {
-			Answer mappedAnswer = questionIdToAnswer.get(answer.getQuestionId());
-			if (null == mappedAnswer || answer.getPiRound() > mappedAnswer.getPiRound()) {
-				/* Since it is not known to which type of question the answer belongs, it
-				 * will be assumed that all answers with subject AND text being set will be
-				 * of the type free text. An alternative would be to fetch all questions of
-				 * the session and check the questionType property but that approach would
-				 * cost additional resources. */
-				boolean freeText = null != answer.getAnswerSubject() && null != answer.getAnswerText();
-				if (!freeText && 0 == answer.getPiRound()) {
-					answer.setPiRound(1);
-				}
-				questionIdToAnswer.put(answer.getQuestionId(), answer);
+			Question question = questionIdToQuestion.get(answer.getQuestionId());
+			if (0 == answer.getPiRound() && !"freetext".equals(question.getQuestionType())) {
+				answer.setPiRound(1);
+			}
+			if (answer.getPiRound() == question.getPiRound()) {
+				filteredAnswers.add(answer);
 			}
 		}
 
-		return new ArrayList<Answer>(questionIdToAnswer.values());
+		return filteredAnswers;
 	}
 
 	@Override
