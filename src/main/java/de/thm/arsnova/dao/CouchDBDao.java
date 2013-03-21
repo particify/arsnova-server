@@ -891,8 +891,12 @@ public class CouchDBDao implements IDatabaseDao {
 		try {
 			View view = new View("skill_question/count_answers_by_question_and_piround");
 			if (2 == piRound) {
-				view.setKey("[" + URLEncoder.encode(
+				view.setStartKey("[" + URLEncoder.encode(
 					"\"" + questionId + "\",2",
+					"UTF-8"
+				) + "]");
+				view.setEndKey("[" + URLEncoder.encode(
+					"\"" + questionId + "\",2,{}",
 					"UTF-8"
 				) + "]");
 			} else {
@@ -902,7 +906,7 @@ public class CouchDBDao implements IDatabaseDao {
 					"UTF-8"
 				) + "]");
 				view.setEndKey("[" + URLEncoder.encode(
-					"\"" + questionId + "\",1",
+					"\"" + questionId + "\",1,{}",
 					"UTF-8"
 				) + "]");
 			}
