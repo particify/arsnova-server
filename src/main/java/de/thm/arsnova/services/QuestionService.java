@@ -205,7 +205,11 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public List<Answer> getAnswers(String questionId, int piRound) {
-		return databaseDao.getAnswers(questionId, piRound);
+		Question question = databaseDao.getQuestion(questionId);
+
+		return "freetext".equals(question.getQuestionType())
+			? getFreetextAnswers(questionId)
+			: databaseDao.getAnswers(questionId, piRound);
 	}
 
 	@Override
