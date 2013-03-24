@@ -78,12 +78,12 @@ public class LecturerQuestionController extends AbstractController {
 
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.PUT)
 	@ResponseBody
-	public final void updateQuestion(
+	public final Question updateQuestion(
 			@PathVariable final String questionId,
 			@RequestBody final Question question,
 			final HttpServletResponse response
 	) {
-		this.questionService.update(question);
+		return this.questionService.update(question);
 	}
 
 	@RequestMapping(value = "/{questionId}/publish", method = RequestMethod.POST)
