@@ -13,7 +13,7 @@ public class Answer {
 	private int piRound;
 	private String user;
 	private long timestamp;
-	private int answerCount;
+	private int answerCount = 1;
 
 	public Answer() {
 		this.type = "skill_question_answer";
