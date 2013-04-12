@@ -10,6 +10,11 @@ security.twitter.secret=mC0HOvxiEgqwdDWCcDoy3q75nUQPu1bYRp1ncHWGd0
 security.google.key=110959746118.apps.googleusercontent.com
 security.google.secret=CkzUJZswY8rjWCCYnHVovyGA
 
+security.ldap.url=ldap://example.com:389/dc=example,dc=com
+security.ldap.user-search-filter=(uid={0})
+security.ldap.user-search-base="ou=people"
+
+
 security.ssl=false
 security.keystore=/etc/arsnova.thm.de.jks
 security.storepass=arsnova

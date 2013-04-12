@@ -20,6 +20,7 @@ package de.thm.arsnova.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -38,9 +39,11 @@ import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.GrantedAuthorityImpl;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.token.Sha512DigestUtils;
+import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.stereotype.Controller;
@@ -67,6 +70,9 @@ public class LoginController extends AbstractController {
 
 	@Autowired
 	private FacebookProvider facebookProvider;
+	
+	@Autowired
+	private LdapAuthenticationProvider ldapAuthenticationProvider;
 
 	@Autowired
 	private CasAuthenticationEntryPoint casEntryPoint;
@@ -136,6 +142,27 @@ public class LoginController extends AbstractController {
 		}
 		return null;
 	}
+	
+	@RequestMapping(value = { "/auth/login", "/doLogin" }, method = RequestMethod.POST)
+	public final View doLdapLogin(
+			@RequestParam("type") final String type,
+			@RequestParam(value = "user", required = false) final String userName,
+			@RequestParam(value = "referer", required = false) final String forcedReferer,
+			@RequestParam(value = "password", required = false) final String password,
+			final HttpServletRequest request,
+			final HttpServletResponse response
+	) throws IOException, ServletException {
+		if ("ldap".equals(type)) {
+			org.springframework.security.core.userdetails.User user =
+					new org.springframework.security.core.userdetails.User(
+							userName, password, true, true, true, true, this.getAuthorities()
+					);
+			
+			Authentication token = new UsernamePasswordAuthenticationToken(user, null, getAuthorities());
+			ldapAuthenticationProvider.authenticate(token);
+		}
+		return null;
+	}
 
 	@RequestMapping(value = { "/auth/", "/whoami" }, method = RequestMethod.GET)
 	@ResponseBody
@@ -152,5 +179,11 @@ public class LoginController extends AbstractController {
 			return new RedirectView("/j_spring_cas_security_logout");
 		}
 		return new RedirectView(request.getHeader("referer") != null ? request.getHeader("referer") : "/");
+	}
+	
+	private Collection<? extends GrantedAuthority> getAuthorities() {
+		List<GrantedAuthority> authList = new ArrayList<GrantedAuthority>(2);
+		authList.add(new GrantedAuthorityImpl("ROLE_USER"));
+		return authList;
 	}
 }
