@@ -61,6 +61,7 @@ import de.thm.arsnova.services.IUserService;
 public class LoginController extends AbstractController {
 
 	private static final int MAX_USERNAME_LENGTH = 15;
+	private static final int MAX_GUESTHASH_LENGTH = 10;
 
 	@Autowired
 	private TwitterProvider twitterProvider;
@@ -127,7 +128,7 @@ public class LoginController extends AbstractController {
 			if (guestName != null && guestName.startsWith("Guest") && guestName.length() == MAX_USERNAME_LENGTH) {
 				username = guestName;
 			} else {
-				username = "Guest" + Sha512DigestUtils.shaHex(request.getSession().getId()).substring(0, 10);
+				username = "Guest" + Sha512DigestUtils.shaHex(request.getSession().getId()).substring(0, MAX_GUESTHASH_LENGTH);
 			}
 			org.springframework.security.core.userdetails.User user =
 					new org.springframework.security.core.userdetails.User(
@@ -181,8 +182,8 @@ public class LoginController extends AbstractController {
 		return new RedirectView(request.getHeader("referer") != null ? request.getHeader("referer") : "/");
 	}
 	
-	private Collection<? extends GrantedAuthority> getAuthorities() {
-		List<GrantedAuthority> authList = new ArrayList<GrantedAuthority>(2);
+	private Collection<GrantedAuthority> getAuthorities() {
+		List<GrantedAuthority> authList = new ArrayList<GrantedAuthority>();
 		authList.add(new GrantedAuthorityImpl("ROLE_USER"));
 		return authList;
 	}
