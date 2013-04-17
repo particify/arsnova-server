@@ -14,6 +14,10 @@ security.ssl=false
 security.keystore=/etc/arsnova.thm.de.jks
 security.storepass=arsnova
 
+security.ldap.url=ldap://example.com:389/dc=example,dc=com
+security.ldap.user-search-filter=(uid={0})
+security.ldap.user-search-base=
+
 couchdb.host=localhost
 couchdb.port=5984
 couchdb.name=arsnova

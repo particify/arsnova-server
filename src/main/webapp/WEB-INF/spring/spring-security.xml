@@ -10,14 +10,16 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd">
 
     <security:authentication-manager alias="authenticationManager">
+        <security:ldap-authentication-provider
+			user-search-filter="${security.ldap.user-search-filter}"
+			user-search-base="${security.ldap.user-search-base}" />
         <security:authentication-provider ref="facebookAuthProvider" />
         <security:authentication-provider ref="twitterAuthProvider" />
         <security:authentication-provider ref="googleAuthProvider" />
         <security:authentication-provider ref="casAuthenticationProvider" />
-        <security:authentication-provider ref="ldapAuthProvider" />
     </security:authentication-manager>
 
-    <security:http entry-point-ref="facebookEntryPoint">
+    <security:http entry-point-ref="loginUrlAuthenticationEntryPoint">
         <security:custom-filter ref="facebookFilter" before="CAS_FILTER" />
         <security:custom-filter ref="twitterFilter" after="CAS_FILTER" />
         <security:custom-filter ref="googleFilter" before="FORM_LOGIN_FILTER" />
@@ -27,11 +29,13 @@
     </security:http>
 
     <!-- ######################### LDAP ############################# -->
-  
 	<security:ldap-server url="${security.ldap.url}" />
-	<security:ldap-authentication-provider id="ldapAuthProvider"
-		user-search-filter="${security.ldap.user-search-filter}"
-		user-search-base="${security.ldap.user-search-base}" />
+
+	<bean id="loginUrlAuthenticationEntryPoint"
+		class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+		<property name="loginFormUrl" value="/login.html" />
+		<property name="forceHttps" value="false" />
+	</bean>
     
     <!-- ######################### FACEBOOK ######################### -->
     <bean id="facebookEntryPoint" class="com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationEntryPoint"

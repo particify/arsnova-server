@@ -38,11 +38,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.token.Sha512DigestUtils;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.util.UrlUtils;
@@ -144,23 +146,36 @@ public class LoginController extends AbstractController {
 		return null;
 	}
 	
-	@RequestMapping(value = { "/auth/login", "/doLogin" }, method = RequestMethod.POST)
+	@RequestMapping(value = { "/auth/ldaplogin" }, method = RequestMethod.POST)
 	public final View doLdapLogin(
 			@RequestParam("type") final String type,
-			@RequestParam(value = "user", required = false) final String userName,
+			@RequestParam(value = "user") final String userName,
 			@RequestParam(value = "referer", required = false) final String forcedReferer,
-			@RequestParam(value = "password", required = false) final String password,
+			@RequestParam(value = "password") final String password,
 			final HttpServletRequest request,
 			final HttpServletResponse response
-	) throws IOException, ServletException {
-		if ("ldap".equals(type)) {
+	) {
+		if ("ldap".equals(type) && password != null) {
+			String referer = request.getHeader("referer");
+			if (null != forcedReferer && null != referer && !UrlUtils.isAbsoluteUrl(referer)) {
+				referer = forcedReferer;
+			}
+			if (null == referer) {
+				referer = "/";
+			}
 			org.springframework.security.core.userdetails.User user =
 					new org.springframework.security.core.userdetails.User(
-							userName, password, true, true, true, true, this.getAuthorities()
+						userName, password, true, true, true, true, this.getAuthorities()
 					);
 			
-			Authentication token = new UsernamePasswordAuthenticationToken(user, null, getAuthorities());
-			ldapAuthenticationProvider.authenticate(token);
+			Authentication token = new UsernamePasswordAuthenticationToken(user, password, getAuthorities());
+			try {
+				ldapAuthenticationProvider.authenticate(token);
+				return new RedirectView(referer + "#auth/checkLogin");
+			}
+			catch (AuthenticationException e) {
+				e.printStackTrace();
+			}
 		}
 		return null;
 	}
