@@ -557,14 +557,14 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("subject", question.getSubject());
 		q.put("text", question.getText());
 		q.put("active", question.isActive());
-		q.put("number", 0); // TODO This number has to get incremented
-							// automatically
+		q.put("number", 0); // TODO: This number is now unused. A clean up is necessary.
 		q.put("releasedFor", question.getReleasedFor());
 		q.put("possibleAnswers", question.getPossibleAnswers());
 		q.put("noCorrect", question.isNoCorrect());
 		q.put("piRound", question.getPiRound());
 		q.put("showStatistic", question.isShowStatistic());
 		q.put("showAnswer", question.isShowAnswer());
+		q.put("abstention", question.isAbstention());
 		try {
 			database.saveDocument(q);
 			question.set_id(q.getId());
@@ -589,6 +589,7 @@ public class CouchDBDao implements IDatabaseDao {
 			q.put("piRound", question.getPiRound());
 			q.put("showStatistic", question.isShowStatistic());
 			q.put("showAnswer", question.isShowAnswer());
+			q.put("abstention", question.isAbstention());
 			this.database.saveDocument(q);
 			question.set_rev(q.getRev());
 
@@ -987,7 +988,7 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public List<Answer> getFreetextAnswers(String questionId) {
 		try {
-			View view = new View("skill_question/freetext_answers");
+			View view = new View("skill_question/freetext_answers_full");
 			view.setKey(URLEncoder.encode("\"" + questionId + "\"", "UTF-8"));
 			ViewResults results = this.getDatabase().view(view);
 			if (results.getResults().isEmpty()) {
@@ -996,8 +997,6 @@ public class CouchDBDao implements IDatabaseDao {
 			List<Answer> answers = new ArrayList<Answer>();
 			for (Document d : results.getResults()) {
 				Answer a = (Answer) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Answer.class);
-				a.setAnswerSubject(d.getJSONObject().getJSONObject("value").getString("subject"));
-				a.setAnswerText(d.getJSONObject().getJSONObject("value").getString("text"));
 				a.setQuestionId(questionId);
 				answers.add(a);
 			}
@@ -1021,7 +1020,7 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 
 		try {
-			View view = new View("answer/by_user_and_session");
+			View view = new View("answer/by_user_and_session_full");
 			view.setKey(
 				"[" + URLEncoder.encode("\"" + user.getUsername() + "\",\"" + s.get_id() + "\"", "UTF-8") + "]"
 			);
@@ -1359,6 +1358,7 @@ public class CouchDBDao implements IDatabaseDao {
 			a.put("timestamp", answer.getTimestamp());
 			a.put("user", user.getUsername());
 			a.put("piRound", answer.getPiRound());
+			a.put("abstention", answer.isAbstention());
 			this.database.saveDocument(a);
 			answer.set_id(a.getId());
 			answer.set_rev(a.getRev());
@@ -1376,6 +1376,7 @@ public class CouchDBDao implements IDatabaseDao {
 			a.put("answerSubject", answer.getAnswerSubject());
 			a.put("answerText", answer.getAnswerText());
 			a.put("timestamp", answer.getTimestamp());
+			a.put("abstention", answer.isAbstention());
 			this.database.saveDocument(a);
 			answer.set_rev(a.getRev());
 			return answer;

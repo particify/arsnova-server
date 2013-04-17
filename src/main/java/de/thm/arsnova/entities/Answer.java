@@ -14,6 +14,7 @@ public class Answer {
 	private String user;
 	private long timestamp;
 	private int answerCount = 1;
+	private boolean abstention; // Currently available only for freetext answers!
 
 	public Answer() {
 		this.type = "skill_question_answer";
@@ -105,6 +106,14 @@ public class Answer {
 
 	public final void setAnswerCount(final int answerCount) {
 		this.answerCount = answerCount;
+	}
+	
+	public boolean isAbstention() {
+		return abstention;
+	}
+
+	public void setAbstention(boolean abstention) {
+		this.abstention = abstention;
 	}
 
 	@Override
