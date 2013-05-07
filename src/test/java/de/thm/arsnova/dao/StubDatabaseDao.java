@@ -367,7 +367,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<String> getUnAnsweredQuestions(Session session, User user) {
+	public List<String> getUnAnsweredQuestionIds(Session session, User user) {
 		// TODO Auto-generated method stub
 		return null;
 	}

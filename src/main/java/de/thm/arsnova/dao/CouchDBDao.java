@@ -803,7 +803,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final List<String> getUnAnsweredQuestions(final Session session, final User user) {
+	public final List<String> getUnAnsweredQuestionIds(final Session session, final User user) {
 		try {
 			View view = new View("answer/by_user");
 			view.setKey(

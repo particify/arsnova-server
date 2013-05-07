@@ -181,11 +181,11 @@ public class LecturerQuestionController extends AbstractController {
 
 	@RequestMapping(value = "/unanswered", method = RequestMethod.GET)
 	@ResponseBody
-	public final List<String> getUnAnsweredSkillQuestions(
+	public final List<String> getUnAnsweredSkillQuestionIds(
 			@RequestParam final String sessionkey,
 			final HttpServletResponse response
 	) {
-		List<String> answers = questionService.getUnAnsweredQuestions(sessionkey);
+		List<String> answers = questionService.getUnAnsweredQuestionIds(sessionkey);
 		if (answers == null || answers.isEmpty()) {
 			throw new NoContentException();
 		}

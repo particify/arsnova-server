@@ -70,7 +70,7 @@ public interface IDatabaseDao {
 
 	void deleteQuestion(Question question);
 
-	List<String> getUnAnsweredQuestions(Session session, User user);
+	List<String> getUnAnsweredQuestionIds(Session session, User user);
 
 	Answer getMyAnswer(String questionId, int piRound);
 
