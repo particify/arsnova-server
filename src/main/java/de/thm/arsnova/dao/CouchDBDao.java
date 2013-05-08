@@ -773,7 +773,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final void deleteQuestion(final Question question) {
+	public final void deleteQuestionWithAnswers(final Question question) {
 		try {
 			this.deleteAnswers(question);
 			this.deleteDocument(question.get_id());
@@ -1507,5 +1507,14 @@ public class CouchDBDao implements IDatabaseDao {
 			LOGGER.error("Could not lock session {}", session);
 		}
 		return null;
+	}
+
+	@Override
+	public void deleteSession(Session session) {
+		try {
+			this.deleteDocument(session.get_id());
+		} catch (IOException e) {
+			LOGGER.error("Could not delete session {}", session);
+		}
 	}
 }
