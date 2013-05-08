@@ -116,23 +116,28 @@ public class SessionServiceTest {
 
 	@Test
 	public void testShouldDeleteAllSessionData() {
-		userService.setUserAuthenticated(true);
-
-		Session session = new Session();
-		session.setCreator(userService.getCurrentUser().getUsername());
-		Question q1 = new Question();
-		Question q2 = new Question();
-
-		IDatabaseDao mockDatabase = mock(IDatabaseDao.class);
-		when(mockDatabase.getSkillQuestions(anyString())).thenReturn(Arrays.asList(q1, q2));
-		when(mockDatabase.getSession(anyString())).thenReturn(session);
-		ReflectionTestUtils.setField(getTargetObject(sessionService), "databaseDao", mockDatabase);
-
-		sessionService.deleteSession(session.getKeyword(), userService.getCurrentUser());
-
-		verify(mockDatabase).deleteQuestionWithAnswers(q1);
-		verify(mockDatabase).deleteQuestionWithAnswers(q2);
-		verify(mockDatabase).deleteSession(session);
+		IDatabaseDao tempDatabase = (IDatabaseDao) ReflectionTestUtils.getField(getTargetObject(sessionService), "databaseDao");
+		try {
+			userService.setUserAuthenticated(true);
+	
+			Session session = new Session();
+			session.setCreator(userService.getCurrentUser().getUsername());
+			Question q1 = new Question();
+			Question q2 = new Question();
+	
+			IDatabaseDao mockDatabase = mock(IDatabaseDao.class);
+			when(mockDatabase.getSkillQuestions(anyString())).thenReturn(Arrays.asList(q1, q2));
+			when(mockDatabase.getSession(anyString())).thenReturn(session);
+			ReflectionTestUtils.setField(getTargetObject(sessionService), "databaseDao", mockDatabase);
+	
+			sessionService.deleteSession(session.getKeyword(), userService.getCurrentUser());
+	
+			verify(mockDatabase).deleteQuestionWithAnswers(q1);
+			verify(mockDatabase).deleteQuestionWithAnswers(q2);
+			verify(mockDatabase).deleteSession(session);
+		} finally {
+			ReflectionTestUtils.setField(getTargetObject(sessionService), "databaseDao", tempDatabase);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
