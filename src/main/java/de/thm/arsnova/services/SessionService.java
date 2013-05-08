@@ -35,6 +35,7 @@ import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.LoggedIn;
+import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.ForbiddenException;
@@ -222,5 +223,18 @@ public class SessionService implements ISessionService {
 	public Session setActive(String sessionkey, Boolean lock) {
 		Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		return databaseDao.lockSession(session, lock);
+	}
+
+	@Override
+	@Authenticated
+	public void deleteSession(String sessionkey, User user) {
+		Session session = databaseDao.getSession(sessionkey);
+		if (!session.isCreator(user)) {
+			throw new ForbiddenException();
+		}
+		for (Question q : databaseDao.getSkillQuestions(sessionkey)) {
+			databaseDao.deleteQuestionWithAnswers(q);
+		}
+		databaseDao.deleteSession(session);
 	}
 }

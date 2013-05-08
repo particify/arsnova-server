@@ -146,7 +146,7 @@ public class QuestionService implements IQuestionService {
 		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
-		databaseDao.deleteQuestion(question);
+		databaseDao.deleteQuestionWithAnswers(question);
 	}
 	
 	@Override

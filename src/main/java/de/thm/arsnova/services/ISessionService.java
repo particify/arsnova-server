@@ -49,4 +49,6 @@ public interface ISessionService {
 	Session setActive(String sessionkey, Boolean lock);
 
 	Session joinSession(String keyword, UUID socketId);
+
+	void deleteSession(String sessionkey, User user);
 }

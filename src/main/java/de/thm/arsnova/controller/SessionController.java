@@ -64,6 +64,13 @@ public class SessionController extends AbstractController {
 		return sessionService.joinSession(sessionkey);
 	}
 
+	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.DELETE)
+	@ResponseBody
+	public final void deleteSession(@PathVariable final String sessionkey) {
+		User user = userService.getCurrentUser();
+		sessionService.deleteSession(sessionkey, user);
+	}
+
 	@RequestMapping(value = "/{sessionkey}/online", method = RequestMethod.POST)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.CREATED)
