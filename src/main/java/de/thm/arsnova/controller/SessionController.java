@@ -39,7 +39,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.LoggedIn;
-import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
@@ -160,7 +159,7 @@ public class SessionController extends AbstractController {
 
 		return sessions;
 	}
-	
+
 	@RequestMapping(value = "/{sessionkey}/lock", method = RequestMethod.POST)
 	@ResponseBody
 	public final Session lockSession(
