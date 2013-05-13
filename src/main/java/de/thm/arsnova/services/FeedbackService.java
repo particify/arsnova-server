@@ -19,7 +19,8 @@
 
 package de.thm.arsnova.services;
 
-import java.util.HashSet;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -128,8 +129,8 @@ public class FeedbackService implements IFeedbackService {
 				this.server.reportDeletedFeedback(e.getKey(), e.getValue());
 			}
 		}
-		for(String session : allAffectedSessions) {
-			this.server.reportUpdatedFeedbackForSession(session);	
+		for (String session : allAffectedSessions) {
+			this.server.reportUpdatedFeedbackForSession(session);
 		}
 		
 	}
@@ -137,5 +138,83 @@ public class FeedbackService implements IFeedbackService {
 	@Override
 	public final Integer getMyFeedback(final String keyword, final User user) {
 		return this.databaseDao.getMyFeedback(keyword, user);
+	}
+	
+	private static class FeedbackStorageObject {
+		private int value;
+		private Date timestamp;
+
+		public FeedbackStorageObject(int initValue) {
+			this.value = initValue;
+			this.timestamp = new Date();
+		}
+		
+		public int getValue() {
+			return value;
+		}
+		public Date getTimestamp() {
+			return timestamp;
+		}
+	}
+	
+	private static class FeedbackStorage {
+		private Map<String, Map<String, FeedbackStorageObject>> data;
+		
+		public Feedback getFeedback(String keyword) {
+			int a = 0;
+			int b = 0;
+			int c = 0;
+			int d = 0;
+			
+			if (data.get(keyword) == null) {
+				return new Feedback(0, 0, 0, 0);
+			}
+			
+			for (FeedbackStorageObject fso : data.get(keyword).values()) {
+				switch (fso.getValue()) {
+				case 0:
+					a++;
+					break;
+				case 1:
+					b++;
+					break;
+				case 2:
+					c++;
+					break;
+				case 3:
+					d++;
+					break;
+				}
+			}
+			
+			return new Feedback(a, b, c, d);
+		}
+		
+		public boolean saveFeedback(String keyword, int value, User user) {
+			if (data.get(keyword) == null) {
+				data.put(keyword, new HashMap<String, FeedbackStorageObject>());
+			}
+			data.get(keyword).put(user.getUsername(), new FeedbackStorageObject(value));
+			return true;
+		}
+		
+		public void cleanFeedbackVotes(int cleanupFeedbackDelay) {
+			for (String keyword : data.keySet()) {
+				this.cleanSessionFeedbackVotes(keyword, cleanupFeedbackDelay);
+			}
+		}
+		
+		private void cleanSessionFeedbackVotes(String keyword, int cleanupFeedbackDelay) {
+			final long timelimitInMillis = 60000 * (long) cleanupFeedbackDelay;
+			final long maxAllowedTimeInMillis = System.currentTimeMillis() - timelimitInMillis;
+			
+			Map<String, FeedbackStorageObject> sessionFeedbacks = data.get(keyword);
+			
+			for ( FeedbackStorageObject fso : sessionFeedbacks.values() ) {
+				if (fso.getTimestamp().getTime() < maxAllowedTimeInMillis) {
+					sessionFeedbacks.remove(fso);
+				}
+			}
+		}
 	}
 }
