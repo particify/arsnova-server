@@ -188,6 +188,8 @@ public class FeedbackService implements IFeedbackService {
 				case 3:
 					d++;
 					break;
+				default:
+					break;
 				}
 			}
 			
