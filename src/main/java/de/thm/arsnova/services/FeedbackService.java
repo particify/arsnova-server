@@ -214,12 +214,11 @@ public class FeedbackService implements IFeedbackService {
 			
 			Map<String, FeedbackStorageObject> sessionFeedbacks = data.get(keyword);
 			
-			for (String username : sessionFeedbacks.keySet()) {
+			for (Map.Entry<String, FeedbackStorageObject> entry : sessionFeedbacks.entrySet()) {
 				if (
-					sessionFeedbacks.containsKey(username)
-					&& sessionFeedbacks.get(username).getTimestamp().getTime() < maxAllowedTimeInMillis
+					entry.getValue().getTimestamp().getTime() < maxAllowedTimeInMillis
 				) {
-					sessionFeedbacks.remove(username);
+					sessionFeedbacks.remove(entry.getKey());
 				}
 			}
 		}
