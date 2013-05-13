@@ -21,7 +21,6 @@ package de.thm.arsnova.services;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +35,7 @@ import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.LoggedIn;
+import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.ForbiddenException;
@@ -56,7 +56,7 @@ public class SessionService implements ISessionService {
 	@Autowired
 	private ARSnovaSocketIOServer socketIoServer;
 
-	@Autowired(required=false)
+	@Autowired(required = false)
 	private ConnectorClient connectorClient;
 
 	public void setDatabaseDao(final IDatabaseDao newDatabaseDao) {
@@ -117,26 +117,22 @@ public class SessionService implements ISessionService {
 		if (connectorClient == null) {
 			return mySessions;
 		}
-		
+
 		List<Session> courseSessions = databaseDao.getCourseSessions(
 			connectorClient.getCourses(user.getUsername()).getCourse()
 		);
-		
+
 		Map<String, Session> allAvailableSessions = new HashMap<String, Session>();
-		
+
 		for (Session session : mySessions) {
 			allAvailableSessions.put(session.get_id(), session);
 		}
-		
 		for (Session session : courseSessions) {
 			allAvailableSessions.put(session.get_id(), session);
 		}
-		
-		List<Session> result = new ArrayList<Session>(allAvailableSessions.values());
-		
-		return result;
+		return new ArrayList<Session>(allAvailableSessions.values());
 	}
-	
+
 	@Override
 	public final List<Session> getMyVisitedSessions(final User user) {
 		return databaseDao.getMyVisitedSessions(user);
@@ -152,7 +148,6 @@ public class SessionService implements ISessionService {
 				throw new ForbiddenException();
 			}
 		}
-		
 		return databaseDao.saveSession(session);
 	}
 
@@ -196,7 +191,7 @@ public class SessionService implements ISessionService {
 		Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		return databaseDao.countActiveUsers(session, since);
 	}
-	
+
 	public static class SessionNameComperator implements Comparator<Session>, Serializable {
 		private static final long serialVersionUID = 1L;
 
@@ -205,8 +200,8 @@ public class SessionService implements ISessionService {
 			return session1.getName().compareToIgnoreCase(session2.getName());
 		}
 	}
-	
-	public static class SessionShortNameComperator implements Comparator<Session>, Serializable{
+
+	public static class SessionShortNameComperator implements Comparator<Session>, Serializable {
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -228,5 +223,18 @@ public class SessionService implements ISessionService {
 	public Session setActive(String sessionkey, Boolean lock) {
 		Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		return databaseDao.lockSession(session, lock);
+	}
+
+	@Override
+	@Authenticated
+	public void deleteSession(String sessionkey, User user) {
+		Session session = databaseDao.getSession(sessionkey);
+		if (!session.isCreator(user)) {
+			throw new ForbiddenException();
+		}
+		for (Question q : databaseDao.getSkillQuestions(sessionkey)) {
+			databaseDao.deleteQuestionWithAnswers(q);
+		}
+		databaseDao.deleteSession(session);
 	}
 }

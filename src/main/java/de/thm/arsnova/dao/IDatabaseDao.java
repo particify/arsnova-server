@@ -68,9 +68,9 @@ public interface IDatabaseDao {
 
 	List<String> getQuestionIds(Session session, User user);
 
-	void deleteQuestion(Question question);
+	void deleteQuestionWithAnswers(Question question);
 
-	List<String> getUnAnsweredQuestions(Session session, User user);
+	List<String> getUnAnsweredQuestionIds(Session session, User user);
 
 	Answer getMyAnswer(String questionId, int piRound);
 
@@ -135,4 +135,6 @@ public interface IDatabaseDao {
 	Session lockSession(Session session, Boolean lock);
 
 	List<String> getActiveUsers(int timeDifference);
+
+	void deleteSession(Session session);
 }

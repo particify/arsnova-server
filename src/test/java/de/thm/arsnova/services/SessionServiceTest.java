@@ -22,14 +22,23 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
+
+import static org.mockito.Mockito.*;
+
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.dao.StubDatabaseDao;
+import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
@@ -55,7 +64,7 @@ public class SessionServiceTest {
 		databaseDao.cleanupTestData();
 		userService.setUserAuthenticated(false);
 	}
-
+	
 	@Test
 	public void testShouldGenerateSessionKeyword() {
 		System.out.println(sessionService.generateKeyword());
@@ -103,5 +112,43 @@ public class SessionServiceTest {
 		session.setShortName("TSX");
 		sessionService.saveSession(session);
 		assertNotNull(sessionService.joinSession("11111111"));
+	}
+
+	@Test
+	public void testShouldDeleteAllSessionData() {
+		IDatabaseDao tempDatabase = (IDatabaseDao) ReflectionTestUtils.getField(getTargetObject(sessionService), "databaseDao");
+		try {
+			userService.setUserAuthenticated(true);
+	
+			Session session = new Session();
+			session.setCreator(userService.getCurrentUser().getUsername());
+			Question q1 = new Question();
+			Question q2 = new Question();
+	
+			IDatabaseDao mockDatabase = mock(IDatabaseDao.class);
+			when(mockDatabase.getSkillQuestions(anyString())).thenReturn(Arrays.asList(q1, q2));
+			when(mockDatabase.getSession(anyString())).thenReturn(session);
+			ReflectionTestUtils.setField(getTargetObject(sessionService), "databaseDao", mockDatabase);
+	
+			sessionService.deleteSession(session.getKeyword(), userService.getCurrentUser());
+	
+			verify(mockDatabase).deleteQuestionWithAnswers(q1);
+			verify(mockDatabase).deleteQuestionWithAnswers(q2);
+			verify(mockDatabase).deleteSession(session);
+		} finally {
+			ReflectionTestUtils.setField(getTargetObject(sessionService), "databaseDao", tempDatabase);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T getTargetObject(Object proxy) {
+		if ((AopUtils.isJdkDynamicProxy(proxy))) {
+			try {
+				return (T) getTargetObject(((Advised) proxy).getTargetSource().getTarget());
+			} catch (Exception e) {
+				throw new RuntimeException("Failed to unproxy target.", e);
+			}
+		}
+		return (T) proxy;
 	}
 }

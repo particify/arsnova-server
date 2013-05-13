@@ -39,6 +39,7 @@ public class Question {
 	private int piRound;
 	private boolean showStatistic; // sic
 	private boolean showAnswer;
+	private boolean abstention;
 	private String _id;
 	private String _rev;
 
@@ -176,6 +177,14 @@ public class Question {
 
 	public void setShowAnswer(boolean showAnswer) {
 		this.showAnswer = showAnswer;
+	}
+
+	public boolean isAbstention() {
+		return abstention;
+	}
+
+	public void setAbstention(boolean abstention) {
+		this.abstention = abstention;
 	}
 
 	public final String get_id() {

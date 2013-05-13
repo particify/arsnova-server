@@ -39,7 +39,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.LoggedIn;
-import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
@@ -63,6 +62,13 @@ public class SessionController extends AbstractController {
 	@ResponseBody
 	public final Session joinSession(@PathVariable final String sessionkey) {
 		return sessionService.joinSession(sessionkey);
+	}
+
+	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.DELETE)
+	@ResponseBody
+	public final void deleteSession(@PathVariable final String sessionkey) {
+		User user = userService.getCurrentUser();
+		sessionService.deleteSession(sessionkey, user);
 	}
 
 	@RequestMapping(value = "/{sessionkey}/online", method = RequestMethod.POST)
@@ -160,7 +166,7 @@ public class SessionController extends AbstractController {
 
 		return sessions;
 	}
-	
+
 	@RequestMapping(value = "/{sessionkey}/lock", method = RequestMethod.POST)
 	@ResponseBody
 	public final Session lockSession(

@@ -146,7 +146,7 @@ public class QuestionService implements IQuestionService {
 		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
-		databaseDao.deleteQuestion(question);
+		databaseDao.deleteQuestionWithAnswers(question);
 	}
 	
 	@Override
@@ -182,7 +182,7 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@Authenticated
-	public List<String> getUnAnsweredQuestions(String sessionKey) {
+	public List<String> getUnAnsweredQuestionIds(String sessionKey) {
 		User user = userService.getCurrentUser();
 		if (user == null) {
 			throw new UnauthorizedException();
@@ -191,7 +191,7 @@ public class QuestionService implements IQuestionService {
 		if (session == null) {
 			throw new NotFoundException();
 		}
-		return databaseDao.getUnAnsweredQuestions(session, user);
+		return databaseDao.getUnAnsweredQuestionIds(session, user);
 	}
 
 	@Override

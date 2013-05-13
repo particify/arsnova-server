@@ -367,7 +367,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<String> getUnAnsweredQuestions(Session session, User user) {
+	public List<String> getUnAnsweredQuestionIds(Session session, User user) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -379,7 +379,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public void deleteQuestion(Question question) {
+	public void deleteQuestionWithAnswers(Question question) {
 		// TODO Auto-generated method stub
 	}
 
@@ -431,5 +431,10 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public List<String> getActiveUsers(int timeDifference) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void deleteSession(Session session) {
+		// TODO Auto-generated method stub
 	}
 }
