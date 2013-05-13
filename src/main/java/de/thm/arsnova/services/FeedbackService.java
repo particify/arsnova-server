@@ -159,7 +159,11 @@ public class FeedbackService implements IFeedbackService {
 	
 	private static class FeedbackStorage {
 		private Map<String, Map<String, FeedbackStorageObject>> data;
-		
+
+		public FeedbackStorage() {
+			this.data = new HashMap<String, Map<String,FeedbackStorageObject>>();
+		}
+
 		public Feedback getFeedback(String keyword) {
 			int a = 0;
 			int b = 0;
@@ -189,7 +193,7 @@ public class FeedbackService implements IFeedbackService {
 			
 			return new Feedback(a, b, c, d);
 		}
-		
+
 		public boolean saveFeedback(String keyword, int value, User user) {
 			if (data.get(keyword) == null) {
 				data.put(keyword, new HashMap<String, FeedbackStorageObject>());
@@ -197,22 +201,25 @@ public class FeedbackService implements IFeedbackService {
 			data.get(keyword).put(user.getUsername(), new FeedbackStorageObject(value));
 			return true;
 		}
-		
+
 		public void cleanFeedbackVotes(int cleanupFeedbackDelay) {
 			for (String keyword : data.keySet()) {
 				this.cleanSessionFeedbackVotes(keyword, cleanupFeedbackDelay);
 			}
 		}
-		
+
 		private void cleanSessionFeedbackVotes(String keyword, int cleanupFeedbackDelay) {
 			final long timelimitInMillis = 60000 * (long) cleanupFeedbackDelay;
 			final long maxAllowedTimeInMillis = System.currentTimeMillis() - timelimitInMillis;
 			
 			Map<String, FeedbackStorageObject> sessionFeedbacks = data.get(keyword);
 			
-			for ( FeedbackStorageObject fso : sessionFeedbacks.values() ) {
-				if (fso.getTimestamp().getTime() < maxAllowedTimeInMillis) {
-					sessionFeedbacks.remove(fso);
+			for (String username : sessionFeedbacks.keySet()) {
+				if (
+					sessionFeedbacks.containsKey(username)
+					&& sessionFeedbacks.get(username).getTimestamp().getTime() < maxAllowedTimeInMillis
+				) {
+					sessionFeedbacks.remove(username);
 				}
 			}
 		}
