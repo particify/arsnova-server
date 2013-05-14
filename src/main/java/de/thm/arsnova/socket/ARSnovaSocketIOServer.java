@@ -22,8 +22,8 @@ import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
 
-import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.services.IFeedbackService;
 import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.services.ISessionService;
@@ -237,6 +237,34 @@ public class ARSnovaSocketIOServer {
 	public void reportUpdatedFeedbackForSession(String sessionKey) {
 		de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
 		broadcastInSession(sessionKey, "feedbackData", fb.getValues());
+		try {
+			long averageFeedback = feedbackService.getAverageFeedbackRounded(sessionKey);
+			broadcastInSession(sessionKey, "feedbackDataRoundedAverage", averageFeedback);
+		} catch (NoContentException e) {
+			broadcastInSession(sessionKey, "feedbackDataRoundedAverage", null);
+		}
+	}
+
+	public void reportFeedbackForUserInSession(de.thm.arsnova.entities.Session session, User user) {
+		de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(session.getKeyword());
+		Long averageFeedback;
+		try {
+			averageFeedback = feedbackService.getAverageFeedbackRounded(session.getKeyword());
+		} catch (NoContentException e) {
+			averageFeedback = null;
+		}
+		List<UUID> connectionIds = findConnectionIdForUser(user.getUsername());
+		if (connectionIds.isEmpty()) {
+			return;
+		}
+
+		for (SocketIOClient client : server.getAllClients()) {
+			if (connectionIds.contains(client.getSessionId())) {
+				logger.info("Sending " + user.getUsername() + " feedback data " + fb.getValues() + ".");
+				client.sendEvent("feedbackData", fb.getValues());
+				client.sendEvent("feedbackDataRoundedAverage", averageFeedback);
+			}
+		}
 	}
 
 	public void reportActiveUserCountForSession(String sessionKey) {

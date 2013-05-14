@@ -103,6 +103,8 @@ public class SessionServiceTest {
 	@Test
 	public void testShouldSaveSession() {
 		userService.setUserAuthenticated(true);
+		// Prevent "NotFoundExceptions" inside StubDatabase while saving the session
+		databaseDao.saveFeedback("11111111", 1, userService.getCurrentUser());
 
 		Session session = new Session();
 		session.setActive(true);
