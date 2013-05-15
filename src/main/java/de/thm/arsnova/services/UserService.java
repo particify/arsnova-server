@@ -276,4 +276,12 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 			LOGGER.error("IOException while saving UserService", e);
 		}
 	}
+
+	@Override
+	public void removeUserFromMaps(User user) {
+		if (user != null) {
+			user2session.remove(user);
+			user2sessionLegacy.remove(user);
+		}
+	}
 }

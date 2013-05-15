@@ -50,4 +50,6 @@ public interface IUserService {
 	void removeUserFromSessionBySocketId(UUID socketId);
 
 	int getUsersInSessionCount(String keyword);
+
+	void removeUserFromMaps(User user);
 }

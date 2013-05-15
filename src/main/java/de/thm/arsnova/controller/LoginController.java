@@ -146,6 +146,7 @@ public class LoginController extends AbstractController {
 	@RequestMapping(value = { "/auth/logout", "/logout" }, method = RequestMethod.GET)
 	public final View doLogout(final HttpServletRequest request) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		userService.removeUserFromMaps(userService.getCurrentUser());
 		request.getSession().invalidate();
 		SecurityContextHolder.clearContext();
 		if (auth instanceof CasAuthenticationToken) {
