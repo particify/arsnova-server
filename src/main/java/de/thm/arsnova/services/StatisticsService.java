@@ -1,6 +1,7 @@
 package de.thm.arsnova.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.dao.IDatabaseDao;
@@ -17,6 +18,9 @@ public class StatisticsService implements IStatisticsService {
 	@Autowired
 	private IUserService userService;
 
+	@Autowired
+	private SessionRegistry sessionRegistry;
+
 	@Override
 	public final int countActiveUsers() {
 		long since = System.currentTimeMillis() - DURATION_IN_MILLIS;
@@ -25,7 +29,7 @@ public class StatisticsService implements IStatisticsService {
 
 	@Override
 	public int countLoggedInUsers() {
-		return userService.loggedInUsers();
+		return sessionRegistry.getAllPrincipals().size();
 	}
 
 	@Override
