@@ -287,6 +287,6 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 
 	@Override
 	public int loggedInUsers() {
-		return user2session.size();
+		return user2sessionLegacy.size();
 	}
 }
