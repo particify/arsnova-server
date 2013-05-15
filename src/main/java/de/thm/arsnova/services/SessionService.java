@@ -100,6 +100,7 @@ public class SessionService implements ISessionService {
 
 		userService.addCurrentUserToSessionMap(keyword);
 		socketIoServer.reportActiveUserCountForSession(keyword);
+		socketIoServer.reportFeedbackForUserInSession(session, userService.getCurrentUser());
 
 		if (connectorClient != null && session.isCourseSession()) {
 			String courseid = session.getCourseId();
