@@ -6,5 +6,7 @@ public interface IStatisticsService {
 
 	int countActiveUsers();
 
+	int countLoggedInUsers();
+
 	Statistics getStatistics();
 }

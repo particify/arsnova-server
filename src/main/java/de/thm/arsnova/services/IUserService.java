@@ -52,4 +52,6 @@ public interface IUserService {
 	int getUsersInSessionCount(String keyword);
 
 	void removeUserFromMaps(User user);
+
+	int loggedInUsers();
 }

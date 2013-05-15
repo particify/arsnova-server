@@ -31,6 +31,14 @@ public class StatisticsController {
 		return Integer.toString(statisticsService.countActiveUsers());
 	}
 
+	@RequestMapping(method = RequestMethod.GET, value = "/statistics/loggedinusercount", produces = "text/plain")
+	@ResponseBody
+	public final String countLoggedInUsers(HttpServletResponse response) {
+		response.addHeader("X-Deprecated-API", "1");
+
+		return Integer.toString(statisticsService.countLoggedInUsers());
+	}
+
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics/sessioncount", produces = "text/plain")
 	@ResponseBody
 	public final String countSessions(HttpServletResponse response) {

@@ -14,10 +14,18 @@ public class StatisticsService implements IStatisticsService {
 	@Autowired
 	private IDatabaseDao databaseDao;
 
+	@Autowired
+	private IUserService userService;
+
 	@Override
 	public final int countActiveUsers() {
 		long since = System.currentTimeMillis() - DURATION_IN_MILLIS;
 		return databaseDao.countActiveUsers(since);
+	}
+
+	@Override
+	public int countLoggedInUsers() {
+		return userService.loggedInUsers();
 	}
 
 	@Override
