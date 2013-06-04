@@ -163,12 +163,12 @@ public class LoginController extends AbstractController {
 	@RequestMapping(value = { "/test/me" }, method = RequestMethod.GET)
 	@ResponseBody
 	public final User me() {
-		return userSessionService.getUser();		
+		return userSessionService.getUser();
 	}
 	
 	@RequestMapping(value = { "/test/mysession" }, method = RequestMethod.GET)
 	@ResponseBody
 	public final Session mysession() {
-		return userSessionService.getSession();		
+		return userSessionService.getSession();
 	}
 }

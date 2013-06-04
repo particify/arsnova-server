@@ -1,11 +1,14 @@
 package de.thm.arsnova.services;
 
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
 @Component
+@Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class UserSessionServiceImpl implements UserSessionService {
 	
 	private User user;
