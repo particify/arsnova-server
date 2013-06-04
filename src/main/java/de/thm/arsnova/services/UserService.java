@@ -66,20 +66,15 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 	public final void removeInactiveUsersFromLegacyMap() {
 		List<String> usernames = databaseDao.getActiveUsers(MAX_USER_INACTIVE_SECONDS);
 		Set<String> affectedSessions = new HashSet<String>();
-		LOGGER.info(
-			"Active users in database: {}, active users in memory (user2sessionLegacy): {}",
-			usernames.size(), user2sessionLegacy.size()
-		);
+
 		for (Entry<User, String> e : user2sessionLegacy.entrySet()) {
-			LOGGER.debug("entry: {}", e);
 			User key = e.getKey();
-			if (!usernames.contains(key.getUsername())) {
+			if (usernames != null && !usernames.contains(key.getUsername())) {
 				if (null != e.getValue()) {
 					affectedSessions.add(e.getValue());
 				} else {
 					LOGGER.warn("Session for user {} is null", key);
 				}
-				LOGGER.debug("Removing user {} from user2sessionLegacy", e.getKey());
 				user2sessionLegacy.remove(e.getKey());
 			}
 		}
@@ -150,11 +145,13 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 
 	@Override
 	public boolean isUserInSession(User user, String keyword) {
-		if (keyword == null)
+		if (keyword == null) {
 			return false;
+		}
 		String session = user2sessionLegacy.get(user);
-		if (session == null)
+		if (session == null) {
 			return false;
+		}
 		return keyword.equals(session);
 	}
 
@@ -184,9 +181,9 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public void addCurrentUserToSessionMap(String keyword) {
 		User user = getCurrentUser();
-		if (user == null)
+		if (user == null) {
 			throw new UnauthorizedException();
-		LOGGER.info("Mapping user " + user.getUsername() + " to session " + keyword + " [legacy].");
+		}
 		user2sessionLegacy.put(user, keyword);
 	}
 
@@ -194,7 +191,6 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public void addUserToSessionBySocketId(UUID socketId, String keyword) {
 		User user = socketid2user.get(socketId);
-		LOGGER.info("Mapping user " + user.getUsername() + " to session " + keyword + ".");
 		user2session.put(user, keyword);
 	}
 
