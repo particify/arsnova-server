@@ -92,12 +92,6 @@ public class ARSnovaSocketIOServer {
 					return;
 				}
 				feedbackService.saveFeedback(data.getSessionkey(), data.getValue(), u);
-
-				/**
-				 * send feedback back to clients
-				 * disabled since broadcast is already called in feedbackService.saveFeedback
-				 */
-				//reportUpdatedFeedbackForSession(data.getSessionkey());
 			}
 		});
 
@@ -114,18 +108,14 @@ public class ARSnovaSocketIOServer {
 
 		server.addConnectListener(new ConnectListener() {
 			@Override
-			public void onConnect(SocketIOClient client) {
-				logger.info("Client {} connected.", client.getSessionId());
-			}
+			public void onConnect(SocketIOClient client) {}
 		});
 
 		server.addDisconnectListener(new DisconnectListener() {
 			@Override
 			public void onDisconnect(SocketIOClient client) {
-				logger.info("Client {} disconnected.", client.getSessionId());
 				String username = userService.getUser2SocketId(client.getSessionId()).getUsername();
 				String sessionKey = userService.getSessionForUser(username);
-				logger.info("Removing disconnected user {} (session key: {}).", username, sessionKey);
 				userService.removeUserFromSessionBySocketId(client.getSessionId());
 				userService.removeUser2SocketId(client.getSessionId());
 				if (null != sessionKey) {
@@ -260,7 +250,6 @@ public class ARSnovaSocketIOServer {
 
 		for (SocketIOClient client : server.getAllClients()) {
 			if (connectionIds.contains(client.getSessionId())) {
-				logger.info("Sending " + user.getUsername() + " feedback data " + fb.getValues() + ".");
 				client.sendEvent("feedbackData", fb.getValues());
 				client.sendEvent("feedbackDataRoundedAverage", averageFeedback);
 			}
@@ -293,9 +282,6 @@ public class ARSnovaSocketIOServer {
 	}
 
 	public void broadcastInSession(String sessionKey, String eventName, Object data) {
-		/* TODO role handling implementation */
-		logger.info("Broadcasting " + eventName + " for session " + sessionKey + ".");
-
 		/**
 		 * collect a list of users which are in the current session iterate over
 		 * all connected clients and if send feedback, if user is in current
@@ -306,8 +292,6 @@ public class ARSnovaSocketIOServer {
 		for (SocketIOClient c : server.getAllClients()) {
 			User u = userService.getUser2SocketId(c.getSessionId());
 			if (u != null && users.contains(u)) {
-				logger.debug("sending out to client {}, username is: {}, current session is: {}",
-						new Object[] { c.getSessionId(), u.getUsername(), sessionKey });
 				c.sendEvent(eventName, data);
 			}
 		}
