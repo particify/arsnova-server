@@ -38,7 +38,6 @@ import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.connector.model.UserRole;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
-import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 
 @Controller
@@ -53,13 +52,10 @@ public class CourseController extends AbstractController {
 	@Autowired
 	private IUserService userService;
 
-	@Autowired
-	private ISessionService sessionService;
-
 	@RequestMapping(value = "/mycourses", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<Course> myCourses(
-			@RequestParam(value="sortby", defaultValue="name") final String sortby
+			@RequestParam(value = "sortby", defaultValue = "name") final String sortby
 	) {
 		String username = userService.getCurrentUser().getUsername();
 

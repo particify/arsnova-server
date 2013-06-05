@@ -16,9 +16,6 @@ public class StatisticsService implements IStatisticsService {
 	private IDatabaseDao databaseDao;
 
 	@Autowired
-	private IUserService userService;
-
-	@Autowired
 	private SessionRegistry sessionRegistry;
 
 	@Override

@@ -132,14 +132,13 @@ public class FeedbackService implements IFeedbackService {
 		for (String session : allAffectedSessions) {
 			this.server.reportUpdatedFeedbackForSession(session);
 		}
-		
 	}
 
 	@Override
 	public final Integer getMyFeedback(final String keyword, final User user) {
 		return this.databaseDao.getMyFeedback(keyword, user);
 	}
-	
+
 	private static class FeedbackStorageObject {
 		private int value;
 		private Date timestamp;
@@ -156,7 +155,7 @@ public class FeedbackService implements IFeedbackService {
 			return timestamp;
 		}
 	}
-	
+
 	private static class FeedbackStorage {
 		private Map<String, Map<String, FeedbackStorageObject>> data;
 
@@ -169,30 +168,29 @@ public class FeedbackService implements IFeedbackService {
 			int b = 0;
 			int c = 0;
 			int d = 0;
-			
+
 			if (data.get(keyword) == null) {
 				return new Feedback(0, 0, 0, 0);
 			}
-			
+
 			for (FeedbackStorageObject fso : data.get(keyword).values()) {
 				switch (fso.getValue()) {
-				case 0:
+				case Feedback.FEEDBACK_FASTER:
 					a++;
 					break;
-				case 1:
+				case Feedback.FEEDBACK_OK:
 					b++;
 					break;
-				case 2:
+				case Feedback.FEEDBACK_SLOWER:
 					c++;
 					break;
-				case 3:
+				case Feedback.FEEDBACK_AWAY:
 					d++;
 					break;
 				default:
 					break;
 				}
 			}
-			
 			return new Feedback(a, b, c, d);
 		}
 
@@ -213,9 +211,9 @@ public class FeedbackService implements IFeedbackService {
 		private void cleanSessionFeedbackVotes(String keyword, int cleanupFeedbackDelay) {
 			final long timelimitInMillis = 60000 * (long) cleanupFeedbackDelay;
 			final long maxAllowedTimeInMillis = System.currentTimeMillis() - timelimitInMillis;
-			
+
 			Map<String, FeedbackStorageObject> sessionFeedbacks = data.get(keyword);
-			
+
 			for (Map.Entry<String, FeedbackStorageObject> entry : sessionFeedbacks.entrySet()) {
 				if (
 					entry.getValue().getTimestamp().getTime() < maxAllowedTimeInMillis

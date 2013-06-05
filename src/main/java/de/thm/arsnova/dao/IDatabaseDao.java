@@ -19,7 +19,6 @@
 
 package de.thm.arsnova.dao;
 
-import java.io.IOException;
 import java.util.List;
 
 import de.thm.arsnova.connector.model.Course;
