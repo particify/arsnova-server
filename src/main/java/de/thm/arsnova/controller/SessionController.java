@@ -43,7 +43,6 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
-import de.thm.arsnova.services.UserSessionService;
 import de.thm.arsnova.services.SessionService.SessionNameComperator;
 import de.thm.arsnova.services.SessionService.SessionShortNameComperator;
 
@@ -59,15 +58,10 @@ public class SessionController extends AbstractController {
 	@Autowired
 	private IUserService userService;
 
-	@Autowired
-	private UserSessionService userSessionService;
-
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.GET)
 	@ResponseBody
 	public final Session joinSession(@PathVariable final String sessionkey) {
 		Session session = sessionService.joinSession(sessionkey);
-		userSessionService.setUser(userService.getCurrentUser());
-		userSessionService.setSession(session);
 		return session;
 	}
 

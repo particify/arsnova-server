@@ -1,5 +1,7 @@
 package de.thm.arsnova.services;
 
+import java.util.UUID;
+
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
@@ -13,6 +15,7 @@ public class UserSessionServiceImpl implements UserSessionService {
 	
 	private User user;
 	private Session session;
+	private UUID socketId;
 	
 	@Override
 	public void setUser(User u) {
@@ -32,5 +35,15 @@ public class UserSessionServiceImpl implements UserSessionService {
 	@Override
 	public Session getSession() {
 		return this.session;
+	}
+	
+	@Override
+	public void setSocketId(UUID sId) {
+		this.socketId = sId;
+	}
+	
+	@Override
+	public UUID getSocketId() {
+		return this.socketId;
 	}
 }

@@ -24,10 +24,6 @@
 	        </value>
 	    </property>
 	</bean>
-	
-	<aop:aspectj-autoproxy>
-		<aop:include name="authorizationAdviser" />
-	</aop:aspectj-autoproxy>
 
 	<mvc:annotation-driven />
 	<mvc:resources mapping="/**" location="/" />
