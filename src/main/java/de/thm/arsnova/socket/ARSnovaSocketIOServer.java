@@ -23,6 +23,7 @@ import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
 
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.events.ARSnovaEvent;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.services.IFeedbackService;
 import de.thm.arsnova.services.IQuestionService;
@@ -281,6 +282,20 @@ public class ARSnovaSocketIOServer {
 		broadcastInSession(sessionKey, "lecQuestionAvail", lecturerQuestionId);
 	}
 
+	/** Sends event to a websocket connection identified by UUID 
+	 * 
+	 * @param sessionId The UUID of the websocket ID
+	 * @param event The event to be send to client
+	 */
+	public void sendToClient(UUID sessionId, ARSnovaEvent event) {
+		for (SocketIOClient c : server.getAllClients()) {
+			if (c.getSessionId().equals(sessionId)) {
+				System.out.println(sessionId);
+				break;
+			}
+		}
+	}
+	
 	public void broadcastInSession(String sessionKey, String eventName, Object data) {
 		/**
 		 * collect a list of users which are in the current session iterate over

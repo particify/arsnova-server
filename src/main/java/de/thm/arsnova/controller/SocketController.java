@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.IUserService;
+import de.thm.arsnova.services.UserSessionService;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Controller
@@ -43,6 +44,9 @@ public class SocketController extends AbstractController {
 
 	@Autowired
 	private IUserService userService;
+
+	@Autowired
+	private UserSessionService userSessionService;
 
 	@Autowired
 	private ARSnovaSocketIOServer server;
@@ -57,6 +61,7 @@ public class SocketController extends AbstractController {
 		response.setStatus(u != null ? HttpStatus.NO_CONTENT.value() : HttpStatus.UNAUTHORIZED.value());
 		if (u != null) {
 			userService.putUser2SocketId(UUID.fromString(socketid), u);
+			userSessionService.setSocketId(UUID.fromString(socketid));
 		}
 	}
 
