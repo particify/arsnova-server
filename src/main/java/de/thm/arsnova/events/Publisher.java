@@ -11,7 +11,7 @@ public class Publisher implements ApplicationContextAware {
 
 	@Autowired
 	private ApplicationContext context;
-	
+
 	@Override
 	public void setApplicationContext(ApplicationContext c) throws BeansException {
 		this.context = c;

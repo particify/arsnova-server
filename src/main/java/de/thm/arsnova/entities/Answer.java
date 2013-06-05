@@ -1,6 +1,5 @@
 package de.thm.arsnova.entities;
 
-
 public class Answer {
 
 	private String _id;
@@ -107,7 +106,7 @@ public class Answer {
 	public final void setAnswerCount(final int answerCount) {
 		this.answerCount = answerCount;
 	}
-	
+
 	public boolean isAbstention() {
 		return abstention;
 	}

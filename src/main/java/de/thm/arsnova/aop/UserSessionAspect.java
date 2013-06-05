@@ -17,13 +17,13 @@ public class UserSessionAspect {
 
 	@Autowired
 	private UserSessionService userSessionService;
-	
+
 	@Autowired
 	private IUserService userService;
-	
+
 	@Autowired
 	private Publisher publisher;
-	
+
 	/** Sets current user and ARSnova session in session scoped UserSessionService 
 	 * 
 	 * @param jp
@@ -38,7 +38,7 @@ public class UserSessionAspect {
 		userSessionService.setUser(userService.getCurrentUser());
 		userSessionService.setSession(session);
 	}
-	
+
 	/** Sets current user, ARSnova session and websocket session ID in session scoped UserSessionService 
 	 * 
 	 * @param jp

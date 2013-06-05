@@ -793,7 +793,7 @@ public class CouchDBDao implements IDatabaseDao {
 			View view = new View("answer/cleanup");
 			view.setKey(URLEncoder.encode("\"" + question.get_id() + "\"", "UTF-8"));
 			ViewResults results = this.getDatabase().view(view);
-	
+
 			for (Document d : results.getResults()) {
 				this.deleteDocument(d.getId());
 			}
@@ -1141,7 +1141,7 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		return null;
 	}
-	
+
 	public Question getInterposedQuestion(String sessionKey, String documentId) {
 		try {
 			Document document = this.getDatabase().getDocument(documentId);
@@ -1403,12 +1403,12 @@ public class CouchDBDao implements IDatabaseDao {
 			LOGGER.error("Could not delete interposed question {} because of {}", question.get_id(), e.getMessage());
 		}
 	}
-	
+
 	@Override
 	public List<Session> getCourseSessions(List<Course> courses) {
 		ExtendedView view = new ExtendedView("logged_in/available_moodlesessions");
 		view.setCourseIdKeys(courses);
-		
+
 		ViewResults sessions = this.getDatabase().view(view);
 
 		List<Session> result = new ArrayList<Session>();
@@ -1447,21 +1447,21 @@ public class CouchDBDao implements IDatabaseDao {
 	private class ExtendedView extends View {
 
 		private String keys;
-		
+
 		public ExtendedView(String fullname) {
 			super(fullname);
 		}
-		
+
 		public void setKeys(String newKeys) {
 			this.keys = newKeys;
 		}
-		
+
 		public void setCourseIdKeys(List<Course> courses) {
 			if (courses.isEmpty()) {
 				this.keys = "[]";
 				return;
 			}
-			
+
 			StringBuilder sb = new StringBuilder();
 			sb.append("[");
 			for (int i = 0; i < courses.size() - 1; i++) {
@@ -1476,7 +1476,7 @@ public class CouchDBDao implements IDatabaseDao {
 				LOGGER.error("Error while encoding course ID keys", e);
 			}
 		}
-		
+
 		public String getQueryString() {
 			StringBuilder query = new StringBuilder();
 			if (super.getQueryString() != null) {
@@ -1489,7 +1489,7 @@ public class CouchDBDao implements IDatabaseDao {
 
 				query.append("keys=" + this.keys);
 			}
-			
+
 			if (query.toString().isEmpty()) return null;
 			return query.toString();
 		}

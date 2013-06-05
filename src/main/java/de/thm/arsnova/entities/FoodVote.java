@@ -1,6 +1,5 @@
 package de.thm.arsnova.entities;
 
-
 public class FoodVote {
 	private String _id;
 	private String _rev;
@@ -8,7 +7,7 @@ public class FoodVote {
 	private String name;
 	private int count;
 	private String day;
-	
+
 	public FoodVote() {
 		this.type = "food_vote";
 	}

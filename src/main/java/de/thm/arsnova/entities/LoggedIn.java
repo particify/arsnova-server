@@ -112,15 +112,15 @@ public class LoggedIn {
 	public void setVisitedSessions(List<VisitedSession> visitedSessions) {
 		this.visitedSessions = visitedSessions;
 	}
-	
+
 	public List<String> get_conflicts() {
 		return _conflicts;
 	}
-	
+
 	public void set_conflicts(List<String> _conflicts) {
 		this._conflicts = _conflicts;
 	}
-	
+
 	public boolean hasConflicts() {
 		return ! (_conflicts == null || _conflicts.isEmpty());
 	}

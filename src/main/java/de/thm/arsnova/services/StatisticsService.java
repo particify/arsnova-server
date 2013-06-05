@@ -32,7 +32,7 @@ public class StatisticsService implements IStatisticsService {
 	@Override
 	public final Statistics getStatistics() {
 		long since = System.currentTimeMillis() - DURATION_IN_MILLIS;
-		
+
 		Statistics statistics = new Statistics();
 		statistics.setOpenSessions(databaseDao.countOpenSessions());
 		statistics.setClosedSessions(databaseDao.countClosedSessions());

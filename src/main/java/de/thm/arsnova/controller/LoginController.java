@@ -76,7 +76,7 @@ public class LoginController extends AbstractController {
 
 	@Autowired
 	private IUserService userService;
-	
+
 	@Autowired
 	private UserSessionService userSessionService;
 
@@ -160,13 +160,13 @@ public class LoginController extends AbstractController {
 		}
 		return new RedirectView(request.getHeader("referer") != null ? request.getHeader("referer") : "/");
 	}
-	
+
 	@RequestMapping(value = { "/test/me" }, method = RequestMethod.GET)
 	@ResponseBody
 	public final User me() {
 		return userSessionService.getUser();
 	}
-	
+
 	@RequestMapping(value = { "/test/mysession" }, method = RequestMethod.GET)
 	@ResponseBody
 	public final Session mysession() {

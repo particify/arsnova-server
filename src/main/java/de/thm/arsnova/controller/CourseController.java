@@ -68,7 +68,7 @@ public class CourseController extends AbstractController {
 		}
 
 		List<Course> result = new ArrayList<Course>();
-		
+
 		for (Course course : connectorClient.getCourses(username).getCourse()) {
 			if (
 					course.getMembership().isMember()
@@ -77,13 +77,13 @@ public class CourseController extends AbstractController {
 				result.add(course);
 			}
 		}
-		
+
 		if (sortby != null && sortby.equals("shortname")) {
 			Collections.sort(result, new CourseShortNameComperator());
 		} else {
 			Collections.sort(result, new CourseNameComperator());
 		}
-		
+
 		return result;
 	}
 
@@ -95,7 +95,7 @@ public class CourseController extends AbstractController {
 			return course1.getFullname().compareToIgnoreCase(course2.getFullname());
 		}
 	}
-	
+
 	private static class CourseShortNameComperator implements Comparator<Course>, Serializable {
 		private static final long serialVersionUID = 1L;
 

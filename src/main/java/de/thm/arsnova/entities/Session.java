@@ -104,11 +104,11 @@ public class Session {
 	public String get_rev() {
 		return _rev;
 	}
-	
+
 	public boolean isCreator(User user) {
 		return user.getUsername().equals(this.creator);
 	}
-	
+
 	public String getCourseType() {
 		return courseType;
 	}

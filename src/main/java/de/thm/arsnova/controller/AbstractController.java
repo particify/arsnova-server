@@ -33,12 +33,12 @@ public class AbstractController {
 	@ExceptionHandler(NoContentException.class)
 	public void handleNoContentException(final Exception e, final HttpServletRequest request) {
 	}
-	
+
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(BadRequestException.class)
 	public void handleBadRequestException(final Exception e, final HttpServletRequest request) {
 	}
-	
+
 	@ResponseStatus(HttpStatus.PRECONDITION_FAILED)
 	@ExceptionHandler(PreconditionFailedException.class)
 	public void handlePreconditionFailedException(final Exception e, final HttpServletRequest request) {

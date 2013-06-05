@@ -13,13 +13,13 @@ import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 public class ARSnovaEventListener implements ApplicationListener<ARSnovaEvent> {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(ARSnovaEventListener.class);
-	
+
 	@Autowired
 	private ARSnovaSocketIOServer socketIoServer;
-	
+
 	@Autowired
 	private UserSessionService userSessionService;
-	
+
 	@Override
 	public void onApplicationEvent(ARSnovaEvent event) {
 		userSessionService.sendEventViaWebSocket(socketIoServer, event);

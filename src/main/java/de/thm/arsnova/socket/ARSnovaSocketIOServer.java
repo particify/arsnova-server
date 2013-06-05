@@ -55,7 +55,7 @@ public class ARSnovaSocketIOServer {
 	private String storepass;
 	private final Configuration config;
 	private SocketIOServer server;
-	
+
 	private int lastActiveUserCount = 0;
 
 	public ARSnovaSocketIOServer() {
@@ -89,7 +89,7 @@ public class ARSnovaSocketIOServer {
 				 * a feedback
 				 */
 				User u = userService.getUser2SocketId(client.getSessionId());
-				if (u == null || userService.isUserInSession(u, data.getSessionkey()) == false) {
+				if (u == null || ! userService.isUserInSession(u, data.getSessionkey())) {
 					return;
 				}
 				feedbackService.saveFeedback(data.getSessionkey(), data.getValue(), u);
@@ -109,7 +109,7 @@ public class ARSnovaSocketIOServer {
 
 		server.addConnectListener(new ConnectListener() {
 			@Override
-			public void onConnect(SocketIOClient client) {}
+			public void onConnect(SocketIOClient client) { }
 		});
 
 		server.addDisconnectListener(new DisconnectListener() {
@@ -295,7 +295,7 @@ public class ARSnovaSocketIOServer {
 			}
 		}
 	}
-	
+
 	public void broadcastInSession(String sessionKey, String eventName, Object data) {
 		/**
 		 * collect a list of users which are in the current session iterate over

@@ -147,7 +147,7 @@ public class FeedbackService implements IFeedbackService {
 			this.value = initValue;
 			this.timestamp = new Date();
 		}
-		
+
 		public int getValue() {
 			return value;
 		}

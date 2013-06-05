@@ -147,7 +147,7 @@ public class QuestionService implements IQuestionService {
 		}
 		databaseDao.deleteQuestionWithAnswers(question);
 	}
-	
+
 	@Override
 	@Authenticated
 	public void deleteInterposedQuestion(String questionId) {
