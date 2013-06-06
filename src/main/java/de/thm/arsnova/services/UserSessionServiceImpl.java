@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.events.ARSnovaEvent;
+import de.thm.arsnova.events.ARSnovaEvent.Destination;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Component
@@ -56,9 +57,19 @@ public class UserSessionServiceImpl implements UserSessionService {
 	@Override
 	public void sendEventViaWebSocket(ARSnovaSocketIOServer server, ARSnovaEvent event) {
 		if (
-				hasConnectedWebSocket()
+				event.getDestinationType() == Destination.SESSION
+				&& hasConnectedWebSocket()
 				&& event != null && session != null
 				&& event.getSessionKey().equals(session.getKeyword())
+		) {
+			server.sendToClient(getSocketId(), event);
+		}
+		
+		if (
+				event.getDestinationType() == Destination.USER
+				&& hasConnectedWebSocket()
+				&& event != null && user != null
+				&& event.getRecipient().getUsername().equals(user.getUsername())
 		) {
 			server.sendToClient(getSocketId(), event);
 		}
