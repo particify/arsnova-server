@@ -46,7 +46,7 @@ public class ARSnovaSocketIOServer {
 	@Autowired
 	private ISessionService sessionService;
 
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+	private static final Logger LOGGER = LoggerFactory.getLogger(ARSnovaSocketIOServer.class);
 
 	private int portNumber;
 	private String hostIp;
@@ -76,7 +76,7 @@ public class ARSnovaSocketIOServer {
 				config.setKeyStore(stream);
 				config.setKeyStorePassword(storepass);
 			} catch (FileNotFoundException e) {
-				logger.error("Keystore {} not found on filesystem", keystore);
+				LOGGER.error("Keystore {} not found on filesystem", keystore);
 			}
 		}
 		server = new SocketIOServer(config);
@@ -115,6 +115,10 @@ public class ARSnovaSocketIOServer {
 		server.addDisconnectListener(new DisconnectListener() {
 			@Override
 			public void onDisconnect(SocketIOClient client) {
+				if (userService == null || client.getSessionId() == null || userService.getUser2SocketId(client.getSessionId()) == null) {
+					LOGGER.warn("NullPointer in ARSnovaSocketIOServer DisconnectListener");
+					return;
+				}
 				String username = userService.getUser2SocketId(client.getSessionId()).getUsername();
 				String sessionKey = userService.getSessionForUser(username);
 				userService.removeUserFromSessionBySocketId(client.getSessionId());
@@ -130,14 +134,14 @@ public class ARSnovaSocketIOServer {
 	}
 
 	public void stopServer() throws Exception {
-		logger.trace("In stopServer method of class: {}", getClass().getName());
+		LOGGER.trace("In stopServer method of class: {}", getClass().getName());
 		try {
 			for (SocketIOClient client : server.getAllClients()) {
 				client.disconnect();
 			}
 		} catch (Exception e) {
 			/* If exceptions are not caught they could prevent the Socket.IO server from shutting down. */
-			logger.error("Exception caught on Socket.IO shutdown: {}", e.getStackTrace());
+			LOGGER.error("Exception caught on Socket.IO shutdown: {}", e.getStackTrace());
 		}
 		server.stop();
 
