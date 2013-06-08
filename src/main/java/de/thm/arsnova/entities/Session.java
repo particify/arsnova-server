@@ -18,7 +18,11 @@
  */
 package de.thm.arsnova.entities;
 
-public class Session {
+import java.io.Serializable;
+
+public class Session implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private String type;
 	private String name;
@@ -127,5 +131,10 @@ public class Session {
 
 	public boolean isCourseSession() {
 		return (this.getCourseId() != null) && (!this.getCourseId().isEmpty());
+	}
+	
+	@Override
+	public String toString() {
+		return "User [keyword=" + keyword+ ", type=" + type + "]";
 	}
 }

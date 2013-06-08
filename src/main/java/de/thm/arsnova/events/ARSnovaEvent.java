@@ -18,7 +18,7 @@ public class ARSnovaEvent extends ApplicationEvent {
 		USER,
 		SESSION
 	};
-	
+
 	public ARSnovaEvent(Object source, String sKey, String eName, Object d) {
 		super(source);
 		this.data = d;
@@ -26,7 +26,7 @@ public class ARSnovaEvent extends ApplicationEvent {
 		this.sessionKey = sKey;
 		this.destination = Destination.SESSION;
 	}
-	
+
 	public ARSnovaEvent(Object source, User recipient, String eName, Object d) {
 		super(source);
 		this.data = d;
@@ -46,11 +46,12 @@ public class ARSnovaEvent extends ApplicationEvent {
 	public Object getData() {
 		return data;
 	}
-	
+
 	public User getRecipient() {
 		return user;
 	}
 	
+
 	public Destination getDestinationType() {
 		return destination;
 	}
