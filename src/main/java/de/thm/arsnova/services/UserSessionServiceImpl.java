@@ -1,5 +1,6 @@
 package de.thm.arsnova.services;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 import org.springframework.context.annotation.Scope;
@@ -13,8 +14,9 @@ import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class UserSessionServiceImpl implements UserSessionService {
-
+public class UserSessionServiceImpl implements UserSessionService, Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	private User user;
 	private Session session;
 	private UUID socketId;
