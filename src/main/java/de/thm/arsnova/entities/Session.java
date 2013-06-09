@@ -19,6 +19,7 @@
 package de.thm.arsnova.entities;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class Session implements Serializable {
 
@@ -33,6 +34,7 @@ public class Session implements Serializable {
 	private long lastOwnerActivity;
 	private String courseType;
 	private String courseId;
+	private List<String> _conflicts;
 
 	private String _id;
 	private String _rev;
@@ -107,6 +109,14 @@ public class Session implements Serializable {
 
 	public String get_rev() {
 		return _rev;
+	}
+	
+	public void set_conflicts(List<String> conflicts) {
+		_conflicts = conflicts;
+	}
+
+	public List<String> get_conflicts() {
+		return _conflicts;
 	}
 
 	public boolean isCreator(User user) {
