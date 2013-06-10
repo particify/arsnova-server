@@ -3,6 +3,8 @@ package de.thm.arsnova.services;
 import java.io.Serializable;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
@@ -17,6 +19,8 @@ import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class UserSessionServiceImpl implements UserSessionService, Serializable {
 	private static final long serialVersionUID = 1L;
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(UserSessionServiceImpl.class);
 	
 	private User user;
 	private Session session;
@@ -58,10 +62,15 @@ public class UserSessionServiceImpl implements UserSessionService, Serializable 
 
 	@Override
 	public void sendEventViaWebSocket(ARSnovaSocketIOServer server, ARSnovaEvent event) {
+		if (event == null) {
+			LOGGER.info("Trying to send NULL event");
+			return;
+		}
+		
 		if (
 				event.getDestinationType() == Destination.SESSION
 				&& hasConnectedWebSocket()
-				&& event != null && session != null
+				&& session != null
 				&& event.getSessionKey().equals(session.getKeyword())
 		) {
 			server.sendToClient(getSocketId(), event);
@@ -70,7 +79,7 @@ public class UserSessionServiceImpl implements UserSessionService, Serializable 
 		if (
 				event.getDestinationType() == Destination.USER
 				&& hasConnectedWebSocket()
-				&& event != null && user != null
+				&& user != null
 				&& event.getRecipient().getUsername().equals(user.getUsername())
 		) {
 			server.sendToClient(getSocketId(), event);
