@@ -33,6 +33,8 @@ import org.springframework.stereotype.Service;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.events.ARSnovaEvent;
+import de.thm.arsnova.events.Publisher;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
