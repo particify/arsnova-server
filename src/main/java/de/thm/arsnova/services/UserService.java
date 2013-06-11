@@ -258,7 +258,7 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 			File tmpDir = new File(System.getProperty("java.io.tmpdir"));
 			File store = new File(tmpDir, "arsnova.bin");
 			if (!store.exists()) {
-				if (! store.createNewFile()) {
+				if (!store.createNewFile()) {
 					LOGGER.info("Could not create store file");
 				}
 			}

@@ -3,8 +3,11 @@ package de.thm.arsnova.services;
 import java.io.Serializable;
 import java.util.UUID;
 
+import javax.annotation.PreDestroy;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
@@ -26,6 +29,17 @@ public class UserSessionServiceImpl implements UserSessionService, Serializable 
 	private Session session;
 	private UUID socketId;
 
+	@Autowired
+	private IUserService userService;
+	
+	@PreDestroy
+	public void tearDown() {
+		if ( socketId != null ) {
+			LOGGER.info("Removing websocket session {}", socketId);
+			userService.removeUser2SocketId(socketId);
+		}
+	}
+	
 	@Override
 	public void setUser(User u) {
 		this.user = u;
