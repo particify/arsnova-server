@@ -38,7 +38,6 @@ import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.events.Publisher;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
@@ -56,9 +55,6 @@ public class SessionService implements ISessionService {
 	
 	@Autowired
 	private UserSessionService userSessionService;
-
-	@Autowired
-	private Publisher publisher;
 	
 	@Autowired
 	private ARSnovaSocketIOServer socketIoServer;

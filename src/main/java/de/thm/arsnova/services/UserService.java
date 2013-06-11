@@ -43,7 +43,7 @@ public class UserService implements IUserService {
 	private static final ConcurrentHashMap<User, Date> lastOnline = new ConcurrentHashMap<User, Date>();
 
 	@Override
-	public void setLastOnline(User user, Date date) {
+	public void setLastOnlineActivity(User user, Date date) {
 		lastOnline.put(user, date);
 		LOGGER.info("Updating active user {}", user.getUsername());
 		

@@ -80,7 +80,7 @@ public class UserSessionServiceImpl implements UserSessionService, Serializable 
 	public LoggedIn keepalive() {
 		if (this.user != null) {
 			this.lastActive = new Date();
-			userService.setLastOnline(this.user, this.lastActive);
+			userService.setLastOnlineActivity(this.user, this.lastActive);
 			
 			LoggedIn result = new LoggedIn();
 			result.setUser(this.user.getUsername());

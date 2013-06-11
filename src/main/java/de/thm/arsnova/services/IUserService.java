@@ -55,5 +55,5 @@ public interface IUserService {
 
 	int loggedInUsers();
 
-	void setLastOnline(User user, Date date);
+	void setLastOnlineActivity(User user, Date date);
 }
