@@ -19,6 +19,7 @@
 
 package de.thm.arsnova.services;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -53,4 +54,6 @@ public interface IUserService {
 	void removeUserFromMaps(User user);
 
 	int loggedInUsers();
+
+	void setLastOnline(User user, Date date);
 }
