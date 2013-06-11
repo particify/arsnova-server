@@ -88,7 +88,7 @@ public class UserSessionServiceImpl implements UserSessionService, Serializable 
 			return result;
 		}
 		
-		return null;
+		return new LoggedIn();
 	}
 	
 	private boolean hasConnectedWebSocket() {
