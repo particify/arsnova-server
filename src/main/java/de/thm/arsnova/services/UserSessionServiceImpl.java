@@ -80,7 +80,7 @@ public class UserSessionServiceImpl implements UserSessionService, Serializable 
 	public LoggedIn keepalive() {
 		if (this.user != null) {
 			this.lastActive = new Date();
-			userService.setLastOnlineActivity(this.user, this.lastActive);
+			userService.triggerOnlineActivity(this.user, this);
 			
 			LoggedIn result = new LoggedIn();
 			result.setUser(this.user.getUsername());
@@ -89,6 +89,11 @@ public class UserSessionServiceImpl implements UserSessionService, Serializable 
 		}
 		
 		return new LoggedIn();
+	}
+	
+	@Override
+	public Date getLastActivity() {
+		return this.lastActive;
 	}
 	
 	private boolean hasConnectedWebSocket() {

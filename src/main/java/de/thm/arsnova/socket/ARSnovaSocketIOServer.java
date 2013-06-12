@@ -308,7 +308,7 @@ public class ARSnovaSocketIOServer {
 	public void sendToClient(UUID sessionId, ARSnovaEvent event) {
 		for (SocketIOClient c : server.getAllClients()) {
 			if (c.getSessionId().equals(sessionId)) {
-				LOGGER.info("Send Event {}", event.getEventName());
+				LOGGER.info("Send Event {} -- {}", event.getEventName(), userService.getCurrentUser().getUsername());
 				c.sendEvent(event.getEventName(), event.getData());
 				break;
 			}

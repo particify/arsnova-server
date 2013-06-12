@@ -19,10 +19,10 @@
 
 package de.thm.arsnova.services;
 
-import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import de.thm.arsnova.entities.User;
 
@@ -55,5 +55,7 @@ public interface IUserService {
 
 	int loggedInUsers();
 
-	void setLastOnlineActivity(User user, Date date);
+	void triggerOnlineActivity(User user, UserSessionService uss);
+
+	ConcurrentHashMap<User, UserSessionService> getUserSessionServices();
 }

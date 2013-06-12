@@ -1,7 +1,8 @@
 package de.thm.arsnova.services;
 
-import java.util.Date;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -40,18 +41,18 @@ public class UserService implements IUserService {
 	/* used for HTTP polling online check solution (legacy) */
 	private static final ConcurrentHashMap<User, String> user2sessionLegacy = new ConcurrentHashMap<User, String>();
 
-	private static final ConcurrentHashMap<User, Date> lastOnline = new ConcurrentHashMap<User, Date>();
+	private static final ConcurrentHashMap<User, UserSessionService> userSessionServices = new ConcurrentHashMap<User, UserSessionService>();
 
 	@Override
-	public void setLastOnlineActivity(User user, Date date) {
-		lastOnline.put(user, date);
+	public void triggerOnlineActivity(User user, UserSessionService uss) {
+		userSessionServices.put(user, uss);
 		LOGGER.info("Updating active user {}", user.getUsername());
 		
-		for (Entry<User,Date> e : lastOnline.entrySet()) {
+		for (Entry<User,UserSessionService> e : userSessionServices.entrySet()) {
 			LOGGER.info("User in Map {}", e.getKey().getUsername());
-			if (e.getValue().getTime() < System.currentTimeMillis() - MAX_USER_INACTIVE_SECONDS * 1000) {
+			if (e.getValue().getLastActivity().getTime() < System.currentTimeMillis() - MAX_USER_INACTIVE_SECONDS * 1000) {
 				LOGGER.info("Removing inactive user {}", e.getKey());
-				lastOnline.remove(e.getKey());
+				userSessionServices.remove(e.getKey());
 				this.removeUserFromMaps(e.getKey());
 				LOGGER.info("Active user count: {}", this.loggedInUsers());
 			}
@@ -207,5 +208,10 @@ public class UserService implements IUserService {
 	@Override
 	public int loggedInUsers() {
 		return user2sessionLegacy.size();
+	}
+	
+	@Override
+	public ConcurrentHashMap<User, UserSessionService> getUserSessionServices() {
+		return userSessionServices;
 	}
 }
