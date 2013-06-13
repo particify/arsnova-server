@@ -101,4 +101,10 @@ public class QuestionServiceTest {
 		
 		assertFalse(theQ.isRead());
 	}
+
+	@Test
+	public void testShouldNotThrowExceptionInMyAnsersCall() {
+		userService.setUserAuthenticated(true);
+		assertNotNull(questionService.getMyAnswers("12345678"));
+	}
 }

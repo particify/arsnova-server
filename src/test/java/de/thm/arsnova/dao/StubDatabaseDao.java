@@ -18,7 +18,6 @@
  */
 package de.thm.arsnova.dao;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -274,8 +273,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	
 	@Override
 	public List<Answer> getMyAnswers(String sessionKey) {
-		// TODO Auto-generated method stub
-		return null;
+		return new ArrayList<Answer>();
 	}
 	
 	@Override
