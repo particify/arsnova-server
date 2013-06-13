@@ -1026,7 +1026,7 @@ public class CouchDBDao implements IDatabaseDao {
 			);
 			ViewResults results = this.getDatabase().view(view);
 			List<Answer> answers = new ArrayList<Answer>();
-			if (results.getResults().isEmpty()) {
+			if (results == null || results.getResults() == null || results.getResults().isEmpty()) {
 				return answers;
 			}
 			for (Document d : results.getResults()) {
