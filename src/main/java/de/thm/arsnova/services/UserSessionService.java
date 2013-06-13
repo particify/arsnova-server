@@ -2,7 +2,6 @@ package de.thm.arsnova.services;
 
 import java.util.UUID;
 
-import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.events.ARSnovaEvent;
@@ -18,8 +17,6 @@ public interface UserSessionService {
 	
 	void setSocketId(UUID socketId);
 	UUID getSocketId();
-
-	LoggedIn keepalive();
 
 	void sendEventViaWebSocket(ARSnovaSocketIOServer server, ARSnovaEvent event);
 }

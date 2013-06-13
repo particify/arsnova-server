@@ -52,10 +52,7 @@ public class SessionService implements ISessionService {
 
 	@Autowired
 	private IUserService userService;
-	
-	@Autowired
-	private UserSessionService userSessionService;
-	
+
 	@Autowired
 	private ARSnovaSocketIOServer socketIoServer;
 
@@ -185,9 +182,8 @@ public class SessionService implements ISessionService {
 		if (session.getCreator().equals(user.getUsername())) {
 			databaseDao.updateSessionOwnerActivity(session);
 		}
-		
-		return userSessionService.keepalive();
-		//return databaseDao.registerAsOnlineUser(user, session);
+
+		return databaseDao.registerAsOnlineUser(user, session);
 	}
 
 	@Override
