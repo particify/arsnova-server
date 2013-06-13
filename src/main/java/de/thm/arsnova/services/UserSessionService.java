@@ -1,6 +1,5 @@
 package de.thm.arsnova.services;
 
-import java.util.Date;
 import java.util.UUID;
 
 import de.thm.arsnova.entities.LoggedIn;
@@ -21,7 +20,6 @@ public interface UserSessionService {
 	UUID getSocketId();
 
 	LoggedIn keepalive();
-	public Date getLastActivity();
 
 	void sendEventViaWebSocket(ARSnovaSocketIOServer server, ARSnovaEvent event);
 }

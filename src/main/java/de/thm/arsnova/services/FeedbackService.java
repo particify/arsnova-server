@@ -19,7 +19,6 @@
 
 package de.thm.arsnova.services;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -112,7 +111,6 @@ public class FeedbackService implements IFeedbackService {
 	public final boolean saveFeedback(final String keyword, final int value, final User user) {
 		boolean result = feedbackStorage.saveFeedback(keyword, value, user);
 		if (result) {
-			System.out.println(new Date().toLocaleString());
 			this.server.reportUpdatedFeedbackForSession(keyword);
 		}
 		return result;
