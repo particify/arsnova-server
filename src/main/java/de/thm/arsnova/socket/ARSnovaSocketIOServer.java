@@ -24,7 +24,6 @@ import com.corundumstudio.socketio.listener.DisconnectListener;
 
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.events.ARSnovaEvent;
-import de.thm.arsnova.events.Publisher;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.services.IFeedbackService;
 import de.thm.arsnova.services.IQuestionService;
@@ -46,9 +45,6 @@ public class ARSnovaSocketIOServer {
 
 	@Autowired
 	private ISessionService sessionService;
-
-	@Autowired
-	private Publisher publisher;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ARSnovaSocketIOServer.class);
 
@@ -235,15 +231,12 @@ public class ARSnovaSocketIOServer {
 
 	public void reportUpdatedFeedbackForSession(String sessionKey) {
 		de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
-		publisher.publish(new ARSnovaEvent(this, sessionKey, "feedbackData", fb.getValues()));
-		//broadcastInSession(sessionKey, "feedbackData", fb.getValues());
+		broadcastInSession(sessionKey, "feedbackData", fb.getValues());
 		try {
 			long averageFeedback = feedbackService.getAverageFeedbackRounded(sessionKey);
-			publisher.publish(new ARSnovaEvent(this, sessionKey, "feedbackDataRoundedAverage", averageFeedback));
-			//broadcastInSession(sessionKey, "feedbackDataRoundedAverage", averageFeedback);
+			broadcastInSession(sessionKey, "feedbackDataRoundedAverage", averageFeedback);
 		} catch (NoContentException e) {
-			publisher.publish(new ARSnovaEvent(this, sessionKey, "feedbackDataRoundedAverage", null));
-			//broadcastInSession(sessionKey, "feedbackDataRoundedAverage", null);
+			broadcastInSession(sessionKey, "feedbackDataRoundedAverage", null);
 		}
 	}
 
@@ -260,15 +253,12 @@ public class ARSnovaSocketIOServer {
 			return;
 		}
 
-		publisher.publish(new ARSnovaEvent(this, user, "feedbackData", fb.getValues()));
-		publisher.publish(new ARSnovaEvent(this, user, "feedbackDataRoundedAverage", averageFeedback));
-		
-		/*for (SocketIOClient client : server.getAllClients()) {
+		for (SocketIOClient client : server.getAllClients()) {
 			if (connectionIds.contains(client.getSessionId())) {
 				client.sendEvent("feedbackData", fb.getValues());
 				client.sendEvent("feedbackDataRoundedAverage", averageFeedback);
 			}
-		}*/
+		}
 	}
 
 	public void reportActiveUserCountForSession(String sessionKey) {
@@ -278,26 +268,22 @@ public class ARSnovaSocketIOServer {
 			return;
 		}
 		lastActiveUserCount = count;
-		
-		publisher.publish(new ARSnovaEvent(this, sessionKey, "activeUserCountData", count));
-		//broadcastInSession(sessionKey, "activeUserCountData", count);
+
+		broadcastInSession(sessionKey, "activeUserCountData", count);
 	}
 
 	public void reportAnswersToLecturerQuestionAvailable(String sessionKey, String lecturerQuestionId) {
-		publisher.publish(new ARSnovaEvent(this, sessionKey, "answersToLecQuestionAvail", lecturerQuestionId));
-		//broadcastInSession(sessionKey, "answersToLecQuestionAvail", lecturerQuestionId);
+		broadcastInSession(sessionKey, "answersToLecQuestionAvail", lecturerQuestionId);
 	}
 
 	public void reportAudienceQuestionAvailable(String sessionKey, String audienceQuestionId) {
 		/* TODO role handling implementation, send this only to users with role lecturer */
-		publisher.publish(new ARSnovaEvent(this, sessionKey, "audQuestionAvail", audienceQuestionId));
-		//broadcastInSession(sessionKey, "audQuestionAvail", audienceQuestionId);
+		broadcastInSession(sessionKey, "audQuestionAvail", audienceQuestionId);
 	}
 
 	public void reportLecturerQuestionAvailable(String sessionKey, String lecturerQuestionId) {
 		/* TODO role handling implementation, send this only to users with role audience */
-		publisher.publish(new ARSnovaEvent(this, sessionKey, "lecQuestionAvail", lecturerQuestionId));
-		//broadcastInSession(sessionKey, "lecQuestionAvail", lecturerQuestionId);
+		broadcastInSession(sessionKey, "lecQuestionAvail", lecturerQuestionId);
 	}
 
 	/** Sends event to a websocket connection identified by UUID 
@@ -308,9 +294,24 @@ public class ARSnovaSocketIOServer {
 	public void sendToClient(UUID sessionId, ARSnovaEvent event) {
 		for (SocketIOClient c : server.getAllClients()) {
 			if (c.getSessionId().equals(sessionId)) {
-				LOGGER.info("Send Event {} -- {}", event.getEventName(), userService.getCurrentUser().getUsername());
-				c.sendEvent(event.getEventName(), event.getData());
+				System.out.println(sessionId);
 				break;
+			}
+		}
+	}
+
+	public void broadcastInSession(String sessionKey, String eventName, Object data) {
+		/**
+		 * collect a list of users which are in the current session iterate over
+		 * all connected clients and if send feedback, if user is in current
+		 * session
+		 */
+		Set<User> users = userService.getUsersInSession(sessionKey);
+
+		for (SocketIOClient c : server.getAllClients()) {
+			User u = userService.getUser2SocketId(c.getSessionId());
+			if (u != null && users.contains(u)) {
+				c.sendEvent(eventName, data);
 			}
 		}
 	}

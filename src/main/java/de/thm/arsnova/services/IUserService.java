@@ -22,7 +22,6 @@ package de.thm.arsnova.services;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import de.thm.arsnova.entities.User;
 
@@ -54,8 +53,4 @@ public interface IUserService {
 	void removeUserFromMaps(User user);
 
 	int loggedInUsers();
-
-	void triggerOnlineActivity(User user, UserSessionService uss);
-
-	ConcurrentHashMap<User, UserSessionService> getUserSessionServices();
 }

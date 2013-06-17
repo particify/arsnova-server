@@ -1,51 +1,31 @@
 package de.thm.arsnova.services;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.UUID;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
-import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.events.ARSnovaEvent;
 import de.thm.arsnova.events.ARSnovaEvent.Destination;
-import de.thm.arsnova.events.Publisher;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class UserSessionServiceImpl implements UserSessionService, Serializable {
 	private static final long serialVersionUID = 1L;
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserSessionServiceImpl.class);
-	private static final int MAX_USER_INACTIVE_MILLIS = 120000;
 	
 	private User user;
 	private Session session;
 	private UUID socketId;
-	private Date lastActive;
 
-	@Autowired
-	private IUserService userService;
-
-	@PreDestroy
-	public void tearDown() {
-		if ( socketId != null ) {
-			LOGGER.info("Removing websocket session {}", socketId);
-			userService.removeUser2SocketId(socketId);
-		}
-		LOGGER.info("TEAR DOWN SESSION");
-	}
-	
 	@Override
 	public void setUser(User u) {
 		this.user = u;
@@ -76,26 +56,6 @@ public class UserSessionServiceImpl implements UserSessionService, Serializable 
 		return this.socketId;
 	}
 
-	@Override
-	public LoggedIn keepalive() {
-		if (this.user != null) {
-			this.lastActive = new Date();
-			userService.triggerOnlineActivity(this.user, this);
-			
-			LoggedIn result = new LoggedIn();
-			result.setUser(this.user.getUsername());
-			result.setTimestamp(this.lastActive.getTime());
-			return result;
-		}
-		
-		return new LoggedIn();
-	}
-	
-	@Override
-	public Date getLastActivity() {
-		return this.lastActive;
-	}
-	
 	private boolean hasConnectedWebSocket() {
 		return getSocketId() != null;
 	}

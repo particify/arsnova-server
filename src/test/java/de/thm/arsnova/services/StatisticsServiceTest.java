@@ -67,7 +67,7 @@ public class StatisticsServiceTest {
 	@Test
 	public final void testShouldReturnStatistics() {
 		Statistics actual = statisticsService.getStatistics();
-		assertEquals(3, actual.getOpenSessions());
+		assertEquals(2, actual.getOpenSessions());
 		assertEquals(1, actual.getClosedSessions());
 	}
 }

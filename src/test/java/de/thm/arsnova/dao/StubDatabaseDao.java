@@ -86,15 +86,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 		session.setShortName("TS2");
 
 		stubSessions.put("87654321", session);
-		
-		session = new Session();
-		session.setActive(true);
-		session.setCreator("ptsr00");
-		session.setKeyword("18273645");
-		session.setName("TestSession2");
-		session.setShortName("TS3");
-
-		stubSessions.put("18273645", session);
 	}
 
 	private void fillWithDummyFeedbacks() {

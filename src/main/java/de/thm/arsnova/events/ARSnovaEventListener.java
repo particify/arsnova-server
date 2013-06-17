@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import de.thm.arsnova.services.UserService;
 import de.thm.arsnova.services.UserSessionService;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
@@ -19,15 +18,10 @@ public class ARSnovaEventListener implements ApplicationListener<ARSnovaEvent> {
 	private ARSnovaSocketIOServer socketIoServer;
 
 	@Autowired
-	private UserService userService;
+	private UserSessionService userSessionService;
 
 	@Override
 	public void onApplicationEvent(ARSnovaEvent event) {
-		for( UserSessionService userSessionService : userService.getUserSessionServices().values() ) {
-			if (userSessionService != null) {
-				LOGGER.info(userSessionService.getUser().getUsername());
-				userSessionService.sendEventViaWebSocket(socketIoServer, event);
-			}
-		}
+		userSessionService.sendEventViaWebSocket(socketIoServer, event);
 	}
 }

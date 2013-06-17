@@ -22,16 +22,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import de.thm.arsnova.dao.StubDatabaseDao;
-import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 
@@ -52,53 +49,6 @@ public class FeedbackServiceTest {
 	@Autowired
 	private StubDatabaseDao databaseDao;
 
-	@Before
-	public final void setup() {
-		userService.setUserAuthenticated(false);
-		
-		feedbackService.saveFeedback("87654321", 0, new TestUser("testuser01"));
-		feedbackService.saveFeedback("87654321", 0, new TestUser("testuser02"));
-		feedbackService.saveFeedback("87654321", 1, new TestUser("testuser11"));
-		feedbackService.saveFeedback("87654321", 1, new TestUser("testuser12"));
-		feedbackService.saveFeedback("87654321", 1, new TestUser("testuser13"));
-		feedbackService.saveFeedback("87654321", 2, new TestUser("testuser21"));
-		feedbackService.saveFeedback("87654321", 2, new TestUser("testuser22"));
-		feedbackService.saveFeedback("87654321", 2, new TestUser("testuser23"));
-		feedbackService.saveFeedback("87654321", 2, new TestUser("testuser24"));
-		feedbackService.saveFeedback("87654321", 2, new TestUser("testuser25"));
-		feedbackService.saveFeedback("87654321", 3, new TestUser("testuser31"));
-		feedbackService.saveFeedback("87654321", 3, new TestUser("testuser32"));
-		feedbackService.saveFeedback("87654321", 3, new TestUser("testuser33"));
-		feedbackService.saveFeedback("87654321", 3, new TestUser("testuser34"));
-		feedbackService.saveFeedback("87654321", 3, new TestUser("testuser35"));
-		feedbackService.saveFeedback("87654321", 3, new TestUser("testuser36"));
-		feedbackService.saveFeedback("87654321", 3, new TestUser("testuser37"));
-		
-		
-		feedbackService.saveFeedback("18273645", 0, new TestUser("testuser01"));
-		feedbackService.saveFeedback("18273645", 0, new TestUser("testuser02"));
-		feedbackService.saveFeedback("18273645", 1, new TestUser("testuser11"));
-		feedbackService.saveFeedback("18273645", 1, new TestUser("testuser12"));
-		feedbackService.saveFeedback("18273645", 1, new TestUser("testuser13"));
-		feedbackService.saveFeedback("18273645", 2, new TestUser("testuser21"));
-		feedbackService.saveFeedback("18273645", 2, new TestUser("testuser22"));
-		feedbackService.saveFeedback("18273645", 2, new TestUser("testuser23"));
-		feedbackService.saveFeedback("18273645", 2, new TestUser("testuser24"));
-		feedbackService.saveFeedback("18273645", 2, new TestUser("testuser25"));
-		feedbackService.saveFeedback("18273645", 3, new TestUser("testuser31"));
-		feedbackService.saveFeedback("18273645", 3, new TestUser("testuser32"));
-		feedbackService.saveFeedback("18273645", 3, new TestUser("testuser33"));
-		feedbackService.saveFeedback("18273645", 3, new TestUser("testuser34"));
-		feedbackService.saveFeedback("18273645", 3, new TestUser("testuser35"));
-		feedbackService.saveFeedback("18273645", 3, new TestUser("testuser36"));
-		feedbackService.saveFeedback("18273645", 3, new TestUser("testuser37"));
-		feedbackService.saveFeedback("18273645", 3, new TestUser("testuser38"));
-		feedbackService.saveFeedback("18273645", 3, new TestUser("testuser39"));
-		feedbackService.saveFeedback("18273645", 3, new TestUser("testuser310"));
-		feedbackService.saveFeedback("18273645", 3, new TestUser("testuser311"));
-		
-	}
-	
 	@After
 	public final void cleanup() {
 		databaseDao.cleanupTestData();
@@ -161,16 +111,5 @@ public class FeedbackServiceTest {
 	public void testShouldReturnAverageFeedbackNotRounded() {
 		userService.setUserAuthenticated(true);
 		assertEquals(2.1904, feedbackService.getAverageFeedback("18273645"), 0.001);
-	}
-	
-	public static class TestUser extends User {
-		private static final long serialVersionUID = 1L;
-		
-		private String username;
-		private String type;
-
-		public TestUser(String username) {
-			super( new UsernamePasswordAuthenticationToken(username, "secret") );
-		}
 	}
 }
