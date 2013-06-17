@@ -9,6 +9,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.annotation.PreDestroy;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +62,13 @@ public class ARSnovaSocketIOServer {
 
 	public ARSnovaSocketIOServer() {
 		config = new Configuration();
+	}
+	
+	@PreDestroy
+	public void closeAllSessions() {
+		for (SocketIOClient c : server.getAllClients()) {
+			c.disconnect();
+		}
 	}
 
 	public void startServer() throws Exception {
