@@ -66,6 +66,7 @@ public class ARSnovaSocketIOServer {
 	
 	@PreDestroy
 	public void closeAllSessions() {
+		LOGGER.info("Close all websockets due to @PreDestroy");
 		for (SocketIOClient c : server.getAllClients()) {
 			c.disconnect();
 		}
