@@ -23,6 +23,8 @@ import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
+import com.corundumstudio.socketio.parser.Packet;
+import com.corundumstudio.socketio.parser.PacketType;
 
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.events.ARSnovaEvent;
@@ -70,6 +72,13 @@ public class ARSnovaSocketIOServer {
 		for (SocketIOClient c : server.getAllClients()) {
 			c.disconnect();
 		}
+		
+		int clientCount = 0;
+		for (SocketIOClient c : server.getAllClients()) {
+			c.send(new Packet(PacketType.DISCONNECT));
+			clientCount++;
+		}
+		LOGGER.info("Pending websockets at @PreDestroy: {}", clientCount);
 		server.stop();
 	}
 
