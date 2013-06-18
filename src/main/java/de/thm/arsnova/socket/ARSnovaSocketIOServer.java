@@ -70,6 +70,7 @@ public class ARSnovaSocketIOServer {
 		for (SocketIOClient c : server.getAllClients()) {
 			c.disconnect();
 		}
+		server.stop();
 	}
 
 	public void startServer() throws Exception {
