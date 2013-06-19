@@ -1,14 +1,6 @@
 package de.thm.arsnova.services;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -16,13 +8,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.PreDestroy;
+
 import org.scribe.up.profile.facebook.FacebookProfile;
 import org.scribe.up.profile.google.Google2Profile;
 import org.scribe.up.profile.twitter.TwitterProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -40,7 +32,7 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
-public class UserService implements IUserService, InitializingBean, DisposableBean {
+public class UserService implements IUserService {
 
 	private static final int DEFAULT_SCHEDULER_DELAY_MS = 60000;
 
@@ -222,7 +214,7 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 		return null;
 	}
 
-	@Override
+	@PreDestroy
 	public void destroy() {
 		LOGGER.error("Destroy UserService");
 	}
