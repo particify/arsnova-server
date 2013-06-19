@@ -3,6 +3,10 @@ package de.thm.arsnova;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Feedback;
@@ -37,7 +41,7 @@ public class FeedbackStorage {
 	private IDatabaseDao dao;
 	
 	public FeedbackStorage(IDatabaseDao newDao) {
-		this.data = new HashMap<String, Map<String,FeedbackStorageObject>>();
+		this.data = new ConcurrentHashMap<String, Map<String,FeedbackStorageObject>>();
 		this.dao = newDao;
 	}
 
@@ -90,13 +94,14 @@ public class FeedbackStorage {
 		return null;
 	}
 
+	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public boolean saveFeedback(String keyword, int value, User user) {
 		if (dao.getSession(keyword) == null) {
 			throw new NotFoundException();
 		}
 		
 		if (data.get(keyword) == null) {
-			data.put(keyword, new HashMap<String, FeedbackStorageObject>());
+			data.put(keyword, new ConcurrentHashMap<String, FeedbackStorageObject>());
 		}
 		
 		System.out.println(user.getUsername());
@@ -105,6 +110,7 @@ public class FeedbackStorage {
 		return true;
 	}
 
+	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public void cleanFeedbackVotes(int cleanupFeedbackDelay) {
 		for (String keyword : data.keySet()) {
 			this.cleanSessionFeedbackVotes(keyword, cleanupFeedbackDelay);
