@@ -23,9 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Feedback;
@@ -40,8 +37,6 @@ import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 
-@Component
-@Scope("singleton")
 public class StubDatabaseDao implements IDatabaseDao {
 
 	private static Map<String, Session> stubSessions = new ConcurrentHashMap<String, Session>();
