@@ -223,54 +223,8 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 	}
 
 	@Override
-	public void afterPropertiesSet() {
-		try {
-			File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-			File store = new File(tmpDir, "arsnova.bin");
-			if (!store.exists()) {
-				return;
-			}
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(store));
-			Hashtable<String, Map<?, ?>> map = (Hashtable<String, Map<?, ?>>) ois.readObject();
-			ois.close();
-			Map<UUID, User> s2u = (Map<UUID, User>) map.get("socketid2user");
-			Map<User, String> u2s = (Map<User, String>) map.get("user2session");
-
-			LOGGER.info("load from store: {}", map);
-
-			socketid2user.putAll(s2u);
-			user2sessionLegacy.putAll(u2s);
-
-		} catch (IOException e) {
-			LOGGER.error("IOException during restoring UserService", e);
-		} catch (ClassNotFoundException e) {
-			LOGGER.error("ClassNotFoundException during restoring UserService", e);
-		}
-	}
-
-	@Override
 	public void destroy() {
-		Hashtable<String, Map<?, ?>> map = new Hashtable<String, Map<?, ?>>();
-		map.put("socketid2user", socketid2user);
-		map.put("user2session", user2sessionLegacy);
-
-		try {
-			File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-			File store = new File(tmpDir, "arsnova.bin");
-			if (!store.exists()) {
-				if (! store.createNewFile()) {
-					LOGGER.info("Could not create store file");
-				}
-			}
-			OutputStream file = new FileOutputStream(store);
-			ObjectOutputStream objOut = new ObjectOutputStream(file);
-			objOut.writeObject(map);
-			objOut.close();
-			file.close();
-			LOGGER.info("saved to store: {}", map);
-		} catch (IOException e) {
-			LOGGER.error("IOException while saving UserService", e);
-		}
+		LOGGER.error("Destroy UserService");
 	}
 
 	@Override
