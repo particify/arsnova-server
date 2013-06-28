@@ -348,6 +348,20 @@
 			<artifactId>http-utils</artifactId>
 			<version>0.1.0-SNAPSHOT</version>
 		</dependency>
+		
+		<dependency>
+            <groupId>org.apache.directory.server</groupId>
+            <artifactId>apacheds-core</artifactId>
+            <version>1.5.5</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.directory.server</groupId>
+            <artifactId>apacheds-server-jndi</artifactId>
+            <version>1.5.5</version>
+            <scope>runtime</scope>
+        </dependency>
+
 	</dependencies>
 	<build>
 		<plugins>
@@ -369,10 +383,10 @@
 					<scanIntervalSeconds>1</scanIntervalSeconds>
 					<webApp> 
 						<contextPath>/</contextPath>
-						<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
+						<!--<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
 							<resourcesAsCSV>src/main/webapp,../arsnova-js/src/main/webapp,../arsnova-legacy-js/src/main/webapp,../arsnova-st2-js/src/main/webapp,../arsnova-light-js/src/main/webapp</resourcesAsCSV> 
 						</baseResource>
-						<overrideDescriptor>src/main/webapp/WEB-INF/web-dev.xml</overrideDescriptor>
+						<overrideDescriptor>src/main/webapp/WEB-INF/web-dev.xml</overrideDescriptor>-->
 					</webApp>
 				</configuration>
 			</plugin>

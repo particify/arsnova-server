@@ -1,0 +1,22 @@
+dn: dc=example, dc=com
+objectclass: organization
+objectclass: top
+o: Dummy Organisation
+
+dn: uid=ptsr00, dc=example, dc=com
+objectclass: person
+objectclass: organizationalperson
+objectclass: inetorgperson
+uid: ptsr00
+sn: Tester
+givenName: Patrick
+userPassword:: VGVzdA==
+
+dn: uid=ptsr01, dc=example, dc=com
+objectclass: person
+objectclass: organizationalperson
+objectclass: inetorgperson
+uid: ptsr01
+sn: Tester
+givenName: Patricia
+userPassword:: VGVzdA==
