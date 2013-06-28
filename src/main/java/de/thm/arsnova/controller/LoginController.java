@@ -176,13 +176,18 @@ public class LoginController extends AbstractController {
 			Authentication token = new UsernamePasswordAuthenticationToken(user, password, getAuthorities());
 			try {
 				Authentication auth = ldapAuthenticationProvider.authenticate(token);
+				if (auth.isAuthenticated()) {
+					SecurityContextHolder.getContext().setAuthentication(token);
+					request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+							SecurityContextHolder.getContext());
+					return new RedirectView("/#auth/checkLogin");
+				}
 				LOGGER.info("LDAPLOGIN: {}", auth.isAuthenticated());
-				return new RedirectView(referer + "#auth/checkLogin");
 			}
 			catch (AuthenticationException e) {
 				LOGGER.info("No LDAP login: {}", e);
-				return new RedirectView("/login.html");
 			}
+			return new RedirectView("/login.html");
 		}
 		return null;
 	}
