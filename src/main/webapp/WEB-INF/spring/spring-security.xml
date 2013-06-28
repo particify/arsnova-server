@@ -30,7 +30,7 @@
 
     <!-- ######################### LDAP ############################# -->
 	<!-- <security:ldap-server url="${security.ldap.url}" /> -->
-	<security:ldap-server ldif="classpath:/test.ldif" />
+	<security:ldap-server ldif="classpath:/test.ldif" root="dc=example,dc=com" />
 
 	<bean id="loginUrlAuthenticationEntryPoint"
 		class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">

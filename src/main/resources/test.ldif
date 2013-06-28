@@ -3,7 +3,11 @@ objectclass: organization
 objectclass: top
 o: Dummy Organisation
 
-dn: uid=ptsr00, dc=example, dc=com
+dn: ou=people, dc=example, dc=com
+objectclass: organizationalunit
+ou: people
+
+dn: uid=ptsr00, ou=people, dc=example, dc=com
 objectclass: person
 objectclass: organizationalperson
 objectclass: inetorgperson
@@ -12,7 +16,7 @@ sn: Tester
 givenName: Patrick
 userPassword:: VGVzdA==
 
-dn: uid=ptsr01, dc=example, dc=com
+dn: uid=ptsr01, ou=people, dc=example, dc=com
 objectclass: person
 objectclass: organizationalperson
 objectclass: inetorgperson
