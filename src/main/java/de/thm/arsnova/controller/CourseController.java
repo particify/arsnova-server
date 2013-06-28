@@ -38,7 +38,6 @@ import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.connector.model.UserRole;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
-import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 
 @Controller
@@ -53,13 +52,10 @@ public class CourseController extends AbstractController {
 	@Autowired
 	private IUserService userService;
 
-	@Autowired
-	private ISessionService sessionService;
-
 	@RequestMapping(value = "/mycourses", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<Course> myCourses(
-			@RequestParam(value="sortby", defaultValue="name") final String sortby
+			@RequestParam(value = "sortby", defaultValue = "name") final String sortby
 	) {
 		String username = userService.getCurrentUser().getUsername();
 
@@ -72,7 +68,7 @@ public class CourseController extends AbstractController {
 		}
 
 		List<Course> result = new ArrayList<Course>();
-		
+
 		for (Course course : connectorClient.getCourses(username).getCourse()) {
 			if (
 					course.getMembership().isMember()
@@ -81,13 +77,13 @@ public class CourseController extends AbstractController {
 				result.add(course);
 			}
 		}
-		
+
 		if (sortby != null && sortby.equals("shortname")) {
 			Collections.sort(result, new CourseShortNameComperator());
 		} else {
 			Collections.sort(result, new CourseNameComperator());
 		}
-		
+
 		return result;
 	}
 
@@ -99,7 +95,7 @@ public class CourseController extends AbstractController {
 			return course1.getFullname().compareToIgnoreCase(course2.getFullname());
 		}
 	}
-	
+
 	private static class CourseShortNameComperator implements Comparator<Course>, Serializable {
 		private static final long serialVersionUID = 1L;
 

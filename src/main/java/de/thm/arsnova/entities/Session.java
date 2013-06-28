@@ -18,7 +18,12 @@
  */
 package de.thm.arsnova.entities;
 
-public class Session {
+import java.io.Serializable;
+import java.util.List;
+
+public class Session implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private String type;
 	private String name;
@@ -29,6 +34,7 @@ public class Session {
 	private long lastOwnerActivity;
 	private String courseType;
 	private String courseId;
+	private List<String> _conflicts;
 
 	private String _id;
 	private String _rev;
@@ -105,10 +111,18 @@ public class Session {
 		return _rev;
 	}
 	
+	public void set_conflicts(List<String> conflicts) {
+		_conflicts = conflicts;
+	}
+
+	public List<String> get_conflicts() {
+		return _conflicts;
+	}
+
 	public boolean isCreator(User user) {
 		return user.getUsername().equals(this.creator);
 	}
-	
+
 	public String getCourseType() {
 		return courseType;
 	}
@@ -127,5 +141,10 @@ public class Session {
 
 	public boolean isCourseSession() {
 		return (this.getCourseId() != null) && (!this.getCourseId().isEmpty());
+	}
+	
+	@Override
+	public String toString() {
+		return "User [keyword=" + keyword+ ", type=" + type + "]";
 	}
 }

@@ -61,7 +61,8 @@ public class SessionController extends AbstractController {
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.GET)
 	@ResponseBody
 	public final Session joinSession(@PathVariable final String sessionkey) {
-		return sessionService.joinSession(sessionkey);
+		Session session = sessionService.joinSession(sessionkey);
+		return session;
 	}
 
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.DELETE)

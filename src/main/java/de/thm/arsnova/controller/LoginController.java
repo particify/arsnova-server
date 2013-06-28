@@ -56,8 +56,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
+import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.IUserService;
+import de.thm.arsnova.services.UserSessionService;
 
 @Controller
 public class LoginController extends AbstractController {
@@ -82,6 +84,9 @@ public class LoginController extends AbstractController {
 
 	@Autowired
 	private IUserService userService;
+
+	@Autowired
+	private UserSessionService userSessionService;
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
 
@@ -189,6 +194,7 @@ public class LoginController extends AbstractController {
 	@RequestMapping(value = { "/auth/logout", "/logout" }, method = RequestMethod.GET)
 	public final View doLogout(final HttpServletRequest request) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		userService.removeUserFromMaps(userService.getCurrentUser());
 		request.getSession().invalidate();
 		SecurityContextHolder.clearContext();
 		if (auth instanceof CasAuthenticationToken) {
@@ -196,10 +202,22 @@ public class LoginController extends AbstractController {
 		}
 		return new RedirectView(request.getHeader("referer") != null ? request.getHeader("referer") : "/");
 	}
-	
+		
 	private Collection<GrantedAuthority> getAuthorities() {
 		List<GrantedAuthority> authList = new ArrayList<GrantedAuthority>();
 		authList.add(new GrantedAuthorityImpl("ROLE_USER"));
 		return authList;
+	}
+	
+	@RequestMapping(value = { "/test/me" }, method = RequestMethod.GET)
+	@ResponseBody
+	public final User me() {
+		return userSessionService.getUser();
+	}
+
+	@RequestMapping(value = { "/test/mysession" }, method = RequestMethod.GET)
+	@ResponseBody
+	public final Session mysession() {
+		return userSessionService.getSession();
 	}
 }

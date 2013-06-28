@@ -1,14 +1,6 @@
 package de.thm.arsnova.services;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -16,13 +8,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.PreDestroy;
+
 import org.scribe.up.profile.facebook.FacebookProfile;
 import org.scribe.up.profile.google.Google2Profile;
 import org.scribe.up.profile.twitter.TwitterProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -40,7 +32,7 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
-public class UserService implements IUserService, InitializingBean, DisposableBean {
+public class UserService implements IUserService {
 
 	private static final int DEFAULT_SCHEDULER_DELAY_MS = 60000;
 
@@ -66,20 +58,15 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 	public final void removeInactiveUsersFromLegacyMap() {
 		List<String> usernames = databaseDao.getActiveUsers(MAX_USER_INACTIVE_SECONDS);
 		Set<String> affectedSessions = new HashSet<String>();
-		LOGGER.info(
-			"Active users in database: {}, active users in memory (user2sessionLegacy): {}",
-			usernames.size(), user2sessionLegacy.size()
-		);
+
 		for (Entry<User, String> e : user2sessionLegacy.entrySet()) {
-			LOGGER.debug("entry: {}", e);
 			User key = e.getKey();
-			if (!usernames.contains(key.getUsername())) {
+			if (usernames != null && !usernames.contains(key.getUsername())) {
 				if (null != e.getValue()) {
 					affectedSessions.add(e.getValue());
 				} else {
 					LOGGER.warn("Session for user {} is null", key);
 				}
-				LOGGER.debug("Removing user {} from user2sessionLegacy", e.getKey());
 				user2sessionLegacy.remove(e.getKey());
 			}
 		}
@@ -150,11 +137,13 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 
 	@Override
 	public boolean isUserInSession(User user, String keyword) {
-		if (keyword == null)
+		if (keyword == null) {
 			return false;
+		}
 		String session = user2sessionLegacy.get(user);
-		if (session == null)
+		if (session == null) {
 			return false;
+		}
 		return keyword.equals(session);
 	}
 
@@ -184,9 +173,9 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public void addCurrentUserToSessionMap(String keyword) {
 		User user = getCurrentUser();
-		if (user == null)
+		if (user == null) {
 			throw new UnauthorizedException();
-		LOGGER.info("Mapping user " + user.getUsername() + " to session " + keyword + " [legacy].");
+		}
 		user2sessionLegacy.put(user, keyword);
 	}
 
@@ -194,7 +183,6 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public void addUserToSessionBySocketId(UUID socketId, String keyword) {
 		User user = socketid2user.get(socketId);
-		LOGGER.info("Mapping user " + user.getUsername() + " to session " + keyword + ".");
 		user2session.put(user, keyword);
 	}
 
@@ -225,55 +213,22 @@ public class UserService implements IUserService, InitializingBean, DisposableBe
 
 		return null;
 	}
-	
+
+	@PreDestroy
+	public void destroy() {
+		LOGGER.error("Destroy UserService");
+	}
+
 	@Override
-	public void afterPropertiesSet() {
-		try {
-			File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-			File store = new File(tmpDir, "arsnova.bin");
-			if (!store.exists()) {
-				return;
-			}
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(store));
-			Hashtable<String, Map<?, ?>> map = (Hashtable<String, Map<?, ?>>) ois.readObject();
-			ois.close();
-			Map<UUID, User> s2u = (Map<UUID, User>) map.get("socketid2user");
-			Map<User, String> u2s = (Map<User, String>) map.get("user2session");
-
-			LOGGER.info("load from store: {}", map);
-
-			socketid2user.putAll(s2u);
-			user2sessionLegacy.putAll(u2s);
-
-		} catch (IOException e) {
-			LOGGER.error("IOException during restoring UserService", e);
-		} catch (ClassNotFoundException e) {
-			LOGGER.error("ClassNotFoundException during restoring UserService", e);
+	public void removeUserFromMaps(User user) {
+		if (user != null) {
+			user2session.remove(user);
+			user2sessionLegacy.remove(user);
 		}
 	}
 
 	@Override
-	public void destroy() {
-		Hashtable<String, Map<?, ?>> map = new Hashtable<String, Map<?, ?>>();
-		map.put("socketid2user", socketid2user);
-		map.put("user2session", user2sessionLegacy);
-
-		try {
-			File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-			File store = new File(tmpDir, "arsnova.bin");
-			if (!store.exists()) {
-				if (! store.createNewFile()) {
-					LOGGER.info("Could not create store file");
-				}
-			}
-			OutputStream file = new FileOutputStream(store);
-			ObjectOutputStream objOut = new ObjectOutputStream(file);
-			objOut.writeObject(map);
-			objOut.close();
-			file.close();
-			LOGGER.info("saved to store: {}", map);
-		} catch (IOException e) {
-			LOGGER.error("IOException while saving UserService", e);
-		}
+	public int loggedInUsers() {
+		return user2sessionLegacy.size();
 	}
 }

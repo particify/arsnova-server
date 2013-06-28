@@ -31,6 +31,7 @@ public class LoggedIn {
 	private String sessionId;
 	private long timestamp;
 	private List<VisitedSession> visitedSessions = new ArrayList<VisitedSession>();
+	private List<String> _conflicts;
 
 	public LoggedIn() {
 		this.type = "logged_in";
@@ -110,6 +111,18 @@ public class LoggedIn {
 
 	public void setVisitedSessions(List<VisitedSession> visitedSessions) {
 		this.visitedSessions = visitedSessions;
+	}
+
+	public List<String> get_conflicts() {
+		return _conflicts;
+	}
+
+	public void set_conflicts(List<String> _conflicts) {
+		this._conflicts = _conflicts;
+	}
+
+	public boolean hasConflicts() {
+		return ! (_conflicts == null || _conflicts.isEmpty());
 	}
 
 	@Override

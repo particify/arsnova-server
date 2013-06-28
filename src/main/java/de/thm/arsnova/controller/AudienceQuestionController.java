@@ -64,7 +64,7 @@ public class AudienceQuestionController extends AbstractController {
 	@RequestMapping(value = "/readcount", method = RequestMethod.GET)
 	@ResponseBody
 	public final InterposedReadingCount getUnreadInterposedCount(
-			@RequestParam final String sessionkey,
+			@RequestParam("sessionkey") final String sessionkey,
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");

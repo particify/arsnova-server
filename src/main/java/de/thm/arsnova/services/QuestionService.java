@@ -19,7 +19,6 @@
 
 package de.thm.arsnova.services;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -148,7 +147,7 @@ public class QuestionService implements IQuestionService {
 		}
 		databaseDao.deleteQuestionWithAnswers(question);
 	}
-	
+
 	@Override
 	@Authenticated
 	public void deleteInterposedQuestion(String questionId) {
