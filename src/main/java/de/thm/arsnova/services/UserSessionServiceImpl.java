@@ -25,6 +25,7 @@ public class UserSessionServiceImpl implements UserSessionService, Serializable 
 	private User user;
 	private Session session;
 	private UUID socketId;
+	private Role role;
 
 	@Override
 	public void setUser(User u) {
@@ -84,5 +85,15 @@ public class UserSessionServiceImpl implements UserSessionService, Serializable 
 		) {
 			server.sendToClient(getSocketId(), event);
 		}
+	}
+
+	@Override
+	public void setRole(Role r) {
+		role = r;
+	}
+	
+	@Override
+	public Role getRole() {
+		return role;
 	}
 }

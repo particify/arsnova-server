@@ -8,6 +8,11 @@ import de.thm.arsnova.events.ARSnovaEvent;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 public interface UserSessionService {
+	
+	enum Role {
+		STUDENT,
+		TEACHER
+	}
 
 	void setUser(User user);
 	User getUser();
@@ -18,5 +23,8 @@ public interface UserSessionService {
 	void setSocketId(UUID socketId);
 	UUID getSocketId();
 
+	void setRole(Role role);
+	Role getRole();
+	
 	void sendEventViaWebSocket(ARSnovaSocketIOServer server, ARSnovaEvent event);
 }
