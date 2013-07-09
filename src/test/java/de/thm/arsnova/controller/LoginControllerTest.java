@@ -126,7 +126,7 @@ public class LoginControllerTest {
 
 		handlerAdapter.handle(request, response, loginController);
 		assertNotNull(response);
-		assertEquals("{\"username\":\"ptsr00\",\"type\":\"ldap\"}", response.getContentAsString());
+		assertEquals("{\"username\":\"ptsr00\",\"type\":\"ldap\",\"role\":null}", response.getContentAsString());
 	}
 
 	@Test

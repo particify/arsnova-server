@@ -11,7 +11,7 @@ public interface UserSessionService {
 	
 	enum Role {
 		STUDENT,
-		TEACHER
+		SPEAKER
 	}
 
 	void setUser(User user);

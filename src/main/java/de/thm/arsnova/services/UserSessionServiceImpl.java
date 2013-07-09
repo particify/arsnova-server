@@ -30,6 +30,7 @@ public class UserSessionServiceImpl implements UserSessionService, Serializable 
 	@Override
 	public void setUser(User u) {
 		this.user = u;
+		this.user.setRole(this.role);
 	}
 
 	@Override
@@ -90,6 +91,9 @@ public class UserSessionServiceImpl implements UserSessionService, Serializable 
 	@Override
 	public void setRole(Role r) {
 		role = r;
+		if (user != null) {
+			user.setRole(role);
+		}
 	}
 	
 	@Override

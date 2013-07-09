@@ -20,10 +20,12 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 
 import de.thm.arsnova.dao.StubDatabaseDao;
+import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.StubUserService;
+import de.thm.arsnova.services.UserSessionService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {
@@ -76,12 +78,17 @@ public class SessionControllerTest {
 
 	@Test(expected = ForbiddenException.class)
 	public void testShouldNotGetForbiddenSession() throws Exception {
+		Session session = new Session();
+		session.setKeyword("08154711");
+		session.setCreator("some other user");
+		session.setActive(false);
+		databaseDao.saveSession(session);
 		userService.setUserAuthenticated(true);
+		userService.setRole(UserSessionService.Role.STUDENT);
 
 		request.setMethod("GET");
-		request.setRequestURI("/session/99999999");
-		final ModelAndView mav = handlerAdapter.handle(request, response,
-				sessionController);
+		request.setRequestURI("/session/08154711");
+		final ModelAndView mav = handlerAdapter.handle(request, response, sessionController);
 
 		assertNull(mav);
 		assertTrue(response.getStatus() == 403);

@@ -9,6 +9,8 @@ import org.scribe.up.profile.twitter.TwitterProfile;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
+import de.thm.arsnova.services.UserSessionService;
+
 public class User implements Serializable {
 	public static final String GOOGLE = "google";
 	public static final String TWITTER = "twitter";
@@ -20,6 +22,7 @@ public class User implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String username;
 	private String type;
+	private UserSessionService.Role role;
 
 	public User(Google2Profile profile) {
 		setUsername(profile.getEmail());
@@ -65,6 +68,18 @@ public class User implements Serializable {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public UserSessionService.Role getRole() {
+		return role;
+	}
+
+	public void setRole(UserSessionService.Role role) {
+		this.role = role;
+	}
+
+	public boolean hasRole(UserSessionService.Role role) {
+		return this.role == role;
 	}
 
 	@Override
