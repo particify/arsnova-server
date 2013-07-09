@@ -1,9 +1,31 @@
 <html>
-	<h1>LDAP-Login</h1>
-	<form action="auth/ldaplogin" method="post">
-		<div><input type="text" name="user" placeholder="Username" /></div>
-		<div><input type="password" name="password" placeholder="Password" /></div>
-		<div><input type="submit" value="Login" /></div>
-		<input type="hidden" name="type" value="ldap" />
-	</form>
+	<style>
+		body {
+			font-family: sans-serif;
+		}
+		h1 {
+			text-align: center;
+		}
+		img, form {
+			display: block;
+			margin: 16px auto;
+			width: 320px;
+		}
+		form input {
+			width: 320px;
+			border: 1px solid gray;
+			border-radius: 2px;
+			padding: 4px;
+		}
+	</style>
+	<body>
+		<h1>Hochschul-Zugang</h1>
+		<img src="uni_logo_mlu.jpg" />
+		<form action="auth/ldaplogin" method="post">
+			<div><input type="text" name="user" placeholder="Benutzername" /></div>
+			<div><input type="password" name="password" placeholder="Passwort" /></div>
+			<div><input type="submit" value="Anmelden" /></div>
+			<input type="hidden" name="type" value="ldap" />
+		</form>
+	</body>
 </html>
