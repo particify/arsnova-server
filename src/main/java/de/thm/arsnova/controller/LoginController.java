@@ -53,6 +53,8 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.NoContentException;
+import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.services.UserSessionService;
 
@@ -167,18 +169,30 @@ public class LoginController extends AbstractController {
 	@RequestMapping(value = { "/test/me" }, method = RequestMethod.GET)
 	@ResponseBody
 	public final User me() {
-		return userSessionService.getUser();
+		User me = userSessionService.getUser();
+		if (me == null) {
+			throw new UnauthorizedException();
+		}
+		return me;
 	}
 
 	@RequestMapping(value = { "/test/mysession" }, method = RequestMethod.GET)
 	@ResponseBody
 	public final Session mysession() {
-		return userSessionService.getSession();
+		Session mysession = userSessionService.getSession();
+		if (mysession == null) {
+			throw new UnauthorizedException();
+		}
+		return mysession;
 	}
 
 	@RequestMapping(value = { "/test/myrole" }, method = RequestMethod.GET)
 	@ResponseBody
 	public final UserSessionService.Role myrole() {
-		return userSessionService.getRole();
+		UserSessionService.Role myrole = userSessionService.getRole();
+		if (myrole == null) {
+			throw new UnauthorizedException();
+		}
+		return myrole;
 	}
 }
