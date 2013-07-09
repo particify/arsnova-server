@@ -89,9 +89,12 @@ public class LoginController extends AbstractController {
 			@RequestParam(value = "referer", required = false) final String forcedReferer,
 			@RequestParam(value = "successurl", required = false) final String successUrl,
 			@RequestParam(value = "failureurl", required = false) final String failureUrl,
+			@RequestParam(value = "role", required = false) UserSessionService.Role role,
 			final HttpServletRequest request,
 			final HttpServletResponse response
 	) throws IOException, ServletException {
+		userSessionService.setRole(role);
+		
 		String referer = request.getHeader("referer");
 		if (null != forcedReferer && null != referer && !UrlUtils.isAbsoluteUrl(referer)) {
 			/* Use a url from a request parameter as referer as long as the url is not absolute (to prevent
