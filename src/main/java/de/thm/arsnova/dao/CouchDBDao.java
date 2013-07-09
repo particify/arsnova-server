@@ -913,13 +913,16 @@ public class CouchDBDao implements IDatabaseDao {
 			}
 			view.setGroup(true);
 			ViewResults results = this.getDatabase().view(view);
+			int abstentionCount = this.getAbstentionAnswerCount(questionId);
 			List<Answer> answers = new ArrayList<Answer>();
 			for (Document d : results.getResults()) {
 				Answer a = new Answer();
 				a.setAnswerCount(d.getInt("value"));
+				a.setAbstentionCount(abstentionCount);
 				a.setQuestionId(d.getJSONObject().getJSONArray("key").getString(0));
 				a.setPiRound(piRound);
-				a.setAnswerText(d.getJSONObject().getJSONArray("key").getString(2));
+				String answerText = d.getJSONObject().getJSONArray("key").getString(2);
+				a.setAnswerText(answerText == "null" ? null : answerText);
 				answers.add(a);
 			}
 			return answers;
@@ -927,6 +930,22 @@ public class CouchDBDao implements IDatabaseDao {
 			LOGGER.error("Error while retrieving answers", e);
 		}
 		return null;
+	}
+	
+	private int getAbstentionAnswerCount(final String questionId) {
+		try {
+			View view = new View("skill_question/count_abstention_answers_by_question");
+			view.setKey(URLEncoder.encode("\"" + questionId + "\"", "UTF-8"));
+			view.setGroup(true);
+			ViewResults results = this.getDatabase().view(view);
+			if (results.getResults().size() == 0) {
+				return 0;
+			}
+			return results.getJSONArray("rows").optJSONObject(0).optInt("value");
+		} catch (UnsupportedEncodingException e) {
+			LOGGER.error("Error while retrieving abstention answers", e);
+		}
+		return 0;
 	}
 
 	@Override

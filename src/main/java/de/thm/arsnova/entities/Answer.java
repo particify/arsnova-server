@@ -13,7 +13,8 @@ public class Answer {
 	private String user;
 	private long timestamp;
 	private int answerCount = 1;
-	private boolean abstention; // Currently available only for freetext answers!
+	private boolean abstention; // Currently available only for freetext and mc answers!
+	private int abstentionCount; // Currently available only for freetext and mc answers!
 
 	public Answer() {
 		this.type = "skill_question_answer";
@@ -113,6 +114,14 @@ public class Answer {
 
 	public void setAbstention(boolean abstention) {
 		this.abstention = abstention;
+	}
+
+	public int getAbstentionCount() {
+		return abstentionCount;
+	}
+
+	public void setAbstentionCount(int abstentionCount) {
+		this.abstentionCount = abstentionCount;
 	}
 
 	@Override
