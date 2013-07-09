@@ -175,4 +175,10 @@ public class LoginController extends AbstractController {
 	public final Session mysession() {
 		return userSessionService.getSession();
 	}
+
+	@RequestMapping(value = { "/test/myrole" }, method = RequestMethod.GET)
+	@ResponseBody
+	public final UserSessionService.Role myrole() {
+		return userSessionService.getRole();
+	}
 }
