@@ -25,8 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sf.json.JSONObject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -37,16 +35,18 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.IUserService;
+import de.thm.arsnova.services.UserSessionService;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Controller
 @RequestMapping("/socket")
 public class SocketController extends AbstractController {
 
-	public static final Logger LOGGER = LoggerFactory.getLogger(SocketController.class);
-
 	@Autowired
 	private IUserService userService;
+
+	@Autowired
+	private UserSessionService userSessionService;
 
 	@Autowired
 	private ARSnovaSocketIOServer server;
@@ -58,10 +58,10 @@ public class SocketController extends AbstractController {
 			return;
 		}
 		User u = userService.getCurrentUser();
-		LOGGER.info("Mapping socket {} to user {}.", socketid, u.getUsername());
 		response.setStatus(u != null ? HttpStatus.NO_CONTENT.value() : HttpStatus.UNAUTHORIZED.value());
 		if (u != null) {
 			userService.putUser2SocketId(UUID.fromString(socketid), u);
+			userSessionService.setSocketId(UUID.fromString(socketid));
 		}
 	}
 

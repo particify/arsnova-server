@@ -140,5 +140,7 @@
 
     <bean id="failureHandler" class="de.thm.arsnova.LoginAuthenticationFailureHandler"
         p:defaultFailureUrl="/index.html" />
-    
+
+    <!-- Session Registry -->
+    <bean id="sessionRegistry" class="org.springframework.security.core.session.SessionRegistryImpl" />
 </beans>

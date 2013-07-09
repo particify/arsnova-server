@@ -33,18 +33,18 @@ public class FoodService implements IFoodService {
 
 	@Autowired
 	private IDatabaseDao databaseDao;
-	
+
 	public final void setDatabaseDao(IDatabaseDao databaseDao) {
 		this.databaseDao = databaseDao;
 	}
-	
+
 	@Override
 	@Authenticated
 	public void vote(String menu) {
 		this.databaseDao.vote(menu);
 
 	}
-	
+
 	@Override
 	public List<FoodVote> getFoodVote() {
 		return this.databaseDao.getFoodVote();

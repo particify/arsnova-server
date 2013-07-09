@@ -44,7 +44,6 @@ import org.springframework.security.core.authority.GrantedAuthorityImpl;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.token.Sha512DigestUtils;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.util.UrlUtils;
@@ -56,8 +55,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
+import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.IUserService;
+import de.thm.arsnova.services.UserSessionService;
 
 @Controller
 public class LoginController extends AbstractController {
@@ -83,6 +84,9 @@ public class LoginController extends AbstractController {
 	@Autowired
 	private IUserService userService;
 
+	@Autowired
+	private UserSessionService userSessionService;
+
 	public static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
 
 	@RequestMapping(value = { "/auth/login", "/doLogin" }, method = RequestMethod.GET)
@@ -92,9 +96,12 @@ public class LoginController extends AbstractController {
 			@RequestParam(value = "referer", required = false) final String forcedReferer,
 			@RequestParam(value = "successurl", required = false) final String successUrl,
 			@RequestParam(value = "failureurl", required = false) final String failureUrl,
+			@RequestParam(value = "role", required = false) UserSessionService.Role role,
 			final HttpServletRequest request,
 			final HttpServletResponse response
 	) throws IOException, ServletException {
+		userSessionService.setRole(role);
+		
 		String referer = request.getHeader("referer");
 		if (null != forcedReferer && null != referer && !UrlUtils.isAbsoluteUrl(referer)) {
 			/* Use a url from a request parameter as referer as long as the url is not absolute (to prevent
@@ -189,6 +196,7 @@ public class LoginController extends AbstractController {
 	@RequestMapping(value = { "/auth/logout", "/logout" }, method = RequestMethod.GET)
 	public final View doLogout(final HttpServletRequest request) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		userService.removeUserFromMaps(userService.getCurrentUser());
 		request.getSession().invalidate();
 		SecurityContextHolder.clearContext();
 		if (auth instanceof CasAuthenticationToken) {
@@ -201,5 +209,23 @@ public class LoginController extends AbstractController {
 		List<GrantedAuthority> authList = new ArrayList<GrantedAuthority>();
 		authList.add(new GrantedAuthorityImpl("ROLE_USER"));
 		return authList;
+	}
+
+	@RequestMapping(value = { "/test/me" }, method = RequestMethod.GET)
+	@ResponseBody
+	public final User me() {
+		return userSessionService.getUser();
+	}
+
+	@RequestMapping(value = { "/test/mysession" }, method = RequestMethod.GET)
+	@ResponseBody
+	public final Session mysession() {
+		return userSessionService.getSession();
+	}
+
+	@RequestMapping(value = { "/test/myrole" }, method = RequestMethod.GET)
+	@ResponseBody
+	public final UserSessionService.Role myrole() {
+		return userSessionService.getRole();
 	}
 }

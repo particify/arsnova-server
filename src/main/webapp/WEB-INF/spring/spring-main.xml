@@ -29,10 +29,15 @@
 	
 	<import resource="spring-security.xml" />
 
-	<context:component-scan base-package="de.thm.arsnova" />
+	<context:component-scan base-package="de.thm.arsnova.dao,de.thm.arsnova.services,de.thm.arsnova.events" />
 	<context:annotation-config />
 
 	<task:annotation-driven />
+	
+	<aop:aspectj-autoproxy>
+		<aop:include name="authorizationAdviser" />
+		<aop:include name="userSessionAspect" />
+	</aop:aspectj-autoproxy>
 
 	<bean id="socketServer" class="de.thm.arsnova.socket.ARSnovaSocketIOServer"
 		init-method="startServer" destroy-method="stopServer" scope="singleton"
@@ -42,6 +47,8 @@
 	<bean id="authorizationAdviser" class="de.thm.arsnova.aop.AuthorizationAdviser">
 		<property name="userService" ref="userService" />
 	</bean>
+	
+	<bean id="userSessionAspect" class="de.thm.arsnova.aop.UserSessionAspect" />
 
 	<bean id="userService" scope="singleton" class="de.thm.arsnova.services.UserService" />
 

@@ -18,14 +18,10 @@
  */
 package de.thm.arsnova.dao;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Answer;
@@ -41,8 +37,6 @@ import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 
-@Component
-@Scope("singleton")
 public class StubDatabaseDao implements IDatabaseDao {
 
 	private static Map<String, Session> stubSessions = new ConcurrentHashMap<String, Session>();
@@ -87,6 +81,15 @@ public class StubDatabaseDao implements IDatabaseDao {
 		session.setShortName("TS2");
 
 		stubSessions.put("87654321", session);
+		
+		session = new Session();
+		session.setActive(true);
+		session.setCreator("ptsr00");
+		session.setKeyword("18273645");
+		session.setName("TestSession2");
+		session.setShortName("TS3");
+
+		stubSessions.put("18273645", session);
 	}
 
 	private void fillWithDummyFeedbacks() {
@@ -274,8 +277,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	
 	@Override
 	public List<Answer> getMyAnswers(String sessionKey) {
-		// TODO Auto-generated method stub
-		return null;
+		return new ArrayList<Answer>();
 	}
 	
 	@Override
