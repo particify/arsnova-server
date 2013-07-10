@@ -61,6 +61,22 @@ public class UserSessionServiceImpl implements UserSessionService, Serializable 
 	private boolean hasConnectedWebSocket() {
 		return getSocketId() != null;
 	}
+	
+	@Override
+	public boolean inSession() {
+		return (
+			this.isAuthenticated()
+			&& this.getSession() != null
+		);
+	}
+	
+	@Override
+	public boolean isAuthenticated() {
+		return (
+			this.getUser() != null
+			&& this.getRole() != null	
+		);
+	}
 
 	@Override
 	public void sendEventViaWebSocket(ARSnovaSocketIOServer server, ARSnovaEvent event) {

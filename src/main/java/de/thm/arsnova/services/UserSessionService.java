@@ -26,5 +26,8 @@ public interface UserSessionService {
 	void setRole(Role role);
 	Role getRole();
 	
+	boolean inSession();
+	boolean isAuthenticated();
+	
 	void sendEventViaWebSocket(ARSnovaSocketIOServer server, ARSnovaEvent event);
 }
