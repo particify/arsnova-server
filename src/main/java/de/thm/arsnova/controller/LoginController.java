@@ -146,6 +146,9 @@ public class LoginController extends AbstractController {
 					SecurityContextHolder.getContext());
 			result = new RedirectView(null == successUrl ? referer + "#auth/checkLogin" : successUrl);
 		}
+		
+		userSessionService.setUser(userService.getCurrentUser());
+		
 		return result;
 	}
 
