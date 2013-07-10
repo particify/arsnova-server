@@ -51,8 +51,31 @@ public class UserSessionAspect {
 		returning="session"
 	)
 	public final void joinSessionAdviceWithWebsocket(final JoinPoint jp, final String keyword, final UUID socketId, final Session session) {
-		userSessionService.setUser(userService.getCurrentUser());
 		userSessionService.setSession(session);
 		userSessionService.setSocketId(socketId);
+	}
+	
+	/** Sets current user, ARSnova session and websocket session ID in session scoped UserSessionService 
+	 * 
+	 * @param jp
+	 * @param keyword
+	 * @param socketId
+	 * @param session
+	 */
+	@AfterReturning(
+		pointcut="execution(public * de.thm.arsnova.controller.LoginController.doLogin(..)) " +
+				"&& args(type, guestName, forcedReferer, successUrl, failureUrl, role, ..)"
+	)
+	public final void doLogin(
+		final JoinPoint jp,
+		final String type,
+		final String guestName,
+		final String forcedReferer,
+		final String successUrl,
+		final String failureUrl,
+		final UserSessionService.Role role) {
+		
+		userSessionService.setRole(role);
+		userSessionService.setUser(userService.getCurrentUser());
 	}
 }

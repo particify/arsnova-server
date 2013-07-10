@@ -53,7 +53,6 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.services.UserSessionService;
@@ -95,8 +94,6 @@ public class LoginController extends AbstractController {
 			final HttpServletRequest request,
 			final HttpServletResponse response
 	) throws IOException, ServletException {
-		userSessionService.setRole(role);
-		
 		String referer = request.getHeader("referer");
 		if (null != forcedReferer && null != referer && !UrlUtils.isAbsoluteUrl(referer)) {
 			/* Use a url from a request parameter as referer as long as the url is not absolute (to prevent
