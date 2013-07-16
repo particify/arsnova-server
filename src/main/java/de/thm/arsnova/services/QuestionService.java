@@ -229,7 +229,11 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public List<Answer> getFreetextAnswers(String questionId) {
-		return databaseDao.getFreetextAnswers(questionId);
+		List<Answer> answers = databaseDao.getFreetextAnswers(questionId);
+		if (answers == null) {
+			throw new NotFoundException();
+		}
+		return answers;
 	}
 
 	@Override

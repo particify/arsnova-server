@@ -1007,13 +1007,13 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public List<Answer> getFreetextAnswers(String questionId) {
 		try {
+			List<Answer> answers = new ArrayList<Answer>();
 			View view = new View("skill_question/freetext_answers_full");
 			view.setKey(URLEncoder.encode("\"" + questionId + "\"", "UTF-8"));
 			ViewResults results = this.getDatabase().view(view);
 			if (results.getResults().isEmpty()) {
-				throw new NotFoundException();
+				return answers;
 			}
-			List<Answer> answers = new ArrayList<Answer>();
 			for (Document d : results.getResults()) {
 				Answer a = (Answer) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Answer.class);
 				a.setQuestionId(questionId);
