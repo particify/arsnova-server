@@ -150,6 +150,17 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@Authenticated
+	public void deleteAllQuestions(String sessionKeyword) {
+		User user = userService.getCurrentUser();
+		Session session = databaseDao.getSession(sessionKeyword);
+		if (user == null || session == null || !session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
+		databaseDao.deleteAllQuestionsWithAnswers(session);
+	}
+
+	@Override
+	@Authenticated
 	public void deleteInterposedQuestion(String questionId) {
 		InterposedQuestion question = databaseDao.getInterposedQuestion(questionId);
 		if (question == null) {

@@ -439,4 +439,10 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public void deleteSession(Session session) {
 		// TODO Auto-generated method stub
 	}
+
+	@Override
+	public void deleteAllQuestionsWithAnswers(Session session) {
+		// TODO Auto-generated method stub
+		
+	}
 }
