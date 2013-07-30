@@ -146,6 +146,12 @@ public class LecturerQuestionController extends AbstractController {
 		return questions;
 	}
 
+	@RequestMapping(value = { "/" }, method = RequestMethod.DELETE)
+	@ResponseBody
+	public final void deleteSkillQuestions(@RequestParam final String sessionkey, final HttpServletResponse response) {
+		this.questionService.deleteAllQuestions(sessionkey);
+	}
+
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	@ResponseBody
 	public final int getSkillQuestionCount(@RequestParam final String sessionkey, final HttpServletResponse response) {

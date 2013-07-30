@@ -69,6 +69,8 @@ public interface IDatabaseDao {
 
 	void deleteQuestionWithAnswers(Question question);
 
+	void deleteAllQuestionsWithAnswers(Session session);
+
 	List<String> getUnAnsweredQuestionIds(Session session, User user);
 
 	Answer getMyAnswer(String questionId, int piRound);

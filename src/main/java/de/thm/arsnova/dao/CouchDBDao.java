@@ -781,6 +781,24 @@ public class CouchDBDao implements IDatabaseDao {
 			LOGGER.error("IOException: Could not delete question {}", question.get_id());
 		}
 	}
+	
+	@Override
+	public final void deleteAllQuestionsWithAnswers(Session session) {
+		try {
+			View view = new View("skill_question/by_session");
+			view.setStartKey("[" + URLEncoder.encode("\"" + session.get_id() + "\"", "UTF-8") + "]");
+			view.setEndKey("[" + URLEncoder.encode("\"" + session.get_id() + "\", {}", "UTF-8") + "]");
+			ViewResults results = this.getDatabase().view(view);
+			
+			for (Document d : results.getResults()) {
+				Question q = new Question();
+				q.set_id(d.getId());
+				this.deleteQuestionWithAnswers(q);
+			}
+		} catch (IOException e) {
+			LOGGER.error("IOException: Could not delete questions for session {}", session.getKeyword());
+		}
+	}
 
 	private void deleteDocument(final String documentId) throws IOException {
 		Document d = this.getDatabase().getDocument(documentId);

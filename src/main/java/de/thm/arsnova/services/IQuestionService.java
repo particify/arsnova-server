@@ -41,6 +41,8 @@ public interface IQuestionService {
 
 	void deleteQuestion(String questionId);
 
+	void deleteAllQuestions(String sessionKeyword);
+
 	List<String> getUnAnsweredQuestionIds(String sessionKey);
 
 	Answer getMyAnswer(String questionId);
