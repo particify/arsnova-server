@@ -34,9 +34,17 @@ public class NovaView extends View {
 		this.startKey = quote(key);
 	}
 
+	public void setStartKeyArray(String key) {
+		this.startKey = encode("[\"" + key + "\"]");
+	}
+
 	@Override
 	public void setEndKey(String key) {
 		this.endKey = quote(key);
+	}
+
+	public void setEndKeyArray(String key) {
+		this.endKey = encode("[\"" + key + "\"]");
 	}
 
 	public void setStartKey(String... keys) {

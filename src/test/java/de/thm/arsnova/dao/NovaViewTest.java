@@ -49,6 +49,20 @@ public class NovaViewTest {
 	}
 
 	@Test
+	public void setStartKeyShouldAcceptSingleArgumentArray() {
+		NovaView v = new NovaView(null);
+		v.setStartKeyArray("foo");
+		assertEncodedEquals("startkey", "[\"foo\"]", v.getQueryString());
+	}
+
+	@Test
+	public void setEndKeyShouldAcceptSingleArgumentArray() {
+		NovaView v = new NovaView(null);
+		v.setEndKeyArray("foo");
+		assertEncodedEquals("endkey", "[\"foo\"]", v.getQueryString());
+	}
+
+	@Test
 	public void setEndKeyShouldAcceptSingleArgument() {
 		NovaView v = new NovaView(null);
 		v.setEndKey("foo");
