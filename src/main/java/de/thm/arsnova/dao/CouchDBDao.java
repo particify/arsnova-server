@@ -124,28 +124,24 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public final List<Session> getMySessions(final User user) {
-		try {
-			View view = new View("session/by_creator");
-			view.setStartKey("[" + URLEncoder.encode("\"" + user.getUsername() + "\"", "UTF-8") + "]");
-			view.setEndKey("[" + URLEncoder.encode("\"" + user.getUsername() + "\",{}", "UTF-8") + "]");
+		NovaView view = new NovaView("session/by_creator");
+		view.setStartKeyArray(user.getUsername());
+		view.setEndKeyArray(user.getUsername(), "{}");
 
-			ViewResults sessions = this.getDatabase().view(view);
+		ViewResults sessions = this.getDatabase().view(view);
 
-			List<Session> result = new ArrayList<Session>();
-			for (Document d : sessions.getResults()) {
-				Session session = (Session) JSONObject.toBean(
-						d.getJSONObject().getJSONObject("value"),
-						Session.class
-				);
-				session.setCreator(d.getJSONObject().getJSONArray("key").getString(0));
-				session.setName(d.getJSONObject().getJSONArray("key").getString(1));
-				session.set_id(d.getId());
-				result.add(session);
-			}
-			return result;
-		} catch (UnsupportedEncodingException e) {
-			return null;
+		List<Session> result = new ArrayList<Session>();
+		for (Document d : sessions.getResults()) {
+			Session session = (Session) JSONObject.toBean(
+					d.getJSONObject().getJSONObject("value"),
+					Session.class
+			);
+			session.setCreator(d.getJSONObject().getJSONArray("key").getString(0));
+			session.setName(d.getJSONObject().getJSONArray("key").getString(1));
+			session.set_id(d.getId());
+			result.add(session);
 		}
+		return result;
 	}
 
 	@Override
@@ -156,20 +152,22 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 
 		User user = this.userService.getCurrentUser();
-		View view = null;
+		NovaView view = null;
 
 		try {
+			String viewName;
 			if (session.getCreator().equals(user.getUsername())) {
-				view = new View("skill_question/by_session_sorted_by_subject_and_text");
+				viewName = "skill_question/by_session_sorted_by_subject_and_text";
 			} else {
 				if (user.getType().equals(User.THM)) {
-					view = new View("skill_question/by_session_for_thm_full");
+					viewName = "skill_question/by_session_for_thm_full";
 				} else {
-					view = new View("skill_question/by_session_for_all_full");
+					viewName = "skill_question/by_session_for_all_full";
 				}
 			}
-			view.setStartKey("[" + URLEncoder.encode("\"" + session.get_id() + "\"", "UTF-8") + "]");
-			view.setEndKey("[" + URLEncoder.encode("\"" + session.get_id() + "\",{}", "UTF-8") + "]");
+			view = new NovaView(viewName);
+			view.setStartKeyArray(session.get_id());
+			view.setEndKeyArray(session.get_id(), "{}");
 
 			ViewResults questions = this.getDatabase().view(view);
 			if (questions == null || questions.isEmpty()) {
@@ -200,8 +198,6 @@ public class CouchDBDao implements IDatabaseDao {
 			}
 
 			return result;
-		} catch (UnsupportedEncodingException e) {
-			return null;
 		} catch (IOException e) {
 			return null;
 		}
@@ -209,63 +205,49 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public final int getSkillQuestionCount(final Session session) {
-		try {
-			View view = new View("skill_question/count_by_session");
-			view.setKey(URLEncoder.encode("\"" + session.get_id() + "\"", "UTF-8"));
-			ViewResults results = this.getDatabase().view(view);
+		NovaView view = new NovaView("skill_question/count_by_session");
+		view.setKey(session.get_id());
+		ViewResults results = this.getDatabase().view(view);
 
-			if (results.getJSONArray("rows").optJSONObject(0) == null) {
-				return 0;
-			}
-
-			return results.getJSONArray("rows").optJSONObject(0).optInt("value");
-
-		} catch (UnsupportedEncodingException e) {
+		if (results.getJSONArray("rows").optJSONObject(0) == null) {
 			return 0;
 		}
+
+		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 	}
 
 	@Override
 	public final Session getSessionFromKeyword(final String keyword) {
-		try {
-			View view = new View("session/by_keyword");
-			view.setKey(URLEncoder.encode("\"" + keyword + "\"", "UTF-8"));
-			ViewResults results = this.getDatabase().view(view);
+		NovaView view = new NovaView("session/by_keyword");
+		view.setKey(keyword);
+		ViewResults results = this.getDatabase().view(view);
 
-			if (results.getJSONArray("rows").optJSONObject(0) == null) {
-				return null;
-			}
-			return (Session) JSONObject.toBean(
-					results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
-					Session.class
-			);
-		} catch (UnsupportedEncodingException e) {
+		if (results.getJSONArray("rows").optJSONObject(0) == null) {
 			return null;
 		}
+		return (Session) JSONObject.toBean(
+				results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
+				Session.class
+		);
 	}
 
 	@Override
 	public final Session getSessionFromId(final String sessionId) {
-		try {
-			View view = new View("session/by_id");
-			view.setKey(URLEncoder.encode("\"" + sessionId + "\"", "UTF-8"));
-			ViewResults results = this.getDatabase().view(view);
+		View view = new View("session/by_id");
+		view.setKey(sessionId);
+		ViewResults results = this.getDatabase().view(view);
 
-			if (results.getJSONArray("rows").optJSONObject(0) == null) {
-				return null;
-			}
-			return (Session) JSONObject.toBean(
-					results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
-					Session.class
-			);
-		} catch (UnsupportedEncodingException e) {
+		if (results.getJSONArray("rows").optJSONObject(0) == null) {
 			return null;
 		}
+		return (Session) JSONObject.toBean(
+				results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
+				Session.class
+		);
 	}
 
 	@Override
 	public final Session saveSession(final Session session) {
-
 		Document sessionDocument = new Document();
 		sessionDocument.put("type", "session");
 		sessionDocument.put("name", session.getName());
@@ -280,7 +262,6 @@ public class CouchDBDao implements IDatabaseDao {
 		} catch (IOException e) {
 			return null;
 		}
-
 		return this.getSession(sessionDocument.getString("keyword"));
 	}
 
@@ -290,10 +271,10 @@ public class CouchDBDao implements IDatabaseDao {
 		if (sessionId == null) {
 			throw new NotFoundException();
 		}
-		View view = new View("understanding/by_session");
+		NovaView view = new NovaView("understanding/by_session");
 		view.setGroup(true);
-		view.setStartKey(URLEncoder.encode("[\"" + sessionId + "\"]"));
-		view.setEndKey(URLEncoder.encode("[\"" + sessionId + "\",{}]"));
+		view.setStartKeyArray(sessionId);
+		view.setEndKeyArray(sessionId, "{}");
 		ViewResults results = this.getDatabase().view(view);
 
 		LOGGER.debug("Feedback: {}", results.getJSONArray("rows"));
@@ -444,8 +425,8 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	private String getSessionId(final String keyword) {
-		View view = new View("session/by_keyword");
-		view.setKey(URLEncoder.encode("\"" + keyword + "\""));
+		NovaView view = new NovaView("session/by_keyword");
+		view.setKey(keyword);
 		ViewResults results = this.getDatabase().view(view);
 		if (results.getJSONArray("rows").optJSONObject(0) == null) {
 			return null;
@@ -568,8 +549,8 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public final Question getQuestion(final String id) {
 		try {
-			View view = new View("skill_question/by_id");
-			view.setKey(URLEncoder.encode("\"" + id + "\"", "UTF-8"));
+			NovaView view = new NovaView("skill_question/by_id");
+			view.setKey(id);
 			ViewResults results = this.getDatabase().view(view);
 
 			if (results.getJSONArray("rows").optJSONObject(0) == null) {
@@ -598,8 +579,8 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public final LoggedIn registerAsOnlineUser(final User user, final Session session) {
 		try {
-			View view = new View("logged_in/all");
-			view.setKey(URLEncoder.encode("\"" + user.getUsername() + "\"", "UTF-8"));
+			NovaView view = new NovaView("logged_in/all");
+			view.setKey(user.getUsername());
 			ViewResults results = this.getDatabase().view(view);
 
 			LoggedIn loggedIn = new LoggedIn();
@@ -638,8 +619,6 @@ public class CouchDBDao implements IDatabaseDao {
 				l.setVisitedSessions(new ArrayList<VisitedSession>(visitedSessions));
 			}
 			return l;
-		} catch (UnsupportedEncodingException e) {
-			return null;
 		} catch (IOException e) {
 			return null;
 		}
@@ -688,30 +667,24 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public final List<String> getQuestionIds(final Session session, final User user) {
-		View view;
+		NovaView view;
 		if (user.getType().equals("thm")) {
-			view = new View("skill_question/by_session_only_id_for_thm");
+			view = new NovaView("skill_question/by_session_only_id_for_thm");
 		} else {
-			view = new View("skill_question/by_session_only_id_for_all");
+			view = new NovaView("skill_question/by_session_only_id_for_all");
 		}
 
-		try {
-			view.setKey(URLEncoder.encode("\"" + session.get_id() + "\"", "UTF-8"));
-			ViewResults results = this.getDatabase().view(view);
-			if (results.getResults().size() == 0) {
-				return new ArrayList<String>();
-			}
-
-			List<String> ids = new ArrayList<String>();
-			for (Document d : results.getResults()) {
-				ids.add(d.getId());
-			}
-			return ids;
-
-		} catch (IOException e) {
-			LOGGER.error("Could not get list of question ids of session {}", session.getKeyword());
+		view.setKey(session.get_id());
+		ViewResults results = this.getDatabase().view(view);
+		if (results.getResults().size() == 0) {
+			return new ArrayList<String>();
 		}
-		return new ArrayList<String>();
+
+		List<String> ids = new ArrayList<String>();
+		for (Document d : results.getResults()) {
+			ids.add(d.getId());
+		}
+		return ids;
 	}
 
 	@Override
@@ -726,19 +699,15 @@ public class CouchDBDao implements IDatabaseDao {
 	
 	@Override
 	public final void deleteAllQuestionsWithAnswers(Session session) {
-		try {
-			View view = new View("skill_question/by_session");
-			view.setStartKey("[" + URLEncoder.encode("\"" + session.get_id() + "\"", "UTF-8") + "]");
-			view.setEndKey("[" + URLEncoder.encode("\"" + session.get_id() + "\", {}", "UTF-8") + "]");
-			ViewResults results = this.getDatabase().view(view);
-			
-			for (Document d : results.getResults()) {
-				Question q = new Question();
-				q.set_id(d.getId());
-				this.deleteQuestionWithAnswers(q);
-			}
-		} catch (IOException e) {
-			LOGGER.error("IOException: Could not delete questions for session {}", session.getKeyword());
+		NovaView view = new NovaView("skill_question/by_session");
+		view.setStartKeyArray(session.get_id());
+		view.setEndKey(session.get_id(), "{}");
+		ViewResults results = this.getDatabase().view(view);
+		
+		for (Document d : results.getResults()) {
+			Question q = new Question();
+			q.set_id(d.getId());
+			this.deleteQuestionWithAnswers(q);
 		}
 	}
 
@@ -750,8 +719,8 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public final void deleteAnswers(final Question question) {
 		try {
-			View view = new View("answer/cleanup");
-			view.setKey(URLEncoder.encode("\"" + question.get_id() + "\"", "UTF-8"));
+			NovaView view = new NovaView("answer/cleanup");
+			view.setKey(question.get_id());
 			ViewResults results = this.getDatabase().view(view);
 
 			for (Document d : results.getResults()) {
@@ -764,35 +733,23 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public final List<String> getUnAnsweredQuestionIds(final Session session, final User user) {
-		try {
-			View view = new View("answer/by_user");
-			view.setKey(
-					"[" + URLEncoder.encode(
-							"\"" + user.getUsername() + "\",\"" + session.get_id() + "\"",
-							"UTF-8"
-					)
-					+ "]"
-			);
-			ViewResults anseweredQuestions = this.getDatabase().view(view);
+		NovaView view = new NovaView("answer/by_user");
+		view.setKey(user.getUsername(), session.get_id());
+		ViewResults anseweredQuestions = this.getDatabase().view(view);
 
-			List<String> answered = new ArrayList<String>();
-			for (Document d : anseweredQuestions.getResults()) {
-				answered.add(d.getString("value"));
-			}
-
-			List<String> questions = this.getQuestionIds(session, user);
-			List<String> unanswered = new ArrayList<String>();
-			for (String questionId : questions) {
-				if (!answered.contains(questionId)) {
-					unanswered.add(questionId);
-				}
-			}
-			return unanswered;
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("Error while retrieving unansweredquestions", e);
+		List<String> answered = new ArrayList<String>();
+		for (Document d : anseweredQuestions.getResults()) {
+			answered.add(d.getString("value"));
 		}
 
-		return null;
+		List<String> questions = this.getQuestionIds(session, user);
+		List<String> unanswered = new ArrayList<String>();
+		for (String questionId : questions) {
+			if (!answered.contains(questionId)) {
+				unanswered.add(questionId);
+			}
+		}
+		return unanswered;
 	}
 
 	@Override
@@ -802,127 +759,73 @@ public class CouchDBDao implements IDatabaseDao {
 			throw new UnauthorizedException();
 		}
 
-		try {
-			View view = new View("answer/by_question_and_user_and_piround");
-			if (2 == piRound) {
-				view.setKey(
-						"[" + URLEncoder.encode(
-								"\"" + questionId + "\",\"" + user.getUsername() + "\",2",
-								"UTF-8"
-						)
-						+ "]"
-				);
-			} else {
-				/* needed for legacy questions whose piRound property has not been set */
-				view.setStartKey(
-						"[" + URLEncoder.encode(
-								"\"" + questionId + "\",\"" + user.getUsername() + "\"",
-								"UTF-8"
-						)
-						+ "]"
-				);
-				view.setEndKey(
-						"[" + URLEncoder.encode(
-								"\"" + questionId + "\",\"" + user.getUsername() + "\",1",
-								"UTF-8"
-						)
-						+ "]"
-				);
-			}
-			ViewResults results = this.getDatabase().view(view);
-			if (results.getResults().isEmpty()) {
-				return null;
-			}
-			return (Answer) JSONObject.toBean(
-					results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
-					Answer.class
-			);
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.error(
-					"Error while retrieving answer for user {} and question {}, {}",
-					new Object[] {user,	questionId, e }
-			);
+		NovaView view = new NovaView("answer/by_question_and_user_and_piround");
+		if (2 == piRound) {
+			view.setKey(questionId, user.getUsername(), "2");
+		} else {
+			/* needed for legacy questions whose piRound property has not been set */
+			view.setStartKey(questionId, user.getUsername());
+			view.setEndKey(questionId, user.getUsername(), "1");
 		}
-
-		return null;
+		ViewResults results = this.getDatabase().view(view);
+		if (results.getResults().isEmpty()) {
+			return null;
+		}
+		return (Answer) JSONObject.toBean(
+				results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
+				Answer.class
+		);
 	}
 
 	@Override
 	public final List<Answer> getAnswers(final String questionId, int piRound) {
-		try {
-			View view = new View("skill_question/count_answers_by_question_and_piround");
-			if (2 == piRound) {
-				view.setStartKey("[" + URLEncoder.encode(
-					"\"" + questionId + "\",2",
-					"UTF-8"
-				) + "]");
-				view.setEndKey("[" + URLEncoder.encode(
-					"\"" + questionId + "\",2,{}",
-					"UTF-8"
-				) + "]");
-			} else {
-				/* needed for legacy questions whose piRound property has not been set */
-				view.setStartKey("[" + URLEncoder.encode(
-					"\"" + questionId + "\"",
-					"UTF-8"
-				) + "]");
-				view.setEndKey("[" + URLEncoder.encode(
-					"\"" + questionId + "\",1,{}",
-					"UTF-8"
-				) + "]");
-			}
-			view.setGroup(true);
-			ViewResults results = this.getDatabase().view(view);
-			int abstentionCount = this.getAbstentionAnswerCount(questionId);
-			List<Answer> answers = new ArrayList<Answer>();
-			for (Document d : results.getResults()) {
-				Answer a = new Answer();
-				a.setAnswerCount(d.getInt("value"));
-				a.setAbstentionCount(abstentionCount);
-				a.setQuestionId(d.getJSONObject().getJSONArray("key").getString(0));
-				a.setPiRound(piRound);
-				String answerText = d.getJSONObject().getJSONArray("key").getString(2);
-				a.setAnswerText(answerText == "null" ? null : answerText);
-				answers.add(a);
-			}
-			return answers;
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("Error while retrieving answers", e);
+		NovaView view = new NovaView("skill_question/count_answers_by_question_and_piround");
+		if (2 == piRound) {
+			view.setStartKey(questionId, "2");
+			view.setEndKey(questionId, "2", "{}");
+		} else {
+			/* needed for legacy questions whose piRound property has not been set */
+			view.setStartKeyArray(questionId);
+			view.setEndKeyArray(questionId, "1", "{}");
 		}
-		return null;
+		view.setGroup(true);
+		ViewResults results = this.getDatabase().view(view);
+		int abstentionCount = this.getAbstentionAnswerCount(questionId);
+		List<Answer> answers = new ArrayList<Answer>();
+		for (Document d : results.getResults()) {
+			Answer a = new Answer();
+			a.setAnswerCount(d.getInt("value"));
+			a.setAbstentionCount(abstentionCount);
+			a.setQuestionId(d.getJSONObject().getJSONArray("key").getString(0));
+			a.setPiRound(piRound);
+			String answerText = d.getJSONObject().getJSONArray("key").getString(2);
+			a.setAnswerText(answerText == "null" ? null : answerText);
+			answers.add(a);
+		}
+		return answers;
 	}
-	
+
 	private int getAbstentionAnswerCount(final String questionId) {
-		try {
-			View view = new View("skill_question/count_abstention_answers_by_question");
-			view.setKey(URLEncoder.encode("\"" + questionId + "\"", "UTF-8"));
-			view.setGroup(true);
-			ViewResults results = this.getDatabase().view(view);
-			if (results.getResults().size() == 0) {
-				return 0;
-			}
-			return results.getJSONArray("rows").optJSONObject(0).optInt("value");
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("Error while retrieving abstention answers", e);
+		NovaView view = new NovaView("skill_question/count_abstention_answers_by_question");
+		view.setKey(questionId);
+		view.setGroup(true);
+		ViewResults results = this.getDatabase().view(view);
+		if (results.getResults().size() == 0) {
+			return 0;
 		}
-		return 0;
+		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 	}
 
 	@Override
 	public final int getAnswerCount(final String questionId) {
-		try {
-			View view = new View("skill_question/count_answers_by_question");
-			view.setKey(URLEncoder.encode("\"" + questionId + "\"", "UTF-8"));
-			view.setGroup(true);
-			ViewResults results = this.getDatabase().view(view);
-			if (results.getResults().size() == 0) {
-				return 0;
-			}
-			return results.getJSONArray("rows").optJSONObject(0).optInt("value");
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("Error while retrieving answer count", e);
+		NovaView view = new NovaView("skill_question/count_answers_by_question");
+		view.setKey(questionId);
+		view.setGroup(true);
+		ViewResults results = this.getDatabase().view(view);
+		if (results.getResults().size() == 0) {
+			return 0;
 		}
-		return 0;
+		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 	}
 
 	@Override
@@ -944,20 +847,14 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public final int countActiveUsers(Session session, long since) {
 		if (session == null) throw new NotFoundException();
-		try {
-			View view = new View("logged_in/count");
-			view.setStartKey(
-					URLEncoder.encode("[\"" + session.get_id() + "\", " + String.valueOf(since) + "]", "UTF-8")
-			);
-			view.setEndKey(URLEncoder.encode("[\"" + session.get_id() + "\", {}]", "UTF-8"));
-			ViewResults results = this.getDatabase().view(view);
-			if (isEmptyResults(results)) {
-				return 0;
-			}
-			return results.getJSONArray("rows").optJSONObject(0).getInt("value");
-		} catch (UnsupportedEncodingException e) {
+		NovaView view = new NovaView("logged_in/count");
+		view.setStartKey(session.get_id(), String.valueOf(since));
+		view.setEndKey(session.get_id(), "{}");
+		ViewResults results = this.getDatabase().view(view);
+		if (isEmptyResults(results)) {
 			return 0;
 		}
+		return results.getJSONArray("rows").optJSONObject(0).getInt("value");
 	}
 
 	private boolean isEmptyResults(ViewResults results) {
@@ -966,24 +863,19 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public List<Answer> getFreetextAnswers(String questionId) {
-		try {
-			List<Answer> answers = new ArrayList<Answer>();
-			View view = new View("skill_question/freetext_answers_full");
-			view.setKey(URLEncoder.encode("\"" + questionId + "\"", "UTF-8"));
-			ViewResults results = this.getDatabase().view(view);
-			if (results.getResults().isEmpty()) {
-				return answers;
-			}
-			for (Document d : results.getResults()) {
-				Answer a = (Answer) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Answer.class);
-				a.setQuestionId(questionId);
-				answers.add(a);
-			}
+		List<Answer> answers = new ArrayList<Answer>();
+		NovaView view = new NovaView("skill_question/freetext_answers_full");
+		view.setKey(questionId);
+		ViewResults results = this.getDatabase().view(view);
+		if (results.getResults().isEmpty()) {
 			return answers;
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("Error while retrieving freetext answers", e);
 		}
-		return null;
+		for (Document d : results.getResults()) {
+			Answer a = (Answer) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Answer.class);
+			a.setQuestionId(questionId);
+			answers.add(a);
+		}
+		return answers;
 	}
 
 	@Override
@@ -998,29 +890,22 @@ public class CouchDBDao implements IDatabaseDao {
 			throw new UnauthorizedException();
 		}
 
-		try {
-			View view = new View("answer/by_user_and_session_full");
-			view.setKey(
-				"[" + URLEncoder.encode("\"" + user.getUsername() + "\",\"" + s.get_id() + "\"", "UTF-8") + "]"
-			);
-			ViewResults results = this.getDatabase().view(view);
-			List<Answer> answers = new ArrayList<Answer>();
-			if (results == null || results.getResults() == null || results.getResults().isEmpty()) {
-				return answers;
-			}
-			for (Document d : results.getResults()) {
-				Answer a = (Answer) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Answer.class);
-				a.set_id(d.getId());
-				a.set_rev(d.getRev());
-				a.setUser(user.getUsername());
-				a.setSessionId(s.get_id());
-				answers.add(a);
-			}
+		NovaView view = new NovaView("answer/by_user_and_session_full");
+		view.setKey(user.getUsername(), s.get_id());
+		ViewResults results = this.getDatabase().view(view);
+		List<Answer> answers = new ArrayList<Answer>();
+		if (results == null || results.getResults() == null || results.getResults().isEmpty()) {
 			return answers;
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("Error while retrieving user answers", e);
 		}
-		return null;
+		for (Document d : results.getResults()) {
+			Answer a = (Answer) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Answer.class);
+			a.set_id(d.getId());
+			a.set_rev(d.getRev());
+			a.setUser(user.getUsername());
+			a.setSessionId(s.get_id());
+			answers.add(a);
+		}
+		return answers;
 	}
 
 	@Override
@@ -1030,18 +915,13 @@ public class CouchDBDao implements IDatabaseDao {
 			throw new NotFoundException();
 		}
 
-		try {
-			View view = new View("skill_question/count_answers_by_session");
-			view.setKey(URLEncoder.encode("\"" + s.get_id() + "\"", "UTF-8"));
-			ViewResults results = this.getDatabase().view(view);
-			if (results.getResults().size() == 0) {
-				return 0;
-			}
-			return results.getJSONArray("rows").optJSONObject(0).optInt("value");
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("Error while retrieving total answer count", e);
+		NovaView view = new NovaView("skill_question/count_answers_by_session");
+		view.setKey(s.get_id());
+		ViewResults results = this.getDatabase().view(view);
+		if (results.getResults().size() == 0) {
+			return 0;
 		}
-		return 0;
+		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 	}
 
 	@Override
@@ -1051,42 +931,32 @@ public class CouchDBDao implements IDatabaseDao {
 			throw new NotFoundException();
 		}
 
-		try {
-			View view = new View("interposed_question/count_by_session");
-			view.setKey(URLEncoder.encode("\"" + s.get_id() + "\"", "UTF-8"));
-			view.setGroup(true);
-			ViewResults results = this.getDatabase().view(view);
-			if (results.size() == 0 || results.getResults().size() == 0) {
-				return 0;
-			}
-			return results.getJSONArray("rows").optJSONObject(0).optInt("value");
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("Error while retrieving interposed question count", e);
+		NovaView view = new NovaView("interposed_question/count_by_session");
+		view.setKey(s.get_id());
+		view.setGroup(true);
+		ViewResults results = this.getDatabase().view(view);
+		if (results.size() == 0 || results.getResults().size() == 0) {
+			return 0;
 		}
-		return 0;
+		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 	}
 
 	@Override
 	public InterposedReadingCount getInterposedReadingCount(Session session) {
-		try {
-			View view = new View("interposed_question/count_by_session_reading");
-			view.setStartKey(URLEncoder.encode("[\"" + session.get_id() + "\"]", "UTF-8"));
-			view.setEndKey(URLEncoder.encode("[\"" + session.get_id() + "\", {}]", "UTF-8"));
-			view.setGroup(true);
-			ViewResults results = this.getDatabase().view(view);
-			if (results.size() == 0 || results.getResults().size() == 0) {
-				return new InterposedReadingCount();
-			}
-			int read = results.getJSONArray("rows").optJSONObject(0).optInt("value");
-			int unread = 0;
-			if (results.getJSONArray("rows").optJSONObject(1) != null) {
-				unread = results.getJSONArray("rows").optJSONObject(1).optInt("value");
-			}
-			return new InterposedReadingCount(read, unread);
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("Error while retrieving interposed question count", e);
+		NovaView view = new NovaView("interposed_question/count_by_session_reading");
+		view.setStartKeyArray(session.get_id());
+		view.setEndKeyArray(session.get_id(), "{}");
+		view.setGroup(true);
+		ViewResults results = this.getDatabase().view(view);
+		if (results.size() == 0 || results.getResults().size() == 0) {
+			return new InterposedReadingCount();
 		}
-		return new InterposedReadingCount();
+		int read = results.getJSONArray("rows").optJSONObject(0).optInt("value");
+		int unread = 0;
+		if (results.getJSONArray("rows").optJSONObject(1) != null) {
+			unread = results.getJSONArray("rows").optJSONObject(1).optInt("value");
+		}
+		return new InterposedReadingCount(read, unread);
 	}
 
 	@Override
@@ -1096,29 +966,24 @@ public class CouchDBDao implements IDatabaseDao {
 			throw new NotFoundException();
 		}
 
-		try {
-			View view = new View("interposed_question/by_session");
-			view.setKey(URLEncoder.encode("\"" + s.get_id() + "\"", "UTF-8"));
-			ViewResults questions = this.getDatabase().view(view);
-			if (questions == null || questions.isEmpty()) {
-				return null;
-			}
-			List<InterposedQuestion> result = new ArrayList<InterposedQuestion>();
-			LOGGER.debug("{}", questions.getResults());
-			for (Document document : questions.getResults()) {
-				InterposedQuestion question = (InterposedQuestion) JSONObject.toBean(
-						document.getJSONObject().getJSONObject("value"),
-						InterposedQuestion.class
-				);
-				question.setSessionId(sessionKey);
-				question.set_id(document.getId());
-				result.add(question);
-			}
-			return result;
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("Error while retrieving interposed questions", e);
+		NovaView view = new NovaView("interposed_question/by_session");
+		view.setKey(s.get_id());
+		ViewResults questions = this.getDatabase().view(view);
+		if (questions == null || questions.isEmpty()) {
+			return null;
 		}
-		return null;
+		List<InterposedQuestion> result = new ArrayList<InterposedQuestion>();
+		LOGGER.debug("{}", questions.getResults());
+		for (Document document : questions.getResults()) {
+			InterposedQuestion question = (InterposedQuestion) JSONObject.toBean(
+					document.getJSONObject().getJSONObject("value"),
+					InterposedQuestion.class
+			);
+			question.setSessionId(sessionKey);
+			question.set_id(document.getId());
+			result.add(question);
+		}
+		return result;
 	}
 
 	public Question getInterposedQuestion(String sessionKey, String documentId) {
@@ -1146,8 +1011,8 @@ public class CouchDBDao implements IDatabaseDao {
 
 		String date = new SimpleDateFormat("dd-mm-yyyyy").format(new Date());
 		try {
-			View view = new View("food_vote/get_user_vote");
-			view.setKey("[" + URLEncoder.encode("\"" + date + "\",\"" + u.getUsername() + "\"", "UTF-8") + "]");
+			NovaView view = new NovaView("food_vote/get_user_vote");
+			view.setKey(date, u.getUsername());
 			ViewResults results = this.getDatabase().view(view);
 
 			if (results.getResults().isEmpty()) {
@@ -1162,8 +1027,6 @@ public class CouchDBDao implements IDatabaseDao {
 				vote.put("name", menu);
 				this.database.saveDocument(vote);
 			}
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("Error while retrieving user food vote", e);
 		} catch (IOException e) {
 			LOGGER.error("Error while saving user food vote", e);
 		}
@@ -1173,23 +1036,17 @@ public class CouchDBDao implements IDatabaseDao {
 	public List<FoodVote> getFoodVote() {
 		List<FoodVote> foodVotes = new ArrayList<FoodVote>();
 		String date = new SimpleDateFormat("dd-mm-yyyyy").format(new Date());
-		try {
-			View view = new View("food_vote/count_by_day");
-			view.setStartKey("[" + URLEncoder.encode("\"" + date + "\"", "UTF-8") + "]");
-			view.setEndKey("[" + URLEncoder.encode("\"" + date + "\",{}", "UTF-8") + "]");
-			view.setGroup(true);
-			ViewResults results = this.getDatabase().view(view);
-			for (Document d : results.getResults()) {
-				FoodVote vote = new FoodVote();
-				vote.setCount(d.getJSONObject().optInt("value"));
-				vote.setDay(date);
-				vote.setName(d.getJSONObject().getJSONArray("key").getString(1));
-				foodVotes.add(vote);
-			}
-
-			return foodVotes;
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("Error while retrieving food vote count", e);
+		NovaView view = new NovaView("food_vote/count_by_day");
+		view.setStartKeyArray(date);
+		view.setEndKeyArray(date, "{}");
+		view.setGroup(true);
+		ViewResults results = this.getDatabase().view(view);
+		for (Document d : results.getResults()) {
+			FoodVote vote = new FoodVote();
+			vote.setCount(d.getJSONObject().optInt("value"));
+			vote.setDay(date);
+			vote.setName(d.getJSONObject().getJSONArray("key").getString(1));
+			foodVotes.add(vote);
 		}
 		return foodVotes;
 	}
@@ -1197,20 +1054,15 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public int getFoodVoteCount() {
 		String date = new SimpleDateFormat("dd-mm-yyyyy").format(new Date());
-		try {
-			View view = new View("food_vote/count_by_day");
-			view.setStartKey("[" + URLEncoder.encode("\"" + date + "\"", "UTF-8") + "]");
-			view.setEndKey("[" + URLEncoder.encode("\"" + date + "\",{}", "UTF-8") + "]");
-			view.setGroup(false);
-			ViewResults results = this.getDatabase().view(view);
-			if (results.size() == 0 || results.getResults().size() == 0) {
-				return 0;
-			}
-			return results.getJSONArray("rows").optJSONObject(0).optInt("value");
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("Error while retrieving food vote count", e);
+		NovaView view = new NovaView("food_vote/count_by_day");
+		view.setStartKeyArray(date);
+		view.setEndKeyArray(date, "{}");
+		view.setGroup(false);
+		ViewResults results = this.getDatabase().view(view);
+		if (results.size() == 0 || results.getResults().size() == 0) {
+			return 0;
 		}
-		return 0;
+		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 	}
 
 	@Override
@@ -1295,34 +1147,30 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public List<Session> getMyVisitedSessions(User user) {
-		try {
-			View view = new View("logged_in/visited_sessions_by_user");
-			view.setKey(URLEncoder.encode("\"" + user.getUsername() + "\"", "UTF-8"));
-			ViewResults sessions = this.getDatabase().view(view);
-			List<Session> allSessions = new ArrayList<Session>();
-			for (Document d : sessions.getResults()) {
-				// Not all users have visited sessions
-				if (d.getJSONObject().optJSONArray("value") != null) {
-					@SuppressWarnings("unchecked")
-					Collection<Session> visitedSessions =  JSONArray.toCollection(
-						d.getJSONObject().getJSONArray("value"),
-						Session.class
-					);
-					allSessions.addAll(visitedSessions);
-				}
+		NovaView view = new NovaView("logged_in/visited_sessions_by_user");
+		view.setKey(user.getUsername());
+		ViewResults sessions = this.getDatabase().view(view);
+		List<Session> allSessions = new ArrayList<Session>();
+		for (Document d : sessions.getResults()) {
+			// Not all users have visited sessions
+			if (d.getJSONObject().optJSONArray("value") != null) {
+				@SuppressWarnings("unchecked")
+				Collection<Session> visitedSessions =  JSONArray.toCollection(
+					d.getJSONObject().getJSONArray("value"),
+					Session.class
+				);
+				allSessions.addAll(visitedSessions);
 			}
-			// Do these sessions still exist?
-			List<Session> result = new ArrayList<Session>();
-			for (Session s : allSessions) {
-				Session session = this.getSessionFromKeyword(s.getKeyword());
-				if (session != null) {
-					result.add(session);
-				}
-			}
-			return result;
-		} catch (UnsupportedEncodingException e) {
-			return null;
 		}
+		// Do these sessions still exist?
+		List<Session> result = new ArrayList<Session>();
+		for (Session s : allSessions) {
+			Session session = this.getSessionFromKeyword(s.getKeyword());
+			if (session != null) {
+				result.add(session);
+			}
+		}
+		return result;
 	}
 
 	@Override
@@ -1403,24 +1251,17 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public final List<String> getActiveUsers(int timeDifference) {
-		try {
-			long inactiveBeforeTimestamp = new Date().getTime() - timeDifference * 1000;
+		long inactiveBeforeTimestamp = new Date().getTime() - timeDifference * 1000;
 
-			View view = new View("logged_in/by_and_only_timestamp_and_username");
-			view.setStartKey("[" + URLEncoder.encode(String.valueOf(inactiveBeforeTimestamp), "UTF-8") + "]");
-			ViewResults results = this.getDatabase().view(view);
-			LOGGER.debug("getActiveUsers result count: {}", String.valueOf(results.size()));
+		NovaView view = new NovaView("logged_in/by_and_only_timestamp_and_username");
+		view.setStartKeyArray(String.valueOf(inactiveBeforeTimestamp));
+		ViewResults results = this.getDatabase().view(view);
 
-			List<String> result = new ArrayList<String>();
-			for (Document d : results.getResults()) {
-				result.add(d.getJSONObject().getJSONArray("key").getString(1));
-			}
-
-			return result;
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("Error while retrieving active users", e);
+		List<String> result = new ArrayList<String>();
+		for (Document d : results.getResults()) {
+			result.add(d.getJSONObject().getJSONArray("key").getString(1));
 		}
-		return null;
+		return result;
 	}
 
 	private class ExtendedView extends View {
