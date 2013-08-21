@@ -105,11 +105,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public void cleanFeedbackVotes(int cleanupFeedbackDelay) {
-		stubSessions.clear();
-	}
-
-	@Override
 	public Session getSession(String keyword) {
 		// Magic keyword for forbidden session
 		if (keyword.equals("99999999"))

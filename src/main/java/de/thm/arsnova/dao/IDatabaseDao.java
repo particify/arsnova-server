@@ -33,8 +33,6 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
 public interface IDatabaseDao {
-	void cleanFeedbackVotes(int cleanupFeedbackDelay);
-
 	Session getSessionFromKeyword(String keyword);
 
 	Session getSession(String keyword);

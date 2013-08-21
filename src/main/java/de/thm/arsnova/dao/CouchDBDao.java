@@ -114,59 +114,6 @@ public class CouchDBDao implements IDatabaseDao {
 		this.userService = service;
 	}
 
-	/**
-	 * This method cleans up old feedback votes at the scheduled interval.
-	 */
-	@Override
-	public final void cleanFeedbackVotes(final int cleanupFeedbackDelay) {
-		final long timelimitInMillis = 60000 * (long) cleanupFeedbackDelay;
-		final long maxAllowedTimeInMillis = System.currentTimeMillis() - timelimitInMillis;
-
-		Map<String, Set<String>> affectedUsers = new HashMap<String, Set<String>>();
-		Set<String> allAffectedSessions = new HashSet<String>();
-
-		List<Document> results = findFeedbackForDeletion(maxAllowedTimeInMillis);
-		for (Document d : results) {
-			try {
-				// Read the required document data
-				Document feedback = this.getDatabase().getDocument(d.getId());
-				String arsInternalSessionId = feedback.getString("sessionId");
-				String user = feedback.getString("user");
-
-				// Store user and session data for later. We need this to
-				// communicate the changes back to the users.
-				Set<String> affectedArsSessions = affectedUsers.get(user);
-				if (affectedArsSessions == null) {
-					affectedArsSessions = new HashSet<String>();
-				}
-				affectedArsSessions.add(getSessionKeyword(arsInternalSessionId));
-				affectedUsers.put(user, affectedArsSessions);
-				allAffectedSessions.addAll(affectedArsSessions);
-
-				this.database.deleteDocument(feedback);
-				LOGGER.debug("Cleaning up Feedback document " + d.getId());
-			} catch (IOException e) {
-				LOGGER.error("Could not delete Feedback document " + d.getId());
-			} catch (JSONException e) {
-				LOGGER.error(
-						"Could not delete Feedback document {}, error is: {} ",
-						new Object[] {d.getId(), e}
-				);
-			}
-		}
-		if (!results.isEmpty()) {
-			feedbackService.broadcastFeedbackChanges(affectedUsers, allAffectedSessions);
-		}
-	}
-
-	private List<Document> findFeedbackForDeletion(final long maxAllowedTimeInMillis) {
-		View cleanupFeedbackView = new View("understanding/cleanup");
-		cleanupFeedbackView.setStartKey("null");
-		cleanupFeedbackView.setEndKey(String.valueOf(maxAllowedTimeInMillis));
-		ViewResults feedbackForCleanup = this.getDatabase().view(cleanupFeedbackView);
-		return feedbackForCleanup.getResults();
-	}
-
 	@Override
 	public final Session getSession(final String keyword) {
 		Session result = this.getSessionFromKeyword(keyword);
