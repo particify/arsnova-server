@@ -98,13 +98,6 @@ public class NovaViewTest {
 	}
 
 	@Test
-	public void singleKeysShouldNotEnquoteNumbers() {
-		NovaView v = new NovaView(null);
-		v.setKey("2");
-		assertEncodedEquals("key", "2", v.getQueryString());
-	}
-
-	@Test
 	public void singleArrayKeysShouldNotEnquoteNumbers() {
 		NovaView v1 = new NovaView(null);
 		NovaView v2 = new NovaView(null);

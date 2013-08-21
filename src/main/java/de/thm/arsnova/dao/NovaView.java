@@ -98,9 +98,6 @@ public class NovaView extends View {
 	}
 
 	private String quote(String string) {
-		if (isNumber(string)) {
-			return encode(string);
-		}
 		return encode("\"" + string + "\"");
 	}
 	
