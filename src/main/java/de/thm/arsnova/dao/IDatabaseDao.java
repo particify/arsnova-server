@@ -23,7 +23,6 @@ import java.util.List;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.FoodVote;
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.InterposedReadingCount;
@@ -41,10 +40,6 @@ public interface IDatabaseDao {
 
 	Session saveSession(Session session);
 
-	Feedback getFeedback(String keyword);
-
-	boolean saveFeedback(String keyword, int value, User user);
-
 	boolean sessionKeyAvailable(String keyword);
 
 	Question saveQuestion(Session session, Question question);
@@ -60,8 +55,6 @@ public interface IDatabaseDao {
 	LoggedIn registerAsOnlineUser(User u, Session s);
 
 	void updateSessionOwnerActivity(Session session);
-
-	Integer getMyFeedback(String keyword, User user);
 
 	List<String> getQuestionIds(Session session, User user);
 

@@ -25,7 +25,6 @@ import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -51,7 +50,6 @@ import com.fourspaces.couchdb.ViewResults;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.FoodVote;
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.InterposedReadingCount;
@@ -266,172 +264,12 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final Feedback getFeedback(final String keyword) {
-		String sessionId = this.getSessionId(keyword);
-		if (sessionId == null) {
-			throw new NotFoundException();
-		}
-		NovaView view = new NovaView("understanding/by_session");
-		view.setGroup(true);
-		view.setStartKeyArray(sessionId);
-		view.setEndKeyArray(sessionId, "{}");
-		ViewResults results = this.getDatabase().view(view);
-
-		LOGGER.debug("Feedback: {}", results.getJSONArray("rows"));
-
-		return this.createFeedbackObject(results);
-	}
-
-	private Feedback createFeedbackObject(final ViewResults results) {
-		int[] values = {0, 0, 0, 0};
-		JSONArray rows = results.getJSONArray("rows");
-
-		try {
-			for (int i = Feedback.MIN_FEEDBACK_TYPE; i <= Feedback.MAX_FEEDBACK_TYPE; i++) {
-				String key = rows.optJSONObject(i).optJSONArray("key").getString(1);
-				JSONObject feedback = rows.optJSONObject(i);
-
-				if (key.equals("Bitte schneller")) {
-					values[Feedback.FEEDBACK_FASTER] = feedback.getInt("value");
-				}
-				if (key.equals("Kann folgen")) {
-					values[Feedback.FEEDBACK_OK] = feedback.getInt("value");
-				}
-				if (key.equals("Zu schnell")) {
-					values[Feedback.FEEDBACK_SLOWER] = feedback.getInt("value");
-				}
-				if (key.equals("Nicht mehr dabei")) {
-					values[Feedback.FEEDBACK_AWAY] = feedback.getInt("value");
-				}
-			}
-		} catch (Exception e) {
-			return new Feedback(
-					values[Feedback.FEEDBACK_FASTER],
-					values[Feedback.FEEDBACK_OK],
-					values[Feedback.FEEDBACK_SLOWER],
-					values[Feedback.FEEDBACK_AWAY]
-			);
-		}
-		return new Feedback(
-				values[Feedback.FEEDBACK_FASTER],
-				values[Feedback.FEEDBACK_OK],
-				values[Feedback.FEEDBACK_SLOWER],
-				values[Feedback.FEEDBACK_AWAY]
-		);
-	}
-
-	@Override
-	public final boolean saveFeedback(
-			final String keyword,
-			final int value,
-			final de.thm.arsnova.entities.User user
-	) {
-		String sessionId = this.getSessionId(keyword);
-		if (sessionId == null) {
-			return false;
-		}
-		if (!(value >= Feedback.MIN_FEEDBACK_TYPE && value <= Feedback.MAX_FEEDBACK_TYPE)) {
-			return false;
-		}
-
-		Document feedback = new Document();
-		List<Document> postedFeedback = findPreviousFeedback(sessionId, user);
-
-		// Feedback can only be posted once. If there already is some feedback,
-		// we need to update it.
-		if (!postedFeedback.isEmpty()) {
-			for (Document f : postedFeedback) {
-				// Use the first found feedback and update value and timestamp
-				try {
-					feedback = this.getDatabase().getDocument(f.getId());
-					feedback.put("value", feedbackValueToString(value));
-					feedback.put("timestamp", System.currentTimeMillis());
-				} catch (IOException e) {
-					return false;
-				}
-				break;
-			}
-		} else {
-			feedback.put("type", "understanding");
-			feedback.put("user", user.getUsername());
-			feedback.put("sessionId", sessionId);
-			feedback.put("timestamp", System.currentTimeMillis());
-			feedback.put("value", feedbackValueToString(value));
-		}
-
-		try {
-			this.getDatabase().saveDocument(feedback);
-		} catch (IOException e) {
-			return false;
-		}
-
-		return true;
-	}
-
-	private List<Document> findPreviousFeedback(final String sessionId, final de.thm.arsnova.entities.User user) {
-		View view = new View("understanding/by_user");
-		try {
-			view.setKey(
-					URLEncoder.encode(
-							"[\"" + sessionId + "\",\"" + user.getUsername() + "\"]",
-							"UTF-8"
-					)
-			);
-		} catch (UnsupportedEncodingException e) {
-			return Collections.<Document> emptyList();
-		}
-		ViewResults results = this.getDatabase().view(view);
-		return results.getResults();
-	}
-
-	private String feedbackValueToString(final int value) {
-		switch (value) {
-		case Feedback.FEEDBACK_FASTER:
-			return "Bitte schneller";
-		case Feedback.FEEDBACK_OK:
-			return "Kann folgen";
-		case Feedback.FEEDBACK_SLOWER:
-			return "Zu schnell";
-		case Feedback.FEEDBACK_AWAY:
-			return "Nicht mehr dabei";
-		default:
-			return null;
-		}
-	}
-
-	private int feedbackValueFromString(final String value) {
-		if (value.equals("Bitte schneller")) {
-			return Feedback.FEEDBACK_FASTER;
-		}
-		if (value.equals("Kann folgen")) {
-			return Feedback.FEEDBACK_OK;
-		}
-		if (value.equals("Zu schnell")) {
-			return Feedback.FEEDBACK_AWAY;
-		}
-		if (value.equals("Nicht mehr dabei")) {
-			return Feedback.FEEDBACK_AWAY;
-		}
-		return Integer.MIN_VALUE;
-	}
-
-	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public final boolean sessionKeyAvailable(final String keyword) {
 		View view = new View("session/by_keyword");
 		ViewResults results = this.getDatabase().view(view);
 
 		return !results.containsKey(keyword);
-	}
-
-	private String getSessionId(final String keyword) {
-		NovaView view = new NovaView("session/by_keyword");
-		view.setKey(keyword);
-		ViewResults results = this.getDatabase().view(view);
-		if (results.getJSONArray("rows").optJSONObject(0) == null) {
-			return null;
-		}
-		return results.getJSONArray("rows").optJSONObject(0).optJSONObject("value").getString("_id");
 	}
 
 	private String getSessionKeyword(final String internalSessionId) throws IOException {
@@ -633,35 +471,6 @@ public class CouchDBDao implements IDatabaseDao {
 		} catch (IOException e) {
 			LOGGER.error("Failed to update lastOwnerActivity for Session {}", session);
 			return;
-		}
-	}
-
-	@Override
-	public final Integer getMyFeedback(final String keyword, final User user) {
-		try {
-			String sessionId = this.getSessionId(keyword);
-			if (sessionId == null) {
-				throw new NotFoundException();
-			}
-
-			View view = new View("understanding/by_user");
-			view.setKey(
-					URLEncoder.encode(
-							"[\"" + sessionId + "\", \"" + user.getUsername() + "\"]",
-							"UTF-8"
-					)
-			);
-			ViewResults results = this.getDatabase().view(view);
-			JSONArray rows = results.getJSONArray("rows");
-
-			if (rows.size() == 0) {
-				return null;
-			}
-
-			JSONObject json = rows.optJSONObject(0).optJSONObject("value");
-			return this.feedbackValueFromString(json.getString("value"));
-		} catch (UnsupportedEncodingException e) {
-			return null;
 		}
 	}
 
