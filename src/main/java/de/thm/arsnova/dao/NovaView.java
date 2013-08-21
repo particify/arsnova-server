@@ -35,7 +35,11 @@ public class NovaView extends View {
 	}
 
 	public void setStartKeyArray(String key) {
-		this.startKey = encode("[\"" + key + "\"]");
+		if (isNumber(key)) {
+			this.startKey = encode("[" + key + "]");
+		} else {
+			this.startKey = encode("[\"" + key + "\"]");
+		}
 	}
 
 	public void setStartKeyArray(String... keys) {
@@ -48,7 +52,11 @@ public class NovaView extends View {
 	}
 
 	public void setEndKeyArray(String key) {
-		this.endKey = encode("[\"" + key + "\"]");
+		if (isNumber(key)) {
+			this.endKey = encode("[" + key + "]");
+		} else {
+			this.endKey = encode("[\"" + key + "\"]");
+		}
 	}
 
 	public void setEndKeyArray(String... keys) {
@@ -75,7 +83,9 @@ public class NovaView extends View {
 	private String toJsonArray(String[] strings) {
 		StringBuilder sb = new StringBuilder();
 		for (String str : strings) {
-			if (str.equals("{}")) {
+			if (isNumber(str)) {
+				sb.append(str + ",");
+			} else if (str.equals("{}")) {
 				sb.append(str + ",");
 			} else {
 				sb.append("\"" + str + "\"" + ",");
@@ -88,7 +98,14 @@ public class NovaView extends View {
 	}
 
 	private String quote(String string) {
+		if (isNumber(string)) {
+			return encode(string);
+		}
 		return encode("\"" + string + "\"");
+	}
+	
+	private boolean isNumber(String string) {
+		return string.matches("^[0-9]+$");
 	}
 
 	private String encode(String string) {

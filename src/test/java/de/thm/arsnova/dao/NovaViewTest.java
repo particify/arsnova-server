@@ -90,6 +90,30 @@ public class NovaViewTest {
 		assertEncodedEquals("key", "[\"foo\",\"bar\",{}]", v.getQueryString());
 	}
 
+	@Test
+	public void arrayKeysShouldNotEnquoteNumbers() {
+		NovaView v = new NovaView(null);
+		v.setKey("foo", "bar", "2");
+		assertEncodedEquals("key", "[\"foo\",\"bar\",2]", v.getQueryString());
+	}
+
+	@Test
+	public void singleKeysShouldNotEnquoteNumbers() {
+		NovaView v = new NovaView(null);
+		v.setKey("2");
+		assertEncodedEquals("key", "2", v.getQueryString());
+	}
+
+	@Test
+	public void singleArrayKeysShouldNotEnquoteNumbers() {
+		NovaView v1 = new NovaView(null);
+		NovaView v2 = new NovaView(null);
+		v1.setStartKeyArray("2");
+		v2.setEndKeyArray("2");
+		assertEncodedEquals("startkey", "[2]", v1.getQueryString());
+		assertEncodedEquals("endkey", "[2]", v2.getQueryString());
+	}
+
 	private void assertEncodedEquals(String key, String expected, String actual) {
 		try {
 			assertEquals(key + "=" + URLEncoder.encode(expected, "UTF-8"), actual);
