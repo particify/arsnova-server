@@ -172,8 +172,8 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Question> getSkillQuestions(String session) {
-		if (getSession(session) == null)
+	public List<Question> getSkillQuestions(User user, Session session) {
+		if (session == null)
 			throw new NotFoundException();
 		List<Question> questions = stubQuestions.get(session);
 		if (questions == null)
@@ -402,5 +402,41 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public void deleteAllQuestionsWithAnswers(Session session) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public List<Question> getLectureQuestions(User user, Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Question> getFlashcards(User user, Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Question> getPreparationQuestions(User user, Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getLectureQuestionCount(Session session) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getFlashcardCount(Session session) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getPreparationQuestionCount(Session session) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

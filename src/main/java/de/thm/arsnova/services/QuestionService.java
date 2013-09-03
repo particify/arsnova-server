@@ -59,11 +59,7 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public List<Question> getSkillQuestions(String sessionkey) {
-		List<Question> result = databaseDao.getSkillQuestions(sessionkey);
-		if (result == null || result.size() == 0) {
-			throw new NoContentException();
-		}
-		return result;
+		return databaseDao.getSkillQuestions(userService.getCurrentUser(), getSession(sessionkey));
 	}
 
 	@Override
@@ -398,13 +394,13 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public List<Question> getLectureQuestions(String sessionkey) {
-		return databaseDao.getLectureQuestions(getSession(sessionkey));
+		return databaseDao.getLectureQuestions(userService.getCurrentUser(), getSession(sessionkey));
 	}
 
 	@Override
 	@Authenticated
 	public List<Question> getFlashcards(String sessionkey) {
-		return databaseDao.getFlashcards(getSession(sessionkey));
+		return databaseDao.getFlashcards(userService.getCurrentUser(), getSession(sessionkey));
 	}
 
 	@Override
@@ -419,5 +415,23 @@ public class QuestionService implements IQuestionService {
 			throw new NotFoundException();
 		}
 		return session;
+	}
+
+	@Override
+	@Authenticated
+	public int getLectureQuestionCount(String sessionkey) {
+		return databaseDao.getLectureQuestionCount(getSession(sessionkey));
+	}
+
+	@Override
+	@Authenticated
+	public int getFlashcardCount(String sessionkey) {
+		return databaseDao.getFlashcardCount(getSession(sessionkey));
+	}
+
+	@Override
+	@Authenticated
+	public int getPreparationQuestionCount(String sessionkey) {
+		return databaseDao.getPreparationQuestionCount(getSession(sessionkey));
 	}
 }

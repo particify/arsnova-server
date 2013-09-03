@@ -132,7 +132,7 @@ public class LecturerQuestionController extends AbstractController {
 	@ResponseBody
 	public final List<Question> getSkillQuestions(
 			@RequestParam final String sessionkey,
-			@RequestParam(value = "lecturequestionsonly", defaultValue = "true") final boolean lectureQuestionsOnly,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
 			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly,
 			final HttpServletResponse response
@@ -162,10 +162,23 @@ public class LecturerQuestionController extends AbstractController {
 
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	@ResponseBody
-	public final int getSkillQuestionCount(@RequestParam final String sessionkey, final HttpServletResponse response) {
+	public final int getSkillQuestionCount(
+			@RequestParam final String sessionkey,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
+			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly,
+			final HttpServletResponse response) {
 		response.addHeader("X-Deprecated-API", "1");
 
-		return questionService.getSkillQuestionCount(sessionkey);
+		if (lectureQuestionsOnly) {
+			return questionService.getLectureQuestionCount(sessionkey);
+		} else if (flashcardsOnly) {
+			return questionService.getFlashcardCount(sessionkey);
+		} else if (preparationQuestionsOnly) {
+			return questionService.getPreparationQuestionCount(sessionkey);
+		} else {
+			return questionService.getSkillQuestionCount(sessionkey);
+		}
 	}
 
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)

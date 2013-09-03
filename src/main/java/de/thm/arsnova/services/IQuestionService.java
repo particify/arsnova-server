@@ -85,4 +85,10 @@ public interface IQuestionService {
 
 	List<Question> getPreparationQuestions(String sessionkey);
 
+	int getLectureQuestionCount(String sessionkey);
+
+	int getFlashcardCount(String sessionkey);
+
+	int getPreparationQuestionCount(String sessionkey);
+
 }

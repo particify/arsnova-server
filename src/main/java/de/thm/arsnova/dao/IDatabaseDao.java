@@ -48,7 +48,7 @@ public interface IDatabaseDao {
 
 	Question getQuestion(String id);
 
-	List<Question> getSkillQuestions(String session);
+	List<Question> getSkillQuestions(User user, Session session);
 
 	int getSkillQuestionCount(Session session);
 
@@ -130,9 +130,15 @@ public interface IDatabaseDao {
 
 	void deleteSession(Session session);
 
-	List<Question> getLectureQuestions(Session session);
+	List<Question> getLectureQuestions(User user, Session session);
 
-	List<Question> getFlashcards(Session session);
+	List<Question> getFlashcards(User user, Session session);
 
 	List<Question> getPreparationQuestions(User user, Session session);
+
+	int getLectureQuestionCount(Session session);
+
+	int getFlashcardCount(Session session);
+
+	int getPreparationQuestionCount(Session session);
 }

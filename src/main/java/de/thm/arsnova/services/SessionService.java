@@ -244,7 +244,7 @@ public class SessionService implements ISessionService {
 		if (!session.isCreator(user)) {
 			throw new ForbiddenException();
 		}
-		for (Question q : databaseDao.getSkillQuestions(sessionkey)) {
+		for (Question q : databaseDao.getSkillQuestions(user, session)) {
 			databaseDao.deleteQuestionWithAnswers(q);
 		}
 		databaseDao.deleteSession(session);

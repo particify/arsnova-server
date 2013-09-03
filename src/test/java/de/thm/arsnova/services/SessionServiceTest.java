@@ -126,7 +126,7 @@ public class SessionServiceTest {
 			Question q2 = new Question();
 	
 			IDatabaseDao mockDatabase = mock(IDatabaseDao.class);
-			when(mockDatabase.getSkillQuestions(anyString())).thenReturn(Arrays.asList(q1, q2));
+			when(mockDatabase.getSkillQuestions(userService.getCurrentUser(), session)).thenReturn(Arrays.asList(q1, q2));
 			when(mockDatabase.getSession(anyString())).thenReturn(session);
 			ReflectionTestUtils.setField(getTargetObject(sessionService), "databaseDao", mockDatabase);
 	
