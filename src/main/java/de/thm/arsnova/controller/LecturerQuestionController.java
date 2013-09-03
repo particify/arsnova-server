@@ -128,19 +128,27 @@ public class LecturerQuestionController extends AbstractController {
 		this.questionService.update(question);
 	}
 
-	@RequestMapping(
-			value = { "/" },
-			method = RequestMethod.GET
-	)
+	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<Question> getSkillQuestions(
 			@RequestParam final String sessionkey,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "true") final boolean lectureQuestionsOnly,
+			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly,
 			final HttpServletResponse response
 	) {
-		List<Question> questions = questionService.getSkillQuestions(sessionkey);
+		List<Question> questions;
+		if (lectureQuestionsOnly) {
+			questions = questionService.getLectureQuestions(sessionkey);
+		} else if (flashcardsOnly) {
+			questions = questionService.getFlashcards(sessionkey);
+		} else if (preparationQuestionsOnly) {
+			questions = questionService.getPreparationQuestions(sessionkey);
+		} else {
+			questions = questionService.getSkillQuestions(sessionkey);
+		}
 		if (questions == null || questions.isEmpty()) {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
-
 			return null;
 		}
 		return questions;

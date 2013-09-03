@@ -79,4 +79,10 @@ public interface IQuestionService {
 
 	void deleteInterposedQuestion(String questionId);
 
+	List<Question> getLectureQuestions(String sessionkey);
+
+	List<Question> getFlashcards(String sessionkey);
+
+	List<Question> getPreparationQuestions(String sessionkey);
+
 }

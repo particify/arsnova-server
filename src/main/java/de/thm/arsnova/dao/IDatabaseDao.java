@@ -129,4 +129,10 @@ public interface IDatabaseDao {
 	List<String> getActiveUsers(int timeDifference);
 
 	void deleteSession(Session session);
+
+	List<Question> getLectureQuestions(Session session);
+
+	List<Question> getFlashcards(Session session);
+
+	List<Question> getPreparationQuestions(User user, Session session);
 }

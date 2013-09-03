@@ -394,4 +394,30 @@ public class QuestionService implements IQuestionService {
 
 		socketIoServer.reportAnswersToLecturerQuestionAvailable(question.getSessionKeyword(), question.get_id());
 	}
+
+	@Override
+	@Authenticated
+	public List<Question> getLectureQuestions(String sessionkey) {
+		return databaseDao.getLectureQuestions(getSession(sessionkey));
+	}
+
+	@Override
+	@Authenticated
+	public List<Question> getFlashcards(String sessionkey) {
+		return databaseDao.getFlashcards(getSession(sessionkey));
+	}
+
+	@Override
+	@Authenticated
+	public List<Question> getPreparationQuestions(String sessionkey) {
+		return databaseDao.getPreparationQuestions(userService.getCurrentUser(), getSession(sessionkey));
+	}
+	
+	private Session getSession(String sessionkey) {
+		Session session = this.databaseDao.getSessionFromKeyword(sessionkey);
+		if (session == null) {
+			throw new NotFoundException();
+		}
+		return session;
+	}
 }

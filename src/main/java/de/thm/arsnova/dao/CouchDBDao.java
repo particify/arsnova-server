@@ -1146,4 +1146,61 @@ public class CouchDBDao implements IDatabaseDao {
 			LOGGER.error("Could not delete session {}", session);
 		}
 	}
+
+	@Override
+	public List<Question> getLectureQuestions(Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Question> getFlashcards(Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Question> getPreparationQuestions(User user, Session session) {
+		String viewName;
+		if (session.isCreator(user)) {
+			viewName = "skill_question/preparation_question_by_session";
+		} else {
+			if (user.getType().equals(User.THM)) {
+				viewName = "skill_question/preparation_question_by_session_for_thm";
+			} else {
+				viewName = "skill_question/preparation_question_by_session_for_all";
+			}
+		}
+		NovaView view = new NovaView(viewName);
+		view.setStartKeyArray(session.get_id());
+		view.setEndKeyArray(session.get_id(), "{}");
+		ViewResults questions = this.getDatabase().view(view);
+		if (questions == null || questions.isEmpty()) {
+			return null;
+		}
+		List<Question> result = new ArrayList<Question>();
+
+		MorpherRegistry morpherRegistry = JSONUtils.getMorpherRegistry();
+		Morpher dynaMorpher = new BeanMorpher(PossibleAnswer.class, morpherRegistry);
+		morpherRegistry.registerMorpher(dynaMorpher);
+		for (Document document : questions.getResults()) {
+			Question question = (Question) JSONObject.toBean(
+					document.getJSONObject().getJSONObject("value"),
+					Question.class
+			);
+			@SuppressWarnings("unchecked")
+			Collection<PossibleAnswer> answers = JSONArray.toCollection(
+					document.getJSONObject().getJSONObject("value").getJSONArray("possibleAnswers"),
+					PossibleAnswer.class
+			);
+			question.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
+			question.setSessionKeyword(session.getKeyword());
+			if (!"freetext".equals(question.getQuestionType()) && 0 == question.getPiRound()) {
+				/* needed for legacy questions whose piRound property has not been set */
+				question.setPiRound(1);
+			}
+			result.add(question);
+		}
+		return result;
+	}
 }
