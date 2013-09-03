@@ -91,4 +91,8 @@ public interface IQuestionService {
 
 	int getPreparationQuestionCount(String sessionkey);
 
+	int countLectureQuestionAnswers(String sessionkey);
+
+	int countPreparationQuestionAnswers(String sessionkey);
+
 }

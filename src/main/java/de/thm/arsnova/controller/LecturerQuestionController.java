@@ -366,11 +366,19 @@ public class LecturerQuestionController extends AbstractController {
 	@ResponseBody
 	public final int getTotalAnswerCount(
 			@RequestParam final String sessionkey,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly,
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
 
-		return questionService.getTotalAnswerCount(sessionkey);
+		if (lectureQuestionsOnly) {
+			return questionService.countLectureQuestionAnswers(sessionkey);
+		} else if (preparationQuestionsOnly) {
+			return questionService.countPreparationQuestionAnswers(sessionkey);
+		} else {
+			return questionService.getTotalAnswerCount(sessionkey);
+		}
 	}
 
 }

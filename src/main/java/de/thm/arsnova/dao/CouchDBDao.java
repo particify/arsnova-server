@@ -1197,4 +1197,24 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 	}
+
+	@Override
+	public int countLectureQuestionAnswers(Session session) {
+		return countQuestionVariantAnswers(session, "lecture");
+	}
+
+	@Override
+	public int countPreparationQuestionAnswers(Session session) {
+		return countQuestionVariantAnswers(session, "preparation");
+	}
+	
+	private int countQuestionVariantAnswers(Session session, String variant) {
+		NovaView view = new NovaView("skill_question/count_answers_by_session_and_question_variant");
+		view.setKey(session.get_id(), variant);
+		ViewResults results = this.getDatabase().view(view);
+		if (results.getResults().size() == 0) {
+			return 0;
+		}
+		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
+	}
 }

@@ -439,4 +439,16 @@ public class StubDatabaseDao implements IDatabaseDao {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+
+	@Override
+	public int countLectureQuestionAnswers(Session session) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int countPreparationQuestionAnswers(Session session) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

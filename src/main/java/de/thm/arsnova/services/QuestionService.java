@@ -35,7 +35,6 @@ import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
@@ -433,5 +432,17 @@ public class QuestionService implements IQuestionService {
 	@Authenticated
 	public int getPreparationQuestionCount(String sessionkey) {
 		return databaseDao.getPreparationQuestionCount(getSession(sessionkey));
+	}
+
+	@Override
+	@Authenticated
+	public int countLectureQuestionAnswers(String sessionkey) {
+		return databaseDao.countLectureQuestionAnswers(getSession(sessionkey));
+	}
+
+	@Override
+	@Authenticated
+	public int countPreparationQuestionAnswers(String sessionkey) {
+		return databaseDao.countPreparationQuestionAnswers(getSession(sessionkey));
 	}
 }

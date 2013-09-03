@@ -141,4 +141,8 @@ public interface IDatabaseDao {
 	int getFlashcardCount(Session session);
 
 	int getPreparationQuestionCount(Session session);
+
+	int countLectureQuestionAnswers(Session session);
+
+	int countPreparationQuestionAnswers(Session session);
 }
