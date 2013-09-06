@@ -37,6 +37,7 @@ public class UserSessionAspect {
 	 * @param socketId
 	 * @param session
 	 */
+	/* FIXME This is not working because of scoping problems
 	@AfterReturning(
 		pointcut="execution(public * de.thm.arsnova.services.SessionService.joinSession(..)) && args(keyword, socketId)",
 		returning="session"
@@ -45,4 +46,5 @@ public class UserSessionAspect {
 		userSessionService.setSession(session);
 		userSessionService.setSocketId(socketId);
 	}
+	*/
 }
