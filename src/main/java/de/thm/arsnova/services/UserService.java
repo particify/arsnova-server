@@ -142,8 +142,12 @@ public class UserService implements IUserService {
 		}
 		String session = user2sessionLegacy.get(user);
 		if (session == null) {
-			return false;
+			session = user2session.get(user);
+			if (session == null) {
+				return false;
+			}
 		}
+
 		return keyword.equals(session);
 	}
 
