@@ -137,12 +137,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>de.thm.arsnova</groupId>
-			<artifactId>arsnova-light-js</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-			<type>war</type>
-		</dependency>
-		<dependency>
-			<groupId>de.thm.arsnova</groupId>
 			<artifactId>arsnova-st2-js-ecollab</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 			<type>war</type>
@@ -317,13 +311,6 @@
 			<groupId>de.thm.arsnova.connector</groupId>
 			<artifactId>connector-client</artifactId>
 			<version>0.14.0-SNAPSHOT</version>
-		</dependency>
-		
-		<!-- Needed to allow cross origin requests to the API -->
-		<dependency>
-			<groupId>de.thm.utils</groupId>
-			<artifactId>http-utils</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>
