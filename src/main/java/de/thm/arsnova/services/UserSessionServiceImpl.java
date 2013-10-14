@@ -25,10 +25,12 @@ public class UserSessionServiceImpl implements UserSessionService, Serializable 
 	private User user;
 	private Session session;
 	private UUID socketId;
+	private Role role;
 
 	@Override
 	public void setUser(User u) {
 		this.user = u;
+		this.user.setRole(this.role);
 	}
 
 	@Override
@@ -59,6 +61,22 @@ public class UserSessionServiceImpl implements UserSessionService, Serializable 
 	private boolean hasConnectedWebSocket() {
 		return getSocketId() != null;
 	}
+	
+	@Override
+	public boolean inSession() {
+		return (
+			this.isAuthenticated()
+			&& this.getSession() != null
+		);
+	}
+	
+	@Override
+	public boolean isAuthenticated() {
+		return (
+			this.getUser() != null
+			&& this.getRole() != null	
+		);
+	}
 
 	@Override
 	public void sendEventViaWebSocket(ARSnovaSocketIOServer server, ARSnovaEvent event) {
@@ -84,5 +102,18 @@ public class UserSessionServiceImpl implements UserSessionService, Serializable 
 		) {
 			server.sendToClient(getSocketId(), event);
 		}
+	}
+
+	@Override
+	public void setRole(Role r) {
+		role = r;
+		if (user != null) {
+			user.setRole(role);
+		}
+	}
+	
+	@Override
+	public Role getRole() {
+		return role;
 	}
 }

@@ -58,6 +58,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.services.UserSessionService;
 
@@ -97,9 +98,12 @@ public class LoginController extends AbstractController {
 			@RequestParam(value = "referer", required = false) final String forcedReferer,
 			@RequestParam(value = "successurl", required = false) final String successUrl,
 			@RequestParam(value = "failureurl", required = false) final String failureUrl,
+			@RequestParam(value = "role", required = false) UserSessionService.Role role,
 			final HttpServletRequest request,
 			final HttpServletResponse response
 	) throws IOException, ServletException {
+		userSessionService.setRole(role);
+		
 		String referer = request.getHeader("referer");
 		if (null != forcedReferer && null != referer && !UrlUtils.isAbsoluteUrl(referer)) {
 			/* Use a url from a request parameter as referer as long as the url is not absolute (to prevent
@@ -117,17 +121,19 @@ public class LoginController extends AbstractController {
 			null == failureUrl ? referer : failureUrl
 		);
 
+		View result = null;
+		
 		if ("cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);
 		} else if ("twitter".equals(type)) {
 			String authUrl = twitterProvider.getAuthorizationUrl(new HttpUserSession(request));
-			return new RedirectView(authUrl);
+			result = new RedirectView(authUrl);
 		} else if ("facebook".equals(type)) {
 			String authUrl = facebookProvider.getAuthorizationUrl(new HttpUserSession(request));
-			return new RedirectView(authUrl);
+			result = new RedirectView(authUrl);
 		} else if ("google".equals(type)) {
 			String authUrl = googleProvider.getAuthorizationUrl(new HttpUserSession(request));
-			return new RedirectView(authUrl);
+			result = new RedirectView(authUrl);
 		} else if ("guest".equals(type)) {
 			List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 			authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
@@ -146,9 +152,10 @@ public class LoginController extends AbstractController {
 			SecurityContextHolder.getContext().setAuthentication(token);
 			request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
 					SecurityContextHolder.getContext());
-			return new RedirectView(null == successUrl ? referer + "#auth/checkLogin" : successUrl);
+			result = new RedirectView(null == successUrl ? referer + "#auth/checkLogin" : successUrl);
 		}
-		return null;
+				
+		return result;
 	}
 	
 	@RequestMapping(value = { "/auth/ldaplogin" }, method = RequestMethod.POST)
@@ -195,6 +202,7 @@ public class LoginController extends AbstractController {
 	@RequestMapping(value = { "/auth/", "/whoami" }, method = RequestMethod.GET)
 	@ResponseBody
 	public final User whoami() {
+		userSessionService.setUser(userService.getCurrentUser());		
 		return userService.getCurrentUser();
 	}
 
@@ -219,12 +227,30 @@ public class LoginController extends AbstractController {
 	@RequestMapping(value = { "/test/me" }, method = RequestMethod.GET)
 	@ResponseBody
 	public final User me() {
-		return userSessionService.getUser();
+		User me = userSessionService.getUser();
+		if (me == null) {
+			throw new UnauthorizedException();
+		}
+		return me;
 	}
 
 	@RequestMapping(value = { "/test/mysession" }, method = RequestMethod.GET)
 	@ResponseBody
 	public final Session mysession() {
-		return userSessionService.getSession();
+		Session mysession = userSessionService.getSession();
+		if (mysession == null) {
+			throw new UnauthorizedException();
+		}
+		return mysession;
+	}
+
+	@RequestMapping(value = { "/test/myrole" }, method = RequestMethod.GET)
+	@ResponseBody
+	public final UserSessionService.Role myrole() {
+		UserSessionService.Role myrole = userSessionService.getRole();
+		if (myrole == null) {
+			throw new UnauthorizedException();
+		}
+		return myrole;
 	}
 }

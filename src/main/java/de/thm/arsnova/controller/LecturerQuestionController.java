@@ -146,6 +146,12 @@ public class LecturerQuestionController extends AbstractController {
 		return questions;
 	}
 
+	@RequestMapping(value = { "/" }, method = RequestMethod.DELETE)
+	@ResponseBody
+	public final void deleteSkillQuestions(@RequestParam final String sessionkey, final HttpServletResponse response) {
+		this.questionService.deleteAllQuestions(sessionkey);
+	}
+
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	@ResponseBody
 	public final int getSkillQuestionCount(@RequestParam final String sessionkey, final HttpServletResponse response) {
@@ -153,22 +159,6 @@ public class LecturerQuestionController extends AbstractController {
 
 		return questionService.getSkillQuestionCount(sessionkey);
 	}
-
-	/*
-	 * TODO is this used anywhere?
-	@RequestMapping(value = "/ids", method = RequestMethod.GET)
-	@ResponseBody
-	public final List<String> getQuestionIds(
-			@RequestParam final String sessionkey,
-			final HttpServletResponse response
-	) {
-		List<String> questions = questionService.getQuestionIds(sessionkey);
-		if (questions == null || questions.isEmpty()) {
-			throw new NotFoundException();
-		}
-		return questions;
-	}
-	*/
 
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)
 	@ResponseBody

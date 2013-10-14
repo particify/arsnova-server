@@ -64,7 +64,6 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
-	@Authenticated
 	public final Session joinSession(final String keyword, final UUID socketId) {
 		/* Socket.IO solution */
 
@@ -96,7 +95,18 @@ public class SessionService implements ISessionService {
 	public final Session joinSession(final String keyword) {
 		/* HTTP polling solution (legacy) */
 
-		Session session = databaseDao.getSession(keyword);
+		User user = userService.getCurrentUser();
+		Session session = databaseDao.getSessionFromKeyword(keyword);
+		if (session == null) {
+			throw new NotFoundException();
+		}
+		if (!session.isActive()) {
+			if (user.hasRole(UserSessionService.Role.STUDENT)) {
+				throw new ForbiddenException();
+			} else if (user.hasRole(UserSessionService.Role.SPEAKER) && !session.isCreator(user)) {
+				throw new ForbiddenException();
+			}
+		}
 
 		userService.addCurrentUserToSessionMap(keyword);
 		socketIoServer.reportActiveUserCountForSession(keyword);

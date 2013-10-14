@@ -46,4 +46,8 @@ public class StubUserService extends UserService {
 	public User getCurrentUser() {
 		return stubUser;
 	}
+	
+	public void setRole(UserSessionService.Role role) {
+		stubUser.setRole(role);
+	}
 }

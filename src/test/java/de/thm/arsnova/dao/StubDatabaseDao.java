@@ -105,11 +105,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public void cleanFeedbackVotes(int cleanupFeedbackDelay) {
-		stubSessions.clear();
-	}
-
-	@Override
 	public Session getSession(String keyword) {
 		// Magic keyword for forbidden session
 		if (keyword.equals("99999999"))
@@ -149,37 +144,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 			if (! session.isActive()) result++;
 		}
 		return result;
-	}
-	
-	@Override
-	public Feedback getFeedback(String keyword) {
-		// Magic keyword for forbidden session
-		if (keyword.equals("99999999"))
-			throw new ForbiddenException();
-
-		Feedback feedback = stubFeedbacks.get(keyword);
-		if (feedback == null)
-			throw new NotFoundException();
-
-		return feedback;
-	}
-
-	@Override
-	public boolean saveFeedback(String keyword, int value, User user) {
-		if (stubFeedbacks.get(keyword) == null) {
-			stubFeedbacks.put(keyword, new Feedback(0, 0, 0, 0));
-		}
-
-		Feedback sessionFeedback = stubFeedbacks.get(keyword);
-
-		List<Integer> values = sessionFeedback.getValues();
-		values.set(value, values.get(value) + 1);
-
-		sessionFeedback = new Feedback(values.get(0), values.get(1), values.get(2), values.get(3));
-
-		stubFeedbacks.put(keyword, sessionFeedback);
-
-		return true;
 	}
 
 	@Override
@@ -238,12 +202,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public void updateSessionOwnerActivity(Session session) {
 		// TODO Auto-generated method stub
 
-	}
-
-	@Override
-	public Integer getMyFeedback(String keyword, User user) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -438,5 +396,11 @@ public class StubDatabaseDao implements IDatabaseDao {
 	@Override
 	public void deleteSession(Session session) {
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void deleteAllQuestionsWithAnswers(Session session) {
+		// TODO Auto-generated method stub
+		
 	}
 }

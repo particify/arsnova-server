@@ -74,3 +74,38 @@ Make environment usable for productive usage
  {{{http://wiki.apache.org/httpd/RedirectSSL}example}}.
 
  Finally you should (re)start all services. ARSnova2 is now listening on HTTP port 80 and 443.
+ 
+Securing your websocket connection
+
+ To provide SSL websocket encryption, you have to provide the servers ssl key and certificate in a Java keystore. The following steps will guide you threw this process.
+ 
+ Use your webserver certificate, private key and certificate chain to create a PKCS12 keystore
+
++---------------------------+
+openssl pkcs12 -export -in <servercert>.crt -inkey <serverkey>.key \
+               -out keystore.p12 -name 1 \
+               -certfile <your_cert_chain_file>
++---------------------------+
+
+ You will be asked for a password for your PKCS12 keystore. This password must be used for importing this keystore into your java keystore.
+ The import can be done by using this command:
+
++---------------------------+
+keytool -importkeystore \
+        -deststorepass <your_java_keystore_password> -destkeypass <your_java_keystore_password> -destkeystore arsnova.jks \
+        -srckeystore keystore.p12 -srcstoretype PKCS12 -srcstorepass <your_pkcs12_keystore_password> \
+        -alias 1
++---------------------------+
+ 
+ Be sure to provide the correct certificate and key file names and to use the correct passwords for your keystore.
+ 
+ The last step is to find your ARSnova configuration file, setup the location of your Java keystore and its password.
+ 
++---------------------------+
+ 
+security.ssl=true
+security.keystore=<your keystore location>
+security.storepass=<your keystore password>
+ 
++---------------------------+
+ 
