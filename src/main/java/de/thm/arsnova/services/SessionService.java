@@ -64,7 +64,6 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
-	@Authenticated
 	public final Session joinSession(final String keyword, final UUID socketId) {
 		/* Socket.IO solution */
 
