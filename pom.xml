@@ -137,12 +137,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>de.thm.arsnova</groupId>
-			<artifactId>arsnova-light-js</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-			<type>war</type>
-		</dependency>
-		<dependency>
-			<groupId>de.thm.arsnova</groupId>
 			<artifactId>arsnova-st2-js</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 			<type>war</type>
@@ -347,7 +341,7 @@
 					<webApp> 
 						<contextPath>/</contextPath>
 						<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
-							<resourcesAsCSV>src/main/webapp,../arsnova-js/src/main/webapp,../arsnova-legacy-js/src/main/webapp,../arsnova-st2-js/src/main/webapp,../arsnova-light-js/src/main/webapp</resourcesAsCSV> 
+							<resourcesAsCSV>src/main/webapp,../arsnova-st2-js/src/main/webapp</resourcesAsCSV> 
 						</baseResource>
 						<overrideDescriptor>src/main/webapp/WEB-INF/web-dev.xml</overrideDescriptor>
 					</webApp>
