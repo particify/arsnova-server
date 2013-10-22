@@ -341,7 +341,7 @@
 					<webApp> 
 						<contextPath>/</contextPath>
 						<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
-							<resourcesAsCSV>src/main/webapp,../arsnova-st2-js/src/main/webapp</resourcesAsCSV> 
+							<resourcesAsCSV>src/main/webapp,../arsnova-mobile/src/main/webapp</resourcesAsCSV> 
 						</baseResource>
 						<overrideDescriptor>src/main/webapp/WEB-INF/web-dev.xml</overrideDescriptor>
 					</webApp>
