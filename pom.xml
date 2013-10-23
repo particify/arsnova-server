@@ -10,7 +10,7 @@
 		<org.springframework-version>3.2.2.RELEASE</org.springframework-version>
 		<org.springframework.security-version>3.1.4.RELEASE</org.springframework.security-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.url>https://scm.thm.de/arsnova</project.url>
+		<project.url>https://scm.thm.de/arsnova2</project.url>
 	</properties>
 
 	<developers>
@@ -54,7 +54,7 @@
 
 	<issueManagement>
 		<system>Redmine</system>
-		<url>https://scm.thm.de/redmine/projects/arsnova2</url>
+		<url>https://scm.thm.de/redmine/projects/arsnova</url>
 	</issueManagement>
 
 	<ciManagement>
@@ -137,7 +137,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>de.thm.arsnova</groupId>
-			<artifactId>arsnova-st2-js</artifactId>
+			<artifactId>arsnova-mobile</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 			<type>war</type>
 		</dependency>
