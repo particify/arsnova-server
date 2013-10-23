@@ -20,6 +20,18 @@
 			<organizationUrl>http://www.thm.de</organizationUrl>
 		</developer>
 		<developer>
+			<name>Andreas Gärtner</name>
+			<organization>Technische Hochschule Mittelhessen</organization>
+			<organizationUrl>http://www.thm.de</organizationUrl>
+			<email>andreas.gaertner@mni.thm.de</email>
+		</developer>
+		<developer>
+			<name>Daniel Gerhardt</name>
+			<organization>Technische Hochschule Mittelhessen</organization>
+			<organizationUrl>http://www.thm.de</organizationUrl>
+			<email>daniel.gerhardt@mni.thm.de</email>
+		</developer>
+		<developer>
 			<name>Jan Kammer</name>
 			<organization>Technische Hochschule Mittelhessen</organization>
 			<organizationUrl>http://www.thm.de</organizationUrl>
