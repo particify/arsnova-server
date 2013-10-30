@@ -24,6 +24,7 @@ public class Question {
 
 	private String type;
 	private String questionType;
+	private String questionVariant;
 	private String subject;
 	private String text;
 	private boolean active;
@@ -57,6 +58,14 @@ public class Question {
 
 	public final void setQuestionType(final String questionType) {
 		this.questionType = questionType;
+	}
+
+	public final String getQuestionVariant() {
+		return questionVariant;
+	}
+
+	public final void setQuestionVariant(final String questionVariant) {
+		this.questionVariant = questionVariant;
 	}
 
 	public final String getSubject() {

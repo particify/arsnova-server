@@ -262,6 +262,7 @@ public class CouchDBDao implements IDatabaseDao {
 		Document q = new Document();
 		q.put("type", "skill_question");
 		q.put("questionType", question.getQuestionType());
+		q.put("questionVariant", question.getQuestionVariant());
 		q.put("sessionId", session.get_id());
 		q.put("subject", question.getSubject());
 		q.put("text", question.getText());
@@ -457,6 +458,10 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public final void deleteAllQuestionsWithAnswers(Session session) {
 		NovaView view = new NovaView("skill_question/by_session");
+		deleteAllQuestionDocumentsWithAnswers(session, view);
+	}
+
+	private void deleteAllQuestionDocumentsWithAnswers(Session session, NovaView view) {
 		view.setStartKeyArray(session.get_id());
 		view.setEndKey(session.get_id(), "{}");
 		ViewResults results = this.getDatabase().view(view);
@@ -1216,5 +1221,35 @@ public class CouchDBDao implements IDatabaseDao {
 			return 0;
 		}
 		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
+	}
+
+	@Override
+	public void deleteAllLectureQuestionsWithAnswers(Session session) {
+		NovaView view = new NovaView("skill_question/lecture_question_by_session");
+		deleteAllQuestionDocumentsWithAnswers(session, view);
+	}
+
+	@Override
+	public void deleteAllFlashcardsWithAnswers(Session session) {
+		NovaView view = new NovaView("skill_question/flashcard_by_session");
+		deleteAllQuestionDocumentsWithAnswers(session, view);
+	}
+
+	@Override
+	public void deleteAllPreparationQuestionsWithAnswers(Session session) {
+		NovaView view = new NovaView("skill_question/preparation_question_by_session");
+		deleteAllQuestionDocumentsWithAnswers(session, view);
+	}
+
+	@Override
+	public List<String> getUnAnsweredLectureQuestionIds(Session session, User user) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getUnAnsweredPreparationQuestionIds(Session session, User user) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

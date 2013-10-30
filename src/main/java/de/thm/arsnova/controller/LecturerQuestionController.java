@@ -156,8 +156,22 @@ public class LecturerQuestionController extends AbstractController {
 
 	@RequestMapping(value = { "/" }, method = RequestMethod.DELETE)
 	@ResponseBody
-	public final void deleteSkillQuestions(@RequestParam final String sessionkey, final HttpServletResponse response) {
-		this.questionService.deleteAllQuestions(sessionkey);
+	public final void deleteSkillQuestions(
+			@RequestParam final String sessionkey,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
+			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly,
+			final HttpServletResponse response
+	) {
+		if (lectureQuestionsOnly) {
+			this.questionService.deleteLectureQuestions(sessionkey);
+		} else if (flashcardsOnly) {
+			this.questionService.deleteFlashcards(sessionkey);
+		} else if (preparationQuestionsOnly) {
+			this.questionService.deletePreparationQuestions(sessionkey);
+		} else {
+			this.questionService.deleteAllQuestions(sessionkey);
+		}
 	}
 
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
@@ -194,9 +208,18 @@ public class LecturerQuestionController extends AbstractController {
 	@ResponseBody
 	public final List<String> getUnAnsweredSkillQuestionIds(
 			@RequestParam final String sessionkey,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly,
 			final HttpServletResponse response
 	) {
-		List<String> answers = questionService.getUnAnsweredQuestionIds(sessionkey);
+		List<String> answers;
+		if (lectureQuestionsOnly) {
+			answers = questionService.getUnAnsweredLectureQuestionIds(sessionkey);
+		} else if (preparationQuestionsOnly) {
+			answers = questionService.getUnAnsweredPreparationQuestionIds(sessionkey);
+		} else {
+			answers = questionService.getUnAnsweredQuestionIds(sessionkey);
+		}
 		if (answers == null || answers.isEmpty()) {
 			throw new NoContentException();
 		}

@@ -95,4 +95,14 @@ public interface IQuestionService {
 
 	int countPreparationQuestionAnswers(String sessionkey);
 
+	void deleteLectureQuestions(String sessionkey);
+
+	void deleteFlashcards(String sessionkey);
+
+	void deletePreparationQuestions(String sessionkey);
+
+	List<String> getUnAnsweredLectureQuestionIds(String sessionkey);
+
+	List<String> getUnAnsweredPreparationQuestionIds(String sessionkey);
+
 }

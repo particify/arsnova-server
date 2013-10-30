@@ -145,4 +145,14 @@ public interface IDatabaseDao {
 	int countLectureQuestionAnswers(Session session);
 
 	int countPreparationQuestionAnswers(Session session);
+
+	void deleteAllLectureQuestionsWithAnswers(Session session);
+
+	void deleteAllFlashcardsWithAnswers(Session session);
+
+	void deleteAllPreparationQuestionsWithAnswers(Session session);
+
+	List<String> getUnAnsweredLectureQuestionIds(Session session, User user);
+
+	List<String> getUnAnsweredPreparationQuestionIds(Session session, User user);
 }

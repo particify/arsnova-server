@@ -116,10 +116,7 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public List<String> getQuestionIds(String sessionKey) {
-		User user = userService.getCurrentUser();
-		if (user == null) {
-			throw new UnauthorizedException();
-		}
+		User user = getCurrentUser();
 		Session session = databaseDao.getSessionFromKeyword(sessionKey);
 		if (session == null) {
 			throw new NotFoundException();
@@ -146,12 +143,17 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public void deleteAllQuestions(String sessionKeyword) {
+		Session session = getSessionWithAuthCheck(sessionKeyword);
+		databaseDao.deleteAllQuestionsWithAnswers(session);
+	}
+
+	private Session getSessionWithAuthCheck(String sessionKeyword) {
 		User user = userService.getCurrentUser();
 		Session session = databaseDao.getSession(sessionKeyword);
 		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
-		databaseDao.deleteAllQuestionsWithAnswers(session);
+		return session;
 	}
 
 	@Override
@@ -188,15 +190,17 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public List<String> getUnAnsweredQuestionIds(String sessionKey) {
+		User user = getCurrentUser();
+		Session session = getSession(sessionKey);
+		return databaseDao.getUnAnsweredQuestionIds(session, user);
+	}
+
+	private User getCurrentUser() {
 		User user = userService.getCurrentUser();
 		if (user == null) {
 			throw new UnauthorizedException();
 		}
-		Session session = databaseDao.getSessionFromKeyword(sessionKey);
-		if (session == null) {
-			throw new NotFoundException();
-		}
-		return databaseDao.getUnAnsweredQuestionIds(session, user);
+		return user;
 	}
 
 	@Override
@@ -337,10 +341,7 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public Answer saveAnswer(Answer answer) {
-		User user = userService.getCurrentUser();
-		if (user == null) {
-			throw new UnauthorizedException();
-		}
+		User user = getCurrentUser();
 		Question question = this.getQuestion(answer.getQuestionId());
 		if (question == null) {
 			throw new NotFoundException();
@@ -444,5 +445,40 @@ public class QuestionService implements IQuestionService {
 	@Authenticated
 	public int countPreparationQuestionAnswers(String sessionkey) {
 		return databaseDao.countPreparationQuestionAnswers(getSession(sessionkey));
+	}
+
+	@Override
+	@Authenticated
+	public void deleteLectureQuestions(String sessionkey) {
+		Session session = getSessionWithAuthCheck(sessionkey);
+		databaseDao.deleteAllLectureQuestionsWithAnswers(session);
+	}
+
+	@Override
+	@Authenticated
+	public void deleteFlashcards(String sessionkey) {
+		Session session = getSessionWithAuthCheck(sessionkey);
+		databaseDao.deleteAllFlashcardsWithAnswers(session);
+	}
+
+	@Override
+	@Authenticated
+	public void deletePreparationQuestions(String sessionkey) {
+		Session session = getSessionWithAuthCheck(sessionkey);
+		databaseDao.deleteAllPreparationQuestionsWithAnswers(session);
+	}
+
+	@Override
+	public List<String> getUnAnsweredLectureQuestionIds(String sessionkey) {
+		User user = getCurrentUser();
+		Session session = getSession(sessionkey);
+		return databaseDao.getUnAnsweredLectureQuestionIds(session, user);
+	}
+
+	@Override
+	public List<String> getUnAnsweredPreparationQuestionIds(String sessionkey) {
+		User user = getCurrentUser();
+		Session session = getSession(sessionkey);
+		return databaseDao.getUnAnsweredPreparationQuestionIds(session, user);
 	}
 }
