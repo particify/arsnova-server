@@ -9,12 +9,13 @@ public class Answer {
 	private String questionId;
 	private String answerText;
 	private String answerSubject;
+	private String questionVariant;
 	private int piRound;
 	private String user;
 	private long timestamp;
 	private int answerCount = 1;
-	private boolean abstention; // Currently available only for freetext and mc answers!
-	private int abstentionCount; // Currently available only for freetext and mc answers!
+	private boolean abstention;
+	private int abstentionCount;
 
 	public Answer() {
 		this.type = "skill_question_answer";
@@ -122,6 +123,14 @@ public class Answer {
 
 	public void setAbstentionCount(int abstentionCount) {
 		this.abstentionCount = abstentionCount;
+	}
+
+	public String getQuestionVariant() {
+		return questionVariant;
+	}
+
+	public void setQuestionVariant(String questionVariant) {
+		this.questionVariant = questionVariant;
 	}
 
 	@Override

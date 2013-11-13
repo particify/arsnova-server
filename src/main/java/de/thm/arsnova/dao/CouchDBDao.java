@@ -431,18 +431,8 @@ public class CouchDBDao implements IDatabaseDao {
 		} else {
 			view = new NovaView("skill_question/by_session_only_id_for_all");
 		}
-
 		view.setKey(session.get_id());
-		ViewResults results = this.getDatabase().view(view);
-		if (results.getResults().size() == 0) {
-			return new ArrayList<String>();
-		}
-
-		List<String> ids = new ArrayList<String>();
-		for (Document d : results.getResults()) {
-			ids.add(d.getId());
-		}
-		return ids;
+		return collectQuestionIds(view);
 	}
 
 	@Override
@@ -497,21 +487,7 @@ public class CouchDBDao implements IDatabaseDao {
 	public final List<String> getUnAnsweredQuestionIds(final Session session, final User user) {
 		NovaView view = new NovaView("answer/by_user");
 		view.setKey(user.getUsername(), session.get_id());
-		ViewResults anseweredQuestions = this.getDatabase().view(view);
-
-		List<String> answered = new ArrayList<String>();
-		for (Document d : anseweredQuestions.getResults()) {
-			answered.add(d.getString("value"));
-		}
-
-		List<String> questions = this.getQuestionIds(session, user);
-		List<String> unanswered = new ArrayList<String>();
-		for (String questionId : questions) {
-			if (!answered.contains(questionId)) {
-				unanswered.add(questionId);
-			}
-		}
-		return unanswered;
+		return collectUnansweredQuestionIds(session, user, this.getQuestionIds(session, user), view);
 	}
 
 	@Override
@@ -943,6 +919,7 @@ public class CouchDBDao implements IDatabaseDao {
 			a.put("sessionId", answer.getSessionId());
 			a.put("questionId", answer.getQuestionId());
 			a.put("answerSubject", answer.getAnswerSubject());
+			a.put("questionVariant", answer.getQuestionVariant());
 			a.put("answerText", answer.getAnswerText());
 			a.put("timestamp", answer.getTimestamp());
 			a.put("user", user.getUsername());
@@ -1243,13 +1220,68 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public List<String> getUnAnsweredLectureQuestionIds(Session session, User user) {
-		// TODO Auto-generated method stub
-		return null;
+		NovaView view = new NovaView("answer/variant_by_user");
+		view.setKey(user.getUsername(), session.get_id(), "lecture");
+		return collectUnansweredQuestionIds(session, user, this.getLectureQuestionIds(session, user), view);
+	}
+
+	private List<String> getLectureQuestionIds(Session session, User user) {
+		NovaView view;
+		if (user.getType().equals("thm")) {
+			view = new NovaView("skill_question/lecture_question_by_session_for_thm");
+		} else {
+			view = new NovaView("skill_question/lecture_question_by_session_for_all");
+		}
+		view.setStartKeyArray(session.get_id());
+		view.setEndKeyArray(session.get_id(), "{}");
+		return collectQuestionIds(view);
 	}
 
 	@Override
 	public List<String> getUnAnsweredPreparationQuestionIds(Session session, User user) {
-		// TODO Auto-generated method stub
-		return null;
+		NovaView view = new NovaView("answer/variant_by_user");
+		view.setKey(user.getUsername(), session.get_id(), "preparation");
+		return collectUnansweredQuestionIds(session, user, this.getPreparationQuestionIds(session, user), view);
+	}
+
+	private List<String> getPreparationQuestionIds(Session session, User user) {
+		NovaView view;
+		if (user.getType().equals("thm")) {
+			view = new NovaView("skill_question/preparation_question_by_session_for_thm");
+		} else {
+			view = new NovaView("skill_question/preparation_question_by_session_for_all");
+		}
+		view.setStartKeyArray(session.get_id());
+		view.setEndKeyArray(session.get_id(), "{}");
+		return collectQuestionIds(view);
+	}
+
+	private List<String> collectUnansweredQuestionIds(Session session, User user, List<String> questions, NovaView view) {
+		ViewResults answeredQuestions = this.getDatabase().view(view);
+
+		List<String> answered = new ArrayList<String>();
+		for (Document d : answeredQuestions.getResults()) {
+			answered.add(d.getString("value"));
+		}
+
+		List<String> unanswered = new ArrayList<String>();
+		for (String questionId : questions) {
+			if (!answered.contains(questionId)) {
+				unanswered.add(questionId);
+			}
+		}
+		return unanswered;
+	}
+
+	private List<String> collectQuestionIds(NovaView view) {
+		ViewResults results = this.getDatabase().view(view);
+		if (results.getResults().size() == 0) {
+			return new ArrayList<String>();
+		}
+		List<String> ids = new ArrayList<String>();
+		for (Document d : results.getResults()) {
+			ids.add(d.getId());
+		}
+		return ids;
 	}
 }
