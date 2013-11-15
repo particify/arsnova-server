@@ -20,6 +20,18 @@
 			<organizationUrl>http://www.thm.de</organizationUrl>
 		</developer>
 		<developer>
+			<name>Andreas Gärtner</name>
+			<organization>Technische Hochschule Mittelhessen</organization>
+			<organizationUrl>http://www.thm.de</organizationUrl>
+			<email>andreas.gaertner@mni.thm.de</email>
+		</developer>
+		<developer>
+			<name>Daniel Gerhardt</name>
+			<organization>Technische Hochschule Mittelhessen</organization>
+			<organizationUrl>http://www.thm.de</organizationUrl>
+			<email>daniel.gerhardt@mni.thm.de</email>
+		</developer>
+		<developer>
 			<name>Jan Kammer</name>
 			<organization>Technische Hochschule Mittelhessen</organization>
 			<organizationUrl>http://www.thm.de</organizationUrl>
@@ -54,7 +66,7 @@
 
 	<issueManagement>
 		<system>Redmine</system>
-		<url>https://scm.thm.de/redmine/projects/arsnova2</url>
+		<url>https://scm.thm.de/redmine/projects/arsnova</url>
 	</issueManagement>
 
 	<ciManagement>
@@ -137,13 +149,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>de.thm.arsnova</groupId>
-			<artifactId>arsnova-light-js</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-			<type>war</type>
-		</dependency>
-		<dependency>
-			<groupId>de.thm.arsnova</groupId>
-			<artifactId>arsnova-st2-js</artifactId>
+			<artifactId>arsnova-mobile</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 			<type>war</type>
 		</dependency>
@@ -324,13 +330,6 @@
 			<version>0.14.0-SNAPSHOT</version>
 		</dependency>
 		
-		<!-- Needed to allow cross origin requests to the API -->
-		<dependency>
-			<groupId>de.thm.utils</groupId>
-			<artifactId>http-utils</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
-		</dependency>
-		
 		<dependency>
             <groupId>org.apache.directory.server</groupId>
             <artifactId>apacheds-core</artifactId>
@@ -366,7 +365,7 @@
 					<webApp> 
 						<contextPath>/</contextPath>
 						<!--<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
-							<resourcesAsCSV>src/main/webapp,../arsnova-js/src/main/webapp,../arsnova-legacy-js/src/main/webapp,../arsnova-st2-js/src/main/webapp,../arsnova-light-js/src/main/webapp</resourcesAsCSV> 
+							<resourcesAsCSV>src/main/webapp,../arsnova-mobile/src/main/webapp</resourcesAsCSV> 
 						</baseResource>
 						<overrideDescriptor>src/main/webapp/WEB-INF/web-dev.xml</overrideDescriptor>-->
 					</webApp>

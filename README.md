@@ -1,12 +1,12 @@
 # ARSnova
 
-ARSnova is a modern approach to Audience Response Systems (ARS). It is released under the GPLv3 license, and is offered as a Software as a Service free of charge. Head over to [arsnova.thm.de](https://arsnova.thm.de/) to see it in action.
+ARSnova is a modern approach to Audience Response Systems (ARS). It is released under the GPLv3 license, and is offered as a Software as a Service free of charge. Head over to [arsnova.eu](https://arsnova.eu/) to see it in action.
 
 ![ARSnova](src/site/resources/showcase.png)
 
 ARSnova consists of two projects: the mobile client and the server. This repository contains the server code. You will find the client at thm-projects/arsnova-st2-js. However, you do not need to download both respositories in order to get started.
 
-## Getting started
+## Getting Started
 
 This is the main repository. Almost all dependencies (including the mobile client) are managed for you by Maven.  The mobile client is served via `index.html`, and optionally via `developer.html`. 
 
@@ -44,7 +44,58 @@ The configuration is ready for development usage. Finally, you should (re)start 
 
 ### Database
 
-We provide a script that will set up all database essentials. This "Setup Tool" is located at <https://scm.thm.de/arsnova/setuptool>. Make sure you have configured your database credentials inside the ARSnova configuration file: you will need to have the entries `couchdb.username` and `couchdb.password`.
+We provide a script that will set up all database essentials. This "Setup Tool" is located at <https://github.com/thm-projects/setuptool>. Make sure you have configured your database credentials inside the ARSnova configuration file: you will need to have the entries `couchdb.username` and `couchdb.password`.
+
+## Production Use
+
+If you intend to use ARSnova in productive environments, you will have to do some additional configuration work.
+
+### Session Persistence
+
+Look for your Tomcat configuration directory and change the file "context.xml" to match this example:
+ 
+	<Context>
+		<Manager pathname="/path/to/tomcat/sessions/arsnova.ser"/>
+	</Context> 
+ 
+This will enable session persistence across restarts as described [here](http://tomcat.apache.org/tomcat-7.0-doc/config/manager.html#Special_Features).
+
+### HTTPS
+
+To protect requests and responses you should use HTTPS and configure your Apache Webserver installation to redirect all traffic according to this
+ [example](http://wiki.apache.org/httpd/RedirectSSL).
+
+Finally you should (re)start all services. ARSnova is now listening on HTTP port 80 and 443.
+ 
+### Securing Your Web Socket Connection
+
+To provide SSL websocket encryption, you have to provide the servers SSL key and certificate in a Java keystore. The following steps will guide you through this process.
+ 
+Use your webserver certificate, private key and certificate chain to create a PKCS12 keystore:
+
+	openssl pkcs12 -export -in <servercert>.crt \
+					-inkey <serverkey>.key \
+	               	-out keystore.p12 -name 1 \
+    	           	-certfile <your_cert_chain_file>
+
+You will be asked for a password for your PKCS12 keystore. This password must be used for importing this keystore into your java keystore. The import can be done using this command:
+
+	keytool -importkeystore \
+    	    -deststorepass <your_java_keystore_password> \
+    	    -destkeypass <your_java_keystore_password> \
+    	    -destkeystore arsnova.jks \
+        	-srckeystore keystore.p12 \
+        	-srcstoretype PKCS12 \
+        	-srcstorepass <your_pkcs12_keystore_password> \
+        	-alias 1
+ 
+Be sure to provide the correct certificate and key file names and to use the correct passwords for your keystore.
+ 
+The last step is to find your ARSnova configuration file (see step "Configuration" above), setup the location of your Java keystore and its password.
+ 
+	security.ssl=true
+	security.keystore=<your keystore location>
+	security.storepass=<your keystore password>
 
 ## Credits
 

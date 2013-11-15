@@ -7,14 +7,12 @@
 	xmlns:mvc="http://www.springframework.org/schema/mvc"
 	xmlns:task="http://www.springframework.org/schema/task"
 	xmlns:aop="http://www.springframework.org/schema/aop"
-	xmlns:http="http://www.thm.de/schema/http"
 	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
 		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.2.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd
-		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
-		http://www.thm.de/schema/http http://www.thm.de/schema/http/http.xsd">
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd">
 
 	<bean id="propertyPlaceholderConfigurer"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
@@ -54,12 +52,9 @@
 
 	<!-- Example of connector client configuration -->
 	<!-- Uncomment bean definition to activate connector -->
-	<!--
-	<bean id="connectorClient" scope="singleton" class="de.thm.arsnova.connector.client.ConnectorClientImpl">
+	<!-- bean id="connectorClient" scope="singleton" class="de.thm.arsnova.connector.client.ConnectorClientImpl">
 		<property name="serviceLocation" value="${connector.uri}"></property>
 		<property name="username" value="${connector.username}"></property>
 		<property name="password" value="${connector.password}"></property>
-	</bean>
-	-->
-	<http:access-control allow-origin="*" allow-methods="GET" />
+	</bean -->
 </beans>
