@@ -382,7 +382,7 @@ public class QuestionService implements IQuestionService {
 			throw new NotFoundException();
 		}
 		User user = userService.getCurrentUser();
-		Session session = this.databaseDao.getSessionFromId(question.getSessionId());
+		Session session = this.databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
