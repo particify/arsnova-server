@@ -238,6 +238,19 @@ public class SessionService implements ISessionService {
 
 	@Override
 	@Authenticated
+	public Session updateSession(String sessionkey, Session session) {
+		Session s = databaseDao.getSession(sessionkey);
+		User user = userService.getCurrentUser();
+
+		if (!s.isCreator(user)) {
+			throw new ForbiddenException();
+		}
+
+		return databaseDao.updateSession(session);
+	}
+
+	@Override
+	@Authenticated
 	public void deleteSession(String sessionkey, User user) {
 		Session session = databaseDao.getSession(sessionkey);
 		if (!session.isCreator(user)) {
