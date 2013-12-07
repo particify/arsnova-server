@@ -1092,6 +1092,24 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
+	public Session updateSession(Session session) {
+		try {
+			Document s = this.database.getDocument(session.get_id());
+			s.put("name", session.getName());
+			s.put("shortName", session.getShortName());
+			s.put("active", session.isActive());
+			this.database.saveDocument(s);
+			session.set_rev(s.getRev());
+
+			return session;
+		} catch (IOException e) {
+			LOGGER.error("Could not lock session {}", session);
+		}
+
+		return null;
+	}
+
+	@Override
 	public void deleteSession(Session session) {
 		try {
 			this.deleteDocument(session.get_id());
