@@ -82,7 +82,7 @@ public class QuestionService implements IQuestionService {
 
 		User user = userService.getCurrentUser();
 
-		if (! user.hasRole(UserSessionService.Role.SPEAKER) || session.isCreator(user)) {
+		if (! user.hasRole(UserSessionService.Role.SPEAKER) && session.isCreator(user)) {
 			throw new ForbiddenException();
 		}
 
@@ -106,7 +106,7 @@ public class QuestionService implements IQuestionService {
 
 		User user = userService.getCurrentUser();
 
-		if (! user.hasRole(UserSessionService.Role.SPEAKER) || session.isCreator(user)) {
+		if (! user.hasRole(UserSessionService.Role.SPEAKER) && session.isCreator(user)) {
 			throw new ForbiddenException();
 		}
 
