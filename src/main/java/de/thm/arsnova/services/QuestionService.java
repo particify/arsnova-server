@@ -35,6 +35,7 @@ import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
@@ -79,6 +80,12 @@ public class QuestionService implements IQuestionService {
 		Session session = this.databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		question.setSessionId(session.get_id());
 
+		User user = userService.getCurrentUser();
+
+		if (! user.hasRole(UserSessionService.Role.SPEAKER) || session.isCreator(user)) {
+			throw new ForbiddenException();
+		}
+
 		if ("freetext".equals(question.getQuestionType())) {
 			question.setPiRound(0);
 		} else if (question.getPiRound() < 1 || question.getPiRound() > 2) {
@@ -96,6 +103,12 @@ public class QuestionService implements IQuestionService {
 	public boolean saveQuestion(InterposedQuestion question) {
 		Session session = this.databaseDao.getSessionFromKeyword(question.getSessionId());
 		InterposedQuestion result = this.databaseDao.saveQuestion(session, question);
+
+		User user = userService.getCurrentUser();
+
+		if (! user.hasRole(UserSessionService.Role.SPEAKER) || session.isCreator(user)) {
+			throw new ForbiddenException();
+		}
 
 		if (null != result) {
 			socketIoServer.reportAudienceQuestionAvailable(result.getSessionId(), result.get_id());
@@ -142,7 +155,7 @@ public class QuestionService implements IQuestionService {
 
 		User user = userService.getCurrentUser();
 		Session session = databaseDao.getSession(question.getSessionKeyword());
-		if (user == null || session == null || !session.isCreator(user)) {
+		if (user == null || session == null || ! session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
 		databaseDao.deleteQuestionWithAnswers(question);
@@ -153,7 +166,7 @@ public class QuestionService implements IQuestionService {
 	public void deleteAllQuestions(String sessionKeyword) {
 		User user = userService.getCurrentUser();
 		Session session = databaseDao.getSession(sessionKeyword);
-		if (user == null || session == null || !session.isCreator(user)) {
+		if (user == null || session == null || ! session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
 		databaseDao.deleteAllQuestionsWithAnswers(session);
@@ -168,7 +181,7 @@ public class QuestionService implements IQuestionService {
 		}
 		User user = userService.getCurrentUser();
 		Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
-		if (user == null || session == null || !session.isCreator(user)) {
+		if (user == null || session == null || ! session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
 		databaseDao.deleteInterposedQuestion(question);
@@ -184,7 +197,7 @@ public class QuestionService implements IQuestionService {
 
 		User user = userService.getCurrentUser();
 		Session session = databaseDao.getSession(question.getSessionKeyword());
-		if (user == null || session == null || !session.isCreator(user)) {
+		if (user == null || session == null || ! session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
 		databaseDao.deleteAnswers(question);
