@@ -20,6 +20,7 @@
 			<param-name>contextConfigLocation</param-name>
 			<param-value>
 				/WEB-INF/spring/arsnova-servlet.xml
+				/WEB-INF/spring/spring-websocket.xml
 			</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
