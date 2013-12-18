@@ -104,12 +104,6 @@ public class QuestionService implements IQuestionService {
 		Session session = this.databaseDao.getSessionFromKeyword(question.getSessionId());
 		InterposedQuestion result = this.databaseDao.saveQuestion(session, question);
 
-		User user = userService.getCurrentUser();
-
-		if (! session.isCreator(user)) {
-			throw new ForbiddenException();
-		}
-
 		if (null != result) {
 			socketIoServer.reportAudienceQuestionAvailable(result.getSessionId(), result.get_id());
 
