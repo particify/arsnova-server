@@ -131,4 +131,6 @@ public interface IDatabaseDao {
 	Session updateSession(Session session);
 
 	void deleteSession(Session session);
+
+	void deleteAllInterposedQuestions(Session session);
 }

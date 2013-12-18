@@ -79,4 +79,6 @@ public interface IQuestionService {
 
 	void deleteInterposedQuestion(String questionId);
 
+	void deleteAllInterposedQuestions(String sessionKeyword);
+
 }

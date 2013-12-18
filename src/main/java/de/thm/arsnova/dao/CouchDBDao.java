@@ -1164,4 +1164,22 @@ public class CouchDBDao implements IDatabaseDao {
 			LOGGER.error("Could not delete session {}", session);
 		}
 	}
+
+	@Override
+	public void deleteAllInterposedQuestions(Session session) {
+		NovaView view = new NovaView("interposed_question/by_session");
+		view.setKey(session.get_id());
+		ViewResults questions = this.getDatabase().view(view);
+		if (questions == null || questions.isEmpty()) {
+			return;
+		}
+		for (Document document : questions.getResults()) {
+			try {
+				this.deleteDocument(document.getId());
+			} catch (IOException e) {
+				LOGGER.error("Could not delete all interposed questions {}", session);
+			}
+		}
+		
+	}
 }
