@@ -42,8 +42,6 @@ public interface ISessionService {
 
 	LoggedIn registerAsOnlineUser(User user, String sessionkey);
 
-	int countActiveUsers(String sessionkey);
-
 	int countSessions(List<Course> courses);
 
 	Session setActive(String sessionkey, Boolean lock);

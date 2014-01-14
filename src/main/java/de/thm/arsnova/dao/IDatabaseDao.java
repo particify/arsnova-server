@@ -74,8 +74,6 @@ public interface IDatabaseDao {
 
 	int countActiveUsers(long since);
 
-	int countActiveUsers(Session session, long since);
-
 	List<Answer> getMyAnswers(String sessionKey);
 
 	int getTotalAnswerCount(String sessionKey);

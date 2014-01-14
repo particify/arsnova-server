@@ -275,12 +275,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public int countActiveUsers(Session session, long since) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
 	public int countAnswers() {
 		// TODO Auto-generated method stub
 		return 0;

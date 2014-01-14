@@ -196,13 +196,6 @@ public class SessionService implements ISessionService {
 		return databaseDao.registerAsOnlineUser(user, session);
 	}
 
-	@Override
-	public int countActiveUsers(String sessionkey) {
-		final long since = System.currentTimeMillis() - DURATION_IN_MILLIS;
-		Session session = databaseDao.getSessionFromKeyword(sessionkey);
-		return databaseDao.countActiveUsers(session, since);
-	}
-
 	public static class SessionNameComperator implements Comparator<Session>, Serializable {
 		private static final long serialVersionUID = 1L;
 

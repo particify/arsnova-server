@@ -582,19 +582,6 @@ public class CouchDBDao implements IDatabaseDao {
 		return 0;
 	}
 
-	@Override
-	public final int countActiveUsers(Session session, long since) {
-		if (session == null) throw new NotFoundException();
-		NovaView view = new NovaView("logged_in/count");
-		view.setStartKey(session.get_id(), String.valueOf(since));
-		view.setEndKey(session.get_id(), "{}");
-		ViewResults results = this.getDatabase().view(view);
-		if (isEmptyResults(results)) {
-			return 0;
-		}
-		return results.getJSONArray("rows").optJSONObject(0).getInt("value");
-	}
-
 	private boolean isEmptyResults(ViewResults results) {
 		return results == null || results.getResults().isEmpty() || results.getJSONArray("rows").size() == 0;
 	}
