@@ -127,6 +127,15 @@ public class SessionController extends AbstractController {
 		return newSession;
 	}
 
+	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.PUT)
+	@ResponseBody
+	public final Session updateSession(
+			@PathVariable final String sessionkey,
+			@RequestBody final Session session
+	) {
+		return sessionService.updateSession(sessionkey, session);
+	}
+
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<Session> getSessions(

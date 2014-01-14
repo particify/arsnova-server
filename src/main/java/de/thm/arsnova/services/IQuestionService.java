@@ -105,4 +105,6 @@ public interface IQuestionService {
 
 	List<String> getUnAnsweredPreparationQuestionIds(String sessionkey);
 
+	void deleteAllInterposedQuestions(String sessionKeyword);
+
 }

@@ -233,7 +233,24 @@ public class SessionService implements ISessionService {
 	@Override
 	public Session setActive(String sessionkey, Boolean lock) {
 		Session session = databaseDao.getSessionFromKeyword(sessionkey);
+		User user = userService.getCurrentUser();
+		if (!session.isCreator(user)) {
+			throw new ForbiddenException();
+		}
 		return databaseDao.lockSession(session, lock);
+	}
+
+	@Override
+	@Authenticated
+	public Session updateSession(String sessionkey, Session session) {
+		Session s = databaseDao.getSession(sessionkey);
+		User user = userService.getCurrentUser();
+
+		if (!s.isCreator(user)) {
+			throw new ForbiddenException();
+		}
+
+		return databaseDao.updateSession(session);
 	}
 
 	@Override

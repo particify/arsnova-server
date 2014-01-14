@@ -1069,6 +1069,24 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
+	public Session updateSession(Session session) {
+		try {
+			Document s = this.database.getDocument(session.get_id());
+			s.put("name", session.getName());
+			s.put("shortName", session.getShortName());
+			s.put("active", session.isActive());
+			this.database.saveDocument(s);
+			session.set_rev(s.getRev());
+
+			return session;
+		} catch (IOException e) {
+			LOGGER.error("Could not lock session {}", session);
+		}
+
+		return null;
+	}
+
+	@Override
 	public void deleteSession(Session session) {
 		try {
 			this.deleteDocument(session.get_id());
@@ -1283,5 +1301,21 @@ public class CouchDBDao implements IDatabaseDao {
 			ids.add(d.getId());
 		}
 		return ids;
+	}
+	
+	public void deleteAllInterposedQuestions(Session session) {
+		NovaView view = new NovaView("interposed_question/by_session");
+		view.setKey(session.get_id());
+		ViewResults questions = this.getDatabase().view(view);
+		if (questions == null || questions.isEmpty()) {
+			return;
+		}
+		for (Document document : questions.getResults()) {
+			try {
+				this.deleteDocument(document.getId());
+			} catch (IOException e) {
+				LOGGER.error("Could not delete all interposed questions {}", session);
+			}
+		}
 	}
 }

@@ -35,6 +35,7 @@ import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
@@ -73,6 +74,12 @@ public class QuestionService implements IQuestionService {
 	public Question saveQuestion(Question question) {
 		Session session = this.databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		question.setSessionId(session.get_id());
+
+		User user = userService.getCurrentUser();
+
+		if (! session.isCreator(user)) {
+			throw new ForbiddenException();
+		}
 
 		if ("freetext".equals(question.getQuestionType())) {
 			question.setPiRound(0);
@@ -134,7 +141,7 @@ public class QuestionService implements IQuestionService {
 
 		User user = userService.getCurrentUser();
 		Session session = databaseDao.getSession(question.getSessionKeyword());
-		if (user == null || session == null || !session.isCreator(user)) {
+		if (user == null || session == null || ! session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
 		databaseDao.deleteQuestionWithAnswers(question);
@@ -150,7 +157,7 @@ public class QuestionService implements IQuestionService {
 	private Session getSessionWithAuthCheck(String sessionKeyword) {
 		User user = userService.getCurrentUser();
 		Session session = databaseDao.getSession(sessionKeyword);
-		if (user == null || session == null || !session.isCreator(user)) {
+		if (user == null || session == null || ! session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
 		return session;
@@ -165,10 +172,21 @@ public class QuestionService implements IQuestionService {
 		}
 		User user = userService.getCurrentUser();
 		Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
-		if (user == null || session == null || !session.isCreator(user)) {
+		if (user == null || session == null || ! session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
 		databaseDao.deleteInterposedQuestion(question);
+	}
+	
+	@Override
+	@Authenticated
+	public void deleteAllInterposedQuestions(String sessionKeyword) {
+		User user = userService.getCurrentUser();
+		Session session = databaseDao.getSessionFromKeyword(sessionKeyword);
+		if (user == null || session == null || ! session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
+		databaseDao.deleteAllInterposedQuestions(session);
 	}
 
 	@Override
@@ -181,7 +199,7 @@ public class QuestionService implements IQuestionService {
 
 		User user = userService.getCurrentUser();
 		Session session = databaseDao.getSession(question.getSessionKeyword());
-		if (user == null || session == null || !session.isCreator(user)) {
+		if (user == null || session == null || ! session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
 		databaseDao.deleteAnswers(question);
@@ -382,7 +400,7 @@ public class QuestionService implements IQuestionService {
 			throw new NotFoundException();
 		}
 		User user = userService.getCurrentUser();
-		Session session = this.databaseDao.getSessionFromId(question.getSessionId());
+		Session session = this.databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}

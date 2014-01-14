@@ -128,6 +128,8 @@ public interface IDatabaseDao {
 
 	List<String> getActiveUsers(int timeDifference);
 
+	Session updateSession(Session session);
+
 	void deleteSession(Session session);
 
 	List<Question> getLectureQuestions(User user, Session session);
@@ -155,4 +157,6 @@ public interface IDatabaseDao {
 	List<String> getUnAnsweredLectureQuestionIds(Session session, User user);
 
 	List<String> getUnAnsweredPreparationQuestionIds(Session session, User user);
+
+	void deleteAllInterposedQuestions(Session session);
 }
