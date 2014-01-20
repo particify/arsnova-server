@@ -259,6 +259,19 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public final Question saveQuestion(final Session session, final Question question) {
+		Document q = toQuestionDocument(session, question);
+		try {
+			database.saveDocument(q);
+			question.set_id(q.getId());
+			question.set_rev(q.getRev());
+			return question;
+		} catch (IOException e) {
+			LOGGER.error("Could not save question {}", question);
+		}
+		return null;
+	}
+
+	private Document toQuestionDocument(final Session session, final Question question) {
 		Document q = new Document();
 		q.put("type", "skill_question");
 		q.put("questionType", question.getQuestionType());
@@ -275,15 +288,7 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("showStatistic", question.isShowStatistic());
 		q.put("showAnswer", question.isShowAnswer());
 		q.put("abstention", question.isAbstention());
-		try {
-			database.saveDocument(q);
-			question.set_id(q.getId());
-			question.set_rev(q.getRev());
-			return question;
-		} catch (IOException e) {
-			LOGGER.error("Could not save question {}", question);
-		}
-		return null;
+		return q;
 	}
 
 	@Override
@@ -1303,6 +1308,26 @@ public class CouchDBDao implements IDatabaseDao {
 			} catch (IOException e) {
 				LOGGER.error("Could not delete all interposed questions {}", session);
 			}
+		}
+	}
+
+	@Override
+	public void publishAllQuestions(Session session, boolean publish) {
+		List<Question> questions = this.getQuestions(new NovaView("skill_question/by_session"), session);
+		for (Question q : questions) {
+			q.setActive(publish);
+		}
+		List<Document> documents = new ArrayList<Document>();
+		for (Question q : questions) {
+			Document d = toQuestionDocument(session, q);
+			d.setId(q.get_id());
+			d.setRev(q.get_rev());
+			documents.add(d);
+		}
+		try {
+			this.database.bulkSaveDocuments(documents.toArray(new Document[documents.size()]));
+		} catch (IOException e) {
+			LOGGER.error("Could not bulk publish all questions: {}", e.getMessage());
 		}
 	}
 }

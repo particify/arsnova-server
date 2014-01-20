@@ -107,4 +107,6 @@ public interface IQuestionService {
 
 	void deleteAllInterposedQuestions(String sessionKeyword);
 
+	void publishAll(String sessionkey, boolean publish);
+
 }

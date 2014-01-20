@@ -99,6 +99,20 @@ public class LecturerQuestionController extends AbstractController {
 		}
 		this.questionService.update(question);
 	}
+	
+	@RequestMapping(value = "/publish", method = RequestMethod.POST)
+	@ResponseBody
+	public final void publishAllQuestions(
+			@RequestParam final String sessionkey,
+			@RequestParam(required = false) final Boolean publish,
+			final HttpServletResponse response
+	) {
+		boolean p = true;
+		if (publish != null) {
+			p = publish;
+		}
+		this.questionService.publishAll(sessionkey, p);
+	}
 
 	@RequestMapping(value = "/{questionId}/publishstatistics", method = RequestMethod.POST)
 	@ResponseBody

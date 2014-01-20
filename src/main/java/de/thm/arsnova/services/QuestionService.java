@@ -487,6 +487,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
+	@Authenticated
 	public List<String> getUnAnsweredLectureQuestionIds(String sessionkey) {
 		User user = getCurrentUser();
 		Session session = getSession(sessionkey);
@@ -494,9 +495,21 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
+	@Authenticated
 	public List<String> getUnAnsweredPreparationQuestionIds(String sessionkey) {
 		User user = getCurrentUser();
 		Session session = getSession(sessionkey);
 		return databaseDao.getUnAnsweredPreparationQuestionIds(session, user);
+	}
+
+	@Override
+	@Authenticated
+	public void publishAll(String sessionkey, boolean publish) {
+		User user = getCurrentUser();
+		Session session = getSession(sessionkey);
+		if (!session.isCreator(user)) {
+			throw new ForbiddenException();
+		}
+		databaseDao.publishAllQuestions(session, publish);
 	}
 }

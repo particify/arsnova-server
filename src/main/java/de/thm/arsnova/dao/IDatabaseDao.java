@@ -157,4 +157,6 @@ public interface IDatabaseDao {
 	List<String> getUnAnsweredPreparationQuestionIds(Session session, User user);
 
 	void deleteAllInterposedQuestions(Session session);
+
+	void publishAllQuestions(Session session, boolean publish);
 }
