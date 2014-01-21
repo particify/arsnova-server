@@ -37,8 +37,6 @@ public interface IQuestionService {
 
 	int getSkillQuestionCount(String sessionkey);
 
-	List<String> getQuestionIds(String sessionKey);
-
 	void deleteQuestion(String questionId);
 
 	void deleteAllQuestions(String sessionKeyword);

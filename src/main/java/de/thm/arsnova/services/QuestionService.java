@@ -122,17 +122,6 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@Authenticated
-	public List<String> getQuestionIds(String sessionKey) {
-		User user = getCurrentUser();
-		Session session = databaseDao.getSessionFromKeyword(sessionKey);
-		if (session == null) {
-			throw new NotFoundException();
-		}
-		return databaseDao.getQuestionIds(session, user);
-	}
-
-	@Override
-	@Authenticated
 	public void deleteQuestion(String questionId) {
 		Question question = databaseDao.getQuestion(questionId);
 		if (question == null) {
