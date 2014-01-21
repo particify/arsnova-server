@@ -508,7 +508,7 @@ public class QuestionService implements IQuestionService {
 		User user = getCurrentUser();
 		Session session = getSession(sessionkey);
 		if (!session.isCreator(user)) {
-			throw new ForbiddenException();
+			throw new UnauthorizedException();
 		}
 		databaseDao.publishAllQuestions(session, publish);
 	}
@@ -519,7 +519,7 @@ public class QuestionService implements IQuestionService {
 		User user = getCurrentUser();
 		Session session = getSession(sessionkey);
 		if (!session.isCreator(user)) {
-			throw new ForbiddenException();
+			throw new UnauthorizedException();
 		}
 		databaseDao.deleteAllQuestionsAnswers(session);
 	}
