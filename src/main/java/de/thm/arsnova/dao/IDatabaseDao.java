@@ -159,4 +159,6 @@ public interface IDatabaseDao {
 	void deleteAllInterposedQuestions(Session session);
 
 	void publishAllQuestions(Session session, boolean publish);
+
+	void deleteAllQuestionsAnswers(Session session);
 }

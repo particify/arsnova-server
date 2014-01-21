@@ -1330,4 +1330,12 @@ public class CouchDBDao implements IDatabaseDao {
 			LOGGER.error("Could not bulk publish all questions: {}", e.getMessage());
 		}
 	}
+
+	@Override
+	public void deleteAllQuestionsAnswers(Session session) {
+		List<Question> questions = this.getQuestions(new NovaView("skill_question/by_session"), session);
+		for (Question q : questions) {
+			this.deleteAnswers(q);
+		}
+	}
 }

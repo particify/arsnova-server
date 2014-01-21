@@ -109,4 +109,6 @@ public interface IQuestionService {
 
 	void publishAll(String sessionkey, boolean publish);
 
+	void deleteAllQuestionsAnswers(String sessionkey);
+
 }

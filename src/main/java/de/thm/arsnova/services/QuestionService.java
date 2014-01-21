@@ -512,4 +512,15 @@ public class QuestionService implements IQuestionService {
 		}
 		databaseDao.publishAllQuestions(session, publish);
 	}
+
+	@Override
+	@Authenticated
+	public void deleteAllQuestionsAnswers(String sessionkey) {
+		User user = getCurrentUser();
+		Session session = getSession(sessionkey);
+		if (!session.isCreator(user)) {
+			throw new ForbiddenException();
+		}
+		databaseDao.deleteAllQuestionsAnswers(session);
+	}
 }

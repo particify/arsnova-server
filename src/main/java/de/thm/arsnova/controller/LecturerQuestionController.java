@@ -355,6 +355,15 @@ public class LecturerQuestionController extends AbstractController {
 		questionService.deleteAnswers(questionId);
 	}
 
+	@RequestMapping(value = "/answers", method = RequestMethod.DELETE)
+	@ResponseBody
+	public final void deleteAllQuestionsAnswers(
+			@RequestParam final String sessionkey,
+			final HttpServletResponse response
+	) {
+		questionService.deleteAllQuestionsAnswers(sessionkey);
+	}
+
 	/**
 	 *
 	 * @param sessionKey
