@@ -217,7 +217,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public int getAnswerCount(String questionId) {
+	public int getAnswerCount(Question question, int piRound) {
 		// TODO Auto-generated method stub
 		return 0;
 	}

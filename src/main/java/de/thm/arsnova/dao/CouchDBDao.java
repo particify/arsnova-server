@@ -560,10 +560,12 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final int getAnswerCount(final String questionId) {
-		NovaView view = new NovaView("skill_question/count_answers_by_question");
-		view.setKey(questionId);
+	public final int getAnswerCount(final Question question, final int piRound) {
+		LOGGER.debug("coudbdao: getAnswerCount, piRound: ", piRound);
+		NovaView view = new NovaView("skill_question/count_total_answers_by_question_and_piround");
 		view.setGroup(true);
+		view.setStartKey(question.get_id(), String.valueOf(piRound));
+		view.setEndKey(question.get_id(), String.valueOf(piRound), "{}");
 		ViewResults results = this.getDatabase().view(view);
 		if (results.getResults().size() == 0) {
 			return 0;

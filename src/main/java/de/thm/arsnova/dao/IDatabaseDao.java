@@ -68,7 +68,7 @@ public interface IDatabaseDao {
 
 	List<Answer> getAnswers(String questionId, int piRound);
 
-	int getAnswerCount(String questionId);
+	int getAnswerCount(Question question, int piRound);
 
 	List<Answer> getFreetextAnswers(String questionId);
 

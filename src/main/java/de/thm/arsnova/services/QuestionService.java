@@ -236,11 +236,12 @@ public class QuestionService implements IQuestionService {
 		return getAnswers(questionId, question.getPiRound());
 	}
 
-	/* TODO add implementation for piRound */
 	@Override
 	@Authenticated
 	public int getAnswerCount(String questionId) {
-		return databaseDao.getAnswerCount(questionId);
+		Question question = getQuestion(questionId);
+		
+		return databaseDao.getAnswerCount(question, question.getPiRound());
 	}
 
 	@Override
