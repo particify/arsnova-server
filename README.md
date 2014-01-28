@@ -4,18 +4,63 @@ ARSnova is a modern approach to Audience Response Systems (ARS). It is released 
 
 ![ARSnova](src/site/resources/showcase.png)
 
-ARSnova consists of two projects: the mobile client and the server. This repository contains the server code. You will find the client at thm-projects/arsnova-st2-js. However, you do not need to download both respositories in order to get started.
+ARSnova consists of two projects: the mobile client and the server. This repository contains the server code. You will find the client at thm-projects/arsnova-mobile. However, you do not need to download both repositories in order to get started.
 
 ## Getting Started
 
-This is the main repository. Almost all dependencies (including the mobile client) are managed for you by Maven.  The mobile client is served via `index.html`, and optionally via `developer.html`. 
+This is the main repository. Almost all dependencies (including the mobile client) are managed for you by Maven.
 
-## Configuration
+### Download
 
-You will need to do some configuration work upfront.
+If you have no intention in contributing, you might want to consider downloading one of our pre-built WAR archives. You will find them in our [Maven repository](https://maven.mni.thm.de/content/repositories/snapshots/de/thm/arsnova/arsnova-war/2.0.0-SNAPSHOT/), but please do note that we are not officially offering these archives.
 
- * Add a new directory "arsnova" in `/etc`, and create a copy of arsnova.properties.example named arsnova.properties in this directory.
- * Change settings to match your environment
+### Building
+
+ARSnova consists of two main projects: arsnova-war (this repository) and arsnova-mobile. By building arsnova-war, you will automatically download the mobile client. If you do not plan to work on the client, you won't need to build it separately.
+
+Because all dependencies are handled by Maven, a complete build is done with:
+
+	mvn install
+
+### Development
+
+You need three things to get started developing ARSnova:
+
+1. the configuration file,
+2. a CouchDB database including several view documents,
+3. and a development server.
+
+We will cover all three in the following sections.
+
+#### Configuration
+
+You will need to do some configuration work upfront: add a new directory "arsnova" in `/etc`, and create a copy of [arsnova.properties.example](src/main/webapp/WEB-INF/arsnova.properties.example) named arsnova.properties in this directory. Then change the settings to match your environment, e.g. you might want to change the URLs.
+
+Also, don't forget to change all properties starting with `couchdb`, if you do not want to use our defaults. The properties are used in the next section.
+
+*A note to Windows users*: our settings are based on Linux and Mac environments. We do not officially support Windows, so you have to do some extra steps. The property file's path is hard coded in [spring-main.xml](src/main/webapp/WEB-INF/spring/spring-main.xml) and in the "Setup Tool" (see next section). You want to change the paths to make them match your environment. 
+
+#### Database
+
+We provide a Python script that will set up all database essentials. This "Setup Tool" is located at <https://github.com/thm-projects/setuptool>. Make sure you have configured your database credentials inside the ARSnova configuration file (see previous section): you will need to have the entries `couchdb.username` and `couchdb.password`.
+
+To set up the database, run:
+	
+	python tool.py
+
+This will create the database along with all required view documents. Note that this script requires Python 2 and will not run with Python 3.
+
+#### Developer Mode
+
+The easiest way to deploy ARSnova is via Jetty:
+
+	mvn jetty:run
+	
+This will work out of the box. ARSnova will be located at <http://localhost:8080/developer.html>. Be sure to use `developer.html` instead of `index.html` because it does not use any minified scripts or stylesheets. This way, your changes will take effect immediately without an additional build step.
+
+## Production Use
+
+If you intend to use ARSnova in productive environments, you will have to do some additional configuration work.
 
 ### Server
 
@@ -41,14 +86,6 @@ To enable the required Apache Webserver modules simply type:
 	# a2enmod proxy_http
 
 The configuration is ready for development usage. Finally, you should (re)start all services. ARSnova is now listening on HTTP port 80.
-
-### Database
-
-We provide a script that will set up all database essentials. This "Setup Tool" is located at <https://github.com/thm-projects/setuptool>. Make sure you have configured your database credentials inside the ARSnova configuration file: you will need to have the entries `couchdb.username` and `couchdb.password`.
-
-## Production Use
-
-If you intend to use ARSnova in productive environments, you will have to do some additional configuration work.
 
 ### Session Persistence
 
