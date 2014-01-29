@@ -56,7 +56,7 @@ The easiest way to deploy ARSnova is via Jetty:
 
 	mvn jetty:run -Dmobile.path=
 	
-This will work out of the box. ARSnova will be located at <http://localhost:8080/developer.html>. Be sure to use `developer.html` instead of `index.html` because it does not use any minified scripts or stylesheets. This way, your changes will take effect immediately without an additional build step.
+This will work out of the box. ARSnova will be located at <http://localhost:8080/>. 
 
 If you're wondering what that `-Dmobile.path=` thing is doing, this is a special override property for Jetty. By default, this property points to a local version of ARSnova mobile located at `../arsnova-mobile` &mdash; relative to the location of this project. If you happen to have downloaded ARSnova mobile to this location, you may skip the override, and just use:
 	
