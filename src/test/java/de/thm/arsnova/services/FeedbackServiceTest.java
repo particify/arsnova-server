@@ -166,9 +166,6 @@ public class FeedbackServiceTest {
 	public static class TestUser extends User {
 		private static final long serialVersionUID = 1L;
 		
-		private String username;
-		private String type;
-
 		public TestUser(String username) {
 			super( new UsernamePasswordAuthenticationToken(username, "secret") );
 		}
