@@ -310,11 +310,11 @@ public class ARSnovaSocketIOServer {
 	 * 
 	 * @param sessionId The UUID of the websocket ID
 	 * @param event The event to be send to client
+	 * TODO This method is unimplemented!
 	 */
 	public void sendToClient(UUID sessionId, ARSnovaEvent event) {
 		for (SocketIOClient c : server.getAllClients()) {
 			if (c.getSessionId().equals(sessionId)) {
-				System.out.println(sessionId);
 				break;
 			}
 		}
