@@ -40,7 +40,7 @@ public class FeedbackStorage {
 	private IDatabaseDao dao;
 	
 	public FeedbackStorage(IDatabaseDao newDao) {
-		this.data = new ConcurrentHashMap<String, Map<String,FeedbackStorageObject>>();
+		this.data = new ConcurrentHashMap<String, Map<String, FeedbackStorageObject>>();
 		this.dao = newDao;
 	}
 

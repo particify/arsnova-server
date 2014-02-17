@@ -109,7 +109,7 @@ public class ARSnovaSocketIOServer {
 				 * a feedback
 				 */
 				User u = userService.getUser2SocketId(client.getSessionId());
-				if (u == null || ! userService.isUserInSession(u, data.getSessionkey())) {
+				if (u == null || !userService.isUserInSession(u, data.getSessionkey())) {
 					return;
 				}
 				feedbackService.saveFeedback(data.getSessionkey(), data.getValue(), u);

@@ -1023,8 +1023,7 @@ public class CouchDBDao implements IDatabaseDao {
 			sb.append("]");
 			try {
 				this.setKeys(URLEncoder.encode(sb.toString(), "UTF-8"));
-			}
-			catch (UnsupportedEncodingException e) {
+			} catch (UnsupportedEncodingException e) {
 				LOGGER.error("Error while encoding course ID keys", e);
 			}
 		}
