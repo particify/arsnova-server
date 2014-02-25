@@ -112,6 +112,9 @@ public class QuestionService implements IQuestionService {
 	@Authenticated
 	public Question getQuestion(String id) {
 		Question result = databaseDao.getQuestion(id);
+		if (result == null) {
+			return null;
+		}
 		if (!"freetext".equals(result.getQuestionType()) && 0 == result.getPiRound()) {
 			/* needed for legacy questions whose piRound property has not been set */
 			result.setPiRound(1);
