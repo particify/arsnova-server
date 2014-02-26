@@ -143,6 +143,10 @@ public class Session implements Serializable {
 		return (this.getCourseId() != null) && (!this.getCourseId().isEmpty());
 	}
 	
+	public void setCourseSession() {
+		// no op!
+	}
+	
 	@Override
 	public String toString() {
 		return "User [keyword=" + keyword+ ", type=" + type + "]";
