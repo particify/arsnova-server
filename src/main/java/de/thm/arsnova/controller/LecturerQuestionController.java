@@ -99,6 +99,20 @@ public class LecturerQuestionController extends AbstractController {
 		}
 		this.questionService.update(question);
 	}
+	
+	@RequestMapping(value = "/publish", method = RequestMethod.POST)
+	@ResponseBody
+	public final void publishAllQuestions(
+			@RequestParam final String sessionkey,
+			@RequestParam(required = false) final Boolean publish,
+			final HttpServletResponse response
+	) {
+		boolean p = true;
+		if (publish != null) {
+			p = publish;
+		}
+		this.questionService.publishAll(sessionkey, p);
+	}
 
 	@RequestMapping(value = "/{questionId}/publishstatistics", method = RequestMethod.POST)
 	@ResponseBody
@@ -128,19 +142,27 @@ public class LecturerQuestionController extends AbstractController {
 		this.questionService.update(question);
 	}
 
-	@RequestMapping(
-			value = { "/" },
-			method = RequestMethod.GET
-	)
+	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@ResponseBody
 	public final List<Question> getSkillQuestions(
 			@RequestParam final String sessionkey,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
+			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly,
 			final HttpServletResponse response
 	) {
-		List<Question> questions = questionService.getSkillQuestions(sessionkey);
+		List<Question> questions;
+		if (lectureQuestionsOnly) {
+			questions = questionService.getLectureQuestions(sessionkey);
+		} else if (flashcardsOnly) {
+			questions = questionService.getFlashcards(sessionkey);
+		} else if (preparationQuestionsOnly) {
+			questions = questionService.getPreparationQuestions(sessionkey);
+		} else {
+			questions = questionService.getSkillQuestions(sessionkey);
+		}
 		if (questions == null || questions.isEmpty()) {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
-
 			return null;
 		}
 		return questions;
@@ -148,16 +170,43 @@ public class LecturerQuestionController extends AbstractController {
 
 	@RequestMapping(value = { "/" }, method = RequestMethod.DELETE)
 	@ResponseBody
-	public final void deleteSkillQuestions(@RequestParam final String sessionkey, final HttpServletResponse response) {
-		this.questionService.deleteAllQuestions(sessionkey);
+	public final void deleteSkillQuestions(
+			@RequestParam final String sessionkey,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
+			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly,
+			final HttpServletResponse response
+	) {
+		if (lectureQuestionsOnly) {
+			this.questionService.deleteLectureQuestions(sessionkey);
+		} else if (flashcardsOnly) {
+			this.questionService.deleteFlashcards(sessionkey);
+		} else if (preparationQuestionsOnly) {
+			this.questionService.deletePreparationQuestions(sessionkey);
+		} else {
+			this.questionService.deleteAllQuestions(sessionkey);
+		}
 	}
 
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	@ResponseBody
-	public final int getSkillQuestionCount(@RequestParam final String sessionkey, final HttpServletResponse response) {
+	public final int getSkillQuestionCount(
+			@RequestParam final String sessionkey,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
+			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly,
+			final HttpServletResponse response) {
 		response.addHeader("X-Deprecated-API", "1");
 
-		return questionService.getSkillQuestionCount(sessionkey);
+		if (lectureQuestionsOnly) {
+			return questionService.getLectureQuestionCount(sessionkey);
+		} else if (flashcardsOnly) {
+			return questionService.getFlashcardCount(sessionkey);
+		} else if (preparationQuestionsOnly) {
+			return questionService.getPreparationQuestionCount(sessionkey);
+		} else {
+			return questionService.getSkillQuestionCount(sessionkey);
+		}
 	}
 
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)
@@ -173,9 +222,18 @@ public class LecturerQuestionController extends AbstractController {
 	@ResponseBody
 	public final List<String> getUnAnsweredSkillQuestionIds(
 			@RequestParam final String sessionkey,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly,
 			final HttpServletResponse response
 	) {
-		List<String> answers = questionService.getUnAnsweredQuestionIds(sessionkey);
+		List<String> answers;
+		if (lectureQuestionsOnly) {
+			answers = questionService.getUnAnsweredLectureQuestionIds(sessionkey);
+		} else if (preparationQuestionsOnly) {
+			answers = questionService.getUnAnsweredPreparationQuestionIds(sessionkey);
+		} else {
+			answers = questionService.getUnAnsweredQuestionIds(sessionkey);
+		}
 		if (answers == null || answers.isEmpty()) {
 			throw new NoContentException();
 		}
@@ -297,6 +355,15 @@ public class LecturerQuestionController extends AbstractController {
 		questionService.deleteAnswers(questionId);
 	}
 
+	@RequestMapping(value = "/answers", method = RequestMethod.DELETE)
+	@ResponseBody
+	public final void deleteAllQuestionsAnswers(
+			@RequestParam final String sessionkey,
+			final HttpServletResponse response
+	) {
+		questionService.deleteAllQuestionsAnswers(sessionkey);
+	}
+
 	/**
 	 *
 	 * @param sessionKey
@@ -345,11 +412,19 @@ public class LecturerQuestionController extends AbstractController {
 	@ResponseBody
 	public final int getTotalAnswerCount(
 			@RequestParam final String sessionkey,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly,
 			final HttpServletResponse response
 	) {
 		response.addHeader("X-Deprecated-API", "1");
 
-		return questionService.getTotalAnswerCount(sessionkey);
+		if (lectureQuestionsOnly) {
+			return questionService.countLectureQuestionAnswers(sessionkey);
+		} else if (preparationQuestionsOnly) {
+			return questionService.countPreparationQuestionAnswers(sessionkey);
+		} else {
+			return questionService.getTotalAnswerCount(sessionkey);
+		}
 	}
 
 }

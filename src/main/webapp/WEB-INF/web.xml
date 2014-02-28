@@ -62,6 +62,10 @@
 		<extension>manifest</extension>
 		<mime-type>text/cache-manifest</mime-type>
 	</mime-mapping>
+	<mime-mapping>
+		<extension>json</extension>
+		<mime-type>application/json</mime-type>
+	</mime-mapping>
 
 	<error-page>
 		<error-code>401</error-code>
@@ -81,6 +85,8 @@
 	</error-page>
 
 	<session-config>
+		<tracking-mode>COOKIE</tracking-mode>
+
 		<!-- delete sessions after 6 hours -->
 		<session-timeout>360</session-timeout>
 	</session-config>

@@ -42,13 +42,13 @@ public interface ISessionService {
 
 	LoggedIn registerAsOnlineUser(User user, String sessionkey);
 
-	int countActiveUsers(String sessionkey);
-
 	int countSessions(List<Course> courses);
 
 	Session setActive(String sessionkey, Boolean lock);
 
 	Session joinSession(String keyword, UUID socketId);
+
+	Session updateSession(String sessionkey, Session session);
 
 	void deleteSession(String sessionkey, User user);
 }

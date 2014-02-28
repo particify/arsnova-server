@@ -1,7 +1,6 @@
 package de.thm.arsnova;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -41,7 +40,7 @@ public class FeedbackStorage {
 	private IDatabaseDao dao;
 	
 	public FeedbackStorage(IDatabaseDao newDao) {
-		this.data = new ConcurrentHashMap<String, Map<String,FeedbackStorageObject>>();
+		this.data = new ConcurrentHashMap<String, Map<String, FeedbackStorageObject>>();
 		this.dao = newDao;
 	}
 
@@ -103,8 +102,6 @@ public class FeedbackStorage {
 		if (data.get(keyword) == null) {
 			data.put(keyword, new ConcurrentHashMap<String, FeedbackStorageObject>());
 		}
-		
-		System.out.println(user.getUsername());
 		
 		data.get(keyword).put(user.getUsername(), new FeedbackStorageObject(value, user));
 		return true;

@@ -143,75 +143,23 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final List<Question> getSkillQuestions(final String sessionKeyword) {
-		Session session = this.getSessionFromKeyword(sessionKeyword);
-		if (session == null) {
-			throw new NotFoundException();
-		}
-
-		User user = this.userService.getCurrentUser();
-		NovaView view = null;
-
-		try {
-			String viewName;
-			if (session.getCreator().equals(user.getUsername())) {
-				viewName = "skill_question/by_session_sorted_by_subject_and_text";
+	public final List<Question> getSkillQuestions(User user, Session session) {
+		String viewName;
+		if (session.getCreator().equals(user.getUsername())) {
+			viewName = "skill_question/by_session_sorted_by_subject_and_text";
+		} else {
+			if (user.getType().equals(User.THM)) {
+				viewName = "skill_question/by_session_for_thm_full";
 			} else {
-				if (user.getType().equals(User.THM)) {
-					viewName = "skill_question/by_session_for_thm_full";
-				} else {
-					viewName = "skill_question/by_session_for_all_full";
-				}
+				viewName = "skill_question/by_session_for_all_full";
 			}
-			view = new NovaView(viewName);
-			view.setStartKeyArray(session.get_id());
-			view.setEndKeyArray(session.get_id(), "{}");
-
-			ViewResults questions = this.getDatabase().view(view);
-			if (questions == null || questions.isEmpty()) {
-				return null;
-			}
-			List<Question> result = new ArrayList<Question>();
-
-			MorpherRegistry morpherRegistry = JSONUtils.getMorpherRegistry();
-			Morpher dynaMorpher = new BeanMorpher(PossibleAnswer.class, morpherRegistry);
-			morpherRegistry.registerMorpher(dynaMorpher);
-			for (Document document : questions.getResults()) {
-				Question question = (Question) JSONObject.toBean(
-						document.getJSONObject().getJSONObject("value"),
-						Question.class
-				);
-				Collection<PossibleAnswer> answers = JSONArray.toCollection(
-						document.getJSONObject().getJSONObject("value")
-							.getJSONArray("possibleAnswers"),
-						PossibleAnswer.class
-				);
-				question.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
-				question.setSessionKeyword(this.getSessionKeyword(question.getSessionId()));
-				if (!"freetext".equals(question.getQuestionType()) && 0 == question.getPiRound()) {
-					/* needed for legacy questions whose piRound property has not been set */
-					question.setPiRound(1);
-				}
-				result.add(question);
-			}
-
-			return result;
-		} catch (IOException e) {
-			return null;
 		}
+		return getQuestions(new NovaView(viewName), session);
 	}
 
 	@Override
 	public final int getSkillQuestionCount(final Session session) {
-		NovaView view = new NovaView("skill_question/count_by_session");
-		view.setKey(session.get_id());
-		ViewResults results = this.getDatabase().view(view);
-
-		if (results.getJSONArray("rows").optJSONObject(0) == null) {
-			return 0;
-		}
-
-		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
+		return getQuestionCount(new NovaView("skill_question/count_by_session"), session);
 	}
 
 	@Override
@@ -311,9 +259,23 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public final Question saveQuestion(final Session session, final Question question) {
+		Document q = toQuestionDocument(session, question);
+		try {
+			database.saveDocument(q);
+			question.set_id(q.getId());
+			question.set_rev(q.getRev());
+			return question;
+		} catch (IOException e) {
+			LOGGER.error("Could not save question {}", question);
+		}
+		return null;
+	}
+
+	private Document toQuestionDocument(final Session session, final Question question) {
 		Document q = new Document();
 		q.put("type", "skill_question");
 		q.put("questionType", question.getQuestionType());
+		q.put("questionVariant", question.getQuestionVariant());
 		q.put("sessionId", session.get_id());
 		q.put("subject", question.getSubject());
 		q.put("text", question.getText());
@@ -326,15 +288,7 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("showStatistic", question.isShowStatistic());
 		q.put("showAnswer", question.isShowAnswer());
 		q.put("abstention", question.isAbstention());
-		try {
-			database.saveDocument(q);
-			question.set_id(q.getId());
-			question.set_rev(q.getRev());
-			return question;
-		} catch (IOException e) {
-			LOGGER.error("Could not save question {}", question);
-		}
-		return null;
+		return q;
 	}
 
 	@Override
@@ -482,18 +436,8 @@ public class CouchDBDao implements IDatabaseDao {
 		} else {
 			view = new NovaView("skill_question/by_session_only_id_for_all");
 		}
-
 		view.setKey(session.get_id());
-		ViewResults results = this.getDatabase().view(view);
-		if (results.getResults().size() == 0) {
-			return new ArrayList<String>();
-		}
-
-		List<String> ids = new ArrayList<String>();
-		for (Document d : results.getResults()) {
-			ids.add(d.getId());
-		}
-		return ids;
+		return collectQuestionIds(view);
 	}
 
 	@Override
@@ -509,6 +453,10 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public final void deleteAllQuestionsWithAnswers(Session session) {
 		NovaView view = new NovaView("skill_question/by_session");
+		deleteAllQuestionDocumentsWithAnswers(session, view);
+	}
+
+	private void deleteAllQuestionDocumentsWithAnswers(Session session, NovaView view) {
 		view.setStartKeyArray(session.get_id());
 		view.setEndKey(session.get_id(), "{}");
 		ViewResults results = this.getDatabase().view(view);
@@ -544,21 +492,7 @@ public class CouchDBDao implements IDatabaseDao {
 	public final List<String> getUnAnsweredQuestionIds(final Session session, final User user) {
 		NovaView view = new NovaView("answer/by_user");
 		view.setKey(user.getUsername(), session.get_id());
-		ViewResults anseweredQuestions = this.getDatabase().view(view);
-
-		List<String> answered = new ArrayList<String>();
-		for (Document d : anseweredQuestions.getResults()) {
-			answered.add(d.getString("value"));
-		}
-
-		List<String> questions = this.getQuestionIds(session, user);
-		List<String> unanswered = new ArrayList<String>();
-		for (String questionId : questions) {
-			if (!answered.contains(questionId)) {
-				unanswered.add(questionId);
-			}
-		}
-		return unanswered;
+		return collectUnansweredQuestionIds(session, user, this.getQuestionIds(session, user), view);
 	}
 
 	@Override
@@ -626,10 +560,11 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final int getAnswerCount(final String questionId) {
-		NovaView view = new NovaView("skill_question/count_answers_by_question");
-		view.setKey(questionId);
+	public final int getAnswerCount(final Question question, final int piRound) {
+		NovaView view = new NovaView("skill_question/count_total_answers_by_question_and_piround");
 		view.setGroup(true);
+		view.setStartKey(question.get_id(), String.valueOf(piRound));
+		view.setEndKey(question.get_id(), String.valueOf(piRound), "{}");
 		ViewResults results = this.getDatabase().view(view);
 		if (results.getResults().size() == 0) {
 			return 0;
@@ -651,19 +586,6 @@ public class CouchDBDao implements IDatabaseDao {
 			LOGGER.error("Error while retrieving active users count", e);
 		}
 		return 0;
-	}
-
-	@Override
-	public final int countActiveUsers(Session session, long since) {
-		if (session == null) throw new NotFoundException();
-		NovaView view = new NovaView("logged_in/count");
-		view.setStartKey(session.get_id(), String.valueOf(since));
-		view.setEndKey(session.get_id(), "{}");
-		ViewResults results = this.getDatabase().view(view);
-		if (isEmptyResults(results)) {
-			return 0;
-		}
-		return results.getJSONArray("rows").optJSONObject(0).getInt("value");
 	}
 
 	private boolean isEmptyResults(ViewResults results) {
@@ -990,6 +912,7 @@ public class CouchDBDao implements IDatabaseDao {
 			a.put("sessionId", answer.getSessionId());
 			a.put("questionId", answer.getQuestionId());
 			a.put("answerSubject", answer.getAnswerSubject());
+			a.put("questionVariant", answer.getQuestionVariant());
 			a.put("answerText", answer.getAnswerText());
 			a.put("timestamp", answer.getTimestamp());
 			a.put("user", user.getUsername());
@@ -1100,8 +1023,7 @@ public class CouchDBDao implements IDatabaseDao {
 			sb.append("]");
 			try {
 				this.setKeys(URLEncoder.encode(sb.toString(), "UTF-8"));
-			}
-			catch (UnsupportedEncodingException e) {
+			} catch (UnsupportedEncodingException e) {
 				LOGGER.error("Error while encoding course ID keys", e);
 			}
 		}
@@ -1139,11 +1061,281 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
+	public Session updateSession(Session session) {
+		try {
+			Document s = this.database.getDocument(session.get_id());
+			s.put("name", session.getName());
+			s.put("shortName", session.getShortName());
+			s.put("active", session.isActive());
+			this.database.saveDocument(s);
+			session.set_rev(s.getRev());
+
+			return session;
+		} catch (IOException e) {
+			LOGGER.error("Could not lock session {}", session);
+		}
+
+		return null;
+	}
+
+	@Override
 	public void deleteSession(Session session) {
 		try {
 			this.deleteDocument(session.get_id());
 		} catch (IOException e) {
 			LOGGER.error("Could not delete session {}", session);
+		}
+	}
+
+	@Override
+	public List<Question> getLectureQuestions(User user, Session session) {
+		String viewName;
+		if (session.isCreator(user)) {
+			viewName = "skill_question/lecture_question_by_session";
+		} else {
+			if (user.getType().equals(User.THM)) {
+				viewName = "skill_question/lecture_question_by_session_for_thm";
+			} else {
+				viewName = "skill_question/lecture_question_by_session_for_all";
+			}
+		}
+		return getQuestions(new NovaView(viewName), session);
+	}
+
+	@Override
+	public List<Question> getFlashcards(User user, Session session) {
+		String viewName;
+		if (session.isCreator(user)) {
+			viewName = "skill_question/flashcard_by_session";
+		} else {
+			if (user.getType().equals(User.THM)) {
+				viewName = "skill_question/flashcard_by_session_for_thm";
+			} else {
+				viewName = "skill_question/flashcard_by_session_for_all";
+			}
+		}
+		return getQuestions(new NovaView(viewName), session);
+	}
+
+	@Override
+	public List<Question> getPreparationQuestions(User user, Session session) {
+		String viewName;
+		if (session.isCreator(user)) {
+			viewName = "skill_question/preparation_question_by_session";
+		} else {
+			if (user.getType().equals(User.THM)) {
+				viewName = "skill_question/preparation_question_by_session_for_thm";
+			} else {
+				viewName = "skill_question/preparation_question_by_session_for_all";
+			}
+		}
+		return getQuestions(new NovaView(viewName), session);
+		
+	}
+	
+	private List<Question> getQuestions(NovaView view, Session session) {
+		view.setStartKeyArray(session.get_id());
+		view.setEndKeyArray(session.get_id(), "{}");
+		ViewResults questions = this.getDatabase().view(view);
+		if (questions == null || questions.isEmpty()) {
+			return null;
+		}
+		List<Question> result = new ArrayList<Question>();
+
+		MorpherRegistry morpherRegistry = JSONUtils.getMorpherRegistry();
+		Morpher dynaMorpher = new BeanMorpher(PossibleAnswer.class, morpherRegistry);
+		morpherRegistry.registerMorpher(dynaMorpher);
+		for (Document document : questions.getResults()) {
+			Question question = (Question) JSONObject.toBean(
+					document.getJSONObject().getJSONObject("value"),
+					Question.class
+			);
+			@SuppressWarnings("unchecked")
+			Collection<PossibleAnswer> answers = JSONArray.toCollection(
+					document.getJSONObject().getJSONObject("value").getJSONArray("possibleAnswers"),
+					PossibleAnswer.class
+			);
+			question.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
+			question.setSessionKeyword(session.getKeyword());
+			if (!"freetext".equals(question.getQuestionType()) && 0 == question.getPiRound()) {
+				/* needed for legacy questions whose piRound property has not been set */
+				question.setPiRound(1);
+			}
+			result.add(question);
+		}
+		return result;
+	}
+
+	@Override
+	public int getLectureQuestionCount(Session session) {
+		return getQuestionCount(new NovaView("skill_question/lecture_question_count_by_session"), session);
+	}
+
+	@Override
+	public int getFlashcardCount(Session session) {
+		return getQuestionCount(new NovaView("skill_question/flashcard_count_by_session"), session);
+	}
+
+	@Override
+	public int getPreparationQuestionCount(Session session) {
+		return getQuestionCount(new NovaView("skill_question/preparation_question_count_by_session"), session);
+	}
+	
+	private int getQuestionCount(NovaView view, Session session) {
+		view.setKey(session.get_id());
+		ViewResults results = this.getDatabase().view(view);
+		if (results.getJSONArray("rows").optJSONObject(0) == null) {
+			return 0;
+		}
+		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
+	}
+
+	@Override
+	public int countLectureQuestionAnswers(Session session) {
+		return countQuestionVariantAnswers(session, "lecture");
+	}
+
+	@Override
+	public int countPreparationQuestionAnswers(Session session) {
+		return countQuestionVariantAnswers(session, "preparation");
+	}
+	
+	private int countQuestionVariantAnswers(Session session, String variant) {
+		NovaView view = new NovaView("skill_question/count_answers_by_session_and_question_variant");
+		view.setKey(session.get_id(), variant);
+		ViewResults results = this.getDatabase().view(view);
+		if (results.getResults().size() == 0) {
+			return 0;
+		}
+		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
+	}
+
+	@Override
+	public void deleteAllLectureQuestionsWithAnswers(Session session) {
+		NovaView view = new NovaView("skill_question/lecture_question_by_session");
+		deleteAllQuestionDocumentsWithAnswers(session, view);
+	}
+
+	@Override
+	public void deleteAllFlashcardsWithAnswers(Session session) {
+		NovaView view = new NovaView("skill_question/flashcard_by_session");
+		deleteAllQuestionDocumentsWithAnswers(session, view);
+	}
+
+	@Override
+	public void deleteAllPreparationQuestionsWithAnswers(Session session) {
+		NovaView view = new NovaView("skill_question/preparation_question_by_session");
+		deleteAllQuestionDocumentsWithAnswers(session, view);
+	}
+
+	@Override
+	public List<String> getUnAnsweredLectureQuestionIds(Session session, User user) {
+		NovaView view = new NovaView("answer/variant_by_user");
+		view.setKey(user.getUsername(), session.get_id(), "lecture");
+		return collectUnansweredQuestionIds(session, user, this.getLectureQuestionIds(session, user), view);
+	}
+
+	private List<String> getLectureQuestionIds(Session session, User user) {
+		NovaView view;
+		if (user.getType().equals("thm")) {
+			view = new NovaView("skill_question/lecture_question_by_session_for_thm");
+		} else {
+			view = new NovaView("skill_question/lecture_question_by_session_for_all");
+		}
+		view.setStartKeyArray(session.get_id());
+		view.setEndKeyArray(session.get_id(), "{}");
+		return collectQuestionIds(view);
+	}
+
+	@Override
+	public List<String> getUnAnsweredPreparationQuestionIds(Session session, User user) {
+		NovaView view = new NovaView("answer/variant_by_user");
+		view.setKey(user.getUsername(), session.get_id(), "preparation");
+		return collectUnansweredQuestionIds(session, user, this.getPreparationQuestionIds(session, user), view);
+	}
+
+	private List<String> getPreparationQuestionIds(Session session, User user) {
+		NovaView view;
+		if (user.getType().equals("thm")) {
+			view = new NovaView("skill_question/preparation_question_by_session_for_thm");
+		} else {
+			view = new NovaView("skill_question/preparation_question_by_session_for_all");
+		}
+		view.setStartKeyArray(session.get_id());
+		view.setEndKeyArray(session.get_id(), "{}");
+		return collectQuestionIds(view);
+	}
+
+	private List<String> collectUnansweredQuestionIds(Session session, User user, List<String> questions, NovaView view) {
+		ViewResults answeredQuestions = this.getDatabase().view(view);
+
+		List<String> answered = new ArrayList<String>();
+		for (Document d : answeredQuestions.getResults()) {
+			answered.add(d.getString("value"));
+		}
+
+		List<String> unanswered = new ArrayList<String>();
+		for (String questionId : questions) {
+			if (!answered.contains(questionId)) {
+				unanswered.add(questionId);
+			}
+		}
+		return unanswered;
+	}
+
+	private List<String> collectQuestionIds(NovaView view) {
+		ViewResults results = this.getDatabase().view(view);
+		if (results.getResults().size() == 0) {
+			return new ArrayList<String>();
+		}
+		List<String> ids = new ArrayList<String>();
+		for (Document d : results.getResults()) {
+			ids.add(d.getId());
+		}
+		return ids;
+	}
+	
+	public void deleteAllInterposedQuestions(Session session) {
+		NovaView view = new NovaView("interposed_question/by_session");
+		view.setKey(session.get_id());
+		ViewResults questions = this.getDatabase().view(view);
+		if (questions == null || questions.isEmpty()) {
+			return;
+		}
+		for (Document document : questions.getResults()) {
+			try {
+				this.deleteDocument(document.getId());
+			} catch (IOException e) {
+				LOGGER.error("Could not delete all interposed questions {}", session);
+			}
+		}
+	}
+
+	@Override
+	public void publishAllQuestions(Session session, boolean publish) {
+		List<Question> questions = this.getQuestions(new NovaView("skill_question/by_session"), session);
+		for (Question q : questions) {
+			q.setActive(publish);
+		}
+		List<Document> documents = new ArrayList<Document>();
+		for (Question q : questions) {
+			Document d = toQuestionDocument(session, q);
+			d.setId(q.get_id());
+			d.setRev(q.get_rev());
+			documents.add(d);
+		}
+		try {
+			this.database.bulkSaveDocuments(documents.toArray(new Document[documents.size()]));
+		} catch (IOException e) {
+			LOGGER.error("Could not bulk publish all questions: {}", e.getMessage());
+		}
+	}
+
+	@Override
+	public void deleteAllQuestionsAnswers(Session session) {
+		List<Question> questions = this.getQuestions(new NovaView("skill_question/by_session"), session);
+		for (Question q : questions) {
+			this.deleteAnswers(q);
 		}
 	}
 }

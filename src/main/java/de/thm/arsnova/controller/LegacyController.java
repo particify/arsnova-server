@@ -22,15 +22,22 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import de.thm.arsnova.services.IQuestionService;
 
 @Controller
 public class LegacyController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(LegacyController.class);
+
+	@Autowired
+	private IQuestionService questionService;
 
 	/* specific routes */
 
@@ -113,6 +120,15 @@ public class LegacyController extends AbstractController {
 	) {
 		response.addHeader("X-Deprecated-API", "1");
 		return String.format("forward:/audiencequestion/?sessionkey=%s", sessionKey);
+	}
+
+	@RequestMapping(value = "/session/{sessionKey}/interposed", method = RequestMethod.DELETE)
+	@ResponseBody
+	public final void deleteAllInterposedQuestions(
+			@PathVariable final String sessionKey,
+			final HttpServletResponse response
+	) {
+		questionService.deleteAllInterposedQuestions(sessionKey);
 	}
 
 	@RequestMapping(value = "/session/{sessionKey}/interposedcount", method = RequestMethod.GET)
