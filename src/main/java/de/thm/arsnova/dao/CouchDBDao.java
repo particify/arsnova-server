@@ -293,6 +293,7 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("offsetX", question.getOffsetX());
 		q.put("offsetY", question.getOffsetY());
 		q.put("zoomLvl", question.getZoomLvl());
+		q.put("chosenFields", question.getChosenFields());
 
 		return q;
 	}
@@ -316,6 +317,7 @@ public class CouchDBDao implements IDatabaseDao {
 			q.put("offsetX", question.getOffsetX());
 			q.put("offsetY", question.getOffsetY());
 			q.put("zoomLvl", question.getZoomLvl());
+			q.put("chosenFields", question.getChosenFields());
 			this.database.saveDocument(q);
 			question.set_rev(q.getRev());
 
