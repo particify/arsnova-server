@@ -288,6 +288,12 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("showStatistic", question.isShowStatistic());
 		q.put("showAnswer", question.isShowAnswer());
 		q.put("abstention", question.isAbstention());
+		q.put("image", question.getImage());
+		q.put("gridSize", question.getGridSize());
+		q.put("offsetX", question.getOffsetX());
+		q.put("offsetY", question.getOffsetY());
+		q.put("zoomLvl", question.getZoomLvl());
+
 		return q;
 	}
 
@@ -305,6 +311,11 @@ public class CouchDBDao implements IDatabaseDao {
 			q.put("showStatistic", question.isShowStatistic());
 			q.put("showAnswer", question.isShowAnswer());
 			q.put("abstention", question.isAbstention());
+			q.put("image", question.getImage());
+			q.put("gridSize", question.getGridSize());
+			q.put("offsetX", question.getOffsetX());
+			q.put("offsetY", question.getOffsetY());
+			q.put("zoomLvl", question.getZoomLvl());
 			this.database.saveDocument(q);
 			question.set_rev(q.getRev());
 

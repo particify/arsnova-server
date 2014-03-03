@@ -44,6 +44,12 @@ public class Question {
 	private String _id;
 	private String _rev;
 
+	private String image;
+	private int gridSize;
+	private int offsetX;
+	private int offsetY;
+	private int zoomLvl;
+
 	public final String getType() {
 		return type;
 	}
@@ -210,6 +216,46 @@ public class Question {
 
 	public final void set_rev(final String _rev) {
 		this._rev = _rev;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
+	}
+
+	public int getGridSize() {
+		return gridSize;
+	}
+
+	public void setGridSize(int gridSize) {
+		this.gridSize = gridSize;
+	}
+
+	public int getOffsetX() {
+		return offsetX;
+	}
+
+	public void setOffsetX(int offsetX) {
+		this.offsetX = offsetX;
+	}
+
+	public int getOffsetY() {
+		return offsetY;
+	}
+
+	public void setOffsetY(int offsetY) {
+		this.offsetY = offsetY;
+	}
+
+	public int getZoomLvl() {
+		return zoomLvl;
+	}
+
+	public void setZoomLvl(int zoomLvl) {
+		this.zoomLvl = zoomLvl;
 	}
 
 	@Override
