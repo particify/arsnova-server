@@ -20,7 +20,6 @@ import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 
-import de.thm.arsnova.FeedbackStorage;
 import de.thm.arsnova.dao.StubDatabaseDao;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -49,8 +48,6 @@ public class FeedbackControllerTest {
 	@Autowired
 	private StubDatabaseDao databaseDao;
 	
-	private FeedbackStorage feedbackStorage;
-
 	@After
 	public final void cleanup() {
 		databaseDao.cleanupTestData();
@@ -61,7 +58,6 @@ public class FeedbackControllerTest {
 		this.request = new MockHttpServletRequest();
 		this.response = new MockHttpServletResponse();
 		handlerAdapter = applicationContext.getBean(AnnotationMethodHandlerAdapter.class);
-		this.feedbackStorage = new FeedbackStorage(databaseDao); 
 	}
 
 	@Test(expected = NotFoundException.class)

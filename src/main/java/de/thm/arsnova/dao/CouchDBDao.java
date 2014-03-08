@@ -574,7 +574,6 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public final int getAnswerCount(final Question question, final int piRound) {
-		LOGGER.debug("coudbdao: getAnswerCount, piRound: ", piRound);
 		NovaView view = new NovaView("skill_question/count_total_answers_by_question_and_piround");
 		view.setGroup(true);
 		view.setStartKey(question.get_id(), String.valueOf(piRound));
@@ -1037,8 +1036,7 @@ public class CouchDBDao implements IDatabaseDao {
 			sb.append("]");
 			try {
 				this.setKeys(URLEncoder.encode(sb.toString(), "UTF-8"));
-			}
-			catch (UnsupportedEncodingException e) {
+			} catch (UnsupportedEncodingException e) {
 				LOGGER.error("Error while encoding course ID keys", e);
 			}
 		}

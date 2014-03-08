@@ -67,7 +67,6 @@ public class SessionServiceTest {
 	
 	@Test
 	public void testShouldGenerateSessionKeyword() {
-		System.out.println(sessionService.generateKeyword());
 		assertTrue(sessionService.generateKeyword().matches("^[0-9]{8}$"));
 	}
 

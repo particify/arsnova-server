@@ -1,7 +1,5 @@
 package de.thm.arsnova.aop;
 
-import java.util.UUID;
-
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
