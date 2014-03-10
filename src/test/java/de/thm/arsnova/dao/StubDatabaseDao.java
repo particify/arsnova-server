@@ -497,4 +497,16 @@ public class StubDatabaseDao implements IDatabaseDao {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public int getLearningProgress(Session session) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getMyLearningProgress(Session session, User user) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

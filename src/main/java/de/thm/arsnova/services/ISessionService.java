@@ -51,4 +51,8 @@ public interface ISessionService {
 	Session updateSession(String sessionkey, Session session);
 
 	void deleteSession(String sessionkey, User user);
+
+	int getLearningProgress(String sessionkey);
+
+	int getMyLearningProgress(String sessionkey);
 }

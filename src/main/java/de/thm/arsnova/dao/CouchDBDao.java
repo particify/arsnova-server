@@ -913,6 +913,7 @@ public class CouchDBDao implements IDatabaseDao {
 			a.put("questionId", answer.getQuestionId());
 			a.put("answerSubject", answer.getAnswerSubject());
 			a.put("questionVariant", answer.getQuestionVariant());
+			a.put("questionValue", answer.getQuestionValue());
 			a.put("answerText", answer.getAnswerText());
 			a.put("timestamp", answer.getTimestamp());
 			a.put("user", user.getUsername());
@@ -936,6 +937,7 @@ public class CouchDBDao implements IDatabaseDao {
 			a.put("answerText", answer.getAnswerText());
 			a.put("timestamp", answer.getTimestamp());
 			a.put("abstention", answer.isAbstention());
+			a.put("questionValue", answer.getQuestionValue());
 			this.database.saveDocument(a);
 			answer.set_rev(a.getRev());
 			return answer;
@@ -1337,5 +1339,40 @@ public class CouchDBDao implements IDatabaseDao {
 		for (Question q : questions) {
 			this.deleteAnswers(q);
 		}
+	}
+
+	@Override
+	public int getLearningProgress(Session session) {
+		NovaView courseView = new NovaView("learning_progress/course_value");
+		NovaView maximumView = new NovaView("learning_progress/maximum_value");
+		courseView.setKey(session.get_id());
+		maximumView.setKey(session.get_id());
+
+		return getProgressPercentage(courseView, maximumView);
+	}
+
+	@Override
+	public int getMyLearningProgress(Session session, User user) {
+		NovaView userView = new NovaView("learning_progress/user_value");
+		NovaView maximumView = new NovaView("learning_progress/maximum_value");
+		userView.setKey(session.get_id(), user.getUsername());
+		maximumView.setKey(session.get_id());
+
+		return getProgressPercentage(userView, maximumView);
+	}
+
+	private int getProgressPercentage(NovaView progressView, NovaView maximumView) {
+		List<Document> progressValue = this.getDatabase().view(progressView).getResults();
+		List<Document> maximumValue = this.getDatabase().view(maximumView).getResults();
+		if (maximumValue.isEmpty()) {
+			return 0;
+		}
+		int maximum = maximumValue.get(0).getInt("value");
+		int progress = 0;
+		if (!progressValue.isEmpty()) {
+			progress = progressValue.get(0).getInt("value");
+		}
+		int percentage = (int)((progress * 100.0f) / maximum);
+		return percentage < 0 ? 0 : percentage;
 	}
 }

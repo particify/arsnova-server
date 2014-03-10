@@ -161,4 +161,8 @@ public interface IDatabaseDao {
 	void publishAllQuestions(Session session, boolean publish);
 
 	void deleteAllQuestionsAnswers(Session session);
+
+	int getLearningProgress(Session session);
+
+	int getMyLearningProgress(Session session, User user);
 }
