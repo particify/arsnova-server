@@ -256,4 +256,19 @@ public class SessionService implements ISessionService {
 		}
 		databaseDao.deleteSession(session);
 	}
+
+	@Override
+	@Authenticated
+	public int getLearningProgress(String sessionkey) {
+		Session session = databaseDao.getSession(sessionkey);
+		return databaseDao.getLearningProgress(session);
+	}
+
+	@Override
+	@Authenticated
+	public int getMyLearningProgress(String sessionkey) {
+		Session session = databaseDao.getSession(sessionkey);
+		User user = userService.getCurrentUser();
+		return databaseDao.getMyLearningProgress(session, user);
+	}
 }

@@ -10,6 +10,7 @@ public class Answer {
 	private String answerText;
 	private String answerSubject;
 	private String questionVariant;
+	private int questionValue;
 	private int piRound;
 	private String user;
 	private long timestamp;
@@ -131,6 +132,14 @@ public class Answer {
 
 	public void setQuestionVariant(String questionVariant) {
 		this.questionVariant = questionVariant;
+	}
+
+	public int getQuestionValue() {
+		return questionValue;
+	}
+
+	public void setQuestionValue(int questionValue) {
+		this.questionValue = questionValue;
 	}
 
 	@Override

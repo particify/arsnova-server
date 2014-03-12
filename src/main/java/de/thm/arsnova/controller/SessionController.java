@@ -191,6 +191,24 @@ public class SessionController extends AbstractController {
 		return null;
 	}
 
+	@RequestMapping(value = "/{sessionkey}/learningprogress", method = RequestMethod.GET)
+	@ResponseBody
+	public final int learningProgress(
+			@PathVariable final String sessionkey,
+			final HttpServletResponse response
+	) {
+		return sessionService.getLearningProgress(sessionkey);
+	}
+
+	@RequestMapping(value = "/{sessionkey}/mylearningprogress", method = RequestMethod.GET)
+	@ResponseBody
+	public final int myLearningProgress(
+			@PathVariable final String sessionkey,
+			final HttpServletResponse response
+	) {
+		return sessionService.getMyLearningProgress(sessionkey);
+	}
+
 	/* internal redirections */
 
 	@RequestMapping(value = "/{sessionKey}/lecturerquestion")
