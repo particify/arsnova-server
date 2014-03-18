@@ -366,7 +366,8 @@ public class CouchDBDao implements IDatabaseDao {
 					results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
 					Question.class
 			);
-			JSONArray possibleAnswers = results.getJSONArray("rows").optJSONObject(0).optJSONObject("value")
+			JSONArray possibleAnswers = new JSONArray();
+			possibleAnswers = results.getJSONArray("rows").optJSONObject(0).optJSONObject("value")
 					.getJSONArray("possibleAnswers");
 			Collection<PossibleAnswer> answers = JSONArray.toCollection(
 					possibleAnswers,
