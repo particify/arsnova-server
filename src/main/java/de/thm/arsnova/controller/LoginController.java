@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -34,6 +35,7 @@ import org.scribe.up.session.HttpUserSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
@@ -52,6 +54,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -166,14 +169,14 @@ public class LoginController extends AbstractController {
 			final HttpServletRequest request,
 			final HttpServletResponse response
 	) {
-		if ("ldap".equals(type) && password != null) {
-			String referer = request.getHeader("referer");
-			if (null != forcedReferer && null != referer && !UrlUtils.isAbsoluteUrl(referer)) {
-				referer = forcedReferer;
-			}
-			if (null == referer) {
-				referer = "/";
-			}
+		if ("ldap".equals(type) && !"".equals(userName) && !"".equals(password)) {
+//			String referer = request.getHeader("referer");
+//			if (null != forcedReferer && null != referer && !UrlUtils.isAbsoluteUrl(referer)) {
+//				referer = forcedReferer;
+//			}
+//			if (null == referer) {
+//				referer = "/";
+//			}
 			org.springframework.security.core.userdetails.User user =
 					new org.springframework.security.core.userdetails.User(
 						userName, password, true, true, true, true, this.getAuthorities()
@@ -186,15 +189,18 @@ public class LoginController extends AbstractController {
 					SecurityContextHolder.getContext().setAuthentication(token);
 					request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
 							SecurityContextHolder.getContext());
-					return new RedirectView("/#auth/checkLogin");
+
+					return null;
 				}
 				LOGGER.info("LDAPLOGIN: {}", auth.isAuthenticated());
 			}
 			catch (AuthenticationException e) {
 				LOGGER.info("No LDAP login: {}", e);
 			}
-			return new RedirectView("/login.html");
 		}
+
+		response.setStatus(HttpStatus.UNAUTHORIZED.value());
+
 		return null;
 	}
 
