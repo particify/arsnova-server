@@ -49,7 +49,6 @@ public class Question {
 	private int offsetX;
 	private int offsetY;
 	private int zoomLvl;
-	private int[][] chosenFields;
 
 	public final String getType() {
 		return type;
@@ -257,14 +256,6 @@ public class Question {
 
 	public void setZoomLvl(int zoomLvl) {
 		this.zoomLvl = zoomLvl;
-	}
-
-	public int[][] getChosenFields() {
-		return chosenFields;
-	}
-
-	public void setChosenFields(int[][] chosenFields) {
-		this.chosenFields = chosenFields;
 	}
 
 	@Override
