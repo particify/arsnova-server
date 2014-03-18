@@ -27,6 +27,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import de.thm.arsnova.ImageUtils;
 import de.thm.arsnova.annotation.Authenticated;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Answer;
@@ -35,6 +36,7 @@ import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
@@ -85,6 +87,17 @@ public class QuestionService implements IQuestionService {
 			question.setPiRound(0);
 		} else if (question.getPiRound() < 1 || question.getPiRound() > 2) {
 			question.setPiRound(1);
+		}
+		
+		// convert imageurl to base64 if neccessary
+		if ("grid".equals(question.getQuestionType())) {
+			if (question.getImage().startsWith("http")) {
+				String base64ImageString = ImageUtils.encodeImageToString(question.getImage());
+				if (base64ImageString == null) {
+					throw new BadRequestException();
+				}
+				question.setImage(base64ImageString);
+			}
 		}
 
 		Question result = this.databaseDao.saveQuestion(session, question);
