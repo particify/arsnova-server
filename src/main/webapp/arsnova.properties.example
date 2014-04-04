@@ -1,19 +1,27 @@
 security.arsnova-url=http://localhost:8080
-security.cas-server-url=https://cas.thm.de/cas
 
-security.facebook.key=318531508227494
-security.facebook.secret=e3f38cfc72bb63e35641b637081a6177
+security.guest.enabled=true
+security.guest.lecturer.enabled=true
 
-security.twitter.key=PEVtidSG0HzSrxVRPpsCXw
-security.twitter.secret=mC0HOvxiEgqwdDWCcDoy3q75nUQPu1bYRp1ncHWGd0
-
-security.google.key=110959746118.apps.googleusercontent.com
-security.google.secret=CkzUJZswY8rjWCCYnHVovyGA
-
+security.ldap.enabled=true
 security.ldap.url=ldap://example.com:33389/dc=example,dc=com
 security.ldap.user-search-filter=(uid={0})
 security.ldap.user-search-base="ou=people"
 
+security.cas.enabled=true
+security.cas-server-url=https://cas.thm.de/cas
+
+security.facebook.enabled=true
+security.facebook.key=
+security.facebook.secret=
+
+security.twitter.enabled=true
+security.twitter.key=
+security.twitter.secret=
+
+security.google.enabled=true
+security.google.key=
+security.google.secret=
 
 security.ssl=false
 security.keystore=/etc/arsnova.thm.de.jks

@@ -19,12 +19,13 @@
 package de.thm.arsnova.controller;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -35,6 +36,7 @@ import org.scribe.up.session.HttpUserSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
@@ -54,10 +56,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
+import de.thm.arsnova.entities.ServiceDescription;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.UnauthorizedException;
@@ -69,6 +71,21 @@ public class LoginController extends AbstractController {
 
 	private static final int MAX_USERNAME_LENGTH = 15;
 	private static final int MAX_GUESTHASH_LENGTH = 10;
+
+	@Value("${security.guest.enabled}")
+	private String guestEnabled;
+	@Value("${security.guest.lecturer.enabled}")
+	private String guestLecturerEnabled;
+	@Value("${security.cas.enabled}")
+	private String casEnabled;
+	@Value("${security.ldap.enabled}")
+	private String ldapEnabled;
+	@Value("${security.facebook.enabled}")
+	private String facebookEnabled;
+	@Value("${security.google.enabled}")
+	private String googleEnabled;
+	@Value("${security.twitter.enabled}")
+	private String twitterEnabled;
 
 	@Autowired
 	private TwitterProvider twitterProvider;
@@ -170,13 +187,6 @@ public class LoginController extends AbstractController {
 			final HttpServletResponse response
 	) {
 		if ("ldap".equals(type) && !"".equals(userName) && !"".equals(password)) {
-//			String referer = request.getHeader("referer");
-//			if (null != forcedReferer && null != referer && !UrlUtils.isAbsoluteUrl(referer)) {
-//				referer = forcedReferer;
-//			}
-//			if (null == referer) {
-//				referer = "/";
-//			}
 			org.springframework.security.core.userdetails.User user =
 					new org.springframework.security.core.userdetails.User(
 						userName, password, true, true, true, true, this.getAuthorities()
@@ -221,6 +231,60 @@ public class LoginController extends AbstractController {
 			return new RedirectView("/j_spring_cas_security_logout");
 		}
 		return new RedirectView(request.getHeader("referer") != null ? request.getHeader("referer") : "/");
+	}
+	
+	@RequestMapping(value = { "/auth/services" }, method = RequestMethod.GET)
+	@ResponseBody
+	public final List<ServiceDescription> getServices(final HttpServletRequest request) {
+		List<ServiceDescription> services = new ArrayList<ServiceDescription>();
+
+		if ("true".equals(guestEnabled)) {
+			ServiceDescription sdesc = new ServiceDescription(
+				"Guest",
+				null
+			);
+			if (!"true".equals(guestLecturerEnabled)) {
+				sdesc.setAllowLecturer(false);
+			}
+			services.add(sdesc);
+		}
+
+		if ("true".equals(casEnabled)) {
+			try {
+				services.add(new ServiceDescription(
+						"CAS",
+						casEntryPoint.getLoginUrl()
+							+ "?" + casEntryPoint.getServiceProperties().getServiceParameter()
+							+ "=" + URLEncoder.encode(casEntryPoint.getServiceProperties().getService(), "UTF-8")
+					));
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		if ("true".equals(facebookEnabled)) {
+			services.add(new ServiceDescription(
+				"Facebook",
+				facebookProvider.getAuthorizationUrl(new HttpUserSession(request))
+			));
+		}
+
+		if ("true".equals(googleEnabled)) {
+			services.add(new ServiceDescription(
+				"Google",
+				googleProvider.getAuthorizationUrl(new HttpUserSession(request))
+			));
+		}
+
+		if ("true".equals(twitterEnabled)) {
+			services.add(new ServiceDescription(
+				"Twitter",
+				twitterProvider.getAuthorizationUrl(new HttpUserSession(request))
+			));
+		}
+
+		return services;
 	}
 	
 	private Collection<GrantedAuthority> getAuthorities() {
