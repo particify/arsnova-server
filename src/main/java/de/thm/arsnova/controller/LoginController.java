@@ -44,7 +44,6 @@ import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.token.Sha512DigestUtils;
@@ -289,7 +288,7 @@ public class LoginController extends AbstractController {
 	
 	private Collection<GrantedAuthority> getAuthorities() {
 		List<GrantedAuthority> authList = new ArrayList<GrantedAuthority>();
-		authList.add(new GrantedAuthorityImpl("ROLE_USER"));
+		authList.add(new SimpleGrantedAuthority("ROLE_USER"));
 		return authList;
 	}
 
