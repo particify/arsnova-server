@@ -39,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.core.Authentication;
@@ -58,6 +59,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
+import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.ServiceDescription;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
@@ -87,6 +89,9 @@ public class LoginController extends AbstractController {
 	private String twitterEnabled;
 
 	@Autowired
+	private DaoAuthenticationProvider daoProvider;
+
+	@Autowired
 	private TwitterProvider twitterProvider;
 
 	@Autowired
@@ -109,10 +114,11 @@ public class LoginController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
 
-	@RequestMapping(value = { "/auth/login", "/doLogin" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/auth/login", "/doLogin" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public final View doLogin(
 			@RequestParam("type") final String type,
-			@RequestParam(value = "user", required = false) final String guestName,
+			@RequestParam(value = "user", required = false) String username,
+			@RequestParam(required = false) final String password,
 			@RequestParam(value = "referer", required = false) final String forcedReferer,
 			@RequestParam(value = "successurl", required = false) final String successUrl,
 			@RequestParam(value = "failureurl", required = false) final String failureUrl,
@@ -121,7 +127,7 @@ public class LoginController extends AbstractController {
 			final HttpServletResponse response
 	) throws IOException, ServletException {
 		userSessionService.setRole(role);
-		
+
 		String referer = request.getHeader("referer");
 		if (null != forcedReferer && null != referer && !UrlUtils.isAbsoluteUrl(referer)) {
 			/* Use a url from a request parameter as referer as long as the url is not absolute (to prevent
@@ -140,8 +146,49 @@ public class LoginController extends AbstractController {
 		);
 
 		View result = null;
-		
-		if ("cas".equals(type)) {
+
+		if ("arsnova".equals(type)) {
+			Authentication authRequest = new UsernamePasswordAuthenticationToken(username, password);
+			Authentication auth = daoProvider.authenticate(authRequest);
+			if (auth.isAuthenticated()) {
+				SecurityContextHolder.getContext().setAuthentication(auth);
+				request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+						SecurityContextHolder.getContext());
+				
+				return null;
+			}
+
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+
+			return null;
+		} else if ("ldap".equals(type)) {
+			if (!"".equals(username) && !"".equals(password)) {
+				org.springframework.security.core.userdetails.User user =
+						new org.springframework.security.core.userdetails.User(
+							username, password, true, true, true, true, this.getAuthorities()
+						);
+
+				Authentication token = new UsernamePasswordAuthenticationToken(user, password, getAuthorities());
+				try {
+					Authentication auth = ldapAuthenticationProvider.authenticate(token);
+					if (auth.isAuthenticated()) {
+						SecurityContextHolder.getContext().setAuthentication(token);
+						request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+								SecurityContextHolder.getContext());
+
+						return null;
+					}
+					LOGGER.info("LDAPLOGIN: {}", auth.isAuthenticated());
+				}
+				catch (AuthenticationException e) {
+					LOGGER.info("No LDAP login: {}", e);
+				}
+
+				response.setStatus(HttpStatus.UNAUTHORIZED.value());
+
+				return null;
+			}
+		} else if ("cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);
 		} else if ("twitter".equals(type)) {
 			String authUrl = twitterProvider.getAuthorizationUrl(new HttpUserSession(request));
@@ -155,10 +202,7 @@ public class LoginController extends AbstractController {
 		} else if ("guest".equals(type)) {
 			List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 			authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
-			String username = "";
-			if (guestName != null && guestName.startsWith("Guest") && guestName.length() == MAX_USERNAME_LENGTH) {
-				username = guestName;
-			} else {
+			if (username == null || !username.startsWith("Guest") || username.length() != MAX_USERNAME_LENGTH) {
 				username = "Guest" + Sha512DigestUtils.shaHex(request.getSession().getId()).substring(0, MAX_GUESTHASH_LENGTH);
 			}
 			org.springframework.security.core.userdetails.User user =
@@ -172,45 +216,8 @@ public class LoginController extends AbstractController {
 					SecurityContextHolder.getContext());
 			result = new RedirectView(null == successUrl ? referer + "#auth/checkLogin" : successUrl);
 		}
-				
+
 		return result;
-	}
-	
-	@RequestMapping(value = { "/auth/ldaplogin" }, method = RequestMethod.POST)
-	public final View doLdapLogin(
-			@RequestParam("type") final String type,
-			@RequestParam(value = "user") final String userName,
-			@RequestParam(value = "referer", required = false) final String forcedReferer,
-			@RequestParam(value = "password") final String password,
-			final HttpServletRequest request,
-			final HttpServletResponse response
-	) {
-		if ("ldap".equals(type) && !"".equals(userName) && !"".equals(password)) {
-			org.springframework.security.core.userdetails.User user =
-					new org.springframework.security.core.userdetails.User(
-						userName, password, true, true, true, true, this.getAuthorities()
-					);
-			
-			Authentication token = new UsernamePasswordAuthenticationToken(user, password, getAuthorities());
-			try {
-				Authentication auth = ldapAuthenticationProvider.authenticate(token);
-				if (auth.isAuthenticated()) {
-					SecurityContextHolder.getContext().setAuthentication(token);
-					request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-							SecurityContextHolder.getContext());
-
-					return null;
-				}
-				LOGGER.info("LDAPLOGIN: {}", auth.isAuthenticated());
-			}
-			catch (AuthenticationException e) {
-				LOGGER.info("No LDAP login: {}", e);
-			}
-		}
-
-		response.setStatus(HttpStatus.UNAUTHORIZED.value());
-
-		return null;
 	}
 
 	@RequestMapping(value = { "/auth/", "/whoami" }, method = RequestMethod.GET)
@@ -220,7 +227,7 @@ public class LoginController extends AbstractController {
 		return userService.getCurrentUser();
 	}
 
-	@RequestMapping(value = { "/auth/logout", "/logout" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/auth/logout", "/logout" }, method = { RequestMethod.POST, RequestMethod.GET } )
 	public final View doLogout(final HttpServletRequest request) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		userService.removeUserFromMaps(userService.getCurrentUser());
@@ -285,7 +292,40 @@ public class LoginController extends AbstractController {
 
 		return services;
 	}
-	
+
+	@RequestMapping(value = { "/auth/register" }, method = RequestMethod.POST)
+	public final void register(
+			@RequestParam final String username,
+			@RequestParam final String password,
+			final HttpServletRequest request,
+			final HttpServletResponse response
+	) {
+		if (null != userService.createDbUser(username, password)) {
+			return;
+		}
+
+		/* TODO: Improve error handling: send reason to client */
+		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+	}
+
+	@RequestMapping(value = { "/auth/activate" }, method = {RequestMethod.POST, RequestMethod.GET})
+	public final void activate(
+			@RequestParam final String username,
+			@RequestParam final String key,
+			final HttpServletRequest request,
+			final HttpServletResponse response
+	) {
+		DbUser dbUser = userService.getDbUser(username);
+		if (null != dbUser && key.equals(dbUser.getActivationKey())) {
+			dbUser.setActivationKey(null);
+			userService.updateDbUser(dbUser);
+
+			return;
+		}
+
+		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+	}
+
 	private Collection<GrantedAuthority> getAuthorities() {
 		List<GrantedAuthority> authList = new ArrayList<GrantedAuthority>();
 		authList.add(new SimpleGrantedAuthority("ROLE_USER"));

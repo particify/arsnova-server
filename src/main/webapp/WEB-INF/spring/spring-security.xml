@@ -17,20 +17,32 @@
         <security:authentication-provider ref="twitterAuthProvider" />
         <security:authentication-provider ref="googleAuthProvider" />
         <security:authentication-provider ref="casAuthenticationProvider" />
+        <security:authentication-provider ref="daoAuthenticationProvider" />
     </security:authentication-manager>
 
-    <security:http entry-point-ref="loginUrlAuthenticationEntryPoint">
+    <security:http entry-point-ref="restLoginEntryPoint">
         <security:custom-filter ref="facebookFilter" before="CAS_FILTER" />
         <security:custom-filter ref="twitterFilter" after="CAS_FILTER" />
         <security:custom-filter ref="googleFilter" before="FORM_LOGIN_FILTER" />
         
 		<security:custom-filter ref="casAuthenticationFilter" position="CAS_FILTER" />
-		<security:custom-filter ref="requestSingleLogoutFilter" before="LOGOUT_FILTER" />  
+		<security:custom-filter ref="requestSingleLogoutFilter" before="LOGOUT_FILTER" />
     </security:http>
+
+	<!-- ######################### DB auth ############################# -->
+	<bean id="daoAuthenticationProvider"
+			class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+		<property name="userDetailsService" ref="dbUserDetailsService" />
+		<property name="passwordEncoder" ref="passwordEncoder" />
+	</bean>
+	
+	<bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
 
     <!-- ######################### LDAP ############################# -->
 	<!-- <security:ldap-server url="${security.ldap.url}" /> -->
 	<security:ldap-server ldif="classpath:/test.ldif" root="dc=example,dc=com" />
+	
+	<bean id="restLoginEntryPoint" class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint" />
 
 	<bean id="loginUrlAuthenticationEntryPoint"
 		class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">

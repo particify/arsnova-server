@@ -27,7 +27,7 @@
 	
 	<import resource="spring-security.xml" />
 
-	<context:component-scan base-package="de.thm.arsnova.dao,de.thm.arsnova.services,de.thm.arsnova.events" />
+	<context:component-scan base-package="de.thm.arsnova.dao,de.thm.arsnova.events,de.thm.arsnova.security,de.thm.arsnova.services" />
 	<context:annotation-config />
 
 	<task:annotation-driven />

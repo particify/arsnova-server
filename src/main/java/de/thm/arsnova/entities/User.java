@@ -17,6 +17,7 @@ public class User implements Serializable {
 	public static final String FACEBOOK = "facebook";
 	public static final String THM = "thm";
 	public static final String LDAP = "ldap";
+	public static final String ARSNOVA = "arsnova";
 	public static final String ANONYMOUS = "anonymous";
 	public static final String GUEST = "guest";
 

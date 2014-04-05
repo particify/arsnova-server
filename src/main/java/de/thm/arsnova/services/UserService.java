@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PreDestroy;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.scribe.up.profile.facebook.FacebookProfile;
 import org.scribe.up.profile.google.Google2Profile;
 import org.scribe.up.profile.twitter.TwitterProfile;
@@ -23,12 +24,16 @@ import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.keygen.BytesKeyGenerator;
+import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationToken;
 
 import de.thm.arsnova.dao.IDatabaseDao;
+import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
@@ -54,6 +59,9 @@ public class UserService implements IUserService {
 
 	@Autowired
 	private ARSnovaSocketIOServer socketIoServer;
+	
+	private BytesKeyGenerator keygen;
+	private BCryptPasswordEncoder encoder;
 
 	@Scheduled(fixedDelay = DEFAULT_SCHEDULER_DELAY_MS)
 	public final void removeInactiveUsersFromLegacyMap() {
@@ -109,6 +117,8 @@ public class UserService implements IUserService {
 			user = new User(token);
 			if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_GUEST"))) {
 				user.setType(User.GUEST);
+			} else if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_DB_USER"))) {
+				user.setType(User.ARSNOVA);
 			}
 		}
 
@@ -238,5 +248,46 @@ public class UserService implements IUserService {
 	@Override
 	public int loggedInUsers() {
 		return user2sessionLegacy.size();
+	}
+
+	@Override
+	public DbUser getDbUser(String username) {
+		return databaseDao.getUser(username);
+	}
+
+	@Override
+	public DbUser createDbUser(String username, String password) {
+		if (null == keygen) {
+			keygen = KeyGenerators.secureRandom(32);
+		}
+		
+		if (null != databaseDao.getUser(username)) {
+			return null;
+		}
+
+		DbUser dbUser = new DbUser();
+		dbUser.setUsername(username);
+		dbUser.setPassword(encodePassword(password));
+		dbUser.setActivationKey(RandomStringUtils.randomAlphanumeric(32));
+		dbUser.setCreation(System.currentTimeMillis());
+
+		return databaseDao.createOrUpdateUser(dbUser);
+	}
+
+	public String encodePassword(String password) {
+		if (null == encoder) {
+			encoder = new BCryptPasswordEncoder(12);
+		}
+
+		return encoder.encode(password);
+	}
+
+	@Override
+	public DbUser updateDbUser(DbUser dbUser) {
+		if (null != dbUser.getId()) {
+			return databaseDao.createOrUpdateUser(dbUser);
+		}
+		
+		return null;
 	}
 }
