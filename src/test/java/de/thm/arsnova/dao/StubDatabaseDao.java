@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.FoodVote;
 import de.thm.arsnova.entities.InterposedQuestion;
@@ -496,5 +497,17 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public void deleteAllQuestionsAnswers(Session session) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public DbUser createOrUpdateUser(DbUser user) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DbUser getUser(String username) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -50,6 +50,7 @@ import com.fourspaces.couchdb.ViewResults;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.FoodVote;
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.InterposedReadingCount;
@@ -1337,5 +1338,51 @@ public class CouchDBDao implements IDatabaseDao {
 		for (Question q : questions) {
 			this.deleteAnswers(q);
 		}
+	}
+
+	@Override
+	public DbUser createOrUpdateUser(DbUser user) {
+		try {
+			String id = user.getId();
+			String rev = user.getRev();
+			Document d = new Document();
+
+			if (null != id) {
+				d = database.getDocument(id, rev);
+			}
+
+			d.put("type", "userdetails");
+			d.put("username", user.getUsername());
+			d.put("password", user.getPassword());
+			d.put("activationKey", user.getActivationKey());
+			d.put("creation", user.getCreation());
+			d.put("lastLogin", user.getLastLogin());
+
+			database.saveDocument(d, id);
+			user.setId(d.getId());
+			user.setRev(d.getRev());
+
+			return user;
+		} catch (IOException e) {
+			LOGGER.error("Could not save user {}", user);
+		}
+
+		return null;
+	}
+
+	@Override
+	public DbUser getUser(String username) {
+		NovaView view = new NovaView("user/all");
+		view.setKey(username);
+		ViewResults results = this.getDatabase().view(view);
+
+		if (results.getJSONArray("rows").optJSONObject(0) == null) {
+			return null;
+		}
+
+		return (DbUser) JSONObject.toBean(
+			results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
+			DbUser.class
+		);
 	}
 }
