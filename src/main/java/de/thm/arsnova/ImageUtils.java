@@ -22,6 +22,7 @@ package de.thm.arsnova;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -59,9 +60,8 @@ public class ImageUtils {
 
 			String extension = urlParts[urlParts.length-1];
 
-	    	// TODO: Check in frontend if really needed to append this string
 	    	result.append("data:image/" + extension + ";base64,");
-	    	result.append(Base64.encodeBase64String(convertImageToByteArray(imageUrl, extension)));
+	    	result.append(Base64.encodeBase64String(convertFileToByteArray(imageUrl)));
 	    	
 			return result.toString();
 	    }
@@ -81,9 +81,45 @@ public class ImageUtils {
 			URL 				  url   = new URL(imageUrl);
 			BufferedImage 		  image = ImageIO.read(url);
 		    ByteArrayOutputStream baos  = new ByteArrayOutputStream();
-		    
+
 		    ImageIO.write(image, extension, baos);
+		    
 		    baos.flush();
+		    baos.close();
+		    return baos.toByteArray();
+		    
+		} catch (MalformedURLException e) {
+			LOGGER.error(e.getLocalizedMessage());
+		} catch (IOException e) {
+			LOGGER.error(e.getLocalizedMessage());
+		}
+
+	    return null;
+	}
+	
+	/**
+	 * Gets the bytestream of an image url.
+	 * s
+	 * @param  imageUrl The image url as a {@link String}
+	 * @return The <code>byte[]</code> of the image on success, otherwise <code>null</code>.
+	 */
+	public static byte[] convertFileToByteArray(String imageUrl) {
+
+		try {
+			URL 				  url   = new URL(imageUrl);
+		    ByteArrayOutputStream baos  = new ByteArrayOutputStream();
+		    
+		    InputStream is = url.openStream();
+		    byte[] byteChunk = new byte[4096]; // Or whatever size you want to read in at a time.
+		    int n;
+
+		    while ( (n = is.read(byteChunk)) > 0 ) {
+		    	baos.write(byteChunk, 0, n);
+		    }
+
+		    baos.flush();
+		    baos.close();
+		    
 		    return baos.toByteArray();
 		    
 		} catch (MalformedURLException e) {
