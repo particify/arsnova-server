@@ -20,7 +20,7 @@
 		<property name="locations">
 			<list>
 				<value>arsnova.properties.example</value>
-				<value>file:///etc/arsnova/arsnova.properties</value>
+				<value>file:///C:/_Dev/WS1314/MSP/arsnova/arsnova-war/src/main/webapp/arsnova.properties</value>
 			</list>
 		</property>
 	</bean>
