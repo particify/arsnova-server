@@ -59,7 +59,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
-import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.ServiceDescription;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
@@ -291,39 +290,6 @@ public class LoginController extends AbstractController {
 		}
 
 		return services;
-	}
-
-	@RequestMapping(value = { "/auth/register" }, method = RequestMethod.POST)
-	public final void register(
-			@RequestParam final String username,
-			@RequestParam final String password,
-			final HttpServletRequest request,
-			final HttpServletResponse response
-	) {
-		if (null != userService.createDbUser(username, password)) {
-			return;
-		}
-
-		/* TODO: Improve error handling: send reason to client */
-		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-	}
-
-	@RequestMapping(value = { "/auth/activate" }, method = {RequestMethod.POST, RequestMethod.GET})
-	public final void activate(
-			@RequestParam final String username,
-			@RequestParam final String key,
-			final HttpServletRequest request,
-			final HttpServletResponse response
-	) {
-		DbUser dbUser = userService.getDbUser(username);
-		if (null != dbUser && key.equals(dbUser.getActivationKey())) {
-			dbUser.setActivationKey(null);
-			userService.updateDbUser(dbUser);
-
-			return;
-		}
-
-		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 	}
 
 	private Collection<GrantedAuthority> getAuthorities() {

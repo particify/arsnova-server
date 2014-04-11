@@ -321,7 +321,7 @@ public class UserService implements IUserService {
 
 	public void sendActivationEmail(DbUser dbUser) {
 		SimpleMailMessage msg = new SimpleMailMessage(regMailTemplate);
-		String activationUrl = MessageFormat.format("{0}/auth/activate?username={1}&key={2}", arsnovaUrl, dbUser.getUsername(), dbUser.getActivationKey());
+		String activationUrl = MessageFormat.format("{0}/user/activate?username={1}&key={2}", arsnovaUrl, dbUser.getUsername(), dbUser.getActivationKey());
 		msg.setTo(dbUser.getUsername());
 		msg.setText(MessageFormat.format(msg.getText(), activationUrl));
 		LOGGER.debug("Activation mail body: {}", msg.getText());
