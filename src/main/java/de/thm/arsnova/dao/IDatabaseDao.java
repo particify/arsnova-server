@@ -162,8 +162,10 @@ public interface IDatabaseDao {
 	void publishAllQuestions(Session session, boolean publish);
 
 	void deleteAllQuestionsAnswers(Session session);
-	
+
 	DbUser createOrUpdateUser(DbUser user);
-	
+
 	DbUser getUser(String username);
+
+	boolean deleteUser(DbUser dbUser);
 }

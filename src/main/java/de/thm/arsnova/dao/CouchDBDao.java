@@ -1385,4 +1385,17 @@ public class CouchDBDao implements IDatabaseDao {
 			DbUser.class
 		);
 	}
+
+	@Override
+	public boolean deleteUser(DbUser dbUser) {
+		try {
+			this.deleteDocument(dbUser.getId());
+
+			return true;
+		} catch (IOException e) {
+			LOGGER.error("Could not delete user {}", dbUser.getId());
+		}
+
+		return false;
+	}
 }

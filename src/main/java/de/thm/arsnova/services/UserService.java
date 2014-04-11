@@ -45,6 +45,7 @@ import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationToken
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
@@ -364,5 +365,24 @@ public class UserService implements IUserService {
 		}
 
 		return null;
+	}
+
+	@Override
+	public DbUser deleteDbUser(String username) {
+		User user = getCurrentUser();
+		if (!user.getUsername().equals(username)
+				&& SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+						.contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+			throw new UnauthorizedException();
+		}
+
+		DbUser dbUser = databaseDao.getUser(username);
+		if (null == dbUser) {
+			throw new NotFoundException();
+		}
+
+		databaseDao.deleteUser(dbUser);
+
+		return dbUser;
 	}
 }

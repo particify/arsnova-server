@@ -54,10 +54,12 @@ public interface IUserService {
 	void removeUserFromMaps(User user);
 
 	int loggedInUsers();
-	
+
 	DbUser getDbUser(String username);
-	
+
 	DbUser createDbUser(String username, String password);
-	
+
 	DbUser updateDbUser(DbUser dbUser);
+
+	DbUser deleteDbUser(String username);
 }
