@@ -3,8 +3,14 @@ security.arsnova-url=http://localhost:8080
 security.guest.enabled=true
 security.guest.lecturer.enabled=true
 
+security.user-db.enabled=true
+security.user-db.allowed-email-domains=*
+security.user-db.registration-mail.subject=ARSnova Registration
+security.user-db.registration-mail.body=Welcome to ARSnova!\n\nPlease confirm your registration by visiting the following web address:\n{0}\n\nAfterwards, you can log into ARSnova with your e-mail address and password.
+
 security.ldap.enabled=true
 security.ldap.url=ldap://example.com:33389/dc=example,dc=com
+security.ldap.user-dn-pattern=uid={0},ou=arsnova
 security.ldap.user-search-filter=(uid={0})
 security.ldap.user-search-base="ou=people"
 
@@ -26,6 +32,10 @@ security.google.secret=
 security.ssl=false
 security.keystore=/etc/arsnova.thm.de.jks
 security.storepass=arsnova
+
+mail.sender.name=ARSnova
+mail.sender.address=
+mail.host=
 
 # minutes, after which the feedback is deleted
 feedback.cleanup=10

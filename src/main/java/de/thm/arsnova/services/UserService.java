@@ -1,5 +1,8 @@
 package de.thm.arsnova.services;
 
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -7,16 +10,22 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.scribe.up.profile.facebook.FacebookProfile;
 import org.scribe.up.profile.google.Google2Profile;
 import org.scribe.up.profile.twitter.TwitterProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,6 +36,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.keygen.BytesKeyGenerator;
 import org.springframework.security.crypto.keygen.KeyGenerators;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +48,7 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
+@Service
 public class UserService implements IUserService {
 
 	private static final int DEFAULT_SCHEDULER_DELAY_MS = 60000;
@@ -59,7 +70,20 @@ public class UserService implements IUserService {
 
 	@Autowired
 	private ARSnovaSocketIOServer socketIoServer;
-	
+
+	@Autowired
+	private MailSender mailSender;
+
+	@Autowired
+	private SimpleMailMessage regMailTemplate;
+
+	@Value("${security.user-db.allowed-email-domains}")
+	private String allowedEmailDomains;
+
+	@Value("${security.arsnova-url}")
+	private String arsnovaUrl;
+
+	private Pattern mailPattern;
 	private BytesKeyGenerator keygen;
 	private BCryptPasswordEncoder encoder;
 
@@ -260,7 +284,15 @@ public class UserService implements IUserService {
 		if (null == keygen) {
 			keygen = KeyGenerators.secureRandom(32);
 		}
-		
+
+		if (null == mailPattern) {
+			parseMailAddressPattern();
+		}
+
+		if (null == mailPattern || !mailPattern.matcher(username).matches()) {
+			return null;
+		}
+
 		if (null != databaseDao.getUser(username)) {
 			return null;
 		}
@@ -271,7 +303,12 @@ public class UserService implements IUserService {
 		dbUser.setActivationKey(RandomStringUtils.randomAlphanumeric(32));
 		dbUser.setCreation(System.currentTimeMillis());
 
-		return databaseDao.createOrUpdateUser(dbUser);
+		DbUser result = databaseDao.createOrUpdateUser(dbUser);
+		if (null != result) {
+			sendActivationEmail(result);
+		}
+
+		return result;
 	}
 
 	public String encodePassword(String password) {
@@ -282,12 +319,50 @@ public class UserService implements IUserService {
 		return encoder.encode(password);
 	}
 
+	public void sendActivationEmail(DbUser dbUser) {
+		SimpleMailMessage msg = new SimpleMailMessage(regMailTemplate);
+		String activationUrl = MessageFormat.format("{0}/auth/activate?username={1}&key={2}", arsnovaUrl, dbUser.getUsername(), dbUser.getActivationKey());
+		msg.setTo(dbUser.getUsername());
+		msg.setText(MessageFormat.format(msg.getText(), activationUrl));
+		LOGGER.debug("Activation mail body: {}", msg.getText());
+
+		try {
+			LOGGER.info("Sending activation mail to {}", dbUser.getUsername());
+			mailSender.send(msg);
+		} catch (MailException e) {
+			LOGGER.warn("Activation mail could not be sent: {}", e);
+		}
+	}
+
+	private void parseMailAddressPattern() {
+		/* TODO: Add Unicode support */
+
+		List<String> domainList = Arrays.asList(allowedEmailDomains.split(","));
+
+		if (domainList.size() > 0) {
+			List<String> patterns = new ArrayList<String>();
+			if (domainList.contains("*")) {
+				patterns.add("([a-z0-9-]\\.)+[a-z0-9-]");
+			} else {
+				Pattern patternPattern = Pattern.compile("[a-z0-9.*-]+", Pattern.CASE_INSENSITIVE);
+				for (String patternStr : domainList) {
+					if (patternPattern.matcher(patternStr).matches()) {
+						patterns.add(patternStr.replaceAll("[.]", "[.]").replaceAll("[*]", "[a-z0-9-]+?"));
+					}
+				}
+			}
+
+			mailPattern = Pattern.compile("[a-z0-9._-]+?@(" + StringUtils.join(patterns, "|") + ")", Pattern.CASE_INSENSITIVE);
+			LOGGER.info("Allowed e-mail addresses (pattern) for registration: " + mailPattern.pattern());
+		}
+	}
+
 	@Override
 	public DbUser updateDbUser(DbUser dbUser) {
 		if (null != dbUser.getId()) {
 			return databaseDao.createOrUpdateUser(dbUser);
 		}
-		
+
 		return null;
 	}
 }

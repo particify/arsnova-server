@@ -1,29 +1,50 @@
 security.arsnova-url=http://localhost:8080
+
+security.guest.enabled=true
+security.guest.lecturer.enabled=true
+
+security.user-db.enabled=true
+security.user-db.allowed-email-domains=*
+security.user-db.registration-mail.subject=ARSnova Registration
+security.user-db.registration-mail.body=Welcome to ARSnova!\n\nPlease confirm your registration by visiting the following web address:\n{0}\n\nAfterwards, you can log into ARSnova with your e-mail address and password.
+
+security.ldap.enabled=true
+security.ldap.url=ldap://example.com:33389/dc=example,dc=com
+security.ldap.user-dn-pattern=uid={0},ou=arsnova
+security.ldap.user-search-filter=(uid={0})
+security.ldap.user-search-base="ou=people"
+
+security.cas.enabled=true
 security.cas-server-url=https://cas.thm.de/cas
 
-security.facebook.key=318531508227494
-security.facebook.secret=e3f38cfc72bb63e35641b637081a6177
+security.facebook.enabled=true
+security.facebook.key=
+security.facebook.secret=
 
-security.twitter.key=PEVtidSG0HzSrxVRPpsCXw
-security.twitter.secret=mC0HOvxiEgqwdDWCcDoy3q75nUQPu1bYRp1ncHWGd0
+security.twitter.enabled=true
+security.twitter.key=
+security.twitter.secret=
 
-security.google.key=110959746118.apps.googleusercontent.com
-security.google.secret=CkzUJZswY8rjWCCYnHVovyGA
+security.google.enabled=true
+security.google.key=
+security.google.secret=
 
 security.ssl=false
 security.keystore=/etc/arsnova.thm.de.jks
 security.storepass=arsnova
 
-security.ldap.url=ldap://example.com:389/dc=example,dc=com
-security.ldap.user-search-filter=(uid={0})
-security.ldap.user-search-base=
+mail.sender.name=ARSnova
+mail.sender.address=
+mail.host=
+
+# minutes, after which the feedback is deleted
+feedback.cleanup=10
 
 couchdb.host=localhost
 couchdb.port=5984
 couchdb.name=arsnova
-
-# minutes, after which the feedback is deleted
-feedback.cleanup=10
+couchdb.username=admin
+couchdb.password=
 
 socketio.ip=0.0.0.0
 socketio.port=10443

@@ -48,7 +48,15 @@
 	
 	<bean id="userSessionAspect" class="de.thm.arsnova.aop.UserSessionAspect" />
 
-	<bean id="userService" scope="singleton" class="de.thm.arsnova.services.UserService" />
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="${mail.host}"/>
+	</bean>
+
+	<bean id="templateMessage" class="org.springframework.mail.SimpleMailMessage">
+		<property name="from" value="${mail.sender.address} <${mail.sender.address}>"/>
+		<property name="subject" value="${security.user-db.registration-mail.subject}"/>
+		<property name="text" value="${security.user-db.registration-mail.body}"/>
+	</bean>
 
 	<!-- Example of connector client configuration -->
 	<!-- Uncomment bean definition to activate connector -->
