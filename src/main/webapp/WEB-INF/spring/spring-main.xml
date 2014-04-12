@@ -52,12 +52,6 @@
 		<property name="host" value="${mail.host}"/>
 	</bean>
 
-	<bean id="templateMessage" class="org.springframework.mail.SimpleMailMessage">
-		<property name="from" value="${mail.sender.address} &lt;${mail.sender.address}&gt;"/>
-		<property name="subject" value="${security.user-db.registration-mail.subject}"/>
-		<property name="text" value="${security.user-db.registration-mail.body}"/>
-	</bean>
-
 	<!-- Example of connector client configuration -->
 	<!-- Uncomment bean definition to activate connector -->
 	<!-- bean id="connectorClient" scope="singleton" class="de.thm.arsnova.connector.client.ConnectorClientImpl">

@@ -13,6 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import javax.annotation.PreDestroy;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
@@ -24,8 +26,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
-import org.springframework.mail.MailSender;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -73,16 +75,25 @@ public class UserService implements IUserService {
 	private ARSnovaSocketIOServer socketIoServer;
 
 	@Autowired
-	private MailSender mailSender;
-
-	@Autowired
-	private SimpleMailMessage regMailTemplate;
+	private JavaMailSender mailSender;
 
 	@Value("${security.user-db.allowed-email-domains}")
 	private String allowedEmailDomains;
 
 	@Value("${security.arsnova-url}")
 	private String arsnovaUrl;
+
+	@Value("${mail.sender.address}")
+	private String regMailSenderAddress;
+	
+	@Value("${mail.sender.name}")
+	private String regMailSenderName;
+	
+	@Value("${security.user-db.registration-mail.subject}")
+	private String regMailSubject;
+	
+	@Value("${security.user-db.registration-mail.body}")
+	private String regMailBody;
 
 	private Pattern mailPattern;
 	private BytesKeyGenerator keygen;
@@ -321,15 +332,21 @@ public class UserService implements IUserService {
 	}
 
 	public void sendActivationEmail(DbUser dbUser) {
-		SimpleMailMessage msg = new SimpleMailMessage(regMailTemplate);
 		String activationUrl = MessageFormat.format("{0}/user/activate?username={1}&key={2}", arsnovaUrl, dbUser.getUsername(), dbUser.getActivationKey());
-		msg.setTo(dbUser.getUsername());
-		msg.setText(MessageFormat.format(msg.getText(), activationUrl));
-		LOGGER.debug("Activation mail body: {}", msg.getText());
-
+		MimeMessage msg = mailSender.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(msg);
 		try {
-			LOGGER.info("Sending activation mail to {}", dbUser.getUsername());
+			helper.setFrom(regMailSenderName + "<" + regMailSenderAddress + ">");
+			helper.setTo(dbUser.getUsername());
+			helper.setSubject(regMailSubject);
+			helper.setText(MessageFormat.format(regMailBody, activationUrl));
+			msg.setHeader("Content-Type", "text/plain; charset=UTF-8");
+
+			LOGGER.debug("Message encoding: {}", new Object[] {helper.getEncoding()});
+			LOGGER.info("Sending activation mail from \"{}\" to \"{}\"", new Object[] {msg.getFrom(), dbUser.getUsername()});
 			mailSender.send(msg);
+		} catch (MessagingException e) {
+			LOGGER.warn("Activation mail could not be sent: {}", e);
 		} catch (MailException e) {
 			LOGGER.warn("Activation mail could not be sent: {}", e);
 		}
