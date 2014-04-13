@@ -28,6 +28,10 @@ import de.thm.arsnova.entities.User;
 
 public interface IUserService {
 	User getCurrentUser();
+	
+	boolean isBannedFromLogin(String addr);
+
+	void increaseFailedLoginCount(String addr);
 
 	User getUser2SocketId(UUID socketId);
 

@@ -24,6 +24,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -38,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
@@ -125,6 +127,13 @@ public class LoginController extends AbstractController {
 			final HttpServletRequest request,
 			final HttpServletResponse response
 	) throws IOException, ServletException {
+		String addr = request.getRemoteAddr();
+		if (userService.isBannedFromLogin(addr)) {
+			response.sendError(429, "Too Many Requests");
+
+			return null;
+		}
+
 		userSessionService.setRole(role);
 
 		String referer = request.getHeader("referer");
@@ -148,15 +157,20 @@ public class LoginController extends AbstractController {
 
 		if ("arsnova".equals(type)) {
 			Authentication authRequest = new UsernamePasswordAuthenticationToken(username, password);
-			Authentication auth = daoProvider.authenticate(authRequest);
-			if (auth.isAuthenticated()) {
-				SecurityContextHolder.getContext().setAuthentication(auth);
-				request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-						SecurityContextHolder.getContext());
-				
-				return null;
+			try {
+				Authentication auth = daoProvider.authenticate(authRequest);
+				if (auth.isAuthenticated()) {
+					SecurityContextHolder.getContext().setAuthentication(auth);
+					request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+							SecurityContextHolder.getContext());
+					
+					return null;
+				}
+			} catch (AuthenticationException e) {
+				LOGGER.info("Authentication failed: {}", e.getMessage());
 			}
 
+			userService.increaseFailedLoginCount(addr);
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 
 			return null;
@@ -183,6 +197,7 @@ public class LoginController extends AbstractController {
 					LOGGER.info("No LDAP login: {}", e);
 				}
 
+				userService.increaseFailedLoginCount(addr);
 				response.setStatus(HttpStatus.UNAUTHORIZED.value());
 
 				return null;

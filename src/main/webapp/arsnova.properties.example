@@ -1,4 +1,5 @@
 security.arsnova-url=http://localhost:8080
+security.authentication.login-try-limit=50
 
 security.guest.enabled=true
 security.guest.lecturer.enabled=true

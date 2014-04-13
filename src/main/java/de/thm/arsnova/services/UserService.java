@@ -3,6 +3,7 @@ package de.thm.arsnova.services;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +57,10 @@ public class UserService implements IUserService {
 
 	private static final int DEFAULT_SCHEDULER_DELAY_MS = 60000;
 
+	private static final int LOGIN_TRY_RESET_DELAY_MS = 30 * 1000;
+
+	private static final int LOGIN_BAN_RESET_DELAY_MS = 2 * 60 * 1000;
+
 	private static final int MAX_USER_INACTIVE_SECONDS = 120;
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
@@ -95,9 +100,35 @@ public class UserService implements IUserService {
 	@Value("${security.user-db.registration-mail.body}")
 	private String regMailBody;
 
+	@Value("${security.authentication.login-try-limit}")
+	private int loginTryLimit;
+
 	private Pattern mailPattern;
 	private BytesKeyGenerator keygen;
 	private BCryptPasswordEncoder encoder;
+	private ConcurrentHashMap<String, Byte> loginTries;
+	private Set<String> loginBans;
+
+	{
+		loginTries = new ConcurrentHashMap<String, Byte>();
+		loginBans = Collections.synchronizedSet(new HashSet<String>());
+	}
+
+	@Scheduled(fixedDelay = LOGIN_TRY_RESET_DELAY_MS)
+	public void resetLoginTries() {
+		if (loginTries.size() > 0) {
+			LOGGER.debug("Reset failed login counters.");
+			loginTries.clear();
+		}
+	}
+
+	@Scheduled(fixedDelay = LOGIN_BAN_RESET_DELAY_MS)
+	public void resetLoginBans() {
+		if (loginBans.size() > 0) {
+			LOGGER.info("Reset temporary login bans.");
+			loginBans.clear();
+		}
+	}
 
 	@Scheduled(fixedDelay = DEFAULT_SCHEDULER_DELAY_MS)
 	public final void removeInactiveUsersFromLegacyMap() {
@@ -163,6 +194,24 @@ public class UserService implements IUserService {
 		}
 
 		return user;
+	}
+
+	public boolean isBannedFromLogin(String addr) {
+		return loginBans.contains(addr);
+	}
+
+	public void increaseFailedLoginCount(String addr) {
+		Byte tries = (Byte) loginTries.get(addr);
+		if (null == tries) {
+			tries = 0;
+		}
+		if (tries < 5) {
+			loginTries.put(addr, ++tries);
+			if (5 == tries) {
+				LOGGER.info("Temporarily banned {} from login.", new Object[] {addr});
+				loginBans.add(addr);
+			}
+		}
 	}
 
 	@Override
