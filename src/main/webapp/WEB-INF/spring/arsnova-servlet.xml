@@ -1,64 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:aop="http://www.springframework.org/schema/aop"
-	xmlns:mvc="http://www.springframework.org/schema/mvc"
-	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:context="http://www.springframework.org/schema/context"
 	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd">
 
 	<!-- ARSnova Servlet Context -->
-	
-	<context:component-scan base-package="de.thm.arsnova.controller" />
-	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" />
-	
-	<bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
-	    <property name="favorPathExtension" value="false" />
-	    <property name="favorParameter" value="true" />
-	    <property name="mediaTypes" >
-	        <value>
-	        	html=text/html
-	          	json=application/json
-	        </value>
-	    </property>
+
+	<context:component-scan base-package="de.thm.arsnova.controller,de.thm.arsnova.web" />
+	<mvc:annotation-driven
+		content-negotiation-manager="contentNegotiationManager" />
+
+	<bean id="contentNegotiationManager"
+		class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+		<property name="favorPathExtension" value="false" />
+		<property name="favorParameter" value="true" />
+		<property name="mediaTypes">
+			<value>
+				html=text/html
+				json=application/json
+			</value>
+		</property>
 	</bean>
 
 	<mvc:annotation-driven />
 	<mvc:resources mapping="/**" location="/" />
-	
+
 	<!-- -->
-	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
-	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
 		<property name="messageConverters">
 			<list>
-	            <bean class = "org.springframework.http.converter.StringHttpMessageConverter">
-	                <property name="supportedMediaTypes" value = "text/plain;charset=UTF-8" />
-	            </bean>
-				<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter" />
+				<bean
+					class="org.springframework.http.converter.StringHttpMessageConverter">
+					<property name="supportedMediaTypes" value="text/plain;charset=UTF-8" />
+				</bean>
+				<bean
+					class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter" />
 			</list>
 		</property>
 	</bean>
 	<!-- -->
 
-	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
-		<property name="viewResolvers">  
-			<list>  
-				<bean class="org.springframework.web.servlet.view.UrlBasedViewResolver">  
-					<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>  
-					<property name="prefix" value="/WEB-INF/jsp/"/>  
-					<property name="suffix" value=".jsp"/>  
-				</bean>  
-		    </list>  
-		</property>  
-		<property name="defaultViews">  
-			<list>  
-				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView">  
-					<property name="prefixJson" value="false"/>  
-				</bean>  
-			</list>  
-		</property>  
+	<bean
+		class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="viewResolvers">
+			<list>
+				<bean class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+					<property name="viewClass"
+						value="org.springframework.web.servlet.view.JstlView" />
+					<property name="prefix" value="/WEB-INF/jsp/" />
+					<property name="suffix" value=".jsp" />
+				</bean>
+			</list>
+		</property>
+		<property name="defaultViews">
+			<list>
+				<bean
+					class="org.springframework.web.servlet.view.json.MappingJackson2JsonView">
+					<property name="prefixJson" value="false" />
+				</bean>
+			</list>
+		</property>
 	</bean>
-	
+
 </beans>
