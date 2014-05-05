@@ -21,6 +21,9 @@ couchdb.name=arsnova
 # minutes, after which the feedback is deleted
 feedback.cleanup=10
 
+# maximal filesize in bytes
+upload.filesize_b=1048576
+
 socketio.ip=0.0.0.0
 socketio.port=10443
 
