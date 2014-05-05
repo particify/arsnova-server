@@ -24,9 +24,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import de.thm.arsnova.ImageUtils;
 import de.thm.arsnova.annotation.Authenticated;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Answer;
@@ -35,6 +39,7 @@ import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
@@ -51,6 +56,11 @@ public class QuestionService implements IQuestionService {
 
 	@Autowired
 	private ARSnovaSocketIOServer socketIoServer;
+	
+	@Value("${upload.filesize_b}")
+	private int uploadFileSizeByte;
+	
+	public static final Logger LOGGER = LoggerFactory.getLogger(QuestionService.class);
 
 	public void setDatabaseDao(IDatabaseDao databaseDao) {
 		this.databaseDao = databaseDao;
@@ -85,6 +95,25 @@ public class QuestionService implements IQuestionService {
 			question.setPiRound(0);
 		} else if (question.getPiRound() < 1 || question.getPiRound() > 2) {
 			question.setPiRound(1);
+		}
+		
+		// convert imageurl to base64 if neccessary
+		if ("grid".equals(question.getQuestionType())) {
+			org.slf4j.Logger logger = LoggerFactory.getLogger(QuestionService.class);
+			if (question.getImage().startsWith("http")) {
+				String base64ImageString = ImageUtils.encodeImageToString(question.getImage());
+				if (base64ImageString == null) {
+					throw new BadRequestException();
+				}
+				question.setImage(base64ImageString);
+			}
+			
+			// base64 adds offset to filesize, formular taken from: http://en.wikipedia.org/wiki/Base64#MIME
+			int fileSize =  (int)((question.getImage().length()-814)/1.37);
+			if ( fileSize > this.uploadFileSizeByte ) {
+				LOGGER.error("Could not save file. File is too large with "+ fileSize + " Byte.");
+				throw new BadRequestException();
+			}
 		}
 
 		Question result = this.databaseDao.saveQuestion(session, question);
