@@ -323,7 +323,7 @@
 		<dependency>
 			<groupId>de.thm.arsnova.connector</groupId>
 			<artifactId>connector-client</artifactId>
-			<version>0.40.0-SNAPSHOT</version>
+			<version>0.40.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>
