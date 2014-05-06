@@ -78,9 +78,9 @@ public class UserController extends AbstractController {
 		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 	}
 
-	@RequestMapping(value = { "/activate" }, method = { RequestMethod.POST,
+	@RequestMapping(value = { "/{username}/activate" }, method = { RequestMethod.POST,
 			RequestMethod.GET })
-	public final void activate(@RequestParam final String username,
+	public final void activate(@PathVariable final String username,
 			@RequestParam final String key, final HttpServletRequest request,
 			final HttpServletResponse response) {
 		DbUser dbUser = userService.getDbUser(username);
@@ -94,7 +94,7 @@ public class UserController extends AbstractController {
 		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 	}
 
-	@RequestMapping(value = { "/{username}/delete" }, method = RequestMethod.POST)
+	@RequestMapping(value = { "/{username}" }, method = RequestMethod.DELETE)
 	public final void activate(@PathVariable final String username,
 			final HttpServletRequest request,
 			final HttpServletResponse response) {

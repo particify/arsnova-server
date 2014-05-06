@@ -381,7 +381,7 @@ public class UserService implements IUserService {
 	}
 
 	public void sendActivationEmail(DbUser dbUser) {
-		String activationUrl = MessageFormat.format("{0}/user/activate?username={1}&key={2}", arsnovaUrl, dbUser.getUsername(), dbUser.getActivationKey());
+		String activationUrl = MessageFormat.format("{0}/user/{1}/activate?key={2}", arsnovaUrl, dbUser.getUsername(), dbUser.getActivationKey());
 		MimeMessage msg = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(msg);
 		try {
