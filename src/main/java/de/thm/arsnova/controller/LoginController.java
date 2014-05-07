@@ -24,7 +24,6 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -39,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
@@ -78,10 +76,12 @@ public class LoginController extends AbstractController {
 	private String guestEnabled;
 	@Value("${security.guest.lecturer.enabled}")
 	private String guestLecturerEnabled;
-	@Value("${security.cas.enabled}")
-	private String casEnabled;
+	@Value("${security.user-db.enabled}")
+	private String dbAuthEnabled;
 	@Value("${security.ldap.enabled}")
 	private String ldapEnabled;
+	@Value("${security.cas.enabled}")
+	private String casEnabled;
 	@Value("${security.facebook.enabled}")
 	private String facebookEnabled;
 	@Value("${security.google.enabled}")
@@ -267,6 +267,20 @@ public class LoginController extends AbstractController {
 				sdesc.setAllowLecturer(false);
 			}
 			services.add(sdesc);
+		}
+
+		if ("true".equals(dbAuthEnabled)) {
+			services.add(new ServiceDescription(
+				"ARSnova",
+				null
+			));
+		}
+
+		if ("true".equals(ldapEnabled)) {
+			services.add(new ServiceDescription(
+				"LDAP",
+				null
+			));
 		}
 
 		if ("true".equals(casEnabled)) {
