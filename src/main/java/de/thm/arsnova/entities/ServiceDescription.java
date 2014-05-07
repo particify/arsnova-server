@@ -1,20 +1,30 @@
 package de.thm.arsnova.entities;
 
 public class ServiceDescription {
-
+	private String id;
 	private String name;
 	private String dialogUrl;
 	private boolean allowLecturer = true;
 
-	public ServiceDescription(String name, String dialogUrl) {
+	public ServiceDescription(String id, String name, String dialogUrl) {
+		this.id = id;
 		this.name = name;
 		this.dialogUrl = dialogUrl;
 	}
 
-	public ServiceDescription(String name, String dialogUrl, boolean allowLecturer) {
+	public ServiceDescription(String id, String name, String dialogUrl, boolean allowLecturer) {
+		this.id = id;
 		this.name = name;
 		this.dialogUrl = dialogUrl;
 		this.allowLecturer = allowLecturer;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public String getName() {
@@ -40,5 +50,4 @@ public class ServiceDescription {
 	public void setAllowLecturer(boolean allowLecturer) {
 		this.allowLecturer = allowLecturer;
 	}
-
 }

@@ -78,10 +78,16 @@ public class LoginController extends AbstractController {
 	private String guestLecturerEnabled;
 	@Value("${security.user-db.enabled}")
 	private String dbAuthEnabled;
+	@Value("${security.user-db.title:ARSnova}")
+	private String dbAuthTitle;
 	@Value("${security.ldap.enabled}")
 	private String ldapEnabled;
+	@Value("${security.ldap.title:LDAP}")
+	private String ldapTitle;
 	@Value("${security.cas.enabled}")
 	private String casEnabled;
+	@Value("${security.cas.title:CAS}")
+	private String casTitle;
 	@Value("${security.facebook.enabled}")
 	private String facebookEnabled;
 	@Value("${security.google.enabled}")
@@ -262,6 +268,7 @@ public class LoginController extends AbstractController {
 
 		if ("true".equals(guestEnabled)) {
 			ServiceDescription sdesc = new ServiceDescription(
+				"guest",
 				"Guest",
 				null
 			);
@@ -273,14 +280,16 @@ public class LoginController extends AbstractController {
 
 		if ("true".equals(dbAuthEnabled)) {
 			services.add(new ServiceDescription(
-				"ARSnova",
+				"arsnova",
+				dbAuthTitle,
 				null
 			));
 		}
 
 		if ("true".equals(ldapEnabled)) {
 			services.add(new ServiceDescription(
-				"LDAP",
+				"ldap",
+				ldapTitle,
 				null
 			));
 		}
@@ -288,7 +297,8 @@ public class LoginController extends AbstractController {
 		if ("true".equals(casEnabled)) {
 			try {
 				services.add(new ServiceDescription(
-						"CAS",
+						"cas",
+						casTitle,
 						casEntryPoint.getLoginUrl()
 							+ "?" + casEntryPoint.getServiceProperties().getServiceParameter()
 							+ "=" + URLEncoder.encode(casEntryPoint.getServiceProperties().getService(), "UTF-8")
@@ -301,6 +311,7 @@ public class LoginController extends AbstractController {
 
 		if ("true".equals(facebookEnabled)) {
 			services.add(new ServiceDescription(
+				"facebook",
 				"Facebook",
 				facebookProvider.getAuthorizationUrl(new HttpUserSession(request))
 			));
@@ -308,6 +319,7 @@ public class LoginController extends AbstractController {
 
 		if ("true".equals(googleEnabled)) {
 			services.add(new ServiceDescription(
+				"google",
 				"Google",
 				googleProvider.getAuthorizationUrl(new HttpUserSession(request))
 			));
@@ -315,6 +327,7 @@ public class LoginController extends AbstractController {
 
 		if ("true".equals(twitterEnabled)) {
 			services.add(new ServiceDescription(
+				"twitter",
 				"Twitter",
 				twitterProvider.getAuthorizationUrl(new HttpUserSession(request))
 			));
