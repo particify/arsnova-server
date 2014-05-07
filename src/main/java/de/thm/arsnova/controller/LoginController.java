@@ -208,6 +208,8 @@ public class LoginController extends AbstractController {
 			String authUrl = twitterProvider.getAuthorizationUrl(new HttpUserSession(request));
 			result = new RedirectView(authUrl);
 		} else if ("facebook".equals(type)) {
+			facebookProvider.setFields("id,link");
+			facebookProvider.setScope("");
 			String authUrl = facebookProvider.getAuthorizationUrl(new HttpUserSession(request));
 			result = new RedirectView(authUrl);
 		} else if ("google".equals(type)) {
