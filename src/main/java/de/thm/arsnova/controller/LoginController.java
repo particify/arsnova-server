@@ -74,36 +74,52 @@ public class LoginController extends AbstractController {
 
 	@Value("${customization.path}")
 	private String customizationPath;
+
 	@Value("${security.guest.enabled}")
 	private String guestEnabled;
+
 	@Value("${security.guest.lecturer.enabled}")
 	private String guestLecturerEnabled;
+
 	@Value("${security.user-db.enabled}")
 	private String dbAuthEnabled;
+
 	@Value("${security.user-db.title:ARSnova}")
 	private String dbAuthTitle;
-	@Value("${security.user-db.login-dialog}")
+
+	@Value("${security.user-db.login-dialog-path}")
 	private String dbAuthDialog;
+
 	@Value("${security.user-db.image:}")
 	private String dbAuthImage;
+
 	@Value("${security.ldap.enabled}")
 	private String ldapEnabled;
+
 	@Value("${security.ldap.title:LDAP}")
 	private String ldapTitle;
-	@Value("${security.ldap.login-dialog}")
+
+	@Value("${security.ldap.login-dialog-path}")
 	private String ldapDialog;
+
 	@Value("${security.ldap.image:}")
 	private String ldapImage;
+
 	@Value("${security.cas.enabled}")
 	private String casEnabled;
+
 	@Value("${security.cas.title:CAS}")
 	private String casTitle;
+
 	@Value("${security.cas.image:}")
 	private String casImage;
+
 	@Value("${security.facebook.enabled}")
 	private String facebookEnabled;
+
 	@Value("${security.google.enabled}")
 	private String googleEnabled;
+
 	@Value("${security.twitter.enabled}")
 	private String twitterEnabled;
 

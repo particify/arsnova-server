@@ -1,3 +1,4 @@
+root-url=http://localhost:8080
 customization.path=/customization
 mobile.path=/mobile
 presenter.path=/presenter
@@ -15,7 +16,8 @@ security.guest.lecturer.enabled=true
 
 security.user-db.enabled=true
 security.user-db.title=ARSnova
-security.user-db.login-dialog=login-arsnova.html
+security.user-db.login-dialog-path=account.html
+security.user-db.activation-path=account.html
 security.user-db.image=
 security.user-db.allowed-email-domains=*
 security.user-db.registration-mail.subject=ARSnova Registration
@@ -23,7 +25,7 @@ security.user-db.registration-mail.body=Welcome to ARSnova!\n\nPlease confirm yo
 
 security.ldap.enabled=true
 security.ldap.title=LDAP
-security.ldap.login-dialog=login-ldap.html
+security.ldap.login-dialog-path=login-ldap.html
 security.user-db.image=
 security.ldap.url=ldap://example.com:33389/dc=example,dc=com
 security.ldap.user-dn-pattern=uid={0},ou=arsnova

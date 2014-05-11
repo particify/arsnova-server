@@ -1,5 +1,6 @@
 package de.thm.arsnova.services;
 
+import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +43,7 @@ import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.UriUtils;
 
 import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationToken;
 
@@ -82,21 +84,27 @@ public class UserService implements IUserService {
 	@Autowired
 	private JavaMailSender mailSender;
 
+	@Value("${root-url}")
+	private String rootUrl;
+
+	@Value("${customization.path}")
+	private String customizationPath;
+
 	@Value("${security.user-db.allowed-email-domains}")
 	private String allowedEmailDomains;
 
-	@Value("${security.arsnova-url}")
-	private String arsnovaUrl;
+	@Value("${security.user-db.activation-path}")
+	private String activationPath;
 
 	@Value("${mail.sender.address}")
 	private String regMailSenderAddress;
-	
+
 	@Value("${mail.sender.name}")
 	private String regMailSenderName;
-	
+
 	@Value("${security.user-db.registration-mail.subject}")
 	private String regMailSubject;
-	
+
 	@Value("${security.user-db.registration-mail.body}")
 	private String regMailBody;
 
@@ -381,7 +389,21 @@ public class UserService implements IUserService {
 	}
 
 	public void sendActivationEmail(DbUser dbUser) {
-		String activationUrl = MessageFormat.format("{0}/user/{1}/activate?key={2}", arsnovaUrl, dbUser.getUsername(), dbUser.getActivationKey());
+		String activationUrl;
+		try {
+			activationUrl = MessageFormat.format(
+				"{0}{1}/{2}?username={3}&key={4}",
+				rootUrl,
+				customizationPath,
+				activationPath,
+				UriUtils.encodeQueryParam(dbUser.getUsername(), "UTF-8"),
+				dbUser.getActivationKey()
+			);
+		} catch (UnsupportedEncodingException e1) {
+			LOGGER.error(e1.getMessage());
+
+			return;
+		}
 		MimeMessage msg = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(msg, "UTF-8");
 		try {
