@@ -387,6 +387,11 @@ public class CouchDBDao implements IDatabaseDao {
 				}
 			}
 
+			/* Do not clutter CouchDB. Only update once every 3 hours per session. */
+			if (loggedIn.getSessionId().equals(session.get_id()) && loggedIn.getTimestamp() > System.currentTimeMillis() - 3 * 3600000) {
+				return loggedIn;
+			}
+
 			loggedIn.setUser(user.getUsername());
 			loggedIn.setSessionId(session.get_id());
 			loggedIn.addVisitedSession(session);
@@ -420,6 +425,11 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public final void updateSessionOwnerActivity(final Session session) {
 		try {
+			/* Do not clutter CouchDB. Only update once every 3 hours. */
+			if (session.getLastOwnerActivity() > System.currentTimeMillis() - 3 * 3600000) {
+				return;
+			}
+
 			session.setLastOwnerActivity(System.currentTimeMillis());
 			JSONObject json = JSONObject.fromObject(session);
 			this.getDatabase().saveDocument(new Document(json));
