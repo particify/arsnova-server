@@ -4,12 +4,22 @@ public class ServiceDescription {
 	private String id;
 	private String name;
 	private String dialogUrl;
+	private String image;
 	private boolean allowLecturer = true;
 
 	public ServiceDescription(String id, String name, String dialogUrl) {
 		this.id = id;
 		this.name = name;
 		this.dialogUrl = dialogUrl;
+	}
+
+	public ServiceDescription(String id, String name, String dialogUrl, String image) {
+		this.id = id;
+		this.name = name;
+		this.dialogUrl = dialogUrl;
+		if (!"".equals(image)) {
+			this.image = image;
+		}
 	}
 
 	public ServiceDescription(String id, String name, String dialogUrl, boolean allowLecturer) {
@@ -41,6 +51,14 @@ public class ServiceDescription {
 
 	public void setDialogUrl(String dialogUrl) {
 		this.dialogUrl = dialogUrl;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
 	}
 
 	public boolean isAllowLecturer() {

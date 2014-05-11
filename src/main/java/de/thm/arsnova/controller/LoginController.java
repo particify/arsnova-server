@@ -72,6 +72,8 @@ public class LoginController extends AbstractController {
 	private static final int MAX_USERNAME_LENGTH = 15;
 	private static final int MAX_GUESTHASH_LENGTH = 10;
 
+	@Value("${customization.path}")
+	private String customizationPath;
 	@Value("${security.guest.enabled}")
 	private String guestEnabled;
 	@Value("${security.guest.lecturer.enabled}")
@@ -80,14 +82,24 @@ public class LoginController extends AbstractController {
 	private String dbAuthEnabled;
 	@Value("${security.user-db.title:ARSnova}")
 	private String dbAuthTitle;
+	@Value("${security.user-db.login-dialog}")
+	private String dbAuthDialog;
+	@Value("${security.user-db.image:}")
+	private String dbAuthImage;
 	@Value("${security.ldap.enabled}")
 	private String ldapEnabled;
 	@Value("${security.ldap.title:LDAP}")
 	private String ldapTitle;
+	@Value("${security.ldap.login-dialog}")
+	private String ldapDialog;
+	@Value("${security.ldap.image:}")
+	private String ldapImage;
 	@Value("${security.cas.enabled}")
 	private String casEnabled;
 	@Value("${security.cas.title:CAS}")
 	private String casTitle;
+	@Value("${security.cas.image:}")
+	private String casImage;
 	@Value("${security.facebook.enabled}")
 	private String facebookEnabled;
 	@Value("${security.google.enabled}")
@@ -282,7 +294,8 @@ public class LoginController extends AbstractController {
 			services.add(new ServiceDescription(
 				"arsnova",
 				dbAuthTitle,
-				null
+				customizationPath + "/" + dbAuthDialog,
+				dbAuthImage
 			));
 		}
 
@@ -290,7 +303,8 @@ public class LoginController extends AbstractController {
 			services.add(new ServiceDescription(
 				"ldap",
 				ldapTitle,
-				null
+				customizationPath + "/" + ldapDialog,
+				ldapImage
 			));
 		}
 
@@ -301,7 +315,8 @@ public class LoginController extends AbstractController {
 						casTitle,
 						casEntryPoint.getLoginUrl()
 							+ "?" + casEntryPoint.getServiceProperties().getServiceParameter()
-							+ "=" + URLEncoder.encode(casEntryPoint.getServiceProperties().getService(), "UTF-8")
+							+ "=" + URLEncoder.encode(casEntryPoint.getServiceProperties().getService(), "UTF-8"),
+						casImage
 					));
 			} catch (UnsupportedEncodingException e) {
 				// TODO Auto-generated catch block
