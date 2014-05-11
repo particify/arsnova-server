@@ -325,6 +325,8 @@ public class LoginController extends AbstractController {
 		}
 
 		if ("true".equals(facebookEnabled)) {
+			facebookProvider.setFields("id,link");
+			facebookProvider.setScope("");
 			services.add(new ServiceDescription(
 				"facebook",
 				"Facebook",
