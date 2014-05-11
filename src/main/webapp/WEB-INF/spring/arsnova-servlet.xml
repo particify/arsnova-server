@@ -13,7 +13,7 @@
 	<!-- ARSnova Servlet Context -->
 	
 	<context:component-scan base-package="de.thm.arsnova.controller" />
-	<context:property-placeholder location="file:///etc/arsnova/arsnova.properties" />
+	<context:property-placeholder location="file:///etc/arsnova/arsnova.properties" file-encoding="UTF-8" />
 	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" />
 	
 	<bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">

@@ -23,6 +23,7 @@
 				<value>file:///etc/arsnova/arsnova.properties</value>
 			</list>
 		</property>
+		<property name="fileEncoding" value="UTF-8" />
 	</bean>
 	
 	<import resource="spring-security.xml" />

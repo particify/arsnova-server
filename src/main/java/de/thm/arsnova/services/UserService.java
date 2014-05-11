@@ -383,15 +383,13 @@ public class UserService implements IUserService {
 	public void sendActivationEmail(DbUser dbUser) {
 		String activationUrl = MessageFormat.format("{0}/user/{1}/activate?key={2}", arsnovaUrl, dbUser.getUsername(), dbUser.getActivationKey());
 		MimeMessage msg = mailSender.createMimeMessage();
-		MimeMessageHelper helper = new MimeMessageHelper(msg);
+		MimeMessageHelper helper = new MimeMessageHelper(msg, "UTF-8");
 		try {
 			helper.setFrom(regMailSenderName + "<" + regMailSenderAddress + ">");
 			helper.setTo(dbUser.getUsername());
 			helper.setSubject(regMailSubject);
 			helper.setText(MessageFormat.format(regMailBody, activationUrl));
-			msg.setHeader("Content-Type", "text/plain; charset=UTF-8");
 
-			LOGGER.debug("Message encoding: {}", new Object[] {helper.getEncoding()});
 			LOGGER.info("Sending activation mail from \"{}\" to \"{}\"", new Object[] {msg.getFrom(), dbUser.getUsername()});
 			mailSender.send(msg);
 		} catch (MessagingException e) {
