@@ -385,11 +385,11 @@ public class CouchDBDao implements IDatabaseDao {
 					Collection<VisitedSession> visitedSessions = JSONArray.toCollection(vs, VisitedSession.class);
 					loggedIn.setVisitedSessions(new ArrayList<VisitedSession>(visitedSessions));
 				}
-			}
 
-			/* Do not clutter CouchDB. Only update once every 3 hours per session. */
-			if (loggedIn.getSessionId().equals(session.get_id()) && loggedIn.getTimestamp() > System.currentTimeMillis() - 3 * 3600000) {
-				return loggedIn;
+				/* Do not clutter CouchDB. Only update once every 3 hours per session. */
+				if (loggedIn.getSessionId().equals(session.get_id()) && loggedIn.getTimestamp() > System.currentTimeMillis() - 3 * 3600000) {
+					return loggedIn;
+				}
 			}
 
 			loggedIn.setUser(user.getUsername());
