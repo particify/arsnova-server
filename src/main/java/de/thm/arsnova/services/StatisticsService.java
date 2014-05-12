@@ -10,18 +10,18 @@ import de.thm.arsnova.entities.Statistics;
 @Service
 public class StatisticsService implements IStatisticsService {
 
-	private static final int DURATION_IN_MILLIS = 3 * 60 * 1000;
-
 	@Autowired
 	private IDatabaseDao databaseDao;
+
+	@Autowired
+	private IUserService userService;
 
 	@Autowired
 	private SessionRegistry sessionRegistry;
 
 	@Override
 	public final int countActiveUsers() {
-		long since = System.currentTimeMillis() - DURATION_IN_MILLIS;
-		return databaseDao.countActiveUsers(since);
+		return userService.loggedInUsers();
 	}
 
 	@Override
@@ -31,14 +31,13 @@ public class StatisticsService implements IStatisticsService {
 
 	@Override
 	public final Statistics getStatistics() {
-		long since = System.currentTimeMillis() - DURATION_IN_MILLIS;
-
 		Statistics statistics = new Statistics();
 		statistics.setOpenSessions(databaseDao.countOpenSessions());
 		statistics.setClosedSessions(databaseDao.countClosedSessions());
 		statistics.setAnswers(databaseDao.countAnswers());
 		statistics.setQuestions(databaseDao.countQuestions());
-		statistics.setActiveUsers(databaseDao.countActiveUsers(since));
+		statistics.setActiveUsers(userService.loggedInUsers());
+
 		return statistics;
 	}
 }
