@@ -21,6 +21,7 @@ package de.thm.arsnova.controller;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -150,44 +151,22 @@ public class LoginController extends AbstractController {
 	public static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
 
 	@RequestMapping(value = { "/auth/login", "/doLogin" }, method = { RequestMethod.POST, RequestMethod.GET })
-	public final View doLogin(
+	public final void doLogin(
 			@RequestParam("type") final String type,
 			@RequestParam(value = "user", required = false) String username,
 			@RequestParam(required = false) final String password,
-			@RequestParam(value = "referer", required = false) final String forcedReferer,
-			@RequestParam(value = "successurl", required = false) final String successUrl,
-			@RequestParam(value = "failureurl", required = false) final String failureUrl,
 			@RequestParam(value = "role", required = false) UserSessionService.Role role,
 			final HttpServletRequest request,
 			final HttpServletResponse response
-	) throws IOException, ServletException {
+	) throws IOException {
 		String addr = request.getRemoteAddr();
 		if (userService.isBannedFromLogin(addr)) {
 			response.sendError(429, "Too Many Requests");
 
-			return null;
+			return;
 		}
 
 		userSessionService.setRole(role);
-
-		String referer = request.getHeader("referer");
-		if (null != forcedReferer && null != referer && !UrlUtils.isAbsoluteUrl(referer)) {
-			/* Use a url from a request parameter as referer as long as the url is not absolute (to prevent
-			 * abuse of the redirection). */
-			referer = forcedReferer;
-		}
-		if (null == referer) {
-			referer = "/";
-		}
-
-		request.getSession().setAttribute("ars-login-success-url",
-			null == successUrl ? referer + "#auth/checkLogin" : successUrl
-		);
-		request.getSession().setAttribute("ars-login-failure-url",
-			null == failureUrl ? referer : failureUrl
-		);
-
-		View result = null;
 
 		if ("arsnova".equals(type)) {
 			Authentication authRequest = new UsernamePasswordAuthenticationToken(username, password);
@@ -198,7 +177,7 @@ public class LoginController extends AbstractController {
 					request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
 							SecurityContextHolder.getContext());
 					
-					return null;
+					return;
 				}
 			} catch (AuthenticationException e) {
 				LOGGER.info("Authentication failed: {}", e.getMessage());
@@ -206,8 +185,6 @@ public class LoginController extends AbstractController {
 
 			userService.increaseFailedLoginCount(addr);
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
-
-			return null;
 		} else if ("ldap".equals(type)) {
 			if (!"".equals(username) && !"".equals(password)) {
 				org.springframework.security.core.userdetails.User user =
@@ -223,7 +200,7 @@ public class LoginController extends AbstractController {
 						request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
 								SecurityContextHolder.getContext());
 
-						return null;
+						return;
 					}
 					LOGGER.info("LDAPLOGIN: {}", auth.isAuthenticated());
 				}
@@ -233,22 +210,7 @@ public class LoginController extends AbstractController {
 
 				userService.increaseFailedLoginCount(addr);
 				response.setStatus(HttpStatus.UNAUTHORIZED.value());
-
-				return null;
 			}
-		} else if ("cas".equals(type)) {
-			casEntryPoint.commence(request, response, null);
-		} else if ("twitter".equals(type)) {
-			String authUrl = twitterProvider.getAuthorizationUrl(new HttpUserSession(request));
-			result = new RedirectView(authUrl);
-		} else if ("facebook".equals(type)) {
-			facebookProvider.setFields("id,link");
-			facebookProvider.setScope("");
-			String authUrl = facebookProvider.getAuthorizationUrl(new HttpUserSession(request));
-			result = new RedirectView(authUrl);
-		} else if ("google".equals(type)) {
-			String authUrl = googleProvider.getAuthorizationUrl(new HttpUserSession(request));
-			result = new RedirectView(authUrl);
 		} else if ("guest".equals(type)) {
 			List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 			authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
@@ -264,7 +226,51 @@ public class LoginController extends AbstractController {
 			SecurityContextHolder.getContext().setAuthentication(token);
 			request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
 					SecurityContextHolder.getContext());
-			result = new RedirectView(null == successUrl ? referer + "#auth/checkLogin" : successUrl);
+		}
+	}
+
+	@RequestMapping(value = { "/auth/dialog" }, method = RequestMethod.GET)
+	@ResponseBody
+	public final View dialog(
+			@RequestParam("type") final String type,
+			@RequestParam(value = "referer", required = false) final String forcedReferer,
+			@RequestParam(value = "successurl", required = false) final String successUrl,
+			@RequestParam(value = "failureurl", required = false) final String failureUrl,
+			final HttpServletRequest request,
+			final HttpServletResponse response
+	) throws IOException, ServletException {
+		View result = null;
+
+		String referer = request.getHeader("referer");
+		if (null != forcedReferer && null != referer && !UrlUtils.isAbsoluteUrl(referer)) {
+			/* Use a url from a request parameter as referer as long as the url is not absolute (to prevent
+			 * abuse of the redirection). */
+			referer = forcedReferer;
+		}
+		if (null == referer) {
+			referer = "/";
+		}
+
+		request.getSession().setAttribute("ars-login-success-url",
+			null == successUrl ? referer : successUrl
+		);
+		request.getSession().setAttribute("ars-login-failure-url",
+			null == failureUrl ? referer : failureUrl
+		);
+
+		if ("cas".equals(type)) {
+			casEntryPoint.commence(request, response, null);
+		} else if ("twitter".equals(type)) {
+			String authUrl = twitterProvider.getAuthorizationUrl(new HttpUserSession(request));
+			result = new RedirectView(authUrl);
+		} else if ("facebook".equals(type)) {
+			facebookProvider.setFields("id,link");
+			facebookProvider.setScope("");
+			String authUrl = facebookProvider.getAuthorizationUrl(new HttpUserSession(request));
+			result = new RedirectView(authUrl);
+		} else if ("google".equals(type)) {
+			String authUrl = googleProvider.getAuthorizationUrl(new HttpUserSession(request));
+			result = new RedirectView(authUrl);
 		}
 
 		return result;
@@ -293,6 +299,7 @@ public class LoginController extends AbstractController {
 	@ResponseBody
 	public final List<ServiceDescription> getServices(final HttpServletRequest request) {
 		List<ServiceDescription> services = new ArrayList<ServiceDescription>();
+		String dialogUrl = request.getContextPath() + "/auth/dialog?type={0}";
 
 		if ("true".equals(guestEnabled)) {
 			ServiceDescription sdesc = new ServiceDescription(
@@ -325,28 +332,18 @@ public class LoginController extends AbstractController {
 		}
 
 		if ("true".equals(casEnabled)) {
-			try {
-				services.add(new ServiceDescription(
-						"cas",
-						casTitle,
-						casEntryPoint.getLoginUrl()
-							+ "?" + casEntryPoint.getServiceProperties().getServiceParameter()
-							+ "=" + URLEncoder.encode(casEntryPoint.getServiceProperties().getService(), "UTF-8"),
-						casImage
-					));
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			services.add(new ServiceDescription(
+				"cas",
+				casTitle,
+				MessageFormat.format(dialogUrl, "cas")
+			));
 		}
 
 		if ("true".equals(facebookEnabled)) {
-			facebookProvider.setFields("id,link");
-			facebookProvider.setScope("");
 			services.add(new ServiceDescription(
 				"facebook",
 				"Facebook",
-				facebookProvider.getAuthorizationUrl(new HttpUserSession(request))
+				MessageFormat.format(dialogUrl, "facebook")
 			));
 		}
 
@@ -354,7 +351,7 @@ public class LoginController extends AbstractController {
 			services.add(new ServiceDescription(
 				"google",
 				"Google",
-				googleProvider.getAuthorizationUrl(new HttpUserSession(request))
+				MessageFormat.format(dialogUrl, "google")
 			));
 		}
 
@@ -362,7 +359,7 @@ public class LoginController extends AbstractController {
 			services.add(new ServiceDescription(
 				"twitter",
 				"Twitter",
-				twitterProvider.getAuthorizationUrl(new HttpUserSession(request))
+				MessageFormat.format(dialogUrl, "twitter")
 			));
 		}
 
