@@ -20,6 +20,8 @@ package de.thm.arsnova.controller;
 
 import java.util.HashMap;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,8 +56,11 @@ public class ConfigurationController extends AbstractController {
 	
 	@RequestMapping(value = { "/" }, method = RequestMethod.GET)
 	@ResponseBody
-	public final HashMap<String, String> getConfiguration() {
+	public final HashMap<String, String> getConfiguration(HttpServletRequest request) {
 		HashMap<String, String> config = new HashMap<String, String>();
+		/* The API path could be unknown to the client in case the request was forwarded */
+		config.put("apiPath", request.getContextPath());
+
 		if (!"".equals(customizationPath)) {
 			config.put("customizationPath", customizationPath);
 		}
