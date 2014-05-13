@@ -317,7 +317,7 @@ public class LoginController extends AbstractController {
 			services.add(new ServiceDescription(
 				"arsnova",
 				dbAuthTitle,
-				customizationPath + "/" + dbAuthDialog,
+				customizationPath + "/" + dbAuthDialog + "?redirect={0}",
 				dbAuthImage
 			));
 		}
@@ -326,7 +326,7 @@ public class LoginController extends AbstractController {
 			services.add(new ServiceDescription(
 				"ldap",
 				ldapTitle,
-				customizationPath + "/" + ldapDialog,
+				customizationPath + "/" + ldapDialog + "?redirect={0}",
 				ldapImage
 			));
 		}
