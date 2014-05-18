@@ -41,23 +41,43 @@ public class ConfigurationController extends AbstractController {
 
 	@Value("${customization.path}")
 	private String customizationPath;
+
 	@Value("${mobile.path}")
 	private String mobilePath;
+
 	@Value("${presenter.path}")
 	private String presenterPath;
+
 	@Value("${links.overlay.url}")
 	private String overlayUrl;
+
 	@Value("${links.organization.url}")
 	private String organizationUrl;
+
 	@Value("${links.imprint.url}")
 	private String imprintUrl;
+
 	@Value("${links.privacy-policy.url}")
 	private String privacyPolicyUrl;
-	
+
+	@Value("${features.mathjax.enabled:true}")
+	private String mathJaxEnabled;
+
+	@Value("${features.markdown.enabled:false}")
+	private String markdownEnabled;
+
+	@Value("${features.question-format.flashcard.enabled:false}")
+	private String flashcardEnabled;
+
+	@Value("${features.question-format.grid-square.enabled:false}")
+	private String gridSquareEnabled;
+
 	@RequestMapping(value = { "/" }, method = RequestMethod.GET)
 	@ResponseBody
-	public final HashMap<String, String> getConfiguration(HttpServletRequest request) {
-		HashMap<String, String> config = new HashMap<String, String>();
+	public final HashMap<String, Object> getConfiguration(HttpServletRequest request) {
+		HashMap<String, Object> config = new HashMap<String, Object>();
+		HashMap<String, Boolean> features = new HashMap<String, Boolean>();
+
 		/* The API path could be unknown to the client in case the request was forwarded */
 		config.put("apiPath", request.getContextPath());
 
@@ -82,7 +102,14 @@ public class ConfigurationController extends AbstractController {
 		if (!"".equals(privacyPolicyUrl)) {
 			config.put("privacyPolicyUrl", privacyPolicyUrl);
 		}
-		
+
+		config.put("features", features);
+
+		features.put("mathJax", "true".equals(mathJaxEnabled));
+		features.put("markdown", "true".equals(markdownEnabled));
+		features.put("flashcard", "true".equals(flashcardEnabled));
+		features.put("gridSquare", "true".equals(gridSquareEnabled));
+
 		return config;
 	}
 }

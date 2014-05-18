@@ -75,3 +75,13 @@ socketio.port=10443
 connector.uri=http://localhost:8080/connector-service
 connector.username=test
 connector.password=test
+
+# Enable MathJax to allow the use of Math formulas written in TeX syntax in text fields.
+features.mathJax.enabled=true
+
+# The following features are considered experimental because they have not been
+# tested in a production environment over a longer time frame and/or their behavior
+# will change in future releases.
+features.markdown.enabled=false
+features.question-format.flashcard.enabled=false
+features.question-format.grid-square.enabled=false
