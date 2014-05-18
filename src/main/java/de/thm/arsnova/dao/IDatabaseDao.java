@@ -168,4 +168,8 @@ public interface IDatabaseDao {
 	DbUser getUser(String username);
 
 	boolean deleteUser(DbUser dbUser);
+
+	int getLearningProgress(Session session);
+
+	int getMyLearningProgress(Session session, User user);
 }
