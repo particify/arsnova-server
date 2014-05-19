@@ -170,17 +170,7 @@ public class UserService implements IUserService {
 		User user = null;
 
 		if (authentication instanceof OAuthAuthenticationToken) {
-			OAuthAuthenticationToken token = (OAuthAuthenticationToken) authentication;
-			if (token.getUserProfile() instanceof Google2Profile) {
-				Google2Profile profile = (Google2Profile) token.getUserProfile();
-				user = new User(profile);
-			} else if (token.getUserProfile() instanceof TwitterProfile) {
-				TwitterProfile profile = (TwitterProfile) token.getUserProfile();
-				user = new User(profile);
-			} else if (token.getUserProfile() instanceof FacebookProfile) {
-				FacebookProfile profile = (FacebookProfile) token.getUserProfile();
-				user = new User(profile);
-			}
+			user = getOAuthUser(authentication, user);
 		} else if (authentication instanceof CasAuthenticationToken) {
 			CasAuthenticationToken token = (CasAuthenticationToken) authentication;
 			user = new User(token.getAssertion().getPrincipal());
@@ -201,6 +191,21 @@ public class UserService implements IUserService {
 			throw new UnauthorizedException();
 		}
 
+		return user;
+	}
+
+	private User getOAuthUser(Authentication authentication, User user) {
+		OAuthAuthenticationToken token = (OAuthAuthenticationToken) authentication;
+		if (token.getUserProfile() instanceof Google2Profile) {
+			Google2Profile profile = (Google2Profile) token.getUserProfile();
+			user = new User(profile);
+		} else if (token.getUserProfile() instanceof TwitterProfile) {
+			TwitterProfile profile = (TwitterProfile) token.getUserProfile();
+			user = new User(profile);
+		} else if (token.getUserProfile() instanceof FacebookProfile) {
+			FacebookProfile profile = (FacebookProfile) token.getUserProfile();
+			user = new User(profile);
+		}
 		return user;
 	}
 

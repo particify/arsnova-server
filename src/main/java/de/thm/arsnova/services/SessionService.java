@@ -128,8 +128,8 @@ public class SessionService implements ISessionService {
 		}
 
 		List<Session> courseSessions = databaseDao.getCourseSessions(
-			connectorClient.getCourses(user.getUsername()).getCourse()
-		);
+				connectorClient.getCourses(user.getUsername()).getCourse()
+				);
 
 		Map<String, Session> allAvailableSessions = new HashMap<String, Session>();
 
@@ -152,8 +152,8 @@ public class SessionService implements ISessionService {
 	public final Session saveSession(final Session session) {
 		if (connectorClient != null && session.getCourseId() != null) {
 			if (!connectorClient.getMembership(
-				userService.getCurrentUser().getUsername(), session.getCourseId()).isMember()
-			) {
+					userService.getCurrentUser().getUsername(), session.getCourseId()).isMember()
+					) {
 				throw new ForbiddenException();
 			}
 		}

@@ -30,7 +30,6 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.events.ARSnovaEvent;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.services.IFeedbackService;
-import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.message.Feedback;
@@ -40,9 +39,6 @@ public class ARSnovaSocketIOServer {
 
 	@Autowired
 	private IFeedbackService feedbackService;
-
-	@Autowired
-	private IQuestionService questionService;
 
 	@Autowired
 	private IUserService userService;
@@ -65,14 +61,14 @@ public class ARSnovaSocketIOServer {
 	public ARSnovaSocketIOServer() {
 		config = new Configuration();
 	}
-	
+
 	@PreDestroy
 	public void closeAllSessions() {
 		LOGGER.info("Close all websockets due to @PreDestroy");
 		for (SocketIOClient c : server.getAllClients()) {
 			c.disconnect();
 		}
-		
+
 		int clientCount = 0;
 		for (SocketIOClient c : server.getAllClients()) {
 			c.send(new Packet(PacketType.DISCONNECT));
@@ -135,7 +131,11 @@ public class ARSnovaSocketIOServer {
 		server.addDisconnectListener(new DisconnectListener() {
 			@Override
 			public void onDisconnect(SocketIOClient client) {
-				if (userService == null || client.getSessionId() == null || userService.getUser2SocketId(client.getSessionId()) == null) {
+				if (
+						userService == null
+						|| client.getSessionId() == null
+						|| userService.getUser2SocketId(client.getSessionId()) == null
+						) {
 					LOGGER.warn("NullPointer in ARSnovaSocketIOServer DisconnectListener");
 					return;
 				}
@@ -306,8 +306,8 @@ public class ARSnovaSocketIOServer {
 		broadcastInSession(sessionKey, "lecQuestionAvail", lecturerQuestionId);
 	}
 
-	/** Sends event to a websocket connection identified by UUID 
-	 * 
+	/** Sends event to a websocket connection identified by UUID
+	 *
 	 * @param sessionId The UUID of the websocket ID
 	 * @param event The event to be send to client
 	 * TODO This method is unimplemented!

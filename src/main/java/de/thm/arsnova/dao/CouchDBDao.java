@@ -63,7 +63,6 @@ import de.thm.arsnova.entities.VisitedSession;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
-import de.thm.arsnova.services.IFeedbackService;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 
@@ -71,9 +70,6 @@ import de.thm.arsnova.services.IUserService;
 public class CouchDBDao implements IDatabaseDao {
 	@Autowired
 	private IUserService userService;
-
-	@Autowired
-	private IFeedbackService feedbackService;
 
 	@Autowired
 	private ISessionService sessionService;
@@ -134,7 +130,7 @@ public class CouchDBDao implements IDatabaseDao {
 			Session session = (Session) JSONObject.toBean(
 					d.getJSONObject().getJSONObject("value"),
 					Session.class
-			);
+					);
 			session.setCreator(d.getJSONObject().getJSONArray("key").getString(0));
 			session.setName(d.getJSONObject().getJSONArray("key").getString(1));
 			session.set_id(d.getId());
@@ -175,7 +171,7 @@ public class CouchDBDao implements IDatabaseDao {
 		return (Session) JSONObject.toBean(
 				results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
 				Session.class
-		);
+				);
 	}
 
 	@Override
@@ -190,7 +186,7 @@ public class CouchDBDao implements IDatabaseDao {
 		return (Session) JSONObject.toBean(
 				results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
 				Session.class
-		);
+				);
 	}
 
 	@Override
@@ -244,14 +240,14 @@ public class CouchDBDao implements IDatabaseDao {
 				com.fourspaces.couchdb.Session session = new com.fourspaces.couchdb.Session(
 						databaseHost,
 						databasePort
-				);
+						);
 				database = session.getDatabase(databaseName);
 			} catch (Exception e) {
 				LOGGER.error(
 						"Cannot connect to CouchDB database '" + databaseName
 						+ "' on host '" + databaseHost
 						+ "' using port " + databasePort
-				);
+						);
 			}
 		}
 
@@ -364,14 +360,14 @@ public class CouchDBDao implements IDatabaseDao {
 			Question q = (Question) JSONObject.toBean(
 					results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
 					Question.class
-			);
+					);
 			JSONArray possibleAnswers = new JSONArray();
 			possibleAnswers = results.getJSONArray("rows").optJSONObject(0).optJSONObject("value")
 					.getJSONArray("possibleAnswers");
 			Collection<PossibleAnswer> answers = JSONArray.toCollection(
 					possibleAnswers,
 					PossibleAnswer.class
-			);
+					);
 			q.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
 			q.setSessionKeyword(this.getSessionKeyword(q.getSessionId()));
 			return q;
@@ -472,7 +468,7 @@ public class CouchDBDao implements IDatabaseDao {
 			LOGGER.error("IOException: Could not delete question {}", question.get_id());
 		}
 	}
-	
+
 	@Override
 	public final void deleteAllQuestionsWithAnswers(Session session) {
 		NovaView view = new NovaView("skill_question/by_session");
@@ -483,7 +479,7 @@ public class CouchDBDao implements IDatabaseDao {
 		view.setStartKeyArray(session.get_id());
 		view.setEndKey(session.get_id(), "{}");
 		ViewResults results = this.getDatabase().view(view);
-		
+
 		for (Document d : results.getResults()) {
 			Question q = new Question();
 			q.set_id(d.getId());
@@ -540,7 +536,7 @@ public class CouchDBDao implements IDatabaseDao {
 		return (Answer) JSONObject.toBean(
 				results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
 				Answer.class
-		);
+				);
 	}
 
 	@Override
@@ -565,7 +561,7 @@ public class CouchDBDao implements IDatabaseDao {
 			a.setQuestionId(d.getJSONObject().getJSONArray("key").getString(0));
 			a.setPiRound(piRound);
 			String answerText = d.getJSONObject().getJSONArray("key").getString(2);
-			a.setAnswerText(answerText == "null" ? null : answerText);
+			a.setAnswerText("null".equals(answerText) ? null : answerText);
 			answers.add(a);
 		}
 		return answers;
@@ -732,7 +728,7 @@ public class CouchDBDao implements IDatabaseDao {
 			InterposedQuestion question = (InterposedQuestion) JSONObject.toBean(
 					document.getJSONObject().getJSONObject("value"),
 					InterposedQuestion.class
-			);
+					);
 			question.setSessionId(sessionKey);
 			question.set_id(document.getId());
 			result.add(question);
@@ -861,8 +857,8 @@ public class CouchDBDao implements IDatabaseDao {
 			for (int i = 0; i < rows.size(); i++) {
 				JSONObject row = rows.getJSONObject(i);
 				if (
-					row.getString("key").equals(key)
-				) {
+						row.getString("key").equals(key)
+						) {
 					result += row.getInt("value");
 				}
 			}
@@ -910,9 +906,9 @@ public class CouchDBDao implements IDatabaseDao {
 			if (d.getJSONObject().optJSONArray("value") != null) {
 				@SuppressWarnings("unchecked")
 				Collection<Session> visitedSessions =  JSONArray.toCollection(
-					d.getJSONObject().getJSONArray("value"),
-					Session.class
-				);
+						d.getJSONObject().getJSONArray("value"),
+						Session.class
+						);
 				allSessions.addAll(visitedSessions);
 			}
 		}
@@ -1000,7 +996,7 @@ public class CouchDBDao implements IDatabaseDao {
 			Session session = (Session) JSONObject.toBean(
 					d.getJSONObject().getJSONObject("value"),
 					Session.class
-			);
+					);
 			result.add(session);
 		}
 		return result;
@@ -1053,6 +1049,7 @@ public class CouchDBDao implements IDatabaseDao {
 			}
 		}
 
+		@Override
 		public String getQueryString() {
 			StringBuilder query = new StringBuilder();
 			if (super.getQueryString() != null) {
@@ -1066,7 +1063,9 @@ public class CouchDBDao implements IDatabaseDao {
 				query.append("keys=" + this.keys);
 			}
 
-			if (query.toString().isEmpty()) return null;
+			if (query.toString().isEmpty()) {
+				return null;
+			}
 			return query.toString();
 		}
 	}
@@ -1155,9 +1154,9 @@ public class CouchDBDao implements IDatabaseDao {
 			}
 		}
 		return getQuestions(new NovaView(viewName), session);
-		
+
 	}
-	
+
 	private List<Question> getQuestions(NovaView view, Session session) {
 		view.setStartKeyArray(session.get_id());
 		view.setEndKeyArray(session.get_id(), "{}");
@@ -1174,12 +1173,12 @@ public class CouchDBDao implements IDatabaseDao {
 			Question question = (Question) JSONObject.toBean(
 					document.getJSONObject().getJSONObject("value"),
 					Question.class
-			);
+					);
 			@SuppressWarnings("unchecked")
 			Collection<PossibleAnswer> answers = JSONArray.toCollection(
 					document.getJSONObject().getJSONObject("value").getJSONArray("possibleAnswers"),
 					PossibleAnswer.class
-			);
+					);
 			question.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
 			question.setSessionKeyword(session.getKeyword());
 			if (!"freetext".equals(question.getQuestionType()) && 0 == question.getPiRound()) {
@@ -1205,7 +1204,7 @@ public class CouchDBDao implements IDatabaseDao {
 	public int getPreparationQuestionCount(Session session) {
 		return getQuestionCount(new NovaView("skill_question/preparation_question_count_by_session"), session);
 	}
-	
+
 	private int getQuestionCount(NovaView view, Session session) {
 		view.setKey(session.get_id());
 		ViewResults results = this.getDatabase().view(view);
@@ -1224,7 +1223,7 @@ public class CouchDBDao implements IDatabaseDao {
 	public int countPreparationQuestionAnswers(Session session) {
 		return countQuestionVariantAnswers(session, "preparation");
 	}
-	
+
 	private int countQuestionVariantAnswers(Session session, String variant) {
 		NovaView view = new NovaView("skill_question/count_answers_by_session_and_question_variant");
 		view.setKey(session.get_id(), variant);
@@ -1319,7 +1318,8 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		return ids;
 	}
-	
+
+	@Override
 	public void deleteAllInterposedQuestions(Session session) {
 		NovaView view = new NovaView("interposed_question/by_session");
 		view.setKey(session.get_id());
