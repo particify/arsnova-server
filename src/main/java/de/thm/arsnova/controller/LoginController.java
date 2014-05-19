@@ -93,9 +93,9 @@ public class LoginController extends AbstractController {
 			@RequestParam(value = "role", required = false) UserSessionService.Role role,
 			final HttpServletRequest request,
 			final HttpServletResponse response
-	) throws IOException, ServletException {
+			) throws IOException, ServletException {
 		userSessionService.setRole(role);
-		
+
 		String referer = request.getHeader("referer");
 		if (null != forcedReferer && null != referer && !UrlUtils.isAbsoluteUrl(referer)) {
 			/* Use a url from a request parameter as referer as long as the url is not absolute (to prevent
@@ -107,14 +107,14 @@ public class LoginController extends AbstractController {
 		}
 
 		request.getSession().setAttribute("ars-login-success-url",
-			null == successUrl ? referer + "#auth/checkLogin" : successUrl
-		);
+				null == successUrl ? referer + "#auth/checkLogin" : successUrl
+				);
 		request.getSession().setAttribute("ars-login-failure-url",
-			null == failureUrl ? referer : failureUrl
-		);
+				null == failureUrl ? referer : failureUrl
+				);
 
 		View result = null;
-		
+
 		if ("cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);
 		} else if ("twitter".equals(type)) {
@@ -133,12 +133,14 @@ public class LoginController extends AbstractController {
 			if (guestName != null && guestName.startsWith("Guest") && guestName.length() == MAX_USERNAME_LENGTH) {
 				username = guestName;
 			} else {
-				username = "Guest" + Sha512DigestUtils.shaHex(request.getSession().getId()).substring(0, MAX_GUESTHASH_LENGTH);
+				username = "Guest" + Sha512DigestUtils.shaHex(
+						request.getSession().getId()
+						).substring(0, MAX_GUESTHASH_LENGTH);
 			}
 			org.springframework.security.core.userdetails.User user =
 					new org.springframework.security.core.userdetails.User(
 							username, "", true, true, true, true, authorities
-					);
+							);
 			Authentication token = new UsernamePasswordAuthenticationToken(user, null, authorities);
 
 			SecurityContextHolder.getContext().setAuthentication(token);
@@ -146,14 +148,14 @@ public class LoginController extends AbstractController {
 					SecurityContextHolder.getContext());
 			result = new RedirectView(null == successUrl ? referer + "#auth/checkLogin" : successUrl);
 		}
-				
+
 		return result;
 	}
 
 	@RequestMapping(value = { "/auth/", "/whoami" }, method = RequestMethod.GET)
 	@ResponseBody
 	public final User whoami() {
-		userSessionService.setUser(userService.getCurrentUser());		
+		userSessionService.setUser(userService.getCurrentUser());
 		return userService.getCurrentUser();
 	}
 
