@@ -63,6 +63,9 @@ feedback.cleanup=10
 # maximal filesize in bytes
 upload.filesize_b=1048576
 
+# maximal number of answer options allowed for a skill question
+question.answerOptionLimit=8
+
 couchdb.host=localhost
 couchdb.port=5984
 couchdb.name=arsnova

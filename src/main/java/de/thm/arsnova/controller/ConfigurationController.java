@@ -72,6 +72,9 @@ public class ConfigurationController extends AbstractController {
 	@Value("${features.question-format.grid-square.enabled:false}")
 	private String gridSquareEnabled;
 
+	@Value("${answerOptionLimit:8}")
+	private String answerOptionLimit;
+
 	@RequestMapping(value = { "/" }, method = RequestMethod.GET)
 	@ResponseBody
 	public final HashMap<String, Object> getConfiguration(HttpServletRequest request) {
@@ -102,6 +105,8 @@ public class ConfigurationController extends AbstractController {
 		if (!"".equals(privacyPolicyUrl)) {
 			config.put("privacyPolicyUrl", privacyPolicyUrl);
 		}
+
+		config.put("answerOptionLimit", Integer.valueOf(answerOptionLimit));
 
 		config.put("features", features);
 
