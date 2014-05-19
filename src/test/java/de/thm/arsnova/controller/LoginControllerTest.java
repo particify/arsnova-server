@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2012 THM webMedia
- * 
+ *
  * This file is part of ARSnova.
  *
  * ARSnova is free software: you can redistribute it and/or modify
@@ -19,139 +19,78 @@
 package de.thm.arsnova.controller;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import javax.inject.Inject;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.web.servlet.HandlerAdapter;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
-import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
-import de.thm.arsnova.dao.StubDatabaseDao;
 import de.thm.arsnova.services.StubUserService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
+@WebAppConfiguration
 @ContextConfiguration(locations = {
 		"file:src/main/webapp/WEB-INF/spring/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
-		"file:src/test/resources/test-config.xml" })
+		"file:src/test/resources/test-config.xml",
+		"file:src/test/resources/test-socketioconfig.xml"
+})
 public class LoginControllerTest {
-
-	@Inject
-	private ApplicationContext applicationContext;
-	private MockHttpServletRequest request;
-	private MockHttpServletResponse response;
-	private HandlerAdapter handlerAdapter;
-
-	@Autowired
-	private LoginController loginController;
 
 	@Autowired
 	private StubUserService userService;
-	
-	@Autowired
-	private StubDatabaseDao databaseDao;
 
-	@After
-	public final void cleanup() {
-		databaseDao.cleanupTestData();
-	}
+	private MockMvc mockMvc;
+
+	@Autowired
+	private WebApplicationContext webApplicationContext;
 
 	@Before
-	public void setUp() throws Exception {
-		this.request = new MockHttpServletRequest();
-		this.response = new MockHttpServletResponse();
-		handlerAdapter = applicationContext
-				.getBean(AnnotationMethodHandlerAdapter.class);
+	public void setup() {
+		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 	}
 
 	@Test
 	public void testGuestLogin() throws Exception {
-		request.setMethod("GET");
-		request.setRequestURI("/doLogin");
-		request.addParameter("type", "guest");
-
-		final ModelAndView mav = handlerAdapter.handle(request, response,
-				loginController);
-
-		assertNotNull(mav);
-		assertNotNull(mav.getView());
-		RedirectView view = (RedirectView) mav.getView();
-		assertEquals("/#auth/checkLogin", view.getUrl());
-		Authentication auth = SecurityContextHolder.getContext()
-				.getAuthentication();
-		assertEquals(auth.getClass(), UsernamePasswordAuthenticationToken.class);
+		mockMvc.perform(get("/doLogin").param("type", "guest")).andExpect(status().isMovedTemporarily()).andExpect(redirectedUrl("/#auth/checkLogin"));
 	}
 
 	@Test
 	public void testReuseGuestLogin() throws Exception {
-		request.setMethod("GET");
-		request.setRequestURI("/doLogin");
-		request.addParameter("type", "guest");
-		request.addParameter("user", "Guest1234567890");
+		mockMvc.perform(get("/doLogin").param("type", "guest").param("user","Guest1234567890"))
+		.andExpect(status().isMovedTemporarily()).andExpect(redirectedUrl("/#auth/checkLogin"));
 
-		final ModelAndView mav = handlerAdapter.handle(request, response,
-				loginController);
-
-		assertNotNull(mav);
-		assertNotNull(mav.getView());
-		RedirectView view = (RedirectView) mav.getView();
-		assertEquals("/#auth/checkLogin", view.getUrl());
 		Authentication auth = SecurityContextHolder.getContext()
 				.getAuthentication();
 		assertEquals(auth.getClass(), UsernamePasswordAuthenticationToken.class);
 		assertEquals("Guest1234567890", auth.getName());
+
 	}
 
 	@Test
 	public void testUser() throws Exception {
 		userService.setUserAuthenticated(true);
 
-		request.setMethod("GET");
-		request.setRequestURI("/whoami");
-
-		handlerAdapter.handle(request, response, loginController);
-		assertNotNull(response);
-		assertEquals("{\"username\":\"ptsr00\",\"type\":\"ldap\",\"role\":null}", response.getContentAsString());
+		mockMvc.perform(get("/whoami"))
+		.andExpect(status().isOk())
+		.andExpect(content().string("{\"username\":\"ptsr00\",\"type\":\"ldap\",\"role\":null}"));
 	}
 
 	@Test
 	public void testLogoutWithoutRedirect() throws Exception {
-		request.setMethod("GET");
-		request.setRequestURI("/logout");
-		final ModelAndView mav = handlerAdapter.handle(request, response,
-				loginController);
-		assertNotNull(mav);
-		assertNotNull(mav.getView());
-		RedirectView view = (RedirectView) mav.getView();
-		assertEquals("/", view.getUrl());
-	}
-
-	@Test
-	public void testLogoutWithRedirect() throws Exception {
-		request.setMethod("GET");
-		request.setRequestURI("/logout");
-		request.addHeader("referer", "/dojo-index.html");
-
-		final ModelAndView mav = handlerAdapter.handle(request, response,
-				loginController);
-		assertNotNull(mav);
-		assertNotNull(mav.getView());
-		RedirectView view = (RedirectView) mav.getView();
-		assertEquals("/dojo-index.html", view.getUrl());
+		mockMvc.perform(get("/logout")).andExpect(status().isMovedTemporarily()).andExpect(redirectedUrl("/"));
 	}
 }
