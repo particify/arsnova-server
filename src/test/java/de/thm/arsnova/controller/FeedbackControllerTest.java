@@ -1,113 +1,72 @@
 package de.thm.arsnova.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import javax.inject.Inject;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.web.servlet.HandlerAdapter;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
-import de.thm.arsnova.FeedbackStorage;
-import de.thm.arsnova.dao.StubDatabaseDao;
-import de.thm.arsnova.exceptions.NoContentException;
-import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.StubUserService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
+@WebAppConfiguration
 @ContextConfiguration(locations = {
 		"file:src/main/webapp/WEB-INF/spring/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
-		"file:src/test/resources/test-config.xml"
+		"file:src/test/resources/test-config.xml",
+		"file:src/test/resources/test-socketioconfig.xml"
 })
 public class FeedbackControllerTest {
 
-	@Inject
-	private ApplicationContext applicationContext;
-	private MockHttpServletRequest request;
-	private MockHttpServletResponse response;
-	private HandlerAdapter handlerAdapter;
-
-	@Autowired
-	private FeedbackController feedbackController;
-
 	@Autowired
 	private StubUserService userService;
-	
-	@Autowired
-	private StubDatabaseDao databaseDao;
-	
-	private FeedbackStorage feedbackStorage;
 
-	@After
-	public final void cleanup() {
-		databaseDao.cleanupTestData();
-	}
+	private MockMvc mockMvc;
+
+	@Autowired
+	private WebApplicationContext webApplicationContext;
 
 	@Before
-	public void setUp() {
-		this.request = new MockHttpServletRequest();
-		this.response = new MockHttpServletResponse();
-		handlerAdapter = applicationContext.getBean(AnnotationMethodHandlerAdapter.class);
-		this.feedbackStorage = new FeedbackStorage(databaseDao); 
+	public void setup() {
+		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 	}
 
-	@Test(expected = NotFoundException.class)
+	@Test
 	public void testShouldNotGetFeedbackForUnknownSession() throws Exception {
 		userService.setUserAuthenticated(true);
-
-		request.setMethod("GET");
-		request.setRequestURI("/session/00000000/feedback");
-		final ModelAndView mav = handlerAdapter.handle(request, response, feedbackController);
-
-		assertNull(mav);
-		assertTrue(response.getStatus() == 404);
+		mockMvc.perform(get("/session/00000000/feedback").accept(MediaType.APPLICATION_JSON))
+		.andExpect(status().isNotFound());
 	}
 
-	@Test(expected = NoContentException.class)
+	@Test
 	public void testShouldNotGetAverageFeedbackContentForSessionWithoutFeedback() throws Exception {
 		userService.setUserAuthenticated(true);
-
-		request.setMethod("GET");
-		request.setRequestURI("/session/12345678/averagefeedback");
-		final ModelAndView mav = handlerAdapter.handle(request, response, feedbackController);
-
-		assertNull(mav);
-		assertTrue(response.getStatus() == 204);
+		mockMvc.perform(get("/session/12345678/averagefeedback").accept(MediaType.APPLICATION_JSON))
+		.andExpect(status().isNoContent());
 	}
 
 	@Test
 	public void testShouldNotGetCorrectFeedbackCountForSessionWithoutFeedback() throws Exception {
 		userService.setUserAuthenticated(true);
-
-		request.setMethod("GET");
-		request.setRequestURI("/session/12345678/feedbackcount");
-		handlerAdapter.handle(request, response, feedbackController);
-
-		assertTrue(response.getStatus() == 200);
-		assertEquals("0", response.getContentAsString());
+		mockMvc.perform(get("/session/12345678/feedbackcount").accept(MediaType.APPLICATION_JSON))
+		.andExpect(status().isOk())
+		.andExpect(content().string("0"));
 	}
-	
+
 	@Test
 	public void testShouldReturnFeedback() throws Exception {
 		userService.setUserAuthenticated(true);
-
-		request.setMethod("GET");
-		request.setRequestURI("/session/87654321/feedback");
-		handlerAdapter.handle(request, response, feedbackController);
-
-		assertTrue(response.getStatus() == 200);
+		mockMvc.perform(get("/session/87654321/feedback").accept(MediaType.APPLICATION_JSON))
+		.andExpect(status().isOk());
 	}
 }

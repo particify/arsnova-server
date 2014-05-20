@@ -23,6 +23,7 @@ public class PossibleAnswer {
 	private String id;
 	private String text;
 	private boolean correct;
+	private int value;
 
 	public String getId() {
 		return this.id;
@@ -46,6 +47,14 @@ public class PossibleAnswer {
 
 	public void setCorrect(boolean correct) {
 		this.correct = correct;
+	}
+
+	public int getValue() {
+		return value;
+	}
+
+	public void setValue(int value) {
+		this.value = value;
 	}
 
 	@Override

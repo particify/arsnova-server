@@ -42,8 +42,6 @@ public interface ISessionService {
 
 	LoggedIn registerAsOnlineUser(User user, String sessionkey);
 
-	int countActiveUsers(String sessionkey);
-
 	int countSessions(List<Course> courses);
 
 	Session setActive(String sessionkey, Boolean lock);
@@ -53,4 +51,8 @@ public interface ISessionService {
 	Session updateSession(String sessionkey, Session session);
 
 	void deleteSession(String sessionkey, User user);
+
+	int getLearningProgress(String sessionkey);
+
+	int getMyLearningProgress(String sessionkey);
 }

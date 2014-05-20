@@ -122,7 +122,7 @@ public class LoggedIn {
 	}
 
 	public boolean hasConflicts() {
-		return ! (_conflicts == null || _conflicts.isEmpty());
+		return !(_conflicts == null || _conflicts.isEmpty());
 	}
 
 	@Override

@@ -37,8 +37,6 @@ public interface IQuestionService {
 
 	int getSkillQuestionCount(String sessionkey);
 
-	List<String> getQuestionIds(String sessionKey);
-
 	void deleteQuestion(String questionId);
 
 	void deleteAllQuestions(String sessionKeyword);
@@ -78,5 +76,37 @@ public interface IQuestionService {
 	void deleteAnswer(String questionId, String answerId);
 
 	void deleteInterposedQuestion(String questionId);
+
+	List<Question> getLectureQuestions(String sessionkey);
+
+	List<Question> getFlashcards(String sessionkey);
+
+	List<Question> getPreparationQuestions(String sessionkey);
+
+	int getLectureQuestionCount(String sessionkey);
+
+	int getFlashcardCount(String sessionkey);
+
+	int getPreparationQuestionCount(String sessionkey);
+
+	int countLectureQuestionAnswers(String sessionkey);
+
+	int countPreparationQuestionAnswers(String sessionkey);
+
+	void deleteLectureQuestions(String sessionkey);
+
+	void deleteFlashcards(String sessionkey);
+
+	void deletePreparationQuestions(String sessionkey);
+
+	List<String> getUnAnsweredLectureQuestionIds(String sessionkey);
+
+	List<String> getUnAnsweredPreparationQuestionIds(String sessionkey);
+
+	void deleteAllInterposedQuestions(String sessionKeyword);
+
+	void publishAll(String sessionkey, boolean publish);
+
+	void deleteAllQuestionsAnswers(String sessionkey);
 
 }

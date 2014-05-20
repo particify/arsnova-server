@@ -24,9 +24,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import de.thm.arsnova.ImageUtils;
 import de.thm.arsnova.annotation.Authenticated;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Answer;
@@ -35,8 +39,8 @@ import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
-import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
@@ -52,6 +56,11 @@ public class QuestionService implements IQuestionService {
 
 	@Autowired
 	private ARSnovaSocketIOServer socketIoServer;
+	
+	@Value("${upload.filesize_b}")
+	private int uploadFileSizeByte;
+	
+	public static final Logger LOGGER = LoggerFactory.getLogger(QuestionService.class);
 
 	public void setDatabaseDao(IDatabaseDao databaseDao) {
 		this.databaseDao = databaseDao;
@@ -60,11 +69,7 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public List<Question> getSkillQuestions(String sessionkey) {
-		List<Question> result = databaseDao.getSkillQuestions(sessionkey);
-		if (result == null || result.size() == 0) {
-			throw new NoContentException();
-		}
-		return result;
+		return databaseDao.getSkillQuestions(userService.getCurrentUser(), getSession(sessionkey));
 	}
 
 	@Override
@@ -90,6 +95,25 @@ public class QuestionService implements IQuestionService {
 			question.setPiRound(0);
 		} else if (question.getPiRound() < 1 || question.getPiRound() > 2) {
 			question.setPiRound(1);
+		}
+		
+		// convert imageurl to base64 if neccessary
+		if ("grid".equals(question.getQuestionType())) {
+			org.slf4j.Logger logger = LoggerFactory.getLogger(QuestionService.class);
+			if (question.getImage().startsWith("http")) {
+				String base64ImageString = ImageUtils.encodeImageToString(question.getImage());
+				if (base64ImageString == null) {
+					throw new BadRequestException();
+				}
+				question.setImage(base64ImageString);
+			}
+			
+			// base64 adds offset to filesize, formular taken from: http://en.wikipedia.org/wiki/Base64#MIME
+			int fileSize =  (int)((question.getImage().length()-814)/1.37);
+			if ( fileSize > this.uploadFileSizeByte ) {
+				LOGGER.error("Could not save file. File is too large with "+ fileSize + " Byte.");
+				throw new BadRequestException();
+			}
 		}
 
 		Question result = this.databaseDao.saveQuestion(session, question);
@@ -117,26 +141,15 @@ public class QuestionService implements IQuestionService {
 	@Authenticated
 	public Question getQuestion(String id) {
 		Question result = databaseDao.getQuestion(id);
+		if (result == null) {
+			return null;
+		}
 		if (!"freetext".equals(result.getQuestionType()) && 0 == result.getPiRound()) {
 			/* needed for legacy questions whose piRound property has not been set */
 			result.setPiRound(1);
 		}
 
 		return result;
-	}
-
-	@Override
-	@Authenticated
-	public List<String> getQuestionIds(String sessionKey) {
-		User user = userService.getCurrentUser();
-		if (user == null) {
-			throw new UnauthorizedException();
-		}
-		Session session = databaseDao.getSessionFromKeyword(sessionKey);
-		if (session == null) {
-			throw new NotFoundException();
-		}
-		return databaseDao.getQuestionIds(session, user);
 	}
 
 	@Override
@@ -158,12 +171,17 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public void deleteAllQuestions(String sessionKeyword) {
+		Session session = getSessionWithAuthCheck(sessionKeyword);
+		databaseDao.deleteAllQuestionsWithAnswers(session);
+	}
+
+	private Session getSessionWithAuthCheck(String sessionKeyword) {
 		User user = userService.getCurrentUser();
 		Session session = databaseDao.getSession(sessionKeyword);
 		if (user == null || session == null || ! session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
-		databaseDao.deleteAllQuestionsWithAnswers(session);
+		return session;
 	}
 
 	@Override
@@ -179,6 +197,17 @@ public class QuestionService implements IQuestionService {
 			throw new UnauthorizedException();
 		}
 		databaseDao.deleteInterposedQuestion(question);
+	}
+	
+	@Override
+	@Authenticated
+	public void deleteAllInterposedQuestions(String sessionKeyword) {
+		User user = userService.getCurrentUser();
+		Session session = databaseDao.getSessionFromKeyword(sessionKeyword);
+		if (user == null || session == null || ! session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
+		databaseDao.deleteAllInterposedQuestions(session);
 	}
 
 	@Override
@@ -200,15 +229,17 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public List<String> getUnAnsweredQuestionIds(String sessionKey) {
+		User user = getCurrentUser();
+		Session session = getSession(sessionKey);
+		return databaseDao.getUnAnsweredQuestionIds(session, user);
+	}
+
+	private User getCurrentUser() {
 		User user = userService.getCurrentUser();
 		if (user == null) {
 			throw new UnauthorizedException();
 		}
-		Session session = databaseDao.getSessionFromKeyword(sessionKey);
-		if (session == null) {
-			throw new NotFoundException();
-		}
-		return databaseDao.getUnAnsweredQuestionIds(session, user);
+		return user;
 	}
 
 	@Override
@@ -237,11 +268,12 @@ public class QuestionService implements IQuestionService {
 		return getAnswers(questionId, question.getPiRound());
 	}
 
-	/* TODO add implementation for piRound */
 	@Override
 	@Authenticated
 	public int getAnswerCount(String questionId) {
-		return databaseDao.getAnswerCount(questionId);
+		Question question = getQuestion(questionId);
+		
+		return databaseDao.getAnswerCount(question, question.getPiRound());
 	}
 
 	@Override
@@ -349,10 +381,7 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@Authenticated
 	public Answer saveAnswer(Answer answer) {
-		User user = userService.getCurrentUser();
-		if (user == null) {
-			throw new UnauthorizedException();
-		}
+		User user = getCurrentUser();
 		Question question = this.getQuestion(answer.getQuestionId());
 		if (question == null) {
 			throw new NotFoundException();
@@ -400,5 +429,120 @@ public class QuestionService implements IQuestionService {
 		this.databaseDao.deleteAnswer(answerId);
 
 		socketIoServer.reportAnswersToLecturerQuestionAvailable(question.getSessionKeyword(), question.get_id());
+	}
+
+	@Override
+	@Authenticated
+	public List<Question> getLectureQuestions(String sessionkey) {
+		return databaseDao.getLectureQuestions(userService.getCurrentUser(), getSession(sessionkey));
+	}
+
+	@Override
+	@Authenticated
+	public List<Question> getFlashcards(String sessionkey) {
+		return databaseDao.getFlashcards(userService.getCurrentUser(), getSession(sessionkey));
+	}
+
+	@Override
+	@Authenticated
+	public List<Question> getPreparationQuestions(String sessionkey) {
+		return databaseDao.getPreparationQuestions(userService.getCurrentUser(), getSession(sessionkey));
+	}
+	
+	private Session getSession(String sessionkey) {
+		Session session = this.databaseDao.getSessionFromKeyword(sessionkey);
+		if (session == null) {
+			throw new NotFoundException();
+		}
+		return session;
+	}
+
+	@Override
+	@Authenticated
+	public int getLectureQuestionCount(String sessionkey) {
+		return databaseDao.getLectureQuestionCount(getSession(sessionkey));
+	}
+
+	@Override
+	@Authenticated
+	public int getFlashcardCount(String sessionkey) {
+		return databaseDao.getFlashcardCount(getSession(sessionkey));
+	}
+
+	@Override
+	@Authenticated
+	public int getPreparationQuestionCount(String sessionkey) {
+		return databaseDao.getPreparationQuestionCount(getSession(sessionkey));
+	}
+
+	@Override
+	@Authenticated
+	public int countLectureQuestionAnswers(String sessionkey) {
+		return databaseDao.countLectureQuestionAnswers(getSession(sessionkey));
+	}
+
+	@Override
+	@Authenticated
+	public int countPreparationQuestionAnswers(String sessionkey) {
+		return databaseDao.countPreparationQuestionAnswers(getSession(sessionkey));
+	}
+
+	@Override
+	@Authenticated
+	public void deleteLectureQuestions(String sessionkey) {
+		Session session = getSessionWithAuthCheck(sessionkey);
+		databaseDao.deleteAllLectureQuestionsWithAnswers(session);
+	}
+
+	@Override
+	@Authenticated
+	public void deleteFlashcards(String sessionkey) {
+		Session session = getSessionWithAuthCheck(sessionkey);
+		databaseDao.deleteAllFlashcardsWithAnswers(session);
+	}
+
+	@Override
+	@Authenticated
+	public void deletePreparationQuestions(String sessionkey) {
+		Session session = getSessionWithAuthCheck(sessionkey);
+		databaseDao.deleteAllPreparationQuestionsWithAnswers(session);
+	}
+
+	@Override
+	@Authenticated
+	public List<String> getUnAnsweredLectureQuestionIds(String sessionkey) {
+		User user = getCurrentUser();
+		Session session = getSession(sessionkey);
+		return databaseDao.getUnAnsweredLectureQuestionIds(session, user);
+	}
+
+	@Override
+	@Authenticated
+	public List<String> getUnAnsweredPreparationQuestionIds(String sessionkey) {
+		User user = getCurrentUser();
+		Session session = getSession(sessionkey);
+		return databaseDao.getUnAnsweredPreparationQuestionIds(session, user);
+	}
+
+	@Override
+	@Authenticated
+	public void publishAll(String sessionkey, boolean publish) {
+		User user = getCurrentUser();
+		Session session = getSession(sessionkey);
+		if (!session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
+		databaseDao.publishAllQuestions(session, publish);
+	}
+
+	@Override
+	@Authenticated
+	public void deleteAllQuestionsAnswers(String sessionkey) {
+		User user = getCurrentUser();
+		Session session = getSession(sessionkey);
+		if (!session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
+		databaseDao.deleteAllQuestionsAnswers(session);
 	}
 }

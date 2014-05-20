@@ -45,8 +45,6 @@ import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 @Service
 public class SessionService implements ISessionService {
 
-	private static final int DURATION_IN_MILLIS = 3 * 60 * 1000;
-
 	@Autowired
 	private IDatabaseDao databaseDao;
 
@@ -130,8 +128,8 @@ public class SessionService implements ISessionService {
 		}
 
 		List<Session> courseSessions = databaseDao.getCourseSessions(
-			connectorClient.getCourses(user.getUsername()).getCourse()
-		);
+				connectorClient.getCourses(user.getUsername()).getCourse()
+				);
 
 		Map<String, Session> allAvailableSessions = new HashMap<String, Session>();
 
@@ -154,8 +152,8 @@ public class SessionService implements ISessionService {
 	public final Session saveSession(final Session session) {
 		if (connectorClient != null && session.getCourseId() != null) {
 			if (!connectorClient.getMembership(
-				userService.getCurrentUser().getUsername(), session.getCourseId()).isMember()
-			) {
+					userService.getCurrentUser().getUsername(), session.getCourseId()).isMember()
+					) {
 				throw new ForbiddenException();
 			}
 		}
@@ -194,13 +192,6 @@ public class SessionService implements ISessionService {
 		}
 
 		return databaseDao.registerAsOnlineUser(user, session);
-	}
-
-	@Override
-	public int countActiveUsers(String sessionkey) {
-		final long since = System.currentTimeMillis() - DURATION_IN_MILLIS;
-		Session session = databaseDao.getSessionFromKeyword(sessionkey);
-		return databaseDao.countActiveUsers(session, since);
 	}
 
 	public static class SessionNameComperator implements Comparator<Session>, Serializable {
@@ -260,9 +251,24 @@ public class SessionService implements ISessionService {
 		if (!session.isCreator(user)) {
 			throw new ForbiddenException();
 		}
-		for (Question q : databaseDao.getSkillQuestions(sessionkey)) {
+		for (Question q : databaseDao.getSkillQuestions(user, session)) {
 			databaseDao.deleteQuestionWithAnswers(q);
 		}
 		databaseDao.deleteSession(session);
+	}
+
+	@Override
+	@Authenticated
+	public int getLearningProgress(String sessionkey) {
+		Session session = databaseDao.getSession(sessionkey);
+		return databaseDao.getLearningProgress(session);
+	}
+
+	@Override
+	@Authenticated
+	public int getMyLearningProgress(String sessionkey) {
+		Session session = databaseDao.getSession(sessionkey);
+		User user = userService.getCurrentUser();
+		return databaseDao.getMyLearningProgress(session, user);
 	}
 }

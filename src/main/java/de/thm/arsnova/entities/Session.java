@@ -21,6 +21,8 @@ package de.thm.arsnova.entities;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Session implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -110,7 +112,7 @@ public class Session implements Serializable {
 	public String get_rev() {
 		return _rev;
 	}
-	
+
 	public void set_conflicts(List<String> conflicts) {
 		_conflicts = conflicts;
 	}
@@ -139,10 +141,11 @@ public class Session implements Serializable {
 		this.courseId = courseId;
 	}
 
+	@JsonIgnore
 	public boolean isCourseSession() {
 		return (this.getCourseId() != null) && (!this.getCourseId().isEmpty());
 	}
-	
+
 	@Override
 	public String toString() {
 		return "User [keyword=" + keyword+ ", type=" + type + "]";

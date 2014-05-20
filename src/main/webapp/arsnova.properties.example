@@ -17,6 +17,9 @@ security.storepass=arsnova
 # minutes, after which the feedback is deleted
 feedback.cleanup=10
 
+# maximal filesize in bytes
+upload.filesize_b=1048576
+
 couchdb.host=localhost
 couchdb.port=5984
 couchdb.name=arsnova

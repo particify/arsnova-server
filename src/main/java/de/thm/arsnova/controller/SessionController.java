@@ -61,8 +61,7 @@ public class SessionController extends AbstractController {
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.GET)
 	@ResponseBody
 	public final Session joinSession(@PathVariable final String sessionkey) {
-		Session session = sessionService.joinSession(sessionkey);
-		return session;
+		return sessionService.joinSession(sessionkey);
 	}
 
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.DELETE)
@@ -78,7 +77,7 @@ public class SessionController extends AbstractController {
 	public final LoggedIn registerAsOnlineUser(
 			@PathVariable final String sessionkey,
 			final HttpServletResponse response
-	) {
+			) {
 		response.addHeader("X-Deprecated-API", "1");
 
 		User user = userService.getCurrentUser();
@@ -95,7 +94,7 @@ public class SessionController extends AbstractController {
 	public final int countActiveUsers(
 			@PathVariable final String sessionkey,
 			final HttpServletResponse response
-	) {
+			) {
 		response.addHeader("X-Deprecated-API", "1");
 
 		return userService.getUsersInSessionCount(sessionkey);
@@ -132,7 +131,7 @@ public class SessionController extends AbstractController {
 	public final Session updateSession(
 			@PathVariable final String sessionkey,
 			@RequestBody final Session session
-	) {
+			) {
 		return sessionService.updateSession(sessionkey, session);
 	}
 
@@ -143,7 +142,7 @@ public class SessionController extends AbstractController {
 			@RequestParam(value = "visitedonly", defaultValue = "false") final boolean visitedOnly,
 			@RequestParam(value = "sortby", defaultValue = "name") final String sortby,
 			final HttpServletResponse response
-	) {
+			) {
 		User user = userService.getCurrentUser();
 		List<Session> sessions = null;
 
@@ -183,12 +182,30 @@ public class SessionController extends AbstractController {
 			@PathVariable final String sessionkey,
 			@RequestParam(required = false) final Boolean lock,
 			final HttpServletResponse response
-	) {
+			) {
 		if (lock != null) {
 			return this.sessionService.setActive(sessionkey, lock);
 		}
 		response.setStatus(HttpStatus.NOT_FOUND.value());
 		return null;
+	}
+
+	@RequestMapping(value = "/{sessionkey}/learningprogress", method = RequestMethod.GET)
+	@ResponseBody
+	public final int learningProgress(
+			@PathVariable final String sessionkey,
+			final HttpServletResponse response
+			) {
+		return sessionService.getLearningProgress(sessionkey);
+	}
+
+	@RequestMapping(value = "/{sessionkey}/mylearningprogress", method = RequestMethod.GET)
+	@ResponseBody
+	public final int myLearningProgress(
+			@PathVariable final String sessionkey,
+			final HttpServletResponse response
+			) {
+		return sessionService.getMyLearningProgress(sessionkey);
 	}
 
 	/* internal redirections */
@@ -197,7 +214,7 @@ public class SessionController extends AbstractController {
 	public final String redirectLecturerQuestion(
 			@PathVariable final String sessionKey,
 			final HttpServletResponse response
-	) {
+			) {
 		response.addHeader("X-Forwarded", "1");
 
 		return String.format("forward:/lecturerquestion/?sessionkey=%s", sessionKey);
@@ -208,7 +225,7 @@ public class SessionController extends AbstractController {
 			@PathVariable final String sessionKey,
 			@PathVariable final String arg1,
 			final HttpServletResponse response
-	) {
+			) {
 		response.addHeader("X-Forwarded", "1");
 
 		return String.format("forward:/lecturerquestion/%s/?sessionkey=%s", arg1, sessionKey);
@@ -220,7 +237,7 @@ public class SessionController extends AbstractController {
 			@PathVariable final String arg1,
 			@PathVariable final String arg2,
 			final HttpServletResponse response
-	) {
+			) {
 		response.addHeader("X-Forwarded", "1");
 
 		return String.format("forward:/lecturerquestion/%s/%s/?sessionkey=%s", arg1, arg2, sessionKey);
@@ -233,7 +250,7 @@ public class SessionController extends AbstractController {
 			@PathVariable final String arg2,
 			@PathVariable final String arg3,
 			final HttpServletResponse response
-	) {
+			) {
 		response.addHeader("X-Forwarded", "1");
 
 		return String.format("forward:/lecturerquestion/%s/%s/%s/?sessionkey=%s", arg1, arg2, arg3, sessionKey);
@@ -243,7 +260,7 @@ public class SessionController extends AbstractController {
 	public final String redirectAudienceQuestion(
 			@PathVariable final String sessionKey,
 			final HttpServletResponse response
-	) {
+			) {
 		response.addHeader("X-Forwarded", "1");
 
 		return String.format("forward:/audiencequestion/?sessionkey=%s", sessionKey);
@@ -254,7 +271,7 @@ public class SessionController extends AbstractController {
 			@PathVariable final String sessionKey,
 			@PathVariable final String arg1,
 			final HttpServletResponse response
-	) {
+			) {
 		response.addHeader("X-Forwarded", "1");
 
 		return String.format("forward:/audiencequestion/%s/?sessionkey=%s", arg1, sessionKey);
@@ -266,7 +283,7 @@ public class SessionController extends AbstractController {
 			@PathVariable final String arg1,
 			@PathVariable final String arg2,
 			final HttpServletResponse response
-	) {
+			) {
 		response.addHeader("X-Forwarded", "1");
 
 		return String.format("forward:/audiencequestion/%s/%s/?sessionkey=%s", arg1, arg2, sessionKey);
@@ -279,7 +296,7 @@ public class SessionController extends AbstractController {
 			@PathVariable final String arg2,
 			@PathVariable final String arg3,
 			final HttpServletResponse response
-	) {
+			) {
 		response.addHeader("X-Forwarded", "1");
 
 		return String.format("forward:/audiencequestion/%s/%s/%s/?sessionkey=%s", arg1, arg2, arg3, sessionKey);

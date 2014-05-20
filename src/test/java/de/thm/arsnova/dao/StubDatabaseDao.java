@@ -172,8 +172,8 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Question> getSkillQuestions(String session) {
-		if (getSession(session) == null)
+	public List<Question> getSkillQuestions(User user, Session session) {
+		if (session == null)
 			throw new NotFoundException();
 		List<Question> questions = stubQuestions.get(session);
 		if (questions == null)
@@ -217,7 +217,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public int getAnswerCount(String questionId) {
+	public int getAnswerCount(Question question, int piRound) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -272,12 +272,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public List<FoodVote> getFoodVote() {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public int countActiveUsers(Session session, long since) {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	@Override
@@ -408,5 +402,111 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public void deleteAllQuestionsWithAnswers(Session session) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public List<Question> getLectureQuestions(User user, Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Question> getFlashcards(User user, Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Question> getPreparationQuestions(User user, Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getLectureQuestionCount(Session session) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getFlashcardCount(Session session) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getPreparationQuestionCount(Session session) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int countLectureQuestionAnswers(Session session) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int countPreparationQuestionAnswers(Session session) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void deleteAllLectureQuestionsWithAnswers(Session session) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void deleteAllFlashcardsWithAnswers(Session session) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void deleteAllPreparationQuestionsWithAnswers(Session session) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public List<String> getUnAnsweredLectureQuestionIds(Session session, User user) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getUnAnsweredPreparationQuestionIds(Session session, User user) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void deleteAllInterposedQuestions(Session session) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void publishAllQuestions(Session session, boolean publish) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void deleteAllQuestionsAnswers(Session session) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int getLearningProgress(Session session) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getMyLearningProgress(Session session, User user) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

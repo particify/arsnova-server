@@ -100,7 +100,7 @@ public class NovaView extends View {
 	private String quote(String string) {
 		return encode("\"" + string + "\"");
 	}
-	
+
 	private boolean isNumber(String string) {
 		return string.matches("^[0-9]+$");
 	}

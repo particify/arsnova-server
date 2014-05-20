@@ -48,7 +48,7 @@ public interface IDatabaseDao {
 
 	Question getQuestion(String id);
 
-	List<Question> getSkillQuestions(String session);
+	List<Question> getSkillQuestions(User user, Session session);
 
 	int getSkillQuestionCount(Session session);
 
@@ -68,13 +68,11 @@ public interface IDatabaseDao {
 
 	List<Answer> getAnswers(String questionId, int piRound);
 
-	int getAnswerCount(String questionId);
+	int getAnswerCount(Question question, int piRound);
 
 	List<Answer> getFreetextAnswers(String questionId);
 
 	int countActiveUsers(long since);
-
-	int countActiveUsers(Session session, long since);
 
 	List<Answer> getMyAnswers(String sessionKey);
 
@@ -131,4 +129,40 @@ public interface IDatabaseDao {
 	Session updateSession(Session session);
 
 	void deleteSession(Session session);
+
+	List<Question> getLectureQuestions(User user, Session session);
+
+	List<Question> getFlashcards(User user, Session session);
+
+	List<Question> getPreparationQuestions(User user, Session session);
+
+	int getLectureQuestionCount(Session session);
+
+	int getFlashcardCount(Session session);
+
+	int getPreparationQuestionCount(Session session);
+
+	int countLectureQuestionAnswers(Session session);
+
+	int countPreparationQuestionAnswers(Session session);
+
+	void deleteAllLectureQuestionsWithAnswers(Session session);
+
+	void deleteAllFlashcardsWithAnswers(Session session);
+
+	void deleteAllPreparationQuestionsWithAnswers(Session session);
+
+	List<String> getUnAnsweredLectureQuestionIds(Session session, User user);
+
+	List<String> getUnAnsweredPreparationQuestionIds(Session session, User user);
+
+	void deleteAllInterposedQuestions(Session session);
+
+	void publishAllQuestions(Session session, boolean publish);
+
+	void deleteAllQuestionsAnswers(Session session);
+
+	int getLearningProgress(Session session);
+
+	int getMyLearningProgress(Session session, User user);
 }

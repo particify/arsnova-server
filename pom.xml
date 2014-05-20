@@ -11,6 +11,7 @@
 		<org.springframework.security-version>3.2.0.RELEASE</org.springframework.security-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.url>https://scm.thm.de/arsnova</project.url>
+		<mobile.path>../arsnova-mobile/src/main/webapp/build/production/ARSnova</mobile.path>
 	</properties>
 
 	<developers>
@@ -327,7 +328,7 @@
 		<dependency>
 			<groupId>de.thm.arsnova.connector</groupId>
 			<artifactId>connector-client</artifactId>
-			<version>0.14.0-SNAPSHOT</version>
+			<version>0.40.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -351,7 +352,7 @@
 					<webApp> 
 						<contextPath>/</contextPath>
 						<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
-							<resourcesAsCSV>src/main/webapp,../arsnova-mobile/src/main/webapp</resourcesAsCSV> 
+							<resourcesAsCSV>src/main/webapp,${mobile.path}</resourcesAsCSV> 
 						</baseResource>
 						<overrideDescriptor>src/main/webapp/WEB-INF/web-dev.xml</overrideDescriptor>
 					</webApp>
@@ -360,7 +361,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
-				<version>3.1</version>
+				<version>3.3</version>
 				<configuration>
 					<locales>en</locales>
 				</configuration>
