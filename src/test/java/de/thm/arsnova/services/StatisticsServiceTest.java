@@ -18,6 +18,7 @@ import de.thm.arsnova.entities.Statistics;
 @ContextConfiguration(locations = {
 		"file:src/main/webapp/WEB-INF/spring/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
+		"file:src/main/webapp/WEB-INF/spring/spring-security.xml",
 		"file:src/test/resources/test-config.xml"
 })
 public class StatisticsServiceTest {
@@ -39,12 +40,12 @@ public class StatisticsServiceTest {
 		session.setActive(false);
 		databaseDao.saveSession(session);
 	}
-	
+
 	@After
 	public final void cleanup() {
 		databaseDao.cleanupTestData();
 	}
-	
+
 	@Test
 	public final void testShouldReturnNoActiveUsers() {
 		int actual = statisticsService.countActiveUsers();
@@ -55,7 +56,7 @@ public class StatisticsServiceTest {
 	public final void testShouldReturnCurrentActiveUsers() {
 		Session session = new Session();
 		session.setKeyword("1278127812");
-		
+
 		userService.setUserAuthenticated(true);
 		databaseDao.registerAsOnlineUser(userService.getCurrentUser(), session);
 
@@ -63,7 +64,7 @@ public class StatisticsServiceTest {
 		assertEquals(1, actual);
 		userService.setUserAuthenticated(false);
 	}
-	
+
 	@Test
 	public final void testShouldReturnStatistics() {
 		Statistics actual = statisticsService.getStatistics();

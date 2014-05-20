@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2012 THM webMedia
- * 
+ *
  * This file is part of ARSnova.
  *
  * ARSnova is free software: you can redistribute it and/or modify
@@ -39,6 +39,7 @@ import de.thm.arsnova.exceptions.NotFoundException;
 @ContextConfiguration(locations = {
 		"file:src/main/webapp/WEB-INF/spring/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
+		"file:src/main/webapp/WEB-INF/spring/spring-security.xml",
 		"file:src/test/resources/test-config.xml"
 })
 public class FeedbackServiceTest {
@@ -48,14 +49,14 @@ public class FeedbackServiceTest {
 
 	@Autowired
 	StubUserService userService;
-	
+
 	@Autowired
 	private StubDatabaseDao databaseDao;
 
 	@Before
 	public final void setup() {
 		userService.setUserAuthenticated(false);
-		
+
 		feedbackService.saveFeedback("87654321", 0, new TestUser("testuser01"));
 		feedbackService.saveFeedback("87654321", 0, new TestUser("testuser02"));
 		feedbackService.saveFeedback("87654321", 1, new TestUser("testuser11"));
@@ -73,8 +74,8 @@ public class FeedbackServiceTest {
 		feedbackService.saveFeedback("87654321", 3, new TestUser("testuser35"));
 		feedbackService.saveFeedback("87654321", 3, new TestUser("testuser36"));
 		feedbackService.saveFeedback("87654321", 3, new TestUser("testuser37"));
-		
-		
+
+
 		feedbackService.saveFeedback("18273645", 0, new TestUser("testuser01"));
 		feedbackService.saveFeedback("18273645", 0, new TestUser("testuser02"));
 		feedbackService.saveFeedback("18273645", 1, new TestUser("testuser11"));
@@ -96,9 +97,9 @@ public class FeedbackServiceTest {
 		feedbackService.saveFeedback("18273645", 3, new TestUser("testuser39"));
 		feedbackService.saveFeedback("18273645", 3, new TestUser("testuser310"));
 		feedbackService.saveFeedback("18273645", 3, new TestUser("testuser311"));
-		
+
 	}
-	
+
 	@After
 	public final void cleanup() {
 		databaseDao.cleanupTestData();
@@ -162,10 +163,10 @@ public class FeedbackServiceTest {
 		userService.setUserAuthenticated(true);
 		assertEquals(2.1904, feedbackService.getAverageFeedback("18273645"), 0.001);
 	}
-	
+
 	public static class TestUser extends User {
 		private static final long serialVersionUID = 1L;
-		
+
 		public TestUser(String username) {
 			super( new UsernamePasswordAuthenticationToken(username, "secret") );
 		}

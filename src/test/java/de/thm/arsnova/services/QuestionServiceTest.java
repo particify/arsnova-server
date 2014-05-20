@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2012 THM webMedia
- * 
+ *
  * This file is part of ARSnova.
  *
  * ARSnova is free software: you can redistribute it and/or modify
@@ -18,7 +18,9 @@
  */
 package de.thm.arsnova.services;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Test;
@@ -36,6 +38,7 @@ import de.thm.arsnova.exceptions.UnauthorizedException;
 @ContextConfiguration(locations = {
 		"file:src/main/webapp/WEB-INF/spring/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
+		"file:src/main/webapp/WEB-INF/spring/spring-security.xml",
 		"file:src/test/resources/test-config.xml"
 })
 public class QuestionServiceTest {
@@ -45,7 +48,7 @@ public class QuestionServiceTest {
 
 	@Autowired
 	StubUserService userService;
-	
+
 	@Autowired
 	private StubDatabaseDao databaseDao;
 
@@ -73,7 +76,7 @@ public class QuestionServiceTest {
 		userService.setUserAuthenticated(true);
 		assertEquals(1, questionService.getSkillQuestionCount("12345678"));
 	}
-	
+
 	@Test
 	public void testShouldMarkInterposedQuestionAsReadIfSessionCreator() throws Exception {
 		userService.setUserAuthenticated(true);
@@ -82,12 +85,12 @@ public class QuestionServiceTest {
 		theQ.set_id("the internal id");
 		theQ.setSessionId("12345678");
 		databaseDao.interposedQuestion = theQ;
-		
+
 		questionService.readInterposedQuestion(theQ.get_id());
-		
+
 		assertTrue(theQ.isRead());
 	}
-	
+
 	@Test
 	public void testShouldNotMarkInterposedQuestionAsReadIfRegularUser() throws Exception {
 		userService.setUserAuthenticated(true, "regular user");
@@ -96,9 +99,9 @@ public class QuestionServiceTest {
 		theQ.set_id("the internal id");
 		theQ.setSessionId("12345678");
 		databaseDao.interposedQuestion = theQ;
-		
+
 		questionService.readInterposedQuestion(theQ.get_id());
-		
+
 		assertFalse(theQ.isRead());
 	}
 }

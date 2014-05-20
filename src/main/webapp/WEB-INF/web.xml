@@ -7,7 +7,8 @@
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
 			/WEB-INF/spring/spring-main.xml
-        </param-value>
+			/WEB-INF/spring/spring-security.xml
+		</param-value>
 	</context-param>
 	<context-param>
 		<param-name>log4jConfigLocation</param-name>
@@ -95,8 +96,5 @@
 
 	<session-config>
 		<tracking-mode>COOKIE</tracking-mode>
-
-		<!-- delete sessions after 6 hours -->
-		<session-timeout>360</session-timeout>
 	</session-config>
 </web-app>

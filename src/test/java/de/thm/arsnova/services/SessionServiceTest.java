@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2012 THM webMedia
- * 
+ *
  * This file is part of ARSnova.
  *
  * ARSnova is free software: you can redistribute it and/or modify
@@ -21,10 +21,12 @@ package de.thm.arsnova.services;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-
-import static org.mockito.Mockito.*;
 
 import org.junit.After;
 import org.junit.Test;
@@ -47,7 +49,8 @@ import de.thm.arsnova.exceptions.UnauthorizedException;
 @ContextConfiguration(locations = {
 		"file:src/main/webapp/WEB-INF/spring/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
-		"file:src/test/resources/test-config.xml" })
+		"file:src/main/webapp/WEB-INF/spring/spring-security.xml",
+"file:src/test/resources/test-config.xml" })
 public class SessionServiceTest {
 
 	@Autowired
@@ -55,7 +58,7 @@ public class SessionServiceTest {
 
 	@Autowired
 	private StubUserService userService;
-	
+
 	@Autowired
 	private StubDatabaseDao databaseDao;
 
@@ -64,7 +67,7 @@ public class SessionServiceTest {
 		databaseDao.cleanupTestData();
 		userService.setUserAuthenticated(false);
 	}
-	
+
 	@Test
 	public void testShouldGenerateSessionKeyword() {
 		assertTrue(sessionService.generateKeyword().matches("^[0-9]{8}$"));
@@ -118,19 +121,19 @@ public class SessionServiceTest {
 		IDatabaseDao tempDatabase = (IDatabaseDao) ReflectionTestUtils.getField(getTargetObject(sessionService), "databaseDao");
 		try {
 			userService.setUserAuthenticated(true);
-	
+
 			Session session = new Session();
 			session.setCreator(userService.getCurrentUser().getUsername());
 			Question q1 = new Question();
 			Question q2 = new Question();
-	
+
 			IDatabaseDao mockDatabase = mock(IDatabaseDao.class);
 			when(mockDatabase.getSkillQuestions(userService.getCurrentUser(), session)).thenReturn(Arrays.asList(q1, q2));
 			when(mockDatabase.getSession(anyString())).thenReturn(session);
 			ReflectionTestUtils.setField(getTargetObject(sessionService), "databaseDao", mockDatabase);
-	
+
 			sessionService.deleteSession(session.getKeyword(), userService.getCurrentUser());
-	
+
 			verify(mockDatabase).deleteQuestionWithAnswers(q1);
 			verify(mockDatabase).deleteQuestionWithAnswers(q2);
 			verify(mockDatabase).deleteSession(session);
