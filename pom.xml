@@ -7,8 +7,8 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<org.springframework-version>4.0.0.RELEASE</org.springframework-version>
-		<org.springframework.security-version>3.2.0.RELEASE</org.springframework.security-version>
+		<org.springframework-version>4.0.4.RELEASE</org.springframework-version>
+		<org.springframework.security-version>3.2.3.RELEASE</org.springframework.security-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.url>https://scm.thm.de/arsnova</project.url>
 		<mobile.path>../arsnova-mobile/src/main/webapp/build/production/ARSnova</mobile.path>
@@ -105,22 +105,6 @@
 				<version>2.9.1</version>
 				<configuration></configuration>
 			</plugin>
-			<!--
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>findbugs-maven-plugin</artifactId>
-				<version>2.5.2</version>
-				<configuration></configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>2.10</version>
-				<configuration>
-					<configLocation>ARSnova-checkstyle-checker.xml</configLocation>
-				</configuration>
-			</plugin>
-			-->
 		</plugins>
 	</reporting>
 
@@ -255,7 +239,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.10</version>
+			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -289,12 +273,12 @@
 		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjrt</artifactId>
-			<version>1.7.1</version>
+			<version>1.7.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjweaver</artifactId>
-			<version>1.7.1</version>
+			<version>1.7.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -313,17 +297,10 @@
 			<version>1.9.5</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- 
-		<dependency>
-			<groupId>org.codehaus.groovy</groupId>
-			<artifactId>groovy</artifactId>
-			<version>2.0.5</version>
-		</dependency>
-		-->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.2.2</version>
+			<version>4.3.3</version>
 		</dependency>
 		<dependency>
 			<groupId>de.thm.arsnova.connector</groupId>
@@ -338,9 +315,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.5.1</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-
+					<source>1.7</source>
+					<target>1.7</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -380,7 +356,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>cobertura-maven-plugin</artifactId>
-				<version>2.5.2</version>
+				<version>2.6</version>
 				<configuration>
 					<formats>
 						<format>xml</format>
@@ -391,12 +367,12 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>aspectj-maven-plugin</artifactId>
-				<version>1.4</version>
+				<version>1.6</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>2.10</version>
+				<version>2.12.1</version>
 				<configuration>
 					<configLocation>ARSnova-checkstyle-checker.xml</configLocation>
 				</configuration>
@@ -404,83 +380,12 @@
 			<plugin>
 				<groupId>org.apache.tomcat.maven</groupId>
 				<artifactId>tomcat7-maven-plugin</artifactId>
-				<version>2.0</version>
+				<version>2.2</version>
 				<configuration>
 					<url>http://localhost:8080/manager/text</url>
 					<server>arsnova</server>
 					<path>/arsnova-war</path>
 				</configuration>
-			</plugin>
-			<!--<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.12.4</version>
-				<configuration>
-					<includes>
-						<include>**/Selenium*.java</include>
-					</includes>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.cargo</groupId>
-				<artifactId>cargo-maven2-plugin</artifactId>
-				<version>1.2.0</version>
-				<configuration>
-					<container>
-						<containerId>tomcat7x</containerId>
-						<zipUrlInstaller>
-							<url>http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.16/bin/apache-tomcat-7.0.16.zip
-							</url>
-							<downloadDir>${project.build.directory}/downloads</downloadDir>
-							<extractDir>${project.build.directory}/extracts</extractDir>
-						</zipUrlInstaller>
-					</container>
-					<configuration>
-						<properties>
-							<cargo.servlet.port>8081</cargo.servlet.port>
-							<cargo.tomcat.ajp.port>8010</cargo.tomcat.ajp.port>
-						</properties>
-						<deployables>
-							<deployable>
-								<groupId>de.thm.arsnova</groupId>
-								<artifactId>arsnova-war</artifactId>
-								<type>war</type>
-								<properties>
-									<context>arsnova-war</context>
-								</properties>
-							</deployable>
-						</deployables>
-					</configuration>
-				</configuration>
-				<executions>
-					<execution>
-						<id>start-tomcat</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>start</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>stop-tomcat</id>
-						<phase>post-integration-test</phase>
-						<goals>
-							<goal>stop</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>-->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>groovy-maven-plugin</artifactId>
-				<version>1.4</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
