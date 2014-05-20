@@ -33,6 +33,7 @@
 	<filter>
 		<filter-name>springSecurityFilterChain</filter-name>
 		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+		<async-supported>true</async-supported>
 	</filter>
 	<filter-mapping>
 		<filter-name>springSecurityFilterChain</filter-name>
@@ -45,6 +46,7 @@
 			<param-name>encoding</param-name>
 			<param-value>UTF-8</param-value>
 		</init-param>
+		<async-supported>true</async-supported>
 	</filter>
 	<filter-mapping>
 		<filter-name>characterEncodingFilter</filter-name>
@@ -63,6 +65,7 @@
 	<filter>
 		<filter-name>corsFilter</filter-name>
 		<filter-class>de.thm.arsnova.web.CorsFilter</filter-class>
+		<async-supported>true</async-supported>
 	</filter>
 	<filter-mapping>
 		<filter-name>corsFilter</filter-name>
