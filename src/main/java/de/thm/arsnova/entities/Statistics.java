@@ -42,4 +42,30 @@ public class Statistics {
 	public void setActiveUsers(int activeUsers) {
 		this.activeUsers = activeUsers;
 	}
+
+	@Override
+	public int hashCode() {
+		return (this.getClass().getName()
+				+ this.activeUsers
+				+ this.answers
+				+ this.closedSessions
+				+ this.openSessions
+				+ this.questions).hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (obj == this) {
+			return true;
+		}
+		if (obj instanceof Statistics) {
+			Statistics other = (Statistics) obj;
+			return this.hashCode() == other.hashCode();
+		}
+
+		return false;
+	}
 }

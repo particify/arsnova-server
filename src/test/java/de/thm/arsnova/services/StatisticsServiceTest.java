@@ -1,17 +1,20 @@
 package de.thm.arsnova.services;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.when;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import de.thm.arsnova.dao.StubDatabaseDao;
-import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.Statistics;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -23,52 +26,51 @@ import de.thm.arsnova.entities.Statistics;
 })
 public class StatisticsServiceTest {
 
-	@Autowired
-	private IStatisticsService statisticsService;
+	@InjectMocks
+	private final IStatisticsService statisticsService = new StatisticsService();
 
-	@Autowired
-	private StubUserService userService;
-
-	@Autowired
+	@Mock
 	private StubDatabaseDao databaseDao;
 
 	@Before
 	public final void startup() {
-		// Create new session to be appended to the existing two sessions
-		Session session = new Session();
-		session.setKeyword("1111222");
-		session.setActive(false);
-		databaseDao.saveSession(session);
+		MockitoAnnotations.initMocks(this);
+		when(databaseDao.countQuestions()).thenReturn(123);
+		when(databaseDao.countActiveUsers(anyInt())).thenReturn(42);
+		when(databaseDao.countOpenSessions()).thenReturn(1978);
+		when(databaseDao.countClosedSessions()).thenReturn(1984);
+		when(databaseDao.countAnswers()).thenReturn(2014);
 	}
 
 	@After
 	public final void cleanup() {
-		databaseDao.cleanupTestData();
 	}
 
 	@Test
 	public final void testShouldReturnNoActiveUsers() {
+		when(databaseDao.countActiveUsers(anyInt())).thenReturn(0);
+
 		int actual = statisticsService.countActiveUsers();
 		assertEquals(0, actual);
 	}
 
 	@Test
 	public final void testShouldReturnCurrentActiveUsers() {
-		Session session = new Session();
-		session.setKeyword("1278127812");
-
-		userService.setUserAuthenticated(true);
-		databaseDao.registerAsOnlineUser(userService.getCurrentUser(), session);
-
 		int actual = statisticsService.countActiveUsers();
-		assertEquals(1, actual);
-		userService.setUserAuthenticated(false);
+		assertEquals(42, actual);
 	}
 
 	@Test
-	public final void testShouldReturnStatistics() {
+	public final void testShouldReturnEqualStatistics() {
 		Statistics actual = statisticsService.getStatistics();
-		assertEquals(3, actual.getOpenSessions());
-		assertEquals(1, actual.getClosedSessions());
+
+		Statistics expected = new Statistics();
+		expected.setActiveUsers(42);
+		expected.setAnswers(2014);
+		expected.setClosedSessions(1984);
+		expected.setOpenSessions(1978);
+		expected.setQuestions(123);
+
+		assertEquals(expected, actual);
 	}
 }
