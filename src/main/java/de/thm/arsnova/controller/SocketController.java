@@ -27,18 +27,17 @@ import net.sf.json.JSONObject;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.services.UserSessionService;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
-@Controller
+@RestController
 @RequestMapping("/socket")
 public class SocketController extends AbstractController {
 
@@ -66,7 +65,6 @@ public class SocketController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/url", method = RequestMethod.GET)
-	@ResponseBody
 	public final String getSocketUrl(final HttpServletRequest request) {
 		StringBuilder url = new StringBuilder();
 

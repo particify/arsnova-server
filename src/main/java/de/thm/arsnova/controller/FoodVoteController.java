@@ -27,16 +27,15 @@ import net.sf.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.entities.FoodVote;
 import de.thm.arsnova.services.IFoodService;
 
-@Controller
+@RestController
 @RequestMapping("/canteen/menu/vote")
 public class FoodVoteController extends AbstractController {
 
@@ -50,19 +49,17 @@ public class FoodVoteController extends AbstractController {
 	public final void setFoodVote(
 			@RequestBody final Object menu,
 			final HttpServletResponse response
-		) {
+			) {
 		String menustring = JSONObject.fromObject(menu).getString("menu");
 		foodService.vote(menustring);
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
-	@ResponseBody
 	public final List<FoodVote> getFoodVote() {
 		return foodService.getFoodVote();
 	}
 
 	@RequestMapping(value = "/count", method = RequestMethod.GET, produces = "text/plain")
-	@ResponseBody
 	public final String getFoodVoteCount() {
 		return Integer.toString(foodService.getFoodVoteCount());
 	}

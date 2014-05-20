@@ -28,14 +28,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.LoggedIn;
@@ -46,7 +45,7 @@ import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.services.SessionService.SessionNameComperator;
 import de.thm.arsnova.services.SessionService.SessionShortNameComperator;
 
-@Controller
+@RestController
 @RequestMapping("/session")
 public class SessionController extends AbstractController {
 
@@ -59,20 +58,17 @@ public class SessionController extends AbstractController {
 	private IUserService userService;
 
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.GET)
-	@ResponseBody
 	public final Session joinSession(@PathVariable final String sessionkey) {
 		return sessionService.joinSession(sessionkey);
 	}
 
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.DELETE)
-	@ResponseBody
 	public final void deleteSession(@PathVariable final String sessionkey) {
 		User user = userService.getCurrentUser();
 		sessionService.deleteSession(sessionkey, user);
 	}
 
 	@RequestMapping(value = "/{sessionkey}/online", method = RequestMethod.POST)
-	@ResponseBody
 	@ResponseStatus(HttpStatus.CREATED)
 	public final LoggedIn registerAsOnlineUser(
 			@PathVariable final String sessionkey,
@@ -90,7 +86,6 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{sessionkey}/activeusercount", method = RequestMethod.GET)
-	@ResponseBody
 	public final int countActiveUsers(
 			@PathVariable final String sessionkey,
 			final HttpServletResponse response
@@ -101,7 +96,6 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.POST)
-	@ResponseBody
 	@ResponseStatus(HttpStatus.CREATED)
 	public final Session postNewSession(@RequestBody final Session session, final HttpServletResponse response) {
 		if (session != null && session.isCourseSession()) {
@@ -127,7 +121,6 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.PUT)
-	@ResponseBody
 	public final Session updateSession(
 			@PathVariable final String sessionkey,
 			@RequestBody final Session session
@@ -136,7 +129,6 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
-	@ResponseBody
 	public final List<Session> getSessions(
 			@RequestParam(value = "ownedonly", defaultValue = "false") final boolean ownedOnly,
 			@RequestParam(value = "visitedonly", defaultValue = "false") final boolean visitedOnly,
@@ -177,7 +169,6 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{sessionkey}/lock", method = RequestMethod.POST)
-	@ResponseBody
 	public final Session lockSession(
 			@PathVariable final String sessionkey,
 			@RequestParam(required = false) final Boolean lock,
@@ -191,7 +182,6 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{sessionkey}/learningprogress", method = RequestMethod.GET)
-	@ResponseBody
 	public final int learningProgress(
 			@PathVariable final String sessionkey,
 			final HttpServletResponse response
@@ -200,7 +190,6 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{sessionkey}/mylearningprogress", method = RequestMethod.GET)
-	@ResponseBody
 	public final int myLearningProgress(
 			@PathVariable final String sessionkey,
 			final HttpServletResponse response

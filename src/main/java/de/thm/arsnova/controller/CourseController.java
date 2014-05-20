@@ -27,11 +27,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
@@ -40,7 +39,7 @@ import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.IUserService;
 
-@Controller
+@RestController
 public class CourseController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory
@@ -53,10 +52,9 @@ public class CourseController extends AbstractController {
 	private IUserService userService;
 
 	@RequestMapping(value = "/mycourses", method = RequestMethod.GET)
-	@ResponseBody
 	public final List<Course> myCourses(
 			@RequestParam(value = "sortby", defaultValue = "name") final String sortby
-	) {
+			) {
 		String username = userService.getCurrentUser().getUsername();
 
 		if (username == null) {
@@ -73,7 +71,7 @@ public class CourseController extends AbstractController {
 			if (
 					course.getMembership().isMember()
 					&& course.getMembership().getUserrole().equals(UserRole.TEACHER)
-			) {
+					) {
 				result.add(course);
 			}
 		}
