@@ -1,5 +1,7 @@
 package de.thm.arsnova.controller;
 
+import java.util.concurrent.Callable;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,17 @@ public class StatisticsController {
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics")
 	public final Statistics getStatistics() {
 		return statisticsService.getStatistics();
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/astatistics")
+	public final Callable<Statistics> getAsyncStatistics() {
+		return new Callable<Statistics> () {
+
+			@Override
+			public Statistics call() throws Exception {
+				return statisticsService.getStatistics();
+			}
+		};
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics/activeusercount", produces = "text/plain")
