@@ -234,7 +234,8 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	@PreAuthorize("isAuthenticated() and hasPermission(#session, 'owner')")
+	//@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public Session updateSession(String sessionkey, Session session) {
 		return databaseDao.updateSession(session);
 	}

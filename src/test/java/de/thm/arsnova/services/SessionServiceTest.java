@@ -48,8 +48,8 @@ import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.dao.StubDatabaseDao;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.exceptions.UnauthorizedException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {
@@ -135,7 +135,7 @@ public class SessionServiceTest {
 		assertNotNull(sessionService.joinSession("11111111"));
 	}
 
-	@Test(expected = UnauthorizedException.class)
+	@Test(expected = ForbiddenException.class)
 	public void testShouldUpdateSession() {
 		setAuthenticated(true, "ptsr00");
 

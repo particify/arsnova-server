@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import de.thm.arsnova.dao.StubDatabaseDao;
 import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -65,17 +68,19 @@ public class QuestionServiceTest {
 			SecurityContextHolder.getContext().setAuthentication(token);
 			userService.setUserAuthenticated(isAuthenticated, username);
 		} else {
-			SecurityContextHolder.setContext(
-					SecurityContextHolder.createEmptyContext()
-					);
 			userService.setUserAuthenticated(isAuthenticated);
 		}
 	}
 
+	@Before
+	public final void startup() {
+		SecurityContextHolder.clearContext();
+	}
+
 	@After
 	public final void cleanup() {
-		databaseDao.cleanupTestData();
-		setAuthenticated(false, "ptsr00");
+		//databaseDao.cleanupTestData();
+		//setAuthenticated(false, "ptsr00");
 	}
 
 	@Test(expected = AuthenticationCredentialsNotFoundException.class)
@@ -122,5 +127,14 @@ public class QuestionServiceTest {
 		questionService.readInterposedQuestion(theQ.get_id());
 
 		assertFalse(theQ.isRead());
+	}
+
+	@Test(expected = ForbiddenException.class)
+	public void testShouldSaveQuestion() throws Exception{
+		setAuthenticated(true, "regular user");
+		Question question = new Question();
+		question.setSessionKeyword("12345678");
+		question.setQuestionVariant("freetext");
+		questionService.saveQuestion(question);
 	}
 }
