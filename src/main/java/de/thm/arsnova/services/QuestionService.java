@@ -146,16 +146,15 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
+	@PreAuthorize("isAuthenticated() and hasPermission(#question.getSessionKeyword(), 'session', 'owner')")
 	public void deleteQuestion(String questionId) {
 		Question question = databaseDao.getQuestion(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
 
-		User user = userService.getCurrentUser();
 		Session session = databaseDao.getSession(question.getSessionKeyword());
-		if (user == null || session == null || ! session.isCreator(user)) {
+		if (session == null) {
 			throw new UnauthorizedException();
 		}
 		databaseDao.deleteQuestionWithAnswers(question);
@@ -178,26 +177,24 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
+	@PreAuthorize("isAuthenticated() and hasPermission(#question.getSessionKeyword(), 'session', 'owner')")
 	public void deleteInterposedQuestion(String questionId) {
 		InterposedQuestion question = databaseDao.getInterposedQuestion(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
-		User user = userService.getCurrentUser();
 		Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
-		if (user == null || session == null || ! session.isCreator(user)) {
+		if (session == null) {
 			throw new UnauthorizedException();
 		}
 		databaseDao.deleteInterposedQuestion(question);
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
+	@PreAuthorize("isAuthenticated() and hasPermission(#sessionKeyword, 'session', 'owner')")
 	public void deleteAllInterposedQuestions(String sessionKeyword) {
-		User user = userService.getCurrentUser();
 		Session session = databaseDao.getSessionFromKeyword(sessionKeyword);
-		if (user == null || session == null || ! session.isCreator(user)) {
+		if (session == null) {
 			throw new UnauthorizedException();
 		}
 		databaseDao.deleteAllInterposedQuestions(session);
