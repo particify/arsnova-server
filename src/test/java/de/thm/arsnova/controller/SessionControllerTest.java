@@ -85,4 +85,28 @@ public class SessionControllerTest {
 		mockMvc.perform(post("/session/").contentType(MediaType.APPLICATION_JSON).content("{\"keyword\":12345678}"))
 		.andExpect(status().isUnauthorized());
 	}
+
+	@Test
+	public void testShouldNotReturnMySessionsIfUnauthorized() throws Exception {
+		setAuthenticated(false);
+
+		mockMvc.perform(get("/session/").param("ownedonly", "true"))
+		.andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	public void testShouldNotReturnMyVisitedSessionsIfUnauthorized() throws Exception {
+		setAuthenticated(false);
+
+		mockMvc.perform(get("/session/").param("visitedonly", "true"))
+		.andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	public void testShouldShowUnimplementedIfNoFlagIsSet() throws Exception {
+		setAuthenticated(false);
+
+		mockMvc.perform(get("/session/"))
+		.andExpect(status().isNotImplemented());
+	}
 }

@@ -138,12 +138,6 @@ public class SessionController extends AbstractController {
 		User user = userService.getCurrentUser();
 		List<Session> sessions = null;
 
-		/* TODO Could @Authorized annotation be used instead of this check? */
-		if (null == user) {
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			return null;
-		}
-
 		/* TODO implement all parameter combinations, implement use of user parameter */
 		if (ownedOnly && !visitedOnly) {
 			sessions = sessionService.getMySessions(user);
