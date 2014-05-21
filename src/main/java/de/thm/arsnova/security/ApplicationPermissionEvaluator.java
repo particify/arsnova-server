@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 
-public class SessionPermissionEvaluator implements PermissionEvaluator {
+public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 	@Autowired
 	IDatabaseDao dao;

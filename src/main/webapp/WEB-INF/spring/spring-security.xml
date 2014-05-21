@@ -1,136 +1,155 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:p="http://www.springframework.org/schema/p"
-	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:security="http://www.springframework.org/schema/security"
 	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
-    <security:authentication-manager alias="authenticationManager">
-        <security:authentication-provider ref="facebookAuthProvider" />
-        <security:authentication-provider ref="twitterAuthProvider" />
-        <security:authentication-provider ref="googleAuthProvider" />
-        <security:authentication-provider ref="casAuthenticationProvider" />
-    </security:authentication-manager>
+	<security:authentication-manager alias="authenticationManager">
+		<security:authentication-provider
+			ref="facebookAuthProvider" />
+		<security:authentication-provider
+			ref="twitterAuthProvider" />
+		<security:authentication-provider
+			ref="googleAuthProvider" />
+		<security:authentication-provider
+			ref="casAuthenticationProvider" />
+	</security:authentication-manager>
 
-    <security:http entry-point-ref="facebookEntryPoint">
-        <security:custom-filter ref="facebookFilter" before="CAS_FILTER" />
-        <security:custom-filter ref="twitterFilter" after="CAS_FILTER" />
-        <security:custom-filter ref="googleFilter" before="FORM_LOGIN_FILTER" />
-        
-		<security:custom-filter ref="casAuthenticationFilter" position="CAS_FILTER" />
-		<security:custom-filter ref="requestSingleLogoutFilter" before="LOGOUT_FILTER" />  
-    </security:http>
+	<security:http entry-point-ref="facebookEntryPoint">
+		<security:custom-filter ref="facebookFilter"
+			before="CAS_FILTER" />
+		<security:custom-filter ref="twitterFilter"
+			after="CAS_FILTER" />
+		<security:custom-filter ref="googleFilter"
+			before="FORM_LOGIN_FILTER" />
 
-    <security:global-method-security pre-post-annotations="enabled"></security:global-method-security>
-    
-    <!-- ######################### FACEBOOK ######################### -->
-    <bean id="facebookEntryPoint" class="com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationEntryPoint"
-        p:provider-ref="facebookProvider" />
+		<security:custom-filter ref="casAuthenticationFilter"
+			position="CAS_FILTER" />
+		<security:custom-filter ref="requestSingleLogoutFilter"
+			before="LOGOUT_FILTER" />
+	</security:http>
 
-    <bean id="facebookProvider" class="org.scribe.up.provider.impl.FacebookProvider"
-        p:key="${security.facebook.key}"
-        p:secret="${security.facebook.secret}"
-        p:callbackUrl="${security.arsnova-url}/j_spring_facebook_security_check" />
+	<security:global-method-security
+		pre-post-annotations="enabled">
+		<security:expression-handler ref="expressionHandler" />
 
-    <bean id="facebookFilter" class="com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationFilter"
-        p:filterProcessesUrl="/j_spring_facebook_security_check"
-        p:provider-ref="facebookProvider"
-        p:authenticationManager-ref="authenticationManager"
-        p:authenticationFailureHandler-ref="failureHandler"
-        p:authenticationSuccessHandler-ref="successHandler" />
+	</security:global-method-security>
 
-	<bean id="facebookAuthProvider" class="com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationProvider"
-	    p:provider-ref="facebookProvider" />
+	<bean id="permissionEvaluator" class="de.thm.arsnova.security.ApplicationPermissionEvaluator" />
 
-    <!-- ######################### TWITTER ######################### -->
-    <bean id="twitterProvider" class="org.scribe.up.provider.impl.TwitterProvider"
-        p:key="${security.twitter.key}"
-        p:secret="${security.twitter.secret}"
-        p:callbackUrl="${security.arsnova-url}/j_spring_twitter_security_check" />
-
-    <bean id="twitterFilter" class="com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationFilter"
-        p:filterProcessesUrl="/j_spring_twitter_security_check"
-        p:provider-ref="twitterProvider"
-        p:authenticationManager-ref="authenticationManager"
-		p:authenticationFailureHandler-ref="failureHandler"
-        p:authenticationSuccessHandler-ref="successHandler" />
-
-    <bean id="twitterAuthProvider" class="com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationProvider"
-        p:provider-ref="twitterProvider" />
-    
-    <!-- ######################### GOOGLE ######################### -->
-    <bean id="googleProvider" class="org.scribe.up.provider.impl.Google2Provider"
-        p:key="${security.google.key}"
-        p:secret="${security.google.secret}"
-        p:scope-ref="googleScope"
-        p:callbackUrl="${security.arsnova-url}/j_spring_google_security_check" />
-    
-    <bean id="googleScope" class="org.scribe.up.provider.impl.Google2Provider.Google2Scope" factory-method="valueOf">
-	     <constructor-arg index="0" value="EMAIL" />
+	<bean id="expressionHandler"
+		class="org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler">
+		<property name="permissionEvaluator" ref="permissionEvaluator" />
 	</bean>
 
-	<bean id="googleFilter" class="com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationFilter"
-	    p:filterProcessesUrl="/j_spring_google_security_check"
-	    p:provider-ref="googleProvider"
-	   	p:authenticationManager-ref="authenticationManager"
-        p:authenticationFailureHandler-ref="failureHandler"
-        p:authenticationSuccessHandler-ref="successHandler" />	   	
+	<!-- ######################### FACEBOOK ######################### -->
+	<bean id="facebookEntryPoint"
+		class="com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationEntryPoint"
+		p:provider-ref="facebookProvider" />
 
-    <bean id="googleAuthProvider" class="com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationProvider"
-        p:provider-ref="googleProvider" />
-    
-    <!-- ######################### CAS ######################### -->
-    <bean id="casAuthenticationFilter"
+	<bean id="facebookProvider" class="org.scribe.up.provider.impl.FacebookProvider"
+		p:key="${security.facebook.key}" p:secret="${security.facebook.secret}"
+		p:callbackUrl="${security.arsnova-url}/j_spring_facebook_security_check" />
+
+	<bean id="facebookFilter"
+		class="com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationFilter"
+		p:filterProcessesUrl="/j_spring_facebook_security_check"
+		p:provider-ref="facebookProvider" p:authenticationManager-ref="authenticationManager"
+		p:authenticationFailureHandler-ref="failureHandler"
+		p:authenticationSuccessHandler-ref="successHandler" />
+
+	<bean id="facebookAuthProvider"
+		class="com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationProvider"
+		p:provider-ref="facebookProvider" />
+
+	<!-- ######################### TWITTER ######################### -->
+	<bean id="twitterProvider" class="org.scribe.up.provider.impl.TwitterProvider"
+		p:key="${security.twitter.key}" p:secret="${security.twitter.secret}"
+		p:callbackUrl="${security.arsnova-url}/j_spring_twitter_security_check" />
+
+	<bean id="twitterFilter"
+		class="com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationFilter"
+		p:filterProcessesUrl="/j_spring_twitter_security_check"
+		p:provider-ref="twitterProvider" p:authenticationManager-ref="authenticationManager"
+		p:authenticationFailureHandler-ref="failureHandler"
+		p:authenticationSuccessHandler-ref="successHandler" />
+
+	<bean id="twitterAuthProvider"
+		class="com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationProvider"
+		p:provider-ref="twitterProvider" />
+
+	<!-- ######################### GOOGLE ######################### -->
+	<bean id="googleProvider" class="org.scribe.up.provider.impl.Google2Provider"
+		p:key="${security.google.key}" p:secret="${security.google.secret}"
+		p:scope-ref="googleScope" p:callbackUrl="${security.arsnova-url}/j_spring_google_security_check" />
+
+	<bean id="googleScope"
+		class="org.scribe.up.provider.impl.Google2Provider.Google2Scope"
+		factory-method="valueOf">
+		<constructor-arg index="0" value="EMAIL" />
+	</bean>
+
+	<bean id="googleFilter"
+		class="com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationFilter"
+		p:filterProcessesUrl="/j_spring_google_security_check" p:provider-ref="googleProvider"
+		p:authenticationManager-ref="authenticationManager"
+		p:authenticationFailureHandler-ref="failureHandler"
+		p:authenticationSuccessHandler-ref="successHandler" />
+
+	<bean id="googleAuthProvider"
+		class="com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationProvider"
+		p:provider-ref="googleProvider" />
+
+	<!-- ######################### CAS ######################### -->
+	<bean id="casAuthenticationFilter"
 		class="org.springframework.security.cas.web.CasAuthenticationFilter"
-		p:authenticationManager-ref="authenticationManager" 
-        p:authenticationFailureHandler-ref="failureHandler"
-        p:authenticationSuccessHandler-ref="successHandler" />
+		p:authenticationManager-ref="authenticationManager"
+		p:authenticationFailureHandler-ref="failureHandler"
+		p:authenticationSuccessHandler-ref="successHandler" />
 
 	<bean id="casEntryPoint"
 		class="org.springframework.security.cas.web.CasAuthenticationEntryPoint"
-		p:loginUrl="${security.cas-server-url}/login"
-		p:serviceProperties-ref="casServiceProperties" />
-	
-	<bean id="casServiceProperties" 
-		class="org.springframework.security.cas.ServiceProperties"
-	    p:service="${security.arsnova-url}/j_spring_cas_security_check"
-	    p:sendRenew="false" />
+		p:loginUrl="${security.cas-server-url}/login" p:serviceProperties-ref="casServiceProperties" />
+
+	<bean id="casServiceProperties" class="org.springframework.security.cas.ServiceProperties"
+		p:service="${security.arsnova-url}/j_spring_cas_security_check"
+		p:sendRenew="false" />
 
 	<bean id="casAuthenticationProvider"
 		class="org.springframework.security.cas.authentication.CasAuthenticationProvider"
-		p:key="casAuthProviderKey"
-		p:serviceProperties-ref="casServiceProperties"		
-		p:authenticationUserDetailsService-ref="casUserDetailsService" 
+		p:key="casAuthProviderKey" p:serviceProperties-ref="casServiceProperties"
+		p:authenticationUserDetailsService-ref="casUserDetailsService"
 		p:ticketValidator-ref="casTicketValidator" />
-	
+
 	<bean id="casUserDetailsService" class="de.thm.arsnova.CasUserDetailsService" />
-	<bean id="casTicketValidator" class="org.jasig.cas.client.validation.Cas20ProxyTicketValidator">
+	<bean id="casTicketValidator"
+		class="org.jasig.cas.client.validation.Cas20ProxyTicketValidator">
 		<constructor-arg value="${security.cas-server-url}" />
 	</bean>
-    
+
 	<bean id="requestSingleLogoutFilter"
-	    class="org.springframework.security.web.authentication.logout.LogoutFilter"
-	    p:filterProcessesUrl="/j_spring_cas_security_logout">
-	    <constructor-arg ref="casLogoutSuccessHandler" />
+		class="org.springframework.security.web.authentication.logout.LogoutFilter"
+		p:filterProcessesUrl="/j_spring_cas_security_logout">
+		<constructor-arg ref="casLogoutSuccessHandler" />
 		<constructor-arg>
-	      <bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
-	    </constructor-arg>	    
+			<bean
+				class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler" />
+		</constructor-arg>
 	</bean>
 
 	<bean id="casLogoutSuccessHandler" class="de.thm.arsnova.CASLogoutSuccessHandler"
-	    p:casUrl="${security.cas-server-url}"
-	    p:defaultTarget="${security.arsnova-url}"/>
-	
+		p:casUrl="${security.cas-server-url}" p:defaultTarget="${security.arsnova-url}" />
+
 	<bean id="successHandler" class="de.thm.arsnova.LoginAuthenticationSucessHandler"
-	    p:targetUrl="#auth/checkLogin"/>
+		p:targetUrl="#auth/checkLogin" />
 
-    <bean id="failureHandler" class="de.thm.arsnova.LoginAuthenticationFailureHandler"
-        p:defaultFailureUrl="/index.html" />
+	<bean id="failureHandler" class="de.thm.arsnova.LoginAuthenticationFailureHandler"
+		p:defaultFailureUrl="/index.html" />
 
-    <!-- Session Registry -->
-    <bean id="sessionRegistry" class="org.springframework.security.core.session.SessionRegistryImpl" />
+	<!-- Session Registry -->
+	<bean id="sessionRegistry"
+		class="org.springframework.security.core.session.SessionRegistryImpl" />
 </beans>

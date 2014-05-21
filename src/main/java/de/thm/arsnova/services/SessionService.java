@@ -121,6 +121,7 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
+	@PreAuthorize("isAuthenticated()")
 	public final List<Session> getMySessions(final User user) {
 		List<Session> mySessions = databaseDao.getMySessions(user);
 		if (connectorClient == null) {
@@ -143,12 +144,13 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
+	@PreAuthorize("isAuthenticated()")
 	public final List<Session> getMyVisitedSessions(final User user) {
 		return databaseDao.getMyVisitedSessions(user);
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#session.getKeyword(), 'session', 'owner')")
+	@PreAuthorize("isAuthenticated()")
 	public final Session saveSession(final Session session) {
 		if (connectorClient != null && session.getCourseId() != null) {
 			if (!connectorClient.getMembership(
@@ -232,15 +234,8 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
+	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public Session updateSession(String sessionkey, Session session) {
-		Session s = databaseDao.getSession(sessionkey);
-		User user = userService.getCurrentUser();
-
-		if (!s.isCreator(user)) {
-			throw new ForbiddenException();
-		}
-
 		return databaseDao.updateSession(session);
 	}
 

@@ -39,7 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,7 +64,6 @@ import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 
-@Component
 public class CouchDBDao implements IDatabaseDao {
 	@Autowired
 	private IUserService userService;

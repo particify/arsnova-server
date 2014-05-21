@@ -57,7 +57,7 @@ public class SessionControllerTest {
 			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken("ptsr00", "secret", ga);
 			SecurityContextHolder.getContext().setAuthentication(token);
 		} else {
-			SecurityContextHolder.createEmptyContext();
+			SecurityContextHolder.clearContext();
 		}
 		userService.setUserAuthenticated(isAuthenticated);
 	}
@@ -71,18 +71,18 @@ public class SessionControllerTest {
 	}
 
 	@Test
-	public void testShouldNotGetUnknownSessionEvenIfUnauthorized() throws Exception {
+	public void testShouldNotGetUnknownSessionIfUnauthorized() throws Exception {
 		setAuthenticated(false);
 
 		mockMvc.perform(get("/session/00000000"))
-		.andExpect(status().isNotFound());
+		.andExpect(status().isUnauthorized());
 	}
 
 	@Test
-	public void testShouldCreateSessionIfNotAuthorized() throws Exception {
+	public void testShouldCreateSessionIfUnauthorized() throws Exception {
 		setAuthenticated(false);
 
-		mockMvc.perform(post("/session/").contentType(MediaType.APPLICATION_JSON).content("{}"))
-		.andExpect(status().isForbidden());
+		mockMvc.perform(post("/session/").contentType(MediaType.APPLICATION_JSON).content("{\"keyword\":12345678}"))
+		.andExpect(status().isUnauthorized());
 	}
 }
