@@ -22,9 +22,9 @@ package de.thm.arsnova.services;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import de.thm.arsnova.annotation.Authenticated;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.FoodVote;
 
@@ -39,7 +39,7 @@ public class FoodService implements IFoodService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public void vote(String menu) {
 		this.databaseDao.vote(menu);
 

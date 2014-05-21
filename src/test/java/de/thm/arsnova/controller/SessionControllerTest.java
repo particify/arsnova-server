@@ -4,11 +4,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -45,36 +51,38 @@ public class SessionControllerTest {
 		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 	}
 
+	private void setAuthenticated(boolean isAuthenticated) {
+		if (isAuthenticated) {
+			List<GrantedAuthority> ga = new ArrayList<GrantedAuthority>();
+			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken("ptsr00", "secret", ga);
+			SecurityContextHolder.getContext().setAuthentication(token);
+		} else {
+			SecurityContextHolder.createEmptyContext();
+		}
+		userService.setUserAuthenticated(isAuthenticated);
+	}
+
 	@Test
 	public void testShouldNotGetUnknownSession() throws Exception {
-		userService.setUserAuthenticated(true);
+		setAuthenticated(true);
 
 		mockMvc.perform(get("/session/00000000"))
 		.andExpect(status().isNotFound());
 	}
 
 	@Test
-	public void testShouldNotGetSessionIfUnauthorized() throws Exception {
-		userService.setUserAuthenticated(false);
+	public void testShouldNotGetUnknownSessionEvenIfUnauthorized() throws Exception {
+		setAuthenticated(false);
 
 		mockMvc.perform(get("/session/00000000"))
-		.andExpect(status().isUnauthorized());
+		.andExpect(status().isNotFound());
 	}
 
 	@Test
-	public void testShouldNotGetSessionIfAnonymous() throws Exception {
-		userService.setUserAuthenticated(false);
-		userService.useAnonymousUser();
-
-		mockMvc.perform(get("/session/00000000"))
-		.andExpect(status().isUnauthorized());
-	}
-
-	@Test
-	public void testShouldCreateSessionIfUnauthorized() throws Exception {
-		userService.setUserAuthenticated(false);
+	public void testShouldCreateSessionIfNotAuthorized() throws Exception {
+		setAuthenticated(false);
 
 		mockMvc.perform(post("/session/").contentType(MediaType.APPLICATION_JSON).content("{}"))
-		.andExpect(status().isUnauthorized());
+		.andExpect(status().isForbidden());
 	}
 }

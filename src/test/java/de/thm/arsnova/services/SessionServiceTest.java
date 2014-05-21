@@ -26,7 +26,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Test;
@@ -34,6 +36,10 @@ import org.junit.runner.RunWith;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -74,21 +80,32 @@ public class SessionServiceTest {
 		assertTrue(sessionService.generateKeyword().matches("^[0-9]{8}$"));
 	}
 
+	private void setAuthenticated(boolean isAuthenticated) {
+		if (isAuthenticated) {
+			List<GrantedAuthority> ga = new ArrayList<GrantedAuthority>();
+			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken("ptsr00", "secret", ga);
+			SecurityContextHolder.getContext().setAuthentication(token);
+		} else {
+			SecurityContextHolder.createEmptyContext();
+		}
+		userService.setUserAuthenticated(isAuthenticated);
+	}
+
 	@Test(expected = NotFoundException.class)
 	public void testShouldFindNonExistantSession() {
-		userService.setUserAuthenticated(true);
+		setAuthenticated(true);
 		sessionService.joinSession("00000000");
 	}
 
 	@Test(expected = UnauthorizedException.class)
 	public void testShouldNotReturnSessionIfUnauthorized() {
-		userService.setUserAuthenticated(false);
+		setAuthenticated(false);
 		sessionService.joinSession("12345678");
 	}
 
-	@Test(expected = UnauthorizedException.class)
+	@Test(expected = AccessDeniedException.class)
 	public void testShouldNotSaveSessionIfUnauthorized() {
-		userService.setUserAuthenticated(false);
+		setAuthenticated(false);
 
 		Session session = new Session();
 		session.setActive(true);
@@ -98,14 +115,14 @@ public class SessionServiceTest {
 		session.setShortName("TSX");
 		sessionService.saveSession(session);
 
-		userService.setUserAuthenticated(true);
+		setAuthenticated(true);
 
 		assertNull(sessionService.joinSession("11111111"));
 	}
 
-	@Test
+	@Test(expected = AccessDeniedException.class)
 	public void testShouldSaveSession() {
-		userService.setUserAuthenticated(true);
+		setAuthenticated(true);
 
 		Session session = new Session();
 		session.setActive(true);
@@ -121,7 +138,7 @@ public class SessionServiceTest {
 	public void testShouldDeleteAllSessionData() {
 		IDatabaseDao tempDatabase = (IDatabaseDao) ReflectionTestUtils.getField(getTargetObject(sessionService), "databaseDao");
 		try {
-			userService.setUserAuthenticated(true);
+			setAuthenticated(true);
 
 			Session session = new Session();
 			session.setCreator(userService.getCurrentUser().getUsername());

@@ -3,6 +3,8 @@ package de.thm.arsnova.controller;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -19,14 +21,24 @@ public class AbstractController {
 	public void handleNotFoundException(final Exception e, final HttpServletRequest request) {
 	}
 
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+	@ExceptionHandler(UnauthorizedException.class)
+	public void handleUnauthorizedException(final Exception e, final HttpServletRequest request) {
+	}
+
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+	@ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
+	public void handleAuthenticationCredentialsNotFoundException(final Exception e, final HttpServletRequest request) {
+	}
+
 	@ResponseStatus(HttpStatus.FORBIDDEN)
 	@ExceptionHandler(ForbiddenException.class)
 	public void handleForbiddenException(final Exception e, final HttpServletRequest request) {
 	}
 
-	@ResponseStatus(HttpStatus.UNAUTHORIZED)
-	@ExceptionHandler(UnauthorizedException.class)
-	public void handleUnauthorizedException(final Exception e, final HttpServletRequest request) {
+	@ResponseStatus(HttpStatus.FORBIDDEN)
+	@ExceptionHandler(AccessDeniedException.class)
+	public void handleAccessDeniedException(final Exception e, final HttpServletRequest request) {
 	}
 
 	@ResponseStatus(HttpStatus.NO_CONTENT)

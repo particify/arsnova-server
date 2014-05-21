@@ -22,17 +22,23 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import de.thm.arsnova.dao.StubDatabaseDao;
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.exceptions.UnauthorizedException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {
@@ -52,34 +58,47 @@ public class QuestionServiceTest {
 	@Autowired
 	private StubDatabaseDao databaseDao;
 
+	private void setAuthenticated(boolean isAuthenticated, String username) {
+		if (isAuthenticated) {
+			List<GrantedAuthority> ga = new ArrayList<GrantedAuthority>();
+			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, "secret", ga);
+			SecurityContextHolder.getContext().setAuthentication(token);
+			userService.setUserAuthenticated(isAuthenticated, username);
+		} else {
+			SecurityContextHolder.setContext(
+					SecurityContextHolder.createEmptyContext()
+					);
+			userService.setUserAuthenticated(isAuthenticated);
+		}
+	}
+
 	@After
 	public final void cleanup() {
 		databaseDao.cleanupTestData();
-		userService.setUserAuthenticated(false);
+		setAuthenticated(false, "ptsr00");
 	}
 
-	@Test(expected = UnauthorizedException.class)
+	@Test(expected = AuthenticationCredentialsNotFoundException.class)
 	public void testShouldNotReturnQuestionsIfNotAuthenticated() {
-		userService.setUserAuthenticated(false);
+		setAuthenticated(false, "nobody");
 		questionService.getSkillQuestions("12345678");
-
 	}
 
 	@Test(expected = NotFoundException.class)
 	public void testShouldFindQuestionsForNonExistantSession() {
-		userService.setUserAuthenticated(true);
+		setAuthenticated(true, "ptsr00");
 		questionService.getSkillQuestions("00000000");
 	}
 
 	@Test
 	public void testShouldFindQuestions() {
-		userService.setUserAuthenticated(true);
+		setAuthenticated(true, "ptsr00");
 		assertEquals(1, questionService.getSkillQuestionCount("12345678"));
 	}
 
 	@Test
 	public void testShouldMarkInterposedQuestionAsReadIfSessionCreator() throws Exception {
-		userService.setUserAuthenticated(true);
+		setAuthenticated(true, "ptsr00");
 		InterposedQuestion theQ = new InterposedQuestion();
 		theQ.setRead(false);
 		theQ.set_id("the internal id");
@@ -93,7 +112,7 @@ public class QuestionServiceTest {
 
 	@Test
 	public void testShouldNotMarkInterposedQuestionAsReadIfRegularUser() throws Exception {
-		userService.setUserAuthenticated(true, "regular user");
+		setAuthenticated(true, "regular user");
 		InterposedQuestion theQ = new InterposedQuestion();
 		theQ.setRead(false);
 		theQ.set_id("the internal id");

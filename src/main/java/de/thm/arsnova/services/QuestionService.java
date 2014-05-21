@@ -28,10 +28,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.ImageUtils;
-import de.thm.arsnova.annotation.Authenticated;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.InterposedQuestion;
@@ -56,10 +56,10 @@ public class QuestionService implements IQuestionService {
 
 	@Autowired
 	private ARSnovaSocketIOServer socketIoServer;
-	
+
 	@Value("${upload.filesize_b}")
 	private int uploadFileSizeByte;
-	
+
 	public static final Logger LOGGER = LoggerFactory.getLogger(QuestionService.class);
 
 	public void setDatabaseDao(IDatabaseDao databaseDao) {
@@ -67,20 +67,20 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public List<Question> getSkillQuestions(String sessionkey) {
 		return databaseDao.getSkillQuestions(userService.getCurrentUser(), getSession(sessionkey));
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public int getSkillQuestionCount(String sessionkey) {
 		Session session = this.databaseDao.getSessionFromKeyword(sessionkey);
 		return databaseDao.getSkillQuestionCount(session);
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public Question saveQuestion(Question question) {
 		Session session = this.databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		question.setSessionId(session.get_id());
@@ -96,7 +96,7 @@ public class QuestionService implements IQuestionService {
 		} else if (question.getPiRound() < 1 || question.getPiRound() > 2) {
 			question.setPiRound(1);
 		}
-		
+
 		// convert imageurl to base64 if neccessary
 		if ("grid".equals(question.getQuestionType())) {
 			org.slf4j.Logger logger = LoggerFactory.getLogger(QuestionService.class);
@@ -107,7 +107,7 @@ public class QuestionService implements IQuestionService {
 				}
 				question.setImage(base64ImageString);
 			}
-			
+
 			// base64 adds offset to filesize, formular taken from: http://en.wikipedia.org/wiki/Base64#MIME
 			int fileSize =  (int)((question.getImage().length()-814)/1.37);
 			if ( fileSize > this.uploadFileSizeByte ) {
@@ -123,7 +123,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public boolean saveQuestion(InterposedQuestion question) {
 		Session session = this.databaseDao.getSessionFromKeyword(question.getSessionId());
 		InterposedQuestion result = this.databaseDao.saveQuestion(session, question);
@@ -138,7 +138,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public Question getQuestion(String id) {
 		Question result = databaseDao.getQuestion(id);
 		if (result == null) {
@@ -153,7 +153,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public void deleteQuestion(String questionId) {
 		Question question = databaseDao.getQuestion(questionId);
 		if (question == null) {
@@ -169,7 +169,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public void deleteAllQuestions(String sessionKeyword) {
 		Session session = getSessionWithAuthCheck(sessionKeyword);
 		databaseDao.deleteAllQuestionsWithAnswers(session);
@@ -185,7 +185,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public void deleteInterposedQuestion(String questionId) {
 		InterposedQuestion question = databaseDao.getInterposedQuestion(questionId);
 		if (question == null) {
@@ -198,9 +198,9 @@ public class QuestionService implements IQuestionService {
 		}
 		databaseDao.deleteInterposedQuestion(question);
 	}
-	
+
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public void deleteAllInterposedQuestions(String sessionKeyword) {
 		User user = userService.getCurrentUser();
 		Session session = databaseDao.getSessionFromKeyword(sessionKeyword);
@@ -211,7 +211,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public void deleteAnswers(String questionId) {
 		Question question = databaseDao.getQuestion(questionId);
 		if (question == null) {
@@ -227,7 +227,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public List<String> getUnAnsweredQuestionIds(String sessionKey) {
 		User user = getCurrentUser();
 		Session session = getSession(sessionKey);
@@ -243,7 +243,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public Answer getMyAnswer(String questionId) {
 		Question question = getQuestion(questionId);
 
@@ -251,17 +251,17 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public List<Answer> getAnswers(String questionId, int piRound) {
 		Question question = databaseDao.getQuestion(questionId);
 
 		return "freetext".equals(question.getQuestionType())
-			? getFreetextAnswers(questionId)
-			: databaseDao.getAnswers(questionId, piRound);
+				? getFreetextAnswers(questionId)
+						: databaseDao.getAnswers(questionId, piRound);
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public List<Answer> getAnswers(String questionId) {
 		Question question = getQuestion(questionId);
 
@@ -269,15 +269,15 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public int getAnswerCount(String questionId) {
 		Question question = getQuestion(questionId);
-		
+
 		return databaseDao.getAnswerCount(question, question.getPiRound());
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public List<Answer> getFreetextAnswers(String questionId) {
 		List<Answer> answers = databaseDao.getFreetextAnswers(questionId);
 		if (answers == null) {
@@ -287,7 +287,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public List<Answer> getMyAnswers(String sessionKey) {
 		List<Question> questions = getSkillQuestions(sessionKey);
 		Map<String, Question> questionIdToQuestion = new HashMap<String, Question>();
@@ -312,19 +312,19 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public int getTotalAnswerCount(String sessionKey) {
 		return databaseDao.getTotalAnswerCount(sessionKey);
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public int getInterposedCount(String sessionKey) {
 		return databaseDao.getInterposedCount(sessionKey);
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public InterposedReadingCount getInterposedReadingCount(String sessionKey) {
 		Session session = this.databaseDao.getSessionFromKeyword(sessionKey);
 		if (session == null) {
@@ -334,13 +334,13 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public List<InterposedQuestion> getInterposedQuestions(String sessionKey) {
 		return databaseDao.getInterposedQuestions(sessionKey);
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public InterposedQuestion readInterposedQuestion(String questionId) {
 		InterposedQuestion question = databaseDao.getInterposedQuestion(questionId);
 		if (question == null) {
@@ -356,7 +356,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public Question update(Question question) {
 		Question oldQuestion = databaseDao.getQuestion(question.get_id());
 		if (null == oldQuestion) {
@@ -379,7 +379,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public Answer saveAnswer(Answer answer) {
 		User user = getCurrentUser();
 		Question question = this.getQuestion(answer.getQuestionId());
@@ -400,7 +400,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public Answer updateAnswer(Answer answer) {
 		User user = userService.getCurrentUser();
 		if (user == null || !user.getUsername().equals(answer.getUser())) {
@@ -415,7 +415,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public void deleteAnswer(String questionId, String answerId) {
 		Question question = this.databaseDao.getQuestion(questionId);
 		if (question == null) {
@@ -432,23 +432,23 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public List<Question> getLectureQuestions(String sessionkey) {
 		return databaseDao.getLectureQuestions(userService.getCurrentUser(), getSession(sessionkey));
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public List<Question> getFlashcards(String sessionkey) {
 		return databaseDao.getFlashcards(userService.getCurrentUser(), getSession(sessionkey));
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public List<Question> getPreparationQuestions(String sessionkey) {
 		return databaseDao.getPreparationQuestions(userService.getCurrentUser(), getSession(sessionkey));
 	}
-	
+
 	private Session getSession(String sessionkey) {
 		Session session = this.databaseDao.getSessionFromKeyword(sessionkey);
 		if (session == null) {
@@ -458,58 +458,58 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public int getLectureQuestionCount(String sessionkey) {
 		return databaseDao.getLectureQuestionCount(getSession(sessionkey));
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public int getFlashcardCount(String sessionkey) {
 		return databaseDao.getFlashcardCount(getSession(sessionkey));
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public int getPreparationQuestionCount(String sessionkey) {
 		return databaseDao.getPreparationQuestionCount(getSession(sessionkey));
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public int countLectureQuestionAnswers(String sessionkey) {
 		return databaseDao.countLectureQuestionAnswers(getSession(sessionkey));
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public int countPreparationQuestionAnswers(String sessionkey) {
 		return databaseDao.countPreparationQuestionAnswers(getSession(sessionkey));
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public void deleteLectureQuestions(String sessionkey) {
 		Session session = getSessionWithAuthCheck(sessionkey);
 		databaseDao.deleteAllLectureQuestionsWithAnswers(session);
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public void deleteFlashcards(String sessionkey) {
 		Session session = getSessionWithAuthCheck(sessionkey);
 		databaseDao.deleteAllFlashcardsWithAnswers(session);
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public void deletePreparationQuestions(String sessionkey) {
 		Session session = getSessionWithAuthCheck(sessionkey);
 		databaseDao.deleteAllPreparationQuestionsWithAnswers(session);
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public List<String> getUnAnsweredLectureQuestionIds(String sessionkey) {
 		User user = getCurrentUser();
 		Session session = getSession(sessionkey);
@@ -517,7 +517,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public List<String> getUnAnsweredPreparationQuestionIds(String sessionkey) {
 		User user = getCurrentUser();
 		Session session = getSession(sessionkey);
@@ -525,7 +525,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public void publishAll(String sessionkey, boolean publish) {
 		User user = getCurrentUser();
 		Session session = getSession(sessionkey);
@@ -536,7 +536,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public void deleteAllQuestionsAnswers(String sessionkey) {
 		User user = getCurrentUser();
 		Session session = getSession(sessionkey);

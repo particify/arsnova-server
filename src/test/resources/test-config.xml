@@ -3,7 +3,9 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:websocket="http://www.springframework.org/schema/websocket"
-	xsi:schemaLocation="http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd
+	xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd
+		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
@@ -12,10 +14,6 @@
 	</bean>
 	
 	<bean id="databaseDao" class="de.thm.arsnova.dao.StubDatabaseDao">
-	</bean>
-
-	<bean id="authorizationAdviser" class="de.thm.arsnova.aop.AuthorizationAdviser">
-		<property name="userService" ref="userService" />
 	</bean>
 
 	<bean id="userService" class="de.thm.arsnova.services.StubUserService" />
@@ -29,4 +27,12 @@
         </map>
     </property>
 	</bean>
+	
+	<security:authentication-manager>
+		<security:authentication-provider>
+			<security:user-service>
+				<security:user name="ptsr00" password="secret" authorities=""/>
+			</security:user-service>
+		</security:authentication-provider>
+	</security:authentication-manager>
 </beans>

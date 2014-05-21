@@ -28,9 +28,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import de.thm.arsnova.annotation.Authenticated;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.dao.IDatabaseDao;
@@ -89,7 +89,7 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public final Session joinSession(final String keyword) {
 		/* HTTP polling solution (legacy) */
 
@@ -148,7 +148,7 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated() and hasPermission(#session.getKeyword(), 'session', 'owner')")
 	public final Session saveSession(final Session session) {
 		if (connectorClient != null && session.getCourseId() != null) {
 			if (!connectorClient.getMembership(
@@ -179,7 +179,7 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public final LoggedIn registerAsOnlineUser(final User user, final String sessionkey) {
 		/* HTTP polling solution (legacy) */
 
@@ -232,7 +232,7 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public Session updateSession(String sessionkey, Session session) {
 		Session s = databaseDao.getSession(sessionkey);
 		User user = userService.getCurrentUser();
@@ -245,7 +245,7 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public void deleteSession(String sessionkey, User user) {
 		Session session = databaseDao.getSession(sessionkey);
 		if (!session.isCreator(user)) {
@@ -258,14 +258,14 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public int getLearningProgress(String sessionkey) {
 		Session session = databaseDao.getSession(sessionkey);
 		return databaseDao.getLearningProgress(session);
 	}
 
 	@Override
-	@Authenticated
+	@PreAuthorize("isAuthenticated()")
 	public int getMyLearningProgress(String sessionkey) {
 		Session session = databaseDao.getSession(sessionkey);
 		User user = userService.getCurrentUser();

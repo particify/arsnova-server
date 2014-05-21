@@ -40,10 +40,6 @@
 		p:portNumber="${socketio.port}" p:hostIp="${socketio.ip}" p:useSSL="${security.ssl}" p:keystore="${security.keystore}"
 		p:storepass="${security.storepass}" />
 
-	<bean id="authorizationAdviser" class="de.thm.arsnova.aop.AuthorizationAdviser">
-		<property name="userService" ref="userService" />
-	</bean>
-
 	<bean id="userSessionAspect" class="de.thm.arsnova.aop.UserSessionAspect" />
 
 	<bean id="userService" scope="singleton" class="de.thm.arsnova.services.UserService" />
