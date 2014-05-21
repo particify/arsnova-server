@@ -79,8 +79,7 @@ public class QuestionServiceTest {
 
 	@After
 	public final void cleanup() {
-		//databaseDao.cleanupTestData();
-		//setAuthenticated(false, "ptsr00");
+		SecurityContextHolder.clearContext();
 	}
 
 	@Test(expected = AuthenticationCredentialsNotFoundException.class)

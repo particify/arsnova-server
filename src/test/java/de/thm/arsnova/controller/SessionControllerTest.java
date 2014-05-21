@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,25 +47,32 @@ public class SessionControllerTest {
 	@Autowired
 	private WebApplicationContext webApplicationContext;
 
-	@Before
-	public void setup() {
-		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-	}
-
-	private void setAuthenticated(boolean isAuthenticated) {
+	private void setAuthenticated(boolean isAuthenticated, String username) {
 		if (isAuthenticated) {
 			List<GrantedAuthority> ga = new ArrayList<GrantedAuthority>();
-			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken("ptsr00", "secret", ga);
+			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, "secret", ga);
 			SecurityContextHolder.getContext().setAuthentication(token);
+			userService.setUserAuthenticated(isAuthenticated, username);
 		} else {
-			SecurityContextHolder.clearContext();
+			userService.setUserAuthenticated(isAuthenticated);
 		}
-		userService.setUserAuthenticated(isAuthenticated);
+	}
+
+	@Before
+	public final void startup() {
+		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+		SecurityContextHolder.clearContext();
+	}
+
+	@After
+	public final void cleanup() {
+		SecurityContextHolder.clearContext();
+		userService.setUserAuthenticated(false);
 	}
 
 	@Test
 	public void testShouldNotGetUnknownSession() throws Exception {
-		setAuthenticated(true);
+		setAuthenticated(true, "ptsr00");
 
 		mockMvc.perform(get("/session/00000000"))
 		.andExpect(status().isNotFound());
@@ -72,7 +80,7 @@ public class SessionControllerTest {
 
 	@Test
 	public void testShouldNotGetUnknownSessionIfUnauthorized() throws Exception {
-		setAuthenticated(false);
+		setAuthenticated(false, "ptsr00");
 
 		mockMvc.perform(get("/session/00000000"))
 		.andExpect(status().isUnauthorized());
@@ -80,7 +88,7 @@ public class SessionControllerTest {
 
 	@Test
 	public void testShouldCreateSessionIfUnauthorized() throws Exception {
-		setAuthenticated(false);
+		setAuthenticated(false, "ptsr00");
 
 		mockMvc.perform(post("/session/").contentType(MediaType.APPLICATION_JSON).content("{\"keyword\":12345678}"))
 		.andExpect(status().isUnauthorized());
@@ -88,7 +96,7 @@ public class SessionControllerTest {
 
 	@Test
 	public void testShouldNotReturnMySessionsIfUnauthorized() throws Exception {
-		setAuthenticated(false);
+		setAuthenticated(false, "ptsr00");
 
 		mockMvc.perform(get("/session/").param("ownedonly", "true"))
 		.andExpect(status().isUnauthorized());
@@ -96,7 +104,7 @@ public class SessionControllerTest {
 
 	@Test
 	public void testShouldNotReturnMyVisitedSessionsIfUnauthorized() throws Exception {
-		setAuthenticated(false);
+		setAuthenticated(false, "ptsr00");
 
 		mockMvc.perform(get("/session/").param("visitedonly", "true"))
 		.andExpect(status().isUnauthorized());
@@ -104,7 +112,7 @@ public class SessionControllerTest {
 
 	@Test
 	public void testShouldShowUnimplementedIfNoFlagIsSet() throws Exception {
-		setAuthenticated(false);
+		setAuthenticated(false, "ptsr00");
 
 		mockMvc.perform(get("/session/"))
 		.andExpect(status().isNotImplemented());

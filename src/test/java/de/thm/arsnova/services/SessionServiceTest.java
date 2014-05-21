@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.aop.framework.Advised;
@@ -69,19 +70,7 @@ public class SessionServiceTest {
 	@Autowired
 	private StubDatabaseDao databaseDao;
 
-	@After
-	public final void cleanup() {
-		databaseDao.cleanupTestData();
-		userService.setUserAuthenticated(false);
-	}
-
-	@Test
-	public void testShouldGenerateSessionKeyword() {
-		assertTrue(sessionService.generateKeyword().matches("^[0-9]{8}$"));
-	}
-
 	private void setAuthenticated(boolean isAuthenticated, String username) {
-		SecurityContextHolder.clearContext();
 		if (isAuthenticated) {
 			List<GrantedAuthority> ga = new ArrayList<GrantedAuthority>();
 			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, "secret", ga);
@@ -90,6 +79,23 @@ public class SessionServiceTest {
 		} else {
 			userService.setUserAuthenticated(isAuthenticated);
 		}
+	}
+
+	@Before
+	public final void startup() {
+		SecurityContextHolder.clearContext();
+	}
+
+	@After
+	public final void cleanup() {
+		databaseDao.cleanupTestData();
+		SecurityContextHolder.clearContext();
+		userService.setUserAuthenticated(false);
+	}
+
+	@Test
+	public void testShouldGenerateSessionKeyword() {
+		assertTrue(sessionService.generateKeyword().matches("^[0-9]{8}$"));
 	}
 
 	@Test(expected = NotFoundException.class)

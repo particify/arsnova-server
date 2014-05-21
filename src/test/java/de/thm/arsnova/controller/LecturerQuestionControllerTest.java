@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,13 +45,7 @@ public class LecturerQuestionControllerTest {
 	@Autowired
 	private WebApplicationContext webApplicationContext;
 
-	@Before
-	public void setup() {
-		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-	}
-
 	private void setAuthenticated(boolean isAuthenticated, String username) {
-		SecurityContextHolder.clearContext();
 		if (isAuthenticated) {
 			List<GrantedAuthority> ga = new ArrayList<GrantedAuthority>();
 			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, "secret", ga);
@@ -59,6 +54,18 @@ public class LecturerQuestionControllerTest {
 		} else {
 			userService.setUserAuthenticated(isAuthenticated);
 		}
+	}
+
+	@Before
+	public final void startup() {
+		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+		SecurityContextHolder.clearContext();
+	}
+
+	@After
+	public final void cleanup() {
+		SecurityContextHolder.clearContext();
+		userService.setUserAuthenticated(false);
 	}
 
 	@Test
