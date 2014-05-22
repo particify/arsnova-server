@@ -60,13 +60,9 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.VisitedSession;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.ISessionService;
-import de.thm.arsnova.services.IUserService;
 
 public class CouchDBDao implements IDatabaseDao {
-	@Autowired
-	private IUserService userService;
 
 	@Autowired
 	private ISessionService sessionService;
@@ -97,17 +93,13 @@ public class CouchDBDao implements IDatabaseDao {
 		this.sessionService = service;
 	}
 
-	public final void setUserService(final IUserService service) {
-		this.userService = service;
-	}
-
 	@Override
 	public final Session getSession(final String keyword) {
 		Session result = this.getSessionFromKeyword(keyword);
 		if (result == null) {
 			throw new NotFoundException();
 		}
-		if (result.isActive() || result.getCreator().equals(userService.getCurrentUser().getUsername())) {
+		if (result.isActive()) {
 			return result;
 		}
 
@@ -187,13 +179,13 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final Session saveSession(final Session session) {
+	public final Session saveSession(final User user, final Session session) {
 		Document sessionDocument = new Document();
 		sessionDocument.put("type", "session");
 		sessionDocument.put("name", session.getName());
 		sessionDocument.put("shortName", session.getShortName());
 		sessionDocument.put("keyword", sessionService.generateKeyword());
-		sessionDocument.put("creator", this.actualUserName());
+		sessionDocument.put("creator", user.getUsername());
 		sessionDocument.put("active", true);
 		sessionDocument.put("courseType", session.getCourseType());
 		sessionDocument.put("courseId", session.getCourseId());
@@ -221,14 +213,6 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		LOGGER.error("No session found for internal id: {}", internalSessionId);
 		return null;
-	}
-
-	private String actualUserName() {
-		User user = userService.getCurrentUser();
-		if (user == null) {
-			return null;
-		}
-		return user.getUsername();
 	}
 
 	private Database getDatabase() {
@@ -502,19 +486,15 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final Answer getMyAnswer(final String questionId, int piRound) {
-		User user = userService.getCurrentUser();
-		if (user == null) {
-			throw new UnauthorizedException();
-		}
+	public final Answer getMyAnswer(final User me, final String questionId, int piRound) {
 
 		NovaView view = new NovaView("answer/by_question_and_user_and_piround");
 		if (2 == piRound) {
-			view.setKey(questionId, user.getUsername(), "2");
+			view.setKey(questionId, me.getUsername(), "2");
 		} else {
 			/* needed for legacy questions whose piRound property has not been set */
-			view.setStartKey(questionId, user.getUsername());
-			view.setEndKey(questionId, user.getUsername(), "1");
+			view.setStartKey(questionId, me.getUsername());
+			view.setEndKey(questionId, me.getUsername(), "1");
 		}
 		ViewResults results = this.getDatabase().view(view);
 		if (results.getResults().isEmpty()) {
@@ -616,19 +596,14 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Answer> getMyAnswers(String sessionKey) {
+	public List<Answer> getMyAnswers(final User me, final String sessionKey) {
 		Session s = this.getSessionFromKeyword(sessionKey);
 		if (s == null) {
 			throw new NotFoundException();
 		}
 
-		User user = userService.getCurrentUser();
-		if (user == null) {
-			throw new UnauthorizedException();
-		}
-
 		NovaView view = new NovaView("answer/by_user_and_session_full");
-		view.setKey(user.getUsername(), s.get_id());
+		view.setKey(me.getUsername(), s.get_id());
 		ViewResults results = this.getDatabase().view(view);
 		List<Answer> answers = new ArrayList<Answer>();
 		if (results == null || results.getResults() == null || results.getResults().isEmpty()) {
@@ -638,7 +613,7 @@ public class CouchDBDao implements IDatabaseDao {
 			Answer a = (Answer) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Answer.class);
 			a.set_id(d.getId());
 			a.set_rev(d.getRev());
-			a.setUser(user.getUsername());
+			a.setUser(me.getUsername());
 			a.setSessionId(s.get_id());
 			answers.add(a);
 		}
@@ -740,23 +715,18 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public void vote(String menu) {
-		User u = this.userService.getCurrentUser();
-		if (u == null) {
-			throw new UnauthorizedException();
-		}
-
+	public void vote(final User me, final String menu) {
 		String date = new SimpleDateFormat("dd-mm-yyyyy").format(new Date());
 		try {
 			NovaView view = new NovaView("food_vote/get_user_vote");
-			view.setKey(date, u.getUsername());
+			view.setKey(date, me.getUsername());
 			ViewResults results = this.getDatabase().view(view);
 
 			if (results.getResults().isEmpty()) {
 				Document vote = new Document();
 				vote.put("type", "food_vote");
 				vote.put("name", menu);
-				vote.put("user", u.getUsername());
+				vote.put("user", me.getUsername());
 				vote.put("day", date);
 				this.database.saveDocument(vote);
 			} else {

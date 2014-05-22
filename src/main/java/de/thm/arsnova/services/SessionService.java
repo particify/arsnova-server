@@ -159,7 +159,7 @@ public class SessionService implements ISessionService {
 				throw new ForbiddenException();
 			}
 		}
-		return databaseDao.saveSession(session);
+		return databaseDao.saveSession(userService.getCurrentUser(), session);
 	}
 
 	@Override

@@ -34,6 +34,9 @@ public class FoodService implements IFoodService {
 	@Autowired
 	private IDatabaseDao databaseDao;
 
+	@Autowired
+	private IUserService userService;
+
 	public final void setDatabaseDao(IDatabaseDao databaseDao) {
 		this.databaseDao = databaseDao;
 	}
@@ -41,7 +44,7 @@ public class FoodService implements IFoodService {
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public void vote(String menu) {
-		this.databaseDao.vote(menu);
+		this.databaseDao.vote(userService.getCurrentUser(), menu);
 
 	}
 

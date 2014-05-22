@@ -38,7 +38,7 @@ public interface IDatabaseDao {
 
 	List<Session> getMySessions(User user);
 
-	Session saveSession(Session session);
+	Session saveSession(User user, Session session);
 
 	boolean sessionKeyAvailable(String keyword);
 
@@ -64,7 +64,7 @@ public interface IDatabaseDao {
 
 	List<String> getUnAnsweredQuestionIds(Session session, User user);
 
-	Answer getMyAnswer(String questionId, int piRound);
+	Answer getMyAnswer(User me, String questionId, int piRound);
 
 	List<Answer> getAnswers(String questionId, int piRound);
 
@@ -74,7 +74,7 @@ public interface IDatabaseDao {
 
 	int countActiveUsers(long since);
 
-	List<Answer> getMyAnswers(String sessionKey);
+	List<Answer> getMyAnswers(User me, String sessionKey);
 
 	int getTotalAnswerCount(String sessionKey);
 
@@ -84,7 +84,7 @@ public interface IDatabaseDao {
 
 	List<InterposedQuestion> getInterposedQuestions(String sessionKey);
 
-	void vote(String menu);
+	void vote(User me, String menu);
 
 	int getFoodVoteCount();
 

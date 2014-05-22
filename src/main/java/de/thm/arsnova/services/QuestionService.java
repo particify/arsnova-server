@@ -237,7 +237,7 @@ public class QuestionService implements IQuestionService {
 	public Answer getMyAnswer(String questionId) {
 		Question question = getQuestion(questionId);
 
-		return databaseDao.getMyAnswer(questionId, question.getPiRound());
+		return databaseDao.getMyAnswer(userService.getCurrentUser(), questionId, question.getPiRound());
 	}
 
 	@Override
@@ -286,7 +286,7 @@ public class QuestionService implements IQuestionService {
 		}
 
 		/* filter answers by active piRound per question */
-		List<Answer> answers = databaseDao.getMyAnswers(sessionKey);
+		List<Answer> answers = databaseDao.getMyAnswers(userService.getCurrentUser(), sessionKey);
 		List<Answer> filteredAnswers = new ArrayList<Answer>();
 		for (Answer answer : answers) {
 			Question question = questionIdToQuestion.get(answer.getQuestionId());

@@ -43,7 +43,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	private static Map<String, Feedback> stubFeedbacks = new ConcurrentHashMap<String, Feedback>();
 	private static Map<String, List<Question>> stubQuestions = new ConcurrentHashMap<String, List<Question>>();
 	private static Map<String, User> stubUsers = new ConcurrentHashMap<String, User>();
-	
+
 	public InterposedQuestion interposedQuestion;
 
 	public StubDatabaseDao() {
@@ -57,12 +57,12 @@ public class StubDatabaseDao implements IDatabaseDao {
 		stubFeedbacks.clear();
 		stubQuestions.clear();
 		stubUsers.clear();
-		
+
 		fillWithDummySessions();
 		fillWithDummyFeedbacks();
 		fillWithDummyQuestions();
 	}
-	
+
 	private void fillWithDummySessions() {
 		Session session = new Session();
 		session.setActive(true);
@@ -72,7 +72,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 		session.setShortName("TS1");
 
 		stubSessions.put("12345678", session);
-		
+
 		session = new Session();
 		session.setActive(true);
 		session.setCreator("ptsr00");
@@ -81,7 +81,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 		session.setShortName("TS2");
 
 		stubSessions.put("87654321", session);
-		
+
 		session = new Session();
 		session.setActive(true);
 		session.setCreator("ptsr00");
@@ -118,7 +118,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public Session saveSession(Session session) {
+	public Session saveSession(User user, Session session) {
 		stubSessions.put(session.getKeyword(), session);
 		return session;
 	}
@@ -127,7 +127,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public int countSessions() {
 		return stubSessions.size();
 	}
-	
+
 	@Override
 	public int countOpenSessions() {
 		int result = 0;
@@ -136,7 +136,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 		}
 		return result;
 	}
-	
+
 	@Override
 	public int countClosedSessions() {
 		int result = 0;
@@ -205,7 +205,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public Answer getMyAnswer(String questionId, int piRound) {
+	public Answer getMyAnswer(User user, String questionId, int piRound) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -227,39 +227,39 @@ public class StubDatabaseDao implements IDatabaseDao {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	@Override
 	public int countActiveUsers(long since) {
 		return stubUsers.size();
 	}
-	
+
 	@Override
-	public List<Answer> getMyAnswers(String sessionKey) {
+	public List<Answer> getMyAnswers(User user, String sessionKey) {
 		return new ArrayList<Answer>();
 	}
-	
+
 	@Override
 	public int getTotalAnswerCount(String sessionKey) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-	
+
 	@Override
 	public int getInterposedCount(String sessionKey) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-	
+
 	@Override
 	public List<InterposedQuestion> getInterposedQuestions(String sessionKey) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	@Override
-	public void vote(String menu) {
+	public void vote(User user, String menu) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -369,7 +369,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public void deleteInterposedQuestion(InterposedQuestion question) {
 		// TODO Auto-generated method stub
 	}
-	
+
 	@Override
 	public List<Session> getCourseSessions(List<Course> courses) {
 		return null;
@@ -401,7 +401,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	@Override
 	public void deleteAllQuestionsWithAnswers(Session session) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -455,19 +455,19 @@ public class StubDatabaseDao implements IDatabaseDao {
 	@Override
 	public void deleteAllLectureQuestionsWithAnswers(Session session) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void deleteAllFlashcardsWithAnswers(Session session) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void deleteAllPreparationQuestionsWithAnswers(Session session) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -482,6 +482,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 		return null;
 	}
 
+	@Override
 	public void deleteAllInterposedQuestions(Session session) {
 		// TODO Auto-generated method stub
 	}
@@ -489,13 +490,13 @@ public class StubDatabaseDao implements IDatabaseDao {
 	@Override
 	public void publishAllQuestions(Session session, boolean publish) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void deleteAllQuestionsAnswers(Session session) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
