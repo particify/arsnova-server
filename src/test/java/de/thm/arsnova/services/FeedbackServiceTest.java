@@ -45,10 +45,10 @@ import de.thm.arsnova.exceptions.NotFoundException;
 public class FeedbackServiceTest {
 
 	@Autowired
-	IFeedbackService feedbackService;
+	private IFeedbackService feedbackService;
 
 	@Autowired
-	StubUserService userService;
+	private StubUserService userService;
 
 	@Autowired
 	private StubDatabaseDao databaseDao;

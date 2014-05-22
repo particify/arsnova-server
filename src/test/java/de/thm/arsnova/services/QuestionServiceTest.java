@@ -53,10 +53,10 @@ import de.thm.arsnova.exceptions.NotFoundException;
 public class QuestionServiceTest {
 
 	@Autowired
-	IQuestionService questionService;
+	private IQuestionService questionService;
 
 	@Autowired
-	StubUserService userService;
+	private StubUserService userService;
 
 	@Autowired
 	private StubDatabaseDao databaseDao;
