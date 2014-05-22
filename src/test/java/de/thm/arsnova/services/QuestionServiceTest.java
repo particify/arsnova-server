@@ -136,4 +136,10 @@ public class QuestionServiceTest {
 		question.setQuestionVariant("freetext");
 		questionService.saveQuestion(question);
 	}
+
+	@Test(expected = ForbiddenException.class)
+	public void testShouldDeleteQuestion() throws Exception{
+		setAuthenticated(true, "otheruser");
+		questionService.deleteQuestion("a1a2a3a4a5a6a7a8a9a");
+	}
 }

@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationToken;
 
 import de.thm.arsnova.dao.IDatabaseDao;
+import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.ForbiddenException;
@@ -42,6 +43,8 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 		if ("session".equals(targetType) && ! checkSessionPermission(username, targetId, permission)) {
 			throw new ForbiddenException();
+		} else if ("question".equals(targetType) && ! checkQuestionPermission(username, targetId, permission)) {
+			throw new ForbiddenException();
 		}
 		return true;
 	}
@@ -49,6 +52,20 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	private boolean checkSessionPermission(String username, Serializable targetId, Object permission) {
 		if (permission instanceof String && permission.equals("owner")) {
 			return dao.getSession(targetId.toString()).getCreator().equals(username);
+		}
+		return false;
+	}
+
+	private boolean checkQuestionPermission(String username, Serializable targetId, Object permission) {
+		if (permission instanceof String && permission.equals("owner")) {
+			Question question = dao.getQuestion(targetId.toString());
+			if (question != null) {
+				Session session = dao.getSessionFromId(question.getSessionId());
+				if (session == null) {
+					return false;
+				}
+				return session.getCreator().equals(username);
+			}
 		}
 		return false;
 	}

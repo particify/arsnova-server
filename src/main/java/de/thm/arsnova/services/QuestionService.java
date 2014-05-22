@@ -146,7 +146,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#question.getSessionKeyword(), 'session', 'owner')")
+	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
 	public void deleteQuestion(String questionId) {
 		Question question = databaseDao.getQuestion(questionId);
 		if (question == null) {
@@ -161,7 +161,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
+	@PreAuthorize("isAuthenticated() and hasPermission(#sessionKeyword, 'session', 'owner')")
 	public void deleteAllQuestions(String sessionKeyword) {
 		Session session = getSessionWithAuthCheck(sessionKeyword);
 		databaseDao.deleteAllQuestionsWithAnswers(session);

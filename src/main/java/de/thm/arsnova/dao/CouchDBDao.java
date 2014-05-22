@@ -165,15 +165,16 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public final Session getSessionFromId(final String sessionId) {
-		View view = new View("session/by_id");
+		NovaView view = new NovaView("session/by_id");
 		view.setKey(sessionId);
-		ViewResults results = this.getDatabase().view(view);
 
-		if (results.getJSONArray("rows").optJSONObject(0) == null) {
+		ViewResults sessions = this.getDatabase().view(view);
+
+		if (sessions.getJSONArray("rows").optJSONObject(0) == null) {
 			return null;
 		}
 		return (Session) JSONObject.toBean(
-				results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
+				sessions.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
 				Session.class
 				);
 	}
