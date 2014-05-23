@@ -14,7 +14,7 @@ import de.thm.arsnova.connector.client.ConnectorClientImpl;
 @Configuration
 @PropertySources({
 	@PropertySource("arsnova.properties.example"),
-	@PropertySource("file:///etc/arsnova/connector.properties"),
+	@PropertySource("file:///etc/arsnova/arsnova.properties"),
 })
 public class ExtraConfig {
 
@@ -23,7 +23,10 @@ public class ExtraConfig {
 
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-		return new PropertySourcesPlaceholderConfigurer();
+		PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
+		configurer.setIgnoreResourceNotFound(true);
+		configurer.setIgnoreUnresolvablePlaceholders(false);
+		return configurer;
 	}
 
 	@Bean(name = "connectorClient")
