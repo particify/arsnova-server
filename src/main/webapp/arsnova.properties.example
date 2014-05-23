@@ -29,6 +29,7 @@ couchdb.password=
 socketio.ip=0.0.0.0
 socketio.port=10443
 
+connector.enable=false
 connector.uri=http://localhost:8080/connector-service
 connector.username=test
 connector.password=test
