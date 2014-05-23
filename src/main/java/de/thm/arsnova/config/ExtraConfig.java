@@ -3,19 +3,16 @@ package de.thm.arsnova.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.client.ConnectorClientImpl;
 
 @Configuration
-@PropertySources({
-	@PropertySource("arsnova.properties.example"),
-	@PropertySource("file:///etc/arsnova/arsnova.properties"),
-})
 public class ExtraConfig {
 
 	@Autowired
@@ -24,6 +21,10 @@ public class ExtraConfig {
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
+		configurer.setLocations(new Resource[] {
+				new ClassPathResource("arsnova.properties.example"),
+				new FileSystemResource("file:///etc/arsnova/arsnova.properties"),
+		});
 		configurer.setIgnoreResourceNotFound(true);
 		configurer.setIgnoreUnresolvablePlaceholders(false);
 		return configurer;

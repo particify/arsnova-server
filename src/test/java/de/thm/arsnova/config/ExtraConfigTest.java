@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -22,9 +21,6 @@ import de.thm.arsnova.connector.client.ConnectorClient;
 		"file:src/test/resources/test-socketioconfig.xml"
 })
 public class ExtraConfigTest {
-
-	@Autowired
-	PropertySourcesPlaceholderConfigurer configurer;
 
 	@Autowired(required = false)
 	private ConnectorClient connectorClient;
