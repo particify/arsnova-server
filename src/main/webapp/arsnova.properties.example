@@ -14,6 +14,13 @@ security.authentication.login-try-limit=50
 security.guest.enabled=true
 security.guest.lecturer.enabled=true
 
+# Setup combined login if you want to use a single, customized login page
+# which is used for multiple authentication services.
+security.custom-login.enabled=false
+security.custom-login.title=University
+security.custom-login.login-dialog-path=
+security.custom-login.image=
+
 security.user-db.enabled=true
 security.user-db.title=ARSnova
 security.user-db.login-dialog-path=account.html

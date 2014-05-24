@@ -82,6 +82,18 @@ public class LoginController extends AbstractController {
 	@Value("${security.guest.lecturer.enabled}")
 	private String guestLecturerEnabled;
 
+	@Value("${security.custom-login.enabled}")
+	private String customLoginEnabled;
+
+	@Value("${security.custom-login.title:University}")
+	private String customLoginTitle;
+
+	@Value("${security.custom-login.login-dialog-path}")
+	private String customLoginDialog;
+
+	@Value("${security.custom-login.image:}")
+	private String customLoginImage;
+
 	@Value("${security.user-db.enabled}")
 	private String dbAuthEnabled;
 
@@ -313,7 +325,16 @@ public class LoginController extends AbstractController {
 			services.add(sdesc);
 		}
 
-		if ("true".equals(dbAuthEnabled)) {
+		if ("true".equals(customLoginEnabled) && !"".equals(customLoginDialog)) {
+			services.add(new ServiceDescription(
+				"custom",
+				customLoginTitle,
+				customizationPath + "/" + customLoginDialog + "?redirect={0}",
+				customLoginImage
+			));
+		}
+
+		if ("true".equals(dbAuthEnabled) && !"".equals(dbAuthDialog)) {
 			services.add(new ServiceDescription(
 				"arsnova",
 				dbAuthTitle,
@@ -322,7 +343,7 @@ public class LoginController extends AbstractController {
 			));
 		}
 
-		if ("true".equals(ldapEnabled)) {
+		if ("true".equals(ldapEnabled) && !"".equals(ldapDialog)) {
 			services.add(new ServiceDescription(
 				"ldap",
 				ldapTitle,
