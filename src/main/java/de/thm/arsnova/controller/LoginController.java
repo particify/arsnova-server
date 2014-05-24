@@ -245,30 +245,24 @@ public class LoginController extends AbstractController {
 	@ResponseBody
 	public final View dialog(
 			@RequestParam("type") final String type,
-			@RequestParam(value = "referer", required = false) final String forcedReferer,
-			@RequestParam(value = "successurl", required = false) final String successUrl,
-			@RequestParam(value = "failureurl", required = false) final String failureUrl,
+			@RequestParam(value = "successurl", defaultValue = "/") String successUrl,
+			@RequestParam(value = "failureurl", defaultValue = "/") String failureUrl,
 			final HttpServletRequest request,
 			final HttpServletResponse response
 	) throws IOException, ServletException {
 		View result = null;
 
-		String referer = request.getHeader("referer");
-		if (null != forcedReferer && null != referer && !UrlUtils.isAbsoluteUrl(referer)) {
-			/* Use a url from a request parameter as referer as long as the url is not absolute (to prevent
-			 * abuse of the redirection). */
-			referer = forcedReferer;
+		/* Use URLs from a request parameters for redirection as long as the 
+		 * URL is not absolute (to prevent abuse of the redirection). */
+		if (UrlUtils.isAbsoluteUrl(successUrl)) {
+			successUrl = "/";
 		}
-		if (null == referer) {
-			referer = "/";
+		if (UrlUtils.isAbsoluteUrl(failureUrl)) {
+			failureUrl = "/";
 		}
 
-		request.getSession().setAttribute("ars-login-success-url",
-			null == successUrl ? referer : successUrl
-		);
-		request.getSession().setAttribute("ars-login-failure-url",
-			null == failureUrl ? referer : failureUrl
-		);
+		request.getSession().setAttribute("ars-login-success-url", successUrl);
+		request.getSession().setAttribute("ars-login-failure-url", failureUrl);
 
 		if ("cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);
