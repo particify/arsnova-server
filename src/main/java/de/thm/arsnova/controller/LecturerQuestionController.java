@@ -80,7 +80,10 @@ public class LecturerQuestionController extends AbstractController {
 			@RequestBody final Question question,
 			final HttpServletResponse response
 			) {
-		return this.questionService.update(question);
+		try {
+			return this.questionService.update(question);
+		} catch (Exception e) {}
+		throw new BadRequestException();
 	}
 
 	@RequestMapping(value = "/{questionId}/publish", method = RequestMethod.POST)
@@ -186,7 +189,7 @@ public class LecturerQuestionController extends AbstractController {
 			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly,
 			final HttpServletResponse response) {
-		response.addHeader("X-Deprecated-API", "1");
+		response.addHeader(X_DEPRECATED_API, "1");
 
 		if (lectureQuestionsOnly) {
 			return questionService.getLectureQuestionCount(sessionkey);
@@ -225,7 +228,7 @@ public class LecturerQuestionController extends AbstractController {
 		if (answers == null || answers.isEmpty()) {
 			throw new NoContentException();
 		}
-		response.addHeader("X-Deprecated-API", "1");
+		response.addHeader(X_DEPRECATED_API, "1");
 
 		return answers;
 	}
@@ -256,7 +259,7 @@ public class LecturerQuestionController extends AbstractController {
 			return null;
 		}
 
-		response.addHeader("X-Deprecated-API", "1");
+		response.addHeader(X_DEPRECATED_API, "1");
 
 		return answer;
 	}
@@ -363,7 +366,7 @@ public class LecturerQuestionController extends AbstractController {
 			@PathVariable final String questionId,
 			final HttpServletResponse response
 			) {
-		response.addHeader("X-Deprecated-API", "1");
+		response.addHeader(X_DEPRECATED_API, "1");
 
 		return questionService.getAnswerCount(questionId);
 	}
@@ -381,7 +384,7 @@ public class LecturerQuestionController extends AbstractController {
 			@RequestParam final String sessionkey,
 			final HttpServletResponse response
 			) {
-		response.addHeader("X-Deprecated-API", "1");
+		response.addHeader(X_DEPRECATED_API, "1");
 
 		return questionService.getMyAnswers(sessionkey);
 	}
@@ -393,7 +396,7 @@ public class LecturerQuestionController extends AbstractController {
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly,
 			final HttpServletResponse response
 			) {
-		response.addHeader("X-Deprecated-API", "1");
+		response.addHeader(X_DEPRECATED_API, "1");
 
 		if (lectureQuestionsOnly) {
 			return questionService.countLectureQuestionAnswers(sessionkey);

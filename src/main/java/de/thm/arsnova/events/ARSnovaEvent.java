@@ -10,9 +10,9 @@ public class ARSnovaEvent extends ApplicationEvent {
 
 	private String sessionKey;
 	private User user;
-	private String eventName;
-	private Object data;
-	private Destination destination;
+	private final String eventName;
+	private final Object data;
+	private final Destination destination;
 
 	public enum Destination {
 		USER,
@@ -50,7 +50,6 @@ public class ARSnovaEvent extends ApplicationEvent {
 	public User getRecipient() {
 		return user;
 	}
-	
 
 	public Destination getDestinationType() {
 		return destination;

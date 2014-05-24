@@ -13,7 +13,7 @@ import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.services.IStatisticsService;
 
 @RestController
-public class StatisticsController {
+public class StatisticsController extends AbstractController {
 
 	@Autowired
 	private IStatisticsService statisticsService;
@@ -36,21 +36,21 @@ public class StatisticsController {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics/activeusercount", produces = "text/plain")
 	public final String countActiveUsers(HttpServletResponse response) {
-		response.addHeader("X-Deprecated-API", "1");
+		response.addHeader(X_DEPRECATED_API, "1");
 
 		return Integer.toString(statisticsService.countActiveUsers());
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics/loggedinusercount", produces = "text/plain")
 	public final String countLoggedInUsers(HttpServletResponse response) {
-		response.addHeader("X-Deprecated-API", "1");
+		response.addHeader(X_DEPRECATED_API, "1");
 
 		return Integer.toString(statisticsService.countLoggedInUsers());
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics/sessioncount", produces = "text/plain")
 	public final String countSessions(HttpServletResponse response) {
-		response.addHeader("X-Deprecated-API", "1");
+		response.addHeader(X_DEPRECATED_API, "1");
 
 		return Integer.toString(statisticsService.getStatistics().getOpenSessions()
 				+ statisticsService.getStatistics().getClosedSessions());

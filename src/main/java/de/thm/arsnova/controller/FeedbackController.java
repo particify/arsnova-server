@@ -50,7 +50,7 @@ public class FeedbackController extends AbstractController {
 
 	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.GET)
 	public final Feedback getFeedback(@PathVariable final String sessionkey, final HttpServletResponse response) {
-		response.addHeader("X-Deprecated-API", "1");
+		response.addHeader(X_DEPRECATED_API, "1");
 
 		return feedbackService.getFeedback(sessionkey);
 	}
@@ -59,7 +59,7 @@ public class FeedbackController extends AbstractController {
 	public final Integer getMyFeedback(@PathVariable final String sessionkey, final HttpServletResponse response) {
 		Integer value = feedbackService.getMyFeedback(sessionkey, userService.getCurrentUser());
 
-		response.addHeader("X-Deprecated-API", "1");
+		response.addHeader(X_DEPRECATED_API, "1");
 
 		if (value != null && value >= Feedback.MIN_FEEDBACK_TYPE && value <= Feedback.MAX_FEEDBACK_TYPE) {
 			return value;
@@ -69,7 +69,7 @@ public class FeedbackController extends AbstractController {
 
 	@RequestMapping(value = "/session/{sessionkey}/feedbackcount", method = RequestMethod.GET)
 	public final int getFeedbackCount(@PathVariable final String sessionkey, final HttpServletResponse response) {
-		response.addHeader("X-Deprecated-API", "1");
+		response.addHeader(X_DEPRECATED_API, "1");
 
 		return feedbackService.getFeedbackCount(sessionkey);
 	}
@@ -79,14 +79,14 @@ public class FeedbackController extends AbstractController {
 			@PathVariable final String sessionkey,
 			final HttpServletResponse response
 			) {
-		response.addHeader("X-Deprecated-API", "1");
+		response.addHeader(X_DEPRECATED_API, "1");
 
 		return feedbackService.getAverageFeedbackRounded(sessionkey);
 	}
 
 	@RequestMapping(value = "/session/{sessionkey}/averagefeedback", method = RequestMethod.GET)
 	public final double getAverageFeedback(@PathVariable final String sessionkey, final HttpServletResponse response) {
-		response.addHeader("X-Deprecated-API", "1");
+		response.addHeader(X_DEPRECATED_API, "1");
 
 		return feedbackService.getAverageFeedback(sessionkey);
 	}
@@ -98,7 +98,7 @@ public class FeedbackController extends AbstractController {
 			@RequestBody final int value,
 			final HttpServletResponse response
 			) {
-		response.addHeader("X-Deprecated-API", "1");
+		response.addHeader(X_DEPRECATED_API, "1");
 
 		User user = userService.getCurrentUser();
 		if (feedbackService.saveFeedback(sessionkey, value, user)) {

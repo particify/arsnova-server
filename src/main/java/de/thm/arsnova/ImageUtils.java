@@ -34,41 +34,44 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Util class for image operations.
- * 
+ *
  * @author Daniel Vogel (daniel.vogel@mni.thm.de)
  *
  */
 public class ImageUtils {
+
+	private ImageUtils() {}
+
 	public static final Logger LOGGER = LoggerFactory.getLogger(ImageUtils.class);
 
 	/**
 	 * Converts an image to an Base64 String.
-	 * 
+	 *
 	 * @param  imageUrl The image url as a {@link String}
 	 * @return The Base64 {@link String} of the image on success, otherwise <code>null</code>.
 	 */
 	public static String encodeImageToString(String imageUrl) {
-		
+
 		String[]      urlParts = imageUrl.split("\\.");
 		StringBuilder result   = new StringBuilder();
-		
+
 		// get format
-	    //
-	    // The format is read dynamically. We have to take control
-	    // in the frontend that no unsupported formats are transmitted!
-	    if ( urlParts.length > 0 ) {
+		//
+		// The format is read dynamically. We have to take control
+		// in the frontend that no unsupported formats are transmitted!
+		if ( urlParts.length > 0 ) {
 
 			String extension = urlParts[urlParts.length-1];
 
-	    	result.append("data:image/" + extension + ";base64,");
-	    	result.append(Base64.encodeBase64String(convertFileToByteArray(imageUrl)));
-	    	
+			result.append("data:image/" + extension + ";base64,");
+			result.append(Base64.encodeBase64String(convertFileToByteArray(imageUrl)));
+
 			return result.toString();
-	    }
-	    
+		}
+
 		return null;
 	}
-	
+
 	/**
 	 * Gets the bytestream of an image url.
 	 * s
@@ -80,23 +83,23 @@ public class ImageUtils {
 		try {
 			URL 				  url   = new URL(imageUrl);
 			BufferedImage 		  image = ImageIO.read(url);
-		    ByteArrayOutputStream baos  = new ByteArrayOutputStream();
+			ByteArrayOutputStream baos  = new ByteArrayOutputStream();
 
-		    ImageIO.write(image, extension, baos);
-		    
-		    baos.flush();
-		    baos.close();
-		    return baos.toByteArray();
-		    
+			ImageIO.write(image, extension, baos);
+
+			baos.flush();
+			baos.close();
+			return baos.toByteArray();
+
 		} catch (MalformedURLException e) {
 			LOGGER.error(e.getLocalizedMessage());
 		} catch (IOException e) {
 			LOGGER.error(e.getLocalizedMessage());
 		}
 
-	    return null;
+		return null;
 	}
-	
+
 	/**
 	 * Gets the bytestream of an image url.
 	 * s
@@ -107,28 +110,28 @@ public class ImageUtils {
 
 		try {
 			URL 				  url   = new URL(imageUrl);
-		    ByteArrayOutputStream baos  = new ByteArrayOutputStream();
-		    
-		    InputStream is = url.openStream();
-		    byte[] byteChunk = new byte[4096]; // Or whatever size you want to read in at a time.
-		    int n;
+			ByteArrayOutputStream baos  = new ByteArrayOutputStream();
 
-		    while ( (n = is.read(byteChunk)) > 0 ) {
-		    	baos.write(byteChunk, 0, n);
-		    }
+			InputStream is = url.openStream();
+			byte[] byteChunk = new byte[4096]; // Or whatever size you want to read in at a time.
+			int n;
 
-		    baos.flush();
-		    baos.close();
-		    
-		    return baos.toByteArray();
-		    
+			while ( (n = is.read(byteChunk)) > 0 ) {
+				baos.write(byteChunk, 0, n);
+			}
+
+			baos.flush();
+			baos.close();
+
+			return baos.toByteArray();
+
 		} catch (MalformedURLException e) {
 			LOGGER.error(e.getLocalizedMessage());
 		} catch (IOException e) {
 			LOGGER.error(e.getLocalizedMessage());
 		}
 
-	    return null;
+		return null;
 	}
 }
 

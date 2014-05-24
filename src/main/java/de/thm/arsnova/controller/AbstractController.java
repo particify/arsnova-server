@@ -16,6 +16,9 @@ import de.thm.arsnova.exceptions.PreconditionFailedException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 
 public class AbstractController {
+	protected static final String X_DEPRECATED_API = "X-Deprecated-API";
+	protected static final String X_FORWARDED = "X-Forwarded";
+
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ExceptionHandler(NotFoundException.class)
 	public void handleNotFoundException(final Exception e, final HttpServletRequest request) {
