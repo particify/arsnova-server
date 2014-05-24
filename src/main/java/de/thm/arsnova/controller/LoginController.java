@@ -305,7 +305,9 @@ public class LoginController extends AbstractController {
 	@ResponseBody
 	public final List<ServiceDescription> getServices(final HttpServletRequest request) {
 		List<ServiceDescription> services = new ArrayList<ServiceDescription>();
-		String dialogUrl = request.getContextPath() + "/auth/dialog?type={0}";
+
+		/* The first parameter is replaced by the backend, the second one by the frondend */
+		String dialogUrl = request.getContextPath() + "/auth/dialog?type={0}&successurl='{0}'";
 
 		if ("true".equals(guestEnabled)) {
 			ServiceDescription sdesc = new ServiceDescription(
