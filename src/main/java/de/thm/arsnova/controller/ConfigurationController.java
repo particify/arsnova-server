@@ -72,8 +72,11 @@ public class ConfigurationController extends AbstractController {
 	@Value("${features.question-format.grid-square.enabled:false}")
 	private String gridSquareEnabled;
 
-	@Value("${answerOptionLimit:8}")
+	@Value("${question.answerOptionLimit:8}")
 	private String answerOptionLimit;
+
+	@Value("${question.parse-answer-option-formatting:false}")
+	private String parseAnswerOptionFormatting;
 
 	@RequestMapping(value = { "/" }, method = RequestMethod.GET)
 	@ResponseBody
@@ -107,6 +110,7 @@ public class ConfigurationController extends AbstractController {
 		}
 
 		config.put("answerOptionLimit", Integer.valueOf(answerOptionLimit));
+		config.put("parseAnswerOptionFormatting", Boolean.valueOf(parseAnswerOptionFormatting));
 
 		config.put("features", features);
 

@@ -66,6 +66,11 @@ upload.filesize_b=1048576
 # maximal number of answer options allowed for a skill question
 question.answerOptionLimit=8
 
+# Enable Markdown and MathJax parsing in answer options. Formatting in answer options should
+# be used cautiously since it could lead to display errors. Answer options will still not
+# be parsed in diagrams. This setting has no effect if neither MathJax nor Markdown are enabled.
+question.parse-answer-option-formatting=false
+
 couchdb.host=localhost
 couchdb.port=5984
 couchdb.name=arsnova
