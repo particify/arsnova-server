@@ -33,7 +33,7 @@ security.user-db.registration-mail.body=Welcome to ARSnova!\n\nPlease confirm yo
 security.ldap.enabled=true
 security.ldap.title=LDAP
 security.ldap.login-dialog-path=login-ldap.html
-security.user-db.image=
+security.ldap.image=
 security.ldap.url=ldap://example.com:33389/dc=example,dc=com
 security.ldap.user-dn-pattern=uid={0},ou=arsnova
 security.ldap.user-search-filter=(uid={0})
@@ -41,7 +41,7 @@ security.ldap.user-search-base="ou=people"
 
 security.cas.enabled=true
 security.cas.title=CAS
-security.user-db.image=
+security.cas.image=
 security.cas-server-url=https://cas.thm.de/cas
 
 security.facebook.enabled=true
