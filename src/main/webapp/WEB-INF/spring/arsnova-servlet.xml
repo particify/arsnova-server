@@ -13,6 +13,10 @@
 	<mvc:annotation-driven
 		content-negotiation-manager="contentNegotiationManager" />
 
+	<mvc:interceptors>
+		<bean class="de.thm.arsnova.web.CacheControlInterceptorHandler" />
+	</mvc:interceptors>
+
 	<bean id="contentNegotiationManager"
 		class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
 		<property name="favorPathExtension" value="false" />

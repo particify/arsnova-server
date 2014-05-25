@@ -2,6 +2,7 @@ package de.thm.arsnova.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Before;
@@ -58,5 +59,12 @@ public class StatisticsControllerTest {
 		mockMvc.perform(get("/statistics"))
 		.andExpect(status().isOk())
 		.andExpect(content().string("{\"answers\":0,\"questions\":0,\"openSessions\":3,\"closedSessions\":0,\"activeUsers\":0}"));
+	}
+
+	@Test
+	public final void testShouldGetCacheControlHeaderForStatistics() throws Exception {
+		mockMvc.perform(get("/statistics"))
+		.andExpect(status().isOk())
+		.andExpect(header().string("cache-control", "public, max-age=60"));
 	}
 }

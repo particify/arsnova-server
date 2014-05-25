@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.services.IStatisticsService;
+import de.thm.arsnova.web.CacheControl;
 
 @RestController
 public class StatisticsController extends AbstractController {
@@ -19,6 +20,7 @@ public class StatisticsController extends AbstractController {
 	private IStatisticsService statisticsService;
 
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics")
+	@CacheControl(maxAge = 60, policy = CacheControl.Policy.PUBLIC)
 	public final Statistics getStatistics() {
 		return statisticsService.getStatistics();
 	}
