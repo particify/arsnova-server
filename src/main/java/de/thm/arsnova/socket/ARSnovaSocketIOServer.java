@@ -100,15 +100,12 @@ public class ARSnovaSocketIOServer {
 		server.addEventListener("setFeedback", Feedback.class, new DataListener<Feedback>() {
 			@Override
 			public void onData(SocketIOClient client, Feedback data, AckRequest ackSender) {
-				/**
-				 * do a check if user is in the session, for which he would give
-				 * a feedback
-				 */
 				User u = userService.getUser2SocketId(client.getSessionId());
-				if (u == null || !userService.isUserInSession(u, data.getSessionkey())) {
-					return;
+				String sessionKey = userService.getSessionForUser(u.getUsername());
+				LOGGER.debug("Feedback recieved: {}", new Object[] {u, sessionKey, data.getValue()});
+				if (null != sessionKey) {
+					feedbackService.saveFeedback(sessionKey, data.getValue(), u);
 				}
-				feedbackService.saveFeedback(data.getSessionkey(), data.getValue(), u);
 			}
 		});
 
