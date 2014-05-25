@@ -67,7 +67,9 @@ public class SessionService implements ISessionService {
 
 		Session session = databaseDao.getSession(keyword);
 		if (null == session) {
-			throw new NotFoundException();
+			userService.removeUserFromSessionBySocketId(socketId);
+
+			return null;
 		}
 		User user = userService.getUser2SocketId(socketId);
 
