@@ -112,11 +112,12 @@ public class ARSnovaSocketIOServer {
 		server.addEventListener("setSession", Session.class, new DataListener<Session>() {
 			@Override
 			public void onData(SocketIOClient client, Session session, AckRequest ackSender) {
-				sessionService.joinSession(session.getKeyword(), client.getSessionId());
-				/* active user count has to be sent to the client since the broadcast is
-				 * not always sent as long as the polling solution is active simultaneously */
-				reportActiveUserCountForSession(session.getKeyword());
-				reportSessionDataToClient(session.getKeyword(), client);
+				if (null != sessionService.joinSession(session.getKeyword(), client.getSessionId())) {
+					/* active user count has to be sent to the client since the broadcast is
+					 * not always sent as long as the polling solution is active simultaneously */
+					reportActiveUserCountForSession(session.getKeyword());
+					reportSessionDataToClient(session.getKeyword(), client);
+				}
 			}
 		});
 

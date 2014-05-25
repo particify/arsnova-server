@@ -65,7 +65,12 @@ public class SessionService implements ISessionService {
 	public final Session joinSession(final String keyword, final UUID socketId) {
 		/* Socket.IO solution */
 
-		Session session = databaseDao.getSession(keyword);
+		Session session = null;
+		try {
+			session = databaseDao.getSession(keyword);
+		} catch (NotFoundException e) {
+
+		}
 		if (null == session) {
 			userService.removeUserFromSessionBySocketId(socketId);
 
