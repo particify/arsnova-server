@@ -56,8 +56,6 @@ public class ARSnovaSocketIOServer {
 	private final Configuration config;
 	private SocketIOServer server;
 
-	private int lastActiveUserCount = 0;
-
 	public ARSnovaSocketIOServer() {
 		config = new Configuration();
 	}
@@ -112,6 +110,15 @@ public class ARSnovaSocketIOServer {
 		server.addEventListener("setSession", Session.class, new DataListener<Session>() {
 			@Override
 			public void onData(SocketIOClient client, Session session, AckRequest ackSender) {
+				User u = userService.getUser2SocketId(client.getSessionId());
+				String oldSessionKey = userService.getSessionForUser(u.getUsername());
+				if (session.getKeyword() == oldSessionKey) {
+					return;
+				}
+				if (null != oldSessionKey) {
+					reportActiveUserCountForSession(oldSessionKey);
+				}
+
 				if (null != sessionService.joinSession(session.getKeyword(), client.getSessionId())) {
 					/* active user count has to be sent to the client since the broadcast is
 					 * not always sent as long as the polling solution is active simultaneously */
@@ -282,10 +289,6 @@ public class ARSnovaSocketIOServer {
 	public void reportActiveUserCountForSession(String sessionKey) {
 		/* This check is needed as long as the HTTP polling solution is active simultaneously. */
 		int count = userService.getUsersInSessionCount(sessionKey);
-		if (count == lastActiveUserCount) {
-			return;
-		}
-		lastActiveUserCount = count;
 
 		broadcastInSession(sessionKey, "activeUserCountData", count);
 	}
