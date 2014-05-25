@@ -261,8 +261,18 @@ public class LoginController extends AbstractController {
 			failureUrl = "/";
 		}
 
-		request.getSession().setAttribute("ars-login-success-url", successUrl);
-		request.getSession().setAttribute("ars-login-failure-url", failureUrl);
+		/* Workaround until a solution is found to do a redirect which is 
+		 * relative to the server root instead of the context path */
+		String port;
+		if ("https".equals(request.getScheme())) {
+			port = 443 != request.getServerPort() ? ":" + request.getLocalPort() : "";
+		} else {
+			port = 80 != request.getServerPort() ? ":" + request.getLocalPort() : "";
+		}
+		String serverUrl = request.getScheme() + "://" + request.getServerName() + port;
+
+		request.getSession().setAttribute("ars-login-success-url", serverUrl + successUrl);
+		request.getSession().setAttribute("ars-login-failure-url", serverUrl + failureUrl);
 
 		if ("cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);

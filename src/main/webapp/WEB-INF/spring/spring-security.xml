@@ -10,9 +10,11 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd">
 
     <security:authentication-manager alias="authenticationManager">
-        <security:ldap-authentication-provider
+        <!-- <security:ldap-authentication-provider
 			user-search-filter="${security.ldap.user-search-filter}"
 			user-search-base="${security.ldap.user-search-base}" />
+			-->
+		<security:ldap-authentication-provider user-dn-pattern="${security.ldap.user-dn-pattern}" />
         <security:authentication-provider ref="facebookAuthProvider" />
         <security:authentication-provider ref="twitterAuthProvider" />
         <security:authentication-provider ref="googleAuthProvider" />
@@ -39,8 +41,8 @@
 	<bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
 
     <!-- ######################### LDAP ############################# -->
-	<!-- <security:ldap-server url="${security.ldap.url}" /> -->
-	<security:ldap-server ldif="classpath:/test.ldif" root="dc=example,dc=com" />
+	<security:ldap-server url="${security.ldap.url}" />
+	<!-- <security:ldap-server ldif="classpath:/test.ldif" root="dc=example,dc=com" /> -->
 	
 	<bean id="restLoginEntryPoint" class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint" />
 
@@ -57,7 +59,7 @@
     <bean id="facebookProvider" class="org.scribe.up.provider.impl.FacebookProvider"
         p:key="${security.facebook.key}"
         p:secret="${security.facebook.secret}"
-        p:callbackUrl="${security.arsnova-url}/j_spring_facebook_security_check" />
+        p:callbackUrl="${root-url}#{servletContext.contextPath}/j_spring_facebook_security_check" />
 
     <bean id="facebookFilter" class="com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationFilter"
         p:filterProcessesUrl="/j_spring_facebook_security_check"
@@ -73,7 +75,7 @@
     <bean id="twitterProvider" class="org.scribe.up.provider.impl.TwitterProvider"
         p:key="${security.twitter.key}"
         p:secret="${security.twitter.secret}"
-        p:callbackUrl="${security.arsnova-url}/j_spring_twitter_security_check" />
+        p:callbackUrl="${root-url}#{servletContext.contextPath}/j_spring_twitter_security_check" />
 
     <bean id="twitterFilter" class="com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationFilter"
         p:filterProcessesUrl="/j_spring_twitter_security_check"
@@ -90,7 +92,7 @@
         p:key="${security.google.key}"
         p:secret="${security.google.secret}"
         p:scope-ref="googleScope"
-        p:callbackUrl="${security.arsnova-url}/j_spring_google_security_check" />
+        p:callbackUrl="${root-url}#{servletContext.contextPath}/j_spring_google_security_check" />
     
     <bean id="googleScope" class="org.scribe.up.provider.impl.Google2Provider.Google2Scope" factory-method="valueOf">
 	     <constructor-arg index="0" value="EMAIL" />
@@ -120,7 +122,7 @@
 	
 	<bean id="casServiceProperties" 
 		class="org.springframework.security.cas.ServiceProperties"
-	    p:service="${security.arsnova-url}/j_spring_cas_security_check"
+	    p:service="${root-url}#{servletContext.contextPath}/j_spring_cas_security_check"
 	    p:sendRenew="false" />
 
 	<bean id="casAuthenticationProvider"
@@ -146,13 +148,13 @@
 
 	<bean id="casLogoutSuccessHandler" class="de.thm.arsnova.CASLogoutSuccessHandler"
 	    p:casUrl="${security.cas-server-url}"
-	    p:defaultTarget="${security.arsnova-url}"/>
+	    p:defaultTarget="${root-url}"/>
 	
 	<bean id="successHandler" class="de.thm.arsnova.LoginAuthenticationSucessHandler"
-	    p:targetUrl="#auth/checkLogin"/>
+	    p:targetUrl="${root-url}"/>
 
     <bean id="failureHandler" class="de.thm.arsnova.LoginAuthenticationFailureHandler"
-        p:defaultFailureUrl="/index.html" />
+        p:defaultFailureUrl="${root-url}" />
 
     <!-- Session Registry -->
     <bean id="sessionRegistry" class="org.springframework.security.core.session.SessionRegistryImpl" />

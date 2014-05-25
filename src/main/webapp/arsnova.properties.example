@@ -8,7 +8,6 @@ links.organization.url=
 links.imprint.url=
 links.privacy-policy.url=
 
-security.arsnova-url=http://localhost:8080
 security.authentication.login-try-limit=50
 
 security.guest.enabled=true
