@@ -48,10 +48,24 @@ public class StatisticsControllerTest {
 	}
 
 	@Test
+	public final void testShouldSendXDeprecatedApiForGetCurrentOnlineUsers() throws Exception {
+		mockMvc.perform(get("/statistics/activeusercount"))
+		.andExpect(status().isOk())
+		.andExpect(header().string(AbstractController.X_DEPRECATED_API,"1"));
+	}
+
+	@Test
 	public final void testShouldGetSessionCount() throws Exception {
 		mockMvc.perform(get("/statistics/sessioncount"))
 		.andExpect(status().isOk())
 		.andExpect(content().string("3"));
+	}
+
+	@Test
+	public final void testShouldSendXDeprecatedApiForGetSessionCount() throws Exception {
+		mockMvc.perform(get("/statistics/sessioncount"))
+		.andExpect(status().isOk())
+		.andExpect(header().string(AbstractController.X_DEPRECATED_API,"1"));
 	}
 
 	@Test
