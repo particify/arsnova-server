@@ -44,6 +44,7 @@ import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.services.SessionService.SessionNameComperator;
 import de.thm.arsnova.services.SessionService.SessionShortNameComperator;
+import de.thm.arsnova.web.DeprecatedApi;
 
 @RestController
 @RequestMapping("/session")
@@ -68,14 +69,10 @@ public class SessionController extends AbstractController {
 		sessionService.deleteSession(sessionkey, user);
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/{sessionkey}/online", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public final LoggedIn registerAsOnlineUser(
-			@PathVariable final String sessionkey,
-			final HttpServletResponse response
-			) {
-		response.addHeader(X_DEPRECATED_API, "1");
-
+	public final LoggedIn registerAsOnlineUser(@PathVariable final String sessionkey) {
 		User user = userService.getCurrentUser();
 		LoggedIn loggedIn = sessionService.registerAsOnlineUser(user, sessionkey);
 		if (loggedIn != null) {
@@ -85,13 +82,9 @@ public class SessionController extends AbstractController {
 		throw new RuntimeException();
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/{sessionkey}/activeusercount", method = RequestMethod.GET)
-	public final int countActiveUsers(
-			@PathVariable final String sessionkey,
-			final HttpServletResponse response
-			) {
-		response.addHeader(X_DEPRECATED_API, "1");
-
+	public final int countActiveUsers(@PathVariable final String sessionkey) {
 		return userService.getUsersInSessionCount(sessionkey);
 	}
 

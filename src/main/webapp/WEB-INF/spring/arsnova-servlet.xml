@@ -15,6 +15,7 @@
 
 	<mvc:interceptors>
 		<bean class="de.thm.arsnova.web.CacheControlInterceptorHandler" />
+		<bean class="de.thm.arsnova.web.DeprecatedApiInterceptorHandler" />
 	</mvc:interceptors>
 
 	<bean id="contentNegotiationManager"

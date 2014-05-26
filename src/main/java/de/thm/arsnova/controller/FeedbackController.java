@@ -18,8 +18,6 @@
  */
 package de.thm.arsnova.controller;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +34,7 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IFeedbackService;
 import de.thm.arsnova.services.IUserService;
+import de.thm.arsnova.web.DeprecatedApi;
 
 @RestController
 public class FeedbackController extends AbstractController {
@@ -48,58 +47,47 @@ public class FeedbackController extends AbstractController {
 	@Autowired
 	private IUserService userService;
 
+	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.GET)
-	public final Feedback getFeedback(@PathVariable final String sessionkey, final HttpServletResponse response) {
-		response.addHeader(X_DEPRECATED_API, "1");
-
+	public final Feedback getFeedback(@PathVariable final String sessionkey) {
 		return feedbackService.getFeedback(sessionkey);
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionkey}/myfeedback", method = RequestMethod.GET)
-	public final Integer getMyFeedback(@PathVariable final String sessionkey, final HttpServletResponse response) {
+	public final Integer getMyFeedback(@PathVariable final String sessionkey) {
 		Integer value = feedbackService.getMyFeedback(sessionkey, userService.getCurrentUser());
-
-		response.addHeader(X_DEPRECATED_API, "1");
-
 		if (value != null && value >= Feedback.MIN_FEEDBACK_TYPE && value <= Feedback.MAX_FEEDBACK_TYPE) {
 			return value;
 		}
 		throw new NotFoundException();
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionkey}/feedbackcount", method = RequestMethod.GET)
-	public final int getFeedbackCount(@PathVariable final String sessionkey, final HttpServletResponse response) {
-		response.addHeader(X_DEPRECATED_API, "1");
-
+	public final int getFeedbackCount(@PathVariable final String sessionkey) {
 		return feedbackService.getFeedbackCount(sessionkey);
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionkey}/roundedaveragefeedback", method = RequestMethod.GET)
-	public final long getAverageFeedbackRounded(
-			@PathVariable final String sessionkey,
-			final HttpServletResponse response
-			) {
-		response.addHeader(X_DEPRECATED_API, "1");
-
+	public final long getAverageFeedbackRounded(@PathVariable final String sessionkey) {
 		return feedbackService.getAverageFeedbackRounded(sessionkey);
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionkey}/averagefeedback", method = RequestMethod.GET)
-	public final double getAverageFeedback(@PathVariable final String sessionkey, final HttpServletResponse response) {
-		response.addHeader(X_DEPRECATED_API, "1");
-
+	public final double getAverageFeedback(@PathVariable final String sessionkey) {
 		return feedbackService.getAverageFeedback(sessionkey);
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public final Feedback postFeedback(
 			@PathVariable final String sessionkey,
-			@RequestBody final int value,
-			final HttpServletResponse response
+			@RequestBody final int value
 			) {
-		response.addHeader(X_DEPRECATED_API, "1");
-
 		User user = userService.getCurrentUser();
 		if (feedbackService.saveFeedback(sessionkey, value, user)) {
 			Feedback feedback = feedbackService.getFeedback(sessionkey);

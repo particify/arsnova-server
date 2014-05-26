@@ -20,8 +20,6 @@ package de.thm.arsnova.controller;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +37,7 @@ import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.PreconditionFailedException;
 import de.thm.arsnova.services.IQuestionService;
+import de.thm.arsnova.web.DeprecatedApi;
 
 @RestController
 @RequestMapping("/audiencequestion")
@@ -50,38 +49,24 @@ public class AudienceQuestionController extends AbstractController {
 	private IQuestionService questionService;
 
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
-	public final int getInterposedCount(
-			@RequestParam final String sessionkey,
-			final HttpServletResponse response
-			) {
-		response.addHeader(X_DEPRECATED_API, "1");
-
+	@DeprecatedApi
+	public final int getInterposedCount(@RequestParam final String sessionkey) {
 		return questionService.getInterposedCount(sessionkey);
 	}
 
 	@RequestMapping(value = "/readcount", method = RequestMethod.GET)
-	public final InterposedReadingCount getUnreadInterposedCount(
-			@RequestParam("sessionkey") final String sessionkey,
-			final HttpServletResponse response
-			) {
-		response.addHeader(X_DEPRECATED_API, "1");
-
+	@DeprecatedApi
+	public final InterposedReadingCount getUnreadInterposedCount(@RequestParam("sessionkey") final String sessionkey) {
 		return questionService.getInterposedReadingCount(sessionkey);
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public final List<InterposedQuestion> getInterposedQuestions(
-			@RequestParam final String sessionkey,
-			final HttpServletResponse response
-			) {
+	public final List<InterposedQuestion> getInterposedQuestions(@RequestParam final String sessionkey) {
 		return questionService.getInterposedQuestions(sessionkey);
 	}
 
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
-	public final InterposedQuestion getInterposedQuestion(
-			@PathVariable final String questionId,
-			final HttpServletResponse response
-			) {
+	public final InterposedQuestion getInterposedQuestion(@PathVariable final String questionId) {
 		return questionService.readInterposedQuestion(questionId);
 	}
 
@@ -89,8 +74,7 @@ public class AudienceQuestionController extends AbstractController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public final void postInterposedQuestion(
 			@RequestParam final String sessionkey,
-			@RequestBody final InterposedQuestion question,
-			final HttpServletResponse response
+			@RequestBody final InterposedQuestion question
 			) {
 		if (!sessionkey.equals(question.getSessionId())) {
 			throw new PreconditionFailedException();
@@ -104,11 +88,7 @@ public class AudienceQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)
-	public final void deleteInterposedQuestion(
-			@PathVariable final String questionId,
-			final HttpServletResponse response
-			) {
+	public final void deleteInterposedQuestion(@PathVariable final String questionId) {
 		questionService.deleteInterposedQuestion(questionId);
 	}
-
 }

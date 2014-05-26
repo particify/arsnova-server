@@ -18,8 +18,6 @@
  */
 package de.thm.arsnova.controller;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.services.IQuestionService;
+import de.thm.arsnova.web.DeprecatedApi;
 
 @Controller
 public class LegacyController extends AbstractController {
@@ -41,158 +40,118 @@ public class LegacyController extends AbstractController {
 
 	/* specific routes */
 
+	@DeprecatedApi
 	@RequestMapping(value = "/session/mysessions", method = RequestMethod.GET)
-	public final String redirectSessionMy(
-			final HttpServletResponse response
-			) {
-		response.addHeader(X_DEPRECATED_API, "1");
-
+	public final String redirectSessionMy() {
 		return "forward:/session/?ownedonly=true";
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/session/visitedsessions", method = RequestMethod.GET)
-	public final String redirectSessionVisited(
-			final HttpServletResponse response
-			) {
-		response.addHeader(X_DEPRECATED_API, "1");
-
+	public final String redirectSessionVisited() {
 		return "forward:/session/?visitedonly=true";
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/question")
-	public final String redirectQuestionByLecturer(
-			@PathVariable final String sessionKey,
-			final HttpServletResponse response
-			) {
-		response.addHeader(X_DEPRECATED_API, "1");
+	public final String redirectQuestionByLecturer(@PathVariable final String sessionKey) {
 		return String.format("forward:/lecturerquestion/?sessionkey=%s", sessionKey);
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/skillquestions", method = RequestMethod.GET)
-	public final String redirectQuestionByLecturerList(
-			@PathVariable final String sessionKey,
-			final HttpServletResponse response
-			) {
-		response.addHeader(X_DEPRECATED_API, "1");
+	public final String redirectQuestionByLecturerList(@PathVariable final String sessionKey) {
 		return String.format("forward:/lecturerquestion/?sessionkey=%s", sessionKey);
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/skillquestioncount", method = RequestMethod.GET)
-	public final String redirectQuestionByLecturerCount(
-			@PathVariable final String sessionKey,
-			final HttpServletResponse response
-			) {
-		response.addHeader(X_DEPRECATED_API, "1");
+	public final String redirectQuestionByLecturerCount(@PathVariable final String sessionKey) {
 		return String.format("forward:/lecturerquestion/count?sessionkey=%s", sessionKey);
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/answercount", method = RequestMethod.GET)
-	public final String redirectQuestionByLecturerAnswerCount(
-			@PathVariable final String sessionKey,
-			final HttpServletResponse response
-			) {
-		response.addHeader(X_DEPRECATED_API, "1");
+	public final String redirectQuestionByLecturerAnswerCount(@PathVariable final String sessionKey) {
 		return String.format("forward:/lecturerquestion/answercount?sessionkey=%s", sessionKey);
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/unanswered", method = RequestMethod.GET)
-	public final String redirectQuestionByLecturerUnnsweredCount(
-			@PathVariable final String sessionKey,
-			final HttpServletResponse response
-			) {
-		response.addHeader(X_DEPRECATED_API, "1");
+	public final String redirectQuestionByLecturerUnnsweredCount(@PathVariable final String sessionKey) {
 		return String.format("forward:/lecturerquestion/answercount?sessionkey=%s", sessionKey);
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/myanswers", method = RequestMethod.GET)
-	public final String redirectQuestionByLecturerMyAnswers(
-			@PathVariable final String sessionKey,
-			final HttpServletResponse response
-			) {
-		response.addHeader(X_DEPRECATED_API, "1");
+	public final String redirectQuestionByLecturerMyAnswers(@PathVariable final String sessionKey) {
 		return String.format("forward:/lecturerquestion/myanswers?sessionkey=%s", sessionKey);
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/interposed")
-	public final String redirectQuestionByAudience(
-			@PathVariable final String sessionKey,
-			final HttpServletResponse response
-			) {
-		response.addHeader(X_DEPRECATED_API, "1");
+	public final String redirectQuestionByAudience(@PathVariable final String sessionKey) {
 		return String.format("forward:/audiencequestion/?sessionkey=%s", sessionKey);
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/interposed", method = RequestMethod.DELETE)
 	@ResponseBody
-	public final void deleteAllInterposedQuestions(
-			@PathVariable final String sessionKey,
-			final HttpServletResponse response
-			) {
+	public final void deleteAllInterposedQuestions(@PathVariable final String sessionKey) {
 		questionService.deleteAllInterposedQuestions(sessionKey);
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/interposedcount", method = RequestMethod.GET)
-	public final String redirectQuestionByAudienceCount(
-			@PathVariable final String sessionKey,
-			final HttpServletResponse response
-			) {
-		response.addHeader(X_DEPRECATED_API, "1");
+	public final String redirectQuestionByAudienceCount(@PathVariable final String sessionKey) {
 		return String.format("forward:/audiencequestion/count?sessionkey=%s", sessionKey);
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/interposedreadingcount", method = RequestMethod.GET)
-	public final String redirectQuestionByAudienceReadCount(
-			@PathVariable final String sessionKey,
-			final HttpServletResponse response
-			) {
-		response.addHeader(X_DEPRECATED_API, "1");
+	public final String redirectQuestionByAudienceReadCount(@PathVariable final String sessionKey) {
 		return String.format("forward:/audiencequestion/readcount?sessionkey=%s", sessionKey);
 	}
 
 	/* generalized routes */
 
+	@DeprecatedApi
 	@RequestMapping(value = { "/session/{sessionKey}/question/{arg1}", "/session/{sessionKey}/questions/{arg1}" })
 	public final String redirectQuestionByLecturerWithOneArgument(
 			@PathVariable final String sessionKey,
-			@PathVariable final String arg1,
-			final HttpServletResponse response
+			@PathVariable final String arg1
 			) {
-		response.addHeader(X_DEPRECATED_API, "1");
 		return String.format("forward:/lecturerquestion/%s/?sessionkey=%s", arg1, sessionKey);
 	}
 
+	@DeprecatedApi
 	@RequestMapping(
 			value = { "/session/{sessionKey}/question/{arg1}/{arg2}", "/session/{sessionKey}/questions/{arg1}/{arg2}" }
 			)
 	public final String redirectQuestionByLecturerWithTwoArguments(
 			@PathVariable final String sessionKey,
 			@PathVariable final String arg1,
-			@PathVariable final String arg2,
-			final HttpServletResponse response
+			@PathVariable final String arg2
 			) {
-		response.addHeader(X_DEPRECATED_API, "1");
 		return String.format("forward:/lecturerquestion/%s/%s/?sessionkey=%s", arg1, arg2, sessionKey);
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/interposed/{arg1}")
 	public final String redirectQuestionByAudienceWithOneArgument(
 			@PathVariable final String sessionKey,
-			@PathVariable final String arg1,
-			final HttpServletResponse response
+			@PathVariable final String arg1
 			) {
-		response.addHeader(X_DEPRECATED_API, "1");
 		return String.format("forward:/audiencequestion/%s/?sessionkey=%s", arg1, sessionKey);
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/interposed/{arg1}/{arg2}")
 	public final String redirectQuestionByAudienceWithTwoArguments(
 			@PathVariable final String sessionKey,
 			@PathVariable final String arg1,
-			@PathVariable final String arg2,
-			final HttpServletResponse response
+			@PathVariable final String arg2
 			) {
-		response.addHeader(X_DEPRECATED_API, "1");
 		return String.format("forward:/audiencequestion/%s/%s/?sessionkey=%s", arg1, arg2, sessionKey);
 	}
-
 }

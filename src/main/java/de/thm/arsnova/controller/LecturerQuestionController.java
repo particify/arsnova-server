@@ -42,6 +42,7 @@ import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IQuestionService;
+import de.thm.arsnova.web.DeprecatedApi;
 
 @RestController
 @RequestMapping("/lecturerquestion")
@@ -53,10 +54,7 @@ public class LecturerQuestionController extends AbstractController {
 	private IQuestionService questionService;
 
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
-	public final Question getQuestion(
-			@PathVariable final String questionId,
-			final HttpServletResponse response
-			) {
+	public final Question getQuestion(@PathVariable final String questionId) {
 		Question question = questionService.getQuestion(questionId);
 		if (question != null) {
 			return question;
@@ -67,7 +65,7 @@ public class LecturerQuestionController extends AbstractController {
 
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public final Question postQuestion(@RequestBody final Question question, final HttpServletResponse response) {
+	public final Question postQuestion(@RequestBody final Question question) {
 		if (questionService.saveQuestion(question) != null) {
 			return question;
 		}
@@ -77,8 +75,7 @@ public class LecturerQuestionController extends AbstractController {
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.PUT)
 	public final Question updateQuestion(
 			@PathVariable final String questionId,
-			@RequestBody final Question question,
-			final HttpServletResponse response
+			@RequestBody final Question question
 			) {
 		try {
 			return this.questionService.update(question);
@@ -90,8 +87,7 @@ public class LecturerQuestionController extends AbstractController {
 	public final void publishQuestion(
 			@PathVariable final String questionId,
 			@RequestParam(required = false) final Boolean publish,
-			@RequestBody final Question question,
-			final HttpServletResponse response
+			@RequestBody final Question question
 			) {
 		if (publish != null) {
 			question.setActive(publish);
@@ -102,8 +98,7 @@ public class LecturerQuestionController extends AbstractController {
 	@RequestMapping(value = "/publish", method = RequestMethod.POST)
 	public final void publishAllQuestions(
 			@RequestParam final String sessionkey,
-			@RequestParam(required = false) final Boolean publish,
-			final HttpServletResponse response
+			@RequestParam(required = false) final Boolean publish
 			) {
 		boolean p = true;
 		if (publish != null) {
@@ -116,8 +111,7 @@ public class LecturerQuestionController extends AbstractController {
 	public final void publishStatistics(
 			@PathVariable final String questionId,
 			@RequestParam(required = false) final Boolean showStatistics,
-			@RequestBody final Question question,
-			final HttpServletResponse response
+			@RequestBody final Question question
 			) {
 		if (showStatistics != null) {
 			question.setShowStatistic(showStatistics);
@@ -129,8 +123,7 @@ public class LecturerQuestionController extends AbstractController {
 	public final void publishCorrectAnswer(
 			@PathVariable final String questionId,
 			@RequestParam(required = false) final Boolean showCorrectAnswer,
-			@RequestBody final Question question,
-			final HttpServletResponse response
+			@RequestBody final Question question
 			) {
 		if (showCorrectAnswer != null) {
 			question.setShowAnswer(showCorrectAnswer);
@@ -182,15 +175,14 @@ public class LecturerQuestionController extends AbstractController {
 		}
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	public final int getSkillQuestionCount(
 			@RequestParam final String sessionkey,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
 			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly,
-			final HttpServletResponse response) {
-		response.addHeader(X_DEPRECATED_API, "1");
-
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly
+			) {
 		if (lectureQuestionsOnly) {
 			return questionService.getLectureQuestionCount(sessionkey);
 		} else if (flashcardsOnly) {
@@ -204,18 +196,17 @@ public class LecturerQuestionController extends AbstractController {
 
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)
 	public final void deleteAnswersAndQuestion(
-			@PathVariable final String questionId,
-			final HttpServletResponse response
+			@PathVariable final String questionId
 			) {
 		questionService.deleteQuestion(questionId);
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/unanswered", method = RequestMethod.GET)
 	public final List<String> getUnAnsweredSkillQuestionIds(
 			@RequestParam final String sessionkey,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly,
-			final HttpServletResponse response
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly
 			) {
 		List<String> answers;
 		if (lectureQuestionsOnly) {
@@ -228,7 +219,6 @@ public class LecturerQuestionController extends AbstractController {
 		if (answers == null || answers.isEmpty()) {
 			throw new NoContentException();
 		}
-		response.addHeader(X_DEPRECATED_API, "1");
 
 		return answers;
 	}
@@ -248,6 +238,7 @@ public class LecturerQuestionController extends AbstractController {
 	 * @throws ForbiddenException
 	 *             if not logged in
 	 */
+	@DeprecatedApi
 	@RequestMapping(value = "/{questionId}/myanswer", method = RequestMethod.GET)
 	public final Answer getMyAnswer(
 			@PathVariable final String questionId,
@@ -258,8 +249,6 @@ public class LecturerQuestionController extends AbstractController {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
 			return null;
 		}
-
-		response.addHeader(X_DEPRECATED_API, "1");
 
 		return answer;
 	}
@@ -361,43 +350,30 @@ public class LecturerQuestionController extends AbstractController {
 	 * @throws ForbiddenException
 	 *             if not logged in
 	 */
+	@DeprecatedApi
 	@RequestMapping(value = "/{questionId}/answercount", method = RequestMethod.GET)
-	public final int getAnswerCount(
-			@PathVariable final String questionId,
-			final HttpServletResponse response
-			) {
-		response.addHeader(X_DEPRECATED_API, "1");
-
+	public final int getAnswerCount(@PathVariable final String questionId) {
 		return questionService.getAnswerCount(questionId);
 	}
 
 	@RequestMapping(value = "/{questionId}/freetextanswer/", method = RequestMethod.GET)
-	public final List<Answer> getFreetextAnswers(
-			@PathVariable final String questionId,
-			final HttpServletResponse response
-			) {
+	public final List<Answer> getFreetextAnswers(@PathVariable final String questionId) {
 		return questionService.getFreetextAnswers(questionId);
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/myanswers", method = RequestMethod.GET)
-	public final List<Answer> getMyAnswers(
-			@RequestParam final String sessionkey,
-			final HttpServletResponse response
-			) {
-		response.addHeader(X_DEPRECATED_API, "1");
-
+	public final List<Answer> getMyAnswers(@RequestParam final String sessionkey) {
 		return questionService.getMyAnswers(sessionkey);
 	}
 
+	@DeprecatedApi
 	@RequestMapping(value = "/answercount", method = RequestMethod.GET)
 	public final int getTotalAnswerCount(
 			@RequestParam final String sessionkey,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly,
-			final HttpServletResponse response
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly
 			) {
-		response.addHeader(X_DEPRECATED_API, "1");
-
 		if (lectureQuestionsOnly) {
 			return questionService.countLectureQuestionAnswers(sessionkey);
 		} else if (preparationQuestionsOnly) {
@@ -406,5 +382,4 @@ public class LecturerQuestionController extends AbstractController {
 			return questionService.getTotalAnswerCount(sessionkey);
 		}
 	}
-
 }
