@@ -2,6 +2,8 @@ package de.thm.arsnova.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
@@ -116,5 +118,23 @@ public class SessionControllerTest {
 
 		mockMvc.perform(get("/session/"))
 		.andExpect(status().isNotImplemented());
+	}
+
+	@Test
+	public void testShouldReturnActiveUserCount() throws Exception {
+		setAuthenticated(false, "ptsr00");
+
+		mockMvc.perform(get("/session/12345678/activeusercount"))
+		.andExpect(status().isOk())
+		.andExpect(content().string("0"));
+	}
+
+	@Test
+	public void testShouldReturnXDeprecatedApiHeaderForActiveUserCount() throws Exception {
+		setAuthenticated(false, "ptsr00");
+
+		mockMvc.perform(get("/session/12345678/activeusercount"))
+		.andExpect(status().isOk())
+		.andExpect(header().string(AbstractController.X_DEPRECATED_API, "1"));
 	}
 }

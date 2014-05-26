@@ -1,6 +1,8 @@
 package de.thm.arsnova.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
@@ -82,5 +84,23 @@ public class LecturerQuestionControllerTest {
 
 		mockMvc.perform(get("/lecturerquestion/").param("sessionkey", "12345678").param("preparationquestionsonly", "true"))
 		.andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	public void testShouldReturnQuestionCount() throws Exception {
+		setAuthenticated(true, "somebody");
+
+		mockMvc.perform(get("/lecturerquestion/count").param("sessionkey", "12345678").param("lecturequestionsonly", "true"))
+		.andExpect(status().isOk())
+		.andExpect(content().string("0"));
+	}
+
+	@Test
+	public void testShouldReturnXDeprecatedApiHeaderForQuestionCount() throws Exception {
+		setAuthenticated(true, "somebody");
+
+		mockMvc.perform(get("/lecturerquestion/count").param("sessionkey", "12345678").param("lecturequestionsonly", "true"))
+		.andExpect(status().isOk())
+		.andExpect(header().string(AbstractController.X_DEPRECATED_API, "1"));
 	}
 }

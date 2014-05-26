@@ -2,6 +2,7 @@ package de.thm.arsnova.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Before;
@@ -68,6 +69,15 @@ public class FeedbackControllerTest {
 	public void testShouldReturnFeedback() throws Exception {
 		userService.setUserAuthenticated(true);
 		mockMvc.perform(get("/session/87654321/feedback").accept(MediaType.APPLICATION_JSON))
-		.andExpect(status().isOk());
+		.andExpect(status().isOk())
+		.andExpect(content().string("{\"values\":[0,0,0,0]}"));
+	}
+
+	@Test
+	public void testShouldReturnXDeprecatedApiHeaderForFeedback() throws Exception {
+		userService.setUserAuthenticated(true);
+		mockMvc.perform(get("/session/87654321/feedback").accept(MediaType.APPLICATION_JSON))
+		.andExpect(status().isOk())
+		.andExpect(header().string(AbstractController.X_DEPRECATED_API, "1"));
 	}
 }
