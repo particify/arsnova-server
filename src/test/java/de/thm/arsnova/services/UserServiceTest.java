@@ -24,10 +24,12 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.context.ActiveProfiles;
 
 import de.thm.arsnova.entities.User;
 
 @RunWith(BlockJUnit4ClassRunner.class)
+@ActiveProfiles("test")
 public class UserServiceTest {
 
 	private static final ConcurrentHashMap<UUID, User> socketid2user = new ConcurrentHashMap<UUID, User>();

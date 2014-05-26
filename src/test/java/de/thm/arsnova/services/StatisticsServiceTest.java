@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -24,6 +25,7 @@ import de.thm.arsnova.entities.Statistics;
 		"file:src/main/webapp/WEB-INF/spring/spring-security.xml",
 		"file:src/test/resources/test-config.xml"
 })
+@ActiveProfiles("test")
 public class StatisticsServiceTest {
 
 	@InjectMocks

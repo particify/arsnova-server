@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -42,6 +43,7 @@ import de.thm.arsnova.exceptions.NotFoundException;
 		"file:src/main/webapp/WEB-INF/spring/spring-security.xml",
 		"file:src/test/resources/test-config.xml"
 })
+@ActiveProfiles("test")
 public class FeedbackServiceTest {
 
 	@Autowired
@@ -74,7 +76,6 @@ public class FeedbackServiceTest {
 		feedbackService.saveFeedback("87654321", 3, new TestUser("testuser35"));
 		feedbackService.saveFeedback("87654321", 3, new TestUser("testuser36"));
 		feedbackService.saveFeedback("87654321", 3, new TestUser("testuser37"));
-
 
 		feedbackService.saveFeedback("18273645", 0, new TestUser("testuser01"));
 		feedbackService.saveFeedback("18273645", 0, new TestUser("testuser02"));
