@@ -56,7 +56,7 @@ public class FeedbackService implements IFeedbackService {
 
 	@Autowired
 	private IUserService userService;
-	
+
 	private FeedbackStorage feedbackStorage;
 
 	public final void setDatabaseDao(final IDatabaseDao newDatabaseDao) {
@@ -67,7 +67,7 @@ public class FeedbackService implements IFeedbackService {
 	public void init() {
 		this.feedbackStorage = new FeedbackStorage(databaseDao);
 	}
-	
+
 	@Override
 	@Scheduled(fixedDelay = DEFAULT_SCHEDULER_DELAY)
 	public final void cleanFeedbackVotes() {
@@ -129,7 +129,7 @@ public class FeedbackService implements IFeedbackService {
 	public final void broadcastFeedbackChanges(
 			final Map<String, Set<String>> affectedUsers,
 			final Set<String> allAffectedSessions
-	) {
+			) {
 		for (Map.Entry<String, Set<String>> e : affectedUsers.entrySet()) {
 			// Is this user registered with a socket connection?
 			String connectedSocket = userService.getSessionForUser(e.getKey());

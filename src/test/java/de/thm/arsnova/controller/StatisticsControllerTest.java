@@ -3,6 +3,7 @@ package de.thm.arsnova.controller;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Before;
@@ -72,7 +73,11 @@ public class StatisticsControllerTest {
 	public final void testShouldGetStatistics() throws Exception {
 		mockMvc.perform(get("/statistics"))
 		.andExpect(status().isOk())
-		.andExpect(content().string("{\"answers\":0,\"questions\":0,\"openSessions\":3,\"closedSessions\":0,\"activeUsers\":0}"));
+		.andExpect(jsonPath("$.answers").value(0))
+		.andExpect(jsonPath("$.questions").value(0))
+		.andExpect(jsonPath("$.openSessions").value(3))
+		.andExpect(jsonPath("$.closedSessions").value(0))
+		.andExpect(jsonPath("$.activeUsers").value(0));
 	}
 
 	@Test
