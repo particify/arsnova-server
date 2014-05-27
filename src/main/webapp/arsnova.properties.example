@@ -1,25 +1,80 @@
-root-url=http://localhost:8080
+################################################################################
+# General server settings
+################################################################################
+# The URL under which the ARSnova server is reachable. Use
+# http://localhost:8080 for development.
+root-url=https://example.com
+
+# The context paths where the ARSnova modules have been deployed
 customization.path=/customization
 mobile.path=/mobile
 presenter.path=/presenter
 
-links.overlay.url=https://arsnova.eu/overlay/
-links.organization.url=
-links.imprint.url=
-links.privacy-policy.url=
+# SSL configuration
+security.ssl=false
+security.keystore=/etc/arsnova/arsnova.jks
+security.storepass=arsnova
 
+# WebSockets server
+socketio.ip=0.0.0.0
+socketio.port=10443
+
+
+################################################################################
+# Database
+################################################################################
+couchdb.host=localhost
+couchdb.port=5984
+couchdb.name=arsnova
+couchdb.username=admin
+couchdb.password=
+
+
+################################################################################
+# E-Mail
+################################################################################
+mail.sender.name=ARSnova
+mail.sender.address=
+mail.host=
+
+
+################################################################################
+# Authentication
+################################################################################
+# After the specified number of login tries the client IP will be banned for
+# several minutes
 security.authentication.login-try-limit=50
 
+# Configuration parameters for authentication services:
+# enabled: enable or disable the service
+# title: the title which is displayed by frontends
+# login-dialog-path: URL of a login dialog page
+# image: an image which is used for frontend buttons
+
+# Guest authentication
+#
 security.guest.enabled=true
 security.guest.lecturer.enabled=true
 
 # Setup combined login if you want to use a single, customized login page
 # which is used for multiple authentication services.
+#
 security.custom-login.enabled=false
 security.custom-login.title=University
 security.custom-login.login-dialog-path=
 security.custom-login.image=
 
+# Internal authentication
+#
+# Specific parameters:
+# activation-path: URL of the account activation page
+# allowed-email-domains: Allows you to restrict registration to specific
+#     domains. You can use wildcards (*), e. g. *.*.example.com. Multiple
+#     entries are separated by commas.
+# registration-mail.subject: Subject used for registration e-mail
+# registration-mail.body: Text body used for registration e-mail. {0} will be
+#     replaced by the value of activation-path.
+#
 security.user-db.enabled=true
 security.user-db.title=ARSnova
 security.user-db.login-dialog-path=account.html
@@ -27,42 +82,85 @@ security.user-db.activation-path=account.html
 security.user-db.image=
 security.user-db.allowed-email-domains=*
 security.user-db.registration-mail.subject=ARSnova Registration
-security.user-db.registration-mail.body=Welcome to ARSnova!\n\nPlease confirm your registration by visiting the following web address:\n{0}\n\nAfterwards, you can log into ARSnova with your e-mail address and password.
+security.user-db.registration-mail.body=Welcome to ARSnova!\n\nPlease confirm \
+    your registration by visiting the following web address:\n{0}\n\n\
+    Afterwards, you can log into ARSnova with your e-mail address and password.
 
+# LDAP authentication
+# 
+# Specific parameters:
+# url: LDAP server URL
+# user-dn-pattern: Pattern used to check user credentials against the LDAP
+#     server. {0} will be replaced with the user ID by ARSnova.
+#
 security.ldap.enabled=true
 security.ldap.title=LDAP
 security.ldap.login-dialog-path=login-ldap.html
 security.ldap.image=
 security.ldap.url=ldap://example.com:33389/dc=example,dc=com
 security.ldap.user-dn-pattern=uid={0},ou=arsnova
-security.ldap.user-search-filter=(uid={0})
-security.ldap.user-search-base="ou=people"
+# Not yet implemented parameters
+#security.ldap.user-search-filter=(uid={0})
+#security.ldap.user-search-base="ou=people"
 
+# CAS authentication
+#
 security.cas.enabled=true
 security.cas.title=CAS
 security.cas.image=
-security.cas-server-url=https://cas.thm.de/cas
+security.cas-server-url=https://example.com/cas
 
+# OAuth authentication with third party services
+# Specific parameters:
+# key: OAuth key/id provided by a third party auth service
+# secret: OAuth secret provided by a third party auth service
+
+# Facebook
+#
 security.facebook.enabled=true
 security.facebook.key=
 security.facebook.secret=
 
+# Twitter
+#
 security.twitter.enabled=true
 security.twitter.key=
 security.twitter.secret=
 
+# Google
+#
 security.google.enabled=true
 security.google.key=
 security.google.secret=
 
-security.ssl=false
-security.keystore=/etc/arsnova.thm.de.jks
-security.storepass=arsnova
 
-mail.sender.name=ARSnova
-mail.sender.address=
-mail.host=
+################################################################################
+# ARSnova Connector (for LMS)
+################################################################################
+connector.uri=http://localhost:8080/connector-service
+connector.username=test
+connector.password=test
 
+
+################################################################################
+# Features
+################################################################################
+# Enable MathJax to allow the use of Math formulas written in TeX syntax in
+# text fields.
+features.mathjax.enabled=true
+
+# The following features are considered experimental because they have not been
+# tested in a production environment over a longer time frame and/or their
+# behavior will change in future releases.
+#
+features.markdown.enabled=false
+features.question-format.flashcard.enabled=false
+features.question-format.grid-square.enabled=false
+
+
+################################################################################
+# Customization
+################################################################################
 # minutes, after which the feedback is deleted
 feedback.cleanup=10
 
@@ -72,30 +170,15 @@ upload.filesize_b=1048576
 # maximal number of answer options allowed for a skill question
 question.answerOptionLimit=8
 
-# Enable Markdown and MathJax parsing in answer options. Formatting in answer options should
-# be used cautiously since it could lead to display errors. Answer options will still not
-# be parsed in diagrams. This setting has no effect if neither MathJax nor Markdown are enabled.
+# Enable Markdown and MathJax parsing in answer options. Formatting in answer
+# options should be used cautiously since it could lead to display errors.
+# Answer options will still not be parsed in diagrams. This setting has no
+# effect if neither MathJax nor Markdown are enabled.
 question.parse-answer-option-formatting=false
 
-couchdb.host=localhost
-couchdb.port=5984
-couchdb.name=arsnova
-couchdb.username=admin
-couchdb.password=
-
-socketio.ip=0.0.0.0
-socketio.port=10443
-
-connector.uri=http://localhost:8080/connector-service
-connector.username=test
-connector.password=test
-
-# Enable MathJax to allow the use of Math formulas written in TeX syntax in text fields.
-features.mathjax.enabled=true
-
-# The following features are considered experimental because they have not been
-# tested in a production environment over a longer time frame and/or their behavior
-# will change in future releases.
-features.markdown.enabled=false
-features.question-format.flashcard.enabled=false
-features.question-format.grid-square.enabled=false
+# Links which are displayed in the frontend applications
+#
+links.overlay.url=https://arsnova.eu/overlay/
+links.organization.url=
+links.imprint.url=
+links.privacy-policy.url=
