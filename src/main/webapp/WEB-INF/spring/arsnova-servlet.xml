@@ -22,10 +22,12 @@
 		class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
 		<property name="favorPathExtension" value="false" />
 		<property name="favorParameter" value="true" />
+		<property name="defaultContentType" value="application/json" />
 		<property name="mediaTypes">
 			<value>
 				html=text/html
 				json=application/json
+				xml=application/xml
 			</value>
 		</property>
 	</bean>

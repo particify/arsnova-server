@@ -11,50 +11,50 @@ public class Statistics {
 	public int getAnswers() {
 		return answers;
 	}
-	public void setAnswers(int answers) {
+	public void setAnswers(final int answers) {
 		this.answers = answers;
 	}
 
 	public int getQuestions() {
 		return questions;
 	}
-	public void setQuestions(int questions) {
+	public void setQuestions(final int questions) {
 		this.questions = questions;
 	}
 
 	public int getOpenSessions() {
 		return openSessions;
 	}
-	public void setOpenSessions(int openSessions) {
+	public void setOpenSessions(final int openSessions) {
 		this.openSessions = openSessions;
 	}
 
 	public int getClosedSessions() {
 		return closedSessions;
 	}
-	public void setClosedSessions(int closedSessions) {
+	public void setClosedSessions(final int closedSessions) {
 		this.closedSessions = closedSessions;
 	}
 
 	public int getActiveUsers() {
 		return activeUsers;
 	}
-	public void setActiveUsers(int activeUsers) {
+	public void setActiveUsers(final int activeUsers) {
 		this.activeUsers = activeUsers;
 	}
 
 	@Override
 	public int hashCode() {
 		return (this.getClass().getName()
-				+ this.activeUsers
-				+ this.answers
-				+ this.closedSessions
-				+ this.openSessions
-				+ this.questions).hashCode();
+				+ activeUsers
+				+ answers
+				+ closedSessions
+				+ openSessions
+				+ questions).hashCode();
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (obj == null) {
 			return false;
 		}
@@ -62,8 +62,8 @@ public class Statistics {
 			return true;
 		}
 		if (obj instanceof Statistics) {
-			Statistics other = (Statistics) obj;
-			return this.hashCode() == other.hashCode();
+			final Statistics other = (Statistics) obj;
+			return hashCode() == other.hashCode();
 		}
 
 		return false;
