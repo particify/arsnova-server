@@ -168,7 +168,7 @@ feedback.cleanup=10
 upload.filesize_b=1048576
 
 # maximal number of answer options allowed for a skill question
-question.answerOptionLimit=8
+question.answer-option-limit=8
 
 # Enable Markdown and MathJax parsing in answer options. Formatting in answer
 # options should be used cautiously since it could lead to display errors.
