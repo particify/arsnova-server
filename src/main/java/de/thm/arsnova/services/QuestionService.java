@@ -183,10 +183,6 @@ public class QuestionService implements IQuestionService {
 		if (question == null) {
 			throw new NotFoundException();
 		}
-		final Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
-		if (session == null) {
-			throw new UnauthorizedException();
-		}
 		databaseDao.deleteInterposedQuestion(question);
 	}
 
