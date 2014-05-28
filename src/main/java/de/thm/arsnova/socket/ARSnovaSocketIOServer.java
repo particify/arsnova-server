@@ -65,12 +65,12 @@ public class ARSnovaSocketIOServer {
 	@PreDestroy
 	public void closeAllSessions() {
 		LOGGER.info("Close all websockets due to @PreDestroy");
-		for (SocketIOClient c : server.getAllClients()) {
+		for (final SocketIOClient c : server.getAllClients()) {
 			c.disconnect();
 		}
 
 		int clientCount = 0;
-		for (SocketIOClient c : server.getAllClients()) {
+		for (final SocketIOClient c : server.getAllClients()) {
 			c.send(new Packet(PacketType.DISCONNECT));
 			clientCount++;
 		}
@@ -88,10 +88,10 @@ public class ARSnovaSocketIOServer {
 		config.setHostname(hostIp);
 		if (useSSL) {
 			try {
-				InputStream stream = new FileInputStream(keystore);
+				final InputStream stream = new FileInputStream(keystore);
 				config.setKeyStore(stream);
 				config.setKeyStorePassword(storepass);
-			} catch (FileNotFoundException e) {
+			} catch (final FileNotFoundException e) {
 				LOGGER.error("Keystore {} not found on filesystem", keystore);
 			}
 		}
@@ -99,12 +99,12 @@ public class ARSnovaSocketIOServer {
 
 		server.addEventListener("setFeedback", Feedback.class, new DataListener<Feedback>() {
 			@Override
-			public void onData(SocketIOClient client, Feedback data, AckRequest ackSender) {
+			public void onData(final SocketIOClient client, final Feedback data, final AckRequest ackSender) {
 				/**
 				 * do a check if user is in the session, for which he would give
 				 * a feedback
 				 */
-				User u = userService.getUser2SocketId(client.getSessionId());
+				final User u = userService.getUser2SocketId(client.getSessionId());
 				if (u == null || !userService.isUserInSession(u, data.getSessionkey())) {
 					return;
 				}
@@ -114,7 +114,7 @@ public class ARSnovaSocketIOServer {
 
 		server.addEventListener("setSession", Session.class, new DataListener<Session>() {
 			@Override
-			public void onData(SocketIOClient client, Session session, AckRequest ackSender) {
+			public void onData(final SocketIOClient client, final Session session, final AckRequest ackSender) {
 				sessionService.joinSession(session.getKeyword(), client.getSessionId());
 				/* active user count has to be sent to the client since the broadcast is
 				 * not always sent as long as the polling solution is active simultaneously */
@@ -125,22 +125,21 @@ public class ARSnovaSocketIOServer {
 
 		server.addConnectListener(new ConnectListener() {
 			@Override
-			public void onConnect(SocketIOClient client) { }
+			public void onConnect(final SocketIOClient client) { }
 		});
 
 		server.addDisconnectListener(new DisconnectListener() {
 			@Override
-			public void onDisconnect(SocketIOClient client) {
+			public void onDisconnect(final SocketIOClient client) {
 				if (
 						userService == null
 						|| client.getSessionId() == null
 						|| userService.getUser2SocketId(client.getSessionId()) == null
 						) {
-					LOGGER.warn("NullPointer in ARSnovaSocketIOServer DisconnectListener");
 					return;
 				}
-				String username = userService.getUser2SocketId(client.getSessionId()).getUsername();
-				String sessionKey = userService.getSessionForUser(username);
+				final String username = userService.getUser2SocketId(client.getSessionId()).getUsername();
+				final String sessionKey = userService.getSessionForUser(username);
 				userService.removeUserFromSessionBySocketId(client.getSessionId());
 				userService.removeUser2SocketId(client.getSessionId());
 				if (null != sessionKey) {
@@ -156,10 +155,10 @@ public class ARSnovaSocketIOServer {
 	public void stopServer() throws Exception {
 		LOGGER.trace("In stopServer method of class: {}", getClass().getName());
 		try {
-			for (SocketIOClient client : server.getAllClients()) {
+			for (final SocketIOClient client : server.getAllClients()) {
 				client.disconnect();
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			/* If exceptions are not caught they could prevent the Socket.IO server from shutting down. */
 			LOGGER.error("Exception caught on Socket.IO shutdown: {}", e.getStackTrace());
 		}
@@ -172,7 +171,7 @@ public class ARSnovaSocketIOServer {
 	}
 
 	@Required
-	public void setPortNumber(int portNumber) {
+	public void setPortNumber(final int portNumber) {
 		this.portNumber = portNumber;
 	}
 
@@ -180,7 +179,7 @@ public class ARSnovaSocketIOServer {
 		return hostIp;
 	}
 
-	public void setHostIp(String hostIp) {
+	public void setHostIp(final String hostIp) {
 		this.hostIp = hostIp;
 	}
 
@@ -189,7 +188,7 @@ public class ARSnovaSocketIOServer {
 	}
 
 	@Required
-	public void setStorepass(String storepass) {
+	public void setStorepass(final String storepass) {
 		this.storepass = storepass;
 	}
 
@@ -198,7 +197,7 @@ public class ARSnovaSocketIOServer {
 	}
 
 	@Required
-	public void setKeystore(String keystore) {
+	public void setKeystore(final String keystore) {
 		this.keystore = keystore;
 	}
 
@@ -207,17 +206,17 @@ public class ARSnovaSocketIOServer {
 	}
 
 	@Required
-	public void setUseSSL(boolean useSSL) {
+	public void setUseSSL(final boolean useSSL) {
 		this.useSSL = useSSL;
 	}
 
-	public void reportDeletedFeedback(String username, Set<String> arsSessions) {
-		List<UUID> connectionIds = findConnectionIdForUser(username);
+	public void reportDeletedFeedback(final String username, final Set<String> arsSessions) {
+		final List<UUID> connectionIds = findConnectionIdForUser(username);
 		if (connectionIds.isEmpty()) {
 			return;
 		}
 
-		for (SocketIOClient client : server.getAllClients()) {
+		for (final SocketIOClient client : server.getAllClients()) {
 			// Find the client whose feedback has been deleted and send a
 			// message.
 			if (connectionIds.contains(client.getSessionId())) {
@@ -226,9 +225,9 @@ public class ARSnovaSocketIOServer {
 		}
 	}
 
-	private List<UUID> findConnectionIdForUser(String username) {
-		List<UUID> result = new ArrayList<UUID>();
-		for (Entry<UUID, User> e : userService.socketId2User()) {
+	private List<UUID> findConnectionIdForUser(final String username) {
+		final List<UUID> result = new ArrayList<UUID>();
+		for (final Entry<UUID, User> e : userService.socketId2User()) {
 			if (e.getValue().getUsername().equals(username)) {
 				result.add(e.getKey());
 			}
@@ -243,37 +242,37 @@ public class ARSnovaSocketIOServer {
 	 * @param sessionKey
 	 * @param client
 	 */
-	public void reportSessionDataToClient(String sessionKey, SocketIOClient client) {
+	public void reportSessionDataToClient(final String sessionKey, final SocketIOClient client) {
 		client.sendEvent("activeUserCountData", userService.getUsersInSessionCount(sessionKey));
-		de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
+		final de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
 		client.sendEvent("feedbackData", fb.getValues());
 	}
 
-	public void reportUpdatedFeedbackForSession(String sessionKey) {
-		de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
+	public void reportUpdatedFeedbackForSession(final String sessionKey) {
+		final de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
 		broadcastInSession(sessionKey, "feedbackData", fb.getValues());
 		try {
-			long averageFeedback = feedbackService.getAverageFeedbackRounded(sessionKey);
+			final long averageFeedback = feedbackService.getAverageFeedbackRounded(sessionKey);
 			broadcastInSession(sessionKey, "feedbackDataRoundedAverage", averageFeedback);
-		} catch (NoContentException e) {
+		} catch (final NoContentException e) {
 			broadcastInSession(sessionKey, "feedbackDataRoundedAverage", null);
 		}
 	}
 
-	public void reportFeedbackForUserInSession(de.thm.arsnova.entities.Session session, User user) {
-		de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(session.getKeyword());
+	public void reportFeedbackForUserInSession(final de.thm.arsnova.entities.Session session, final User user) {
+		final de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(session.getKeyword());
 		Long averageFeedback;
 		try {
 			averageFeedback = feedbackService.getAverageFeedbackRounded(session.getKeyword());
-		} catch (NoContentException e) {
+		} catch (final NoContentException e) {
 			averageFeedback = null;
 		}
-		List<UUID> connectionIds = findConnectionIdForUser(user.getUsername());
+		final List<UUID> connectionIds = findConnectionIdForUser(user.getUsername());
 		if (connectionIds.isEmpty()) {
 			return;
 		}
 
-		for (SocketIOClient client : server.getAllClients()) {
+		for (final SocketIOClient client : server.getAllClients()) {
 			if (connectionIds.contains(client.getSessionId())) {
 				client.sendEvent("feedbackData", fb.getValues());
 				client.sendEvent("feedbackDataRoundedAverage", averageFeedback);
@@ -281,9 +280,9 @@ public class ARSnovaSocketIOServer {
 		}
 	}
 
-	public void reportActiveUserCountForSession(String sessionKey) {
+	public void reportActiveUserCountForSession(final String sessionKey) {
 		/* This check is needed as long as the HTTP polling solution is active simultaneously. */
-		int count = userService.getUsersInSessionCount(sessionKey);
+		final int count = userService.getUsersInSessionCount(sessionKey);
 		if (count == lastActiveUserCount) {
 			return;
 		}
@@ -292,16 +291,16 @@ public class ARSnovaSocketIOServer {
 		broadcastInSession(sessionKey, "activeUserCountData", count);
 	}
 
-	public void reportAnswersToLecturerQuestionAvailable(String sessionKey, String lecturerQuestionId) {
+	public void reportAnswersToLecturerQuestionAvailable(final String sessionKey, final String lecturerQuestionId) {
 		broadcastInSession(sessionKey, "answersToLecQuestionAvail", lecturerQuestionId);
 	}
 
-	public void reportAudienceQuestionAvailable(String sessionKey, String audienceQuestionId) {
+	public void reportAudienceQuestionAvailable(final String sessionKey, final String audienceQuestionId) {
 		/* TODO role handling implementation, send this only to users with role lecturer */
 		broadcastInSession(sessionKey, "audQuestionAvail", audienceQuestionId);
 	}
 
-	public void reportLecturerQuestionAvailable(String sessionKey, String lecturerQuestionId) {
+	public void reportLecturerQuestionAvailable(final String sessionKey, final String lecturerQuestionId) {
 		/* TODO role handling implementation, send this only to users with role audience */
 		broadcastInSession(sessionKey, "lecQuestionAvail", lecturerQuestionId);
 	}
@@ -312,24 +311,24 @@ public class ARSnovaSocketIOServer {
 	 * @param event The event to be send to client
 	 * TODO This method is unimplemented!
 	 */
-	public void sendToClient(UUID sessionId, ARSnovaEvent event) {
-		for (SocketIOClient c : server.getAllClients()) {
+	public void sendToClient(final UUID sessionId, final ARSnovaEvent event) {
+		for (final SocketIOClient c : server.getAllClients()) {
 			if (c.getSessionId().equals(sessionId)) {
 				break;
 			}
 		}
 	}
 
-	public void broadcastInSession(String sessionKey, String eventName, Object data) {
+	public void broadcastInSession(final String sessionKey, final String eventName, final Object data) {
 		/**
 		 * collect a list of users which are in the current session iterate over
 		 * all connected clients and if send feedback, if user is in current
 		 * session
 		 */
-		Set<User> users = userService.getUsersInSession(sessionKey);
+		final Set<User> users = userService.getUsersInSession(sessionKey);
 
-		for (SocketIOClient c : server.getAllClients()) {
-			User u = userService.getUser2SocketId(c.getSessionId());
+		for (final SocketIOClient c : server.getAllClients()) {
+			final User u = userService.getUser2SocketId(c.getSessionId());
 			if (u != null && users.contains(u)) {
 				c.sendEvent(eventName, data);
 			}

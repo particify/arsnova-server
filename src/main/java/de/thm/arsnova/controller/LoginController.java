@@ -90,7 +90,7 @@ public class LoginController extends AbstractController {
 			@RequestParam(value = "referer", required = false) final String forcedReferer,
 			@RequestParam(value = "successurl", required = false) final String successUrl,
 			@RequestParam(value = "failureurl", required = false) final String failureUrl,
-			@RequestParam(value = "role", required = false) UserSessionService.Role role,
+			@RequestParam(value = "role", required = false) final UserSessionService.Role role,
 			final HttpServletRequest request,
 			final HttpServletResponse response
 			) throws IOException, ServletException {
@@ -118,37 +118,45 @@ public class LoginController extends AbstractController {
 		if ("cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);
 		} else if ("twitter".equals(type)) {
-			String authUrl = twitterProvider.getAuthorizationUrl(new HttpUserSession(request));
+			final String authUrl = twitterProvider.getAuthorizationUrl(new HttpUserSession(request));
 			result = new RedirectView(authUrl);
 		} else if ("facebook".equals(type)) {
-			String authUrl = facebookProvider.getAuthorizationUrl(new HttpUserSession(request));
+			final String authUrl = facebookProvider.getAuthorizationUrl(new HttpUserSession(request));
 			result = new RedirectView(authUrl);
 		} else if ("google".equals(type)) {
-			String authUrl = googleProvider.getAuthorizationUrl(new HttpUserSession(request));
+			final String authUrl = googleProvider.getAuthorizationUrl(new HttpUserSession(request));
 			result = new RedirectView(authUrl);
 		} else if ("guest".equals(type)) {
-			List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-			authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
-			String username = "";
-			if (guestName != null && guestName.startsWith("Guest") && guestName.length() == MAX_USERNAME_LENGTH) {
-				username = guestName;
-			} else {
-				username = "Guest" + Sha512DigestUtils.shaHex(
-						request.getSession().getId()
-						).substring(0, MAX_GUESTHASH_LENGTH);
-			}
-			org.springframework.security.core.userdetails.User user =
-					new org.springframework.security.core.userdetails.User(
-							username, "", true, true, true, true, authorities
-							);
-			Authentication token = new UsernamePasswordAuthenticationToken(user, null, authorities);
-
-			SecurityContextHolder.getContext().setAuthentication(token);
-			request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-					SecurityContextHolder.getContext());
-			result = new RedirectView(null == successUrl ? referer + "#auth/checkLogin" : successUrl);
+			result = handleGuestLogin(guestName, successUrl, request, referer);
 		}
 
+		return result;
+	}
+
+	private View handleGuestLogin(final String guestName,
+			final String successUrl, final HttpServletRequest request,
+			final String referer) {
+		View result;
+		final List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+		authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
+		String username = "";
+		if (guestName != null && guestName.startsWith("Guest") && guestName.length() == MAX_USERNAME_LENGTH) {
+			username = guestName;
+		} else {
+			username = "Guest" + Sha512DigestUtils.shaHex(
+					request.getSession().getId()
+					).substring(0, MAX_GUESTHASH_LENGTH);
+		}
+		final org.springframework.security.core.userdetails.User user =
+				new org.springframework.security.core.userdetails.User(
+						username, "", true, true, true, true, authorities
+						);
+		final Authentication token = new UsernamePasswordAuthenticationToken(user, null, authorities);
+
+		SecurityContextHolder.getContext().setAuthentication(token);
+		request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+				SecurityContextHolder.getContext());
+		result = new RedirectView(null == successUrl ? referer + "#auth/checkLogin" : successUrl);
 		return result;
 	}
 
@@ -161,7 +169,7 @@ public class LoginController extends AbstractController {
 
 	@RequestMapping(value = { "/auth/logout", "/logout" }, method = RequestMethod.GET)
 	public final View doLogout(final HttpServletRequest request) {
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		userService.removeUserFromMaps(userService.getCurrentUser());
 		request.getSession().invalidate();
 		SecurityContextHolder.clearContext();
@@ -174,7 +182,7 @@ public class LoginController extends AbstractController {
 	@RequestMapping(value = { "/test/me" }, method = RequestMethod.GET)
 	@ResponseBody
 	public final User me() {
-		User me = userSessionService.getUser();
+		final User me = userSessionService.getUser();
 		if (me == null) {
 			throw new UnauthorizedException();
 		}
@@ -184,7 +192,7 @@ public class LoginController extends AbstractController {
 	@RequestMapping(value = { "/test/mysession" }, method = RequestMethod.GET)
 	@ResponseBody
 	public final Session mysession() {
-		Session mysession = userSessionService.getSession();
+		final Session mysession = userSessionService.getSession();
 		if (mysession == null) {
 			throw new UnauthorizedException();
 		}
@@ -194,7 +202,7 @@ public class LoginController extends AbstractController {
 	@RequestMapping(value = { "/test/myrole" }, method = RequestMethod.GET)
 	@ResponseBody
 	public final UserSessionService.Role myrole() {
-		UserSessionService.Role myrole = userSessionService.getRole();
+		final UserSessionService.Role myrole = userSessionService.getRole();
 		if (myrole == null) {
 			throw new UnauthorizedException();
 		}

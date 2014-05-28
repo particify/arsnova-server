@@ -1,7 +1,5 @@
 package de.thm.arsnova.controller;
 
-import java.util.concurrent.Callable;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -22,17 +20,6 @@ public class StatisticsController extends AbstractController {
 	@CacheControl(maxAge = 60, policy = CacheControl.Policy.PUBLIC)
 	public final Statistics getStatistics() {
 		return statisticsService.getStatistics();
-	}
-
-	@RequestMapping(method = RequestMethod.GET, value = "/astatistics")
-	public final Callable<Statistics> getAsyncStatistics() {
-		return new Callable<Statistics> () {
-
-			@Override
-			public Statistics call() throws Exception {
-				return statisticsService.getStatistics();
-			}
-		};
 	}
 
 	@DeprecatedApi

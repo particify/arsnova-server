@@ -1,7 +1,5 @@
 package de.thm.arsnova.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,8 +18,6 @@ import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 @Configuration
 public class ExtraConfig {
 
-	private final Logger LOGGER = LoggerFactory.getLogger(ExtraConfig.class);
-
 	@Autowired
 	private Environment env;
 
@@ -33,7 +29,7 @@ public class ExtraConfig {
 
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-		PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
+		final PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
 		configurer.setLocations(new Resource[] {
 				new ClassPathResource("arsnova.properties.example"),
 				new FileSystemResource("file:///etc/arsnova/arsnova.properties"),
@@ -49,7 +45,7 @@ public class ExtraConfig {
 			return null;
 		}
 
-		ConnectorClientImpl connectorClient = new ConnectorClientImpl();
+		final ConnectorClientImpl connectorClient = new ConnectorClientImpl();
 		connectorClient.setServiceLocation(env.getProperty("connector.uri"));
 		connectorClient.setUsername(env.getProperty("connector.username"));
 		connectorClient.setPassword(env.getProperty("connector.password"));
@@ -59,7 +55,7 @@ public class ExtraConfig {
 	@Profile("!test")
 	@Bean(name = "socketServer", initMethod = "startServer", destroyMethod = "stopServer")
 	public ARSnovaSocketIOServer socketServer() {
-		ARSnovaSocketIOServer socketServer = new ARSnovaSocketIOServer();
+		final ARSnovaSocketIOServer socketServer = new ARSnovaSocketIOServer();
 		socketServer.setHostIp(socketIp);
 		socketServer.setPortNumber(socketPort);
 		socketServer.setUseSSL(socketUseSll);
@@ -71,7 +67,7 @@ public class ExtraConfig {
 	@Profile("test")
 	@Bean(name = "socketServer", initMethod = "startServer", destroyMethod = "stopServer")
 	public ARSnovaSocketIOServer socketTestServer() {
-		ARSnovaSocketIOServer socketServer = new ARSnovaSocketIOServer();
+		final ARSnovaSocketIOServer socketServer = new ARSnovaSocketIOServer();
 		socketServer.setHostIp(socketIp);
 		socketServer.setPortNumber(socketPort + 1234);
 		socketServer.setUseSSL(socketUseSll);

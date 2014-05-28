@@ -18,7 +18,8 @@
  */
 package de.thm.arsnova.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -29,88 +30,88 @@ public class NovaViewTest {
 
 	@Test
 	public void setKeyShouldAcceptSingleArgument() {
-		NovaView v = new NovaView(null);
+		final NovaView v = new NovaView(null);
 		v.setKey("foo");
 		assertEncodedEquals("key", "\"foo\"", v.getQueryString());
 	}
 
 	@Test
 	public void setKeyShouldAcceptMultipleArgument() {
-		NovaView v = new NovaView(null);
+		final NovaView v = new NovaView(null);
 		v.setKey("foo", "bar", "baz");
 		assertEncodedEquals("key", "[\"foo\",\"bar\",\"baz\"]", v.getQueryString());
 	}
 
 	@Test
 	public void setStartKeyShouldAcceptSingleArgument() {
-		NovaView v = new NovaView(null);
+		final NovaView v = new NovaView(null);
 		v.setStartKey("foo");
 		assertEncodedEquals("startkey", "\"foo\"", v.getQueryString());
 	}
 
 	@Test
 	public void setStartKeyShouldAcceptSingleArgumentArray() {
-		NovaView v = new NovaView(null);
+		final NovaView v = new NovaView(null);
 		v.setStartKeyArray("foo");
 		assertEncodedEquals("startkey", "[\"foo\"]", v.getQueryString());
 	}
 
 	@Test
 	public void setEndKeyShouldAcceptSingleArgumentArray() {
-		NovaView v = new NovaView(null);
+		final NovaView v = new NovaView(null);
 		v.setEndKeyArray("foo");
 		assertEncodedEquals("endkey", "[\"foo\"]", v.getQueryString());
 	}
 
 	@Test
 	public void setEndKeyShouldAcceptSingleArgument() {
-		NovaView v = new NovaView(null);
+		final NovaView v = new NovaView(null);
 		v.setEndKey("foo");
 		assertEncodedEquals("endkey", "\"foo\"", v.getQueryString());
 	}
 
 	@Test
 	public void setStartKeyShouldAcceptMultipleArgument() {
-		NovaView v = new NovaView(null);
+		final NovaView v = new NovaView(null);
 		v.setStartKey("foo", "bar", "baz");
 		assertEncodedEquals("startkey", "[\"foo\",\"bar\",\"baz\"]", v.getQueryString());
 	}
 
 	@Test
 	public void setEndKeyShouldAcceptMultipleArgument() {
-		NovaView v = new NovaView(null);
+		final NovaView v = new NovaView(null);
 		v.setEndKey("foo", "bar", "baz");
 		assertEncodedEquals("endkey", "[\"foo\",\"bar\",\"baz\"]", v.getQueryString());
 	}
 
 	@Test
 	public void keysShouldSupportEmptyObject() {
-		NovaView v = new NovaView(null);
+		final NovaView v = new NovaView(null);
 		v.setKey("foo", "bar", "{}");
 		assertEncodedEquals("key", "[\"foo\",\"bar\",{}]", v.getQueryString());
 	}
 
 	@Test
 	public void arrayKeysShouldNotEnquoteNumbers() {
-		NovaView v = new NovaView(null);
+		final NovaView v = new NovaView(null);
 		v.setKey("foo", "bar", "2");
 		assertEncodedEquals("key", "[\"foo\",\"bar\",2]", v.getQueryString());
 	}
 
 	@Test
 	public void singleArrayKeysShouldNotEnquoteNumbers() {
-		NovaView v1 = new NovaView(null);
-		NovaView v2 = new NovaView(null);
+		final NovaView v1 = new NovaView(null);
+		final NovaView v2 = new NovaView(null);
 		v1.setStartKeyArray("2");
 		v2.setEndKeyArray("2");
 		assertEncodedEquals("startkey", "[2]", v1.getQueryString());
 		assertEncodedEquals("endkey", "[2]", v2.getQueryString());
 	}
 
-	private void assertEncodedEquals(String key, String expected, String actual) {
+	private void assertEncodedEquals(final String key, final String expected, final String actual) {
 		try {
 			assertEquals(key + "=" + URLEncoder.encode(expected, "UTF-8"), actual);
-		} catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			fail(e.getLocalizedMessage());
 		}
 	}

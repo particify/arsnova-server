@@ -55,7 +55,7 @@ public class LecturerQuestionController extends AbstractController {
 
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
 	public final Question getQuestion(@PathVariable final String questionId) {
-		Question question = questionService.getQuestion(questionId);
+		final Question question = questionService.getQuestion(questionId);
 		if (question != null) {
 			return question;
 		}
@@ -78,9 +78,10 @@ public class LecturerQuestionController extends AbstractController {
 			@RequestBody final Question question
 			) {
 		try {
-			return this.questionService.update(question);
-		} catch (Exception e) {}
-		throw new BadRequestException();
+			return questionService.update(question);
+		} catch (final Exception e) {
+			throw new BadRequestException();
+		}
 	}
 
 	@RequestMapping(value = "/{questionId}/publish", method = RequestMethod.POST)
@@ -92,7 +93,7 @@ public class LecturerQuestionController extends AbstractController {
 		if (publish != null) {
 			question.setActive(publish);
 		}
-		this.questionService.update(question);
+		questionService.update(question);
 	}
 
 	@RequestMapping(value = "/publish", method = RequestMethod.POST)
@@ -104,7 +105,7 @@ public class LecturerQuestionController extends AbstractController {
 		if (publish != null) {
 			p = publish;
 		}
-		this.questionService.publishAll(sessionkey, p);
+		questionService.publishAll(sessionkey, p);
 	}
 
 	@RequestMapping(value = "/{questionId}/publishstatistics", method = RequestMethod.POST)
@@ -116,7 +117,7 @@ public class LecturerQuestionController extends AbstractController {
 		if (showStatistics != null) {
 			question.setShowStatistic(showStatistics);
 		}
-		this.questionService.update(question);
+		questionService.update(question);
 	}
 
 	@RequestMapping(value = "/{questionId}/publishcorrectanswer", method = RequestMethod.POST)
@@ -128,7 +129,7 @@ public class LecturerQuestionController extends AbstractController {
 		if (showCorrectAnswer != null) {
 			question.setShowAnswer(showCorrectAnswer);
 		}
-		this.questionService.update(question);
+		questionService.update(question);
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
@@ -165,13 +166,13 @@ public class LecturerQuestionController extends AbstractController {
 			final HttpServletResponse response
 			) {
 		if (lectureQuestionsOnly) {
-			this.questionService.deleteLectureQuestions(sessionkey);
+			questionService.deleteLectureQuestions(sessionkey);
 		} else if (flashcardsOnly) {
-			this.questionService.deleteFlashcards(sessionkey);
+			questionService.deleteFlashcards(sessionkey);
 		} else if (preparationQuestionsOnly) {
-			this.questionService.deletePreparationQuestions(sessionkey);
+			questionService.deletePreparationQuestions(sessionkey);
 		} else {
-			this.questionService.deleteAllQuestions(sessionkey);
+			questionService.deleteAllQuestions(sessionkey);
 		}
 	}
 
@@ -244,7 +245,7 @@ public class LecturerQuestionController extends AbstractController {
 			@PathVariable final String questionId,
 			final HttpServletResponse response
 			) {
-		Answer answer = questionService.getMyAnswer(questionId);
+		final Answer answer = questionService.getMyAnswer(questionId);
 		if (answer == null) {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
 			return null;
