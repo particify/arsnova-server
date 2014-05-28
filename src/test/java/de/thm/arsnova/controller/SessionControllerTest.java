@@ -49,10 +49,10 @@ public class SessionControllerTest {
 	@Autowired
 	private WebApplicationContext webApplicationContext;
 
-	private void setAuthenticated(boolean isAuthenticated, String username) {
+	private void setAuthenticated(final boolean isAuthenticated, final String username) {
 		if (isAuthenticated) {
-			List<GrantedAuthority> ga = new ArrayList<GrantedAuthority>();
-			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, "secret", ga);
+			final List<GrantedAuthority> ga = new ArrayList<GrantedAuthority>();
+			final UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, "secret", ga);
 			SecurityContextHolder.getContext().setAuthentication(token);
 			userService.setUserAuthenticated(isAuthenticated, username);
 		} else {
@@ -76,7 +76,7 @@ public class SessionControllerTest {
 	public void testShouldNotGetUnknownSession() throws Exception {
 		setAuthenticated(true, "ptsr00");
 
-		mockMvc.perform(get("/session/00000000"))
+		mockMvc.perform(get("/session/00000000").accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isNotFound());
 	}
 
@@ -84,7 +84,7 @@ public class SessionControllerTest {
 	public void testShouldNotGetUnknownSessionIfUnauthorized() throws Exception {
 		setAuthenticated(false, "ptsr00");
 
-		mockMvc.perform(get("/session/00000000"))
+		mockMvc.perform(get("/session/00000000").accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isUnauthorized());
 	}
 
@@ -92,15 +92,20 @@ public class SessionControllerTest {
 	public void testShouldCreateSessionIfUnauthorized() throws Exception {
 		setAuthenticated(false, "ptsr00");
 
-		mockMvc.perform(post("/session/").contentType(MediaType.APPLICATION_JSON).content("{\"keyword\":12345678}"))
-		.andExpect(status().isUnauthorized());
+		mockMvc.perform(
+				post("/session/")
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content("{\"keyword\":12345678}")
+				)
+				.andExpect(status().isUnauthorized());
 	}
 
 	@Test
 	public void testShouldNotReturnMySessionsIfUnauthorized() throws Exception {
 		setAuthenticated(false, "ptsr00");
 
-		mockMvc.perform(get("/session/").param("ownedonly", "true"))
+		mockMvc.perform(get("/session/").param("ownedonly", "true").accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isUnauthorized());
 	}
 
@@ -108,7 +113,7 @@ public class SessionControllerTest {
 	public void testShouldNotReturnMyVisitedSessionsIfUnauthorized() throws Exception {
 		setAuthenticated(false, "ptsr00");
 
-		mockMvc.perform(get("/session/").param("visitedonly", "true"))
+		mockMvc.perform(get("/session/").param("visitedonly", "true").accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isUnauthorized());
 	}
 
@@ -116,7 +121,7 @@ public class SessionControllerTest {
 	public void testShouldShowUnimplementedIfNoFlagIsSet() throws Exception {
 		setAuthenticated(false, "ptsr00");
 
-		mockMvc.perform(get("/session/"))
+		mockMvc.perform(get("/session/").accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isNotImplemented());
 	}
 
@@ -124,8 +129,9 @@ public class SessionControllerTest {
 	public void testShouldReturnActiveUserCount() throws Exception {
 		setAuthenticated(false, "ptsr00");
 
-		mockMvc.perform(get("/session/12345678/activeusercount"))
+		mockMvc.perform(get("/session/12345678/activeusercount").accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isOk())
+		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 		.andExpect(content().string("0"));
 	}
 
@@ -133,7 +139,7 @@ public class SessionControllerTest {
 	public void testShouldReturnXDeprecatedApiHeaderForActiveUserCount() throws Exception {
 		setAuthenticated(false, "ptsr00");
 
-		mockMvc.perform(get("/session/12345678/activeusercount"))
+		mockMvc.perform(get("/session/12345678/activeusercount").accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isOk())
 		.andExpect(header().string(AbstractController.X_DEPRECATED_API, "1"));
 	}

@@ -74,6 +74,7 @@ public class StatisticsControllerTest {
 	public final void testShouldGetStatistics() throws Exception {
 		mockMvc.perform(get("/statistics").accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isOk())
+		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 		.andExpect(jsonPath("$.answers").value(0))
 		.andExpect(jsonPath("$.questions").value(0))
 		.andExpect(jsonPath("$.openSessions").value(3))

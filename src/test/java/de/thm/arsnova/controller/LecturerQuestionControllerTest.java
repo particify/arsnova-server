@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,10 +48,10 @@ public class LecturerQuestionControllerTest {
 	@Autowired
 	private WebApplicationContext webApplicationContext;
 
-	private void setAuthenticated(boolean isAuthenticated, String username) {
+	private void setAuthenticated(final boolean isAuthenticated, final String username) {
 		if (isAuthenticated) {
-			List<GrantedAuthority> ga = new ArrayList<GrantedAuthority>();
-			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, "secret", ga);
+			final List<GrantedAuthority> ga = new ArrayList<GrantedAuthority>();
+			final UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, "secret", ga);
 			SecurityContextHolder.getContext().setAuthentication(token);
 			userService.setUserAuthenticated(isAuthenticated, username);
 		} else {
@@ -74,33 +75,49 @@ public class LecturerQuestionControllerTest {
 	public void testShouldNotGetLecturerQuestionsIfUnauthorized() throws Exception {
 		setAuthenticated(false, "nobody");
 
-		mockMvc.perform(get("/lecturerquestion/").param("sessionkey", "12345678").param("lecturequestionsonly", "true"))
-		.andExpect(status().isUnauthorized());
+		mockMvc.perform(
+				get("/lecturerquestion/")
+				.param("sessionkey", "12345678").param("lecturequestionsonly", "true")
+				.accept(MediaType.APPLICATION_JSON)
+				).andExpect(status().isUnauthorized()
+						);
 	}
 
 	@Test
 	public void testShouldNotGetPreparationQuestionsIfUnauthorized() throws Exception {
 		setAuthenticated(false, "nobody");
 
-		mockMvc.perform(get("/lecturerquestion/").param("sessionkey", "12345678").param("preparationquestionsonly", "true"))
-		.andExpect(status().isUnauthorized());
+		mockMvc.perform(
+				get("/lecturerquestion/")
+				.param("sessionkey", "12345678").param("preparationquestionsonly", "true")
+				.accept(MediaType.APPLICATION_JSON)
+				).andExpect(status().isUnauthorized()
+						);
 	}
 
 	@Test
 	public void testShouldReturnQuestionCount() throws Exception {
 		setAuthenticated(true, "somebody");
 
-		mockMvc.perform(get("/lecturerquestion/count").param("sessionkey", "12345678").param("lecturequestionsonly", "true"))
-		.andExpect(status().isOk())
-		.andExpect(content().string("0"));
+		mockMvc.perform(
+				get("/lecturerquestion/count")
+				.param("sessionkey", "12345678").param("lecturequestionsonly", "true")
+				.accept(MediaType.APPLICATION_JSON)
+				).andExpect(status().isOk())
+				.andExpect(content().string("0")
+						);
 	}
 
 	@Test
 	public void testShouldReturnXDeprecatedApiHeaderForQuestionCount() throws Exception {
 		setAuthenticated(true, "somebody");
 
-		mockMvc.perform(get("/lecturerquestion/count").param("sessionkey", "12345678").param("lecturequestionsonly", "true"))
-		.andExpect(status().isOk())
-		.andExpect(header().string(AbstractController.X_DEPRECATED_API, "1"));
+		mockMvc.perform(
+				get("/lecturerquestion/count")
+				.param("sessionkey", "12345678").param("lecturequestionsonly", "true")
+				.accept(MediaType.APPLICATION_JSON)
+				).andExpect(status().isOk())
+				.andExpect(header().string(AbstractController.X_DEPRECATED_API, "1")
+						);
 	}
 }

@@ -71,6 +71,7 @@ public class FeedbackControllerTest {
 		userService.setUserAuthenticated(true);
 		mockMvc.perform(get("/session/87654321/feedback").accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isOk())
+		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 		.andExpect(jsonPath("$.values").isArray());
 	}
 

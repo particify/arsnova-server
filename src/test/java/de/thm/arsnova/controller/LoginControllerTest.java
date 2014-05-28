@@ -21,6 +21,7 @@ package de.thm.arsnova.controller;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -28,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -66,15 +68,22 @@ public class LoginControllerTest {
 
 	@Test
 	public void testGuestLogin() throws Exception {
-		mockMvc.perform(get("/doLogin").param("type", "guest")).andExpect(status().isMovedTemporarily()).andExpect(redirectedUrl("/#auth/checkLogin"));
+		mockMvc.perform(
+				get("/doLogin")
+				.param("type", "guest")
+				).andExpect(status().isMovedTemporarily())
+				.andExpect(redirectedUrl("/#auth/checkLogin"));
 	}
 
 	@Test
 	public void testReuseGuestLogin() throws Exception {
-		mockMvc.perform(get("/doLogin").param("type", "guest").param("user","Guest1234567890"))
-		.andExpect(status().isMovedTemporarily()).andExpect(redirectedUrl("/#auth/checkLogin"));
+		mockMvc.perform(
+				get("/doLogin")
+				.param("type", "guest").param("user","Guest1234567890")
+				).andExpect(status().isMovedTemporarily())
+				.andExpect(redirectedUrl("/#auth/checkLogin"));
 
-		Authentication auth = SecurityContextHolder.getContext()
+		final Authentication auth = SecurityContextHolder.getContext()
 				.getAuthentication();
 		assertEquals(auth.getClass(), UsernamePasswordAuthenticationToken.class);
 		assertEquals("Guest1234567890", auth.getName());
@@ -85,13 +94,17 @@ public class LoginControllerTest {
 	public void testUser() throws Exception {
 		userService.setUserAuthenticated(true);
 
-		mockMvc.perform(get("/whoami"))
+		mockMvc.perform(get("/whoami").accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isOk())
-		.andExpect(content().string("{\"username\":\"ptsr00\",\"type\":\"ldap\",\"role\":null}"));
+		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+		.andExpect(jsonPath("$.username").value("ptsr00"))
+		.andExpect(jsonPath("$.type").value("ldap"));
 	}
 
 	@Test
 	public void testLogoutWithoutRedirect() throws Exception {
-		mockMvc.perform(get("/logout")).andExpect(status().isMovedTemporarily()).andExpect(redirectedUrl("/"));
+		mockMvc.perform(get("/logout"))
+		.andExpect(status().isMovedTemporarily())
+		.andExpect(redirectedUrl("/"));
 	}
 }
