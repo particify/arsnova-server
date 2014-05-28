@@ -177,7 +177,7 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
+	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'interposedquestion', 'owner')")
 	public void deleteInterposedQuestion(final String questionId) {
 		final InterposedQuestion question = databaseDao.getInterposedQuestion(questionId);
 		if (question == null) {
