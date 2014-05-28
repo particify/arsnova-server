@@ -77,7 +77,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		if (permission instanceof String && permission.equals("owner")) {
 			final InterposedQuestion question = dao.getInterposedQuestion(targetId.toString());
 			if (question != null) {
-				final Session session = dao.getSessionFromId(question.getSessionId());
+				final Session session = dao.getSessionFromKeyword(question.getSessionId());
 				if (session == null) {
 					return false;
 				}
