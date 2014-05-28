@@ -63,10 +63,10 @@ public class QuestionServiceTest {
 	@Autowired
 	private StubDatabaseDao databaseDao;
 
-	private void setAuthenticated(boolean isAuthenticated, String username) {
+	private void setAuthenticated(final boolean isAuthenticated, final String username) {
 		if (isAuthenticated) {
-			List<GrantedAuthority> ga = new ArrayList<GrantedAuthority>();
-			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, "secret", ga);
+			final List<GrantedAuthority> ga = new ArrayList<GrantedAuthority>();
+			final UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, "secret", ga);
 			SecurityContextHolder.getContext().setAuthentication(token);
 			userService.setUserAuthenticated(isAuthenticated, username);
 		} else {
@@ -105,7 +105,7 @@ public class QuestionServiceTest {
 	@Test
 	public void testShouldMarkInterposedQuestionAsReadIfSessionCreator() throws Exception {
 		setAuthenticated(true, "ptsr00");
-		InterposedQuestion theQ = new InterposedQuestion();
+		final InterposedQuestion theQ = new InterposedQuestion();
 		theQ.setRead(false);
 		theQ.set_id("the internal id");
 		theQ.setSessionId("12345678");
@@ -119,7 +119,7 @@ public class QuestionServiceTest {
 	@Test
 	public void testShouldNotMarkInterposedQuestionAsReadIfRegularUser() throws Exception {
 		setAuthenticated(true, "regular user");
-		InterposedQuestion theQ = new InterposedQuestion();
+		final InterposedQuestion theQ = new InterposedQuestion();
 		theQ.setRead(false);
 		theQ.set_id("the internal id");
 		theQ.setSessionId("12345678");
@@ -133,15 +133,21 @@ public class QuestionServiceTest {
 	@Test(expected = ForbiddenException.class)
 	public void testShouldSaveQuestion() throws Exception{
 		setAuthenticated(true, "regular user");
-		Question question = new Question();
+		final Question question = new Question();
 		question.setSessionKeyword("12345678");
 		question.setQuestionVariant("freetext");
 		questionService.saveQuestion(question);
 	}
 
 	@Test(expected = ForbiddenException.class)
-	public void testShouldDeleteQuestion() throws Exception{
+	public void testShouldNotDeleteQuestion() throws Exception{
 		setAuthenticated(true, "otheruser");
 		questionService.deleteQuestion("a1a2a3a4a5a6a7a8a9a");
+	}
+
+	@Test(expected = ForbiddenException.class)
+	public void testShouldNotDeleteInterposedQuestion() throws Exception{
+		setAuthenticated(true, "otheruser");
+		questionService.deleteInterposedQuestion("a1a2a3a4a5a6a7a8a9a");
 	}
 }

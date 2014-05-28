@@ -61,27 +61,27 @@ public class QuestionService implements IQuestionService {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(QuestionService.class);
 
-	public void setDatabaseDao(IDatabaseDao databaseDao) {
+	public void setDatabaseDao(final IDatabaseDao databaseDao) {
 		this.databaseDao = databaseDao;
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Question> getSkillQuestions(String sessionkey) {
+	public List<Question> getSkillQuestions(final String sessionkey) {
 		return databaseDao.getSkillQuestions(userService.getCurrentUser(), getSession(sessionkey));
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getSkillQuestionCount(String sessionkey) {
-		Session session = this.databaseDao.getSessionFromKeyword(sessionkey);
+	public int getSkillQuestionCount(final String sessionkey) {
+		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		return databaseDao.getSkillQuestionCount(session);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#question.getSessionKeyword(), 'session', 'owner')")
-	public Question saveQuestion(Question question) {
-		Session session = this.databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+	public Question saveQuestion(final Question question) {
+		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		question.setSessionId(session.get_id());
 
 		if ("freetext".equals(question.getQuestionType())) {
@@ -92,9 +92,9 @@ public class QuestionService implements IQuestionService {
 
 		// convert imageurl to base64 if neccessary
 		if ("grid".equals(question.getQuestionType())) {
-			org.slf4j.Logger logger = LoggerFactory.getLogger(QuestionService.class);
+			final org.slf4j.Logger logger = LoggerFactory.getLogger(QuestionService.class);
 			if (question.getImage().startsWith("http")) {
-				String base64ImageString = ImageUtils.encodeImageToString(question.getImage());
+				final String base64ImageString = ImageUtils.encodeImageToString(question.getImage());
 				if (base64ImageString == null) {
 					throw new BadRequestException();
 				}
@@ -102,14 +102,14 @@ public class QuestionService implements IQuestionService {
 			}
 
 			// base64 adds offset to filesize, formular taken from: http://en.wikipedia.org/wiki/Base64#MIME
-			int fileSize =  (int)((question.getImage().length()-814)/1.37);
-			if ( fileSize > this.uploadFileSizeByte ) {
+			final int fileSize =  (int)((question.getImage().length()-814)/1.37);
+			if ( fileSize > uploadFileSizeByte ) {
 				LOGGER.error("Could not save file. File is too large with "+ fileSize + " Byte.");
 				throw new BadRequestException();
 			}
 		}
 
-		Question result = this.databaseDao.saveQuestion(session, question);
+		final Question result = databaseDao.saveQuestion(session, question);
 		socketIoServer.reportLecturerQuestionAvailable(result.getSessionKeyword(), result.get_id());
 
 		return result;
@@ -117,9 +117,9 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public boolean saveQuestion(InterposedQuestion question) {
-		Session session = this.databaseDao.getSessionFromKeyword(question.getSessionId());
-		InterposedQuestion result = this.databaseDao.saveQuestion(session, question);
+	public boolean saveQuestion(final InterposedQuestion question) {
+		final Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
+		final InterposedQuestion result = databaseDao.saveQuestion(session, question);
 
 		if (null != result) {
 			socketIoServer.reportAudienceQuestionAvailable(result.getSessionId(), result.get_id());
@@ -132,8 +132,8 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public Question getQuestion(String id) {
-		Question result = databaseDao.getQuestion(id);
+	public Question getQuestion(final String id) {
+		final Question result = databaseDao.getQuestion(id);
 		if (result == null) {
 			return null;
 		}
@@ -147,13 +147,13 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
-	public void deleteQuestion(String questionId) {
-		Question question = databaseDao.getQuestion(questionId);
+	public void deleteQuestion(final String questionId) {
+		final Question question = databaseDao.getQuestion(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
 
-		Session session = databaseDao.getSession(question.getSessionKeyword());
+		final Session session = databaseDao.getSession(question.getSessionKeyword());
 		if (session == null) {
 			throw new UnauthorizedException();
 		}
@@ -162,14 +162,14 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionKeyword, 'session', 'owner')")
-	public void deleteAllQuestions(String sessionKeyword) {
-		Session session = getSessionWithAuthCheck(sessionKeyword);
+	public void deleteAllQuestions(final String sessionKeyword) {
+		final Session session = getSessionWithAuthCheck(sessionKeyword);
 		databaseDao.deleteAllQuestionsWithAnswers(session);
 	}
 
-	private Session getSessionWithAuthCheck(String sessionKeyword) {
-		User user = userService.getCurrentUser();
-		Session session = databaseDao.getSession(sessionKeyword);
+	private Session getSessionWithAuthCheck(final String sessionKeyword) {
+		final User user = userService.getCurrentUser();
+		final Session session = databaseDao.getSession(sessionKeyword);
 		if (user == null || session == null || ! session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
@@ -177,13 +177,13 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#question.getSessionKeyword(), 'session', 'owner')")
-	public void deleteInterposedQuestion(String questionId) {
-		InterposedQuestion question = databaseDao.getInterposedQuestion(questionId);
+	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
+	public void deleteInterposedQuestion(final String questionId) {
+		final InterposedQuestion question = databaseDao.getInterposedQuestion(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
-		Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
+		final Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
 		if (session == null) {
 			throw new UnauthorizedException();
 		}
@@ -192,8 +192,8 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionKeyword, 'session', 'owner')")
-	public void deleteAllInterposedQuestions(String sessionKeyword) {
-		Session session = databaseDao.getSessionFromKeyword(sessionKeyword);
+	public void deleteAllInterposedQuestions(final String sessionKeyword) {
+		final Session session = databaseDao.getSessionFromKeyword(sessionKeyword);
 		if (session == null) {
 			throw new UnauthorizedException();
 		}
@@ -202,14 +202,14 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public void deleteAnswers(String questionId) {
-		Question question = databaseDao.getQuestion(questionId);
+	public void deleteAnswers(final String questionId) {
+		final Question question = databaseDao.getQuestion(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
 
-		User user = userService.getCurrentUser();
-		Session session = databaseDao.getSession(question.getSessionKeyword());
+		final User user = userService.getCurrentUser();
+		final Session session = databaseDao.getSession(question.getSessionKeyword());
 		if (user == null || session == null || ! session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
@@ -218,14 +218,14 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<String> getUnAnsweredQuestionIds(String sessionKey) {
-		User user = getCurrentUser();
-		Session session = getSession(sessionKey);
+	public List<String> getUnAnsweredQuestionIds(final String sessionKey) {
+		final User user = getCurrentUser();
+		final Session session = getSession(sessionKey);
 		return databaseDao.getUnAnsweredQuestionIds(session, user);
 	}
 
 	private User getCurrentUser() {
-		User user = userService.getCurrentUser();
+		final User user = userService.getCurrentUser();
 		if (user == null) {
 			throw new UnauthorizedException();
 		}
@@ -234,16 +234,16 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public Answer getMyAnswer(String questionId) {
-		Question question = getQuestion(questionId);
+	public Answer getMyAnswer(final String questionId) {
+		final Question question = getQuestion(questionId);
 
 		return databaseDao.getMyAnswer(userService.getCurrentUser(), questionId, question.getPiRound());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getAnswers(String questionId, int piRound) {
-		Question question = databaseDao.getQuestion(questionId);
+	public List<Answer> getAnswers(final String questionId, final int piRound) {
+		final Question question = databaseDao.getQuestion(questionId);
 
 		return "freetext".equals(question.getQuestionType())
 				? getFreetextAnswers(questionId)
@@ -252,24 +252,24 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getAnswers(String questionId) {
-		Question question = getQuestion(questionId);
+	public List<Answer> getAnswers(final String questionId) {
+		final Question question = getQuestion(questionId);
 
 		return getAnswers(questionId, question.getPiRound());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getAnswerCount(String questionId) {
-		Question question = getQuestion(questionId);
+	public int getAnswerCount(final String questionId) {
+		final Question question = getQuestion(questionId);
 
 		return databaseDao.getAnswerCount(question, question.getPiRound());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getFreetextAnswers(String questionId) {
-		List<Answer> answers = databaseDao.getFreetextAnswers(questionId);
+	public List<Answer> getFreetextAnswers(final String questionId) {
+		final List<Answer> answers = databaseDao.getFreetextAnswers(questionId);
 		if (answers == null) {
 			throw new NotFoundException();
 		}
@@ -278,18 +278,18 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getMyAnswers(String sessionKey) {
-		List<Question> questions = getSkillQuestions(sessionKey);
-		Map<String, Question> questionIdToQuestion = new HashMap<String, Question>();
-		for (Question question : questions) {
+	public List<Answer> getMyAnswers(final String sessionKey) {
+		final List<Question> questions = getSkillQuestions(sessionKey);
+		final Map<String, Question> questionIdToQuestion = new HashMap<String, Question>();
+		for (final Question question : questions) {
 			questionIdToQuestion.put(question.get_id(), question);
 		}
 
 		/* filter answers by active piRound per question */
-		List<Answer> answers = databaseDao.getMyAnswers(userService.getCurrentUser(), sessionKey);
-		List<Answer> filteredAnswers = new ArrayList<Answer>();
-		for (Answer answer : answers) {
-			Question question = questionIdToQuestion.get(answer.getQuestionId());
+		final List<Answer> answers = databaseDao.getMyAnswers(userService.getCurrentUser(), sessionKey);
+		final List<Answer> filteredAnswers = new ArrayList<Answer>();
+		for (final Answer answer : answers) {
+			final Question question = questionIdToQuestion.get(answer.getQuestionId());
 			if (0 == answer.getPiRound() && !"freetext".equals(question.getQuestionType())) {
 				answer.setPiRound(1);
 			}
@@ -303,20 +303,20 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getTotalAnswerCount(String sessionKey) {
+	public int getTotalAnswerCount(final String sessionKey) {
 		return databaseDao.getTotalAnswerCount(sessionKey);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getInterposedCount(String sessionKey) {
+	public int getInterposedCount(final String sessionKey) {
 		return databaseDao.getInterposedCount(sessionKey);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public InterposedReadingCount getInterposedReadingCount(String sessionKey) {
-		Session session = this.databaseDao.getSessionFromKeyword(sessionKey);
+	public InterposedReadingCount getInterposedReadingCount(final String sessionKey) {
+		final Session session = databaseDao.getSessionFromKeyword(sessionKey);
 		if (session == null) {
 			throw new NotFoundException();
 		}
@@ -325,36 +325,36 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<InterposedQuestion> getInterposedQuestions(String sessionKey) {
+	public List<InterposedQuestion> getInterposedQuestions(final String sessionKey) {
 		return databaseDao.getInterposedQuestions(sessionKey);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public InterposedQuestion readInterposedQuestion(String questionId) {
-		InterposedQuestion question = databaseDao.getInterposedQuestion(questionId);
+	public InterposedQuestion readInterposedQuestion(final String questionId) {
+		final InterposedQuestion question = databaseDao.getInterposedQuestion(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
-		Session session = this.databaseDao.getSessionFromKeyword(question.getSessionId());
+		final Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
 
-		User user = this.userService.getCurrentUser();
+		final User user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
-			this.databaseDao.markInterposedQuestionAsRead(question);
+			databaseDao.markInterposedQuestionAsRead(question);
 		}
 		return question;
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public Question update(Question question) {
-		Question oldQuestion = databaseDao.getQuestion(question.get_id());
+	public Question update(final Question question) {
+		final Question oldQuestion = databaseDao.getQuestion(question.get_id());
 		if (null == oldQuestion) {
 			throw new NotFoundException();
 		}
 
-		User user = userService.getCurrentUser();
-		Session session = databaseDao.getSession(question.getSessionKeyword());
+		final User user = userService.getCurrentUser();
+		final Session session = databaseDao.getSession(question.getSessionKeyword());
 		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
@@ -365,14 +365,14 @@ public class QuestionService implements IQuestionService {
 			question.setPiRound(oldQuestion.getPiRound() > 0 ? oldQuestion.getPiRound() : 1);
 		}
 
-		return this.databaseDao.updateQuestion(question);
+		return databaseDao.updateQuestion(question);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public Answer saveAnswer(Answer answer) {
-		User user = getCurrentUser();
-		Question question = this.getQuestion(answer.getQuestionId());
+	public Answer saveAnswer(final Answer answer) {
+		final User user = getCurrentUser();
+		final Question question = getQuestion(answer.getQuestionId());
 		if (question == null) {
 			throw new NotFoundException();
 		}
@@ -383,7 +383,7 @@ public class QuestionService implements IQuestionService {
 			answer.setPiRound(question.getPiRound());
 		}
 
-		Answer result = this.databaseDao.saveAnswer(answer, user);
+		final Answer result = databaseDao.saveAnswer(answer, user);
 		socketIoServer.reportAnswersToLecturerQuestionAvailable(question.getSessionKeyword(), question.get_id());
 
 		return result;
@@ -391,14 +391,14 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public Answer updateAnswer(Answer answer) {
-		User user = userService.getCurrentUser();
+	public Answer updateAnswer(final Answer answer) {
+		final User user = userService.getCurrentUser();
 		if (user == null || !user.getUsername().equals(answer.getUser())) {
 			throw new UnauthorizedException();
 		}
 
-		Question question = this.getQuestion(answer.getQuestionId());
-		Answer result = this.databaseDao.updateAnswer(answer);
+		final Question question = getQuestion(answer.getQuestionId());
+		final Answer result = databaseDao.updateAnswer(answer);
 		socketIoServer.reportAnswersToLecturerQuestionAvailable(question.getSessionKeyword(), question.get_id());
 
 		return result;
@@ -406,41 +406,41 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public void deleteAnswer(String questionId, String answerId) {
-		Question question = this.databaseDao.getQuestion(questionId);
+	public void deleteAnswer(final String questionId, final String answerId) {
+		final Question question = databaseDao.getQuestion(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
-		User user = userService.getCurrentUser();
-		Session session = this.databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+		final User user = userService.getCurrentUser();
+		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
-		this.databaseDao.deleteAnswer(answerId);
+		databaseDao.deleteAnswer(answerId);
 
 		socketIoServer.reportAnswersToLecturerQuestionAvailable(question.getSessionKeyword(), question.get_id());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Question> getLectureQuestions(String sessionkey) {
+	public List<Question> getLectureQuestions(final String sessionkey) {
 		return databaseDao.getLectureQuestions(userService.getCurrentUser(), getSession(sessionkey));
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Question> getFlashcards(String sessionkey) {
+	public List<Question> getFlashcards(final String sessionkey) {
 		return databaseDao.getFlashcards(userService.getCurrentUser(), getSession(sessionkey));
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Question> getPreparationQuestions(String sessionkey) {
+	public List<Question> getPreparationQuestions(final String sessionkey) {
 		return databaseDao.getPreparationQuestions(userService.getCurrentUser(), getSession(sessionkey));
 	}
 
-	private Session getSession(String sessionkey) {
-		Session session = this.databaseDao.getSessionFromKeyword(sessionkey);
+	private Session getSession(final String sessionkey) {
+		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		if (session == null) {
 			throw new NotFoundException();
 		}
@@ -449,76 +449,76 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getLectureQuestionCount(String sessionkey) {
+	public int getLectureQuestionCount(final String sessionkey) {
 		return databaseDao.getLectureQuestionCount(getSession(sessionkey));
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getFlashcardCount(String sessionkey) {
+	public int getFlashcardCount(final String sessionkey) {
 		return databaseDao.getFlashcardCount(getSession(sessionkey));
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getPreparationQuestionCount(String sessionkey) {
+	public int getPreparationQuestionCount(final String sessionkey) {
 		return databaseDao.getPreparationQuestionCount(getSession(sessionkey));
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int countLectureQuestionAnswers(String sessionkey) {
+	public int countLectureQuestionAnswers(final String sessionkey) {
 		return databaseDao.countLectureQuestionAnswers(getSession(sessionkey));
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int countPreparationQuestionAnswers(String sessionkey) {
+	public int countPreparationQuestionAnswers(final String sessionkey) {
 		return databaseDao.countPreparationQuestionAnswers(getSession(sessionkey));
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public void deleteLectureQuestions(String sessionkey) {
-		Session session = getSessionWithAuthCheck(sessionkey);
+	public void deleteLectureQuestions(final String sessionkey) {
+		final Session session = getSessionWithAuthCheck(sessionkey);
 		databaseDao.deleteAllLectureQuestionsWithAnswers(session);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public void deleteFlashcards(String sessionkey) {
-		Session session = getSessionWithAuthCheck(sessionkey);
+	public void deleteFlashcards(final String sessionkey) {
+		final Session session = getSessionWithAuthCheck(sessionkey);
 		databaseDao.deleteAllFlashcardsWithAnswers(session);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public void deletePreparationQuestions(String sessionkey) {
-		Session session = getSessionWithAuthCheck(sessionkey);
+	public void deletePreparationQuestions(final String sessionkey) {
+		final Session session = getSessionWithAuthCheck(sessionkey);
 		databaseDao.deleteAllPreparationQuestionsWithAnswers(session);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<String> getUnAnsweredLectureQuestionIds(String sessionkey) {
-		User user = getCurrentUser();
-		Session session = getSession(sessionkey);
+	public List<String> getUnAnsweredLectureQuestionIds(final String sessionkey) {
+		final User user = getCurrentUser();
+		final Session session = getSession(sessionkey);
 		return databaseDao.getUnAnsweredLectureQuestionIds(session, user);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<String> getUnAnsweredPreparationQuestionIds(String sessionkey) {
-		User user = getCurrentUser();
-		Session session = getSession(sessionkey);
+	public List<String> getUnAnsweredPreparationQuestionIds(final String sessionkey) {
+		final User user = getCurrentUser();
+		final Session session = getSession(sessionkey);
 		return databaseDao.getUnAnsweredPreparationQuestionIds(session, user);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public void publishAll(String sessionkey, boolean publish) {
-		User user = getCurrentUser();
-		Session session = getSession(sessionkey);
+	public void publishAll(final String sessionkey, final boolean publish) {
+		final User user = getCurrentUser();
+		final Session session = getSession(sessionkey);
 		if (!session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
@@ -527,9 +527,9 @@ public class QuestionService implements IQuestionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public void deleteAllQuestionsAnswers(String sessionkey) {
-		User user = getCurrentUser();
-		Session session = getSession(sessionkey);
+	public void deleteAllQuestionsAnswers(final String sessionkey) {
+		final User user = getCurrentUser();
+		final Session session = getSession(sessionkey);
 		if (!session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
