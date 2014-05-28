@@ -522,4 +522,10 @@ public class StubDatabaseDao implements IDatabaseDao {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+
+	@Override
+	public boolean deleteUser(DbUser dbUser) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
