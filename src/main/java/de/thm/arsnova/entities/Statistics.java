@@ -7,6 +7,7 @@ public class Statistics {
 	private int openSessions;
 	private int closedSessions;
 	private int activeUsers;
+	private int loggedinUsers;
 
 	public int getAnswers() {
 		return answers;
@@ -43,6 +44,13 @@ public class Statistics {
 		this.activeUsers = activeUsers;
 	}
 
+	public int getLoggedinUsers() {
+		return loggedinUsers;
+	}
+	public void setLoggedinUsers(final int loggedinUsers) {
+		this.loggedinUsers = loggedinUsers;
+	}
+
 	@Override
 	public int hashCode() {
 		return (this.getClass().getName()
@@ -50,7 +58,9 @@ public class Statistics {
 				+ answers
 				+ closedSessions
 				+ openSessions
-				+ questions).hashCode();
+				+ questions
+				+ loggedinUsers
+				).hashCode();
 	}
 
 	@Override

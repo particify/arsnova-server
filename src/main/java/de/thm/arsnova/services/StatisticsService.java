@@ -20,25 +20,29 @@ public class StatisticsService implements IStatisticsService {
 
 	@Override
 	public final int countActiveUsers() {
-		long since = System.currentTimeMillis() - DURATION_IN_MILLIS;
+		final long since = System.currentTimeMillis() - DURATION_IN_MILLIS;
 		return databaseDao.countActiveUsers(since);
 	}
 
 	@Override
 	public int countLoggedInUsers() {
+		if (sessionRegistry == null) {
+			return 0;
+		}
 		return sessionRegistry.getAllPrincipals().size();
 	}
 
 	@Override
 	public final Statistics getStatistics() {
-		long since = System.currentTimeMillis() - DURATION_IN_MILLIS;
+		final long since = System.currentTimeMillis() - DURATION_IN_MILLIS;
 
-		Statistics statistics = new Statistics();
+		final Statistics statistics = new Statistics();
 		statistics.setOpenSessions(databaseDao.countOpenSessions());
 		statistics.setClosedSessions(databaseDao.countClosedSessions());
 		statistics.setAnswers(databaseDao.countAnswers());
 		statistics.setQuestions(databaseDao.countQuestions());
 		statistics.setActiveUsers(databaseDao.countActiveUsers(since));
+		statistics.setLoggedinUsers(countLoggedInUsers());
 		return statistics;
 	}
 }
