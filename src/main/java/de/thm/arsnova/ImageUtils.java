@@ -38,9 +38,10 @@ import org.slf4j.LoggerFactory;
  * @author Daniel Vogel (daniel.vogel@mni.thm.de)
  *
  */
-public class ImageUtils {
+public final class ImageUtils {
 
-	private ImageUtils() {}
+	private ImageUtils() {
+	}
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(ImageUtils.class);
 
@@ -50,18 +51,17 @@ public class ImageUtils {
 	 * @param  imageUrl The image url as a {@link String}
 	 * @return The Base64 {@link String} of the image on success, otherwise <code>null</code>.
 	 */
-	public static String encodeImageToString(String imageUrl) {
+	public static String encodeImageToString(final String imageUrl) {
 
-		String[]      urlParts = imageUrl.split("\\.");
-		StringBuilder result   = new StringBuilder();
+		final String[] urlParts = imageUrl.split("\\.");
+		final StringBuilder result   = new StringBuilder();
 
 		// get format
 		//
 		// The format is read dynamically. We have to take control
 		// in the frontend that no unsupported formats are transmitted!
-		if ( urlParts.length > 0 ) {
-
-			String extension = urlParts[urlParts.length-1];
+		if (urlParts.length > 0) {
+			final String extension = urlParts[urlParts.length - 1];
 
 			result.append("data:image/" + extension + ";base64,");
 			result.append(Base64.encodeBase64String(convertFileToByteArray(imageUrl)));
@@ -78,12 +78,12 @@ public class ImageUtils {
 	 * @param  imageUrl The image url as a {@link String}
 	 * @return The <code>byte[]</code> of the image on success, otherwise <code>null</code>.
 	 */
-	public static byte[] convertImageToByteArray(String imageUrl, String extension) {
+	public static byte[] convertImageToByteArray(final String imageUrl, final String extension) {
 
 		try {
-			URL 				  url   = new URL(imageUrl);
-			BufferedImage 		  image = ImageIO.read(url);
-			ByteArrayOutputStream baos  = new ByteArrayOutputStream();
+			final URL url = new URL(imageUrl);
+			final BufferedImage image = ImageIO.read(url);
+			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 			ImageIO.write(image, extension, baos);
 
@@ -91,9 +91,9 @@ public class ImageUtils {
 			baos.close();
 			return baos.toByteArray();
 
-		} catch (MalformedURLException e) {
+		} catch (final MalformedURLException e) {
 			LOGGER.error(e.getLocalizedMessage());
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.error(e.getLocalizedMessage());
 		}
 
@@ -102,21 +102,23 @@ public class ImageUtils {
 
 	/**
 	 * Gets the bytestream of an image url.
-	 * s
+	 *
 	 * @param  imageUrl The image url as a {@link String}
 	 * @return The <code>byte[]</code> of the image on success, otherwise <code>null</code>.
 	 */
-	public static byte[] convertFileToByteArray(String imageUrl) {
+	public static byte[] convertFileToByteArray(final String imageUrl) {
+		// Or whatever size you want to read in at a time.
+		final int CHUNK_SIZE = 4096;
 
 		try {
-			URL 				  url   = new URL(imageUrl);
-			ByteArrayOutputStream baos  = new ByteArrayOutputStream();
+			final URL url = new URL(imageUrl);
+			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-			InputStream is = url.openStream();
-			byte[] byteChunk = new byte[4096]; // Or whatever size you want to read in at a time.
+			final InputStream is = url.openStream();
+			final byte[] byteChunk = new byte[CHUNK_SIZE];
 			int n;
 
-			while ( (n = is.read(byteChunk)) > 0 ) {
+			while ((n = is.read(byteChunk)) > 0 ) {
 				baos.write(byteChunk, 0, n);
 			}
 
@@ -125,13 +127,12 @@ public class ImageUtils {
 
 			return baos.toByteArray();
 
-		} catch (MalformedURLException e) {
+		} catch (final MalformedURLException e) {
 			LOGGER.error(e.getLocalizedMessage());
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOGGER.error(e.getLocalizedMessage());
 		}
 
 		return null;
 	}
 }
-

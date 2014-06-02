@@ -135,22 +135,22 @@ public class Question {
 	}
 
 	public final void setSession(final String session) {
-		this.sessionId = session;
+		sessionId = session;
 	}
 
 	public final String getSessionKeyword() {
-		return this.sessionKeyword;
+		return sessionKeyword;
 	}
 
 	public final void setSessionKeyword(final String keyword) {
-		this.sessionKeyword = keyword;
+		sessionKeyword = keyword;
 	}
 
 	public final long getTimestamp() {
 		return timestamp;
 	}
 
-	public final void setTimestamp(long timestamp) {
+	public final void setTimestamp(final long timestamp) {
 		this.timestamp = timestamp;
 	}
 
@@ -174,7 +174,7 @@ public class Question {
 		return piRound;
 	}
 
-	public void setPiRound(int piRound) {
+	public void setPiRound(final int piRound) {
 		this.piRound = piRound;
 	}
 
@@ -182,7 +182,7 @@ public class Question {
 		return showStatistic;
 	}
 
-	public void setShowStatistic(boolean showStatistic) {
+	public void setShowStatistic(final boolean showStatistic) {
 		this.showStatistic = showStatistic;
 	}
 
@@ -190,7 +190,7 @@ public class Question {
 		return showAnswer;
 	}
 
-	public void setShowAnswer(boolean showAnswer) {
+	public void setShowAnswer(final boolean showAnswer) {
 		this.showAnswer = showAnswer;
 	}
 
@@ -198,7 +198,7 @@ public class Question {
 		return abstention;
 	}
 
-	public void setAbstention(boolean abstention) {
+	public void setAbstention(final boolean abstention) {
 		this.abstention = abstention;
 	}
 
@@ -222,7 +222,7 @@ public class Question {
 		return image;
 	}
 
-	public void setImage(String image) {
+	public void setImage(final String image) {
 		this.image = image;
 	}
 
@@ -230,7 +230,7 @@ public class Question {
 		return gridSize;
 	}
 
-	public void setGridSize(int gridSize) {
+	public void setGridSize(final int gridSize) {
 		this.gridSize = gridSize;
 	}
 
@@ -238,7 +238,7 @@ public class Question {
 		return offsetX;
 	}
 
-	public void setOffsetX(int offsetX) {
+	public void setOffsetX(final int offsetX) {
 		this.offsetX = offsetX;
 	}
 
@@ -246,7 +246,7 @@ public class Question {
 		return offsetY;
 	}
 
-	public void setOffsetY(int offsetY) {
+	public void setOffsetY(final int offsetY) {
 		this.offsetY = offsetY;
 	}
 
@@ -254,12 +254,12 @@ public class Question {
 		return zoomLvl;
 	}
 
-	public void setZoomLvl(int zoomLvl) {
+	public void setZoomLvl(final int zoomLvl) {
 		this.zoomLvl = zoomLvl;
 	}
 
 	@Override
 	public final String toString() {
-		return "Question type '" + this.type + "': " + this.subject + ";\n" + this.text + this.possibleAnswers;
+		return "Question type '" + type + "': " + subject + ";\n" + text + possibleAnswers;
 	}
 }

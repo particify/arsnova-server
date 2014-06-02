@@ -25,64 +25,64 @@ import com.fourspaces.couchdb.View;
 
 public class NovaView extends View {
 
-	public NovaView(String fullname) {
+	public NovaView(final String fullname) {
 		super(fullname);
 	}
 
 	@Override
-	public void setStartKey(String key) {
-		this.startKey = quote(key);
+	public void setStartKey(final String key) {
+		startKey = quote(key);
 	}
 
-	public void setStartKeyArray(String key) {
+	public void setStartKeyArray(final String key) {
 		if (isNumber(key)) {
-			this.startKey = encode("[" + key + "]");
+			startKey = encode("[" + key + "]");
 		} else {
-			this.startKey = encode("[\"" + key + "\"]");
+			startKey = encode("[\"" + key + "\"]");
 		}
 	}
 
-	public void setStartKeyArray(String... keys) {
+	public void setStartKeyArray(final String... keys) {
 		this.setStartKey(keys);
 	}
 
 	@Override
-	public void setEndKey(String key) {
-		this.endKey = quote(key);
+	public void setEndKey(final String key) {
+		endKey = quote(key);
 	}
 
-	public void setEndKeyArray(String key) {
+	public void setEndKeyArray(final String key) {
 		if (isNumber(key)) {
-			this.endKey = encode("[" + key + "]");
+			endKey = encode("[" + key + "]");
 		} else {
-			this.endKey = encode("[\"" + key + "\"]");
+			endKey = encode("[\"" + key + "\"]");
 		}
 	}
 
-	public void setEndKeyArray(String... keys) {
+	public void setEndKeyArray(final String... keys) {
 		this.setEndKey(keys);
 	}
 
-	public void setStartKey(String... keys) {
-		this.startKey = toJsonArray(keys);
+	public void setStartKey(final String... keys) {
+		startKey = toJsonArray(keys);
 	}
 
-	public void setEndKey(String... keys) {
-		this.endKey = toJsonArray(keys);
+	public void setEndKey(final String... keys) {
+		endKey = toJsonArray(keys);
 	}
 
 	@Override
-	public void setKey(String key) {
+	public void setKey(final String key) {
 		this.key = quote(key);
 	}
 
-	public void setKey(String... keys) {
-		this.key = toJsonArray(keys);
+	public void setKey(final String... keys) {
+		key = toJsonArray(keys);
 	}
 
-	private String toJsonArray(String[] strings) {
-		StringBuilder sb = new StringBuilder();
-		for (String str : strings) {
+	private String toJsonArray(final String[] strings) {
+		final StringBuilder sb = new StringBuilder();
+		for (final String str : strings) {
 			if (isNumber(str)) {
 				sb.append(str + ",");
 			} else if (str.equals("{}")) {
@@ -91,26 +91,27 @@ public class NovaView extends View {
 				sb.append("\"" + str + "\"" + ",");
 			}
 		}
-		sb.replace(sb.length() - 1, sb.length(), ""); // remove final comma
+		// remove final comma
+		sb.replace(sb.length() - 1, sb.length(), "");
 		sb.insert(0, "[");
 		sb.append("]");
 		return encode(sb.toString());
 	}
 
-	private String quote(String string) {
+	private String quote(final String string) {
 		return encode("\"" + string + "\"");
 	}
 
-	private boolean isNumber(String string) {
+	private boolean isNumber(final String string) {
 		return string.matches("^[0-9]+$");
 	}
 
-	private String encode(String string) {
+	private String encode(final String string) {
 		try {
 			return URLEncoder.encode(string, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			// Since we're using 'UTF-8', this should Exception should never occur.
+			return "";
 		}
-		return "";
 	}
 }
