@@ -35,7 +35,8 @@ import org.springframework.web.bind.annotation.RestController;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.connector.model.UserRole;
-import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.NotImplementedException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.IUserService;
 
@@ -55,19 +56,20 @@ public class CourseController extends AbstractController {
 	public final List<Course> myCourses(
 			@RequestParam(value = "sortby", defaultValue = "name") final String sortby
 			) {
-		String username = userService.getCurrentUser().getUsername();
 
-		if (username == null) {
+		final User currentUser = userService.getCurrentUser();
+
+		if (currentUser == null || currentUser.getUsername() == null) {
 			throw new UnauthorizedException();
 		}
 
 		if (connectorClient == null) {
-			throw new NotFoundException();
+			throw new NotImplementedException();
 		}
 
-		List<Course> result = new ArrayList<Course>();
+		final List<Course> result = new ArrayList<Course>();
 
-		for (Course course : connectorClient.getCourses(username).getCourse()) {
+		for (final Course course : connectorClient.getCourses(currentUser.getUsername()).getCourse()) {
 			if (
 					course.getMembership().isMember()
 					&& course.getMembership().getUserrole().equals(UserRole.TEACHER)
@@ -76,7 +78,7 @@ public class CourseController extends AbstractController {
 			}
 		}
 
-		if (sortby != null && sortby.equals("shortname")) {
+		if ("shortname".equals(sortby)) {
 			Collections.sort(result, new CourseShortNameComperator());
 		} else {
 			Collections.sort(result, new CourseNameComperator());
@@ -89,7 +91,7 @@ public class CourseController extends AbstractController {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		public int compare(Course course1, Course course2) {
+		public int compare(final Course course1, final Course course2) {
 			return course1.getFullname().compareToIgnoreCase(course2.getFullname());
 		}
 	}
@@ -98,7 +100,7 @@ public class CourseController extends AbstractController {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		public int compare(Course course1, Course course2) {
+		public int compare(final Course course1, final Course course2) {
 			return course1.getShortname().compareToIgnoreCase(course2.getShortname());
 		}
 	}

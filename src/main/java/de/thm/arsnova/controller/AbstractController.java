@@ -12,6 +12,7 @@ import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.exceptions.NotImplementedException;
 import de.thm.arsnova.exceptions.PreconditionFailedException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 
@@ -57,5 +58,10 @@ public class AbstractController {
 	@ResponseStatus(HttpStatus.PRECONDITION_FAILED)
 	@ExceptionHandler(PreconditionFailedException.class)
 	public void handlePreconditionFailedException(final Exception e, final HttpServletRequest request) {
+	}
+
+	@ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
+	@ExceptionHandler(NotImplementedException.class)
+	public void handleNotImplementedException(final Exception e, final HttpServletRequest request) {
 	}
 }
