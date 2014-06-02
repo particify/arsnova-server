@@ -45,7 +45,7 @@ public class Session implements Serializable {
 		return type;
 	}
 
-	public void setType(String type) {
+	public void setType(final String type) {
 		this.type = type;
 	}
 
@@ -53,7 +53,7 @@ public class Session implements Serializable {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
@@ -61,7 +61,7 @@ public class Session implements Serializable {
 		return shortName;
 	}
 
-	public void setShortName(String shortName) {
+	public void setShortName(final String shortName) {
 		this.shortName = shortName;
 	}
 
@@ -69,7 +69,7 @@ public class Session implements Serializable {
 		return keyword;
 	}
 
-	public void setKeyword(String keyword) {
+	public void setKeyword(final String keyword) {
 		this.keyword = keyword;
 	}
 
@@ -77,7 +77,7 @@ public class Session implements Serializable {
 		return creator;
 	}
 
-	public void setCreator(String creator) {
+	public void setCreator(final String creator) {
 		this.creator = creator;
 	}
 
@@ -85,7 +85,7 @@ public class Session implements Serializable {
 		return active;
 	}
 
-	public void setActive(boolean active) {
+	public void setActive(final boolean active) {
 		this.active = active;
 	}
 
@@ -93,11 +93,11 @@ public class Session implements Serializable {
 		return lastOwnerActivity;
 	}
 
-	public void setLastOwnerActivity(long lastOwnerActivity) {
+	public void setLastOwnerActivity(final long lastOwnerActivity) {
 		this.lastOwnerActivity = lastOwnerActivity;
 	}
 
-	public void set_id(String id) {
+	public void set_id(final String id) {
 		_id = id;
 	}
 
@@ -105,7 +105,7 @@ public class Session implements Serializable {
 		return _id;
 	}
 
-	public void set_rev(String rev) {
+	public void set_rev(final String rev) {
 		_rev = rev;
 	}
 
@@ -113,7 +113,7 @@ public class Session implements Serializable {
 		return _rev;
 	}
 
-	public void set_conflicts(List<String> conflicts) {
+	public void set_conflicts(final List<String> conflicts) {
 		_conflicts = conflicts;
 	}
 
@@ -121,15 +121,15 @@ public class Session implements Serializable {
 		return _conflicts;
 	}
 
-	public boolean isCreator(User user) {
-		return user.getUsername().equals(this.creator);
+	public boolean isCreator(final User user) {
+		return user.getUsername().equals(creator);
 	}
 
 	public String getCourseType() {
 		return courseType;
 	}
 
-	public void setCourseType(String courseType) {
+	public void setCourseType(final String courseType) {
 		this.courseType = courseType;
 	}
 
@@ -137,17 +137,17 @@ public class Session implements Serializable {
 		return courseId;
 	}
 
-	public void setCourseId(String courseId) {
+	public void setCourseId(final String courseId) {
 		this.courseId = courseId;
 	}
 
 	@JsonIgnore
 	public boolean isCourseSession() {
-		return (this.getCourseId() != null) && (!this.getCourseId().isEmpty());
+		return getCourseId() != null && !getCourseId().isEmpty();
 	}
 
 	@Override
 	public String toString() {
-		return "User [keyword=" + keyword+ ", type=" + type + "]";
+		return "Session [keyword=" + keyword+ ", type=" + type + "]";
 	}
 }
