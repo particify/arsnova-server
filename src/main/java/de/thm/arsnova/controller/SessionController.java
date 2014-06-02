@@ -65,7 +65,7 @@ public class SessionController extends AbstractController {
 
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.DELETE)
 	public final void deleteSession(@PathVariable final String sessionkey) {
-		User user = userService.getCurrentUser();
+		final User user = userService.getCurrentUser();
 		sessionService.deleteSession(sessionkey, user);
 	}
 
@@ -73,13 +73,8 @@ public class SessionController extends AbstractController {
 	@RequestMapping(value = "/{sessionkey}/online", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public final LoggedIn registerAsOnlineUser(@PathVariable final String sessionkey) {
-		User user = userService.getCurrentUser();
-		LoggedIn loggedIn = sessionService.registerAsOnlineUser(user, sessionkey);
-		if (loggedIn != null) {
-			return loggedIn;
-		}
-
-		throw new RuntimeException();
+		final User user = userService.getCurrentUser();
+		return sessionService.registerAsOnlineUser(user, sessionkey);
 	}
 
 	@DeprecatedApi
@@ -92,18 +87,18 @@ public class SessionController extends AbstractController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public final Session postNewSession(@RequestBody final Session session, final HttpServletResponse response) {
 		if (session != null && session.isCourseSession()) {
-			List<Course> courses = new ArrayList<Course>();
-			Course course = new Course();
+			final List<Course> courses = new ArrayList<Course>();
+			final Course course = new Course();
 			course.setId(session.getCourseId());
 			courses.add(course);
-			int sessionCount = sessionService.countSessions(courses);
+			final int sessionCount = sessionService.countSessions(courses);
 			if (sessionCount > 0) {
-				String appendix = " (" + String.valueOf(sessionCount + 1) + ")";
+				final String appendix = " (" + String.valueOf(sessionCount + 1) + ")";
 				session.setName(session.getName() + appendix);
 				session.setShortName(session.getShortName() + appendix);
 			}
 		}
-		Session newSession = sessionService.saveSession(session);
+		final Session newSession = sessionService.saveSession(session);
 
 		if (newSession == null) {
 			response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
@@ -128,7 +123,7 @@ public class SessionController extends AbstractController {
 			@RequestParam(value = "sortby", defaultValue = "name") final String sortby,
 			final HttpServletResponse response
 			) {
-		User user = userService.getCurrentUser();
+		final User user = userService.getCurrentUser();
 		List<Session> sessions = null;
 
 		/* TODO implement all parameter combinations, implement use of user parameter */
@@ -162,7 +157,7 @@ public class SessionController extends AbstractController {
 			final HttpServletResponse response
 			) {
 		if (lock != null) {
-			return this.sessionService.setActive(sessionkey, lock);
+			return sessionService.setActive(sessionkey, lock);
 		}
 		response.setStatus(HttpStatus.NOT_FOUND.value());
 		return null;

@@ -205,7 +205,7 @@ public class SessionService implements ISessionService {
 
 		final Session session = this.joinSession(sessionkey);
 		if (session == null) {
-			return null;
+			throw new NotFoundException();
 		}
 		if (session.getCreator().equals(user.getUsername())) {
 			databaseDao.updateSessionOwnerActivity(session);

@@ -151,7 +151,7 @@ public class CouchDBDao implements IDatabaseDao {
 		final ViewResults results = getDatabase().view(view);
 
 		if (results.getJSONArray("rows").optJSONObject(0) == null) {
-			return null;
+			throw new NotFoundException();
 		}
 		return (Session) JSONObject.toBean(
 				results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
@@ -339,8 +339,7 @@ public class CouchDBDao implements IDatabaseDao {
 					results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
 					Question.class
 					);
-			JSONArray possibleAnswers = new JSONArray();
-			possibleAnswers = results.getJSONArray("rows").optJSONObject(0).optJSONObject("value")
+			final JSONArray possibleAnswers = results.getJSONArray("rows").optJSONObject(0).optJSONObject("value")
 					.getJSONArray("possibleAnswers");
 			final Collection<PossibleAnswer> answers = JSONArray.toCollection(
 					possibleAnswers,
@@ -972,7 +971,7 @@ public class CouchDBDao implements IDatabaseDao {
 		return result;
 	}
 
-	private class ExtendedView extends View {
+	private static class ExtendedView extends View {
 
 		private String keys;
 
@@ -1246,7 +1245,12 @@ public class CouchDBDao implements IDatabaseDao {
 		return collectQuestionIds(view);
 	}
 
-	private List<String> collectUnansweredQuestionIds(final Session session, final User user, final List<String> questions, final NovaView view) {
+	private List<String> collectUnansweredQuestionIds(
+			final Session session,
+			final User user,
+			final List<String> questions,
+			final NovaView view
+			) {
 		final ViewResults answeredQuestions = getDatabase().view(view);
 
 		final List<String> answered = new ArrayList<String>();

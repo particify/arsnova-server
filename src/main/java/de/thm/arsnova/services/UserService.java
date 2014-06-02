@@ -56,11 +56,11 @@ public class UserService implements IUserService {
 
 	@Scheduled(fixedDelay = DEFAULT_SCHEDULER_DELAY_MS)
 	public final void removeInactiveUsersFromLegacyMap() {
-		List<String> usernames = databaseDao.getActiveUsers(MAX_USER_INACTIVE_SECONDS);
-		Set<String> affectedSessions = new HashSet<String>();
+		final List<String> usernames = databaseDao.getActiveUsers(MAX_USER_INACTIVE_SECONDS);
+		final Set<String> affectedSessions = new HashSet<String>();
 
-		for (Entry<User, String> e : user2sessionLegacy.entrySet()) {
-			User key = e.getKey();
+		for (final Entry<User, String> e : user2sessionLegacy.entrySet()) {
+			final User key = e.getKey();
 			if (usernames != null && !usernames.contains(key.getUsername())) {
 				if (null != e.getValue()) {
 					affectedSessions.add(e.getValue());
@@ -71,14 +71,14 @@ public class UserService implements IUserService {
 			}
 		}
 
-		for (String sessionKeyword : affectedSessions) {
+		for (final String sessionKeyword : affectedSessions) {
 			socketIoServer.reportActiveUserCountForSession(sessionKeyword);
 		}
 	}
 
 	@Override
 	public User getCurrentUser() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication == null || authentication.getPrincipal() == null) {
 			return null;
 		}
@@ -88,13 +88,13 @@ public class UserService implements IUserService {
 		if (authentication instanceof OAuthAuthenticationToken) {
 			user = getOAuthUser(authentication, user);
 		} else if (authentication instanceof CasAuthenticationToken) {
-			CasAuthenticationToken token = (CasAuthenticationToken) authentication;
+			final CasAuthenticationToken token = (CasAuthenticationToken) authentication;
 			user = new User(token.getAssertion().getPrincipal());
 		} else if (authentication instanceof AnonymousAuthenticationToken) {
-			AnonymousAuthenticationToken token = (AnonymousAuthenticationToken) authentication;
+			final AnonymousAuthenticationToken token = (AnonymousAuthenticationToken) authentication;
 			user = new User(token);
 		} else if (authentication instanceof UsernamePasswordAuthenticationToken) {
-			UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) authentication;
+			final UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) authentication;
 			user = new User(token);
 		}
 
@@ -105,28 +105,28 @@ public class UserService implements IUserService {
 		return user;
 	}
 
-	private User getOAuthUser(Authentication authentication, User user) {
-		OAuthAuthenticationToken token = (OAuthAuthenticationToken) authentication;
+	private User getOAuthUser(final Authentication authentication, User user) {
+		final OAuthAuthenticationToken token = (OAuthAuthenticationToken) authentication;
 		if (token.getUserProfile() instanceof Google2Profile) {
-			Google2Profile profile = (Google2Profile) token.getUserProfile();
+			final Google2Profile profile = (Google2Profile) token.getUserProfile();
 			user = new User(profile);
 		} else if (token.getUserProfile() instanceof TwitterProfile) {
-			TwitterProfile profile = (TwitterProfile) token.getUserProfile();
+			final TwitterProfile profile = (TwitterProfile) token.getUserProfile();
 			user = new User(profile);
 		} else if (token.getUserProfile() instanceof FacebookProfile) {
-			FacebookProfile profile = (FacebookProfile) token.getUserProfile();
+			final FacebookProfile profile = (FacebookProfile) token.getUserProfile();
 			user = new User(profile);
 		}
 		return user;
 	}
 
 	@Override
-	public User getUser2SocketId(UUID socketId) {
+	public User getUser2SocketId(final UUID socketId) {
 		return socketid2user.get(socketId);
 	}
 
 	@Override
-	public void putUser2SocketId(UUID socketId, User user) {
+	public void putUser2SocketId(final UUID socketId, final User user) {
 		socketid2user.put(socketId, user);
 	}
 
@@ -136,12 +136,12 @@ public class UserService implements IUserService {
 	}
 
 	@Override
-	public void removeUser2SocketId(UUID socketId) {
+	public void removeUser2SocketId(final UUID socketId) {
 		socketid2user.remove(socketId);
 	}
 
 	@Override
-	public boolean isUserInSession(User user, String keyword) {
+	public boolean isUserInSession(final User user, final String keyword) {
 		if (keyword == null) {
 			return false;
 		}
@@ -157,14 +157,14 @@ public class UserService implements IUserService {
 	}
 
 	@Override
-	public Set<User> getUsersInSession(String keyword) {
-		Set<User> result = new HashSet<User>();
-		for (Entry<User, String> e : user2session.entrySet()) {
+	public Set<User> getUsersInSession(final String keyword) {
+		final Set<User> result = new HashSet<User>();
+		for (final Entry<User, String> e : user2session.entrySet()) {
 			if (e.getValue().equals(keyword)) {
 				result.add(e.getKey());
 			}
 		}
-		for (Entry<User, String> e : user2sessionLegacy.entrySet()) {
+		for (final Entry<User, String> e : user2sessionLegacy.entrySet()) {
 			if (e.getValue().equals(keyword)) {
 				result.add(e.getKey());
 			}
@@ -174,14 +174,14 @@ public class UserService implements IUserService {
 	}
 
 	@Override
-	public int getUsersInSessionCount(String keyword) {
+	public int getUsersInSessionCount(final String keyword) {
 		return getUsersInSession(keyword).size();
 	}
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public void addCurrentUserToSessionMap(String keyword) {
-		User user = getCurrentUser();
+	public void addCurrentUserToSessionMap(final String keyword) {
+		final User user = getCurrentUser();
 		if (user == null) {
 			throw new UnauthorizedException();
 		}
@@ -190,15 +190,15 @@ public class UserService implements IUserService {
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public void addUserToSessionBySocketId(UUID socketId, String keyword) {
-		User user = socketid2user.get(socketId);
+	public void addUserToSessionBySocketId(final UUID socketId, final String keyword) {
+		final User user = socketid2user.get(socketId);
 		user2session.put(user, keyword);
 	}
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public void removeUserFromSessionBySocketId(UUID socketId) {
-		User user = socketid2user.get(socketId);
+	public void removeUserFromSessionBySocketId(final UUID socketId) {
+		final User user = socketid2user.get(socketId);
 		if (null == user) {
 			LOGGER.warn("null == user for socket {}", socketId);
 
@@ -208,13 +208,13 @@ public class UserService implements IUserService {
 	}
 
 	@Override
-	public String getSessionForUser(String username) {
-		for (Entry<User, String> entry  : user2session.entrySet()) {
+	public String getSessionForUser(final String username) {
+		for (final Entry<User, String> entry  : user2session.entrySet()) {
 			if (entry.getKey().getUsername().equals(username)) {
 				return entry.getValue();
 			}
 		}
-		for (Entry<User, String> entry  : user2sessionLegacy.entrySet()) {
+		for (final Entry<User, String> entry  : user2sessionLegacy.entrySet()) {
 			if (entry.getKey().getUsername().equals(username)) {
 				return entry.getValue();
 			}
@@ -229,7 +229,7 @@ public class UserService implements IUserService {
 	}
 
 	@Override
-	public void removeUserFromMaps(User user) {
+	public void removeUserFromMaps(final User user) {
 		if (user != null) {
 			user2session.remove(user);
 			user2sessionLegacy.remove(user);
