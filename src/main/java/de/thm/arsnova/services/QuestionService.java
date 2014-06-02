@@ -92,7 +92,6 @@ public class QuestionService implements IQuestionService {
 
 		// convert imageurl to base64 if neccessary
 		if ("grid".equals(question.getQuestionType())) {
-			final org.slf4j.Logger logger = LoggerFactory.getLogger(QuestionService.class);
 			if (question.getImage().startsWith("http")) {
 				final String base64ImageString = ImageUtils.encodeImageToString(question.getImage());
 				if (base64ImageString == null) {

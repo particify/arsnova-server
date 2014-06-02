@@ -15,7 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import de.thm.arsnova.dao.StubDatabaseDao;
+import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Statistics;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -32,7 +32,7 @@ public class StatisticsServiceTest {
 	private final IStatisticsService statisticsService = new StatisticsService();
 
 	@Mock
-	private StubDatabaseDao databaseDao;
+	private IDatabaseDao databaseDao;
 
 	@Before
 	public final void startup() {
@@ -52,26 +52,27 @@ public class StatisticsServiceTest {
 	public final void testShouldReturnNoActiveUsers() {
 		when(databaseDao.countActiveUsers(anyInt())).thenReturn(0);
 
-		int actual = statisticsService.countActiveUsers();
+		final int actual = statisticsService.countActiveUsers();
 		assertEquals(0, actual);
 	}
 
 	@Test
 	public final void testShouldReturnCurrentActiveUsers() {
-		int actual = statisticsService.countActiveUsers();
+		final int actual = statisticsService.countActiveUsers();
 		assertEquals(42, actual);
 	}
 
 	@Test
 	public final void testShouldReturnEqualStatistics() {
-		Statistics actual = statisticsService.getStatistics();
+		final Statistics actual = statisticsService.getStatistics();
 
-		Statistics expected = new Statistics();
+		final Statistics expected = new Statistics();
 		expected.setActiveUsers(42);
 		expected.setAnswers(2014);
 		expected.setClosedSessions(1984);
 		expected.setOpenSessions(1978);
 		expected.setQuestions(123);
+		expected.setLoggedinUsers(0);
 
 		assertEquals(expected, actual);
 	}

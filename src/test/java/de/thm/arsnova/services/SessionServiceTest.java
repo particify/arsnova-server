@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import org.junit.After;
@@ -72,10 +73,10 @@ public class SessionServiceTest {
 	@Autowired
 	private StubDatabaseDao databaseDao;
 
-	private void setAuthenticated(boolean isAuthenticated, String username) {
+	private void setAuthenticated(final boolean isAuthenticated, final String username) {
 		if (isAuthenticated) {
-			List<GrantedAuthority> ga = new ArrayList<GrantedAuthority>();
-			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, "secret", ga);
+			final List<GrantedAuthority> ga = new ArrayList<GrantedAuthority>();
+			final UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, "secret", ga);
 			SecurityContextHolder.getContext().setAuthentication(token);
 			userService.setUserAuthenticated(isAuthenticated, username);
 		} else {
@@ -101,7 +102,7 @@ public class SessionServiceTest {
 	}
 
 	@Test(expected = NotFoundException.class)
-	public void testShouldFindNonExistantSession() {
+	public void testShouldNotFindNonExistantSession() {
 		setAuthenticated(true, "ptsr00");
 		sessionService.joinSession("00000000");
 	}
@@ -116,7 +117,7 @@ public class SessionServiceTest {
 	public void testShouldNotSaveSessionIfUnauthorized() {
 		setAuthenticated(false, null);
 
-		Session session = new Session();
+		final Session session = new Session();
 		session.setActive(true);
 		session.setCreator("ptsr00");
 		session.setKeyword("11111111");
@@ -133,7 +134,7 @@ public class SessionServiceTest {
 	public void testShouldSaveSession() {
 		setAuthenticated(true, "ptsr00");
 
-		Session session = new Session();
+		final Session session = new Session();
 		session.setActive(true);
 		session.setCreator("ptsr00");
 		session.setKeyword("11111111");
@@ -147,7 +148,7 @@ public class SessionServiceTest {
 	public void testShouldUpdateSession() {
 		setAuthenticated(true, "ptsr00");
 
-		Session session = new Session();
+		final Session session = new Session();
 		session.setActive(true);
 		session.setCreator("ptsr00");
 		session.setKeyword("11111111");
@@ -161,16 +162,16 @@ public class SessionServiceTest {
 
 	@Test
 	public void testShouldDeleteAllSessionData() {
-		IDatabaseDao tempDatabase = (IDatabaseDao) ReflectionTestUtils.getField(getTargetObject(sessionService), "databaseDao");
+		final IDatabaseDao tempDatabase = (IDatabaseDao) ReflectionTestUtils.getField(getTargetObject(sessionService), "databaseDao");
 		try {
 			setAuthenticated(true, "ptsr00");
 
-			Session session = new Session();
+			final Session session = new Session();
 			session.setCreator(userService.getCurrentUser().getUsername());
-			Question q1 = new Question();
-			Question q2 = new Question();
+			final Question q1 = new Question();
+			final Question q2 = new Question();
 
-			IDatabaseDao mockDatabase = mock(IDatabaseDao.class);
+			final IDatabaseDao mockDatabase = mock(IDatabaseDao.class);
 			when(mockDatabase.getSkillQuestions(userService.getCurrentUser(), session)).thenReturn(Arrays.asList(q1, q2));
 			when(mockDatabase.getSession(anyString())).thenReturn(session);
 			ReflectionTestUtils.setField(getTargetObject(sessionService), "databaseDao", mockDatabase);
@@ -185,12 +186,40 @@ public class SessionServiceTest {
 		}
 	}
 
+	@Test
+	public void testShouldCompareSessionByName() {
+		final Session sessionA = new Session();
+		sessionA.setName("TestSessionA");
+		sessionA.setShortName("TSA");
+
+		final Session sessionB = new Session();
+		sessionB.setName("TestSessionB");
+		sessionB.setShortName("TSB");
+
+		final Comparator<Session> comp = new SessionService.SessionNameComperator();
+		assertTrue(comp.compare(sessionA, sessionB) < 0);
+	}
+
+	@Test
+	public void testShouldCompareSessionByShortName() {
+		final Session sessionA = new Session();
+		sessionA.setName("TestSessionA");
+		sessionA.setShortName("TSA");
+
+		final Session sessionB = new Session();
+		sessionB.setName("TestSessionB");
+		sessionB.setShortName("TSB");
+
+		final Comparator<Session> comp = new SessionService.SessionShortNameComperator();
+		assertTrue(comp.compare(sessionA, sessionB) < 0);
+	}
+
 	@SuppressWarnings("unchecked")
-	public static <T> T getTargetObject(Object proxy) {
-		if ((AopUtils.isJdkDynamicProxy(proxy))) {
+	public static <T> T getTargetObject(final Object proxy) {
+		if (AopUtils.isJdkDynamicProxy(proxy)) {
 			try {
 				return (T) getTargetObject(((Advised) proxy).getTargetSource().getTarget());
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				throw new RuntimeException("Failed to unproxy target.", e);
 			}
 		}
