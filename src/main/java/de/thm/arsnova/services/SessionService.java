@@ -45,6 +45,24 @@ import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 @Service
 public class SessionService implements ISessionService {
 
+	public static class SessionNameComperator implements Comparator<Session>, Serializable {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public int compare(final Session session1, final Session session2) {
+			return session1.getName().compareToIgnoreCase(session2.getName());
+		}
+	}
+
+	public static class SessionShortNameComperator implements Comparator<Session>, Serializable {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public int compare(final Session session1, final Session session2) {
+			return session1.getShortName().compareToIgnoreCase(session2.getShortName());
+		}
+	}
+
 	@Autowired
 	private IDatabaseDao databaseDao;
 
@@ -58,18 +76,18 @@ public class SessionService implements ISessionService {
 	private ConnectorClient connectorClient;
 
 	public void setDatabaseDao(final IDatabaseDao newDatabaseDao) {
-		this.databaseDao = newDatabaseDao;
+		databaseDao = newDatabaseDao;
 	}
 
 	@Override
 	public final Session joinSession(final String keyword, final UUID socketId) {
 		/* Socket.IO solution */
 
-		Session session = databaseDao.getSession(keyword);
+		final Session session = databaseDao.getSession(keyword);
 		if (null == session) {
 			throw new NotFoundException();
 		}
-		User user = userService.getUser2SocketId(socketId);
+		final User user = userService.getUser2SocketId(socketId);
 
 		userService.addUserToSessionBySocketId(socketId, keyword);
 
@@ -79,7 +97,7 @@ public class SessionService implements ISessionService {
 		databaseDao.registerAsOnlineUser(user, session);
 
 		if (connectorClient != null && session.isCourseSession()) {
-			String courseid = session.getCourseId();
+			final String courseid = session.getCourseId();
 			if (!connectorClient.getMembership(user.getUsername(), courseid).isMember()) {
 				throw new ForbiddenException();
 			}
@@ -93,8 +111,8 @@ public class SessionService implements ISessionService {
 	public final Session joinSession(final String keyword) {
 		/* HTTP polling solution (legacy) */
 
-		User user = userService.getCurrentUser();
-		Session session = databaseDao.getSessionFromKeyword(keyword);
+		final User user = userService.getCurrentUser();
+		final Session session = databaseDao.getSessionFromKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();
 		}
@@ -111,7 +129,7 @@ public class SessionService implements ISessionService {
 		socketIoServer.reportFeedbackForUserInSession(session, userService.getCurrentUser());
 
 		if (connectorClient != null && session.isCourseSession()) {
-			String courseid = session.getCourseId();
+			final String courseid = session.getCourseId();
 			if (!connectorClient.getMembership(userService.getCurrentUser().getUsername(), courseid).isMember()) {
 				throw new ForbiddenException();
 			}
@@ -123,21 +141,21 @@ public class SessionService implements ISessionService {
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public final List<Session> getMySessions(final User user) {
-		List<Session> mySessions = databaseDao.getMySessions(user);
+		final List<Session> mySessions = databaseDao.getMySessions(user);
 		if (connectorClient == null) {
 			return mySessions;
 		}
 
-		List<Session> courseSessions = databaseDao.getCourseSessions(
+		final List<Session> courseSessions = databaseDao.getCourseSessions(
 				connectorClient.getCourses(user.getUsername()).getCourse()
 				);
 
-		Map<String, Session> allAvailableSessions = new HashMap<String, Session>();
+		final Map<String, Session> allAvailableSessions = new HashMap<String, Session>();
 
-		for (Session session : mySessions) {
+		for (final Session session : mySessions) {
 			allAvailableSessions.put(session.get_id(), session);
 		}
-		for (Session session : courseSessions) {
+		for (final Session session : courseSessions) {
 			allAvailableSessions.put(session.get_id(), session);
 		}
 		return new ArrayList<Session>(allAvailableSessions.values());
@@ -171,10 +189,10 @@ public class SessionService implements ISessionService {
 	public final String generateKeyword() {
 		final int low = 10000000;
 		final int high = 100000000;
-		String keyword = String
+		final String keyword = String
 				.valueOf((int) (Math.random() * (high - low) + low));
 
-		if (this.sessionKeyAvailable(keyword)) {
+		if (sessionKeyAvailable(keyword)) {
 			return keyword;
 		}
 		return generateKeyword();
@@ -185,7 +203,7 @@ public class SessionService implements ISessionService {
 	public final LoggedIn registerAsOnlineUser(final User user, final String sessionkey) {
 		/* HTTP polling solution (legacy) */
 
-		Session session = this.joinSession(sessionkey);
+		final Session session = this.joinSession(sessionkey);
 		if (session == null) {
 			return null;
 		}
@@ -196,27 +214,9 @@ public class SessionService implements ISessionService {
 		return databaseDao.registerAsOnlineUser(user, session);
 	}
 
-	public static class SessionNameComperator implements Comparator<Session>, Serializable {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public int compare(Session session1, Session session2) {
-			return session1.getName().compareToIgnoreCase(session2.getName());
-		}
-	}
-
-	public static class SessionShortNameComperator implements Comparator<Session>, Serializable {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public int compare(Session session1, Session session2) {
-			return session1.getShortName().compareToIgnoreCase(session2.getShortName());
-		}
-	}
-
 	@Override
-	public int countSessions(List<Course> courses) {
-		List<Session> sessions = databaseDao.getCourseSessions(courses);
+	public int countSessions(final List<Course> courses) {
+		final List<Session> sessions = databaseDao.getCourseSessions(courses);
 		if (sessions == null) {
 			return 0;
 		}
@@ -224,9 +224,9 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
-	public Session setActive(String sessionkey, Boolean lock) {
-		Session session = databaseDao.getSessionFromKeyword(sessionkey);
-		User user = userService.getCurrentUser();
+	public Session setActive(final String sessionkey, final Boolean lock) {
+		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
+		final User user = userService.getCurrentUser();
 		if (!session.isCreator(user)) {
 			throw new ForbiddenException();
 		}
@@ -235,18 +235,15 @@ public class SessionService implements ISessionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#session, 'owner')")
-	public Session updateSession(String sessionkey, Session session) {
+	public Session updateSession(final String sessionkey, final Session session) {
 		return databaseDao.updateSession(session);
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
-	public void deleteSession(String sessionkey, User user) {
-		Session session = databaseDao.getSession(sessionkey);
-		if (!session.isCreator(user)) {
-			throw new ForbiddenException();
-		}
-		for (Question q : databaseDao.getSkillQuestions(user, session)) {
+	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	public void deleteSession(final String sessionkey, final User user) {
+		final Session session = databaseDao.getSession(sessionkey);
+		for (final Question q : databaseDao.getSkillQuestions(user, session)) {
 			databaseDao.deleteQuestionWithAnswers(q);
 		}
 		databaseDao.deleteSession(session);
@@ -254,16 +251,16 @@ public class SessionService implements ISessionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getLearningProgress(String sessionkey) {
-		Session session = databaseDao.getSession(sessionkey);
+	public int getLearningProgress(final String sessionkey) {
+		final Session session = databaseDao.getSession(sessionkey);
 		return databaseDao.getLearningProgress(session);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getMyLearningProgress(String sessionkey) {
-		Session session = databaseDao.getSession(sessionkey);
-		User user = userService.getCurrentUser();
+	public int getMyLearningProgress(final String sessionkey) {
+		final Session session = databaseDao.getSession(sessionkey);
+		final User user = userService.getCurrentUser();
 		return databaseDao.getMyLearningProgress(session, user);
 	}
 }

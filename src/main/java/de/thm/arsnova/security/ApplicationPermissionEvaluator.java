@@ -53,8 +53,15 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	}
 
 	private boolean checkSessionPermission(final String username, final Serializable targetId, final Object permission) {
-		if (permission instanceof String && permission.equals("owner")) {
-			return dao.getSession(targetId.toString()).getCreator().equals(username);
+		try {
+			if (permission instanceof String && (permission.equals("owner") || permission.equals("write"))) {
+				return dao.getSession(targetId.toString()).getCreator().equals(username);
+			} else if (permission instanceof String && permission.equals("read")) {
+				return dao.getSession(targetId.toString()).isActive();
+			}
+		}
+		catch (final NullPointerException e) {
+			e.printStackTrace();
 		}
 		return false;
 	}

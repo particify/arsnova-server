@@ -167,6 +167,7 @@ public class SessionServiceTest {
 			setAuthenticated(true, "ptsr00");
 
 			final Session session = new Session();
+			session.setKeyword("12345678");
 			session.setCreator(userService.getCurrentUser().getUsername());
 			final Question q1 = new Question();
 			final Question q2 = new Question();
@@ -184,6 +185,18 @@ public class SessionServiceTest {
 		} finally {
 			ReflectionTestUtils.setField(getTargetObject(sessionService), "databaseDao", tempDatabase);
 		}
+	}
+
+	@Test(expected = AuthenticationCredentialsNotFoundException.class)
+	public void testShouldNotDeleteSessionIfUnauthorized() {
+		setAuthenticated(false, "nobody");
+		sessionService.deleteSession("12345678", userService.getCurrentUser());
+	}
+
+	@Test(expected = ForbiddenException.class)
+	public void testShouldNotDeleteSessionIfNotOwner() {
+		setAuthenticated(true, "anybody");
+		sessionService.deleteSession("12345678", userService.getCurrentUser());
 	}
 
 	@Test
