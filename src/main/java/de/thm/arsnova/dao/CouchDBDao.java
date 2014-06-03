@@ -1326,8 +1326,8 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public int getLearningProgress(final Session session) {
-		final NovaView courseView = new NovaView("learning_progress/course_value");
-		final NovaView maximumView = new NovaView("learning_progress/maximum_value");
+		final NovaView courseView = new NovaView("learning_progress_course_value/course_value");
+		final NovaView maximumView = new NovaView("learning_progress_maximum_value/maximum_value");
 		courseView.setKey(session.get_id());
 		maximumView.setKey(session.get_id());
 
@@ -1336,8 +1336,8 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public int getMyLearningProgress(final Session session, final User user) {
-		final NovaView userView = new NovaView("learning_progress/user_value");
-		final NovaView maximumView = new NovaView("learning_progress/maximum_value");
+		final NovaView userView = new NovaView("learning_progress_user_value/user_value");
+		final NovaView maximumView = new NovaView("learning_progress_maximum_value/maximum_value");
 		userView.setKey(session.get_id(), user.getUsername());
 		maximumView.setKey(session.get_id());
 
