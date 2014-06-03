@@ -22,6 +22,8 @@ Because all dependencies are handled by Maven, a complete build is done with:
 
 	mvn install
 
+*Note:* Java 1.7 JDK is required and must be installed prior to building ARSnova.
+
 ### Development
 
 You need three things to get started developing ARSnova:
@@ -38,14 +40,14 @@ You will need to do some configuration work upfront: add a new directory "arsnov
 
 Also, don't forget to change all properties starting with `couchdb`, if you do not want to use our defaults. The properties are used in the next section.
 
-*A note to Windows users*: our settings are based on Linux and Mac environments. We do not officially support Windows, so you have to do some extra steps. The property file's path is hard coded in [spring-main.xml](src/main/webapp/WEB-INF/spring/spring-main.xml) and in the "Setup Tool" (see next section). You want to change the paths to make them match your environment. 
+*A note to Windows users*: our settings are based on Linux and Mac environments. We do not officially support Windows, so you have to do some extra steps. The property file's path is hard coded in [spring-main.xml](src/main/webapp/WEB-INF/spring/spring-main.xml) and in the "Setup Tool" (see next section). You want to change the paths to make them match your environment.
 
 #### Database
 
 We provide a Python script that will set up all database essentials. This "Setup Tool" is located at [thm-projects/setuptool](https://github.com/thm-projects/setuptool). Make sure you have configured your database credentials inside the ARSnova configuration file (see previous section): you will need to have the entries `couchdb.username` and `couchdb.password`.
 
 To set up the database, run:
-	
+
 	python tool.py
 
 This will create the database along with all required view documents. Note that this script requires Python 2 and will not run with Python 3.
@@ -55,11 +57,11 @@ This will create the database along with all required view documents. Note that 
 The easiest way to deploy ARSnova is via Jetty:
 
 	mvn jetty:run -Dmobile.path=
-	
-This will work out of the box. ARSnova will be located at <http://localhost:8080/>. 
+
+This will work out of the box. ARSnova will be located at <http://localhost:8080/>.
 
 If you're wondering what that `-Dmobile.path=` thing is doing, this is a special override property for Jetty. By default, this property points to a local version of ARSnova mobile located at `../arsnova-mobile` &mdash; relative to the location of this project. If you happen to have downloaded ARSnova mobile to this location, you may skip the override, and just use:
-	
+
 	mvn jetty:run
 
 ## Production Use
@@ -73,7 +75,7 @@ In order to build up a full featured server installation containing ARSnova and 
  * Apache Tomcat 7.0.29 (or newer)
  * Apache Webserver 2.2 or newer with builtin modules `mod_proxy`, `mod_proxy_ajp` and `mod_proxy_http`
  * Apache CouchDB
- 
+
 Make sure all services are installed. Next step is to configure the Apache Webserver. Find the configuration file or create a new one for use with a virtual host. This depends on your needs. At least you should have a configuration containing these settings:
 
 	<Location />
@@ -94,11 +96,11 @@ The configuration is ready for development usage. Finally, you should (re)start 
 ### Session Persistence
 
 Look for your Tomcat configuration directory and change the file "context.xml" to match this example:
- 
+
 	<Context>
 		<Manager pathname="/path/to/tomcat/sessions/arsnova.ser"/>
-	</Context> 
- 
+	</Context>
+
 This will enable session persistence across restarts as described [here](http://tomcat.apache.org/tomcat-7.0-doc/config/manager.html#Special_Features).
 
 ### HTTPS
@@ -107,11 +109,11 @@ To protect requests and responses you should use HTTPS and configure your Apache
  [example](http://wiki.apache.org/httpd/RedirectSSL).
 
 Finally you should (re)start all services. ARSnova is now listening on HTTP port 80 and 443.
- 
+
 ### Securing Your Web Socket Connection
 
 To provide SSL websocket encryption, you have to provide the servers SSL key and certificate in a Java keystore. The following steps will guide you through this process.
- 
+
 Use your webserver certificate, private key and certificate chain to create a PKCS12 keystore:
 
 	openssl pkcs12 -export -in <servercert>.crt \
@@ -129,11 +131,11 @@ You will be asked for a password for your PKCS12 keystore. This password must be
         	-srcstoretype PKCS12 \
         	-srcstorepass <your_pkcs12_keystore_password> \
         	-alias 1
- 
+
 Be sure to provide the correct certificate and key file names and to use the correct passwords for your keystore.
- 
+
 The last step is to find your ARSnova configuration file (see step "Configuration" above), setup the location of your Java keystore and its password.
- 
+
 	security.ssl=true
 	security.keystore=<your keystore location>
 	security.storepass=<your keystore password>
