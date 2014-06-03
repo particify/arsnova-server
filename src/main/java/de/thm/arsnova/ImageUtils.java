@@ -40,6 +40,9 @@ import org.slf4j.LoggerFactory;
  */
 public final class ImageUtils {
 
+	// Or whatever size you want to read in at a time.
+	private final static int CHUNK_SIZE = 4096;
+
 	private ImageUtils() {
 	}
 
@@ -107,8 +110,7 @@ public final class ImageUtils {
 	 * @return The <code>byte[]</code> of the image on success, otherwise <code>null</code>.
 	 */
 	public static byte[] convertFileToByteArray(final String imageUrl) {
-		// Or whatever size you want to read in at a time.
-		final int CHUNK_SIZE = 4096;
+
 
 		try {
 			final URL url = new URL(imageUrl);
