@@ -29,7 +29,6 @@
 	<task:annotation-driven />
 
 	<aop:aspectj-autoproxy>
-		<aop:include name="authorizationAdviser" />
 		<aop:include name="userSessionAspect" />
 	</aop:aspectj-autoproxy>
 
