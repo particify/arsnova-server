@@ -27,7 +27,6 @@ import com.corundumstudio.socketio.parser.Packet;
 import com.corundumstudio.socketio.parser.PacketType;
 
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.events.ARSnovaEvent;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.services.IFeedbackService;
 import de.thm.arsnova.services.ISessionService;
@@ -303,20 +302,6 @@ public class ARSnovaSocketIOServer {
 	public void reportLecturerQuestionAvailable(final String sessionKey, final String lecturerQuestionId) {
 		/* TODO role handling implementation, send this only to users with role audience */
 		broadcastInSession(sessionKey, "lecQuestionAvail", lecturerQuestionId);
-	}
-
-	/** Sends event to a websocket connection identified by UUID
-	 *
-	 * @param sessionId The UUID of the websocket ID
-	 * @param event The event to be send to client
-	 * TODO This method is unimplemented!
-	 */
-	public void sendToClient(final UUID sessionId, final ARSnovaEvent event) {
-		for (final SocketIOClient c : server.getAllClients()) {
-			if (c.getSessionId().equals(sessionId)) {
-				break;
-			}
-		}
 	}
 
 	public void broadcastInSession(final String sessionKey, final String eventName, final Object data) {
