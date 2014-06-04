@@ -86,7 +86,7 @@ public class UserService implements IUserService {
 		User user = null;
 
 		if (authentication instanceof OAuthAuthenticationToken) {
-			user = getOAuthUser(authentication, user);
+			user = getOAuthUser(authentication);
 		} else if (authentication instanceof CasAuthenticationToken) {
 			final CasAuthenticationToken token = (CasAuthenticationToken) authentication;
 			user = new User(token.getAssertion().getPrincipal());
@@ -105,7 +105,8 @@ public class UserService implements IUserService {
 		return user;
 	}
 
-	private User getOAuthUser(final Authentication authentication, User user) {
+	private User getOAuthUser(final Authentication authentication) {
+		User user = null;
 		final OAuthAuthenticationToken token = (OAuthAuthenticationToken) authentication;
 		if (token.getUserProfile() instanceof Google2Profile) {
 			final Google2Profile profile = (Google2Profile) token.getUserProfile();

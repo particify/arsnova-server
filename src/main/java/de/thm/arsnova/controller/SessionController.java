@@ -93,7 +93,7 @@ public class SessionController extends AbstractController {
 			courses.add(course);
 			final int sessionCount = sessionService.countSessions(courses);
 			if (sessionCount > 0) {
-				final String appendix = " (" + String.valueOf(sessionCount + 1) + ")";
+				final String appendix = " (" + (sessionCount + 1) + ")";
 				session.setName(session.getName() + appendix);
 				session.setShortName(session.getShortName() + appendix);
 			}

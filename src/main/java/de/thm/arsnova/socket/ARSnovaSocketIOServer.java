@@ -77,7 +77,7 @@ public class ARSnovaSocketIOServer {
 		server.stop();
 	}
 
-	public void startServer() throws Exception {
+	public void startServer() {
 		/**
 		 * hack: listen to ipv4 adresses
 		 */
@@ -151,7 +151,7 @@ public class ARSnovaSocketIOServer {
 		server.start();
 	}
 
-	public void stopServer() throws Exception {
+	public void stopServer() {
 		LOGGER.trace("In stopServer method of class: {}", getClass().getName());
 		try {
 			for (final SocketIOClient client : server.getAllClients()) {

@@ -26,12 +26,16 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	private IDatabaseDao dao;
 
 	@Override
-	public boolean hasPermission(final Authentication authentication, final Object targetDomainObject, final Object permission) {
+	public boolean hasPermission(
+			final Authentication authentication,
+			final Object targetDomainObject,
+			final Object permission
+			) {
 		final String username = getUsername(authentication);
 
 		if (
 				targetDomainObject instanceof Session
-				&& ! checkSessionPermission(username, ((Session)targetDomainObject).getKeyword(), permission)
+				&& !checkSessionPermission(username, ((Session) targetDomainObject).getKeyword(), permission)
 				) {
 			throw new ForbiddenException();
 		}
@@ -39,20 +43,35 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	}
 
 	@Override
-	public boolean hasPermission(final Authentication authentication, final Serializable targetId, final String targetType, final Object permission) {
+	public boolean hasPermission(
+			final Authentication authentication,
+			final Serializable targetId,
+			final String targetType,
+			final Object permission
+			) {
 		final String username = getUsername(authentication);
 
-		if ("session".equals(targetType) && ! checkSessionPermission(username, targetId, permission)) {
+		if ("session".equals(targetType) && !checkSessionPermission(username, targetId, permission)) {
 			throw new ForbiddenException();
-		} else if ("question".equals(targetType) && ! checkQuestionPermission(username, targetId, permission)) {
+		} else if (
+				"question".equals(targetType)
+				&& !checkQuestionPermission(username, targetId, permission)
+				) {
 			throw new ForbiddenException();
-		} else if ("interposedquestion".equals(targetType) && ! checkInterposedQuestionPermission(username, targetId, permission)) {
+		} else if (
+				"interposedquestion".equals(targetType)
+				&& !checkInterposedQuestionPermission(username, targetId, permission)
+				) {
 			throw new ForbiddenException();
 		}
 		return true;
 	}
 
-	private boolean checkSessionPermission(final String username, final Serializable targetId, final Object permission) {
+	private boolean checkSessionPermission(
+			final String username,
+			final Serializable targetId,
+			final Object permission
+			) {
 		if (permission instanceof String && (permission.equals("owner") || permission.equals("write"))) {
 			return dao.getSession(targetId.toString()).getCreator().equals(username);
 		} else if (permission instanceof String && permission.equals("read")) {
@@ -61,7 +80,11 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		return false;
 	}
 
-	private boolean checkQuestionPermission(final String username, final Serializable targetId, final Object permission) {
+	private boolean checkQuestionPermission(
+			final String username,
+			final Serializable targetId,
+			final Object permission
+			) {
 		if (permission instanceof String && permission.equals("owner")) {
 			final Question question = dao.getQuestion(targetId.toString());
 			if (question != null) {
@@ -75,7 +98,11 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		return false;
 	}
 
-	private boolean checkInterposedQuestionPermission(final String username, final Serializable targetId, final Object permission) {
+	private boolean checkInterposedQuestionPermission(
+			final String username,
+			final Serializable targetId,
+			final Object permission
+			) {
 		if (permission instanceof String && permission.equals("owner")) {
 			final InterposedQuestion question = dao.getInterposedQuestion(targetId.toString());
 			if (question != null) {
