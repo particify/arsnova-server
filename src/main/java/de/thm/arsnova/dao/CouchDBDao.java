@@ -478,7 +478,7 @@ public class CouchDBDao implements IDatabaseDao {
 	public final List<String> getUnAnsweredQuestionIds(final Session session, final User user) {
 		final NovaView view = new NovaView("answer/by_user");
 		view.setKey(user.getUsername(), session.get_id());
-		return collectUnansweredQuestionIds(session, user, getQuestionIds(session, user), view);
+		return collectUnansweredQuestionIds(getQuestionIds(session, user), view);
 	}
 
 	@Override
@@ -1211,7 +1211,7 @@ public class CouchDBDao implements IDatabaseDao {
 	public List<String> getUnAnsweredLectureQuestionIds(final Session session, final User user) {
 		final NovaView view = new NovaView("answer/variant_by_user");
 		view.setKey(user.getUsername(), session.get_id(), "lecture");
-		return collectUnansweredQuestionIds(session, user, getLectureQuestionIds(session, user), view);
+		return collectUnansweredQuestionIds(getLectureQuestionIds(session, user), view);
 	}
 
 	private List<String> getLectureQuestionIds(final Session session, final User user) {
@@ -1230,7 +1230,7 @@ public class CouchDBDao implements IDatabaseDao {
 	public List<String> getUnAnsweredPreparationQuestionIds(final Session session, final User user) {
 		final NovaView view = new NovaView("answer/variant_by_user");
 		view.setKey(user.getUsername(), session.get_id(), "preparation");
-		return collectUnansweredQuestionIds(session, user, getPreparationQuestionIds(session, user), view);
+		return collectUnansweredQuestionIds(getPreparationQuestionIds(session, user), view);
 	}
 
 	private List<String> getPreparationQuestionIds(final Session session, final User user) {
@@ -1246,8 +1246,6 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	private List<String> collectUnansweredQuestionIds(
-			final Session session,
-			final User user,
 			final List<String> questions,
 			final NovaView view
 			) {

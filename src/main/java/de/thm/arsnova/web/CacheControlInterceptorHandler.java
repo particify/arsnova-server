@@ -12,29 +12,28 @@ public class CacheControlInterceptorHandler extends HandlerInterceptorAdapter {
 
 	@Override
 	public boolean preHandle(
-			HttpServletRequest request,
-			HttpServletResponse response,
-			Object handler) throws Exception {
+			final HttpServletRequest request,
+			final HttpServletResponse response,
+			final Object handler) throws Exception {
 
-		setCacheControlResponseHeader(request, response, handler);
+		setCacheControlResponseHeader(response, handler);
 		return super.preHandle(request, response, handler);
 	}
 
 	private void setCacheControlResponseHeader(
-			HttpServletRequest request,
-			HttpServletResponse response,
-			Object handler) {
+			final HttpServletResponse response,
+			final Object handler) {
 
-		CacheControl cacheControl = getCacheControlAnnotation(request, response, handler);
+		final CacheControl cacheControl = getCacheControlAnnotation(handler);
 
 		if (cacheControl == null) {
 			return;
 		}
 
-		StringBuilder headerValue = new StringBuilder();
+		final StringBuilder headerValue = new StringBuilder();
 
 		if(cacheControl.policy().length > 0) {
-			for (CacheControl.Policy policy : cacheControl.policy()) {
+			for (final CacheControl.Policy policy : cacheControl.policy()) {
 				if (headerValue.length() > 0) {
 					headerValue.append(", ");
 				}
@@ -60,12 +59,8 @@ public class CacheControlInterceptorHandler extends HandlerInterceptorAdapter {
 		response.setHeader("cache-control", headerValue.toString());
 	}
 
-	private CacheControl getCacheControlAnnotation(
-			HttpServletRequest request,
-			HttpServletResponse response,
-			Object handler
-			) {
-		if (handler == null || !(handler instanceof HandlerMethod)) {
+	private CacheControl getCacheControlAnnotation(final Object handler) {
+		if (!(handler instanceof HandlerMethod)) {
 			return null;
 		}
 

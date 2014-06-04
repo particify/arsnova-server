@@ -12,23 +12,19 @@ public class DeprecatedApiInterceptorHandler extends HandlerInterceptorAdapter {
 
 	@Override
 	public boolean preHandle(
-			HttpServletRequest request,
-			HttpServletResponse response,
-			Object handler) throws Exception {
+			final HttpServletRequest request,
+			final HttpServletResponse response,
+			final Object handler) throws Exception {
 
-		if (getDeprecatedApiAnnotation(request, response, handler) != null) {
+		if (getDeprecatedApiAnnotation(handler) != null) {
 			response.addHeader("X-Deprecated-Api", "1");
 		}
 
 		return super.preHandle(request, response, handler);
 	}
 
-	private DeprecatedApi getDeprecatedApiAnnotation(
-			HttpServletRequest request,
-			HttpServletResponse response,
-			Object handler
-			) {
-		if (handler == null || !(handler instanceof HandlerMethod)) {
+	private DeprecatedApi getDeprecatedApiAnnotation(final Object handler) {
+		if (!(handler instanceof HandlerMethod)) {
 			return null;
 		}
 

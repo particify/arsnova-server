@@ -52,9 +52,6 @@ public class FeedbackService implements IFeedbackService {
 	@Autowired
 	private IDatabaseDao databaseDao;
 
-	@Autowired
-	private IUserService userService;
-
 	private FeedbackStorage feedbackStorage;
 
 	public final void setDatabaseDao(final IDatabaseDao newDatabaseDao) {
