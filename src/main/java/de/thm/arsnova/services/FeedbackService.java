@@ -20,8 +20,6 @@
 package de.thm.arsnova.services;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -60,12 +58,12 @@ public class FeedbackService implements IFeedbackService {
 	private FeedbackStorage feedbackStorage;
 
 	public final void setDatabaseDao(final IDatabaseDao newDatabaseDao) {
-		this.databaseDao = newDatabaseDao;
+		databaseDao = newDatabaseDao;
 	}
 
 	@PostConstruct
 	public void init() {
-		this.feedbackStorage = new FeedbackStorage(databaseDao);
+		feedbackStorage = new FeedbackStorage(databaseDao);
 	}
 
 	@Override
@@ -81,20 +79,20 @@ public class FeedbackService implements IFeedbackService {
 
 	@Override
 	public final int getFeedbackCount(final String keyword) {
-		Feedback feedback = feedbackStorage.getFeedback(keyword);
-		List<Integer> values = feedback.getValues();
+		final Feedback feedback = feedbackStorage.getFeedback(keyword);
+		final List<Integer> values = feedback.getValues();
 		return values.get(Feedback.FEEDBACK_FASTER) + values.get(Feedback.FEEDBACK_OK)
 				+ values.get(Feedback.FEEDBACK_SLOWER) + values.get(Feedback.FEEDBACK_AWAY);
 	}
 
 	@Override
 	public final double getAverageFeedback(final String sessionkey) {
-		Feedback feedback = feedbackStorage.getFeedback(sessionkey);
-		List<Integer> values = feedback.getValues();
-		double count = values.get(Feedback.FEEDBACK_FASTER) + values.get(Feedback.FEEDBACK_OK)
+		final Feedback feedback = feedbackStorage.getFeedback(sessionkey);
+		final List<Integer> values = feedback.getValues();
+		final double count = values.get(Feedback.FEEDBACK_FASTER) + values.get(Feedback.FEEDBACK_OK)
 				+ values.get(Feedback.FEEDBACK_SLOWER) + values.get(Feedback.FEEDBACK_AWAY);
-		double sum = values.get(Feedback.FEEDBACK_OK) + (values.get(Feedback.FEEDBACK_SLOWER) * 2)
-				+ (values.get(Feedback.FEEDBACK_AWAY) * 3);
+		final double sum = values.get(Feedback.FEEDBACK_OK) + values.get(Feedback.FEEDBACK_SLOWER) * 2
+				+ values.get(Feedback.FEEDBACK_AWAY) * 3;
 
 		if (count == 0) {
 			throw new NoContentException();
@@ -104,46 +102,20 @@ public class FeedbackService implements IFeedbackService {
 
 	@Override
 	public final long getAverageFeedbackRounded(final String sessionkey) {
-		return Math.round(this.getAverageFeedback(sessionkey));
+		return Math.round(getAverageFeedback(sessionkey));
 	}
 
 	@Override
 	public final boolean saveFeedback(final String keyword, final int value, final User user) {
-		boolean result = feedbackStorage.saveFeedback(keyword, value, user);
+		final boolean result = feedbackStorage.saveFeedback(keyword, value, user);
 		if (result) {
-			this.server.reportUpdatedFeedbackForSession(keyword);
+			server.reportUpdatedFeedbackForSession(keyword);
 		}
 		return result;
 	}
 
-	/**
-	 *
-	 * @param affectedUsers
-	 *            The user whose feedback got deleted along with all affected
-	 *            session keywords
-	 * @param allAffectedSessions
-	 *            For convenience, this represents the union of all session
-	 *            keywords mentioned above.
-	 */
-	@Override
-	public final void broadcastFeedbackChanges(
-			final Map<String, Set<String>> affectedUsers,
-			final Set<String> allAffectedSessions
-			) {
-		for (Map.Entry<String, Set<String>> e : affectedUsers.entrySet()) {
-			// Is this user registered with a socket connection?
-			String connectedSocket = userService.getSessionForUser(e.getKey());
-			if (connectedSocket != null) {
-				this.server.reportDeletedFeedback(e.getKey(), e.getValue());
-			}
-		}
-		for (String session : allAffectedSessions) {
-			this.server.reportUpdatedFeedbackForSession(session);
-		}
-	}
-
 	@Override
 	public final Integer getMyFeedback(final String keyword, final User user) {
-		return this.feedbackStorage.getMyFeedback(keyword, user);
+		return feedbackStorage.getMyFeedback(keyword, user);
 	}
 }

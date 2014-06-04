@@ -19,9 +19,6 @@
 
 package de.thm.arsnova.services;
 
-import java.util.Map;
-import java.util.Set;
-
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.User;
 
@@ -37,8 +34,6 @@ public interface IFeedbackService {
 	long getAverageFeedbackRounded(String sessionkey);
 
 	boolean saveFeedback(String keyword, int value, User user);
-
-	void broadcastFeedbackChanges(Map<String, Set<String>> affectedUsers, Set<String> allAffectedSessions);
 
 	Integer getMyFeedback(String keyword, User user);
 }
