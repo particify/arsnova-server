@@ -25,13 +25,13 @@ public class StatisticsController extends AbstractController {
 	@DeprecatedApi
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics/activeusercount", produces = "text/plain")
 	public final String countActiveUsers() {
-		return Integer.toString(statisticsService.countActiveUsers());
+		return Integer.toString(statisticsService.getStatistics().getActiveUsers());
 	}
 
 	@DeprecatedApi
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics/loggedinusercount", produces = "text/plain")
 	public final String countLoggedInUsers() {
-		return Integer.toString(statisticsService.countLoggedInUsers());
+		return Integer.toString(statisticsService.getStatistics().getLoggedinUsers());
 	}
 
 	@DeprecatedApi

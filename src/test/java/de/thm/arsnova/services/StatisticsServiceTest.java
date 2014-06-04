@@ -49,20 +49,6 @@ public class StatisticsServiceTest {
 	}
 
 	@Test
-	public final void testShouldReturnNoActiveUsers() {
-		when(databaseDao.countActiveUsers(anyInt())).thenReturn(0);
-
-		final int actual = statisticsService.countActiveUsers();
-		assertEquals(0, actual);
-	}
-
-	@Test
-	public final void testShouldReturnCurrentActiveUsers() {
-		final int actual = statisticsService.countActiveUsers();
-		assertEquals(42, actual);
-	}
-
-	@Test
 	public final void testShouldReturnEqualStatistics() {
 		final Statistics actual = statisticsService.getStatistics();
 
