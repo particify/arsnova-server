@@ -1351,7 +1351,12 @@ public class CouchDBDao implements IDatabaseDao {
 		final int maximum = maximumValue.get(0).getInt("value");
 		int progress = 0;
 		if (!progressValue.isEmpty()) {
-			progress = progressValue.get(0).getInt("value");
+			if (progressValue.get(0).optJSONArray("value").isArray()) {
+				JSONArray courseProgress = progressValue.get(0).getJSONArray("value");
+				progress = courseProgress.getInt(0) / courseProgress.getInt(1);
+			} else {
+				progress = progressValue.get(0).getInt("value");
+			}
 		}
 		final int percentage = (int)(progress * 100.0f / maximum);
 		return percentage < 0 ? 0 : percentage;
