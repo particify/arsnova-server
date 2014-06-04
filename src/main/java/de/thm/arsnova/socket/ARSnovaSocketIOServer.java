@@ -242,7 +242,7 @@ public class ARSnovaSocketIOServer {
 	 * @param client
 	 */
 	public void reportSessionDataToClient(final String sessionKey, final SocketIOClient client) {
-		client.sendEvent("activeUserCountData", userService.getUsersInSessionCount(sessionKey));
+		client.sendEvent("activeUserCountData", sessionService.activeUsers(sessionKey));
 		final de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
 		client.sendEvent("feedbackData", fb.getValues());
 	}
@@ -281,7 +281,7 @@ public class ARSnovaSocketIOServer {
 
 	public void reportActiveUserCountForSession(final String sessionKey) {
 		/* This check is needed as long as the HTTP polling solution is active simultaneously. */
-		final int count = userService.getUsersInSessionCount(sessionKey);
+		final int count = sessionService.activeUsers(sessionKey);
 		if (count == lastActiveUserCount) {
 			return;
 		}

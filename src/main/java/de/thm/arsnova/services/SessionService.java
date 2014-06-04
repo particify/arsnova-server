@@ -140,14 +140,14 @@ public class SessionService implements ISessionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public final List<Session> getMySessions(final User user) {
-		final List<Session> mySessions = databaseDao.getMySessions(user);
+	public final List<Session> getMySessions() {
+		final List<Session> mySessions = databaseDao.getMySessions(userService.getCurrentUser());
 		if (connectorClient == null) {
 			return mySessions;
 		}
 
 		final List<Session> courseSessions = databaseDao.getCourseSessions(
-				connectorClient.getCourses(user.getUsername()).getCourse()
+				connectorClient.getCourses(userService.getCurrentUser().getUsername()).getCourse()
 				);
 
 		final Map<String, Session> allAvailableSessions = new HashMap<String, Session>();
@@ -163,8 +163,8 @@ public class SessionService implements ISessionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public final List<Session> getMyVisitedSessions(final User user) {
-		return databaseDao.getMyVisitedSessions(user);
+	public final List<Session> getMyVisitedSessions() {
+		return databaseDao.getMyVisitedSessions(userService.getCurrentUser());
 	}
 
 	@Override
@@ -200,18 +200,18 @@ public class SessionService implements ISessionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public final LoggedIn registerAsOnlineUser(final User user, final String sessionkey) {
+	public final LoggedIn registerAsOnlineUser(final String sessionkey) {
 		/* HTTP polling solution (legacy) */
 
 		final Session session = this.joinSession(sessionkey);
 		if (session == null) {
 			throw new NotFoundException();
 		}
-		if (session.getCreator().equals(user.getUsername())) {
+		if (session.getCreator().equals(userService.getCurrentUser().getUsername())) {
 			databaseDao.updateSessionOwnerActivity(session);
 		}
 
-		return databaseDao.registerAsOnlineUser(user, session);
+		return databaseDao.registerAsOnlineUser(userService.getCurrentUser(), session);
 	}
 
 	@Override
@@ -221,6 +221,11 @@ public class SessionService implements ISessionService {
 			return 0;
 		}
 		return sessions.size();
+	}
+
+	@Override
+	public int activeUsers(final String sessionkey) {
+		return userService.getUsersInSession(sessionkey).size();
 	}
 
 	@Override
@@ -241,9 +246,9 @@ public class SessionService implements ISessionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
-	public void deleteSession(final String sessionkey, final User user) {
+	public void deleteSession(final String sessionkey) {
 		final Session session = databaseDao.getSession(sessionkey);
-		for (final Question q : databaseDao.getSkillQuestions(user, session)) {
+		for (final Question q : databaseDao.getSkillQuestions(userService.getCurrentUser(), session)) {
 			databaseDao.deleteQuestionWithAnswers(q);
 		}
 		databaseDao.deleteSession(session);

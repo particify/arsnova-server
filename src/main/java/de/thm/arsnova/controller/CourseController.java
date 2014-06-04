@@ -43,8 +43,7 @@ import de.thm.arsnova.services.IUserService;
 @RestController
 public class CourseController extends AbstractController {
 
-	public static final Logger LOGGER = LoggerFactory
-			.getLogger(CourseController.class);
+	public static final Logger LOGGER = LoggerFactory.getLogger(CourseController.class);
 
 	@Autowired(required = false)
 	private ConnectorClient connectorClient;

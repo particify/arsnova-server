@@ -25,7 +25,6 @@ import java.util.UUID;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.User;
 
 public interface ISessionService {
 	Session joinSession(String keyword);
@@ -36,13 +35,15 @@ public interface ISessionService {
 
 	String generateKeyword();
 
-	List<Session> getMySessions(User user);
+	List<Session> getMySessions();
 
-	List<Session> getMyVisitedSessions(User currentUser);
+	List<Session> getMyVisitedSessions();
 
-	LoggedIn registerAsOnlineUser(User user, String sessionkey);
+	LoggedIn registerAsOnlineUser(String sessionkey);
 
 	int countSessions(List<Course> courses);
+
+	int activeUsers(String sessionkey);
 
 	Session setActive(String sessionkey, Boolean lock);
 
@@ -50,7 +51,7 @@ public interface ISessionService {
 
 	Session updateSession(String sessionkey, Session session);
 
-	void deleteSession(String sessionkey, User user);
+	void deleteSession(String sessionkey);
 
 	int getLearningProgress(String sessionkey);
 

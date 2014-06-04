@@ -39,9 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.ISessionService;
-import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.services.SessionService.SessionNameComperator;
 import de.thm.arsnova.services.SessionService.SessionShortNameComperator;
 import de.thm.arsnova.web.DeprecatedApi;
@@ -55,9 +53,6 @@ public class SessionController extends AbstractController {
 	@Autowired
 	private ISessionService sessionService;
 
-	@Autowired
-	private IUserService userService;
-
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.GET)
 	public final Session joinSession(@PathVariable final String sessionkey) {
 		return sessionService.joinSession(sessionkey);
@@ -65,22 +60,20 @@ public class SessionController extends AbstractController {
 
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.DELETE)
 	public final void deleteSession(@PathVariable final String sessionkey) {
-		final User user = userService.getCurrentUser();
-		sessionService.deleteSession(sessionkey, user);
+		sessionService.deleteSession(sessionkey);
 	}
 
 	@DeprecatedApi
 	@RequestMapping(value = "/{sessionkey}/online", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public final LoggedIn registerAsOnlineUser(@PathVariable final String sessionkey) {
-		final User user = userService.getCurrentUser();
-		return sessionService.registerAsOnlineUser(user, sessionkey);
+		return sessionService.registerAsOnlineUser(sessionkey);
 	}
 
 	@DeprecatedApi
 	@RequestMapping(value = "/{sessionkey}/activeusercount", method = RequestMethod.GET)
 	public final int countActiveUsers(@PathVariable final String sessionkey) {
-		return userService.getUsersInSessionCount(sessionkey);
+		return sessionService.activeUsers(sessionkey);
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.POST)
@@ -123,14 +116,13 @@ public class SessionController extends AbstractController {
 			@RequestParam(value = "sortby", defaultValue = "name") final String sortby,
 			final HttpServletResponse response
 			) {
-		final User user = userService.getCurrentUser();
 		List<Session> sessions = null;
 
 		/* TODO implement all parameter combinations, implement use of user parameter */
 		if (ownedOnly && !visitedOnly) {
-			sessions = sessionService.getMySessions(user);
+			sessions = sessionService.getMySessions();
 		} else if (visitedOnly && !ownedOnly) {
-			sessions = sessionService.getMyVisitedSessions(userService.getCurrentUser());
+			sessions = sessionService.getMyVisitedSessions();
 		} else {
 			response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
 			return null;

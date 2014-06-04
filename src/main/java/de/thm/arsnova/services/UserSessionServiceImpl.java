@@ -3,8 +3,6 @@ package de.thm.arsnova.services;
 import java.io.Serializable;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
@@ -16,8 +14,6 @@ import de.thm.arsnova.entities.User;
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class UserSessionServiceImpl implements UserSessionService, Serializable {
 	private static final long serialVersionUID = 1L;
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(UserSessionServiceImpl.class);
 
 	private User user;
 	private Session session;
@@ -53,10 +49,6 @@ public class UserSessionServiceImpl implements UserSessionService, Serializable 
 	@Override
 	public UUID getSocketId() {
 		return socketId;
-	}
-
-	private boolean hasConnectedWebSocket() {
-		return getSocketId() != null;
 	}
 
 	@Override

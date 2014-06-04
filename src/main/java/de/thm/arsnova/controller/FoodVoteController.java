@@ -39,8 +39,7 @@ import de.thm.arsnova.services.IFoodService;
 @RequestMapping("/canteen/menu/vote")
 public class FoodVoteController extends AbstractController {
 
-	public static final Logger LOGGER = LoggerFactory
-			.getLogger(FoodVoteController.class);
+	public static final Logger LOGGER = LoggerFactory.getLogger(FoodVoteController.class);
 
 	@Autowired
 	private IFoodService foodService;
@@ -50,7 +49,7 @@ public class FoodVoteController extends AbstractController {
 			@RequestBody final Object menu,
 			final HttpServletResponse response
 			) {
-		String menustring = JSONObject.fromObject(menu).getString("menu");
+		final String menustring = JSONObject.fromObject(menu).getString("menu");
 		foodService.vote(menustring);
 	}
 

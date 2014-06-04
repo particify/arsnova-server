@@ -177,7 +177,7 @@ public class SessionServiceTest {
 			when(mockDatabase.getSession(anyString())).thenReturn(session);
 			ReflectionTestUtils.setField(getTargetObject(sessionService), "databaseDao", mockDatabase);
 
-			sessionService.deleteSession(session.getKeyword(), userService.getCurrentUser());
+			sessionService.deleteSession(session.getKeyword());
 
 			verify(mockDatabase).deleteQuestionWithAnswers(q1);
 			verify(mockDatabase).deleteQuestionWithAnswers(q2);
@@ -190,13 +190,13 @@ public class SessionServiceTest {
 	@Test(expected = AuthenticationCredentialsNotFoundException.class)
 	public void testShouldNotDeleteSessionIfUnauthorized() {
 		setAuthenticated(false, "nobody");
-		sessionService.deleteSession("12345678", userService.getCurrentUser());
+		sessionService.deleteSession("12345678");
 	}
 
 	@Test(expected = ForbiddenException.class)
 	public void testShouldNotDeleteSessionIfNotOwner() {
 		setAuthenticated(true, "anybody");
-		sessionService.deleteSession("12345678", userService.getCurrentUser());
+		sessionService.deleteSession("12345678");
 	}
 
 	@Test

@@ -175,11 +175,6 @@ public class UserService implements IUserService {
 	}
 
 	@Override
-	public int getUsersInSessionCount(final String keyword) {
-		return getUsersInSession(keyword).size();
-	}
-
-	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public void addCurrentUserToSessionMap(final String keyword) {
 		final User user = getCurrentUser();
