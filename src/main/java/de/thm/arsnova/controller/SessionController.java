@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.SessionService.SessionNameComperator;
 import de.thm.arsnova.services.SessionService.SessionShortNameComperator;
@@ -119,13 +121,17 @@ public class SessionController extends AbstractController {
 		List<Session> sessions = null;
 
 		/* TODO implement all parameter combinations, implement use of user parameter */
-		if (ownedOnly && !visitedOnly) {
-			sessions = sessionService.getMySessions();
-		} else if (visitedOnly && !ownedOnly) {
-			sessions = sessionService.getMyVisitedSessions();
-		} else {
-			response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
-			return null;
+		try {
+			if (ownedOnly && !visitedOnly) {
+				sessions = sessionService.getMySessions();
+			} else if (visitedOnly && !ownedOnly) {
+				sessions = sessionService.getMyVisitedSessions();
+			} else {
+				response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
+				return null;
+			}
+		} catch (final AccessDeniedException e) {
+			throw new UnauthorizedException();
 		}
 
 		if (sessions == null || sessions.isEmpty()) {
