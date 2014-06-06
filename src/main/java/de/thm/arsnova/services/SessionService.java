@@ -199,7 +199,6 @@ public class SessionService implements ISessionService {
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
 	public final LoggedIn registerAsOnlineUser(final String sessionkey) {
 		/* HTTP polling solution (legacy) */
 
