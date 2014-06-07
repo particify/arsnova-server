@@ -30,8 +30,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+/**
+ * The ConfigurationController provides frontend clients with information necessary to correctly interact with the 
+ * backend and other frontends as well as settings for ARSnova. The the alternative /arsnova-config route is necessary
+ * in case the backend application is deployed as root context.
+ */
 @Controller
-@RequestMapping("/configuration")
+@RequestMapping({"/configuration", "/arsnova-config"})
 public class ConfigurationController extends AbstractController {
 	@Value("${security.guest.enabled}")
 	private String guestEnabled;
@@ -78,7 +83,7 @@ public class ConfigurationController extends AbstractController {
 	@Value("${question.parse-answer-option-formatting:false}")
 	private String parseAnswerOptionFormatting;
 
-	@RequestMapping(value = { "/" }, method = RequestMethod.GET)
+	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public final HashMap<String, Object> getConfiguration(HttpServletRequest request) {
 		HashMap<String, Object> config = new HashMap<String, Object>();
