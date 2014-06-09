@@ -434,7 +434,7 @@ public class UserService implements IUserService {
 		if (domainList.size() > 0) {
 			List<String> patterns = new ArrayList<String>();
 			if (domainList.contains("*")) {
-				patterns.add("([a-z0-9-]\\.)+[a-z0-9-]");
+				patterns.add("([a-z0-9-]+\\.)+[a-z0-9-]+");
 			} else {
 				Pattern patternPattern = Pattern.compile("[a-z0-9.*-]+", Pattern.CASE_INSENSITIVE);
 				for (String patternStr : domainList) {
