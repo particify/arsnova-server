@@ -144,4 +144,12 @@ public class SessionControllerTest {
 		.andExpect(status().isOk())
 		.andExpect(header().string(AbstractController.X_DEPRECATED_API, "1"));
 	}
+
+	@Test
+	public void testShouldEndInUnauthorizedResult() throws Exception {
+		setAuthenticated(false, "ptsr00");
+
+		mockMvc.perform(post("/session/12345678/online").accept(MediaType.APPLICATION_JSON))
+		.andExpect(status().isUnauthorized());
+	}
 }
