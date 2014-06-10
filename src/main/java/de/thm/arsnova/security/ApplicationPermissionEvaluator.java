@@ -17,7 +17,6 @@ import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 
 public class ApplicationPermissionEvaluator implements PermissionEvaluator {
@@ -35,11 +34,11 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 		if (
 				targetDomainObject instanceof Session
-				&& !checkSessionPermission(username, ((Session) targetDomainObject).getKeyword(), permission)
+				&& checkSessionPermission(username, ((Session) targetDomainObject).getKeyword(), permission)
 				) {
-			throw new ForbiddenException();
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	@Override
@@ -51,20 +50,22 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			) {
 		final String username = getUsername(authentication);
 
-		if ("session".equals(targetType) && !checkSessionPermission(username, targetId, permission)) {
-			throw new ForbiddenException();
+		if (
+				"session".equals(targetType)
+				&& checkSessionPermission(username, targetId, permission)) {
+			return true;
 		} else if (
 				"question".equals(targetType)
-				&& !checkQuestionPermission(username, targetId, permission)
+				&& checkQuestionPermission(username, targetId, permission)
 				) {
-			throw new ForbiddenException();
+			return true;
 		} else if (
 				"interposedquestion".equals(targetType)
-				&& !checkInterposedQuestionPermission(username, targetId, permission)
+				&& checkInterposedQuestionPermission(username, targetId, permission)
 				) {
-			throw new ForbiddenException();
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	private boolean checkSessionPermission(

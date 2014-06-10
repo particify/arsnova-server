@@ -1,7 +1,9 @@
 package de.thm.arsnova.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -151,5 +153,21 @@ public class SessionControllerTest {
 
 		mockMvc.perform(post("/session/12345678/online").accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	public void testShouldEndInForbidden() throws Exception {
+		setAuthenticated(true, "ptsr00");
+
+		mockMvc.perform(
+				put("/session/12345678")
+				.content("{\"keyword\":\"12345678\", \"name\":\"Testsession\"}, \"shortName\":\"TS\", \"creator\":\"ptsr00\", \"active\":true")
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		setAuthenticated(true, "other");
+
+		mockMvc.perform(delete("/session/12345678")).andExpect(status().isForbidden());
 	}
 }

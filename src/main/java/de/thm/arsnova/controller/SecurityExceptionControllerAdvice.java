@@ -1,10 +1,14 @@
 package de.thm.arsnova.controller;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -35,9 +39,22 @@ public class SecurityExceptionControllerAdvice {
 	public void handleAuthenticationCredentialsNotFoundException(final Exception e, final HttpServletRequest request) {
 	}
 
-	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	@ExceptionHandler(AccessDeniedException.class)
-	public void handleAccessDeniedException(final Exception e, final HttpServletRequest request) {
+	public void handleAccessDeniedException(
+			final Exception e,
+			final HttpServletRequest request,
+			final HttpServletResponse response
+			) {
+		final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (
+				authentication == null
+				|| authentication.getPrincipal() == null
+				|| authentication instanceof AnonymousAuthenticationToken
+				) {
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			return;
+		}
+		response.setStatus(HttpStatus.FORBIDDEN.value());
 	}
 
 	@ResponseStatus(HttpStatus.FORBIDDEN)
@@ -63,10 +80,5 @@ public class SecurityExceptionControllerAdvice {
 	@ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
 	@ExceptionHandler(NotImplementedException.class)
 	public void handleNotImplementedException(final Exception e, final HttpServletRequest request) {
-	}
-
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	@ExceptionHandler(Exception.class)
-	public void handleAllOtherExceptions(final Exception e, final HttpServletRequest request) {
 	}
 }
