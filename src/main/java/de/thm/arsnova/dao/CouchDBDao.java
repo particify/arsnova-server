@@ -95,7 +95,7 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public final Session getSession(final String keyword) {
 		final Session result = getSessionFromKeyword(keyword);
-		if (result != null && result.isActive()) {
+		if (result != null) {
 			return result;
 		}
 
@@ -1352,7 +1352,7 @@ public class CouchDBDao implements IDatabaseDao {
 		int progress = 0;
 		if (!progressValue.isEmpty()) {
 			if (progressValue.get(0).optJSONArray("value").isArray()) {
-				JSONArray courseProgress = progressValue.get(0).getJSONArray("value");
+				final JSONArray courseProgress = progressValue.get(0).getJSONArray("value");
 				progress = courseProgress.getInt(0) / courseProgress.getInt(1);
 			} else {
 				progress = progressValue.get(0).getInt("value");
