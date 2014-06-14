@@ -385,7 +385,7 @@
 				<configuration>
 					<url>http://localhost:8080/manager/text</url>
 					<server>arsnova</server>
-					<path>/arsnova-war</path>
+					<path>/mobile</path>
 				</configuration>
 			</plugin>
 			<plugin>
