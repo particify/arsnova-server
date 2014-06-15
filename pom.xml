@@ -11,7 +11,10 @@
 		<org.springframework.security-version>3.1.4.RELEASE</org.springframework.security-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.url>https://scm.thm.de/arsnova</project.url>
-		<mobile.path>../arsnova-mobile/src/main/webapp/build/production/ARSnova</mobile.path>
+		<customization.path>${basedir}/../arsnova-customization/src/main/webapp</customization.path>
+		<mobile.path>${basedir}/../arsnova-mobile/src/main/webapp/build/production/ARSnova</mobile.path>
+		<presenter.rootPath>${basedir}/../arsnova-presenter</presenter.rootPath>
+		<presenter.outputDir>target/arsnova-presenter-1.1.0-SNAPSHOT</presenter.outputDir>
 	</properties>
 
 	<developers>
@@ -148,12 +151,6 @@
 	</repositories>
 
 	<dependencies>
-		<dependency>
-			<groupId>de.thm.arsnova</groupId>
-			<artifactId>arsnova-mobile</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<type>war</type>
-		</dependency>
 		<!-- Spring -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -333,7 +330,7 @@
 		<dependency>
 			<groupId>de.thm.arsnova.connector</groupId>
 			<artifactId>connector-client</artifactId>
-			<version>0.40.1-SNAPSHOT</version>
+			<version>0.71.0-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
@@ -359,22 +356,35 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
-
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.mortbay.jetty</groupId>
+				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>7.6.5.v20120716</version>
+				<version>9.2.1.v20140609</version>
 				<configuration>
 					<scanIntervalSeconds>1</scanIntervalSeconds>
-					<webApp> 
-						<contextPath>/</contextPath>
-						<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
-							<resourcesAsCSV>src/main/webapp,${mobile.path}</resourcesAsCSV>
-						</baseResource>
+					<webApp>
 						<overrideDescriptor>src/main/webapp/WEB-INF/web-dev.xml</overrideDescriptor>
 					</webApp>
+					<contextHandlers>
+						<contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
+							<contextPath>/mobile</contextPath>
+							<resourceBase>${mobile.path}</resourceBase>
+						</contextHandler>
+						<contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
+							<contextPath>/presenter</contextPath>
+							<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
+								<resourcesAsCSV>${presenter.rootPath}/${presenter.outputDir},${presenter.rootPath}/src/main/websources,${presenter.rootPath}/src/main/webapp</resourcesAsCSV>
+							</baseResource>
+							<descriptor>${presenter.rootPath}/src/main/config/WEB-INF/web.dev.xml</descriptor>
+							<aliasCheck implementation="org.eclipse.jetty.server.handler.AllowSymLinkAliasChecker" />
+						</contextHandler>
+						<contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
+							<contextPath>/customization</contextPath>
+							<resourceBase>${customization.path}</resourceBase>
+						</contextHandler>
+					</contextHandlers>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -509,7 +519,7 @@
 		</plugins>
 	</build>
 
-	<name>ARSnova</name>
+	<name>ARSnova Backend</name>
 	<description>ARSnova is a great audience response system</description>
 	<organization>
 		<name>Technische Hochschule Mittelhessen</name>
