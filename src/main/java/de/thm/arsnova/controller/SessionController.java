@@ -18,11 +18,14 @@
  */
 package de.thm.arsnova.controller;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
+
+import net.sf.json.JSONObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -170,11 +173,15 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{sessionkey}/mylearningprogress", method = RequestMethod.GET)
-	public final int myLearningProgress(
+	public final JSONObject myLearningProgress(
 			@PathVariable final String sessionkey,
 			final HttpServletResponse response
 			) {
-		return sessionService.getMyLearningProgress(sessionkey);
+		SimpleEntry<Integer, Integer> result = sessionService.getMyLearningProgress(sessionkey);
+		JSONObject json = new JSONObject();
+		json.put("myprogress", result.getKey());
+		json.put("courseprogress", result.getValue());
+		return json;
 	}
 
 	/* internal redirections */

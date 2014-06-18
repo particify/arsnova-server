@@ -18,6 +18,7 @@
  */
 package de.thm.arsnova.dao;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -506,8 +507,8 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public int getMyLearningProgress(Session session, User user) {
+	public SimpleEntry<Integer, Integer> getMyLearningProgress(Session session, User user) {
 		// TODO Auto-generated method stub
-		return 0;
+		return null;
 	}
 }
