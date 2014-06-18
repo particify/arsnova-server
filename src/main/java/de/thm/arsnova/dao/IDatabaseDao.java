@@ -19,6 +19,7 @@
 
 package de.thm.arsnova.dao;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 
 import de.thm.arsnova.connector.model.Course;
@@ -164,5 +165,5 @@ public interface IDatabaseDao {
 
 	int getLearningProgress(Session session);
 
-	int getMyLearningProgress(Session session, User user);
+	SimpleEntry<Integer, Integer> getMyLearningProgress(Session session, User user);
 }

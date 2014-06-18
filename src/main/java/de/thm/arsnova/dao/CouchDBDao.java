@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -1323,42 +1325,44 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public int getLearningProgress(final Session session) {
-		final NovaView courseView = new NovaView("learning_progress_course_value/course_value");
-		final NovaView maximumView = new NovaView("learning_progress_maximum_value/maximum_value");
-		courseView.setKey(session.get_id());
-		maximumView.setKey(session.get_id());
+	public int getLearningProgress(Session session) {
+		NovaView progressView = new NovaView("learning_progress/all");
+		progressView.setStartKeyArray(session.get_id());
+		progressView.setEndKeyArray(session.get_id(), "{}");
 
-		return getProgressPercentage(courseView, maximumView);
+		List<Document> progressResults = this.getDatabase().view(progressView).getResults();
+		// when filtering just by session, the query contains all three values.
+		return getProgressPercentage(progressResults, progressResults);
 	}
 
 	@Override
-	public int getMyLearningProgress(final Session session, final User user) {
-		final NovaView userView = new NovaView("learning_progress_user_value/user_value");
-		final NovaView maximumView = new NovaView("learning_progress_maximum_value/maximum_value");
-		userView.setKey(session.get_id(), user.getUsername());
-		maximumView.setKey(session.get_id());
+	public SimpleEntry<Integer,Integer> getMyLearningProgress(Session session, User user) {
+		NovaView progressView = new NovaView("learning_progress/all");
+		NovaView maximumView = new NovaView("learning_progress/all");
+		progressView.setKey(session.get_id(), user.getUsername());
+		maximumView.setStartKeyArray(session.get_id());
+		maximumView.setEndKeyArray(session.get_id(), "{}");
 
-		return getProgressPercentage(userView, maximumView);
+		List<Document> progressResults = this.getDatabase().view(progressView).getResults();
+		List<Document> maximumResults = this.getDatabase().view(maximumView).getResults();
+
+		int myprogress = getProgressPercentage(progressResults, maximumResults);
+		int courseprogress = getProgressPercentage(maximumResults, maximumResults);
+		return new AbstractMap.SimpleEntry<Integer, Integer>(myprogress, courseprogress);
 	}
 
-	private int getProgressPercentage(final NovaView progressView, final NovaView maximumView) {
-		final List<Document> progressValue = getDatabase().view(progressView).getResults();
-		final List<Document> maximumValue = getDatabase().view(maximumView).getResults();
-		if (maximumValue.isEmpty()) {
+	private int getProgressPercentage(List<Document> progressResults, List<Document> maximumResults) {
+		if (progressResults.isEmpty() || maximumResults.isEmpty()) {
 			return 0;
 		}
-		final int maximum = maximumValue.get(0).getInt("value");
-		int progress = 0;
-		if (!progressValue.isEmpty()) {
-			if (progressValue.get(0).optJSONArray("value").isArray()) {
-				final JSONArray courseProgress = progressValue.get(0).getJSONArray("value");
-				progress = courseProgress.getInt(0) / courseProgress.getInt(1);
-			} else {
-				progress = progressValue.get(0).getInt("value");
-			}
+		final int max = maximumResults.get(0).getJSONArray("value").getInt(0);
+		JSONArray values = progressResults.get(0).getJSONArray("value");
+		final int userResult = values.getInt(1);
+		final int numAnswers = values.getInt(2);
+		if (numAnswers == 0) {
+			return 0;
 		}
-		final int percentage = (int)(progress * 100.0f / maximum);
-		return percentage < 0 ? 0 : percentage;
+		final int averageResult = userResult/numAnswers;
+		return (int)((averageResult * 100.0f) / max);
 	}
 }
