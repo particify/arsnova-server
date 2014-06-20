@@ -1326,43 +1326,61 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public int getLearningProgress(Session session) {
-		NovaView progressView = new NovaView("learning_progress/all");
-		progressView.setStartKeyArray(session.get_id());
-		progressView.setEndKeyArray(session.get_id(), "{}");
+		// Note: we have to use this many views because our CouchDB version does not support
+		// advanced features like summing over lists. Thus, we have to do it all by ourselves...
+		NovaView maximumValueView = new NovaView("learning_progress_maximum_value/max");
+		NovaView answerSumView = new NovaView("learning_progress_user_values/sum");
+		NovaView answerDocumentCountView = new NovaView("learning_progress_course_answers/count");
+		maximumValueView.setKey(session.get_id());
+		answerSumView.setStartKeyArray(session.get_id());
+		answerSumView.setEndKeyArray(session.get_id(), "{}");
+		answerDocumentCountView.setStartKeyArray(session.get_id());
+		answerDocumentCountView.setEndKeyArray(session.get_id(), "{}");
+		answerDocumentCountView.setGroup(true);
 
-		List<Document> progressResults = this.getDatabase().view(progressView).getResults();
-		// when filtering just by session, the query contains all three values.
-		return getProgressPercentage(progressResults, progressResults);
+		List<Document> maximumValueResult = this.getDatabase().view(maximumValueView).getResults();
+		List<Document> answerSumResult = this.getDatabase().view(answerSumView).getResults();
+		List<Document> answerDocumentCountResult = this.getDatabase().view(answerDocumentCountView).getResults();
+
+		if (maximumValueResult.isEmpty() || answerSumResult.isEmpty() || answerDocumentCountResult.isEmpty()) {
+			return 0;
+		}
+
+		final double courseMaximumValue = maximumValueResult.get(0).getInt("value");
+		final double userTotalValue = answerSumResult.get(0).getInt("value");
+		final double numUsers = answerDocumentCountResult.size();
+		if (courseMaximumValue == 0 || numUsers == 0) {
+			return 0;
+		}
+		final double courseAverageValue = userTotalValue / numUsers;
+		final double courseProgress = courseAverageValue / courseMaximumValue;
+		return (int)Math.round(courseProgress * 100);
 	}
 
 	@Override
 	public SimpleEntry<Integer,Integer> getMyLearningProgress(Session session, User user) {
-		NovaView progressView = new NovaView("learning_progress/all");
-		NovaView maximumView = new NovaView("learning_progress/all");
-		progressView.setKey(session.get_id(), user.getUsername());
-		maximumView.setStartKeyArray(session.get_id());
-		maximumView.setEndKeyArray(session.get_id(), "{}");
+		final int courseProgress = this.getLearningProgress(session);
 
-		List<Document> progressResults = this.getDatabase().view(progressView).getResults();
-		List<Document> maximumResults = this.getDatabase().view(maximumView).getResults();
+		NovaView maximumValueView = new NovaView("learning_progress_maximum_value/max");
+		NovaView answerSumView = new NovaView("learning_progress_user_values/sum");
+		maximumValueView.setKey(session.get_id());
+		answerSumView.setKey(session.get_id(), user.getUsername());
 
-		int myprogress = getProgressPercentage(progressResults, maximumResults);
-		int courseprogress = getProgressPercentage(maximumResults, maximumResults);
-		return new AbstractMap.SimpleEntry<Integer, Integer>(myprogress, courseprogress);
-	}
+		List<Document> maximumValueResult = this.getDatabase().view(maximumValueView).getResults();
+		List<Document> answerSumResult = this.getDatabase().view(answerSumView).getResults();
 
-	private int getProgressPercentage(List<Document> progressResults, List<Document> maximumResults) {
-		if (progressResults.isEmpty() || maximumResults.isEmpty()) {
-			return 0;
+		if (maximumValueResult.isEmpty() || answerSumResult.isEmpty()) {
+			return new AbstractMap.SimpleEntry<Integer, Integer>(0, courseProgress);
 		}
-		final int max = maximumResults.get(0).getJSONArray("value").getInt(0);
-		JSONArray values = progressResults.get(0).getJSONArray("value");
-		final int userResult = values.getInt(1);
-		final int numAnswers = values.getInt(2);
-		if (numAnswers == 0) {
-			return 0;
+
+		final double courseMaximumValue = maximumValueResult.get(0).getInt("value");
+		final double userTotalValue = answerSumResult.get(0).getInt("value");
+
+		if (courseMaximumValue == 0) {
+			return new AbstractMap.SimpleEntry<Integer, Integer>(0, courseProgress);
 		}
-		final int averageResult = userResult/numAnswers;
-		return (int)((averageResult * 100.0f) / max);
+		final double myProgress = userTotalValue / courseMaximumValue;
+
+		return new AbstractMap.SimpleEntry<Integer, Integer>((int)Math.round((myProgress*100)), courseProgress);
 	}
 }
