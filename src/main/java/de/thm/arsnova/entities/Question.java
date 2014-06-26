@@ -56,6 +56,8 @@ public class Question {
 	private int gridSizeY;
 	private boolean gridIsHidden;
 	private int imgRotation;
+	private boolean toggleFieldsLeft;
+	private int numClickableFields;
 
 	public final String getType() {
 		return type;
@@ -319,6 +321,22 @@ public class Question {
 
 	public void setImgRotation(int imgRotation) {
 		this.imgRotation = imgRotation;
+	}
+	
+	public boolean getToggleFieldsLeft() {
+		return toggleFieldsLeft;
+	}
+
+	public void setToggleFieldsLeft(boolean toggleFieldsLeft) {
+		this.toggleFieldsLeft = toggleFieldsLeft;
+	}
+	
+	public int getNumClickableFields() {
+		return numClickableFields;
+	}
+
+	public void setNumClickableFields(int numClickableFields) {
+		this.numClickableFields = numClickableFields;
 	}
 
 	@Override

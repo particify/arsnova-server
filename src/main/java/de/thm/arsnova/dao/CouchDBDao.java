@@ -277,7 +277,9 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("gridSizeY", question.getGridSizeY());
 		q.put("gridIsHidden", question.getGridIsHidden());
 		q.put("imgRotation", question.getImgRotation());
-
+		q.put("toggleFieldsLeft", question.getToggleFieldsLeft());
+		q.put("numClickableFields", question.getNumClickableFields());
+		
 		return q;
 	}
 
@@ -307,6 +309,8 @@ public class CouchDBDao implements IDatabaseDao {
 			q.put("gridSizeY", question.getGridSizeY());
 			q.put("gridIsHidden", question.getGridIsHidden());
 			q.put("imgRotation", question.getImgRotation());
+			q.put("toggleFieldsLeft", question.getToggleFieldsLeft());
+			q.put("numClickableFields", question.getNumClickableFields());
 			database.saveDocument(q);
 			question.set_rev(q.getRev());
 
