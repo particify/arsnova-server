@@ -49,6 +49,13 @@ public class Question {
 	private int offsetX;
 	private int offsetY;
 	private int zoomLvl;
+	private int gridOffsetX;
+	private int gridOffsetY;
+	private int gridZoomLvl;
+	private int gridSizeX;
+	private int gridSizeY;
+	private boolean gridIsHidden;
+	private int imgRotation;
 
 	public final String getType() {
 		return type;
@@ -256,6 +263,62 @@ public class Question {
 
 	public void setZoomLvl(final int zoomLvl) {
 		this.zoomLvl = zoomLvl;
+	}
+	
+	public int getGridOffsetX() {
+		return gridOffsetX;
+	}
+
+	public void setGridOffsetX(int gridOffsetX) {
+		this.gridOffsetX = gridOffsetX;
+	}
+	
+	public int getGridOffsetY() {
+		return gridOffsetY;
+	}
+
+	public void setGridOffsetY(int gridOffsetY) {
+		this.gridOffsetY = gridOffsetY;
+	}
+	
+	public int getGridZoomLvl() {
+		return gridZoomLvl;
+	}
+
+	public void setGridZoomLvl(int gridZoomLvl) {
+		this.gridZoomLvl = gridZoomLvl;
+	}
+	
+	public int getGridSizeX() {
+		return gridSizeX;
+	}
+
+	public void setGridSizeX(int gridSizeX) {
+		this.gridSizeX = gridSizeX;
+	}
+	
+	public int getGridSizeY() {
+		return gridSizeY;
+	}
+
+	public void setGridSizeY(int gridSizeY) {
+		this.gridSizeY = gridSizeY;
+	}
+	
+	public boolean getGridIsHidden() {
+		return gridIsHidden;
+	}
+
+	public void setGridIsHidden(boolean gridIsHidden) {
+		this.gridIsHidden = gridIsHidden;
+	}
+	
+	public int getImgRotation() {
+		return imgRotation;
+	}
+
+	public void setImgRotation(int imgRotation) {
+		this.imgRotation = imgRotation;
 	}
 
 	@Override
