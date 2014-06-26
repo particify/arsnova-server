@@ -279,6 +279,7 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("imgRotation", question.getImgRotation());
 		q.put("toggleFieldsLeft", question.getToggleFieldsLeft());
 		q.put("numClickableFields", question.getNumClickableFields());
+		q.put("thresholdCorrectAnswers", question.getThresholdCorrectAnswers());
 		
 		return q;
 	}
@@ -311,6 +312,7 @@ public class CouchDBDao implements IDatabaseDao {
 			q.put("imgRotation", question.getImgRotation());
 			q.put("toggleFieldsLeft", question.getToggleFieldsLeft());
 			q.put("numClickableFields", question.getNumClickableFields());
+			q.put("thresholdCorrectAnswers", question.getThresholdCorrectAnswers());
 			database.saveDocument(q);
 			question.set_rev(q.getRev());
 

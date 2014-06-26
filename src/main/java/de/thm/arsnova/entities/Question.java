@@ -58,6 +58,7 @@ public class Question {
 	private int imgRotation;
 	private boolean toggleFieldsLeft;
 	private int numClickableFields;
+	private int thresholdCorrectAnswers;
 
 	public final String getType() {
 		return type;
@@ -337,6 +338,14 @@ public class Question {
 
 	public void setNumClickableFields(int numClickableFields) {
 		this.numClickableFields = numClickableFields;
+	}
+	
+	public int getThresholdCorrectAnswers() {
+		return thresholdCorrectAnswers;
+	}
+	
+	public void setThresholdCorrectAnswers(int thresholdCorrectAnswers) {
+		this.thresholdCorrectAnswers = thresholdCorrectAnswers;
 	}
 
 	@Override
