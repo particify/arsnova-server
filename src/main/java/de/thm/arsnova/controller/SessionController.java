@@ -42,6 +42,7 @@ import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.ISessionService;
+import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.services.SessionService.SessionNameComperator;
 import de.thm.arsnova.services.SessionService.SessionShortNameComperator;
 import de.thm.arsnova.web.DeprecatedApi;
@@ -55,9 +56,16 @@ public class SessionController extends AbstractController {
 	@Autowired
 	private ISessionService sessionService;
 
+	@Autowired
+	private IUserService userService;
+
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.GET)
 	public final Session joinSession(@PathVariable final String sessionkey) {
-		return sessionService.joinSession(sessionkey);
+		final Session session = sessionService.joinSession(sessionkey);
+		if (session.getCreator().equals(userService.getCurrentUser().getUsername())) {
+			session.setCreator("NOT VISIBLE TO YOU");
+		}
+		return session;
 	}
 
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.DELETE)
