@@ -270,7 +270,17 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("offsetX", question.getOffsetX());
 		q.put("offsetY", question.getOffsetY());
 		q.put("zoomLvl", question.getZoomLvl());
-
+		q.put("gridOffsetX", question.getGridOffsetX());
+		q.put("gridOffsetY", question.getGridOffsetY());
+		q.put("gridZoomLvl", question.getGridZoomLvl());
+		q.put("gridSizeX", question.getGridSizeX());
+		q.put("gridSizeY", question.getGridSizeY());
+		q.put("gridIsHidden", question.getGridIsHidden());
+		q.put("imgRotation", question.getImgRotation());
+		q.put("toggleFieldsLeft", question.getToggleFieldsLeft());
+		q.put("numClickableFields", question.getNumClickableFields());
+		q.put("thresholdCorrectAnswers", question.getThresholdCorrectAnswers());
+		
 		return q;
 	}
 
@@ -293,6 +303,16 @@ public class CouchDBDao implements IDatabaseDao {
 			q.put("offsetX", question.getOffsetX());
 			q.put("offsetY", question.getOffsetY());
 			q.put("zoomLvl", question.getZoomLvl());
+			q.put("gridOffsetX", question.getGridOffsetX());
+			q.put("gridOffsetY", question.getGridOffsetY());
+			q.put("gridZoomLvl", question.getGridZoomLvl());
+			q.put("gridSizeX", question.getGridSizeX());
+			q.put("gridSizeY", question.getGridSizeY());
+			q.put("gridIsHidden", question.getGridIsHidden());
+			q.put("imgRotation", question.getImgRotation());
+			q.put("toggleFieldsLeft", question.getToggleFieldsLeft());
+			q.put("numClickableFields", question.getNumClickableFields());
+			q.put("thresholdCorrectAnswers", question.getThresholdCorrectAnswers());
 			database.saveDocument(q);
 			question.set_rev(q.getRev());
 
