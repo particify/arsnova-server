@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.token.Sha512DigestUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -65,8 +66,10 @@ public class SessionController extends AbstractController {
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.GET)
 	public final Session joinSession(@PathVariable final String sessionkey) {
 		final Session session = sessionService.joinSession(sessionkey);
-		if (session.getCreator().equals(userService.getCurrentUser().getUsername())) {
+		if (! session.getCreator().equals(userService.getCurrentUser().getUsername())) {
 			session.setCreator("NOT VISIBLE TO YOU");
+		} else {
+			session.setCreator(Sha512DigestUtils.shaHex(session.getCreator()));
 		}
 		return session;
 	}
@@ -185,8 +188,8 @@ public class SessionController extends AbstractController {
 			@PathVariable final String sessionkey,
 			final HttpServletResponse response
 			) {
-		SimpleEntry<Integer, Integer> result = sessionService.getMyLearningProgress(sessionkey);
-		JSONObject json = new JSONObject();
+		final SimpleEntry<Integer, Integer> result = sessionService.getMyLearningProgress(sessionkey);
+		final JSONObject json = new JSONObject();
 		json.put("myprogress", result.getKey());
 		json.put("courseprogress", result.getValue());
 		return json;
