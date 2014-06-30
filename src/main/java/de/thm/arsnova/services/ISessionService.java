@@ -19,6 +19,7 @@
 
 package de.thm.arsnova.services;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,5 +56,5 @@ public interface ISessionService {
 
 	int getLearningProgress(String sessionkey);
 
-	int getMyLearningProgress(String sessionkey);
+	SimpleEntry<Integer, Integer> getMyLearningProgress(String sessionkey);
 }

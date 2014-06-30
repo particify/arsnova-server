@@ -20,6 +20,7 @@
 package de.thm.arsnova.services;
 
 import java.io.Serializable;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -262,7 +263,7 @@ public class SessionService implements ISessionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getMyLearningProgress(final String sessionkey) {
+	public SimpleEntry<Integer,Integer> getMyLearningProgress(final String sessionkey) {
 		final Session session = databaseDao.getSession(sessionkey);
 		final User user = userService.getCurrentUser();
 		return databaseDao.getMyLearningProgress(session, user);
