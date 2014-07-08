@@ -280,7 +280,7 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("toggleFieldsLeft", question.getToggleFieldsLeft());
 		q.put("numClickableFields", question.getNumClickableFields());
 		q.put("thresholdCorrectAnswers", question.getThresholdCorrectAnswers());
-		
+
 		return q;
 	}
 
@@ -891,9 +891,13 @@ public class CouchDBDao implements IDatabaseDao {
 		// Do these sessions still exist?
 		final List<Session> result = new ArrayList<Session>();
 		for (final Session s : allSessions) {
-			final Session session = getSessionFromKeyword(s.getKeyword());
-			if (session != null) {
-				result.add(session);
+			try {
+				final Session session = getSessionFromKeyword(s.getKeyword());
+				if (session != null) {
+					result.add(session);
+				}
+			} catch (final NotFoundException e) {
+				// TODO Remove non existant session
 			}
 		}
 		return result;
@@ -1345,12 +1349,12 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public int getLearningProgress(Session session) {
+	public int getLearningProgress(final Session session) {
 		// Note: we have to use this many views because our CouchDB version does not support
 		// advanced features like summing over lists. Thus, we have to do it all by ourselves...
-		NovaView maximumValueView = new NovaView("learning_progress_maximum_value/max");
-		NovaView answerSumView = new NovaView("learning_progress_user_values/sum");
-		NovaView answerDocumentCountView = new NovaView("learning_progress_course_answers/count");
+		final NovaView maximumValueView = new NovaView("learning_progress_maximum_value/max");
+		final NovaView answerSumView = new NovaView("learning_progress_user_values/sum");
+		final NovaView answerDocumentCountView = new NovaView("learning_progress_course_answers/count");
 		maximumValueView.setKey(session.get_id());
 		answerSumView.setStartKeyArray(session.get_id());
 		answerSumView.setEndKeyArray(session.get_id(), "{}");
@@ -1358,9 +1362,9 @@ public class CouchDBDao implements IDatabaseDao {
 		answerDocumentCountView.setEndKeyArray(session.get_id(), "{}");
 		answerDocumentCountView.setGroup(true);
 
-		List<Document> maximumValueResult = this.getDatabase().view(maximumValueView).getResults();
-		List<Document> answerSumResult = this.getDatabase().view(answerSumView).getResults();
-		List<Document> answerDocumentCountResult = this.getDatabase().view(answerDocumentCountView).getResults();
+		final List<Document> maximumValueResult = getDatabase().view(maximumValueView).getResults();
+		final List<Document> answerSumResult = getDatabase().view(answerSumView).getResults();
+		final List<Document> answerDocumentCountResult = getDatabase().view(answerDocumentCountView).getResults();
 
 		if (maximumValueResult.isEmpty() || answerSumResult.isEmpty() || answerDocumentCountResult.isEmpty()) {
 			return 0;
@@ -1378,16 +1382,16 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public SimpleEntry<Integer,Integer> getMyLearningProgress(Session session, User user) {
-		final int courseProgress = this.getLearningProgress(session);
+	public SimpleEntry<Integer,Integer> getMyLearningProgress(final Session session, final User user) {
+		final int courseProgress = getLearningProgress(session);
 
-		NovaView maximumValueView = new NovaView("learning_progress_maximum_value/max");
-		NovaView answerSumView = new NovaView("learning_progress_user_values/sum");
+		final NovaView maximumValueView = new NovaView("learning_progress_maximum_value/max");
+		final NovaView answerSumView = new NovaView("learning_progress_user_values/sum");
 		maximumValueView.setKey(session.get_id());
 		answerSumView.setKey(session.get_id(), user.getUsername());
 
-		List<Document> maximumValueResult = this.getDatabase().view(maximumValueView).getResults();
-		List<Document> answerSumResult = this.getDatabase().view(answerSumView).getResults();
+		final List<Document> maximumValueResult = getDatabase().view(maximumValueView).getResults();
+		final List<Document> answerSumResult = getDatabase().view(answerSumView).getResults();
 
 		if (maximumValueResult.isEmpty() || answerSumResult.isEmpty()) {
 			return new AbstractMap.SimpleEntry<Integer, Integer>(0, courseProgress);
@@ -1401,6 +1405,6 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		final double myProgress = userTotalValue / courseMaximumValue;
 
-		return new AbstractMap.SimpleEntry<Integer, Integer>((int)Math.round((myProgress*100)), courseProgress);
+		return new AbstractMap.SimpleEntry<Integer, Integer>((int)Math.round(myProgress*100), courseProgress);
 	}
 }
