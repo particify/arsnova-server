@@ -247,7 +247,7 @@
 		<dependency>
 			<groupId>com.corundumstudio.socketio</groupId>
 			<artifactId>netty-socketio</artifactId>
-			<version>1.0.1</version>
+			<version>1.7.1</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.inject</groupId>
