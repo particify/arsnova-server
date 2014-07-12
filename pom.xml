@@ -9,6 +9,7 @@
 	<properties>
 		<org.springframework-version>4.0.5.RELEASE</org.springframework-version>
 		<org.springframework.security-version>3.2.4.RELEASE</org.springframework.security-version>
+		<org.springframework.integration-mail-version>4.0.3.RELEASE</org.springframework.integration-mail-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.url>https://scm.thm.de/arsnova</project.url>
 		<mobile.production.path>../arsnova-mobile/src/main/webapp/build/production/ARSnova</mobile.production.path>
@@ -137,6 +138,11 @@
 	</repositories>
 
 	<dependencies>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.6</version>
+		</dependency>
 		<!-- Spring -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -154,6 +160,11 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
 			<version>${org.springframework-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.integration</groupId>
+			<artifactId>spring-integration-mail</artifactId>
+			<version>${org.springframework.integration-mail-version}</version>
 		</dependency>
 		<!-- Security -->
 		<dependency>
