@@ -65,6 +65,9 @@ public class ConfigurationController extends AbstractController {
 	@Value("${links.privacy-policy.url}")
 	private String privacyPolicyUrl;
 
+	@Value("${links.documentation.url}")
+	private String documentationUrl;
+
 	@Value("${features.mathjax.enabled:true}")
 	private String mathJaxEnabled;
 
@@ -100,6 +103,10 @@ public class ConfigurationController extends AbstractController {
 		}
 		if (!"".equals(presenterPath)) {
 			config.put("presenterPath", presenterPath);
+		}
+
+		if (!"".equals(documentationUrl)) {
+			config.put("documentationUrl", documentationUrl);
 		}
 		if (!"".equals(overlayUrl)) {
 			config.put("overlayUrl", overlayUrl);
