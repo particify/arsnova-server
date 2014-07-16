@@ -32,7 +32,7 @@ public class ExtraConfig {
 		final PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
 		configurer.setLocations(new Resource[] {
 				new ClassPathResource("arsnova.properties.example"),
-				new FileSystemResource("file:///etc/arsnova/arsnova.properties"),
+				new FileSystemResource("/etc/arsnova/arsnova.properties"),
 		});
 		configurer.setIgnoreResourceNotFound(true);
 		configurer.setIgnoreUnresolvablePlaceholders(false);
