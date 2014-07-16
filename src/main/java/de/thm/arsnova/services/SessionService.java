@@ -130,11 +130,13 @@ public class SessionService implements ISessionService {
 	@Override
 	public final List<Session> getMySessions(final User user) {
 		List<Session> mySessions = databaseDao.getMySessions(user);
-		if (connectorClient == null) {
+		if (true /*connectorClient == null*/) {
 			return mySessions;
 		}
 
-		List<Session> courseSessions = databaseDao.getCourseSessions(
+		/* FIXME: Database view is missing (setuptool) so code below has been disabled */
+
+		final List<Session> courseSessions = databaseDao.getCourseSessions(
 				connectorClient.getCourses(user.getUsername()).getCourse()
 				);
 
@@ -221,6 +223,11 @@ public class SessionService implements ISessionService {
 
 	@Override
 	public int countSessions(List<Course> courses) {
+		if (true) {
+			/* FIXME: Database view is missing (setuptool) so code below has been disabled */
+			return 0;
+		}
+
 		List<Session> sessions = databaseDao.getCourseSessions(courses);
 		if (sessions == null) {
 			return 0;
