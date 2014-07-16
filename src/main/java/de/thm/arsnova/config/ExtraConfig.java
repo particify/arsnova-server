@@ -21,6 +21,11 @@ public class ExtraConfig {
 	@Autowired
 	private Environment env;
 
+	@Value(value = "${connector.enable}") private boolean connectorEnable;
+	@Value(value = "${connector.uri}") private String connectorUri;
+	@Value(value = "${connector.username}") private String connectorUsername;
+	@Value(value = "${connector.password}") private String connectorPassword;
+
 	@Value(value = "${socketio.ip}") private String socketIp;
 	@Value(value = "${socketio.port}") private int socketPort;
 	@Value(value = "${security.ssl}") private boolean socketUseSll;
@@ -41,14 +46,14 @@ public class ExtraConfig {
 
 	@Bean(name = "connectorClient")
 	public ConnectorClient connectorClient() {
-		if (!"true".equals(env.getProperty("connector.enable"))) {
+		if (!connectorEnable) {
 			return null;
 		}
 
 		final ConnectorClientImpl connectorClient = new ConnectorClientImpl();
-		connectorClient.setServiceLocation(env.getProperty("connector.uri"));
-		connectorClient.setUsername(env.getProperty("connector.username"));
-		connectorClient.setPassword(env.getProperty("connector.password"));
+		connectorClient.setServiceLocation(connectorUri);
+		connectorClient.setUsername(connectorUsername);
+		connectorClient.setPassword(connectorPassword);
 		return connectorClient;
 	}
 
