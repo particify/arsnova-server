@@ -966,7 +966,7 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public List<Session> getCourseSessions(final List<Course> courses) {
-		final ExtendedView view = new ExtendedView("logged_in/by_courseid");
+		final ExtendedView view = new ExtendedView("session/by_courseid");
 		view.setCourseIdKeys(courses);
 
 		final ViewResults sessions = getDatabase().view(view);
