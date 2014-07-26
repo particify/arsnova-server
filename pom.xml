@@ -11,7 +11,9 @@
 		<org.springframework.security-version>3.2.4.RELEASE</org.springframework.security-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.url>https://scm.thm.de/arsnova</project.url>
-		<mobile.path>../arsnova-mobile/src/main/webapp/build/production/ARSnova</mobile.path>
+		<mobile.production.path>../arsnova-mobile/src/main/webapp/build/production/ARSnova</mobile.production.path>
+		<mobile.testing.path>../arsnova-mobile/src/main/webapp/build/testing/ARSnova</mobile.testing.path>
+		<mobile.path>${mobile.production.path}</mobile.path>
 	</properties>
 
 	<developers>
