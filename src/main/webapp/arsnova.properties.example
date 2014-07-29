@@ -158,6 +158,7 @@ features.mathjax.enabled=true
 # behavior will change in future releases.
 #
 features.markdown.enabled=false
+features.learning-progress.enabled=false
 features.question-format.flashcard.enabled=false
 features.question-format.grid-square.enabled=false
 
