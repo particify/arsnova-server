@@ -80,7 +80,8 @@ public class UserController extends AbstractController {
 
 	@RequestMapping(value = { "/{username}/activate" }, method = { RequestMethod.POST,
 			RequestMethod.GET })
-	public final void activate(@PathVariable final String username,
+	public final void activate(
+			@PathVariable final String username,
 			@RequestParam final String key, final HttpServletRequest request,
 			final HttpServletResponse response) {
 		DbUser dbUser = userService.getDbUser(username);
@@ -95,11 +96,35 @@ public class UserController extends AbstractController {
 	}
 
 	@RequestMapping(value = { "/{username}" }, method = RequestMethod.DELETE)
-	public final void activate(@PathVariable final String username,
+	public final void activate(
+			@PathVariable final String username,
 			final HttpServletRequest request,
 			final HttpServletResponse response) {
 		if (null == userService.deleteDbUser(username)) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+		}
+	}
+
+	@RequestMapping(value = { "/{username}/resetpassword" }, method = RequestMethod.POST)
+	public final void resetPassword(
+			@PathVariable final String username,
+			@RequestParam(required = false) final String key,
+			@RequestParam(required = false) final String password,
+			final HttpServletRequest request,
+			final HttpServletResponse response) {
+		DbUser dbUser = userService.getDbUser(username);
+		if (null == dbUser) {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+
+			return;
+		}
+
+		if (null != key) {
+			if (!userService.resetPassword(dbUser, key, password)) {
+				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+			}
+		} else {
+			userService.initiatePasswordReset(username);
 		}
 	}
 }

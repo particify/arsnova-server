@@ -6,6 +6,8 @@ public class DbUser {
 	private String username;
 	private String password;
 	private String activationKey;
+	private String passwordResetKey;
+	private long passwordResetTime;
 	private long creation;
 	private long lastLogin;
 
@@ -57,6 +59,22 @@ public class DbUser {
 
 	public void setActivationKey(String activationKey) {
 		this.activationKey = activationKey;
+	}
+
+	public String getPasswordResetKey() {
+		return passwordResetKey;
+	}
+
+	public void setPasswordResetKey(String passwordResetKey) {
+		this.passwordResetKey = passwordResetKey;
+	}
+
+	public long getPasswordResetTime() {
+		return passwordResetTime;
+	}
+
+	public void setPasswordResetTime(long passwordResetTime) {
+		this.passwordResetTime = passwordResetTime;
 	}
 
 	public long getCreation() {

@@ -66,4 +66,8 @@ public interface IUserService {
 	DbUser updateDbUser(DbUser dbUser);
 
 	DbUser deleteDbUser(String username);
+
+	void initiatePasswordReset(String username);
+
+	boolean resetPassword(DbUser dbUser, String key, String password);
 }

@@ -79,12 +79,16 @@ security.user-db.enabled=true
 security.user-db.title=ARSnova
 security.user-db.login-dialog-path=account.html
 security.user-db.activation-path=account.html
+security.user-db.reset-password-path=account.html
 security.user-db.image=
 security.user-db.allowed-email-domains=*
 security.user-db.registration-mail.subject=ARSnova Registration
 security.user-db.registration-mail.body=Welcome to ARSnova!\n\nPlease confirm \
     your registration by visiting the following web address:\n{0}\n\n\
     Afterwards, you can log into ARSnova with your e-mail address and password.
+security.user-db.reset-password-mail.subject=ARSnova Password Reset
+security.user-db.reset-password-mail.body=You requested to reset your \
+    password.\n\nPlease follow the link below to set a new password:\n{0}
 
 # LDAP authentication
 # 

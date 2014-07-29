@@ -1379,6 +1379,8 @@ public class CouchDBDao implements IDatabaseDao {
 			d.put("username", user.getUsername());
 			d.put("password", user.getPassword());
 			d.put("activationKey", user.getActivationKey());
+			d.put("passwordResetKey", user.getPasswordResetKey());
+			d.put("passwordResetTime", user.getPasswordResetTime());
 			d.put("creation", user.getCreation());
 			d.put("lastLogin", user.getLastLogin());
 

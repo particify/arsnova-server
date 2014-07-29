@@ -50,6 +50,7 @@ import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationToken
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
@@ -64,6 +65,10 @@ public class UserService implements IUserService {
 	private static final int LOGIN_BAN_RESET_DELAY_MS = 2 * 60 * 1000;
 
 	private static final int MAX_USER_INACTIVE_SECONDS = 120;
+
+	private static final int REPEATED_PASSWORD_RESET_DELAY_MS = 3 * 60 * 1000;
+	
+	private static final int PASSWORD_RESET_KEY_DURABILITY_MS = 2 * 60 * 60 * 1000;
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
@@ -96,17 +101,26 @@ public class UserService implements IUserService {
 	@Value("${security.user-db.activation-path}")
 	private String activationPath;
 
+	@Value("${security.user-db.reset-password-path}")
+	private String resetPasswordPath;
+
 	@Value("${mail.sender.address}")
-	private String regMailSenderAddress;
+	private String mailSenderAddress;
 
 	@Value("${mail.sender.name}")
-	private String regMailSenderName;
+	private String mailSenderName;
 
 	@Value("${security.user-db.registration-mail.subject}")
 	private String regMailSubject;
 
 	@Value("${security.user-db.registration-mail.body}")
 	private String regMailBody;
+
+	@Value("${security.user-db.reset-password-mail.subject}")
+	private String resetPasswordMailSubject;
+
+	@Value("${security.user-db.reset-password-mail.body}")
+	private String resetPasswordMailBody;
 
 	@Value("${security.authentication.login-try-limit}")
 	private int loginTryLimit;
@@ -397,7 +411,7 @@ public class UserService implements IUserService {
 		String activationUrl;
 		try {
 			activationUrl = MessageFormat.format(
-				"{0}{1}/{2}?username={3}&key={4}",
+				"{0}{1}/{2}?action=activate&username={3}&key={4}",
 				rootUrl,
 				customizationPath,
 				activationPath,
@@ -409,21 +423,8 @@ public class UserService implements IUserService {
 
 			return;
 		}
-		MimeMessage msg = mailSender.createMimeMessage();
-		MimeMessageHelper helper = new MimeMessageHelper(msg, "UTF-8");
-		try {
-			helper.setFrom(regMailSenderName + "<" + regMailSenderAddress + ">");
-			helper.setTo(dbUser.getUsername());
-			helper.setSubject(regMailSubject);
-			helper.setText(MessageFormat.format(regMailBody, activationUrl));
 
-			LOGGER.info("Sending activation mail from \"{}\" to \"{}\"", new Object[] {msg.getFrom(), dbUser.getUsername()});
-			mailSender.send(msg);
-		} catch (MessagingException e) {
-			LOGGER.warn("Activation mail could not be sent: {}", e);
-		} catch (MailException e) {
-			LOGGER.warn("Activation mail could not be sent: {}", e);
-		}
+		sendEmail(dbUser, regMailSubject, MessageFormat.format(regMailBody, activationUrl));
 	}
 
 	private void parseMailAddressPattern() {
@@ -475,5 +476,76 @@ public class UserService implements IUserService {
 		databaseDao.deleteUser(dbUser);
 
 		return dbUser;
+	}
+
+	@Override
+	public void initiatePasswordReset(String username) {
+		DbUser dbUser = databaseDao.getUser(username);
+		if (null == dbUser) {
+			throw new NotFoundException();
+		}
+		if (System.currentTimeMillis() < dbUser.getPasswordResetTime() + REPEATED_PASSWORD_RESET_DELAY_MS) {
+			throw new BadRequestException();
+		}
+
+		dbUser.setPasswordResetKey(RandomStringUtils.randomAlphanumeric(32));
+		dbUser.setPasswordResetTime(System.currentTimeMillis());
+		databaseDao.createOrUpdateUser(dbUser);
+
+		String resetPasswordUrl;
+		try {
+			resetPasswordUrl = MessageFormat.format(
+				"{0}{1}/{2}?action=resetpassword&username={3}&key={4}",
+				rootUrl,
+				customizationPath,
+				resetPasswordPath,
+				UriUtils.encodeQueryParam(dbUser.getUsername(), "UTF-8"),
+				dbUser.getPasswordResetKey()
+			);
+		} catch (UnsupportedEncodingException e1) {
+			LOGGER.error(e1.getMessage());
+
+			return;
+		}
+
+		sendEmail(dbUser, resetPasswordMailSubject, MessageFormat.format(resetPasswordMailBody, resetPasswordUrl));
+	}
+
+	@Override
+	public boolean resetPassword(DbUser dbUser, String key, String password) {
+		if (null == key || "".equals(key) || !key.equals(dbUser.getPasswordResetKey())) {
+			return false;
+		}
+		if (System.currentTimeMillis() > dbUser.getPasswordResetTime() + PASSWORD_RESET_KEY_DURABILITY_MS) {
+			dbUser.setPasswordResetKey(null);
+			dbUser.setPasswordResetTime(0);
+			updateDbUser(dbUser);
+
+			return false;
+		}
+
+		dbUser.setPassword(encodePassword(password));
+		dbUser.setPasswordResetKey(null);
+		updateDbUser(dbUser);
+
+		return true;
+	}
+
+	private void sendEmail(DbUser dbUser, String subject, String body) {
+		MimeMessage msg = mailSender.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(msg, "UTF-8");
+		try {
+			helper.setFrom(mailSenderName + "<" + mailSenderAddress + ">");
+			helper.setTo(dbUser.getUsername());
+			helper.setSubject(subject);
+			helper.setText(body);
+
+			LOGGER.info("Sending mail \"{}\" from \"{}\" to \"{}\"", new Object[] {subject, msg.getFrom(), dbUser.getUsername()});
+			mailSender.send(msg);
+		} catch (MessagingException e) {
+			LOGGER.warn("Mail \"{}\" could not be sent: {}", subject, e);
+		} catch (MailException e) {
+			LOGGER.warn("Mail \"{}\" could not be sent: {}", subject, e);
+		}
 	}
 }
