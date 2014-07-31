@@ -73,68 +73,35 @@ public class LoginController extends AbstractController {
 	private static final int MAX_USERNAME_LENGTH = 15;
 	private static final int MAX_GUESTHASH_LENGTH = 10;
 
-	@Value("${customization.path}")
-	private String customizationPath;
+	@Value("${customization.path}") private String customizationPath;
 
-	@Value("${security.guest.enabled}")
-	private String guestEnabled;
+	@Value("${security.guest.enabled}") private String guestEnabled;
+	@Value("${security.guest.lecturer.enabled}") private String guestLecturerEnabled;
 
-	@Value("${security.guest.lecturer.enabled}")
-	private String guestLecturerEnabled;
+	@Value("${security.custom-login.enabled}") private String customLoginEnabled;
+	@Value("${security.custom-login.title:University}") private String customLoginTitle;
+	@Value("${security.custom-login.login-dialog-path}") private String customLoginDialog;
+	@Value("${security.custom-login.image:}") private String customLoginImage;
 
-	@Value("${security.custom-login.enabled}")
-	private String customLoginEnabled;
+	@Value("${security.user-db.enabled}") private String dbAuthEnabled;
+	@Value("${security.user-db.title:ARSnova}") private String dbAuthTitle;
+	@Value("${security.user-db.login-dialog-path}") private String dbAuthDialog;
+	@Value("${security.user-db.image:}") private String dbAuthImage;
 
-	@Value("${security.custom-login.title:University}")
-	private String customLoginTitle;
+	@Value("${security.ldap.enabled}") private String ldapEnabled;
+	@Value("${security.ldap.title:LDAP}") private String ldapTitle;
+	@Value("${security.ldap.login-dialog-path}") private String ldapDialog;
+	@Value("${security.ldap.image:}") private String ldapImage;
 
-	@Value("${security.custom-login.login-dialog-path}")
-	private String customLoginDialog;
+	@Value("${security.cas.enabled}") private String casEnabled;
+	@Value("${security.cas.title:CAS}") private String casTitle;
+	@Value("${security.cas.image:}") private String casImage;
 
-	@Value("${security.custom-login.image:}")
-	private String customLoginImage;
+	@Value("${security.facebook.enabled}") private String facebookEnabled;
 
-	@Value("${security.user-db.enabled}")
-	private String dbAuthEnabled;
+	@Value("${security.google.enabled}") private String googleEnabled;
 
-	@Value("${security.user-db.title:ARSnova}")
-	private String dbAuthTitle;
-
-	@Value("${security.user-db.login-dialog-path}")
-	private String dbAuthDialog;
-
-	@Value("${security.user-db.image:}")
-	private String dbAuthImage;
-
-	@Value("${security.ldap.enabled}")
-	private String ldapEnabled;
-
-	@Value("${security.ldap.title:LDAP}")
-	private String ldapTitle;
-
-	@Value("${security.ldap.login-dialog-path}")
-	private String ldapDialog;
-
-	@Value("${security.ldap.image:}")
-	private String ldapImage;
-
-	@Value("${security.cas.enabled}")
-	private String casEnabled;
-
-	@Value("${security.cas.title:CAS}")
-	private String casTitle;
-
-	@Value("${security.cas.image:}")
-	private String casImage;
-
-	@Value("${security.facebook.enabled}")
-	private String facebookEnabled;
-
-	@Value("${security.google.enabled}")
-	private String googleEnabled;
-
-	@Value("${security.twitter.enabled}")
-	private String twitterEnabled;
+	@Value("${security.twitter.enabled}") private String twitterEnabled;
 
 	@Autowired
 	private DaoAuthenticationProvider daoProvider;
