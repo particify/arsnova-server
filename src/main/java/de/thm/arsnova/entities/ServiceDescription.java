@@ -5,6 +5,7 @@ public class ServiceDescription {
 	private String name;
 	private String dialogUrl;
 	private String image;
+	private int order = 0;
 	private boolean allowLecturer = true;
 
 	public ServiceDescription(String id, String name, String dialogUrl) {
@@ -59,6 +60,14 @@ public class ServiceDescription {
 
 	public void setImage(String image) {
 		this.image = image;
+	}
+
+	public int getOrder() {
+		return order;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
 	}
 
 	public boolean isAllowLecturer() {

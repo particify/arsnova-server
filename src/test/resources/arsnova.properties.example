@@ -63,6 +63,7 @@ security.custom-login.enabled=false
 security.custom-login.title=University
 security.custom-login.login-dialog-path=
 security.custom-login.image=
+security.custom-login.order=0
 
 # Internal authentication
 #
@@ -81,6 +82,7 @@ security.user-db.login-dialog-path=account.html
 security.user-db.activation-path=account.html
 security.user-db.reset-password-path=account.html
 security.user-db.image=
+security.user-db.order=0
 security.user-db.allowed-email-domains=*
 security.user-db.registration-mail.subject=ARSnova Registration
 security.user-db.registration-mail.body=Welcome to ARSnova!\n\nPlease confirm \
@@ -101,6 +103,7 @@ security.ldap.enabled=true
 security.ldap.title=LDAP
 security.ldap.login-dialog-path=login-ldap.html
 security.ldap.image=
+security.ldap.order=0
 security.ldap.url=ldap://example.com:33389/dc=example,dc=com
 security.ldap.user-dn-pattern=uid={0},ou=arsnova
 # Not yet implemented parameters
@@ -112,6 +115,7 @@ security.ldap.user-dn-pattern=uid={0},ou=arsnova
 security.cas.enabled=true
 security.cas.title=CAS
 security.cas.image=
+security.cas.order=0
 security.cas-server-url=https://example.com/cas
 
 # OAuth authentication with third party services
@@ -122,18 +126,21 @@ security.cas-server-url=https://example.com/cas
 # Facebook
 #
 security.facebook.enabled=true
+security.facebook.order=0
 security.facebook.key=
 security.facebook.secret=
 
 # Twitter
 #
 security.twitter.enabled=true
+security.twitter.order=0
 security.twitter.key=
 security.twitter.secret=
 
 # Google
 #
 security.google.enabled=true
+security.google.order=0
 security.google.key=
 security.google.secret=
 
