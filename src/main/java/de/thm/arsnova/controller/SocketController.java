@@ -18,13 +18,14 @@
  */
 package de.thm.arsnova.controller;
 
+import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.json.JSONObject;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,19 +50,28 @@ public class SocketController extends AbstractController {
 
 	@Autowired
 	private ARSnovaSocketIOServer server;
+	
+	private static final Logger logger = LoggerFactory.getLogger(SocketController.class);
 
 	@RequestMapping(method = RequestMethod.POST, value = "/assign")
-	public final void authorize(@RequestBody final Object sessionObject, final HttpServletResponse response) {
-		String socketid = (String) JSONObject.fromObject(sessionObject).get("session");
-		if (socketid == null) {
+	public final void authorize(@RequestBody final Map<String, String> sessionMap, final HttpServletResponse response) {
+		String socketid = sessionMap.get("session");
+		if (null == socketid) {
+			logger.debug("Expected property 'session' missing", socketid);
+			response.setStatus(HttpStatus.BAD_REQUEST.value());
+
 			return;
 		}
 		User u = userService.getCurrentUser();
-		response.setStatus(u != null ? HttpStatus.NO_CONTENT.value() : HttpStatus.UNAUTHORIZED.value());
-		if (u != null) {
-			userService.putUser2SocketId(UUID.fromString(socketid), u);
-			userSessionService.setSocketId(UUID.fromString(socketid));
+		if (null == u) {
+			logger.debug("Client {} requested to assign Websocket session but has not authenticated", socketid);
+			response.setStatus(HttpStatus.FORBIDDEN.value());
+
+			return;
 		}
+		userService.putUser2SocketId(UUID.fromString(socketid), u);
+		userSessionService.setSocketId(UUID.fromString(socketid));
+		response.setStatus(HttpStatus.NO_CONTENT.value());
 	}
 
 	@RequestMapping(value = "/url", method = RequestMethod.GET)
