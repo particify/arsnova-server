@@ -167,7 +167,7 @@ public class LoginController extends AbstractController {
 					return;
 				}
 			} catch (AuthenticationException e) {
-				LOGGER.info("Authentication failed: {}", e.getMessage());
+				LOGGER.info("Database authentication failed: {}", e.getMessage());
 			}
 
 			userService.increaseFailedLoginCount(addr);
@@ -189,10 +189,10 @@ public class LoginController extends AbstractController {
 
 						return;
 					}
-					LOGGER.info("LDAPLOGIN: {}", auth.isAuthenticated());
+					LOGGER.info("LDAP isAuthenticated: {}", auth.isAuthenticated());
 				}
 				catch (AuthenticationException e) {
-					LOGGER.info("No LDAP login: {}", e);
+					LOGGER.info("LDAP authentication failed: {}", e.getMessage());
 				}
 
 				userService.increaseFailedLoginCount(addr);
