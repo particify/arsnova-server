@@ -111,6 +111,11 @@ public class ARSnovaSocketIOServer {
 			@Override
 			public void onData(SocketIOClient client, Session session, AckRequest ackSender) {
 				User u = userService.getUser2SocketId(client.getSessionId());
+				if (null == u) {
+					LOGGER.info("Client {} requested to join session but is not mapped to a user", client.getSessionId());
+
+					return;
+				}
 				String oldSessionKey = userService.getSessionForUser(u.getUsername());
 				if (session.getKeyword() == oldSessionKey) {
 					return;
