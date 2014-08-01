@@ -268,6 +268,11 @@ public class QuestionService implements IQuestionService {
 		if (answers == null) {
 			throw new NotFoundException();
 		}
+		/* Remove user for privacy concerns */
+		for (Answer answer : answers) {
+			answer.setUser(null);
+		}
+
 		return answers;
 	}
 
