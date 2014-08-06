@@ -49,54 +49,80 @@ import de.thm.arsnova.LoginAuthenticationFailureHandler;
 import de.thm.arsnova.LoginAuthenticationSucessHandler;
 import de.thm.arsnova.security.DbUserDetailsService;
 
-@EnableWebSecurity
 @Configuration
-@EnableGlobalMethodSecurity(prePostEnabled=true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
-	@Value("$security.ldap.server-url") private String ldapUrl;
-	@Value("$security.ldap.userDn") private String ldapUserDn;
-
-	@Value("${security.cas-server-url}") private String casUrl;
-
-	@Value(value = "${security.facebook.key}") private String securityFacebookKey;
-	@Value(value = "${security.facebook.secret}") private String securityFacebookSecret;
-
-	@Value(value = "${security.twitter.key}") private String securityTwitterKey;
-	@Value(value = "${security.twitter.secret}") private String securityTwitterSecret;
-
-	@Value(value = "${security.google.key}") private String securityGoogleKey;
-	@Value(value = "${security.google.secret}") private String securityGoogleSecret;
-
 	@Value("${root-url}") private String rootUrl;
 	@Value("#{servletContext.contextPath}") private String contextPath;
+
+	@Value("${security.user-db.enabled}") private boolean dbAuthEnabled;
+
+	@Value("${security.ldap.enabled}") private boolean ldapEnabled;
+	@Value("${security.ldap.url}") private String ldapUrl;
+	@Value("${security.ldap.user-dn-pattern}") private String ldapUserDn;
+
+	@Value("${security.cas.enabled}") private boolean casEnabled;
+	@Value("${security.cas-server-url}") private String casUrl;
+
+	@Value("${security.facebook.enabled}") private boolean facebookEnabled;
+	@Value("${security.facebook.key}") private String facebookKey;
+	@Value("${security.facebook.secret}") private String facebookSecret;
+
+	@Value("${security.twitter.enabled}") private boolean twitterEnabled;
+	@Value("${security.twitter.key}") private String twitterKey;
+	@Value("${security.twitter.secret}") private String twitterSecret;
+
+	@Value("${security.google.enabled}") private boolean googleEnabled;
+	@Value("${security.google.key}") private String googleKey;
+	@Value("${security.google.secret}") private String googleSecret;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint());
 		http.csrf().disable();
-		http.addFilter(casAuthenticationFilter());
-		http.addFilter(casLogoutFilter());
-		http.addFilterAfter(googleFilter(), CasAuthenticationFilter.class);
-		http.addFilterAfter(facebookFilter(), CasAuthenticationFilter.class);
-		http.addFilterAfter(twitterFilter(), CasAuthenticationFilter.class);
+
+		if (casEnabled) {
+			http.addFilter(casAuthenticationFilter());
+			http.addFilter(casLogoutFilter());
+		}
+		if (googleEnabled) {
+			http.addFilterAfter(googleFilter(), CasAuthenticationFilter.class);
+		}
+		if (facebookEnabled) {
+			http.addFilterAfter(facebookFilter(), CasAuthenticationFilter.class);
+		}
+		if (twitterEnabled) {
+			http.addFilterAfter(twitterFilter(), CasAuthenticationFilter.class);
+		}
 	};
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.authenticationProvider(daoAuthenticationProvider());
-		auth.authenticationProvider(ldapAuthenticationProvider());
-		auth.authenticationProvider(casAuthenticationProvider());
-		auth.authenticationProvider(googleAuthProvider());
-		auth.authenticationProvider(facebookAuthProvider());
-		auth.authenticationProvider(twitterAuthProvider());
+		if (dbAuthEnabled) {
+			auth.authenticationProvider(daoAuthenticationProvider());
+		}
+		if (ldapEnabled) {
+			auth.authenticationProvider(ldapAuthenticationProvider());
+		}
+		if (casEnabled) {
+			auth.authenticationProvider(casAuthenticationProvider());
+		}
+		if (googleEnabled) {
+			auth.authenticationProvider(googleAuthProvider());
+		}
+		if (facebookEnabled) {
+			auth.authenticationProvider(facebookAuthProvider());
+		}
+		if (twitterEnabled) {
+			auth.authenticationProvider(twitterAuthProvider());
+		}
 	};
 
 	@Bean
 	@Override
 	public AuthenticationManager authenticationManagerBean() throws Exception {
-		final AuthenticationManager authenticationManager = super.authenticationManager();
-		return authenticationManager;
+		return super.authenticationManager();
 	}
 
 	@Bean
@@ -108,6 +134,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		});
 		configurer.setIgnoreResourceNotFound(true);
 		configurer.setIgnoreUnresolvablePlaceholders(false);
+
 		return configurer;
 	}
 
@@ -125,6 +152,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	LoginAuthenticationSucessHandler successHandler() {
 		final LoginAuthenticationSucessHandler successHandler = new LoginAuthenticationSucessHandler();
 		successHandler.setTargetUrl(rootUrl);
+
 		return successHandler;
 	}
 
@@ -132,6 +160,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	LoginAuthenticationFailureHandler failureHandler() {
 		final LoginAuthenticationFailureHandler failureHandler = new LoginAuthenticationFailureHandler();
 		failureHandler.setDefaultFailureUrl(rootUrl);
+
 		return failureHandler;
 	}
 
@@ -142,6 +171,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		final DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
 		authProvider.setUserDetailsService(dbUserDetailsService());
 		authProvider.setPasswordEncoder(passwordEncoder());
+
 		return authProvider;
 	}
 
@@ -247,15 +277,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public OAuthAuthenticationEntryPoint facebookEntryPoint() {
 		final OAuthAuthenticationEntryPoint entryPoint = new OAuthAuthenticationEntryPoint();
 		entryPoint.setProvider(facebookProvider());
+
 		return entryPoint;
 	}
 
 	@Bean
 	public FacebookProvider facebookProvider() {
 		final FacebookProvider provider = new FacebookProvider();
-		provider.setKey(securityFacebookKey);
-		provider.setSecret(securityFacebookSecret);
+		provider.setKey(facebookKey);
+		provider.setSecret(facebookSecret);
 		provider.setCallbackUrl(rootUrl + contextPath + "/j_spring_facebook_security_check");
+
 		return provider;
 	}
 
@@ -266,6 +298,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		filter.setAuthenticationManager(authenticationManager());
 		filter.setAuthenticationFailureHandler(failureHandler());
 		filter.setAuthenticationSuccessHandler(successHandler());
+
 		return filter;
 	}
 
@@ -273,6 +306,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public OAuthAuthenticationProvider facebookAuthProvider() {
 		final OAuthAuthenticationProvider authProvider = new OAuthAuthenticationProvider();
 		authProvider.setProvider(facebookProvider());
+
 		return authProvider;
 	}
 
@@ -281,9 +315,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public TwitterProvider twitterProvider() {
 		final TwitterProvider provider = new TwitterProvider();
-		provider.setKey(securityTwitterKey);
-		provider.setSecret(securityTwitterSecret);
+		provider.setKey(twitterKey);
+		provider.setSecret(twitterSecret);
 		provider.setCallbackUrl(rootUrl + contextPath + "/j_spring_twitter_security_check");
+
 		return provider;
 	}
 
@@ -301,6 +336,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public OAuthAuthenticationProvider twitterAuthProvider() {
 		final OAuthAuthenticationProvider authProvider = new OAuthAuthenticationProvider();
 		authProvider.setProvider(twitterProvider());
+
 		return authProvider;
 	}
 
@@ -309,10 +345,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public Google2Provider googleProvider() {
 		final Google2Provider provider = new Google2Provider();
-		provider.setKey(securityGoogleKey);
-		provider.setSecret(securityGoogleSecret);
+		provider.setKey(googleKey);
+		provider.setSecret(googleSecret);
 		provider.setCallbackUrl(rootUrl + contextPath + "/j_spring_google_security_check");
 		provider.setScope(Google2Scope.EMAIL);
+
 		return provider;
 	}
 
@@ -323,6 +360,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		filter.setAuthenticationManager(authenticationManager());
 		filter.setAuthenticationFailureHandler(failureHandler());
 		filter.setAuthenticationSuccessHandler(successHandler());
+
 		return filter;
 	}
 
@@ -330,6 +368,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public OAuthAuthenticationProvider googleAuthProvider() {
 		final OAuthAuthenticationProvider authProvider = new OAuthAuthenticationProvider();
 		authProvider.setProvider(googleProvider());
+
 		return authProvider;
 	}
 }
