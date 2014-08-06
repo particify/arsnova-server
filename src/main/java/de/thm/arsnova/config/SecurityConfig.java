@@ -12,7 +12,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.ldap.core.support.DirContextSource;
+import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.cas.ServiceProperties;
@@ -28,6 +28,7 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
 import org.springframework.security.ldap.authentication.BindAuthenticator;
 import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
 import org.springframework.security.ldap.authentication.LdapAuthenticator;
@@ -194,8 +195,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public LdapAuthenticationProvider ldapAuthenticationProvider() {
-		DirContextSource contextSource = new DirContextSource();
-		contextSource.setUrl(ldapUrl);
+		LdapContextSource contextSource = new DefaultSpringSecurityContextSource(ldapUrl);
 		contextSource.setUserDn(ldapUserDn);
 		LdapAuthenticator authenticator = new BindAuthenticator(contextSource);
 		LdapAuthenticationProvider authProvider = new LdapAuthenticationProvider(authenticator, new NullLdapAuthoritiesPopulator());
