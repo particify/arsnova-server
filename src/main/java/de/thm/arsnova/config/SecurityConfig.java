@@ -34,11 +34,15 @@ import org.springframework.security.ldap.authentication.LdapAuthenticator;
 import org.springframework.security.ldap.authentication.NullLdapAuthoritiesPopulator;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
 import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationProvider;
 import com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationEntryPoint;
 import com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationFilter;
 
+import de.thm.arsnova.CASLogoutSuccessHandler;
 import de.thm.arsnova.CasUserDetailsService;
 import de.thm.arsnova.LoginAuthenticationFailureHandler;
 import de.thm.arsnova.LoginAuthenticationSucessHandler;
@@ -70,6 +74,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint());
 		http.addFilter(casAuthenticationFilter());
+		http.addFilter(casLogoutFilter());
 		http.addFilterAfter(googleFilter(), CasAuthenticationFilter.class);
 		http.addFilterAfter(facebookFilter(), CasAuthenticationFilter.class);
 		http.addFilterAfter(twitterFilter(), CasAuthenticationFilter.class);
@@ -148,6 +153,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return new DbUserDetailsService();
 	}
 
+	@Bean
+	public SecurityContextLogoutHandler logoutHandler() {
+		return new SecurityContextLogoutHandler();
+	}
+
 	// LDAP Authentication Configuration
 
 	@Bean
@@ -210,6 +220,23 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		filter.setAuthenticationFailureHandler(failureHandler());
 
 		return filter;
+	}
+
+	@Bean
+	public LogoutFilter casLogoutFilter() {
+		LogoutFilter filter = new LogoutFilter(casLogoutSuccessHandler(), logoutHandler());
+		filter.setFilterProcessesUrl("/j_spring_cas_security_logout");
+
+		return filter;
+	}
+
+	@Bean
+	public LogoutSuccessHandler casLogoutSuccessHandler() {
+		CASLogoutSuccessHandler handler = new CASLogoutSuccessHandler();
+		handler.setCasUrl(casUrl);
+		handler.setDefaultTarget(rootUrl);
+
+		return handler;
 	}
 
 	// Facebook Authentication Configuration
