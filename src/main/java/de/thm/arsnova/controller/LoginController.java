@@ -281,7 +281,7 @@ public class LoginController extends AbstractController {
 		request.getSession().invalidate();
 		SecurityContextHolder.clearContext();
 		if (auth instanceof CasAuthenticationToken) {
-			return new RedirectView("/j_spring_cas_security_logout");
+			return new RedirectView("/j_spring_cas_security_logout", true);
 		}
 		return new RedirectView(request.getHeader("referer") != null ? request.getHeader("referer") : "/");
 	}
