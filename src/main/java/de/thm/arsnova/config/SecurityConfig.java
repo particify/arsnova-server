@@ -19,6 +19,7 @@ import org.springframework.security.cas.ServiceProperties;
 import org.springframework.security.cas.authentication.CasAuthenticationProvider;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.cas.web.CasAuthenticationFilter;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -68,16 +69,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint());
-		http.authenticationProvider(daoAuthenticationProvider());
-		http.authenticationProvider(ldapAuthenticationProvider());
-		http.authenticationProvider(casAuthenticationProvider());
-		http.authenticationProvider(googleAuthProvider());
-		http.authenticationProvider(facebookAuthProvider());
-		http.authenticationProvider(twitterAuthProvider());
 		http.addFilter(casAuthenticationFilter());
 		http.addFilterAfter(googleFilter(), CasAuthenticationFilter.class);
 		http.addFilterAfter(facebookFilter(), CasAuthenticationFilter.class);
 		http.addFilterAfter(twitterFilter(), CasAuthenticationFilter.class);
+	};
+
+	@Override
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		auth.authenticationProvider(daoAuthenticationProvider());
+		auth.authenticationProvider(ldapAuthenticationProvider());
+		auth.authenticationProvider(casAuthenticationProvider());
+		auth.authenticationProvider(googleAuthProvider());
+		auth.authenticationProvider(facebookAuthProvider());
+		auth.authenticationProvider(twitterAuthProvider());
 	};
 
 	@Bean
