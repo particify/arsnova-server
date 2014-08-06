@@ -37,6 +37,7 @@ import org.springframework.security.web.authentication.Http403ForbiddenEntryPoin
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationProvider;
 import com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationEntryPoint;
@@ -225,7 +226,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public LogoutFilter casLogoutFilter() {
 		LogoutFilter filter = new LogoutFilter(casLogoutSuccessHandler(), logoutHandler());
-		filter.setFilterProcessesUrl("/j_spring_cas_security_logout");
+		filter.setLogoutRequestMatcher(new AntPathRequestMatcher("/j_spring_cas_security_logout"));
 
 		return filter;
 	}
@@ -253,14 +254,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		final FacebookProvider provider = new FacebookProvider();
 		provider.setKey(securityFacebookKey);
 		provider.setSecret(securityFacebookSecret);
-		provider.setCallbackUrl(rootUrl + "/j_spring_facebook_security_check");
+		provider.setCallbackUrl(rootUrl + contextPath + "/j_spring_facebook_security_check");
 		return provider;
 	}
 
 	@Bean
 	public OAuthAuthenticationFilter facebookFilter() throws Exception {
 		final OAuthAuthenticationFilter filter = new OAuthAuthenticationFilter("/j_spring_facebook_security_check");
-		filter.setFilterProcessesUrl("/j_spring_facebook_security_check");
 		filter.setProvider(facebookProvider());
 		filter.setAuthenticationManager(authenticationManager());
 		filter.setAuthenticationFailureHandler(failureHandler());
@@ -282,14 +282,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		final TwitterProvider provider = new TwitterProvider();
 		provider.setKey(securityTwitterKey);
 		provider.setSecret(securityTwitterSecret);
-		provider.setCallbackUrl(rootUrl + "/j_spring_twitter_security_check");
+		provider.setCallbackUrl(rootUrl + contextPath + "/j_spring_twitter_security_check");
 		return provider;
 	}
 
 	@Bean
 	public OAuthAuthenticationFilter twitterFilter() throws Exception {
 		final OAuthAuthenticationFilter filter = new OAuthAuthenticationFilter("/j_spring_twitter_security_check");
-		filter.setFilterProcessesUrl("/j_spring_twitter_security_check");
 		filter.setProvider(twitterProvider());
 		filter.setAuthenticationManager(authenticationManager());
 		filter.setAuthenticationFailureHandler(failureHandler());
@@ -311,7 +310,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		final Google2Provider provider = new Google2Provider();
 		provider.setKey(securityGoogleKey);
 		provider.setSecret(securityGoogleSecret);
-		provider.setCallbackUrl(rootUrl + "/j_spring_google_security_check");
+		provider.setCallbackUrl(rootUrl + contextPath + "/j_spring_google_security_check");
 		provider.setScope(Google2Scope.EMAIL);
 		return provider;
 	}
@@ -319,7 +318,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public OAuthAuthenticationFilter googleFilter() throws Exception {
 		final OAuthAuthenticationFilter filter = new OAuthAuthenticationFilter("/j_spring_google_security_check");
-		filter.setFilterProcessesUrl("/j_spring_google_security_check");
 		filter.setProvider(twitterProvider());
 		filter.setAuthenticationManager(authenticationManager());
 		filter.setAuthenticationFailureHandler(failureHandler());
