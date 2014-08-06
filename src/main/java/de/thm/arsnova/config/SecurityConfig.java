@@ -123,14 +123,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	LoginAuthenticationSucessHandler successHandler() {
 		final LoginAuthenticationSucessHandler successHandler = new LoginAuthenticationSucessHandler();
-		successHandler.setTargetUrl("#auth/checkLogin");
+		successHandler.setTargetUrl(rootUrl);
 		return successHandler;
 	}
 
 	@Bean
 	LoginAuthenticationFailureHandler failureHandler() {
 		final LoginAuthenticationFailureHandler failureHandler = new LoginAuthenticationFailureHandler();
-		failureHandler.setDefaultFailureUrl("/index.html");
+		failureHandler.setDefaultFailureUrl(rootUrl);
 		return failureHandler;
 	}
 
