@@ -136,22 +136,22 @@ public class LoginController extends AbstractController {
 	@Value("${security.twitter.enabled}")
 	private String twitterEnabled;
 
-	@Autowired
+	@Autowired(required = false)
 	private DaoAuthenticationProvider daoProvider;
 
-	@Autowired
+	@Autowired(required = false)
 	private TwitterProvider twitterProvider;
 
-	@Autowired
+	@Autowired(required = false)
 	private Google2Provider googleProvider;
 
-	@Autowired
+	@Autowired(required = false)
 	private FacebookProvider facebookProvider;
 	
-	@Autowired
+	@Autowired(required = false)
 	private LdapAuthenticationProvider ldapAuthenticationProvider;
 
-	@Autowired
+	@Autowired(required = false)
 	private CasAuthenticationEntryPoint casEntryPoint;
 
 	@Autowired
