@@ -147,7 +147,7 @@ public class LoginController extends AbstractController {
 
 	@Autowired(required = false)
 	private FacebookProvider facebookProvider;
-	
+
 	@Autowired(required = false)
 	private LdapAuthenticationProvider ldapAuthenticationProvider;
 

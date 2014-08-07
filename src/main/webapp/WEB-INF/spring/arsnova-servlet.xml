@@ -15,14 +15,14 @@
 	<context:component-scan base-package="de.thm.arsnova.controller,de.thm.arsnova.web" />
 	<context:property-placeholder location="file:///etc/arsnova/arsnova.properties" file-encoding="UTF-8" />
 	<mvc:annotation-driven
-		content-negotiation-manager="contentNegotiationManager" />
+		content-negotiation-manager="mvcContentNegotiationManager" />
 
 	<mvc:interceptors>
 		<bean class="de.thm.arsnova.web.CacheControlInterceptorHandler" />
 		<bean class="de.thm.arsnova.web.DeprecatedApiInterceptorHandler" />
 	</mvc:interceptors>
 
-	<bean id="contentNegotiationManager"
+	<bean id="mvcContentNegotiationManager"
 		class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
 		<property name="favorPathExtension" value="false" />
 		<property name="favorParameter" value="true" />

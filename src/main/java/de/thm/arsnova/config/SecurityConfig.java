@@ -1,13 +1,18 @@
 package de.thm.arsnova.config;
 
+import javax.servlet.ServletContext;
+
 import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
 import org.scribe.up.provider.impl.FacebookProvider;
 import org.scribe.up.provider.impl.Google2Provider;
 import org.scribe.up.provider.impl.Google2Provider.Google2Scope;
 import org.scribe.up.provider.impl.TwitterProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
@@ -40,6 +45,7 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.context.ServletContextAware;
 
 import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationProvider;
 import com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationEntryPoint;
@@ -54,9 +60,10 @@ import de.thm.arsnova.security.DbUserDetailsService;
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig extends WebSecurityConfigurerAdapter implements ServletContextAware {
+	private ServletContext servletContext;
+
 	@Value("${root-url}") private String rootUrl;
-	@Value("#{servletContext.contextPath}") private String contextPath;
 
 	@Value("${security.user-db.enabled}") private boolean dbAuthEnabled;
 
@@ -194,11 +201,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	// LDAP Authentication Configuration
 
+	@Profile("!test")
 	@Bean
 	public LdapAuthenticationProvider ldapAuthenticationProvider() throws Exception {
 		return new LdapAuthenticationProvider(ldapAuthenticator(), ldapAuthoritiesPopulator());
 	}
 
+	@Profile("!test")
 	@Bean
 	public LdapContextSource ldapContextSource() throws Exception {
 		DefaultSpringSecurityContextSource contextSource = new DefaultSpringSecurityContextSource(ldapUrl);
@@ -209,6 +218,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return contextSource;
 	}
 
+	@Profile("!test")
 	@Bean
 	public LdapAuthenticator ldapAuthenticator() throws Exception {
 		BindAuthenticator authenticator = new BindAuthenticator(ldapContextSource());
@@ -217,6 +227,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return authenticator;
 	}
 
+	@Profile("!test")
 	@Bean
 	public LdapAuthoritiesPopulator ldapAuthoritiesPopulator() throws Exception {
 		return new DefaultLdapAuthoritiesPopulator(ldapContextSource(), null);
@@ -224,6 +235,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	// CAS Authentication Configuration
 
+	@Profile("!test")
 	@Bean
 	public CasAuthenticationProvider casAuthenticationProvider() {
 		CasAuthenticationProvider authProvider = new CasAuthenticationProvider();
@@ -235,25 +247,29 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return authProvider;
 	}
 
+	@Profile("!test")
 	@Bean
 	public CasUserDetailsService casUserDetailsService() {
 		return new CasUserDetailsService();
 	}
 
+	@Profile("!test")
 	@Bean
 	public ServiceProperties casServiceProperties() {
 		ServiceProperties properties = new ServiceProperties();
-		properties.setService(rootUrl + contextPath + "/j_spring_cas_security_check");
+		properties.setService(rootUrl + servletContext.getContextPath() + "/j_spring_cas_security_check");
 		properties.setSendRenew(false);
 
 		return properties;
 	}
 
+	@Profile("!test")
 	@Bean
 	public Cas20ProxyTicketValidator casTicketValidator() {
 		return new Cas20ProxyTicketValidator(casUrl);
 	}
 
+	@Profile("!test")
 	@Bean
 	public CasAuthenticationEntryPoint casAuthenticationEntryPoint() {
 		CasAuthenticationEntryPoint entryPoint = new CasAuthenticationEntryPoint();
@@ -263,6 +279,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return entryPoint;
 	}
 
+	@Profile("!test")
 	@Bean
 	public CasAuthenticationFilter casAuthenticationFilter() throws Exception {
 		CasAuthenticationFilter filter = new CasAuthenticationFilter();
@@ -273,6 +290,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return filter;
 	}
 
+	@Profile("!test")
 	@Bean
 	public LogoutFilter casLogoutFilter() {
 		LogoutFilter filter = new LogoutFilter(casLogoutSuccessHandler(), logoutHandler());
@@ -281,6 +299,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return filter;
 	}
 
+	@Profile("!test")
 	@Bean
 	public LogoutSuccessHandler casLogoutSuccessHandler() {
 		CASLogoutSuccessHandler handler = new CASLogoutSuccessHandler();
@@ -292,6 +311,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	// Facebook Authentication Configuration
 
+	@Profile("!test")
 	@Bean
 	public OAuthAuthenticationEntryPoint facebookEntryPoint() {
 		final OAuthAuthenticationEntryPoint entryPoint = new OAuthAuthenticationEntryPoint();
@@ -300,16 +320,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return entryPoint;
 	}
 
+	@Profile("!test")
 	@Bean
 	public FacebookProvider facebookProvider() {
 		final FacebookProvider provider = new FacebookProvider();
 		provider.setKey(facebookKey);
 		provider.setSecret(facebookSecret);
-		provider.setCallbackUrl(rootUrl + contextPath + "/j_spring_facebook_security_check");
+		provider.setCallbackUrl(rootUrl + servletContext.getContextPath() + "/j_spring_facebook_security_check");
 
 		return provider;
 	}
 
+	@Profile("!test")
 	@Bean
 	public OAuthAuthenticationFilter facebookFilter() throws Exception {
 		final OAuthAuthenticationFilter filter = new OAuthAuthenticationFilter("/j_spring_facebook_security_check");
@@ -321,6 +343,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return filter;
 	}
 
+	@Profile("!test")
 	@Bean
 	public OAuthAuthenticationProvider facebookAuthProvider() {
 		final OAuthAuthenticationProvider authProvider = new OAuthAuthenticationProvider();
@@ -331,16 +354,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	// Twitter Authentication Configuration
 
+	@Profile("!test")
 	@Bean
 	public TwitterProvider twitterProvider() {
 		final TwitterProvider provider = new TwitterProvider();
 		provider.setKey(twitterKey);
 		provider.setSecret(twitterSecret);
-		provider.setCallbackUrl(rootUrl + contextPath + "/j_spring_twitter_security_check");
+		provider.setCallbackUrl(rootUrl + servletContext.getContextPath() + "/j_spring_twitter_security_check");
 
 		return provider;
 	}
 
+	@Profile("!test")
 	@Bean
 	public OAuthAuthenticationFilter twitterFilter() throws Exception {
 		final OAuthAuthenticationFilter filter = new OAuthAuthenticationFilter("/j_spring_twitter_security_check");
@@ -351,6 +376,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return filter;
 	}
 
+	@Profile("!test")
 	@Bean
 	public OAuthAuthenticationProvider twitterAuthProvider() {
 		final OAuthAuthenticationProvider authProvider = new OAuthAuthenticationProvider();
@@ -361,17 +387,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	// Google Authentication Configuration
 
+	@Profile("!test")
 	@Bean
 	public Google2Provider googleProvider() {
 		final Google2Provider provider = new Google2Provider();
 		provider.setKey(googleKey);
 		provider.setSecret(googleSecret);
-		provider.setCallbackUrl(rootUrl + contextPath + "/j_spring_google_security_check");
+		provider.setCallbackUrl(rootUrl + servletContext.getContextPath() + "/j_spring_google_security_check");
 		provider.setScope(Google2Scope.EMAIL);
 
 		return provider;
 	}
 
+	@Profile("!test")
 	@Bean
 	public OAuthAuthenticationFilter googleFilter() throws Exception {
 		final OAuthAuthenticationFilter filter = new OAuthAuthenticationFilter("/j_spring_google_security_check");
@@ -383,11 +411,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return filter;
 	}
 
+	@Profile("!test")
 	@Bean
 	public OAuthAuthenticationProvider googleAuthProvider() {
 		final OAuthAuthenticationProvider authProvider = new OAuthAuthenticationProvider();
 		authProvider.setProvider(googleProvider());
 
 		return authProvider;
+	}
+
+	@Override
+	public void setServletContext(ServletContext servletContext) {
+		this.servletContext = servletContext;
 	}
 }
