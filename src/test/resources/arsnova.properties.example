@@ -54,6 +54,7 @@ security.authentication.login-try-limit=50
 # Guest authentication
 #
 security.guest.enabled=true
+security.guest.order=0
 security.guest.lecturer.enabled=true
 
 # Setup combined login if you want to use a single, customized login page
