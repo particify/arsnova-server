@@ -1,5 +1,8 @@
 package de.thm.arsnova.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.ServletContext;
 
 import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
@@ -61,6 +64,8 @@ import de.thm.arsnova.security.DbUserDetailsService;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter implements ServletContextAware {
+	private final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+
 	private ServletContext servletContext;
 
 	@Value("${root-url}") private String rootUrl;
@@ -108,24 +113,32 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		List<String> providers = new ArrayList<>();
 		if (dbAuthEnabled) {
+			providers.add("user-db");
 			auth.authenticationProvider(daoAuthenticationProvider());
 		}
 		if (ldapEnabled) {
+			providers.add("ldap");
 			auth.authenticationProvider(ldapAuthenticationProvider());
 		}
 		if (casEnabled) {
+			providers.add("cas");
 			auth.authenticationProvider(casAuthenticationProvider());
 		}
 		if (googleEnabled) {
+			providers.add("google");
 			auth.authenticationProvider(googleAuthProvider());
 		}
 		if (facebookEnabled) {
+			providers.add("facebook");
 			auth.authenticationProvider(facebookAuthProvider());
 		}
 		if (twitterEnabled) {
+			providers.add("twitter");
 			auth.authenticationProvider(twitterAuthProvider());
 		}
+		logger.info("Enabled authentication providers: {}", providers);
 	};
 
 	@Bean
