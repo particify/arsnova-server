@@ -32,7 +32,8 @@ import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
 import org.springframework.security.ldap.authentication.BindAuthenticator;
 import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
 import org.springframework.security.ldap.authentication.LdapAuthenticator;
-import org.springframework.security.ldap.authentication.NullLdapAuthoritiesPopulator;
+import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
+import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
@@ -194,13 +195,31 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	// LDAP Authentication Configuration
 
 	@Bean
-	public LdapAuthenticationProvider ldapAuthenticationProvider() {
-		LdapContextSource contextSource = new DefaultSpringSecurityContextSource(ldapUrl);
-		contextSource.setUserDn(ldapUserDn);
-		LdapAuthenticator authenticator = new BindAuthenticator(contextSource);
-		LdapAuthenticationProvider authProvider = new LdapAuthenticationProvider(authenticator, new NullLdapAuthoritiesPopulator());
+	public LdapAuthenticationProvider ldapAuthenticationProvider() throws Exception {
+		return new LdapAuthenticationProvider(ldapAuthenticator(), ldapAuthoritiesPopulator());
+	}
 
-		return authProvider;
+	@Bean
+	public LdapContextSource ldapContextSource() throws Exception {
+		DefaultSpringSecurityContextSource contextSource = new DefaultSpringSecurityContextSource(ldapUrl);
+		/* TODO: implement support for LDAP bind using manager credentials */
+//		contextSource.setUserDn(ldapManagerUserDn);
+//		contextSource.setPassword(ldapManagerPassword);
+
+		return contextSource;
+	}
+
+	@Bean
+	public LdapAuthenticator ldapAuthenticator() throws Exception {
+		BindAuthenticator authenticator = new BindAuthenticator(ldapContextSource());
+		authenticator.setUserDnPatterns(new String[] {ldapUserDn});
+
+		return authenticator;
+	}
+
+	@Bean
+	public LdapAuthoritiesPopulator ldapAuthoritiesPopulator() throws Exception {
+		return new DefaultLdapAuthoritiesPopulator(ldapContextSource(), null);
 	}
 
 	// CAS Authentication Configuration
