@@ -403,7 +403,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 	@Bean
 	public OAuthAuthenticationFilter googleFilter() throws Exception {
 		final OAuthAuthenticationFilter filter = new OAuthAuthenticationFilter("/j_spring_google_security_check");
-		filter.setProvider(twitterProvider());
+		filter.setProvider(googleProvider());
 		filter.setAuthenticationManager(authenticationManager());
 		filter.setAuthenticationFailureHandler(failureHandler());
 		filter.setAuthenticationSuccessHandler(successHandler());
