@@ -13,7 +13,8 @@
 	<!-- ARSnova Servlet Context -->
 
 	<context:component-scan base-package="de.thm.arsnova.controller,de.thm.arsnova.web" />
-	<context:property-placeholder location="file:///etc/arsnova/arsnova.properties" file-encoding="UTF-8" />
+	<context:property-placeholder location="arsnova.properties.example" file-encoding="UTF-8" />
+	<context:property-placeholder location="file:///etc/arsnova/arsnova.properties" file-encoding="UTF-8" ignore-resource-not-found="true" />
 	<mvc:annotation-driven
 		content-negotiation-manager="contentNegotiationManager" />
 
