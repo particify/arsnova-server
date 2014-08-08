@@ -72,8 +72,7 @@ public class LoginControllerTest {
 		mockMvc.perform(
 				get("/doLogin")
 				.param("type", "guest")
-				).andExpect(status().isMovedTemporarily())
-				.andExpect(redirectedUrl("/#auth/checkLogin"));
+				).andExpect(status().isOk());
 	}
 
 	@Test
@@ -81,8 +80,7 @@ public class LoginControllerTest {
 		mockMvc.perform(
 				get("/doLogin")
 				.param("type", "guest").param("user","Guest1234567890")
-				).andExpect(status().isMovedTemporarily())
-				.andExpect(redirectedUrl("/#auth/checkLogin"));
+				).andExpect(status().isOk());
 
 		final Authentication auth = SecurityContextHolder.getContext()
 				.getAuthentication();
