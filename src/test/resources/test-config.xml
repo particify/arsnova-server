@@ -25,15 +25,4 @@
 			</map>
 		</property>
 	</bean>
-
-	<!--
-	<security:authentication-manager>
-		<security:authentication-provider>
-			<security:user-service>
-				<security:user name="ptsr00" password="secret"
-					authorities="" />
-			</security:user-service>
-		</security:authentication-provider>
-	</security:authentication-manager>
-	-->
 </beans>
