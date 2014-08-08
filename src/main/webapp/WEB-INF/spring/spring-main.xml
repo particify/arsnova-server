@@ -16,7 +16,7 @@
 		p:ignoreUnresolvablePlaceholders="false" p:ignoreResourceNotFound="true">
 		<property name="locations">
 			<list>
-				<value>arsnova.properties.example</value>
+				<value>classpath:arsnova.properties.example</value>
 				<value>file:///etc/arsnova/arsnova.properties</value>
 			</list>
 		</property>
