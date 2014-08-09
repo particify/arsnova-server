@@ -66,7 +66,7 @@ import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 
-@Component
+@Component("databaseDao")
 public class CouchDBDao implements IDatabaseDao {
 	@Autowired
 	private IUserService userService;
