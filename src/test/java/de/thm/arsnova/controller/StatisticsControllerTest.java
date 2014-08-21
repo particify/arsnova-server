@@ -47,13 +47,14 @@ public class StatisticsControllerTest {
 	public final void testShouldGetCurrentOnlineUsers() throws Exception {
 		mockMvc.perform(get("/statistics/activeusercount").accept(MediaType.TEXT_PLAIN))
 		.andExpect(status().isOk())
-		.andExpect(content().string("0"));
+		.andExpect(content().contentType("text/plain"));
 	}
 
 	@Test
 	public final void testShouldSendXDeprecatedApiForGetCurrentOnlineUsers() throws Exception {
 		mockMvc.perform(get("/statistics/activeusercount").accept(MediaType.TEXT_PLAIN))
 		.andExpect(status().isOk())
+		.andExpect(content().contentType("text/plain"))
 		.andExpect(header().string(AbstractController.X_DEPRECATED_API,"1"));
 	}
 
@@ -61,6 +62,7 @@ public class StatisticsControllerTest {
 	public final void testShouldGetSessionCount() throws Exception {
 		mockMvc.perform(get("/statistics/sessioncount").accept(MediaType.TEXT_PLAIN))
 		.andExpect(status().isOk())
+		.andExpect(content().contentType("text/plain"))
 		.andExpect(content().string("3"));
 	}
 
@@ -68,6 +70,7 @@ public class StatisticsControllerTest {
 	public final void testShouldSendXDeprecatedApiForGetSessionCount() throws Exception {
 		mockMvc.perform(get("/statistics/sessioncount").accept(MediaType.TEXT_PLAIN))
 		.andExpect(status().isOk())
+		.andExpect(content().contentType("text/plain"))
 		.andExpect(header().string(AbstractController.X_DEPRECATED_API,"1"));
 	}
 
@@ -80,7 +83,7 @@ public class StatisticsControllerTest {
 		.andExpect(jsonPath("$.questions").value(0))
 		.andExpect(jsonPath("$.openSessions").value(3))
 		.andExpect(jsonPath("$.closedSessions").value(0))
-		.andExpect(jsonPath("$.activeUsers").value(0));
+		.andExpect(jsonPath("$.activeUsers").exists());
 	}
 
 	@Test
