@@ -21,6 +21,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.ldap.core.support.LdapContextSource;
+import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.cas.ServiceProperties;
@@ -58,6 +59,7 @@ import de.thm.arsnova.CASLogoutSuccessHandler;
 import de.thm.arsnova.CasUserDetailsService;
 import de.thm.arsnova.LoginAuthenticationFailureHandler;
 import de.thm.arsnova.LoginAuthenticationSucessHandler;
+import de.thm.arsnova.security.ApplicationPermissionEvaluator;
 import de.thm.arsnova.security.DbUserDetailsService;
 
 @Configuration
@@ -164,6 +166,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 	@Bean
 	public SessionRegistry sessionRegistry() {
 		return new SessionRegistryImpl();
+	}
+
+	@Bean
+	public PermissionEvaluator permissionEvaluator() {
+		return new ApplicationPermissionEvaluator();
 	}
 
 	@Bean
