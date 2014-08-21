@@ -1,5 +1,7 @@
 package de.thm.arsnova.socket;
 
+import io.netty.channel.ChannelOption;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -15,16 +17,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.stereotype.Component;
 
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.Configuration;
+import com.corundumstudio.socketio.SocketConfig;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
-import com.corundumstudio.socketio.parser.Packet;
-import com.corundumstudio.socketio.parser.PacketType;
+import com.corundumstudio.socketio.protocol.Packet;
+import com.corundumstudio.socketio.protocol.PacketType;
 
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.NoContentException;
@@ -34,6 +38,7 @@ import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.message.Feedback;
 import de.thm.arsnova.socket.message.Session;
 
+@Component
 public class ARSnovaSocketIOServer {
 
 	@Autowired
@@ -81,6 +86,9 @@ public class ARSnovaSocketIOServer {
 		 */
 		System.setProperty("java.net.preferIPv4Stack", "true");
 
+		SocketConfig soConfig = new SocketConfig();
+		soConfig.setReuseAddress(true);
+		config.setSocketConfig(soConfig);
 		config.setPort(portNumber);
 		config.setHostname(hostIp);
 		if (useSSL) {
