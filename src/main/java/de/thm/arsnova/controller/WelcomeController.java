@@ -18,22 +18,33 @@
  */
 package de.thm.arsnova.controller;
 
+import java.util.HashMap;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
 public class WelcomeController extends AbstractController {
+
+	@Value("${mobile.path}")
+	String mobileContextPath;
+
 	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public final ModelAndView home(final HttpServletRequest request) {
-		String referer = request.getHeader("referer");
-		String target = "index.html";
-		if (referer != null && referer.endsWith("dojo-index.html")) {
-			target = "dojo-index.html";
-		}
-		return new ModelAndView("redirect:/" + target);
+	public final View home(final HttpServletRequest request) {
+		return new RedirectView(mobileContextPath + "/", false);
 	}
+
+	@RequestMapping(value = "/", method = RequestMethod.GET, produces = "application/json")
+	@ResponseBody
+	public final HashMap<String, Object> jsonHome(final HttpServletRequest request) {
+		return new HashMap<String, Object>();
+	}
+
 }

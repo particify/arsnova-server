@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.FoodVote;
 import de.thm.arsnova.entities.InterposedQuestion;
@@ -501,6 +502,18 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
+	public DbUser createOrUpdateUser(DbUser user) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DbUser getUser(String username) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public int getLearningProgress(Session session) {
 		// TODO Auto-generated method stub
 		return 0;
@@ -510,5 +523,11 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public SimpleEntry<Integer, Integer> getMyLearningProgress(Session session, User user) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public boolean deleteUser(DbUser dbUser) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

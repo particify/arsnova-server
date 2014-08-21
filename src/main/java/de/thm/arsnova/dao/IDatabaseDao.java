@@ -24,6 +24,7 @@ import java.util.List;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.FoodVote;
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.InterposedReadingCount;
@@ -162,6 +163,12 @@ public interface IDatabaseDao {
 	void publishAllQuestions(Session session, boolean publish);
 
 	void deleteAllQuestionsAnswers(Session session);
+
+	DbUser createOrUpdateUser(DbUser user);
+
+	DbUser getUser(String username);
+
+	boolean deleteUser(DbUser dbUser);
 
 	int getLearningProgress(Session session);
 

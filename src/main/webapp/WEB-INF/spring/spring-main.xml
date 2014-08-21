@@ -20,10 +20,13 @@
 				<value>file:///etc/arsnova/arsnova.properties</value>
 			</list>
 		</property>
+		<property name="fileEncoding" value="UTF-8" />
 	</bean>
 
-	<context:component-scan
-		base-package="de.thm.arsnova.dao,de.thm.arsnova.services,de.thm.arsnova.events,de.thm.arsnova.config" />
+	<import resource="spring-security.xml" />
+
+	<context:component-scan base-package="de.thm.arsnova.dao,de.thm.arsnova.events,de.thm.arsnova.security,de.thm.arsnova.services,de.thm.arsnova.config" />
+
 	<context:annotation-config />
 
 	<task:annotation-driven />
@@ -34,7 +37,9 @@
 
 	<bean id="userSessionAspect" class="de.thm.arsnova.aop.UserSessionAspect" />
 
-	<bean id="userService" scope="singleton" class="de.thm.arsnova.services.UserService" />
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="${mail.host}"/>
+	</bean>
 
 	<bean id="databaseDao" class="de.thm.arsnova.dao.CouchDBDao" />
 </beans>

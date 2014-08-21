@@ -16,6 +16,9 @@ public class StatisticsService implements IStatisticsService {
 	private IDatabaseDao databaseDao;
 
 	@Autowired
+	private IUserService userService;
+
+	@Autowired
 	private SessionRegistry sessionRegistry;
 
 	@Override
@@ -27,8 +30,10 @@ public class StatisticsService implements IStatisticsService {
 		statistics.setClosedSessions(databaseDao.countClosedSessions());
 		statistics.setAnswers(databaseDao.countAnswers());
 		statistics.setQuestions(databaseDao.countQuestions());
-		statistics.setActiveUsers(databaseDao.countActiveUsers(since));
+		/* TODO: Are both of the following do the same, now? If so, remove one of them. */
+		statistics.setActiveUsers(userService.loggedInUsers());
 		statistics.setLoggedinUsers(countLoggedInUsers());
+
 		return statistics;
 	}
 

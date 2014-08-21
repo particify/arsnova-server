@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +52,7 @@ import com.fourspaces.couchdb.ViewResults;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.FoodVote;
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.InterposedReadingCount;
@@ -63,6 +65,7 @@ import de.thm.arsnova.entities.VisitedSession;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.ISessionService;
 
+@Component("databaseDao")
 public class CouchDBDao implements IDatabaseDao {
 
 	@Autowired
@@ -392,6 +395,11 @@ public class CouchDBDao implements IDatabaseDao {
 					final Collection<VisitedSession> visitedSessions = JSONArray.toCollection(vs, VisitedSession.class);
 					loggedIn.setVisitedSessions(new ArrayList<VisitedSession>(visitedSessions));
 				}
+
+				/* Do not clutter CouchDB. Only update once every 3 hours per session. */
+				if (loggedIn.getSessionId().equals(session.get_id()) && loggedIn.getTimestamp() > System.currentTimeMillis() - 3 * 3600000) {
+					return loggedIn;
+				}
 			}
 
 			loggedIn.setUser(user.getUsername());
@@ -427,6 +435,11 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public final void updateSessionOwnerActivity(final Session session) {
 		try {
+			/* Do not clutter CouchDB. Only update once every 3 hours. */
+			if (session.getLastOwnerActivity() > System.currentTimeMillis() - 3 * 3600000) {
+				return;
+			}
+
 			session.setLastOwnerActivity(System.currentTimeMillis());
 			final JSONObject json = JSONObject.fromObject(session);
 			getDatabase().saveDocument(new Document(json));
@@ -1406,5 +1419,65 @@ public class CouchDBDao implements IDatabaseDao {
 		final double myProgress = userTotalValue / courseMaximumValue;
 
 		return new AbstractMap.SimpleEntry<Integer, Integer>((int)Math.round(myProgress*100), courseProgress);
+	}
+
+	public DbUser createOrUpdateUser(DbUser user) {
+		try {
+			String id = user.getId();
+			String rev = user.getRev();
+			Document d = new Document();
+
+			if (null != id) {
+				d = database.getDocument(id, rev);
+			}
+
+			d.put("type", "userdetails");
+			d.put("username", user.getUsername());
+			d.put("password", user.getPassword());
+			d.put("activationKey", user.getActivationKey());
+			d.put("passwordResetKey", user.getPasswordResetKey());
+			d.put("passwordResetTime", user.getPasswordResetTime());
+			d.put("creation", user.getCreation());
+			d.put("lastLogin", user.getLastLogin());
+
+			database.saveDocument(d, id);
+			user.setId(d.getId());
+			user.setRev(d.getRev());
+
+			return user;
+		} catch (IOException e) {
+			LOGGER.error("Could not save user {}", user);
+		}
+
+		return null;
+	}
+
+	@Override
+	public DbUser getUser(String username) {
+		NovaView view = new NovaView("user/all");
+		view.setKey(username);
+		ViewResults results = this.getDatabase().view(view);
+
+		if (results.getJSONArray("rows").optJSONObject(0) == null) {
+			return null;
+		}
+
+		return (DbUser) JSONObject.toBean(
+			results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
+			DbUser.class
+		);
+	}
+
+	@Override
+	public boolean deleteUser(DbUser dbUser) {
+		try {
+			this.deleteDocument(dbUser.getId());
+
+			return true;
+		} catch (IOException e) {
+			LOGGER.error("Could not delete user {}", dbUser.getId());
+		}
+
+		return false;
 	}
 }

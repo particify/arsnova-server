@@ -14,6 +14,9 @@
 		<mobile.production.path>../arsnova-mobile/src/main/webapp/build/production/ARSnova</mobile.production.path>
 		<mobile.testing.path>../arsnova-mobile/src/main/webapp/build/testing/ARSnova</mobile.testing.path>
 		<mobile.path>${mobile.production.path}</mobile.path>
+		<customization.path>${basedir}/../arsnova-customization/src/main/webapp</customization.path>
+		<presenter.rootPath>${basedir}/../arsnova-presenter</presenter.rootPath>
+		<presenter.outputDir>target/arsnova-presenter-1.1.0-SNAPSHOT</presenter.outputDir>
 	</properties>
 
 	<developers>
@@ -134,12 +137,6 @@
 	</repositories>
 
 	<dependencies>
-		<dependency>
-			<groupId>de.thm.arsnova</groupId>
-			<artifactId>arsnova-mobile</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<type>war</type>
-		</dependency>
 		<!-- Spring -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -177,6 +174,11 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-cas</artifactId>
+			<version>${org.springframework.security-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-ldap</artifactId>
 			<version>${org.springframework.security-version}</version>
 		</dependency>
 		<dependency>
@@ -226,6 +228,11 @@
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.0.1</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+			<version>1.4.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -310,6 +317,20 @@
 			<version>0.9.1</version>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+            <groupId>org.apache.directory.server</groupId>
+            <artifactId>apacheds-core</artifactId>
+            <version>1.5.5</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.directory.server</groupId>
+            <artifactId>apacheds-server-jndi</artifactId>
+            <version>1.5.5</version>
+            <scope>runtime</scope>
+        </dependency>
+
 	</dependencies>
 	<build>
 		<plugins>
@@ -323,18 +344,32 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.mortbay.jetty</groupId>
+				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>7.6.5.v20120716</version>
+				<version>9.2.1.v20140609</version>
 				<configuration>
 					<scanIntervalSeconds>1</scanIntervalSeconds>
-					<webApp> 
-						<contextPath>/</contextPath>
-						<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
-							<resourcesAsCSV>src/main/webapp,${mobile.path}</resourcesAsCSV> 
-						</baseResource>
+					<webApp>
 						<overrideDescriptor>src/main/webapp/WEB-INF/web-dev.xml</overrideDescriptor>
 					</webApp>
+					<contextHandlers>
+						<contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
+							<contextPath>/mobile</contextPath>
+							<resourceBase>${mobile.path}</resourceBase>
+						</contextHandler>
+						<contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
+							<contextPath>/presenter</contextPath>
+							<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
+								<resourcesAsCSV>${presenter.rootPath}/${presenter.outputDir},${presenter.rootPath}/src/main/websources,${presenter.rootPath}/src/main/webapp</resourcesAsCSV>
+							</baseResource>
+							<descriptor>${presenter.rootPath}/src/main/config/WEB-INF/web.dev.xml</descriptor>
+							<aliasCheck implementation="org.eclipse.jetty.server.handler.AllowSymLinkAliasChecker" />
+						</contextHandler>
+						<contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
+							<contextPath>/customization</contextPath>
+							<resourceBase>${customization.path}</resourceBase>
+						</contextHandler>
+					</contextHandlers>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -398,7 +433,7 @@
 		</plugins>
 	</build>
 
-	<name>ARSnova</name>
+	<name>ARSnova Backend</name>
 	<description>ARSnova is a great audience response system</description>
 	<organization>
 		<name>Technische Hochschule Mittelhessen</name>

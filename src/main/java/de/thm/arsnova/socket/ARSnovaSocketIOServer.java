@@ -55,8 +55,6 @@ public class ARSnovaSocketIOServer {
 	private final Configuration config;
 	private SocketIOServer server;
 
-	private int lastActiveUserCount = 0;
-
 	public ARSnovaSocketIOServer() {
 		config = new Configuration();
 	}
@@ -99,26 +97,38 @@ public class ARSnovaSocketIOServer {
 		server.addEventListener("setFeedback", Feedback.class, new DataListener<Feedback>() {
 			@Override
 			public void onData(final SocketIOClient client, final Feedback data, final AckRequest ackSender) {
-				/**
-				 * do a check if user is in the session, for which he would give
-				 * a feedback
-				 */
 				final User u = userService.getUser2SocketId(client.getSessionId());
-				if (u == null || !userService.isUserInSession(u, data.getSessionkey())) {
-					return;
+				final String sessionKey = userService.getSessionForUser(u.getUsername());
+				LOGGER.debug("Feedback recieved: {}", new Object[] {u, sessionKey, data.getValue()});
+				if (null != sessionKey) {
+					feedbackService.saveFeedback(sessionKey, data.getValue(), u);
 				}
-				feedbackService.saveFeedback(data.getSessionkey(), data.getValue(), u);
 			}
 		});
 
 		server.addEventListener("setSession", Session.class, new DataListener<Session>() {
 			@Override
 			public void onData(final SocketIOClient client, final Session session, final AckRequest ackSender) {
-				sessionService.joinSession(session.getKeyword(), client.getSessionId());
-				/* active user count has to be sent to the client since the broadcast is
-				 * not always sent as long as the polling solution is active simultaneously */
-				reportActiveUserCountForSession(session.getKeyword());
-				reportSessionDataToClient(session.getKeyword(), client);
+				final User u = userService.getUser2SocketId(client.getSessionId());
+				if (null == u) {
+					LOGGER.info("Client {} requested to join session but is not mapped to a user", client.getSessionId());
+
+					return;
+				}
+				final String oldSessionKey = userService.getSessionForUser(u.getUsername());
+				if (session.getKeyword() == oldSessionKey) {
+					return;
+				}
+				if (null != oldSessionKey) {
+					reportActiveUserCountForSession(oldSessionKey);
+				}
+
+				if (null != sessionService.joinSession(session.getKeyword(), client.getSessionId())) {
+					/* active user count has to be sent to the client since the broadcast is
+					 * not always sent as long as the polling solution is active simultaneously */
+					reportActiveUserCountForSession(session.getKeyword());
+					reportSessionDataToClient(session.getKeyword(), client);
+				}
 			}
 		});
 
@@ -281,11 +291,7 @@ public class ARSnovaSocketIOServer {
 
 	public void reportActiveUserCountForSession(final String sessionKey) {
 		/* This check is needed as long as the HTTP polling solution is active simultaneously. */
-		final int count = sessionService.activeUsers(sessionKey);
-		if (count == lastActiveUserCount) {
-			return;
-		}
-		lastActiveUserCount = count;
+		final int count = userService.getUsersInSession(sessionKey).size();
 
 		broadcastInSession(sessionKey, "activeUserCountData", count);
 	}

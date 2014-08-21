@@ -19,7 +19,11 @@
 package de.thm.arsnova.controller;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -33,14 +37,19 @@ import org.scribe.up.session.HttpUserSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.token.Sha512DigestUtils;
+import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.stereotype.Controller;
@@ -51,6 +60,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
+import de.thm.arsnova.entities.ServiceDescription;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.UnauthorizedException;
@@ -63,6 +73,72 @@ public class LoginController extends AbstractController {
 	private static final int MAX_USERNAME_LENGTH = 15;
 	private static final int MAX_GUESTHASH_LENGTH = 10;
 
+	@Value("${customization.path}")
+	private String customizationPath;
+
+	@Value("${security.guest.enabled}")
+	private String guestEnabled;
+
+	@Value("${security.guest.lecturer.enabled}")
+	private String guestLecturerEnabled;
+
+	@Value("${security.custom-login.enabled}")
+	private String customLoginEnabled;
+
+	@Value("${security.custom-login.title:University}")
+	private String customLoginTitle;
+
+	@Value("${security.custom-login.login-dialog-path}")
+	private String customLoginDialog;
+
+	@Value("${security.custom-login.image:}")
+	private String customLoginImage;
+
+	@Value("${security.user-db.enabled}")
+	private String dbAuthEnabled;
+
+	@Value("${security.user-db.title:ARSnova}")
+	private String dbAuthTitle;
+
+	@Value("${security.user-db.login-dialog-path}")
+	private String dbAuthDialog;
+
+	@Value("${security.user-db.image:}")
+	private String dbAuthImage;
+
+	@Value("${security.ldap.enabled}")
+	private String ldapEnabled;
+
+	@Value("${security.ldap.title:LDAP}")
+	private String ldapTitle;
+
+	@Value("${security.ldap.login-dialog-path}")
+	private String ldapDialog;
+
+	@Value("${security.ldap.image:}")
+	private String ldapImage;
+
+	@Value("${security.cas.enabled}")
+	private String casEnabled;
+
+	@Value("${security.cas.title:CAS}")
+	private String casTitle;
+
+	@Value("${security.cas.image:}")
+	private String casImage;
+
+	@Value("${security.facebook.enabled}")
+	private String facebookEnabled;
+
+	@Value("${security.google.enabled}")
+	private String googleEnabled;
+
+	@Value("${security.twitter.enabled}")
+	private String twitterEnabled;
+
+	@Autowired
+	private DaoAuthenticationProvider daoProvider;
+
 	@Autowired
 	private TwitterProvider twitterProvider;
 
@@ -71,6 +147,9 @@ public class LoginController extends AbstractController {
 
 	@Autowired
 	private FacebookProvider facebookProvider;
+	
+	@Autowired
+	private LdapAuthenticationProvider ldapAuthenticationProvider;
 
 	@Autowired
 	private CasAuthenticationEntryPoint casEntryPoint;
@@ -83,37 +162,117 @@ public class LoginController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
 
-	@RequestMapping(value = { "/auth/login", "/doLogin" }, method = RequestMethod.GET)
-	public final View doLogin(
+	@RequestMapping(value = { "/auth/login", "/doLogin" }, method = { RequestMethod.POST, RequestMethod.GET })
+	public final void doLogin(
 			@RequestParam("type") final String type,
-			@RequestParam(value = "user", required = false) final String guestName,
-			@RequestParam(value = "referer", required = false) final String forcedReferer,
-			@RequestParam(value = "successurl", required = false) final String successUrl,
-			@RequestParam(value = "failureurl", required = false) final String failureUrl,
+			@RequestParam(value = "user", required = false) String username,
+			@RequestParam(required = false) final String password,
 			@RequestParam(value = "role", required = false) final UserSessionService.Role role,
 			final HttpServletRequest request,
 			final HttpServletResponse response
-			) throws IOException, ServletException {
+	) throws IOException {
+		String addr = request.getRemoteAddr();
+		if (userService.isBannedFromLogin(addr)) {
+			response.sendError(429, "Too Many Requests");
+
+			return;
+		}
+
 		userSessionService.setRole(role);
 
-		String referer = request.getHeader("referer");
-		if (null != forcedReferer && null != referer && !UrlUtils.isAbsoluteUrl(referer)) {
-			/* Use a url from a request parameter as referer as long as the url is not absolute (to prevent
-			 * abuse of the redirection). */
-			referer = forcedReferer;
-		}
-		if (null == referer) {
-			referer = "/";
-		}
+		if ("arsnova".equals(type)) {
+			Authentication authRequest = new UsernamePasswordAuthenticationToken(username, password);
+			try {
+				Authentication auth = daoProvider.authenticate(authRequest);
+				if (auth.isAuthenticated()) {
+					SecurityContextHolder.getContext().setAuthentication(auth);
+					request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+							SecurityContextHolder.getContext());
+					
+					return;
+				}
+			} catch (AuthenticationException e) {
+				LOGGER.info("Authentication failed: {}", e.getMessage());
+			}
 
-		request.getSession().setAttribute("ars-login-success-url",
-				null == successUrl ? referer + "#auth/checkLogin" : successUrl
-				);
-		request.getSession().setAttribute("ars-login-failure-url",
-				null == failureUrl ? referer : failureUrl
-				);
+			userService.increaseFailedLoginCount(addr);
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+		} else if ("ldap".equals(type)) {
+			if (!"".equals(username) && !"".equals(password)) {
+				org.springframework.security.core.userdetails.User user =
+						new org.springframework.security.core.userdetails.User(
+							username, password, true, true, true, true, this.getAuthorities()
+						);
 
+				Authentication token = new UsernamePasswordAuthenticationToken(user, password, getAuthorities());
+				try {
+					Authentication auth = ldapAuthenticationProvider.authenticate(token);
+					if (auth.isAuthenticated()) {
+						SecurityContextHolder.getContext().setAuthentication(token);
+						request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+								SecurityContextHolder.getContext());
+
+						return;
+					}
+					LOGGER.info("LDAPLOGIN: {}", auth.isAuthenticated());
+				}
+				catch (AuthenticationException e) {
+					LOGGER.info("No LDAP login: {}", e);
+				}
+
+				userService.increaseFailedLoginCount(addr);
+				response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			}
+		} else if ("guest".equals(type)) {
+			List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+			authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
+			if (username == null || !username.startsWith("Guest") || username.length() != MAX_USERNAME_LENGTH) {
+				username = "Guest" + Sha512DigestUtils.shaHex(request.getSession().getId()).substring(0, MAX_GUESTHASH_LENGTH);
+			}
+			org.springframework.security.core.userdetails.User user =
+					new org.springframework.security.core.userdetails.User(
+							username, "", true, true, true, true, authorities
+					);
+			Authentication token = new UsernamePasswordAuthenticationToken(user, null, authorities);
+
+			SecurityContextHolder.getContext().setAuthentication(token);
+			request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+					SecurityContextHolder.getContext());
+		}
+	}
+
+	@RequestMapping(value = { "/auth/dialog" }, method = RequestMethod.GET)
+	@ResponseBody
+	public final View dialog(
+			@RequestParam("type") final String type,
+			@RequestParam(value = "successurl", defaultValue = "/") String successUrl,
+			@RequestParam(value = "failureurl", defaultValue = "/") String failureUrl,
+			final HttpServletRequest request,
+			final HttpServletResponse response
+	) throws IOException, ServletException {
 		View result = null;
+
+		/* Use URLs from a request parameters for redirection as long as the 
+		 * URL is not absolute (to prevent abuse of the redirection). */
+		if (UrlUtils.isAbsoluteUrl(successUrl)) {
+			successUrl = "/";
+		}
+		if (UrlUtils.isAbsoluteUrl(failureUrl)) {
+			failureUrl = "/";
+		}
+
+		/* Workaround until a solution is found to do a redirect which is 
+		 * relative to the server root instead of the context path */
+		String port;
+		if ("https".equals(request.getScheme())) {
+			port = 443 != request.getServerPort() ? ":" + request.getLocalPort() : "";
+		} else {
+			port = 80 != request.getServerPort() ? ":" + request.getLocalPort() : "";
+		}
+		String serverUrl = request.getScheme() + "://" + request.getServerName() + port;
+
+		request.getSession().setAttribute("ars-login-success-url", serverUrl + successUrl);
+		request.getSession().setAttribute("ars-login-failure-url", serverUrl + failureUrl);
 
 		if ("cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);
@@ -121,62 +280,123 @@ public class LoginController extends AbstractController {
 			final String authUrl = twitterProvider.getAuthorizationUrl(new HttpUserSession(request));
 			result = new RedirectView(authUrl);
 		} else if ("facebook".equals(type)) {
+			facebookProvider.setFields("id,link");
+			facebookProvider.setScope("");
 			final String authUrl = facebookProvider.getAuthorizationUrl(new HttpUserSession(request));
 			result = new RedirectView(authUrl);
 		} else if ("google".equals(type)) {
 			final String authUrl = googleProvider.getAuthorizationUrl(new HttpUserSession(request));
 			result = new RedirectView(authUrl);
-		} else if ("guest".equals(type)) {
-			result = handleGuestLogin(guestName, successUrl, request, referer);
 		}
 
-		return result;
-	}
-
-	private View handleGuestLogin(final String guestName,
-			final String successUrl, final HttpServletRequest request,
-			final String referer) {
-		View result;
-		final List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-		authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
-		String username = "";
-		if (guestName != null && guestName.startsWith("Guest") && guestName.length() == MAX_USERNAME_LENGTH) {
-			username = guestName;
-		} else {
-			username = "Guest" + Sha512DigestUtils.shaHex(
-					request.getSession().getId()
-					).substring(0, MAX_GUESTHASH_LENGTH);
-		}
-		final org.springframework.security.core.userdetails.User user =
-				new org.springframework.security.core.userdetails.User(
-						username, "", true, true, true, true, authorities
-						);
-		final Authentication token = new UsernamePasswordAuthenticationToken(user, null, authorities);
-
-		SecurityContextHolder.getContext().setAuthentication(token);
-		request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-				SecurityContextHolder.getContext());
-		result = new RedirectView(null == successUrl ? referer + "#auth/checkLogin" : successUrl);
 		return result;
 	}
 
 	@RequestMapping(value = { "/auth/", "/whoami" }, method = RequestMethod.GET)
 	@ResponseBody
 	public final User whoami() {
-		userSessionService.setUser(userService.getCurrentUser());
+		userSessionService.setUser(userService.getCurrentUser());		
 		return userService.getCurrentUser();
 	}
 
-	@RequestMapping(value = { "/auth/logout", "/logout" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/auth/logout", "/logout" }, method = { RequestMethod.POST, RequestMethod.GET } )
 	public final View doLogout(final HttpServletRequest request) {
 		final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		userService.removeUserFromMaps(userService.getCurrentUser());
 		request.getSession().invalidate();
 		SecurityContextHolder.clearContext();
 		if (auth instanceof CasAuthenticationToken) {
-			return new RedirectView("/j_spring_cas_security_logout");
+			return new RedirectView("/j_spring_cas_security_logout", true);
 		}
 		return new RedirectView(request.getHeader("referer") != null ? request.getHeader("referer") : "/");
+	}
+	
+	@RequestMapping(value = { "/auth/services" }, method = RequestMethod.GET)
+	@ResponseBody
+	public final List<ServiceDescription> getServices(final HttpServletRequest request) {
+		List<ServiceDescription> services = new ArrayList<ServiceDescription>();
+
+		/* The first parameter is replaced by the backend, the second one by the frondend */
+		String dialogUrl = request.getContextPath() + "/auth/dialog?type={0}&successurl='{0}'";
+
+		if ("true".equals(guestEnabled)) {
+			ServiceDescription sdesc = new ServiceDescription(
+				"guest",
+				"Guest",
+				null
+			);
+			if (!"true".equals(guestLecturerEnabled)) {
+				sdesc.setAllowLecturer(false);
+			}
+			services.add(sdesc);
+		}
+
+		if ("true".equals(customLoginEnabled) && !"".equals(customLoginDialog)) {
+			services.add(new ServiceDescription(
+				"custom",
+				customLoginTitle,
+				customizationPath + "/" + customLoginDialog + "?redirect={0}",
+				customLoginImage
+			));
+		}
+
+		if ("true".equals(dbAuthEnabled) && !"".equals(dbAuthDialog)) {
+			services.add(new ServiceDescription(
+				"arsnova",
+				dbAuthTitle,
+				customizationPath + "/" + dbAuthDialog + "?redirect={0}",
+				dbAuthImage
+			));
+		}
+
+		if ("true".equals(ldapEnabled) && !"".equals(ldapDialog)) {
+			services.add(new ServiceDescription(
+				"ldap",
+				ldapTitle,
+				customizationPath + "/" + ldapDialog + "?redirect={0}",
+				ldapImage
+			));
+		}
+
+		if ("true".equals(casEnabled)) {
+			services.add(new ServiceDescription(
+				"cas",
+				casTitle,
+				MessageFormat.format(dialogUrl, "cas")
+			));
+		}
+
+		if ("true".equals(facebookEnabled)) {
+			services.add(new ServiceDescription(
+				"facebook",
+				"Facebook",
+				MessageFormat.format(dialogUrl, "facebook")
+			));
+		}
+
+		if ("true".equals(googleEnabled)) {
+			services.add(new ServiceDescription(
+				"google",
+				"Google",
+				MessageFormat.format(dialogUrl, "google")
+			));
+		}
+
+		if ("true".equals(twitterEnabled)) {
+			services.add(new ServiceDescription(
+				"twitter",
+				"Twitter",
+				MessageFormat.format(dialogUrl, "twitter")
+			));
+		}
+
+		return services;
+	}
+
+	private Collection<GrantedAuthority> getAuthorities() {
+		List<GrantedAuthority> authList = new ArrayList<GrantedAuthority>();
+		authList.add(new SimpleGrantedAuthority("ROLE_USER"));
+		return authList;
 	}
 
 	@RequestMapping(value = { "/test/me" }, method = RequestMethod.GET)

@@ -23,10 +23,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.User;
 
 public interface IUserService {
 	User getCurrentUser();
+	
+	boolean isBannedFromLogin(String addr);
+
+	void increaseFailedLoginCount(String addr);
 
 	User getUser2SocketId(UUID socketId);
 
@@ -51,4 +56,16 @@ public interface IUserService {
 	void removeUserFromMaps(User user);
 
 	int loggedInUsers();
+
+	DbUser getDbUser(String username);
+
+	DbUser createDbUser(String username, String password);
+
+	DbUser updateDbUser(DbUser dbUser);
+
+	DbUser deleteDbUser(String username);
+
+	void initiatePasswordReset(String username);
+
+	boolean resetPassword(DbUser dbUser, String key, String password);
 }
