@@ -100,7 +100,7 @@ security.user-db.reset-password-mail.body=You requested to reset your \
 # user-dn-pattern: Pattern used to check user credentials against the LDAP
 #     server. {0} will be replaced with the user ID by ARSnova.
 #
-security.ldap.enabled=true
+security.ldap.enabled=false
 security.ldap.title=LDAP
 security.ldap.login-dialog-path=login-ldap.html
 security.ldap.image=
@@ -113,7 +113,7 @@ security.ldap.user-dn-pattern=uid={0},ou=arsnova
 
 # CAS authentication
 #
-security.cas.enabled=true
+security.cas.enabled=false
 security.cas.title=CAS
 security.cas.image=
 security.cas.order=0
@@ -126,21 +126,21 @@ security.cas-server-url=https://example.com/cas
 
 # Facebook
 #
-security.facebook.enabled=true
+security.facebook.enabled=false
 security.facebook.order=0
 security.facebook.key=
 security.facebook.secret=
 
 # Twitter
 #
-security.twitter.enabled=true
+security.twitter.enabled=false
 security.twitter.order=0
 security.twitter.key=
 security.twitter.secret=
 
 # Google
 #
-security.google.enabled=true
+security.google.enabled=false
 security.google.order=0
 security.google.key=
 security.google.secret=

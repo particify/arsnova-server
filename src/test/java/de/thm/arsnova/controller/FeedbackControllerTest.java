@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -25,10 +26,10 @@ import de.thm.arsnova.services.StubUserService;
 @ContextConfiguration(locations = {
 		"file:src/main/webapp/WEB-INF/spring/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
-		"file:src/main/webapp/WEB-INF/spring/spring-security.xml",
 		"file:src/test/resources/test-config.xml",
 		"file:src/test/resources/test-socketioconfig.xml"
 })
+@ActiveProfiles("test")
 public class FeedbackControllerTest {
 
 	@Autowired

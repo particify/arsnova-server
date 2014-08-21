@@ -22,7 +22,6 @@ import de.thm.arsnova.entities.Statistics;
 @ContextConfiguration(locations = {
 		"file:src/main/webapp/WEB-INF/spring/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
-		"file:src/main/webapp/WEB-INF/spring/spring-security.xml",
 		"file:src/test/resources/test-config.xml"
 })
 @ActiveProfiles("test")
@@ -34,11 +33,14 @@ public class StatisticsServiceTest {
 	@Mock
 	private IDatabaseDao databaseDao;
 
+	@Mock
+	private IUserService userService;
+
 	@Before
 	public final void startup() {
 		MockitoAnnotations.initMocks(this);
+		when(userService.loggedInUsers()).thenReturn(42);
 		when(databaseDao.countQuestions()).thenReturn(123);
-		when(databaseDao.countActiveUsers(anyInt())).thenReturn(42);
 		when(databaseDao.countOpenSessions()).thenReturn(1978);
 		when(databaseDao.countClosedSessions()).thenReturn(1984);
 		when(databaseDao.countAnswers()).thenReturn(2014);

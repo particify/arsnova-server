@@ -1,7 +1,9 @@
 package de.thm.arsnova.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -18,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -32,10 +35,10 @@ import de.thm.arsnova.services.StubUserService;
 @ContextConfiguration(locations = {
 		"file:src/main/webapp/WEB-INF/spring/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
-		"file:src/main/webapp/WEB-INF/spring/spring-security.xml",
 		"file:src/test/resources/test-config.xml",
 		"file:src/test/resources/test-socketioconfig.xml"
 })
+@ActiveProfiles("test")
 public class SessionControllerTest {
 
 	@Autowired
@@ -142,5 +145,29 @@ public class SessionControllerTest {
 		mockMvc.perform(get("/session/12345678/activeusercount").accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isOk())
 		.andExpect(header().string(AbstractController.X_DEPRECATED_API, "1"));
+	}
+
+	@Test
+	public void testShouldEndInUnauthorizedResult() throws Exception {
+		setAuthenticated(false, "ptsr00");
+
+		mockMvc.perform(post("/session/12345678/online").accept(MediaType.APPLICATION_JSON))
+		.andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	public void testShouldEndInForbidden() throws Exception {
+		setAuthenticated(true, "ptsr00");
+
+		mockMvc.perform(
+				put("/session/12345678")
+				.content("{\"keyword\":\"12345678\", \"name\":\"Testsession\"}, \"shortName\":\"TS\", \"creator\":\"ptsr00\", \"active\":true")
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+		setAuthenticated(true, "other");
+
+		mockMvc.perform(delete("/session/12345678")).andExpect(status().isForbidden());
 	}
 }

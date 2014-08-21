@@ -38,6 +38,7 @@ import org.junit.runner.RunWith;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -51,14 +52,12 @@ import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.dao.StubDatabaseDao;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {
 		"file:src/main/webapp/WEB-INF/spring/arsnova-servlet.xml",
 		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
-		"file:src/main/webapp/WEB-INF/spring/spring-security.xml",
 		"file:src/test/resources/test-config.xml"
 })
 @ActiveProfiles("test")
@@ -144,7 +143,7 @@ public class SessionServiceTest {
 		assertNotNull(sessionService.joinSession("11111111"));
 	}
 
-	@Test(expected = ForbiddenException.class)
+	@Test(expected = AccessDeniedException.class)
 	public void testShouldUpdateSession() {
 		setAuthenticated(true, "ptsr00");
 
@@ -193,7 +192,7 @@ public class SessionServiceTest {
 		sessionService.deleteSession("12345678");
 	}
 
-	@Test(expected = ForbiddenException.class)
+	@Test(expected = AccessDeniedException.class)
 	public void testShouldNotDeleteSessionIfNotOwner() {
 		setAuthenticated(true, "anybody");
 		sessionService.deleteSession("12345678");
