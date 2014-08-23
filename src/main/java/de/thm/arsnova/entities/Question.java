@@ -59,6 +59,7 @@ public class Question {
 	private boolean toggleFieldsLeft;
 	private int numClickableFields;
 	private int thresholdCorrectAnswers;
+	private boolean cvIsColored;
 
 	public final String getType() {
 		return type;
@@ -194,6 +195,14 @@ public class Question {
 
 	public void setShowStatistic(final boolean showStatistic) {
 		this.showStatistic = showStatistic;
+	}
+
+	public boolean getCvIsColored() {
+		return cvIsColored;
+	}
+	
+	public void setCvIsColored(boolean cvIsColored) {
+		this.cvIsColored = cvIsColored;
 	}
 
 	public boolean isShowAnswer() {
@@ -347,6 +356,7 @@ public class Question {
 	public void setThresholdCorrectAnswers(int thresholdCorrectAnswers) {
 		this.thresholdCorrectAnswers = thresholdCorrectAnswers;
 	}
+
 
 	@Override
 	public final String toString() {
