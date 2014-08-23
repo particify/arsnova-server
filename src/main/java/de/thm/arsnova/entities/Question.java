@@ -197,7 +197,7 @@ public class Question {
 		this.showStatistic = showStatistic;
 	}
 
-	public boolean isCvColored() {
+	public boolean getCvIsColored() {
 		return cvIsColored;
 	}
 	
