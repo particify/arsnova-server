@@ -58,13 +58,9 @@ import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 @Service
 public class UserService implements IUserService {
 
-	private static final int DEFAULT_SCHEDULER_DELAY_MS = 60000;
-
 	private static final int LOGIN_TRY_RESET_DELAY_MS = 30 * 1000;
 
 	private static final int LOGIN_BAN_RESET_DELAY_MS = 2 * 60 * 1000;
-
-	private static final int MAX_USER_INACTIVE_SECONDS = 120;
 
 	private static final int REPEATED_PASSWORD_RESET_DELAY_MS = 3 * 60 * 1000;
 	
@@ -76,9 +72,6 @@ public class UserService implements IUserService {
 
 	/* used for Socket.IO online check solution (new) */
 	private static final ConcurrentHashMap<User, String> user2session = new ConcurrentHashMap<User, String>();
-
-	/* used for HTTP polling online check solution (legacy) */
-	private static final ConcurrentHashMap<User, String> user2sessionLegacy = new ConcurrentHashMap<User, String>();
 
 	@Autowired
 	private IDatabaseDao databaseDao;
@@ -149,28 +142,6 @@ public class UserService implements IUserService {
 		if (loginBans.size() > 0) {
 			LOGGER.info("Reset temporary login bans.");
 			loginBans.clear();
-		}
-	}
-
-	@Scheduled(fixedDelay = DEFAULT_SCHEDULER_DELAY_MS)
-	public final void removeInactiveUsersFromLegacyMap() {
-		final List<String> usernames = databaseDao.getActiveUsers(MAX_USER_INACTIVE_SECONDS);
-		final Set<String> affectedSessions = new HashSet<String>();
-
-		for (final Entry<User, String> e : user2sessionLegacy.entrySet()) {
-			final User key = e.getKey();
-			if (usernames != null && !usernames.contains(key.getUsername())) {
-				if (null != e.getValue()) {
-					affectedSessions.add(e.getValue());
-				} else {
-					LOGGER.warn("Session for user {} is null", key);
-				}
-				user2sessionLegacy.remove(e.getKey());
-			}
-		}
-
-		for (final String sessionKeyword : affectedSessions) {
-			socketIoServer.reportActiveUserCountForSession(sessionKeyword);
 		}
 	}
 
@@ -267,12 +238,9 @@ public class UserService implements IUserService {
 		if (keyword == null) {
 			return false;
 		}
-		String session = user2sessionLegacy.get(user);
+		String session = user2session.get(user);
 		if (session == null) {
-			session = user2session.get(user);
-			if (session == null) {
-				return false;
-			}
+			return false;
 		}
 
 		return keyword.equals(session);
@@ -286,23 +254,8 @@ public class UserService implements IUserService {
 				result.add(e.getKey());
 			}
 		}
-		for (final Entry<User, String> e : user2sessionLegacy.entrySet()) {
-			if (e.getValue().equals(keyword)) {
-				result.add(e.getKey());
-			}
-		}
 
 		return result;
-	}
-
-	@Override
-	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public void addCurrentUserToSessionMap(final String keyword) {
-		final User user = getCurrentUser();
-		if (user == null) {
-			throw new UnauthorizedException();
-		}
-		user2sessionLegacy.put(user, keyword);
 	}
 
 	@Override
@@ -331,11 +284,6 @@ public class UserService implements IUserService {
 				return entry.getValue();
 			}
 		}
-		for (final Entry<User, String> entry  : user2sessionLegacy.entrySet()) {
-			if (entry.getKey().getUsername().equals(username)) {
-				return entry.getValue();
-			}
-		}
 
 		return null;
 	}
@@ -349,13 +297,12 @@ public class UserService implements IUserService {
 	public void removeUserFromMaps(final User user) {
 		if (user != null) {
 			user2session.remove(user);
-			user2sessionLegacy.remove(user);
 		}
 	}
 
 	@Override
 	public int loggedInUsers() {
-		return user2sessionLegacy.size();
+		return user2session.size();
 	}
 
 	@Override
