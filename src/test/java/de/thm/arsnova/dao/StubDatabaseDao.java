@@ -28,7 +28,6 @@ import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.Feedback;
-import de.thm.arsnova.entities.FoodVote;
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.LoggedIn;
@@ -262,18 +261,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public void vote(User user, String menu) {
 		// TODO Auto-generated method stub
 
-	}
-
-	@Override
-	public int getFoodVoteCount() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public List<FoodVote> getFoodVote() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override

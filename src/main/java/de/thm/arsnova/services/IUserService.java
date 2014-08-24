@@ -45,8 +45,6 @@ public interface IUserService {
 
 	Set<User> getUsersInSession(String keyword);
 
-	void addCurrentUserToSessionMap(String keyword);
-
 	String getSessionForUser(String username);
 
 	void addUserToSessionBySocketId(UUID socketId, String keyword);

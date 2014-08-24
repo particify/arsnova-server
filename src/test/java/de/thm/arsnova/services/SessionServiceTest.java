@@ -103,13 +103,13 @@ public class SessionServiceTest {
 	@Test(expected = NotFoundException.class)
 	public void testShouldNotFindNonExistantSession() {
 		setAuthenticated(true, "ptsr00");
-		sessionService.joinSession("00000000");
+		sessionService.getSession("00000000");
 	}
 
 	@Test(expected = AuthenticationCredentialsNotFoundException.class)
 	public void testShouldNotReturnSessionIfUnauthorized() {
 		setAuthenticated(false, null);
-		sessionService.joinSession("12345678");
+		sessionService.getSession("12345678");
 	}
 
 	@Test(expected = AuthenticationCredentialsNotFoundException.class)
@@ -126,7 +126,7 @@ public class SessionServiceTest {
 
 		setAuthenticated(true, "ptsr00");
 
-		assertNull(sessionService.joinSession("11111111"));
+		assertNull(sessionService.getSession("11111111"));
 	}
 
 	@Test
@@ -140,7 +140,7 @@ public class SessionServiceTest {
 		session.setName("TestSessionX");
 		session.setShortName("TSX");
 		sessionService.saveSession(session);
-		assertNotNull(sessionService.joinSession("11111111"));
+		assertNotNull(sessionService.getSession("11111111"));
 	}
 
 	@Test(expected = AccessDeniedException.class)

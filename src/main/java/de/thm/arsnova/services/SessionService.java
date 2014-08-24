@@ -35,7 +35,6 @@ import org.springframework.stereotype.Service;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.dao.IDatabaseDao;
-import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
@@ -116,9 +115,7 @@ public class SessionService implements ISessionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public final Session joinSession(final String keyword) {
-		/* HTTP polling solution (legacy) */
-
+	public final Session getSession(final String keyword) {
 		final User user = userService.getCurrentUser();
 		final Session session = databaseDao.getSessionFromKeyword(keyword);
 		if (session == null) {
@@ -131,10 +128,6 @@ public class SessionService implements ISessionService {
 				throw new ForbiddenException();
 			}
 		}
-
-		userService.addCurrentUserToSessionMap(keyword);
-		socketIoServer.reportActiveUserCountForSession(keyword);
-		socketIoServer.reportFeedbackForUserInSession(session, userService.getCurrentUser());
 
 		if (connectorClient != null && session.isCourseSession()) {
 			final String courseid = session.getCourseId();
@@ -204,21 +197,6 @@ public class SessionService implements ISessionService {
 			return keyword;
 		}
 		return generateKeyword();
-	}
-
-	@Override
-	public final LoggedIn registerAsOnlineUser(final String sessionkey) {
-		/* HTTP polling solution (legacy) */
-
-		final Session session = this.joinSession(sessionkey);
-		if (session == null) {
-			throw new NotFoundException();
-		}
-		if (session.getCreator().equals(userService.getCurrentUser().getUsername())) {
-			databaseDao.updateSessionOwnerActivity(session);
-		}
-
-		return databaseDao.registerAsOnlineUser(userService.getCurrentUser(), session);
 	}
 
 	@Override

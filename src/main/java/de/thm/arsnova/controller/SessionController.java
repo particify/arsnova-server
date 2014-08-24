@@ -42,7 +42,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.ISessionService;
@@ -65,7 +64,7 @@ public class SessionController extends AbstractController {
 
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.GET)
 	public final Session joinSession(@PathVariable final String sessionkey) {
-		final Session session = sessionService.joinSession(sessionkey);
+		final Session session = sessionService.getSession(sessionkey);
 		if (! session.getCreator().equals(userService.getCurrentUser().getUsername())) {
 			session.setCreator("NOT VISIBLE TO YOU");
 		} else {
@@ -77,13 +76,6 @@ public class SessionController extends AbstractController {
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.DELETE)
 	public final void deleteSession(@PathVariable final String sessionkey) {
 		sessionService.deleteSession(sessionkey);
-	}
-
-	@DeprecatedApi
-	@RequestMapping(value = "/{sessionkey}/online", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.CREATED)
-	public final LoggedIn registerAsOnlineUser(@PathVariable final String sessionkey) {
-		return sessionService.registerAsOnlineUser(sessionkey);
 	}
 
 	@DeprecatedApi
