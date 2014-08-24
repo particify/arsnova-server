@@ -19,8 +19,6 @@
 package de.thm.arsnova.controller;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -188,7 +186,7 @@ public class LoginController extends AbstractController {
 					SecurityContextHolder.getContext().setAuthentication(auth);
 					request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
 							SecurityContextHolder.getContext());
-					
+
 					return;
 				}
 			} catch (AuthenticationException e) {
@@ -252,7 +250,7 @@ public class LoginController extends AbstractController {
 	) throws IOException, ServletException {
 		View result = null;
 
-		/* Use URLs from a request parameters for redirection as long as the 
+		/* Use URLs from a request parameters for redirection as long as the
 		 * URL is not absolute (to prevent abuse of the redirection). */
 		if (UrlUtils.isAbsoluteUrl(successUrl)) {
 			successUrl = "/";
@@ -261,7 +259,7 @@ public class LoginController extends AbstractController {
 			failureUrl = "/";
 		}
 
-		/* Workaround until a solution is found to do a redirect which is 
+		/* Workaround until a solution is found to do a redirect which is
 		 * relative to the server root instead of the context path */
 		String port;
 		if ("https".equals(request.getScheme())) {
@@ -295,7 +293,7 @@ public class LoginController extends AbstractController {
 	@RequestMapping(value = { "/auth/", "/whoami" }, method = RequestMethod.GET)
 	@ResponseBody
 	public final User whoami() {
-		userSessionService.setUser(userService.getCurrentUser());		
+		userSessionService.setUser(userService.getCurrentUser());
 		return userService.getCurrentUser();
 	}
 
@@ -310,7 +308,7 @@ public class LoginController extends AbstractController {
 		}
 		return new RedirectView(request.getHeader("referer") != null ? request.getHeader("referer") : "/");
 	}
-	
+
 	@RequestMapping(value = { "/auth/services" }, method = RequestMethod.GET)
 	@ResponseBody
 	public final List<ServiceDescription> getServices(final HttpServletRequest request) {

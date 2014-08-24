@@ -63,7 +63,7 @@ public class UserService implements IUserService {
 	private static final int LOGIN_BAN_RESET_DELAY_MS = 2 * 60 * 1000;
 
 	private static final int REPEATED_PASSWORD_RESET_DELAY_MS = 3 * 60 * 1000;
-	
+
 	private static final int PASSWORD_RESET_KEY_DURABILITY_MS = 2 * 60 * 60 * 1000;
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
@@ -195,12 +195,14 @@ public class UserService implements IUserService {
 		return user;
 	}
 
+	@Override
 	public boolean isBannedFromLogin(String addr) {
 		return loginBans.contains(addr);
 	}
 
+	@Override
 	public void increaseFailedLoginCount(String addr) {
-		Byte tries = (Byte) loginTries.get(addr);
+		Byte tries = loginTries.get(addr);
 		if (null == tries) {
 			tries = 0;
 		}

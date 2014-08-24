@@ -48,6 +48,7 @@ public class TestSecurityConfig extends SecurityConfig {
 		return super.authenticationManager();
 	}
 
+	@Override
 	@Bean
 	public SessionRegistry sessionRegistry() {
 		return new SessionRegistryImpl();

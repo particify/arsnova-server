@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.UUID;
 
 import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 
 public interface ISessionService {

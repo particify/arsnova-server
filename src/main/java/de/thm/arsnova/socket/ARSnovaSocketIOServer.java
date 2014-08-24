@@ -1,7 +1,5 @@
 package de.thm.arsnova.socket;
 
-import io.netty.channel.ChannelOption;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;

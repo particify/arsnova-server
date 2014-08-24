@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * The ConfigurationController provides frontend clients with information necessary to correctly interact with the 
+ * The ConfigurationController provides frontend clients with information necessary to correctly interact with the
  * backend and other frontends as well as settings for ARSnova. The the alternative /arsnova-config route is necessary
  * in case the backend application is deployed as root context.
  */

@@ -1,0 +1,12 @@
+* text=auto
+
+*.css           text
+*.html          text
+*.ldif          text
+*.md            text
+*.properties    text
+*.txt           text
+*.xml           text
+
+*.jar           -text
+*.png           -text

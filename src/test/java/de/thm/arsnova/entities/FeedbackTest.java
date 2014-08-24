@@ -18,49 +18,50 @@
  */
 package de.thm.arsnova.entities;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 public class FeedbackTest {
-	
+
 	@Test
 	public void differentObjectsShouldNotBeEqual() {
 		Feedback f = new Feedback(0, 0, 0, 0);
 		String x = "";
-		
+
 		assertFalse(f.equals(x));
 	}
-	
+
 	@Test
 	public void differentlySizedFeedbacksShouldNotBeEqual() {
 		Feedback f1 = new Feedback(0, 0, 0, 0);
 		Feedback f2 = new Feedback(0, 0, 0, 0);
 		f2.getValues().add(0);
-		
+
 		assertFalse(f1.equals(f2));
 	}
-	
+
 	@Test
 	public void nullShouldNotBeEqual() {
 		Feedback f = new Feedback(0, 0, 0, 0);
 		assertFalse(f.equals(null));
 	}
-	
+
 	@Test
 	public void sameContentsShouldBeEqual() {
 		Feedback f1 = new Feedback(1, 2, 3, 4);
 		Feedback f2 = new Feedback(1, 2, 3, 4);
-		
+
 		assertTrue(f1.equals(f2));
 		assertTrue(f2.equals(f1));
 	}
-	
+
 	@Test
 	public void differentContentsShouldNotBeEqual() {
 		Feedback f1 = new Feedback(1, 2, 3, 4);
 		Feedback f2 = new Feedback(4, 3, 2, 1);
-		
+
 		assertFalse(f1.equals(f2));
 		assertFalse(f2.equals(f1));
 	}
