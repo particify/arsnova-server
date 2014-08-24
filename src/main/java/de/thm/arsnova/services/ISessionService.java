@@ -28,7 +28,7 @@ import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 
 public interface ISessionService {
-	Session joinSession(String keyword);
+	Session getSession(String keyword);
 
 	Session saveSession(Session session);
 
@@ -39,8 +39,6 @@ public interface ISessionService {
 	List<Session> getMySessions();
 
 	List<Session> getMyVisitedSessions();
-
-	LoggedIn registerAsOnlineUser(String sessionkey);
 
 	int countSessions(List<Course> courses);
 

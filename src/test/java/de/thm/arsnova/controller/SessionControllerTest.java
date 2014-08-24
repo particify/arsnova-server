@@ -148,14 +148,6 @@ public class SessionControllerTest {
 	}
 
 	@Test
-	public void testShouldEndInUnauthorizedResult() throws Exception {
-		setAuthenticated(false, "ptsr00");
-
-		mockMvc.perform(post("/session/12345678/online").accept(MediaType.APPLICATION_JSON))
-		.andExpect(status().isUnauthorized());
-	}
-
-	@Test
 	public void testShouldEndInForbidden() throws Exception {
 		setAuthenticated(true, "ptsr00");
 
