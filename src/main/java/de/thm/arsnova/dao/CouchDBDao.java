@@ -53,7 +53,6 @@ import com.fourspaces.couchdb.ViewResults;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.DbUser;
-import de.thm.arsnova.entities.FoodVote;
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.LoggedIn;
@@ -770,39 +769,6 @@ public class CouchDBDao implements IDatabaseDao {
 		} catch (final IOException e) {
 			LOGGER.error("Error while saving user food vote", e);
 		}
-	}
-
-	@Override
-	public List<FoodVote> getFoodVote() {
-		final List<FoodVote> foodVotes = new ArrayList<FoodVote>();
-		final String date = new SimpleDateFormat("dd-mm-yyyyy").format(new Date());
-		final NovaView view = new NovaView("food_vote/count_by_day");
-		view.setStartKeyArray(date);
-		view.setEndKeyArray(date, "{}");
-		view.setGroup(true);
-		final ViewResults results = getDatabase().view(view);
-		for (final Document d : results.getResults()) {
-			final FoodVote vote = new FoodVote();
-			vote.setCount(d.getJSONObject().optInt("value"));
-			vote.setDay(date);
-			vote.setName(d.getJSONObject().getJSONArray("key").getString(1));
-			foodVotes.add(vote);
-		}
-		return foodVotes;
-	}
-
-	@Override
-	public int getFoodVoteCount() {
-		final String date = new SimpleDateFormat("dd-mm-yyyyy").format(new Date());
-		final NovaView view = new NovaView("food_vote/count_by_day");
-		view.setStartKeyArray(date);
-		view.setEndKeyArray(date, "{}");
-		view.setGroup(false);
-		final ViewResults results = getDatabase().view(view);
-		if (results.size() == 0 || results.getResults().size() == 0) {
-			return 0;
-		}
-		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 	}
 
 	@Override

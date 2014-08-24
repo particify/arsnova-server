@@ -25,7 +25,6 @@ import java.util.List;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.DbUser;
-import de.thm.arsnova.entities.FoodVote;
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.LoggedIn;
@@ -87,10 +86,6 @@ public interface IDatabaseDao {
 	List<InterposedQuestion> getInterposedQuestions(String sessionKey);
 
 	void vote(User me, String menu);
-
-	int getFoodVoteCount();
-
-	List<FoodVote> getFoodVote();
 
 	int countSessions();
 
