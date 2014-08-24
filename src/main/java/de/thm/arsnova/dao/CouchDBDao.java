@@ -1389,6 +1389,7 @@ public class CouchDBDao implements IDatabaseDao {
 		return new AbstractMap.SimpleEntry<Integer, Integer>((int)Math.round(myProgress*100), courseProgress);
 	}
 
+	@Override
 	public DbUser createOrUpdateUser(DbUser user) {
 		try {
 			String id = user.getId();

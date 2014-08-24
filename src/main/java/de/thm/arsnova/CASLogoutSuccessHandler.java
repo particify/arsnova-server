@@ -20,7 +20,7 @@ public class CASLogoutSuccessHandler implements LogoutSuccessHandler {
 	private String casUrl;
 	private String defaultTarget;
 
-	private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+	private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
 	@Override
 	public final void onLogoutSuccess(

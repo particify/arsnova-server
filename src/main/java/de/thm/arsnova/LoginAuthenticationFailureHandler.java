@@ -35,7 +35,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 public class LoginAuthenticationFailureHandler extends
 		SimpleUrlAuthenticationFailureHandler {
 
-	private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+	private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 	private String failureUrl;
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(LoginAuthenticationFailureHandler.class);
@@ -54,6 +54,7 @@ public class LoginAuthenticationFailureHandler extends
 		redirectStrategy.sendRedirect(request, response, failureUrl);
 	}
 
+	@Override
 	public final void setDefaultFailureUrl(final String url) {
 		failureUrl = url;
 	}

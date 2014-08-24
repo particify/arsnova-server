@@ -30,7 +30,7 @@ public class Feedback {
 	public static final int FEEDBACK_SLOWER = 2;
 	public static final int FEEDBACK_AWAY = 3;
 
-	private List<Integer> values;
+	private final List<Integer> values;
 
 	public Feedback(final int a, final int b, final int c, final int d) {
 		values = new ArrayList<Integer>();

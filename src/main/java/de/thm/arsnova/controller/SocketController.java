@@ -50,7 +50,7 @@ public class SocketController extends AbstractController {
 
 	@Autowired
 	private ARSnovaSocketIOServer server;
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(SocketController.class);
 
 	@RequestMapping(method = RequestMethod.POST, value = "/assign")
