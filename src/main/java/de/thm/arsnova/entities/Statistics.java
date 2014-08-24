@@ -52,7 +52,10 @@ public class Statistics {
 	}
 
 	public int getAverageAnswersPerQuestion() {
-		return getAnswers() / getQuestions();
+		if (getQuestions() > 0) {
+			return getAnswers() / getQuestions();
+		}
+		return 0;
 	}
 	public void setAverageAnswersPerQuestion(final int value) {
 		// NOP
