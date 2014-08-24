@@ -51,6 +51,13 @@ public class Statistics {
 		this.loggedinUsers = loggedinUsers;
 	}
 
+	public int getAverageAnswersPerQuestion() {
+		return getAnswers() / getQuestions();
+	}
+	public void setAverageAnswersPerQuestion(final int value) {
+		// NOP
+	}
+
 	@Override
 	public int hashCode() {
 		return (this.getClass().getName()
