@@ -709,10 +709,41 @@ public class CouchDBDao implements IDatabaseDao {
 		if (results.size() == 0 || results.getResults().size() == 0) {
 			return new InterposedReadingCount();
 		}
-		final int read = results.getJSONArray("rows").optJSONObject(0).optInt("value");
-		int unread = 0;
-		if (results.getJSONArray("rows").optJSONObject(1) != null) {
-			unread = results.getJSONArray("rows").optJSONObject(1).optInt("value");
+		// A complete result looks like this. Note that the second row is optional, and that the first one may be
+		// 'unread' or 'read', i.e., results may be switched around or only one result may be present.
+		// count = {"rows":[
+		// {"key":["cecebabb21b096e592d81f9c1322b877","Guestc9350cf4a3","read"],"value":1},
+		// {"key":["cecebabb21b096e592d81f9c1322b877","Guestc9350cf4a3","unread"],"value":1}
+		// ]}
+		int read = 0, unread = 0;
+		String type = "";
+		final JSONObject fst = results.getJSONArray("rows").getJSONObject(0);
+		final JSONObject snd = results.getJSONArray("rows").optJSONObject(1);
+
+		final JSONArray fstkey = fst.getJSONArray("key");
+		if (fstkey.size() == 2) {
+			type = fstkey.getString(1);
+		} else if (fstkey.size() == 3) {
+			type = fstkey.getString(2);
+		}
+		if (type.equals("read")) {
+			read = fst.optInt("value");
+		} else if (type.equals("unread")) {
+			unread = fst.optInt("value");
+		}
+
+		if (snd != null) {
+			final JSONArray sndkey = snd.getJSONArray("key");
+			if (sndkey.size() == 2) {
+				type = sndkey.getString(1);
+			} else {
+				type = sndkey.getString(2);
+			}
+			if (type.equals("read")) {
+				read = snd.optInt("value");
+			} else if (type.equals("unread")) {
+				unread = snd.optInt("value");
+			}
 		}
 		return new InterposedReadingCount(read, unread);
 	}
