@@ -34,6 +34,7 @@ public class InterposedQuestion {
 	private String sessionId;
 	private long timestamp;
 	private boolean read;
+	private String creator;
 
 	public String get_id() {
 		return _id;
@@ -84,4 +85,11 @@ public class InterposedQuestion {
 		this.timestamp = timestamp;
 	}
 
+	public String getCreator() {
+		return creator;
+	}
+
+	public void setCreator(String creator) {
+		this.creator = creator;
+	}
 }

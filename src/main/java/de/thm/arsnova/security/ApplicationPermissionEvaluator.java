@@ -107,6 +107,11 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		if (permission instanceof String && permission.equals("owner")) {
 			final InterposedQuestion question = dao.getInterposedQuestion(targetId.toString());
 			if (question != null) {
+				// Does the creator want to delete his own question?
+				if (question.getCreator() != null && question.getCreator().equals(username)) {
+					return true;
+				}
+				// Allow deletion if requested by session owner
 				final Session session = dao.getSessionFromKeyword(question.getSessionId());
 				if (session == null) {
 					return false;

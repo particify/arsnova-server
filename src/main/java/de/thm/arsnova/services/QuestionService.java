@@ -118,7 +118,7 @@ public class QuestionService implements IQuestionService {
 	@PreAuthorize("isAuthenticated()")
 	public boolean saveQuestion(final InterposedQuestion question) {
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
-		final InterposedQuestion result = databaseDao.saveQuestion(session, question);
+		final InterposedQuestion result = databaseDao.saveQuestion(session, question, userService.getCurrentUser());
 
 		if (null != result) {
 			socketIoServer.reportAudienceQuestionAvailable(result.getSessionId(), result.get_id());
@@ -186,13 +186,18 @@ public class QuestionService implements IQuestionService {
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#sessionKeyword, 'session', 'owner')")
+	@PreAuthorize("isAuthenticated()")
 	public void deleteAllInterposedQuestions(final String sessionKeyword) {
 		final Session session = databaseDao.getSessionFromKeyword(sessionKeyword);
 		if (session == null) {
 			throw new UnauthorizedException();
 		}
-		databaseDao.deleteAllInterposedQuestions(session);
+		final User user = getCurrentUser();
+		if (session.isCreator(user)) {
+			databaseDao.deleteAllInterposedQuestions(session);
+		} else {
+			databaseDao.deleteAllInterposedQuestions(session, user);
+		}
 	}
 
 	@Override
@@ -326,7 +331,13 @@ public class QuestionService implements IQuestionService {
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<InterposedQuestion> getInterposedQuestions(final String sessionKey) {
-		return databaseDao.getInterposedQuestions(sessionKey);
+		final Session session = this.getSession(sessionKey);
+		final User user = getCurrentUser();
+		if (session.isCreator(user)) {
+			return databaseDao.getInterposedQuestions(session);
+		} else {
+			return databaseDao.getInterposedQuestions(session, user);
+		}
 	}
 
 	@Override

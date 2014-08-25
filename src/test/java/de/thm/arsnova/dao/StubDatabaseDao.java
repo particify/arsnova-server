@@ -252,7 +252,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<InterposedQuestion> getInterposedQuestions(String sessionKey) {
+	public List<InterposedQuestion> getInterposedQuestions(Session session) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -276,7 +276,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public InterposedQuestion saveQuestion(Session session, InterposedQuestion question) {
+	public InterposedQuestion saveQuestion(Session session, InterposedQuestion question, User user) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -516,5 +516,17 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public boolean deleteUser(DbUser dbUser) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public List<InterposedQuestion> getInterposedQuestions(Session session, User user) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void deleteAllInterposedQuestions(Session session, User user) {
+		// TODO Auto-generated method stub
+		
 	}
 }

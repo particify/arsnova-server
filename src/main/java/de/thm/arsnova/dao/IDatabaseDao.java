@@ -45,7 +45,7 @@ public interface IDatabaseDao {
 
 	Question saveQuestion(Session session, Question question);
 
-	InterposedQuestion saveQuestion(Session session, InterposedQuestion question);
+	InterposedQuestion saveQuestion(Session session, InterposedQuestion question, User user);
 
 	Question getQuestion(String id);
 
@@ -83,7 +83,9 @@ public interface IDatabaseDao {
 
 	InterposedReadingCount getInterposedReadingCount(Session session);
 
-	List<InterposedQuestion> getInterposedQuestions(String sessionKey);
+	List<InterposedQuestion> getInterposedQuestions(Session session);
+
+	List<InterposedQuestion> getInterposedQuestions(Session session, User user);
 
 	void vote(User me, String menu);
 
@@ -154,6 +156,8 @@ public interface IDatabaseDao {
 	List<String> getUnAnsweredPreparationQuestionIds(Session session, User user);
 
 	void deleteAllInterposedQuestions(Session session);
+
+	void deleteAllInterposedQuestions(Session session, User user);
 
 	void publishAllQuestions(Session session, boolean publish);
 

@@ -329,7 +329,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final InterposedQuestion saveQuestion(final Session session, final InterposedQuestion question) {
+	public final InterposedQuestion saveQuestion(final Session session, final InterposedQuestion question, User user) {
 		final Document q = new Document();
 		q.put("type", "interposed_question");
 		q.put("sessionId", session.get_id());
@@ -337,6 +337,7 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("text", question.getText());
 		q.put("timestamp", System.currentTimeMillis());
 		q.put("read", false);
+		q.put("creator", user.getUsername());
 		try {
 			database.saveDocument(q);
 			question.set_id(q.getId());
@@ -704,42 +705,50 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<InterposedQuestion> getInterposedQuestions(final String sessionKey) {
-		final Session s = getSessionFromKeyword(sessionKey);
-		if (s == null) {
-			throw new NotFoundException();
-		}
-
+	public List<InterposedQuestion> getInterposedQuestions(final Session session) {
 		final NovaView view = new NovaView("interposed_question/by_session");
-		view.setKey(s.get_id());
+		view.setKey(session.get_id());
 		final ViewResults questions = getDatabase().view(view);
 		if (questions == null || questions.isEmpty()) {
 			return null;
 		}
+		return createInterposedList(session, questions);
+	}
+
+	@Override
+	public List<InterposedQuestion> getInterposedQuestions(final Session session, final User user) {
+		final NovaView view = new NovaView("interposed_question/by_session_and_creator");
+		view.setKey(session.get_id(), user.getUsername());
+		final ViewResults questions = getDatabase().view(view);
+		if (questions == null || questions.isEmpty()) {
+			return null;
+		}
+		return createInterposedList(session, questions);
+	}
+
+	private List<InterposedQuestion> createInterposedList(
+			final Session session, final ViewResults questions) {
 		final List<InterposedQuestion> result = new ArrayList<InterposedQuestion>();
-		LOGGER.debug("{}", questions.getResults());
 		for (final Document document : questions.getResults()) {
 			final InterposedQuestion question = (InterposedQuestion) JSONObject.toBean(
 					document.getJSONObject().getJSONObject("value"),
 					InterposedQuestion.class
 					);
-			question.setSessionId(sessionKey);
+			question.setSessionId(session.getKeyword());
 			question.set_id(document.getId());
 			result.add(question);
 		}
 		return result;
 	}
 
-	public Question getInterposedQuestion(final String sessionKey, final String documentId) {
+	public InterposedQuestion getInterposedQuestion(final String sessionKey, final String documentId) {
 		try {
 			final Document document = getDatabase().getDocument(documentId);
 			if (document == null) {
 				LOGGER.error("Document is NULL");
 				return null;
 			}
-			final Question question = (Question) JSONObject.toBean(document.getJSONObject(), Question.class);
-			question.setQuestionType("interposed_question");
-			return question;
+			return (InterposedQuestion) JSONObject.toBean(document.getJSONObject(), InterposedQuestion.class);
 		} catch (final IOException e) {
 			LOGGER.error("Error while retrieving interposed question", e);
 		}
@@ -1289,6 +1298,18 @@ public class CouchDBDao implements IDatabaseDao {
 		final NovaView view = new NovaView("interposed_question/by_session");
 		view.setKey(session.get_id());
 		final ViewResults questions = getDatabase().view(view);
+		deleteAllInterposedQuestions(session, questions);
+	}
+
+	@Override
+	public void deleteAllInterposedQuestions(final Session session, final User user) {
+		final NovaView view = new NovaView("interposed_question/by_session_and_creator");
+		view.setKey(session.get_id(), user.getUsername());
+		final ViewResults questions = getDatabase().view(view);
+		deleteAllInterposedQuestions(session, questions);
+	}
+
+	private void deleteAllInterposedQuestions(final Session session, final ViewResults questions) {
 		if (questions == null || questions.isEmpty()) {
 			return;
 		}
