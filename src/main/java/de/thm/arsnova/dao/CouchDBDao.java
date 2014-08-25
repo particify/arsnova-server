@@ -692,6 +692,19 @@ public class CouchDBDao implements IDatabaseDao {
 		view.setStartKeyArray(session.get_id());
 		view.setEndKeyArray(session.get_id(), "{}");
 		view.setGroup(true);
+		return getInterposedReadingCount(view);
+	}
+
+	@Override
+	public InterposedReadingCount getInterposedReadingCount(final Session session, final User user) {
+		final NovaView view = new NovaView("interposed_question/count_by_session_reading_for_creator");
+		view.setStartKeyArray(session.get_id(), user.getUsername());
+		view.setEndKeyArray(session.get_id(), user.getUsername(), "{}");
+		view.setGroup(true);
+		return getInterposedReadingCount(view);
+	}
+
+	private InterposedReadingCount getInterposedReadingCount(final NovaView view) {
 		final ViewResults results = getDatabase().view(view);
 		if (results.size() == 0 || results.getResults().size() == 0) {
 			return new InterposedReadingCount();

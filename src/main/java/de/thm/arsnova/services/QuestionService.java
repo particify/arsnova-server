@@ -322,10 +322,15 @@ public class QuestionService implements IQuestionService {
 	@PreAuthorize("isAuthenticated()")
 	public InterposedReadingCount getInterposedReadingCount(final String sessionKey) {
 		final Session session = databaseDao.getSessionFromKeyword(sessionKey);
+		final User user = getCurrentUser();
 		if (session == null) {
 			throw new NotFoundException();
 		}
-		return databaseDao.getInterposedReadingCount(session);
+		if (session.isCreator(user)) {
+			return databaseDao.getInterposedReadingCount(session);
+		} else {
+			return databaseDao.getInterposedReadingCount(session, user);
+		}
 	}
 
 	@Override

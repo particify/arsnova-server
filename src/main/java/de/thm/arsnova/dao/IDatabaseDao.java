@@ -83,6 +83,8 @@ public interface IDatabaseDao {
 
 	InterposedReadingCount getInterposedReadingCount(Session session);
 
+	InterposedReadingCount getInterposedReadingCount(Session session, User user);
+
 	List<InterposedQuestion> getInterposedQuestions(Session session);
 
 	List<InterposedQuestion> getInterposedQuestions(Session session, User user);

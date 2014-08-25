@@ -529,4 +529,10 @@ public class StubDatabaseDao implements IDatabaseDao {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public InterposedReadingCount getInterposedReadingCount(Session session, User user) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
