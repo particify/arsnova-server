@@ -134,11 +134,7 @@ public class CouchDBDao implements IDatabaseDao {
 		if (session.getCreator().equals(user.getUsername())) {
 			viewName = "skill_question/by_session_sorted_by_subject_and_text";
 		} else {
-			if (user.getType().equals(User.THM)) {
-				viewName = "skill_question/by_session_for_thm_full";
-			} else {
-				viewName = "skill_question/by_session_for_all_full";
-			}
+			viewName = "skill_question/by_session_for_all_full";
 		}
 		return getQuestions(new NovaView(viewName), session);
 	}
@@ -453,12 +449,7 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public final List<String> getQuestionIds(final Session session, final User user) {
-		NovaView view;
-		if (user.getType().equals("thm")) {
-			view = new NovaView("skill_question/by_session_only_id_for_thm");
-		} else {
-			view = new NovaView("skill_question/by_session_only_id_for_all");
-		}
+		NovaView view = new NovaView("skill_question/by_session_only_id_for_all");
 		view.setKey(session.get_id());
 		return collectQuestionIds(view);
 	}
@@ -1131,11 +1122,7 @@ public class CouchDBDao implements IDatabaseDao {
 		if (session.isCreator(user)) {
 			viewName = "skill_question/lecture_question_by_session";
 		} else {
-			if (user.getType().equals(User.THM)) {
-				viewName = "skill_question/lecture_question_by_session_for_thm";
-			} else {
-				viewName = "skill_question/lecture_question_by_session_for_all";
-			}
+			viewName = "skill_question/lecture_question_by_session_for_all";
 		}
 		return getQuestions(new NovaView(viewName), session);
 	}
@@ -1146,11 +1133,7 @@ public class CouchDBDao implements IDatabaseDao {
 		if (session.isCreator(user)) {
 			viewName = "skill_question/flashcard_by_session";
 		} else {
-			if (user.getType().equals(User.THM)) {
-				viewName = "skill_question/flashcard_by_session_for_thm";
-			} else {
-				viewName = "skill_question/flashcard_by_session_for_all";
-			}
+			viewName = "skill_question/flashcard_by_session_for_all";
 		}
 		return getQuestions(new NovaView(viewName), session);
 	}
@@ -1161,11 +1144,7 @@ public class CouchDBDao implements IDatabaseDao {
 		if (session.isCreator(user)) {
 			viewName = "skill_question/preparation_question_by_session";
 		} else {
-			if (user.getType().equals(User.THM)) {
-				viewName = "skill_question/preparation_question_by_session_for_thm";
-			} else {
-				viewName = "skill_question/preparation_question_by_session_for_all";
-			}
+			viewName = "skill_question/preparation_question_by_session_for_all";
 		}
 		return getQuestions(new NovaView(viewName), session);
 
@@ -1275,12 +1254,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	private List<String> getLectureQuestionIds(final Session session, final User user) {
-		NovaView view;
-		if (user.getType().equals("thm")) {
-			view = new NovaView("skill_question/lecture_question_by_session_for_thm");
-		} else {
-			view = new NovaView("skill_question/lecture_question_by_session_for_all");
-		}
+		NovaView view = new NovaView("skill_question/lecture_question_by_session_for_all");
 		view.setStartKeyArray(session.get_id());
 		view.setEndKeyArray(session.get_id(), "{}");
 		return collectQuestionIds(view);
@@ -1294,12 +1268,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	private List<String> getPreparationQuestionIds(final Session session, final User user) {
-		NovaView view;
-		if (user.getType().equals("thm")) {
-			view = new NovaView("skill_question/preparation_question_by_session_for_thm");
-		} else {
-			view = new NovaView("skill_question/preparation_question_by_session_for_all");
-		}
+		NovaView view = new NovaView("skill_question/preparation_question_by_session_for_all");
 		view.setStartKeyArray(session.get_id());
 		view.setEndKeyArray(session.get_id(), "{}");
 		return collectQuestionIds(view);
