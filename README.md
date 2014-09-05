@@ -6,7 +6,7 @@ ARSnova is a modern approach to Audience Response Systems (ARS). It is released 
 
 ARSnova consists of two projects: the mobile client and the server. This repository contains the server code. You will find the client at thm-projects/arsnova-mobile. However, you do not need to download both repositories in order to get started.
 
-[![Build Status](https://travis-ci.org/thm-projects/arsnova-war.svg?branch=master)](https://travis-ci.org/thm-projects/arsnova-war)
+[![Build Status](https://travis-ci.org/thm-projects/arsnova-backend.svg?branch=master)](https://travis-ci.org/thm-projects/arsnova-backend)
 
 ## Getting Started
 
@@ -33,7 +33,7 @@ We also leverage the cloud provided by [Travis CI](https://travis-ci.org/) and [
 
 Our official build status provided by Travis CI:
 
-- [![Build Status](https://travis-ci.org/thm-projects/arsnova-war.svg?branch=master)](https://travis-ci.org/thm-projects/arsnova-war) for ARSnova-war
+- [![Build Status](https://travis-ci.org/thm-projects/arsnova-backend.svg?branch=master)](https://travis-ci.org/thm-projects/arsnova-backend) for arsnova-backend
 - [![Build Status](https://travis-ci.org/thm-projects/arsnova-mobile.svg?branch=master)](https://travis-ci.org/thm-projects/arsnova-mobile) for ARSnova-mobile
 
 ## Development
@@ -42,11 +42,11 @@ This is ARSnova's main repository. Almost all dependencies (including the mobile
 
 ### Download
 
-If you have no intention in contributing, you might want to consider downloading one of our pre-built WAR archives. You will find them in our [Maven repository](https://maven.mni.thm.de/content/repositories/snapshots/de/thm/arsnova/arsnova-war/2.0.0-SNAPSHOT/), but please do note that we are not officially offering these archives.
+If you have no intention in contributing, you might want to consider downloading one of our pre-built WAR archives. You will find them in our [Maven repository](https://maven.mni.thm.de/content/repositories/snapshots/de/thm/arsnova/arsnova-backend/2.0.0-SNAPSHOT/), but please do note that we are not officially offering these archives.
 
 ### Building
 
-ARSnova consists of two main projects: arsnova-war (this repository) and arsnova-mobile. By building arsnova-war, you will automatically download the mobile client. If you do not plan to work on the client, you won't need to build it separately.
+ARSnova consists of two main projects: arsnova-backend (this repository) and arsnova-mobile. By building arsnova-backend, you will automatically download the mobile client. If you do not plan to work on the client, you won't need to build it separately.
 
 Because all dependencies are handled by Maven, a complete build is done with:
 
@@ -74,7 +74,7 @@ Also, don't forget to change all properties starting with `couchdb`, if you do n
 
 #### Database
 
-We provide a Python script that will set up all database essentials. This "Setup Tool" is located at [thm-projects/setuptool](https://github.com/thm-projects/setuptool). Make sure you have configured your database credentials inside the ARSnova configuration file (see previous section): you will need to have the entries `couchdb.username` and `couchdb.password`.
+We provide a Python script that will set up all database essentials. This "Setup Tool" is located at [thm-projects/arsnova-setuptool](https://github.com/thm-projects/arsnova-setuptool). Make sure you have configured your database credentials inside the ARSnova configuration file (see previous section): you will need to have the entries `couchdb.username` and `couchdb.password`.
 
 To set up the database, run:
 
