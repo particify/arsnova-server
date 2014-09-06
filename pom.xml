@@ -432,7 +432,7 @@
 				<configuration>
 					<url>http://localhost:8080/manager/text</url>
 					<server>arsnova</server>
-					<path>/mobile</path>
+					<path>/api</path>
 				</configuration>
 			</plugin>
 			<plugin>
