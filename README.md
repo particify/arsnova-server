@@ -4,7 +4,7 @@ ARSnova is a modern approach to Audience Response Systems (ARS). It is released 
 
 ![ARSnova](src/site/resources/showcase.png)
 
-ARSnova consists of two projects: the mobile client and the server. This repository contains the server code. You will find the client at thm-projects/arsnova-mobile. However, you do not need to download both repositories in order to get started.
+ARSnova consists of two projects: the mobile frontend and the backend. This repository contains the backend code. You will find the frontend at thm-projects/arsnova-mobile. However, you do not need to download both repositories in order to get started.
 
 [![Build Status](https://travis-ci.org/thm-projects/arsnova-backend.svg?branch=master)](https://travis-ci.org/thm-projects/arsnova-backend)
 
@@ -33,12 +33,12 @@ We also leverage the cloud provided by [Travis CI](https://travis-ci.org/) and [
 
 Our official build status provided by Travis CI:
 
-- [![Build Status](https://travis-ci.org/thm-projects/arsnova-backend.svg?branch=master)](https://travis-ci.org/thm-projects/arsnova-backend) for arsnova-backend
-- [![Build Status](https://travis-ci.org/thm-projects/arsnova-mobile.svg?branch=master)](https://travis-ci.org/thm-projects/arsnova-mobile) for ARSnova-mobile
+- [![Build Status](https://travis-ci.org/thm-projects/arsnova-backend.svg?branch=master)](https://travis-ci.org/thm-projects/arsnova-backend) for ARSnova Backend
+- [![Build Status](https://travis-ci.org/thm-projects/arsnova-mobile.svg?branch=master)](https://travis-ci.org/thm-projects/arsnova-mobile) for ARSnova Mobile
 
 ## Development
 
-This is ARSnova's main repository. Almost all dependencies (including the mobile client) are managed for you by Maven.
+This is ARSnova's main repository. Almost all dependencies are managed for you by Maven.
 
 ### Download
 
@@ -46,7 +46,7 @@ If you have no intention in contributing, you might want to consider downloading
 
 ### Building
 
-ARSnova consists of two main projects: arsnova-backend (this repository) and arsnova-mobile. By building arsnova-backend, you will automatically download the mobile client. If you do not plan to work on the client, you won't need to build it separately.
+ARSnova consists of two main projects: ARSnova Backend (this repository) and ARSnova Mobile.
 
 Because all dependencies are handled by Maven, a complete build is done with:
 
