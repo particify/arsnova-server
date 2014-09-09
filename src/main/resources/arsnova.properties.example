@@ -194,6 +194,7 @@ question.parse-answer-option-formatting=false
 # Links which are displayed in the frontend applications
 #
 links.documentation.url=https://arsnova.eu/manual/
+links.presenter-documentation.url=
 links.overlay.url=https://arsnova.eu/overlay/
 links.organization.url=
 links.imprint.url=
