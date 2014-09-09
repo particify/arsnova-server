@@ -7,7 +7,7 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<org.springframework-version>4.0.6.RELEASE</org.springframework-version>
+		<org.springframework-version>4.0.7.RELEASE</org.springframework-version>
 		<org.springframework.security-version>3.2.4.RELEASE</org.springframework.security-version>
 		<org.springframework.integration-mail-version>4.0.3.RELEASE</org.springframework.integration-mail-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -320,7 +320,7 @@
 		<dependency>
 			<groupId>de.thm.arsnova.connector</groupId>
 			<artifactId>connector-client</artifactId>
-			<version>0.71.0-SNAPSHOT</version>
+			<version>0.72.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jayway.jsonpath</groupId>
