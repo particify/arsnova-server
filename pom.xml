@@ -39,18 +39,6 @@
 			<email>daniel.gerhardt@mni.thm.de</email>
 		</developer>
 		<developer>
-			<name>Jan Kammer</name>
-			<organization>Technische Hochschule Mittelhessen</organization>
-			<organizationUrl>http://www.thm.de</organizationUrl>
-			<email>jan.kammer@mni.thm.de</email>
-		</developer>
-		<developer>
-			<name>Daniel Knapp</name>
-			<organization>Technische Hochschule Mittelhessen</organization>
-			<organizationUrl>http://www.thm.de</organizationUrl>
-			<email>daniel.knapp@mni.thm.de</email>
-		</developer>
-		<developer>
 			<name>Christoph Thelen</name>
 			<organization>Technische Hochschule Mittelhessen</organization>
 			<organizationUrl>http://www.thm.de</organizationUrl>
@@ -67,7 +55,7 @@
 	<distributionManagement>
 		<site>
 			<id>website</id>
-			<url>https://arsnova.thm.de</url>
+			<url>https://arsnova.eu</url>
 		</site>
 	</distributionManagement>
 
@@ -78,13 +66,13 @@
 
 	<ciManagement>
 		<system>Jenkins</system>
-		<url>https://jenkins.mni.thm.de/jenkins/job/ARSnova-war/</url>
+		<url>https://jenkins.mni.thm.de/jenkins/job/ARSnova-Backend/</url>
 	</ciManagement>
 
 	<scm>
-		<url>https://scm.thm.de/arsnova/arsnova-war</url>
-		<connection>scm:git://scm.thm.de/arsnova/arsnova-war.git</connection>
-		<developerConnection>scm:ssh://gitorious@scm.thm.de/arsnova/arsnova-war.git</developerConnection>
+		<url>https://github.com/thm-projects/arsnova-backend</url>
+		<connection>scm:https://github.com/thm-projects/arsnova-backend.git</connection>
+		<developerConnection>scm:ssh://gitorious@scm.thm.de/arsnova/arsnova-backend.git</developerConnection>
 	</scm>
 
 	<licenses>
