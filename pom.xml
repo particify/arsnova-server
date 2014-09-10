@@ -12,6 +12,7 @@
 		<org.springframework.integration-mail-version>4.0.3.RELEASE</org.springframework.integration-mail-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.url>https://scm.thm.de/arsnova</project.url>
+		<sonar.language>java</sonar.language>
 		<mobile.production.path>../arsnova-mobile/src/main/webapp/build/production/ARSnova</mobile.production.path>
 		<mobile.testing.path>../arsnova-mobile/src/main/webapp/build/testing/ARSnova</mobile.testing.path>
 		<mobile.path>${mobile.production.path}</mobile.path>
@@ -377,6 +378,16 @@
 				<configuration>
 					<locales>en</locales>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>2.7</version>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>2.4</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
