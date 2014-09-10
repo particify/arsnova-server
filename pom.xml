@@ -17,7 +17,7 @@
 		<mobile.path>${mobile.production.path}</mobile.path>
 		<customization.path>${basedir}/../arsnova-customization/src/main/webapp</customization.path>
 		<presenter.rootPath>${basedir}/../arsnova-presenter</presenter.rootPath>
-		<presenter.outputDir>target/arsnova-presenter-1.1.0-SNAPSHOT</presenter.outputDir>
+		<presenter.outputDir>target/arsnova-presenter-${presenter.version}</presenter.outputDir>
 	</properties>
 
 	<developers>
