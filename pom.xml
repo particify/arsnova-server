@@ -72,8 +72,8 @@
 
 	<scm>
 		<url>https://github.com/thm-projects/arsnova-backend</url>
-		<connection>scm:https://github.com/thm-projects/arsnova-backend.git</connection>
-		<developerConnection>scm:ssh://gitorious@scm.thm.de/arsnova/arsnova-backend.git</developerConnection>
+		<connection>scm:git:https://github.com/thm-projects/arsnova-backend.git</connection>
+		<developerConnection>scm:git:ssh://gitorious@scm.thm.de/arsnova/arsnova-backend.git</developerConnection>
 	</scm>
 
 	<licenses>
