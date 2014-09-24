@@ -71,68 +71,43 @@ public class LoginController extends AbstractController {
 	private static final int MAX_USERNAME_LENGTH = 15;
 	private static final int MAX_GUESTHASH_LENGTH = 10;
 
-	@Value("${customization.path}")
-	private String customizationPath;
+	@Value("${customization.path}") private String customizationPath;
 
-	@Value("${security.guest.enabled}")
-	private String guestEnabled;
+	@Value("${security.guest.enabled}") private String guestEnabled;
+	@Value("${security.guest.lecturer.enabled}") private String guestLecturerEnabled;
+	@Value("${security.guest.order}") private int guestOrder;
 
-	@Value("${security.guest.lecturer.enabled}")
-	private String guestLecturerEnabled;
+	@Value("${security.custom-login.enabled}") private String customLoginEnabled;
+	@Value("${security.custom-login.title:University}") private String customLoginTitle;
+	@Value("${security.custom-login.login-dialog-path}") private String customLoginDialog;
+	@Value("${security.custom-login.image:}") private String customLoginImage;
+	@Value("${security.custom-login.order}") private int customLoginOrder;
 
-	@Value("${security.custom-login.enabled}")
-	private String customLoginEnabled;
+	@Value("${security.user-db.enabled}") private String dbAuthEnabled;
+	@Value("${security.user-db.title:ARSnova}") private String dbAuthTitle;
+	@Value("${security.user-db.login-dialog-path}") private String dbAuthDialog;
+	@Value("${security.user-db.image:}") private String dbAuthImage;
+	@Value("${security.user-db.order}") private int dbAuthOrder;
 
-	@Value("${security.custom-login.title:University}")
-	private String customLoginTitle;
+	@Value("${security.ldap.enabled}") private String ldapEnabled;
+	@Value("${security.ldap.title:LDAP}") private String ldapTitle;
+	@Value("${security.ldap.login-dialog-path}") private String ldapDialog;
+	@Value("${security.ldap.image:}") private String ldapImage;
+	@Value("${security.ldap.order}") private int ldapOrder;
 
-	@Value("${security.custom-login.login-dialog-path}")
-	private String customLoginDialog;
+	@Value("${security.cas.enabled}") private String casEnabled;
+	@Value("${security.cas.title:CAS}") private String casTitle;
+	@Value("${security.cas.image:}") private String casImage;
+	@Value("${security.cas.order}") private int casOrder;
 
-	@Value("${security.custom-login.image:}")
-	private String customLoginImage;
+	@Value("${security.facebook.enabled}") private String facebookEnabled;
+	@Value("${security.facebook.order}") private int facebookOrder;
 
-	@Value("${security.user-db.enabled}")
-	private String dbAuthEnabled;
+	@Value("${security.google.enabled}") private String googleEnabled;
+	@Value("${security.google.order}") private int googleOrder;
 
-	@Value("${security.user-db.title:ARSnova}")
-	private String dbAuthTitle;
-
-	@Value("${security.user-db.login-dialog-path}")
-	private String dbAuthDialog;
-
-	@Value("${security.user-db.image:}")
-	private String dbAuthImage;
-
-	@Value("${security.ldap.enabled}")
-	private String ldapEnabled;
-
-	@Value("${security.ldap.title:LDAP}")
-	private String ldapTitle;
-
-	@Value("${security.ldap.login-dialog-path}")
-	private String ldapDialog;
-
-	@Value("${security.ldap.image:}")
-	private String ldapImage;
-
-	@Value("${security.cas.enabled}")
-	private String casEnabled;
-
-	@Value("${security.cas.title:CAS}")
-	private String casTitle;
-
-	@Value("${security.cas.image:}")
-	private String casImage;
-
-	@Value("${security.facebook.enabled}")
-	private String facebookEnabled;
-
-	@Value("${security.google.enabled}")
-	private String googleEnabled;
-
-	@Value("${security.twitter.enabled}")
-	private String twitterEnabled;
+	@Value("${security.twitter.enabled}") private String twitterEnabled;
+	@Value("${security.twitter.order}") private int twitterOrder;
 
 	@Autowired(required = false)
 	private DaoAuthenticationProvider daoProvider;
@@ -323,6 +298,7 @@ public class LoginController extends AbstractController {
 				"Guest",
 				null
 			);
+			sdesc.setOrder(guestOrder);
 			if (!"true".equals(guestLecturerEnabled)) {
 				sdesc.setAllowLecturer(false);
 			}
@@ -330,62 +306,76 @@ public class LoginController extends AbstractController {
 		}
 
 		if ("true".equals(customLoginEnabled) && !"".equals(customLoginDialog)) {
-			services.add(new ServiceDescription(
+			ServiceDescription sdesc = new ServiceDescription(
 				"custom",
 				customLoginTitle,
 				customizationPath + "/" + customLoginDialog + "?redirect={0}",
 				customLoginImage
-			));
+			);
+			sdesc.setOrder(customLoginOrder);
+			services.add(sdesc);
 		}
 
 		if ("true".equals(dbAuthEnabled) && !"".equals(dbAuthDialog)) {
-			services.add(new ServiceDescription(
+			ServiceDescription sdesc = new ServiceDescription(
 				"arsnova",
 				dbAuthTitle,
 				customizationPath + "/" + dbAuthDialog + "?redirect={0}",
 				dbAuthImage
-			));
+			);
+			sdesc.setOrder(dbAuthOrder);
+			services.add(sdesc);
 		}
 
 		if ("true".equals(ldapEnabled) && !"".equals(ldapDialog)) {
-			services.add(new ServiceDescription(
+			ServiceDescription sdesc = new ServiceDescription(
 				"ldap",
 				ldapTitle,
 				customizationPath + "/" + ldapDialog + "?redirect={0}",
 				ldapImage
-			));
+			);
+			sdesc.setOrder(ldapOrder);
+			services.add(sdesc);
 		}
 
 		if ("true".equals(casEnabled)) {
-			services.add(new ServiceDescription(
+			ServiceDescription sdesc = new ServiceDescription(
 				"cas",
 				casTitle,
 				MessageFormat.format(dialogUrl, "cas")
-			));
+			);
+			sdesc.setOrder(casOrder);
+			services.add(sdesc);
 		}
 
 		if ("true".equals(facebookEnabled)) {
-			services.add(new ServiceDescription(
+			ServiceDescription sdesc = new ServiceDescription(
 				"facebook",
 				"Facebook",
 				MessageFormat.format(dialogUrl, "facebook")
-			));
+			);
+			sdesc.setOrder(facebookOrder);
+			services.add(sdesc);
 		}
 
 		if ("true".equals(googleEnabled)) {
-			services.add(new ServiceDescription(
+			ServiceDescription sdesc = new ServiceDescription(
 				"google",
 				"Google",
 				MessageFormat.format(dialogUrl, "google")
-			));
+			);
+			sdesc.setOrder(googleOrder);
+			services.add(sdesc);
 		}
 
 		if ("true".equals(twitterEnabled)) {
-			services.add(new ServiceDescription(
+			ServiceDescription sdesc = new ServiceDescription(
 				"twitter",
 				"Twitter",
 				MessageFormat.format(dialogUrl, "twitter")
-			));
+			);
+			sdesc.setOrder(twitterOrder);
+			services.add(sdesc);
 		}
 
 		return services;
