@@ -1,5 +1,7 @@
 package de.thm.arsnova.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Answer {
 
 	private String _id;
@@ -86,6 +88,10 @@ public class Answer {
 		this.piRound = piRound;
 	}
 
+	/* TODO: use JsonViews instead of JsonIgnore when supported by Spring (4.1)
+	 * http://wiki.fasterxml.com/JacksonJsonViews
+	 * https://jira.spring.io/browse/SPR-7156 */
+	@JsonIgnore
 	public final String getUser() {
 		return user;
 	}
