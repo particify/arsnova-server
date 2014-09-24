@@ -1,6 +1,12 @@
 # Changelog
 
-## 2.0
+## 2.0.1
+This release introduces the following changes:
+* Updates dependency for Socket.IO support to fix memory leaks
+* Usernames for student's questions and free text answers are no longer exposed
+  by API responses
+
+## 2.0.0
 ARSnova 2.0 has been in development for more than two years. Further releases
 can be expected much more frequently.
 
