@@ -1214,7 +1214,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	private List<String> getLectureQuestionIds(final Session session, final User user) {
-		NovaView view = new NovaView("skill_question/lecture_question_by_session_for_all");
+		NovaView view = new NovaView("skill_question/lecture_question_ids_by_session_for_all");
 		view.setStartKeyArray(session.get_id());
 		view.setEndKeyArray(session.get_id(), "{}");
 		return collectQuestionIds(view);
@@ -1228,7 +1228,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	private List<String> getPreparationQuestionIds(final Session session, final User user) {
-		NovaView view = new NovaView("skill_question/preparation_question_by_session_for_all");
+		NovaView view = new NovaView("skill_question/preparation_question_ids_by_session_for_all");
 		view.setStartKeyArray(session.get_id());
 		view.setEndKeyArray(session.get_id(), "{}");
 		return collectQuestionIds(view);
