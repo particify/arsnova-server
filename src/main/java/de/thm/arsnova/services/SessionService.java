@@ -45,7 +45,7 @@ import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 @Service
 public class SessionService implements ISessionService {
 
-	public static class SessionNameComperator implements Comparator<Session>, Serializable {
+	public static class SessionNameComparator implements Comparator<Session>, Serializable {
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -54,7 +54,7 @@ public class SessionService implements ISessionService {
 		}
 	}
 
-	public static class SessionShortNameComperator implements Comparator<Session>, Serializable {
+	public static class SessionShortNameComparator implements Comparator<Session>, Serializable {
 		private static final long serialVersionUID = 1L;
 
 		@Override

@@ -46,8 +46,8 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
-import de.thm.arsnova.services.SessionService.SessionNameComperator;
-import de.thm.arsnova.services.SessionService.SessionShortNameComperator;
+import de.thm.arsnova.services.SessionService.SessionNameComparator;
+import de.thm.arsnova.services.SessionService.SessionShortNameComparator;
 import de.thm.arsnova.web.DeprecatedApi;
 
 @RestController
@@ -146,9 +146,9 @@ public class SessionController extends AbstractController {
 		}
 
 		if (sortby != null && sortby.equals("shortname")) {
-			Collections.sort(sessions, new SessionShortNameComperator());
+			Collections.sort(sessions, new SessionShortNameComparator());
 		} else {
-			Collections.sort(sessions, new SessionNameComperator());
+			Collections.sort(sessions, new SessionNameComparator());
 		}
 
 		return sessions;
