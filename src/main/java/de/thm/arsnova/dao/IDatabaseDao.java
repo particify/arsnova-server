@@ -123,8 +123,6 @@ public interface IDatabaseDao {
 
 	Session lockSession(Session session, Boolean lock);
 
-	List<String> getActiveUsers(int timeDifference);
-
 	Session updateSession(Session session);
 
 	void deleteSession(Session session);

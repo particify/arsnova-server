@@ -365,12 +365,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<String> getActiveUsers(int timeDifference) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public Session updateSession(Session session) {
 		// TODO Auto-generated method stub
 		return null;

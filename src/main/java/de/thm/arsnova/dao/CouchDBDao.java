@@ -982,21 +982,6 @@ public class CouchDBDao implements IDatabaseDao {
 		return result;
 	}
 
-	@Override
-	public final List<String> getActiveUsers(final int timeDifference) {
-		final long inactiveBeforeTimestamp = new Date().getTime() - timeDifference * 1000;
-
-		final NovaView view = new NovaView("logged_in/by_and_only_timestamp_and_username");
-		view.setStartKeyArray(String.valueOf(inactiveBeforeTimestamp));
-		final ViewResults results = getDatabase().view(view);
-
-		final List<String> result = new ArrayList<String>();
-		for (final Document d : results.getResults()) {
-			result.add(d.getJSONObject().getJSONArray("key").getString(1));
-		}
-		return result;
-	}
-
 	private static class ExtendedView extends View {
 
 		private String keys;
