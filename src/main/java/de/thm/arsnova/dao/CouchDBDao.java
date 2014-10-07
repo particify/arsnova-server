@@ -791,31 +791,6 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public void vote(final User me, final String menu) {
-		final String date = new SimpleDateFormat("dd-mm-yyyyy").format(new Date());
-		try {
-			final NovaView view = new NovaView("food_vote/get_user_vote");
-			view.setKey(date, me.getUsername());
-			final ViewResults results = getDatabase().view(view);
-
-			if (results.getResults().isEmpty()) {
-				final Document vote = new Document();
-				vote.put("type", "food_vote");
-				vote.put("name", menu);
-				vote.put("user", me.getUsername());
-				vote.put("day", date);
-				database.saveDocument(vote);
-			} else {
-				final Document vote = results.getResults().get(0);
-				vote.put("name", menu);
-				database.saveDocument(vote);
-			}
-		} catch (final IOException e) {
-			LOGGER.error("Error while saving user food vote", e);
-		}
-	}
-
-	@Override
 	public int countSessions() {
 		return sessionsCountValue("openSessions")
 				+ sessionsCountValue("closedSessions");

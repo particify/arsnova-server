@@ -89,8 +89,6 @@ public interface IDatabaseDao {
 
 	List<InterposedQuestion> getInterposedQuestions(Session session, User user);
 
-	void vote(User me, String menu);
-
 	int countSessions();
 
 	int countOpenSessions();

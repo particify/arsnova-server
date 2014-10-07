@@ -258,12 +258,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public void vote(User user, String menu) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public int countAnswers() {
 		// TODO Auto-generated method stub
 		return 0;
