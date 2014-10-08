@@ -880,25 +880,52 @@ public class CouchDBDao implements IDatabaseDao {
 			// Not all users have visited sessions
 			if (d.getJSONObject().optJSONArray("value") != null) {
 				@SuppressWarnings("unchecked")
-				final
-				Collection<Session> visitedSessions =  JSONArray.toCollection(
-						d.getJSONObject().getJSONArray("value"),
-						Session.class
-						);
+				final Collection<Session> visitedSessions =  JSONArray.toCollection(
+					d.getJSONObject().getJSONArray("value"),
+					Session.class
+				);
 				allSessions.addAll(visitedSessions);
 			}
 		}
 		// Do these sessions still exist?
 		final List<Session> result = new ArrayList<Session>();
+		final List<Session> deletedSessions = new ArrayList<Session>();
 		for (final Session s : allSessions) {
 			try {
 				final Session session = getSessionFromKeyword(s.getKeyword());
 				if (session != null) {
 					result.add(session);
+				} else {
+					deletedSessions.add(s);
 				}
 			} catch (final NotFoundException e) {
-				// TODO Remove non existant session
+				deletedSessions.add(s);
 			}
+		}
+		if (deletedSessions.isEmpty()) {
+			return result;
+		}
+		// Update document to remove sessions that don't exist anymore
+		try {
+			List<VisitedSession> visitedSessions = new ArrayList<VisitedSession>();
+			for (final Session s : result) {
+				visitedSessions.add(new VisitedSession(s));
+			}
+			final LoggedIn loggedIn = new LoggedIn();
+			final Document loggedInDocument = getDatabase().getDocument(sessions.getResults().get(0).getString("id"));
+			loggedIn.setSessionId(loggedInDocument.getString("sessionId"));
+			loggedIn.setUser(user.getUsername());
+			loggedIn.setTimestamp(loggedInDocument.getLong("timestamp"));
+			loggedIn.setType(loggedInDocument.getString("type"));
+			loggedIn.setVisitedSessions(visitedSessions);
+			loggedIn.set_id(loggedInDocument.getId());
+			loggedIn.set_rev(loggedInDocument.getRev());
+
+			final JSONObject json = JSONObject.fromObject(loggedIn);
+			final Document doc = new Document(json);
+			getDatabase().saveDocument(doc);
+		} catch (IOException e) {
+			LOGGER.error("Could not clean up logged_in document of {}", user.getUsername());
 		}
 		return result;
 	}
