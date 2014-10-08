@@ -22,12 +22,10 @@ package de.thm.arsnova.dao;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import net.sf.ezmorph.Morpher;
@@ -364,10 +362,8 @@ public class CouchDBDao implements IDatabaseDao {
 					);
 			final JSONArray possibleAnswers = results.getJSONArray("rows").optJSONObject(0).optJSONObject("value")
 					.getJSONArray("possibleAnswers");
-			final Collection<PossibleAnswer> answers = JSONArray.toCollection(
-					possibleAnswers,
-					PossibleAnswer.class
-					);
+			@SuppressWarnings("unchecked")
+			final Collection<PossibleAnswer> answers = JSONArray.toCollection(possibleAnswers, PossibleAnswer.class);
 			q.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
 			q.setSessionKeyword(getSessionKeyword(q.getSessionId()));
 			return q;
@@ -390,6 +386,7 @@ public class CouchDBDao implements IDatabaseDao {
 				loggedIn = (LoggedIn) JSONObject.toBean(json, LoggedIn.class);
 				final JSONArray vs = json.optJSONArray("visitedSessions");
 				if (vs != null) {
+					@SuppressWarnings("unchecked")
 					final Collection<VisitedSession> visitedSessions = JSONArray.toCollection(vs, VisitedSession.class);
 					loggedIn.setVisitedSessions(new ArrayList<VisitedSession>(visitedSessions));
 				}
@@ -421,6 +418,7 @@ public class CouchDBDao implements IDatabaseDao {
 			final LoggedIn l = (LoggedIn) JSONObject.toBean(doc.getJSONObject(), LoggedIn.class);
 			final JSONArray vs = doc.getJSONObject().optJSONArray("visitedSessions");
 			if (vs != null) {
+				@SuppressWarnings("unchecked")
 				final Collection<VisitedSession> visitedSessions = JSONArray.toCollection(vs, VisitedSession.class);
 				l.setVisitedSessions(new ArrayList<VisitedSession>(visitedSessions));
 			}
