@@ -34,9 +34,11 @@ import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
+import de.thm.arsnova.connector.model.Courses;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -54,11 +56,29 @@ public class SessionService implements ISessionService {
 		}
 	}
 
+	public static class SessionInfoNameComparator implements Comparator<SessionInfo>, Serializable {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public int compare(final SessionInfo session1, final SessionInfo session2) {
+			return session1.getName().compareToIgnoreCase(session2.getName());
+		}
+	}
+
 	public static class SessionShortNameComparator implements Comparator<Session>, Serializable {
 		private static final long serialVersionUID = 1L;
 
 		@Override
 		public int compare(final Session session1, final Session session2) {
+			return session1.getShortName().compareToIgnoreCase(session2.getShortName());
+		}
+	}
+
+	public static class SessionInfoShortNameComparator implements Comparator<SessionInfo>, Serializable {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public int compare(final SessionInfo session1, final SessionInfo session2) {
 			return session1.getShortName().compareToIgnoreCase(session2.getShortName());
 		}
 	}
@@ -128,14 +148,12 @@ public class SessionService implements ISessionService {
 				throw new ForbiddenException();
 			}
 		}
-
 		if (connectorClient != null && session.isCourseSession()) {
 			final String courseid = session.getCourseId();
 			if (!connectorClient.getMembership(userService.getCurrentUser().getUsername(), courseid).isMember()) {
 				throw new ForbiddenException();
 			}
 		}
-
 		return session;
 	}
 
@@ -151,6 +169,11 @@ public class SessionService implements ISessionService {
 				connectorClient.getCourses(userService.getCurrentUser().getUsername()).getCourse()
 				);
 
+		return combineSessions(mySessions, courseSessions);
+	}
+
+	private List<Session> combineSessions(final List<Session> mySessions,
+			final List<Session> courseSessions) {
 		final Map<String, Session> allAvailableSessions = new HashMap<String, Session>();
 
 		for (final Session session : mySessions) {
@@ -164,8 +187,30 @@ public class SessionService implements ISessionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	public final List<SessionInfo> getMySessionsInfo() {
+		final User user = userService.getCurrentUser();
+		final List<SessionInfo> mySessions = databaseDao.getMySessionsInfo(user);
+		if (connectorClient == null) {
+			return mySessions;
+		}
+
+		final List<Course> myCourses = connectorClient.getCourses(user.getUsername()).getCourse();
+		final List<SessionInfo> courseSessions = databaseDao.getCourseSessionsInfo(myCourses);
+		// assume that my sessions and my course sessions are distinct
+		mySessions.addAll(courseSessions);
+		return mySessions;
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
 	public final List<Session> getMyVisitedSessions() {
 		return databaseDao.getMyVisitedSessions(userService.getCurrentUser());
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public final List<SessionInfo> getMyVisitedSessionsInfo() {
+		return databaseDao.getMyVisitedSessionsInfo(userService.getCurrentUser());
 	}
 
 	@Override

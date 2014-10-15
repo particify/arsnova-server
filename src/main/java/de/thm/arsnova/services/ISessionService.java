@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.SessionInfo;
 
 public interface ISessionService {
 	Session getSession(String keyword);
@@ -54,4 +55,8 @@ public interface ISessionService {
 	int getLearningProgress(String sessionkey);
 
 	SimpleEntry<Integer, Integer> getMyLearningProgress(String sessionkey);
+
+	List<SessionInfo> getMySessionsInfo();
+
+	List<SessionInfo> getMyVisitedSessionsInfo();
 }

@@ -26,7 +26,9 @@ import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.ezmorph.Morpher;
 import net.sf.ezmorph.MorpherRegistry;
@@ -35,6 +37,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.util.JSONUtils;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +60,7 @@ import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.PossibleAnswer;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.VisitedSession;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -124,6 +128,98 @@ public class CouchDBDao implements IDatabaseDao {
 			result.add(session);
 		}
 		return result;
+	}
+
+	@Override
+	public final List<SessionInfo> getMySessionsInfo(final User user) {
+		final List<Session> sessions = this.getMySessions(user);
+		return getInfosForSessions(sessions);
+	}
+
+	private List<SessionInfo> getInfosForSessions(final List<Session> sessions) {
+		final ExtendedView questionCountView = new ExtendedView("skill_question/count_by_session");
+		final ExtendedView answerCountView = new ExtendedView("skill_question/count_answers_by_session");
+		final ExtendedView interposedCountView = new ExtendedView("interposed_question/count_by_session_reading");
+		final ExtendedView interposedCountUserView = new ExtendedView("interposed_question/count_by_session_reading_for_creator");
+		questionCountView.setSessionIdKeys(sessions);
+		questionCountView.setGroup(true);
+		answerCountView.setSessionIdKeys(sessions);
+		answerCountView.setGroup(true);
+		List<String> interposedQueryKeys = new ArrayList<String>();
+		for (Session s : sessions) {
+			interposedQueryKeys.add("[\"" + s.get_id() + "\",\"unread\"]");
+		}
+		try {
+			interposedCountView.setKeys(URLEncoder.encode("["+StringUtils.join(interposedQueryKeys, ",")+"]", "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
+		interposedCountView.setGroup(true);
+		return getSessionInfoData(sessions, questionCountView, answerCountView, interposedCountView);
+	}
+
+	private List<SessionInfo> getInfosForVisitedSessions(final List<Session> sessions, final User user) {
+		final ExtendedView questionCountView = new ExtendedView("skill_question/count_by_session");
+		final ExtendedView answerCountView = new ExtendedView("skill_question/count_answers_by_session");
+		final ExtendedView interposedCountUserView = new ExtendedView("interposed_question/count_by_session_reading_for_creator");
+		questionCountView.setSessionIdKeys(sessions);
+		questionCountView.setGroup(true);
+		answerCountView.setSessionIdKeys(sessions);
+		answerCountView.setGroup(true);
+		List<String> interposedQueryKeys = new ArrayList<String>();
+		for (Session s : sessions) {
+			interposedQueryKeys.add("[\"" + s.get_id() + "\",\"" + user.getUsername() + "\",\"unread\"]");
+		}
+		try {
+			interposedCountUserView.setKeys(URLEncoder.encode("["+StringUtils.join(interposedQueryKeys, ",")+"]", "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
+		interposedCountUserView.setGroup(true);
+		return getSessionInfoData(sessions, questionCountView, answerCountView, interposedCountUserView);
+	}
+
+	private List<SessionInfo> getSessionInfoData(final List<Session> sessions,
+			final ExtendedView questionCountView,
+			final ExtendedView answerCountView,
+			final ExtendedView interposedCountView) {
+		final ViewResults questionCountViewResults = getDatabase().view(questionCountView);
+		final ViewResults answerCountViewResults = getDatabase().view(answerCountView);
+		final ViewResults interposedCountViewResults = getDatabase().view(interposedCountView);
+
+		Map<String, Integer> questionCountMap = new HashMap<String, Integer>();
+		for (final Document d : questionCountViewResults.getResults()) {
+			questionCountMap.put(d.getString("key"), d.getInt("value"));
+		}
+		Map<String, Integer> answerCountMap = new HashMap<String, Integer>();
+		for (final Document d : answerCountViewResults.getResults()) {
+			answerCountMap.put(d.getString("key"), d.getInt("value"));
+		}
+		Map<String, Integer> interposedCountMap = new HashMap<String, Integer>();
+		for (final Document d : interposedCountViewResults.getResults()) {
+			interposedCountMap.put(d.getJSONArray("key").getString(0), d.getInt("value"));
+		}
+		List<SessionInfo> sessionInfos = new ArrayList<SessionInfo>();
+		for (Session session : sessions) {
+			int numQuestions = 0;
+			int numAnswers = 0;
+			int numInterposed = 0;
+			if (questionCountMap.containsKey(session.get_id())) {
+				numQuestions = questionCountMap.get(session.get_id());
+			}
+			if (answerCountMap.containsKey(session.get_id())) {
+				numAnswers = answerCountMap.get(session.get_id());
+			}
+			if (interposedCountMap.containsKey(session.get_id())) {
+				numInterposed = interposedCountMap.get(session.get_id());
+			}
+			SessionInfo info = new SessionInfo(session);
+			info.setNumQuestions(numQuestions);
+			info.setNumAnswers(numAnswers);
+			info.setNumInterposed(numInterposed);
+			sessionInfos.add(info);
+		}
+		return sessionInfos;
 	}
 
 	@Override
@@ -885,22 +981,22 @@ public class CouchDBDao implements IDatabaseDao {
 				allSessions.addAll(visitedSessions);
 			}
 		}
-		// Do these sessions still exist?
+		// Filter sessions that don't exist anymore, also filter my own sessions
 		final List<Session> result = new ArrayList<Session>();
-		final List<Session> deletedSessions = new ArrayList<Session>();
+		final List<Session> filteredSessions = new ArrayList<Session>();
 		for (final Session s : allSessions) {
 			try {
 				final Session session = getSessionFromKeyword(s.getKeyword());
-				if (session != null) {
+				if (session != null && !session.isCreator(user)) {
 					result.add(session);
 				} else {
-					deletedSessions.add(s);
+					filteredSessions.add(s);
 				}
 			} catch (final NotFoundException e) {
-				deletedSessions.add(s);
+				filteredSessions.add(s);
 			}
 		}
-		if (deletedSessions.isEmpty()) {
+		if (filteredSessions.isEmpty()) {
 			return result;
 		}
 		// Update document to remove sessions that don't exist anymore
@@ -926,6 +1022,12 @@ public class CouchDBDao implements IDatabaseDao {
 			LOGGER.error("Could not clean up logged_in document of {}", user.getUsername());
 		}
 		return result;
+	}
+
+	@Override
+	public List<SessionInfo> getMyVisitedSessionsInfo(final User user) {
+		List<Session> sessions = this.getMyVisitedSessions(user);
+		return this.getInfosForVisitedSessions(sessions, user);
 	}
 
 	@Override
@@ -1007,6 +1109,12 @@ public class CouchDBDao implements IDatabaseDao {
 		return result;
 	}
 
+	@Override
+	public List<SessionInfo> getCourseSessionsInfo(final List<Course> courses) {
+		List<Session> sessions = this.getCourseSessions(courses);
+		return getInfosForSessions(sessions);
+	}
+
 	private static class ExtendedView extends View {
 
 		private String keys;
@@ -1020,18 +1128,30 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 
 		public void setCourseIdKeys(final List<Course> courses) {
-			if (courses.isEmpty()) {
+			List<String> courseIds = new ArrayList<String>();
+			for (Course c : courses) {
+				courseIds.add(c.getId());
+			}
+			setKeyList(courseIds);
+		}
+
+		public void setSessionIdKeys(final List<Session> sessions) {
+			List<String> sessionIds = new ArrayList<String>();
+			for (Session s : sessions) {
+				sessionIds.add(s.get_id());
+			}
+			setKeyList(sessionIds);
+		}
+
+		public void setKeyList(final List<String> keylist) {
+			if (keylist.isEmpty()) {
 				keys = "[]";
 				return;
 			}
 
 			final StringBuilder sb = new StringBuilder();
-			sb.append("[");
-			for (int i = 0; i < courses.size() - 1; i++) {
-				sb.append("\"" + courses.get(i).getId() + "\",");
-			}
-			sb.append("\"" + courses.get(courses.size() - 1).getId() + "\"");
-			sb.append("]");
+			// generates: ["<key>","<key>","<key>",...]
+			sb.append("[\"" + StringUtils.join(keylist, "\",\"") + "\"]");
 			try {
 				setKeys(URLEncoder.encode(sb.toString(), "UTF-8"));
 			} catch (final UnsupportedEncodingException e) {
@@ -1046,10 +1166,9 @@ public class CouchDBDao implements IDatabaseDao {
 				query.append(super.getQueryString());
 			}
 			if (keys != null) {
-				if (query.toString().isEmpty()) {
+				if (!query.toString().isEmpty()) {
 					query.append("&");
 				}
-
 				query.append("keys=" + keys);
 			}
 

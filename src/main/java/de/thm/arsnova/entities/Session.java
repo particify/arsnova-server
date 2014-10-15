@@ -148,6 +148,6 @@ public class Session implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Session [keyword=" + keyword+ ", type=" + type + "]";
+		return "Session [keyword=" + keyword+ ", type=" + type + ", creator=" + creator + "]";
 	}
 }

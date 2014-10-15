@@ -43,11 +43,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.services.SessionService.SessionNameComparator;
+import de.thm.arsnova.services.SessionService.SessionInfoNameComparator;
 import de.thm.arsnova.services.SessionService.SessionShortNameComparator;
+import de.thm.arsnova.services.SessionService.SessionInfoShortNameComparator;
 import de.thm.arsnova.web.DeprecatedApi;
 
 @RestController
@@ -151,6 +154,38 @@ public class SessionController extends AbstractController {
 			Collections.sort(sessions, new SessionNameComparator());
 		}
 
+		return sessions;
+	}
+
+	/**
+	 * Returns a list of my own sessions with only the necessary information like name, keyword, or counters.
+	 * @param statusOnly The flag that has to be set in order to get this shortened list.
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping(value = "/", method = RequestMethod.GET, params = "statusonly=true")
+	public final List<SessionInfo> getMySessions(
+			@RequestParam(value = "visitedonly", defaultValue = "false") final boolean visitedOnly,
+			@RequestParam(value = "sortby", defaultValue = "name") final String sortby,
+			final HttpServletResponse response
+			) {
+		List<SessionInfo> sessions;
+		if (!visitedOnly) {
+			sessions = sessionService.getMySessionsInfo();
+		} else {
+			sessions = sessionService.getMyVisitedSessionsInfo();
+		}
+
+		if (sessions == null || sessions.isEmpty()) {
+			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+			return null;
+		}
+
+		if (sortby != null && sortby.equals("shortname")) {
+			Collections.sort(sessions, new SessionInfoShortNameComparator());
+		} else {
+			Collections.sort(sessions, new SessionInfoNameComparator());
+		}
 		return sessions;
 	}
 

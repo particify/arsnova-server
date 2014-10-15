@@ -30,6 +30,7 @@ import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 
 public interface IDatabaseDao {
@@ -170,4 +171,10 @@ public interface IDatabaseDao {
 	int getLearningProgress(Session session);
 
 	SimpleEntry<Integer, Integer> getMyLearningProgress(Session session, User user);
+
+	List<SessionInfo> getMySessionsInfo(User user);
+
+	List<SessionInfo> getCourseSessionsInfo(List<Course> myCourses);
+
+	List<SessionInfo> getMyVisitedSessionsInfo(User currentUser);
 }
