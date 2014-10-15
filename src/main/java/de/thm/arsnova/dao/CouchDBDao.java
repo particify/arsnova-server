@@ -279,6 +279,7 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("numClickableFields", question.getNumClickableFields());
 		q.put("thresholdCorrectAnswers", question.getThresholdCorrectAnswers());
 		q.put("cvIsColored", question.getCvIsColored());
+		q.put("gridLineColor", question.getGridLineColor());
 
 		return q;
 	}
@@ -313,6 +314,7 @@ public class CouchDBDao implements IDatabaseDao {
 			q.put("numClickableFields", question.getNumClickableFields());
 			q.put("thresholdCorrectAnswers", question.getThresholdCorrectAnswers());
 			q.put("cvIsColored", question.getCvIsColored());
+			q.put("gridLineColor", question.getGridLineColor());
 			database.saveDocument(q);
 			question.set_rev(q.getRev());
 

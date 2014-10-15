@@ -60,6 +60,7 @@ public class Question {
 	private int numClickableFields;
 	private int thresholdCorrectAnswers;
 	private boolean cvIsColored;
+	private String gridLineColor;
 
 	public final String getType() {
 		return type;
@@ -357,6 +358,13 @@ public class Question {
 		this.thresholdCorrectAnswers = thresholdCorrectAnswers;
 	}
 
+	public String getGridLineColor() {
+		return gridLineColor;
+	}
+	
+	public void setGridLineColor(String gridLineColor) {
+		this.gridLineColor = gridLineColor;
+	}
 
 	@Override
 	public final String toString() {
