@@ -32,7 +32,8 @@ public class SessionInfo {
 	private int numQuestions;
 	private int numAnswers;
 	private int numInterposed;
-	
+	private int numUnanswered;
+
 	public SessionInfo(Session session) {
 		this.name = session.getName();
 		this.shortName = session.getShortName();
@@ -111,5 +112,13 @@ public class SessionInfo {
 
 	public void setNumInterposed(int numInterposed) {
 		this.numInterposed = numInterposed;
+	}
+
+	public int getNumUnanswered() {
+		return numUnanswered;
+	}
+
+	public void setNumUnanswered(int numUnanswered) {
+		this.numUnanswered = numUnanswered;
 	}
 }

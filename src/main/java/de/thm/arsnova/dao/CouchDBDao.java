@@ -27,8 +27,10 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.sf.ezmorph.Morpher;
 import net.sf.ezmorph.MorpherRegistry;
@@ -140,7 +142,6 @@ public class CouchDBDao implements IDatabaseDao {
 		final ExtendedView questionCountView = new ExtendedView("skill_question/count_by_session");
 		final ExtendedView answerCountView = new ExtendedView("skill_question/count_answers_by_session");
 		final ExtendedView interposedCountView = new ExtendedView("interposed_question/count_by_session_reading");
-		final ExtendedView interposedCountUserView = new ExtendedView("interposed_question/count_by_session_reading_for_creator");
 		questionCountView.setSessionIdKeys(sessions);
 		questionCountView.setGroup(true);
 		answerCountView.setSessionIdKeys(sessions);
@@ -155,37 +156,94 @@ public class CouchDBDao implements IDatabaseDao {
 			throw new RuntimeException(e);
 		}
 		interposedCountView.setGroup(true);
-		return getSessionInfoData(sessions, questionCountView, answerCountView, interposedCountView);
+		return getSessionInfoData(sessions, questionCountView, answerCountView, interposedCountView, null, null);
 	}
 
 	private List<SessionInfo> getInfosForVisitedSessions(final List<Session> sessions, final User user) {
 		final ExtendedView questionCountView = new ExtendedView("skill_question/count_by_session");
 		final ExtendedView answerCountView = new ExtendedView("skill_question/count_answers_by_session");
 		final ExtendedView interposedCountUserView = new ExtendedView("interposed_question/count_by_session_reading_for_creator");
+		final ExtendedView answeredQuestionsView = new ExtendedView("answer/by_user");
+		final ExtendedView questionIdsView = new ExtendedView("skill_question/by_session_only_id_for_all");
 		questionCountView.setSessionIdKeys(sessions);
 		questionCountView.setGroup(true);
 		answerCountView.setSessionIdKeys(sessions);
 		answerCountView.setGroup(true);
+		questionIdsView.setSessionIdKeys(sessions);
 		List<String> interposedQueryKeys = new ArrayList<String>();
 		for (Session s : sessions) {
 			interposedQueryKeys.add("[\"" + s.get_id() + "\",\"" + user.getUsername() + "\",\"unread\"]");
 		}
+		List<String> answeredQuestionQueryKeys = new ArrayList<String>();
+		for (Session s : sessions) {
+			answeredQuestionQueryKeys.add("[\"" + user.getUsername() + "\",\"" + s.get_id() + "\"]");
+		}
 		try {
 			interposedCountUserView.setKeys(URLEncoder.encode("["+StringUtils.join(interposedQueryKeys, ",")+"]", "UTF-8"));
+			answeredQuestionsView.setKeys(URLEncoder.encode("["+StringUtils.join(answeredQuestionQueryKeys, ",")+"]", "UTF-8"));
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
 		interposedCountUserView.setGroup(true);
-		return getSessionInfoData(sessions, questionCountView, answerCountView, interposedCountUserView);
+		return getSessionInfoData(sessions, questionCountView, answerCountView, interposedCountUserView, answeredQuestionsView, questionIdsView);
 	}
 
 	private List<SessionInfo> getSessionInfoData(final List<Session> sessions,
 			final ExtendedView questionCountView,
 			final ExtendedView answerCountView,
-			final ExtendedView interposedCountView) {
+			final ExtendedView interposedCountView,
+			final ExtendedView answeredQuestionsView,
+			final ExtendedView questionIdsView) {
 		final ViewResults questionCountViewResults = getDatabase().view(questionCountView);
 		final ViewResults answerCountViewResults = getDatabase().view(answerCountView);
 		final ViewResults interposedCountViewResults = getDatabase().view(interposedCountView);
+
+		Map<String, Set<String>> answeredQuestionsMap = new HashMap<String, Set<String>>();
+		Map<String, Set<String>> questionIdMap = new HashMap<String, Set<String>>();
+		if (answeredQuestionsView != null && questionIdsView != null) {
+			final ViewResults answeredQuestionsViewResults = getDatabase().view(answeredQuestionsView);
+			final ViewResults questionIdsViewResults = getDatabase().view(questionIdsView);
+
+			// Maps a session ID to a set of question IDs of answered questions of that session
+			for (final Document d : answeredQuestionsViewResults.getResults()) {
+				final String sessionId = d.getJSONArray("key").getString(1);
+				final String questionId = d.getString("value");
+				Set<String> questionIdsInSession = answeredQuestionsMap.get(sessionId);
+				if (questionIdsInSession == null) {
+					questionIdsInSession = new HashSet<String>();
+				}
+				questionIdsInSession.add(questionId);
+				answeredQuestionsMap.put(sessionId, questionIdsInSession);
+			}
+
+			// Maps a session ID to a set of question IDs of that session
+			for (final Document d : questionIdsViewResults.getResults()) {
+				final String sessionId = d.getString("key");
+				final String questionId = d.getId();
+				Set<String> questionIdsInSession = questionIdMap.get(sessionId);
+				if (questionIdsInSession == null) {
+					questionIdsInSession = new HashSet<String>();
+				}
+				questionIdsInSession.add(questionId);
+				questionIdMap.put(sessionId, questionIdsInSession);
+			}
+		}
+
+		// For each session, count the question IDs that are not yet answered
+		Map<String, Integer> unansweredQuestionsCountMap = new HashMap<String, Integer>();
+		for (final Session s : sessions) {
+			if (!questionIdMap.containsKey(s.get_id())) {
+				continue;
+			}
+			// Note: create a copy of the first set so that we don't modify the contents in the original set
+			Set<String> questionIdsInSession = new HashSet<String>(questionIdMap.get(s.get_id()));
+			Set<String> answeredQuestionIdsInSession = answeredQuestionsMap.get(s.get_id());
+			if (answeredQuestionIdsInSession == null) {
+				answeredQuestionIdsInSession = new HashSet<String>();
+			}
+			questionIdsInSession.removeAll(answeredQuestionIdsInSession);
+			unansweredQuestionsCountMap.put(s.get_id(), questionIdsInSession.size());
+		}
 
 		Map<String, Integer> questionCountMap = new HashMap<String, Integer>();
 		for (final Document d : questionCountViewResults.getResults()) {
@@ -204,6 +262,7 @@ public class CouchDBDao implements IDatabaseDao {
 			int numQuestions = 0;
 			int numAnswers = 0;
 			int numInterposed = 0;
+			int numUnanswered = 0;
 			if (questionCountMap.containsKey(session.get_id())) {
 				numQuestions = questionCountMap.get(session.get_id());
 			}
@@ -213,10 +272,14 @@ public class CouchDBDao implements IDatabaseDao {
 			if (interposedCountMap.containsKey(session.get_id())) {
 				numInterposed = interposedCountMap.get(session.get_id());
 			}
+			if (unansweredQuestionsCountMap.containsKey(session.get_id())) {
+				numUnanswered = unansweredQuestionsCountMap.get(session.get_id());
+			}
 			SessionInfo info = new SessionInfo(session);
 			info.setNumQuestions(numQuestions);
 			info.setNumAnswers(numAnswers);
 			info.setNumInterposed(numInterposed);
+			info.setNumUnanswered(numUnanswered);
 			sessionInfos.add(info);
 		}
 		return sessionInfos;
