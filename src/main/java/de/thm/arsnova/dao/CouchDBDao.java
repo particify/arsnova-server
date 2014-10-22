@@ -20,8 +20,6 @@
 package de.thm.arsnova.dao;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -39,7 +37,6 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.util.JSONUtils;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -150,11 +147,7 @@ public class CouchDBDao implements IDatabaseDao {
 		for (Session s : sessions) {
 			interposedQueryKeys.add("[\"" + s.get_id() + "\",\"unread\"]");
 		}
-		try {
-			interposedCountView.setKeys(URLEncoder.encode("["+StringUtils.join(interposedQueryKeys, ",")+"]", "UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
+		interposedCountView.setKeys(interposedQueryKeys);
 		interposedCountView.setGroup(true);
 		return getSessionInfoData(sessions, questionCountView, answerCountView, interposedCountView);
 	}
@@ -167,11 +160,7 @@ public class CouchDBDao implements IDatabaseDao {
 		for (Session s : sessions) {
 			answeredQuestionQueryKeys.add("[\"" + user.getUsername() + "\",\"" + s.get_id() + "\"]");
 		}
-		try {
-			answeredQuestionsView.setKeys(URLEncoder.encode("["+StringUtils.join(answeredQuestionQueryKeys, ",")+"]", "UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
+		answeredQuestionsView.setKeys(answeredQuestionQueryKeys);
 		return getVisitedSessionInfoData(sessions, answeredQuestionsView, questionIdsView);
 	}
 
@@ -1172,16 +1161,10 @@ public class CouchDBDao implements IDatabaseDao {
 		return getInfosForSessions(sessions);
 	}
 
-	private static class ExtendedView extends View {
-
-		private String keys;
+	private static class ExtendedView extends NovaView {
 
 		public ExtendedView(final String fullname) {
 			super(fullname);
-		}
-
-		public void setKeys(final String newKeys) {
-			keys = newKeys;
 		}
 
 		public void setCourseIdKeys(final List<Course> courses) {
@@ -1201,38 +1184,7 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 
 		public void setKeyList(final List<String> keylist) {
-			if (keylist.isEmpty()) {
-				keys = "[]";
-				return;
-			}
-
-			final StringBuilder sb = new StringBuilder();
-			// generates: ["<key>","<key>","<key>",...]
-			sb.append("[\"" + StringUtils.join(keylist, "\",\"") + "\"]");
-			try {
-				setKeys(URLEncoder.encode(sb.toString(), "UTF-8"));
-			} catch (final UnsupportedEncodingException e) {
-				LOGGER.error("Error while encoding course ID keys", e);
-			}
-		}
-
-		@Override
-		public String getQueryString() {
-			final StringBuilder query = new StringBuilder();
-			if (super.getQueryString() != null) {
-				query.append(super.getQueryString());
-			}
-			if (keys != null) {
-				if (!query.toString().isEmpty()) {
-					query.append("&");
-				}
-				query.append("keys=" + keys);
-			}
-
-			if (query.toString().isEmpty()) {
-				return null;
-			}
-			return query.toString();
+			setKeys(keylist);
 		}
 	}
 

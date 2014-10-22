@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Arrays;
 
 import org.junit.Test;
 
@@ -106,6 +107,30 @@ public class NovaViewTest {
 		v2.setEndKeyArray("2");
 		assertEncodedEquals("startkey", "[2]", v1.getQueryString());
 		assertEncodedEquals("endkey", "[2]", v2.getQueryString());
+	}
+
+	@Test
+	public void shouldSupportAddingKeysParameter() {
+		String[] stringKeys = new String[] { "foo", "bar" };
+		String[] numberKeys = new String[] { "123", "456" };
+		String[] mixedKeys = new String[] { "foo", "123" };
+		String[] arrayKeys = new String[] { "[\"foo\",123]", "[456,\"bar\"]" };
+		String[] emptyKeys = new String[0];
+		final NovaView v1 = new NovaView(null);
+		final NovaView v2 = new NovaView(null);
+		final NovaView v3 = new NovaView(null);
+		final NovaView v4 = new NovaView(null);
+		final NovaView v5 = new NovaView(null);
+		v1.setKeys(Arrays.asList(stringKeys));
+		v2.setKeys(Arrays.asList(numberKeys));
+		v3.setKeys(Arrays.asList(mixedKeys));
+		v4.setKeys(Arrays.asList(arrayKeys));
+		v5.setKeys(Arrays.asList(emptyKeys));
+		assertEncodedEquals("keys", "[\"foo\",\"bar\"]", v1.getQueryString());
+		assertEncodedEquals("keys", "[123,456]", v2.getQueryString());
+		assertEncodedEquals("keys", "[\"foo\",123]", v3.getQueryString());
+		assertEncodedEquals("keys", "[[\"foo\",123],[456,\"bar\"]]", v4.getQueryString());
+		assertEncodedEquals("keys", "[]", v5.getQueryString());
 	}
 
 	private void assertEncodedEquals(final String key, final String expected, final String actual) {

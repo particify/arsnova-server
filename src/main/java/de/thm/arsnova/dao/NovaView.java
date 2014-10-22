@@ -20,10 +20,16 @@ package de.thm.arsnova.dao;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.fourspaces.couchdb.View;
 
 public class NovaView extends View {
+
+	protected String keys;
 
 	public NovaView(final String fullname) {
 		super(fullname);
@@ -80,22 +86,40 @@ public class NovaView extends View {
 		key = toJsonArray(keys);
 	}
 
-	private String toJsonArray(final String[] strings) {
-		final StringBuilder sb = new StringBuilder();
-		for (final String str : strings) {
-			if (isNumber(str)) {
-				sb.append(str + ",");
-			} else if (str.equals("{}")) {
-				sb.append(str + ",");
+	public void setKeys(List<String> keys) {
+		this.keys = toJsonArray(keys.toArray(new String[keys.size()]));
+	}
+
+	@Override
+	public String getQueryString() {
+		final String tempQuery = super.getQueryString();
+		final StringBuilder query = new StringBuilder();
+		if (tempQuery != null) {
+			query.append(tempQuery);
+		}
+		if (keys != null) {
+			if (query.length() > 0) {
+				query.append("&");
+			}
+			query.append("keys=" + keys);
+		}
+
+		if (query.length() == 0) {
+			return null;
+		}
+		return query.toString();
+	}
+
+	private String toJsonArray(final String[] strs) {
+		final List<String> strings = new ArrayList<String>();
+		for (final String string : strs) {
+			if (isNumber(string) || isPlaceholder(string) || isArray(string)) {
+				strings.add(string);
 			} else {
-				sb.append("\"" + str + "\"" + ",");
+				strings.add("\"" + string + "\"");
 			}
 		}
-		// remove final comma
-		sb.replace(sb.length() - 1, sb.length(), "");
-		sb.insert(0, "[");
-		sb.append("]");
-		return encode(sb.toString());
+		return encode("[" + StringUtils.join(strings, ",") + "]");
 	}
 
 	private String quote(final String string) {
@@ -104,6 +128,14 @@ public class NovaView extends View {
 
 	private boolean isNumber(final String string) {
 		return string.matches("^[0-9]+$");
+	}
+
+	private boolean isPlaceholder(final String string) {
+		return string.equals("{}");
+	}
+
+	private boolean isArray(final String string) {
+		return string.startsWith("[") && string.endsWith("]");
 	}
 
 	private String encode(final String string) {
