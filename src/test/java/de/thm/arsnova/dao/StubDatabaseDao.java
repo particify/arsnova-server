@@ -231,11 +231,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public int countActiveUsers(long since) {
-		return stubUsers.size();
-	}
-
-	@Override
 	public List<Answer> getMyAnswers(User user, String sessionKey) {
 		return new ArrayList<Answer>();
 	}

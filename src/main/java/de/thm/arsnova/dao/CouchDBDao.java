@@ -722,22 +722,6 @@ public class CouchDBDao implements IDatabaseDao {
 		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 	}
 
-	@Override
-	public final int countActiveUsers(final long since) {
-		try {
-			final View view = new View("statistic/count_active_users");
-			view.setStartKey(String.valueOf(since));
-			final ViewResults results = getDatabase().view(view);
-			if (isEmptyResults(results)) {
-				return 0;
-			}
-			return results.getJSONArray("rows").optJSONObject(0).getInt("value");
-		} catch (final Exception e) {
-			LOGGER.error("Error while retrieving active users count", e);
-		}
-		return 0;
-	}
-
 	private boolean isEmptyResults(final ViewResults results) {
 		return results == null || results.getResults().isEmpty() || results.getJSONArray("rows").size() == 0;
 	}
