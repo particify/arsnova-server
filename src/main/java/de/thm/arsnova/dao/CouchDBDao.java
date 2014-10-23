@@ -1172,7 +1172,7 @@ public class CouchDBDao implements IDatabaseDao {
 			for (Course c : courses) {
 				courseIds.add(c.getId());
 			}
-			setKeyList(courseIds);
+			setKeys(courseIds);
 		}
 
 		public void setSessionIdKeys(final List<Session> sessions) {
@@ -1180,11 +1180,7 @@ public class CouchDBDao implements IDatabaseDao {
 			for (Session s : sessions) {
 				sessionIds.add(s.get_id());
 			}
-			setKeyList(sessionIds);
-		}
-
-		public void setKeyList(final List<String> keylist) {
-			setKeys(keylist);
+			setKeys(sessionIds);
 		}
 	}
 
