@@ -61,6 +61,7 @@ public class Question {
 	private int thresholdCorrectAnswers;
 	private boolean cvIsColored;
 	private String gridLineColor;
+	private int numberOfDots;
 
 	public final String getType() {
 		return type;
@@ -364,6 +365,14 @@ public class Question {
 	
 	public void setGridLineColor(String gridLineColor) {
 		this.gridLineColor = gridLineColor;
+	}
+	
+	public int getNumberOfDots() {
+		return numberOfDots;
+	}
+	
+	public void setNubmerOfDots(int numberOfDots) {
+		this.numberOfDots = numberOfDots;
 	}
 
 	@Override
