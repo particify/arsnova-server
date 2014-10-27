@@ -316,6 +316,10 @@ public class ARSnovaSocketIOServer {
 		broadcastInSession(sessionKey, "lecQuestionAvail", lecturerQuestionId);
 	}
 
+	public void reportSessionStatus(final String sessionKey, final boolean active) {
+		broadcastInSession(sessionKey, "setSessionActive", active);
+	}
+
 	public void broadcastInSession(final String sessionKey, final String eventName, final Object data) {
 		/**
 		 * collect a list of users which are in the current session iterate over

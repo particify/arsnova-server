@@ -34,7 +34,6 @@ import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.connector.model.Courses;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
@@ -265,6 +264,7 @@ public class SessionService implements ISessionService {
 		if (!session.isCreator(user)) {
 			throw new ForbiddenException();
 		}
+		socketIoServer.reportSessionStatus(sessionkey, lock);
 		return databaseDao.lockSession(session, lock);
 	}
 
