@@ -10,10 +10,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Feedback;
+import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.exceptions.NotFoundException;
 
 public class FeedbackStorage {
 	private static class FeedbackStorageObject {
@@ -34,34 +33,23 @@ public class FeedbackStorage {
 			return timestamp;
 		}
 		public boolean fromUser(final User u) {
-			return u.getUsername().equals(user.getUsername());
+			return user.equals(u);
 		}
 	}
 
-	private final IDatabaseDao dao;
+	private final Map<Session, Map<User, FeedbackStorageObject>> data = new ConcurrentHashMap<Session, Map<User, FeedbackStorageObject>>();
 
-	private final Map<String, Map<String, FeedbackStorageObject>> data;
-
-	public FeedbackStorage(final IDatabaseDao newDao) {
-		data = new ConcurrentHashMap<String, Map<String, FeedbackStorageObject>>();
-		dao = newDao;
-	}
-
-	public Feedback getFeedback(final String keyword) {
+	public Feedback getFeedback(final Session session) {
 		int a = 0;
 		int b = 0;
 		int c = 0;
 		int d = 0;
 
-		if (dao.getSession(keyword) == null) {
-			throw new NotFoundException();
-		}
-
-		if (data.get(keyword) == null) {
+		if (data.get(session) == null) {
 			return new Feedback(0, 0, 0, 0);
 		}
 
-		for (final FeedbackStorageObject fso : data.get(keyword).values()) {
+		for (final FeedbackStorageObject fso : data.get(session).values()) {
 			switch (fso.getValue()) {
 			case Feedback.FEEDBACK_FASTER:
 				a++;
@@ -82,12 +70,12 @@ public class FeedbackStorage {
 		return new Feedback(a, b, c, d);
 	}
 
-	public Integer getMyFeedback(final String keyword, final User u) {
-		if (data.get(keyword) == null) {
+	public Integer getMyFeedback(final Session session, final User u) {
+		if (data.get(session) == null) {
 			return null;
 		}
 
-		for (final FeedbackStorageObject fso : data.get(keyword).values()) {
+		for (final FeedbackStorageObject fso : data.get(session).values()) {
 			if (fso.fromUser(u)) {
 				return fso.getValue();
 			}
@@ -97,43 +85,40 @@ public class FeedbackStorage {
 	}
 
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public boolean saveFeedback(final String keyword, final int value, final User user) {
-		if (dao.getSession(keyword) == null) {
-			throw new NotFoundException();
+	public void saveFeedback(final Session session, final int value, final User user) {
+		if (data.get(session) == null) {
+			data.put(session, new ConcurrentHashMap<User, FeedbackStorageObject>());
 		}
 
-		if (data.get(keyword) == null) {
-			data.put(keyword, new ConcurrentHashMap<String, FeedbackStorageObject>());
-		}
-
-		data.get(keyword).put(user.getUsername(), new FeedbackStorageObject(value, user));
-		return true;
+		data.get(session).put(user, new FeedbackStorageObject(value, user));
 	}
 
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public Map<String, List<User>> cleanFeedbackVotes(final int cleanupFeedbackDelay) {
-		final Map<String, List<User>> removedFeedbackOfUsersInSession = new HashMap<String, List<User>>();;
-		for (final String keyword : data.keySet()) {
-			List<User> affectedUsers = cleanFeedbackVotesInSession(keyword, cleanupFeedbackDelay);
+	public Map<Session, List<User>> cleanFeedbackVotes(final int cleanupFeedbackDelay) {
+		final Map<Session, List<User>> removedFeedbackOfUsersInSession = new HashMap<Session, List<User>>();
+		for (final Session session : data.keySet()) {
+			List<User> affectedUsers = cleanFeedbackVotesInSession(session, cleanupFeedbackDelay);
 			if (!affectedUsers.isEmpty()) {
-				removedFeedbackOfUsersInSession.put(keyword, affectedUsers);
+				removedFeedbackOfUsersInSession.put(session, affectedUsers);
 			}
 		}
 		return removedFeedbackOfUsersInSession;
 	}
 
-	private List<User> cleanFeedbackVotesInSession(final String keyword, final int cleanupFeedbackDelay) {
+	private List<User> cleanFeedbackVotesInSession(final Session session, final int cleanupFeedbackDelay) {
 		final long timelimitInMillis = 60000 * (long) cleanupFeedbackDelay;
 		final long maxAllowedTimeInMillis = System.currentTimeMillis() - timelimitInMillis;
 
-		final Map<String, FeedbackStorageObject> sessionFeedbacks = data.get(keyword);
+		final Map<User, FeedbackStorageObject> sessionFeedbacks = data.get(session);
 		final List<User> affectedUsers = new ArrayList<User>();
 
-		for (final Map.Entry<String, FeedbackStorageObject> entry : sessionFeedbacks.entrySet()) {
-			final boolean timeIsUp = entry.getValue().getTimestamp().getTime() < maxAllowedTimeInMillis;
+		for (final Map.Entry<User, FeedbackStorageObject> entry : sessionFeedbacks.entrySet()) {
+			final User user = entry.getKey();
+			final FeedbackStorageObject feedback = entry.getValue();
+			final boolean timeIsUp = feedback.getTimestamp().getTime() < maxAllowedTimeInMillis;
 			if (timeIsUp) {
-				sessionFeedbacks.remove(entry.getKey());
-				affectedUsers.add(entry.getValue().user);
+				sessionFeedbacks.remove(user);
+				affectedUsers.add(user);
 			}
 		}
 		return affectedUsers;

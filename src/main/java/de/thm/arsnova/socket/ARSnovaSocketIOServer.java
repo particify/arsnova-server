@@ -225,17 +225,21 @@ public class ARSnovaSocketIOServer {
 		this.useSSL = useSSL;
 	}
 
-	public void reportDeletedFeedback(final String username, final Set<String> arsSessions) {
+	public void reportDeletedFeedback(final String username, final Set<de.thm.arsnova.entities.Session> arsSessions) {
 		final List<UUID> connectionIds = findConnectionIdForUser(username);
 		if (connectionIds.isEmpty()) {
 			return;
+		}
+		final List<String> keywords = new ArrayList<String>();
+		for (final de.thm.arsnova.entities.Session session : arsSessions) {
+			keywords.add(session.getKeyword());
 		}
 
 		for (final SocketIOClient client : server.getAllClients()) {
 			// Find the client whose feedback has been deleted and send a
 			// message.
 			if (connectionIds.contains(client.getSessionId())) {
-				client.sendEvent("feedbackReset", arsSessions);
+				client.sendEvent("feedbackReset", keywords);
 			}
 		}
 	}
@@ -263,14 +267,14 @@ public class ARSnovaSocketIOServer {
 		client.sendEvent("feedbackData", fb.getValues());
 	}
 
-	public void reportUpdatedFeedbackForSession(final String sessionKey) {
-		final de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
-		broadcastInSession(sessionKey, "feedbackData", fb.getValues());
+	public void reportUpdatedFeedbackForSession(final de.thm.arsnova.entities.Session session) {
+		final de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(session.getKeyword());
+		broadcastInSession(session.getKeyword(), "feedbackData", fb.getValues());
 		try {
-			final long averageFeedback = feedbackService.getAverageFeedbackRounded(sessionKey);
-			broadcastInSession(sessionKey, "feedbackDataRoundedAverage", averageFeedback);
+			final long averageFeedback = feedbackService.getAverageFeedbackRounded(session.getKeyword());
+			broadcastInSession(session.getKeyword(), "feedbackDataRoundedAverage", averageFeedback);
 		} catch (final NoContentException e) {
-			broadcastInSession(sessionKey, "feedbackDataRoundedAverage", null);
+			broadcastInSession(session.getKeyword(), "feedbackDataRoundedAverage", null);
 		}
 	}
 

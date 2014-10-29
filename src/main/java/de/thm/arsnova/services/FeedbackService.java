@@ -35,8 +35,10 @@ import org.springframework.stereotype.Service;
 import de.thm.arsnova.FeedbackStorage;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Feedback;
+import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.NoContentException;
+import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
@@ -64,54 +66,58 @@ public class FeedbackService implements IFeedbackService {
 
 	@PostConstruct
 	public void init() {
-		feedbackStorage = new FeedbackStorage(databaseDao);
+		feedbackStorage = new FeedbackStorage();
 	}
 
 	@Override
 	@Scheduled(fixedDelay = DEFAULT_SCHEDULER_DELAY)
 	public final void cleanFeedbackVotes() {
-		Map<String, List<User>> deletedFeedbackOfUsersInSession = feedbackStorage.cleanFeedbackVotes(cleanupFeedbackDelay);
+		Map<Session, List<User>> deletedFeedbackOfUsersInSession = feedbackStorage.cleanFeedbackVotes(cleanupFeedbackDelay);
 		/*
 		 * mapping (Session -> Users) is not suitable for web sockets, because we want to sent all affected
 		 * sessions to a single user in one go instead of sending multiple messages for each session. Hence,
 		 * we need the mapping (User -> Sessions)
 		 */
-		final Map<User, Set<String>> affectedSessionsOfUsers = new HashMap<User, Set<String>>();
+		final Map<User, Set<Session>> affectedSessionsOfUsers = new HashMap<User, Set<Session>>();
 
-		for (Map.Entry<String, List<User>> entry : deletedFeedbackOfUsersInSession.entrySet()) {
-			final String sessionKeyword = entry.getKey();
+		for (Map.Entry<Session, List<User>> entry : deletedFeedbackOfUsersInSession.entrySet()) {
+			final Session session = entry.getKey();
 			final List<User> users = entry.getValue();
 			for (User user : users) {
-				Set<String> affectedSessions;
+				Set<Session> affectedSessions;
 				if (affectedSessionsOfUsers.containsKey(user)) {
 					affectedSessions = affectedSessionsOfUsers.get(user);
 				} else {
-					affectedSessions = new HashSet<String>();
+					affectedSessions = new HashSet<Session>();
 				}
-				affectedSessions.add(sessionKeyword);
+				affectedSessions.add(session);
 				affectedSessionsOfUsers.put(user, affectedSessions);
 			}
 		}
 		// Send feedback reset event to all affected users
-		for (Map.Entry<User, Set<String>> entry : affectedSessionsOfUsers.entrySet()) {
+		for (Map.Entry<User, Set<Session>> entry : affectedSessionsOfUsers.entrySet()) {
 			final User user = entry.getKey();
-			final Set<String> arsSessions = entry.getValue();
+			final Set<Session> arsSessions = entry.getValue();
 			server.reportDeletedFeedback(user.getUsername(), arsSessions);
 		}
 		// For each session that has deleted feedback, send the new feedback to all clients
-		for (String sessionKey : deletedFeedbackOfUsersInSession.keySet()) {
-			server.reportUpdatedFeedbackForSession(sessionKey);
+		for (Session session : deletedFeedbackOfUsersInSession.keySet()) {
+			server.reportUpdatedFeedbackForSession(session);
 		}
 	}
 
 	@Override
 	public final Feedback getFeedback(final String keyword) {
-		return feedbackStorage.getFeedback(keyword);
+		final Session session = databaseDao.getSessionFromKeyword(keyword);
+		if (session == null) {
+			throw new NotFoundException();
+		}
+		return feedbackStorage.getFeedback(session);
 	}
 
 	@Override
 	public final int getFeedbackCount(final String keyword) {
-		final Feedback feedback = feedbackStorage.getFeedback(keyword);
+		final Feedback feedback = this.getFeedback(keyword);
 		final List<Integer> values = feedback.getValues();
 		return values.get(Feedback.FEEDBACK_FASTER) + values.get(Feedback.FEEDBACK_OK)
 				+ values.get(Feedback.FEEDBACK_SLOWER) + values.get(Feedback.FEEDBACK_AWAY);
@@ -119,7 +125,11 @@ public class FeedbackService implements IFeedbackService {
 
 	@Override
 	public final double getAverageFeedback(final String sessionkey) {
-		final Feedback feedback = feedbackStorage.getFeedback(sessionkey);
+		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
+		if (session == null) {
+			throw new NotFoundException();
+		}
+		final Feedback feedback = feedbackStorage.getFeedback(session);
 		final List<Integer> values = feedback.getValues();
 		final double count = values.get(Feedback.FEEDBACK_FASTER) + values.get(Feedback.FEEDBACK_OK)
 				+ values.get(Feedback.FEEDBACK_SLOWER) + values.get(Feedback.FEEDBACK_AWAY);
@@ -139,15 +149,21 @@ public class FeedbackService implements IFeedbackService {
 
 	@Override
 	public final boolean saveFeedback(final String keyword, final int value, final User user) {
-		final boolean result = feedbackStorage.saveFeedback(keyword, value, user);
-		if (result) {
-			server.reportUpdatedFeedbackForSession(keyword);
+		final Session session = databaseDao.getSessionFromKeyword(keyword);
+		if (session == null) {
+			throw new NotFoundException();
 		}
-		return result;
+		feedbackStorage.saveFeedback(session, value, user);
+		server.reportUpdatedFeedbackForSession(session);
+		return true;
 	}
 
 	@Override
 	public final Integer getMyFeedback(final String keyword, final User user) {
-		return feedbackStorage.getMyFeedback(keyword, user);
+		final Session session = databaseDao.getSessionFromKeyword(keyword);
+		if (session == null) {
+			throw new NotFoundException();
+		}
+		return feedbackStorage.getMyFeedback(session, user);
 	}
 }
