@@ -265,6 +265,13 @@ public class ARSnovaSocketIOServer {
 		client.sendEvent("activeUserCountData", sessionService.activeUsers(sessionKey));
 		final de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
 		client.sendEvent("feedbackData", fb.getValues());
+		try {
+			final long averageFeedback = feedbackService.getAverageFeedbackRounded(sessionKey);
+			client.sendEvent("feedbackDataRoundedAverage", averageFeedback);
+		} catch (final NoContentException e) {
+			final Object object = null; // can't directly use "null".
+			client.sendEvent("feedbackDataRoundedAverage", object);
+		}
 	}
 
 	public void reportUpdatedFeedbackForSession(final de.thm.arsnova.entities.Session session) {
