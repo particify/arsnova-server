@@ -114,8 +114,10 @@ public class FeedbackStorage {
 	public Map<String, List<User>> cleanFeedbackVotes(final int cleanupFeedbackDelay) {
 		final Map<String, List<User>> removedFeedbackOfUsersInSession = new HashMap<String, List<User>>();;
 		for (final String keyword : data.keySet()) {
-			List<User> feedbackOfUsers = cleanFeedbackVotesInSession(keyword, cleanupFeedbackDelay);
-			removedFeedbackOfUsersInSession.put(keyword, feedbackOfUsers);
+			List<User> affectedUsers = cleanFeedbackVotesInSession(keyword, cleanupFeedbackDelay);
+			if (!affectedUsers.isEmpty()) {
+				removedFeedbackOfUsersInSession.put(keyword, affectedUsers);
+			}
 		}
 		return removedFeedbackOfUsersInSession;
 	}
@@ -125,15 +127,15 @@ public class FeedbackStorage {
 		final long maxAllowedTimeInMillis = System.currentTimeMillis() - timelimitInMillis;
 
 		final Map<String, FeedbackStorageObject> sessionFeedbacks = data.get(keyword);
-		final List<User> feedbackOfUsers = new ArrayList<User>();
+		final List<User> affectedUsers = new ArrayList<User>();
 
 		for (final Map.Entry<String, FeedbackStorageObject> entry : sessionFeedbacks.entrySet()) {
 			final boolean timeIsUp = entry.getValue().getTimestamp().getTime() < maxAllowedTimeInMillis;
 			if (timeIsUp) {
 				sessionFeedbacks.remove(entry.getKey());
-				feedbackOfUsers.add(entry.getValue().user);
+				affectedUsers.add(entry.getValue().user);
 			}
 		}
-		return feedbackOfUsers;
+		return affectedUsers;
 	}
 }
