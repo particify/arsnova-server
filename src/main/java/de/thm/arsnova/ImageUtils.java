@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 public final class ImageUtils {
 
 	// Or whatever size you want to read in at a time.
-	private final static int CHUNK_SIZE = 4096;
+	private static final int CHUNK_SIZE = 4096;
 
 	private ImageUtils() {
 	}
@@ -120,7 +120,7 @@ public final class ImageUtils {
 			final byte[] byteChunk = new byte[CHUNK_SIZE];
 			int n;
 
-			while ((n = is.read(byteChunk)) > 0 ) {
+			while ((n = is.read(byteChunk)) > 0) {
 				baos.write(byteChunk, 0, n);
 			}
 

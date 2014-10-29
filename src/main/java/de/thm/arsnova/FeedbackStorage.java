@@ -38,7 +38,8 @@ public class FeedbackStorage {
 		}
 	}
 
-	private final Map<Session, Map<User, FeedbackStorageObject>> data = new ConcurrentHashMap<Session, Map<User, FeedbackStorageObject>>();
+	private final Map<Session, Map<User, FeedbackStorageObject>> data =
+			new ConcurrentHashMap<Session, Map<User, FeedbackStorageObject>>();
 
 	public Feedback getFeedback(final Session session) {
 		int a = 0;

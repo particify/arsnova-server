@@ -10,8 +10,6 @@ import de.thm.arsnova.entities.Statistics;
 @Service
 public class StatisticsService implements IStatisticsService {
 
-	private static final int DURATION_IN_MILLIS = 3 * 60 * 1000;
-
 	@Autowired
 	private IDatabaseDao databaseDao;
 
@@ -23,8 +21,6 @@ public class StatisticsService implements IStatisticsService {
 
 	@Override
 	public final Statistics getStatistics() {
-		final long since = System.currentTimeMillis() - DURATION_IN_MILLIS;
-
 		final Statistics statistics = new Statistics();
 		statistics.setOpenSessions(databaseDao.countOpenSessions());
 		statistics.setClosedSessions(databaseDao.countClosedSessions());

@@ -34,7 +34,7 @@ import org.springframework.web.servlet.view.RedirectView;
 public class WelcomeController extends AbstractController {
 
 	@Value("${mobile.path}")
-	String mobileContextPath;
+	private String mobileContextPath;
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public final View home(final HttpServletRequest request) {

@@ -21,13 +21,8 @@ package de.thm.arsnova.services;
 
 import java.io.Serializable;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,15 +99,10 @@ public class SessionService implements ISessionService {
 	public final Session joinSession(final String keyword, final UUID socketId) {
 		/* Socket.IO solution */
 
-		Session session = null;
-		try {
-			session = databaseDao.getSession(keyword);
-		} catch (NotFoundException e) {
+		Session session = databaseDao.getSessionFromKeyword(keyword);
 
-		}
 		if (null == session) {
 			userService.removeUserFromSessionBySocketId(socketId);
-
 			return null;
 		}
 		final User user = userService.getUser2SocketId(socketId);
@@ -264,7 +254,7 @@ public class SessionService implements ISessionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public SimpleEntry<Integer,Integer> getMyLearningProgress(final String sessionkey) {
+	public SimpleEntry<Integer, Integer> getMyLearningProgress(final String sessionkey) {
 		final Session session = databaseDao.getSession(sessionkey);
 		final User user = userService.getCurrentUser();
 		return databaseDao.getMyLearningProgress(session, user);

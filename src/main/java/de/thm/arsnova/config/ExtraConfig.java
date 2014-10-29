@@ -72,9 +72,10 @@ public class ExtraConfig {
 	@Profile("test")
 	@Bean(name = "socketServer", initMethod = "startServer", destroyMethod = "stopServer")
 	public ARSnovaSocketIOServer socketTestServer() {
+		final int testSocketPort = 1234;
 		final ARSnovaSocketIOServer socketServer = new ARSnovaSocketIOServer();
 		socketServer.setHostIp(socketIp);
-		socketServer.setPortNumber(socketPort + 1234);
+		socketServer.setPortNumber(socketPort + testSocketPort);
 		socketServer.setUseSSL(socketUseSll);
 		socketServer.setKeystore(socketKeystore);
 		socketServer.setStorepass(socketStorepass);

@@ -68,7 +68,7 @@ public class SessionController extends AbstractController {
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.GET)
 	public final Session joinSession(@PathVariable final String sessionkey) {
 		final Session session = sessionService.getSession(sessionkey);
-		if (! session.getCreator().equals(userService.getCurrentUser().getUsername())) {
+		if (!session.isCreator(userService.getCurrentUser())) {
 			session.setCreator("NOT VISIBLE TO YOU");
 		} else {
 			session.setCreator(Sha512DigestUtils.shaHex(session.getCreator()));

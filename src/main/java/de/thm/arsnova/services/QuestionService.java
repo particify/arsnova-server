@@ -101,9 +101,9 @@ public class QuestionService implements IQuestionService {
 			}
 
 			// base64 adds offset to filesize, formular taken from: http://en.wikipedia.org/wiki/Base64#MIME
-			final int fileSize =  (int)((question.getImage().length()-814)/1.37);
-			if ( fileSize > uploadFileSizeByte ) {
-				LOGGER.error("Could not save file. File is too large with "+ fileSize + " Byte.");
+			final int fileSize = (int) ((question.getImage().length()-814)/1.37);
+			if (fileSize > uploadFileSizeByte) {
+				LOGGER.error("Could not save file. File is too large with " + fileSize + " Byte.");
 				throw new BadRequestException();
 			}
 		}
@@ -169,7 +169,7 @@ public class QuestionService implements IQuestionService {
 	private Session getSessionWithAuthCheck(final String sessionKeyword) {
 		final User user = userService.getCurrentUser();
 		final Session session = databaseDao.getSession(sessionKeyword);
-		if (user == null || session == null || ! session.isCreator(user)) {
+		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
 		return session;
@@ -210,7 +210,7 @@ public class QuestionService implements IQuestionService {
 
 		final User user = userService.getCurrentUser();
 		final Session session = databaseDao.getSession(question.getSessionKeyword());
-		if (user == null || session == null || ! session.isCreator(user)) {
+		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
 		databaseDao.deleteAnswers(question);

@@ -32,7 +32,7 @@ public class CacheControlInterceptorHandler extends HandlerInterceptorAdapter {
 
 		final StringBuilder headerValue = new StringBuilder();
 
-		if(cacheControl.policy().length > 0) {
+		if (cacheControl.policy().length > 0) {
 			for (final CacheControl.Policy policy : cacheControl.policy()) {
 				if (headerValue.length() > 0) {
 					headerValue.append(", ");
@@ -49,7 +49,7 @@ public class CacheControlInterceptorHandler extends HandlerInterceptorAdapter {
 			response.setHeader("cache-control", headerValue.toString());
 		}
 
-		if(cacheControl.maxAge() >= 0) {
+		if (cacheControl.maxAge() >= 0) {
 			if (headerValue.length() > 0) {
 				headerValue.append(", ");
 			}
