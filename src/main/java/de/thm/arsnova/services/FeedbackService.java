@@ -19,7 +19,11 @@
 
 package de.thm.arsnova.services;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -66,7 +70,33 @@ public class FeedbackService implements IFeedbackService {
 	@Override
 	@Scheduled(fixedDelay = DEFAULT_SCHEDULER_DELAY)
 	public final void cleanFeedbackVotes() {
-		feedbackStorage.cleanFeedbackVotes(cleanupFeedbackDelay);
+		Map<String, List<User>> deletedFeedbackOfUsersInSession = feedbackStorage.cleanFeedbackVotes(cleanupFeedbackDelay);
+		/*
+		 * mapping (Session -> Users) is not suitable for web sockets, because we want to sent all affected
+		 * sessions to a single user in one go instead of sending multiple messages for each session. Hence,
+		 * we need the mapping (User -> Sessions)
+		 */
+		final Map<User, Set<String>> affectedSessionsOfUsers = new HashMap<User, Set<String>>();
+
+		for (Map.Entry<String, List<User>> entry : deletedFeedbackOfUsersInSession.entrySet()) {
+			final String sessionKeyword = entry.getKey();
+			final List<User> users = entry.getValue();
+			for (User user : users) {
+				Set<String> affectedSessions;
+				if (affectedSessionsOfUsers.containsKey(user)) {
+					affectedSessions = affectedSessionsOfUsers.get(user);
+				} else {
+					affectedSessions = new HashSet<String>();
+				}
+				affectedSessions.add(sessionKeyword);
+				affectedSessionsOfUsers.put(user, affectedSessions);
+			}
+		}
+		for (Map.Entry<User, Set<String>> entry : affectedSessionsOfUsers.entrySet()) {
+			final User user = entry.getKey();
+			final Set<String> arsSessions = entry.getValue();
+			server.reportDeletedFeedback(user.getUsername(), arsSessions);
+		}
 	}
 
 	@Override

@@ -1,6 +1,9 @@
 package de.thm.arsnova;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -108,24 +111,29 @@ public class FeedbackStorage {
 	}
 
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public void cleanFeedbackVotes(final int cleanupFeedbackDelay) {
+	public Map<String, List<User>> cleanFeedbackVotes(final int cleanupFeedbackDelay) {
+		final Map<String, List<User>> removedFeedbackOfUsersInSession = new HashMap<String, List<User>>();;
 		for (final String keyword : data.keySet()) {
-			cleanSessionFeedbackVotes(keyword, cleanupFeedbackDelay);
+			List<User> feedbackOfUsers = cleanFeedbackVotesInSession(keyword, cleanupFeedbackDelay);
+			removedFeedbackOfUsersInSession.put(keyword, feedbackOfUsers);
 		}
+		return removedFeedbackOfUsersInSession;
 	}
 
-	private void cleanSessionFeedbackVotes(final String keyword, final int cleanupFeedbackDelay) {
+	private List<User> cleanFeedbackVotesInSession(final String keyword, final int cleanupFeedbackDelay) {
 		final long timelimitInMillis = 60000 * (long) cleanupFeedbackDelay;
 		final long maxAllowedTimeInMillis = System.currentTimeMillis() - timelimitInMillis;
 
 		final Map<String, FeedbackStorageObject> sessionFeedbacks = data.get(keyword);
+		final List<User> feedbackOfUsers = new ArrayList<User>();
 
 		for (final Map.Entry<String, FeedbackStorageObject> entry : sessionFeedbacks.entrySet()) {
-			if (
-					entry.getValue().getTimestamp().getTime() < maxAllowedTimeInMillis
-					) {
+			final boolean timeIsUp = entry.getValue().getTimestamp().getTime() < maxAllowedTimeInMillis;
+			if (timeIsUp) {
 				sessionFeedbacks.remove(entry.getKey());
+				feedbackOfUsers.add(entry.getValue().user);
 			}
 		}
+		return feedbackOfUsers;
 	}
 }
