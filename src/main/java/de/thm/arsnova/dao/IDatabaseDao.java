@@ -172,7 +172,5 @@ public interface IDatabaseDao {
 
 	List<SessionInfo> getMySessionsInfo(User user);
 
-	List<SessionInfo> getCourseSessionsInfo(List<Course> myCourses);
-
 	List<SessionInfo> getMyVisitedSessionsInfo(User currentUser);
 }

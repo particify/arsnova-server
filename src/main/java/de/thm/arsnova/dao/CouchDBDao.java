@@ -1139,12 +1139,6 @@ public class CouchDBDao implements IDatabaseDao {
 		return result;
 	}
 
-	@Override
-	public List<SessionInfo> getCourseSessionsInfo(final List<Course> courses) {
-		List<Session> sessions = this.getCourseSessions(courses);
-		return getInfosForSessions(sessions);
-	}
-
 	private static class ExtendedView extends NovaView {
 
 		public ExtendedView(final String fullname) {

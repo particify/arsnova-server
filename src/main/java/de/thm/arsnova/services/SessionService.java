@@ -24,8 +24,10 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,45 +161,14 @@ public class SessionService implements ISessionService {
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public final List<Session> getMySessions() {
-		final List<Session> mySessions = databaseDao.getMySessions(userService.getCurrentUser());
-		if (connectorClient == null) {
-			return mySessions;
-		}
-
-		final List<Session> courseSessions = databaseDao.getCourseSessions(
-				connectorClient.getCourses(userService.getCurrentUser().getUsername()).getCourse()
-				);
-
-		return combineSessions(mySessions, courseSessions);
-	}
-
-	private List<Session> combineSessions(final List<Session> mySessions,
-			final List<Session> courseSessions) {
-		final Map<String, Session> allAvailableSessions = new HashMap<String, Session>();
-
-		for (final Session session : mySessions) {
-			allAvailableSessions.put(session.get_id(), session);
-		}
-		for (final Session session : courseSessions) {
-			allAvailableSessions.put(session.get_id(), session);
-		}
-		return new ArrayList<Session>(allAvailableSessions.values());
+		return databaseDao.getMySessions(userService.getCurrentUser());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public final List<SessionInfo> getMySessionsInfo() {
 		final User user = userService.getCurrentUser();
-		final List<SessionInfo> mySessions = databaseDao.getMySessionsInfo(user);
-		if (connectorClient == null) {
-			return mySessions;
-		}
-
-		final List<Course> myCourses = connectorClient.getCourses(user.getUsername()).getCourse();
-		final List<SessionInfo> courseSessions = databaseDao.getCourseSessionsInfo(myCourses);
-		// assume that my sessions and my course sessions are distinct
-		mySessions.addAll(courseSessions);
-		return mySessions;
+		return databaseDao.getMySessionsInfo(user);
 	}
 
 	@Override

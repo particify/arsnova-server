@@ -527,12 +527,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<SessionInfo> getCourseSessionsInfo(List<Course> myCourses) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public List<SessionInfo> getMyVisitedSessionsInfo(User currentUser) {
 		// TODO Auto-generated method stub
 		return null;
