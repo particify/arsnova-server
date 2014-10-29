@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -105,9 +106,9 @@ public class FeedbackStorage {
 		return removedFeedbackOfUsersInSession;
 	}
 
-	private List<User> cleanFeedbackVotesInSession(final Session session, final int cleanupFeedbackDelay) {
-		final long timelimitInMillis = 60000 * (long) cleanupFeedbackDelay;
-		final long maxAllowedTimeInMillis = System.currentTimeMillis() - timelimitInMillis;
+	private List<User> cleanFeedbackVotesInSession(final Session session, final int cleanupFeedbackDelayInMins) {
+		final long timelimitInMillis = TimeUnit.MILLISECONDS.convert(cleanupFeedbackDelayInMins, TimeUnit.MINUTES);
+		final Date maxAllowedTime = new Date(System.currentTimeMillis() - timelimitInMillis);
 
 		final Map<User, FeedbackStorageObject> sessionFeedbacks = data.get(session);
 		final List<User> affectedUsers = new ArrayList<User>();
@@ -115,7 +116,7 @@ public class FeedbackStorage {
 		for (final Map.Entry<User, FeedbackStorageObject> entry : sessionFeedbacks.entrySet()) {
 			final User user = entry.getKey();
 			final FeedbackStorageObject feedback = entry.getValue();
-			final boolean timeIsUp = feedback.getTimestamp().getTime() < maxAllowedTimeInMillis;
+			final boolean timeIsUp = feedback.getTimestamp().before(maxAllowedTime);
 			if (timeIsUp) {
 				sessionFeedbacks.remove(user);
 				affectedUsers.add(user);
