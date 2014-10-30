@@ -62,6 +62,7 @@ public class Question {
 	private boolean cvIsColored;
 	private String gridLineColor;
 	private int numberOfDots;
+	private String gridType;
 
 	public final String getType() {
 		return type;
@@ -371,8 +372,16 @@ public class Question {
 		return numberOfDots;
 	}
 	
-	public void setNubmerOfDots(int numberOfDots) {
+	public void setNumberOfDots(int numberOfDots) {
 		this.numberOfDots = numberOfDots;
+	}
+	
+	public String getGridType() {
+		return gridType;
+	}
+	
+	public void setGridType(String gridType) {
+		this.gridType = gridType;
 	}
 
 	@Override
