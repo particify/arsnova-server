@@ -225,8 +225,8 @@ public class ARSnovaSocketIOServer {
 		this.useSSL = useSSL;
 	}
 
-	public void reportDeletedFeedback(final String username, final Set<de.thm.arsnova.entities.Session> arsSessions) {
-		final List<UUID> connectionIds = findConnectionIdForUser(username);
+	public void reportDeletedFeedback(final User user, final Set<de.thm.arsnova.entities.Session> arsSessions) {
+		final List<UUID> connectionIds = findConnectionIdForUser(user);
 		if (connectionIds.isEmpty()) {
 			return;
 		}
@@ -244,11 +244,13 @@ public class ARSnovaSocketIOServer {
 		}
 	}
 
-	private List<UUID> findConnectionIdForUser(final String username) {
+	private List<UUID> findConnectionIdForUser(final User user) {
 		final List<UUID> result = new ArrayList<UUID>();
 		for (final Entry<UUID, User> e : userService.socketId2User()) {
-			if (e.getValue().getUsername().equals(username)) {
-				result.add(e.getKey());
+			final UUID someUsersConnectionId = e.getKey();
+			final User someUser = e.getValue();
+			if (someUser.equals(user)) {
+				result.add(someUsersConnectionId);
 			}
 		}
 		return result;
@@ -293,7 +295,7 @@ public class ARSnovaSocketIOServer {
 		} catch (final NoContentException e) {
 			averageFeedback = null;
 		}
-		final List<UUID> connectionIds = findConnectionIdForUser(user.getUsername());
+		final List<UUID> connectionIds = findConnectionIdForUser(user);
 		if (connectionIds.isEmpty()) {
 			return;
 		}

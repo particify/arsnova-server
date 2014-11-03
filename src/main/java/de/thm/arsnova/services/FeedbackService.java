@@ -98,7 +98,7 @@ public class FeedbackService implements IFeedbackService {
 		for (Map.Entry<User, Set<Session>> entry : affectedSessionsOfUsers.entrySet()) {
 			final User user = entry.getKey();
 			final Set<Session> arsSessions = entry.getValue();
-			server.reportDeletedFeedback(user.getUsername(), arsSessions);
+			server.reportDeletedFeedback(user, arsSessions);
 		}
 		// For each session that has deleted feedback, send the new feedback to all clients
 		for (Session session : deletedFeedbackOfUsersInSession.keySet()) {
