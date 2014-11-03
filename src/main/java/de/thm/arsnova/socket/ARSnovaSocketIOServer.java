@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.corundumstudio.socketio.AckRequest;
@@ -28,7 +29,13 @@ import com.corundumstudio.socketio.listener.DisconnectListener;
 import com.corundumstudio.socketio.protocol.Packet;
 import com.corundumstudio.socketio.protocol.PacketType;
 
+import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.events.NewInterposedQuestionEvent;
+import de.thm.arsnova.events.NewQuestionEvent;
+import de.thm.arsnova.events.NovaEvent;
+import de.thm.arsnova.events.NovaEventVisitor;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.services.IFeedbackService;
 import de.thm.arsnova.services.ISessionService;
@@ -37,7 +44,7 @@ import de.thm.arsnova.socket.message.Feedback;
 import de.thm.arsnova.socket.message.Session;
 
 @Component
-public class ARSnovaSocketIOServer {
+public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, NovaEventVisitor {
 
 	@Autowired
 	private IFeedbackService feedbackService;
@@ -319,14 +326,14 @@ public class ARSnovaSocketIOServer {
 		broadcastInSession(sessionKey, "answersToLecQuestionAvail", lecturerQuestionId);
 	}
 
-	public void reportAudienceQuestionAvailable(final String sessionKey, final String audienceQuestionId) {
+	public void reportAudienceQuestionAvailable(final de.thm.arsnova.entities.Session session, final InterposedQuestion audienceQuestion) {
 		/* TODO role handling implementation, send this only to users with role lecturer */
-		broadcastInSession(sessionKey, "audQuestionAvail", audienceQuestionId);
+		broadcastInSession(session.getKeyword(), "audQuestionAvail", audienceQuestion.get_id());
 	}
 
-	public void reportLecturerQuestionAvailable(final String sessionKey, final String lecturerQuestionId) {
+	public void reportLecturerQuestionAvailable(final de.thm.arsnova.entities.Session session, final Question lecturerQuestion) {
 		/* TODO role handling implementation, send this only to users with role audience */
-		broadcastInSession(sessionKey, "lecQuestionAvail", lecturerQuestionId);
+		broadcastInSession(session.getKeyword(), "lecQuestionAvail", lecturerQuestion.get_id());
 	}
 
 	public void reportSessionStatus(final String sessionKey, final boolean active) {
@@ -347,5 +354,20 @@ public class ARSnovaSocketIOServer {
 				c.sendEvent(eventName, data);
 			}
 		}
+	}
+
+	@Override
+	public void visit(NewQuestionEvent event) {
+		this.reportLecturerQuestionAvailable(event.getSession(), event.getQuestion());
+	}
+
+	@Override
+	public void visit(NewInterposedQuestionEvent event) {
+		this.reportAudienceQuestionAvailable(event.getSession(), event.getQuestion());
+	}
+
+	@Override
+	public void onApplicationEvent(NovaEvent event) {
+		event.accept(this);
 	}
 }

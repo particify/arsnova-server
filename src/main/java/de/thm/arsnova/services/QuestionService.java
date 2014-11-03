@@ -28,6 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -39,13 +41,15 @@ import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.events.NewInterposedQuestionEvent;
+import de.thm.arsnova.events.NewQuestionEvent;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
-public class QuestionService implements IQuestionService {
+public class QuestionService implements IQuestionService, ApplicationEventPublisherAware {
 
 	@Autowired
 	private IDatabaseDao databaseDao;
@@ -58,6 +62,8 @@ public class QuestionService implements IQuestionService {
 
 	@Value("${upload.filesize_b}")
 	private int uploadFileSizeByte;
+
+	private ApplicationEventPublisher publisher;
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(QuestionService.class);
 
@@ -109,7 +115,8 @@ public class QuestionService implements IQuestionService {
 		}
 
 		final Question result = databaseDao.saveQuestion(session, question);
-		socketIoServer.reportLecturerQuestionAvailable(result.getSessionKeyword(), result.get_id());
+		final NewQuestionEvent event = new NewQuestionEvent(this, result, session);
+		this.publisher.publishEvent(event);
 
 		return result;
 	}
@@ -121,11 +128,10 @@ public class QuestionService implements IQuestionService {
 		final InterposedQuestion result = databaseDao.saveQuestion(session, question, userService.getCurrentUser());
 
 		if (null != result) {
-			socketIoServer.reportAudienceQuestionAvailable(result.getSessionId(), result.get_id());
-
+			final NewInterposedQuestionEvent event = new NewInterposedQuestionEvent(this, result, session);
+			this.publisher.publishEvent(event);
 			return true;
 		}
-
 		return false;
 	}
 
@@ -550,5 +556,10 @@ public class QuestionService implements IQuestionService {
 			throw new UnauthorizedException();
 		}
 		databaseDao.deleteAllQuestionsAnswers(session);
+	}
+
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+		this.publisher = publisher;
 	}
 }
