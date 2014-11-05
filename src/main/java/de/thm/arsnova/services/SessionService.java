@@ -21,11 +21,8 @@ package de.thm.arsnova.services;
 
 import java.io.Serializable;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +34,7 @@ import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -45,7 +43,7 @@ import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 @Service
 public class SessionService implements ISessionService {
 
-	public static class SessionNameComperator implements Comparator<Session>, Serializable {
+	public static class SessionNameComparator implements Comparator<Session>, Serializable {
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -54,11 +52,29 @@ public class SessionService implements ISessionService {
 		}
 	}
 
-	public static class SessionShortNameComperator implements Comparator<Session>, Serializable {
+	public static class SessionInfoNameComparator implements Comparator<SessionInfo>, Serializable {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public int compare(final SessionInfo session1, final SessionInfo session2) {
+			return session1.getName().compareToIgnoreCase(session2.getName());
+		}
+	}
+
+	public static class SessionShortNameComparator implements Comparator<Session>, Serializable {
 		private static final long serialVersionUID = 1L;
 
 		@Override
 		public int compare(final Session session1, final Session session2) {
+			return session1.getShortName().compareToIgnoreCase(session2.getShortName());
+		}
+	}
+
+	public static class SessionInfoShortNameComparator implements Comparator<SessionInfo>, Serializable {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public int compare(final SessionInfo session1, final SessionInfo session2) {
 			return session1.getShortName().compareToIgnoreCase(session2.getShortName());
 		}
 	}
@@ -83,15 +99,10 @@ public class SessionService implements ISessionService {
 	public final Session joinSession(final String keyword, final UUID socketId) {
 		/* Socket.IO solution */
 
-		Session session = null;
-		try {
-			session = databaseDao.getSession(keyword);
-		} catch (NotFoundException e) {
+		Session session = databaseDao.getSessionFromKeyword(keyword);
 
-		}
 		if (null == session) {
 			userService.removeUserFromSessionBySocketId(socketId);
-
 			return null;
 		}
 		final User user = userService.getUser2SocketId(socketId);
@@ -128,44 +139,38 @@ public class SessionService implements ISessionService {
 				throw new ForbiddenException();
 			}
 		}
-
 		if (connectorClient != null && session.isCourseSession()) {
 			final String courseid = session.getCourseId();
 			if (!connectorClient.getMembership(userService.getCurrentUser().getUsername(), courseid).isMember()) {
 				throw new ForbiddenException();
 			}
 		}
-
 		return session;
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public final List<Session> getMySessions() {
-		final List<Session> mySessions = databaseDao.getMySessions(userService.getCurrentUser());
-		if (connectorClient == null) {
-			return mySessions;
-		}
+		return databaseDao.getMySessions(userService.getCurrentUser());
+	}
 
-		final List<Session> courseSessions = databaseDao.getCourseSessions(
-				connectorClient.getCourses(userService.getCurrentUser().getUsername()).getCourse()
-				);
-
-		final Map<String, Session> allAvailableSessions = new HashMap<String, Session>();
-
-		for (final Session session : mySessions) {
-			allAvailableSessions.put(session.get_id(), session);
-		}
-		for (final Session session : courseSessions) {
-			allAvailableSessions.put(session.get_id(), session);
-		}
-		return new ArrayList<Session>(allAvailableSessions.values());
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public final List<SessionInfo> getMySessionsInfo() {
+		final User user = userService.getCurrentUser();
+		return databaseDao.getMySessionsInfo(user);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public final List<Session> getMyVisitedSessions() {
 		return databaseDao.getMyVisitedSessions(userService.getCurrentUser());
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public final List<SessionInfo> getMyVisitedSessionsInfo() {
+		return databaseDao.getMyVisitedSessionsInfo(userService.getCurrentUser());
 	}
 
 	@Override
@@ -220,6 +225,7 @@ public class SessionService implements ISessionService {
 		if (!session.isCreator(user)) {
 			throw new ForbiddenException();
 		}
+		socketIoServer.reportSessionStatus(sessionkey, lock);
 		return databaseDao.lockSession(session, lock);
 	}
 
@@ -248,7 +254,7 @@ public class SessionService implements ISessionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public SimpleEntry<Integer,Integer> getMyLearningProgress(final String sessionkey) {
+	public SimpleEntry<Integer, Integer> getMyLearningProgress(final String sessionkey) {
 		final Session session = databaseDao.getSession(sessionkey);
 		final User user = userService.getCurrentUser();
 		return databaseDao.getMyLearningProgress(session, user);

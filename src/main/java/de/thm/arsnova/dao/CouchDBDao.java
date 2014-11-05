@@ -20,15 +20,15 @@
 package de.thm.arsnova.dao;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import net.sf.ezmorph.Morpher;
 import net.sf.ezmorph.MorpherRegistry;
@@ -59,6 +59,7 @@ import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.PossibleAnswer;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.VisitedSession;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -126,6 +127,145 @@ public class CouchDBDao implements IDatabaseDao {
 			result.add(session);
 		}
 		return result;
+	}
+
+	@Override
+	public final List<SessionInfo> getMySessionsInfo(final User user) {
+		final List<Session> sessions = this.getMySessions(user);
+		return getInfosForSessions(sessions);
+	}
+
+	private List<SessionInfo> getInfosForSessions(final List<Session> sessions) {
+		final ExtendedView questionCountView = new ExtendedView("skill_question/count_by_session");
+		final ExtendedView answerCountView = new ExtendedView("skill_question/count_answers_by_session");
+		final ExtendedView interposedCountView = new ExtendedView("interposed_question/count_by_session_reading");
+		questionCountView.setSessionIdKeys(sessions);
+		questionCountView.setGroup(true);
+		answerCountView.setSessionIdKeys(sessions);
+		answerCountView.setGroup(true);
+		List<String> interposedQueryKeys = new ArrayList<String>();
+		for (Session s : sessions) {
+			interposedQueryKeys.add("[\"" + s.get_id() + "\",\"unread\"]");
+		}
+		interposedCountView.setKeys(interposedQueryKeys);
+		interposedCountView.setGroup(true);
+		return getSessionInfoData(sessions, questionCountView, answerCountView, interposedCountView);
+	}
+
+	private List<SessionInfo> getInfosForVisitedSessions(final List<Session> sessions, final User user) {
+		final ExtendedView answeredQuestionsView = new ExtendedView("answer/by_user");
+		final ExtendedView questionIdsView = new ExtendedView("skill_question/by_session_only_id_for_all");
+		questionIdsView.setSessionIdKeys(sessions);
+		List<String> answeredQuestionQueryKeys = new ArrayList<String>();
+		for (Session s : sessions) {
+			answeredQuestionQueryKeys.add("[\"" + user.getUsername() + "\",\"" + s.get_id() + "\"]");
+		}
+		answeredQuestionsView.setKeys(answeredQuestionQueryKeys);
+		return getVisitedSessionInfoData(sessions, answeredQuestionsView, questionIdsView);
+	}
+
+	private List<SessionInfo> getVisitedSessionInfoData(List<Session> sessions,
+			ExtendedView answeredQuestionsView, ExtendedView questionIdsView) {
+		final Map<String, Set<String>> answeredQuestionsMap = new HashMap<String, Set<String>>();
+		final Map<String, Set<String>> questionIdMap = new HashMap<String, Set<String>>();
+		final ViewResults answeredQuestionsViewResults = getDatabase().view(answeredQuestionsView);
+		final ViewResults questionIdsViewResults = getDatabase().view(questionIdsView);
+
+		// Maps a session ID to a set of question IDs of answered questions of that session
+		for (final Document d : answeredQuestionsViewResults.getResults()) {
+			final String sessionId = d.getJSONArray("key").getString(1);
+			final String questionId = d.getString("value");
+			Set<String> questionIdsInSession = answeredQuestionsMap.get(sessionId);
+			if (questionIdsInSession == null) {
+				questionIdsInSession = new HashSet<String>();
+			}
+			questionIdsInSession.add(questionId);
+			answeredQuestionsMap.put(sessionId, questionIdsInSession);
+		}
+
+		// Maps a session ID to a set of question IDs of that session
+		for (final Document d : questionIdsViewResults.getResults()) {
+			final String sessionId = d.getString("key");
+			final String questionId = d.getId();
+			Set<String> questionIdsInSession = questionIdMap.get(sessionId);
+			if (questionIdsInSession == null) {
+				questionIdsInSession = new HashSet<String>();
+			}
+			questionIdsInSession.add(questionId);
+			questionIdMap.put(sessionId, questionIdsInSession);
+		}
+
+		// For each session, count the question IDs that are not yet answered
+		Map<String, Integer> unansweredQuestionsCountMap = new HashMap<String, Integer>();
+		for (final Session s : sessions) {
+			if (!questionIdMap.containsKey(s.get_id())) {
+				continue;
+			}
+			// Note: create a copy of the first set so that we don't modify the contents in the original set
+			Set<String> questionIdsInSession = new HashSet<String>(questionIdMap.get(s.get_id()));
+			Set<String> answeredQuestionIdsInSession = answeredQuestionsMap.get(s.get_id());
+			if (answeredQuestionIdsInSession == null) {
+				answeredQuestionIdsInSession = new HashSet<String>();
+			}
+			questionIdsInSession.removeAll(answeredQuestionIdsInSession);
+			unansweredQuestionsCountMap.put(s.get_id(), questionIdsInSession.size());
+		}
+
+		List<SessionInfo> sessionInfos = new ArrayList<SessionInfo>();
+		for (Session session : sessions) {
+			int numUnanswered = 0;
+
+			if (unansweredQuestionsCountMap.containsKey(session.get_id())) {
+				numUnanswered = unansweredQuestionsCountMap.get(session.get_id());
+			}
+			SessionInfo info = new SessionInfo(session);
+			info.setNumUnanswered(numUnanswered);
+			sessionInfos.add(info);
+		}
+		return sessionInfos;
+	}
+
+	private List<SessionInfo> getSessionInfoData(final List<Session> sessions,
+			final ExtendedView questionCountView,
+			final ExtendedView answerCountView,
+			final ExtendedView interposedCountView) {
+		final ViewResults questionCountViewResults = getDatabase().view(questionCountView);
+		final ViewResults answerCountViewResults = getDatabase().view(answerCountView);
+		final ViewResults interposedCountViewResults = getDatabase().view(interposedCountView);
+
+		Map<String, Integer> questionCountMap = new HashMap<String, Integer>();
+		for (final Document d : questionCountViewResults.getResults()) {
+			questionCountMap.put(d.getString("key"), d.getInt("value"));
+		}
+		Map<String, Integer> answerCountMap = new HashMap<String, Integer>();
+		for (final Document d : answerCountViewResults.getResults()) {
+			answerCountMap.put(d.getString("key"), d.getInt("value"));
+		}
+		Map<String, Integer> interposedCountMap = new HashMap<String, Integer>();
+		for (final Document d : interposedCountViewResults.getResults()) {
+			interposedCountMap.put(d.getJSONArray("key").getString(0), d.getInt("value"));
+		}
+		List<SessionInfo> sessionInfos = new ArrayList<SessionInfo>();
+		for (Session session : sessions) {
+			int numQuestions = 0;
+			int numAnswers = 0;
+			int numInterposed = 0;
+			if (questionCountMap.containsKey(session.get_id())) {
+				numQuestions = questionCountMap.get(session.get_id());
+			}
+			if (answerCountMap.containsKey(session.get_id())) {
+				numAnswers = answerCountMap.get(session.get_id());
+			}
+			if (interposedCountMap.containsKey(session.get_id())) {
+				numInterposed = interposedCountMap.get(session.get_id());
+			}
+			SessionInfo info = new SessionInfo(session);
+			info.setNumQuestions(numQuestions);
+			info.setNumAnswers(numAnswers);
+			info.setNumInterposed(numInterposed);
+			sessionInfos.add(info);
+		}
+		return sessionInfos;
 	}
 
 	@Override
@@ -370,10 +510,8 @@ public class CouchDBDao implements IDatabaseDao {
 					);
 			final JSONArray possibleAnswers = results.getJSONArray("rows").optJSONObject(0).optJSONObject("value")
 					.getJSONArray("possibleAnswers");
-			final Collection<PossibleAnswer> answers = JSONArray.toCollection(
-					possibleAnswers,
-					PossibleAnswer.class
-					);
+			@SuppressWarnings("unchecked")
+			final Collection<PossibleAnswer> answers = JSONArray.toCollection(possibleAnswers, PossibleAnswer.class);
 			q.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
 			q.setSessionKeyword(getSessionKeyword(q.getSessionId()));
 			return q;
@@ -396,6 +534,7 @@ public class CouchDBDao implements IDatabaseDao {
 				loggedIn = (LoggedIn) JSONObject.toBean(json, LoggedIn.class);
 				final JSONArray vs = json.optJSONArray("visitedSessions");
 				if (vs != null) {
+					@SuppressWarnings("unchecked")
 					final Collection<VisitedSession> visitedSessions = JSONArray.toCollection(vs, VisitedSession.class);
 					loggedIn.setVisitedSessions(new ArrayList<VisitedSession>(visitedSessions));
 				}
@@ -427,6 +566,7 @@ public class CouchDBDao implements IDatabaseDao {
 			final LoggedIn l = (LoggedIn) JSONObject.toBean(doc.getJSONObject(), LoggedIn.class);
 			final JSONArray vs = doc.getJSONObject().optJSONArray("visitedSessions");
 			if (vs != null) {
+				@SuppressWarnings("unchecked")
 				final Collection<VisitedSession> visitedSessions = JSONArray.toCollection(vs, VisitedSession.class);
 				l.setVisitedSessions(new ArrayList<VisitedSession>(visitedSessions));
 			}
@@ -586,22 +726,6 @@ public class CouchDBDao implements IDatabaseDao {
 			return 0;
 		}
 		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
-	}
-
-	@Override
-	public final int countActiveUsers(final long since) {
-		try {
-			final View view = new View("statistic/count_active_users");
-			view.setStartKey(String.valueOf(since));
-			final ViewResults results = getDatabase().view(view);
-			if (isEmptyResults(results)) {
-				return 0;
-			}
-			return results.getJSONArray("rows").optJSONObject(0).getInt("value");
-		} catch (final Exception e) {
-			LOGGER.error("Error while retrieving active users count", e);
-		}
-		return 0;
 	}
 
 	private boolean isEmptyResults(final ViewResults results) {
@@ -797,31 +921,6 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public void vote(final User me, final String menu) {
-		final String date = new SimpleDateFormat("dd-mm-yyyyy").format(new Date());
-		try {
-			final NovaView view = new NovaView("food_vote/get_user_vote");
-			view.setKey(date, me.getUsername());
-			final ViewResults results = getDatabase().view(view);
-
-			if (results.getResults().isEmpty()) {
-				final Document vote = new Document();
-				vote.put("type", "food_vote");
-				vote.put("name", menu);
-				vote.put("user", me.getUsername());
-				vote.put("day", date);
-				database.saveDocument(vote);
-			} else {
-				final Document vote = results.getResults().get(0);
-				vote.put("name", menu);
-				database.saveDocument(vote);
-			}
-		} catch (final IOException e) {
-			LOGGER.error("Error while saving user food vote", e);
-		}
-	}
-
-	@Override
 	public int countSessions() {
 		return sessionsCountValue("openSessions")
 				+ sessionsCountValue("closedSessions");
@@ -911,27 +1010,60 @@ public class CouchDBDao implements IDatabaseDao {
 			// Not all users have visited sessions
 			if (d.getJSONObject().optJSONArray("value") != null) {
 				@SuppressWarnings("unchecked")
-				final
-				Collection<Session> visitedSessions =  JSONArray.toCollection(
-						d.getJSONObject().getJSONArray("value"),
-						Session.class
-						);
+				final Collection<Session> visitedSessions =  JSONArray.toCollection(
+					d.getJSONObject().getJSONArray("value"),
+					Session.class
+				);
 				allSessions.addAll(visitedSessions);
 			}
 		}
-		// Do these sessions still exist?
+		// Filter sessions that don't exist anymore, also filter my own sessions
 		final List<Session> result = new ArrayList<Session>();
+		final List<Session> filteredSessions = new ArrayList<Session>();
 		for (final Session s : allSessions) {
 			try {
 				final Session session = getSessionFromKeyword(s.getKeyword());
-				if (session != null) {
+				if (session != null && !session.isCreator(user)) {
 					result.add(session);
+				} else {
+					filteredSessions.add(s);
 				}
 			} catch (final NotFoundException e) {
-				// TODO Remove non existant session
+				filteredSessions.add(s);
 			}
 		}
+		if (filteredSessions.isEmpty()) {
+			return result;
+		}
+		// Update document to remove sessions that don't exist anymore
+		try {
+			List<VisitedSession> visitedSessions = new ArrayList<VisitedSession>();
+			for (final Session s : result) {
+				visitedSessions.add(new VisitedSession(s));
+			}
+			final LoggedIn loggedIn = new LoggedIn();
+			final Document loggedInDocument = getDatabase().getDocument(sessions.getResults().get(0).getString("id"));
+			loggedIn.setSessionId(loggedInDocument.getString("sessionId"));
+			loggedIn.setUser(user.getUsername());
+			loggedIn.setTimestamp(loggedInDocument.getLong("timestamp"));
+			loggedIn.setType(loggedInDocument.getString("type"));
+			loggedIn.setVisitedSessions(visitedSessions);
+			loggedIn.set_id(loggedInDocument.getId());
+			loggedIn.set_rev(loggedInDocument.getRev());
+
+			final JSONObject json = JSONObject.fromObject(loggedIn);
+			final Document doc = new Document(json);
+			getDatabase().saveDocument(doc);
+		} catch (IOException e) {
+			LOGGER.error("Could not clean up logged_in document of {}", user.getUsername());
+		}
 		return result;
+	}
+
+	@Override
+	public List<SessionInfo> getMyVisitedSessionsInfo(final User user) {
+		List<Session> sessions = this.getMyVisitedSessions(user);
+		return this.getInfosForVisitedSessions(sessions, user);
 	}
 
 	@Override
@@ -1013,71 +1145,26 @@ public class CouchDBDao implements IDatabaseDao {
 		return result;
 	}
 
-	@Override
-	public final List<String> getActiveUsers(final int timeDifference) {
-		final long inactiveBeforeTimestamp = new Date().getTime() - timeDifference * 1000;
-
-		final NovaView view = new NovaView("logged_in/by_and_only_timestamp_and_username");
-		view.setStartKeyArray(String.valueOf(inactiveBeforeTimestamp));
-		final ViewResults results = getDatabase().view(view);
-
-		final List<String> result = new ArrayList<String>();
-		for (final Document d : results.getResults()) {
-			result.add(d.getJSONObject().getJSONArray("key").getString(1));
-		}
-		return result;
-	}
-
-	private static class ExtendedView extends View {
-
-		private String keys;
+	private static class ExtendedView extends NovaView {
 
 		public ExtendedView(final String fullname) {
 			super(fullname);
 		}
 
-		public void setKeys(final String newKeys) {
-			keys = newKeys;
-		}
-
 		public void setCourseIdKeys(final List<Course> courses) {
-			if (courses.isEmpty()) {
-				keys = "[]";
-				return;
+			List<String> courseIds = new ArrayList<String>();
+			for (Course c : courses) {
+				courseIds.add(c.getId());
 			}
-
-			final StringBuilder sb = new StringBuilder();
-			sb.append("[");
-			for (int i = 0; i < courses.size() - 1; i++) {
-				sb.append("\"" + courses.get(i).getId() + "\",");
-			}
-			sb.append("\"" + courses.get(courses.size() - 1).getId() + "\"");
-			sb.append("]");
-			try {
-				setKeys(URLEncoder.encode(sb.toString(), "UTF-8"));
-			} catch (final UnsupportedEncodingException e) {
-				LOGGER.error("Error while encoding course ID keys", e);
-			}
+			setKeys(courseIds);
 		}
 
-		@Override
-		public String getQueryString() {
-			final StringBuilder query = new StringBuilder();
-			if (super.getQueryString() != null) {
-				query.append(super.getQueryString());
+		public void setSessionIdKeys(final List<Session> sessions) {
+			List<String> sessionIds = new ArrayList<String>();
+			for (Session s : sessions) {
+				sessionIds.add(s.get_id());
 			}
-			if (keys != null) {
-				if (query.toString().isEmpty()) {
-					query.append("&");
-				}
-
-				query.append("keys=" + keys);
-			}
-
-			if (query.toString().isEmpty()) {
-				return null;
-			}
-			return query.toString();
+			setKeys(sessionIds);
 		}
 	}
 
@@ -1260,7 +1347,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	private List<String> getLectureQuestionIds(final Session session, final User user) {
-		NovaView view = new NovaView("skill_question/lecture_question_by_session_for_all");
+		NovaView view = new NovaView("skill_question/lecture_question_ids_by_session_for_all");
 		view.setStartKeyArray(session.get_id());
 		view.setEndKeyArray(session.get_id(), "{}");
 		return collectQuestionIds(view);
@@ -1274,7 +1361,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	private List<String> getPreparationQuestionIds(final Session session, final User user) {
-		NovaView view = new NovaView("skill_question/preparation_question_by_session_for_all");
+		NovaView view = new NovaView("skill_question/preparation_question_ids_by_session_for_all");
 		view.setStartKeyArray(session.get_id());
 		view.setEndKeyArray(session.get_id(), "{}");
 		return collectQuestionIds(view);

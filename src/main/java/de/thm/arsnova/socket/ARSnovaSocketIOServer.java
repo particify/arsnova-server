@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.corundumstudio.socketio.AckRequest;
@@ -28,7 +29,13 @@ import com.corundumstudio.socketio.listener.DisconnectListener;
 import com.corundumstudio.socketio.protocol.Packet;
 import com.corundumstudio.socketio.protocol.PacketType;
 
+import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.events.NewInterposedQuestionEvent;
+import de.thm.arsnova.events.NewQuestionEvent;
+import de.thm.arsnova.events.NovaEvent;
+import de.thm.arsnova.events.NovaEventVisitor;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.services.IFeedbackService;
 import de.thm.arsnova.services.ISessionService;
@@ -37,7 +44,7 @@ import de.thm.arsnova.socket.message.Feedback;
 import de.thm.arsnova.socket.message.Session;
 
 @Component
-public class ARSnovaSocketIOServer {
+public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, NovaEventVisitor {
 
 	@Autowired
 	private IFeedbackService feedbackService;
@@ -225,26 +232,32 @@ public class ARSnovaSocketIOServer {
 		this.useSSL = useSSL;
 	}
 
-	public void reportDeletedFeedback(final String username, final Set<String> arsSessions) {
-		final List<UUID> connectionIds = findConnectionIdForUser(username);
+	public void reportDeletedFeedback(final User user, final Set<de.thm.arsnova.entities.Session> arsSessions) {
+		final List<UUID> connectionIds = findConnectionIdForUser(user);
 		if (connectionIds.isEmpty()) {
 			return;
+		}
+		final List<String> keywords = new ArrayList<String>();
+		for (final de.thm.arsnova.entities.Session session : arsSessions) {
+			keywords.add(session.getKeyword());
 		}
 
 		for (final SocketIOClient client : server.getAllClients()) {
 			// Find the client whose feedback has been deleted and send a
 			// message.
 			if (connectionIds.contains(client.getSessionId())) {
-				client.sendEvent("feedbackReset", arsSessions);
+				client.sendEvent("feedbackReset", keywords);
 			}
 		}
 	}
 
-	private List<UUID> findConnectionIdForUser(final String username) {
+	private List<UUID> findConnectionIdForUser(final User user) {
 		final List<UUID> result = new ArrayList<UUID>();
 		for (final Entry<UUID, User> e : userService.socketId2User()) {
-			if (e.getValue().getUsername().equals(username)) {
-				result.add(e.getKey());
+			final UUID someUsersConnectionId = e.getKey();
+			final User someUser = e.getValue();
+			if (someUser.equals(user)) {
+				result.add(someUsersConnectionId);
 			}
 		}
 		return result;
@@ -261,16 +274,23 @@ public class ARSnovaSocketIOServer {
 		client.sendEvent("activeUserCountData", sessionService.activeUsers(sessionKey));
 		final de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
 		client.sendEvent("feedbackData", fb.getValues());
-	}
-
-	public void reportUpdatedFeedbackForSession(final String sessionKey) {
-		final de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
-		broadcastInSession(sessionKey, "feedbackData", fb.getValues());
 		try {
 			final long averageFeedback = feedbackService.getAverageFeedbackRounded(sessionKey);
-			broadcastInSession(sessionKey, "feedbackDataRoundedAverage", averageFeedback);
+			client.sendEvent("feedbackDataRoundedAverage", averageFeedback);
 		} catch (final NoContentException e) {
-			broadcastInSession(sessionKey, "feedbackDataRoundedAverage", null);
+			final Object object = null; // can't directly use "null".
+			client.sendEvent("feedbackDataRoundedAverage", object);
+		}
+	}
+
+	public void reportUpdatedFeedbackForSession(final de.thm.arsnova.entities.Session session) {
+		final de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(session.getKeyword());
+		broadcastInSession(session.getKeyword(), "feedbackData", fb.getValues());
+		try {
+			final long averageFeedback = feedbackService.getAverageFeedbackRounded(session.getKeyword());
+			broadcastInSession(session.getKeyword(), "feedbackDataRoundedAverage", averageFeedback);
+		} catch (final NoContentException e) {
+			broadcastInSession(session.getKeyword(), "feedbackDataRoundedAverage", null);
 		}
 	}
 
@@ -282,7 +302,7 @@ public class ARSnovaSocketIOServer {
 		} catch (final NoContentException e) {
 			averageFeedback = null;
 		}
-		final List<UUID> connectionIds = findConnectionIdForUser(user.getUsername());
+		final List<UUID> connectionIds = findConnectionIdForUser(user);
 		if (connectionIds.isEmpty()) {
 			return;
 		}
@@ -306,14 +326,18 @@ public class ARSnovaSocketIOServer {
 		broadcastInSession(sessionKey, "answersToLecQuestionAvail", lecturerQuestionId);
 	}
 
-	public void reportAudienceQuestionAvailable(final String sessionKey, final String audienceQuestionId) {
+	public void reportAudienceQuestionAvailable(final de.thm.arsnova.entities.Session session, final InterposedQuestion audienceQuestion) {
 		/* TODO role handling implementation, send this only to users with role lecturer */
-		broadcastInSession(sessionKey, "audQuestionAvail", audienceQuestionId);
+		broadcastInSession(session.getKeyword(), "audQuestionAvail", audienceQuestion.get_id());
 	}
 
-	public void reportLecturerQuestionAvailable(final String sessionKey, final String lecturerQuestionId) {
+	public void reportLecturerQuestionAvailable(final de.thm.arsnova.entities.Session session, final Question lecturerQuestion) {
 		/* TODO role handling implementation, send this only to users with role audience */
-		broadcastInSession(sessionKey, "lecQuestionAvail", lecturerQuestionId);
+		broadcastInSession(session.getKeyword(), "lecQuestionAvail", lecturerQuestion.get_id());
+	}
+
+	public void reportSessionStatus(final String sessionKey, final boolean active) {
+		broadcastInSession(sessionKey, "setSessionActive", active);
 	}
 
 	public void broadcastInSession(final String sessionKey, final String eventName, final Object data) {
@@ -330,5 +354,20 @@ public class ARSnovaSocketIOServer {
 				c.sendEvent(eventName, data);
 			}
 		}
+	}
+
+	@Override
+	public void visit(NewQuestionEvent event) {
+		this.reportLecturerQuestionAvailable(event.getSession(), event.getQuestion());
+	}
+
+	@Override
+	public void visit(NewInterposedQuestionEvent event) {
+		this.reportAudienceQuestionAvailable(event.getSession(), event.getQuestion());
+	}
+
+	@Override
+	public void onApplicationEvent(NovaEvent event) {
+		event.accept(this);
 	}
 }

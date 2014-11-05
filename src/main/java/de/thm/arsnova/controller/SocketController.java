@@ -51,22 +51,20 @@ public class SocketController extends AbstractController {
 	@Autowired
 	private ARSnovaSocketIOServer server;
 
-	private static final Logger logger = LoggerFactory.getLogger(SocketController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SocketController.class);
 
 	@RequestMapping(method = RequestMethod.POST, value = "/assign")
 	public final void authorize(@RequestBody final Map<String, String> sessionMap, final HttpServletResponse response) {
 		String socketid = sessionMap.get("session");
 		if (null == socketid) {
-			logger.debug("Expected property 'session' missing", socketid);
+			LOGGER.debug("Expected property 'session' missing", socketid);
 			response.setStatus(HttpStatus.BAD_REQUEST.value());
-
 			return;
 		}
 		User u = userService.getCurrentUser();
 		if (null == u) {
-			logger.debug("Client {} requested to assign Websocket session but has not authenticated", socketid);
+			LOGGER.debug("Client {} requested to assign Websocket session but has not authenticated", socketid);
 			response.setStatus(HttpStatus.FORBIDDEN.value());
-
 			return;
 		}
 		userService.putUser2SocketId(UUID.fromString(socketid), u);

@@ -33,6 +33,7 @@ import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
@@ -230,11 +231,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public int countActiveUsers(long since) {
-		return stubUsers.size();
-	}
-
-	@Override
 	public List<Answer> getMyAnswers(User user, String sessionKey) {
 		return new ArrayList<Answer>();
 	}
@@ -255,12 +251,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public List<InterposedQuestion> getInterposedQuestions(Session session) {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public void vote(User user, String menu) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -366,12 +356,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public Session lockSession(Session session, Boolean lock) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<String> getActiveUsers(int timeDifference) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -532,6 +516,18 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public InterposedReadingCount getInterposedReadingCount(Session session, User user) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<SessionInfo> getMySessionsInfo(User user) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<SessionInfo> getMyVisitedSessionsInfo(User currentUser) {
 		// TODO Auto-generated method stub
 		return null;
 	}

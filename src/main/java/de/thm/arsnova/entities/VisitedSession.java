@@ -18,6 +18,7 @@
  */
 package de.thm.arsnova.entities;
 
+
 public class VisitedSession {
 	private String _id;
 	private String name;

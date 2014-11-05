@@ -21,8 +21,8 @@ public class UserSessionAspect {
 	 * @param session
 	 */
 	@AfterReturning(
-			pointcut="execution(public * de.thm.arsnova.services.SessionService.joinSession(..)) && args(keyword)",
-			returning="session"
+			pointcut = "execution(public * de.thm.arsnova.services.SessionService.joinSession(..)) && args(keyword)",
+			returning = "session"
 			)
 	public final void joinSessionAdvice(final JoinPoint jp, final String keyword, final Session session) {
 		userSessionService.setSession(session);

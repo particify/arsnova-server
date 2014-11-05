@@ -148,6 +148,24 @@ public class Session implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Session [keyword=" + keyword+ ", type=" + type + "]";
+		return "Session [keyword=" + keyword+ ", type=" + type + ", creator=" + creator + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		// See http://stackoverflow.com/a/113600
+		final int theAnswer = 42;
+		final int theOthers = 37;
+
+		return theOthers * theAnswer + this.keyword.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null || !obj.getClass().equals(this.getClass())) {
+			return false;
+		}
+		Session other = (Session) obj;
+		return this.keyword.equals(other.keyword);
 	}
 }

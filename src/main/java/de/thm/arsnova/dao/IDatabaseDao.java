@@ -30,6 +30,7 @@ import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 
 public interface IDatabaseDao {
@@ -73,8 +74,6 @@ public interface IDatabaseDao {
 
 	List<Answer> getFreetextAnswers(String questionId);
 
-	int countActiveUsers(long since);
-
 	List<Answer> getMyAnswers(User me, String sessionKey);
 
 	int getTotalAnswerCount(String sessionKey);
@@ -88,8 +87,6 @@ public interface IDatabaseDao {
 	List<InterposedQuestion> getInterposedQuestions(Session session);
 
 	List<InterposedQuestion> getInterposedQuestions(Session session, User user);
-
-	void vote(User me, String menu);
 
 	int countSessions();
 
@@ -124,8 +121,6 @@ public interface IDatabaseDao {
 	List<Session> getCourseSessions(List<Course> courses);
 
 	Session lockSession(Session session, Boolean lock);
-
-	List<String> getActiveUsers(int timeDifference);
 
 	Session updateSession(Session session);
 
@@ -174,4 +169,8 @@ public interface IDatabaseDao {
 	int getLearningProgress(Session session);
 
 	SimpleEntry<Integer, Integer> getMyLearningProgress(Session session, User user);
+
+	List<SessionInfo> getMySessionsInfo(User user);
+
+	List<SessionInfo> getMyVisitedSessionsInfo(User currentUser);
 }

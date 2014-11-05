@@ -208,7 +208,7 @@ public class SessionServiceTest {
 		sessionB.setName("TestSessionB");
 		sessionB.setShortName("TSB");
 
-		final Comparator<Session> comp = new SessionService.SessionNameComperator();
+		final Comparator<Session> comp = new SessionService.SessionNameComparator();
 		assertTrue(comp.compare(sessionA, sessionB) < 0);
 	}
 
@@ -222,7 +222,7 @@ public class SessionServiceTest {
 		sessionB.setName("TestSessionB");
 		sessionB.setShortName("TSB");
 
-		final Comparator<Session> comp = new SessionService.SessionShortNameComperator();
+		final Comparator<Session> comp = new SessionService.SessionShortNameComparator();
 		assertTrue(comp.compare(sessionA, sessionB) < 0);
 	}
 

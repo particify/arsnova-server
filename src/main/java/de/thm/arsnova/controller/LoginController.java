@@ -159,7 +159,8 @@ public class LoginController extends AbstractController {
 				Authentication auth = daoProvider.authenticate(authRequest);
 				if (auth.isAuthenticated()) {
 					SecurityContextHolder.getContext().setAuthentication(auth);
-					request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+					request.getSession(true).setAttribute(
+							HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
 							SecurityContextHolder.getContext());
 
 					return;
@@ -182,14 +183,14 @@ public class LoginController extends AbstractController {
 					Authentication auth = ldapAuthenticationProvider.authenticate(token);
 					if (auth.isAuthenticated()) {
 						SecurityContextHolder.getContext().setAuthentication(token);
-						request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+						request.getSession(true).setAttribute(
+								HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
 								SecurityContextHolder.getContext());
 
 						return;
 					}
 					LOGGER.info("LDAPLOGIN: {}", auth.isAuthenticated());
-				}
-				catch (AuthenticationException e) {
+				} catch (AuthenticationException e) {
 					LOGGER.info("No LDAP login: {}", e);
 				}
 
@@ -272,7 +273,7 @@ public class LoginController extends AbstractController {
 		return userService.getCurrentUser();
 	}
 
-	@RequestMapping(value = { "/auth/logout", "/logout" }, method = { RequestMethod.POST, RequestMethod.GET } )
+	@RequestMapping(value = { "/auth/logout", "/logout" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public final View doLogout(final HttpServletRequest request) {
 		final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		userService.removeUserFromMaps(userService.getCurrentUser());
