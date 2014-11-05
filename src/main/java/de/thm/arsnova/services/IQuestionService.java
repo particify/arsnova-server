@@ -25,6 +25,7 @@ import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.User;
 
 public interface IQuestionService {
 	Question saveQuestion(Question question);
@@ -91,7 +92,11 @@ public interface IQuestionService {
 
 	int countLectureQuestionAnswers(String sessionkey);
 
+	int countLectureQuestionAnswersInternal(String sessionkey);
+
 	int countPreparationQuestionAnswers(String sessionkey);
+
+	int countPreparationQuestionAnswersInternal(String sessionkey);
 
 	void deleteLectureQuestions(String sessionkey);
 
@@ -101,7 +106,11 @@ public interface IQuestionService {
 
 	List<String> getUnAnsweredLectureQuestionIds(String sessionkey);
 
+	List<String> getUnAnsweredLectureQuestionIds(String sessionKey, User user);
+
 	List<String> getUnAnsweredPreparationQuestionIds(String sessionkey);
+
+	List<String> getUnAnsweredPreparationQuestionIds(String sessionKey, User user);
 
 	void deleteAllInterposedQuestions(String sessionKeyword);
 

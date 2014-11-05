@@ -30,17 +30,20 @@ import com.corundumstudio.socketio.protocol.Packet;
 import com.corundumstudio.socketio.protocol.PacketType;
 
 import de.thm.arsnova.entities.InterposedQuestion;
-import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.events.DeleteAnswerEvent;
+import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
 import de.thm.arsnova.events.NovaEvent;
 import de.thm.arsnova.events.NovaEventVisitor;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.services.IFeedbackService;
+import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.message.Feedback;
+import de.thm.arsnova.socket.message.Question;
 import de.thm.arsnova.socket.message.Session;
 
 @Component
@@ -54,6 +57,9 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 
 	@Autowired
 	private ISessionService sessionService;
+
+	@Autowired
+	private IQuestionService questionService;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ARSnovaSocketIOServer.class);
 
@@ -140,7 +146,7 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 					/* active user count has to be sent to the client since the broadcast is
 					 * not always sent as long as the polling solution is active simultaneously */
 					reportActiveUserCountForSession(session.getKeyword());
-					reportSessionDataToClient(session.getKeyword(), client);
+					reportSessionDataToClient(session.getKeyword(), u, client);
 				}
 			}
 		});
@@ -233,22 +239,11 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 	}
 
 	public void reportDeletedFeedback(final User user, final Set<de.thm.arsnova.entities.Session> arsSessions) {
-		final List<UUID> connectionIds = findConnectionIdForUser(user);
-		if (connectionIds.isEmpty()) {
-			return;
-		}
 		final List<String> keywords = new ArrayList<String>();
 		for (final de.thm.arsnova.entities.Session session : arsSessions) {
 			keywords.add(session.getKeyword());
 		}
-
-		for (final SocketIOClient client : server.getAllClients()) {
-			// Find the client whose feedback has been deleted and send a
-			// message.
-			if (connectionIds.contains(client.getSessionId())) {
-				client.sendEvent("feedbackReset", keywords);
-			}
-		}
+		this.sendToUser(user, "feedbackReset", keywords);
 	}
 
 	private List<UUID> findConnectionIdForUser(final User user) {
@@ -263,14 +258,31 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 		return result;
 	}
 
+	private void sendToUser(final User user, final String event, Object data) {
+		final List<UUID> connectionIds = findConnectionIdForUser(user);
+		if (connectionIds.isEmpty()) {
+			return;
+		}
+		for (final SocketIOClient client : server.getAllClients()) {
+			if (connectionIds.contains(client.getSessionId())) {
+				client.sendEvent(event, data);
+			}
+		}
+	}
+
 	/**
 	 * Currently only sends the feedback data to the client. Should be used for all
 	 * relevant Socket.IO data, the client needs to know after joining a session.
 	 *
 	 * @param sessionKey
+	 * @param user
 	 * @param client
 	 */
-	public void reportSessionDataToClient(final String sessionKey, final SocketIOClient client) {
+	public void reportSessionDataToClient(final String sessionKey, final User user, final SocketIOClient client) {
+		client.sendEvent("unansweredLecturerQuestions", questionService.getUnAnsweredLectureQuestionIds(sessionKey, user));
+		client.sendEvent("unansweredPreparationQuestions", questionService.getUnAnsweredPreparationQuestionIds(sessionKey, user));
+		client.sendEvent("countLectureQuestionAnswers", questionService.countLectureQuestionAnswersInternal(sessionKey));
+		client.sendEvent("countPreparationQuestionAnswers", questionService.countPreparationQuestionAnswersInternal(sessionKey));
 		client.sendEvent("activeUserCountData", sessionService.activeUsers(sessionKey));
 		final de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
 		client.sendEvent("feedbackData", fb.getValues());
@@ -322,8 +334,8 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 		broadcastInSession(sessionKey, "activeUserCountData", count);
 	}
 
-	public void reportAnswersToLecturerQuestionAvailable(final String sessionKey, final String lecturerQuestionId) {
-		broadcastInSession(sessionKey, "answersToLecQuestionAvail", lecturerQuestionId);
+	public void reportAnswersToLecturerQuestionAvailable(final de.thm.arsnova.entities.Session session, final Question lecturerQuestion) {
+		broadcastInSession(session.getKeyword(), "answersToLecQuestionAvail", lecturerQuestion.get_id());
 	}
 
 	public void reportAudienceQuestionAvailable(final de.thm.arsnova.entities.Session session, final InterposedQuestion audienceQuestion) {
@@ -333,7 +345,8 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 
 	public void reportLecturerQuestionAvailable(final de.thm.arsnova.entities.Session session, final Question lecturerQuestion) {
 		/* TODO role handling implementation, send this only to users with role audience */
-		broadcastInSession(session.getKeyword(), "lecQuestionAvail", lecturerQuestion.get_id());
+		broadcastInSession(session.getKeyword(), "lecQuestionAvail", lecturerQuestion.get_id()); // deprecated!
+		broadcastInSession(session.getKeyword(), "lecturerQuestionAvailable", lecturerQuestion);
 	}
 
 	public void reportSessionStatus(final String sessionKey, final boolean active) {
@@ -358,12 +371,31 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 
 	@Override
 	public void visit(NewQuestionEvent event) {
-		this.reportLecturerQuestionAvailable(event.getSession(), event.getQuestion());
+		this.reportLecturerQuestionAvailable(event.getSession(), new Question(event.getQuestion()));
 	}
 
 	@Override
 	public void visit(NewInterposedQuestionEvent event) {
 		this.reportAudienceQuestionAvailable(event.getSession(), event.getQuestion());
+	}
+
+	@Override
+	public void visit(NewAnswerEvent event) {
+		final String sessionKey = event.getSession().getKeyword();
+		this.reportAnswersToLecturerQuestionAvailable(event.getSession(), new Question(event.getQuestion()));
+		broadcastInSession(sessionKey, "countLectureQuestionAnswers", questionService.countLectureQuestionAnswersInternal(sessionKey));
+		broadcastInSession(sessionKey, "countPreparationQuestionAnswers", questionService.countPreparationQuestionAnswersInternal(sessionKey));
+		sendToUser(event.getUser(), "unansweredLecturerQuestions", questionService.getUnAnsweredLectureQuestionIds(sessionKey, event.getUser()));
+		sendToUser(event.getUser(), "unansweredPreparationQuestions", questionService.getUnAnsweredPreparationQuestionIds(sessionKey, event.getUser()));
+	}
+
+	@Override
+	public void visit(DeleteAnswerEvent event) {
+		final String sessionKey = event.getSession().getKeyword();
+		this.reportAnswersToLecturerQuestionAvailable(event.getSession(), new Question(event.getQuestion()));
+		// We do not know which user's answer was deleted, so we can't update his 'unanswered' list of questions...
+		broadcastInSession(sessionKey, "countLectureQuestionAnswers", questionService.countLectureQuestionAnswersInternal(sessionKey));
+		broadcastInSession(sessionKey, "countPreparationQuestionAnswers", questionService.countPreparationQuestionAnswersInternal(sessionKey));
 	}
 
 	@Override

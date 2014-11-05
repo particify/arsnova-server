@@ -41,6 +41,8 @@ import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.events.DeleteAnswerEvent;
+import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
 import de.thm.arsnova.exceptions.BadRequestException;
@@ -406,7 +408,8 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 
 		final Answer result = databaseDao.saveAnswer(answer, user);
-		socketIoServer.reportAnswersToLecturerQuestionAvailable(question.getSessionKeyword(), question.get_id());
+		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+		this.publisher.publishEvent(new NewAnswerEvent(this, result, user, question, session));
 
 		return result;
 	}
@@ -421,7 +424,8 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 		final Question question = getQuestion(answer.getQuestionId());
 		final Answer result = databaseDao.updateAnswer(answer);
-		socketIoServer.reportAnswersToLecturerQuestionAvailable(question.getSessionKeyword(), question.get_id());
+		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+		this.publisher.publishEvent(new NewAnswerEvent(this, result, user, question, session));
 
 		return result;
 	}
@@ -440,7 +444,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 		databaseDao.deleteAnswer(answerId);
 
-		socketIoServer.reportAnswersToLecturerQuestionAvailable(question.getSessionKeyword(), question.get_id());
+		this.publisher.publishEvent(new DeleteAnswerEvent(this, question, session));
 	}
 
 	@Override
@@ -490,12 +494,30 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int countLectureQuestionAnswers(final String sessionkey) {
+		return this.countLectureQuestionAnswersInternal(sessionkey);
+	}
+
+	/*
+	 * The "internal" suffix means it is called by internal services that have no authentication!
+	 * TODO: Find a better way of doing this...
+	 */
+	@Override
+	public int countLectureQuestionAnswersInternal(final String sessionkey) {
 		return databaseDao.countLectureQuestionAnswers(getSession(sessionkey));
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int countPreparationQuestionAnswers(final String sessionkey) {
+		return this.countLectureQuestionAnswersInternal(sessionkey);
+	}
+
+	/*
+	 * The "internal" suffix means it is called by internal services that have no authentication!
+	 * TODO: Find a better way of doing this...
+	 */
+	@Override
+	public int countPreparationQuestionAnswersInternal(final String sessionkey) {
 		return databaseDao.countPreparationQuestionAnswers(getSession(sessionkey));
 	}
 
@@ -524,6 +546,11 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated()")
 	public List<String> getUnAnsweredLectureQuestionIds(final String sessionkey) {
 		final User user = getCurrentUser();
+		return this.getUnAnsweredLectureQuestionIds(sessionkey, user);
+	}
+
+	@Override
+	public List<String> getUnAnsweredLectureQuestionIds(final String sessionkey, final User user) {
 		final Session session = getSession(sessionkey);
 		return databaseDao.getUnAnsweredLectureQuestionIds(session, user);
 	}
@@ -532,6 +559,11 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated()")
 	public List<String> getUnAnsweredPreparationQuestionIds(final String sessionkey) {
 		final User user = getCurrentUser();
+		return this.getUnAnsweredPreparationQuestionIds(sessionkey, user);
+	}
+
+	@Override
+	public List<String> getUnAnsweredPreparationQuestionIds(final String sessionkey, final User user) {
 		final Session session = getSession(sessionkey);
 		return databaseDao.getUnAnsweredPreparationQuestionIds(session, user);
 	}

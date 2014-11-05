@@ -6,4 +6,8 @@ public interface NovaEventVisitor {
 
 	void visit(NewQuestionEvent newQuestionEvent);
 
+	void visit(NewAnswerEvent newAnswerEvent);
+
+	void visit(DeleteAnswerEvent deleteAnswerEvent);
+
 }
