@@ -60,6 +60,9 @@ public class Question {
 	private int numClickableFields;
 	private int thresholdCorrectAnswers;
 	private boolean cvIsColored;
+	private String gridLineColor;
+	private int numberOfDots;
+	private String gridType;
 
 	public final String getType() {
 		return type;
@@ -357,6 +360,29 @@ public class Question {
 		this.thresholdCorrectAnswers = thresholdCorrectAnswers;
 	}
 
+	public String getGridLineColor() {
+		return gridLineColor;
+	}
+	
+	public void setGridLineColor(String gridLineColor) {
+		this.gridLineColor = gridLineColor;
+	}
+	
+	public int getNumberOfDots() {
+		return numberOfDots;
+	}
+	
+	public void setNumberOfDots(int numberOfDots) {
+		this.numberOfDots = numberOfDots;
+	}
+	
+	public String getGridType() {
+		return gridType;
+	}
+	
+	public void setGridType(String gridType) {
+		this.gridType = gridType;
+	}
 
 	@Override
 	public final String toString() {
