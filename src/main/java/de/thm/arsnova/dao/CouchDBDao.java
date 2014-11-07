@@ -422,6 +422,8 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("gridLineColor", question.getGridLineColor());
 		q.put("numberOfDots", question.getNumberOfDots());
 		q.put("gridType", question.getGridType());
+		q.put("scaleFactor", question.getScaleFactor());
+		q.put("gridScaleFactor", question.getGridScaleFactor());
 		
 		return q;
 	}
@@ -459,6 +461,9 @@ public class CouchDBDao implements IDatabaseDao {
 			q.put("gridLineColor", question.getGridLineColor());
 			q.put("numberOfDots", question.getNumberOfDots());
 			q.put("gridType", question.getGridType());
+			q.put("scaleFactor", question.getScaleFactor());
+			q.put("gridScaleFactor", question.getGridScaleFactor());
+			
 			database.saveDocument(q);
 			question.set_rev(q.getRev());
 
