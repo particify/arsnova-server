@@ -63,6 +63,8 @@ public class Question {
 	private String gridLineColor;
 	private int numberOfDots;
 	private String gridType;
+	private String scaleFactor;
+	private String gridScaleFactor;
 
 	public final String getType() {
 		return type;
@@ -382,6 +384,22 @@ public class Question {
 	
 	public void setGridType(String gridType) {
 		this.gridType = gridType;
+	}
+	
+	public void setScaleFactor(String scaleFactor) {
+		this.scaleFactor = scaleFactor;
+	}
+	
+	public String getScaleFactor() {
+		return this.scaleFactor;
+	}
+	
+	public void setGridScaleFactor(String scaleFactor) {
+		this.gridScaleFactor = scaleFactor;
+	}
+	
+	public String getGridScaleFactor() {
+		return this.gridScaleFactor;
 	}
 
 	@Override
