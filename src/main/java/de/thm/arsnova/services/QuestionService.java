@@ -509,7 +509,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int countPreparationQuestionAnswers(final String sessionkey) {
-		return this.countLectureQuestionAnswersInternal(sessionkey);
+		return this.countPreparationQuestionAnswersInternal(sessionkey);
 	}
 
 	/*
