@@ -270,7 +270,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated()")
 	public int getAnswerCount(final String questionId) {
 		final Question question = getQuestion(questionId);
-
+		if (question == null) {
+			return 0;
+		}
 		return databaseDao.getAnswerCount(question, question.getPiRound());
 	}
 
