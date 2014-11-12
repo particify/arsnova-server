@@ -151,6 +151,20 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 			}
 		});
 
+		server.addEventListener(
+				"readInterposedQuestion",
+				de.thm.arsnova.entities.transport.InterposedQuestion.class,
+				new DataListener<de.thm.arsnova.entities.transport.InterposedQuestion>() {
+			@Override
+			public void onData(
+					SocketIOClient client,
+					de.thm.arsnova.entities.transport.InterposedQuestion question,
+					AckRequest ackRequest) {
+				final User user = userService.getUser2SocketId(client.getSessionId());
+				questionService.readInterposedQuestionInternal(question.getId(), user);
+			}
+		});
+
 		server.addConnectListener(new ConnectListener() {
 			@Override
 			public void onConnect(final SocketIOClient client) { }

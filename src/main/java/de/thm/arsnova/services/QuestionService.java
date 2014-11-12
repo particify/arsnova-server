@@ -42,6 +42,7 @@ import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.events.DeleteAnswerEvent;
+import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
@@ -191,6 +192,10 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			throw new NotFoundException();
 		}
 		databaseDao.deleteInterposedQuestion(question);
+
+		final Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
+		final DeleteInterposedQuestionEvent event = new DeleteInterposedQuestionEvent(this, session, question);
+		this.publisher.publishEvent(event);
 	}
 
 	@Override
@@ -358,13 +363,22 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public InterposedQuestion readInterposedQuestion(final String questionId) {
+		final User user = userService.getCurrentUser();
+		return this.readInterposedQuestionInternal(questionId, user);
+	}
+
+	/*
+	 * The "internal" suffix means it is called by internal services that have no authentication!
+	 * TODO: Find a better way of doing this...
+	 */
+	@Override
+	public InterposedQuestion readInterposedQuestionInternal(final String questionId, User user) {
 		final InterposedQuestion question = databaseDao.getInterposedQuestion(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
 
-		final User user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
 			databaseDao.markInterposedQuestionAsRead(question);
 		}
