@@ -378,7 +378,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			throw new NotFoundException();
 		}
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
-
+		if (!question.isCreator(user) && !session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
 		if (session.isCreator(user)) {
 			databaseDao.markInterposedQuestionAsRead(question);
 		}

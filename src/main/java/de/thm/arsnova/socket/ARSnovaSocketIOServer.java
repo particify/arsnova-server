@@ -37,7 +37,9 @@ import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
 import de.thm.arsnova.events.NovaEvent;
 import de.thm.arsnova.events.NovaEventVisitor;
+import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.exceptions.NoContentException;
+import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IFeedbackService;
 import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.services.ISessionService;
@@ -161,7 +163,11 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 					de.thm.arsnova.entities.transport.InterposedQuestion question,
 					AckRequest ackRequest) {
 				final User user = userService.getUser2SocketId(client.getSessionId());
-				questionService.readInterposedQuestionInternal(question.getId(), user);
+				try {
+					questionService.readInterposedQuestionInternal(question.getId(), user);
+				} catch (NotFoundException | UnauthorizedException e) {
+					LOGGER.error("Loading of question {} failed for user {} with exception {}", question.getId(), user, e.getMessage());
+				}
 			}
 		});
 
