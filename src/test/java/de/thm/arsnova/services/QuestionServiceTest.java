@@ -122,6 +122,7 @@ public class QuestionServiceTest {
 		theQ.setRead(false);
 		theQ.set_id("the internal id");
 		theQ.setSessionId("12345678");
+		theQ.setCreator("regular user");
 		databaseDao.interposedQuestion = theQ;
 
 		questionService.readInterposedQuestion(theQ.get_id());
