@@ -32,10 +32,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.transport.InterposedQuestion;
 import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.exceptions.PreconditionFailedException;
 import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.web.DeprecatedApi;
 
@@ -62,24 +61,20 @@ public class AudienceQuestionController extends AbstractController {
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public final List<InterposedQuestion> getInterposedQuestions(@RequestParam final String sessionkey) {
-		return questionService.getInterposedQuestions(sessionkey);
+		return InterposedQuestion.fromList(questionService.getInterposedQuestions(sessionkey));
 	}
 
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
 	public final InterposedQuestion getInterposedQuestion(@PathVariable final String questionId) {
-		return questionService.readInterposedQuestion(questionId);
+		return new InterposedQuestion(questionService.readInterposedQuestion(questionId));
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public final void postInterposedQuestion(
 			@RequestParam final String sessionkey,
-			@RequestBody final InterposedQuestion question
+			@RequestBody final de.thm.arsnova.entities.InterposedQuestion question
 			) {
-		if (!sessionkey.equals(question.getSessionId())) {
-			throw new PreconditionFailedException();
-		}
-
 		if (questionService.saveQuestion(question)) {
 			return;
 		}

@@ -424,7 +424,7 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("gridType", question.getGridType());
 		q.put("scaleFactor", question.getScaleFactor());
 		q.put("gridScaleFactor", question.getGridScaleFactor());
-		
+
 		return q;
 	}
 
@@ -463,7 +463,7 @@ public class CouchDBDao implements IDatabaseDao {
 			q.put("gridType", question.getGridType());
 			q.put("scaleFactor", question.getScaleFactor());
 			q.put("gridScaleFactor", question.getGridScaleFactor());
-			
+
 			database.saveDocument(q);
 			question.set_rev(q.getRev());
 
@@ -876,7 +876,7 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public List<InterposedQuestion> getInterposedQuestions(final Session session) {
-		final NovaView view = new NovaView("interposed_question/by_session");
+		final NovaView view = new NovaView("interposed_question/by_session_full");
 		view.setKey(session.get_id());
 		final ViewResults questions = getDatabase().view(view);
 		if (questions == null || questions.isEmpty()) {
