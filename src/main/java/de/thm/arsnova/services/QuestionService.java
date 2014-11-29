@@ -436,12 +436,13 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated()")
 	public Answer updateAnswer(final Answer answer) {
 		final User user = userService.getCurrentUser();
-		if (user == null || !user.getUsername().equals(answer.getUser())) {
+		final Answer realAnswer = this.getMyAnswer(answer.getQuestionId());
+		if (user == null || realAnswer == null || !user.getUsername().equals(realAnswer.getUser())) {
 			throw new UnauthorizedException();
 		}
 
 		final Question question = getQuestion(answer.getQuestionId());
-		final Answer result = databaseDao.updateAnswer(answer);
+		final Answer result = databaseDao.updateAnswer(realAnswer);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		this.publisher.publishEvent(new NewAnswerEvent(this, result, user, question, session));
 
