@@ -1462,6 +1462,22 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
+	public void deleteAllPreparationAnswers(final Session session) {
+		final List<Question> questions = getQuestions(new NovaView("skill_question/preparation_question_by_session"), session);
+		for (final Question q : questions) {
+			deleteAnswers(q);
+		}
+	}
+
+	@Override
+	public void deleteAllLectureAnswers(final Session session) {
+		final List<Question> questions = getQuestions(new NovaView("skill_question/lecture_question_by_session"), session);
+		for (final Question q : questions) {
+			deleteAnswers(q);
+		}
+	}
+
+	@Override
 	public int getLearningProgress(final Session session) {
 		// Note: we have to use this many views because our CouchDB version does not support
 		// advanced features like summing over lists. Thus, we have to do it all by ourselves...

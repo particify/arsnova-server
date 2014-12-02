@@ -173,4 +173,8 @@ public interface IDatabaseDao {
 	List<SessionInfo> getMySessionsInfo(User user);
 
 	List<SessionInfo> getMyVisitedSessionsInfo(User currentUser);
+
+	void deleteAllPreparationAnswers(Session session);
+
+	void deleteAllLectureAnswers(Session session);
 }

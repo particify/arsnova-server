@@ -214,20 +214,12 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
+	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
 	public void deleteAnswers(final String questionId) {
 		final Question question = databaseDao.getQuestion(questionId);
-		if (question == null) {
-			throw new NotFoundException();
-		}
-
-		final User user = userService.getCurrentUser();
-		final Session session = databaseDao.getSession(question.getSessionKeyword());
-		if (user == null || session == null || !session.isCreator(user)) {
-			throw new UnauthorizedException();
-		}
 		databaseDao.deleteAnswers(question);
 	}
+
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
@@ -607,6 +599,20 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			throw new UnauthorizedException();
 		}
 		databaseDao.deleteAllQuestionsAnswers(session);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	public void deleteAllPreparationAnswers(String sessionkey) {
+		final Session session = getSession(sessionkey);
+		databaseDao.deleteAllPreparationAnswers(session);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	public void deleteAllLectureAnswers(String sessionkey) {
+		final Session session = getSession(sessionkey);
+		databaseDao.deleteAllLectureAnswers(session);
 	}
 
 	@Override

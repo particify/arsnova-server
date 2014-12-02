@@ -120,4 +120,8 @@ public interface IQuestionService {
 
 	void deleteAllQuestionsAnswers(String sessionkey);
 
+	void deleteAllPreparationAnswers(String sessionkey);
+
+	void deleteAllLectureAnswers(String sessionkey);
+
 }
