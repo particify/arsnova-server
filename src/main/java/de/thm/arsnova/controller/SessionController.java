@@ -100,7 +100,8 @@ public class SessionController extends AbstractController {
 				session.setName(session.getName() + appendix);
 				session.setShortName(session.getShortName() + appendix);
 			}
-		}
+		}		
+		
 		final Session newSession = sessionService.saveSession(session);
 
 		if (newSession == null) {
