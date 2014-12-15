@@ -37,6 +37,7 @@ public class Session implements Serializable {
 	private String courseType;
 	private String courseId;
 	private List<String> _conflicts;
+	private long creationTime;
 
 	private String _id;
 	private String _rev;
@@ -144,6 +145,14 @@ public class Session implements Serializable {
 	@JsonIgnore
 	public boolean isCourseSession() {
 		return getCourseId() != null && !getCourseId().isEmpty();
+	}
+	
+	public long getCreationTime() {
+		return creationTime;
+	}
+
+	public void setCreationTime(long creationTime) {
+		this.creationTime = creationTime;
 	}
 
 	@Override
