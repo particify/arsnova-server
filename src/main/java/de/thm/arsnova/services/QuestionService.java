@@ -41,6 +41,9 @@ import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.events.DeleteAnswerEvent;
+import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
+import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
 import de.thm.arsnova.exceptions.BadRequestException;
@@ -189,6 +192,10 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			throw new NotFoundException();
 		}
 		databaseDao.deleteInterposedQuestion(question);
+
+		final Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
+		final DeleteInterposedQuestionEvent event = new DeleteInterposedQuestionEvent(this, session, question);
+		this.publisher.publishEvent(event);
 	}
 
 	@Override
@@ -207,20 +214,12 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
+	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
 	public void deleteAnswers(final String questionId) {
 		final Question question = databaseDao.getQuestion(questionId);
-		if (question == null) {
-			throw new NotFoundException();
-		}
-
-		final User user = userService.getCurrentUser();
-		final Session session = databaseDao.getSession(question.getSessionKeyword());
-		if (user == null || session == null || !session.isCreator(user)) {
-			throw new UnauthorizedException();
-		}
 		databaseDao.deleteAnswers(question);
 	}
+
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
@@ -268,7 +267,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated()")
 	public int getAnswerCount(final String questionId) {
 		final Question question = getQuestion(questionId);
-
+		if (question == null) {
+			return 0;
+		}
 		return databaseDao.getAnswerCount(question, question.getPiRound());
 	}
 
@@ -354,13 +355,24 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public InterposedQuestion readInterposedQuestion(final String questionId) {
+		final User user = userService.getCurrentUser();
+		return this.readInterposedQuestionInternal(questionId, user);
+	}
+
+	/*
+	 * The "internal" suffix means it is called by internal services that have no authentication!
+	 * TODO: Find a better way of doing this...
+	 */
+	@Override
+	public InterposedQuestion readInterposedQuestionInternal(final String questionId, User user) {
 		final InterposedQuestion question = databaseDao.getInterposedQuestion(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
-
-		final User user = userService.getCurrentUser();
+		if (!question.isCreator(user) && !session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
 		if (session.isCreator(user)) {
 			databaseDao.markInterposedQuestionAsRead(question);
 		}
@@ -406,7 +418,8 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 
 		final Answer result = databaseDao.saveAnswer(answer, user);
-		socketIoServer.reportAnswersToLecturerQuestionAvailable(question.getSessionKeyword(), question.get_id());
+		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+		this.publisher.publishEvent(new NewAnswerEvent(this, result, user, question, session));
 
 		return result;
 	}
@@ -415,13 +428,15 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated()")
 	public Answer updateAnswer(final Answer answer) {
 		final User user = userService.getCurrentUser();
-		if (user == null || !user.getUsername().equals(answer.getUser())) {
+		final Answer realAnswer = this.getMyAnswer(answer.getQuestionId());
+		if (user == null || realAnswer == null || !user.getUsername().equals(realAnswer.getUser())) {
 			throw new UnauthorizedException();
 		}
 
 		final Question question = getQuestion(answer.getQuestionId());
-		final Answer result = databaseDao.updateAnswer(answer);
-		socketIoServer.reportAnswersToLecturerQuestionAvailable(question.getSessionKeyword(), question.get_id());
+		final Answer result = databaseDao.updateAnswer(realAnswer);
+		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+		this.publisher.publishEvent(new NewAnswerEvent(this, result, user, question, session));
 
 		return result;
 	}
@@ -440,7 +455,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 		databaseDao.deleteAnswer(answerId);
 
-		socketIoServer.reportAnswersToLecturerQuestionAvailable(question.getSessionKeyword(), question.get_id());
+		this.publisher.publishEvent(new DeleteAnswerEvent(this, question, session));
 	}
 
 	@Override
@@ -490,12 +505,30 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int countLectureQuestionAnswers(final String sessionkey) {
+		return this.countLectureQuestionAnswersInternal(sessionkey);
+	}
+
+	/*
+	 * The "internal" suffix means it is called by internal services that have no authentication!
+	 * TODO: Find a better way of doing this...
+	 */
+	@Override
+	public int countLectureQuestionAnswersInternal(final String sessionkey) {
 		return databaseDao.countLectureQuestionAnswers(getSession(sessionkey));
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int countPreparationQuestionAnswers(final String sessionkey) {
+		return this.countPreparationQuestionAnswersInternal(sessionkey);
+	}
+
+	/*
+	 * The "internal" suffix means it is called by internal services that have no authentication!
+	 * TODO: Find a better way of doing this...
+	 */
+	@Override
+	public int countPreparationQuestionAnswersInternal(final String sessionkey) {
 		return databaseDao.countPreparationQuestionAnswers(getSession(sessionkey));
 	}
 
@@ -524,6 +557,11 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated()")
 	public List<String> getUnAnsweredLectureQuestionIds(final String sessionkey) {
 		final User user = getCurrentUser();
+		return this.getUnAnsweredLectureQuestionIds(sessionkey, user);
+	}
+
+	@Override
+	public List<String> getUnAnsweredLectureQuestionIds(final String sessionkey, final User user) {
 		final Session session = getSession(sessionkey);
 		return databaseDao.getUnAnsweredLectureQuestionIds(session, user);
 	}
@@ -532,6 +570,11 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated()")
 	public List<String> getUnAnsweredPreparationQuestionIds(final String sessionkey) {
 		final User user = getCurrentUser();
+		return this.getUnAnsweredPreparationQuestionIds(sessionkey, user);
+	}
+
+	@Override
+	public List<String> getUnAnsweredPreparationQuestionIds(final String sessionkey, final User user) {
 		final Session session = getSession(sessionkey);
 		return databaseDao.getUnAnsweredPreparationQuestionIds(session, user);
 	}
@@ -556,6 +599,20 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			throw new UnauthorizedException();
 		}
 		databaseDao.deleteAllQuestionsAnswers(session);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	public void deleteAllPreparationAnswers(String sessionkey) {
+		final Session session = getSession(sessionkey);
+		databaseDao.deleteAllPreparationAnswers(session);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	public void deleteAllLectureAnswers(String sessionkey) {
+		final Session session = getSession(sessionkey);
+		databaseDao.deleteAllLectureAnswers(session);
 	}
 
 	@Override

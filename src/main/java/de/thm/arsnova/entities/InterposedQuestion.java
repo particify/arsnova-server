@@ -98,4 +98,8 @@ public class InterposedQuestion {
 	public void setCreator(String creator) {
 		this.creator = creator;
 	}
+
+	public boolean isCreator(User user) {
+		return user.getUsername().equals(creator);
+	}
 }

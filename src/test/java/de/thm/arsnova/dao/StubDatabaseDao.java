@@ -511,7 +511,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	@Override
 	public void deleteAllInterposedQuestions(Session session, User user) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -530,5 +530,17 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public List<SessionInfo> getMyVisitedSessionsInfo(User currentUser) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void deleteAllPreparationAnswers(Session session) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void deleteAllLectureAnswers(Session session) {
+		// TODO Auto-generated method stub
+
 	}
 }

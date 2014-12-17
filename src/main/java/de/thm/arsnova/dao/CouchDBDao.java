@@ -425,7 +425,7 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("gridType", question.getGridType());
 		q.put("scaleFactor", question.getScaleFactor());
 		q.put("gridScaleFactor", question.getGridScaleFactor());
-		
+
 		return q;
 	}
 
@@ -464,7 +464,7 @@ public class CouchDBDao implements IDatabaseDao {
 			q.put("gridType", question.getGridType());
 			q.put("scaleFactor", question.getScaleFactor());
 			q.put("gridScaleFactor", question.getGridScaleFactor());
-			
+
 			database.saveDocument(q);
 			question.set_rev(q.getRev());
 
@@ -877,7 +877,7 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public List<InterposedQuestion> getInterposedQuestions(final Session session) {
-		final NovaView view = new NovaView("interposed_question/by_session");
+		final NovaView view = new NovaView("interposed_question/by_session_full");
 		view.setKey(session.get_id());
 		final ViewResults questions = getDatabase().view(view);
 		if (questions == null || questions.isEmpty()) {
@@ -1463,6 +1463,22 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
+	public void deleteAllPreparationAnswers(final Session session) {
+		final List<Question> questions = getQuestions(new NovaView("skill_question/preparation_question_by_session"), session);
+		for (final Question q : questions) {
+			deleteAnswers(q);
+		}
+	}
+
+	@Override
+	public void deleteAllLectureAnswers(final Session session) {
+		final List<Question> questions = getQuestions(new NovaView("skill_question/lecture_question_by_session"), session);
+		for (final Question q : questions) {
+			deleteAnswers(q);
+		}
+	}
+
+	@Override
 	public int getLearningProgress(final Session session) {
 		// Note: we have to use this many views because our CouchDB version does not support
 		// advanced features like summing over lists. Thus, we have to do it all by ourselves...
@@ -1492,7 +1508,7 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		final double courseAverageValue = userTotalValue / numUsers;
 		final double courseProgress = courseAverageValue / courseMaximumValue;
-		return (int)Math.round(courseProgress * 100);
+		return (int)Math.min(100, Math.round(courseProgress * 100));
 	}
 
 	@Override
@@ -1518,8 +1534,9 @@ public class CouchDBDao implements IDatabaseDao {
 			return new AbstractMap.SimpleEntry<Integer, Integer>(0, courseProgress);
 		}
 		final double myProgress = userTotalValue / courseMaximumValue;
+		final int myLearningProgress = (int)Math.min(100, Math.round(myProgress*100));
 
-		return new AbstractMap.SimpleEntry<Integer, Integer>((int)Math.round(myProgress*100), courseProgress);
+		return new AbstractMap.SimpleEntry<Integer, Integer>(myLearningProgress, courseProgress);
 	}
 
 	@Override

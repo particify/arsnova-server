@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IQuestionService;
@@ -332,9 +333,17 @@ public class LecturerQuestionController extends AbstractController {
 	@RequestMapping(value = "/answers", method = RequestMethod.DELETE)
 	public final void deleteAllQuestionsAnswers(
 			@RequestParam final String sessionkey,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly,
 			final HttpServletResponse response
 			) {
-		questionService.deleteAllQuestionsAnswers(sessionkey);
+		if (lectureQuestionsOnly) {
+			questionService.deleteAllLectureAnswers(sessionkey);
+		} else if (preparationQuestionsOnly) {
+			questionService.deleteAllPreparationAnswers(sessionkey);
+		} else {
+			questionService.deleteAllQuestionsAnswers(sessionkey);
+		}
 	}
 
 	/**
