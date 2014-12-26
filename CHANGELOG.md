@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.2
+This release updates dependencies. The updated library for Socket.IO support
+fixes memory leaks and disables SSL 3.0 support (POODLE vulnerability).
+
 ## 2.0.1
 This release introduces the following changes:
 * Updates dependency for Socket.IO support to fix memory leaks
