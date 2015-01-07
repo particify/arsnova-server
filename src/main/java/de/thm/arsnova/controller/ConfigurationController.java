@@ -61,6 +61,9 @@ public class ConfigurationController extends AbstractController {
 
 	@Value("${links.imprint.url}")
 	private String imprintUrl;
+	
+	@Value("${links.blog.url:}")
+	private String blogUrl;
 
 	@Value("${links.privacy-policy.url}")
 	private String privacyPolicyUrl;
@@ -117,7 +120,10 @@ public class ConfigurationController extends AbstractController {
 		if (!"".equals(documentationUrl)) {
 			config.put("documentationUrl", documentationUrl);
 		}
-		if (!"".equals(presenterDocumentationUrl)) {
+		if (!"".equals(blogUrl)) {
+			config.put("blogUrl", blogUrl);
+		}
+ 		if (!"".equals(presenterDocumentationUrl)) {
 			config.put("presenterDocumentationUrl", presenterDocumentationUrl);
 		}
 		if (!"".equals(overlayUrl)) {
