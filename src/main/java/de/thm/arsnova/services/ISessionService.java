@@ -37,6 +37,8 @@ public interface ISessionService {
 	String generateKeyword();
 
 	List<Session> getMySessions();
+	
+	List<Session> getPublicPoolSessions();
 
 	List<Session> getMyVisitedSessions();
 
