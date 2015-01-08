@@ -188,6 +188,22 @@ public class SessionController extends AbstractController {
 		}
 		return sessions;
 	}
+	
+
+	@RequestMapping(value = "/public_pool", method = RequestMethod.GET)
+	public final List<Session> getPublicPoolSessions(
+			final HttpServletResponse response
+			) {
+		List<Session> sessions;
+		sessions = sessionService.getPublicPoolSessions();
+
+		if (sessions == null || sessions.isEmpty()) {
+			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+			return null;
+		}
+
+		return sessions;
+	}
 
 	@RequestMapping(value = "/{sessionkey}/lock", method = RequestMethod.POST)
 	public final Session lockSession(
