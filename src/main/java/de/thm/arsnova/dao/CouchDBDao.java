@@ -325,6 +325,12 @@ public class CouchDBDao implements IDatabaseDao {
 		sessionDocument.put("courseType", session.getCourseType());
 		sessionDocument.put("courseId", session.getCourseId());
 		sessionDocument.put("creationTime", session.getCreationTime());
+		sessionDocument.put("ppAuthorName", session.getPpAuthorName());
+		sessionDocument.put("ppAuthorMail", session.getPpAuthorMail());
+		sessionDocument.put("ppUniversity", session.getPpUniversity());
+		sessionDocument.put("ppLogo", session.getPpLogo());
+		sessionDocument.put("ppSubject", session.getPpSubject());
+		sessionDocument.put("ppLicense", session.getPpLicense());
 		try {
 			database.saveDocument(sessionDocument);
 		} catch (final IOException e) {
