@@ -199,3 +199,7 @@ links.overlay.url=https://arsnova.eu/overlay/
 links.organization.url=
 links.imprint.url=
 links.privacy-policy.url=
+
+# configuration for the public pool
+pp.subjects = Mathematik,Informatik,BWL
+pp.licenses = MIT,Apache License V2
