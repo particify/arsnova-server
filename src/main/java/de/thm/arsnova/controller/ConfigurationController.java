@@ -94,12 +94,19 @@ public class ConfigurationController extends AbstractController {
 
 	@Value("${question.parse-answer-option-formatting:false}")
 	private String parseAnswerOptionFormatting;
-
+	
+	@Value("${pp.subjects}")
+	private String ppSubjects;
+	
+	@Value("${pp.licenses}")
+	private String ppLicenses;
+	
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public final HashMap<String, Object> getConfiguration(HttpServletRequest request) {
 		HashMap<String, Object> config = new HashMap<String, Object>();
 		HashMap<String, Boolean> features = new HashMap<String, Boolean>();
+		HashMap<String, String> publicPool = new HashMap<String, String>();
 
 		/* The API path could be unknown to the client in case the request was forwarded */
 		config.put("apiPath", request.getContextPath());
@@ -144,6 +151,12 @@ public class ConfigurationController extends AbstractController {
 		features.put("studentsOwnQuestions", "true".equals(studentsOwnQuestions));
 		features.put("flashcard", "true".equals(flashcardEnabled));
 		features.put("gridSquare", "true".equals(gridSquareEnabled));
+		
+		// add public pool configuration
+		config.put("publicPool", publicPool);
+		
+		publicPool.put("subjects", ppSubjects);
+		publicPool.put("licenses", ppLicenses);
 
 		return config;
 	}
