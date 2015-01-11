@@ -130,22 +130,22 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 	
 	@Override
-	public final List<Session> getPublicPoolSessions() {
+	public final Map<String, ArrayList<Session>> getPublicPoolSessions() {
+		Map<String, ArrayList<Session>> sessionMap = new HashMap<String, ArrayList<Session>>();
 		final NovaView view = new NovaView("session/public_pool_by_id");
-
+		view.setGroup(true);
 		final ViewResults sessions = getDatabase().view(view);
 
-		final List<Session> result = new ArrayList<Session>();
-		
-		for (final Document d : sessions.getResults()) {
-			final Session session = (Session) JSONObject.toBean(
-					d.getJSONObject().getJSONObject("value"),
-					Session.class
-					);
-			//session.set_id(d.getId());
-			result.add(session);
+		//final List<Session> result = new ArrayList<Session>();
+		Collection<Session> result = null;
+		for (Document d : sessions.getResults()) {
+			final JSONArray jsonSessions = d.getJSONObject().getJSONArray("value");
+			
+			sessionMap.put(
+					d.getJSONObject().getString("key"),
+					new ArrayList(JSONArray.toCollection(jsonSessions, Session.class)));
 		}
-		return result;
+		return sessionMap;
 	}
 	
 	@Override
@@ -337,6 +337,7 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public final Session saveSession(final User user, final Session session) {
 		final Document sessionDocument = new Document();
+
 		sessionDocument.put("type", "session");
 		sessionDocument.put("name", session.getName());
 		sessionDocument.put("shortName", session.getShortName());

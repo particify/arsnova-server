@@ -195,7 +195,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 	
 	@Override
-	public List<Session> getPublicPoolSessions() {
+	public Map<String, ArrayList<Session>> getPublicPoolSessions() {
 		// TODO Auto-generated method stub
 		return null;
 	}

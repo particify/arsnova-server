@@ -22,6 +22,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -192,10 +193,10 @@ public class SessionController extends AbstractController {
 	
 
 	@RequestMapping(value = "/public_pool", method = RequestMethod.GET)
-	public final List<Session> getPublicPoolSessions(
+	public final Map<String, ArrayList<Session>> getPublicPoolSessions(
 			final HttpServletResponse response
 			) {
-		List<Session> sessions;
+		Map<String, ArrayList<Session>> sessions;
 		sessions = sessionService.getPublicPoolSessions();
 
 		if (sessions == null || sessions.isEmpty()) {

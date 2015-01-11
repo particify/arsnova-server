@@ -20,7 +20,9 @@
 package de.thm.arsnova.dao;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Answer;
@@ -40,7 +42,7 @@ public interface IDatabaseDao {
 
 	List<Session> getMySessions(User user);
 	
-	List<Session> getPublicPoolSessions();
+	Map<String, ArrayList<Session>> getPublicPoolSessions();
 
 	Session saveSession(User user, Session session);
 

@@ -20,7 +20,9 @@
 package de.thm.arsnova.services;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import de.thm.arsnova.connector.model.Course;
@@ -38,7 +40,7 @@ public interface ISessionService {
 
 	List<Session> getMySessions();
 	
-	List<Session> getPublicPoolSessions();
+	Map<String, ArrayList<Session>> getPublicPoolSessions();
 
 	List<Session> getMyVisitedSessions();
 
