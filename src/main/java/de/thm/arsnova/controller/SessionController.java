@@ -193,10 +193,10 @@ public class SessionController extends AbstractController {
 	
 
 	@RequestMapping(value = "/publicpool", method = RequestMethod.GET)
-	public final Map<String, ArrayList<Session>> getPublicPoolSessions(
+	public final List<Session> getPublicPoolSessions(
 			final HttpServletResponse response
 			) {
-		Map<String, ArrayList<Session>> sessions;
+		List<Session> sessions;
 		sessions = sessionService.getPublicPoolSessions();
 
 		if (sessions == null || sessions.isEmpty()) {

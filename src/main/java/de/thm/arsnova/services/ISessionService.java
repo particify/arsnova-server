@@ -40,7 +40,7 @@ public interface ISessionService {
 
 	List<Session> getMySessions();
 	
-	Map<String, ArrayList<Session>> getPublicPoolSessions();
+	List<Session> getPublicPoolSessions();
 
 	List<Session> getMyVisitedSessions();
 

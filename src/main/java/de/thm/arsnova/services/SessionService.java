@@ -158,7 +158,7 @@ public class SessionService implements ISessionService {
 	
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public final Map<String, ArrayList<Session>> getPublicPoolSessions() {
+	public final List<Session> getPublicPoolSessions() {
 		return databaseDao.getPublicPoolSessions();
 	}
 

@@ -42,7 +42,7 @@ public interface IDatabaseDao {
 
 	List<Session> getMySessions(User user);
 	
-	Map<String, ArrayList<Session>> getPublicPoolSessions();
+	List<Session> getPublicPoolSessions();
 
 	Session saveSession(User user, Session session);
 
