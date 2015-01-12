@@ -45,6 +45,7 @@ public class Session implements Serializable {
 	private String ppLogo;
 	private String ppSubject;
 	private String ppLicense;
+	private String sessionType;
 
 	private String _id;
 	private String _rev;
@@ -208,6 +209,14 @@ public class Session implements Serializable {
 
 	public void setPpLicense(final String ppLicense) {
 		this.ppLicense = ppLicense;
+	}
+	
+	public String getSessionType() {
+		return sessionType;
+	}
+	
+	public void setSessionType(final String sessionType) {
+		this.sessionType = sessionType;
 	}
 
 	@Override

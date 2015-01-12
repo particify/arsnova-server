@@ -337,10 +337,7 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public final Session saveSession(final User user, final Session session) {
 		final Document sessionDocument = new Document();
-		if (session.getPpAuthorName() != null)
-			sessionDocument.put("type", "session_public_pool");
-		else
-			sessionDocument.put("type", "session");
+		sessionDocument.put("type", "session");
 		sessionDocument.put("name", session.getName());
 		sessionDocument.put("shortName", session.getShortName());
 		sessionDocument.put("keyword", sessionService.generateKeyword());
@@ -355,6 +352,7 @@ public class CouchDBDao implements IDatabaseDao {
 		sessionDocument.put("ppLogo", session.getPpLogo());
 		sessionDocument.put("ppSubject", session.getPpSubject());
 		sessionDocument.put("ppLicense", session.getPpLicense());
+		sessionDocument.put("sessionType", session.getSessionType());
 		try {
 			database.saveDocument(sessionDocument);
 		} catch (final IOException e) {
