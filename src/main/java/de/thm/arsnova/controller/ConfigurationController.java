@@ -61,7 +61,7 @@ public class ConfigurationController extends AbstractController {
 
 	@Value("${links.imprint.url}")
 	private String imprintUrl;
-	
+
 	@Value("${links.blog.url:}")
 	private String blogUrl;
 
@@ -97,6 +97,15 @@ public class ConfigurationController extends AbstractController {
 
 	@Value("${question.parse-answer-option-formatting:false}")
 	private String parseAnswerOptionFormatting;
+
+	@Value("${tracking.provider}")
+	private String trackingProvider;
+
+	@Value("${tracking.tracker-url}")
+	private String trackingTrackerUrl;
+
+	@Value("${tracking.site-id}")
+	private String trackingSiteId;
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
@@ -150,6 +159,15 @@ public class ConfigurationController extends AbstractController {
 		features.put("studentsOwnQuestions", "true".equals(studentsOwnQuestions));
 		features.put("flashcard", "true".equals(flashcardEnabled));
 		features.put("gridSquare", "true".equals(gridSquareEnabled));
+
+		if (!"".equals(trackingTrackerUrl)) {
+			HashMap<String, String> tracking = new HashMap<String, String>();
+			config.put("tracking", tracking);
+
+			tracking.put("provider", trackingProvider);
+			tracking.put("trackerUrl", trackingTrackerUrl);
+			tracking.put("siteId", trackingSiteId);
+		}
 
 		return config;
 	}

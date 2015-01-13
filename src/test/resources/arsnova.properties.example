@@ -94,7 +94,7 @@ security.user-db.reset-password-mail.body=You requested to reset your \
     password.\n\nPlease follow the link below to set a new password:\n{0}
 
 # LDAP authentication
-# 
+#
 # Specific parameters:
 # url: LDAP server URL
 # user-dn-pattern: Pattern used to check user credentials against the LDAP
@@ -193,9 +193,21 @@ question.parse-answer-option-formatting=false
 
 # Links which are displayed in the frontend applications
 #
+links.blog.url=https://arsnova.eu/blog/
 links.documentation.url=https://arsnova.eu/manual/
 links.presenter-documentation.url=
 links.overlay.url=https://arsnova.eu/overlay/
 links.organization.url=
 links.imprint.url=
 links.privacy-policy.url=
+
+
+################################################################################
+# Tracking
+################################################################################
+# It is possible to use an external tracking software with ARSnova. Currently
+# Piwik is the only supported tracking provider.
+#
+tracking.provider=piwik
+tracking.tracker-url=
+tracking.site-id=
