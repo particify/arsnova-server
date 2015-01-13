@@ -20,6 +20,7 @@
 package de.thm.arsnova.services;
 
 import java.util.List;
+import java.util.AbstractMap.SimpleEntry;
 
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.InterposedQuestion;
@@ -91,6 +92,8 @@ public interface IQuestionService {
 	int getFlashcardCount(String sessionkey);
 
 	int getPreparationQuestionCount(String sessionkey);
+	
+	SimpleEntry<String,Integer> getAnswerCountByQuestion(String questionid);
 
 	int countLectureQuestionAnswers(String sessionkey);
 
@@ -123,5 +126,4 @@ public interface IQuestionService {
 	void deleteAllPreparationAnswers(String sessionkey);
 
 	void deleteAllLectureAnswers(String sessionkey);
-
 }

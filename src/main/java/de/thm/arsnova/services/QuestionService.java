@@ -19,10 +19,12 @@
 
 package de.thm.arsnova.services;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.AbstractMap.SimpleEntry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -219,7 +221,6 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final Question question = databaseDao.getQuestion(questionId);
 		databaseDao.deleteAnswers(question);
 	}
-
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
@@ -500,6 +501,13 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated()")
 	public int getPreparationQuestionCount(final String sessionkey) {
 		return databaseDao.getPreparationQuestionCount(getSession(sessionkey));
+	}
+	
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public SimpleEntry<String,Integer> getAnswerCountByQuestion(final String questionid) {
+		final int questioncount = getAnswerCount(questionid);
+		return new AbstractMap.SimpleEntry<String, Integer>(questionid, questioncount);
 	}
 
 	@Override
