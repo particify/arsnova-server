@@ -41,6 +41,27 @@ public class Session implements Serializable {
 	private String _id;
 	private String _rev;
 
+	/**
+	 * Returns a copy of the given session without any information that identifies a person.
+	 * @param original The session to create a anonymized copy of
+	 * @return
+	 */
+	public static Session anonymizedCopy(final Session original) {
+		final Session copy = new Session();
+		copy.type = original.type;
+		copy.name = original.name;
+		copy.shortName = original.shortName;
+		copy.keyword = original.keyword;
+		copy.creator = ""; // anonymous
+		copy.active = original.active;
+		copy.lastOwnerActivity = original.lastOwnerActivity;
+		copy.courseType = original.courseType;
+		copy.courseId = original.courseId;
+		copy._id = original._id;
+		copy._rev = original._rev;
+		return copy;
+	}
+
 	public String getType() {
 		return type;
 	}
