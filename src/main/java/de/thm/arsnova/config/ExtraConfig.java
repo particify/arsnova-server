@@ -2,6 +2,9 @@ package de.thm.arsnova.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -16,6 +19,7 @@ import de.thm.arsnova.connector.client.ConnectorClientImpl;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Configuration
+@EnableCaching
 public class ExtraConfig {
 
 	@Autowired
@@ -80,5 +84,10 @@ public class ExtraConfig {
 		socketServer.setKeystore(socketKeystore);
 		socketServer.setStorepass(socketStorepass);
 		return socketServer;
+	}
+
+	@Bean
+	public CacheManager cacheManager() {
+		return new ConcurrentMapCacheManager();
 	}
 }

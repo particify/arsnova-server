@@ -56,7 +56,7 @@ public interface IDatabaseDao {
 
 	LoggedIn registerAsOnlineUser(User u, Session s);
 
-	void updateSessionOwnerActivity(Session session);
+	Session updateSessionOwnerActivity(Session session);
 
 	List<String> getQuestionIds(Session session, User user);
 
