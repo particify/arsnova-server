@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import de.thm.arsnova.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.dao.IDatabaseDao;
@@ -40,6 +41,7 @@ import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
@@ -190,6 +192,14 @@ public class SessionService implements ISessionService {
 					) {
 				throw new ForbiddenException();
 			}
+		}
+		
+		if (session.getPpLogo() != null && session.getPpLogo().startsWith("http")) {
+			final String base64ImageString = ImageUtils.encodeImageToString(session.getPpLogo());
+			if (base64ImageString == null) {
+				throw new BadRequestException();
+			}
+			session.setPpLogo(base64ImageString);
 		}
 		return databaseDao.saveSession(userService.getCurrentUser(), session);
 	}
