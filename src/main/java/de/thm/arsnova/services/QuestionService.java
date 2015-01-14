@@ -109,7 +109,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				question.setImage(base64ImageString);
 			}
 
-			// base64 adds offset to filesize, formular taken from: http://en.wikipedia.org/wiki/Base64#MIME
+			// base64 adds offset to filesize, formula taken from: http://en.wikipedia.org/wiki/Base64#MIME
 			final int fileSize = (int) ((question.getImage().length()-814)/1.37);
 			if (fileSize > uploadFileSizeByte) {
 				LOGGER.error("Could not save file. File is too large with " + fileSize + " Byte.");
