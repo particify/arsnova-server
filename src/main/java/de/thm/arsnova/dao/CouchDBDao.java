@@ -39,6 +39,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -353,6 +356,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
+	@Cacheable("sessions")
 	public final Session getSessionFromKeyword(final String keyword) {
 		final NovaView view = new NovaView("session/by_keyword");
 		view.setKey(keyword);
@@ -368,6 +372,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
+	@Cacheable("sessions")
 	public final Session getSessionFromId(final String sessionId) {
 		final NovaView view = new NovaView("session/by_id");
 		view.setKey(sessionId);
@@ -410,6 +415,7 @@ public class CouchDBDao implements IDatabaseDao {
 		} catch (final IOException e) {
 			return null;
 		}
+		// session caching is done by loading the created session
 		return getSession(sessionDocument.getString("keyword"));
 	}
 
@@ -667,19 +673,21 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final void updateSessionOwnerActivity(final Session session) {
+	@CachePut(value = "sessions")
+	public final Session updateSessionOwnerActivity(final Session session) {
 		try {
 			/* Do not clutter CouchDB. Only update once every 3 hours. */
 			if (session.getLastOwnerActivity() > System.currentTimeMillis() - 3 * 3600000) {
-				return;
+				return session;
 			}
 
 			session.setLastOwnerActivity(System.currentTimeMillis());
 			final JSONObject json = JSONObject.fromObject(session);
 			getDatabase().saveDocument(new Document(json));
+			return session;
 		} catch (final IOException e) {
 			LOGGER.error("Failed to update lastOwnerActivity for Session {}", session);
-			return;
+			return session;
 		}
 	}
 
@@ -1275,6 +1283,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
+	@CachePut(value = "sessions")
 	public Session updateSession(final Session session) {
 		try {
 			final Document s = database.getDocument(session.get_id());
@@ -1293,6 +1302,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
+	@CacheEvict(value = "sessions")
 	public void deleteSession(final Session session) {
 		try {
 			deleteDocument(session.get_id());
