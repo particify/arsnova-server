@@ -100,6 +100,12 @@ public class ConfigurationController extends AbstractController {
 	
 	@Value("${pp.licenses}")
 	private String ppLicenses;
+
+	@Value("${pp.logofilesize_b}")
+	private String ppLogoMaxFilesize;
+
+	@Value("${upload.filesize_b}")
+	private String gridImageMaxFileSize;
 	
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
@@ -157,6 +163,9 @@ public class ConfigurationController extends AbstractController {
 		
 		publicPool.put("subjects", ppSubjects);
 		publicPool.put("licenses", ppLicenses);
+		publicPool.put("logoMaxFilesize", ppLogoMaxFilesize);
+
+		config.put("grid", gridImageMaxFileSize);
 
 		return config;
 	}
