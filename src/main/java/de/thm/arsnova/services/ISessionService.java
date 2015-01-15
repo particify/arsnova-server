@@ -41,6 +41,8 @@ public interface ISessionService {
 	List<Session> getMySessions();
 	
 	List<Session> getPublicPoolSessions();
+	
+	List<Session> getMyPublicPoolSessions();
 
 	List<Session> getMyVisitedSessions();
 

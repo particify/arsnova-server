@@ -199,6 +199,12 @@ public class StubDatabaseDao implements IDatabaseDao {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	@Override
+	public List<Session> getMyPublicPoolSessions(User user) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	@Override
 	public LoggedIn registerAsOnlineUser(User u, Session s) {

@@ -149,6 +149,28 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 	
 	@Override
+	public final List<Session> getMyPublicPoolSessions(final User user) {
+		final NovaView view = new NovaView("session/public_pool_by_creator");
+		view.setStartKeyArray(user.getUsername());
+		view.setEndKeyArray(user.getUsername(), "{}");
+		
+		final ViewResults sessions = getDatabase().view(view);
+
+		final List<Session> result = new ArrayList<Session>();
+		for (final Document d : sessions.getResults()) {
+			final Session session = (Session) JSONObject.toBean(
+					d.getJSONObject().getJSONObject("value"),
+					Session.class
+					);
+			session.setCreator(d.getJSONObject().getJSONArray("key").getString(0));
+			session.setName(d.getJSONObject().getJSONArray("key").getString(1));
+			session.set_id(d.getId());
+			result.add(session);
+		}
+		return result;
+	}
+	
+	@Override
 	public final List<SessionInfo> getMySessionsInfo(final User user) {
 		final List<Session> sessions = this.getMySessions(user);
 		return getInfosForSessions(sessions);

@@ -194,10 +194,14 @@ public class SessionController extends AbstractController {
 
 	@RequestMapping(value = "/publicpool", method = RequestMethod.GET)
 	public final List<Session> getPublicPoolSessions(
+			@RequestParam(value = "myonly", defaultValue = "false") final boolean myOnly,
 			final HttpServletResponse response
 			) {
 		List<Session> sessions;
-		sessions = sessionService.getPublicPoolSessions();
+		if (!myOnly)
+			sessions = sessionService.getPublicPoolSessions();
+		else
+			sessions = sessionService.getMyPublicPoolSessions();
 
 		if (sessions == null || sessions.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);

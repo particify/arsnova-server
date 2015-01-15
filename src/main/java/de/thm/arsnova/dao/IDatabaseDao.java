@@ -43,6 +43,8 @@ public interface IDatabaseDao {
 	List<Session> getMySessions(User user);
 	
 	List<Session> getPublicPoolSessions();
+	
+	List<Session> getMyPublicPoolSessions(User user);
 
 	Session saveSession(User user, Session session);
 
