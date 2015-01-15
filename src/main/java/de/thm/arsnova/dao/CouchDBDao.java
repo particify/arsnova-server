@@ -171,6 +171,12 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 	
 	@Override
+	public final List<SessionInfo> getMyPublicPoolSessionsInfo(final User user) {
+		final List<Session> sessions = this.getMyPublicPoolSessions(user);
+		return getInfosForSessions(sessions);
+	}
+	
+	@Override
 	public final List<SessionInfo> getMySessionsInfo(final User user) {
 		final List<Session> sessions = this.getMySessions(user);
 		return getInfosForSessions(sessions);

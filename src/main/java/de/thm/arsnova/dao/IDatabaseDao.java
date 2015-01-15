@@ -178,6 +178,8 @@ public interface IDatabaseDao {
 
 	List<SessionInfo> getMySessionsInfo(User user);
 
+	List<SessionInfo> getMyPublicPoolSessionsInfo(final User user);
+	
 	List<SessionInfo> getMyVisitedSessionsInfo(User currentUser);
 
 	void deleteAllPreparationAnswers(Session session);

@@ -175,8 +175,8 @@ public class SessionService implements ISessionService {
 	
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public final List<Session> getMyPublicPoolSessions() {
-		return databaseDao.getMyPublicPoolSessions(userService.getCurrentUser());
+	public final List<SessionInfo> getMyPublicPoolSessionsInfo() {
+		return databaseDao.getMyPublicPoolSessionsInfo(userService.getCurrentUser());
 	}
 
 	@Override

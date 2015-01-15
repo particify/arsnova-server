@@ -190,19 +190,29 @@ public class SessionController extends AbstractController {
 		}
 		return sessions;
 	}
-	
 
-	@RequestMapping(value = "/publicpool", method = RequestMethod.GET)
-	public final List<Session> getPublicPoolSessions(
-			@RequestParam(value = "myonly", defaultValue = "false") final boolean myOnly,
+	@RequestMapping(value = "/publicpool", method = RequestMethod.GET, params = "statusonly=true")
+	public final List<SessionInfo> getMyPublicPoolSessions(
 			final HttpServletResponse response
 			) {
-		List<Session> sessions;
-		if (!myOnly)
-			sessions = sessionService.getPublicPoolSessions();
-		else
-			sessions = sessionService.getMyPublicPoolSessions();
+		System.out.println("getMyPublicPoolSessions()");
+		List<SessionInfo> sessions = sessionService.getMyPublicPoolSessionsInfo();
+			
+		if (sessions == null || sessions.isEmpty()) {
+			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+			return null;
+		}
 
+		return sessions;
+	}
+	
+	@RequestMapping(value = "/publicpool", method = RequestMethod.GET)
+	public final List<Session> getPublicPoolSessions(
+			final HttpServletResponse response
+			) {
+		System.out.println("getPublicPoolSessions()");
+		List<Session> sessions = sessionService.getPublicPoolSessions();
+		
 		if (sessions == null || sessions.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
 			return null;
