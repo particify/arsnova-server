@@ -89,6 +89,12 @@ public class ConfigurationController extends AbstractController {
 	@Value("${features.question-format.grid-square.enabled:false}")
 	private String gridSquareEnabled;
 
+	@Value("${features.session-import-export.enabled:false}")
+	private String sessionImportExportEnabled;
+
+	@Value("${features.public-pool.enabled}")
+	private String publicPoolEnabled;
+
 	@Value("${question.answer-option-limit:8}")
 	private String answerOptionLimit;
 
@@ -157,6 +163,8 @@ public class ConfigurationController extends AbstractController {
 		features.put("studentsOwnQuestions", "true".equals(studentsOwnQuestions));
 		features.put("flashcard", "true".equals(flashcardEnabled));
 		features.put("gridSquare", "true".equals(gridSquareEnabled));
+		features.put("sessionImportExport", "true".equals(sessionImportExportEnabled));
+		features.put("publicPool", "true".equals(publicPoolEnabled));
 		
 		// add public pool configuration
 		config.put("publicPool", publicPool);
