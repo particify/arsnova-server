@@ -404,6 +404,7 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("showAnswer", question.isShowAnswer());
 		q.put("abstention", question.isAbstention());
 		q.put("image", question.getImage());
+		q.put("fcImage", question.getFcImage());
 		q.put("gridSize", question.getGridSize());
 		q.put("offsetX", question.getOffsetX());
 		q.put("offsetY", question.getOffsetY());
@@ -443,6 +444,7 @@ public class CouchDBDao implements IDatabaseDao {
 			q.put("showAnswer", question.isShowAnswer());
 			q.put("abstention", question.isAbstention());
 			q.put("image", question.getImage());
+			q.put("fcImage", question.getFcImage());
 			q.put("gridSize", question.getGridSize());
 			q.put("offsetX", question.getOffsetX());
 			q.put("offsetY", question.getOffsetY());

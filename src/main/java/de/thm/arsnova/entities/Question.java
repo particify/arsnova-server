@@ -45,6 +45,7 @@ public class Question {
 	private String _rev;
 
 	private String image;
+	private String fcImage;
 	private int gridSize;
 	private int offsetX;
 	private int offsetY;
@@ -248,6 +249,14 @@ public class Question {
 
 	public void setImage(final String image) {
 		this.image = image;
+	}
+	
+	public String getFcImage() {
+		return fcImage;
+	}
+
+	public void setFcImage(final String fcImage) {
+		this.fcImage = fcImage;
 	}
 
 	public int getGridSize() {
