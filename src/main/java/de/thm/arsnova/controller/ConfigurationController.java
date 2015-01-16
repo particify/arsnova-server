@@ -92,7 +92,7 @@ public class ConfigurationController extends AbstractController {
 	@Value("${features.session-import-export.enabled:false}")
 	private String sessionImportExportEnabled;
 
-	@Value("${features.public-pool.enabled}")
+	@Value("${features.public-pool.enabled:false}")
 	private String publicPoolEnabled;
 
 	@Value("${question.answer-option-limit:8}")
@@ -112,6 +112,12 @@ public class ConfigurationController extends AbstractController {
 
 	@Value("${upload.filesize_b}")
 	private String gridImageMaxFileSize;
+	
+	@Value("${pp.session-levels.de}")
+	private String ppLevelsDe;
+
+	@Value("${pp.session-levels.en}")
+	private String ppLevelsEn;
 	
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
@@ -172,6 +178,8 @@ public class ConfigurationController extends AbstractController {
 		publicPool.put("subjects", ppSubjects);
 		publicPool.put("licenses", ppLicenses);
 		publicPool.put("logoMaxFilesize", ppLogoMaxFilesize);
+		publicPool.put("levelsDe", ppLevelsDe);
+		publicPool.put("levelsEn", ppLevelsEn);
 
 		config.put("grid", gridImageMaxFileSize);
 

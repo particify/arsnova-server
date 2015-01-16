@@ -47,6 +47,7 @@ public class Session implements Serializable {
 	private String ppLicense;
 	private String ppDescription;
 	private String ppFaculty;
+	private String ppLevel;
 	private String sessionType;
 
 	private String _id;
@@ -227,6 +228,14 @@ public class Session implements Serializable {
 	
 	public void setPpFaculty(final String ppFaculty) {
 		this.ppFaculty = ppFaculty;
+	}
+	
+	public String getPpLevel() {
+		return ppLevel;
+	}
+	
+	public void setPpLevel(final String ppLevel) {
+		this.ppLevel = ppLevel;
 	}
 	
 	public String getSessionType() {

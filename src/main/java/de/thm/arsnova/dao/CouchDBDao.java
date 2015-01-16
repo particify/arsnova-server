@@ -131,7 +131,7 @@ public class CouchDBDao implements IDatabaseDao {
 	
 	@Override
 	public final List<Session> getPublicPoolSessions() {
-		final NovaView view = new NovaView("session/public_pool_by_id");
+		final NovaView view = new NovaView("session/public_pool_by_subject");
 
 		final ViewResults sessions = getDatabase().view(view);
 
@@ -382,6 +382,7 @@ public class CouchDBDao implements IDatabaseDao {
 		sessionDocument.put("ppLicense", session.getPpLicense());
 		sessionDocument.put("ppDescription", session.getPpDescription());
 		sessionDocument.put("ppFaculty", session.getPpFaculty());
+		sessionDocument.put("ppLevel", session.getPpLevel());
 		sessionDocument.put("sessionType", session.getSessionType());
 		try {
 			database.saveDocument(sessionDocument);
