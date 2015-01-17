@@ -1438,6 +1438,11 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public void publishAllQuestions(final Session session, final boolean publish) {
 		final List<Question> questions = getQuestions(new NovaView("skill_question/by_session"), session);
+		publishQuestions(session, publish, questions);
+	}
+	
+	@Override
+	public void publishQuestions(final Session session, final boolean publish, List<Question> questions) {
 		for (final Question q : questions) {
 			q.setActive(publish);
 		}

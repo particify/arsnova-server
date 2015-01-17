@@ -597,6 +597,17 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 		databaseDao.publishAllQuestions(session, publish);
 	}
+	
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public void publishQuestions(final String sessionkey, final boolean publish, List<Question> questions) {
+		final User user = getCurrentUser();
+		final Session session = getSession(sessionkey);
+		if (!session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
+		databaseDao.publishQuestions(session, publish, questions);
+	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")

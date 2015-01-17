@@ -120,6 +120,8 @@ public interface IQuestionService {
 	void deleteAllInterposedQuestions(String sessionKeyword);
 
 	void publishAll(String sessionkey, boolean publish);
+	
+	void publishQuestions(String sessionkey, boolean publish, List<Question> questions);
 
 	void deleteAllQuestionsAnswers(String sessionkey);
 

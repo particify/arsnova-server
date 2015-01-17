@@ -99,13 +99,26 @@ public class LecturerQuestionController extends AbstractController {
 	@RequestMapping(value = "/publish", method = RequestMethod.POST)
 	public final void publishAllQuestions(
 			@RequestParam final String sessionkey,
-			@RequestParam(required = false) final Boolean publish
+			@RequestParam(required = false) final Boolean publish,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false) final boolean lectureQuestionsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) final boolean preparationQuestionsOnly
 			) {
 		boolean p = true;
+		List<Question> questions;
+		
 		if (publish != null) {
 			p = publish;
 		}
-		questionService.publishAll(sessionkey, p);
+		
+		if (lectureQuestionsOnly) {
+			questions = questionService.getLectureQuestions(sessionkey);
+			questionService.publishQuestions(sessionkey, publish, questions);
+		} else if (preparationQuestionsOnly) {
+			questions = questionService.getPreparationQuestions(sessionkey);
+			questionService.publishQuestions(sessionkey, publish, questions);
+		} else {
+			questionService.publishAll(sessionkey, p);
+		}
 	}
 
 	@RequestMapping(value = "/{questionId}/publishstatistics", method = RequestMethod.POST)
