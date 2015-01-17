@@ -7,7 +7,7 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<org.springframework-version>4.0.8.RELEASE</org.springframework-version>
+		<org.springframework-version>4.0.9.RELEASE</org.springframework-version>
 		<org.springframework.security-version>3.2.5.RELEASE</org.springframework.security-version>
 		<org.springframework.integration-mail-version>4.0.6.RELEASE</org.springframework.integration-mail-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -201,12 +201,12 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.9</version>
+			<version>1.7.10</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.7.9</version>
+			<version>1.7.10</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
@@ -263,7 +263,7 @@
 		<dependency>
 			<groupId>com.corundumstudio.socketio</groupId>
 			<artifactId>netty-socketio</artifactId>
-			<version>1.7.5</version>
+			<version>1.7.6</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.inject</groupId>
@@ -274,7 +274,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.4.2</version>
+			<version>2.4.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -311,7 +311,7 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.3.5</version>
+			<version>4.3.6</version>
 		</dependency>
 		<dependency>
 			<groupId>de.thm.arsnova.connector</groupId>
