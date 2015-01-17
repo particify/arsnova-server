@@ -71,6 +71,7 @@ public class LoginController extends AbstractController {
 	private static final int MAX_USERNAME_LENGTH = 15;
 	private static final int MAX_GUESTHASH_LENGTH = 10;
 
+	@Value("${api.path:}") private String apiPath;
 	@Value("${customization.path}") private String customizationPath;
 
 	@Value("${security.guest.enabled}") private String guestEnabled;
@@ -285,7 +286,10 @@ public class LoginController extends AbstractController {
 		request.getSession().invalidate();
 		SecurityContextHolder.clearContext();
 		if (auth instanceof CasAuthenticationToken) {
-			return new RedirectView("/j_spring_cas_security_logout", true);
+			if ("".equals(apiPath)) {
+				apiPath = request.getContextPath();
+			}
+			return new RedirectView(apiPath + "/j_spring_cas_security_logout", true);
 		}
 		return new RedirectView(request.getHeader("referer") != null ? request.getHeader("referer") : "/");
 	}
@@ -295,8 +299,11 @@ public class LoginController extends AbstractController {
 	public final List<ServiceDescription> getServices(final HttpServletRequest request) {
 		List<ServiceDescription> services = new ArrayList<ServiceDescription>();
 
+		if ("".equals(apiPath)) {
+			apiPath = request.getContextPath();
+		}
 		/* The first parameter is replaced by the backend, the second one by the frondend */
-		String dialogUrl = request.getContextPath() + "/auth/dialog?type={0}&successurl='{0}'";
+		String dialogUrl = apiPath + "/auth/dialog?type={0}&successurl='{0}'";
 
 		if ("true".equals(guestEnabled)) {
 			ServiceDescription sdesc = new ServiceDescription(

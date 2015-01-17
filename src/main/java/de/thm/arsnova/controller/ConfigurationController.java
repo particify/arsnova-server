@@ -44,6 +44,9 @@ public class ConfigurationController extends AbstractController {
 	public static final Logger LOGGER = LoggerFactory
 			.getLogger(ConfigurationController.class);
 
+	@Value("${api.path:}")
+	private String apiPath;
+
 	@Value("${customization.path}")
 	private String customizationPath;
 
@@ -114,7 +117,10 @@ public class ConfigurationController extends AbstractController {
 		HashMap<String, Boolean> features = new HashMap<String, Boolean>();
 
 		/* The API path could be unknown to the client in case the request was forwarded */
-		config.put("apiPath", request.getContextPath());
+		if ("".equals(apiPath)) {
+			apiPath = request.getContextPath();
+		}
+		config.put("apiPath", apiPath);
 
 		if (!"".equals(customizationPath)) {
 			config.put("customizationPath", customizationPath);
