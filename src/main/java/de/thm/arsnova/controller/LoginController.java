@@ -235,15 +235,20 @@ public class LoginController extends AbstractController {
 			failureUrl = "/";
 		}
 
-		/* Workaround until a solution is found to do a redirect which is
-		 * relative to the server root instead of the context path */
-		String port;
+		String serverUrl = request.getScheme() + "://" + request.getServerName();
+		/* Handle proxy
+		 * TODO: It might be better, to support the proposed standard: http://tools.ietf.org/html/rfc7239 */
+		int port = "".equals(request.getHeader("X-Forwarded-Port"))
+				? Integer.valueOf(request.getHeader("X-Forwarded-Port")) : request.getServerPort();
 		if ("https".equals(request.getScheme())) {
-			port = 443 != request.getServerPort() ? ":" + request.getLocalPort() : "";
+			if (443 != port) {
+				serverUrl = serverUrl + ":" + String.valueOf(port);
+			}
 		} else {
-			port = 80 != request.getServerPort() ? ":" + request.getLocalPort() : "";
+			if (80 != port) {
+				serverUrl = serverUrl + ":" + String.valueOf(port);
+			}
 		}
-		String serverUrl = request.getScheme() + "://" + request.getServerName() + port;
 
 		request.getSession().setAttribute("ars-login-success-url", serverUrl + successUrl);
 		request.getSession().setAttribute("ars-login-failure-url", serverUrl + failureUrl);
