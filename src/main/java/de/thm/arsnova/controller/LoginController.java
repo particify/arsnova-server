@@ -288,7 +288,7 @@ public class LoginController extends AbstractController {
 			if ("".equals(apiPath)) {
 				apiPath = request.getContextPath();
 			}
-			return new RedirectView(apiPath + "/j_spring_cas_security_logout", true);
+			return new RedirectView(apiPath + "/j_spring_cas_security_logout");
 		}
 		return new RedirectView(request.getHeader("referer") != null ? request.getHeader("referer") : "/");
 	}
