@@ -1,14 +1,13 @@
 /*
- * Copyright (C) 2012 THM webMedia
+ * This file is part of ARSnova Backend.
+ * Copyright (C) 2012-2015 The ARSnova Team
  *
- * This file is part of ARSnova.
- *
- * ARSnova is free software: you can redistribute it and/or modify
+ * ARSnova Backend is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ARSnova is distributed in the hope that it will be useful,
+ * ARSnova Backend is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -71,6 +70,7 @@ public class LoginController extends AbstractController {
 	private static final int MAX_USERNAME_LENGTH = 15;
 	private static final int MAX_GUESTHASH_LENGTH = 10;
 
+	@Value("${api.path:}") private String apiPath;
 	@Value("${customization.path}") private String customizationPath;
 
 	@Value("${security.guest.enabled}") private String guestEnabled;
@@ -235,15 +235,20 @@ public class LoginController extends AbstractController {
 			failureUrl = "/";
 		}
 
-		/* Workaround until a solution is found to do a redirect which is
-		 * relative to the server root instead of the context path */
-		String port;
+		String serverUrl = request.getScheme() + "://" + request.getServerName();
+		/* Handle proxy
+		 * TODO: It might be better, to support the proposed standard: http://tools.ietf.org/html/rfc7239 */
+		int port = "".equals(request.getHeader("X-Forwarded-Port"))
+				? Integer.valueOf(request.getHeader("X-Forwarded-Port")) : request.getServerPort();
 		if ("https".equals(request.getScheme())) {
-			port = 443 != request.getServerPort() ? ":" + request.getLocalPort() : "";
+			if (443 != port) {
+				serverUrl = serverUrl + ":" + String.valueOf(port);
+			}
 		} else {
-			port = 80 != request.getServerPort() ? ":" + request.getLocalPort() : "";
+			if (80 != port) {
+				serverUrl = serverUrl + ":" + String.valueOf(port);
+			}
 		}
-		String serverUrl = request.getScheme() + "://" + request.getServerName() + port;
 
 		request.getSession().setAttribute("ars-login-success-url", serverUrl + successUrl);
 		request.getSession().setAttribute("ars-login-failure-url", serverUrl + failureUrl);
@@ -280,7 +285,10 @@ public class LoginController extends AbstractController {
 		request.getSession().invalidate();
 		SecurityContextHolder.clearContext();
 		if (auth instanceof CasAuthenticationToken) {
-			return new RedirectView("/j_spring_cas_security_logout", true);
+			if ("".equals(apiPath)) {
+				apiPath = request.getContextPath();
+			}
+			return new RedirectView(apiPath + "/j_spring_cas_security_logout");
 		}
 		return new RedirectView(request.getHeader("referer") != null ? request.getHeader("referer") : "/");
 	}
@@ -290,8 +298,11 @@ public class LoginController extends AbstractController {
 	public final List<ServiceDescription> getServices(final HttpServletRequest request) {
 		List<ServiceDescription> services = new ArrayList<ServiceDescription>();
 
+		if ("".equals(apiPath)) {
+			apiPath = request.getContextPath();
+		}
 		/* The first parameter is replaced by the backend, the second one by the frondend */
-		String dialogUrl = request.getContextPath() + "/auth/dialog?type={0}&successurl='{0}'";
+		String dialogUrl = apiPath + "/auth/dialog?type={0}&successurl='{0}'";
 
 		if ("true".equals(guestEnabled)) {
 			ServiceDescription sdesc = new ServiceDescription(

@@ -5,6 +5,11 @@
 # http://localhost:8080 for development.
 root-url=https://example.com
 
+# The path where the ARSnova API is accessible by clients. By default, this path
+# is set to the context path of the backend. If you are running the backend
+# behind a proxy server, you might need to set this path manually.
+#api.path=/api
+
 # The context paths where the ARSnova modules have been deployed
 customization.path=/customization
 mobile.path=/mobile

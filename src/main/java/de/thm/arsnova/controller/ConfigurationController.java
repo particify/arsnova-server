@@ -1,14 +1,13 @@
 /*
- * Copyright (C) 2014 THM webMedia
+ * This file is part of ARSnova Backend.
+ * Copyright (C) 2012-2015 The ARSnova Team
  *
- * This file is part of ARSnova.
- *
- * ARSnova is free software: you can redistribute it and/or modify
+ * ARSnova Backend is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ARSnova is distributed in the hope that it will be useful,
+ * ARSnova Backend is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -43,6 +42,9 @@ public class ConfigurationController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory
 			.getLogger(ConfigurationController.class);
+
+	@Value("${api.path:}")
+	private String apiPath;
 
 	@Value("${customization.path}")
 	private String customizationPath;
@@ -117,7 +119,10 @@ public class ConfigurationController extends AbstractController {
 		HashMap<String, Boolean> features = new HashMap<String, Boolean>();
 
 		/* The API path could be unknown to the client in case the request was forwarded */
-		config.put("apiPath", request.getContextPath());
+		if ("".equals(apiPath)) {
+			apiPath = request.getContextPath();
+		}
+		config.put("apiPath", apiPath);
 
 		if (!"".equals(customizationPath)) {
 			config.put("customizationPath", customizationPath);
