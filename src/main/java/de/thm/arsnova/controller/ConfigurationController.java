@@ -106,6 +106,9 @@ public class ConfigurationController extends AbstractController {
 
 	@Value("${tracking.site-id}")
 	private String trackingSiteId;
+	
+	@Value("${optional.demoSessionKey:}")
+	private String demoSessionKey;
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
@@ -146,6 +149,9 @@ public class ConfigurationController extends AbstractController {
 		}
 		if (!"".equals(privacyPolicyUrl)) {
 			config.put("privacyPolicyUrl", privacyPolicyUrl);
+		}
+		if (!"".equals(demoSessionKey)) {
+			config.put("demoSessionKey", demoSessionKey);
 		}
 
 		config.put("answerOptionLimit", Integer.valueOf(answerOptionLimit));

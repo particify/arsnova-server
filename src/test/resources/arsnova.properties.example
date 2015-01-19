@@ -191,6 +191,9 @@ question.answer-option-limit=8
 # effect if neither MathJax nor Markdown are enabled.
 question.parse-answer-option-formatting=false
 
+#optional: demo session keyword to show above session login button
+optional.demoSessionKey=
+
 # Links which are displayed in the frontend applications
 #
 links.blog.url=https://arsnova.eu/blog/
