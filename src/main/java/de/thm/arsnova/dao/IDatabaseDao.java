@@ -37,6 +37,8 @@ public interface IDatabaseDao {
 	Session getSession(String keyword);
 
 	List<Session> getMySessions(User user);
+	
+	List<Session> getPublicPoolSessions();
 
 	Session saveSession(User user, Session session);
 

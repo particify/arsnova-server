@@ -100,7 +100,8 @@ public class SessionController extends AbstractController {
 				session.setName(session.getName() + appendix);
 				session.setShortName(session.getShortName() + appendix);
 			}
-		}
+		}		
+		
 		final Session newSession = sessionService.saveSession(session);
 
 		if (newSession == null) {
@@ -185,6 +186,22 @@ public class SessionController extends AbstractController {
 		} else {
 			Collections.sort(sessions, new SessionInfoNameComparator());
 		}
+		return sessions;
+	}
+	
+
+	@RequestMapping(value = "/public_pool", method = RequestMethod.GET)
+	public final List<Session> getPublicPoolSessions(
+			final HttpServletResponse response
+			) {
+		List<Session> sessions;
+		sessions = sessionService.getPublicPoolSessions();
+
+		if (sessions == null || sessions.isEmpty()) {
+			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+			return null;
+		}
+
 		return sessions;
 	}
 

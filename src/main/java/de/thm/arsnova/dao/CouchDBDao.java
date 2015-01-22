@@ -126,7 +126,26 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		return result;
 	}
+	
+	@Override
+	public final List<Session> getPublicPoolSessions() {
+		final NovaView view = new NovaView("session/public_pool_by_id");
 
+		final ViewResults sessions = getDatabase().view(view);
+
+		final List<Session> result = new ArrayList<Session>();
+		
+		for (final Document d : sessions.getResults()) {
+			final Session session = (Session) JSONObject.toBean(
+					d.getJSONObject().getJSONObject("value"),
+					Session.class
+					);
+			//session.set_id(d.getId());
+			result.add(session);
+		}
+		return result;
+	}
+	
 	@Override
 	public final List<SessionInfo> getMySessionsInfo(final User user) {
 		final List<Session> sessions = this.getMySessions(user);
@@ -324,6 +343,13 @@ public class CouchDBDao implements IDatabaseDao {
 		sessionDocument.put("active", true);
 		sessionDocument.put("courseType", session.getCourseType());
 		sessionDocument.put("courseId", session.getCourseId());
+		sessionDocument.put("creationTime", session.getCreationTime());
+		sessionDocument.put("ppAuthorName", session.getPpAuthorName());
+		sessionDocument.put("ppAuthorMail", session.getPpAuthorMail());
+		sessionDocument.put("ppUniversity", session.getPpUniversity());
+		sessionDocument.put("ppLogo", session.getPpLogo());
+		sessionDocument.put("ppSubject", session.getPpSubject());
+		sessionDocument.put("ppLicense", session.getPpLicense());
 		try {
 			database.saveDocument(sessionDocument);
 		} catch (final IOException e) {
