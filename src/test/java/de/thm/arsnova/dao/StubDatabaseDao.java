@@ -555,4 +555,10 @@ public class StubDatabaseDao implements IDatabaseDao {
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public int getAbstentionAnswerCount(String questionId) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }
