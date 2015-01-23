@@ -735,7 +735,8 @@ public class CouchDBDao implements IDatabaseDao {
 		return answers;
 	}
 
-	private int getAbstentionAnswerCount(final String questionId) {
+	@Override
+	public int getAbstentionAnswerCount(final String questionId) {
 		final NovaView view = new NovaView("skill_question/count_abstention_answers_by_question");
 		view.setKey(questionId);
 		view.setGroup(true);
@@ -756,6 +757,7 @@ public class CouchDBDao implements IDatabaseDao {
 		if (results.getResults().size() == 0) {
 			return 0;
 		}
+		
 		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 	}
 
