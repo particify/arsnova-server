@@ -176,6 +176,8 @@ features.learning-progress.enabled=false
 features.students-own-questions.enabled=false
 features.question-format.flashcard.enabled=false
 features.question-format.grid-square.enabled=false
+
+# Without enabled session-import-export feature no sessions can be added to the public pool
 features.session-import-export.enabled=false
 features.public-pool.enabled=false
 
