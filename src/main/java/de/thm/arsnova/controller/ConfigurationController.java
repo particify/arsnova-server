@@ -1,14 +1,13 @@
 /*
- * Copyright (C) 2014 THM webMedia
+ * This file is part of ARSnova Backend.
+ * Copyright (C) 2012-2015 The ARSnova Team
  *
- * This file is part of ARSnova.
- *
- * ARSnova is free software: you can redistribute it and/or modify
+ * ARSnova Backend is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ARSnova is distributed in the hope that it will be useful,
+ * ARSnova Backend is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -44,6 +43,9 @@ public class ConfigurationController extends AbstractController {
 	public static final Logger LOGGER = LoggerFactory
 			.getLogger(ConfigurationController.class);
 
+	@Value("${api.path:}")
+	private String apiPath;
+
 	@Value("${customization.path}")
 	private String customizationPath;
 
@@ -61,6 +63,9 @@ public class ConfigurationController extends AbstractController {
 
 	@Value("${links.imprint.url}")
 	private String imprintUrl;
+
+	@Value("${links.blog.url:}")
+	private String blogUrl;
 
 	@Value("${links.privacy-policy.url}")
 	private String privacyPolicyUrl;
@@ -112,7 +117,19 @@ public class ConfigurationController extends AbstractController {
 
 	@Value("${upload.filesize_b}")
 	private String gridImageMaxFileSize;
+
+	@Value("${tracking.provider}")
+	private String trackingProvider;
+
+	@Value("${tracking.tracker-url}")
+	private String trackingTrackerUrl;
+
+	@Value("${tracking.site-id}")
+	private String trackingSiteId;
 	
+	@Value("${optional.demoSessionKey:}")
+	private String demoSessionKey;
+
 	@Value("${pp.session-levels.de}")
 	private String ppLevelsDe;
 
@@ -127,7 +144,10 @@ public class ConfigurationController extends AbstractController {
 		HashMap<String, String> publicPool = new HashMap<String, String>();
 
 		/* The API path could be unknown to the client in case the request was forwarded */
-		config.put("apiPath", request.getContextPath());
+		if ("".equals(apiPath)) {
+			apiPath = request.getContextPath();
+		}
+		config.put("apiPath", apiPath);
 
 		if (!"".equals(customizationPath)) {
 			config.put("customizationPath", customizationPath);
@@ -142,7 +162,10 @@ public class ConfigurationController extends AbstractController {
 		if (!"".equals(documentationUrl)) {
 			config.put("documentationUrl", documentationUrl);
 		}
-		if (!"".equals(presenterDocumentationUrl)) {
+		if (!"".equals(blogUrl)) {
+			config.put("blogUrl", blogUrl);
+		}
+ 		if (!"".equals(presenterDocumentationUrl)) {
 			config.put("presenterDocumentationUrl", presenterDocumentationUrl);
 		}
 		if (!"".equals(overlayUrl)) {
@@ -156,6 +179,9 @@ public class ConfigurationController extends AbstractController {
 		}
 		if (!"".equals(privacyPolicyUrl)) {
 			config.put("privacyPolicyUrl", privacyPolicyUrl);
+		}
+		if (!"".equals(demoSessionKey)) {
+			config.put("demoSessionKey", demoSessionKey);
 		}
 
 		config.put("answerOptionLimit", Integer.valueOf(answerOptionLimit));
@@ -178,6 +204,15 @@ public class ConfigurationController extends AbstractController {
 		publicPool.put("subjects", ppSubjects);
 		publicPool.put("licenses", ppLicenses);
 		publicPool.put("logoMaxFilesize", ppLogoMaxFilesize);
+
+		if (!"".equals(trackingTrackerUrl)) {
+			HashMap<String, String> tracking = new HashMap<String, String>();
+			config.put("tracking", tracking);
+
+			tracking.put("provider", trackingProvider);
+			tracking.put("trackerUrl", trackingTrackerUrl);
+			tracking.put("siteId", trackingSiteId);
+		}
 		publicPool.put("levelsDe", ppLevelsDe);
 		publicPool.put("levelsEn", ppLevelsEn);
 

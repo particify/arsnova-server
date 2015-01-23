@@ -5,6 +5,11 @@
 # http://localhost:8080 for development.
 root-url=https://example.com
 
+# The path where the ARSnova API is accessible by clients. By default, this path
+# is set to the context path of the backend. If you are running the backend
+# behind a proxy server, you might need to set this path manually.
+#api.path=/api
+
 # The context paths where the ARSnova modules have been deployed
 customization.path=/customization
 mobile.path=/mobile
@@ -94,7 +99,7 @@ security.user-db.reset-password-mail.body=You requested to reset your \
     password.\n\nPlease follow the link below to set a new password:\n{0}
 
 # LDAP authentication
-# 
+#
 # Specific parameters:
 # url: LDAP server URL
 # user-dn-pattern: Pattern used to check user credentials against the LDAP
@@ -191,11 +196,26 @@ question.answer-option-limit=8
 # effect if neither MathJax nor Markdown are enabled.
 question.parse-answer-option-formatting=false
 
+#optional: demo session keyword to show above session login button
+optional.demoSessionKey=
+
 # Links which are displayed in the frontend applications
 #
+links.blog.url=https://arsnova.eu/blog/
 links.documentation.url=https://arsnova.eu/manual/
 links.presenter-documentation.url=
 links.overlay.url=https://arsnova.eu/overlay/
 links.organization.url=
 links.imprint.url=
 links.privacy-policy.url=
+
+
+################################################################################
+# Tracking
+################################################################################
+# It is possible to use an external tracking software with ARSnova. Currently
+# Piwik is the only supported tracking provider.
+#
+tracking.provider=piwik
+tracking.tracker-url=
+tracking.site-id=

@@ -477,6 +477,12 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public void deleteAllInterposedQuestions(Session session) {
 		// TODO Auto-generated method stub
 	}
+	
+	@Override
+	public void publishQuestions(Session session, boolean publish, List<Question> questions) {
+		// TODO Auto-generated method stub
+
+	}
 
 	@Override
 	public void publishAllQuestions(Session session, boolean publish) {

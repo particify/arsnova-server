@@ -1,14 +1,13 @@
 /*
- * Copyright (C) 2012 THM webMedia
+ * This file is part of ARSnova Backend.
+ * Copyright (C) 2012-2015 The ARSnova Team
  *
- * This file is part of ARSnova.
- *
- * ARSnova is free software: you can redistribute it and/or modify
+ * ARSnova Backend is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ARSnova is distributed in the hope that it will be useful,
+ * ARSnova Backend is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -16,13 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package de.thm.arsnova.services;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.AbstractMap.SimpleEntry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -219,7 +219,6 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final Question question = databaseDao.getQuestion(questionId);
 		databaseDao.deleteAnswers(question);
 	}
-
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
@@ -501,6 +500,13 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	public int getPreparationQuestionCount(final String sessionkey) {
 		return databaseDao.getPreparationQuestionCount(getSession(sessionkey));
 	}
+	
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public SimpleEntry<String,Integer> getAnswerCountByQuestion(final String questionid) {
+		final int questioncount = getAnswerCount(questionid);
+		return new AbstractMap.SimpleEntry<String, Integer>(questionid, questioncount);
+	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
@@ -588,6 +594,17 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			throw new UnauthorizedException();
 		}
 		databaseDao.publishAllQuestions(session, publish);
+	}
+	
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public void publishQuestions(final String sessionkey, final boolean publish, List<Question> questions) {
+		final User user = getCurrentUser();
+		final Session session = getSession(sessionkey);
+		if (!session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
+		databaseDao.publishQuestions(session, publish, questions);
 	}
 
 	@Override

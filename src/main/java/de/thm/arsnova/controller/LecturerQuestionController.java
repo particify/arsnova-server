@@ -1,14 +1,13 @@
 /*
- * Copyright (C) 2012 THM webMedia
+ * This file is part of ARSnova Backend.
+ * Copyright (C) 2012-2015 The ARSnova Team
  *
- * This file is part of ARSnova.
- *
- * ARSnova is free software: you can redistribute it and/or modify
+ * ARSnova Backend is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ARSnova is distributed in the hope that it will be useful,
+ * ARSnova Backend is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -99,13 +98,26 @@ public class LecturerQuestionController extends AbstractController {
 	@RequestMapping(value = "/publish", method = RequestMethod.POST)
 	public final void publishAllQuestions(
 			@RequestParam final String sessionkey,
-			@RequestParam(required = false) final Boolean publish
+			@RequestParam(required = false) final Boolean publish,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false) final boolean lectureQuestionsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) final boolean preparationQuestionsOnly
 			) {
 		boolean p = true;
+		List<Question> questions;
+		
 		if (publish != null) {
 			p = publish;
 		}
-		questionService.publishAll(sessionkey, p);
+		
+		if (lectureQuestionsOnly) {
+			questions = questionService.getLectureQuestions(sessionkey);
+			questionService.publishQuestions(sessionkey, publish, questions);
+		} else if (preparationQuestionsOnly) {
+			questions = questionService.getPreparationQuestions(sessionkey);
+			questionService.publishQuestions(sessionkey, publish, questions);
+		} else {
+			questionService.publishAll(sessionkey, p);
+		}
 	}
 
 	@RequestMapping(value = "/{questionId}/publishstatistics", method = RequestMethod.POST)
