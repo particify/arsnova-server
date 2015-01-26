@@ -410,8 +410,15 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		} else if (question.getPiRound() < 1 || question.getPiRound() > 2) {
 			question.setPiRound(oldQuestion.getPiRound() > 0 ? oldQuestion.getPiRound() : 1);
 		}
+		
+		final Question result = databaseDao.updateQuestion(question);
 
-		return databaseDao.updateQuestion(question);
+		if(!oldQuestion.isActive() && question.isActive()) {
+			final NewQuestionEvent event = new NewQuestionEvent(this, result, session);
+			this.publisher.publishEvent(event);
+		}
+		
+		return result;
 	}
 
 	@Override
