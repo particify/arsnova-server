@@ -19,6 +19,7 @@ package de.thm.arsnova.services;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -269,7 +270,19 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		if (question == null) {
 			return 0;
 		}
+		
 		return databaseDao.getAnswerCount(question, question.getPiRound());
+	}
+	
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public int getAbstentionAnswerCount(final String questionId) {
+		final Question question = getQuestion(questionId);
+		if (question == null) {
+			return 0;
+		}
+		
+		return databaseDao.getAbstentionAnswerCount(questionId);
 	}
 
 	@Override
@@ -503,9 +516,13 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public SimpleEntry<String,Integer> getAnswerCountByQuestion(final String questionid) {
-		final int questioncount = getAnswerCount(questionid);
-		return new AbstractMap.SimpleEntry<String, Integer>(questionid, questioncount);
+	public SimpleEntry<String,List<Integer>> getAnswerAndAbstentionCountByQuestion(final String questionid) {
+		final List<Integer> countList = Arrays.asList(
+			getAnswerCount(questionid),
+			getAbstentionAnswerCount(questionid)
+		);
+		
+		return new AbstractMap.SimpleEntry<String, List<Integer>>(questionid, countList);
 	}
 
 	@Override

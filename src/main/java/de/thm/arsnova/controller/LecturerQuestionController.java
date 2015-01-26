@@ -18,6 +18,7 @@
 package de.thm.arsnova.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -377,6 +378,16 @@ public class LecturerQuestionController extends AbstractController {
 		return questionService.getAnswerCount(questionId);
 	}
 
+	@RequestMapping(value = "/{questionId}/answerandabstentioncount", method = RequestMethod.GET)
+	public final List<Integer> getAnswerAndAbstentionCount(@PathVariable final String questionId) {
+		List<Integer> list = Arrays.asList(
+			questionService.getAnswerCount(questionId),
+			questionService.getAbstentionAnswerCount(questionId)
+		);
+		
+		return list;
+	}
+	
 	@RequestMapping(value = "/{questionId}/freetextanswer/", method = RequestMethod.GET)
 	public final List<Answer> getFreetextAnswers(@PathVariable final String questionId) {
 		return questionService.getFreetextAnswers(questionId);

@@ -32,6 +32,7 @@ public class SessionInfo {
 	private int numQuestions;
 	private int numAnswers;
 	private int numInterposed;
+	private int numUnredInterposed;
 	private int numUnanswered;
 
 	public SessionInfo(Session session) {
@@ -129,5 +130,13 @@ public class SessionInfo {
 
 	public void setCreationTime(long creationTime) {
 		this.creationTime = creationTime;
+	}
+
+	public int getNumUnredInterposed() {
+		return numUnredInterposed;
+	}
+
+	public void setNumUnredInterposed(int numUnredInterposed) {
+		this.numUnredInterposed = numUnredInterposed;
 	}
 }
