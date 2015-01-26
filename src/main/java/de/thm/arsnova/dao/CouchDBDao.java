@@ -540,7 +540,11 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("sessionId", session.get_id());
 		q.put("subject", question.getSubject());
 		q.put("text", question.getText());
-		q.put("timestamp", System.currentTimeMillis());
+		if (question.getTimestamp() != 0) {
+			q.put("timestamp", question.getTimestamp());
+		} else {
+			q.put("timestamp", System.currentTimeMillis());
+		}
 		q.put("read", false);
 		q.put("creator", user.getUsername());
 		try {
