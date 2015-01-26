@@ -208,7 +208,6 @@ public class SessionController extends AbstractController {
 	public final List<Session> getPublicPoolSessions(
 			final HttpServletResponse response
 			) {
-		System.out.println("getPublicPoolSessions()");
 		List<Session> sessions = sessionService.getPublicPoolSessions();
 		
 		if (sessions == null || sessions.isEmpty()) {
