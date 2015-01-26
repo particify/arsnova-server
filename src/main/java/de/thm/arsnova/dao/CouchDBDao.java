@@ -129,7 +129,7 @@ public class CouchDBDao implements IDatabaseDao {
 	
 	@Override
 	public final List<Session> getPublicPoolSessions() {
-		final NovaView view = new NovaView("session/public_pool_by_id");
+		final NovaView view = new NovaView("session/public_pool_by_subject");
 
 		final ViewResults sessions = getDatabase().view(view);
 
@@ -144,6 +144,34 @@ public class CouchDBDao implements IDatabaseDao {
 			result.add(session);
 		}
 		return result;
+	}
+	
+	@Override
+	public final List<Session> getMyPublicPoolSessions(final User user) {
+		final NovaView view = new NovaView("session/public_pool_by_creator");
+		view.setStartKeyArray(user.getUsername());
+		view.setEndKeyArray(user.getUsername(), "{}");
+		
+		final ViewResults sessions = getDatabase().view(view);
+
+		final List<Session> result = new ArrayList<Session>();
+		for (final Document d : sessions.getResults()) {
+			final Session session = (Session) JSONObject.toBean(
+					d.getJSONObject().getJSONObject("value"),
+					Session.class
+					);
+			session.setCreator(d.getJSONObject().getJSONArray("key").getString(0));
+			session.setName(d.getJSONObject().getJSONArray("key").getString(1));
+			session.set_id(d.getId());
+			result.add(session);
+		}
+		return result;
+	}
+	
+	@Override
+	public final List<SessionInfo> getMyPublicPoolSessionsInfo(final User user) {
+		final List<Session> sessions = this.getMyPublicPoolSessions(user);
+		return getInfosForSessions(sessions);
 	}
 	
 	@Override
@@ -367,6 +395,10 @@ public class CouchDBDao implements IDatabaseDao {
 		sessionDocument.put("ppLogo", session.getPpLogo());
 		sessionDocument.put("ppSubject", session.getPpSubject());
 		sessionDocument.put("ppLicense", session.getPpLicense());
+		sessionDocument.put("ppDescription", session.getPpDescription());
+		sessionDocument.put("ppFaculty", session.getPpFaculty());
+		sessionDocument.put("ppLevel", session.getPpLevel());
+		sessionDocument.put("sessionType", session.getSessionType());
 		try {
 			database.saveDocument(sessionDocument);
 		} catch (final IOException e) {
@@ -525,7 +557,11 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("sessionId", session.get_id());
 		q.put("subject", question.getSubject());
 		q.put("text", question.getText());
-		q.put("timestamp", System.currentTimeMillis());
+		if (question.getTimestamp() != 0) {
+			q.put("timestamp", question.getTimestamp());
+		} else {
+			q.put("timestamp", System.currentTimeMillis());
+		}
 		q.put("read", false);
 		q.put("creator", user.getUsername());
 		try {
