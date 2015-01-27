@@ -19,17 +19,14 @@ package de.thm.arsnova.services;
 
 import java.io.Serializable;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +34,8 @@ import de.thm.arsnova.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.dao.IDatabaseDao;
+import de.thm.arsnova.domain.LearningProgress;
+import de.thm.arsnova.domain.LearningProgressFactory;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
@@ -94,12 +93,15 @@ public class SessionService implements ISessionService {
 	@Autowired
 	private ARSnovaSocketIOServer socketIoServer;
 
+	@Autowired
+	private LearningProgressFactory learningProgressFactory;
+
 	@Autowired(required = false)
 	private ConnectorClient connectorClient;
-	
+
 	@Value("${pp.logofilesize_b}")
 	private int uploadFileSizeByte;
-	
+
 	public static final Logger LOGGER = LoggerFactory.getLogger(SessionService.class);
 
 	public void setDatabaseDao(final IDatabaseDao newDatabaseDao) {
@@ -164,13 +166,13 @@ public class SessionService implements ISessionService {
 	public final List<Session> getMySessions() {
 		return databaseDao.getMySessions(userService.getCurrentUser());
 	}
-	
+
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public final List<Session> getPublicPoolSessions() {
 		return databaseDao.getPublicPoolSessions();
 	}
-	
+
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public final List<SessionInfo> getMyPublicPoolSessionsInfo() {
@@ -221,7 +223,7 @@ public class SessionService implements ISessionService {
 				throw new BadRequestException();
 			}
 		}
-		
+
 		return databaseDao.saveSession(userService.getCurrentUser(), session);
 	}
 
@@ -286,16 +288,18 @@ public class SessionService implements ISessionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getLearningProgress(final String sessionkey) {
+	public int getLearningProgress(final String sessionkey, final String progressType) {
 		final Session session = databaseDao.getSession(sessionkey);
-		return databaseDao.getLearningProgress(session);
+		LearningProgress learningProgress = learningProgressFactory.createFromType(progressType);
+		return learningProgress.getCourseProgress(session);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public SimpleEntry<Integer, Integer> getMyLearningProgress(final String sessionkey) {
+	public SimpleEntry<Integer, Integer> getMyLearningProgress(final String sessionkey, final String progressType) {
 		final Session session = databaseDao.getSession(sessionkey);
 		final User user = userService.getCurrentUser();
-		return databaseDao.getMyLearningProgress(session, user);
+		LearningProgress learningProgress = learningProgressFactory.createFromType(progressType);
+		return learningProgress.getMyProgress(session, user);
 	}
 }

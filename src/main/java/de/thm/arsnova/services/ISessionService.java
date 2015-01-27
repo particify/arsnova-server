@@ -18,9 +18,7 @@
 package de.thm.arsnova.services;
 
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import de.thm.arsnova.connector.model.Course;
@@ -37,7 +35,7 @@ public interface ISessionService {
 	String generateKeyword();
 
 	List<Session> getMySessions();
-	
+
 	List<Session> getPublicPoolSessions();
 
 	List<Session> getMyVisitedSessions();
@@ -54,12 +52,12 @@ public interface ISessionService {
 
 	void deleteSession(String sessionkey);
 
-	int getLearningProgress(String sessionkey);
+	int getLearningProgress(String sessionkey, String progressType);
 
-	SimpleEntry<Integer, Integer> getMyLearningProgress(String sessionkey);
+	SimpleEntry<Integer, Integer> getMyLearningProgress(String sessionkey, String progressType);
 
 	List<SessionInfo> getMySessionsInfo();
-	
+
 	List<SessionInfo> getMyPublicPoolSessionsInfo();
 
 	List<SessionInfo> getMyVisitedSessionsInfo();

@@ -21,8 +21,6 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.json.JSONObject;
@@ -101,8 +99,8 @@ public class SessionController extends AbstractController {
 				session.setName(session.getName() + appendix);
 				session.setShortName(session.getShortName() + appendix);
 			}
-		}		
-		
+		}
+
 		final Session newSession = sessionService.saveSession(session);
 
 		if (newSession == null) {
@@ -195,7 +193,7 @@ public class SessionController extends AbstractController {
 			final HttpServletResponse response
 			) {
 		List<SessionInfo> sessions = sessionService.getMyPublicPoolSessionsInfo();
-			
+
 		if (sessions == null || sessions.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
 			return null;
@@ -203,13 +201,13 @@ public class SessionController extends AbstractController {
 
 		return sessions;
 	}
-	
+
 	@RequestMapping(value = "/publicpool", method = RequestMethod.GET)
 	public final List<Session> getPublicPoolSessions(
 			final HttpServletResponse response
 			) {
 		List<Session> sessions = sessionService.getPublicPoolSessions();
-		
+
 		if (sessions == null || sessions.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
 			return null;
@@ -234,17 +232,19 @@ public class SessionController extends AbstractController {
 	@RequestMapping(value = "/{sessionkey}/learningprogress", method = RequestMethod.GET)
 	public final int learningProgress(
 			@PathVariable final String sessionkey,
+			@RequestParam(value = "type", defaultValue = "questions") final String progressType,
 			final HttpServletResponse response
 			) {
-		return sessionService.getLearningProgress(sessionkey);
+		return sessionService.getLearningProgress(sessionkey, progressType);
 	}
 
 	@RequestMapping(value = "/{sessionkey}/mylearningprogress", method = RequestMethod.GET)
 	public final JSONObject myLearningProgress(
 			@PathVariable final String sessionkey,
+			@RequestParam(value = "type", defaultValue = "questions") final String progressType,
 			final HttpServletResponse response
 			) {
-		final SimpleEntry<Integer, Integer> result = sessionService.getMyLearningProgress(sessionkey);
+		final SimpleEntry<Integer, Integer> result = sessionService.getMyLearningProgress(sessionkey, progressType);
 		final JSONObject json = new JSONObject();
 		json.put("myprogress", result.getKey());
 		json.put("courseprogress", result.getValue());

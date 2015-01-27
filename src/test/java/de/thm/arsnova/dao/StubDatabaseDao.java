@@ -18,13 +18,13 @@
  */
 package de.thm.arsnova.dao;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.thm.arsnova.connector.model.Course;
+import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.Feedback;
@@ -193,19 +193,19 @@ public class StubDatabaseDao implements IDatabaseDao {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	@Override
 	public List<Session> getPublicPoolSessions() {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	@Override
 	public List<Session> getMyPublicPoolSessions(User user) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	@Override
 	public List<SessionInfo> getMyPublicPoolSessionsInfo(final User user) {
 		// TODO Auto-generated method stub
@@ -477,7 +477,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public void deleteAllInterposedQuestions(Session session) {
 		// TODO Auto-generated method stub
 	}
-	
+
 	@Override
 	public void publishQuestions(Session session, boolean publish, List<Question> questions) {
 		// TODO Auto-generated method stub
@@ -509,13 +509,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public int getLearningProgress(Session session) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public SimpleEntry<Integer, Integer> getMyLearningProgress(Session session, User user) {
+	public CourseScore getLearningProgress(Session session) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -18,15 +18,12 @@
 package de.thm.arsnova.dao;
 
 import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import net.sf.ezmorph.Morpher;
@@ -50,6 +47,7 @@ import com.fourspaces.couchdb.View;
 import com.fourspaces.couchdb.ViewResults;
 
 import de.thm.arsnova.connector.model.Course;
+import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.InterposedQuestion;
@@ -127,7 +125,7 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		return result;
 	}
-	
+
 	@Override
 	public final List<Session> getPublicPoolSessions() {
 		final NovaView view = new NovaView("session/public_pool_by_subject");
@@ -135,7 +133,7 @@ public class CouchDBDao implements IDatabaseDao {
 		final ViewResults sessions = getDatabase().view(view);
 
 		final List<Session> result = new ArrayList<Session>();
-		
+
 		for (final Document d : sessions.getResults()) {
 			final Session session = (Session) JSONObject.toBean(
 					d.getJSONObject().getJSONObject("value"),
@@ -146,13 +144,13 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		return result;
 	}
-	
+
 	@Override
 	public final List<Session> getMyPublicPoolSessions(final User user) {
 		final NovaView view = new NovaView("session/public_pool_by_creator");
 		view.setStartKeyArray(user.getUsername());
 		view.setEndKeyArray(user.getUsername(), "{}");
-		
+
 		final ViewResults sessions = getDatabase().view(view);
 
 		final List<Session> result = new ArrayList<Session>();
@@ -168,13 +166,13 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		return result;
 	}
-	
+
 	@Override
 	public final List<SessionInfo> getMyPublicPoolSessionsInfo(final User user) {
 		final List<Session> sessions = this.getMyPublicPoolSessions(user);
 		return getInfosForSessions(sessions);
 	}
-	
+
 	@Override
 	public final List<SessionInfo> getMySessionsInfo(final User user) {
 		final List<Session> sessions = this.getMySessions(user);
@@ -186,7 +184,7 @@ public class CouchDBDao implements IDatabaseDao {
 		final ExtendedView answerCountView = new ExtendedView("skill_question/count_answers_by_session");
 		final ExtendedView interposedCountView = new ExtendedView("interposed_question/count_by_session");
 		final ExtendedView unredInterposedCountView = new ExtendedView("interposed_question/count_by_session_reading");
-		
+
 		interposedCountView.setSessionIdKeys(sessions);
 		interposedCountView.setGroup(true);
 		questionCountView.setSessionIdKeys(sessions);
@@ -278,7 +276,7 @@ public class CouchDBDao implements IDatabaseDao {
 	private List<SessionInfo> getSessionInfoData(final List<Session> sessions,
 			final ExtendedView questionCountView,
 			final ExtendedView answerCountView,
-			final ExtendedView interposedCountView, 
+			final ExtendedView interposedCountView,
 			final ExtendedView unredInterposedCountView) {
 		final ViewResults questionCountViewResults = getDatabase().view(questionCountView);
 		final ViewResults answerCountViewResults = getDatabase().view(answerCountView);
@@ -301,7 +299,7 @@ public class CouchDBDao implements IDatabaseDao {
 		for (final Document d : unredInterposedCountViewResults.getResults()) {
 			unredInterposedCountMap.put(d.getJSONArray("key").getString(0), d.getInt("value"));
 		}
-		
+
 		List<SessionInfo> sessionInfos = new ArrayList<SessionInfo>();
 		for (Session session : sessions) {
 			int numQuestions = 0;
@@ -320,7 +318,7 @@ public class CouchDBDao implements IDatabaseDao {
 			if (unredInterposedCountMap.containsKey(session.get_id())) {
 				numUnredInterposed = unredInterposedCountMap.get(session.get_id());
 			}
-			
+
 			SessionInfo info = new SessionInfo(session);
 			info.setNumQuestions(numQuestions);
 			info.setNumAnswers(numAnswers);
@@ -811,7 +809,7 @@ public class CouchDBDao implements IDatabaseDao {
 		if (results.getResults().size() == 0) {
 			return 0;
 		}
-		
+
 		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 	}
 
@@ -1565,9 +1563,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public int getLearningProgress(final Session session) {
-		// Note: we have to use this many views because our CouchDB version does not support
-		// advanced features like summing over lists. Thus, we have to do it all by ourselves...
+	public CourseScore getLearningProgress(final Session session) {
 		final NovaView maximumValueView = new NovaView("learning_progress/maximum_value_of_question");
 		final NovaView answerSumView = new NovaView("learning_progress/question_value_achieved_for_user");
 		maximumValueView.setStartKeyArray(session.get_id());
@@ -1578,98 +1574,28 @@ public class CouchDBDao implements IDatabaseDao {
 		final List<Document> maximumValueResult = getDatabase().view(maximumValueView).getResults();
 		final List<Document> answerSumResult = getDatabase().view(answerSumView).getResults();
 
+		CourseScore courseScore = new CourseScore();
+
 		// no results found
 		if (maximumValueResult.isEmpty() || answerSumResult.isEmpty()) {
-			return 0;
+			return courseScore;
 		}
 
-		// collect mapping (questionId -> value)
-		Map<String, Integer> questionValues = new HashMap<String, Integer>();
+		// collect mapping (questionId -> max value)
 		for (Document d : maximumValueResult) {
-			questionValues.put(d.getJSONArray("key").getString(1), d.getInt("value"));
+			String questionId = d.getJSONArray("key").getString(1);
+			int questionScore = d.getInt("value");
+			courseScore.add(questionId, questionScore);
 		}
 		// collect mapping (questionId -> (user -> value))
-		Map<String, Map<String, Integer>> answerValues = new HashMap<String, Map<String, Integer>>();
 		for (Document d : answerSumResult) {
+			String username = d.getJSONArray("key").getString(1);
 			JSONObject value = d.getJSONObject("value");
 			String questionId = value.getString("questionId");
-			if (!answerValues.containsKey(questionId)) {
-				answerValues.put(questionId, new HashMap<String, Integer>());
-			}
-			Map<String, Integer> userValues = answerValues.get(questionId);
-			userValues.put(d.getJSONArray("key").getString(1), value.getInt("score"));
-			answerValues.put(questionId, userValues);
+			int userscore = value.getInt("score");
+			courseScore.add(questionId, username, userscore);
 		}
-
-		// a question is seen as "correct" if and only if all participants have answered it correctly
-		int numQuestionsCorrect = 0;
-		for (Entry<String, Integer> entry : questionValues.entrySet()) {
-			if (answerValues.containsKey(entry.getKey())) {
-				Map<String, Integer> userValues = answerValues.get(entry.getKey());
-				int requiredValue = entry.getValue();
-				boolean allCorrect = true;
-				for (Entry<String, Integer> userEntry : userValues.entrySet()) {
-					// did this particular participant answer it correctly, i.e., has the required points?
-					if (userEntry.getValue() != requiredValue) {
-						allCorrect = false;
-						break;
-					}
-				}
-				if (allCorrect) {
-					numQuestionsCorrect++;
-				}
-			}
-		}
-
-		final double myLearningProgress = (double)numQuestionsCorrect / (questionValues.size());
-		// calculate percent, cap results to 100
-		return (int) Math.min(100, Math.round(myLearningProgress*100));
-	}
-
-	@Override
-	public SimpleEntry<Integer,Integer> getMyLearningProgress(final Session session, final User user) {
-		final int courseProgress = getLearningProgress(session);
-
-		final NovaView maximumValueView = new NovaView("learning_progress/maximum_value_of_question");
-		final NovaView answerSumView = new NovaView("learning_progress/question_value_achieved_for_user");
-		maximumValueView.setStartKeyArray(session.get_id());
-		maximumValueView.setEndKeyArray(session.get_id(), "{}");
-		answerSumView.setKey(session.get_id(), user.getUsername());
-
-		final List<Document> maximumValueResult = getDatabase().view(maximumValueView).getResults();
-		final List<Document> answerSumResult = getDatabase().view(answerSumView).getResults();
-
-		// no results found
-		if (maximumValueResult.isEmpty() || answerSumResult.isEmpty()) {
-			return new AbstractMap.SimpleEntry<Integer, Integer>(0, courseProgress);
-		}
-
-		// collect mappings (questionId -> value)
-		Map<String, Integer> questionValues = new HashMap<String, Integer>();
-		for (Document d : maximumValueResult) {
-			questionValues.put(d.getJSONArray("key").getString(1), d.getInt("value"));
-		}
-		Map<String, Integer> answerValues = new HashMap<String, Integer>();
-		for (Document d : answerSumResult) {
-			JSONObject value = d.getJSONObject("value");
-			answerValues.put(value.getString("questionId"), value.getInt("score"));
-		}
-		// compare user's values to the maximum number for each question to determine the answers' correctness
-		// mapping (questionId -> 1 if correct, 0 if incorrect)
-		int numQuestionsCorrect = 0;
-		for (Entry<String, Integer> entry : questionValues.entrySet()) {
-			if (answerValues.containsKey(entry.getKey())) {
-				int answeredValue = answerValues.get(entry.getKey());
-				if (answeredValue == entry.getValue()) {
-					numQuestionsCorrect++;
-				}
-			}
-		}
-
-		final double myLearningProgress = (double)numQuestionsCorrect / (double)(questionValues.size());
-		// calculate percent, cap results to 100
-		final int percentage = (int) Math.min(100, Math.round(myLearningProgress*100));
-		return new AbstractMap.SimpleEntry<Integer, Integer>(percentage, courseProgress);
+		return courseScore;
 	}
 
 	@Override
