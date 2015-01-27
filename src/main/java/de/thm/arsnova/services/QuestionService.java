@@ -19,6 +19,7 @@ package de.thm.arsnova.services;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,7 +110,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				question.setImage(base64ImageString);
 			}
 
-			// base64 adds offset to filesize, formular taken from: http://en.wikipedia.org/wiki/Base64#MIME
+			// base64 adds offset to filesize, formula taken from: http://en.wikipedia.org/wiki/Base64#MIME
 			final int fileSize = (int) ((question.getImage().length()-814)/1.37);
 			if (fileSize > uploadFileSizeByte) {
 				LOGGER.error("Could not save file. File is too large with " + fileSize + " Byte.");
@@ -269,7 +270,19 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		if (question == null) {
 			return 0;
 		}
+		
 		return databaseDao.getAnswerCount(question, question.getPiRound());
+	}
+	
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public int getAbstentionAnswerCount(final String questionId) {
+		final Question question = getQuestion(questionId);
+		if (question == null) {
+			return 0;
+		}
+		
+		return databaseDao.getAbstentionAnswerCount(questionId);
 	}
 
 	@Override
@@ -397,8 +410,15 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		} else if (question.getPiRound() < 1 || question.getPiRound() > 2) {
 			question.setPiRound(oldQuestion.getPiRound() > 0 ? oldQuestion.getPiRound() : 1);
 		}
+		
+		final Question result = databaseDao.updateQuestion(question);
 
-		return databaseDao.updateQuestion(question);
+		if(!oldQuestion.isActive() && question.isActive()) {
+			final NewQuestionEvent event = new NewQuestionEvent(this, result, session);
+			this.publisher.publishEvent(event);
+		}
+		
+		return result;
 	}
 
 	@Override
@@ -503,9 +523,13 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public SimpleEntry<String,Integer> getAnswerCountByQuestion(final String questionid) {
-		final int questioncount = getAnswerCount(questionid);
-		return new AbstractMap.SimpleEntry<String, Integer>(questionid, questioncount);
+	public SimpleEntry<String,List<Integer>> getAnswerAndAbstentionCountByQuestion(final String questionid) {
+		final List<Integer> countList = Arrays.asList(
+			getAnswerCount(questionid),
+			getAbstentionAnswerCount(questionid)
+		);
+		
+		return new AbstractMap.SimpleEntry<String, List<Integer>>(questionid, countList);
 	}
 
 	@Override

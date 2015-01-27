@@ -94,11 +94,29 @@ public class ConfigurationController extends AbstractController {
 	@Value("${features.question-format.grid-square.enabled:false}")
 	private String gridSquareEnabled;
 
+	@Value("${features.session-import-export.enabled:false}")
+	private String sessionImportExportEnabled;
+
+	@Value("${features.public-pool.enabled:false}")
+	private String publicPoolEnabled;
+
 	@Value("${question.answer-option-limit:8}")
 	private String answerOptionLimit;
 
 	@Value("${question.parse-answer-option-formatting:false}")
 	private String parseAnswerOptionFormatting;
+	
+	@Value("${pp.subjects}")
+	private String ppSubjects;
+	
+	@Value("${pp.licenses}")
+	private String ppLicenses;
+
+	@Value("${pp.logofilesize_b}")
+	private String ppLogoMaxFilesize;
+
+	@Value("${upload.filesize_b}")
+	private String gridImageMaxFileSize;
 
 	@Value("${tracking.provider}")
 	private String trackingProvider;
@@ -112,11 +130,18 @@ public class ConfigurationController extends AbstractController {
 	@Value("${optional.demoSessionKey:}")
 	private String demoSessionKey;
 
+	@Value("${pp.session-levels.de}")
+	private String ppLevelsDe;
+
+	@Value("${pp.session-levels.en}")
+	private String ppLevelsEn;
+	
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public final HashMap<String, Object> getConfiguration(HttpServletRequest request) {
 		HashMap<String, Object> config = new HashMap<String, Object>();
 		HashMap<String, Boolean> features = new HashMap<String, Boolean>();
+		HashMap<String, String> publicPool = new HashMap<String, String>();
 
 		/* The API path could be unknown to the client in case the request was forwarded */
 		if ("".equals(apiPath)) {
@@ -170,6 +195,15 @@ public class ConfigurationController extends AbstractController {
 		features.put("studentsOwnQuestions", "true".equals(studentsOwnQuestions));
 		features.put("flashcard", "true".equals(flashcardEnabled));
 		features.put("gridSquare", "true".equals(gridSquareEnabled));
+		features.put("sessionImportExport", "true".equals(sessionImportExportEnabled));
+		features.put("publicPool", "true".equals(publicPoolEnabled));
+		
+		// add public pool configuration
+		config.put("publicPool", publicPool);
+		
+		publicPool.put("subjects", ppSubjects);
+		publicPool.put("licenses", ppLicenses);
+		publicPool.put("logoMaxFilesize", ppLogoMaxFilesize);
 
 		if (!"".equals(trackingTrackerUrl)) {
 			HashMap<String, String> tracking = new HashMap<String, String>();
@@ -179,6 +213,10 @@ public class ConfigurationController extends AbstractController {
 			tracking.put("trackerUrl", trackingTrackerUrl);
 			tracking.put("siteId", trackingSiteId);
 		}
+		publicPool.put("levelsDe", ppLevelsDe);
+		publicPool.put("levelsEn", ppLevelsEn);
+
+		config.put("grid", gridImageMaxFileSize);
 
 		return config;
 	}

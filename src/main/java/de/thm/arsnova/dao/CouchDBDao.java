@@ -127,7 +127,54 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		return result;
 	}
+	
+	@Override
+	public final List<Session> getPublicPoolSessions() {
+		final NovaView view = new NovaView("session/public_pool_by_subject");
 
+		final ViewResults sessions = getDatabase().view(view);
+
+		final List<Session> result = new ArrayList<Session>();
+		
+		for (final Document d : sessions.getResults()) {
+			final Session session = (Session) JSONObject.toBean(
+					d.getJSONObject().getJSONObject("value"),
+					Session.class
+					);
+			//session.set_id(d.getId());
+			result.add(session);
+		}
+		return result;
+	}
+	
+	@Override
+	public final List<Session> getMyPublicPoolSessions(final User user) {
+		final NovaView view = new NovaView("session/public_pool_by_creator");
+		view.setStartKeyArray(user.getUsername());
+		view.setEndKeyArray(user.getUsername(), "{}");
+		
+		final ViewResults sessions = getDatabase().view(view);
+
+		final List<Session> result = new ArrayList<Session>();
+		for (final Document d : sessions.getResults()) {
+			final Session session = (Session) JSONObject.toBean(
+					d.getJSONObject().getJSONObject("value"),
+					Session.class
+					);
+			session.setCreator(d.getJSONObject().getJSONArray("key").getString(0));
+			session.setName(d.getJSONObject().getJSONArray("key").getString(1));
+			session.set_id(d.getId());
+			result.add(session);
+		}
+		return result;
+	}
+	
+	@Override
+	public final List<SessionInfo> getMyPublicPoolSessionsInfo(final User user) {
+		final List<Session> sessions = this.getMyPublicPoolSessions(user);
+		return getInfosForSessions(sessions);
+	}
+	
 	@Override
 	public final List<SessionInfo> getMySessionsInfo(final User user) {
 		final List<Session> sessions = this.getMySessions(user);
@@ -137,18 +184,22 @@ public class CouchDBDao implements IDatabaseDao {
 	private List<SessionInfo> getInfosForSessions(final List<Session> sessions) {
 		final ExtendedView questionCountView = new ExtendedView("skill_question/count_by_session");
 		final ExtendedView answerCountView = new ExtendedView("skill_question/count_answers_by_session");
-		final ExtendedView interposedCountView = new ExtendedView("interposed_question/count_by_session_reading");
+		final ExtendedView interposedCountView = new ExtendedView("interposed_question/count_by_session");
+		final ExtendedView unredInterposedCountView = new ExtendedView("interposed_question/count_by_session_reading");
+		
+		interposedCountView.setSessionIdKeys(sessions);
+		interposedCountView.setGroup(true);
 		questionCountView.setSessionIdKeys(sessions);
 		questionCountView.setGroup(true);
 		answerCountView.setSessionIdKeys(sessions);
 		answerCountView.setGroup(true);
-		List<String> interposedQueryKeys = new ArrayList<String>();
+		List<String> unredInterposedQueryKeys = new ArrayList<String>();
 		for (Session s : sessions) {
-			interposedQueryKeys.add("[\"" + s.get_id() + "\",\"unread\"]");
+			unredInterposedQueryKeys.add("[\"" + s.get_id() + "\",\"unread\"]");
 		}
-		interposedCountView.setKeys(interposedQueryKeys);
-		interposedCountView.setGroup(true);
-		return getSessionInfoData(sessions, questionCountView, answerCountView, interposedCountView);
+		unredInterposedCountView.setKeys(unredInterposedQueryKeys);
+		unredInterposedCountView.setGroup(true);
+		return getSessionInfoData(sessions, questionCountView, answerCountView, interposedCountView, unredInterposedCountView);
 	}
 
 	private List<SessionInfo> getInfosForVisitedSessions(final List<Session> sessions, final User user) {
@@ -227,10 +278,12 @@ public class CouchDBDao implements IDatabaseDao {
 	private List<SessionInfo> getSessionInfoData(final List<Session> sessions,
 			final ExtendedView questionCountView,
 			final ExtendedView answerCountView,
-			final ExtendedView interposedCountView) {
+			final ExtendedView interposedCountView, 
+			final ExtendedView unredInterposedCountView) {
 		final ViewResults questionCountViewResults = getDatabase().view(questionCountView);
 		final ViewResults answerCountViewResults = getDatabase().view(answerCountView);
 		final ViewResults interposedCountViewResults = getDatabase().view(interposedCountView);
+		final ViewResults unredInterposedCountViewResults = getDatabase().view(unredInterposedCountView);
 
 		Map<String, Integer> questionCountMap = new HashMap<String, Integer>();
 		for (final Document d : questionCountViewResults.getResults()) {
@@ -242,13 +295,19 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		Map<String, Integer> interposedCountMap = new HashMap<String, Integer>();
 		for (final Document d : interposedCountViewResults.getResults()) {
-			interposedCountMap.put(d.getJSONArray("key").getString(0), d.getInt("value"));
+			interposedCountMap.put(d.getString("key"), d.getInt("value"));
 		}
+		Map<String, Integer> unredInterposedCountMap = new HashMap<String, Integer>();
+		for (final Document d : unredInterposedCountViewResults.getResults()) {
+			unredInterposedCountMap.put(d.getJSONArray("key").getString(0), d.getInt("value"));
+		}
+		
 		List<SessionInfo> sessionInfos = new ArrayList<SessionInfo>();
 		for (Session session : sessions) {
 			int numQuestions = 0;
 			int numAnswers = 0;
 			int numInterposed = 0;
+			int numUnredInterposed = 0;
 			if (questionCountMap.containsKey(session.get_id())) {
 				numQuestions = questionCountMap.get(session.get_id());
 			}
@@ -258,10 +317,15 @@ public class CouchDBDao implements IDatabaseDao {
 			if (interposedCountMap.containsKey(session.get_id())) {
 				numInterposed = interposedCountMap.get(session.get_id());
 			}
+			if (unredInterposedCountMap.containsKey(session.get_id())) {
+				numUnredInterposed = unredInterposedCountMap.get(session.get_id());
+			}
+			
 			SessionInfo info = new SessionInfo(session);
 			info.setNumQuestions(numQuestions);
 			info.setNumAnswers(numAnswers);
 			info.setNumInterposed(numInterposed);
+			info.setNumUnredInterposed(numUnredInterposed);
 			sessionInfos.add(info);
 		}
 		return sessionInfos;
@@ -325,6 +389,17 @@ public class CouchDBDao implements IDatabaseDao {
 		sessionDocument.put("active", true);
 		sessionDocument.put("courseType", session.getCourseType());
 		sessionDocument.put("courseId", session.getCourseId());
+		sessionDocument.put("creationTime", session.getCreationTime());
+		sessionDocument.put("ppAuthorName", session.getPpAuthorName());
+		sessionDocument.put("ppAuthorMail", session.getPpAuthorMail());
+		sessionDocument.put("ppUniversity", session.getPpUniversity());
+		sessionDocument.put("ppLogo", session.getPpLogo());
+		sessionDocument.put("ppSubject", session.getPpSubject());
+		sessionDocument.put("ppLicense", session.getPpLicense());
+		sessionDocument.put("ppDescription", session.getPpDescription());
+		sessionDocument.put("ppFaculty", session.getPpFaculty());
+		sessionDocument.put("ppLevel", session.getPpLevel());
+		sessionDocument.put("sessionType", session.getSessionType());
 		try {
 			database.saveDocument(sessionDocument);
 		} catch (final IOException e) {
@@ -483,7 +558,11 @@ public class CouchDBDao implements IDatabaseDao {
 		q.put("sessionId", session.get_id());
 		q.put("subject", question.getSubject());
 		q.put("text", question.getText());
-		q.put("timestamp", System.currentTimeMillis());
+		if (question.getTimestamp() != 0) {
+			q.put("timestamp", question.getTimestamp());
+		} else {
+			q.put("timestamp", System.currentTimeMillis());
+		}
 		q.put("read", false);
 		q.put("creator", user.getUsername());
 		try {
@@ -710,7 +789,8 @@ public class CouchDBDao implements IDatabaseDao {
 		return answers;
 	}
 
-	private int getAbstentionAnswerCount(final String questionId) {
+	@Override
+	public int getAbstentionAnswerCount(final String questionId) {
 		final NovaView view = new NovaView("skill_question/count_abstention_answers_by_question");
 		view.setKey(questionId);
 		view.setGroup(true);
@@ -731,6 +811,7 @@ public class CouchDBDao implements IDatabaseDao {
 		if (results.getResults().size() == 0) {
 			return 0;
 		}
+		
 		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 	}
 

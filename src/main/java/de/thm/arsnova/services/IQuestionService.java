@@ -91,7 +91,7 @@ public interface IQuestionService {
 
 	int getPreparationQuestionCount(String sessionkey);
 	
-	SimpleEntry<String,Integer> getAnswerCountByQuestion(String questionid);
+	SimpleEntry<String, List<Integer>> getAnswerAndAbstentionCountByQuestion(String questionid);
 
 	int countLectureQuestionAnswers(String sessionkey);
 
@@ -126,4 +126,6 @@ public interface IQuestionService {
 	void deleteAllPreparationAnswers(String sessionkey);
 
 	void deleteAllLectureAnswers(String sessionkey);
+
+	int getAbstentionAnswerCount(String questionId);
 }

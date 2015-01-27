@@ -27,10 +27,12 @@ public class SessionInfo {
 	private String keyword;
 	private boolean active;
 	private String courseType;
+	private long creationTime;
 
 	private int numQuestions;
 	private int numAnswers;
 	private int numInterposed;
+	private int numUnredInterposed;
 	private int numUnanswered;
 
 	public SessionInfo(Session session) {
@@ -39,6 +41,7 @@ public class SessionInfo {
 		this.keyword = session.getKeyword();
 		this.active = session.isActive();
 		this.courseType = session.getCourseType();
+		this.creationTime = session.getCreationTime();
 	}
 
 	public static List<SessionInfo> fromSessionList(List<Session> sessions) {
@@ -119,5 +122,21 @@ public class SessionInfo {
 
 	public void setNumUnanswered(int numUnanswered) {
 		this.numUnanswered = numUnanswered;
+	}
+	
+	public long getCreationTime() {
+		return creationTime;
+	}
+
+	public void setCreationTime(long creationTime) {
+		this.creationTime = creationTime;
+	}
+
+	public int getNumUnredInterposed() {
+		return numUnredInterposed;
+	}
+
+	public void setNumUnredInterposed(int numUnredInterposed) {
+		this.numUnredInterposed = numUnredInterposed;
 	}
 }

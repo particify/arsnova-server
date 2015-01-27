@@ -420,7 +420,7 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 	public void visit(NewAnswerEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
 		this.reportAnswersToLecturerQuestionAvailable(event.getSession(), new Question(event.getQuestion()));
-		broadcastInSession(sessionKey, "countQuestionAnswersByQuestion", questionService.getAnswerCountByQuestion(event.getQuestion().get_id()));
+		broadcastInSession(sessionKey, "countQuestionAnswersByQuestion", questionService.getAnswerAndAbstentionCountByQuestion(event.getQuestion().get_id()));
 		broadcastInSession(sessionKey, "countLectureQuestionAnswers", questionService.countLectureQuestionAnswersInternal(sessionKey));
 		broadcastInSession(sessionKey, "countPreparationQuestionAnswers", questionService.countPreparationQuestionAnswersInternal(sessionKey));
 		sendToUser(event.getUser(), "unansweredLecturerQuestions", questionService.getUnAnsweredLectureQuestionIds(sessionKey, event.getUser()));

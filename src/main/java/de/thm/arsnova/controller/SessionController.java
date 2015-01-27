@@ -21,6 +21,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -100,7 +101,8 @@ public class SessionController extends AbstractController {
 				session.setName(session.getName() + appendix);
 				session.setShortName(session.getShortName() + appendix);
 			}
-		}
+		}		
+		
 		final Session newSession = sessionService.saveSession(session);
 
 		if (newSession == null) {
@@ -185,6 +187,34 @@ public class SessionController extends AbstractController {
 		} else {
 			Collections.sort(sessions, new SessionInfoNameComparator());
 		}
+		return sessions;
+	}
+
+	@RequestMapping(value = "/publicpool", method = RequestMethod.GET, params = "statusonly=true")
+	public final List<SessionInfo> getMyPublicPoolSessions(
+			final HttpServletResponse response
+			) {
+		List<SessionInfo> sessions = sessionService.getMyPublicPoolSessionsInfo();
+			
+		if (sessions == null || sessions.isEmpty()) {
+			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+			return null;
+		}
+
+		return sessions;
+	}
+	
+	@RequestMapping(value = "/publicpool", method = RequestMethod.GET)
+	public final List<Session> getPublicPoolSessions(
+			final HttpServletResponse response
+			) {
+		List<Session> sessions = sessionService.getPublicPoolSessions();
+		
+		if (sessions == null || sessions.isEmpty()) {
+			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+			return null;
+		}
+
 		return sessions;
 	}
 

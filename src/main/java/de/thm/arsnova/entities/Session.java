@@ -36,6 +36,18 @@ public class Session implements Serializable {
 	private String courseType;
 	private String courseId;
 	private List<String> _conflicts;
+	private long creationTime;
+	
+	private String ppAuthorName;
+	private String ppAuthorMail;
+	private String ppUniversity;
+	private String ppLogo;
+	private String ppSubject;
+	private String ppLicense;
+	private String ppDescription;
+	private String ppFaculty;
+	private String ppLevel;
+	private String sessionType;
 
 	private String _id;
 	private String _rev;
@@ -143,6 +155,94 @@ public class Session implements Serializable {
 	@JsonIgnore
 	public boolean isCourseSession() {
 		return getCourseId() != null && !getCourseId().isEmpty();
+	}
+	
+	public long getCreationTime() {
+		return creationTime;
+	}
+
+	public void setCreationTime(long creationTime) {
+		this.creationTime = creationTime;
+	}
+	
+	public String getPpAuthorName() {
+		return ppAuthorName;
+	}
+
+	public void setPpAuthorName(final String ppAuthorName) {
+		this.ppAuthorName = ppAuthorName;
+	}
+	
+	public String getPpAuthorMail() {
+		return ppAuthorMail;
+	}
+
+	public void setPpAuthorMail(final String ppAuthorMail) {
+		this.ppAuthorMail = ppAuthorMail;
+	}
+	
+	public String getPpUniversity() {
+		return ppUniversity;
+	}
+
+	public void setPpUniversity(final String ppUniversity) {
+		this.ppUniversity = ppUniversity;
+	}
+	
+	public String getPpLogo() {
+		return ppLogo;
+	}
+
+	public void setPpLogo(final String ppLogo) {
+		this.ppLogo = ppLogo;
+	}
+	
+	public String getPpSubject() {
+		return ppSubject;
+	}
+
+	public void setPpSubject(final String ppSubject) {
+		this.ppSubject = ppSubject;
+	}
+	
+	public String getPpLicense() {
+		return ppLicense;
+	}
+
+	public void setPpLicense(final String ppLicense) {
+		this.ppLicense = ppLicense;
+	}
+	
+	public String getPpDescription() {
+		return ppDescription;
+	}
+	
+	public void setPpDescription(final String ppDescription) {
+		this.ppDescription = ppDescription;
+	}
+	
+	public String getPpFaculty() {
+		return ppFaculty;
+	}
+	
+	public void setPpFaculty(final String ppFaculty) {
+		this.ppFaculty = ppFaculty;
+	}
+	
+	public String getPpLevel() {
+		return ppLevel;
+	}
+	
+	public void setPpLevel(final String ppLevel) {
+		this.ppLevel = ppLevel;
+	}
+	
+	public String getSessionType() {
+		return sessionType;
+	}
+	
+	public void setSessionType(final String sessionType) {
+		this.sessionType = sessionType;
 	}
 
 	@Override

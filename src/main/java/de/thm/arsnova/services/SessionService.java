@@ -19,14 +19,21 @@ package de.thm.arsnova.services;
 
 import java.io.Serializable;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.thm.arsnova.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.dao.IDatabaseDao;
@@ -36,6 +43,7 @@ import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
@@ -88,6 +96,11 @@ public class SessionService implements ISessionService {
 
 	@Autowired(required = false)
 	private ConnectorClient connectorClient;
+	
+	@Value("${pp.logofilesize_b}")
+	private int uploadFileSizeByte;
+	
+	public static final Logger LOGGER = LoggerFactory.getLogger(SessionService.class);
 
 	public void setDatabaseDao(final IDatabaseDao newDatabaseDao) {
 		databaseDao = newDatabaseDao;
@@ -151,6 +164,18 @@ public class SessionService implements ISessionService {
 	public final List<Session> getMySessions() {
 		return databaseDao.getMySessions(userService.getCurrentUser());
 	}
+	
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public final List<Session> getPublicPoolSessions() {
+		return databaseDao.getPublicPoolSessions();
+	}
+	
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public final List<SessionInfo> getMyPublicPoolSessionsInfo() {
+		return databaseDao.getMyPublicPoolSessionsInfo(userService.getCurrentUser());
+	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
@@ -181,6 +206,22 @@ public class SessionService implements ISessionService {
 				throw new ForbiddenException();
 			}
 		}
+		if (session.getPpLogo() != null) {
+			if (session.getPpLogo().startsWith("http")) {
+				final String base64ImageString = ImageUtils.encodeImageToString(session.getPpLogo());
+				if (base64ImageString == null) {
+					throw new BadRequestException();
+				}
+				session.setPpLogo(base64ImageString);
+			}
+			// base64 adds offset to filesize, formula taken from: http://en.wikipedia.org/wiki/Base64#MIME
+			final int fileSize = (int) ((session.getPpLogo().length()-814)/1.37);
+			if (fileSize > uploadFileSizeByte) {
+				LOGGER.error("Could not save file. File is too large with " + fileSize + " Byte.");
+				throw new BadRequestException();
+			}
+		}
+		
 		return databaseDao.saveSession(userService.getCurrentUser(), session);
 	}
 

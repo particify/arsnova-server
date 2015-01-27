@@ -193,6 +193,24 @@ public class StubDatabaseDao implements IDatabaseDao {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	@Override
+	public List<Session> getPublicPoolSessions() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<Session> getMyPublicPoolSessions(User user) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public List<SessionInfo> getMyPublicPoolSessionsInfo(final User user) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	@Override
 	public LoggedIn registerAsOnlineUser(User u, Session s) {
@@ -548,5 +566,11 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public void deleteAllLectureAnswers(Session session) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public int getAbstentionAnswerCount(String questionId) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }
