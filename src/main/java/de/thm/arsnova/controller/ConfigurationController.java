@@ -96,6 +96,9 @@ public class ConfigurationController extends AbstractController {
 
 	@Value("${question.answer-option-limit:8}")
 	private String answerOptionLimit;
+	
+	@Value("${upload.filesize_b:}")
+	private String maxUploadFilesize;
 
 	@Value("${question.parse-answer-option-formatting:false}")
 	private String parseAnswerOptionFormatting;
@@ -157,6 +160,9 @@ public class ConfigurationController extends AbstractController {
 		}
 		if (!"".equals(demoSessionKey)) {
 			config.put("demoSessionKey", demoSessionKey);
+		}
+		if (!"".equals(maxUploadFilesize)) {
+			config.put("maxUploadFilesize", maxUploadFilesize);
 		}
 
 		config.put("answerOptionLimit", Integer.valueOf(answerOptionLimit));
