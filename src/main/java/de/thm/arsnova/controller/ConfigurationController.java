@@ -198,12 +198,15 @@ public class ConfigurationController extends AbstractController {
 		features.put("sessionImportExport", "true".equals(sessionImportExportEnabled));
 		features.put("publicPool", "true".equals(publicPoolEnabled));
 		
-		// add public pool configuration
-		config.put("publicPool", publicPool);
-		
-		publicPool.put("subjects", ppSubjects);
-		publicPool.put("licenses", ppLicenses);
-		publicPool.put("logoMaxFilesize", ppLogoMaxFilesize);
+		// add public pool configuration on demand
+		if (features.get("publicPool")) {
+			config.put("publicPool", publicPool);
+			publicPool.put("subjects", ppSubjects);
+			publicPool.put("licenses", ppLicenses);
+			publicPool.put("logoMaxFilesize", ppLogoMaxFilesize);
+			publicPool.put("levelsDe", ppLevelsDe);
+			publicPool.put("levelsEn", ppLevelsEn);
+		}
 
 		if (!"".equals(trackingTrackerUrl)) {
 			HashMap<String, String> tracking = new HashMap<String, String>();
@@ -213,8 +216,6 @@ public class ConfigurationController extends AbstractController {
 			tracking.put("trackerUrl", trackingTrackerUrl);
 			tracking.put("siteId", trackingSiteId);
 		}
-		publicPool.put("levelsDe", ppLevelsDe);
-		publicPool.put("levelsEn", ppLevelsEn);
 
 		config.put("grid", gridImageMaxFileSize);
 
