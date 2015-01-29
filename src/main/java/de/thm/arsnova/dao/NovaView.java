@@ -28,7 +28,13 @@ import com.fourspaces.couchdb.View;
 
 public class NovaView extends View {
 
+	public enum StaleMode {
+		NONE, OK, UPDATE_AFTER
+	}
+
 	protected String keys;
+
+	protected StaleMode stale = StaleMode.NONE;
 
 	public NovaView(final String fullname) {
 		super(fullname);
@@ -89,6 +95,10 @@ public class NovaView extends View {
 		this.keys = toJsonArray(keys.toArray(new String[keys.size()]));
 	}
 
+	public void setStale(StaleMode stale) {
+		this.stale = stale;
+	}
+
 	@Override
 	public String getQueryString() {
 		final String tempQuery = super.getQueryString();
@@ -101,6 +111,16 @@ public class NovaView extends View {
 				query.append("&");
 			}
 			query.append("keys=" + keys);
+		}
+		if (stale != null && stale != StaleMode.NONE) {
+			if (query.length() > 0) {
+				query.append("&");
+			}
+			if (stale == StaleMode.OK) {
+				query.append("stale=ok");
+			} else if (stale == StaleMode.UPDATE_AFTER) {
+				query.append("stale=update_after");
+			}
 		}
 
 		if (query.length() == 0) {

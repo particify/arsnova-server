@@ -18,14 +18,15 @@
  */
 package de.thm.arsnova.dao;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 
 import org.junit.Test;
+
+import de.thm.arsnova.dao.NovaView.StaleMode;
 
 public class NovaViewTest {
 
@@ -131,6 +132,21 @@ public class NovaViewTest {
 		assertEncodedEquals("keys", "[\"foo\",123]", v3.getQueryString());
 		assertEncodedEquals("keys", "[[\"foo\",123],[456,\"bar\"]]", v4.getQueryString());
 		assertEncodedEquals("keys", "[]", v5.getQueryString());
+	}
+
+	@Test
+	public void shouldSupportStaleViews() {
+		final NovaView v1 = new NovaView(null);
+		final NovaView v2 = new NovaView(null);
+		final NovaView v3 = new NovaView(null);
+		final NovaView v4 = new NovaView(null);
+		v1.setStale(StaleMode.NONE);
+		v2.setStale(StaleMode.OK);
+		v3.setStale(StaleMode.UPDATE_AFTER);
+		assertNull(v1.getQueryString());
+		assertEncodedEquals("stale", "ok", v2.getQueryString());
+		assertEncodedEquals("stale", "update_after", v3.getQueryString());
+		assertNull(v4.getQueryString());
 	}
 
 	private void assertEncodedEquals(final String key, final String expected, final String actual) {
