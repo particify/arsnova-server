@@ -44,6 +44,7 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.exceptions.RequestEntityTooLargeException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
@@ -218,7 +219,7 @@ public class SessionService implements ISessionService {
 			final int fileSize = (int) ((session.getPpLogo().length()-814)/1.37);
 			if (fileSize > uploadFileSizeByte) {
 				LOGGER.error("Could not save file. File is too large with " + fileSize + " Byte.");
-				throw new BadRequestException();
+				throw new RequestEntityTooLargeException();
 			}
 		}
 		
