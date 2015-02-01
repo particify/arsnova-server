@@ -37,8 +37,6 @@ public interface ISessionService {
 	String generateKeyword();
 
 	List<Session> getMySessions();
-	
-	List<Session> getPublicPoolSessions();
 
 	List<Session> getMyVisitedSessions();
 
@@ -59,6 +57,8 @@ public interface ISessionService {
 	SimpleEntry<Integer, Integer> getMyLearningProgress(String sessionkey);
 
 	List<SessionInfo> getMySessionsInfo();
+	
+	List<SessionInfo> getPublicPoolSessionsInfo();
 	
 	List<SessionInfo> getMyPublicPoolSessionsInfo();
 

@@ -179,6 +179,8 @@ public interface IDatabaseDao {
 	SimpleEntry<Integer, Integer> getMyLearningProgress(Session session, User user);
 
 	List<SessionInfo> getMySessionsInfo(User user);
+	
+	List<SessionInfo> getPublicPoolSessionsInfo();
 
 	List<SessionInfo> getMyPublicPoolSessionsInfo(final User user);
 	

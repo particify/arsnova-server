@@ -168,8 +168,8 @@ public class SessionService implements ISessionService {
 	
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public final List<Session> getPublicPoolSessions() {
-		return databaseDao.getPublicPoolSessions();
+	public final List<SessionInfo> getPublicPoolSessionsInfo() {
+		return databaseDao.getPublicPoolSessionsInfo();
 	}
 	
 	@Override

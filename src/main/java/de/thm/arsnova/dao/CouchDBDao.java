@@ -140,10 +140,16 @@ public class CouchDBDao implements IDatabaseDao {
 					d.getJSONObject().getJSONObject("value"),
 					Session.class
 					);
-			//session.set_id(d.getId());
+			session.set_id(d.getId());
 			result.add(session);
 		}
 		return result;
+	}
+	
+	@Override
+	public final List<SessionInfo> getPublicPoolSessionsInfo() {
+		final List<Session> sessions = this.getPublicPoolSessions();
+		return getInfosForSessions(sessions);
 	}
 	
 	@Override
