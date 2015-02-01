@@ -28,13 +28,14 @@ public class SessionInfo {
 	private boolean active;
 	private String courseType;
 	private long creationTime;
-
+	private String sessionType;
+	
 	private int numQuestions;
 	private int numAnswers;
 	private int numInterposed;
 	private int numUnredInterposed;
 	private int numUnanswered;
-
+	
 	public SessionInfo(Session session) {
 		this.name = session.getName();
 		this.shortName = session.getShortName();
@@ -42,6 +43,7 @@ public class SessionInfo {
 		this.active = session.isActive();
 		this.courseType = session.getCourseType();
 		this.creationTime = session.getCreationTime();
+		this.sessionType = session.getSessionType();
 	}
 
 	public static List<SessionInfo> fromSessionList(List<Session> sessions) {
@@ -90,6 +92,14 @@ public class SessionInfo {
 
 	public void setCourseType(String courseType) {
 		this.courseType = courseType;
+	}
+	
+	public String getSessionType() {
+		return sessionType;
+	}
+	
+	public void setSessionType(String sessionType) {
+		this.sessionType = sessionType;
 	}
 
 	public int getNumQuestions() {
