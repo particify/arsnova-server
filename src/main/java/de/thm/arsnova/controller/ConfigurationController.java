@@ -102,16 +102,16 @@ public class ConfigurationController extends AbstractController {
 
 	@Value("${question.answer-option-limit:8}")
 	private String answerOptionLimit;
-	
+
 	@Value("${upload.filesize_b:}")
 	private String maxUploadFilesize;
 
 	@Value("${question.parse-answer-option-formatting:false}")
 	private String parseAnswerOptionFormatting;
-	
+
 	@Value("${pp.subjects}")
 	private String ppSubjects;
-	
+
 	@Value("${pp.licenses}")
 	private String ppLicenses;
 
@@ -129,7 +129,7 @@ public class ConfigurationController extends AbstractController {
 
 	@Value("${tracking.site-id}")
 	private String trackingSiteId;
-	
+
 	@Value("${optional.demoSessionKey:}")
 	private String demoSessionKey;
 
@@ -138,7 +138,7 @@ public class ConfigurationController extends AbstractController {
 
 	@Value("${pp.session-levels.en}")
 	private String ppLevelsEn;
-	
+
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public final HashMap<String, Object> getConfiguration(HttpServletRequest request) {
@@ -168,7 +168,7 @@ public class ConfigurationController extends AbstractController {
 		if (!"".equals(blogUrl)) {
 			config.put("blogUrl", blogUrl);
 		}
- 		if (!"".equals(presenterDocumentationUrl)) {
+		if (!"".equals(presenterDocumentationUrl)) {
 			config.put("presenterDocumentationUrl", presenterDocumentationUrl);
 		}
 		if (!"".equals(overlayUrl)) {
@@ -203,7 +203,7 @@ public class ConfigurationController extends AbstractController {
 		features.put("gridSquare", "true".equals(gridSquareEnabled));
 		features.put("sessionImportExport", "true".equals(sessionImportExportEnabled));
 		features.put("publicPool", "true".equals(publicPoolEnabled));
-		
+
 		// add public pool configuration on demand
 		if (features.get("publicPool")) {
 			config.put("publicPool", publicPool);

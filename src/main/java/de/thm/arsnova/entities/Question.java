@@ -249,7 +249,7 @@ public class Question {
 	public void setImage(final String image) {
 		this.image = image;
 	}
-	
+
 	public String getFcImage() {
 		return fcImage;
 	}
@@ -373,39 +373,39 @@ public class Question {
 	public String getGridLineColor() {
 		return gridLineColor;
 	}
-	
+
 	public void setGridLineColor(String gridLineColor) {
 		this.gridLineColor = gridLineColor;
 	}
-	
+
 	public int getNumberOfDots() {
 		return numberOfDots;
 	}
-	
+
 	public void setNumberOfDots(int numberOfDots) {
 		this.numberOfDots = numberOfDots;
 	}
-	
+
 	public String getGridType() {
 		return gridType;
 	}
-	
+
 	public void setGridType(String gridType) {
 		this.gridType = gridType;
 	}
-	
+
 	public void setScaleFactor(String scaleFactor) {
 		this.scaleFactor = scaleFactor;
 	}
-	
+
 	public String getScaleFactor() {
 		return this.scaleFactor;
 	}
-	
+
 	public void setGridScaleFactor(String scaleFactor) {
 		this.gridScaleFactor = scaleFactor;
 	}
-	
+
 	public String getGridScaleFactor() {
 		return this.gridScaleFactor;
 	}

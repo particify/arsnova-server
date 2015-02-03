@@ -97,10 +97,10 @@ public class SessionService implements ISessionService {
 
 	@Autowired(required = false)
 	private ConnectorClient connectorClient;
-	
+
 	@Value("${pp.logofilesize_b}")
 	private int uploadFileSizeByte;
-	
+
 	public static final Logger LOGGER = LoggerFactory.getLogger(SessionService.class);
 
 	public void setDatabaseDao(final IDatabaseDao newDatabaseDao) {
@@ -165,13 +165,13 @@ public class SessionService implements ISessionService {
 	public final List<Session> getMySessions() {
 		return databaseDao.getMySessions(userService.getCurrentUser());
 	}
-	
+
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public final List<SessionInfo> getPublicPoolSessionsInfo() {
 		return databaseDao.getPublicPoolSessionsInfo();
 	}
-	
+
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public final List<SessionInfo> getMyPublicPoolSessionsInfo() {
@@ -222,7 +222,7 @@ public class SessionService implements ISessionService {
 				throw new RequestEntityTooLargeException();
 			}
 		}
-		
+
 		return databaseDao.saveSession(userService.getCurrentUser(), session);
 	}
 

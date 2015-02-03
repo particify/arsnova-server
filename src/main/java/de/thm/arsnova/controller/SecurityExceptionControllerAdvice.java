@@ -99,7 +99,7 @@ public class SecurityExceptionControllerAdvice {
 	@ExceptionHandler(NotImplementedException.class)
 	public void handleNotImplementedException(final Exception e, final HttpServletRequest request) {
 	}
-	
+
 	@ResponseStatus(HttpStatus.REQUEST_ENTITY_TOO_LARGE)
 	@ExceptionHandler(RequestEntityTooLargeException.class)
 	public void handleRequestEntityTooLargeException(final Exception e, final HttpServletRequest request) {

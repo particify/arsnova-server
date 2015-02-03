@@ -270,10 +270,10 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		if (question == null) {
 			return 0;
 		}
-		
+
 		return databaseDao.getAnswerCount(question, question.getPiRound());
 	}
-	
+
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int getAbstentionAnswerCount(final String questionId) {
@@ -281,7 +281,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		if (question == null) {
 			return 0;
 		}
-		
+
 		return databaseDao.getAbstentionAnswerCount(questionId);
 	}
 
@@ -410,14 +410,14 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		} else if (question.getPiRound() < 1 || question.getPiRound() > 2) {
 			question.setPiRound(oldQuestion.getPiRound() > 0 ? oldQuestion.getPiRound() : 1);
 		}
-		
+
 		final Question result = databaseDao.updateQuestion(question);
 
 		if(!oldQuestion.isActive() && question.isActive()) {
 			final NewQuestionEvent event = new NewQuestionEvent(this, result, session);
 			this.publisher.publishEvent(event);
 		}
-		
+
 		return result;
 	}
 
@@ -520,7 +520,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	public int getPreparationQuestionCount(final String sessionkey) {
 		return databaseDao.getPreparationQuestionCount(getSession(sessionkey));
 	}
-	
+
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public SimpleEntry<String,List<Integer>> getAnswerAndAbstentionCountByQuestion(final String questionid) {
@@ -528,7 +528,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			getAnswerCount(questionid),
 			getAbstentionAnswerCount(questionid)
 		);
-		
+
 		return new AbstractMap.SimpleEntry<String, List<Integer>>(questionid, countList);
 	}
 
@@ -619,7 +619,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 		databaseDao.publishAllQuestions(session, publish);
 	}
-	
+
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public void publishQuestions(final String sessionkey, final boolean publish, List<Question> questions) {

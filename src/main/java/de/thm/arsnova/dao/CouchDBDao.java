@@ -126,7 +126,7 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		return result;
 	}
-	
+
 	@Override
 	public final List<Session> getPublicPoolSessions() {
 		final NovaView view = new NovaView("session/public_pool_by_subject");
@@ -134,7 +134,7 @@ public class CouchDBDao implements IDatabaseDao {
 		final ViewResults sessions = getDatabase().view(view);
 
 		final List<Session> result = new ArrayList<Session>();
-		
+
 		for (final Document d : sessions.getResults()) {
 			final Session session = (Session) JSONObject.toBean(
 					d.getJSONObject().getJSONObject("value"),
@@ -145,19 +145,19 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		return result;
 	}
-	
+
 	@Override
 	public final List<SessionInfo> getPublicPoolSessionsInfo() {
 		final List<Session> sessions = this.getPublicPoolSessions();
 		return getInfosForSessions(sessions);
 	}
-	
+
 	@Override
 	public final List<Session> getMyPublicPoolSessions(final User user) {
 		final NovaView view = new NovaView("session/public_pool_by_creator");
 		view.setStartKeyArray(user.getUsername());
 		view.setEndKeyArray(user.getUsername(), "{}");
-		
+
 		final ViewResults sessions = getDatabase().view(view);
 
 		final List<Session> result = new ArrayList<Session>();
@@ -173,13 +173,13 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		return result;
 	}
-	
+
 	@Override
 	public final List<SessionInfo> getMyPublicPoolSessionsInfo(final User user) {
 		final List<Session> sessions = this.getMyPublicPoolSessions(user);
 		return getInfosForSessions(sessions);
 	}
-	
+
 	@Override
 	public final List<SessionInfo> getMySessionsInfo(final User user) {
 		final List<Session> sessions = this.getMySessions(user);
@@ -191,7 +191,7 @@ public class CouchDBDao implements IDatabaseDao {
 		final ExtendedView answerCountView = new ExtendedView("skill_question/count_answers_by_session");
 		final ExtendedView interposedCountView = new ExtendedView("interposed_question/count_by_session");
 		final ExtendedView unredInterposedCountView = new ExtendedView("interposed_question/count_by_session_reading");
-		
+
 		interposedCountView.setSessionIdKeys(sessions);
 		interposedCountView.setGroup(true);
 		questionCountView.setSessionIdKeys(sessions);
@@ -283,7 +283,7 @@ public class CouchDBDao implements IDatabaseDao {
 	private List<SessionInfo> getSessionInfoData(final List<Session> sessions,
 			final ExtendedView questionCountView,
 			final ExtendedView answerCountView,
-			final ExtendedView interposedCountView, 
+			final ExtendedView interposedCountView,
 			final ExtendedView unredInterposedCountView) {
 		final ViewResults questionCountViewResults = getDatabase().view(questionCountView);
 		final ViewResults answerCountViewResults = getDatabase().view(answerCountView);
@@ -306,7 +306,7 @@ public class CouchDBDao implements IDatabaseDao {
 		for (final Document d : unredInterposedCountViewResults.getResults()) {
 			unredInterposedCountMap.put(d.getJSONArray("key").getString(0), d.getInt("value"));
 		}
-		
+
 		List<SessionInfo> sessionInfos = new ArrayList<SessionInfo>();
 		for (Session session : sessions) {
 			int numQuestions = 0;
@@ -325,7 +325,7 @@ public class CouchDBDao implements IDatabaseDao {
 			if (unredInterposedCountMap.containsKey(session.get_id())) {
 				numUnredInterposed = unredInterposedCountMap.get(session.get_id());
 			}
-			
+
 			SessionInfo info = new SessionInfo(session);
 			info.setNumQuestions(numQuestions);
 			info.setNumAnswers(numAnswers);
@@ -816,7 +816,7 @@ public class CouchDBDao implements IDatabaseDao {
 		if (results.getResults().size() == 0) {
 			return 0;
 		}
-		
+
 		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 	}
 
@@ -1525,7 +1525,7 @@ public class CouchDBDao implements IDatabaseDao {
 		final List<Question> questions = getQuestions(new NovaView("skill_question/by_session"), session);
 		publishQuestions(session, publish, questions);
 	}
-	
+
 	@Override
 	public void publishQuestions(final Session session, final boolean publish, List<Question> questions) {
 		for (final Question q : questions) {

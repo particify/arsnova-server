@@ -105,11 +105,11 @@ public class LecturerQuestionController extends AbstractController {
 			) {
 		boolean p = true;
 		List<Question> questions;
-		
+
 		if (publish != null) {
 			p = publish;
 		}
-		
+
 		if (lectureQuestionsOnly) {
 			questions = questionService.getLectureQuestions(sessionkey);
 			questionService.publishQuestions(sessionkey, publish, questions);
@@ -384,10 +384,10 @@ public class LecturerQuestionController extends AbstractController {
 			questionService.getAnswerCount(questionId),
 			questionService.getAbstentionAnswerCount(questionId)
 		);
-		
+
 		return list;
 	}
-	
+
 	@RequestMapping(value = "/{questionId}/freetextanswer/", method = RequestMethod.GET)
 	public final List<Answer> getFreetextAnswers(@PathVariable final String questionId) {
 		return questionService.getFreetextAnswers(questionId);
