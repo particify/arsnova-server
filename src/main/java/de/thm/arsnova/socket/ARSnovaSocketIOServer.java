@@ -157,15 +157,15 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 				if (session.getKeyword() == oldSessionKey) {
 					return;
 				}
-				if (null != oldSessionKey) {
-					reportActiveUserCountForSession(oldSessionKey);
-				}
 
 				if (null != sessionService.joinSession(session.getKeyword(), client.getSessionId())) {
 					/* active user count has to be sent to the client since the broadcast is
 					 * not always sent as long as the polling solution is active simultaneously */
 					reportActiveUserCountForSession(session.getKeyword());
 					reportSessionDataToClient(session.getKeyword(), u, client);
+				}
+				if (null != oldSessionKey) {
+					reportActiveUserCountForSession(oldSessionKey);
 				}
 			}
 		});

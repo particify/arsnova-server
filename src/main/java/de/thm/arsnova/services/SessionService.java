@@ -111,7 +111,7 @@ public class SessionService implements ISessionService {
 	public final Session joinSession(final String keyword, final UUID socketId) {
 		/* Socket.IO solution */
 
-		Session session = databaseDao.getSessionFromKeyword(keyword);
+		Session session = null != keyword ? databaseDao.getSessionFromKeyword(keyword) : null;
 
 		if (null == session) {
 			userService.removeUserFromSessionBySocketId(socketId);
