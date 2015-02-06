@@ -414,4 +414,51 @@ public class Question {
 	public final String toString() {
 		return "Question type '" + type + "': " + subject + ";\n" + text + possibleAnswers;
 	}
+
+	public int calculateValue(Answer answer) {
+		if (answer.isAbstention()) {
+			return 0;
+		} else if (this.questionType.equals("mc")) {
+			return calculateMultipleChoiceValue(answer);
+		} else if (this.questionType.equals("grid")) {
+			return calculateGridValue(answer);
+		} else {
+			return calculateRegularValue(answer);
+		}
+	}
+
+	private int calculateRegularValue(Answer answer) {
+		String answerText = answer.getAnswerText();
+		for (PossibleAnswer p : this.possibleAnswers) {
+			if (answerText.equals(p.getText())) {
+				return p.getValue();
+			}
+		}
+		return 0;
+	}
+
+	private int calculateGridValue(Answer answer) {
+		int value = 0;
+		String[] answers = answer.getAnswerText().split(",");
+		for (int i = 0; i < answers.length; i++) {
+			for (PossibleAnswer p : this.possibleAnswers) {
+				if (answers[i].equals(p.getText())) {
+					value += p.getValue();
+				}
+			}
+		}
+		return value;
+	}
+
+	private int calculateMultipleChoiceValue(Answer answer) {
+		int value = 0;
+		String[] answers = answer.getAnswerText().split(",");
+		for (int i = 0; i < this.possibleAnswers.size() && i < answers.length; i++) {
+			if (answers[i].equals("1")) {
+				PossibleAnswer p = this.possibleAnswers.get(i);
+				value += p.getValue();
+			}
+		}
+		return value;
+	}
 }

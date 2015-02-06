@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.services;
 
-import java.util.List;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.List;
 
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.InterposedQuestion;
@@ -71,7 +71,7 @@ public interface IQuestionService {
 
 	void deleteAnswers(String questionId);
 
-	Answer saveAnswer(Answer answer);
+	Answer saveAnswer(String questionId, de.thm.arsnova.entities.transport.Answer answer);
 
 	Answer updateAnswer(Answer answer);
 

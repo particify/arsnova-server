@@ -310,10 +310,10 @@ public class LecturerQuestionController extends AbstractController {
 	@RequestMapping(value = "/{questionId}/answer/", method = RequestMethod.POST)
 	public final Answer saveAnswer(
 			@PathVariable final String questionId,
-			@RequestBody final Answer answer,
+			@RequestBody final de.thm.arsnova.entities.transport.Answer answer,
 			final HttpServletResponse response
 			) {
-		return questionService.saveAnswer(answer);
+		return questionService.saveAnswer(questionId, answer);
 	}
 
 	@RequestMapping(value = "/{questionId}/answer/{answerId}", method = RequestMethod.PUT)

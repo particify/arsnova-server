@@ -18,12 +18,13 @@
 package de.thm.arsnova.services;
 
 import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.AbstractMap.SimpleEntry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -423,20 +424,34 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public Answer saveAnswer(final Answer answer) {
+	public Answer saveAnswer(final String questionId, final de.thm.arsnova.entities.transport.Answer answer) {
 		final User user = getCurrentUser();
-		final Question question = getQuestion(answer.getQuestionId());
+		final Question question = getQuestion(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
 
+		// rewrite all fields so that no manipulated data gets written
+		// only answerText, answerSubject, and abstention are allowed
+		Answer theAnswer = new Answer();
+		theAnswer.setAnswerSubject(answer.getAnswerSubject());
+		theAnswer.setAnswerText(answer.getAnswerText());
+		theAnswer.setSessionId(question.getSessionId());
+		theAnswer.setUser(user.getUsername());
+		theAnswer.setQuestionId(question.get_id());
+		theAnswer.setTimestamp(new Date().getTime());
+		theAnswer.setQuestionVariant(question.getQuestionVariant());
+		theAnswer.setAbstention(answer.isAbstention());
+		// calculate learning progress value after all properties are set
+		theAnswer.setQuestionValue(question.calculateValue(theAnswer));
+
 		if ("freetext".equals(question.getQuestionType())) {
-			answer.setPiRound(0);
+			theAnswer.setPiRound(0);
 		} else {
-			answer.setPiRound(question.getPiRound());
+			theAnswer.setPiRound(question.getPiRound());
 		}
 
-		final Answer result = databaseDao.saveAnswer(answer, user);
+		final Answer result = databaseDao.saveAnswer(theAnswer, user);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		this.publisher.publishEvent(new NewAnswerEvent(this, result, user, question, session));
 
