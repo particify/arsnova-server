@@ -133,6 +133,9 @@ public class ConfigurationController extends AbstractController {
 	@Value("${optional.demoSessionKey:}")
 	private String demoSessionKey;
 
+	@Value("${optional.arsnova-slogan:}")
+	private String arsnovaSlogan;
+
 	@Value("${pp.session-levels.de}")
 	private String ppLevelsDe;
 
@@ -185,6 +188,9 @@ public class ConfigurationController extends AbstractController {
 		}
 		if (!"".equals(demoSessionKey)) {
 			config.put("demoSessionKey", demoSessionKey);
+		}
+		if (!"".equals(arsnovaSlogan)) {
+			config.put("arsnovaSlogan", arsnovaSlogan);
 		}
 		if (!"".equals(maxUploadFilesize)) {
 			config.put("maxUploadFilesize", maxUploadFilesize);
