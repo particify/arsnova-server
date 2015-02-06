@@ -457,6 +457,7 @@ public class CouchDBDao implements IDatabaseDao {
 		return database;
 	}
 
+	@CachePut(value = "questions", key="#question")
 	@Override
 	public final Question saveQuestion(final Session session, final Question question) {
 		final Document q = toQuestionDocument(session, question);
@@ -514,6 +515,7 @@ public class CouchDBDao implements IDatabaseDao {
 		return q;
 	}
 
+	@CachePut(value = "questions")
 	@Override
 	public final Question updateQuestion(final Question question) {
 		try {
@@ -589,6 +591,7 @@ public class CouchDBDao implements IDatabaseDao {
 		return null;
 	}
 
+	@Cacheable("questions")
 	@Override
 	public final Question getQuestion(final String id) {
 		try {
@@ -698,6 +701,7 @@ public class CouchDBDao implements IDatabaseDao {
 		return collectQuestionIds(view);
 	}
 
+	@CacheEvict(value = "questions")
 	@Override
 	public final void deleteQuestionWithAnswers(final Question question) {
 		try {
@@ -1536,6 +1540,7 @@ public class CouchDBDao implements IDatabaseDao {
 		publishQuestions(session, publish, questions);
 	}
 
+	@CacheEvict(value = "questions", allEntries = true)
 	@Override
 	public void publishQuestions(final Session session, final boolean publish, List<Question> questions) {
 		for (final Question q : questions) {
