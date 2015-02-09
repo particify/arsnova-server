@@ -193,25 +193,25 @@ public class StubDatabaseDao implements IDatabaseDao {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	@Override
 	public List<Session> getPublicPoolSessions() {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	@Override
 	public List<SessionInfo> getPublicPoolSessionsInfo() {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	@Override
 	public List<Session> getMyPublicPoolSessions(User user) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	@Override
 	public List<SessionInfo> getMyPublicPoolSessionsInfo(final User user) {
 		// TODO Auto-generated method stub
@@ -477,7 +477,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public void deleteAllInterposedQuestions(Session session) {
 		// TODO Auto-generated method stub
 	}
-	
+
 	@Override
 	public void publishQuestions(Session session, boolean publish, List<Question> questions) {
 		// TODO Auto-generated method stub
