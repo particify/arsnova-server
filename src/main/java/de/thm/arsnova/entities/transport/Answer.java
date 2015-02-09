@@ -17,7 +17,12 @@
  */
 package de.thm.arsnova.entities.transport;
 
+import java.util.Date;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.User;
 
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class Answer {
@@ -50,5 +55,29 @@ public class Answer {
 
 	public void setAbstention(boolean abstention) {
 		this.abstention = abstention;
+	}
+
+	public de.thm.arsnova.entities.Answer generateAnswerEntity(final User user, final Question question) {
+		// rewrite all fields so that no manipulated data gets written
+		// only answerText, answerSubject, and abstention are allowed
+		de.thm.arsnova.entities.Answer theAnswer = new de.thm.arsnova.entities.Answer();
+		theAnswer.setAnswerSubject(this.getAnswerSubject());
+		theAnswer.setAnswerText(this.getAnswerText());
+		theAnswer.setSessionId(question.getSessionId());
+		theAnswer.setUser(user.getUsername());
+		theAnswer.setQuestionId(question.get_id());
+		theAnswer.setTimestamp(new Date().getTime());
+		theAnswer.setQuestionVariant(question.getQuestionVariant());
+		theAnswer.setAbstention(this.isAbstention());
+		// calculate learning progress value after all properties are set
+		theAnswer.setQuestionValue(question.calculateValue(theAnswer));
+
+		if ("freetext".equals(question.getQuestionType())) {
+			theAnswer.setPiRound(0);
+		} else {
+			theAnswer.setPiRound(question.getPiRound());
+		}
+
+		return theAnswer;
 	}
 }

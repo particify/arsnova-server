@@ -31,13 +31,13 @@ public class SessionInfo {
 	private String sessionType;
 	private String ppLevel;
 	private String ppSubject;
-	
+
 	private int numQuestions;
 	private int numAnswers;
 	private int numInterposed;
 	private int numUnredInterposed;
 	private int numUnanswered;
-	
+
 	public SessionInfo(Session session) {
 		this.name = session.getName();
 		this.shortName = session.getShortName();
@@ -49,6 +49,8 @@ public class SessionInfo {
 		this.ppLevel = session.getPpLevel();
 		this.ppSubject = session.getPpSubject();
 	}
+
+	public SessionInfo() {}
 
 	public static List<SessionInfo> fromSessionList(List<Session> sessions) {
 		List<SessionInfo> infos = new ArrayList<SessionInfo>();
@@ -97,27 +99,27 @@ public class SessionInfo {
 	public void setCourseType(String courseType) {
 		this.courseType = courseType;
 	}
-	
+
 	public String getSessionType() {
 		return sessionType;
 	}
-	
+
 	public void setSessionType(String sessionType) {
 		this.sessionType = sessionType;
 	}
-	
+
 	public String getPpLevel() {
 		return ppLevel;
 	}
-	
+
 	public void setPpLevel(String ppLevel) {
 		this.ppLevel = ppLevel;
 	}
-	
+
 	public String getPpSubject() {
 		return ppSubject;
 	}
-	
+
 	public void setPpSubject(String ppSubject) {
 		this.ppSubject = ppSubject;
 	}
@@ -153,7 +155,7 @@ public class SessionInfo {
 	public void setNumUnanswered(int numUnanswered) {
 		this.numUnanswered = numUnanswered;
 	}
-	
+
 	public long getCreationTime() {
 		return creationTime;
 	}

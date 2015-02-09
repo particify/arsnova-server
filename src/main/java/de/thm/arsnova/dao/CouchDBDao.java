@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import net.sf.ezmorph.Morpher;
@@ -63,6 +64,8 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.VisitedSession;
+import de.thm.arsnova.entities.transport.ImportExportSession;
+import de.thm.arsnova.entities.transport.ImportExportSession.ImportExportQuestion;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.ISessionService;
 
@@ -1690,5 +1693,56 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 
 		return false;
+	}
+
+	@Override
+	public List<SessionInfo> importSession(User user, Session s, ImportExportSession importSession) {
+		final Session session = this.saveSession(user, s);
+		List<Document> questions = new ArrayList<Document>();
+		// We need to remember which answers belong to which question.
+		// The answers need a questionId, so we first store the questions to get the IDs.
+		// Then we update the answer objects and store them as well.
+		Map<Document, ImportExportQuestion> mapping = new HashMap<Document, ImportExportQuestion>();
+		try {
+			// add session id to all questions and generate documents
+			for (ImportExportQuestion question : importSession.getQuestions()) {
+				Document doc = toQuestionDocument(session, question);
+				question.setSessionId(session.get_id());
+				questions.add(doc);
+				mapping.put(doc, question);
+			}
+			database.bulkSaveDocuments(questions.toArray(new Document[questions.size()]));
+		} catch (final IOException e) {
+			LOGGER.error("Could not bulk save all questions: {}", e.getMessage());
+		}
+		// now bulk import all answers
+		List<Document> answers = new ArrayList<Document>();
+		try {
+			for (Entry<Document, ImportExportQuestion> entry : mapping.entrySet()) {
+				final Document doc = entry.getKey();
+				final ImportExportQuestion question = entry.getValue();
+				question.set_id(doc.getId());
+				question.set_rev(doc.getRev());
+				for (de.thm.arsnova.entities.transport.Answer answer : question.getAnswers()) {
+					final Answer a = answer.generateAnswerEntity(user, question);
+					final Document answerDoc = new Document();
+					answerDoc.put("type", "skill_question_answer");
+					answerDoc.put("sessionId", a.getSessionId());
+					answerDoc.put("questionId", a.getQuestionId());
+					answerDoc.put("answerSubject", a.getAnswerSubject());
+					answerDoc.put("questionVariant", a.getQuestionVariant());
+					answerDoc.put("questionValue", a.getQuestionValue());
+					answerDoc.put("answerText", a.getAnswerText());
+					answerDoc.put("timestamp", a.getTimestamp());
+					answerDoc.put("piRound", a.getPiRound());
+					answerDoc.put("abstention", a.isAbstention());
+					answers.add(answerDoc);
+				}
+			}
+			database.bulkSaveDocuments(answers.toArray(new Document[answers.size()]));
+		} catch (IOException e) {
+			LOGGER.error("Could not bulk save all answers: {}", e.getMessage());
+		}
+		return null;
 	}
 }

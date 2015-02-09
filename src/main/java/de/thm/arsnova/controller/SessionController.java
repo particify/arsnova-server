@@ -21,8 +21,6 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.json.JSONObject;
@@ -43,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
+import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
@@ -209,6 +208,14 @@ public class SessionController extends AbstractController {
 		}
 
 		return sessions;
+	}
+
+	@RequestMapping(value = "/import", method = RequestMethod.POST)
+	public final List<SessionInfo> importSession(
+			@RequestBody final ImportExportSession session,
+			final HttpServletResponse response
+			) {
+		return sessionService.importSession(session);
 	}
 
 	@RequestMapping(value = "/{sessionkey}/lock", method = RequestMethod.POST)

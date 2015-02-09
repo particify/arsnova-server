@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +38,7 @@ import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.BadRequestException;
@@ -297,5 +297,13 @@ public class SessionService implements ISessionService {
 		final Session session = databaseDao.getSession(sessionkey);
 		final User user = userService.getCurrentUser();
 		return databaseDao.getMyLearningProgress(session, user);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public List<SessionInfo> importSession(ImportExportSession importSession) {
+		final User user = userService.getCurrentUser();
+		final Session session = importSession.generateSessionEntity(user);
+		return databaseDao.importSession(user, session, importSession);
 	}
 }

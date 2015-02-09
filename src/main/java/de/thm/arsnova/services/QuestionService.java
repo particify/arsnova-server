@@ -21,7 +21,6 @@ import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -431,25 +430,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			throw new NotFoundException();
 		}
 
-		// rewrite all fields so that no manipulated data gets written
-		// only answerText, answerSubject, and abstention are allowed
-		Answer theAnswer = new Answer();
-		theAnswer.setAnswerSubject(answer.getAnswerSubject());
-		theAnswer.setAnswerText(answer.getAnswerText());
-		theAnswer.setSessionId(question.getSessionId());
-		theAnswer.setUser(user.getUsername());
-		theAnswer.setQuestionId(question.get_id());
-		theAnswer.setTimestamp(new Date().getTime());
-		theAnswer.setQuestionVariant(question.getQuestionVariant());
-		theAnswer.setAbstention(answer.isAbstention());
-		// calculate learning progress value after all properties are set
-		theAnswer.setQuestionValue(question.calculateValue(theAnswer));
-
-		if ("freetext".equals(question.getQuestionType())) {
-			theAnswer.setPiRound(0);
-		} else {
-			theAnswer.setPiRound(question.getPiRound());
-		}
+		Answer theAnswer = answer.generateAnswerEntity(user, question);
 
 		final Answer result = databaseDao.saveAnswer(theAnswer, user);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());

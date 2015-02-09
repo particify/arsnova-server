@@ -19,6 +19,7 @@ package de.thm.arsnova.dao;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
+
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.DbUser;
@@ -29,6 +30,7 @@ import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.transport.ImportExportSession;
 
 public interface IDatabaseDao {
 	Session getSessionFromKeyword(String keyword);
@@ -184,4 +186,6 @@ public interface IDatabaseDao {
 	void deleteAllPreparationAnswers(Session session);
 
 	void deleteAllLectureAnswers(Session session);
+
+	List<SessionInfo> importSession(User user, Session session, ImportExportSession importSession);
 }

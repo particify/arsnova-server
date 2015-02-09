@@ -18,14 +18,13 @@
 package de.thm.arsnova.services;
 
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
+import de.thm.arsnova.entities.transport.ImportExportSession;
 
 public interface ISessionService {
 	Session getSession(String keyword);
@@ -63,4 +62,6 @@ public interface ISessionService {
 	List<SessionInfo> getMyPublicPoolSessionsInfo();
 
 	List<SessionInfo> getMyVisitedSessionsInfo();
+
+	List<SessionInfo> importSession(ImportExportSession session);
 }

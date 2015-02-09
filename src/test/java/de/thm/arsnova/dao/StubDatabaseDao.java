@@ -35,6 +35,7 @@ import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -572,5 +573,11 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public int getAbstentionAnswerCount(String questionId) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public List<SessionInfo> importSession(User user, Session session, ImportExportSession importSession) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
