@@ -130,7 +130,7 @@ public class ConfigurationController extends AbstractController {
 	@Value("${tracking.site-id}")
 	private String trackingSiteId;
 
-	@Value("${optional.demoSessionKey:}")
+	@Value("${session.demo-id:}")
 	private String demoSessionKey;
 
 	@Value("${pp.session-levels.de}")
