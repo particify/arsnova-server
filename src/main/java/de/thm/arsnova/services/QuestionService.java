@@ -111,7 +111,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			}
 
 			// base64 adds offset to filesize, formula taken from: http://en.wikipedia.org/wiki/Base64#MIME
-			final int fileSize = (int) ((question.getImage().length()-814)/1.37);
+			final int fileSize = (int) ((question.getImage().length() - 814) / 1.37);
 			if (fileSize > uploadFileSizeByte) {
 				LOGGER.error("Could not save file. File is too large with " + fileSize + " Byte.");
 				throw new BadRequestException();
@@ -413,7 +413,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 		final Question result = databaseDao.updateQuestion(question);
 
-		if(!oldQuestion.isActive() && question.isActive()) {
+		if (!oldQuestion.isActive() && question.isActive()) {
 			final NewQuestionEvent event = new NewQuestionEvent(this, result, session);
 			this.publisher.publishEvent(event);
 		}
@@ -523,7 +523,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public SimpleEntry<String,List<Integer>> getAnswerAndAbstentionCountByQuestion(final String questionid) {
+	public SimpleEntry<String, List<Integer>> getAnswerAndAbstentionCountByQuestion(final String questionid) {
 		final List<Integer> countList = Arrays.asList(
 			getAnswerCount(questionid),
 			getAbstentionAnswerCount(questionid)

@@ -18,9 +18,7 @@
 package de.thm.arsnova.dao;
 
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Answer;
@@ -39,9 +37,9 @@ public interface IDatabaseDao {
 	Session getSession(String keyword);
 
 	List<Session> getMySessions(User user);
-	
+
 	List<Session> getPublicPoolSessions();
-	
+
 	List<Session> getMyPublicPoolSessions(User user);
 
 	Session saveSession(User user, Session session);
@@ -75,7 +73,7 @@ public interface IDatabaseDao {
 	List<Answer> getAnswers(String questionId, int piRound);
 
 	int getAnswerCount(Question question, int piRound);
-	
+
 	int getAbstentionAnswerCount(String questionId);
 
 	List<Answer> getFreetextAnswers(String questionId);
@@ -161,7 +159,7 @@ public interface IDatabaseDao {
 	void deleteAllInterposedQuestions(Session session);
 
 	void deleteAllInterposedQuestions(Session session, User user);
-	
+
 	void publishQuestions(Session session, boolean publish, List<Question> questions);
 
 	void publishAllQuestions(Session session, boolean publish);
@@ -179,11 +177,11 @@ public interface IDatabaseDao {
 	SimpleEntry<Integer, Integer> getMyLearningProgress(Session session, User user);
 
 	List<SessionInfo> getMySessionsInfo(User user);
-	
+
 	List<SessionInfo> getPublicPoolSessionsInfo();
 
 	List<SessionInfo> getMyPublicPoolSessionsInfo(final User user);
-	
+
 	List<SessionInfo> getMyVisitedSessionsInfo(User currentUser);
 
 	void deleteAllPreparationAnswers(Session session);

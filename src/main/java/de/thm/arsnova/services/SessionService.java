@@ -19,10 +19,8 @@ package de.thm.arsnova.services;
 
 import java.io.Serializable;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -216,7 +214,7 @@ public class SessionService implements ISessionService {
 				session.setPpLogo(base64ImageString);
 			}
 			// base64 adds offset to filesize, formula taken from: http://en.wikipedia.org/wiki/Base64#MIME
-			final int fileSize = (int) ((session.getPpLogo().length()-814)/1.37);
+			final int fileSize = (int) ((session.getPpLogo().length() - 814) / 1.37);
 			if (fileSize > uploadFileSizeByte) {
 				LOGGER.error("Could not save file. File is too large with " + fileSize + " Byte.");
 				throw new RequestEntityTooLargeException();
