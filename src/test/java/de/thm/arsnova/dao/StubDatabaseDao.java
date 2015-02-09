@@ -379,12 +379,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public Session lockSession(Session session, Boolean lock) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public Session updateSession(Session session) {
 		// TODO Auto-generated method stub
 		return null;

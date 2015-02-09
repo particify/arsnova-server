@@ -265,8 +265,9 @@ public class SessionService implements ISessionService {
 		if (!session.isCreator(user)) {
 			throw new ForbiddenException();
 		}
+		session.setActive(lock);
 		socketIoServer.reportSessionStatus(sessionkey, lock);
-		return databaseDao.lockSession(session, lock);
+		return databaseDao.updateSession(session);
 	}
 
 	@Override

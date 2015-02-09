@@ -1273,20 +1273,6 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public Session lockSession(final Session session, final Boolean lock) {
-		try {
-			final Document s = database.getDocument(session.get_id());
-			s.put("active", lock);
-			database.saveDocument(s);
-			session.set_rev(s.getRev());
-			return session;
-		} catch (final IOException e) {
-			LOGGER.error("Could not lock session {}", session);
-		}
-		return null;
-	}
-
-	@Override
 	@CachePut(value = "sessions")
 	public Session updateSession(final Session session) {
 		try {
