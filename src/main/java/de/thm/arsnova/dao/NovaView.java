@@ -36,6 +36,16 @@ public class NovaView extends View {
 
 	protected StaleMode stale = StaleMode.NONE;
 
+	protected boolean includeDocs = false;
+
+	public boolean isIncludeDocs() {
+		return includeDocs;
+	}
+
+	public void setIncludeDocs(boolean includeDocs) {
+		this.includeDocs = includeDocs;
+	}
+
 	public NovaView(final String fullname) {
 		super(fullname);
 	}
@@ -121,6 +131,12 @@ public class NovaView extends View {
 			} else if (stale == StaleMode.UPDATE_AFTER) {
 				query.append("stale=update_after");
 			}
+		}
+		if (includeDocs != false) {
+			if (query.length() > 0) {
+				query.append("&");
+			}
+			query.append("include_docs=true");
 		}
 
 		if (query.length() == 0) {

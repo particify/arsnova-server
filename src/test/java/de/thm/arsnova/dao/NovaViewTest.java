@@ -149,6 +149,18 @@ public class NovaViewTest {
 		assertNull(v4.getQueryString());
 	}
 
+	@Test
+	public void shouldSupportIncludeDocsParameter() {
+		final NovaView v1 = new NovaView(null);
+		final NovaView v2 = new NovaView(null);
+		final NovaView v3 = new NovaView(null);
+		v1.setIncludeDocs(true);
+		v2.setIncludeDocs(false);
+		assertEncodedEquals("include_docs", "true", v1.getQueryString());
+		assertNull(v2.getQueryString());
+		assertNull(v3.getQueryString());
+	}
+
 	private void assertEncodedEquals(final String key, final String expected, final String actual) {
 		try {
 			assertEquals(key + "=" + URLEncoder.encode(expected, "UTF-8"), actual);
