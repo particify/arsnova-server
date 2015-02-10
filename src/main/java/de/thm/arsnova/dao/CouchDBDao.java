@@ -726,11 +726,14 @@ public class CouchDBDao implements IDatabaseDao {
 		view.setEndKey(session.get_id(), "{}");
 		final ViewResults results = getDatabase().view(view);
 
+		List<Question> questions = new ArrayList<Question>();
 		for (final Document d : results.getResults()) {
 			final Question q = new Question();
 			q.set_id(d.getId());
-			deleteQuestionWithAnswers(q);
+			q.set_rev(d.getRev());
+			questions.add(q);
 		}
+		deleteAllAnswersWithQuestions(questions);
 	}
 
 	private void deleteDocument(final String documentId) throws IOException {
@@ -743,11 +746,16 @@ public class CouchDBDao implements IDatabaseDao {
 		try {
 			final NovaView view = new NovaView("answer/cleanup");
 			view.setKey(question.get_id());
+			view.setIncludeDocs(true);
 			final ViewResults results = getDatabase().view(view);
 
-			for (final Document d : results.getResults()) {
-				deleteDocument(d.getId());
+			List<Document> answersToDelete = new ArrayList<Document>();
+			for (final Document a : results.getResults()) {
+				final Document d = new Document(a.getJSONObject("doc"));
+				d.put("_deleted", true);
+				answersToDelete.add(d);
 			}
+			database.bulkSaveDocuments(answersToDelete.toArray(new Document[answersToDelete.size()]));
 		} catch (final IOException e) {
 			LOGGER.error("IOException: Could not delete answers for question {}", question.get_id());
 		}
@@ -1552,25 +1560,77 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public void deleteAllQuestionsAnswers(final Session session) {
 		final List<Question> questions = getQuestions(new NovaView("skill_question/by_session"), session);
-		for (final Question q : questions) {
-			deleteAnswers(q);
-		}
+		deleteAllAnswersForQuestions(questions);
 	}
 
 	@Override
 	public void deleteAllPreparationAnswers(final Session session) {
 		final List<Question> questions = getQuestions(new NovaView("skill_question/preparation_question_by_session"), session);
-		for (final Question q : questions) {
-			deleteAnswers(q);
-		}
+		deleteAllAnswersForQuestions(questions);
 	}
 
 	@Override
 	public void deleteAllLectureAnswers(final Session session) {
 		final List<Question> questions = getQuestions(new NovaView("skill_question/lecture_question_by_session"), session);
-		for (final Question q : questions) {
-			deleteAnswers(q);
+		deleteAllAnswersForQuestions(questions);
+	}
+
+	private boolean deleteAllAnswersForQuestions(List<Question> questions) {
+		List<String> questionIds = new ArrayList<String>();
+		for (Question q : questions) {
+			questionIds.add(q.get_id());
 		}
+		final NovaView bulkView = new NovaView("answer/cleanup");
+		bulkView.setKeys(questionIds);
+		bulkView.setIncludeDocs(true);
+		final List<Document> result = getDatabase().view(bulkView).getResults();
+		final List<Document> allAnswers = new ArrayList<Document>();
+		for (Document a : result) {
+			final Document d = new Document(a.getJSONObject("doc"));
+			d.put("_deleted", true);
+			allAnswers.add(d);
+		}
+		try {
+			getDatabase().bulkSaveDocuments(allAnswers.toArray(new Document[allAnswers.size()]));
+		} catch (IOException e) {
+			LOGGER.error("Could not bulk delete answers: {}", e.getMessage());
+			return false;
+		}
+		return true;
+	}
+
+	private boolean deleteAllAnswersWithQuestions(List<Question> questions) {
+		List<String> questionIds = new ArrayList<String>();
+		final List<Document> allQuestions = new ArrayList<Document>();
+		for (Question q : questions) {
+			final Document d = new Document();
+			d.put("_id", q.get_id());
+			d.put("_rev", q.get_rev());
+			d.put("_deleted", true);
+			questionIds.add(q.get_id());
+			allQuestions.add(d);
+		}
+		final NovaView bulkView = new NovaView("answer/cleanup");
+		bulkView.setKeys(questionIds);
+		bulkView.setIncludeDocs(true);
+		final List<Document> result = getDatabase().view(bulkView).getResults();
+
+		final List<Document> allAnswers = new ArrayList<Document>();
+		for (Document a : result) {
+			final Document d = new Document(a.getJSONObject("doc"));
+			d.put("_deleted", true);
+			allAnswers.add(d);
+		}
+
+		try {
+			List<Document> deleteList = new ArrayList<Document>(allAnswers);
+			deleteList.addAll(allQuestions);
+			getDatabase().bulkSaveDocuments(deleteList.toArray(new Document[deleteList.size()]));
+		} catch (IOException e) {
+			LOGGER.error("Could not bulk delete questions and answers: {}", e.getMessage());
+			return false;
+		}
+		return true;
 	}
 
 	@Override
