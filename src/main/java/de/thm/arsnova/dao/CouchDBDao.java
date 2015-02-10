@@ -1603,11 +1603,11 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 		final double courseAverageValue = userTotalValue / numUsers;
 		final double courseProgress = courseAverageValue / courseMaximumValue;
-		return (int)Math.min(100, Math.round(courseProgress * 100));
+		return (int) Math.min(100, Math.round(courseProgress * 100));
 	}
 
 	@Override
-	public SimpleEntry<Integer,Integer> getMyLearningProgress(final Session session, final User user) {
+	public SimpleEntry<Integer, Integer> getMyLearningProgress(final Session session, final User user) {
 		final int courseProgress = getLearningProgress(session);
 
 		final NovaView maximumValueView = new NovaView("learning_progress_maximum_value/max");
@@ -1629,7 +1629,7 @@ public class CouchDBDao implements IDatabaseDao {
 			return new AbstractMap.SimpleEntry<Integer, Integer>(0, courseProgress);
 		}
 		final double myProgress = userTotalValue / courseMaximumValue;
-		final int myLearningProgress = (int)Math.min(100, Math.round(myProgress*100));
+		final int myLearningProgress = (int) Math.min(100, Math.round(myProgress * 100));
 
 		return new AbstractMap.SimpleEntry<Integer, Integer>(myLearningProgress, courseProgress);
 	}

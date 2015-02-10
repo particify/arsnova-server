@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.thm.arsnova.exceptions.ForbiddenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,7 +112,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			}
 
 			// base64 adds offset to filesize, formula taken from: http://en.wikipedia.org/wiki/Base64#MIME
-			final int fileSize = (int) ((question.getImage().length()-814)/1.37);
+			final int fileSize = (int) ((question.getImage().length() - 814) / 1.37);
 			if (fileSize > uploadFileSizeByte) {
 				LOGGER.error("Could not save file. File is too large with " + fileSize + " Byte.");
 				throw new BadRequestException();
@@ -339,16 +340,20 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public InterposedReadingCount getInterposedReadingCount(final String sessionKey) {
+	public InterposedReadingCount getInterposedReadingCount(final String sessionKey, String username) {
 		final Session session = databaseDao.getSessionFromKeyword(sessionKey);
-		final User user = getCurrentUser();
 		if (session == null) {
 			throw new NotFoundException();
 		}
-		if (session.isCreator(user)) {
+		if (username == null) {
 			return databaseDao.getInterposedReadingCount(session);
 		} else {
-			return databaseDao.getInterposedReadingCount(session, user);
+			User currentUser = userService.getCurrentUser();
+			if (!currentUser.getUsername().equals(username)) {
+				throw new ForbiddenException();
+			}
+
+			return databaseDao.getInterposedReadingCount(session, currentUser);
 		}
 	}
 
@@ -413,7 +418,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 		final Question result = databaseDao.updateQuestion(question);
 
-		if(!oldQuestion.isActive() && question.isActive()) {
+		if (!oldQuestion.isActive() && question.isActive()) {
 			final NewQuestionEvent event = new NewQuestionEvent(this, result, session);
 			this.publisher.publishEvent(event);
 		}
@@ -519,7 +524,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public SimpleEntry<String,List<Integer>> getAnswerAndAbstentionCountByQuestion(final String questionid) {
+	public SimpleEntry<String, List<Integer>> getAnswerAndAbstentionCountByQuestion(final String questionid) {
 		final List<Integer> countList = Arrays.asList(
 			getAnswerCount(questionid),
 			getAbstentionAnswerCount(questionid)

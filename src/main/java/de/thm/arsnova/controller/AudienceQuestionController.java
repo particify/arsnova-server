@@ -54,8 +54,8 @@ public class AudienceQuestionController extends AbstractController {
 
 	@RequestMapping(value = "/readcount", method = RequestMethod.GET)
 	@DeprecatedApi
-	public final InterposedReadingCount getUnreadInterposedCount(@RequestParam("sessionkey") final String sessionkey) {
-		return questionService.getInterposedReadingCount(sessionkey);
+	public final InterposedReadingCount getUnreadInterposedCount(@RequestParam("sessionkey") final String sessionkey, String user) {
+		return questionService.getInterposedReadingCount(sessionkey, user);
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)

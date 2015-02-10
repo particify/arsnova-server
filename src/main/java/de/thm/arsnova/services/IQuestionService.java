@@ -59,7 +59,7 @@ public interface IQuestionService {
 
 	int getInterposedCount(String sessionKey);
 
-	InterposedReadingCount getInterposedReadingCount(String sessionKey);
+	InterposedReadingCount getInterposedReadingCount(String sessionKey, String username);
 
 	List<InterposedQuestion> getInterposedQuestions(String sessionKey);
 
@@ -90,7 +90,7 @@ public interface IQuestionService {
 	int getFlashcardCount(String sessionkey);
 
 	int getPreparationQuestionCount(String sessionkey);
-	
+
 	SimpleEntry<String, List<Integer>> getAnswerAndAbstentionCountByQuestion(String questionid);
 
 	int countLectureQuestionAnswers(String sessionkey);
@@ -118,7 +118,7 @@ public interface IQuestionService {
 	void deleteAllInterposedQuestions(String sessionKeyword);
 
 	void publishAll(String sessionkey, boolean publish);
-	
+
 	void publishQuestions(String sessionkey, boolean publish, List<Question> questions);
 
 	void deleteAllQuestionsAnswers(String sessionkey);

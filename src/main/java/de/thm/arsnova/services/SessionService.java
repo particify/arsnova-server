@@ -214,7 +214,7 @@ public class SessionService implements ISessionService {
 				session.setPpLogo(base64ImageString);
 			}
 			// base64 adds offset to filesize, formula taken from: http://en.wikipedia.org/wiki/Base64#MIME
-			final int fileSize = (int) ((session.getPpLogo().length()-814)/1.37);
+			final int fileSize = (int) ((session.getPpLogo().length() - 814) / 1.37);
 			if (fileSize > uploadFileSizeByte) {
 				LOGGER.error("Could not save file. File is too large with " + fileSize + " Byte.");
 				throw new RequestEntityTooLargeException();
