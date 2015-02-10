@@ -301,9 +301,12 @@ public class SessionService implements ISessionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<SessionInfo> importSession(ImportExportSession importSession) {
+	public SessionInfo importSession(ImportExportSession importSession) {
 		final User user = userService.getCurrentUser();
-		final Session session = importSession.generateSessionEntity(user);
-		return databaseDao.importSession(user, session, importSession);
+		final SessionInfo info = databaseDao.importSession(user, importSession);
+		if (info == null) {
+			throw new RuntimeException("Error while importing the session.");
+		}
+		return info;
 	}
 }

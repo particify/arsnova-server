@@ -1696,13 +1696,17 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<SessionInfo> importSession(User user, Session s, ImportExportSession importSession) {
-		final Session session = this.saveSession(user, s);
+	public SessionInfo importSession(User user, ImportExportSession importSession) {
+		final Session session = this.saveSession(user, importSession.generateSessionEntity(user));
 		List<Document> questions = new ArrayList<Document>();
 		// We need to remember which answers belong to which question.
 		// The answers need a questionId, so we first store the questions to get the IDs.
 		// Then we update the answer objects and store them as well.
 		Map<Document, ImportExportQuestion> mapping = new HashMap<Document, ImportExportQuestion>();
+		// Later, generate all answer documents
+		List<Document> answers = new ArrayList<Document>();
+		// We can then push answers together with interposed questions in one large bulk request
+		List<Document> interposedQuestions = new ArrayList<Document>();
 		try {
 			// add session id to all questions and generate documents
 			for (ImportExportQuestion question : importSession.getQuestions()) {
@@ -1712,12 +1716,8 @@ public class CouchDBDao implements IDatabaseDao {
 				mapping.put(doc, question);
 			}
 			database.bulkSaveDocuments(questions.toArray(new Document[questions.size()]));
-		} catch (final IOException e) {
-			LOGGER.error("Could not bulk save all questions: {}", e.getMessage());
-		}
-		// now bulk import all answers
-		List<Document> answers = new ArrayList<Document>();
-		try {
+
+			// bulk import answers together with interposed questions
 			for (Entry<Document, ImportExportQuestion> entry : mapping.entrySet()) {
 				final Document doc = entry.getKey();
 				final ImportExportQuestion question = entry.getValue();
@@ -1739,10 +1739,46 @@ public class CouchDBDao implements IDatabaseDao {
 					answers.add(answerDoc);
 				}
 			}
-			database.bulkSaveDocuments(answers.toArray(new Document[answers.size()]));
+			for (de.thm.arsnova.entities.transport.InterposedQuestion i : importSession.getFeedbackQuestions()) {
+				final Document q = new Document();
+				q.put("type", "interposed_question");
+				q.put("sessionId", session.get_id());
+				q.put("subject", i.getSubject());
+				q.put("text", i.getText());
+				q.put("timestamp", i.getTimestamp());
+				q.put("read", i.isRead());
+				// we do not store the creator's name
+				q.put("creator", "");
+				interposedQuestions.add(q);
+			}
+			List<Document> documents = new ArrayList<Document>(answers);
+			documents.addAll(interposedQuestions);
+			database.bulkSaveDocuments(documents.toArray(new Document[documents.size()]));
 		} catch (IOException e) {
-			LOGGER.error("Could not bulk save all answers: {}", e.getMessage());
+			LOGGER.error("Could not import this session: {}", e.getMessage());
+			// Something went wrong, delete this session since we do not want a partial import
+			this.deleteSession(session);
+			return null;
 		}
-		return null;
+		// Calculate some statistics...
+		int unreadInterposed = 0;
+		for (de.thm.arsnova.entities.transport.InterposedQuestion i : importSession.getFeedbackQuestions()) {
+			if (!i.isRead()) {
+				unreadInterposed++;
+			}
+		}
+		int numUnanswered = 0;
+		for (ImportExportQuestion question : importSession.getQuestions()) {
+			if (question.getAnswers().size() == 0) {
+				numUnanswered++;
+			}
+		}
+		final SessionInfo info = new SessionInfo(session);
+		info.setNumQuestions(questions.size());
+		info.setNumUnanswered(numUnanswered);
+		info.setNumAnswers(answers.size());
+		info.setNumInterposed(interposedQuestions.size());
+		info.setNumUnredInterposed(unreadInterposed);
+		return info;
 	}
 }

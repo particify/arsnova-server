@@ -187,5 +187,5 @@ public interface IDatabaseDao {
 
 	void deleteAllLectureAnswers(Session session);
 
-	List<SessionInfo> importSession(User user, Session session, ImportExportSession importSession);
+	SessionInfo importSession(User user, ImportExportSession importSession);
 }

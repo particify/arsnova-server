@@ -576,7 +576,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<SessionInfo> importSession(User user, Session session, ImportExportSession importSession) {
+	public SessionInfo importSession(User user, ImportExportSession importSession) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -211,7 +211,7 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/import", method = RequestMethod.POST)
-	public final List<SessionInfo> importSession(
+	public final SessionInfo importSession(
 			@RequestBody final ImportExportSession session,
 			final HttpServletResponse response
 			) {

@@ -63,5 +63,5 @@ public interface ISessionService {
 
 	List<SessionInfo> getMyVisitedSessionsInfo();
 
-	List<SessionInfo> importSession(ImportExportSession session);
+	SessionInfo importSession(ImportExportSession session);
 }
