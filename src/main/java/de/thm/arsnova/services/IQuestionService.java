@@ -59,7 +59,7 @@ public interface IQuestionService {
 
 	int getInterposedCount(String sessionKey);
 
-	InterposedReadingCount getInterposedReadingCount(String sessionKey);
+	InterposedReadingCount getInterposedReadingCount(String sessionKey, String username);
 
 	List<InterposedQuestion> getInterposedQuestions(String sessionKey);
 

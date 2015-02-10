@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.AbstractMap.SimpleEntry;
 
+import de.thm.arsnova.exceptions.ForbiddenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -339,16 +340,20 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public InterposedReadingCount getInterposedReadingCount(final String sessionKey) {
+	public InterposedReadingCount getInterposedReadingCount(final String sessionKey, String username) {
 		final Session session = databaseDao.getSessionFromKeyword(sessionKey);
-		final User user = getCurrentUser();
 		if (session == null) {
 			throw new NotFoundException();
 		}
-		if (session.isCreator(user)) {
+		if (username == null) {
 			return databaseDao.getInterposedReadingCount(session);
 		} else {
-			return databaseDao.getInterposedReadingCount(session, user);
+			User currentUser = userService.getCurrentUser();
+			if (!currentUser.getUsername().equals(username)) {
+				throw new ForbiddenException();
+			}
+
+			return databaseDao.getInterposedReadingCount(session, currentUser);
 		}
 	}
 
