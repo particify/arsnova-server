@@ -56,7 +56,7 @@ public class PointBasedLearningProgress implements LearningProgress {
 		int courseProgress = calculateCourseScore(courseScore);
 
 		final double courseMaximumValue = courseScore.getMaximumScore();
-		final double userTotalValue = courseScore.getTotalUserScore();
+		final double userTotalValue = courseScore.getTotalUserScore(user);
 
 		if (courseMaximumValue == 0) {
 			return new AbstractMap.SimpleEntry<Integer, Integer>(0, courseProgress);

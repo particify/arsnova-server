@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import de.thm.arsnova.entities.User;
+
 public class QuestionScore implements Iterable<UserScore> {
 
 	private String questionId;
@@ -52,6 +54,16 @@ public class QuestionScore implements Iterable<UserScore> {
 		int totalScore = 0;
 		for (UserScore score : userScores) {
 			totalScore += score.getScore();
+		}
+		return totalScore;
+	}
+
+	public int getTotalUserScore(User user) {
+		int totalScore = 0;
+		for (UserScore score : userScores) {
+			if (score.isUser(user)) {
+				totalScore += score.getScore();
+			}
 		}
 		return totalScore;
 	}

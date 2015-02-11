@@ -23,6 +23,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import de.thm.arsnova.entities.User;
+
 public class CourseScore implements Iterable<QuestionScore> {
 
 	private final Map<String, QuestionScore> scores = new HashMap<String, QuestionScore>();
@@ -57,6 +59,14 @@ public class CourseScore implements Iterable<QuestionScore> {
 		int score = 0;
 		for (QuestionScore questionScore : this) {
 			score += questionScore.getTotalUserScore();
+		}
+		return score;
+	}
+
+	public double getTotalUserScore(User user) {
+		int score = 0;
+		for (QuestionScore questionScore : this) {
+			score += questionScore.getTotalUserScore(user);
 		}
 		return score;
 	}
