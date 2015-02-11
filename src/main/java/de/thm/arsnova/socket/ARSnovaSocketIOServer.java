@@ -48,6 +48,7 @@ import com.corundumstudio.socketio.protocol.PacketType;
 
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.transport.LearningProgressType;
 import de.thm.arsnova.events.DeleteAnswerEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
@@ -184,6 +185,21 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 					questionService.readInterposedQuestionInternal(question.getId(), user);
 				} catch (NotFoundException | UnauthorizedException e) {
 					LOGGER.error("Loading of question {} failed for user {} with exception {}", question.getId(), user, e.getMessage());
+				}
+			}
+		});
+
+		server.addEventListener(
+				"setLearningProgressType",
+				LearningProgressType.class,
+				new DataListener<LearningProgressType>() {
+			@Override
+			public void onData(SocketIOClient client, LearningProgressType progressType, AckRequest ack) {
+				final User user = userService.getUser2SocketId(client.getSessionId());
+				final de.thm.arsnova.entities.Session session = sessionService.getSession(progressType.getSessionKeyword());
+				if (session.isCreator(user)) {
+					session.setLearningProgressType(progressType.getLearningProgressType());
+					sessionService.updateSession(progressType.getSessionKeyword(), session);
 				}
 			}
 		});

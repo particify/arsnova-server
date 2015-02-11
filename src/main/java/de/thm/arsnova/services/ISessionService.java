@@ -37,8 +37,6 @@ public interface ISessionService {
 
 	List<Session> getMySessions();
 
-	List<Session> getPublicPoolSessions();
-
 	List<Session> getMyVisitedSessions();
 
 	int countSessions(List<Course> courses);

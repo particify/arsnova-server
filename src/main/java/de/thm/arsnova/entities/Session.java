@@ -37,6 +37,7 @@ public class Session implements Serializable {
 	private String courseId;
 	private List<String> _conflicts;
 	private long creationTime;
+	private String learningProgressType = "questions";
 
 	private String ppAuthorName;
 	private String ppAuthorMail;
@@ -184,6 +185,14 @@ public class Session implements Serializable {
 
 	public void setCreationTime(long creationTime) {
 		this.creationTime = creationTime;
+	}
+
+	public String getLearningProgressType() {
+		return learningProgressType;
+	}
+
+	public void setLearningProgressType(String learningProgressType) {
+		this.learningProgressType = learningProgressType;
 	}
 
 	public String getPpAuthorName() {
