@@ -41,7 +41,9 @@ public class CourseScore implements Iterable<QuestionScore> {
 	 */
 	public void add(String questionId, String username, int userscore) {
 		if (!scores.containsKey(questionId)) {
-			throw new IllegalArgumentException("Invalid argument questionId");
+			// Precondition failed, ignore this element.
+			// Most likely this is a question that has no learning progress value.
+			return;
 		}
 		QuestionScore questionScore = scores.get(questionId);
 		questionScore.add(username, userscore);
