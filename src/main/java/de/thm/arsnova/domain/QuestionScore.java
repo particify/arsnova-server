@@ -46,6 +46,10 @@ public class QuestionScore implements Iterable<UserScore> {
 		return this.userScores.iterator();
 	}
 
+	public boolean hasScores() {
+		return this.userScores.size() > 0;
+	}
+
 	public void add(String username, int userscore) {
 		userScores.add(new UserScore(username, userscore));
 	}

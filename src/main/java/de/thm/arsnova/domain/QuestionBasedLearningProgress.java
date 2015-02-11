@@ -50,6 +50,9 @@ public class QuestionBasedLearningProgress implements LearningProgress {
 		int numQuestionsCorrect = 0;
 		for (QuestionScore questionScore : courseScore) {
 			int requiredScore = questionScore.getMaximum();
+			if (!questionScore.hasScores()) {
+				continue;
+			}
 			boolean allCorrect = true;
 			for (UserScore userScore : questionScore) {
 				if (!userScore.hasScore(requiredScore)) {
