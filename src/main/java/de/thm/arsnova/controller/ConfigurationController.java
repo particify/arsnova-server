@@ -102,16 +102,16 @@ public class ConfigurationController extends AbstractController {
 
 	@Value("${question.answer-option-limit:8}")
 	private String answerOptionLimit;
-	
+
 	@Value("${upload.filesize_b:}")
 	private String maxUploadFilesize;
 
 	@Value("${question.parse-answer-option-formatting:false}")
 	private String parseAnswerOptionFormatting;
-	
+
 	@Value("${pp.subjects}")
 	private String ppSubjects;
-	
+
 	@Value("${pp.licenses}")
 	private String ppLicenses;
 
@@ -129,16 +129,19 @@ public class ConfigurationController extends AbstractController {
 
 	@Value("${tracking.site-id}")
 	private String trackingSiteId;
-	
-	@Value("${optional.demoSessionKey:}")
+
+	@Value("${session.demo-id:}")
 	private String demoSessionKey;
+
+	@Value("${optional.arsnova-slogan:}")
+	private String arsnovaSlogan;
 
 	@Value("${pp.session-levels.de}")
 	private String ppLevelsDe;
 
 	@Value("${pp.session-levels.en}")
 	private String ppLevelsEn;
-	
+
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public final HashMap<String, Object> getConfiguration(HttpServletRequest request) {
@@ -168,7 +171,7 @@ public class ConfigurationController extends AbstractController {
 		if (!"".equals(blogUrl)) {
 			config.put("blogUrl", blogUrl);
 		}
- 		if (!"".equals(presenterDocumentationUrl)) {
+		if (!"".equals(presenterDocumentationUrl)) {
 			config.put("presenterDocumentationUrl", presenterDocumentationUrl);
 		}
 		if (!"".equals(overlayUrl)) {
@@ -185,6 +188,9 @@ public class ConfigurationController extends AbstractController {
 		}
 		if (!"".equals(demoSessionKey)) {
 			config.put("demoSessionKey", demoSessionKey);
+		}
+		if (!"".equals(arsnovaSlogan)) {
+			config.put("arsnovaSlogan", arsnovaSlogan);
 		}
 		if (!"".equals(maxUploadFilesize)) {
 			config.put("maxUploadFilesize", maxUploadFilesize);
@@ -203,13 +209,16 @@ public class ConfigurationController extends AbstractController {
 		features.put("gridSquare", "true".equals(gridSquareEnabled));
 		features.put("sessionImportExport", "true".equals(sessionImportExportEnabled));
 		features.put("publicPool", "true".equals(publicPoolEnabled));
-		
-		// add public pool configuration
-		config.put("publicPool", publicPool);
-		
-		publicPool.put("subjects", ppSubjects);
-		publicPool.put("licenses", ppLicenses);
-		publicPool.put("logoMaxFilesize", ppLogoMaxFilesize);
+
+		// add public pool configuration on demand
+		if (features.get("publicPool")) {
+			config.put("publicPool", publicPool);
+			publicPool.put("subjects", ppSubjects);
+			publicPool.put("licenses", ppLicenses);
+			publicPool.put("logoMaxFilesize", ppLogoMaxFilesize);
+			publicPool.put("levelsDe", ppLevelsDe);
+			publicPool.put("levelsEn", ppLevelsEn);
+		}
 
 		if (!"".equals(trackingTrackerUrl)) {
 			HashMap<String, String> tracking = new HashMap<String, String>();
@@ -219,8 +228,6 @@ public class ConfigurationController extends AbstractController {
 			tracking.put("trackerUrl", trackingTrackerUrl);
 			tracking.put("siteId", trackingSiteId);
 		}
-		publicPool.put("levelsDe", ppLevelsDe);
-		publicPool.put("levelsEn", ppLevelsEn);
 
 		config.put("grid", gridImageMaxFileSize);
 

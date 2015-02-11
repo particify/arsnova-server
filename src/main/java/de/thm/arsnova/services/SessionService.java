@@ -40,9 +40,11 @@ import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.exceptions.RequestEntityTooLargeException;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
@@ -112,7 +114,7 @@ public class SessionService implements ISessionService {
 	public final Session joinSession(final String keyword, final UUID socketId) {
 		/* Socket.IO solution */
 
-		Session session = databaseDao.getSessionFromKeyword(keyword);
+		Session session = null != keyword ? databaseDao.getSessionFromKeyword(keyword) : null;
 
 		if (null == session) {
 			userService.removeUserFromSessionBySocketId(socketId);
@@ -169,8 +171,8 @@ public class SessionService implements ISessionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public final List<Session> getPublicPoolSessions() {
-		return databaseDao.getPublicPoolSessions();
+	public final List<SessionInfo> getPublicPoolSessionsInfo() {
+		return databaseDao.getPublicPoolSessionsInfo();
 	}
 
 	@Override
@@ -217,10 +219,10 @@ public class SessionService implements ISessionService {
 				session.setPpLogo(base64ImageString);
 			}
 			// base64 adds offset to filesize, formula taken from: http://en.wikipedia.org/wiki/Base64#MIME
-			final int fileSize = (int) ((session.getPpLogo().length()-814)/1.37);
+			final int fileSize = (int) ((session.getPpLogo().length() - 814) / 1.37);
 			if (fileSize > uploadFileSizeByte) {
 				LOGGER.error("Could not save file. File is too large with " + fileSize + " Byte.");
-				throw new BadRequestException();
+				throw new RequestEntityTooLargeException();
 			}
 		}
 
@@ -266,8 +268,9 @@ public class SessionService implements ISessionService {
 		if (!session.isCreator(user)) {
 			throw new ForbiddenException();
 		}
+		session.setActive(lock);
 		socketIoServer.reportSessionStatus(sessionkey, lock);
-		return databaseDao.lockSession(session, lock);
+		return databaseDao.updateSession(session);
 	}
 
 	@Override
@@ -301,5 +304,16 @@ public class SessionService implements ISessionService {
 		final User user = userService.getCurrentUser();
 		LearningProgress learningProgress = learningProgressFactory.createFromType(progressType);
 		return learningProgress.getMyProgress(session, user);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public SessionInfo importSession(ImportExportSession importSession) {
+		final User user = userService.getCurrentUser();
+		final SessionInfo info = databaseDao.importSession(user, importSession);
+		if (info == null) {
+			throw new RuntimeException("Error while importing the session.");
+		}
+		return info;
 	}
 }

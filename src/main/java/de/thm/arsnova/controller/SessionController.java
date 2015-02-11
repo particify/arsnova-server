@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.token.Sha512DigestUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
+import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
@@ -65,13 +65,7 @@ public class SessionController extends AbstractController {
 
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.GET)
 	public final Session joinSession(@PathVariable final String sessionkey) {
-		final Session session = sessionService.getSession(sessionkey);
-		if (!session.isCreator(userService.getCurrentUser())) {
-			session.setCreator("NOT VISIBLE TO YOU");
-		} else {
-			session.setCreator(Sha512DigestUtils.shaHex(session.getCreator()));
-		}
-		return session;
+		return Session.anonymizedCopy(sessionService.getSession(sessionkey));
 	}
 
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.DELETE)
@@ -203,10 +197,10 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/publicpool", method = RequestMethod.GET)
-	public final List<Session> getPublicPoolSessions(
+	public final List<SessionInfo> getPublicPoolSessions(
 			final HttpServletResponse response
 			) {
-		List<Session> sessions = sessionService.getPublicPoolSessions();
+		List<SessionInfo> sessions = sessionService.getPublicPoolSessionsInfo();
 
 		if (sessions == null || sessions.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
@@ -214,6 +208,14 @@ public class SessionController extends AbstractController {
 		}
 
 		return sessions;
+	}
+
+	@RequestMapping(value = "/import", method = RequestMethod.POST)
+	public final SessionInfo importSession(
+			@RequestBody final ImportExportSession session,
+			final HttpServletResponse response
+			) {
+		return sessionService.importSession(session);
 	}
 
 	@RequestMapping(value = "/{sessionkey}/lock", method = RequestMethod.POST)

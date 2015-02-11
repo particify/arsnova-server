@@ -14,7 +14,7 @@
 		<fluidoSkin>
 			<topBarEnabled>false</topBarEnabled>
 			<topBar>
-			
+
 			</topBar>
 			<sideBarEnabled>true</sideBarEnabled>
 			<profile>release</profile>
@@ -63,6 +63,6 @@
 			<item name="Source Repository" href="source-repository.html" />
 			<item name="Metrics" href="cobertura/index.html" />
 		</menu>
-		
+
 	</body>
 </project>

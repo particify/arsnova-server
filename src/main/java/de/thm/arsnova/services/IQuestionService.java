@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.services;
 
-import java.util.List;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.List;
 
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.InterposedQuestion;
@@ -59,7 +59,7 @@ public interface IQuestionService {
 
 	int getInterposedCount(String sessionKey);
 
-	InterposedReadingCount getInterposedReadingCount(String sessionKey);
+	InterposedReadingCount getInterposedReadingCount(String sessionKey, String username);
 
 	List<InterposedQuestion> getInterposedQuestions(String sessionKey);
 
@@ -71,7 +71,7 @@ public interface IQuestionService {
 
 	void deleteAnswers(String questionId);
 
-	Answer saveAnswer(Answer answer);
+	Answer saveAnswer(String questionId, de.thm.arsnova.entities.transport.Answer answer);
 
 	Answer updateAnswer(Answer answer);
 
@@ -90,7 +90,7 @@ public interface IQuestionService {
 	int getFlashcardCount(String sessionkey);
 
 	int getPreparationQuestionCount(String sessionkey);
-	
+
 	SimpleEntry<String, List<Integer>> getAnswerAndAbstentionCountByQuestion(String questionid);
 
 	int countLectureQuestionAnswers(String sessionkey);
@@ -118,7 +118,7 @@ public interface IQuestionService {
 	void deleteAllInterposedQuestions(String sessionKeyword);
 
 	void publishAll(String sessionkey, boolean publish);
-	
+
 	void publishQuestions(String sessionkey, boolean publish, List<Question> questions);
 
 	void deleteAllQuestionsAnswers(String sessionkey);

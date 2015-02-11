@@ -35,6 +35,7 @@ import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -201,6 +202,12 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
+	public List<SessionInfo> getPublicPoolSessionsInfo() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public List<Session> getMyPublicPoolSessions(User user) {
 		// TODO Auto-generated method stub
 		return null;
@@ -219,9 +226,9 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public void updateSessionOwnerActivity(Session session) {
+	public Session updateSessionOwnerActivity(Session session) {
 		// TODO Auto-generated method stub
-
+		return null;
 	}
 
 	@Override
@@ -369,12 +376,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public List<Session> getCourseSessions(List<Course> courses) {
-		return null;
-	}
-
-	@Override
-	public Session lockSession(Session session, Boolean lock) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -566,5 +567,11 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public int getAbstentionAnswerCount(String questionId) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public SessionInfo importSession(User user, ImportExportSession importSession) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

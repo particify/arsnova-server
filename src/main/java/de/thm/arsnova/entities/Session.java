@@ -37,7 +37,7 @@ public class Session implements Serializable {
 	private String courseId;
 	private List<String> _conflicts;
 	private long creationTime;
-	
+
 	private String ppAuthorName;
 	private String ppAuthorMail;
 	private String ppUniversity;
@@ -51,6 +51,27 @@ public class Session implements Serializable {
 
 	private String _id;
 	private String _rev;
+
+	/**
+	 * Returns a copy of the given session without any information that identifies a person.
+	 * @param original The session to create a anonymized copy of
+	 * @return
+	 */
+	public static Session anonymizedCopy(final Session original) {
+		final Session copy = new Session();
+		copy.type = original.type;
+		copy.name = original.name;
+		copy.shortName = original.shortName;
+		copy.keyword = original.keyword;
+		copy.creator = ""; // anonymous
+		copy.active = original.active;
+		copy.lastOwnerActivity = original.lastOwnerActivity;
+		copy.courseType = original.courseType;
+		copy.courseId = original.courseId;
+		copy._id = original._id;
+		copy._rev = original._rev;
+		return copy;
+	}
 
 	public String getType() {
 		return type;
@@ -156,7 +177,7 @@ public class Session implements Serializable {
 	public boolean isCourseSession() {
 		return getCourseId() != null && !getCourseId().isEmpty();
 	}
-	
+
 	public long getCreationTime() {
 		return creationTime;
 	}
@@ -164,7 +185,7 @@ public class Session implements Serializable {
 	public void setCreationTime(long creationTime) {
 		this.creationTime = creationTime;
 	}
-	
+
 	public String getPpAuthorName() {
 		return ppAuthorName;
 	}
@@ -172,7 +193,7 @@ public class Session implements Serializable {
 	public void setPpAuthorName(final String ppAuthorName) {
 		this.ppAuthorName = ppAuthorName;
 	}
-	
+
 	public String getPpAuthorMail() {
 		return ppAuthorMail;
 	}
@@ -180,7 +201,7 @@ public class Session implements Serializable {
 	public void setPpAuthorMail(final String ppAuthorMail) {
 		this.ppAuthorMail = ppAuthorMail;
 	}
-	
+
 	public String getPpUniversity() {
 		return ppUniversity;
 	}
@@ -188,7 +209,7 @@ public class Session implements Serializable {
 	public void setPpUniversity(final String ppUniversity) {
 		this.ppUniversity = ppUniversity;
 	}
-	
+
 	public String getPpLogo() {
 		return ppLogo;
 	}
@@ -196,7 +217,7 @@ public class Session implements Serializable {
 	public void setPpLogo(final String ppLogo) {
 		this.ppLogo = ppLogo;
 	}
-	
+
 	public String getPpSubject() {
 		return ppSubject;
 	}
@@ -204,7 +225,7 @@ public class Session implements Serializable {
 	public void setPpSubject(final String ppSubject) {
 		this.ppSubject = ppSubject;
 	}
-	
+
 	public String getPpLicense() {
 		return ppLicense;
 	}
@@ -212,42 +233,42 @@ public class Session implements Serializable {
 	public void setPpLicense(final String ppLicense) {
 		this.ppLicense = ppLicense;
 	}
-	
+
 	public String getPpDescription() {
 		return ppDescription;
 	}
-	
+
 	public void setPpDescription(final String ppDescription) {
 		this.ppDescription = ppDescription;
 	}
-	
+
 	public String getPpFaculty() {
 		return ppFaculty;
 	}
-	
+
 	public void setPpFaculty(final String ppFaculty) {
 		this.ppFaculty = ppFaculty;
 	}
-	
+
 	public String getPpLevel() {
 		return ppLevel;
 	}
-	
+
 	public void setPpLevel(final String ppLevel) {
 		this.ppLevel = ppLevel;
 	}
-	
+
 	public String getSessionType() {
 		return sessionType;
 	}
-	
+
 	public void setSessionType(final String sessionType) {
 		this.sessionType = sessionType;
 	}
 
 	@Override
 	public String toString() {
-		return "Session [keyword=" + keyword+ ", type=" + type + ", creator=" + creator + "]";
+		return "Session [keyword=" + keyword + ", type=" + type + ", creator=" + creator + "]";
 	}
 
 	@Override

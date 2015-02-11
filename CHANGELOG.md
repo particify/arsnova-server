@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.1
+Major features:
+* Public Pool (experimental): It is now possible to share sessions with other
+  users in a pool of public sessions. Other users can create their own copies of
+  shared sessions. This feature can be enabled in the arsnova.properties
+  configuration.
+
+Minor features and changes:
+* Adjustments to correctly handle requests for imports from the frontend.
+* Some communication between the frontend and backend has been optimized for
+  improved performance.
+* Additional configuration parameters for tracking, session export and import, a
+  demo session and a blog URL have been introduced.
+
+**This version is brought to you by:**  
+Project management: Klaus Quibeldey-Cirkel  
+Lead programming: Andreas Gärtner, Daniel Gerhardt, Christoph Thelen  
+Contributions: Felix Schmidt, Artjom Siebert, Daniel Vogel  
+Sponsoring: [AG QLS](https://www.thm.de/zqe/qmnetzwerk/agqls),
+[HMWK](https://wissenschaft.hessen.de/wissenschaft/it-neue-medien/kompetenznetz-e-learning-hessen)  
+
+
 ## 2.0.2
 This release updates dependencies. The updated library for Socket.IO support
 fixes memory leaks and disables SSL 3.0 support (POODLE vulnerability).

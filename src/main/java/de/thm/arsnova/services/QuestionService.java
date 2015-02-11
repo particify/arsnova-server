@@ -18,13 +18,14 @@
 package de.thm.arsnova.services;
 
 import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.AbstractMap.SimpleEntry;
 
+import de.thm.arsnova.exceptions.ForbiddenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,7 +112,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			}
 
 			// base64 adds offset to filesize, formula taken from: http://en.wikipedia.org/wiki/Base64#MIME
-			final int fileSize = (int) ((question.getImage().length()-814)/1.37);
+			final int fileSize = (int) ((question.getImage().length() - 814) / 1.37);
 			if (fileSize > uploadFileSizeByte) {
 				LOGGER.error("Could not save file. File is too large with " + fileSize + " Byte.");
 				throw new BadRequestException();
@@ -270,10 +271,10 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		if (question == null) {
 			return 0;
 		}
-		
+
 		return databaseDao.getAnswerCount(question, question.getPiRound());
 	}
-	
+
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int getAbstentionAnswerCount(final String questionId) {
@@ -281,7 +282,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		if (question == null) {
 			return 0;
 		}
-		
+
 		return databaseDao.getAbstentionAnswerCount(questionId);
 	}
 
@@ -339,16 +340,20 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public InterposedReadingCount getInterposedReadingCount(final String sessionKey) {
+	public InterposedReadingCount getInterposedReadingCount(final String sessionKey, String username) {
 		final Session session = databaseDao.getSessionFromKeyword(sessionKey);
-		final User user = getCurrentUser();
 		if (session == null) {
 			throw new NotFoundException();
 		}
-		if (session.isCreator(user)) {
+		if (username == null) {
 			return databaseDao.getInterposedReadingCount(session);
 		} else {
-			return databaseDao.getInterposedReadingCount(session, user);
+			User currentUser = userService.getCurrentUser();
+			if (!currentUser.getUsername().equals(username)) {
+				throw new ForbiddenException();
+			}
+
+			return databaseDao.getInterposedReadingCount(session, currentUser);
 		}
 	}
 
@@ -410,33 +415,29 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		} else if (question.getPiRound() < 1 || question.getPiRound() > 2) {
 			question.setPiRound(oldQuestion.getPiRound() > 0 ? oldQuestion.getPiRound() : 1);
 		}
-		
+
 		final Question result = databaseDao.updateQuestion(question);
 
-		if(!oldQuestion.isActive() && question.isActive()) {
+		if (!oldQuestion.isActive() && question.isActive()) {
 			final NewQuestionEvent event = new NewQuestionEvent(this, result, session);
 			this.publisher.publishEvent(event);
 		}
-		
+
 		return result;
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public Answer saveAnswer(final Answer answer) {
+	public Answer saveAnswer(final String questionId, final de.thm.arsnova.entities.transport.Answer answer) {
 		final User user = getCurrentUser();
-		final Question question = getQuestion(answer.getQuestionId());
+		final Question question = getQuestion(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
 
-		if ("freetext".equals(question.getQuestionType())) {
-			answer.setPiRound(0);
-		} else {
-			answer.setPiRound(question.getPiRound());
-		}
+		Answer theAnswer = answer.generateAnswerEntity(user, question);
 
-		final Answer result = databaseDao.saveAnswer(answer, user);
+		final Answer result = databaseDao.saveAnswer(theAnswer, user);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		this.publisher.publishEvent(new NewAnswerEvent(this, result, user, question, session));
 
@@ -520,15 +521,15 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	public int getPreparationQuestionCount(final String sessionkey) {
 		return databaseDao.getPreparationQuestionCount(getSession(sessionkey));
 	}
-	
+
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public SimpleEntry<String,List<Integer>> getAnswerAndAbstentionCountByQuestion(final String questionid) {
+	public SimpleEntry<String, List<Integer>> getAnswerAndAbstentionCountByQuestion(final String questionid) {
 		final List<Integer> countList = Arrays.asList(
 			getAnswerCount(questionid),
 			getAbstentionAnswerCount(questionid)
 		);
-		
+
 		return new AbstractMap.SimpleEntry<String, List<Integer>>(questionid, countList);
 	}
 
@@ -619,7 +620,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 		databaseDao.publishAllQuestions(session, publish);
 	}
-	
+
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public void publishQuestions(final String sessionkey, final boolean publish, List<Question> questions) {

@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import net.sf.ezmorph.Morpher;
@@ -37,6 +38,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +63,8 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.VisitedSession;
+import de.thm.arsnova.entities.transport.ImportExportSession;
+import de.thm.arsnova.entities.transport.ImportExportSession.ImportExportQuestion;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.ISessionService;
 
@@ -139,10 +145,16 @@ public class CouchDBDao implements IDatabaseDao {
 					d.getJSONObject().getJSONObject("value"),
 					Session.class
 					);
-			//session.set_id(d.getId());
+			session.set_id(d.getId());
 			result.add(session);
 		}
 		return result;
+	}
+
+	@Override
+	public final List<SessionInfo> getPublicPoolSessionsInfo() {
+		final List<Session> sessions = this.getPublicPoolSessions();
+		return getInfosForSessions(sessions);
 	}
 
 	@Override
@@ -346,6 +358,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
+	@Cacheable("sessions")
 	public final Session getSessionFromKeyword(final String keyword) {
 		final NovaView view = new NovaView("session/by_keyword");
 		view.setKey(keyword);
@@ -361,6 +374,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
+	@Cacheable("sessions")
 	public final Session getSessionFromId(final String sessionId) {
 		final NovaView view = new NovaView("session/by_id");
 		view.setKey(sessionId);
@@ -403,6 +417,7 @@ public class CouchDBDao implements IDatabaseDao {
 		} catch (final IOException e) {
 			return null;
 		}
+		// session caching is done by loading the created session
 		return getSession(sessionDocument.getString("keyword"));
 	}
 
@@ -444,6 +459,7 @@ public class CouchDBDao implements IDatabaseDao {
 		return database;
 	}
 
+	@CachePut(value = "questions", key="#question")
 	@Override
 	public final Question saveQuestion(final Session session, final Question question) {
 		final Document q = toQuestionDocument(session, question);
@@ -501,6 +517,7 @@ public class CouchDBDao implements IDatabaseDao {
 		return q;
 	}
 
+	@CachePut(value = "questions")
 	@Override
 	public final Question updateQuestion(final Question question) {
 		try {
@@ -576,6 +593,7 @@ public class CouchDBDao implements IDatabaseDao {
 		return null;
 	}
 
+	@Cacheable("questions")
 	@Override
 	public final Question getQuestion(final String id) {
 		try {
@@ -660,19 +678,21 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final void updateSessionOwnerActivity(final Session session) {
+	@CachePut(value = "sessions")
+	public final Session updateSessionOwnerActivity(final Session session) {
 		try {
 			/* Do not clutter CouchDB. Only update once every 3 hours. */
 			if (session.getLastOwnerActivity() > System.currentTimeMillis() - 3 * 3600000) {
-				return;
+				return session;
 			}
 
 			session.setLastOwnerActivity(System.currentTimeMillis());
 			final JSONObject json = JSONObject.fromObject(session);
 			getDatabase().saveDocument(new Document(json));
+			return session;
 		} catch (final IOException e) {
 			LOGGER.error("Failed to update lastOwnerActivity for Session {}", session);
-			return;
+			return session;
 		}
 	}
 
@@ -683,6 +703,7 @@ public class CouchDBDao implements IDatabaseDao {
 		return collectQuestionIds(view);
 	}
 
+	@CacheEvict(value = "questions")
 	@Override
 	public final void deleteQuestionWithAnswers(final Question question) {
 		try {
@@ -704,11 +725,14 @@ public class CouchDBDao implements IDatabaseDao {
 		view.setEndKey(session.get_id(), "{}");
 		final ViewResults results = getDatabase().view(view);
 
+		List<Question> questions = new ArrayList<Question>();
 		for (final Document d : results.getResults()) {
 			final Question q = new Question();
 			q.set_id(d.getId());
-			deleteQuestionWithAnswers(q);
+			q.set_rev(d.getRev());
+			questions.add(q);
 		}
+		deleteAllAnswersWithQuestions(questions);
 	}
 
 	private void deleteDocument(final String documentId) throws IOException {
@@ -721,11 +745,16 @@ public class CouchDBDao implements IDatabaseDao {
 		try {
 			final NovaView view = new NovaView("answer/cleanup");
 			view.setKey(question.get_id());
+			view.setIncludeDocs(true);
 			final ViewResults results = getDatabase().view(view);
 
-			for (final Document d : results.getResults()) {
-				deleteDocument(d.getId());
+			List<Document> answersToDelete = new ArrayList<Document>();
+			for (final Document a : results.getResults()) {
+				final Document d = new Document(a.getJSONObject("doc"));
+				d.put("_deleted", true);
+				answersToDelete.add(d);
 			}
+			database.bulkSaveDocuments(answersToDelete.toArray(new Document[answersToDelete.size()]));
 		} catch (final IOException e) {
 			LOGGER.error("IOException: Could not delete answers for question {}", question.get_id());
 		}
@@ -1254,20 +1283,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public Session lockSession(final Session session, final Boolean lock) {
-		try {
-			final Document s = database.getDocument(session.get_id());
-			s.put("active", lock);
-			database.saveDocument(s);
-			session.set_rev(s.getRev());
-			return session;
-		} catch (final IOException e) {
-			LOGGER.error("Could not lock session {}", session);
-		}
-		return null;
-	}
-
-	@Override
+	@CachePut(value = "sessions")
 	public Session updateSession(final Session session) {
 		try {
 			final Document s = database.getDocument(session.get_id());
@@ -1286,6 +1302,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
+	@CacheEvict(value = "sessions")
 	public void deleteSession(final Session session) {
 		try {
 			deleteDocument(session.get_id());
@@ -1519,6 +1536,7 @@ public class CouchDBDao implements IDatabaseDao {
 		publishQuestions(session, publish, questions);
 	}
 
+	@CacheEvict(value = "questions", allEntries = true)
 	@Override
 	public void publishQuestions(final Session session, final boolean publish, List<Question> questions) {
 		for (final Question q : questions) {
@@ -1541,25 +1559,77 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public void deleteAllQuestionsAnswers(final Session session) {
 		final List<Question> questions = getQuestions(new NovaView("skill_question/by_session"), session);
-		for (final Question q : questions) {
-			deleteAnswers(q);
-		}
+		deleteAllAnswersForQuestions(questions);
 	}
 
 	@Override
 	public void deleteAllPreparationAnswers(final Session session) {
 		final List<Question> questions = getQuestions(new NovaView("skill_question/preparation_question_by_session"), session);
-		for (final Question q : questions) {
-			deleteAnswers(q);
-		}
+		deleteAllAnswersForQuestions(questions);
 	}
 
 	@Override
 	public void deleteAllLectureAnswers(final Session session) {
 		final List<Question> questions = getQuestions(new NovaView("skill_question/lecture_question_by_session"), session);
-		for (final Question q : questions) {
-			deleteAnswers(q);
+		deleteAllAnswersForQuestions(questions);
+	}
+
+	private boolean deleteAllAnswersForQuestions(List<Question> questions) {
+		List<String> questionIds = new ArrayList<String>();
+		for (Question q : questions) {
+			questionIds.add(q.get_id());
 		}
+		final NovaView bulkView = new NovaView("answer/cleanup");
+		bulkView.setKeys(questionIds);
+		bulkView.setIncludeDocs(true);
+		final List<Document> result = getDatabase().view(bulkView).getResults();
+		final List<Document> allAnswers = new ArrayList<Document>();
+		for (Document a : result) {
+			final Document d = new Document(a.getJSONObject("doc"));
+			d.put("_deleted", true);
+			allAnswers.add(d);
+		}
+		try {
+			getDatabase().bulkSaveDocuments(allAnswers.toArray(new Document[allAnswers.size()]));
+		} catch (IOException e) {
+			LOGGER.error("Could not bulk delete answers: {}", e.getMessage());
+			return false;
+		}
+		return true;
+	}
+
+	private boolean deleteAllAnswersWithQuestions(List<Question> questions) {
+		List<String> questionIds = new ArrayList<String>();
+		final List<Document> allQuestions = new ArrayList<Document>();
+		for (Question q : questions) {
+			final Document d = new Document();
+			d.put("_id", q.get_id());
+			d.put("_rev", q.get_rev());
+			d.put("_deleted", true);
+			questionIds.add(q.get_id());
+			allQuestions.add(d);
+		}
+		final NovaView bulkView = new NovaView("answer/cleanup");
+		bulkView.setKeys(questionIds);
+		bulkView.setIncludeDocs(true);
+		final List<Document> result = getDatabase().view(bulkView).getResults();
+
+		final List<Document> allAnswers = new ArrayList<Document>();
+		for (Document a : result) {
+			final Document d = new Document(a.getJSONObject("doc"));
+			d.put("_deleted", true);
+			allAnswers.add(d);
+		}
+
+		try {
+			List<Document> deleteList = new ArrayList<Document>(allAnswers);
+			deleteList.addAll(allQuestions);
+			getDatabase().bulkSaveDocuments(deleteList.toArray(new Document[deleteList.size()]));
+		} catch (IOException e) {
+			LOGGER.error("Could not bulk delete questions and answers: {}", e.getMessage());
+			return false;
+		}
+		return true;
 	}
 
 	@Override
@@ -1657,5 +1727,92 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 
 		return false;
+	}
+
+	@Override
+	public SessionInfo importSession(User user, ImportExportSession importSession) {
+		final Session session = this.saveSession(user, importSession.generateSessionEntity(user));
+		List<Document> questions = new ArrayList<Document>();
+		// We need to remember which answers belong to which question.
+		// The answers need a questionId, so we first store the questions to get the IDs.
+		// Then we update the answer objects and store them as well.
+		Map<Document, ImportExportQuestion> mapping = new HashMap<Document, ImportExportQuestion>();
+		// Later, generate all answer documents
+		List<Document> answers = new ArrayList<Document>();
+		// We can then push answers together with interposed questions in one large bulk request
+		List<Document> interposedQuestions = new ArrayList<Document>();
+		try {
+			// add session id to all questions and generate documents
+			for (ImportExportQuestion question : importSession.getQuestions()) {
+				Document doc = toQuestionDocument(session, question);
+				question.setSessionId(session.get_id());
+				questions.add(doc);
+				mapping.put(doc, question);
+			}
+			database.bulkSaveDocuments(questions.toArray(new Document[questions.size()]));
+
+			// bulk import answers together with interposed questions
+			for (Entry<Document, ImportExportQuestion> entry : mapping.entrySet()) {
+				final Document doc = entry.getKey();
+				final ImportExportQuestion question = entry.getValue();
+				question.set_id(doc.getId());
+				question.set_rev(doc.getRev());
+				for (de.thm.arsnova.entities.transport.Answer answer : question.getAnswers()) {
+					final Answer a = answer.generateAnswerEntity(user, question);
+					final Document answerDoc = new Document();
+					answerDoc.put("type", "skill_question_answer");
+					answerDoc.put("sessionId", a.getSessionId());
+					answerDoc.put("questionId", a.getQuestionId());
+					answerDoc.put("answerSubject", a.getAnswerSubject());
+					answerDoc.put("questionVariant", a.getQuestionVariant());
+					answerDoc.put("questionValue", a.getQuestionValue());
+					answerDoc.put("answerText", a.getAnswerText());
+					answerDoc.put("timestamp", a.getTimestamp());
+					answerDoc.put("piRound", a.getPiRound());
+					answerDoc.put("abstention", a.isAbstention());
+					answers.add(answerDoc);
+				}
+			}
+			for (de.thm.arsnova.entities.transport.InterposedQuestion i : importSession.getFeedbackQuestions()) {
+				final Document q = new Document();
+				q.put("type", "interposed_question");
+				q.put("sessionId", session.get_id());
+				q.put("subject", i.getSubject());
+				q.put("text", i.getText());
+				q.put("timestamp", i.getTimestamp());
+				q.put("read", i.isRead());
+				// we do not store the creator's name
+				q.put("creator", "");
+				interposedQuestions.add(q);
+			}
+			List<Document> documents = new ArrayList<Document>(answers);
+			documents.addAll(interposedQuestions);
+			database.bulkSaveDocuments(documents.toArray(new Document[documents.size()]));
+		} catch (IOException e) {
+			LOGGER.error("Could not import this session: {}", e.getMessage());
+			// Something went wrong, delete this session since we do not want a partial import
+			this.deleteSession(session);
+			return null;
+		}
+		// Calculate some statistics...
+		int unreadInterposed = 0;
+		for (de.thm.arsnova.entities.transport.InterposedQuestion i : importSession.getFeedbackQuestions()) {
+			if (!i.isRead()) {
+				unreadInterposed++;
+			}
+		}
+		int numUnanswered = 0;
+		for (ImportExportQuestion question : importSession.getQuestions()) {
+			if (question.getAnswers().size() == 0) {
+				numUnanswered++;
+			}
+		}
+		final SessionInfo info = new SessionInfo(session);
+		info.setNumQuestions(questions.size());
+		info.setNumUnanswered(numUnanswered);
+		info.setNumAnswers(answers.size());
+		info.setNumInterposed(interposedQuestions.size());
+		info.setNumUnredInterposed(unreadInterposed);
+		return info;
 	}
 }

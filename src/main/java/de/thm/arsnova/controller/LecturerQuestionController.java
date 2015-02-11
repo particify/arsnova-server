@@ -38,7 +38,6 @@ import org.springframework.web.bind.annotation.RestController;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IQuestionService;
@@ -105,11 +104,11 @@ public class LecturerQuestionController extends AbstractController {
 			) {
 		boolean p = true;
 		List<Question> questions;
-		
+
 		if (publish != null) {
 			p = publish;
 		}
-		
+
 		if (lectureQuestionsOnly) {
 			questions = questionService.getLectureQuestions(sessionkey);
 			questionService.publishQuestions(sessionkey, publish, questions);
@@ -310,10 +309,10 @@ public class LecturerQuestionController extends AbstractController {
 	@RequestMapping(value = "/{questionId}/answer/", method = RequestMethod.POST)
 	public final Answer saveAnswer(
 			@PathVariable final String questionId,
-			@RequestBody final Answer answer,
+			@RequestBody final de.thm.arsnova.entities.transport.Answer answer,
 			final HttpServletResponse response
 			) {
-		return questionService.saveAnswer(answer);
+		return questionService.saveAnswer(questionId, answer);
 	}
 
 	@RequestMapping(value = "/{questionId}/answer/{answerId}", method = RequestMethod.PUT)
@@ -384,10 +383,10 @@ public class LecturerQuestionController extends AbstractController {
 			questionService.getAnswerCount(questionId),
 			questionService.getAbstentionAnswerCount(questionId)
 		);
-		
+
 		return list;
 	}
-	
+
 	@RequestMapping(value = "/{questionId}/freetextanswer/", method = RequestMethod.GET)
 	public final List<Answer> getFreetextAnswers(@PathVariable final String questionId) {
 		return questionService.getFreetextAnswers(questionId);

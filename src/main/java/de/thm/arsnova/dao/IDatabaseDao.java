@@ -18,6 +18,7 @@
 package de.thm.arsnova.dao;
 
 import java.util.List;
+
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.Answer;
@@ -29,6 +30,7 @@ import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.transport.ImportExportSession;
 
 public interface IDatabaseDao {
 	Session getSessionFromKeyword(String keyword);
@@ -57,7 +59,7 @@ public interface IDatabaseDao {
 
 	LoggedIn registerAsOnlineUser(User u, Session s);
 
-	void updateSessionOwnerActivity(Session session);
+	Session updateSessionOwnerActivity(Session session);
 
 	List<String> getQuestionIds(Session session, User user);
 
@@ -123,8 +125,6 @@ public interface IDatabaseDao {
 
 	List<Session> getCourseSessions(List<Course> courses);
 
-	Session lockSession(Session session, Boolean lock);
-
 	Session updateSession(Session session);
 
 	void deleteSession(Session session);
@@ -175,6 +175,8 @@ public interface IDatabaseDao {
 
 	List<SessionInfo> getMySessionsInfo(User user);
 
+	List<SessionInfo> getPublicPoolSessionsInfo();
+
 	List<SessionInfo> getMyPublicPoolSessionsInfo(final User user);
 
 	List<SessionInfo> getMyVisitedSessionsInfo(User currentUser);
@@ -182,4 +184,6 @@ public interface IDatabaseDao {
 	void deleteAllPreparationAnswers(Session session);
 
 	void deleteAllLectureAnswers(Session session);
+
+	SessionInfo importSession(User user, ImportExportSession importSession);
 }

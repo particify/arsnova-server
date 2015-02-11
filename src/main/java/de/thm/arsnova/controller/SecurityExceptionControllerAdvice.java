@@ -37,6 +37,7 @@ import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.NotImplementedException;
 import de.thm.arsnova.exceptions.PreconditionFailedException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.exceptions.RequestEntityTooLargeException;
 
 @ControllerAdvice
 public class SecurityExceptionControllerAdvice {
@@ -97,5 +98,10 @@ public class SecurityExceptionControllerAdvice {
 	@ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
 	@ExceptionHandler(NotImplementedException.class)
 	public void handleNotImplementedException(final Exception e, final HttpServletRequest request) {
+	}
+
+	@ResponseStatus(HttpStatus.REQUEST_ENTITY_TOO_LARGE)
+	@ExceptionHandler(RequestEntityTooLargeException.class)
+	public void handleRequestEntityTooLargeException(final Exception e, final HttpServletRequest request) {
 	}
 }
