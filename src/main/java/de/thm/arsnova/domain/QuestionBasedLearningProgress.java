@@ -40,11 +40,9 @@ public class QuestionBasedLearningProgress implements LearningProgress {
 
 	private int calculateCourseProgress(CourseScore courseScore) {
 		int numQuestionsCorrect = numQuestionsCorrectForCourse(courseScore);
-		int numUsers = courseScore.getTotalUserCount();
-		final double correctQuestionsOnAverage = (double)numQuestionsCorrect / (double)numUsers;
-		final double myLearningProgress = correctQuestionsOnAverage / courseScore.getQuestionCount();
+		final double correctQuestionsOnAverage = (double)numQuestionsCorrect / (double)(courseScore.getQuestionCount());
 		// calculate percent, cap results to 100
-		return (int) Math.min(100, Math.round(myLearningProgress*100));
+		return (int) Math.min(100, Math.round(correctQuestionsOnAverage*100));
 	}
 
 	private int numQuestionsCorrectForCourse(CourseScore courseScore) {
