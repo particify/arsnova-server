@@ -69,6 +69,8 @@ public class Session implements Serializable {
 		copy.lastOwnerActivity = original.lastOwnerActivity;
 		copy.courseType = original.courseType;
 		copy.courseId = original.courseId;
+		copy.creationTime = original.creationTime;
+		copy.learningProgressType = original.learningProgressType;
 		copy._id = original._id;
 		copy._rev = original._rev;
 		return copy;

@@ -196,10 +196,11 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 			@Override
 			public void onData(SocketIOClient client, LearningProgressType progressType, AckRequest ack) {
 				final User user = userService.getUser2SocketId(client.getSessionId());
-				final de.thm.arsnova.entities.Session session = sessionService.getSession(progressType.getSessionKeyword());
+				final de.thm.arsnova.entities.Session session = sessionService.getSessionInternal(progressType.getSessionKeyword(), user);
 				if (session.isCreator(user)) {
 					session.setLearningProgressType(progressType.getLearningProgressType());
-					sessionService.updateSession(progressType.getSessionKeyword(), session);
+					sessionService.updateSessionInternal(session, user);
+					broadcastInSession(session.getKeyword(), "learningProgressType", progressType.getLearningProgressType());
 				}
 			}
 		});
@@ -332,11 +333,13 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 	 * @param client
 	 */
 	public void reportSessionDataToClient(final String sessionKey, final User user, final SocketIOClient client) {
+		final de.thm.arsnova.entities.Session session = sessionService.getSessionInternal(sessionKey, user);
 		client.sendEvent("unansweredLecturerQuestions", questionService.getUnAnsweredLectureQuestionIds(sessionKey, user));
 		client.sendEvent("unansweredPreparationQuestions", questionService.getUnAnsweredPreparationQuestionIds(sessionKey, user));
 		client.sendEvent("countLectureQuestionAnswers", questionService.countLectureQuestionAnswersInternal(sessionKey));
 		client.sendEvent("countPreparationQuestionAnswers", questionService.countPreparationQuestionAnswersInternal(sessionKey));
 		client.sendEvent("activeUserCountData", sessionService.activeUsers(sessionKey));
+		client.sendEvent("learningProgressType", session.getLearningProgressType());
 		final de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
 		client.sendEvent("feedbackData", fb.getValues());
 		try {

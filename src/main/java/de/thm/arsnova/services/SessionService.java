@@ -143,6 +143,15 @@ public class SessionService implements ISessionService {
 	@PreAuthorize("isAuthenticated()")
 	public final Session getSession(final String keyword) {
 		final User user = userService.getCurrentUser();
+		return this.getSessionInternal(keyword, user);
+	}
+
+	/*
+	 * The "internal" suffix means it is called by internal services that have no authentication!
+	 * TODO: Find a better way of doing this...
+	 */
+	@Override
+	public final Session getSessionInternal(final String keyword, final User user) {
 		final Session session = databaseDao.getSessionFromKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();
@@ -277,6 +286,18 @@ public class SessionService implements ISessionService {
 	@PreAuthorize("isAuthenticated() and hasPermission(#session, 'owner')")
 	public Session updateSession(final String sessionkey, final Session session) {
 		return databaseDao.updateSession(session);
+	}
+
+	/*
+	 * The "internal" suffix means it is called by internal services that have no authentication!
+	 * TODO: Find a better way of doing this...
+	 */
+	@Override
+	public Session updateSessionInternal(final Session session, final User user) {
+		if (session.isCreator(user)) {
+			return databaseDao.updateSession(session);
+		}
+		return null;
 	}
 
 	@Override

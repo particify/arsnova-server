@@ -24,10 +24,13 @@ import java.util.UUID;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
+import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 
 public interface ISessionService {
 	Session getSession(String keyword);
+
+	Session getSessionInternal(String keyword, User user);
 
 	Session saveSession(Session session);
 
@@ -48,6 +51,8 @@ public interface ISessionService {
 	Session joinSession(String keyword, UUID socketId);
 
 	Session updateSession(String sessionkey, Session session);
+
+	Session updateSessionInternal(Session session, User user);
 
 	void deleteSession(String sessionkey);
 
