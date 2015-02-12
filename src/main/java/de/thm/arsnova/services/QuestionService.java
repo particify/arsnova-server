@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import de.thm.arsnova.exceptions.ForbiddenException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,8 +44,12 @@ import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
+import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
+import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
 import de.thm.arsnova.events.DeleteAnswerEvent;
 import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
+import de.thm.arsnova.events.DeleteQuestionEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
@@ -120,7 +125,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 
 		final Question result = databaseDao.saveQuestion(session, question);
-		final NewQuestionEvent event = new NewQuestionEvent(this, result, session);
+		final NewQuestionEvent event = new NewQuestionEvent(this, session, result);
 		this.publisher.publishEvent(event);
 
 		return result;
@@ -133,7 +138,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final InterposedQuestion result = databaseDao.saveQuestion(session, question, userService.getCurrentUser());
 
 		if (null != result) {
-			final NewInterposedQuestionEvent event = new NewInterposedQuestionEvent(this, result, session);
+			final NewInterposedQuestionEvent event = new NewInterposedQuestionEvent(this, session, result);
 			this.publisher.publishEvent(event);
 			return true;
 		}
@@ -168,6 +173,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			throw new UnauthorizedException();
 		}
 		databaseDao.deleteQuestionWithAnswers(question);
+
+		final DeleteQuestionEvent event = new DeleteQuestionEvent(this, session);
+		this.publisher.publishEvent(event);
 	}
 
 	@Override
@@ -175,6 +183,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	public void deleteAllQuestions(final String sessionKeyword) {
 		final Session session = getSessionWithAuthCheck(sessionKeyword);
 		databaseDao.deleteAllQuestionsWithAnswers(session);
+
+		final DeleteQuestionEvent event = new DeleteQuestionEvent(this, session);
+		this.publisher.publishEvent(event);
 	}
 
 	private Session getSessionWithAuthCheck(final String sessionKeyword) {
@@ -419,7 +430,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final Question result = databaseDao.updateQuestion(question);
 
 		if (!oldQuestion.isActive() && question.isActive()) {
-			final NewQuestionEvent event = new NewQuestionEvent(this, result, session);
+			final NewQuestionEvent event = new NewQuestionEvent(this, session, result);
 			this.publisher.publishEvent(event);
 		}
 
@@ -439,7 +450,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 		final Answer result = databaseDao.saveAnswer(theAnswer, user);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
-		this.publisher.publishEvent(new NewAnswerEvent(this, result, user, question, session));
+		this.publisher.publishEvent(new NewAnswerEvent(this, session, result, user, question));
 
 		return result;
 	}
@@ -456,7 +467,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final Question question = getQuestion(answer.getQuestionId());
 		final Answer result = databaseDao.updateAnswer(realAnswer);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
-		this.publisher.publishEvent(new NewAnswerEvent(this, result, user, question, session));
+		this.publisher.publishEvent(new NewAnswerEvent(this, session, result, user, question));
 
 		return result;
 	}
@@ -475,7 +486,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 		databaseDao.deleteAnswer(answerId);
 
-		this.publisher.publishEvent(new DeleteAnswerEvent(this, question, session));
+		this.publisher.publishEvent(new DeleteAnswerEvent(this, session, question));
 	}
 
 	@Override
@@ -641,6 +652,8 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			throw new UnauthorizedException();
 		}
 		databaseDao.deleteAllQuestionsAnswers(session);
+
+		this.publisher.publishEvent(new DeleteAllQuestionsAnswersEvent(this, session));
 	}
 
 	@Override
@@ -648,6 +661,8 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	public void deleteAllPreparationAnswers(String sessionkey) {
 		final Session session = getSession(sessionkey);
 		databaseDao.deleteAllPreparationAnswers(session);
+
+		this.publisher.publishEvent(new DeleteAllPreparationAnswersEvent(this, session));
 	}
 
 	@Override
@@ -655,6 +670,8 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	public void deleteAllLectureAnswers(String sessionkey) {
 		final Session session = getSession(sessionkey);
 		databaseDao.deleteAllLectureAnswers(session);
+
+		this.publisher.publishEvent(new DeleteAllLectureAnswersEvent(this, session));
 	}
 
 	@Override

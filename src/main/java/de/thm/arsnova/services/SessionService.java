@@ -34,8 +34,8 @@ import de.thm.arsnova.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.dao.IDatabaseDao;
+import de.thm.arsnova.domain.ILearningProgressFactory;
 import de.thm.arsnova.domain.LearningProgress;
-import de.thm.arsnova.domain.LearningProgressFactory;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
@@ -96,7 +96,7 @@ public class SessionService implements ISessionService {
 	private ARSnovaSocketIOServer socketIoServer;
 
 	@Autowired
-	private LearningProgressFactory learningProgressFactory;
+	private ILearningProgressFactory learningProgressFactory;
 
 	@Autowired(required = false)
 	private ConnectorClient connectorClient;

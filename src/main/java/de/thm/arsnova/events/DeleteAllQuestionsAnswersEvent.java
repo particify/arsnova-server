@@ -17,26 +17,18 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 
-public class DeleteAnswerEvent extends SessionEvent {
+public class DeleteAllQuestionsAnswersEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Question question;
-
-	public DeleteAnswerEvent(Object source, Session session, Question question) {
+	public DeleteAllQuestionsAnswersEvent(Object source, Session session) {
 		super(source, session);
-		this.question = question;
 	}
 
 	@Override
 	public void accept(NovaEventVisitor visitor) {
 		visitor.visit(this);
-	}
-
-	public Question getQuestion() {
-		return question;
 	}
 }

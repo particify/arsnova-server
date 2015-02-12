@@ -15,28 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.events;
+package de.thm.arsnova.domain;
 
-import de.thm.arsnova.entities.Question;
-import de.thm.arsnova.entities.Session;
+public interface ILearningProgressFactory {
 
-public class DeleteAnswerEvent extends SessionEvent {
+	public abstract LearningProgress createFromType(String progressType);
 
-	private static final long serialVersionUID = 1L;
-
-	private final Question question;
-
-	public DeleteAnswerEvent(Object source, Session session, Question question) {
-		super(source, session);
-		this.question = question;
-	}
-
-	@Override
-	public void accept(NovaEventVisitor visitor) {
-		visitor.visit(this);
-	}
-
-	public Question getQuestion() {
-		return question;
-	}
 }

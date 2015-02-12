@@ -49,7 +49,12 @@ import com.corundumstudio.socketio.protocol.PacketType;
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.LearningProgressType;
+import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
+import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
+import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
 import de.thm.arsnova.events.DeleteAnswerEvent;
+import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
+import de.thm.arsnova.events.DeleteQuestionEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
@@ -453,6 +458,36 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 		// We do not know which user's answer was deleted, so we can't update his 'unanswered' list of questions...
 		broadcastInSession(sessionKey, "countLectureQuestionAnswers", questionService.countLectureQuestionAnswersInternal(sessionKey));
 		broadcastInSession(sessionKey, "countPreparationQuestionAnswers", questionService.countPreparationQuestionAnswersInternal(sessionKey));
+	}
+
+	@Override
+	public void visit(DeleteQuestionEvent deleteQuestionEvent) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void visit(DeleteAllQuestionsAnswersEvent deleteAllAnswersEvent) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void visit(DeleteAllPreparationAnswersEvent deleteAllPreparationAnswersEvent) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void visit(DeleteAllLectureAnswersEvent deleteAllLectureAnswersEvent) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void visit(DeleteInterposedQuestionEvent deleteInterposedQuestionEvent) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override

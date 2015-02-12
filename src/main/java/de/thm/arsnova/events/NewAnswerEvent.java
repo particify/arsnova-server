@@ -22,7 +22,7 @@ import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
-public class NewAnswerEvent extends NovaEvent {
+public class NewAnswerEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;
 
@@ -32,14 +32,11 @@ public class NewAnswerEvent extends NovaEvent {
 
 	private final Question question;
 
-	private final Session session;
-
-	public NewAnswerEvent(Object source, Answer answer, User user, Question question, Session session) {
-		super(source);
+	public NewAnswerEvent(Object source, Session session, Answer answer, User user, Question question) {
+		super(source, session);
 		this.answer = answer;
 		this.user = user;
 		this.question = question;
-		this.session = session;
 	}
 
 	@Override
@@ -58,9 +55,4 @@ public class NewAnswerEvent extends NovaEvent {
 	public Question getQuestion() {
 		return question;
 	}
-
-	public Session getSession() {
-		return session;
-	}
-
 }

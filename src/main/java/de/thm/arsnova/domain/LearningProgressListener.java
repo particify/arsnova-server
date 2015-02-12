@@ -15,28 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.events;
+package de.thm.arsnova.domain;
 
-import de.thm.arsnova.entities.Question;
-import de.thm.arsnova.entities.Session;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
 
-public class DeleteAnswerEvent extends SessionEvent {
+import de.thm.arsnova.events.NovaEvent;
+import de.thm.arsnova.events.NovaEventVisitor;
 
-	private static final long serialVersionUID = 1L;
+@Component
+public class LearningProgressListener implements ApplicationListener<NovaEvent> {
 
-	private final Question question;
-
-	public DeleteAnswerEvent(Object source, Session session, Question question) {
-		super(source, session);
-		this.question = question;
-	}
+	@Autowired
+	private ILearningProgressFactory learningProgressFactory;
 
 	@Override
-	public void accept(NovaEventVisitor visitor) {
-		visitor.visit(this);
+	public void onApplicationEvent(NovaEvent event) {
+		event.accept((NovaEventVisitor) learningProgressFactory);
 	}
 
-	public Question getQuestion() {
-		return question;
-	}
 }

@@ -1634,6 +1634,7 @@ public class CouchDBDao implements IDatabaseDao {
 		return true;
 	}
 
+	@Cacheable("learningprogress")
 	@Override
 	public CourseScore getLearningProgress(final Session session) {
 		final NovaView maximumValueView = new NovaView("learning_progress/maximum_value_of_question");
