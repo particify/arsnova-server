@@ -730,7 +730,7 @@ public class CouchDBDao implements IDatabaseDao {
 		for (final Document d : results.getResults()) {
 			final Question q = new Question();
 			q.set_id(d.getId());
-			q.set_rev(d.getRev());
+			q.set_rev(d.getJSONObject("value").getString("_rev"));
 			questions.add(q);
 		}
 		deleteAllAnswersWithQuestions(questions);
