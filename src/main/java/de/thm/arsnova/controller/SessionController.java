@@ -234,17 +234,19 @@ public class SessionController extends AbstractController {
 	@RequestMapping(value = "/{sessionkey}/learningprogress", method = RequestMethod.GET)
 	public final int learningProgress(
 			@PathVariable final String sessionkey,
+			@RequestParam(value = "type", defaultValue = "questions") final String progressType,
 			final HttpServletResponse response
 			) {
-		return sessionService.getLearningProgress(sessionkey);
+		return sessionService.getLearningProgress(sessionkey, progressType);
 	}
 
 	@RequestMapping(value = "/{sessionkey}/mylearningprogress", method = RequestMethod.GET)
 	public final JSONObject myLearningProgress(
 			@PathVariable final String sessionkey,
+			@RequestParam(value = "type", defaultValue = "questions") final String progressType,
 			final HttpServletResponse response
 			) {
-		final SimpleEntry<Integer, Integer> result = sessionService.getMyLearningProgress(sessionkey);
+		final SimpleEntry<Integer, Integer> result = sessionService.getMyLearningProgress(sessionkey, progressType);
 		final JSONObject json = new JSONObject();
 		json.put("myprogress", result.getKey());
 		json.put("courseprogress", result.getValue());

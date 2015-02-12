@@ -17,10 +17,10 @@
  */
 package de.thm.arsnova.dao;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 
 import de.thm.arsnova.connector.model.Course;
+import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.InterposedQuestion;
@@ -171,9 +171,7 @@ public interface IDatabaseDao {
 
 	boolean deleteUser(DbUser dbUser);
 
-	int getLearningProgress(Session session);
-
-	SimpleEntry<Integer, Integer> getMyLearningProgress(Session session, User user);
+	CourseScore getLearningProgress(Session session);
 
 	List<SessionInfo> getMySessionsInfo(User user);
 

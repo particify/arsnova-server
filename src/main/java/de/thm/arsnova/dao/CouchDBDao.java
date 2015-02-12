@@ -18,8 +18,6 @@
 package de.thm.arsnova.dao;
 
 import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -53,6 +51,7 @@ import com.fourspaces.couchdb.View;
 import com.fourspaces.couchdb.ViewResults;
 
 import de.thm.arsnova.connector.model.Course;
+import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.InterposedQuestion;
@@ -403,6 +402,7 @@ public class CouchDBDao implements IDatabaseDao {
 		sessionDocument.put("courseType", session.getCourseType());
 		sessionDocument.put("courseId", session.getCourseId());
 		sessionDocument.put("creationTime", session.getCreationTime());
+		sessionDocument.put("learningProgressType", session.getLearningProgressType());
 		sessionDocument.put("ppAuthorName", session.getPpAuthorName());
 		sessionDocument.put("ppAuthorMail", session.getPpAuthorMail());
 		sessionDocument.put("ppUniversity", session.getPpUniversity());
@@ -1291,6 +1291,7 @@ public class CouchDBDao implements IDatabaseDao {
 			s.put("name", session.getName());
 			s.put("shortName", session.getShortName());
 			s.put("active", session.isActive());
+			s.put("learningProgressType", session.getLearningProgressType());
 			database.saveDocument(s);
 			session.set_rev(s.getRev());
 
@@ -1634,64 +1635,39 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public int getLearningProgress(final Session session) {
-		// Note: we have to use this many views because our CouchDB version does not support
-		// advanced features like summing over lists. Thus, we have to do it all by ourselves...
-		final NovaView maximumValueView = new NovaView("learning_progress_maximum_value/max");
-		final NovaView answerSumView = new NovaView("learning_progress_user_values/sum");
-		final NovaView answerDocumentCountView = new NovaView("learning_progress_course_answers/count");
-		maximumValueView.setKey(session.get_id());
+	public CourseScore getLearningProgress(final Session session) {
+		final NovaView maximumValueView = new NovaView("learning_progress/maximum_value_of_question");
+		final NovaView answerSumView = new NovaView("learning_progress/question_value_achieved_for_user");
+		maximumValueView.setStartKeyArray(session.get_id());
+		maximumValueView.setEndKeyArray(session.get_id(), "{}");
 		answerSumView.setStartKeyArray(session.get_id());
 		answerSumView.setEndKeyArray(session.get_id(), "{}");
-		answerDocumentCountView.setStartKeyArray(session.get_id());
-		answerDocumentCountView.setEndKeyArray(session.get_id(), "{}");
-		answerDocumentCountView.setGroup(true);
-
-		final List<Document> maximumValueResult = getDatabase().view(maximumValueView).getResults();
-		final List<Document> answerSumResult = getDatabase().view(answerSumView).getResults();
-		final List<Document> answerDocumentCountResult = getDatabase().view(answerDocumentCountView).getResults();
-
-		if (maximumValueResult.isEmpty() || answerSumResult.isEmpty() || answerDocumentCountResult.isEmpty()) {
-			return 0;
-		}
-
-		final double courseMaximumValue = maximumValueResult.get(0).getInt("value");
-		final double userTotalValue = answerSumResult.get(0).getInt("value");
-		final double numUsers = answerDocumentCountResult.size();
-		if (courseMaximumValue == 0 || numUsers == 0) {
-			return 0;
-		}
-		final double courseAverageValue = userTotalValue / numUsers;
-		final double courseProgress = courseAverageValue / courseMaximumValue;
-		return (int) Math.min(100, Math.round(courseProgress * 100));
-	}
-
-	@Override
-	public SimpleEntry<Integer, Integer> getMyLearningProgress(final Session session, final User user) {
-		final int courseProgress = getLearningProgress(session);
-
-		final NovaView maximumValueView = new NovaView("learning_progress_maximum_value/max");
-		final NovaView answerSumView = new NovaView("learning_progress_user_values/sum");
-		maximumValueView.setKey(session.get_id());
-		answerSumView.setKey(session.get_id(), user.getUsername());
 
 		final List<Document> maximumValueResult = getDatabase().view(maximumValueView).getResults();
 		final List<Document> answerSumResult = getDatabase().view(answerSumView).getResults();
 
+		CourseScore courseScore = new CourseScore();
+
+		// no results found
 		if (maximumValueResult.isEmpty() || answerSumResult.isEmpty()) {
-			return new AbstractMap.SimpleEntry<Integer, Integer>(0, courseProgress);
+			return courseScore;
 		}
 
-		final double courseMaximumValue = maximumValueResult.get(0).getInt("value");
-		final double userTotalValue = answerSumResult.get(0).getInt("value");
-
-		if (courseMaximumValue == 0) {
-			return new AbstractMap.SimpleEntry<Integer, Integer>(0, courseProgress);
+		// collect mapping (questionId -> max value)
+		for (Document d : maximumValueResult) {
+			String questionId = d.getJSONArray("key").getString(1);
+			int questionScore = d.getInt("value");
+			courseScore.add(questionId, questionScore);
 		}
-		final double myProgress = userTotalValue / courseMaximumValue;
-		final int myLearningProgress = (int) Math.min(100, Math.round(myProgress * 100));
-
-		return new AbstractMap.SimpleEntry<Integer, Integer>(myLearningProgress, courseProgress);
+		// collect mapping (questionId -> (user -> value))
+		for (Document d : answerSumResult) {
+			String username = d.getJSONArray("key").getString(1);
+			JSONObject value = d.getJSONObject("value");
+			String questionId = value.getString("questionId");
+			int userscore = value.getInt("score");
+			courseScore.add(questionId, username, userscore);
+		}
+		return courseScore;
 	}
 
 	@Override

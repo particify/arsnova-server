@@ -34,6 +34,8 @@ import de.thm.arsnova.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.dao.IDatabaseDao;
+import de.thm.arsnova.domain.LearningProgress;
+import de.thm.arsnova.domain.LearningProgressFactory;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
@@ -93,6 +95,9 @@ public class SessionService implements ISessionService {
 	@Autowired
 	private ARSnovaSocketIOServer socketIoServer;
 
+	@Autowired
+	private LearningProgressFactory learningProgressFactory;
+
 	@Autowired(required = false)
 	private ConnectorClient connectorClient;
 
@@ -138,6 +143,15 @@ public class SessionService implements ISessionService {
 	@PreAuthorize("isAuthenticated()")
 	public final Session getSession(final String keyword) {
 		final User user = userService.getCurrentUser();
+		return this.getSessionInternal(keyword, user);
+	}
+
+	/*
+	 * The "internal" suffix means it is called by internal services that have no authentication!
+	 * TODO: Find a better way of doing this...
+	 */
+	@Override
+	public final Session getSessionInternal(final String keyword, final User user) {
 		final Session session = databaseDao.getSessionFromKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();
@@ -274,6 +288,18 @@ public class SessionService implements ISessionService {
 		return databaseDao.updateSession(session);
 	}
 
+	/*
+	 * The "internal" suffix means it is called by internal services that have no authentication!
+	 * TODO: Find a better way of doing this...
+	 */
+	@Override
+	public Session updateSessionInternal(final Session session, final User user) {
+		if (session.isCreator(user)) {
+			return databaseDao.updateSession(session);
+		}
+		return null;
+	}
+
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public void deleteSession(final String sessionkey) {
@@ -286,17 +312,19 @@ public class SessionService implements ISessionService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getLearningProgress(final String sessionkey) {
+	public int getLearningProgress(final String sessionkey, final String progressType) {
 		final Session session = databaseDao.getSession(sessionkey);
-		return databaseDao.getLearningProgress(session);
+		LearningProgress learningProgress = learningProgressFactory.createFromType(progressType);
+		return learningProgress.getCourseProgress(session);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public SimpleEntry<Integer, Integer> getMyLearningProgress(final String sessionkey) {
+	public SimpleEntry<Integer, Integer> getMyLearningProgress(final String sessionkey, final String progressType) {
 		final Session session = databaseDao.getSession(sessionkey);
 		final User user = userService.getCurrentUser();
-		return databaseDao.getMyLearningProgress(session, user);
+		LearningProgress learningProgress = learningProgressFactory.createFromType(progressType);
+		return learningProgress.getMyProgress(session, user);
 	}
 
 	@Override
