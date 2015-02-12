@@ -35,6 +35,12 @@ import de.thm.arsnova.entities.transport.ImportExportSession;
 public interface IDatabaseDao {
 	Session getSessionFromKeyword(String keyword);
 
+	/**
+	 * @deprecated Use getSessionFromKeyword
+	 * @param keyword
+	 * @return
+	 */
+	@Deprecated
 	Session getSession(String keyword);
 
 	List<Session> getMySessions(User user);
@@ -79,7 +85,7 @@ public interface IDatabaseDao {
 
 	List<Answer> getFreetextAnswers(String questionId);
 
-	List<Answer> getMyAnswers(User me, String sessionKey);
+	List<Answer> getMyAnswers(User me, Session session);
 
 	int getTotalAnswerCount(String sessionKey);
 

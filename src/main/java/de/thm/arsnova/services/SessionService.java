@@ -303,7 +303,7 @@ public class SessionService implements ISessionService {
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public void deleteSession(final String sessionkey) {
-		final Session session = databaseDao.getSession(sessionkey);
+		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		for (final Question q : databaseDao.getSkillQuestions(userService.getCurrentUser(), session)) {
 			databaseDao.deleteQuestionWithAnswers(q);
 		}
@@ -313,7 +313,7 @@ public class SessionService implements ISessionService {
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int getLearningProgress(final String sessionkey, final String progressType) {
-		final Session session = databaseDao.getSession(sessionkey);
+		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		LearningProgress learningProgress = learningProgressFactory.createFromType(progressType);
 		return learningProgress.getCourseProgress(session);
 	}
@@ -321,7 +321,7 @@ public class SessionService implements ISessionService {
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public SimpleEntry<Integer, Integer> getMyLearningProgress(final String sessionkey, final String progressType) {
-		final Session session = databaseDao.getSession(sessionkey);
+		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
 		LearningProgress learningProgress = learningProgressFactory.createFromType(progressType);
 		return learningProgress.getMyProgress(session, user);

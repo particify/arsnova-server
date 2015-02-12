@@ -168,7 +168,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			throw new NotFoundException();
 		}
 
-		final Session session = databaseDao.getSession(question.getSessionKeyword());
+		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		if (session == null) {
 			throw new UnauthorizedException();
 		}
@@ -190,7 +190,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	private Session getSessionWithAuthCheck(final String sessionKeyword) {
 		final User user = userService.getCurrentUser();
-		final Session session = databaseDao.getSession(sessionKeyword);
+		final Session session = databaseDao.getSessionFromKeyword(sessionKeyword);
 		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
@@ -315,6 +315,8 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Answer> getMyAnswers(final String sessionKey) {
+		final Session session = getSession(sessionKey);
+		// Load questions first because we are only interested in answers of the latest piRound.
 		final List<Question> questions = getSkillQuestions(sessionKey);
 		final Map<String, Question> questionIdToQuestion = new HashMap<String, Question>();
 		for (final Question question : questions) {
@@ -322,13 +324,14 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 
 		/* filter answers by active piRound per question */
-		final List<Answer> answers = databaseDao.getMyAnswers(userService.getCurrentUser(), sessionKey);
+		final List<Answer> answers = databaseDao.getMyAnswers(userService.getCurrentUser(), session);
 		final List<Answer> filteredAnswers = new ArrayList<Answer>();
 		for (final Answer answer : answers) {
 			final Question question = questionIdToQuestion.get(answer.getQuestionId());
 			if (0 == answer.getPiRound() && !"freetext".equals(question.getQuestionType())) {
 				answer.setPiRound(1);
 			}
+			// discard all answers that aren't in the same piRound as the question
 			if (answer.getPiRound() == question.getPiRound()) {
 				filteredAnswers.add(answer);
 			}
@@ -416,7 +419,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 
 		final User user = userService.getCurrentUser();
-		final Session session = databaseDao.getSession(question.getSessionKeyword());
+		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}

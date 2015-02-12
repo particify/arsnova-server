@@ -100,6 +100,11 @@ public class CouchDBDao implements IDatabaseDao {
 		sessionService = service;
 	}
 
+	/**
+	 * @deprecated Use getSessionFromKeyword instead. The database should not throw HTTP exceptions.
+	 * Additionally, the caching mechanism won't work here because it is calling inside the same class.
+	 */
+	@Deprecated
 	@Override
 	public final Session getSession(final String keyword) {
 		final Session result = getSessionFromKeyword(keyword);
@@ -865,12 +870,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Answer> getMyAnswers(final User me, final String sessionKey) {
-		final Session s = getSessionFromKeyword(sessionKey);
-		if (s == null) {
-			throw new NotFoundException();
-		}
-
+	public List<Answer> getMyAnswers(final User me, final Session s) {
 		final NovaView view = new NovaView("answer/by_user_and_session_full");
 		view.setKey(me.getUsername(), s.get_id());
 		final ViewResults results = getDatabase().view(view);
