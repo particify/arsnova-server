@@ -35,6 +35,7 @@ public class CourseScore implements Iterable<QuestionScore> {
 
 	/**
 	 * @pre questionId has been added before.
+	 * @pre username is set
 	 * @param questionId
 	 * @param username
 	 * @param userscore
@@ -43,6 +44,10 @@ public class CourseScore implements Iterable<QuestionScore> {
 		if (!scores.containsKey(questionId)) {
 			// Precondition failed, ignore this element.
 			// Most likely this is a question that has no learning progress value.
+			return;
+		}
+		if (username == null || username.isEmpty()) {
+			// Precondition failed: ignore anonymous users
 			return;
 		}
 		QuestionScore questionScore = scores.get(questionId);

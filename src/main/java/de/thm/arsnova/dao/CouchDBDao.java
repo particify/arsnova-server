@@ -1772,6 +1772,8 @@ public class CouchDBDao implements IDatabaseDao {
 					answerDoc.put("timestamp", a.getTimestamp());
 					answerDoc.put("piRound", a.getPiRound());
 					answerDoc.put("abstention", a.isAbstention());
+					// we do not store the user's name
+					answerDoc.put("user", "");
 					answers.add(answerDoc);
 				}
 			}
