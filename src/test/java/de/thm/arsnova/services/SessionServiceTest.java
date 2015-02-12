@@ -173,7 +173,7 @@ public class SessionServiceTest {
 
 			final IDatabaseDao mockDatabase = mock(IDatabaseDao.class);
 			when(mockDatabase.getSkillQuestions(userService.getCurrentUser(), session)).thenReturn(Arrays.asList(q1, q2));
-			when(mockDatabase.getSession(anyString())).thenReturn(session);
+			when(mockDatabase.getSessionFromKeyword(anyString())).thenReturn(session);
 			ReflectionTestUtils.setField(getTargetObject(sessionService), "databaseDao", mockDatabase);
 
 			sessionService.deleteSession(session.getKeyword());

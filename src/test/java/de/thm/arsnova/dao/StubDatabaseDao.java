@@ -256,7 +256,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Answer> getMyAnswers(User user, String sessionKey) {
+	public List<Answer> getMyAnswers(User user, Session session) {
 		return new ArrayList<Answer>();
 	}
 
