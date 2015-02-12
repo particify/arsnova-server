@@ -79,6 +79,9 @@ public class ConfigurationController extends AbstractController {
 	@Value("${features.mathjax.enabled:true}")
 	private String mathJaxEnabled;
 
+	@Value("${features.mathjax.src:}")
+	private String mathJaxSrc;
+
 	@Value("${features.markdown.enabled:false}")
 	private String markdownEnabled;
 
@@ -195,6 +198,9 @@ public class ConfigurationController extends AbstractController {
 		if (!"".equals(maxUploadFilesize)) {
 			config.put("maxUploadFilesize", maxUploadFilesize);
 		}
+		if (!"".equals(mathJaxSrc) && "true".equals(mathJaxEnabled)) {
+			config.put("mathJaxSrc", mathJaxSrc);
+		}
 
 		config.put("answerOptionLimit", Integer.valueOf(answerOptionLimit));
 		config.put("parseAnswerOptionFormatting", Boolean.valueOf(parseAnswerOptionFormatting));
@@ -209,7 +215,7 @@ public class ConfigurationController extends AbstractController {
 		features.put("gridSquare", "true".equals(gridSquareEnabled));
 		features.put("sessionImportExport", "true".equals(sessionImportExportEnabled));
 		features.put("publicPool", "true".equals(publicPoolEnabled));
-
+		
 		// add public pool configuration on demand
 		if (features.get("publicPool")) {
 			config.put("publicPool", publicPool);
