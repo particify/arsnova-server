@@ -1563,10 +1563,10 @@ public class CouchDBDao implements IDatabaseDao {
 	public List<String> getUnAnsweredLectureQuestionIds(final Session session, final User user) {
 		final NovaView view = new NovaView("answer/variant_by_user");
 		view.setKey(user.getUsername(), session.get_id(), "lecture");
-		return collectUnansweredQuestionIds(getLectureQuestionIds(session, user), view);
+		return collectUnansweredQuestionIds(getLectureQuestionIds(session), view);
 	}
 
-	private List<String> getLectureQuestionIds(final Session session, final User user) {
+	private List<String> getLectureQuestionIds(final Session session) {
 		NovaView view = new NovaView("skill_question/lecture_question_ids_by_session_for_all");
 		view.setStartKeyArray(session.get_id());
 		view.setEndKeyArray(session.get_id(), "{}");
@@ -1577,10 +1577,10 @@ public class CouchDBDao implements IDatabaseDao {
 	public List<String> getUnAnsweredPreparationQuestionIds(final Session session, final User user) {
 		final NovaView view = new NovaView("answer/variant_by_user");
 		view.setKey(user.getUsername(), session.get_id(), "preparation");
-		return collectUnansweredQuestionIds(getPreparationQuestionIds(session, user), view);
+		return collectUnansweredQuestionIds(getPreparationQuestionIds(session), view);
 	}
 
-	private List<String> getPreparationQuestionIds(final Session session, final User user) {
+	private List<String> getPreparationQuestionIds(final Session session) {
 		NovaView view = new NovaView("skill_question/preparation_question_ids_by_session_for_all");
 		view.setStartKeyArray(session.get_id());
 		view.setEndKeyArray(session.get_id(), "{}");
