@@ -71,6 +71,18 @@ public class Session implements Serializable {
 		copy.courseId = original.courseId;
 		copy.creationTime = original.creationTime;
 		copy.learningProgressType = original.learningProgressType;
+		// public pool
+		copy.ppAuthorName = original.ppAuthorName;
+		copy.ppAuthorMail = original.ppAuthorMail;
+		copy.ppUniversity = original.ppUniversity;
+		copy.ppLogo = original.ppLogo;
+		copy.ppSubject = original.ppSubject;
+		copy.ppLicense = original.ppLicense;
+		copy.ppDescription = original.ppDescription;
+		copy.ppFaculty = original.ppFaculty;
+		copy.ppLevel = original.ppLevel;
+		copy.sessionType = original.sessionType;
+
 		copy._id = original._id;
 		copy._rev = original._rev;
 		return copy;

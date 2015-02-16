@@ -62,6 +62,24 @@ public class ImportExportSession {
 		s.setActive(session.isActive());
 		s.setName(session.getName());
 		s.setShortName(session.getShortName());
+		// public pool
+		if (session.getPublicPool() != null) {
+			// overwrite name and shortname
+			s.setName(session.getPublicPool().getName());
+			s.setShortName(session.getPublicPool().getShortName());
+			// set pool fields
+			s.setPpAuthorMail(session.getPublicPool().getPpAuthorMail());
+			s.setPpAuthorName(session.getPublicPool().getPpAuthorName());
+			s.setPpDescription(session.getPublicPool().getPpDescription());
+			s.setPpFaculty(session.getPublicPool().getPpFaculty());
+			s.setPpLevel(session.getPublicPool().getPpLevel());
+			s.setPpLicense(session.getPublicPool().getPpLicense());
+			s.setPpLogo(session.getPublicPool().getPpLogo());
+			s.setPpSubject(session.getPublicPool().getPpSubject());
+			s.setPpUniversity(session.getPublicPool().getPpUniversity());
+			// mark as public pool session
+			s.setSessionType("public_pool");
+		}
 		// other fields
 		s.setType("session");
 		s.setCreator(user.getUsername());
@@ -90,6 +108,8 @@ public class ImportExportSession {
 
 		private boolean active;
 
+		private PublicPool publicPool;
+
 		public String getName() {
 			return name;
 		}
@@ -112,6 +132,127 @@ public class ImportExportSession {
 
 		public void setActive(boolean active) {
 			this.active = active;
+		}
+
+		public PublicPool getPublicPool() {
+			return publicPool;
+		}
+
+		public void setPublicPool(PublicPool publicPool) {
+			this.publicPool = publicPool;
+		}
+	}
+
+	public static class PublicPool {
+
+		private String ppAuthorName;
+
+		private String ppAuthorMail;
+
+		private String ppUniversity;
+
+		private String ppLogo;
+
+		private String ppSubject;
+
+		private String ppLicense;
+
+		private String ppLevel;
+
+		private String ppDescription;
+
+		private String ppFaculty;
+
+		private String name;
+
+		private String shortName;
+
+		public String getPpAuthorName() {
+			return ppAuthorName;
+		}
+
+		public void setPpAuthorName(String ppAuthorName) {
+			this.ppAuthorName = ppAuthorName;
+		}
+
+		public String getPpAuthorMail() {
+			return ppAuthorMail;
+		}
+
+		public void setPpAuthorMail(String ppAuthorMail) {
+			this.ppAuthorMail = ppAuthorMail;
+		}
+
+		public String getPpUniversity() {
+			return ppUniversity;
+		}
+
+		public void setPpUniversity(String ppUniversity) {
+			this.ppUniversity = ppUniversity;
+		}
+
+		public String getPpLogo() {
+			return ppLogo;
+		}
+
+		public void setPpLogo(String ppLogo) {
+			this.ppLogo = ppLogo;
+		}
+
+		public String getPpSubject() {
+			return ppSubject;
+		}
+
+		public void setPpSubject(String ppSubject) {
+			this.ppSubject = ppSubject;
+		}
+
+		public String getPpLicense() {
+			return ppLicense;
+		}
+
+		public void setPpLicense(String ppLicense) {
+			this.ppLicense = ppLicense;
+		}
+
+		public String getPpLevel() {
+			return ppLevel;
+		}
+
+		public void setPpLevel(String ppLevel) {
+			this.ppLevel = ppLevel;
+		}
+
+		public String getPpDescription() {
+			return ppDescription;
+		}
+
+		public void setPpDescription(String ppDescription) {
+			this.ppDescription = ppDescription;
+		}
+
+		public String getPpFaculty() {
+			return ppFaculty;
+		}
+
+		public void setPpFaculty(String ppFaculty) {
+			this.ppFaculty = ppFaculty;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getShortName() {
+			return shortName;
+		}
+
+		public void setShortName(String shortName) {
+			this.shortName = shortName;
 		}
 	}
 }
