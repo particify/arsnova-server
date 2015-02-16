@@ -18,6 +18,7 @@
 package de.thm.arsnova.dao;
 
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,7 +26,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import net.sf.ezmorph.Morpher;
 import net.sf.ezmorph.MorpherRegistry;
@@ -42,6 +45,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,6 +83,8 @@ public class CouchDBDao implements IDatabaseDao {
 	private int databasePort;
 	private String databaseName;
 	private Database database;
+
+	private Queue<AbstractMap.SimpleEntry<Document, Answer>> answerQueue = new ConcurrentLinkedQueue<AbstractMap.SimpleEntry<Document, Answer>>();
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(CouchDBDao.class);
 
@@ -1213,27 +1219,43 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	public Answer saveAnswer(final Answer answer, final User user) {
-		try {
-			final Document a = new Document();
-			a.put("type", "skill_question_answer");
-			a.put("sessionId", answer.getSessionId());
-			a.put("questionId", answer.getQuestionId());
-			a.put("answerSubject", answer.getAnswerSubject());
-			a.put("questionVariant", answer.getQuestionVariant());
-			a.put("questionValue", answer.getQuestionValue());
-			a.put("answerText", answer.getAnswerText());
-			a.put("timestamp", answer.getTimestamp());
-			a.put("user", user.getUsername());
-			a.put("piRound", answer.getPiRound());
-			a.put("abstention", answer.isAbstention());
-			database.saveDocument(a);
-			answer.set_id(a.getId());
-			answer.set_rev(a.getRev());
-			return answer;
-		} catch (final IOException e) {
-			LOGGER.error("Could not save answer {}", answer);
+		final Document a = new Document();
+		a.put("type", "skill_question_answer");
+		a.put("sessionId", answer.getSessionId());
+		a.put("questionId", answer.getQuestionId());
+		a.put("answerSubject", answer.getAnswerSubject());
+		a.put("questionVariant", answer.getQuestionVariant());
+		a.put("questionValue", answer.getQuestionValue());
+		a.put("answerText", answer.getAnswerText());
+		a.put("timestamp", answer.getTimestamp());
+		a.put("user", user.getUsername());
+		a.put("piRound", answer.getPiRound());
+		a.put("abstention", answer.isAbstention());
+		this.answerQueue.offer(new AbstractMap.SimpleEntry<Document, Answer>(a, answer));
+		return answer;
+	}
+
+	@Scheduled(fixedDelay = 5000)
+	public void flushAnswerQueue() {
+		final Map<Document, Answer> map = new HashMap<Document, Answer>();
+		final List<Document> answerList = new ArrayList<Document>();
+		AbstractMap.SimpleEntry<Document, Answer> entry;
+		while ((entry = this.answerQueue.poll()) != null) {
+			final Document doc = entry.getKey();
+			final Answer answer = entry.getValue();
+			map.put(doc, answer);
+			answerList.add(doc);
 		}
-		return null;
+		try {
+			getDatabase().bulkSaveDocuments(answerList.toArray(new Document[answerList.size()]));
+			for (Document d : answerList) {
+				final Answer answer = map.get(d);
+				answer.set_id(d.getId());
+				answer.set_rev(d.getRev());
+			}
+		} catch (IOException e) {
+			LOGGER.error("Could not bulk save answers from queue");
+		}
 	}
 
 	@Override
