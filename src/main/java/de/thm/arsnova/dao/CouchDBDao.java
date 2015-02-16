@@ -41,6 +41,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -346,6 +347,12 @@ public class CouchDBDao implements IDatabaseDao {
 		return sessionInfos;
 	}
 
+	/**
+	 * @deprecated The decision to load data depending on the user should be made by a service class, not this
+	 * database class. Please use getSkillQuestionsForUsers or getSkillQuestionsForTeachers as this will enable
+	 * caching.
+	 */
+	@Deprecated
 	@Override
 	public final List<Question> getSkillQuestions(final User user, final Session session) {
 		String viewName;
@@ -354,6 +361,20 @@ public class CouchDBDao implements IDatabaseDao {
 		} else {
 			viewName = "skill_question/by_session_for_all_full";
 		}
+		return getQuestions(new NovaView(viewName), session);
+	}
+
+	@Cacheable("skillquestions")
+	@Override
+	public final List<Question> getSkillQuestionsForUsers(final Session session) {
+		String viewName = "skill_question/by_session_for_all_full";
+		return getQuestions(new NovaView(viewName), session);
+	}
+
+	@Cacheable("skillquestions")
+	@Override
+	public final List<Question> getSkillQuestionsForTeachers(final Session session) {
+		String viewName = "skill_question/by_session_sorted_by_subject_and_text";
 		return getQuestions(new NovaView(viewName), session);
 	}
 
@@ -709,7 +730,11 @@ public class CouchDBDao implements IDatabaseDao {
 		return collectQuestionIds(view);
 	}
 
-	@CacheEvict(value = "questions")
+	@Caching(evict = { @CacheEvict("questions"),
+			@CacheEvict(value = "skillquestions", allEntries = true),
+			@CacheEvict(value = "lecturequestions", allEntries = true),
+			@CacheEvict(value = "preparationquestions", allEntries = true),
+			@CacheEvict(value = "flashcardquestions", allEntries = true) })
 	@Override
 	public final void deleteQuestionWithAnswers(final Question question) {
 		try {
@@ -720,6 +745,11 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 	}
 
+	@Caching(evict = { @CacheEvict("questions"),
+			@CacheEvict(value = "skillquestions", allEntries = true),
+			@CacheEvict(value = "lecturequestions", allEntries = true),
+			@CacheEvict(value = "preparationquestions", allEntries = true),
+			@CacheEvict(value = "flashcardquestions", allEntries = true) })
 	@Override
 	public final void deleteAllQuestionsWithAnswers(final Session session) {
 		final NovaView view = new NovaView("skill_question/by_session");
@@ -1313,6 +1343,12 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 	}
 
+	/**
+	 * @deprecated The decision to load data depending on the user should be made by a service class, not this
+	 * database class. Please use getLectureQuestionsForUsers or getLectureQuestionsForTeachers as this will enable
+	 * caching.
+	 */
+	@Deprecated
 	@Override
 	public List<Question> getLectureQuestions(final User user, final Session session) {
 		String viewName;
@@ -1324,6 +1360,24 @@ public class CouchDBDao implements IDatabaseDao {
 		return getQuestions(new NovaView(viewName), session);
 	}
 
+	@Cacheable("lecturequestions")
+	@Override
+	public List<Question> getLectureQuestionsForUsers(final Session session) {
+		String viewName = "skill_question/lecture_question_by_session_for_all";
+		return getQuestions(new NovaView(viewName), session);
+	}
+
+	@Override
+	public List<Question> getLectureQuestionsForTeachers(final Session session) {
+		String viewName = "skill_question/lecture_question_by_session";
+		return getQuestions(new NovaView(viewName), session);
+	}
+
+	/**
+	 * @deprecated The decision to load data depending on the user should be made by a service class, not this
+	 * database class. Please use getFlashcardsForUsers or getFlashcardsForTeachers as this will enable caching.
+	 */
+	@Deprecated
 	@Override
 	public List<Question> getFlashcards(final User user, final Session session) {
 		String viewName;
@@ -1335,6 +1389,25 @@ public class CouchDBDao implements IDatabaseDao {
 		return getQuestions(new NovaView(viewName), session);
 	}
 
+	@Cacheable("flashcardquestions")
+	@Override
+	public List<Question> getFlashcardsForUsers(final Session session) {
+		String viewName = "skill_question/flashcard_by_session_for_all";
+		return getQuestions(new NovaView(viewName), session);
+	}
+
+	@Override
+	public List<Question> getFlashcardsForTeachers(final Session session) {
+		String viewName = "skill_question/flashcard_by_session";
+		return getQuestions(new NovaView(viewName), session);
+	}
+
+	/**
+	 * @deprecated The decision to load data depending on the user should be made by a service class, not this
+	 * database class. Please use getPreparationQuestionsForUsers or getPreparationQuestionsForTeachers as this will enable
+	 * caching.
+	 */
+	@Deprecated
 	@Override
 	public List<Question> getPreparationQuestions(final User user, final Session session) {
 		String viewName;
@@ -1344,7 +1417,19 @@ public class CouchDBDao implements IDatabaseDao {
 			viewName = "skill_question/preparation_question_by_session_for_all";
 		}
 		return getQuestions(new NovaView(viewName), session);
+	}
 
+	@Cacheable("preparationquestions")
+	@Override
+	public List<Question> getPreparationQuestionsForUsers(final Session session) {
+		String viewName = "skill_question/preparation_question_by_session_for_all";
+		return getQuestions(new NovaView(viewName), session);
+	}
+
+	@Override
+	public List<Question> getPreparationQuestionsForTeachers(final Session session) {
+		String viewName = "skill_question/preparation_question_by_session";
+		return getQuestions(new NovaView(viewName), session);
 	}
 
 	private List<Question> getQuestions(final NovaView view, final Session session) {
@@ -1425,18 +1510,27 @@ public class CouchDBDao implements IDatabaseDao {
 		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 	}
 
+	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
+			@CacheEvict(value = "skillquestions", allEntries = true),
+			@CacheEvict("lecturequestions") })
 	@Override
 	public void deleteAllLectureQuestionsWithAnswers(final Session session) {
 		final NovaView view = new NovaView("skill_question/lecture_question_by_session");
 		deleteAllQuestionDocumentsWithAnswers(session, view);
 	}
 
+	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
+			@CacheEvict(value = "skillquestions", allEntries = true),
+			@CacheEvict("flashcardquestions") })
 	@Override
 	public void deleteAllFlashcardsWithAnswers(final Session session) {
 		final NovaView view = new NovaView("skill_question/flashcard_by_session");
 		deleteAllQuestionDocumentsWithAnswers(session, view);
 	}
 
+	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
+			@CacheEvict(value = "skillquestions", allEntries = true),
+			@CacheEvict("preparationquestions") })
 	@Override
 	public void deleteAllPreparationQuestionsWithAnswers(final Session session) {
 		final NovaView view = new NovaView("skill_question/preparation_question_by_session");
@@ -1538,7 +1632,11 @@ public class CouchDBDao implements IDatabaseDao {
 		publishQuestions(session, publish, questions);
 	}
 
-	@CacheEvict(value = "questions", allEntries = true)
+	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
+			@CacheEvict(value = "skillquestions", allEntries = true),
+			@CacheEvict(value = "lecturequestions", allEntries = true),
+			@CacheEvict(value = "preparationquestions", allEntries = true),
+			@CacheEvict(value = "flashcardquestions", allEntries = true) })
 	@Override
 	public void publishQuestions(final Session session, final boolean publish, List<Question> questions) {
 		for (final Question q : questions) {

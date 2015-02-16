@@ -84,7 +84,13 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Question> getSkillQuestions(final String sessionkey) {
-		return databaseDao.getSkillQuestions(userService.getCurrentUser(), getSession(sessionkey));
+		final Session session = getSession(sessionkey);
+		final User user = userService.getCurrentUser();
+		if (session.isCreator(user)) {
+			return databaseDao.getSkillQuestionsForTeachers(session);
+		} else {
+			return databaseDao.getSkillQuestionsForUsers(session);
+		}
 	}
 
 	@Override
@@ -317,7 +323,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	public List<Answer> getMyAnswers(final String sessionKey) {
 		final Session session = getSession(sessionKey);
 		// Load questions first because we are only interested in answers of the latest piRound.
-		final List<Question> questions = getSkillQuestions(sessionKey);
+		final List<Question> questions = databaseDao.getSkillQuestionsForUsers(session);
 		final Map<String, Question> questionIdToQuestion = new HashMap<String, Question>();
 		for (final Question question : questions) {
 			questionIdToQuestion.put(question.get_id(), question);
@@ -495,19 +501,37 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Question> getLectureQuestions(final String sessionkey) {
-		return databaseDao.getLectureQuestions(userService.getCurrentUser(), getSession(sessionkey));
+		final Session session = getSession(sessionkey);
+		final User user = userService.getCurrentUser();
+		if (session.isCreator(user)) {
+			return databaseDao.getLectureQuestionsForTeachers(session);
+		} else {
+			return databaseDao.getLectureQuestionsForUsers(session);
+		}
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Question> getFlashcards(final String sessionkey) {
-		return databaseDao.getFlashcards(userService.getCurrentUser(), getSession(sessionkey));
+		final Session session = getSession(sessionkey);
+		final User user = userService.getCurrentUser();
+		if (session.isCreator(user)) {
+			return databaseDao.getFlashcardsForTeachers(session);
+		} else {
+			return databaseDao.getFlashcardsForUsers(session);
+		}
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Question> getPreparationQuestions(final String sessionkey) {
-		return databaseDao.getPreparationQuestions(userService.getCurrentUser(), getSession(sessionkey));
+		final Session session = getSession(sessionkey);
+		final User user = userService.getCurrentUser();
+		if (session.isCreator(user)) {
+			return databaseDao.getPreparationQuestionsForTeachers(session);
+		} else {
+			return databaseDao.getPreparationQuestionsForUsers(session);
+		}
 	}
 
 	private Session getSession(final String sessionkey) {

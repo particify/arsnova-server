@@ -59,7 +59,18 @@ public interface IDatabaseDao {
 
 	Question getQuestion(String id);
 
+	/**
+	 * @deprecated Use getSkillQuestionsForUsers or getSkillQuestionsForTeachers
+	 * @param user
+	 * @param session
+	 * @return
+	 */
+	@Deprecated
 	List<Question> getSkillQuestions(User user, Session session);
+
+	List<Question> getSkillQuestionsForUsers(Session session);
+
+	List<Question> getSkillQuestionsForTeachers(Session session);
 
 	int getSkillQuestionCount(Session session);
 
@@ -135,11 +146,44 @@ public interface IDatabaseDao {
 
 	void deleteSession(Session session);
 
+	/**
+	 * @deprecated Use getLectureQuestionsForUsers or getLectureQuestionsForTeachers
+	 * @param user
+	 * @param session
+	 * @return
+	 */
+	@Deprecated
 	List<Question> getLectureQuestions(User user, Session session);
 
+	List<Question> getLectureQuestionsForUsers(Session session);
+
+	List<Question> getLectureQuestionsForTeachers(Session session);
+
+	/**
+	 * @deprecated Use getFlashcardsForUsers or getFlashcardsForTeachers
+	 * @param user
+	 * @param session
+	 * @return
+	 */
+	@Deprecated
 	List<Question> getFlashcards(User user, Session session);
 
+	List<Question> getFlashcardsForUsers(Session session);
+
+	List<Question> getFlashcardsForTeachers(Session session);
+
+	/**
+	 * @deprecated Use getPreparationQuestionsForUsers or getPreparationQuestionsForTeachers
+	 * @param user
+	 * @param session
+	 * @return
+	 */
+	@Deprecated
 	List<Question> getPreparationQuestions(User user, Session session);
+
+	List<Question> getPreparationQuestionsForUsers(Session session);
+
+	List<Question> getPreparationQuestionsForTeachers(Session session);
 
 	int getLectureQuestionCount(Session session);
 
