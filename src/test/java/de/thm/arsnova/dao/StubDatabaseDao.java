@@ -574,4 +574,52 @@ public class StubDatabaseDao implements IDatabaseDao {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public List<Question> getSkillQuestionsForUsers(Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Question> getSkillQuestionsForTeachers(Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Question> getLectureQuestionsForUsers(Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Question> getLectureQuestionsForTeachers(Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Question> getFlashcardsForUsers(Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Question> getFlashcardsForTeachers(Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Question> getPreparationQuestionsForUsers(Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Question> getPreparationQuestionsForTeachers(Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
