@@ -1246,6 +1246,10 @@ public class CouchDBDao implements IDatabaseDao {
 			map.put(doc, answer);
 			answerList.add(doc);
 		}
+		if (answerList.isEmpty()) {
+			// no need to send an empty bulk request. ;-)
+			return;
+		}
 		try {
 			getDatabase().bulkSaveDocuments(answerList.toArray(new Document[answerList.size()]));
 			for (Document d : answerList) {
