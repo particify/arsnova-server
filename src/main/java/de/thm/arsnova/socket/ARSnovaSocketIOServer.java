@@ -448,8 +448,14 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 		//broadcastInSession(sessionKey, "countQuestionAnswersByQuestion", questionService.getAnswerAndAbstentionCountByQuestion(event.getQuestion().get_id()));
 		//broadcastInSession(sessionKey, "countLectureQuestionAnswers", questionService.countLectureQuestionAnswersInternal(sessionKey));
 		//broadcastInSession(sessionKey, "countPreparationQuestionAnswers", questionService.countPreparationQuestionAnswersInternal(sessionKey));
-		sendToUser(event.getUser(), "unansweredLecturerQuestions", questionService.getUnAnsweredLectureQuestionIds(sessionKey, event.getUser()));
-		sendToUser(event.getUser(), "unansweredPreparationQuestions", questionService.getUnAnsweredPreparationQuestionIds(sessionKey, event.getUser()));
+
+		// Update the unanswered count for the question variant that was answered.
+		final de.thm.arsnova.entities.Question question = event.getQuestion();
+		if (question.getQuestionVariant().equals("lecture")) {
+			sendToUser(event.getUser(), "unansweredLecturerQuestions", questionService.getUnAnsweredLectureQuestionIds(sessionKey, event.getUser()));
+		} else if (question.getQuestionVariant().equals("preparation")) {
+			sendToUser(event.getUser(), "unansweredPreparationQuestions", questionService.getUnAnsweredPreparationQuestionIds(sessionKey, event.getUser()));
+		}
 	}
 
 	@Override
