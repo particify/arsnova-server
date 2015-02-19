@@ -38,7 +38,6 @@ import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.domain.ILearningProgressFactory;
 import de.thm.arsnova.domain.LearningProgress;
-import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
@@ -305,9 +304,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public void deleteSession(final String sessionkey) {
 		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
-		for (final Question q : databaseDao.getSkillQuestions(userService.getCurrentUser(), session)) {
-			databaseDao.deleteQuestionWithAnswers(q);
-		}
+		databaseDao.deleteAllQuestionsWithAnswers(session);
 		databaseDao.deleteSession(session);
 	}
 

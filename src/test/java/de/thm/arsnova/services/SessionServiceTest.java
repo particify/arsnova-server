@@ -27,7 +27,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -50,7 +49,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.dao.StubDatabaseDao;
-import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.exceptions.NotFoundException;
 
@@ -168,18 +166,14 @@ public class SessionServiceTest {
 			final Session session = new Session();
 			session.setKeyword("12345678");
 			session.setCreator(userService.getCurrentUser().getUsername());
-			final Question q1 = new Question();
-			final Question q2 = new Question();
 
 			final IDatabaseDao mockDatabase = mock(IDatabaseDao.class);
-			when(mockDatabase.getSkillQuestions(userService.getCurrentUser(), session)).thenReturn(Arrays.asList(q1, q2));
 			when(mockDatabase.getSessionFromKeyword(anyString())).thenReturn(session);
 			ReflectionTestUtils.setField(getTargetObject(sessionService), "databaseDao", mockDatabase);
 
 			sessionService.deleteSession(session.getKeyword());
 
-			verify(mockDatabase).deleteQuestionWithAnswers(q1);
-			verify(mockDatabase).deleteQuestionWithAnswers(q2);
+			verify(mockDatabase).deleteAllQuestionsWithAnswers(session);
 			verify(mockDatabase).deleteSession(session);
 		} finally {
 			ReflectionTestUtils.setField(getTargetObject(sessionService), "databaseDao", tempDatabase);
