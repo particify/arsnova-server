@@ -416,6 +416,42 @@ public class Question {
 		return "Question type '" + type + "': " + subject + ";\n" + text + possibleAnswers;
 	}
 
+	@Override
+	public int hashCode() {
+		// auto generated!
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((_id == null) ? 0 : _id.hashCode());
+		result = prime * result + ((_rev == null) ? 0 : _rev.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		// auto generated!
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		Question other = (Question) obj;
+		if (_id == null) {
+			if (other._id != null) {
+				return false;
+			}
+		} else if (!_id.equals(other._id)) {
+			return false;
+		}
+		if (_rev == null) {
+			if (other._rev != null) {
+				return false;
+			}
+		} else if (!_rev.equals(other._rev)) {
+			return false;
+		}
+		return true;
+	}
+
 	public int calculateValue(Answer answer) {
 		if (answer.isAbstention()) {
 			return 0;

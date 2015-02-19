@@ -176,4 +176,87 @@ public class Answer {
 				+ ", user: " + user;
 	}
 
+	@Override
+	public int hashCode() {
+		// auto generated!
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((_id == null) ? 0 : _id.hashCode());
+		result = prime * result + ((_rev == null) ? 0 : _rev.hashCode());
+		result = prime * result + ((answerSubject == null) ? 0 : answerSubject.hashCode());
+		result = prime * result + ((answerText == null) ? 0 : answerText.hashCode());
+		result = prime * result + piRound;
+		result = prime * result + ((questionId == null) ? 0 : questionId.hashCode());
+		result = prime * result + ((sessionId == null) ? 0 : sessionId.hashCode());
+		result = prime * result + (int) (timestamp ^ (timestamp >>> 32));
+		result = prime * result + ((user == null) ? 0 : user.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		// auto generated!
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		Answer other = (Answer) obj;
+		if (_id == null) {
+			if (other._id != null) {
+				return false;
+			}
+		} else if (!_id.equals(other._id)) {
+			return false;
+		}
+		if (_rev == null) {
+			if (other._rev != null) {
+				return false;
+			}
+		} else if (!_rev.equals(other._rev)) {
+			return false;
+		}
+		if (answerSubject == null) {
+			if (other.answerSubject != null) {
+				return false;
+			}
+		} else if (!answerSubject.equals(other.answerSubject)) {
+			return false;
+		}
+		if (answerText == null) {
+			if (other.answerText != null) {
+				return false;
+			}
+		} else if (!answerText.equals(other.answerText)) {
+			return false;
+		}
+		if (piRound != other.piRound) {
+			return false;
+		}
+		if (questionId == null) {
+			if (other.questionId != null) {
+				return false;
+			}
+		} else if (!questionId.equals(other.questionId)) {
+			return false;
+		}
+		if (sessionId == null) {
+			if (other.sessionId != null) {
+				return false;
+			}
+		} else if (!sessionId.equals(other.sessionId)) {
+			return false;
+		}
+		if (timestamp != other.timestamp) {
+			return false;
+		}
+		if (user == null) {
+			if (other.user != null) {
+				return false;
+			}
+		} else if (!user.equals(other.user)) {
+			return false;
+		}
+		return true;
+	}
 }
