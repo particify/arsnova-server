@@ -630,25 +630,14 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public final Question getQuestion(final String id) {
 		try {
-			final NovaView view = new NovaView("skill_question/by_id");
-			view.setKey(id);
-			final ViewResults results = getDatabase().view(view);
-
-			if (results.getJSONArray("rows").optJSONObject(0) == null) {
-				return null;
-			}
-
-			final Question q = (Question) JSONObject.toBean(
-					results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
-					Question.class
-					);
-			final JSONArray possibleAnswers = results.getJSONArray("rows").optJSONObject(0).optJSONObject("value")
-					.getJSONArray("possibleAnswers");
+			final Document q = getDatabase().getDocument(id);
+			final Question question = (Question) JSONObject.toBean(q.getJSONObject(), Question.class);
+			final JSONArray possibleAnswers = q.getJSONObject().getJSONArray("possibleAnswers");
 			@SuppressWarnings("unchecked")
 			final Collection<PossibleAnswer> answers = JSONArray.toCollection(possibleAnswers, PossibleAnswer.class);
-			q.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
-			q.setSessionKeyword(getSessionKeyword(q.getSessionId()));
-			return q;
+			question.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
+			question.setSessionKeyword(getSessionKeyword(question.getSessionId()));
+			return question;
 		} catch (final IOException e) {
 			LOGGER.error("Could not get question with id {}", id);
 		}

@@ -255,7 +255,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated()")
 	public Answer getMyAnswer(final String questionId) {
 		final Question question = getQuestion(questionId);
-
+		if (question == null) {
+			throw new NotFoundException();
+		}
 		return databaseDao.getMyAnswer(userService.getCurrentUser(), questionId, question.getPiRound());
 	}
 
@@ -263,7 +265,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated()")
 	public List<Answer> getAnswers(final String questionId, final int piRound) {
 		final Question question = databaseDao.getQuestion(questionId);
-
+		if (question == null) {
+			throw new NotFoundException();
+		}
 		return "freetext".equals(question.getQuestionType())
 				? getFreetextAnswers(questionId)
 						: databaseDao.getAnswers(questionId, piRound);
@@ -273,7 +277,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated()")
 	public List<Answer> getAnswers(final String questionId) {
 		final Question question = getQuestion(questionId);
-
+		if (question == null) {
+			throw new NotFoundException();
+		}
 		return getAnswers(questionId, question.getPiRound());
 	}
 
