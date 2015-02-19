@@ -556,7 +556,11 @@ public class CouchDBDao implements IDatabaseDao {
 		return q;
 	}
 
-	@CachePut(value = "questions")
+	@Caching(evict = {@CacheEvict(value = "skillquestions", allEntries = true),
+			@CacheEvict(value = "lecturequestions", allEntries = true),
+			@CacheEvict(value = "preparationquestions", allEntries = true),
+			@CacheEvict(value = "flashcardquestions", allEntries = true) },
+			put = {@CachePut("questions")})
 	@Override
 	public Question updateQuestion(final Question question) {
 		try {
