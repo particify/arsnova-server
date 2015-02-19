@@ -35,14 +35,6 @@ import de.thm.arsnova.entities.transport.ImportExportSession;
 public interface IDatabaseDao {
 	Session getSessionFromKeyword(String keyword);
 
-	/**
-	 * @deprecated Use getSessionFromKeyword
-	 * @param keyword
-	 * @return
-	 */
-	@Deprecated
-	Session getSession(String keyword);
-
 	List<Session> getMySessions(User user);
 
 	List<Session> getPublicPoolSessions();
@@ -148,40 +140,13 @@ public interface IDatabaseDao {
 
 	void deleteSession(Session session);
 
-	/**
-	 * @deprecated Use getLectureQuestionsForUsers or getLectureQuestionsForTeachers
-	 * @param user
-	 * @param session
-	 * @return
-	 */
-	@Deprecated
-	List<Question> getLectureQuestions(User user, Session session);
-
 	List<Question> getLectureQuestionsForUsers(Session session);
 
 	List<Question> getLectureQuestionsForTeachers(Session session);
 
-	/**
-	 * @deprecated Use getFlashcardsForUsers or getFlashcardsForTeachers
-	 * @param user
-	 * @param session
-	 * @return
-	 */
-	@Deprecated
-	List<Question> getFlashcards(User user, Session session);
-
 	List<Question> getFlashcardsForUsers(Session session);
 
 	List<Question> getFlashcardsForTeachers(Session session);
-
-	/**
-	 * @deprecated Use getPreparationQuestionsForUsers or getPreparationQuestionsForTeachers
-	 * @param user
-	 * @param session
-	 * @return
-	 */
-	@Deprecated
-	List<Question> getPreparationQuestions(User user, Session session);
 
 	List<Question> getPreparationQuestionsForUsers(Session session);
 

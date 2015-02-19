@@ -107,21 +107,6 @@ public class CouchDBDao implements IDatabaseDao {
 		sessionService = service;
 	}
 
-	/**
-	 * @deprecated Use getSessionFromKeyword instead. The database should not throw HTTP exceptions.
-	 * Additionally, the caching mechanism won't work here because it is calling inside the same class.
-	 */
-	@Deprecated
-	@Override
-	public Session getSession(final String keyword) {
-		final Session result = getSessionFromKeyword(keyword);
-		if (result != null) {
-			return result;
-		}
-
-		throw new NotFoundException();
-	}
-
 	@Override
 	public List<Session> getMySessions(final User user) {
 		final NovaView view = new NovaView("session/by_creator");
@@ -457,7 +442,7 @@ public class CouchDBDao implements IDatabaseDao {
 			return null;
 		}
 		// session caching is done by loading the created session
-		return getSession(sessionDocument.getString("keyword"));
+		return getSessionFromKeyword(sessionDocument.getString("keyword"));
 	}
 
 	@Override
@@ -1382,23 +1367,6 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 	}
 
-	/**
-	 * @deprecated The decision to load data depending on the user should be made by a service class, not this
-	 * database class. Please use getLectureQuestionsForUsers or getLectureQuestionsForTeachers as this will enable
-	 * caching.
-	 */
-	@Deprecated
-	@Override
-	public List<Question> getLectureQuestions(final User user, final Session session) {
-		String viewName;
-		if (session.isCreator(user)) {
-			viewName = "skill_question/lecture_question_by_session";
-		} else {
-			viewName = "skill_question/lecture_question_by_session_for_all";
-		}
-		return getQuestions(new NovaView(viewName), session);
-	}
-
 	@Cacheable("lecturequestions")
 	@Override
 	public List<Question> getLectureQuestionsForUsers(final Session session) {
@@ -1412,22 +1380,6 @@ public class CouchDBDao implements IDatabaseDao {
 		return getQuestions(new NovaView(viewName), session);
 	}
 
-	/**
-	 * @deprecated The decision to load data depending on the user should be made by a service class, not this
-	 * database class. Please use getFlashcardsForUsers or getFlashcardsForTeachers as this will enable caching.
-	 */
-	@Deprecated
-	@Override
-	public List<Question> getFlashcards(final User user, final Session session) {
-		String viewName;
-		if (session.isCreator(user)) {
-			viewName = "skill_question/flashcard_by_session";
-		} else {
-			viewName = "skill_question/flashcard_by_session_for_all";
-		}
-		return getQuestions(new NovaView(viewName), session);
-	}
-
 	@Cacheable("flashcardquestions")
 	@Override
 	public List<Question> getFlashcardsForUsers(final Session session) {
@@ -1438,23 +1390,6 @@ public class CouchDBDao implements IDatabaseDao {
 	@Override
 	public List<Question> getFlashcardsForTeachers(final Session session) {
 		String viewName = "skill_question/flashcard_by_session";
-		return getQuestions(new NovaView(viewName), session);
-	}
-
-	/**
-	 * @deprecated The decision to load data depending on the user should be made by a service class, not this
-	 * database class. Please use getPreparationQuestionsForUsers or getPreparationQuestionsForTeachers as this will enable
-	 * caching.
-	 */
-	@Deprecated
-	@Override
-	public List<Question> getPreparationQuestions(final User user, final Session session) {
-		String viewName;
-		if (session.isCreator(user)) {
-			viewName = "skill_question/preparation_question_by_session";
-		} else {
-			viewName = "skill_question/preparation_question_by_session_for_all";
-		}
 		return getQuestions(new NovaView(viewName), session);
 	}
 

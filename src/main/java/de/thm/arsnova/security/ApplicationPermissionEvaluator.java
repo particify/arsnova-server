@@ -91,9 +91,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Object permission
 			) {
 		if (permission instanceof String && (permission.equals("owner") || permission.equals("write"))) {
-			return dao.getSession(targetId.toString()).getCreator().equals(username);
+			return dao.getSessionFromKeyword(targetId.toString()).getCreator().equals(username);
 		} else if (permission instanceof String && permission.equals("read")) {
-			return dao.getSession(targetId.toString()).isActive();
+			return dao.getSessionFromKeyword(targetId.toString()).isActive();
 		}
 		return false;
 	}

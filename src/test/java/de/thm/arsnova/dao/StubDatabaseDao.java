@@ -36,7 +36,6 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
-import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 
@@ -105,19 +104,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 		List<Question> questions = new ArrayList<Question>();
 		questions.add(new Question());
 		stubQuestions.put("12345678", questions);
-	}
-
-	@Override
-	public Session getSession(String keyword) {
-		// Magic keyword for forbidden session
-		if (keyword.equals("99999999"))
-			throw new ForbiddenException();
-
-		Session session = stubSessions.get(keyword);
-		if (session == null)
-			throw new NotFoundException();
-
-		return session;
 	}
 
 	@Override
@@ -388,24 +374,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public void deleteAllQuestionsWithAnswers(Session session) {
 		// TODO Auto-generated method stub
 
-	}
-
-	@Override
-	public List<Question> getLectureQuestions(User user, Session session) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Question> getFlashcards(User user, Session session) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Question> getPreparationQuestions(User user, Session session) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
