@@ -88,7 +88,9 @@ public interface IDatabaseDao {
 
 	Answer getMyAnswer(User me, String questionId, int piRound);
 
-	List<Answer> getAnswers(String questionId, int piRound);
+	List<Answer> getAnswers(Question question, int piRound);
+
+	List<Answer> getAnswers(Question question);
 
 	int getAnswerCount(Question question, int piRound);
 

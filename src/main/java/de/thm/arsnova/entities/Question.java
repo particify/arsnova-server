@@ -32,6 +32,7 @@ public class Question {
 	private boolean noCorrect;
 	// TODO: We currently need both sessionId and sessionKeyword, but sessionKeyword will not be persisted.
 	private String sessionId;
+	// This property is needed because the client does not have the session ID, only the keyword.
 	private String sessionKeyword;
 	private long timestamp;
 	private int number;

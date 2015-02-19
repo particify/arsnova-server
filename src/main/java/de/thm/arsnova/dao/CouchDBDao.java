@@ -771,6 +771,7 @@ public class CouchDBDao implements IDatabaseDao {
 		getDatabase().deleteDocument(d);
 	}
 
+	@CacheEvict("answers")
 	@Override
 	public final void deleteAnswers(final Question question) {
 		try {
@@ -820,7 +821,8 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final List<Answer> getAnswers(final String questionId, final int piRound) {
+	public final List<Answer> getAnswers(final Question question, final int piRound) {
+		final String questionId = question.get_id();
 		final NovaView view = new NovaView("skill_question/count_answers_by_question_and_piround");
 		if (2 == piRound) {
 			view.setStartKey(questionId, "2");
@@ -845,6 +847,12 @@ public class CouchDBDao implements IDatabaseDao {
 			answers.add(a);
 		}
 		return answers;
+	}
+
+	@Cacheable("answers")
+	@Override
+	public final List<Answer> getAnswers(final Question question) {
+		return this.getAnswers(question, question.getPiRound());
 	}
 
 	@Override
@@ -1206,6 +1214,7 @@ public class CouchDBDao implements IDatabaseDao {
 		return this.getInfosForVisitedSessions(sessions, user);
 	}
 
+	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public Answer saveAnswer(final Answer answer, final User user) {
 		final Document a = new Document();
@@ -1251,6 +1260,7 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 	}
 
+	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public Answer updateAnswer(final Answer answer) {
 		try {
@@ -1269,6 +1279,7 @@ public class CouchDBDao implements IDatabaseDao {
 		return null;
 	}
 
+	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public void deleteAnswer(final String answerId) {
 		try {
@@ -1527,7 +1538,8 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
 			@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict("lecturequestions") })
+			@CacheEvict("lecturequestions"),
+			@CacheEvict(value = "answers", allEntries = true)})
 	@Override
 	public void deleteAllLectureQuestionsWithAnswers(final Session session) {
 		final NovaView view = new NovaView("skill_question/lecture_question_by_session");
@@ -1536,7 +1548,8 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
 			@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict("flashcardquestions") })
+			@CacheEvict("flashcardquestions"),
+			@CacheEvict(value = "answers", allEntries = true)})
 	@Override
 	public void deleteAllFlashcardsWithAnswers(final Session session) {
 		final NovaView view = new NovaView("skill_question/flashcard_by_session");
@@ -1545,7 +1558,8 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
 			@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict("preparationquestions") })
+			@CacheEvict("preparationquestions"),
+			@CacheEvict(value = "answers", allEntries = true)})
 	@Override
 	public void deleteAllPreparationQuestionsWithAnswers(final Session session) {
 		final NovaView view = new NovaView("skill_question/preparation_question_by_session");
@@ -1671,18 +1685,21 @@ public class CouchDBDao implements IDatabaseDao {
 		}
 	}
 
+	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public void deleteAllQuestionsAnswers(final Session session) {
 		final List<Question> questions = getQuestions(new NovaView("skill_question/by_session"), session);
 		deleteAllAnswersForQuestions(questions);
 	}
 
+	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public void deleteAllPreparationAnswers(final Session session) {
 		final List<Question> questions = getQuestions(new NovaView("skill_question/preparation_question_by_session"), session);
 		deleteAllAnswersForQuestions(questions);
 	}
 
+	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public void deleteAllLectureAnswers(final Session session) {
 		final List<Question> questions = getQuestions(new NovaView("skill_question/lecture_question_by_session"), session);

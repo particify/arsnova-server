@@ -238,12 +238,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Answer> getAnswers(String questionId, int piRound) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public int getAnswerCount(Question question, int piRound) {
 		// TODO Auto-generated method stub
 		return 0;
@@ -619,6 +613,18 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public List<Question> getPreparationQuestionsForTeachers(Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Answer> getAnswers(Question question, int piRound) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Answer> getAnswers(Question question) {
 		// TODO Auto-generated method stub
 		return null;
 	}

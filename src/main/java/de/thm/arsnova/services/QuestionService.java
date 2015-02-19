@@ -270,7 +270,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 		return "freetext".equals(question.getQuestionType())
 				? getFreetextAnswers(questionId)
-						: databaseDao.getAnswers(questionId, piRound);
+						: databaseDao.getAnswers(question, piRound);
 	}
 
 	@Override
@@ -280,7 +280,11 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		if (question == null) {
 			throw new NotFoundException();
 		}
-		return getAnswers(questionId, question.getPiRound());
+		if ("freetext".equals(question.getQuestionType())) {
+			return getFreetextAnswers(questionId);
+		} else {
+			return databaseDao.getAnswers(question);
+		}
 	}
 
 	@Override
