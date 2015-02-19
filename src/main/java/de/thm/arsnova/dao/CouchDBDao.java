@@ -197,6 +197,7 @@ public class CouchDBDao implements IDatabaseDao {
 		return getInfosForSessions(sessions);
 	}
 
+	@Cacheable("mysessions")
 	@Override
 	public final List<SessionInfo> getMySessionsInfo(final User user) {
 		final List<Session> sessions = this.getMySessions(user);
@@ -422,6 +423,7 @@ public class CouchDBDao implements IDatabaseDao {
 				);
 	}
 
+	@CacheEvict(value = "mysessions", key = "#user")
 	@Override
 	public final Session saveSession(final User user, final Session session) {
 		final Document sessionDocument = new Document();
@@ -1360,7 +1362,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	@CacheEvict(value = "sessions")
+	@Caching(evict = { @CacheEvict("sessions"), @CacheEvict(value = "mysessions", allEntries = true) })
 	public void deleteSession(final Session session) {
 		try {
 			deleteDocument(session.get_id());

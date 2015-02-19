@@ -171,4 +171,32 @@ public class SessionInfo {
 	public void setNumUnredInterposed(int numUnredInterposed) {
 		this.numUnredInterposed = numUnredInterposed;
 	}
+
+	@Override
+	public int hashCode() {
+		// auto generated!
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((keyword == null) ? 0 : keyword.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		// auto generated!
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		SessionInfo other = (SessionInfo) obj;
+		if (keyword == null) {
+			if (other.keyword != null) {
+				return false;
+			}
+		} else if (!keyword.equals(other.keyword)) {
+			return false;
+		}
+		return true;
+	}
 }
