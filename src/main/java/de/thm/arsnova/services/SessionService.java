@@ -25,6 +25,8 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
@@ -41,14 +43,14 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
+import de.thm.arsnova.events.StatusSessionEvent;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.RequestEntityTooLargeException;
-import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
-public class SessionService implements ISessionService {
+public class SessionService implements ISessionService, ApplicationEventPublisherAware {
 
 	public static class SessionNameComparator implements Comparator<Session>, Serializable {
 		private static final long serialVersionUID = 1L;
@@ -93,9 +95,6 @@ public class SessionService implements ISessionService {
 	private IUserService userService;
 
 	@Autowired
-	private ARSnovaSocketIOServer socketIoServer;
-
-	@Autowired
 	private ILearningProgressFactory learningProgressFactory;
 
 	@Autowired(required = false)
@@ -103,6 +102,8 @@ public class SessionService implements ISessionService {
 
 	@Value("${pp.logofilesize_b}")
 	private int uploadFileSizeByte;
+
+	private ApplicationEventPublisher publisher;
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(SessionService.class);
 
@@ -278,7 +279,7 @@ public class SessionService implements ISessionService {
 			throw new ForbiddenException();
 		}
 		session.setActive(lock);
-		socketIoServer.reportSessionStatus(sessionkey, lock);
+		this.publisher.publishEvent(new StatusSessionEvent(this, session));
 		return databaseDao.updateSession(session);
 	}
 
@@ -336,5 +337,10 @@ public class SessionService implements ISessionService {
 			throw new RuntimeException("Error while importing the session.");
 		}
 		return info;
+	}
+
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+		this.publisher = publisher;
 	}
 }

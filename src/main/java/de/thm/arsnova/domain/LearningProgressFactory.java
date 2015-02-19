@@ -26,12 +26,15 @@ import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
 import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
 import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
 import de.thm.arsnova.events.DeleteAnswerEvent;
+import de.thm.arsnova.events.DeleteFeedbackForSessionsEvent;
 import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
 import de.thm.arsnova.events.DeleteQuestionEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
+import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
 import de.thm.arsnova.events.NovaEventVisitor;
+import de.thm.arsnova.events.StatusSessionEvent;
 
 @Component
 public class LearningProgressFactory implements NovaEventVisitor, ILearningProgressFactory {
@@ -81,5 +84,14 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
 	public void visit(DeleteAllLectureAnswersEvent event) {}
+
+	@Override
+	public void visit(NewFeedbackEvent newFeedbackEvent) {}
+
+	@Override
+	public void visit(DeleteFeedbackForSessionsEvent deleteFeedbackEvent) {}
+
+	@Override
+	public void visit(StatusSessionEvent statusSessionEvent) {}
 
 }

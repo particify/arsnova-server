@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.services.UserSessionService;
-import de.thm.arsnova.socket.ARSnovaSocketIOServer;
+import de.thm.arsnova.socket.ARSnovaSocket;
 
 @RestController
 @RequestMapping("/socket")
@@ -48,7 +48,7 @@ public class SocketController extends AbstractController {
 	private UserSessionService userSessionService;
 
 	@Autowired
-	private ARSnovaSocketIOServer server;
+	private ARSnovaSocket server;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SocketController.class);
 

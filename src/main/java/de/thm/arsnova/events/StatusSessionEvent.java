@@ -17,30 +17,19 @@
  */
 package de.thm.arsnova.events;
 
-public interface NovaEventVisitor {
+import de.thm.arsnova.entities.Session;
 
-	void visit(NewInterposedQuestionEvent newInterposedQuestionEvent);
+public class StatusSessionEvent extends SessionEvent {
 
-	void visit(DeleteInterposedQuestionEvent deleteInterposedQuestionEvent);
+	private static final long serialVersionUID = 1L;
 
-	void visit(NewQuestionEvent newQuestionEvent);
+	public StatusSessionEvent(Object source, Session session) {
+		super(source, session);
+	}
 
-	void visit(NewAnswerEvent newAnswerEvent);
-
-	void visit(DeleteAnswerEvent deleteAnswerEvent);
-
-	void visit(DeleteQuestionEvent deleteQuestionEvent);
-
-	void visit(DeleteAllQuestionsAnswersEvent deleteAllAnswersEvent);
-
-	void visit(DeleteAllPreparationAnswersEvent deleteAllPreparationAnswersEvent);
-
-	void visit(DeleteAllLectureAnswersEvent deleteAllLectureAnswersEvent);
-
-	void visit(NewFeedbackEvent newFeedbackEvent);
-
-	void visit(DeleteFeedbackForSessionsEvent deleteFeedbackEvent);
-
-	void visit(StatusSessionEvent statusSessionEvent);
+	@Override
+	public void accept(NovaEventVisitor visitor) {
+		visitor.visit(this);
+	}
 
 }

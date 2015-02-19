@@ -70,7 +70,6 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
-import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
 public class UserService implements IUserService {
@@ -92,9 +91,6 @@ public class UserService implements IUserService {
 
 	@Autowired
 	private IDatabaseDao databaseDao;
-
-	@Autowired
-	private ARSnovaSocketIOServer socketIoServer;
 
 	@Autowired
 	private JavaMailSender mailSender;

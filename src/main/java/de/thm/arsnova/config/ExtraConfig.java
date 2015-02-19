@@ -33,6 +33,7 @@ import org.springframework.core.io.Resource;
 
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.client.ConnectorClientImpl;
+import de.thm.arsnova.socket.ARSnovaSocket;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Configuration
@@ -80,7 +81,7 @@ public class ExtraConfig {
 
 	@Profile("!test")
 	@Bean(name = "socketServer", initMethod = "startServer", destroyMethod = "stopServer")
-	public ARSnovaSocketIOServer socketServer() {
+	public ARSnovaSocket socketServer() {
 		final ARSnovaSocketIOServer socketServer = new ARSnovaSocketIOServer();
 		socketServer.setHostIp(socketIp);
 		socketServer.setPortNumber(socketPort);
@@ -92,7 +93,7 @@ public class ExtraConfig {
 
 	@Profile("test")
 	@Bean(name = "socketServer", initMethod = "startServer", destroyMethod = "stopServer")
-	public ARSnovaSocketIOServer socketTestServer() {
+	public ARSnovaSocket socketTestServer() {
 		final int testSocketPort = 1234;
 		final ARSnovaSocketIOServer socketServer = new ARSnovaSocketIOServer();
 		socketServer.setHostIp(socketIp);

@@ -27,6 +27,8 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -35,17 +37,15 @@ import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.events.DeleteFeedbackForSessionsEvent;
+import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
-public class FeedbackService implements IFeedbackService {
+public class FeedbackService implements IFeedbackService, ApplicationEventPublisherAware {
 
 	private static final int DEFAULT_SCHEDULER_DELAY = 5000;
-
-	@Autowired
-	private ARSnovaSocketIOServer server;
 
 	/**
 	 * minutes, after which the feedback is deleted
@@ -57,6 +57,8 @@ public class FeedbackService implements IFeedbackService {
 	private IDatabaseDao databaseDao;
 
 	private FeedbackStorage feedbackStorage;
+
+	private ApplicationEventPublisher publisher;
 
 	public final void setDatabaseDao(final IDatabaseDao newDatabaseDao) {
 		databaseDao = newDatabaseDao;
@@ -96,11 +98,11 @@ public class FeedbackService implements IFeedbackService {
 		for (Map.Entry<User, Set<Session>> entry : affectedSessionsOfUsers.entrySet()) {
 			final User user = entry.getKey();
 			final Set<Session> arsSessions = entry.getValue();
-			server.reportDeletedFeedback(user, arsSessions);
+			this.publisher.publishEvent(new DeleteFeedbackForSessionsEvent(this, arsSessions, user));
 		}
 		// For each session that has deleted feedback, send the new feedback to all clients
 		for (Session session : deletedFeedbackOfUsersInSession.keySet()) {
-			server.reportUpdatedFeedbackForSession(session);
+			this.publisher.publishEvent(new NewFeedbackEvent(this, session));
 		}
 	}
 
@@ -152,7 +154,8 @@ public class FeedbackService implements IFeedbackService {
 			throw new NotFoundException();
 		}
 		feedbackStorage.saveFeedback(session, value, user);
-		server.reportUpdatedFeedbackForSession(session);
+
+		this.publisher.publishEvent(new NewFeedbackEvent(this, session));
 		return true;
 	}
 
@@ -163,5 +166,10 @@ public class FeedbackService implements IFeedbackService {
 			throw new NotFoundException();
 		}
 		return feedbackStorage.getMyFeedback(session, user);
+	}
+
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+		this.publisher = publisher;
 	}
 }

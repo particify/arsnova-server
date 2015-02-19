@@ -56,7 +56,6 @@ import de.thm.arsnova.events.NewQuestionEvent;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
-import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 @Service
 public class QuestionService implements IQuestionService, ApplicationEventPublisherAware {
@@ -66,9 +65,6 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Autowired
 	private IUserService userService;
-
-	@Autowired
-	private ARSnovaSocketIOServer socketIoServer;
 
 	@Value("${upload.filesize_b}")
 	private int uploadFileSizeByte;

@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
-import org.springframework.context.ApplicationListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.corundumstudio.socketio.AckRequest;
@@ -53,13 +53,15 @@ import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
 import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
 import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
 import de.thm.arsnova.events.DeleteAnswerEvent;
+import de.thm.arsnova.events.DeleteFeedbackForSessionsEvent;
 import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
 import de.thm.arsnova.events.DeleteQuestionEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
+import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
-import de.thm.arsnova.events.NovaEvent;
 import de.thm.arsnova.events.NovaEventVisitor;
+import de.thm.arsnova.events.StatusSessionEvent;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -72,7 +74,7 @@ import de.thm.arsnova.socket.message.Question;
 import de.thm.arsnova.socket.message.Session;
 
 @Component
-public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, NovaEventVisitor {
+public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 
 	@Autowired
 	private IFeedbackService feedbackService;
@@ -253,6 +255,7 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 
 	}
 
+	@Override
 	public int getPortNumber() {
 		return portNumber;
 	}
@@ -288,6 +291,7 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 		this.keystore = keystore;
 	}
 
+	@Override
 	public boolean isUseSSL() {
 		return useSSL;
 	}
@@ -440,6 +444,7 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 		this.reportAudienceQuestionAvailable(event.getSession(), event.getQuestion());
 	}
 
+	@Async
 	@Override
 	public void visit(NewAnswerEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
@@ -458,6 +463,7 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 		}
 	}
 
+	@Async
 	@Override
 	public void visit(DeleteAnswerEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
@@ -498,7 +504,18 @@ public class ARSnovaSocketIOServer implements ApplicationListener<NovaEvent>, No
 	}
 
 	@Override
-	public void onApplicationEvent(NovaEvent event) {
-		event.accept(this);
+	public void visit(NewFeedbackEvent event) {
+		this.reportUpdatedFeedbackForSession(event.getSession());
+	}
+
+	@Override
+	public void visit(DeleteFeedbackForSessionsEvent event) {
+		this.reportDeletedFeedback(event.getUser(), event.getSessions());
+
+	}
+
+	@Override
+	public void visit(StatusSessionEvent event) {
+		this.reportSessionStatus(event.getSession().getKeyword(), event.getSession().isActive());
 	}
 }

@@ -17,30 +17,36 @@
  */
 package de.thm.arsnova.events;
 
-public interface NovaEventVisitor {
+import java.util.Set;
 
-	void visit(NewInterposedQuestionEvent newInterposedQuestionEvent);
+import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.User;
 
-	void visit(DeleteInterposedQuestionEvent deleteInterposedQuestionEvent);
+public class DeleteFeedbackForSessionsEvent extends NovaEvent {
 
-	void visit(NewQuestionEvent newQuestionEvent);
+	private static final long serialVersionUID = 1L;
 
-	void visit(NewAnswerEvent newAnswerEvent);
+	private final Set<Session> sessions;
 
-	void visit(DeleteAnswerEvent deleteAnswerEvent);
+	private final User user;
 
-	void visit(DeleteQuestionEvent deleteQuestionEvent);
+	public DeleteFeedbackForSessionsEvent(Object source, Set<Session> sessions, User user) {
+		super(source);
+		this.sessions = sessions;
+		this.user = user;
+	}
 
-	void visit(DeleteAllQuestionsAnswersEvent deleteAllAnswersEvent);
+	public Set<Session> getSessions() {
+		return sessions;
+	}
 
-	void visit(DeleteAllPreparationAnswersEvent deleteAllPreparationAnswersEvent);
+	public User getUser() {
+		return user;
+	}
 
-	void visit(DeleteAllLectureAnswersEvent deleteAllLectureAnswersEvent);
-
-	void visit(NewFeedbackEvent newFeedbackEvent);
-
-	void visit(DeleteFeedbackForSessionsEvent deleteFeedbackEvent);
-
-	void visit(StatusSessionEvent statusSessionEvent);
+	@Override
+	public void accept(NovaEventVisitor visitor) {
+		visitor.visit(this);
+	}
 
 }
