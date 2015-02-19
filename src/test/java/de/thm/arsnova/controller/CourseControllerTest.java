@@ -70,7 +70,7 @@ public class CourseControllerTest {
 	}
 
 	@Test
-	public final void testShouldIndicateNotImplementedIfInactiveClient() throws Exception {
+	public void testShouldIndicateNotImplementedIfInactiveClient() throws Exception {
 		setAuthenticated(true, "ptsr00");
 
 		mockMvc.perform(get("/mycourses").accept(MediaType.TEXT_PLAIN))
@@ -78,7 +78,7 @@ public class CourseControllerTest {
 	}
 
 	@Test
-	public final void testShouldNotReturnCurrentUsersCoursesIfUnauthorized() throws Exception {
+	public void testShouldNotReturnCurrentUsersCoursesIfUnauthorized() throws Exception {
 		setAuthenticated(false, "nobody");
 
 		mockMvc.perform(get("/mycourses").accept(MediaType.TEXT_PLAIN))

@@ -136,7 +136,7 @@ public class LoginController extends AbstractController {
 	public static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
 
 	@RequestMapping(value = { "/auth/login", "/doLogin" }, method = { RequestMethod.POST, RequestMethod.GET })
-	public final void doLogin(
+	public void doLogin(
 			@RequestParam("type") final String type,
 			@RequestParam(value = "user", required = false) String username,
 			@RequestParam(required = false) final String password,
@@ -217,7 +217,7 @@ public class LoginController extends AbstractController {
 
 	@RequestMapping(value = { "/auth/dialog" }, method = RequestMethod.GET)
 	@ResponseBody
-	public final View dialog(
+	public View dialog(
 			@RequestParam("type") final String type,
 			@RequestParam(value = "successurl", defaultValue = "/") String successUrl,
 			@RequestParam(value = "failureurl", defaultValue = "/") String failureUrl,
@@ -273,13 +273,13 @@ public class LoginController extends AbstractController {
 
 	@RequestMapping(value = { "/auth/", "/whoami" }, method = RequestMethod.GET)
 	@ResponseBody
-	public final User whoami() {
+	public User whoami() {
 		userSessionService.setUser(userService.getCurrentUser());
 		return userService.getCurrentUser();
 	}
 
 	@RequestMapping(value = { "/auth/logout", "/logout" }, method = { RequestMethod.POST, RequestMethod.GET })
-	public final View doLogout(final HttpServletRequest request) {
+	public View doLogout(final HttpServletRequest request) {
 		final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		userService.removeUserFromMaps(userService.getCurrentUser());
 		request.getSession().invalidate();
@@ -295,7 +295,7 @@ public class LoginController extends AbstractController {
 
 	@RequestMapping(value = { "/auth/services" }, method = RequestMethod.GET)
 	@ResponseBody
-	public final List<ServiceDescription> getServices(final HttpServletRequest request) {
+	public List<ServiceDescription> getServices(final HttpServletRequest request) {
 		List<ServiceDescription> services = new ArrayList<ServiceDescription>();
 
 		if ("".equals(apiPath)) {
@@ -401,7 +401,7 @@ public class LoginController extends AbstractController {
 
 	@RequestMapping(value = { "/test/me" }, method = RequestMethod.GET)
 	@ResponseBody
-	public final User me() {
+	public User me() {
 		final User me = userSessionService.getUser();
 		if (me == null) {
 			throw new UnauthorizedException();
@@ -411,7 +411,7 @@ public class LoginController extends AbstractController {
 
 	@RequestMapping(value = { "/test/mysession" }, method = RequestMethod.GET)
 	@ResponseBody
-	public final Session mysession() {
+	public Session mysession() {
 		final Session mysession = userSessionService.getSession();
 		if (mysession == null) {
 			throw new UnauthorizedException();
@@ -421,7 +421,7 @@ public class LoginController extends AbstractController {
 
 	@RequestMapping(value = { "/test/myrole" }, method = RequestMethod.GET)
 	@ResponseBody
-	public final UserSessionService.Role myrole() {
+	public UserSessionService.Role myrole() {
 		final UserSessionService.Role myrole = userSessionService.getRole();
 		if (myrole == null) {
 			throw new UnauthorizedException();

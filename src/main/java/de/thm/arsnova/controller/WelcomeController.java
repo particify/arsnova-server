@@ -36,13 +36,13 @@ public class WelcomeController extends AbstractController {
 	private String mobileContextPath;
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public final View home(final HttpServletRequest request) {
+	public View home(final HttpServletRequest request) {
 		return new RedirectView(mobileContextPath + "/", false);
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
-	public final HashMap<String, Object> jsonHome(final HttpServletRequest request) {
+	public HashMap<String, Object> jsonHome(final HttpServletRequest request) {
 		return new HashMap<String, Object>();
 	}
 

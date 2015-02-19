@@ -32,7 +32,7 @@ import org.springframework.stereotype.Service;
 public class CasUserDetailsService extends AbstractCasAssertionUserDetailsService {
 
 	@Override
-	protected final UserDetails loadUserDetails(final Assertion assertion) {
+	protected UserDetails loadUserDetails(final Assertion assertion) {
 		final List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 

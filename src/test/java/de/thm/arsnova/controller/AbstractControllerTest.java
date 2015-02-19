@@ -31,7 +31,7 @@ public abstract class AbstractControllerTest {
 	}
 
 	@After
-	public final void cleanup() {
+	public void cleanup() {
 		SecurityContextHolder.clearContext();
 		userService.setUserAuthenticated(false);
 	}

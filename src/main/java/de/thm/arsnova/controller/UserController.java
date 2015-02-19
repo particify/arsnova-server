@@ -66,7 +66,7 @@ public class UserController extends AbstractController {
 			.getLogger(UserController.class);
 
 	@RequestMapping(value = { "/register" }, method = RequestMethod.POST)
-	public final void register(@RequestParam final String username,
+	public void register(@RequestParam final String username,
 			@RequestParam final String password,
 			final HttpServletRequest request, final HttpServletResponse response) {
 		if (null != userService.createDbUser(username, password)) {
@@ -79,7 +79,7 @@ public class UserController extends AbstractController {
 
 	@RequestMapping(value = { "/{username}/activate" }, method = { RequestMethod.POST,
 			RequestMethod.GET })
-	public final void activate(
+	public void activate(
 			@PathVariable final String username,
 			@RequestParam final String key, final HttpServletRequest request,
 			final HttpServletResponse response) {
@@ -95,7 +95,7 @@ public class UserController extends AbstractController {
 	}
 
 	@RequestMapping(value = { "/{username}" }, method = RequestMethod.DELETE)
-	public final void activate(
+	public void activate(
 			@PathVariable final String username,
 			final HttpServletRequest request,
 			final HttpServletResponse response) {
@@ -105,7 +105,7 @@ public class UserController extends AbstractController {
 	}
 
 	@RequestMapping(value = { "/{username}/resetpassword" }, method = RequestMethod.POST)
-	public final void resetPassword(
+	public void resetPassword(
 			@PathVariable final String username,
 			@RequestParam(required = false) final String key,
 			@RequestParam(required = false) final String password,

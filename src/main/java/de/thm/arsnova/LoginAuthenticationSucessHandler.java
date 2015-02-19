@@ -33,7 +33,7 @@ public class LoginAuthenticationSucessHandler extends
 	public static final Logger LOGGER = LoggerFactory.getLogger(LoginAuthenticationSucessHandler.class);
 
 	@Override
-	protected final String determineTargetUrl(
+	protected String determineTargetUrl(
 			final HttpServletRequest request,
 			final HttpServletResponse response
 	) {
@@ -46,7 +46,7 @@ public class LoginAuthenticationSucessHandler extends
 		return redirect;
 	}
 
-	public final void setTargetUrl(final String url) {
+	public void setTargetUrl(final String url) {
 		targetUrl = url;
 	}
 }

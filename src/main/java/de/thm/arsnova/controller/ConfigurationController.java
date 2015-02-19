@@ -147,7 +147,7 @@ public class ConfigurationController extends AbstractController {
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
-	public final HashMap<String, Object> getConfiguration(HttpServletRequest request) {
+	public HashMap<String, Object> getConfiguration(HttpServletRequest request) {
 		HashMap<String, Object> config = new HashMap<String, Object>();
 		HashMap<String, Boolean> features = new HashMap<String, Boolean>();
 		HashMap<String, String> publicPool = new HashMap<String, String>();
@@ -215,7 +215,7 @@ public class ConfigurationController extends AbstractController {
 		features.put("gridSquare", "true".equals(gridSquareEnabled));
 		features.put("sessionImportExport", "true".equals(sessionImportExportEnabled));
 		features.put("publicPool", "true".equals(publicPoolEnabled));
-		
+
 		// add public pool configuration on demand
 		if (features.get("publicPool")) {
 			config.put("publicPool", publicPool);

@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IQuestionService;
@@ -53,7 +54,7 @@ public class LecturerQuestionController extends AbstractController {
 	private IQuestionService questionService;
 
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
-	public final Question getQuestion(@PathVariable final String questionId) {
+	public Question getQuestion(@PathVariable final String questionId) {
 		final Question question = questionService.getQuestion(questionId);
 		if (question != null) {
 			return question;
@@ -64,7 +65,7 @@ public class LecturerQuestionController extends AbstractController {
 
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public final Question postQuestion(@RequestBody final Question question) {
+	public Question postQuestion(@RequestBody final Question question) {
 		if (questionService.saveQuestion(question) != null) {
 			return question;
 		}
@@ -72,7 +73,7 @@ public class LecturerQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.PUT)
-	public final Question updateQuestion(
+	public Question updateQuestion(
 			@PathVariable final String questionId,
 			@RequestBody final Question question
 			) {
@@ -84,7 +85,7 @@ public class LecturerQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{questionId}/publish", method = RequestMethod.POST)
-	public final void publishQuestion(
+	public void publishQuestion(
 			@PathVariable final String questionId,
 			@RequestParam(required = false) final Boolean publish,
 			@RequestBody final Question question
@@ -96,7 +97,7 @@ public class LecturerQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/publish", method = RequestMethod.POST)
-	public final void publishAllQuestions(
+	public void publishAllQuestions(
 			@RequestParam final String sessionkey,
 			@RequestParam(required = false) final Boolean publish,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false) final boolean lectureQuestionsOnly,
@@ -121,7 +122,7 @@ public class LecturerQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{questionId}/publishstatistics", method = RequestMethod.POST)
-	public final void publishStatistics(
+	public void publishStatistics(
 			@PathVariable final String questionId,
 			@RequestParam(required = false) final Boolean showStatistics,
 			@RequestBody final Question question
@@ -133,7 +134,7 @@ public class LecturerQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{questionId}/publishcorrectanswer", method = RequestMethod.POST)
-	public final void publishCorrectAnswer(
+	public void publishCorrectAnswer(
 			@PathVariable final String questionId,
 			@RequestParam(required = false) final Boolean showCorrectAnswer,
 			@RequestBody final Question question
@@ -145,7 +146,7 @@ public class LecturerQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public final List<Question> getSkillQuestions(
+	public List<Question> getSkillQuestions(
 			@RequestParam final String sessionkey,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
 			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
@@ -170,7 +171,7 @@ public class LecturerQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = { "/" }, method = RequestMethod.DELETE)
-	public final void deleteSkillQuestions(
+	public void deleteSkillQuestions(
 			@RequestParam final String sessionkey,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
 			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
@@ -190,7 +191,7 @@ public class LecturerQuestionController extends AbstractController {
 
 	@DeprecatedApi
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
-	public final int getSkillQuestionCount(
+	public int getSkillQuestionCount(
 			@RequestParam final String sessionkey,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
 			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
@@ -208,7 +209,7 @@ public class LecturerQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)
-	public final void deleteAnswersAndQuestion(
+	public void deleteAnswersAndQuestion(
 			@PathVariable final String questionId
 			) {
 		questionService.deleteQuestion(questionId);
@@ -216,7 +217,7 @@ public class LecturerQuestionController extends AbstractController {
 
 	@DeprecatedApi
 	@RequestMapping(value = "/unanswered", method = RequestMethod.GET)
-	public final List<String> getUnAnsweredSkillQuestionIds(
+	public List<String> getUnAnsweredSkillQuestionIds(
 			@RequestParam final String sessionkey,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly
@@ -253,7 +254,7 @@ public class LecturerQuestionController extends AbstractController {
 	 */
 	@DeprecatedApi
 	@RequestMapping(value = "/{questionId}/myanswer", method = RequestMethod.GET)
-	public final Answer getMyAnswer(
+	public Answer getMyAnswer(
 			@PathVariable final String questionId,
 			final HttpServletResponse response
 			) {
@@ -284,7 +285,7 @@ public class LecturerQuestionController extends AbstractController {
 	 *             if not logged in
 	 */
 	@RequestMapping(value = "/{questionId}/answer/", method = RequestMethod.GET)
-	public final List<Answer> getAnswers(
+	public List<Answer> getAnswers(
 			@PathVariable final String questionId,
 			@RequestParam(value = "piround", required = false) final Integer piRound,
 			final HttpServletResponse response
@@ -307,7 +308,7 @@ public class LecturerQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{questionId}/answer/", method = RequestMethod.POST)
-	public final Answer saveAnswer(
+	public Answer saveAnswer(
 			@PathVariable final String questionId,
 			@RequestBody final de.thm.arsnova.entities.transport.Answer answer,
 			final HttpServletResponse response
@@ -316,7 +317,7 @@ public class LecturerQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{questionId}/answer/{answerId}", method = RequestMethod.PUT)
-	public final Answer updateAnswer(
+	public Answer updateAnswer(
 			@PathVariable final String questionId,
 			@PathVariable final String answerId,
 			@RequestBody final Answer answer,
@@ -326,7 +327,7 @@ public class LecturerQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{questionId}/answer/{answerId}", method = RequestMethod.DELETE)
-	public final void deleteAnswer(
+	public void deleteAnswer(
 			@PathVariable final String questionId,
 			@PathVariable final String answerId,
 			final HttpServletResponse response
@@ -335,7 +336,7 @@ public class LecturerQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{questionId}/answer/", method = RequestMethod.DELETE)
-	public final void deleteAnswers(
+	public void deleteAnswers(
 			@PathVariable final String questionId,
 			final HttpServletResponse response
 			) {
@@ -343,7 +344,7 @@ public class LecturerQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/answers", method = RequestMethod.DELETE)
-	public final void deleteAllQuestionsAnswers(
+	public void deleteAllQuestionsAnswers(
 			@RequestParam final String sessionkey,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly,
@@ -373,12 +374,12 @@ public class LecturerQuestionController extends AbstractController {
 	 */
 	@DeprecatedApi
 	@RequestMapping(value = "/{questionId}/answercount", method = RequestMethod.GET)
-	public final int getAnswerCount(@PathVariable final String questionId) {
+	public int getAnswerCount(@PathVariable final String questionId) {
 		return questionService.getAnswerCount(questionId);
 	}
 
 	@RequestMapping(value = "/{questionId}/answerandabstentioncount", method = RequestMethod.GET)
-	public final List<Integer> getAnswerAndAbstentionCount(@PathVariable final String questionId) {
+	public List<Integer> getAnswerAndAbstentionCount(@PathVariable final String questionId) {
 		List<Integer> list = Arrays.asList(
 			questionService.getAnswerCount(questionId),
 			questionService.getAbstentionAnswerCount(questionId)
@@ -388,19 +389,19 @@ public class LecturerQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{questionId}/freetextanswer/", method = RequestMethod.GET)
-	public final List<Answer> getFreetextAnswers(@PathVariable final String questionId) {
+	public List<Answer> getFreetextAnswers(@PathVariable final String questionId) {
 		return questionService.getFreetextAnswers(questionId);
 	}
 
 	@DeprecatedApi
 	@RequestMapping(value = "/myanswers", method = RequestMethod.GET)
-	public final List<Answer> getMyAnswers(@RequestParam final String sessionkey) {
+	public List<Answer> getMyAnswers(@RequestParam final String sessionkey) {
 		return questionService.getMyAnswers(sessionkey);
 	}
 
 	@DeprecatedApi
 	@RequestMapping(value = "/answercount", method = RequestMethod.GET)
-	public final int getTotalAnswerCount(
+	public int getTotalAnswerCount(
 			@RequestParam final String sessionkey,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly

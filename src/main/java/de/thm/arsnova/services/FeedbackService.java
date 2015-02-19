@@ -60,7 +60,7 @@ public class FeedbackService implements IFeedbackService, ApplicationEventPublis
 
 	private ApplicationEventPublisher publisher;
 
-	public final void setDatabaseDao(final IDatabaseDao newDatabaseDao) {
+	public void setDatabaseDao(final IDatabaseDao newDatabaseDao) {
 		databaseDao = newDatabaseDao;
 	}
 
@@ -71,7 +71,7 @@ public class FeedbackService implements IFeedbackService, ApplicationEventPublis
 
 	@Override
 	@Scheduled(fixedDelay = DEFAULT_SCHEDULER_DELAY)
-	public final void cleanFeedbackVotes() {
+	public void cleanFeedbackVotes() {
 		Map<Session, List<User>> deletedFeedbackOfUsersInSession = feedbackStorage.cleanFeedbackVotes(cleanupFeedbackDelay);
 		/*
 		 * mapping (Session -> Users) is not suitable for web sockets, because we want to sent all affected
@@ -107,7 +107,7 @@ public class FeedbackService implements IFeedbackService, ApplicationEventPublis
 	}
 
 	@Override
-	public final Feedback getFeedback(final String keyword) {
+	public Feedback getFeedback(final String keyword) {
 		final Session session = databaseDao.getSessionFromKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();
@@ -116,7 +116,7 @@ public class FeedbackService implements IFeedbackService, ApplicationEventPublis
 	}
 
 	@Override
-	public final int getFeedbackCount(final String keyword) {
+	public int getFeedbackCount(final String keyword) {
 		final Feedback feedback = this.getFeedback(keyword);
 		final List<Integer> values = feedback.getValues();
 		return values.get(Feedback.FEEDBACK_FASTER) + values.get(Feedback.FEEDBACK_OK)
@@ -124,7 +124,7 @@ public class FeedbackService implements IFeedbackService, ApplicationEventPublis
 	}
 
 	@Override
-	public final double getAverageFeedback(final String sessionkey) {
+	public double getAverageFeedback(final String sessionkey) {
 		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		if (session == null) {
 			throw new NotFoundException();
@@ -143,12 +143,12 @@ public class FeedbackService implements IFeedbackService, ApplicationEventPublis
 	}
 
 	@Override
-	public final long getAverageFeedbackRounded(final String sessionkey) {
+	public long getAverageFeedbackRounded(final String sessionkey) {
 		return Math.round(getAverageFeedback(sessionkey));
 	}
 
 	@Override
-	public final boolean saveFeedback(final String keyword, final int value, final User user) {
+	public boolean saveFeedback(final String keyword, final int value, final User user) {
 		final Session session = databaseDao.getSessionFromKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();
@@ -160,7 +160,7 @@ public class FeedbackService implements IFeedbackService, ApplicationEventPublis
 	}
 
 	@Override
-	public final Integer getMyFeedback(final String keyword, final User user) {
+	public Integer getMyFeedback(final String keyword, final User user) {
 		final Session session = databaseDao.getSessionFromKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();

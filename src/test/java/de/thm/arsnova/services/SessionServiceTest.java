@@ -84,12 +84,12 @@ public class SessionServiceTest {
 	}
 
 	@Before
-	public final void startup() {
+	public void startup() {
 		SecurityContextHolder.clearContext();
 	}
 
 	@After
-	public final void cleanup() {
+	public void cleanup() {
 		databaseDao.cleanupTestData();
 		SecurityContextHolder.clearContext();
 		userService.setUserAuthenticated(false);

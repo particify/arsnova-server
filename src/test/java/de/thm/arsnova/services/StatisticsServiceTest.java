@@ -36,7 +36,7 @@ public class StatisticsServiceTest {
 	private IUserService userService;
 
 	@Before
-	public final void startup() {
+	public void startup() {
 		MockitoAnnotations.initMocks(this);
 		when(userService.loggedInUsers()).thenReturn(42);
 		when(databaseDao.countQuestions()).thenReturn(123);
@@ -46,11 +46,11 @@ public class StatisticsServiceTest {
 	}
 
 	@After
-	public final void cleanup() {
+	public void cleanup() {
 	}
 
 	@Test
-	public final void testShouldReturnEqualStatistics() {
+	public void testShouldReturnEqualStatistics() {
 		final Statistics actual = statisticsService.getStatistics();
 
 		final Statistics expected = new Statistics();

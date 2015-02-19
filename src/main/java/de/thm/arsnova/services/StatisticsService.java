@@ -37,7 +37,7 @@ public class StatisticsService implements IStatisticsService {
 	private SessionRegistry sessionRegistry;
 
 	@Override
-	public final Statistics getStatistics() {
+	public Statistics getStatistics() {
 		final Statistics statistics = new Statistics();
 		statistics.setOpenSessions(databaseDao.countOpenSessions());
 		statistics.setClosedSessions(databaseDao.countClosedSessions());

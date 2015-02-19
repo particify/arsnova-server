@@ -44,14 +44,14 @@ public class StatisticsControllerTest {
 	}
 
 	@Test
-	public final void testShouldGetCurrentOnlineUsers() throws Exception {
+	public void testShouldGetCurrentOnlineUsers() throws Exception {
 		mockMvc.perform(get("/statistics/activeusercount").accept(MediaType.TEXT_PLAIN))
 		.andExpect(status().isOk())
 		.andExpect(content().contentType("text/plain"));
 	}
 
 	@Test
-	public final void testShouldSendXDeprecatedApiForGetCurrentOnlineUsers() throws Exception {
+	public void testShouldSendXDeprecatedApiForGetCurrentOnlineUsers() throws Exception {
 		mockMvc.perform(get("/statistics/activeusercount").accept(MediaType.TEXT_PLAIN))
 		.andExpect(status().isOk())
 		.andExpect(content().contentType("text/plain"))
@@ -59,7 +59,7 @@ public class StatisticsControllerTest {
 	}
 
 	@Test
-	public final void testShouldGetSessionCount() throws Exception {
+	public void testShouldGetSessionCount() throws Exception {
 		mockMvc.perform(get("/statistics/sessioncount").accept(MediaType.TEXT_PLAIN))
 		.andExpect(status().isOk())
 		.andExpect(content().contentType("text/plain"))
@@ -67,7 +67,7 @@ public class StatisticsControllerTest {
 	}
 
 	@Test
-	public final void testShouldSendXDeprecatedApiForGetSessionCount() throws Exception {
+	public void testShouldSendXDeprecatedApiForGetSessionCount() throws Exception {
 		mockMvc.perform(get("/statistics/sessioncount").accept(MediaType.TEXT_PLAIN))
 		.andExpect(status().isOk())
 		.andExpect(content().contentType("text/plain"))
@@ -75,7 +75,7 @@ public class StatisticsControllerTest {
 	}
 
 	@Test
-	public final void testShouldGetStatistics() throws Exception {
+	public void testShouldGetStatistics() throws Exception {
 		mockMvc.perform(get("/statistics").accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isOk())
 		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -87,7 +87,7 @@ public class StatisticsControllerTest {
 	}
 
 	@Test
-	public final void testShouldGetCacheControlHeaderForStatistics() throws Exception {
+	public void testShouldGetCacheControlHeaderForStatistics() throws Exception {
 		mockMvc.perform(get("/statistics").accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isOk())
 		.andExpect(header().string("cache-control", "public, max-age=60"));

@@ -64,13 +64,13 @@ public class SessionControllerTest {
 	}
 
 	@Before
-	public final void startup() {
+	public void startup() {
 		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 		SecurityContextHolder.clearContext();
 	}
 
 	@After
-	public final void cleanup() {
+	public void cleanup() {
 		SecurityContextHolder.clearContext();
 		userService.setUserAuthenticated(false);
 	}

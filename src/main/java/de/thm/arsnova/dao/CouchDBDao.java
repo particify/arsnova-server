@@ -84,26 +84,26 @@ public class CouchDBDao implements IDatabaseDao {
 	private String databaseName;
 	private Database database;
 
-	private Queue<AbstractMap.SimpleEntry<Document, Answer>> answerQueue = new ConcurrentLinkedQueue<AbstractMap.SimpleEntry<Document, Answer>>();
+	private final Queue<AbstractMap.SimpleEntry<Document, Answer>> answerQueue = new ConcurrentLinkedQueue<AbstractMap.SimpleEntry<Document, Answer>>();
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(CouchDBDao.class);
 
 	@Value("${couchdb.host}")
-	public final void setDatabaseHost(final String newDatabaseHost) {
+	public void setDatabaseHost(final String newDatabaseHost) {
 		databaseHost = newDatabaseHost;
 	}
 
 	@Value("${couchdb.port}")
-	public final void setDatabasePort(final String newDatabasePort) {
+	public void setDatabasePort(final String newDatabasePort) {
 		databasePort = Integer.parseInt(newDatabasePort);
 	}
 
 	@Value("${couchdb.name}")
-	public final void setDatabaseName(final String newDatabaseName) {
+	public void setDatabaseName(final String newDatabaseName) {
 		databaseName = newDatabaseName;
 	}
 
-	public final void setSessionService(final ISessionService service) {
+	public void setSessionService(final ISessionService service) {
 		sessionService = service;
 	}
 
@@ -113,7 +113,7 @@ public class CouchDBDao implements IDatabaseDao {
 	 */
 	@Deprecated
 	@Override
-	public final Session getSession(final String keyword) {
+	public Session getSession(final String keyword) {
 		final Session result = getSessionFromKeyword(keyword);
 		if (result != null) {
 			return result;
@@ -123,7 +123,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final List<Session> getMySessions(final User user) {
+	public List<Session> getMySessions(final User user) {
 		final NovaView view = new NovaView("session/by_creator");
 		view.setStartKeyArray(user.getUsername());
 		view.setEndKeyArray(user.getUsername(), "{}");
@@ -145,7 +145,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final List<Session> getPublicPoolSessions() {
+	public List<Session> getPublicPoolSessions() {
 		final NovaView view = new NovaView("session/public_pool_by_subject");
 
 		final ViewResults sessions = getDatabase().view(view);
@@ -164,13 +164,13 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final List<SessionInfo> getPublicPoolSessionsInfo() {
+	public List<SessionInfo> getPublicPoolSessionsInfo() {
 		final List<Session> sessions = this.getPublicPoolSessions();
 		return getInfosForSessions(sessions);
 	}
 
 	@Override
-	public final List<Session> getMyPublicPoolSessions(final User user) {
+	public List<Session> getMyPublicPoolSessions(final User user) {
 		final NovaView view = new NovaView("session/public_pool_by_creator");
 		view.setStartKeyArray(user.getUsername());
 		view.setEndKeyArray(user.getUsername(), "{}");
@@ -192,7 +192,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final List<SessionInfo> getMyPublicPoolSessionsInfo(final User user) {
+	public List<SessionInfo> getMyPublicPoolSessionsInfo(final User user) {
 		final List<Session> sessions = this.getMyPublicPoolSessions(user);
 		if (sessions.isEmpty()) {
 			return new ArrayList<SessionInfo>();
@@ -201,7 +201,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final List<SessionInfo> getMySessionsInfo(final User user) {
+	public List<SessionInfo> getMySessionsInfo(final User user) {
 		final List<Session> sessions = this.getMySessions(user);
 		if (sessions.isEmpty()) {
 			return new ArrayList<SessionInfo>();
@@ -366,7 +366,7 @@ public class CouchDBDao implements IDatabaseDao {
 	 */
 	@Deprecated
 	@Override
-	public final List<Question> getSkillQuestions(final User user, final Session session) {
+	public List<Question> getSkillQuestions(final User user, final Session session) {
 		String viewName;
 		if (session.getCreator().equals(user.getUsername())) {
 			viewName = "skill_question/by_session_sorted_by_subject_and_text";
@@ -378,26 +378,26 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Cacheable("skillquestions")
 	@Override
-	public final List<Question> getSkillQuestionsForUsers(final Session session) {
+	public List<Question> getSkillQuestionsForUsers(final Session session) {
 		String viewName = "skill_question/by_session_for_all_full";
 		return getQuestions(new NovaView(viewName), session);
 	}
 
 	@Cacheable("skillquestions")
 	@Override
-	public final List<Question> getSkillQuestionsForTeachers(final Session session) {
+	public List<Question> getSkillQuestionsForTeachers(final Session session) {
 		String viewName = "skill_question/by_session_sorted_by_subject_and_text";
 		return getQuestions(new NovaView(viewName), session);
 	}
 
 	@Override
-	public final int getSkillQuestionCount(final Session session) {
+	public int getSkillQuestionCount(final Session session) {
 		return getQuestionCount(new NovaView("skill_question/count_by_session"), session);
 	}
 
 	@Override
 	@Cacheable("sessions")
-	public final Session getSessionFromKeyword(final String keyword) {
+	public Session getSessionFromKeyword(final String keyword) {
 		final NovaView view = new NovaView("session/by_keyword");
 		view.setKey(keyword);
 		final ViewResults results = getDatabase().view(view);
@@ -413,7 +413,7 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	@Cacheable("sessions")
-	public final Session getSessionFromId(final String sessionId) {
+	public Session getSessionFromId(final String sessionId) {
 		final NovaView view = new NovaView("session/by_id");
 		view.setKey(sessionId);
 
@@ -429,7 +429,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final Session saveSession(final User user, final Session session) {
+	public Session saveSession(final User user, final Session session) {
 		final Document sessionDocument = new Document();
 		sessionDocument.put("type", "session");
 		sessionDocument.put("name", session.getName());
@@ -462,7 +462,7 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public final boolean sessionKeyAvailable(final String keyword) {
+	public boolean sessionKeyAvailable(final String keyword) {
 		final View view = new View("session/by_keyword");
 		final ViewResults results = getDatabase().view(view);
 
@@ -500,7 +500,7 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@CachePut(value = "questions", key="#question")
 	@Override
-	public final Question saveQuestion(final Session session, final Question question) {
+	public Question saveQuestion(final Session session, final Question question) {
 		final Document q = toQuestionDocument(session, question);
 		try {
 			database.saveDocument(q);
@@ -558,7 +558,7 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@CachePut(value = "questions")
 	@Override
-	public final Question updateQuestion(final Question question) {
+	public Question updateQuestion(final Question question) {
 		try {
 			final Document q = database.getDocument(question.get_id());
 			q.put("subject", question.getSubject());
@@ -606,7 +606,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final InterposedQuestion saveQuestion(final Session session, final InterposedQuestion question, User user) {
+	public InterposedQuestion saveQuestion(final Session session, final InterposedQuestion question, User user) {
 		final Document q = new Document();
 		q.put("type", "interposed_question");
 		q.put("sessionId", session.get_id());
@@ -634,7 +634,7 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Cacheable("questions")
 	@Override
-	public final Question getQuestion(final String id) {
+	public Question getQuestion(final String id) {
 		try {
 			final Document q = getDatabase().getDocument(id);
 			final Question question = (Question) JSONObject.toBean(q.getJSONObject(), Question.class);
@@ -651,7 +651,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final LoggedIn registerAsOnlineUser(final User user, final Session session) {
+	public LoggedIn registerAsOnlineUser(final User user, final Session session) {
 		try {
 			final NovaView view = new NovaView("logged_in/all");
 			view.setKey(user.getUsername());
@@ -707,7 +707,7 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Override
 	@CachePut(value = "sessions")
-	public final Session updateSessionOwnerActivity(final Session session) {
+	public Session updateSessionOwnerActivity(final Session session) {
 		try {
 			/* Do not clutter CouchDB. Only update once every 3 hours. */
 			if (session.getLastOwnerActivity() > System.currentTimeMillis() - 3 * 3600000) {
@@ -725,7 +725,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final List<String> getQuestionIds(final Session session, final User user) {
+	public List<String> getQuestionIds(final Session session, final User user) {
 		NovaView view = new NovaView("skill_question/by_session_only_id_for_all");
 		view.setKey(session.get_id());
 		return collectQuestionIds(view);
@@ -737,7 +737,7 @@ public class CouchDBDao implements IDatabaseDao {
 			@CacheEvict(value = "preparationquestions", allEntries = true),
 			@CacheEvict(value = "flashcardquestions", allEntries = true) })
 	@Override
-	public final void deleteQuestionWithAnswers(final Question question) {
+	public void deleteQuestionWithAnswers(final Question question) {
 		try {
 			deleteAnswers(question);
 			deleteDocument(question.get_id());
@@ -752,7 +752,7 @@ public class CouchDBDao implements IDatabaseDao {
 			@CacheEvict(value = "preparationquestions", allEntries = true),
 			@CacheEvict(value = "flashcardquestions", allEntries = true) })
 	@Override
-	public final void deleteAllQuestionsWithAnswers(final Session session) {
+	public void deleteAllQuestionsWithAnswers(final Session session) {
 		final NovaView view = new NovaView("skill_question/by_session");
 		deleteAllQuestionDocumentsWithAnswers(session, view);
 	}
@@ -779,7 +779,7 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@CacheEvict("answers")
 	@Override
-	public final void deleteAnswers(final Question question) {
+	public void deleteAnswers(final Question question) {
 		try {
 			final NovaView view = new NovaView("answer/cleanup");
 			view.setKey(question.get_id());
@@ -799,14 +799,14 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final List<String> getUnAnsweredQuestionIds(final Session session, final User user) {
+	public List<String> getUnAnsweredQuestionIds(final Session session, final User user) {
 		final NovaView view = new NovaView("answer/by_user");
 		view.setKey(user.getUsername(), session.get_id());
 		return collectUnansweredQuestionIds(getQuestionIds(session, user), view);
 	}
 
 	@Override
-	public final Answer getMyAnswer(final User me, final String questionId, final int piRound) {
+	public Answer getMyAnswer(final User me, final String questionId, final int piRound) {
 
 		final NovaView view = new NovaView("answer/by_question_and_user_and_piround");
 		if (2 == piRound) {
@@ -827,7 +827,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final List<Answer> getAnswers(final Question question, final int piRound) {
+	public List<Answer> getAnswers(final Question question, final int piRound) {
 		final String questionId = question.get_id();
 		final NovaView view = new NovaView("skill_question/count_answers_by_question_and_piround");
 		if (2 == piRound) {
@@ -857,7 +857,7 @@ public class CouchDBDao implements IDatabaseDao {
 
 	@Cacheable("answers")
 	@Override
-	public final List<Answer> getAnswers(final Question question) {
+	public List<Answer> getAnswers(final Question question) {
 		return this.getAnswers(question, question.getPiRound());
 	}
 
@@ -874,7 +874,7 @@ public class CouchDBDao implements IDatabaseDao {
 	}
 
 	@Override
-	public final int getAnswerCount(final Question question, final int piRound) {
+	public int getAnswerCount(final Question question, final int piRound) {
 		final NovaView view = new NovaView("skill_question/count_total_answers_by_question_and_piround");
 		view.setGroup(true);
 		view.setStartKey(question.get_id(), String.valueOf(piRound));

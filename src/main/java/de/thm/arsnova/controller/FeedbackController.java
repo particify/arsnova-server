@@ -48,13 +48,13 @@ public class FeedbackController extends AbstractController {
 
 	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.GET)
-	public final Feedback getFeedback(@PathVariable final String sessionkey) {
+	public Feedback getFeedback(@PathVariable final String sessionkey) {
 		return feedbackService.getFeedback(sessionkey);
 	}
 
 	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionkey}/myfeedback", method = RequestMethod.GET)
-	public final Integer getMyFeedback(@PathVariable final String sessionkey) {
+	public Integer getMyFeedback(@PathVariable final String sessionkey) {
 		Integer value = feedbackService.getMyFeedback(sessionkey, userService.getCurrentUser());
 		if (value != null && value >= Feedback.MIN_FEEDBACK_TYPE && value <= Feedback.MAX_FEEDBACK_TYPE) {
 			return value;
@@ -64,26 +64,26 @@ public class FeedbackController extends AbstractController {
 
 	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionkey}/feedbackcount", method = RequestMethod.GET)
-	public final int getFeedbackCount(@PathVariable final String sessionkey) {
+	public int getFeedbackCount(@PathVariable final String sessionkey) {
 		return feedbackService.getFeedbackCount(sessionkey);
 	}
 
 	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionkey}/roundedaveragefeedback", method = RequestMethod.GET)
-	public final long getAverageFeedbackRounded(@PathVariable final String sessionkey) {
+	public long getAverageFeedbackRounded(@PathVariable final String sessionkey) {
 		return feedbackService.getAverageFeedbackRounded(sessionkey);
 	}
 
 	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionkey}/averagefeedback", method = RequestMethod.GET)
-	public final double getAverageFeedback(@PathVariable final String sessionkey) {
+	public double getAverageFeedback(@PathVariable final String sessionkey) {
 		return feedbackService.getAverageFeedback(sessionkey);
 	}
 
 	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public final Feedback postFeedback(
+	public Feedback postFeedback(
 			@PathVariable final String sessionkey,
 			@RequestBody final int value
 			) {

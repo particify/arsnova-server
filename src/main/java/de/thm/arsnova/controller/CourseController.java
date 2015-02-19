@@ -51,7 +51,7 @@ public class CourseController extends AbstractController {
 	private IUserService userService;
 
 	@RequestMapping(value = "/mycourses", method = RequestMethod.GET)
-	public final List<Course> myCourses(
+	public List<Course> myCourses(
 			@RequestParam(value = "sortby", defaultValue = "name") final String sortby
 			) {
 

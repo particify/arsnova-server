@@ -53,7 +53,7 @@ public class SocketController extends AbstractController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SocketController.class);
 
 	@RequestMapping(method = RequestMethod.POST, value = "/assign")
-	public final void authorize(@RequestBody final Map<String, String> sessionMap, final HttpServletResponse response) {
+	public void authorize(@RequestBody final Map<String, String> sessionMap, final HttpServletResponse response) {
 		String socketid = sessionMap.get("session");
 		if (null == socketid) {
 			LOGGER.debug("Expected property 'session' missing", socketid);
@@ -72,7 +72,7 @@ public class SocketController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/url", method = RequestMethod.GET)
-	public final String getSocketUrl(final HttpServletRequest request) {
+	public String getSocketUrl(final HttpServletRequest request) {
 		StringBuilder url = new StringBuilder();
 
 		url.append(server.isUseSSL() ? "https://" : "http://");

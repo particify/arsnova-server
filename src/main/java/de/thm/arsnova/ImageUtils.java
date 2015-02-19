@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * @author Daniel Vogel (daniel.vogel@mni.thm.de)
  *
  */
-public final class ImageUtils {
+public class ImageUtils {
 
 	// Or whatever size you want to read in at a time.
 	private static final int CHUNK_SIZE = 4096;

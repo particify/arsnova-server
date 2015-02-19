@@ -55,7 +55,7 @@ public class FeedbackServiceTest {
 	private StubDatabaseDao databaseDao;
 
 	@Before
-	public final void setup() {
+	public void setup() {
 		userService.setUserAuthenticated(false);
 
 		feedbackService.saveFeedback("87654321", 0, new TestUser("testuser01"));
@@ -101,7 +101,7 @@ public class FeedbackServiceTest {
 	}
 
 	@After
-	public final void cleanup() {
+	public void cleanup() {
 		databaseDao.cleanupTestData();
 		userService.setUserAuthenticated(false);
 	}

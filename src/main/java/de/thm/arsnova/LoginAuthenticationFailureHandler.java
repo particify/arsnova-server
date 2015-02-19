@@ -40,7 +40,7 @@ public class LoginAuthenticationFailureHandler extends
 	public static final Logger LOGGER = LoggerFactory.getLogger(LoginAuthenticationFailureHandler.class);
 
 	@Override
-	public final void onAuthenticationFailure(
+	public void onAuthenticationFailure(
 			final HttpServletRequest request,
 			final HttpServletResponse response,
 			final AuthenticationException exception
@@ -54,7 +54,7 @@ public class LoginAuthenticationFailureHandler extends
 	}
 
 	@Override
-	public final void setDefaultFailureUrl(final String url) {
+	public void setDefaultFailureUrl(final String url) {
 		failureUrl = url;
 	}
 

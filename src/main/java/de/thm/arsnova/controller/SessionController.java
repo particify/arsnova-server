@@ -21,6 +21,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.json.JSONObject;
@@ -45,10 +46,10 @@ import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
-import de.thm.arsnova.services.SessionService.SessionNameComparator;
 import de.thm.arsnova.services.SessionService.SessionInfoNameComparator;
-import de.thm.arsnova.services.SessionService.SessionShortNameComparator;
 import de.thm.arsnova.services.SessionService.SessionInfoShortNameComparator;
+import de.thm.arsnova.services.SessionService.SessionNameComparator;
+import de.thm.arsnova.services.SessionService.SessionShortNameComparator;
 import de.thm.arsnova.web.DeprecatedApi;
 
 @RestController
@@ -64,24 +65,24 @@ public class SessionController extends AbstractController {
 	private IUserService userService;
 
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.GET)
-	public final Session joinSession(@PathVariable final String sessionkey) {
+	public Session joinSession(@PathVariable final String sessionkey) {
 		return Session.anonymizedCopy(sessionService.getSession(sessionkey));
 	}
 
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.DELETE)
-	public final void deleteSession(@PathVariable final String sessionkey) {
+	public void deleteSession(@PathVariable final String sessionkey) {
 		sessionService.deleteSession(sessionkey);
 	}
 
 	@DeprecatedApi
 	@RequestMapping(value = "/{sessionkey}/activeusercount", method = RequestMethod.GET)
-	public final int countActiveUsers(@PathVariable final String sessionkey) {
+	public int countActiveUsers(@PathVariable final String sessionkey) {
 		return sessionService.activeUsers(sessionkey);
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public final Session postNewSession(@RequestBody final Session session, final HttpServletResponse response) {
+	public Session postNewSession(@RequestBody final Session session, final HttpServletResponse response) {
 		if (session != null && session.isCourseSession()) {
 			final List<Course> courses = new ArrayList<Course>();
 			final Course course = new Course();
@@ -106,7 +107,7 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.PUT)
-	public final Session updateSession(
+	public Session updateSession(
 			@PathVariable final String sessionkey,
 			@RequestBody final Session session
 			) {
@@ -114,7 +115,7 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public final List<Session> getSessions(
+	public List<Session> getSessions(
 			@RequestParam(value = "ownedonly", defaultValue = "false") final boolean ownedOnly,
 			@RequestParam(value = "visitedonly", defaultValue = "false") final boolean visitedOnly,
 			@RequestParam(value = "sortby", defaultValue = "name") final String sortby,
@@ -157,7 +158,7 @@ public class SessionController extends AbstractController {
 	 * @return
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.GET, params = "statusonly=true")
-	public final List<SessionInfo> getMySessions(
+	public List<SessionInfo> getMySessions(
 			@RequestParam(value = "visitedonly", defaultValue = "false") final boolean visitedOnly,
 			@RequestParam(value = "sortby", defaultValue = "name") final String sortby,
 			final HttpServletResponse response
@@ -183,7 +184,7 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/publicpool", method = RequestMethod.GET, params = "statusonly=true")
-	public final List<SessionInfo> getMyPublicPoolSessions(
+	public List<SessionInfo> getMyPublicPoolSessions(
 			final HttpServletResponse response
 			) {
 		List<SessionInfo> sessions = sessionService.getMyPublicPoolSessionsInfo();
@@ -197,7 +198,7 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/publicpool", method = RequestMethod.GET)
-	public final List<SessionInfo> getPublicPoolSessions(
+	public List<SessionInfo> getPublicPoolSessions(
 			final HttpServletResponse response
 			) {
 		List<SessionInfo> sessions = sessionService.getPublicPoolSessionsInfo();
@@ -211,7 +212,7 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/import", method = RequestMethod.POST)
-	public final SessionInfo importSession(
+	public SessionInfo importSession(
 			@RequestBody final ImportExportSession session,
 			final HttpServletResponse response
 			) {
@@ -219,7 +220,7 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{sessionkey}/lock", method = RequestMethod.POST)
-	public final Session lockSession(
+	public Session lockSession(
 			@PathVariable final String sessionkey,
 			@RequestParam(required = false) final Boolean lock,
 			final HttpServletResponse response
@@ -232,7 +233,7 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{sessionkey}/learningprogress", method = RequestMethod.GET)
-	public final int learningProgress(
+	public int learningProgress(
 			@PathVariable final String sessionkey,
 			@RequestParam(value = "type", defaultValue = "questions") final String progressType,
 			final HttpServletResponse response
@@ -241,7 +242,7 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{sessionkey}/mylearningprogress", method = RequestMethod.GET)
-	public final JSONObject myLearningProgress(
+	public JSONObject myLearningProgress(
 			@PathVariable final String sessionkey,
 			@RequestParam(value = "type", defaultValue = "questions") final String progressType,
 			final HttpServletResponse response
@@ -256,7 +257,7 @@ public class SessionController extends AbstractController {
 	/* internal redirections */
 
 	@RequestMapping(value = "/{sessionKey}/lecturerquestion")
-	public final String redirectLecturerQuestion(
+	public String redirectLecturerQuestion(
 			@PathVariable final String sessionKey,
 			final HttpServletResponse response
 			) {
@@ -266,7 +267,7 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{sessionKey}/lecturerquestion/{arg1}")
-	public final String redirectLecturerQuestionWithOneArgument(
+	public String redirectLecturerQuestionWithOneArgument(
 			@PathVariable final String sessionKey,
 			@PathVariable final String arg1,
 			final HttpServletResponse response
@@ -277,7 +278,7 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{sessionKey}/lecturerquestion/{arg1}/{arg2}")
-	public final String redirectLecturerQuestionWithTwoArguments(
+	public String redirectLecturerQuestionWithTwoArguments(
 			@PathVariable final String sessionKey,
 			@PathVariable final String arg1,
 			@PathVariable final String arg2,
@@ -289,7 +290,7 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{sessionKey}/lecturerquestion/{arg1}/{arg2}/{arg3}")
-	public final String redirectLecturerQuestionWithThreeArguments(
+	public String redirectLecturerQuestionWithThreeArguments(
 			@PathVariable final String sessionKey,
 			@PathVariable final String arg1,
 			@PathVariable final String arg2,
@@ -302,7 +303,7 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{sessionKey}/audiencequestion")
-	public final String redirectAudienceQuestion(
+	public String redirectAudienceQuestion(
 			@PathVariable final String sessionKey,
 			final HttpServletResponse response
 			) {
@@ -312,7 +313,7 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{sessionKey}/audiencequestion/{arg1}")
-	public final String redirectAudienceQuestionWithOneArgument(
+	public String redirectAudienceQuestionWithOneArgument(
 			@PathVariable final String sessionKey,
 			@PathVariable final String arg1,
 			final HttpServletResponse response
@@ -323,7 +324,7 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{sessionKey}/audiencequestion/{arg1}/{arg2}")
-	public final String redirectAudienceQuestionWithTwoArguments(
+	public String redirectAudienceQuestionWithTwoArguments(
 			@PathVariable final String sessionKey,
 			@PathVariable final String arg1,
 			@PathVariable final String arg2,
@@ -335,7 +336,7 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{sessionKey}/audiencequestion/{arg1}/{arg2}/{arg3}")
-	public final String redirectAudienceQuestionWithThreeArguments(
+	public String redirectAudienceQuestionWithThreeArguments(
 			@PathVariable final String sessionKey,
 			@PathVariable final String arg1,
 			@PathVariable final String arg2,

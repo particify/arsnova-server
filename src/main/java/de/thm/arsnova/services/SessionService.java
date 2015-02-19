@@ -23,14 +23,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import de.thm.arsnova.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
@@ -44,9 +44,9 @@ import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.events.StatusSessionEvent;
+import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.RequestEntityTooLargeException;
 
 @Service
@@ -112,7 +112,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	}
 
 	@Override
-	public final Session joinSession(final String keyword, final UUID socketId) {
+	public Session joinSession(final String keyword, final UUID socketId) {
 		/* Socket.IO solution */
 
 		Session session = null != keyword ? databaseDao.getSessionFromKeyword(keyword) : null;
@@ -142,7 +142,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public final Session getSession(final String keyword) {
+	public Session getSession(final String keyword) {
 		final User user = userService.getCurrentUser();
 		return this.getSessionInternal(keyword, user);
 	}
@@ -152,7 +152,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	 * TODO: Find a better way of doing this...
 	 */
 	@Override
-	public final Session getSessionInternal(final String keyword, final User user) {
+	public Session getSessionInternal(final String keyword, final User user) {
 		final Session session = databaseDao.getSessionFromKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();
@@ -175,44 +175,44 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public final List<Session> getMySessions() {
+	public List<Session> getMySessions() {
 		return databaseDao.getMySessions(userService.getCurrentUser());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public final List<SessionInfo> getPublicPoolSessionsInfo() {
+	public List<SessionInfo> getPublicPoolSessionsInfo() {
 		return databaseDao.getPublicPoolSessionsInfo();
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public final List<SessionInfo> getMyPublicPoolSessionsInfo() {
+	public List<SessionInfo> getMyPublicPoolSessionsInfo() {
 		return databaseDao.getMyPublicPoolSessionsInfo(userService.getCurrentUser());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public final List<SessionInfo> getMySessionsInfo() {
+	public List<SessionInfo> getMySessionsInfo() {
 		final User user = userService.getCurrentUser();
 		return databaseDao.getMySessionsInfo(user);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public final List<Session> getMyVisitedSessions() {
+	public List<Session> getMyVisitedSessions() {
 		return databaseDao.getMyVisitedSessions(userService.getCurrentUser());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public final List<SessionInfo> getMyVisitedSessionsInfo() {
+	public List<SessionInfo> getMyVisitedSessionsInfo() {
 		return databaseDao.getMyVisitedSessionsInfo(userService.getCurrentUser());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public final Session saveSession(final Session session) {
+	public Session saveSession(final Session session) {
 		if (connectorClient != null && session.getCourseId() != null) {
 			if (!connectorClient.getMembership(
 					userService.getCurrentUser().getUsername(), session.getCourseId()).isMember()
@@ -240,12 +240,12 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	}
 
 	@Override
-	public final boolean sessionKeyAvailable(final String keyword) {
+	public boolean sessionKeyAvailable(final String keyword) {
 		return databaseDao.sessionKeyAvailable(keyword);
 	}
 
 	@Override
-	public final String generateKeyword() {
+	public String generateKeyword() {
 		final int low = 10000000;
 		final int high = 100000000;
 		final String keyword = String

@@ -40,7 +40,7 @@ public class CASLogoutSuccessHandler implements LogoutSuccessHandler {
 	private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
 	@Override
-	public final void onLogoutSuccess(
+	public void onLogoutSuccess(
 			final HttpServletRequest request,
 			final HttpServletResponse response,
 			final Authentication authentication
@@ -57,11 +57,11 @@ public class CASLogoutSuccessHandler implements LogoutSuccessHandler {
 		);
 	}
 
-	public final void setCasUrl(final String newCasUrl) {
+	public void setCasUrl(final String newCasUrl) {
 		casUrl = newCasUrl;
 	}
 
-	public final void setDefaultTarget(final String newDefaultTarget) {
+	public void setDefaultTarget(final String newDefaultTarget) {
 		defaultTarget = newDefaultTarget;
 	}
 }
