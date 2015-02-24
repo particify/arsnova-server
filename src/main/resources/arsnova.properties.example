@@ -233,6 +233,9 @@ pp.licenses = CC by - Attribution,\
     CC by-nc-nd Attribution-Non-Commercial- No Derivatives,\
     GNU GPL - GNU General Public License
 pp.logofilesize_b = 102400
+# Do not reorder levels. Append new levels to the end of the list. Otherwise, references in existing public sessions
+# could be mixed up.
+#
 pp.session-levels.de = Allgemeinbildung,\
     Abitur,\
     Bachelor,\
