@@ -40,4 +40,6 @@
 	</bean>
 
 	<bean id="databaseDao" class="de.thm.arsnova.dao.CouchDBDao" />
+
+	<bean id="socketListener" class="de.thm.arsnova.socket.ARSnovaSocketListener" />
 </beans>

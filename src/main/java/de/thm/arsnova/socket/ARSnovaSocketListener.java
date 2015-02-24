@@ -22,6 +22,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import de.thm.arsnova.events.NovaEvent;
+import de.thm.arsnova.events.NovaEventVisitor;
 
 /**
  * An external Listener is required because otherwise the event methods are not called through a Spring proxy.
@@ -31,11 +32,11 @@ import de.thm.arsnova.events.NovaEvent;
 public class ARSnovaSocketListener implements ApplicationListener<NovaEvent> {
 
 	@Autowired
-	private ARSnovaSocketIOServer socketServer;
+	private ARSnovaSocket socketServer;
 
 	@Override
 	public void onApplicationEvent(NovaEvent event) {
-		event.accept(socketServer);
+		event.accept((NovaEventVisitor) socketServer);
 	}
 
 }
