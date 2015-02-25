@@ -17,12 +17,10 @@
  */
 package de.thm.arsnova.domain;
 
-import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleEntry;
-
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.transport.LearningProgressValues;
 
 public class QuestionBasedLearningProgress implements LearningProgress {
 
@@ -33,9 +31,12 @@ public class QuestionBasedLearningProgress implements LearningProgress {
 	}
 
 	@Override
-	public int getCourseProgress(Session session) {
+	public LearningProgressValues getCourseProgress(Session session) {
 		CourseScore courseScore = databaseDao.getLearningProgress(session);
-		return calculateCourseProgress(courseScore);
+		LearningProgressValues lpv = new LearningProgressValues();
+		lpv.setCourseProgress(calculateCourseProgress(courseScore));
+		lpv.setNumQuestions(courseScore.getQuestionCount());
+		return lpv;
 	}
 
 	private int calculateCourseProgress(CourseScore courseScore) {
@@ -68,7 +69,7 @@ public class QuestionBasedLearningProgress implements LearningProgress {
 	}
 
 	@Override
-	public SimpleEntry<Integer, Integer> getMyProgress(Session session, User user) {
+	public LearningProgressValues getMyProgress(Session session, User user) {
 		CourseScore courseScore = databaseDao.getLearningProgress(session);
 
 		int courseProgress = calculateCourseProgress(courseScore);
@@ -77,7 +78,11 @@ public class QuestionBasedLearningProgress implements LearningProgress {
 		final double myLearningProgress = numQuestionsCorrect / (double)(courseScore.getQuestionCount());
 		// calculate percent, cap results to 100
 		final int percentage = (int) Math.min(100, Math.round(myLearningProgress*100));
-		return new AbstractMap.SimpleEntry<Integer, Integer>(percentage, courseProgress);
+		LearningProgressValues lpv = new LearningProgressValues();
+		lpv.setCourseProgress(courseProgress);
+		lpv.setMyProgress(percentage);
+		lpv.setNumQuestions(courseScore.getQuestionCount());
+		return lpv;
 	}
 
 	private int numQuestionsCorrectForUser(User user, CourseScore courseScore) {

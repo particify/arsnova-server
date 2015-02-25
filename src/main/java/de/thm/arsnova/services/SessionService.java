@@ -42,6 +42,7 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
+import de.thm.arsnova.entities.transport.LearningProgressValues;
 import de.thm.arsnova.events.StatusSessionEvent;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
@@ -310,7 +311,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getLearningProgress(final String sessionkey, final String progressType) {
+	public LearningProgressValues getLearningProgress(final String sessionkey, final String progressType) {
 		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		LearningProgress learningProgress = learningProgressFactory.createFromType(progressType);
 		return learningProgress.getCourseProgress(session);
@@ -318,7 +319,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public SimpleEntry<Integer, Integer> getMyLearningProgress(final String sessionkey, final String progressType) {
+	public LearningProgressValues getMyLearningProgress(final String sessionkey, final String progressType) {
 		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
 		LearningProgress learningProgress = learningProgressFactory.createFromType(progressType);

@@ -17,7 +17,6 @@
  */
 package de.thm.arsnova.services;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +25,7 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
+import de.thm.arsnova.entities.transport.LearningProgressValues;
 
 public interface ISessionService {
 	Session getSession(String keyword);
@@ -56,9 +56,9 @@ public interface ISessionService {
 
 	void deleteSession(String sessionkey);
 
-	int getLearningProgress(String sessionkey, String progressType);
+	LearningProgressValues getLearningProgress(String sessionkey, String progressType);
 
-	SimpleEntry<Integer, Integer> getMyLearningProgress(String sessionkey, String progressType);
+	LearningProgressValues getMyLearningProgress(String sessionkey, String progressType);
 
 	List<SessionInfo> getMySessionsInfo();
 

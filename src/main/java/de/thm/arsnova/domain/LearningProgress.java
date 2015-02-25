@@ -17,14 +17,13 @@
  */
 package de.thm.arsnova.domain;
 
-import java.util.AbstractMap.SimpleEntry;
-
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.transport.LearningProgressValues;
 
 public interface LearningProgress {
 
-	public int getCourseProgress(Session session);
+	public LearningProgressValues getCourseProgress(Session session);
 
-	public SimpleEntry<Integer,Integer> getMyProgress(Session session, User user);
+	public LearningProgressValues getMyProgress(Session session, User user);
 }

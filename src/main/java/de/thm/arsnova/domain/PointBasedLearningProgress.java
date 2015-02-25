@@ -17,12 +17,10 @@
  */
 package de.thm.arsnova.domain;
 
-import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleEntry;
-
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.transport.LearningProgressValues;
 
 public class PointBasedLearningProgress implements LearningProgress {
 
@@ -33,9 +31,12 @@ public class PointBasedLearningProgress implements LearningProgress {
 	}
 
 	@Override
-	public int getCourseProgress(Session session) {
+	public LearningProgressValues getCourseProgress(Session session) {
 		CourseScore courseScore = databaseDao.getLearningProgress(session);
-		return calculateCourseScore(courseScore);
+		LearningProgressValues lpv = new LearningProgressValues();
+		lpv.setCourseProgress(calculateCourseScore(courseScore));
+		lpv.setNumQuestions(courseScore.getQuestionCount());
+		return lpv;
 	}
 
 	private int calculateCourseScore(CourseScore courseScore) {
@@ -51,20 +52,24 @@ public class PointBasedLearningProgress implements LearningProgress {
 	}
 
 	@Override
-	public SimpleEntry<Integer, Integer> getMyProgress(Session session, User user) {
+	public LearningProgressValues getMyProgress(Session session, User user) {
 		CourseScore courseScore = databaseDao.getLearningProgress(session);
 		int courseProgress = calculateCourseScore(courseScore);
 
 		final double courseMaximumValue = courseScore.getMaximumScore();
 		final double userTotalValue = courseScore.getTotalUserScore(user);
 
+		LearningProgressValues lpv = new LearningProgressValues();
+		lpv.setCourseProgress(courseProgress);
+		lpv.setNumQuestions(courseScore.getQuestionCount());
 		if (courseMaximumValue == 0) {
-			return new AbstractMap.SimpleEntry<Integer, Integer>(0, courseProgress);
+			return lpv;
 		}
 		final double myProgress = userTotalValue / courseMaximumValue;
 		final int myLearningProgress = (int)Math.min(100, Math.round(myProgress*100));
+		lpv.setMyProgress(myLearningProgress);
 
-		return new AbstractMap.SimpleEntry<Integer, Integer>(myLearningProgress, courseProgress);
+		return lpv;
 	}
 
 }

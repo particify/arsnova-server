@@ -17,14 +17,11 @@
  */
 package de.thm.arsnova.controller;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
-
-import net.sf.json.JSONObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +40,7 @@ import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.transport.ImportExportSession;
+import de.thm.arsnova.entities.transport.LearningProgressValues;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
@@ -233,7 +231,7 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{sessionkey}/learningprogress", method = RequestMethod.GET)
-	public int learningProgress(
+	public LearningProgressValues learningProgress(
 			@PathVariable final String sessionkey,
 			@RequestParam(value = "type", defaultValue = "questions") final String progressType,
 			final HttpServletResponse response
@@ -242,16 +240,12 @@ public class SessionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{sessionkey}/mylearningprogress", method = RequestMethod.GET)
-	public JSONObject myLearningProgress(
+	public LearningProgressValues myLearningProgress(
 			@PathVariable final String sessionkey,
 			@RequestParam(value = "type", defaultValue = "questions") final String progressType,
 			final HttpServletResponse response
 			) {
-		final SimpleEntry<Integer, Integer> result = sessionService.getMyLearningProgress(sessionkey, progressType);
-		final JSONObject json = new JSONObject();
-		json.put("myprogress", result.getKey());
-		json.put("courseprogress", result.getValue());
-		return json;
+		return sessionService.getMyLearningProgress(sessionkey, progressType);
 	}
 
 	/* internal redirections */

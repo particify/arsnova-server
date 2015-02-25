@@ -20,13 +20,12 @@ package de.thm.arsnova.domain;
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
-import java.util.AbstractMap.SimpleEntry;
-
 import org.junit.Test;
 
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.TestUser;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.transport.LearningProgressValues;
 
 public class QuestionBasedLearningProgressTest {
 
@@ -46,8 +45,11 @@ public class QuestionBasedLearningProgressTest {
 		when(db.getLearningProgress(null)).thenReturn(courseScore);
 		LearningProgress lp = new QuestionBasedLearningProgress(db);
 
-		SimpleEntry<Integer, Integer> expected = new SimpleEntry<Integer, Integer>(0, 0);
-		SimpleEntry<Integer, Integer> actual = lp.getMyProgress(null, user);
+		LearningProgressValues expected = new LearningProgressValues();
+		expected.setCourseProgress(0);
+		expected.setMyProgress(0);
+		expected.setNumQuestions(0);
+		LearningProgressValues actual = lp.getMyProgress(null, user);
 
 		assertEquals(expected, actual);
 	}
@@ -65,8 +67,11 @@ public class QuestionBasedLearningProgressTest {
 		when(db.getLearningProgress(null)).thenReturn(courseScore);
 		LearningProgress lp = new QuestionBasedLearningProgress(db);
 
-		SimpleEntry<Integer, Integer> expected = new SimpleEntry<Integer, Integer>(100, 100);
-		SimpleEntry<Integer, Integer> actual = lp.getMyProgress(null, user);
+		LearningProgressValues expected = new LearningProgressValues();
+		expected.setCourseProgress(100);
+		expected.setMyProgress(100);
+		expected.setNumQuestions(1);
+		LearningProgressValues actual = lp.getMyProgress(null, user);
 
 		assertEquals(expected, actual);
 	}

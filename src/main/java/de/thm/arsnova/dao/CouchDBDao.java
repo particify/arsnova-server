@@ -1728,7 +1728,7 @@ public class CouchDBDao implements IDatabaseDao {
 		CourseScore courseScore = new CourseScore();
 
 		// no results found
-		if (maximumValueResult.isEmpty() || answerSumResult.isEmpty()) {
+		if (maximumValueResult.isEmpty() && answerSumResult.isEmpty()) {
 			return courseScore;
 		}
 
