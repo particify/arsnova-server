@@ -26,13 +26,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import de.thm.arsnova.dao.StubDatabaseDao;
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.TestUser;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 
@@ -162,13 +161,5 @@ public class FeedbackServiceTest {
 	public void testShouldReturnAverageFeedbackNotRounded() {
 		userService.setUserAuthenticated(true);
 		assertEquals(2.1904, feedbackService.getAverageFeedback("18273645"), 0.001);
-	}
-
-	public static class TestUser extends User {
-		private static final long serialVersionUID = 1L;
-
-		public TestUser(String username) {
-			super( new UsernamePasswordAuthenticationToken(username, "secret") );
-		}
 	}
 }

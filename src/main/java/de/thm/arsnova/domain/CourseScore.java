@@ -30,6 +30,9 @@ public class CourseScore implements Iterable<QuestionScore> {
 	private final Map<String, QuestionScore> scores = new HashMap<String, QuestionScore>();
 
 	public void add(String questionId, int questionScore) {
+		if (questionScore == 0) {
+			return;
+		}
 		scores.put(questionId, new QuestionScore(questionId, questionScore));
 	}
 
