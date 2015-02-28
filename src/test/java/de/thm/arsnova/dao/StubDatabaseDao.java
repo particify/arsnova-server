@@ -327,12 +327,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public Answer saveAnswer(Answer answer, User user) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public Answer updateAnswer(Answer answer) {
 		// TODO Auto-generated method stub
 		return null;
@@ -593,6 +587,13 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public List<Answer> getAnswers(Question question) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Answer saveAnswer(Answer answer, User user, Question question,
+			Session session) {
 		// TODO Auto-generated method stub
 		return null;
 	}
