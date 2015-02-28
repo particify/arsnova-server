@@ -36,6 +36,7 @@ public class PointBasedLearningProgress implements LearningProgress {
 		LearningProgressValues lpv = new LearningProgressValues();
 		lpv.setCourseProgress(calculateCourseScore(courseScore));
 		lpv.setNumQuestions(courseScore.getQuestionCount());
+		lpv.setNumUsers(courseScore.getTotalUserCount());
 		return lpv;
 	}
 
@@ -62,6 +63,7 @@ public class PointBasedLearningProgress implements LearningProgress {
 		LearningProgressValues lpv = new LearningProgressValues();
 		lpv.setCourseProgress(courseProgress);
 		lpv.setNumQuestions(courseScore.getQuestionCount());
+		lpv.setNumUsers(courseScore.getTotalUserCount());
 		if (courseMaximumValue == 0) {
 			return lpv;
 		}

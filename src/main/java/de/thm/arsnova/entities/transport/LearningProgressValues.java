@@ -25,6 +25,8 @@ public class LearningProgressValues {
 
 	private int numQuestions;
 
+	private int numUsers;
+
 	public int getCourseProgress() {
 		return courseProgress;
 	}
@@ -47,6 +49,14 @@ public class LearningProgressValues {
 
 	public void setNumQuestions(int numQuestions) {
 		this.numQuestions = numQuestions;
+	}
+
+	public int getNumUsers() {
+		return numUsers;
+	}
+
+	public void setNumUsers(int numUsers) {
+		this.numUsers = numUsers;
 	}
 
 	@Override

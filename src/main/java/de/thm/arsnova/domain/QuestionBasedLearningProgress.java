@@ -36,6 +36,7 @@ public class QuestionBasedLearningProgress implements LearningProgress {
 		LearningProgressValues lpv = new LearningProgressValues();
 		lpv.setCourseProgress(calculateCourseProgress(courseScore));
 		lpv.setNumQuestions(courseScore.getQuestionCount());
+		lpv.setNumUsers(courseScore.getTotalUserCount());
 		return lpv;
 	}
 
@@ -82,6 +83,7 @@ public class QuestionBasedLearningProgress implements LearningProgress {
 		lpv.setCourseProgress(courseProgress);
 		lpv.setMyProgress(percentage);
 		lpv.setNumQuestions(courseScore.getQuestionCount());
+		lpv.setNumUsers(courseScore.getTotalUserCount());
 		return lpv;
 	}
 
