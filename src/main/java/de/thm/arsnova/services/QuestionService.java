@@ -463,11 +463,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 		Answer theAnswer = answer.generateAnswerEntity(user, question);
 
-		final Answer result = databaseDao.saveAnswer(theAnswer, user);
-		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
-		this.publisher.publishEvent(new NewAnswerEvent(this, session, result, user, question));
-
-		return result;
+		return databaseDao.saveAnswer(theAnswer, user, question, getSession(question.getSessionKeyword()));
 	}
 
 	@Override

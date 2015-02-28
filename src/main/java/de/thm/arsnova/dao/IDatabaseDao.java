@@ -124,7 +124,7 @@ public interface IDatabaseDao {
 
 	void deleteAnswers(Question question);
 
-	Answer saveAnswer(Answer answer, User user);
+	Answer saveAnswer(Answer answer, User user, Question question, Session session);
 
 	Answer updateAnswer(Answer answer);
 

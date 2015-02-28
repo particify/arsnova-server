@@ -45,6 +45,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
@@ -68,13 +70,15 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.VisitedSession;
+import de.thm.arsnova.entities.transport.AnswerQueueElement;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.ImportExportSession.ImportExportQuestion;
+import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.ISessionService;
 
 @Component("databaseDao")
-public class CouchDBDao implements IDatabaseDao {
+public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware {
 
 	@Autowired
 	private ISessionService sessionService;
@@ -84,7 +88,9 @@ public class CouchDBDao implements IDatabaseDao {
 	private String databaseName;
 	private Database database;
 
-	private final Queue<AbstractMap.SimpleEntry<Document, Answer>> answerQueue = new ConcurrentLinkedQueue<AbstractMap.SimpleEntry<Document, Answer>>();
+	private ApplicationEventPublisher publisher;
+
+	private final Queue<AbstractMap.SimpleEntry<Document, AnswerQueueElement>> answerQueue = new ConcurrentLinkedQueue<AbstractMap.SimpleEntry<Document, AnswerQueueElement>>();
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(CouchDBDao.class);
 
@@ -105,6 +111,11 @@ public class CouchDBDao implements IDatabaseDao {
 
 	public void setSessionService(final ISessionService service) {
 		sessionService = service;
+	}
+
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+		this.publisher = publisher;
 	}
 
 	@Override
@@ -1212,9 +1223,8 @@ public class CouchDBDao implements IDatabaseDao {
 		return this.getInfosForVisitedSessions(sessions, user);
 	}
 
-	@CacheEvict(value = "answers", allEntries = true)
 	@Override
-	public Answer saveAnswer(final Answer answer, final User user) {
+	public Answer saveAnswer(final Answer answer, final User user, final Question question, final Session session) {
 		final Document a = new Document();
 		a.put("type", "skill_question_answer");
 		a.put("sessionId", answer.getSessionId());
@@ -1227,20 +1237,25 @@ public class CouchDBDao implements IDatabaseDao {
 		a.put("user", user.getUsername());
 		a.put("piRound", answer.getPiRound());
 		a.put("abstention", answer.isAbstention());
-		this.answerQueue.offer(new AbstractMap.SimpleEntry<Document, Answer>(a, answer));
+		AnswerQueueElement answerQueueElement = new AnswerQueueElement(session, question, answer, user);
+		this.answerQueue.offer(new AbstractMap.SimpleEntry<Document, AnswerQueueElement>(a, answerQueueElement));
 		return answer;
 	}
 
+	@Caching(evict = { @CacheEvict(value = "answers", allEntries = true),
+			@CacheEvict(value = "learningprogress", allEntries = true)})
 	@Scheduled(fixedDelay = 5000)
 	public void flushAnswerQueue() {
 		final Map<Document, Answer> map = new HashMap<Document, Answer>();
 		final List<Document> answerList = new ArrayList<Document>();
-		AbstractMap.SimpleEntry<Document, Answer> entry;
+		final List<AnswerQueueElement> elements = new ArrayList<AnswerQueueElement>();
+		AbstractMap.SimpleEntry<Document, AnswerQueueElement> entry;
 		while ((entry = this.answerQueue.poll()) != null) {
 			final Document doc = entry.getKey();
-			final Answer answer = entry.getValue();
+			final Answer answer = entry.getValue().getAnswer();
 			map.put(doc, answer);
 			answerList.add(doc);
+			elements.add(entry.getValue());
 		}
 		if (answerList.isEmpty()) {
 			// no need to send an empty bulk request. ;-)
@@ -1252,6 +1267,10 @@ public class CouchDBDao implements IDatabaseDao {
 				final Answer answer = map.get(d);
 				answer.set_id(d.getId());
 				answer.set_rev(d.getRev());
+			}
+			// Send NewAnswerEvents ...
+			for (AnswerQueueElement e : elements) {
+				this.publisher.publishEvent(new NewAnswerEvent(this, e.getSession(), e.getAnswer(), e.getUser(), e.getQuestion()));
 			}
 		} catch (IOException e) {
 			LOGGER.error("Could not bulk save answers from queue");
