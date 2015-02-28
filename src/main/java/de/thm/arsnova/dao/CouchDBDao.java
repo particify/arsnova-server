@@ -1223,6 +1223,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return this.getInfosForVisitedSessions(sessions, user);
 	}
 
+	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public Answer saveAnswer(final Answer answer, final User user, final Question question, final Session session) {
 		final Document a = new Document();
@@ -1242,8 +1243,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return answer;
 	}
 
-	@Caching(evict = { @CacheEvict(value = "answers", allEntries = true),
-			@CacheEvict(value = "learningprogress", allEntries = true)})
 	@Scheduled(fixedDelay = 5000)
 	public void flushAnswerQueue() {
 		final Map<Document, Answer> map = new HashMap<Document, Answer>();
