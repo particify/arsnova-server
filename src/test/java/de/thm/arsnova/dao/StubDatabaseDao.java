@@ -34,6 +34,7 @@ import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
+import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.exceptions.NoContentException;
@@ -110,29 +111,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public Session saveSession(User user, Session session) {
 		stubSessions.put(session.getKeyword(), session);
 		return session;
-	}
-
-	@Override
-	public int countSessions() {
-		return stubSessions.size();
-	}
-
-	@Override
-	public int countOpenSessions() {
-		int result = 0;
-		for (Session session : stubSessions.values()) {
-			if (session.isActive()) result++;
-		}
-		return result;
-	}
-
-	@Override
-	public int countClosedSessions() {
-		int result = 0;
-		for (Session session : stubSessions.values()) {
-			if (! session.isActive()) result++;
-		}
-		return result;
 	}
 
 	@Override
@@ -256,18 +234,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public List<InterposedQuestion> getInterposedQuestions(Session session) {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public int countAnswers() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int countQuestions() {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	@Override
@@ -592,9 +558,19 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public Answer saveAnswer(Answer answer, User user, Question question,
-			Session session) {
+	public Answer saveAnswer(Answer answer, User user, Question question, Session session) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public Statistics getStatistics() {
+		final Statistics stats = new Statistics();
+		stats.setOpenSessions(3);
+		stats.setClosedSessions(0);
+		stats.setQuestions(0);
+		stats.setAnswers(0);
+		stats.setInterposedQuestions(0);
+		return stats;
 	}
 }

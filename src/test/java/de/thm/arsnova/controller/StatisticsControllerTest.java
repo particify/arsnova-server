@@ -83,7 +83,8 @@ public class StatisticsControllerTest {
 		.andExpect(jsonPath("$.questions").value(0))
 		.andExpect(jsonPath("$.openSessions").value(3))
 		.andExpect(jsonPath("$.closedSessions").value(0))
-		.andExpect(jsonPath("$.activeUsers").exists());
+		.andExpect(jsonPath("$.activeUsers").exists())
+		.andExpect(jsonPath("$.interposedQuestions").exists());
 	}
 
 	@Test

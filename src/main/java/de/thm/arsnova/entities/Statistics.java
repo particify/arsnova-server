@@ -25,10 +25,12 @@ public class Statistics {
 	private int closedSessions;
 	private int activeUsers;
 	private int loggedinUsers;
+	private int interposedQuestions;
 
 	public int getAnswers() {
 		return answers;
 	}
+
 	public void setAnswers(final int answers) {
 		this.answers = answers;
 	}
@@ -36,6 +38,7 @@ public class Statistics {
 	public int getQuestions() {
 		return questions;
 	}
+
 	public void setQuestions(final int questions) {
 		this.questions = questions;
 	}
@@ -43,6 +46,7 @@ public class Statistics {
 	public int getOpenSessions() {
 		return openSessions;
 	}
+
 	public void setOpenSessions(final int openSessions) {
 		this.openSessions = openSessions;
 	}
@@ -50,6 +54,7 @@ public class Statistics {
 	public int getClosedSessions() {
 		return closedSessions;
 	}
+
 	public void setClosedSessions(final int closedSessions) {
 		this.closedSessions = closedSessions;
 	}
@@ -57,6 +62,7 @@ public class Statistics {
 	public int getActiveUsers() {
 		return activeUsers;
 	}
+
 	public void setActiveUsers(final int activeUsers) {
 		this.activeUsers = activeUsers;
 	}
@@ -64,18 +70,17 @@ public class Statistics {
 	public int getLoggedinUsers() {
 		return loggedinUsers;
 	}
+
 	public void setLoggedinUsers(final int loggedinUsers) {
 		this.loggedinUsers = loggedinUsers;
 	}
 
-	public int getAverageAnswersPerQuestion() {
-		if (getQuestions() > 0) {
-			return getAnswers() / getQuestions();
-		}
-		return 0;
+	public int getInterposedQuestions() {
+		return interposedQuestions;
 	}
-	public void setAverageAnswersPerQuestion(final int value) {
-		// NOP
+
+	public void setInterposedQuestions(int interposedQuestions) {
+		this.interposedQuestions = interposedQuestions;
 	}
 
 	@Override
@@ -102,7 +107,6 @@ public class Statistics {
 			final Statistics other = (Statistics) obj;
 			return hashCode() == other.hashCode();
 		}
-
 		return false;
 	}
 }

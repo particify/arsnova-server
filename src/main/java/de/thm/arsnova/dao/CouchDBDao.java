@@ -68,6 +68,7 @@ import de.thm.arsnova.entities.PossibleAnswer;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
+import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.VisitedSession;
 import de.thm.arsnova.entities.transport.AnswerQueueElement;
@@ -1075,57 +1076,45 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	public int countSessions() {
-		return sessionsCountValue("openSessions")
-				+ sessionsCountValue("closedSessions");
-	}
-
-	@Override
-	public int countClosedSessions() {
-		return sessionsCountValue("closedSessions");
-	}
-
-	@Override
-	public int countOpenSessions() {
-		return sessionsCountValue("openSessions");
-	}
-
-	@Override
-	public int countAnswers() {
-		return sessionsCountValue("answers");
-	}
-
-	@Override
-	public int countQuestions() {
-		return sessionsCountValue("questions");
-	}
-
-	private int sessionsCountValue(final String key) {
+	public Statistics getStatistics() {
+		final Statistics stats = new Statistics();
 		try {
-			final View view = new View("statistic/count_sessions");
+			final View view = new View("statistics/statistics");
 			view.setGroup(true);
 
 			final ViewResults results = getDatabase().view(view);
 			if (isEmptyResults(results)) {
-				return 0;
+				return stats;
 			}
 
-			int result = 0;
 			final JSONArray rows = results.getJSONArray("rows");
 
 			for (int i = 0; i < rows.size(); i++) {
 				final JSONObject row = rows.getJSONObject(i);
-				if (
-						row.getString("key").equals(key)
-						) {
-					result += row.getInt("value");
+				final int value = row.getInt("value");
+				switch (row.getString("key")) {
+				case "openSessions":
+					stats.setOpenSessions(stats.getOpenSessions() + value);
+					break;
+				case "closedSessions":
+					stats.setClosedSessions(stats.getClosedSessions() + value);
+					break;
+				case "answers":
+					stats.setAnswers(stats.getAnswers() + value);
+					break;
+				case "questions":
+					stats.setQuestions(stats.getQuestions() + value);
+					break;
+				case "interposedQuestions":
+					stats.setInterposedQuestions(stats.getInterposedQuestions() + value);
+					break;
 				}
 			}
-			return result;
+			return stats;
 		} catch (final Exception e) {
 			LOGGER.error("Error while retrieving session count", e);
 		}
-		return 0;
+		return stats;
 	}
 
 	@Override

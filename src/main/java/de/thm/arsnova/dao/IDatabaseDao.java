@@ -29,6 +29,7 @@ import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
+import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 
@@ -103,16 +104,6 @@ public interface IDatabaseDao {
 	List<InterposedQuestion> getInterposedQuestions(Session session);
 
 	List<InterposedQuestion> getInterposedQuestions(Session session, User user);
-
-	int countSessions();
-
-	int countOpenSessions();
-
-	int countClosedSessions();
-
-	int countAnswers();
-
-	int countQuestions();
 
 	InterposedQuestion getInterposedQuestion(String questionId);
 
@@ -203,4 +194,6 @@ public interface IDatabaseDao {
 	void deleteAllLectureAnswers(Session session);
 
 	SessionInfo importSession(User user, ImportExportSession importSession);
+
+	Statistics getStatistics();
 }
