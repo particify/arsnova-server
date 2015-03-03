@@ -66,7 +66,7 @@ public class Question {
 	private String gridType;
 	private String scaleFactor;
 	private String gridScaleFactor;
-    private int sequenceNr
+    private int sequenceNr;
 
 	public final String getType() {
 		return type;
