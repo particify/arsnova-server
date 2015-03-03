@@ -24,6 +24,7 @@ public class Statistics {
 	private int preparationQuestions;
 	private int openSessions;
 	private int closedSessions;
+	private int creators;
 	private int activeUsers;
 	private int loggedinUsers;
 	private int interposedQuestions;
@@ -98,6 +99,14 @@ public class Statistics {
 
 	public void setInterposedQuestions(int interposedQuestions) {
 		this.interposedQuestions = interposedQuestions;
+	}
+
+	public int getCreators() {
+		return creators;
+	}
+
+	public void setCreators(int creators) {
+		this.creators = creators;
 	}
 
 	@Override

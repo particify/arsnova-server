@@ -1079,39 +1079,49 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public Statistics getStatistics() {
 		final Statistics stats = new Statistics();
 		try {
-			final View view = new View("statistics/statistics");
-			view.setGroup(true);
+			final View statsView = new View("statistics/statistics");
+			final View creatorView = new View("statistics/unique_session_creators");
+			statsView.setGroup(true);
+			creatorView.setGroup(true);
 
-			final ViewResults results = getDatabase().view(view);
-			if (isEmptyResults(results)) {
-				return stats;
-			}
+			final ViewResults statsResults = getDatabase().view(statsView);
+			final ViewResults creatorResults = getDatabase().view(creatorView);
 
-			final JSONArray rows = results.getJSONArray("rows");
-
-			for (int i = 0; i < rows.size(); i++) {
-				final JSONObject row = rows.getJSONObject(i);
-				final int value = row.getInt("value");
-				switch (row.getString("key")) {
-				case "openSessions":
-					stats.setOpenSessions(stats.getOpenSessions() + value);
-					break;
-				case "closedSessions":
-					stats.setClosedSessions(stats.getClosedSessions() + value);
-					break;
-				case "answers":
-					stats.setAnswers(stats.getAnswers() + value);
-					break;
-				case "lectureQuestions":
-					stats.setLectureQuestions(stats.getLectureQuestions() + value);
-					break;
-				case "preparationQuestions":
-					stats.setPreparationQuestions(stats.getPreparationQuestions() + value);
-					break;
-				case "interposedQuestions":
-					stats.setInterposedQuestions(stats.getInterposedQuestions() + value);
-					break;
+			if (!isEmptyResults(statsResults)) {
+				final JSONArray rows = statsResults.getJSONArray("rows");
+				for (int i = 0; i < rows.size(); i++) {
+					final JSONObject row = rows.getJSONObject(i);
+					final int value = row.getInt("value");
+					switch (row.getString("key")) {
+					case "openSessions":
+						stats.setOpenSessions(stats.getOpenSessions() + value);
+						break;
+					case "closedSessions":
+						stats.setClosedSessions(stats.getClosedSessions() + value);
+						break;
+					case "answers":
+						stats.setAnswers(stats.getAnswers() + value);
+						break;
+					case "lectureQuestions":
+						stats.setLectureQuestions(stats.getLectureQuestions() + value);
+						break;
+					case "preparationQuestions":
+						stats.setPreparationQuestions(stats.getPreparationQuestions() + value);
+						break;
+					case "interposedQuestions":
+						stats.setInterposedQuestions(stats.getInterposedQuestions() + value);
+						break;
+					}
 				}
+			}
+			if (!isEmptyResults(creatorResults)) {
+				final JSONArray rows = creatorResults.getJSONArray("rows");
+				Set<String> creators = new HashSet<String>();
+				for (int i = 0; i < rows.size(); i++) {
+					final JSONObject row = rows.getJSONObject(i);
+					creators.add(row.getString("key"));
+				}
+				stats.setCreators(creators.size());
 			}
 			return stats;
 		} catch (final Exception e) {
