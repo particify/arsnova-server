@@ -568,7 +568,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 		final Statistics stats = new Statistics();
 		stats.setOpenSessions(3);
 		stats.setClosedSessions(0);
-		stats.setQuestions(0);
+		stats.setLectureQuestions(0);
 		stats.setAnswers(0);
 		stats.setInterposedQuestions(0);
 		return stats;
