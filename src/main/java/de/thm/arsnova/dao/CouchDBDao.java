@@ -1102,8 +1102,11 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				case "answers":
 					stats.setAnswers(stats.getAnswers() + value);
 					break;
-				case "questions":
-					stats.setQuestions(stats.getQuestions() + value);
+				case "lectureQuestions":
+					stats.setLectureQuestions(stats.getLectureQuestions() + value);
+					break;
+				case "preparationQuestions":
+					stats.setPreparationQuestions(stats.getPreparationQuestions() + value);
 					break;
 				case "interposedQuestions":
 					stats.setInterposedQuestions(stats.getInterposedQuestions() + value);

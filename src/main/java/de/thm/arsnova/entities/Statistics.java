@@ -20,7 +20,8 @@ package de.thm.arsnova.entities;
 public class Statistics {
 
 	private int answers;
-	private int questions;
+	private int lectureQuestions;
+	private int preparationQuestions;
 	private int openSessions;
 	private int closedSessions;
 	private int activeUsers;
@@ -35,12 +36,24 @@ public class Statistics {
 		this.answers = answers;
 	}
 
-	public int getQuestions() {
-		return questions;
+	public int getLectureQuestions() {
+		return lectureQuestions;
 	}
 
-	public void setQuestions(final int questions) {
-		this.questions = questions;
+	public void setLectureQuestions(final int questions) {
+		this.lectureQuestions = questions;
+	}
+
+	public int getPreparationQuestions() {
+		return preparationQuestions;
+	}
+
+	public void setPreparationQuestions(final int questions) {
+		this.preparationQuestions = questions;
+	}
+
+	public int getQuestions() {
+		return getLectureQuestions() + getPreparationQuestions();
 	}
 
 	public int getOpenSessions() {
@@ -57,6 +70,10 @@ public class Statistics {
 
 	public void setClosedSessions(final int closedSessions) {
 		this.closedSessions = closedSessions;
+	}
+
+	public int getSessions() {
+		return getOpenSessions() + getClosedSessions();
 	}
 
 	public int getActiveUsers() {
@@ -90,7 +107,9 @@ public class Statistics {
 				+ answers
 				+ closedSessions
 				+ openSessions
-				+ questions
+				+ lectureQuestions
+				+ preparationQuestions
+				+ interposedQuestions
 				+ loggedinUsers
 				).hashCode();
 	}
