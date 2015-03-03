@@ -66,6 +66,7 @@ public class Question {
 	private String gridType;
 	private String scaleFactor;
 	private String gridScaleFactor;
+    private int sequenceNr
 
 	public final String getType() {
 		return type;
@@ -410,6 +411,14 @@ public class Question {
 	public String getGridScaleFactor() {
 		return this.gridScaleFactor;
 	}
+    
+    public void setSequenceNr(int sequenceNr) {
+        this.sequenceNr = sequenceNr;
+    }
+    
+    public int getSequenceNr() {
+        return this.sequenceNr;
+    }
 
 	@Override
 	public final String toString() {
