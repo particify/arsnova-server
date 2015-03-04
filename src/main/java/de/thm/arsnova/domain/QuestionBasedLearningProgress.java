@@ -41,32 +41,29 @@ public class QuestionBasedLearningProgress implements LearningProgress {
 	}
 
 	private int calculateCourseProgress(CourseScore courseScore) {
-		int numQuestionsCorrect = numQuestionsCorrectForCourse(courseScore);
-		final double correctQuestionsOnAverage = (double)numQuestionsCorrect / (double)(courseScore.getQuestionCount());
 		// calculate percent, cap results to 100
-		return (int) Math.min(100, Math.round(correctQuestionsOnAverage*100));
+		return (int) Math.min(100, Math.round(correctAnswerRatio(courseScore)*100));
 	}
 
-	private int numQuestionsCorrectForCourse(CourseScore courseScore) {
-		// a question is seen as "correct" if and only if all participants have answered it correctly
-		int numQuestionsCorrect = 0;
+	private double correctAnswerRatio(CourseScore courseScore) {
+		double ratio = 0;
 		for (QuestionScore questionScore : courseScore) {
+			int numAnswers = questionScore.getUserCount();
+			int numAnswersCorrect = 0;
 			int requiredScore = questionScore.getMaximum();
 			if (!questionScore.hasScores()) {
 				continue;
 			}
-			boolean allCorrect = true;
 			for (UserScore userScore : questionScore) {
-				if (!userScore.hasScore(requiredScore)) {
-					allCorrect = false;
-					break;
+				if (userScore.hasScore(requiredScore)) {
+					numAnswersCorrect++;
 				}
 			}
-			if (allCorrect) {
-				numQuestionsCorrect++;
+			if (numAnswers != 0) {
+				ratio += (double)numAnswersCorrect / (numAnswers * courseScore.getQuestionCount());
 			}
 		}
-		return numQuestionsCorrect;
+		return ratio;
 	}
 
 	@Override

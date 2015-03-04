@@ -76,4 +76,79 @@ public class QuestionBasedLearningProgressTest {
 		assertEquals(expected, actual);
 	}
 
+	/**
+	 * If 99 users answer a question correctly, and 1 user does not, percentage should be 99%.
+	 */
+	@Test
+	public void shouldCalculatePercentageOfOneQuestionWithSomeWrongAnswers() {
+		CourseScore courseScore = new CourseScore();
+		courseScore.add("question", 10);
+		for (int i = 0; i < 99; i++) {
+			courseScore.add("question", new TestUser("user"+i).getUsername(), 10);
+		}
+		courseScore.add("question", new TestUser("user-with-a-wrong-answer").getUsername(), 0);
+
+		IDatabaseDao db = mock(IDatabaseDao.class);
+		when(db.getLearningProgress(null)).thenReturn(courseScore);
+		LearningProgress lp = new QuestionBasedLearningProgress(db);
+
+		int expected = 99;
+		int actual = lp.getCourseProgress(null).getCourseProgress();
+
+		assertEquals(expected, actual);
+	}
+
+	/**
+	 * Given two users and two questions: the first question is answered correctly by both users, while the second
+	 * is only answered correctly by one user. The first question should receive 100%, the second 50%. This should
+	 * result in an overall score of 75%.
+	 */
+	@Test
+	public void shouldCalculatePercentageOfMultipleQuestionsAndAnswers() {
+		CourseScore courseScore = new CourseScore();
+		// two questions
+		courseScore.add("question1", 10);
+		courseScore.add("question2", 10);
+		// two users
+		User u1 = new TestUser("user1");
+		User u2 = new TestUser("user2");
+		// four answers, last one is wrong
+		courseScore.add("question1", u1.getUsername(), 10);
+		courseScore.add("question1", u2.getUsername(), 10);
+		courseScore.add("question2", u1.getUsername(), 10);
+		courseScore.add("question2", u2.getUsername(), 0);
+
+		IDatabaseDao db = mock(IDatabaseDao.class);
+		when(db.getLearningProgress(null)).thenReturn(courseScore);
+		LearningProgress lp = new QuestionBasedLearningProgress(db);
+
+		int expected = 75;
+		int actual = lp.getCourseProgress(null).getCourseProgress();
+
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void shouldNotBeBiasedByPointsOrAnswerCount() {
+		CourseScore courseScore = new CourseScore();
+		// two questions
+		courseScore.add("question1", 1000);
+		courseScore.add("question2", 1);
+		// first question has many answers, all of them correct
+		for (int i = 0; i < 100; i++) {
+			courseScore.add("question1", new TestUser("user"+i).getUsername(), 1000);
+		}
+		// second question has one wrong answer
+		courseScore.add("question2",  new TestUser("another-user").getUsername(), 0);
+
+		IDatabaseDao db = mock(IDatabaseDao.class);
+		when(db.getLearningProgress(null)).thenReturn(courseScore);
+		LearningProgress lp = new QuestionBasedLearningProgress(db);
+
+		int expected = 50;
+		int actual = lp.getCourseProgress(null).getCourseProgress();
+
+		assertEquals(expected, actual);
+	}
+
 }
