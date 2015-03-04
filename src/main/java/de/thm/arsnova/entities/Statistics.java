@@ -28,6 +28,7 @@ public class Statistics {
 	private int activeUsers;
 	private int loggedinUsers;
 	private int interposedQuestions;
+	private int conceptQuestions;
 
 	public int getAnswers() {
 		return answers;
@@ -109,6 +110,14 @@ public class Statistics {
 		this.creators = creators;
 	}
 
+	public int getConceptQuestions() {
+		return conceptQuestions;
+	}
+
+	public void setConceptQuestions(int conceptQuestions) {
+		this.conceptQuestions = conceptQuestions;
+	}
+
 	@Override
 	public int hashCode() {
 		return (this.getClass().getName()
@@ -120,6 +129,7 @@ public class Statistics {
 				+ preparationQuestions
 				+ interposedQuestions
 				+ loggedinUsers
+				+ conceptQuestions
 				).hashCode();
 	}
 

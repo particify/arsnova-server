@@ -1111,6 +1111,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 					case "interposedQuestions":
 						stats.setInterposedQuestions(stats.getInterposedQuestions() + value);
 						break;
+					case "conceptQuestions":
+						stats.setConceptQuestions(stats.getConceptQuestions() + value);
+						break;
 					}
 				}
 			}
