@@ -114,6 +114,17 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		} else if (question.getPiRound() < 1 || question.getPiRound() > 2) {
 			question.setPiRound(1);
 		}
+        
+        // if SortIndex false, list is sorted so new question is appended to sorted list with (highest sequenceNr)++
+        if ("lecture".equals(question.getQuestionVariant()) {
+            if(session.getSortLectureQuestions()) {
+                question.setSequenceNr();
+            }
+        } else if ("preparation".equals(question.getQuestionVariant()) {
+            if(session.getSortPreparationQuestions()) {
+                question.setSequenceNr();
+            }
+        }
 
 		// convert imageurl to base64 if neccessary
 		if ("grid".equals(question.getQuestionType())) {
