@@ -111,10 +111,12 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
         // if SortIndex false, list is sorted so new question is appended to sorted list with (highest sequenceNr)++
         if ("lecture".equals(question.getQuestionVariant())) {
             if(session.getSortLectureQuestions()) {
+            	//Take a look at entities/Session.java
                 //question.setSequenceNr();
             }
         } else if ("preparation".equals(question.getQuestionVariant())) {
             if(session.getSortPreparationQuestions()) {
+            	//Take a look at entities/Session.java
                 //question.setSequenceNr();
             }
         }
