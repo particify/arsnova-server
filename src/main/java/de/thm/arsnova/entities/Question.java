@@ -440,12 +440,12 @@ public class Question {
 		return this.gridScaleFactor;
 	}
     
-    public void setSequenceNr(int sequenceNr) {
-        this.sequenceNr = sequenceNr;
+    public void setSequenceNo(int sequenceNo) {
+        this.sequenceNo = sequenceNo;
     }
     
     public int getSequenceNo() {
-        return sequenceNr;
+        return sequenceNo;
     }
 
 	@Override

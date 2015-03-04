@@ -119,12 +119,12 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
         if ("lecture".equals(question.getQuestionVariant())) {
             if(session.getSortLectureQuestions()) {
             	//Take a look at entities/Session.java
-                //question.setSequenceNr();
+                //question.setSequenceNo();
             }
         } else if ("preparation".equals(question.getQuestionVariant())) {
             if(session.getSortPreparationQuestions()) {
             	//Take a look at entities/Session.java
-                //question.setSequenceNr();
+                //question.setSequenceNo();
             }
         }
 
