@@ -549,7 +549,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		q.put("gridType", question.getGridType());
 		q.put("scaleFactor", question.getScaleFactor());
 		q.put("gridScaleFactor", question.getGridScaleFactor());
-        q.put("sequenceNr", question.getSequenceNr());
+        q.put("sequenceNo", question.getSequenceNo());
 
 		return q;
 	}
