@@ -134,6 +134,18 @@ public class LecturerQuestionController extends AbstractController {
 		}
 	}
 
+	@RequestMapping(value = "/sort", method = RequestMethod.POST)
+	public void publishQuestion(
+			@PathVariable final String questionId,
+			@RequestParam(required = false) final Boolean publish,
+			@RequestBody final Question question
+			) {
+		if (publish != null) {
+			question.setActive(publish);
+		}
+		questionService.update(question);
+	}
+
 	@RequestMapping(value = "/{questionId}/publishstatistics", method = RequestMethod.POST)
 	public void publishStatistics(
 			@PathVariable final String questionId,
