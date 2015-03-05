@@ -49,6 +49,7 @@ import com.corundumstudio.socketio.protocol.PacketType;
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.LearningProgressType;
+import de.thm.arsnova.events.ChangeLearningProgress;
 import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
 import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
 import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
@@ -517,5 +518,10 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	@Override
 	public void visit(StatusSessionEvent event) {
 		this.reportSessionStatus(event.getSession().getKeyword(), event.getSession().isActive());
+	}
+
+	@Override
+	public void visit(ChangeLearningProgress event) {
+		broadcastInSession(event.getSession().getKeyword(), "learningProgressChange", null);
 	}
 }

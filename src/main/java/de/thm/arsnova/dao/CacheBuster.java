@@ -20,6 +20,7 @@ package de.thm.arsnova.dao;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 
+import de.thm.arsnova.events.ChangeLearningProgress;
 import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
 import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
 import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
@@ -77,4 +78,7 @@ public class CacheBuster implements ICacheBuster, NovaEventVisitor {
 
 	@Override
 	public void visit(StatusSessionEvent event) {}
+
+	@Override
+	public void visit(ChangeLearningProgress changeLearningProgress) {}
 }

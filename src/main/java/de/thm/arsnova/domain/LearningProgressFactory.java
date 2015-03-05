@@ -19,9 +19,12 @@ package de.thm.arsnova.domain;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Component;
 
 import de.thm.arsnova.dao.IDatabaseDao;
+import de.thm.arsnova.events.ChangeLearningProgress;
 import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
 import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
 import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
@@ -37,10 +40,12 @@ import de.thm.arsnova.events.NovaEventVisitor;
 import de.thm.arsnova.events.StatusSessionEvent;
 
 @Component
-public class LearningProgressFactory implements NovaEventVisitor, ILearningProgressFactory {
+public class LearningProgressFactory implements NovaEventVisitor, ILearningProgressFactory, ApplicationEventPublisherAware {
 
 	@Autowired
 	private IDatabaseDao databaseDao;
+
+	private ApplicationEventPublisher publisher;
 
 	@Override
 	public LearningProgress createFromType(String progressType) {
@@ -59,31 +64,45 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
-	public void visit(NewQuestionEvent event) {}
+	public void visit(NewQuestionEvent event) {
+		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
+	}
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
-	public void visit(NewAnswerEvent event) {}
+	public void visit(NewAnswerEvent event) {
+		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
+	}
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
-	public void visit(DeleteAnswerEvent event) {}
+	public void visit(DeleteAnswerEvent event) {
+		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
+	}
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
-	public void visit(DeleteQuestionEvent event) {}
+	public void visit(DeleteQuestionEvent event) {
+		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
+	}
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
-	public void visit(DeleteAllQuestionsAnswersEvent event) {}
+	public void visit(DeleteAllQuestionsAnswersEvent event) {
+		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
+	}
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
-	public void visit(DeleteAllPreparationAnswersEvent event) {}
+	public void visit(DeleteAllPreparationAnswersEvent event) {
+		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
+	}
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
-	public void visit(DeleteAllLectureAnswersEvent event) {}
+	public void visit(DeleteAllLectureAnswersEvent event) {
+		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
+	}
 
 	@Override
 	public void visit(NewFeedbackEvent newFeedbackEvent) {}
@@ -93,5 +112,13 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 
 	@Override
 	public void visit(StatusSessionEvent statusSessionEvent) {}
+
+	@Override
+	public void visit(ChangeLearningProgress changeLearningProgress) {}
+
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+		this.publisher = publisher;
+	}
 
 }

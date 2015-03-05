@@ -43,4 +43,6 @@ public interface NovaEventVisitor {
 
 	void visit(StatusSessionEvent statusSessionEvent);
 
+	void visit(ChangeLearningProgress changeLearningProgress);
+
 }
