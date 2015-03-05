@@ -196,4 +196,8 @@ public interface IDatabaseDao {
 	SessionInfo importSession(User user, ImportExportSession importSession);
 
 	Statistics getStatistics();
+    
+    String getSaveOrderId(Session session);
+    
+    String saveQuestionSort(Session session, final String[] sortOrder);
 }

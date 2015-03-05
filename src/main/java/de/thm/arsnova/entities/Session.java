@@ -49,9 +49,6 @@ public class Session implements Serializable {
 	private String ppFaculty;
 	private String ppLevel;
 	private String sessionType;
-    
-    private boolean sortPreparationQuestions;
-    private boolean sortLectureQuestions;
 
 	private String _id;
 	private String _rev;
@@ -291,22 +288,6 @@ public class Session implements Serializable {
 	public void setSessionType(final String sessionType) {
 		this.sessionType = sessionType;
 	}
-    
-    public boolean getSortPreparationQuestions() {
-        return sortIndexPreparation;
-    }
-    
-    public void setSortPreparationQuestions(final boolean SortPreparationQuestions) {
-        this.sortIndexPreparation = sortIndexPreparation;
-    }
-    
-    public boolean getSortPreparationQuestions() {
-        return sortIndexPreparation;
-    }
-    
-    public void setSortLectureQuestions(final boolean SortLectureQuestions) {
-        this.sortIndexLecture = sortIndexLecture;
-    }
 
 	@Override
 	public String toString() {
