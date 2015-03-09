@@ -36,6 +36,7 @@ public class Answer {
 	private int answerCount = 1;
 	private boolean abstention;
 	private int abstentionCount;
+	private String answerImage;
 
 	public Answer() {
 		this.type = "skill_question_answer";
@@ -111,6 +112,14 @@ public class Answer {
 	@JsonIgnore
 	public final String getUser() {
 		return user;
+	}
+	
+	public String getAnswerImage() {
+		return answerImage;
+	}
+	
+	public void setAnswerImage(String answerImage) {
+		this.answerImage = answerImage;
 	}
 
 	public final void setUser(final String user) {
