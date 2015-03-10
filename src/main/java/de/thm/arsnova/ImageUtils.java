@@ -45,6 +45,10 @@ public class ImageUtils {
 	// Or whatever size you want to read in at a time.
 	private static final int CHUNK_SIZE = 4096;
 	
+	/**
+	 * {@link Pattern} used to check if a {@link String} starts with the
+	 * Base64-Mimetype Prefix and to extract information from the {@link String}.
+	 */
 	public static final Pattern BASE64_IMAGE_PREFIX_PATTERN = Pattern.compile("data:image/(.*);base64,(.*)");
 	
 
@@ -81,7 +85,7 @@ public class ImageUtils {
 	}
 	
 	/**
-	 * Checks if a String starts with the base 64 prefix.
+	 * Checks if a {@link String} starts with the Base64-Mimetype prefix.
 	 * 
 	 * @param maybeImage The Image as a base64 encoded {@link String} 
 	 * @return true if the string is a potentially a base 64 encoded image.
@@ -97,6 +101,18 @@ public class ImageUtils {
 			return BASE64_IMAGE_PREFIX_PATTERN.matcher(maybeImage).matches();
 	}
 	
+	/**
+	 * Rescales an image represented by a Base64-encoded {@link String}
+	 * 
+	 * @param originalImageString
+	 *            The original image represented by a Base64-encoded
+	 *            {@link String}
+	 * @param width
+	 *            the new width
+	 * @param height
+	 *            the new height
+	 * @return The rescaled Image as Base64-encoded {@link String}
+	 */
 	public static String rescaleImage(String originalImageString, final int width, final int height) {
 		if (!isBase64EncodedImage(originalImageString)) return null;
 		else {
