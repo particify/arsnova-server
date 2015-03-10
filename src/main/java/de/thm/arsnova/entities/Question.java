@@ -66,6 +66,7 @@ public class Question {
 	private String gridType;
 	private String scaleFactor;
 	private String gridScaleFactor;
+	private boolean imageQuestion;
 
 	public final String getType() {
 		return type;
@@ -181,6 +182,14 @@ public class Question {
 
 	public final int getDuration() {
 		return duration;
+	}
+	
+	public final boolean isImageQuestion() {
+		return imageQuestion;
+	}
+	
+	public void setImageQuestion(boolean imageQuestion) {
+		this.imageQuestion = imageQuestion;
 	}
 
 	public final void setDuration(final int duration) {
