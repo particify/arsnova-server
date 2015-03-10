@@ -17,12 +17,16 @@
  */
 package de.thm.arsnova;
 
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
@@ -40,6 +44,9 @@ public class ImageUtils {
 
 	// Or whatever size you want to read in at a time.
 	private static final int CHUNK_SIZE = 4096;
+	
+	public static final Pattern BASE64_IMAGE_PREFIX_PATTERN = Pattern.compile("data:image/(.*);base64,(.*)");
+	
 
 	private ImageUtils() {
 	}
@@ -71,6 +78,74 @@ public class ImageUtils {
 		}
 
 		return null;
+	}
+	
+	/**
+	 * Checks if a String starts with the base 64 prefix.
+	 * 
+	 * @param maybeImage The Image as a base64 encoded {@link String} 
+	 * @return true if the string is a potentially a base 64 encoded image.
+	 */
+	public static boolean isBase64EncodedImage(String maybeImage) {
+		if (maybeImage == null) {
+			return false;
+		}
+		else if (maybeImage.isEmpty()) {
+			return false;
+		}
+		else
+			return BASE64_IMAGE_PREFIX_PATTERN.matcher(maybeImage).matches();
+	}
+	
+	public static String rescaleImage(String originalImageString, final int width, final int height) {
+		if (!isBase64EncodedImage(originalImageString)) return null;
+		else {
+			Matcher imageMatcher = BASE64_IMAGE_PREFIX_PATTERN.matcher(originalImageString);
+			if (!imageMatcher.find()) {
+				// shouldn't ever happen, because the regex is already checked.
+				return null;
+			}
+			String extension = imageMatcher.group(1);
+			String base64String = imageMatcher.group(2);
+			
+			byte[] imageData = Base64.decodeBase64(base64String);
+			try {
+				BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(imageData));
+				BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+				Graphics2D g = newImage.createGraphics();
+				
+				final double ratio = ((double) originalImage.getWidth()) / ((double) originalImage.getHeight());
+				
+				int x = 0, y = 0, w = width, h = height;
+				if (originalImage.getWidth() > originalImage.getHeight()) {
+					final int newWidth = (int) Math.round((float) height * ratio);
+					x = -(newWidth - width) >> 1;
+					w = newWidth;
+				} else if (originalImage.getWidth() < originalImage.getHeight()) {
+					final int newHeight = (int) Math.round((float) width / ratio);
+					y = -(newHeight - height) >> 1;
+					h = newHeight;
+				}
+				g.drawImage(originalImage, x, y, w, h, null);
+				g.dispose();
+				
+				StringBuilder result = new StringBuilder();
+				result.append("data:image/");
+				result.append(extension);
+				result.append(";base64,");
+				
+				ByteArrayOutputStream output = new ByteArrayOutputStream();
+				ImageIO.write(newImage, extension, output);
+				
+				output.flush();
+				output.close();
+				
+				return Base64.encodeBase64String(output.toByteArray());
+			} catch (IOException e) {
+				LOGGER.error(e.getLocalizedMessage());
+				return null;
+			}
+		}
 	}
 
 	/**
