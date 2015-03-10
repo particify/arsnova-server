@@ -548,6 +548,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		q.put("gridType", question.getGridType());
 		q.put("scaleFactor", question.getScaleFactor());
 		q.put("gridScaleFactor", question.getGridScaleFactor());
+		q.put("imageQuestion", question.isImageQuestion());
 
 		return q;
 	}
@@ -593,6 +594,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			q.put("gridType", question.getGridType());
 			q.put("scaleFactor", question.getScaleFactor());
 			q.put("gridScaleFactor", question.getGridScaleFactor());
+			q.put("imageQuestion", question.isImageQuestion());
 
 			database.saveDocument(q);
 			question.set_rev(q.getRev());
