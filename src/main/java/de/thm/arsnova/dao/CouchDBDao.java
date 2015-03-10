@@ -1257,6 +1257,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		a.put("piRound", answer.getPiRound());
 		a.put("abstention", answer.isAbstention());
 		a.put("answerImage", answer.getAnswerImage());
+		a.put("answerThumbnailImage", answer.getAnswerThumbnailImage());
 		AnswerQueueElement answerQueueElement = new AnswerQueueElement(session, question, answer, user);
 		this.answerQueue.offer(new AbstractMap.SimpleEntry<Document, AnswerQueueElement>(a, answerQueueElement));
 		return answer;
@@ -1306,6 +1307,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			a.put("abstention", answer.isAbstention());
 			a.put("questionValue", answer.getQuestionValue());
 			a.put("answerImage", answer.getAnswerImage());
+			
+			a.put("answerThumbnailImage", answer.getAnswerThumbnailImage());
 			database.saveDocument(a);
 			answer.set_rev(a.getRev());
 			return answer;

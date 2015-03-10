@@ -37,6 +37,7 @@ public class Answer {
 	private boolean abstention;
 	private int abstentionCount;
 	private String answerImage;
+	private String answerThumbnailImage;
 
 	public Answer() {
 		this.type = "skill_question_answer";
@@ -120,6 +121,14 @@ public class Answer {
 	
 	public void setAnswerImage(String answerImage) {
 		this.answerImage = answerImage;
+	}
+	
+	public String getAnswerThumbnailImage() {
+		return answerThumbnailImage;
+	}
+	
+	public void setAnswerThumbnailImage(String answerThumbnailImage) {
+		this.answerThumbnailImage = answerThumbnailImage;
 	}
 
 	public final void setUser(final String user) {
