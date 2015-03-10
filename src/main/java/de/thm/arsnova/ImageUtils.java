@@ -140,7 +140,9 @@ public class ImageUtils {
 				output.flush();
 				output.close();
 				
-				return Base64.encodeBase64String(output.toByteArray());
+				result.append(Base64.encodeBase64String(output.toByteArray()));
+				
+				return result.toString();
 			} catch (IOException e) {
 				LOGGER.error(e.getLocalizedMessage());
 				return null;
