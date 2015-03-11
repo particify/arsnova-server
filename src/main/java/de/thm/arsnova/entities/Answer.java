@@ -36,7 +36,9 @@ public class Answer {
 	private int answerCount = 1;
 	private boolean abstention;
 	private int abstentionCount;
+	@JsonIgnore
 	private String answerImage;
+	@JsonIgnore
 	private String answerThumbnailImage;
 
 	public Answer() {
@@ -115,6 +117,7 @@ public class Answer {
 		return user;
 	}
 	
+	@JsonIgnore
 	public String getAnswerImage() {
 		return answerImage;
 	}
@@ -123,6 +126,7 @@ public class Answer {
 		this.answerImage = answerImage;
 	}
 	
+	@JsonIgnore
 	public String getAnswerThumbnailImage() {
 		return answerThumbnailImage;
 	}

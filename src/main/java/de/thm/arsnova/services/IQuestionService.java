@@ -25,6 +25,8 @@ import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.transport.ThumbnailRequest;
+import de.thm.arsnova.entities.transport.ThumbnailResponse;
 
 public interface IQuestionService {
 	Question saveQuestion(Question question);
@@ -136,4 +138,8 @@ public interface IQuestionService {
 	void deleteAllLectureAnswers(String sessionkey);
 
 	int getAbstentionAnswerCount(String questionId);
+
+	ThumbnailResponse getThumbnails(String questionId, ThumbnailRequest thumbRequest);
+
+	String getImage(String questionId, String answerId);
 }

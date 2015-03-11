@@ -33,6 +33,9 @@ import javax.imageio.ImageIO;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+
+import de.thm.arsnova.entities.Answer;
 
 /**
  * Util class for image operations.
@@ -51,7 +54,21 @@ public class ImageUtils {
 	 */
 	public static final Pattern BASE64_IMAGE_PREFIX_PATTERN = Pattern.compile("data:image/(.*);base64,(.*)");
 	
-
+	/* default value is 200 pixel in width, set the value in the configuration file */
+	private static int THUMB_WIDTH = 200;
+	/* default value is 200 pixel in height, set the value in the configuration file */
+	private static int THUMB_HEIGHT = 200;
+	
+	@Value(value = "{imageupload.thumbnail.width}")
+	public void setThumbWidth(int thumbWidth) {
+		ImageUtils.THUMB_WIDTH = thumbWidth;
+	}
+	
+	@Value(value = "{imageupload.thumbnail.height}")
+	public void setThumbHeight(int thumbHeight) {
+		ImageUtils.THUMB_HEIGHT = thumbHeight;
+	}
+	
 	private ImageUtils() {
 	}
 
@@ -113,7 +130,7 @@ public class ImageUtils {
 	 *            the new height
 	 * @return The rescaled Image as Base64-encoded {@link String}
 	 */
-	public static String rescaleImage(String originalImageString, final int width, final int height) {
+	public static String createCover(String originalImageString, final int width, final int height) {
 		if (!isBase64EncodedImage(originalImageString)) return null;
 		else {
 			Matcher imageMatcher = BASE64_IMAGE_PREFIX_PATTERN.matcher(originalImageString);
@@ -163,6 +180,13 @@ public class ImageUtils {
 				LOGGER.error(e.getLocalizedMessage());
 				return null;
 			}
+		}
+	}
+	
+	public static void generateThumbnailImage(Answer answer) {
+		if (!isBase64EncodedImage(answer.getAnswerThumbnailImage())) {
+			final String thumbImage = createCover(answer.getAnswerImage(), THUMB_WIDTH, THUMB_HEIGHT);
+			answer.setAnswerThumbnailImage(thumbImage);
 		}
 	}
 
