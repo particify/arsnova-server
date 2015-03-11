@@ -17,115 +17,43 @@
  */
 package de.thm.arsnova.entities;
 
-public class Statistics {
+public class SortOrder {
 
-	private int answers;
-	private int lectureQuestions;
-	private int preparationQuestions;
-	private int openSessions;
-	private int closedSessions;
-	private int activeUsers;
-	private int loggedinUsers;
-	private int interposedQuestions;
+	private String sortVariant;
+    private String[] sortOrder;
 
-	public int getAnswers() {
-		return answers;
+	private String _id;
+	private String _rev;
+    
+    public void setSortVariant(final String sortVariant) {
+        this.sortVariant = sortVariant;
+    }
+    
+    public String getSortVariant() {
+        return this.sortVariant;
+    }
+    
+    public void setSortOrder(final String[] sortOrder) {
+        this.sortOrder = sortOrder;
+    }
+    
+    public String[] getSortOrder() {
+        return this.sortOrder;
+    }
+
+	public void set_id(final String id) {
+		_id = id;
 	}
 
-	public void setAnswers(final int answers) {
-		this.answers = answers;
+	public String get_id() {
+		return _id;
 	}
 
-	public int getLectureQuestions() {
-		return lectureQuestions;
+	public void set_rev(final String rev) {
+		_rev = rev;
 	}
 
-	public void setLectureQuestions(final int questions) {
-		this.lectureQuestions = questions;
-	}
-
-	public int getPreparationQuestions() {
-		return preparationQuestions;
-	}
-
-	public void setPreparationQuestions(final int questions) {
-		this.preparationQuestions = questions;
-	}
-
-	public int getQuestions() {
-		return getLectureQuestions() + getPreparationQuestions();
-	}
-
-	public int getOpenSessions() {
-		return openSessions;
-	}
-
-	public void setOpenSessions(final int openSessions) {
-		this.openSessions = openSessions;
-	}
-
-	public int getClosedSessions() {
-		return closedSessions;
-	}
-
-	public void setClosedSessions(final int closedSessions) {
-		this.closedSessions = closedSessions;
-	}
-
-	public int getSessions() {
-		return getOpenSessions() + getClosedSessions();
-	}
-
-	public int getActiveUsers() {
-		return activeUsers;
-	}
-
-	public void setActiveUsers(final int activeUsers) {
-		this.activeUsers = activeUsers;
-	}
-
-	public int getLoggedinUsers() {
-		return loggedinUsers;
-	}
-
-	public void setLoggedinUsers(final int loggedinUsers) {
-		this.loggedinUsers = loggedinUsers;
-	}
-
-	public int getInterposedQuestions() {
-		return interposedQuestions;
-	}
-
-	public void setInterposedQuestions(int interposedQuestions) {
-		this.interposedQuestions = interposedQuestions;
-	}
-
-	@Override
-	public int hashCode() {
-		return (this.getClass().getName()
-				+ activeUsers
-				+ answers
-				+ closedSessions
-				+ openSessions
-				+ lectureQuestions
-				+ preparationQuestions
-				+ interposedQuestions
-				+ loggedinUsers
-				).hashCode();
-	}
-
-	@Override
-	public boolean equals(final Object obj) {
-		if (obj == null) {
-			return false;
-		}
-		if (obj == this) {
-			return true;
-		}
-		if (obj instanceof Statistics) {
-			final Statistics other = (Statistics) obj;
-			return hashCode() == other.hashCode();
-		}
-		return false;
-	}
+	public String get_rev() {
+		return _rev;
+	} 
 }

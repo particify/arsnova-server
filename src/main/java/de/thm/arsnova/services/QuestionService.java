@@ -47,6 +47,7 @@ import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
 import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
 import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
@@ -114,19 +115,6 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		} else if (question.getPiRound() < 1 || question.getPiRound() > 2) {
 			question.setPiRound(1);
 		}
-        
-        // if SortIndex false, list is sorted so new question is appended to sorted list with (highest sequenceNr)++
-        if ("lecture".equals(question.getQuestionVariant())) {
-            if(session.getSortLectureQuestions()) {
-            	//Take a look at entities/Session.java
-                //question.setSequenceNo();
-            }
-        } else if ("preparation".equals(question.getQuestionVariant())) {
-            if(session.getSortPreparationQuestions()) {
-            	//Take a look at entities/Session.java
-                //question.setSequenceNo();
-            }
-        }
 
 		// convert imageurl to base64 if neccessary
 		if ("grid".equals(question.getQuestionType())) {
@@ -145,6 +133,12 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				throw new BadRequestException();
 			}
 		}
+        
+        SortOrder sortOrder = databaseDao.getSortOrder(session, question.getQuestionVariant);
+        if (sortOrder != null) {
+            
+        }
+        
 
 		final Question result = databaseDao.saveQuestion(session, question);
 		final NewQuestionEvent event = new NewQuestionEvent(this, session, result);

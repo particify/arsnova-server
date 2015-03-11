@@ -311,13 +311,5 @@ public class Session implements Serializable {
 		Session other = (Session) obj;
 		return this.keyword.equals(other.keyword);
 	}
-	// Sorting
-	public boolean getSortLectureQuestions(){
-		return false;
-	}
-	// Sorting
-	public boolean getSortPreparationQuestions(){
-		return false;
-	}
 
 }

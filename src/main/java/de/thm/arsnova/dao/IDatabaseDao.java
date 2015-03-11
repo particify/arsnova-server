@@ -31,6 +31,7 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 
 public interface IDatabaseDao {
@@ -197,7 +198,7 @@ public interface IDatabaseDao {
 
 	Statistics getStatistics();
     
-    String getSaveOrderId(Session session);
+    String getSortOrder(Session session, String questionVariant);
     
-    String saveQuestionSort(Session session, final String[] sortOrder);
+    String createOrUpdateQuestionSortOrder(Session session, SortOrder sortOrder);
 }
