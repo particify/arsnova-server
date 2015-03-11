@@ -128,4 +128,8 @@ public interface IQuestionService {
 	void deleteAllLectureAnswers(String sessionkey);
 
 	int getAbstentionAnswerCount(String questionId);
+    
+    String getSubjectSortType(String sessionkey, String isPreparation);
+    
+    String getQuestionSortType(String sessionkey, String isPreparation);
 }

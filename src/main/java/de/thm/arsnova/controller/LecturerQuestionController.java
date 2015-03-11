@@ -121,18 +121,6 @@ public class LecturerQuestionController extends AbstractController {
 		}
 	}
 
-	@RequestMapping(value = "/sort", method = RequestMethod.POST)
-	public void publishQuestion(
-			@PathVariable final String questionId,
-			@RequestParam(required = false) final Boolean publish,
-			@RequestBody final Question question
-			) {
-		if (publish != null) {
-			question.setActive(publish);
-		}
-		questionService.update(question);
-	}
-
 	@RequestMapping(value = "/{questionId}/publishstatistics", method = RequestMethod.POST)
 	public void publishStatistics(
 			@PathVariable final String questionId,
@@ -425,5 +413,46 @@ public class LecturerQuestionController extends AbstractController {
 		} else {
 			return questionService.getTotalAnswerCount(sessionkey);
 		}
+	}
+
+	@RequestMapping(value = "/setsort", method = RequestMethod.POST)
+	public void setSubjectSortOrder(
+			@PathVariable final String questionId,
+			@RequestParam(required = false) final Boolean publish,
+			@RequestBody final Question question
+			) {
+		if (publish != null) {
+			question.setActive(publish);
+		}
+		questionService.update(question);
+	}
+
+	@RequestMapping(value = "/getsort", method = RequestMethod.GET)
+	public String getSubjectSortType(
+			@RequestParam(required = true) final String sessionkey,
+            @RequestParam(required = true) final String isPreparation
+			) {
+		return questionService.getSubjectSortType(sessionkey, isPreparation);
+	}
+
+	@RequestMapping(value = "/setsort", method = RequestMethod.POST)
+	public void setQuestionSortOrder(
+			@PathVariable final String questionId,
+			@RequestParam(required = false) final Boolean publish,
+			@RequestBody final Question question
+			) {
+		if (publish != null) {
+			question.setActive(publish);
+		}
+		questionService.update(question);
+	}
+
+	@RequestMapping(value = "/getsort", method = RequestMethod.GET)
+	public String getQuestionSortType(
+			@RequestParam(required = true) final String sessionkey,
+			@RequestParam(required = true) final String subject,
+            @RequestParam(required = true) final String isPreparation
+			) {
+		return questionService.getQuestionSortType(sessionkey, subject, isPreparation);
 	}
 }
