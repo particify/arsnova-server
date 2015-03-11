@@ -132,15 +132,22 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				LOGGER.error("Could not save file. File is too large with " + fileSize + " Byte.");
 				throw new BadRequestException();
 			}
-		}
-        
-        SortOrder sortOrder = databaseDao.getSortOrder(session, question.getQuestionVariant);
-        if (sortOrder != null) {
-            
-        }
-        
+		}        
 
 		final Question result = databaseDao.saveQuestion(session, question);
+        
+        SortOrder sortOrder = databaseDao.getSortOrder(session.get_id(), question.getQuestionVariant(), question.getSubject());
+        if (sortOrder != null) {
+            if("alphabet____work".equals(sortOrder.getSortType())) {
+                
+            }
+            else {
+                String[] tmp = sortOrder.getSortOrder();
+                tmp.add(question.get_id());
+                sortOrder.setSortOrder(tmp);
+            }
+        }
+        
 		final NewQuestionEvent event = new NewQuestionEvent(this, session, result);
 		this.publisher.publishEvent(event);
 
@@ -782,4 +789,16 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
 		this.publisher = publisher;
 	}
+    
+    @Override
+    public String getSubjectSortType(String sessionkey, String isPreparation) {
+        SortOrder sortOrder = databaseDao.getSortOrder(sessionkey, isPreparation, "");
+        return SortOrder.getSortType();
+    }
+    
+    @Override
+    public String getQuestionSortType(String session, String subject, String isPreparation) {
+        SortOrder sortOrder = databaseDao.getSortOrder(sessionkey, isPreparation, subject);
+        return SortOrder.getSortType();
+    }
 }

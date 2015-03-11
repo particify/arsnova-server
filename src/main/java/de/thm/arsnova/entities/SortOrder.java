@@ -19,18 +19,45 @@ package de.thm.arsnova.entities;
 
 public class SortOrder {
 
-	private String sortVariant;
+    private String sessionId;
+	private String sortType;
+    private String questionVariant;
+    private String subject;
     private String[] sortOrder;
 
 	private String _id;
 	private String _rev;
     
-    public void setSortVariant(final String sortVariant) {
+    public void setSessionId(final String sessionId) {
+        this.sessionId = sessionId;
+    }
+    
+    public String getSessionId() {
+        return this.sessionId;   
+    }
+    
+    public void setSortType(final String sortType) {
+        this.sortType = sortType;
+    }
+    
+    public String getSortType() {
+        return this.SortType;
+    }
+    
+    public void setQuestionVariant(final String questionVariant) {
         this.sortVariant = sortVariant;
     }
     
-    public String getSortVariant() {
-        return this.sortVariant;
+    public String getQuestionVariant() {
+        return this.questionVariant;
+    }
+    
+    public void setSubject(final String subject) {
+        this.subject = subject;
+    }
+    
+    public String getSubject() {
+        return this.subject;
     }
     
     public void setSortOrder(final String[] sortOrder) {
