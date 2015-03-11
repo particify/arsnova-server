@@ -344,7 +344,8 @@ public class LecturerQuestionController extends AbstractController {
 	@RequestMapping(value = "/{questionId}/thumbs", method = RequestMethod.POST)
 	public ThumbnailResponse getThumbnails(
 			@PathVariable final String questionId,
-			@RequestBody final ThumbnailRequest thumbRequest
+			@RequestBody final ThumbnailRequest thumbRequest,
+			final HttpServletResponse response
 			) {
 		
 		return questionService.getThumbnails(questionId, thumbRequest);
@@ -353,7 +354,8 @@ public class LecturerQuestionController extends AbstractController {
 	@RequestMapping(value = "/{questionId}/answer/{answerId}/image", method = RequestMethod.GET)
 	public String getImage(
 			@PathVariable final String questionId,
-			@PathVariable final String answerId
+			@PathVariable final String answerId,
+			final HttpServletResponse response
 			) {
 		
 		return questionService.getImage(questionId, answerId);
