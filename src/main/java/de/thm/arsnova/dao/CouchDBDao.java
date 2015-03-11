@@ -71,6 +71,7 @@ import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.VisitedSession;
+import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.transport.AnswerQueueElement;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.ImportExportSession.ImportExportQuestion;
@@ -1381,22 +1382,26 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Cacheable("lecturequestions")
 	@Override
 	public List<Question> getLectureQuestionsForUsers(final Session session) {
-		String viewName = "question_sort/lecture_question_by_session_sorted_for_all";
-		List<Question> result = getQuestions(new NovaView(viewName), session);
-        if(result == null) {
+        SortOrder sortOrder = getSortOrder(session, "lecture");
+        if (sordOrder != null) {
+            //get Questionds via sortOrder   List<Question> result =
+        }
+        else {
             String viewName = "skill_question/lecture_question_by_session_for_all";
-            result = getQuestions(new NovaView(viewName), session);
+            List<Question> result = getQuestions(new NovaView(viewName), session);
         }
         return result;
 	}
 
 	@Override
 	public List<Question> getLectureQuestionsForTeachers(final Session session) {
-		String viewName = "question_sort/lecture_question_by_session_sorted";
-		List<Question> result = getQuestions(new NovaView(viewName), session);
-        if (result == null) {
+        SortOrder sortOrder = getSortOrder(session, "lecture");
+        if (sordOrder != null) {
+            //get Questionds via sortOrder
+        }
+		else {
             String viewName = "skill_question/lecture_question_by_session";
-            result = getQuestions(new NovaView(viewName), session);
+            List<Question> result = getQuestions(new NovaView(viewName), session);
         }
         return result;
 	}
@@ -1417,22 +1422,25 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Cacheable("preparationquestions")
 	@Override
 	public List<Question> getPreparationQuestionsForUsers(final Session session) {
-		String viewName = "question_sort/preparation_question_by_session_sorted_for_all";
-		List<Question> result = getQuestions(new NovaView(viewName), session);
-        if (result == null) {
-            String viewName = "skill_question/preparation_question_by_session_for_all";
-            result = getQuestions(new NovaView(viewName), session);
+        SortOrder sortOrder = getSortOrder(session, "preparation");
+        if (sordOrder != null) {
+            //get Questionds via sortOrder
         }
-        return result;
+		else {
+            String viewName = "skill_question/preparation_question_by_session_for_all";
+            return getQuestions(new NovaView(viewName), session);
+        }
 	}
 
 	@Override
 	public List<Question> getPreparationQuestionsForTeachers(final Session session) {
-        String viewName = "question_sort/preparation_question_by_session_sorted";
-		List<Question> result = getQuestions(new NovaView(viewName), session);
-        if (result == null) {
+        SortOrder sortOrder = getSortOrder(session, "preparation");
+        if (sordOrder != null) {
+            //get Questionds via sortOrder
+        }
+		else {
             String viewName = "skill_question/preparation_question_by_session";
-            result = getQuestions(new NovaView(viewName), session);
+            return getQuestions(new NovaView(viewName), session);
         }
         return result;
 	}
@@ -1930,22 +1938,52 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return info;
 	}
     
-    @OVerride
-    String getSaveOrderId(Session session) {
-        String view = "question_sort/get_id";    
+    @Override
+    SortOrder getSortOrder(Session session, String questionVariant) {
+        if ("preparation".equals(questionVariant)) {
+            String viewString = "sort_order/preparation_question_sort_order_by_session";    
+        }
+        else if ("lecture".euals(questionVariant)) {
+            String viewString = "sort_order/lecture_question_sort_order_by_session";
+        }
+		NovaView view = new NovaView(viewString);
+		view.setKey(session.get_id());
+		ViewResults results = this.getDatabase().view(view);
+
+		if (results.getJSONArray("rows").optJSONObject(0) == null) {
+			return null;
+		}
+
+		return (SortOrder) JSONObject.toBean(
+			results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
+			SortOrder.class
+		);
     }
     
     @Override
-    String saveQuestionSort(Session session, final String[] sortOrder) {
-		final Document a = new Document();
-		a.put("type", "question_sort");
-		a.put("sessionId", session.getSessionId());
-        a.put("sortOrder", sortOrder);
+    SortOrder createOrUpdateQuestionSortOrder(Session session, SortOrder sortOrder) {
 		try {
-			database.saveDocument(a);
-		} catch (final IOException e) {
-			return null;
+			String id = sortOrder.get_id();
+			String rev = sortOrder.get_rev();
+			Document d = new Document();
+
+			if (null != id) {
+				d = database.getDocument(id, rev);
+			}
+
+			d.put("type", "sort_order");
+            d.put("sessionId", session.get_id());
+            d.put("questionVariant", sortOrder.getQuestionVariant());
+            d.put("sortOrder", sortOrder.getSortOrder());
+
+			database.saveDocument(d, id);
+			sortOrder.setId(d.getId());
+			sortOrder.setRev(d.getRev());
+
+			return sotOrder;
+		} catch (IOException e) {
+			LOGGER.error("Could not save user {}", user);
 		}
-        return sortOrder;
+        return null;
     }
 }
