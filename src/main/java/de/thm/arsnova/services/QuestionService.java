@@ -463,6 +463,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 
 		Answer theAnswer = answer.generateAnswerEntity(user, question);
+		if ("freetext".equals(theAnswer.getType())) {
+			ImageUtils.generateThumbnailImage(theAnswer);
+		}
 
 		return databaseDao.saveAnswer(theAnswer, user, question, getSession(question.getSessionKeyword()));
 	}
@@ -477,6 +480,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 
 		final Question question = getQuestion(answer.getQuestionId());
+		if ("freetext".equals(answer.getType())) {
+			ImageUtils.generateThumbnailImage(answer);
+		}
 		final Answer result = databaseDao.updateAnswer(realAnswer);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		this.publisher.publishEvent(new NewAnswerEvent(this, session, result, user, question));
