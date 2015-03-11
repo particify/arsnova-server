@@ -62,6 +62,8 @@ import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
 import de.thm.arsnova.events.NovaEventVisitor;
+import de.thm.arsnova.events.PiRoundDelayedStartEvent;
+import de.thm.arsnova.events.PiRoundEndEvent;
 import de.thm.arsnova.events.StatusSessionEvent;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.exceptions.NoContentException;
@@ -472,6 +474,22 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 		// We do not know which user's answer was deleted, so we can't update his 'unanswered' list of questions...
 		broadcastInSession(sessionKey, "countLectureQuestionAnswers", questionService.countLectureQuestionAnswersInternal(sessionKey));
 		broadcastInSession(sessionKey, "countPreparationQuestionAnswers", questionService.countPreparationQuestionAnswersInternal(sessionKey));
+	}
+
+	@Async
+	@Override
+	public void visit(PiRoundDelayedStartEvent event) {
+		final String sessionKey = event.getSession().getKeyword();
+
+		broadcastInSession(sessionKey, "startDelayedPiRound", event.getPiRoundInformations());
+	}
+
+	@Async
+	@Override
+	public void visit(PiRoundEndEvent event) {
+		final String sessionKey = event.getSession().getKeyword();
+
+		broadcastInSession(sessionKey, "endPiRound", event.getQuestionId());
 	}
 
 	@Override

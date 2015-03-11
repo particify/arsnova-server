@@ -45,4 +45,8 @@ public interface NovaEventVisitor {
 
 	void visit(ChangeLearningProgress changeLearningProgress);
 
+	void visit(PiRoundDelayedStartEvent piRoundDelayedStartEvent);
+
+	void visit(PiRoundEndEvent piRoundEndEvent);
+
 }

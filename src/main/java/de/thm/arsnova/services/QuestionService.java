@@ -21,9 +21,12 @@ import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import de.thm.arsnova.exceptions.ForbiddenException;
 
@@ -53,6 +56,8 @@ import de.thm.arsnova.events.DeleteQuestionEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
+import de.thm.arsnova.events.PiRoundDelayedStartEvent;
+import de.thm.arsnova.events.PiRoundEndEvent;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
@@ -72,6 +77,8 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	private ApplicationEventPublisher publisher;
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(QuestionService.class);
+
+	private HashMap<String, Timer> timerList = new HashMap<String, Timer>();
 
 	public void setDatabaseDao(final IDatabaseDao databaseDao) {
 		this.databaseDao = databaseDao;
@@ -188,6 +195,61 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 		final DeleteQuestionEvent event = new DeleteQuestionEvent(this, session);
 		this.publisher.publishEvent(event);
+	}
+
+	public void startNewPiRound(final String questionId, User user) {
+		if(null == user) {
+			user = userService.getCurrentUser();
+		}
+
+		cancelDelayedPiRoundChange(questionId);
+
+		final Question question = databaseDao.getQuestion(questionId);
+		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+
+		question.setPiRound(question.getPiRound() + 1);
+		question.setActive(false);
+		update(question, user);
+
+		this.publisher.publishEvent(new PiRoundEndEvent(this, session, question));
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
+	public void startNewPiRoundDelayed(final String questionId, final int time) {
+		final Timer timer = new Timer();
+		final Date date = new Date();
+		final Date endDate = new Date(date.getTime() + (time * 1000));
+		final IQuestionService questionService = this;
+		final User user = userService.getCurrentUser();
+		final Question question = databaseDao.getQuestion(questionId);
+		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+
+		cancelDelayedPiRoundChange(questionId);
+
+		timer.schedule(new TimerTask() {
+			public void run() {
+				questionService.startNewPiRound(questionId, user);
+			}
+		}, endDate);
+
+		timerList.put(questionId, timer);
+		question.setPiRoundActive(true);
+		question.setPiRoundStartTime(date.getTime());
+		question.setPiRoundEndTime(endDate.getTime());
+		update(question);
+
+		this.publisher.publishEvent(new PiRoundDelayedStartEvent(this, session, question));
+	}
+
+	public void cancelDelayedPiRoundChange(final String questionId) {
+		Timer timer = timerList.get(questionId);
+
+		if(null != timer) {
+			timer.cancel();
+			timerList.remove(questionId);
+			timer.purge();
+		}
 	}
 
 	private Session getSessionWithAuthCheck(final String sessionKeyword) {
@@ -425,12 +487,18 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public Question update(final Question question) {
+		final User user = userService.getCurrentUser();
+		return update(question, user);
+	}
+	
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public Question update(final Question question, User user) {
 		final Question oldQuestion = databaseDao.getQuestion(question.get_id());
 		if (null == oldQuestion) {
 			throw new NotFoundException();
 		}
 
-		final User user = userService.getCurrentUser();
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();

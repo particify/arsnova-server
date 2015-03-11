@@ -84,6 +84,19 @@ public class LecturerQuestionController extends AbstractController {
 		}
 	}
 
+	@RequestMapping(value = "/{questionId}/startNewPiRound", method = RequestMethod.GET)
+	public void startSecondPiRound(
+			@PathVariable final String questionId,
+			@RequestParam(value = "time", defaultValue = "0", required = false) final int time
+			) {
+
+		if(time == 0) {
+			questionService.startNewPiRound(questionId, null);
+		} else {
+			questionService.startNewPiRoundDelayed(questionId, time);
+		}
+	}
+
 	@RequestMapping(value = "/{questionId}/publish", method = RequestMethod.POST)
 	public void publishQuestion(
 			@PathVariable final String questionId,

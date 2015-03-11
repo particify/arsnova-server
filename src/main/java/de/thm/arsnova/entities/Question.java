@@ -17,6 +17,7 @@
  */
 package de.thm.arsnova.entities;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class Question {
@@ -38,6 +39,9 @@ public class Question {
 	private int number;
 	private int duration;
 	private int piRound;
+	private long piRoundEndTime;
+	private long piRoundStartTime;
+	private boolean piRoundActive;
 	private boolean showStatistic; // sic
 	private boolean showAnswer;
 	private boolean abstention;
@@ -193,6 +197,30 @@ public class Question {
 
 	public void setPiRound(final int piRound) {
 		this.piRound = piRound;
+	}
+
+	public long getPiRoundEndTime() {
+		return piRoundEndTime;
+	}
+
+	public void setPiRoundEndTime(long piRoundEndTime) {
+		this.piRoundEndTime = piRoundEndTime;
+	}
+
+	public long getPiRoundStartTime() {
+		return piRoundStartTime;
+	}
+
+	public void setPiRoundStartTime(long piRoundStartTime) {
+		this.piRoundStartTime = piRoundStartTime;
+	}
+
+	public boolean isPiRoundActive() {
+		return piRoundActive;
+	}
+
+	public void setPiRoundActive(boolean piRoundActive) {
+		this.piRoundActive = piRoundActive;
 	}
 
 	public boolean isShowStatistic() {

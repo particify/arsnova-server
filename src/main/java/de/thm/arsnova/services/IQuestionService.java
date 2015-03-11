@@ -41,6 +41,12 @@ public interface IQuestionService {
 
 	void deleteAllQuestions(String sessionKeyword);
 
+	void startNewPiRound(String questionId, User user);
+
+	void startNewPiRoundDelayed(String questionId, int time);
+
+	public void cancelDelayedPiRoundChange(final String questionId);
+
 	List<String> getUnAnsweredQuestionIds(String sessionKey);
 
 	Answer getMyAnswer(String questionId);
@@ -68,6 +74,8 @@ public interface IQuestionService {
 	InterposedQuestion readInterposedQuestionInternal(String questionId, User user);
 
 	Question update(Question question);
+
+	Question update(Question question, User user);
 
 	void deleteAnswers(String questionId);
 
