@@ -139,5 +139,5 @@ public interface IQuestionService {
     
     String getSubjectSortType(String sessionkey, String isPreparation);
     
-    String getQuestionSortType(String sessionkey, String isPreparation);
+    String getQuestionSortType(String sessionkey, String isPreparation, String subject);
 }

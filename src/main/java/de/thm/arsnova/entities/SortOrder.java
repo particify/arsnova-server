@@ -41,11 +41,11 @@ public class SortOrder {
     }
     
     public String getSortType() {
-        return this.SortType;
+        return this.sortType;
     }
     
     public void setQuestionVariant(final String questionVariant) {
-        this.sortVariant = sortVariant;
+        this.questionVariant = questionVariant;
     }
     
     public String getQuestionVariant() {

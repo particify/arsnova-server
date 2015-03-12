@@ -428,7 +428,7 @@ public class LecturerQuestionController extends AbstractController {
 		}
 	}
 
-	@RequestMapping(value = "/setsort", method = RequestMethod.POST)
+	@RequestMapping(value = "/setsubjectsort", method = RequestMethod.POST)
 	public void setSubjectSortOrder(
 			@PathVariable final String questionId,
 			@RequestParam(required = false) final Boolean publish,
@@ -437,10 +437,10 @@ public class LecturerQuestionController extends AbstractController {
 		if (publish != null) {
 			question.setActive(publish);
 		}
-		questionService.update(question);
+		//whaat?
 	}
 
-	@RequestMapping(value = "/getsort", method = RequestMethod.GET)
+	@RequestMapping(value = "/getsubjectsort", method = RequestMethod.GET)
 	public String getSubjectSortType(
 			@RequestParam(required = true) final String sessionkey,
             @RequestParam(required = true) final String isPreparation
@@ -448,7 +448,7 @@ public class LecturerQuestionController extends AbstractController {
 		return questionService.getSubjectSortType(sessionkey, isPreparation);
 	}
 
-	@RequestMapping(value = "/setsort", method = RequestMethod.POST)
+	@RequestMapping(value = "/setquestionsort", method = RequestMethod.POST)
 	public void setQuestionSortOrder(
 			@PathVariable final String questionId,
 			@RequestParam(required = false) final Boolean publish,
@@ -457,15 +457,15 @@ public class LecturerQuestionController extends AbstractController {
 		if (publish != null) {
 			question.setActive(publish);
 		}
-		questionService.update(question);
+		//whaat?
 	}
 
-	@RequestMapping(value = "/getsort", method = RequestMethod.GET)
+	@RequestMapping(value = "/getquestionsort", method = RequestMethod.GET)
 	public String getQuestionSortType(
 			@RequestParam(required = true) final String sessionkey,
 			@RequestParam(required = true) final String subject,
             @RequestParam(required = true) final String isPreparation
 			) {
-		return questionService.getQuestionSortType(sessionkey, subject, isPreparation);
+		return questionService.getQuestionSortType(sessionkey, isPreparation, subject);
 	}
 }
