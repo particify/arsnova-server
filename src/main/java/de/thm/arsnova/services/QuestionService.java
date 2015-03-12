@@ -131,12 +131,12 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
         
         SortOrder sortOrder = databaseDao.getSortOrder(session.get_id(), question.getQuestionVariant(), question.getSubject());
         if (sortOrder != null) {
-            if("alphabet____work".equals(sortOrder.getSortType())) {
+            if("alphabet".equals(sortOrder.getSortType())) {
                 
             }
             else {
                 String[] tmp = sortOrder.getSortOrder();
-                tmp.add(question.get_id());
+                tmp.append(question.get_id());
                 sortOrder.setSortOrder(tmp);
             }
         }
@@ -725,12 +725,12 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
     @Override
     public String getSubjectSortType(String sessionkey, String isPreparation) {
         SortOrder sortOrder = databaseDao.getSortOrder(sessionkey, isPreparation, "");
-        return SortOrder.getSortType();
+        return sortOrder.getSortType();
     }
     
     @Override
-    public String getQuestionSortType(String session, String subject, String isPreparation) {
+    public String getQuestionSortType(String sessionkey, String isPreparation, String subject) {
         SortOrder sortOrder = databaseDao.getSortOrder(sessionkey, isPreparation, subject);
-        return SortOrder.getSortType();
+        return sortOrder.getSortType();
     }
 }

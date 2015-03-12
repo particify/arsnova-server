@@ -1382,13 +1382,13 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Question> getLectureQuestionsForUsers(final Session session) {
         SortOrder subjectSortOrder = getSortOrder(session.get_id(), "lecture", "");
-        if (sortOrder != null) {
+        if (subjectSortOrder != null) {
             List<Question> questions = new ArrayList<Question>();
-            if ("alphabet".equals(sortOrder.getSortType())) {
+            if ("alphabet".equals(subjectSortOrder.getSortType())) {
                 // i srsly dunno, lol
             }
             else {
-                questions = getQuestionsBySortOrder(sortOrder, true);
+                questions = getQuestionsBySortOrder(subjectSortOrder, true);
             }
             return questions;
         }
@@ -1400,14 +1400,14 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<Question> getLectureQuestionsForTeachers(final Session session) {
-        SortOrder subjectSortOrder = getSortOrder(session, "lecture", "");
-        if (sortOrder != null) {
+        SortOrder subjectSortOrder = getSortOrder(session.get_id(), "lecture", "");
+        if (subjectSortOrder != null) {
             List<Question> questions = new ArrayList<Question>();
-            if ("alphabet".equals(sortOrder.getSortType())) {
+            if ("alphabet".equals(subjectSortOrder.getSortType())) {
                 // i srsly dunno, lol
             }
             else {
-                questions = getQuestionsBySortOrder(sortOrder, false);
+                questions = getQuestionsBySortOrder(subjectSortOrder, false);
             }
             return questions;
         }
@@ -1433,14 +1433,14 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Cacheable("preparationquestions")
 	@Override
 	public List<Question> getPreparationQuestionsForUsers(final Session session) {
-        SortOrder subjectSortOrder = getSortOrder(session, "preparation", "");
-        if (sortOrder != null) {
+        SortOrder subjectSortOrder = getSortOrder(session.get_id(), "preparation", "");
+        if (subjectSortOrder != null) {
             List<Question> questions = new ArrayList<Question>();
-            if ("alphabet".equals(sortOrder.getSortType())) {
+            if ("alphabet".equals(subjectSortOrder.getSortType())) {
                 // i srsly dunno, lol
             }
             else {
-                questions = getQuestionsBySortOrder(sortOrder, true);
+                questions = getQuestionsBySortOrder(subjectSortOrder, true);
             }
             return questions;
         }
@@ -1452,14 +1452,14 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<Question> getPreparationQuestionsForTeachers(final Session session) {
-        SortOrder sortOrder = getSortOrder(session, "preparation");
-        if (sortOrder != null) {
+        SortOrder subjectSortOrder = getSortOrder(session.get_id(), "preparation", "");
+        if (subjectSortOrder != null) {
             List<Question> questions = new ArrayList<Question>();
-            if ("alphabet".equals(sortOrder.getSortType())) {
+            if ("alphabet".equals(subjectSortOrder.getSortType())) {
                 // i srsly dunno, lol
             }
             else {
-                questions = getQuestionsBySortOrder(sortOrder, false);
+                questions = getQuestionsBySortOrder(subjectSortOrder, false);
             }
             return questions;
         }
@@ -1974,11 +1974,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
         
 		NovaView view = new NovaView(viewString);
 		view.setKey(sessionId);
-        if(subject.isempty() == false) {
-            String suffix = "_and_subject";
-            viewString = viewString.concat(suffix);
-            view.setKey(subject);
-        }
+        view.setKey(subject);
         
 		ViewResults results = this.getDatabase().view(view);
 
@@ -1986,7 +1982,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			return null;
 		}
 
-        return (SortOrder) JSONObject.toBean(results.getJSONObject(), Question.class);
+        return (SortOrder) JSONObject.toBean(results.getJSONObject(), SortOrder.class);
     }
     
     @Override
@@ -2031,5 +2027,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
                 questions.add(tempQuestion);
             }
         }
+        return questions;
     }
 }
