@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
@@ -41,18 +39,18 @@ import de.thm.arsnova.entities.Answer;
  * Util class for image operations.
  *
  * @author Daniel Vogel (daniel.vogel@mni.thm.de)
- *
+ * @author Jan Sladek (jan.sladek@mni.thm.de)
  */
 public class ImageUtils {
 
 	// Or whatever size you want to read in at a time.
 	private static final int CHUNK_SIZE = 4096;
 	
-	/**
-	 * {@link Pattern} used to check if a {@link String} starts with the
-	 * Base64-Mimetype Prefix and to extract information from the {@link String}.
-	 */
-	public static final Pattern BASE64_IMAGE_PREFIX_PATTERN = Pattern.compile("data:image/(.*);base64,(.*)");
+	/** Base64-Mimetype-Prefix start */
+	public static final String IMAGE_PREFIX_START = "data:image/";
+	
+	/** Base64-Mimetype-Prefix middle part */
+	public static final String IMAGE_PREFIX_MIDDLE = ";base64,";
 	
 	/* default value is 200 pixel in width, set the value in the configuration file */
 	private static int THUMB_WIDTH = 200;
@@ -108,14 +106,52 @@ public class ImageUtils {
 	 * @return true if the string is a potentially a base 64 encoded image.
 	 */
 	public static boolean isBase64EncodedImage(String maybeImage) {
+		return extractImageInfo(maybeImage) != null;
+	}
+	
+	/**
+	 * Extracts information(extension and the raw-image) from a {@link String}
+	 * representing a base64-encoded image and returns it as a two-dimensional
+	 * {@link String}-array, or null if the passed in {@link String} is not a
+	 * valid base64-encoded image.
+	 * 
+	 * @param maybeImage
+	 *            a {@link String} representing a base64-encoded image.
+	 * @return two-dimensional {@link String}-array containing the information
+	 *         "extension" and the "raw-image-{@link String}"
+	 */
+	public static String[] extractImageInfo(final String maybeImage) {
 		if (maybeImage == null) {
-			return false;
+			return null;
 		}
 		else if (maybeImage.isEmpty()) {
-			return false;
+			return null;
 		}
-		else
-			return BASE64_IMAGE_PREFIX_PATTERN.matcher(maybeImage).matches();
+		else {
+			if (!maybeImage.startsWith(IMAGE_PREFIX_START)) {
+				return null;
+			}
+			else {
+				final int extensionStartIndex = IMAGE_PREFIX_START.length();
+				final int extensionEndIndex = maybeImage.indexOf(IMAGE_PREFIX_MIDDLE);
+				
+				final String imageWithoutPrefix = maybeImage.substring(extensionEndIndex);
+				
+				if (!imageWithoutPrefix.startsWith(IMAGE_PREFIX_MIDDLE)) {
+					return null;
+				}
+				else {
+					final String[] imageInfo = new String[2];
+					final String extension = maybeImage.substring(extensionStartIndex, extensionEndIndex);
+					final String imageString = imageWithoutPrefix.substring(IMAGE_PREFIX_MIDDLE.length());
+					
+					imageInfo[0] = extension;
+					imageInfo[1] = imageString;
+					
+					return imageInfo;
+				}
+			}
+		}
 	}
 	
 	/**
@@ -128,18 +164,19 @@ public class ImageUtils {
 	 *            the new width
 	 * @param height
 	 *            the new height
-	 * @return The rescaled Image as Base64-encoded {@link String}
+	 * @return The rescaled Image as Base64-encoded {@link String}, returns null
+	 *         if the passed-on image isn't in a valid format (a Base64-Image).
 	 */
 	public static String createCover(String originalImageString, final int width, final int height) {
-		if (!isBase64EncodedImage(originalImageString)) return null;
+		if (!isBase64EncodedImage(originalImageString)) {
+			return null;
+		}
 		else {
-			Matcher imageMatcher = BASE64_IMAGE_PREFIX_PATTERN.matcher(originalImageString);
-			if (!imageMatcher.find()) {
-				// shouldn't ever happen, because the regex is already checked.
-				return null;
-			}
-			String extension = imageMatcher.group(1);
-			String base64String = imageMatcher.group(2);
+			final String[] imgInfo = extractImageInfo(originalImageString);
+
+			// imgInfo isn't null and contains two fields, this is checked by "isBase64EncodedImage"-Method
+			final String extension = imgInfo[0];
+			final String base64String = imgInfo[1];
 			
 			byte[] imageData = Base64.decodeBase64(base64String);
 			try {
@@ -183,11 +220,21 @@ public class ImageUtils {
 		}
 	}
 	
-	public static void generateThumbnailImage(Answer answer) {
+	/**
+	 * Generates a thumbnail image in the {@link Answer}, if none is present.
+	 * 
+	 * @param answer
+	 *            the {@link Answer} where the thumbnail should be added.
+	 * @return true if the thumbnail image didn't exist before calling this
+	 *         method, false otherwise
+	 */
+	public static boolean generateThumbnailImage(Answer answer) {
 		if (!isBase64EncodedImage(answer.getAnswerThumbnailImage())) {
 			final String thumbImage = createCover(answer.getAnswerImage(), THUMB_WIDTH, THUMB_HEIGHT);
 			answer.setAnswerThumbnailImage(thumbImage);
+			return true;
 		}
+		return false;
 	}
 
 	/**
