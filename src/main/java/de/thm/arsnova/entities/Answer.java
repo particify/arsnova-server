@@ -38,7 +38,6 @@ public class Answer {
 	private int abstentionCount;
 	@JsonIgnore
 	private String answerImage;
-	@JsonIgnore
 	private String answerThumbnailImage;
 
 	public Answer() {
@@ -116,21 +115,20 @@ public class Answer {
 	public final String getUser() {
 		return user;
 	}
-	
+
 	@JsonIgnore
 	public String getAnswerImage() {
 		return answerImage;
 	}
-	
+
 	public void setAnswerImage(String answerImage) {
 		this.answerImage = answerImage;
 	}
 	
-	@JsonIgnore
 	public String getAnswerThumbnailImage() {
 		return answerThumbnailImage;
 	}
-	
+
 	public void setAnswerThumbnailImage(String answerThumbnailImage) {
 		this.answerThumbnailImage = answerThumbnailImage;
 	}

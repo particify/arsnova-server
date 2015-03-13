@@ -46,8 +46,6 @@ import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.entities.transport.ThumbnailRequest;
-import de.thm.arsnova.entities.transport.ThumbnailResponse;
 import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
 import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
 import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
@@ -540,7 +538,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 
 		Answer theAnswer = answer.generateAnswerEntity(user, question);
-		if ("freetext".equals(theAnswer.getType())) {
+		if ("freetext".equals(question.getQuestionType())) {
 			ImageUtils.generateThumbnailImage(theAnswer);
 		}
 
@@ -557,8 +555,8 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 
 		final Question question = getQuestion(answer.getQuestionId());
-		if ("freetext".equals(answer.getType())) {
-			ImageUtils.generateThumbnailImage(answer);
+		if ("freetext".equals(question.getQuestionType())) {
+			ImageUtils.generateThumbnailImage(realAnswer);
 		}
 		final Answer result = databaseDao.updateAnswer(realAnswer);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
@@ -790,25 +788,6 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
 		this.publisher = publisher;
-	}
-
-	@Override
-	public ThumbnailResponse getThumbnails(String questionId, ThumbnailRequest thumbRequest) {
-		final ThumbnailResponse response = new ThumbnailResponse();
-
-		response.setQuestionId(thumbRequest.getQuestionId());
-		final List<Answer> answers = getAnswers(questionId);
-
-		outer: for (String answerId : thumbRequest.getAnswerIds()) {
-			for (Answer answer : answers) {
-				if (answerId != null && answerId.equals(answer.get_id())) {
-					response.addThumbnailEntry(answerId, answer.getAnswerThumbnailImage());
-					break outer;
-				}
-			}
-		}
-
-		return response;
 	}
 
 	@Override
