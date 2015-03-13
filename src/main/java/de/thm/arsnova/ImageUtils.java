@@ -175,7 +175,7 @@ public class ImageUtils {
 			final String[] imgInfo = extractImageInfo(originalImageString);
 
 			// imgInfo isn't null and contains two fields, this is checked by "isBase64EncodedImage"-Method
-			final String extension = "png";
+			final String extension = imgInfo[0];
 			final String base64String = imgInfo[1];
 
 			byte[] imageData = Base64.decodeBase64(base64String);
