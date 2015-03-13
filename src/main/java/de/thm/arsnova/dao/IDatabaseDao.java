@@ -198,7 +198,7 @@ public interface IDatabaseDao {
 
 	Statistics getStatistics();
     
-    SortOrder getSortOrder(String sessionkey, String questionVariant, String subject);
+    SortOrder createOrUpdateSortOrder(SortOrder sortOrder);
     
-    SortOrder createOrUpdateQuestionSortOrder(SortOrder sortOrder);
+    SortOrder getSortOrder(String sessionkey, String questionVariant, String subject);
 }

@@ -23,10 +23,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Dictionary;
 
 import de.thm.arsnova.exceptions.ForbiddenException;
 
@@ -109,6 +111,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	public Question saveQuestion(final Question question) {
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		question.setSessionId(session.get_id());
+        question.setTimestamp(long unixTime = System.currentTimeMillis() / 1000L);
 
 		if ("freetext".equals(question.getQuestionType())) {
 			question.setPiRound(0);
@@ -138,14 +141,8 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
         
         SortOrder sortOrder = databaseDao.getSortOrder(session.get_id(), question.getQuestionVariant(), question.getSubject());
         if (sortOrder != null) {
-            if("alphabet".equals(sortOrder.getSortType())) {
-                
-            }
-            else {
-                String[] tmp = sortOrder.getSortOrder();
-                tmp.append(question.get_id());
-                sortOrder.setSortOrder(tmp);
-            }
+            addQuestionToSortOrder(sortOrder, question);
+            databaseDao.createOrUpdateSortOrder(sortOrder);
         }
         
 		final NewQuestionEvent event = new NewQuestionEvent(this, session, result);
@@ -790,15 +787,74 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		this.publisher = publisher;
 	}
     
+    @Override 
+    public SortOrder setSubjectSort(String sessionkey, String sortType, String questionVariant, String[] sortOrderList) {
+        Session session = databaseDao.getSessionFromKeyword(sessionkey);
+        SortOrder existing = databaseDao.getSortOrder(session.get_id(), questionVariant, "");
+        SortOrder sortOrder = new SortOrder();
+        if (existing != null) {
+            sortOrder.set_id(existing.get_id());
+            sortOrder.set_rev(existing.get_rev());
+        }
+        sortOrder.setSessionId(session.get_id());
+        sortOrder.setSubject("");
+        sortOrder.setSortType(sortType);
+        sortOrder.setQuestionVariant(questionVariant);
+        sortOrder.setSortOrder(Arrays.asList(sortOrderList));
+        return databaseDao.createOrUpdateSortOrder(sortOrder);
+    }
+    
     @Override
     public String getSubjectSortType(String sessionkey, String isPreparation) {
         SortOrder sortOrder = databaseDao.getSortOrder(sessionkey, isPreparation, "");
         return sortOrder.getSortType();
     }
     
+    @Override 
+    public SortOrder setQuestionSort(String sessionkey, String subject, String sortType, String questionVariant, String[] sortOrderList) {
+        Session session = databaseDao.getSessionFromKeyword(sessionkey);
+        SortOrder existing = databaseDao.getSortOrder(session.get_id(), questionVariant, subject);
+        SortOrder sortOrder = new SortOrder();
+        if (existing != null) {
+            sortOrder.set_id(existing.get_id());
+            sortOrder.set_rev(existing.get_rev());
+        }
+        sortOrder.setSessionId(session.get_id());
+        sortOrder.setSubject(subject);
+        sortOrder.setSortType(sortType);
+        sortOrder.setQuestionVariant(questionVariant);
+        sortOrder.setSortOrder(Arrays.asList(sortOrderList));
+        return databaseDao.createOrUpdateSortOrder(sortOrder);
+    }
+    
     @Override
     public String getQuestionSortType(String sessionkey, String isPreparation, String subject) {
         SortOrder sortOrder = databaseDao.getSortOrder(sessionkey, isPreparation, subject);
         return sortOrder.getSortType();
+    }
+    
+    public SortOrder addQuestionToSortOrder(SortOrder sortOrder, Question question) {
+        List<String> tmpList = sortOrder.getSortOrder();
+        tmpList.add(question.get_id());
+        sortOrder.setSortOrder(tmpList);
+        if("alphabet".equals(sortOrder.getSortType())) {
+            sortOrder = alphabeticalSort(sortOrder);
+        }
+        return sortOrder;
+    }
+                                   
+    public SortOrder alphabeticalSort(SortOrder sortOrder){
+        Hashtable<String, String> hash = new Hashtable();
+        for (String qid : sortOrder.getSortOrder()) {
+            Question question = getQuestion(qid);
+            hash.put(question.getText(), qid);
+        }
+        List<String> sortList = new ArrayList();
+        List<String> keys = new ArrayList(hash.keySet());
+        for (String textKey : keys) {
+            sortList.add(hash.get(textKey));
+        }
+        sortOrder.setSortOrder(sortList);
+        return sortOrder;
     }
 }

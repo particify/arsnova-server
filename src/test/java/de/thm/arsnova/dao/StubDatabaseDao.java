@@ -36,6 +36,7 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -572,5 +573,17 @@ public class StubDatabaseDao implements IDatabaseDao {
 		stats.setAnswers(0);
 		stats.setInterposedQuestions(0);
 		return stats;
+	}
+    
+    @Override
+    public SortOrder createOrUpdateSortOrder(SortOrder sortOrder) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+    
+    @Override
+    public SortOrder getSortOrder(String sessionkey, String questionVariant, String subject) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

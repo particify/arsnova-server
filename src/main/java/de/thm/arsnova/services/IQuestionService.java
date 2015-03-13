@@ -25,6 +25,7 @@ import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.SortOrder;
 
 public interface IQuestionService {
 	Question saveQuestion(Question question);
@@ -137,7 +138,11 @@ public interface IQuestionService {
 
 	int getAbstentionAnswerCount(String questionId);
     
+    SortOrder setSubjectSort(String sessionkey, String sortType, String questionVariant, String[] sortOrder);
+    
     String getSubjectSortType(String sessionkey, String isPreparation);
+    
+    SortOrder setQuestionSort(String sessionkey, String subject, String sortType, String questionVariant, String[] sortOrder);
     
     String getQuestionSortType(String sessionkey, String isPreparation, String subject);
 }

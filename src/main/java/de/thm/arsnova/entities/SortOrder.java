@@ -17,13 +17,15 @@
  */
 package de.thm.arsnova.entities;
 
+import java.util.List;
+
 public class SortOrder {
 
     private String sessionId;
 	private String sortType;
     private String questionVariant;
     private String subject;
-    private String[] sortOrder;
+    private List<String> sortOrder;
 
 	private String _id;
 	private String _rev;
@@ -60,11 +62,11 @@ public class SortOrder {
         return this.subject;
     }
     
-    public void setSortOrder(final String[] sortOrder) {
+    public void setSortOrder(final List<String> sortOrder) {
         this.sortOrder = sortOrder;
     }
     
-    public String[] getSortOrder() {
+    public List<String> getSortOrder() {
         return this.sortOrder;
     }
 

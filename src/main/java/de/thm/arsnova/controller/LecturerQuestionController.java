@@ -430,14 +430,16 @@ public class LecturerQuestionController extends AbstractController {
 
 	@RequestMapping(value = "/setsubjectsort", method = RequestMethod.POST)
 	public void setSubjectSortOrder(
-			@PathVariable final String questionId,
-			@RequestParam(required = false) final Boolean publish,
-			@RequestBody final Question question
+			@RequestParam(required = true) final String sessionkey,
+            @RequestParam(required = true) final String sortType,
+            @RequestParam(required = true) final String isPreparation,
+			@RequestBody String[] sortOrder
 			) {
-		if (publish != null) {
-			question.setActive(publish);
+		try {
+			questionService.setSubjectSort(sessionkey, sortType, isPreparation, sortOrder) ;
+		} catch (final Exception e) {
+			throw new BadRequestException();
 		}
-		//whaat?
 	}
 
 	@RequestMapping(value = "/getsubjectsort", method = RequestMethod.GET)
@@ -450,14 +452,17 @@ public class LecturerQuestionController extends AbstractController {
 
 	@RequestMapping(value = "/setquestionsort", method = RequestMethod.POST)
 	public void setQuestionSortOrder(
-			@PathVariable final String questionId,
-			@RequestParam(required = false) final Boolean publish,
-			@RequestBody final Question question
+			@RequestParam(required = true) final String sessionkey,
+            @RequestParam(required = true) final String subject,
+            @RequestParam(required = true) final String sortType,
+            @RequestParam(required = true) final String isPreparation,
+			@RequestBody String[] sortOrder
 			) {
-		if (publish != null) {
-			question.setActive(publish);
+		try {
+			questionService.setQuestionSort(sessionkey, subject, sortType, isPreparation, sortOrder);
+		} catch (final Exception e) {
+			throw new BadRequestException();
 		}
-		//whaat?
 	}
 
 	@RequestMapping(value = "/getquestionsort", method = RequestMethod.GET)
