@@ -37,8 +37,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Question;
-import de.thm.arsnova.entities.transport.ThumbnailRequest;
-import de.thm.arsnova.entities.transport.ThumbnailResponse;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
@@ -327,24 +325,14 @@ public class LecturerQuestionController extends AbstractController {
 			) {
 		return questionService.updateAnswer(answer);
 	}
-	
-	@RequestMapping(value = "/{questionId}/thumbs", method = RequestMethod.POST)
-	public ThumbnailResponse getThumbnails(
-			@PathVariable final String questionId,
-			@RequestBody final ThumbnailRequest thumbRequest,
-			final HttpServletResponse response
-			) {
-		
-		return questionService.getThumbnails(questionId, thumbRequest);
-	}
-	
+
 	@RequestMapping(value = "/{questionId}/answer/{answerId}/image", method = RequestMethod.GET)
 	public String getImage(
 			@PathVariable final String questionId,
 			@PathVariable final String answerId,
 			final HttpServletResponse response
 			) {
-		
+
 		return questionService.getImage(questionId, answerId);
 	}
 
