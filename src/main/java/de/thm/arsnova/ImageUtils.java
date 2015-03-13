@@ -134,6 +134,9 @@ public class ImageUtils {
 			else {
 				final int extensionStartIndex = IMAGE_PREFIX_START.length();
 				final int extensionEndIndex = maybeImage.indexOf(IMAGE_PREFIX_MIDDLE);
+				if (extensionEndIndex < 0) {
+					return null;
+				}
 
 				final String imageWithoutPrefix = maybeImage.substring(extensionEndIndex);
 
