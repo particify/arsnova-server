@@ -181,7 +181,7 @@ public class ImageUtils {
 			byte[] imageData = Base64.decodeBase64(base64String);
 			try {
 				BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(imageData));
-				BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+				BufferedImage newImage = new BufferedImage(width, height, originalImage.getType());
 				Graphics2D g = newImage.createGraphics();
 
 				final double ratio = ((double) originalImage.getWidth()) / ((double) originalImage.getHeight());
