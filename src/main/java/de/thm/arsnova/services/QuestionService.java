@@ -28,8 +28,6 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import de.thm.arsnova.exceptions.ForbiddenException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +57,7 @@ import de.thm.arsnova.events.NewQuestionEvent;
 import de.thm.arsnova.events.PiRoundDelayedStartEvent;
 import de.thm.arsnova.events.PiRoundEndEvent;
 import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 
@@ -197,6 +196,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		this.publisher.publishEvent(event);
 	}
 
+	@Override
 	public void startNewPiRound(final String questionId, User user) {
 		if(null == user) {
 			user = userService.getCurrentUser();
@@ -228,6 +228,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		cancelDelayedPiRoundChange(questionId);
 
 		timer.schedule(new TimerTask() {
+			@Override
 			public void run() {
 				questionService.startNewPiRound(questionId, user);
 			}
@@ -242,6 +243,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		this.publisher.publishEvent(new PiRoundDelayedStartEvent(this, session, question));
 	}
 
+	@Override
 	public void cancelDelayedPiRoundChange(final String questionId) {
 		Timer timer = timerList.get(questionId);
 
@@ -402,6 +404,11 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final List<Answer> filteredAnswers = new ArrayList<Answer>();
 		for (final Answer answer : answers) {
 			final Question question = questionIdToQuestion.get(answer.getQuestionId());
+			if (question == null) {
+				// Question is not present. Most likely it has been locked by the
+				// Session's creator. Locked Questions do not appear in this list.
+				continue;
+			}
 			if (0 == answer.getPiRound() && !"freetext".equals(question.getQuestionType())) {
 				answer.setPiRound(1);
 			}
@@ -490,7 +497,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final User user = userService.getCurrentUser();
 		return update(question, user);
 	}
-	
+
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public Question update(final Question question, User user) {
