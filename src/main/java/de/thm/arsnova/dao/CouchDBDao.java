@@ -549,6 +549,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		q.put("scaleFactor", question.getScaleFactor());
 		q.put("gridScaleFactor", question.getGridScaleFactor());
 		q.put("imageQuestion", question.isImageQuestion());
+		q.put("textAnswerEnabled", question.isTextAnswerEnabled());
 
 		return q;
 	}
@@ -1307,7 +1308,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			a.put("abstention", answer.isAbstention());
 			a.put("questionValue", answer.getQuestionValue());
 			a.put("answerImage", answer.getAnswerImage());
-			
+
 			a.put("answerThumbnailImage", answer.getAnswerThumbnailImage());
 			database.saveDocument(a);
 			answer.set_rev(a.getRev());

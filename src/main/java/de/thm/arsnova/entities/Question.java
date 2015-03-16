@@ -71,6 +71,7 @@ public class Question {
 	private String scaleFactor;
 	private String gridScaleFactor;
 	private boolean imageQuestion;
+	private boolean textAnswerEnabled;
 
 	public final String getType() {
 		return type;
@@ -187,11 +188,11 @@ public class Question {
 	public final int getDuration() {
 		return duration;
 	}
-	
+
 	public final boolean isImageQuestion() {
 		return imageQuestion;
 	}
-	
+
 	public void setImageQuestion(boolean imageQuestion) {
 		this.imageQuestion = imageQuestion;
 	}
@@ -446,6 +447,14 @@ public class Question {
 
 	public String getGridScaleFactor() {
 		return this.gridScaleFactor;
+	}
+
+	public boolean isTextAnswerEnabled() {
+		return this.textAnswerEnabled;
+	}
+
+	public void setTextAnswerEnabled(boolean textAnswerEnabled) {
+		this.textAnswerEnabled = textAnswerEnabled;
 	}
 
 	@Override
