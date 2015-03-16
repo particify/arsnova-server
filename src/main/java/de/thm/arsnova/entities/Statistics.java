@@ -26,6 +26,7 @@ public class Statistics {
 	private int closedSessions;
 	private int creators;
 	private int activeUsers;
+	private int activeStudents;
 	private int loggedinUsers;
 	private int interposedQuestions;
 	private int conceptQuestions;
@@ -116,6 +117,14 @@ public class Statistics {
 
 	public void setConceptQuestions(int conceptQuestions) {
 		this.conceptQuestions = conceptQuestions;
+	}
+
+	public int getActiveStudents() {
+		return activeStudents;
+	}
+
+	public void setActiveStudents(int activeStudents) {
+		this.activeStudents = activeStudents;
 	}
 
 	@Override
