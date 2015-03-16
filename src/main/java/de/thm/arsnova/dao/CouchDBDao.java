@@ -1080,11 +1080,14 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		try {
 			final View statsView = new View("statistics/statistics");
 			final View creatorView = new View("statistics/unique_session_creators");
+			final View studentUserView = new View("statistics/active_student_users");
 			statsView.setGroup(true);
 			creatorView.setGroup(true);
+			studentUserView.setGroup(true);
 
 			final ViewResults statsResults = getDatabase().view(statsView);
 			final ViewResults creatorResults = getDatabase().view(creatorView);
+			final ViewResults studentUserResults = getDatabase().view(studentUserView);
 
 			if (!isEmptyResults(statsResults)) {
 				final JSONArray rows = statsResults.getJSONArray("rows");
@@ -1124,6 +1127,15 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 					creators.add(row.getString("key"));
 				}
 				stats.setCreators(creators.size());
+			}
+			if (!isEmptyResults(studentUserResults)) {
+				final JSONArray rows = studentUserResults.getJSONArray("rows");
+				Set<String> students = new HashSet<String>();
+				for (int i = 0; i < rows.size(); i++) {
+					final JSONObject row = rows.getJSONObject(i);
+					students.add(row.getString("key"));
+				}
+				stats.setActiveStudents(students.size());
 			}
 			return stats;
 		} catch (final Exception e) {
