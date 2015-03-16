@@ -111,7 +111,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	public Question saveQuestion(final Question question) {
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		question.setSessionId(session.get_id());
-        question.setTimestamp(long unixTime = System.currentTimeMillis() / 1000L);
+        question.setTimestamp(System.currentTimeMillis() / 1000L);
 
 		if ("freetext".equals(question.getQuestionType())) {
 			question.setPiRound(0);
@@ -787,23 +787,6 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		this.publisher = publisher;
 	}
     
-    @Override 
-    public SortOrder setSubjectSort(String sessionkey, String sortType, String questionVariant, String[] sortOrderList) {
-        Session session = databaseDao.getSessionFromKeyword(sessionkey);
-        SortOrder existing = databaseDao.getSortOrder(session.get_id(), questionVariant, "");
-        SortOrder sortOrder = new SortOrder();
-        if (existing != null) {
-            sortOrder.set_id(existing.get_id());
-            sortOrder.set_rev(existing.get_rev());
-        }
-        sortOrder.setSessionId(session.get_id());
-        sortOrder.setSubject("");
-        sortOrder.setSortType(sortType);
-        sortOrder.setQuestionVariant(questionVariant);
-        sortOrder.setSortOrder(Arrays.asList(sortOrderList));
-        return databaseDao.createOrUpdateSortOrder(sortOrder);
-    }
-    
     @Override
     public String getSubjectSortType(String sessionkey, String isPreparation) {
         SortOrder sortOrder = databaseDao.getSortOrder(sessionkey, isPreparation, "");
@@ -811,7 +794,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
     }
     
     @Override 
-    public SortOrder setQuestionSort(String sessionkey, String subject, String sortType, String questionVariant, String[] sortOrderList) {
+    public SortOrder setSort(String sessionkey, String subject, String sortType, String questionVariant, String[] sortOrderList) {
         Session session = databaseDao.getSessionFromKeyword(sessionkey);
         SortOrder existing = databaseDao.getSortOrder(session.get_id(), questionVariant, subject);
         SortOrder sortOrder = new SortOrder();

@@ -1951,10 +1951,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
     public SortOrder getSortOrder(String sessionId, String questionVariant, String subject) {
         String viewString = "";
         if ("preparation".equals(questionVariant)) {
-            viewString = "sort_order/preparation_question_sort_order_by_sessionId";    
+            viewString = "sort_order/preparation_question_sort_order_by_sessionid_and_subject";    
         }
         else if ("lecture".equals(questionVariant)) {
-            viewString = "sort_order/lecture_question_sort_order_by_sessionId";
+            viewString = "sort_order/lecture_question_sort_order_by_sessionid_and_subject";
         }
         
 		NovaView view = new NovaView(viewString);
