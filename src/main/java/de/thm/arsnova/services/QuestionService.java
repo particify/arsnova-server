@@ -831,17 +831,19 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
     }
                                    
     public SortOrder alphabeticalSort(SortOrder sortOrder){
-        Hashtable<String, String> hash = new Hashtable();
-        for (String qid : sortOrder.getSortOrder()) {
-            Question question = getQuestion(qid);
-            hash.put(question.getText(), qid);
-        }
-        List<String> sortList = new ArrayList();
-        List<String> keys = new ArrayList(hash.keySet());
-        for (String textKey : keys) {
-            sortList.add(hash.get(textKey));
-        }
-        sortOrder.setSortOrder(sortList);
-        return sortOrder;
+		if ("".equals(sortOrder.getSubject())) {
+        	Hashtable<String, String> hash = new Hashtable();
+        	for (String qid : sortOrder.getSortOrder()) {
+            	Question question = getQuestion(qid);
+            	hash.put(question.getText(), qid);
+        	}
+        	List<String> sortList = new ArrayList();
+        	List<String> keys = new ArrayList(hash.keySet());
+        	for (String textKey : keys) {
+            	sortList.add(hash.get(textKey));
+        	}
+        	sortOrder.setSortOrder(sortList);
+        	return sortOrder;
+		}
     }
 }
