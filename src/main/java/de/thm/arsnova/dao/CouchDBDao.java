@@ -55,6 +55,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fourspaces.couchdb.Database;
 import com.fourspaces.couchdb.Document;
+import com.fourspaces.couchdb.Results;
+import com.fourspaces.couchdb.RowResult;
 import com.fourspaces.couchdb.View;
 import com.fourspaces.couchdb.ViewResults;
 
@@ -127,17 +129,14 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		view.setStartKeyArray(user.getUsername());
 		view.setEndKeyArray(user.getUsername(), "{}");
 
-		final ViewResults sessions = getDatabase().view(view);
+		final Results<Session> results = getDatabase().queryView(view, Session.class);
 
 		final List<Session> result = new ArrayList<Session>();
-		for (final Document d : sessions.getResults()) {
-			final Session session = (Session) JSONObject.toBean(
-					d.getJSONObject().getJSONObject("value"),
-					Session.class
-					);
-			session.setCreator(d.getJSONObject().getJSONArray("key").getString(0));
-			session.setName(d.getJSONObject().getJSONArray("key").getString(1));
-			session.set_id(d.getId());
+		for (final RowResult<Session> row : results.getRows()) {
+			final Session session = row.getValue();
+			session.setCreator(row.getKey().getString(0));
+			session.setName(row.getKey().getString(1));
+			session.set_id(row.getId());
 			result.add(session);
 		}
 		return result;
