@@ -26,7 +26,7 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import de.thm.arsnova.dao.NovaView.StaleMode;
+import com.fourspaces.couchdb.View.StaleMode;
 
 public class NovaViewTest {
 
