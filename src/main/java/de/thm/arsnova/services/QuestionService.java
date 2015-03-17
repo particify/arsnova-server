@@ -839,20 +839,30 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
         return sortOrder;
     }
     
-    public List<Question> getQuestionsBySortOrder(SortOrder sortOrder, boolean onlyActive) {
-        List<Question> questions = new ArrayList<Question>();
-        List<String> questionIds = sortOrder.getSortOrder();
-        for (String t : questionIds) {
-            Question tempQuestion = getQuestion(t);
-            if (onlyActive) {
-                if (tempQuestion.isActive()) {
-                    questions.add(tempQuestion);
-                }
-            }
-            else {
-                questions.add(tempQuestion);
-            }
-        }
+    public List<Question> getQuestionsBySortOrder(SortOrder subjectSortOrder, boolean onlyActive) {
+		if (subjectSortOrder.getSortOrder() == null) {
+			return null;
+		}
+		if (subjectSortOrder.getSortOrder().isEmpty()) {
+			return null;
+		}
+		List<Question> questions = new ArrayList<Question>();
+		List<String> subjects = subjectSortOrder.getSortOrder();
+		for (String sub : subjects) {
+			SortOrder questionSortOrder = databaseDao.getSortOrder(subjectSortOrder.getSessionId(), subjectSortOrder.getQuestionVariant(), sub);
+			List<String> questionIds = questionSortOrder.getSortOrder();
+			for (String t : questionIds) {
+				Question tempQuestion = getQuestion(t);
+				if (onlyActive) {
+					if (tempQuestion.isActive()) {
+						questions.add(tempQuestion);
+					}
+				}
+				else {
+					questions.add(tempQuestion);
+				}
+			}
+		}
         return questions;
     }
 	
@@ -884,6 +894,12 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	}
                                    
     public SortOrder alphabeticalSort(SortOrder sortOrder){
+		if (sortOrder.getSortOrder() == null) {
+			return null;
+		}
+		if (sortOrder.getSortOrder().isEmpty()) {
+			return null;
+		}
 		if ("".equals(sortOrder.getSubject())) {
 			List<String> subjects = sortOrder.getSortOrder();
 			Collections.sort(subjects);

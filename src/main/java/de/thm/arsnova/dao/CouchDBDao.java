@@ -1943,7 +1943,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		Set<String> uniqueSubjects = new HashSet();
 		
 		for (final Document d : results.getResults()) {
-			uniqueSubjects.add(d.getJSONObject().getJSONArray("value").getString(0));
+			uniqueSubjects.add(d.getString("value"));
 		}
 		
 		List<String> uniqueSubjectsList = new ArrayList(uniqueSubjects);
@@ -1961,17 +1961,17 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			viewString = "skill_question/preparation_question_ids_by_session_and_subject";
 		}
 		NovaView view = new NovaView(viewString);
-		view.setKey(session.get_id());
+		view.setKey(session.get_id(), subject);
 		ViewResults results = this.getDatabase().view(view);
 
-		if (results.getResults().isEmpty()) {
+		if (results.getJSONArray("rows").optJSONObject(0) == null) {
 			return null;
 		}
 		
 		List<String> qids = new ArrayList();
 		
 		for (final Document d : results.getResults()) {
-			final String s = d.getJSONObject().getJSONArray("value").getString(0);
+			final String s = d.getString("value");
 			qids.add(s);
 			/*final Answer a = new Answer();
 			a.setAnswerCount(d.getInt("value"));
