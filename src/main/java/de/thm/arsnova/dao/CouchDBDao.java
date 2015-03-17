@@ -1393,27 +1393,15 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Cacheable("lecturequestions")
 	@Override
-	public List<Question> getLectureQuestionsForUsers(final Session session) {
-        SortOrder subjectSortOrder = getSortOrder(session.get_id(), "lecture", "");
-        if (subjectSortOrder != null) {
-            return getQuestionsBySortOrder(subjectSortOrder, true);
-        }
-        else {
-            String viewName = "skill_question/lecture_question_by_session_for_all";
-            return getQuestions(new NovaView(viewName), session);
-        }
+	public List<Question> getLectureQuestionsForUsers(final Session session) {	
+    	String viewName = "skill_question/lecture_question_by_session_for_all";
+        return getQuestions(new NovaView(viewName), session);
 	}
 
 	@Override
 	public List<Question> getLectureQuestionsForTeachers(final Session session) {
-        SortOrder subjectSortOrder = getSortOrder(session.get_id(), "lecture", "");
-        if (subjectSortOrder != null) {
-            return getQuestionsBySortOrder(subjectSortOrder, true);
-        }
-		else {
-            String viewName = "skill_question/lecture_question_by_session";
-            return getQuestions(new NovaView(viewName), session);
-        }
+        String viewName = "skill_question/lecture_question_by_session";
+        return getQuestions(new NovaView(viewName), session);
 	}
 
 	@Cacheable("flashcardquestions")
@@ -1432,26 +1420,14 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Cacheable("preparationquestions")
 	@Override
 	public List<Question> getPreparationQuestionsForUsers(final Session session) {
-        SortOrder subjectSortOrder = getSortOrder(session.get_id(), "preparation", "");
-        if (subjectSortOrder != null) {
-            return getQuestionsBySortOrder(subjectSortOrder, true);
-        }
-		else {
-            String viewName = "skill_question/preparation_question_by_session_for_all";
-            return getQuestions(new NovaView(viewName), session);
-        }
+        String viewName = "skill_question/preparation_question_by_session_for_all";
+    	return getQuestions(new NovaView(viewName), session);
 	}
 
 	@Override
 	public List<Question> getPreparationQuestionsForTeachers(final Session session) {
-        SortOrder subjectSortOrder = getSortOrder(session.get_id(), "preparation", "");
-        if (subjectSortOrder != null) {
-            return getQuestionsBySortOrder(subjectSortOrder, true);
-        }
-		else {
-            String viewName = "skill_question/preparation_question_by_session";
-            return getQuestions(new NovaView(viewName), session);
-        }
+        String viewName = "skill_question/preparation_question_by_session";
+        return getQuestions(new NovaView(viewName), session);
 	}
 
 	private List<Question> getQuestions(final NovaView view, final Session session) {
@@ -1946,6 +1922,69 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		info.setNumUnredInterposed(unreadInterposed);
 		return info;
 	}
+	
+	@Override
+	public List<String> getSubjects(Session session, String questionVariant) {
+		String viewString = "";
+		if ("lecture".equals(questionVariant)) {
+			viewString = "skill_question/lecture_question_subjects_by_session";
+		}
+		else {
+			viewString = "skill_question/preparation_question_subjects_by_session";
+		}
+		NovaView view = new NovaView(viewString);
+		view.setKey(session.get_id());
+		ViewResults results = this.getDatabase().view(view);
+
+		if (results.getJSONArray("rows").optJSONObject(0) == null) {
+			return null;
+		}
+		
+		Set<String> uniqueSubjects = new HashSet();
+		
+		for (final Document d : results.getResults()) {
+			uniqueSubjects.add(d.getJSONObject().getJSONArray("value").getString(0));
+		}
+		
+		List<String> uniqueSubjectsList = new ArrayList(uniqueSubjects);
+		
+		return uniqueSubjectsList;
+	}
+	
+	@Override
+	public List<String> getQuestionIdsBySubject(Session session, String questionVariant, String subject) {
+		String viewString = "";
+		if ("lecture".equals(questionVariant)) {
+			viewString = "skill_question/lecture_question_ids_by_session_and_subject";
+		}
+		else {
+			viewString = "skill_question/preparation_question_ids_by_session_and_subject";
+		}
+		NovaView view = new NovaView(viewString);
+		view.setKey(session.get_id());
+		ViewResults results = this.getDatabase().view(view);
+
+		if (results.getResults().isEmpty()) {
+			return null;
+		}
+		
+		List<String> qids = new ArrayList();
+		
+		for (final Document d : results.getResults()) {
+			final String s = d.getJSONObject().getJSONArray("value").getString(0);
+			qids.add(s);
+			/*final Answer a = new Answer();
+			a.setAnswerCount(d.getInt("value"));
+			a.setAbstentionCount(abstentionCount);
+			a.setQuestionId(d.getJSONObject().getJSONArray("key").getString(0));
+			a.setPiRound(piRound);
+			final String answerText = d.getJSONObject().getJSONArray("key").getString(2);
+			a.setAnswerText("null".equals(answerText) ? null : answerText);
+			answers.add(a);*/
+		}
+		
+		return qids;
+	}
     
     @Override
     public SortOrder getSortOrder(String sessionId, String questionVariant, String subject) {
@@ -1958,16 +1997,18 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
         }
         
 		NovaView view = new NovaView(viewString);
-		view.setKey(sessionId);
-        view.setKey(subject);
+		view.setKey(sessionId, subject);
         
 		ViewResults results = this.getDatabase().view(view);
 
-		if (results.getJSONArray("rows").optJSONObject(0) == null) {
+		if (results.getResults().isEmpty()) {
 			return null;
 		}
 
-        return (SortOrder) JSONObject.toBean(results.getJSONObject(), SortOrder.class);
+		return (SortOrder) JSONObject.toBean(
+			results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
+			SortOrder.class
+		);
     }
     
     @Override
@@ -1994,25 +2035,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 			return sortOrder;
 		} catch (IOException e) {
-			LOGGER.error("Could not save user {}", sortOrder);
+			LOGGER.error("Could not save sort {}", sortOrder);
 		}
         return null;
-    }
-    
-    public List<Question> getQuestionsBySortOrder(SortOrder sortOrder, boolean onlyActive) {
-        List<Question> questions = new ArrayList<Question>();
-        List<String> questionIds = sortOrder.getSortOrder();
-        for (String t : questionIds) {
-            Question tempQuestion = getQuestion(t);
-            if (onlyActive) {
-                if (tempQuestion.isActive()) {
-                    questions.add(tempQuestion);
-                }
-            }
-            else {
-                questions.add(tempQuestion);
-            }
-        }
-        return questions;
     }
 }

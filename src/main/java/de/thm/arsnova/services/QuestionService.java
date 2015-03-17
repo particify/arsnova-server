@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Dictionary;
+import java.util.Collections;
 
 import de.thm.arsnova.exceptions.ForbiddenException;
 
@@ -583,11 +584,15 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated()")
 	public List<Question> getLectureQuestions(final String sessionkey) {
 		final Session session = getSession(sessionkey);
+		SortOrder subjectSortOrder = databaseDao.getSortOrder(session.get_id(), "lecture", "");
+		if (subjectSortOrder == null) {
+			subjectSortOrder = createSortOrder(session, "lecture", "");
+		}
 		final User user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
-			return databaseDao.getLectureQuestionsForTeachers(session);
+			return getQuestionsBySortOrder(subjectSortOrder, false);
 		} else {
-			return databaseDao.getLectureQuestionsForUsers(session);
+			return getQuestionsBySortOrder(subjectSortOrder, true);
 		}
 	}
 
@@ -607,11 +612,15 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated()")
 	public List<Question> getPreparationQuestions(final String sessionkey) {
 		final Session session = getSession(sessionkey);
+		SortOrder subjectSortOrder = databaseDao.getSortOrder(session.get_id(), "preparation", "");
+		if (subjectSortOrder == null) {
+			subjectSortOrder = createSortOrder(session, "preparation", "");
+		}
 		final User user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
-			return databaseDao.getPreparationQuestionsForTeachers(session);
+			return getQuestionsBySortOrder(subjectSortOrder, false);
 		} else {
-			return databaseDao.getPreparationQuestionsForUsers(session);
+			return getQuestionsBySortOrder(subjectSortOrder, true);
 		}
 	}
 
@@ -829,9 +838,59 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
         }
         return sortOrder;
     }
+    
+    public List<Question> getQuestionsBySortOrder(SortOrder sortOrder, boolean onlyActive) {
+        List<Question> questions = new ArrayList<Question>();
+        List<String> questionIds = sortOrder.getSortOrder();
+        for (String t : questionIds) {
+            Question tempQuestion = getQuestion(t);
+            if (onlyActive) {
+                if (tempQuestion.isActive()) {
+                    questions.add(tempQuestion);
+                }
+            }
+            else {
+                questions.add(tempQuestion);
+            }
+        }
+        return questions;
+    }
+	
+	public SortOrder createSortOrder(Session session, String questionVariant, String subject) {
+		if ("".equals(subject)) {
+			SortOrder subjectSortOrder = new SortOrder();
+			subjectSortOrder.setSortOrder(databaseDao.getSubjects(session, questionVariant));
+			subjectSortOrder.setSubject("");
+			subjectSortOrder.setSortType("alphabetical");
+			subjectSortOrder.setQuestionVariant(questionVariant);
+			subjectSortOrder.setSessionId(session.get_id());
+			alphabeticalSort(subjectSortOrder);
+			List<String> subjects = subjectSortOrder.getSortOrder();
+			for (String sub : subjects) {
+				createSortOrder(session, questionVariant, sub);
+			}
+			return databaseDao.createOrUpdateSortOrder(subjectSortOrder);
+		}
+		else {
+			SortOrder sortOrder = new SortOrder();
+			sortOrder.setSessionId(session.get_id());
+			sortOrder.setSubject(subject);
+			sortOrder.setQuestionVariant(questionVariant);
+			sortOrder.setSortType("alphabetical");
+			sortOrder.setSortOrder(databaseDao.getQuestionIdsBySubject(session, questionVariant, subject));
+			alphabeticalSort(sortOrder);
+			return databaseDao.createOrUpdateSortOrder(sortOrder);
+		}
+	}
                                    
     public SortOrder alphabeticalSort(SortOrder sortOrder){
 		if ("".equals(sortOrder.getSubject())) {
+			List<String> subjects = sortOrder.getSortOrder();
+			Collections.sort(subjects);
+			sortOrder.setSortOrder(subjects);
+			return sortOrder;
+		}
+		else {
         	Hashtable<String, String> hash = new Hashtable();
         	for (String qid : sortOrder.getSortOrder()) {
             	Question question = getQuestion(qid);
@@ -839,6 +898,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
         	}
         	List<String> sortList = new ArrayList();
         	List<String> keys = new ArrayList(hash.keySet());
+			Collections.sort(keys);
         	for (String textKey : keys) {
             	sortList.add(hash.get(textKey));
         	}
