@@ -156,10 +156,10 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				addToSortOrder(subjectSortOrder, question.getSubject());
 			}
 			else {
-            	addToSortOrder(questionSortOrder, question.get_id());
+				addToSortOrder(questionSortOrder, question.get_id());
 			}
-        }
-        
+		}
+		
 		final NewQuestionEvent event = new NewQuestionEvent(this, session, result);
 		this.publisher.publishEvent(event);
 
@@ -918,14 +918,14 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
             	Question question = getQuestion(qid);
             	hash.put(question.getText(), qid);
         	}
-        	List<String> sortList = new ArrayList();
-        	List<String> keys = new ArrayList(hash.keySet());
+			List<String> sortList = new ArrayList();
+			List<String> keys = new ArrayList(hash.keySet());
 			Collections.sort(keys);
-        	for (String textKey : keys) {
-            	sortList.add(hash.get(textKey));
-        	}
-        	sortOrder.setSortOrder(sortList);
-        	return sortOrder;
+			for (String textKey : keys) {
+				sortList.add(hash.get(textKey));
+			}
+			sortOrder.setSortOrder(sortList);
+			return sortOrder;
 		}
-    }
+	}
 }

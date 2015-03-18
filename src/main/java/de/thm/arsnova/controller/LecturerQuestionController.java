@@ -445,7 +445,7 @@ public class LecturerQuestionController extends AbstractController {
 	@RequestMapping(value = "/getsubjectsort", method = RequestMethod.GET)
 	public String getSubjectSortType(
 			@RequestParam(required = true) final String sessionkey,
-            @RequestParam(required = true) final String ispreparation
+			@RequestParam(required = true) final String ispreparation
 			) {
 		return questionService.getSubjectSortType(sessionkey, ispreparation);
 	}
@@ -453,9 +453,9 @@ public class LecturerQuestionController extends AbstractController {
 	@RequestMapping(value = "/setquestionsort", method = RequestMethod.POST)
 	public void setQuestionSortOrder(
 			@RequestParam(required = true) final String sessionkey,
-            @RequestParam(required = true) final String subject,
-            @RequestParam(required = true) final String sorttype,
-            @RequestParam(required = true) final String ispreparation,
+			@RequestParam(required = true) final String subject,
+			@RequestParam(required = true) final String sorttype,
+			@RequestParam(required = true) final String ispreparation,
 			@RequestBody String[] sortOrder
 			) {
 		try {
@@ -469,7 +469,7 @@ public class LecturerQuestionController extends AbstractController {
 	public String getQuestionSortType(
 			@RequestParam(required = true) final String sessionkey,
 			@RequestParam(required = true) final String subject,
-            @RequestParam(required = true) final String ispreparation
+			@RequestParam(required = true) final String ispreparation
 			) {
 		return questionService.getQuestionSortType(sessionkey, ispreparation, subject);
 	}

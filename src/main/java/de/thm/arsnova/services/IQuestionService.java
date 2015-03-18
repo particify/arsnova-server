@@ -138,9 +138,9 @@ public interface IQuestionService {
 
 	int getAbstentionAnswerCount(String questionId);
     
-    String getSubjectSortType(String sessionkey, String isPreparation);
+	String getSubjectSortType(String sessionkey, String isPreparation);
+	
+	SortOrder setSort(String sessionkey, String subject, String sortType, String isPreparation, String[] sortOrder);
     
-    SortOrder setSort(String sessionkey, String subject, String sortType, String isPreparation, String[] sortOrder);
-    
-    String getQuestionSortType(String sessionkey, String isPreparation, String subject);
+	String getQuestionSortType(String sessionkey, String isPreparation, String subject);
 }
