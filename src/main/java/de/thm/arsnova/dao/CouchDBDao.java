@@ -2005,6 +2005,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			sortOrder.set_id(d.getJSONObject("value").getString("_id"));
 			sortOrder.set_rev(d.getJSONObject("value").getString("_rev"));
 			sortOrder.setSessionId(d.getJSONObject("value").getString("sessionId"));
+			sortOrder.setSubject(d.getJSONObject("value").getString("subject"));
 			sortOrder.setSortType(d.getJSONObject("value").getString("sortType"));
 			sortOrder.setQuestionVariant(d.getJSONObject("value").getString("questionVariant"));
 			List<String> sort = new ArrayList<String>();
