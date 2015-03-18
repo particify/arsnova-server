@@ -145,7 +145,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			SortOrder questionSortOrder = databaseDao.getSortOrder(session.get_id(), question.getQuestionVariant(), question.getSubject());
 			if (questionSortOrder == null) {
 				List<String> s = new ArrayList<String>();
-				s.add(question.getSubject());
+				s.add(question.get_id());
 				SortOrder newQSortOrder = new SortOrder();
 				newQSortOrder.setSessionId(question.getSessionId());
 				newQSortOrder.setSubject(question.getSubject());
