@@ -140,10 +140,23 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 		final Question result = databaseDao.saveQuestion(session, question);
         
-        SortOrder sortOrder = databaseDao.getSortOrder(session.get_id(), question.getQuestionVariant(), question.getSubject());
-        if (sortOrder != null) {
-            addQuestionToSortOrder(sortOrder, question);
-            databaseDao.createOrUpdateSortOrder(sortOrder);
+        SortOrder subjectSortOrder = databaseDao.getSortOrder(session.get_id(), question.getQuestionVariant(), "");
+        if (subjectSortOrder != null) {
+			SortOrder questionSortOrder = databaseDao.getSortOrder(session.get_id(), question.getQuestionVariant(), question.getSubject());
+			if (questionSortOrder == null) {
+				List<String> s = new ArrayList<String>();
+				s.add(question.getSubject());
+				SortOrder newQSortOrder = new SortOrder();
+				newQSortOrder.setSessionId(question.get_id());
+				newQSortOrder.setSortType(subjectSortOrder.getSortType());
+				newQSortOrder.setQuestionVariant(subjectSortOrder.getQuestionVariant());
+				newQSortOrder.setSortOrder(s);
+				databaseDao.createOrUpdateSortOrder(newQSortOrder);
+				addToSortOrder(subjectSortOrder, question.getSubject());
+			}
+			else {
+            	addToSortOrder(questionSortOrder, question.get_id());
+			}
         }
         
 		final NewQuestionEvent event = new NewQuestionEvent(this, session, result);
@@ -589,11 +602,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			subjectSortOrder = createSortOrder(session, "lecture", "");
 		}
 		final User user = userService.getCurrentUser();
-		if (session.isCreator(user)) {
-			return getQuestionsBySortOrder(subjectSortOrder, false);
-		} else {
-			return getQuestionsBySortOrder(subjectSortOrder, true);
-		}
+		return getQuestionsBySortOrder(subjectSortOrder, session.isCreator(user));
 	}
 
 	@Override
@@ -617,11 +626,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			subjectSortOrder = createSortOrder(session, "preparation", "");
 		}
 		final User user = userService.getCurrentUser();
-		if (session.isCreator(user)) {
-			return getQuestionsBySortOrder(subjectSortOrder, false);
-		} else {
-			return getQuestionsBySortOrder(subjectSortOrder, true);
-		}
+		return getQuestionsBySortOrder(subjectSortOrder, session.isCreator(user));
 	}
 
 	private Session getSession(final String sessionkey) {
@@ -829,14 +834,14 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
         return sortOrder.getSortType();
     }
     
-    public SortOrder addQuestionToSortOrder(SortOrder sortOrder, Question question) {
+    public SortOrder addToSortOrder(SortOrder sortOrder, String toBeAdded) {
         List<String> tmpList = sortOrder.getSortOrder();
-        tmpList.add(question.get_id());
+        tmpList.add(toBeAdded);
         sortOrder.setSortOrder(tmpList);
         if("alphabet".equals(sortOrder.getSortType())) {
             sortOrder = alphabeticalSort(sortOrder);
         }
-        return sortOrder;
+        return databaseDao.createOrUpdateSortOrder(sortOrder);
     }
     
     public List<Question> getQuestionsBySortOrder(SortOrder subjectSortOrder, boolean onlyActive) {

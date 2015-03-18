@@ -20,6 +20,7 @@ package de.thm.arsnova.dao;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -550,6 +551,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		q.put("gridType", question.getGridType());
 		q.put("scaleFactor", question.getScaleFactor());
 		q.put("gridScaleFactor", question.getGridScaleFactor());
+		q.put("timestamp", question.getTimestamp());
 
 		return q;
 	}
@@ -1973,14 +1975,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		for (final Document d : results.getResults()) {
 			final String s = d.getString("value");
 			qids.add(s);
-			/*final Answer a = new Answer();
-			a.setAnswerCount(d.getInt("value"));
-			a.setAbstentionCount(abstentionCount);
-			a.setQuestionId(d.getJSONObject().getJSONArray("key").getString(0));
-			a.setPiRound(piRound);
-			final String answerText = d.getJSONObject().getJSONArray("key").getString(2);
-			a.setAnswerText("null".equals(answerText) ? null : answerText);
-			answers.add(a);*/
 		}
 		
 		return qids;
@@ -2004,21 +1998,38 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		if (results.getResults().isEmpty()) {
 			return null;
 		}
+		
+		SortOrder sortOrder = new SortOrder();
+		
+		for (final Document d : results.getResults()) {
+			sortOrder.set_id(d.getJSONObject("value").getString("_id"));
+			sortOrder.set_rev(d.getJSONObject("value").getString("_rev"));
+			sortOrder.setSessionId(d.getJSONObject("value").getString("sessionId"));
+			sortOrder.setSortType(d.getJSONObject("value").getString("sortType"));
+			sortOrder.setQuestionVariant(d.getJSONObject("value").getString("questionVariant"));
+			List<String> sort = new ArrayList<String>();
+			JSONArray json = d.getJSONObject("value").getJSONArray("sortOrder");
+			int len = json.size();
+			for (int i=0; i<len; i++) {
+				sort.add(json.getString(i));
+			}
+			sortOrder.setSortOrder(sort);
+		}
 
-		return (SortOrder) JSONObject.toBean(
-			results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
-			SortOrder.class
-		);
+		return sortOrder;
     }
     
     @Override
     public SortOrder createOrUpdateSortOrder(SortOrder sortOrder) {
 		try {
-			String id = sortOrder.get_id();
-			String rev = sortOrder.get_rev();
+			SortOrder oldSortOrder = getSortOrder(sortOrder.getSessionId(), sortOrder.getQuestionVariant(), sortOrder.getSubject());
 			Document d = new Document();
 
-			if (null != id) {
+			String id = "";
+			String rev = "";
+			if (oldSortOrder != null) {
+				id = oldSortOrder.get_id();
+				rev = oldSortOrder.get_rev();
 				d = database.getDocument(id, rev);
 			}
 
