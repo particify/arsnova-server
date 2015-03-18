@@ -147,7 +147,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				List<String> s = new ArrayList<String>();
 				s.add(question.getSubject());
 				SortOrder newQSortOrder = new SortOrder();
-				newQSortOrder.setSessionId(question.get_id());
+				newQSortOrder.setSessionId(question.getSessionId());
 				newQSortOrder.setSubject(question.getSubject());
 				newQSortOrder.setSortType(subjectSortOrder.getSortType());
 				newQSortOrder.setQuestionVariant(subjectSortOrder.getQuestionVariant());
