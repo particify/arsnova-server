@@ -201,8 +201,8 @@ public interface IDatabaseDao {
 	List<String> getSubjects(Session session, String questionVariant);
 	
 	List<String> getQuestionIdsBySubject(Session session, String questionVariant, String subject);
-    
-    SortOrder createOrUpdateSortOrder(SortOrder sortOrder);
-    
-    SortOrder getSortOrder(String sessionkey, String questionVariant, String subject);
+	
+	SortOrder createOrUpdateSortOrder(SortOrder sortOrder);
+	
+	SortOrder getSortOrder(String sessionkey, String questionVariant, String subject);
 }

@@ -9,11 +9,11 @@
  *
  * ARSnova Backend is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.	 If not, see <http://www.gnu.org/licenses/>.
  */
 package de.thm.arsnova.services;
 
@@ -112,7 +112,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	public Question saveQuestion(final Question question) {
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		question.setSessionId(session.get_id());
-        question.setTimestamp(System.currentTimeMillis() / 1000L);
+		question.setTimestamp(System.currentTimeMillis() / 1000L);
 
 		if ("freetext".equals(question.getQuestionType())) {
 			question.setPiRound(0);
@@ -136,12 +136,12 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				LOGGER.error("Could not save file. File is too large with " + fileSize + " Byte.");
 				throw new BadRequestException();
 			}
-		}        
+		}		 
 
 		final Question result = databaseDao.saveQuestion(session, question);
-        
-        SortOrder subjectSortOrder = databaseDao.getSortOrder(session.get_id(), question.getQuestionVariant(), "");
-        if (subjectSortOrder != null) {
+		
+		SortOrder subjectSortOrder = databaseDao.getSortOrder(session.get_id(), question.getQuestionVariant(), "");
+		if (subjectSortOrder != null) {
 			SortOrder questionSortOrder = databaseDao.getSortOrder(session.get_id(), question.getQuestionVariant(), question.getSubject());
 			if (questionSortOrder == null) {
 				List<String> s = new ArrayList<String>();
@@ -801,51 +801,51 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
 		this.publisher = publisher;
 	}
-    
-    @Override
-    public String getSubjectSortType(String sessionkey, String isPreparation) {
-        SortOrder sortOrder = databaseDao.getSortOrder(sessionkey, isPreparation, "");
-        return sortOrder.getSortType();
-    }
-    
-    @Override 
-    public SortOrder setSort(String sessionkey, String subject, String sortType, String isPreparation, String[] sortOrderList) {
-        Session session = databaseDao.getSessionFromKeyword(sessionkey);
+	
+	@Override
+	public String getSubjectSortType(String sessionkey, String isPreparation) {
+		SortOrder sortOrder = databaseDao.getSortOrder(sessionkey, isPreparation, "");
+		return sortOrder.getSortType();
+	}
+	
+	@Override 
+	public SortOrder setSort(String sessionkey, String subject, String sortType, String isPreparation, String[] sortOrderList) {
+		Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		String questionVariant = "preparation";
 		if ("false".equals(isPreparation)) {
 			questionVariant = "lecture";
 		}
-        SortOrder existing = databaseDao.getSortOrder(session.get_id(), questionVariant, subject);
-        SortOrder sortOrder = new SortOrder();
-        if (existing != null) {
-            sortOrder.set_id(existing.get_id());
-            sortOrder.set_rev(existing.get_rev());
-        }
-        sortOrder.setSessionId(session.get_id());
-        sortOrder.setSubject(subject);
-        sortOrder.setSortType(sortType);
-        sortOrder.setQuestionVariant(questionVariant);
-        sortOrder.setSortOrder(Arrays.asList(sortOrderList));
-        return databaseDao.createOrUpdateSortOrder(sortOrder);
-    }
-    
-    @Override
-    public String getQuestionSortType(String sessionkey, String isPreparation, String subject) {
-        SortOrder sortOrder = databaseDao.getSortOrder(sessionkey, isPreparation, subject);
-        return sortOrder.getSortType();
-    }
-    
-    public SortOrder addToSortOrder(SortOrder sortOrder, String toBeAdded) {
-        List<String> tmpList = sortOrder.getSortOrder();
-        tmpList.add(toBeAdded);
-        sortOrder.setSortOrder(tmpList);
-        if("alphabet".equals(sortOrder.getSortType())) {
-            sortOrder = alphabeticalSort(sortOrder);
-        }
-        return databaseDao.createOrUpdateSortOrder(sortOrder);
-    }
-    
-    public List<Question> getQuestionsBySortOrder(SortOrder subjectSortOrder, boolean onlyActive) {
+		SortOrder existing = databaseDao.getSortOrder(session.get_id(), questionVariant, subject);
+		SortOrder sortOrder = new SortOrder();
+		if (existing != null) {
+			sortOrder.set_id(existing.get_id());
+			sortOrder.set_rev(existing.get_rev());
+		}
+		sortOrder.setSessionId(session.get_id());
+		sortOrder.setSubject(subject);
+		sortOrder.setSortType(sortType);
+		sortOrder.setQuestionVariant(questionVariant);
+		sortOrder.setSortOrder(Arrays.asList(sortOrderList));
+		return databaseDao.createOrUpdateSortOrder(sortOrder);
+	}
+	
+	@Override
+	public String getQuestionSortType(String sessionkey, String isPreparation, String subject) {
+		SortOrder sortOrder = databaseDao.getSortOrder(sessionkey, isPreparation, subject);
+		return sortOrder.getSortType();
+	}
+	
+	public SortOrder addToSortOrder(SortOrder sortOrder, String toBeAdded) {
+		List<String> tmpList = sortOrder.getSortOrder();
+		tmpList.add(toBeAdded);
+		sortOrder.setSortOrder(tmpList);
+		if("alphabet".equals(sortOrder.getSortType())) {
+			sortOrder = alphabeticalSort(sortOrder);
+		}
+		return databaseDao.createOrUpdateSortOrder(sortOrder);
+	}
+	
+	public List<Question> getQuestionsBySortOrder(SortOrder subjectSortOrder, boolean onlyActive) {
 		if (subjectSortOrder.getSortOrder() == null) {
 			return null;
 		}
@@ -869,8 +869,8 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				}
 			}
 		}
-        return questions;
-    }
+		return questions;
+	}
 	
 	public SortOrder createSortOrder(Session session, String questionVariant, String subject) {
 		if ("".equals(subject)) {
@@ -898,8 +898,8 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			return databaseDao.createOrUpdateSortOrder(sortOrder);
 		}
 	}
-                                   
-    public SortOrder alphabeticalSort(SortOrder sortOrder){
+	
+	public SortOrder alphabeticalSort(SortOrder sortOrder){
 		if (sortOrder.getSortOrder() == null) {
 			return null;
 		}
@@ -913,11 +913,11 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			return sortOrder;
 		}
 		else {
-        	Hashtable<String, String> hash = new Hashtable();
-        	for (String qid : sortOrder.getSortOrder()) {
-            	Question question = getQuestion(qid);
-            	hash.put(question.getText(), qid);
-        	}
+			Hashtable<String, String> hash = new Hashtable();
+			for (String qid : sortOrder.getSortOrder()) {
+				Question question = getQuestion(qid);
+				hash.put(question.getText(), qid);
+			}
 			List<String> sortList = new ArrayList();
 			List<String> keys = new ArrayList(hash.keySet());
 			Collections.sort(keys);
