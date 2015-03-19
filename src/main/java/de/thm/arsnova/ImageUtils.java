@@ -123,15 +123,12 @@ public class ImageUtils {
 	public static String[] extractImageInfo(final String maybeImage) {
 		if (maybeImage == null) {
 			return null;
-		}
-		else if (maybeImage.isEmpty()) {
+		} else if (maybeImage.isEmpty()) {
 			return null;
-		}
-		else {
+		} else {
 			if (!maybeImage.startsWith(IMAGE_PREFIX_START)) {
 				return null;
-			}
-			else {
+			} else {
 				final int extensionStartIndex = IMAGE_PREFIX_START.length();
 				final int extensionEndIndex = maybeImage.indexOf(IMAGE_PREFIX_MIDDLE);
 				if (extensionEndIndex < 0) {
@@ -142,8 +139,7 @@ public class ImageUtils {
 
 				if (!imageWithoutPrefix.startsWith(IMAGE_PREFIX_MIDDLE)) {
 					return null;
-				}
-				else {
+				} else {
 					final String[] imageInfo = new String[2];
 					final String extension = maybeImage.substring(extensionStartIndex, extensionEndIndex);
 					final String imageString = imageWithoutPrefix.substring(IMAGE_PREFIX_MIDDLE.length());
@@ -173,8 +169,7 @@ public class ImageUtils {
 	public static String createCover(String originalImageString, final int width, final int height) {
 		if (!isBase64EncodedImage(originalImageString)) {
 			return null;
-		}
-		else {
+		} else {
 			final String[] imgInfo = extractImageInfo(originalImageString);
 
 			// imgInfo isn't null and contains two fields, this is checked by "isBase64EncodedImage"-Method

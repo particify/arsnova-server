@@ -30,7 +30,7 @@ public class Answer {
 	private String answerSubject;
 
 	private String answerText;
-	
+
 	private String answerImage;
 
 	private boolean abstention;
@@ -83,11 +83,11 @@ public class Answer {
 
 		return theAnswer;
 	}
-	
+
 	public String getAnswerImage() {
 		return answerImage;
 	}
-	
+
 	public void setAnswerImage(String answerImage) {
 		this.answerImage = answerImage;
 	}

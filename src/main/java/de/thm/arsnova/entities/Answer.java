@@ -124,7 +124,7 @@ public class Answer {
 	public void setAnswerImage(String answerImage) {
 		this.answerImage = answerImage;
 	}
-	
+
 	public String getAnswerThumbnailImage() {
 		return answerThumbnailImage;
 	}
