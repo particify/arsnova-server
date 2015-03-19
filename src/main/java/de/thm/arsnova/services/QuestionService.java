@@ -71,6 +71,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Autowired
 	private IUserService userService;
 
+	@Autowired
+	private ImageUtils imageUtils;
+
 	@Value("${upload.filesize_b}")
 	private int uploadFileSizeByte;
 
@@ -118,7 +121,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		// convert imageurl to base64 if neccessary
 		if ("grid".equals(question.getQuestionType())) {
 			if (question.getImage().startsWith("http")) {
-				final String base64ImageString = ImageUtils.encodeImageToString(question.getImage());
+				final String base64ImageString = imageUtils.encodeImageToString(question.getImage());
 				if (base64ImageString == null) {
 					throw new BadRequestException();
 				}
@@ -539,7 +542,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 		Answer theAnswer = answer.generateAnswerEntity(user, question);
 		if ("freetext".equals(question.getQuestionType())) {
-			ImageUtils.generateThumbnailImage(theAnswer);
+			imageUtils.generateThumbnailImage(theAnswer);
 		}
 
 		return databaseDao.saveAnswer(theAnswer, user, question, getSession(question.getSessionKeyword()));
@@ -556,7 +559,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 		final Question question = getQuestion(answer.getQuestionId());
 		if ("freetext".equals(question.getQuestionType())) {
-			ImageUtils.generateThumbnailImage(realAnswer);
+			imageUtils.generateThumbnailImage(realAnswer);
 		}
 		final Answer result = databaseDao.updateAnswer(realAnswer);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());

@@ -32,6 +32,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
 import de.thm.arsnova.entities.Answer;
 
@@ -41,6 +43,7 @@ import de.thm.arsnova.entities.Answer;
  * @author Daniel Vogel (daniel.vogel@mni.thm.de)
  * @author Jan Sladek (jan.sladek@mni.thm.de)
  */
+@Component("imageUtils")
 public class ImageUtils {
 
 	// Or whatever size you want to read in at a time.
@@ -53,24 +56,17 @@ public class ImageUtils {
 	public static final String IMAGE_PREFIX_MIDDLE = ";base64,";
 
 	/* default value is 200 pixel in width, set the value in the configuration file */
-	private static int THUMB_WIDTH = 200;
+	private static final int THUMB_WIDTH_DEFAULT = 200;
 	/* default value is 200 pixel in height, set the value in the configuration file */
-	private static int THUMB_HEIGHT = 200;
-
-	@Value("${imageupload.thumbnail.width}")
-	public void setThumbWidth(int thumbWidth) {
-		ImageUtils.THUMB_WIDTH = thumbWidth;
-	}
-
-	@Value("${imageupload.thumbnail.height}")
-	public void setThumbHeight(int thumbHeight) {
-		ImageUtils.THUMB_HEIGHT = thumbHeight;
-	}
-
-	private ImageUtils() {
-	}
+	private static final int THUMB_HEIGHT_DEFAULT = 200;
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(ImageUtils.class);
+
+	@Value("${imageupload.thumbnail.width}")
+	private int thumbWidth = THUMB_WIDTH_DEFAULT;
+
+	@Value("${imageupload.thumbnail.height}")
+	private int thumbHeight = THUMB_HEIGHT_DEFAULT;
 
 	/**
 	 * Converts an image to an Base64 String.
@@ -78,7 +74,7 @@ public class ImageUtils {
 	 * @param  imageUrl The image url as a {@link String}
 	 * @return The Base64 {@link String} of the image on success, otherwise <code>null</code>.
 	 */
-	public static String encodeImageToString(final String imageUrl) {
+	public String encodeImageToString(final String imageUrl) {
 
 		final String[] urlParts = imageUrl.split("\\.");
 		final StringBuilder result   = new StringBuilder();
@@ -105,7 +101,7 @@ public class ImageUtils {
 	 * @param maybeImage The Image as a base64 encoded {@link String}
 	 * @return true if the string is a potentially a base 64 encoded image.
 	 */
-	public static boolean isBase64EncodedImage(String maybeImage) {
+	public boolean isBase64EncodedImage(String maybeImage) {
 		return extractImageInfo(maybeImage) != null;
 	}
 
@@ -120,7 +116,7 @@ public class ImageUtils {
 	 * @return two-dimensional {@link String}-array containing the information
 	 *         "extension" and the "raw-image-{@link String}"
 	 */
-	public static String[] extractImageInfo(final String maybeImage) {
+	public String[] extractImageInfo(final String maybeImage) {
 		if (maybeImage == null) {
 			return null;
 		} else if (maybeImage.isEmpty()) {
@@ -166,7 +162,7 @@ public class ImageUtils {
 	 * @return The rescaled Image as Base64-encoded {@link String}, returns null
 	 *         if the passed-on image isn't in a valid format (a Base64-Image).
 	 */
-	public static String createCover(String originalImageString, final int width, final int height) {
+	public String createCover(String originalImageString, final int width, final int height) {
 		if (!isBase64EncodedImage(originalImageString)) {
 			return null;
 		} else {
@@ -226,9 +222,9 @@ public class ImageUtils {
 	 * @return true if the thumbnail image didn't exist before calling this
 	 *         method, false otherwise
 	 */
-	public static boolean generateThumbnailImage(Answer answer) {
+	public boolean generateThumbnailImage(Answer answer) {
 		if (!isBase64EncodedImage(answer.getAnswerThumbnailImage())) {
-			final String thumbImage = createCover(answer.getAnswerImage(), THUMB_WIDTH, THUMB_HEIGHT);
+			final String thumbImage = createCover(answer.getAnswerImage(), thumbWidth, thumbHeight);
 			answer.setAnswerThumbnailImage(thumbImage);
 			return true;
 		}
@@ -241,7 +237,7 @@ public class ImageUtils {
 	 * @param  imageUrl The image url as a {@link String}
 	 * @return The <code>byte[]</code> of the image on success, otherwise <code>null</code>.
 	 */
-	public static byte[] convertImageToByteArray(final String imageUrl, final String extension) {
+	public byte[] convertImageToByteArray(final String imageUrl, final String extension) {
 
 		try {
 			final URL url = new URL(imageUrl);
@@ -269,7 +265,7 @@ public class ImageUtils {
 	 * @param  imageUrl The image url as a {@link String}
 	 * @return The <code>byte[]</code> of the image on success, otherwise <code>null</code>.
 	 */
-	public static byte[] convertFileToByteArray(final String imageUrl) {
+	public byte[] convertFileToByteArray(final String imageUrl) {
 
 
 		try {

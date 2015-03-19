@@ -100,6 +100,9 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	@Autowired(required = false)
 	private ConnectorClient connectorClient;
 
+	@Autowired
+	private ImageUtils imageUtils;
+
 	@Value("${pp.logofilesize_b}")
 	private int uploadFileSizeByte;
 
@@ -222,7 +225,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		}
 		if (session.getPpLogo() != null) {
 			if (session.getPpLogo().startsWith("http")) {
-				final String base64ImageString = ImageUtils.encodeImageToString(session.getPpLogo());
+				final String base64ImageString = imageUtils.encodeImageToString(session.getPpLogo());
 				if (base64ImageString == null) {
 					throw new BadRequestException();
 				}

@@ -1,7 +1,6 @@
 package de.thm.arsnova;
 
-import static de.thm.arsnova.ImageUtils.isBase64EncodedImage;
-import static de.thm.arsnova.ImageUtils.extractImageInfo;
+import de.thm.arsnova.ImageUtils;
 import static de.thm.arsnova.ImageUtils.IMAGE_PREFIX_START;
 import static de.thm.arsnova.ImageUtils.IMAGE_PREFIX_MIDDLE;
 
@@ -10,17 +9,35 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@WebAppConfiguration
+@ContextConfiguration(locations = {
+		"file:src/main/webapp/WEB-INF/spring/arsnova-servlet.xml",
+		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
+		"file:src/test/resources/test-config.xml",
+		"file:src/test/resources/test-socketioconfig.xml"
+})
+@ActiveProfiles("test")
 public class ImageUtilsTest {
+
+  private ImageUtils imageUtils = new ImageUtils();
 
   @Test
   public void testNullIsNoValidBase64String() {
-    assertFalse("\"null\" is no valid Base64 String.", isBase64EncodedImage(null));
+    assertFalse("\"null\" is no valid Base64 String.", imageUtils.isBase64EncodedImage(null));
   }
 
   @Test
   public void testEmptyStringIsNoValidBase64String() {
-    assertFalse("The empty String is no valid Base64 String.", isBase64EncodedImage(""));
+    assertFalse("The empty String is no valid Base64 String.", imageUtils.isBase64EncodedImage(""));
   }
 
   @Test
@@ -33,7 +50,7 @@ public class ImageUtilsTest {
     for (String fakeString : fakeStrings) {
       assertFalse(
         String.format("The String %s is not a valid Base64 String.", fakeString),
-        isBase64EncodedImage(fakeString)
+        imageUtils.isBase64EncodedImage(fakeString)
       );
     }
   }
@@ -41,7 +58,7 @@ public class ImageUtilsTest {
   @Test
   public void testValidBase64String() {
     final String imageString = String.format("%spng%sIMAGE-DATA", IMAGE_PREFIX_START, IMAGE_PREFIX_MIDDLE);
-    assertTrue(isBase64EncodedImage(imageString));
+    assertTrue(imageUtils.isBase64EncodedImage(imageString));
   }
 
   @Test
@@ -51,7 +68,7 @@ public class ImageUtilsTest {
     final String imageString = String.format("%s%s%s%s", IMAGE_PREFIX_START,
       extension, IMAGE_PREFIX_MIDDLE, imageData);
 
-    final String[] imageInfo = extractImageInfo(imageString);
+    final String[] imageInfo = imageUtils.extractImageInfo(imageString);
     assertNotNull(imageInfo);
 
     assertEquals("Extracted information doesn't match its specification.", 2, imageInfo.length);
