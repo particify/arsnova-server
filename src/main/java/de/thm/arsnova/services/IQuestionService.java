@@ -9,11 +9,11 @@
  *
  * ARSnova Backend is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.	 If not, see <http://www.gnu.org/licenses/>.
  */
 package de.thm.arsnova.services;
 
@@ -137,7 +137,7 @@ public interface IQuestionService {
 	void deleteAllLectureAnswers(String sessionkey);
 
 	int getAbstentionAnswerCount(String questionId);
-    
+	
 	String getSubjectSortType(String sessionkey, String isPreparation);
 	
 	SortOrder setSort(String sessionkey, String subject, String sortType, String isPreparation, String[] sortOrder);
