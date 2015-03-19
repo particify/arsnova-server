@@ -188,11 +188,6 @@
 			<version>${org.springframework.security-version}</version>
 		</dependency>
 		<dependency>
-			<groupId>jstl</groupId>
-			<artifactId>jstl</artifactId>
-			<version>1.2</version>
-		</dependency>
-		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib</artifactId>
 			<version>3.1</version>
@@ -216,18 +211,6 @@
 			<groupId>de.thm.couchdb4j</groupId>
 			<artifactId>couchdb4j</artifactId>
 			<version>0.4-SNAPSHOT</version>
-			<exclusions>
-				<!-- Exclude httpclient: Selenium loads a more current version -->
-				<exclusion>
-					<groupId>org.apache.httpcomponents</groupId>
-					<artifactId>httpclient</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.ezmorph</groupId>
-			<artifactId>ezmorph</artifactId>
-			<version>1.0.6</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -305,11 +288,6 @@
 			<artifactId>mockito-all</artifactId>
 			<version>1.9.5</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.3.6</version>
 		</dependency>
 		<dependency>
 			<groupId>de.thm.arsnova.connector</groupId>
