@@ -22,6 +22,7 @@ import java.util.UUID;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.SessionFeature;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
@@ -69,4 +70,8 @@ public interface ISessionService {
 	List<SessionInfo> getMyVisitedSessionsInfo();
 
 	SessionInfo importSession(ImportExportSession session);
+
+	SessionFeature getSessionFeatures(String sessionkey);
+
+	SessionFeature changeSessionFeatures(String sessionkey, SessionFeature features);
 }

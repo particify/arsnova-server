@@ -18,7 +18,6 @@
 package de.thm.arsnova.services;
 
 import java.io.Serializable;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -39,6 +38,7 @@ import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.domain.ILearningProgressFactory;
 import de.thm.arsnova.domain.LearningProgress;
 import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.SessionFeature;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
@@ -48,6 +48,7 @@ import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.RequestEntityTooLargeException;
+import de.thm.arsnova.exceptions.UnauthorizedException;
 
 @Service
 public class SessionService implements ISessionService, ApplicationEventPublisherAware {
@@ -340,5 +341,21 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	@Override
 	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
 		this.publisher = publisher;
+	}
+
+	@Override
+	public SessionFeature getSessionFeatures(String sessionkey) {
+		return databaseDao.getSessionFromKeyword(sessionkey).getFeatures();
+	}
+
+	@Override
+	public SessionFeature changeSessionFeatures(String sessionkey, SessionFeature features) {
+		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
+		final User user = userService.getCurrentUser();
+		if (!session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
+		session.setFeatures(features);
+		return databaseDao.updateSession(session).getFeatures();
 	}
 }

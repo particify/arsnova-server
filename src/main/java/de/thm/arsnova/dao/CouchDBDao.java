@@ -447,6 +447,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		sessionDocument.put("ppFaculty", session.getPpFaculty());
 		sessionDocument.put("ppLevel", session.getPpLevel());
 		sessionDocument.put("sessionType", session.getSessionType());
+		sessionDocument.put("features", JSONObject.fromObject(session.getFeatures()));
 		try {
 			database.saveDocument(sessionDocument);
 		} catch (final IOException e) {
@@ -1380,6 +1381,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			s.put("shortName", session.getShortName());
 			s.put("active", session.isActive());
 			s.put("learningProgressType", session.getLearningProgressType());
+			s.put("features", JSONObject.fromObject(session.getFeatures()));
 			database.saveDocument(s);
 			session.set_rev(s.getRev());
 
