@@ -9,11 +9,11 @@
  *
  * ARSnova Backend is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.	 If not, see <http://www.gnu.org/licenses/>.
  */
 package de.thm.arsnova.dao;
 
@@ -31,6 +31,7 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 
 public interface IDatabaseDao {
@@ -196,4 +197,12 @@ public interface IDatabaseDao {
 	SessionInfo importSession(User user, ImportExportSession importSession);
 
 	Statistics getStatistics();
+	
+	List<String> getSubjects(Session session, String questionVariant);
+	
+	List<String> getQuestionIdsBySubject(Session session, String questionVariant, String subject);
+	
+	SortOrder createOrUpdateSortOrder(SortOrder sortOrder);
+	
+	SortOrder getSortOrder(String sessionkey, String questionVariant, String subject);
 }

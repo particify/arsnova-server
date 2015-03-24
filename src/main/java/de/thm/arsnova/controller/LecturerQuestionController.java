@@ -437,4 +437,50 @@ public class LecturerQuestionController extends AbstractController {
 			return questionService.getTotalAnswerCount(sessionkey);
 		}
 	}
+
+	@RequestMapping(value = "/subjectsort", method = RequestMethod.POST)
+	public void setSubjectSortOrder(
+			@RequestParam(required = true) final String sessionkey,
+            @RequestParam(required = true) final String sorttype,
+            @RequestParam(required = true) final String ispreparation,
+			@RequestBody String[] sortOrder
+			) {
+		try {
+			questionService.setSort(sessionkey, "", sorttype, ispreparation, sortOrder) ;
+		} catch (final Exception e) {
+			throw new BadRequestException();
+		}
+	}
+
+	@RequestMapping(value = "/subjectsort", method = RequestMethod.GET)
+	public String getSubjectSortType(
+			@RequestParam(required = true) final String sessionkey,
+			@RequestParam(required = true) final String ispreparation
+			) {
+		return questionService.getSubjectSortType(sessionkey, ispreparation);
+	}
+
+	@RequestMapping(value = "/questionsort", method = RequestMethod.POST)
+	public void setQuestionSortOrder(
+			@RequestParam(required = true) final String sessionkey,
+			@RequestParam(required = true) final String subject,
+			@RequestParam(required = true) final String sorttype,
+			@RequestParam(required = true) final String ispreparation,
+			@RequestBody String[] sortOrder
+			) {
+		try {
+			questionService.setSort(sessionkey, subject, sorttype, ispreparation, sortOrder);
+		} catch (final Exception e) {
+			throw new BadRequestException();
+		}
+	}
+
+	@RequestMapping(value = "/questionsort", method = RequestMethod.GET)
+	public String getQuestionSortType(
+			@RequestParam(required = true) final String sessionkey,
+			@RequestParam(required = true) final String subject,
+			@RequestParam(required = true) final String ispreparation
+			) {
+		return questionService.getQuestionSortType(sessionkey, ispreparation, subject);
+	}
 }

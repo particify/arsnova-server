@@ -9,11 +9,11 @@
  *
  * ARSnova Backend is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.	 If not, see <http://www.gnu.org/licenses/>.
  */
 package de.thm.arsnova.dao;
 
@@ -70,6 +70,7 @@ import de.thm.arsnova.entities.PossibleAnswer;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
+import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.VisitedSession;
@@ -551,6 +552,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		q.put("gridScaleFactor", question.getGridScaleFactor());
 		q.put("imageQuestion", question.isImageQuestion());
 		q.put("textAnswerEnabled", question.isTextAnswerEnabled());
+		q.put("timestamp", question.getTimestamp());
 
 		return q;
 	}
@@ -1184,7 +1186,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			// Not all users have visited sessions
 			if (d.getJSONObject().optJSONArray("value") != null) {
 				@SuppressWarnings("unchecked")
-				final Collection<Session> visitedSessions =  JSONArray.toCollection(
+				final Collection<Session> visitedSessions =	 JSONArray.toCollection(
 					d.getJSONObject().getJSONArray("value"),
 					Session.class
 				);
@@ -1941,5 +1943,132 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		info.setNumInterposed(interposedQuestions.size());
 		info.setNumUnredInterposed(unreadInterposed);
 		return info;
+	}
+
+	@Override
+	public List<String> getSubjects(Session session, String questionVariant) {
+		String viewString = "";
+		if ("lecture".equals(questionVariant)) {
+			viewString = "skill_question/lecture_question_subjects_by_session";
+		}
+		else {
+			viewString = "skill_question/preparation_question_subjects_by_session";
+		}
+		NovaView view = new NovaView(viewString);
+		view.setKey(session.get_id());
+		ViewResults results = this.getDatabase().view(view);
+
+		if (results.getJSONArray("rows").optJSONObject(0) == null) {
+			return null;
+		}
+
+		Set<String> uniqueSubjects = new HashSet<>();
+
+		for (final Document d : results.getResults()) {
+			uniqueSubjects.add(d.getString("value"));
+		}
+
+		List<String> uniqueSubjectsList = new ArrayList<>(uniqueSubjects);
+
+		return uniqueSubjectsList;
+	}
+
+	@Override
+	public List<String> getQuestionIdsBySubject(Session session, String questionVariant, String subject) {
+		String viewString = "";
+		if ("lecture".equals(questionVariant)) {
+			viewString = "skill_question/lecture_question_ids_by_session_and_subject";
+		}
+		else {
+			viewString = "skill_question/preparation_question_ids_by_session_and_subject";
+		}
+		NovaView view = new NovaView(viewString);
+		view.setKey(session.get_id(), subject);
+		ViewResults results = this.getDatabase().view(view);
+
+		if (results.getJSONArray("rows").optJSONObject(0) == null) {
+			return null;
+		}
+
+		List<String> qids = new ArrayList<>();
+
+		for (final Document d : results.getResults()) {
+			final String s = d.getString("value");
+			qids.add(s);
+		}
+
+		return qids;
+	}
+
+	@Override
+	public SortOrder getSortOrder(String sessionId, String questionVariant, String subject) {
+		String viewString = "";
+		if ("preparation".equals(questionVariant)) {
+			viewString = "sort_order/preparation_question_sort_order_by_sessionid_and_subject";
+		}
+		else if ("lecture".equals(questionVariant)) {
+			viewString = "sort_order/lecture_question_sort_order_by_sessionid_and_subject";
+		}
+
+		NovaView view = new NovaView(viewString);
+		view.setKey(sessionId, subject);
+
+		ViewResults results = this.getDatabase().view(view);
+
+		if (results.getResults().isEmpty()) {
+			return null;
+		}
+
+		SortOrder sortOrder = new SortOrder();
+
+		for (final Document d : results.getResults()) {
+			sortOrder.set_id(d.getJSONObject("value").getString("_id"));
+			sortOrder.set_rev(d.getJSONObject("value").getString("_rev"));
+			sortOrder.setSessionId(d.getJSONObject("value").getString("sessionId"));
+			sortOrder.setSubject(d.getJSONObject("value").getString("subject"));
+			sortOrder.setSortType(d.getJSONObject("value").getString("sortType"));
+			sortOrder.setQuestionVariant(d.getJSONObject("value").getString("questionVariant"));
+			List<String> sort = new ArrayList<String>();
+			JSONArray json = d.getJSONObject("value").getJSONArray("sortOrder");
+			int len = json.size();
+			for (int i=0; i<len; i++) {
+				sort.add(json.getString(i));
+			}
+			sortOrder.setSortOrder(sort);
+		}
+
+		return sortOrder;
+	}
+
+	@Override
+	public SortOrder createOrUpdateSortOrder(SortOrder sortOrder) {
+		try {
+			SortOrder oldSortOrder = getSortOrder(sortOrder.getSessionId(), sortOrder.getQuestionVariant(), sortOrder.getSubject());
+			Document d = new Document();
+
+			String id = "";
+			String rev = "";
+			if (oldSortOrder != null) {
+				id = oldSortOrder.get_id();
+				rev = oldSortOrder.get_rev();
+				d = database.getDocument(id, rev);
+			}
+
+			d.put("type", "sort_order");
+			d.put("sessionId", sortOrder.getSessionId());
+			d.put("sortType", sortOrder.getSortType());
+			d.put("questionVariant", sortOrder.getQuestionVariant());
+			d.put("subject", sortOrder.getSubject());
+			d.put("sortOrder", sortOrder.getSortOrder());
+
+			database.saveDocument(d, id);
+			sortOrder.set_id(d.getId());
+			sortOrder.set_rev(d.getRev());
+
+			return sortOrder;
+		} catch (IOException e) {
+			LOGGER.error("Could not save sort {}", sortOrder);
+		}
+		return null;
 	}
 }
