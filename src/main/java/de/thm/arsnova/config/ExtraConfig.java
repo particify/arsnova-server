@@ -35,6 +35,7 @@ import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.client.ConnectorClientImpl;
 import de.thm.arsnova.socket.ARSnovaSocket;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
+import de.thm.arsnova.ImageUtils;
 
 @Configuration
 @EnableCaching
@@ -107,5 +108,10 @@ public class ExtraConfig {
 	@Bean
 	public CacheManager cacheManager() {
 		return new ConcurrentMapCacheManager();
+	}
+
+	@Bean
+	public ImageUtils imageUtils() {
+		return new ImageUtils();
 	}
 }

@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -69,6 +70,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Autowired
 	private IUserService userService;
+
+	@Autowired
+	private ImageUtils imageUtils;
 
 	@Value("${upload.filesize_b}")
 	private int uploadFileSizeByte;
@@ -117,7 +121,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		// convert imageurl to base64 if neccessary
 		if ("grid".equals(question.getQuestionType())) {
 			if (question.getImage().startsWith("http")) {
-				final String base64ImageString = ImageUtils.encodeImageToString(question.getImage());
+				final String base64ImageString = imageUtils.encodeImageToString(question.getImage());
 				if (base64ImageString == null) {
 					throw new BadRequestException();
 				}
@@ -537,6 +541,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 
 		Answer theAnswer = answer.generateAnswerEntity(user, question);
+		if ("freetext".equals(question.getQuestionType())) {
+			imageUtils.generateThumbnailImage(theAnswer);
+		}
 
 		return databaseDao.saveAnswer(theAnswer, user, question, getSession(question.getSessionKeyword()));
 	}
@@ -551,6 +558,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 
 		final Question question = getQuestion(answer.getQuestionId());
+		if ("freetext".equals(question.getQuestionType())) {
+			imageUtils.generateThumbnailImage(realAnswer);
+		}
 		final Answer result = databaseDao.updateAnswer(realAnswer);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		this.publisher.publishEvent(new NewAnswerEvent(this, session, result, user, question));
@@ -781,5 +791,24 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
 		this.publisher = publisher;
+	}
+
+	@Override
+	public String getImage(String questionId, String answerId) {
+		final List<Answer> answers = getAnswers(questionId);
+		Answer answer = null;
+
+		for (Answer a : answers) {
+			if (answerId.equals(a.get_id())) {
+				answer = a;
+				break;
+			}
+		}
+
+		if (answer == null) {
+			throw new NotFoundException();
+		}
+
+		return answer.getAnswerImage();
 	}
 }

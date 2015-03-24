@@ -31,6 +31,8 @@ public class Answer {
 
 	private String answerText;
 
+	private String answerImage;
+
 	private boolean abstention;
 
 	public String getAnswerText() {
@@ -71,6 +73,7 @@ public class Answer {
 		theAnswer.setAbstention(this.isAbstention());
 		// calculate learning progress value after all properties are set
 		theAnswer.setQuestionValue(question.calculateValue(theAnswer));
+		theAnswer.setAnswerImage(this.getAnswerImage());
 
 		if ("freetext".equals(question.getQuestionType())) {
 			theAnswer.setPiRound(0);
@@ -79,5 +82,13 @@ public class Answer {
 		}
 
 		return theAnswer;
+	}
+
+	public String getAnswerImage() {
+		return answerImage;
+	}
+
+	public void setAnswerImage(String answerImage) {
+		this.answerImage = answerImage;
 	}
 }
