@@ -617,6 +617,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		if (subjectSortOrder == null) {
 			subjectSortOrder = createSortOrder(session, "lecture", "");
 		}
+		if (subjectSortOrder == null) {
+			return null;
+		}
 		final User user = userService.getCurrentUser();
 		return getQuestionsBySortOrder(subjectSortOrder, session.isCreator(user));
 	}
@@ -640,6 +643,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		SortOrder subjectSortOrder = databaseDao.getSortOrder(session.get_id(), "preparation", "");
 		if (subjectSortOrder == null) {
 			subjectSortOrder = createSortOrder(session, "preparation", "");
+		}
+		if (subjectSortOrder == null) {
+			return null;
 		}
 		final User user = userService.getCurrentUser();
 		return getQuestionsBySortOrder(subjectSortOrder, session.isCreator(user));
@@ -910,6 +916,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		if ("".equals(subject)) {
 			SortOrder subjectSortOrder = new SortOrder();
 			subjectSortOrder.setSortOrder(databaseDao.getSubjects(session, questionVariant));
+			if (subjectSortOrder.getSortOrder() == null) {
+				return null;
+			}
 			subjectSortOrder.setSubject("");
 			subjectSortOrder.setSortType("alphabetical");
 			subjectSortOrder.setQuestionVariant(questionVariant);
