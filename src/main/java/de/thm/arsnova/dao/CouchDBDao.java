@@ -2015,7 +2015,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 		ViewResults results = this.getDatabase().view(view);
 
-		if (results.getResults().isEmpty()) {
+		if (results == null || results.getResults() == null) {
 			return null;
 		}
 
