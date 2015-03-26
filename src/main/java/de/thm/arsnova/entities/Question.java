@@ -467,7 +467,6 @@ public class Question {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((_id == null) ? 0 : _id.hashCode());
-		result = prime * result + ((_rev == null) ? 0 : _rev.hashCode());
 		return result;
 	}
 
@@ -485,13 +484,6 @@ public class Question {
 				return false;
 			}
 		} else if (!_id.equals(other._id)) {
-			return false;
-		}
-		if (_rev == null) {
-			if (other._rev != null) {
-				return false;
-			}
-		} else if (!_rev.equals(other._rev)) {
 			return false;
 		}
 		return true;
