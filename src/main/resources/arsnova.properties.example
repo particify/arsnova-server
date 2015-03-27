@@ -214,8 +214,8 @@ session.demo-id=
 optional.arsnova-slogan=Audience Response System
 
 # optional: Panel with Text about the University
-optional.uni-enabled=false
-optional.uni-text=Placeholder for UniPanel-Text
+optional.unipanel-enabled=false
+optional.unipanel-text=Placeholder for UniPanel-Text
 
 # Links which are displayed in the frontend applications
 #
