@@ -69,6 +69,8 @@ public class Question {
 	private String gridType;
 	private String scaleFactor;
 	private String gridScaleFactor;
+	private boolean imageQuestion;
+	private boolean textAnswerEnabled;
 
 	public final String getType() {
 		return type;
@@ -184,6 +186,14 @@ public class Question {
 
 	public final int getDuration() {
 		return duration;
+	}
+
+	public final boolean isImageQuestion() {
+		return imageQuestion;
+	}
+
+	public void setImageQuestion(boolean imageQuestion) {
+		this.imageQuestion = imageQuestion;
 	}
 
 	public final void setDuration(final int duration) {
@@ -438,6 +448,14 @@ public class Question {
 		return this.gridScaleFactor;
 	}
 
+	public boolean isTextAnswerEnabled() {
+		return this.textAnswerEnabled;
+	}
+
+	public void setTextAnswerEnabled(boolean textAnswerEnabled) {
+		this.textAnswerEnabled = textAnswerEnabled;
+	}
+
 	@Override
 	public final String toString() {
 		return "Question type '" + type + "': " + subject + ";\n" + text + possibleAnswers;
@@ -449,7 +467,6 @@ public class Question {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((_id == null) ? 0 : _id.hashCode());
-		result = prime * result + ((_rev == null) ? 0 : _rev.hashCode());
 		return result;
 	}
 
@@ -467,13 +484,6 @@ public class Question {
 				return false;
 			}
 		} else if (!_id.equals(other._id)) {
-			return false;
-		}
-		if (_rev == null) {
-			if (other._rev != null) {
-				return false;
-			}
-		} else if (!_rev.equals(other._rev)) {
 			return false;
 		}
 		return true;

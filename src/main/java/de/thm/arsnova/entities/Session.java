@@ -38,6 +38,7 @@ public class Session implements Serializable {
 	private List<String> _conflicts;
 	private long creationTime;
 	private String learningProgressType = "questions";
+	private SessionFeature features;
 
 	private String ppAuthorName;
 	private String ppAuthorMail;
@@ -71,6 +72,7 @@ public class Session implements Serializable {
 		copy.courseId = original.courseId;
 		copy.creationTime = original.creationTime;
 		copy.learningProgressType = original.learningProgressType;
+		copy.features = new SessionFeature(original.features);
 		// public pool
 		copy.ppAuthorName = original.ppAuthorName;
 		copy.ppAuthorMail = original.ppAuthorMail;
@@ -207,6 +209,14 @@ public class Session implements Serializable {
 
 	public void setLearningProgressType(String learningProgressType) {
 		this.learningProgressType = learningProgressType;
+	}
+
+	public SessionFeature getFeatures() {
+		return features;
+	}
+
+	public void setFeatures(SessionFeature features) {
+		this.features = features;
 	}
 
 	public String getPpAuthorName() {

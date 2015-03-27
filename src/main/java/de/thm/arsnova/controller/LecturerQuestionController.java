@@ -339,6 +339,16 @@ public class LecturerQuestionController extends AbstractController {
 		return questionService.updateAnswer(answer);
 	}
 
+	@RequestMapping(value = "/{questionId}/answer/{answerId}/image", method = RequestMethod.GET)
+	public String getImage(
+			@PathVariable final String questionId,
+			@PathVariable final String answerId,
+			final HttpServletResponse response
+			) {
+
+		return questionService.getImage(questionId, answerId);
+	}
+
 	@RequestMapping(value = "/{questionId}/answer/{answerId}", method = RequestMethod.DELETE)
 	public void deleteAnswer(
 			@PathVariable final String questionId,

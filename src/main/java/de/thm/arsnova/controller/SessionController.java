@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.SessionFeature;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
@@ -246,6 +247,23 @@ public class SessionController extends AbstractController {
 			final HttpServletResponse response
 			) {
 		return sessionService.getMyLearningProgress(sessionkey, progressType);
+	}
+
+	@RequestMapping(value = "/{sessionkey}/features", method = RequestMethod.GET)
+	public SessionFeature sessionFeatures(
+			@PathVariable final String sessionkey,
+			final HttpServletResponse response
+			) {
+		return sessionService.getSessionFeatures(sessionkey);
+	}
+
+	@RequestMapping(value = "/{sessionkey}/features", method = RequestMethod.PATCH)
+	public SessionFeature changeSessionFeatures(
+			@PathVariable final String sessionkey,
+			@RequestBody final SessionFeature features,
+			final HttpServletResponse response
+			) {
+		return sessionService.changeSessionFeatures(sessionkey, features);
 	}
 
 	/* internal redirections */

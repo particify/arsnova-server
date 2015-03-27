@@ -54,6 +54,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fourspaces.couchdb.Database;
 import com.fourspaces.couchdb.Document;
+import com.fourspaces.couchdb.Results;
+import com.fourspaces.couchdb.RowResult;
 import com.fourspaces.couchdb.View;
 import com.fourspaces.couchdb.ViewResults;
 
@@ -125,17 +127,14 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		view.setStartKeyArray(user.getUsername());
 		view.setEndKeyArray(user.getUsername(), "{}");
 
-		final ViewResults sessions = getDatabase().view(view);
+		final Results<Session> results = getDatabase().queryView(view, Session.class);
 
 		final List<Session> result = new ArrayList<Session>();
-		for (final Document d : sessions.getResults()) {
-			final Session session = (Session) JSONObject.toBean(
-					d.getJSONObject().getJSONObject("value"),
-					Session.class
-					);
-			session.setCreator(d.getJSONObject().getJSONArray("key").getString(0));
-			session.setName(d.getJSONObject().getJSONArray("key").getString(1));
-			session.set_id(d.getId());
+		for (final RowResult<Session> row : results.getRows()) {
+			final Session session = row.getValue();
+			session.setCreator(row.getKey().getString(0));
+			session.setName(row.getKey().getString(1));
+			session.set_id(row.getId());
 			result.add(session);
 		}
 		return result;
@@ -448,6 +447,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		sessionDocument.put("ppFaculty", session.getPpFaculty());
 		sessionDocument.put("ppLevel", session.getPpLevel());
 		sessionDocument.put("sessionType", session.getSessionType());
+		sessionDocument.put("features", JSONObject.fromObject(session.getFeatures()));
 		try {
 			database.saveDocument(sessionDocument);
 		} catch (final IOException e) {
@@ -549,6 +549,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		q.put("gridType", question.getGridType());
 		q.put("scaleFactor", question.getScaleFactor());
 		q.put("gridScaleFactor", question.getGridScaleFactor());
+		q.put("imageQuestion", question.isImageQuestion());
+		q.put("textAnswerEnabled", question.isTextAnswerEnabled());
 
 		return q;
 	}
@@ -597,6 +599,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			q.put("gridType", question.getGridType());
 			q.put("scaleFactor", question.getScaleFactor());
 			q.put("gridScaleFactor", question.getGridScaleFactor());
+			q.put("imageQuestion", question.isImageQuestion());
 
 			database.saveDocument(q);
 			question.set_rev(q.getRev());
@@ -1084,11 +1087,14 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		try {
 			final View statsView = new View("statistics/statistics");
 			final View creatorView = new View("statistics/unique_session_creators");
+			final View studentUserView = new View("statistics/active_student_users");
 			statsView.setGroup(true);
 			creatorView.setGroup(true);
+			studentUserView.setGroup(true);
 
 			final ViewResults statsResults = getDatabase().view(statsView);
 			final ViewResults creatorResults = getDatabase().view(creatorView);
+			final ViewResults studentUserResults = getDatabase().view(studentUserView);
 
 			if (!isEmptyResults(statsResults)) {
 				final JSONArray rows = statsResults.getJSONArray("rows");
@@ -1128,6 +1134,15 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 					creators.add(row.getString("key"));
 				}
 				stats.setCreators(creators.size());
+			}
+			if (!isEmptyResults(studentUserResults)) {
+				final JSONArray rows = studentUserResults.getJSONArray("rows");
+				Set<String> students = new HashSet<String>();
+				for (int i = 0; i < rows.size(); i++) {
+					final JSONObject row = rows.getJSONObject(i);
+					students.add(row.getString("key"));
+				}
+				stats.setActiveStudents(students.size());
 			}
 			return stats;
 		} catch (final Exception e) {
@@ -1246,6 +1261,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		a.put("user", user.getUsername());
 		a.put("piRound", answer.getPiRound());
 		a.put("abstention", answer.isAbstention());
+		a.put("answerImage", answer.getAnswerImage());
+		a.put("answerThumbnailImage", answer.getAnswerThumbnailImage());
 		AnswerQueueElement answerQueueElement = new AnswerQueueElement(session, question, answer, user);
 		this.answerQueue.offer(new AbstractMap.SimpleEntry<Document, AnswerQueueElement>(a, answerQueueElement));
 		return answer;
@@ -1294,6 +1311,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			a.put("timestamp", answer.getTimestamp());
 			a.put("abstention", answer.isAbstention());
 			a.put("questionValue", answer.getQuestionValue());
+			a.put("answerImage", answer.getAnswerImage());
+
+			a.put("answerThumbnailImage", answer.getAnswerThumbnailImage());
 			database.saveDocument(a);
 			answer.set_rev(a.getRev());
 			return answer;
@@ -1372,6 +1392,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			s.put("shortName", session.getShortName());
 			s.put("active", session.isActive());
 			s.put("learningProgressType", session.getLearningProgressType());
+			s.put("features", JSONObject.fromObject(session.getFeatures()));
 			database.saveDocument(s);
 			session.set_rev(s.getRev());
 

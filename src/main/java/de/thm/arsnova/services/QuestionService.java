@@ -25,10 +25,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import java.util.Timer;
 import java.util.TimerTask;
-
-import de.thm.arsnova.exceptions.ForbiddenException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +58,7 @@ import de.thm.arsnova.events.NewQuestionEvent;
 import de.thm.arsnova.events.PiRoundDelayedStartEvent;
 import de.thm.arsnova.events.PiRoundEndEvent;
 import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 
@@ -70,6 +70,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Autowired
 	private IUserService userService;
+
+	@Autowired
+	private ImageUtils imageUtils;
 
 	@Value("${upload.filesize_b}")
 	private int uploadFileSizeByte;
@@ -118,7 +121,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		// convert imageurl to base64 if neccessary
 		if ("grid".equals(question.getQuestionType())) {
 			if (question.getImage().startsWith("http")) {
-				final String base64ImageString = ImageUtils.encodeImageToString(question.getImage());
+				final String base64ImageString = imageUtils.encodeImageToString(question.getImage());
 				if (base64ImageString == null) {
 					throw new BadRequestException();
 				}
@@ -197,6 +200,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		this.publisher.publishEvent(event);
 	}
 
+	@Override
 	public void startNewPiRound(final String questionId, User user) {
 		if(null == user) {
 			user = userService.getCurrentUser();
@@ -231,6 +235,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		cancelDelayedPiRoundChange(questionId);
 
 		timer.schedule(new TimerTask() {
+			@Override
 			public void run() {
 				questionService.startNewPiRound(questionId, user);
 			}
@@ -246,6 +251,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		this.publisher.publishEvent(new PiRoundDelayedStartEvent(this, session, question));
 	}
 
+	@Override
 	public void cancelDelayedPiRoundChange(final String questionId) {
 		Timer timer = timerList.get(questionId);
 
@@ -406,6 +412,11 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final List<Answer> filteredAnswers = new ArrayList<Answer>();
 		for (final Answer answer : answers) {
 			final Question question = questionIdToQuestion.get(answer.getQuestionId());
+			if (question == null) {
+				// Question is not present. Most likely it has been locked by the
+				// Session's creator. Locked Questions do not appear in this list.
+				continue;
+			}
 			if (0 == answer.getPiRound() && !"freetext".equals(question.getQuestionType())) {
 				answer.setPiRound(1);
 			}
@@ -495,7 +506,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final User user = userService.getCurrentUser();
 		return update(question, user);
 	}
-	
+
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public Question update(final Question question, User user) {
@@ -535,6 +546,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 
 		Answer theAnswer = answer.generateAnswerEntity(user, question);
+		if ("freetext".equals(question.getQuestionType())) {
+			imageUtils.generateThumbnailImage(theAnswer);
+		}
 
 		return databaseDao.saveAnswer(theAnswer, user, question, getSession(question.getSessionKeyword()));
 	}
@@ -549,6 +563,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 
 		final Question question = getQuestion(answer.getQuestionId());
+		if ("freetext".equals(question.getQuestionType())) {
+			imageUtils.generateThumbnailImage(realAnswer);
+		}
 		final Answer result = databaseDao.updateAnswer(realAnswer);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		this.publisher.publishEvent(new NewAnswerEvent(this, session, result, user, question));
@@ -779,5 +796,24 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
 		this.publisher = publisher;
+	}
+
+	@Override
+	public String getImage(String questionId, String answerId) {
+		final List<Answer> answers = getAnswers(questionId);
+		Answer answer = null;
+
+		for (Answer a : answers) {
+			if (answerId.equals(a.get_id())) {
+				answer = a;
+				break;
+			}
+		}
+
+		if (answer == null) {
+			throw new NotFoundException();
+		}
+
+		return answer.getAnswerImage();
 	}
 }

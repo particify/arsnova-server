@@ -136,4 +136,6 @@ public interface IQuestionService {
 	void deleteAllLectureAnswers(String sessionkey);
 
 	int getAbstentionAnswerCount(String questionId);
+
+	String getImage(String questionId, String answerId);
 }
