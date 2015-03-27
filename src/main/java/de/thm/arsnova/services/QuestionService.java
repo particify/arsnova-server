@@ -160,6 +160,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				addToSortOrder(questionSortOrder, question.get_id());
 			}
 		}
+		else {
+			createSortOrder(session, question.getQuestionVariant(), question.getSubject());
+		}
 
 		final NewQuestionEvent event = new NewQuestionEvent(this, session, result);
 		this.publisher.publishEvent(event);
