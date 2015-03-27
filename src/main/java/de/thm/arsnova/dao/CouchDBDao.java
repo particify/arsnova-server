@@ -569,6 +569,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			q.put("possibleAnswers", question.getPossibleAnswers());
 			q.put("noCorrect", question.isNoCorrect());
 			q.put("piRound", question.getPiRound());
+			q.put("piRoundActive", question.isPiRoundActive());
+			q.put("piRoundEndTime", question.getPiRoundEndTime());
+			q.put("piRoundStartTime", question.getPiRoundStartTime());
 			q.put("showStatistic", question.isShowStatistic());
 			q.put("showAnswer", question.isShowAnswer());
 			q.put("abstention", question.isAbstention());

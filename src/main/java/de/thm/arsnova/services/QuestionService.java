@@ -208,6 +208,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 
 		question.setPiRound(question.getPiRound() + 1);
+		question.setPiRoundActive(false);
+		question.setPiRoundStartTime(0);
+		question.setPiRoundEndTime(0);
 		question.setActive(false);
 		update(question, user);
 
@@ -234,6 +237,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}, endDate);
 
 		timerList.put(questionId, timer);
+		question.setActive(true);
 		question.setPiRoundActive(true);
 		question.setPiRoundStartTime(date.getTime());
 		question.setPiRoundEndTime(endDate.getTime());
@@ -405,6 +409,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			if (0 == answer.getPiRound() && !"freetext".equals(question.getQuestionType())) {
 				answer.setPiRound(1);
 			}
+
 			// discard all answers that aren't in the same piRound as the question
 			if (answer.getPiRound() == question.getPiRound()) {
 				filteredAnswers.add(answer);
