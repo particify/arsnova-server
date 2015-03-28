@@ -913,7 +913,6 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				List<String> tempSubSort = subjectSortOrder.getSortOrder();
 				tempSubSort.remove(question.getSubject());
 				subjectSortOrder.setSortOrder(tempSubSort);
-				subjectSortOrder.getSortOrder().remove(question.getSubject());
 				if (subjectSortOrder.getSortOrder().isEmpty()) {
 					databaseDao.deleteSortOrder(subjectSortOrder);
 				}
