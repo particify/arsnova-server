@@ -161,7 +161,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			}
 		}
 		else {
-			createSortOrder(session, question.getQuestionVariant(), question.getSubject());
+			createSortOrder(session, question.getQuestionVariant(), "");
 		}
 
 		final NewQuestionEvent event = new NewQuestionEvent(this, session, result);
