@@ -905,7 +905,8 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		SortOrder sortOrder = databaseDao.getSortOrder(question.getSessionId(), question.getQuestionVariant(), question.getSubject());
 		if (sortOrder != null) {
 			List<String> tempSortOrder = sortOrder.getSortOrder();
-			sortOrder.setSortOrder(tempSortOrder.remove(question.get_id()));
+			tempSortOrder.remove(question.get_id());
+			sortOrder.setSortOrder(tempSortOrder);
 			if (sortOrder.getSortOrder().isEmpty()) {
 				databaseDao.deleteSortOrder(sortOrder);
 				SortOrder subjectSortOrder = databaseDao.getSortOrder(sortOrder.getSessionId(), sortOrder.getQuestionVariant(), "");
