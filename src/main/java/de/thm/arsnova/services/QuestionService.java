@@ -944,6 +944,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			List<String> questionIds = questionSortOrder.getSortOrder();
 			for (String t : questionIds) {
 				Question tempQuestion = getQuestion(t);
+				if (tempQuestion == null) {
+					break;
+				}
 				if (onlyActive) {
 					if (tempQuestion.isActive()) {
 						questions.add(tempQuestion);
