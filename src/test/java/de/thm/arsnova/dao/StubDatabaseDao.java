@@ -598,4 +598,10 @@ public class StubDatabaseDao implements IDatabaseDao {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	@Override
+	void deleteSortOrder(SortOrder sortOrder) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
