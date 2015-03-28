@@ -917,6 +917,12 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				if (subjectSortOrder.getSortOrder().isEmpty()) {
 					databaseDao.deleteSortOrder(subjectSortOrder);
 				}
+				else {
+					databaseDao.createOrUpdateSortOrder(sortOrder);
+				}
+			}
+			else {
+				databaseDao.createOrUpdateSortOrder(sortOrder);
 			}
 		}
 	}
@@ -947,13 +953,13 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		for (String sub : subjects) {
 			SortOrder questionSortOrder = databaseDao.getSortOrder(subjectSortOrder.getSessionId(), subjectSortOrder.getQuestionVariant(), sub);
 			if (questionSortOrder == null) {
-				break;
+				continue;
 			}
 			List<String> questionIds = questionSortOrder.getSortOrder();
 			for (String t : questionIds) {
 				Question tempQuestion = getQuestion(t);
 				if (tempQuestion == null) {
-					break;
+					continue;
 				}
 				if (onlyActive) {
 					if (tempQuestion.isActive()) {
