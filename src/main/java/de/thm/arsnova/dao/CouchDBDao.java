@@ -643,6 +643,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public Question getQuestion(final String id) {
 		try {
 			final Document q = getDatabase().getDocument(id);
+			if (q == null) {
+				return null;
+			}
 			final Question question = (Question) JSONObject.toBean(q.getJSONObject(), Question.class);
 			final JSONArray possibleAnswers = q.getJSONObject().getJSONArray("possibleAnswers");
 			@SuppressWarnings("unchecked")
