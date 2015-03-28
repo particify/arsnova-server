@@ -212,6 +212,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			throw new UnauthorizedException();
 		}
 		databaseDao.deleteQuestionWithAnswers(question);
+		deleteQuestionFromSortOrder(question);
 
 		final DeleteQuestionEvent event = new DeleteQuestionEvent(this, session);
 		this.publisher.publishEvent(event);
@@ -725,6 +726,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated()")
 	public void deleteLectureQuestions(final String sessionkey) {
 		final Session session = getSessionWithAuthCheck(sessionkey);
+		this.deleteSortOrder(session, "lecture", "");
 		databaseDao.deleteAllLectureQuestionsWithAnswers(session);
 	}
 
@@ -739,6 +741,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated()")
 	public void deletePreparationQuestions(final String sessionkey) {
 		final Session session = getSessionWithAuthCheck(sessionkey);
+		this.deleteSortOrder(session, "preparation", "");
 		databaseDao.deleteAllPreparationQuestionsWithAnswers(session);
 	}
 
@@ -896,6 +899,35 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			sortOrder = alphabeticalSort(sortOrder);
 		}
 		return databaseDao.createOrUpdateSortOrder(sortOrder);
+	}
+	
+	public void deleteQuestionFromSortOrder(Question question){
+		SortOrder sortOrder = databaseDao.getSortOrder(question.getSessionId(), question.getQuestionVariant(), question.getSubject());
+		if (sortOrder != null) {
+			sortOrder.getSortOrder().remove(question.get_id());
+			if (sortOrder.getSortOrder().isEmpty()) {
+				databaseDao.deleteSortOrder(sortOrder);
+				SortOrder subjectSortOrder = databaseDao.getSortOrder(sortOrder.getSessionId(), sortOrder.getQuestionVariant(), "");
+				subjectSortOrder.getSortOrder().remove(question.getSubject());
+				if (subjectSortOrder.getSortOrder().isEmpty()) {
+					databaseDao.deleteSortOrder(subjectSortOrder);
+				}
+			}
+		}
+	}
+	
+	public void deleteSortOrder(Session session, String questionVariant, String subject) {
+		SortOrder sortOrder = databaseDao.getSortOrder(session.get_id(), questionVariant, subject);
+		if (sortOrder == null) {
+			return;
+		}
+		if ("".equals(subject)) {
+			List<String> subs = sortOrder.getSortOrder();
+			for (String sub : subs) {
+				deleteSortOrder(session, questionVariant, sub);
+			}
+		}
+		databaseDao.deleteSortOrder(sortOrder);
 	}
 
 	public List<Question> getQuestionsBySortOrder(SortOrder subjectSortOrder, boolean onlyActive) {
