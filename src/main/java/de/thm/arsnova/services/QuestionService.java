@@ -917,7 +917,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 					databaseDao.deleteSortOrder(subjectSortOrder);
 				}
 				else {
-					databaseDao.createOrUpdateSortOrder(sortOrder);
+					databaseDao.createOrUpdateSortOrder(subjectSortOrder);
 				}
 			}
 			else {
