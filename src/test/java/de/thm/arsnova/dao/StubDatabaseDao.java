@@ -600,8 +600,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 	
 	@Override
-	void deleteSortOrder(SortOrder sortOrder) {
+	public void deleteSortOrder(SortOrder sortOrder) {
 		// TODO Auto-generated method stub
-		return null;
 	}
 }
