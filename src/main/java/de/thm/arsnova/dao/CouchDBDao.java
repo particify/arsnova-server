@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -511,6 +512,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	private Document toQuestionDocument(final Session session, final Question question) {
+		final long time = new Date().getTime();
 		final Document q = new Document();
 		q.put("type", "skill_question");
 		q.put("questionType", question.getQuestionType());
@@ -552,6 +554,16 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		q.put("imageQuestion", question.isImageQuestion());
 		q.put("textAnswerEnabled", question.isTextAnswerEnabled());
 
+		if(time > question.getPiRoundEndTime()) {
+			q.put("piRoundEndTime", 0);
+			q.put("piRoundStartTime", 0);
+			q.put("piRoundActive", false);
+		} else {
+			q.put("piRoundActive", question.isPiRoundActive());
+			q.put("piRoundEndTime", question.getPiRoundEndTime());
+			q.put("piRoundStartTime", question.getPiRoundStartTime());
+		}
+
 		return q;
 	}
 
@@ -563,6 +575,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public Question updateQuestion(final Question question) {
 		try {
+			final long time = new Date().getTime();
 			final Document q = database.getDocument(question.get_id());
 			q.put("subject", question.getSubject());
 			q.put("text", question.getText());
@@ -571,9 +584,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			q.put("possibleAnswers", question.getPossibleAnswers());
 			q.put("noCorrect", question.isNoCorrect());
 			q.put("piRound", question.getPiRound());
-			q.put("piRoundActive", question.isPiRoundActive());
-			q.put("piRoundEndTime", question.getPiRoundEndTime());
-			q.put("piRoundStartTime", question.getPiRoundStartTime());
 			q.put("showStatistic", question.isShowStatistic());
 			q.put("showAnswer", question.isShowAnswer());
 			q.put("abstention", question.isAbstention());
@@ -600,6 +610,16 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			q.put("scaleFactor", question.getScaleFactor());
 			q.put("gridScaleFactor", question.getGridScaleFactor());
 			q.put("imageQuestion", question.isImageQuestion());
+
+			if(time > question.getPiRoundEndTime()) {
+				q.put("piRoundEndTime", 0);
+				q.put("piRoundStartTime", 0);
+				q.put("piRoundActive", false);
+			} else {
+				q.put("piRoundActive", question.isPiRoundActive());
+				q.put("piRoundEndTime", question.getPiRoundEndTime());
+				q.put("piRoundStartTime", question.getPiRoundStartTime());
+			}
 
 			database.saveDocument(q);
 			question.set_rev(q.getRev());
