@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -511,29 +510,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return null;
 	}
 
-	private HashMap<String, Object> getRoundMangementState(final Question question) {
-		final HashMap<String, Object> map = new HashMap<String, Object>();
-		final long time = new Date().getTime();
-
-		if(time > question.getPiRoundEndTime()
-			&& question.isPiRoundActive()) {
-			map.put("piRoundEndTime", 0);
-			map.put("piRoundStartTime", 0);
-			map.put("piRoundActive", false);
-			map.put("piRoundFinished", true);
-		} else {
-			map.put("piRoundFinished", false);
-			map.put("piRoundActive", question.isPiRoundActive());
-			map.put("piRoundEndTime", question.getPiRoundEndTime());
-			map.put("piRoundStartTime", question.getPiRoundStartTime());
-		}
-
-		return map;
-	}
-
 	private Document toQuestionDocument(final Session session, final Question question) {
 		Document q = new Document();
 
+		question.updateRoundManagementState();
 		q.put("type", "skill_question");
 		q.put("questionType", question.getQuestionType());
 		q.put("questionVariant", question.getQuestionVariant());
@@ -546,6 +526,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		q.put("possibleAnswers", question.getPossibleAnswers());
 		q.put("noCorrect", question.isNoCorrect());
 		q.put("piRound", question.getPiRound());
+		q.put("piRoundStartTime", question.getPiRoundStartTime());
+		q.put("piRoundEndTime", question.getPiRoundEndTime());
+		q.put("piRoundFinished", question.isPiRoundFinished());
+		q.put("piRoundActive", question.isPiRoundActive());
 		q.put("showStatistic", question.isShowStatistic());
 		q.put("showAnswer", question.isShowAnswer());
 		q.put("abstention", question.isAbstention());
@@ -573,7 +557,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		q.put("gridScaleFactor", question.getGridScaleFactor());
 		q.put("imageQuestion", question.isImageQuestion());
 		q.put("textAnswerEnabled", question.isTextAnswerEnabled());
-		q.putAll(getRoundMangementState(question));
 		
 		return q;
 	}
@@ -586,8 +569,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public Question updateQuestion(final Question question) {
 		try {
-			final long time = new Date().getTime();
 			final Document q = database.getDocument(question.get_id());
+
+			question.updateRoundManagementState();
 			q.put("subject", question.getSubject());
 			q.put("text", question.getText());
 			q.put("active", question.isActive());
@@ -595,6 +579,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			q.put("possibleAnswers", question.getPossibleAnswers());
 			q.put("noCorrect", question.isNoCorrect());
 			q.put("piRound", question.getPiRound());
+			q.put("piRoundStartTime", question.getPiRoundStartTime());
+			q.put("piRoundEndTime", question.getPiRoundEndTime());
+			q.put("piRoundFinished", question.isPiRoundFinished());
+			q.put("piRoundActive", question.isPiRoundActive());
 			q.put("showStatistic", question.isShowStatistic());
 			q.put("showAnswer", question.isShowAnswer());
 			q.put("abstention", question.isAbstention());
@@ -621,7 +609,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			q.put("scaleFactor", question.getScaleFactor());
 			q.put("gridScaleFactor", question.getGridScaleFactor());
 			q.put("imageQuestion", question.isImageQuestion());
-			q.putAll(getRoundMangementState(question));
 
 			database.saveDocument(q);
 			question.set_rev(q.getRev());
@@ -670,6 +657,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			final JSONArray possibleAnswers = q.getJSONObject().getJSONArray("possibleAnswers");
 			@SuppressWarnings("unchecked")
 			final Collection<PossibleAnswer> answers = JSONArray.toCollection(possibleAnswers, PossibleAnswer.class);
+
+			question.updateRoundManagementState();
 			question.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
 			question.setSessionKeyword(getSessionKeyword(question.getSessionId()));
 			return question;

@@ -17,6 +17,7 @@
  */
 package de.thm.arsnova.entities;
 
+import java.util.Date;
 import java.util.List;
 
 public class Question {
@@ -507,6 +508,19 @@ public class Question {
 			return calculateGridValue(answer);
 		} else {
 			return calculateRegularValue(answer);
+		}
+	}
+
+	public void updateRoundManagementState() {
+		final long time = new Date().getTime();
+
+		if(time > this.getPiRoundEndTime() && this.isPiRoundActive()) {
+			this.setPiRoundEndTime(0);
+			this.setPiRoundStartTime(0);
+			this.setPiRoundActive(false);
+			this.setPiRoundFinished(true);
+		} else {
+			this.setPiRoundFinished(false);
 		}
 	}
 
