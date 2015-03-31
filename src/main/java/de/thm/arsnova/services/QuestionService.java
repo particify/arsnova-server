@@ -201,20 +201,15 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	}
 
 	@Override
-	public void startNewPiRound(final String questionId, User user) {
+	public void startNewPiRound(final String questionId, User user) {		
+		final Question question = databaseDao.getQuestion(questionId);
+		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+
 		if(null == user) {
 			user = userService.getCurrentUser();
 		}
 
 		cancelDelayedPiRoundChange(questionId);
-
-		final Question question = databaseDao.getQuestion(questionId);
-		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
-
-		question.setPiRound(question.getPiRound() + 1);
-		question.setPiRoundActive(false);
-		question.setPiRoundStartTime(0);
-		question.setPiRoundEndTime(0);
 		question.setActive(false);
 		update(question, user);
 
@@ -224,15 +219,27 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
 	public void startNewPiRoundDelayed(final String questionId, final int time) {
-		final Timer timer = new Timer();
-		final Date date = new Date();
-		final Date endDate = new Date(date.getTime() + (time * 1000));
 		final IQuestionService questionService = this;
 		final User user = userService.getCurrentUser();
 		final Question question = databaseDao.getQuestion(questionId);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 
-		cancelDelayedPiRoundChange(questionId);
+		final Date date = new Date();
+		final Timer timer = new Timer();
+		final Date endDate = new Date(date.getTime() + (time * 1000));
+		final int round = question.getPiRound();
+
+		if(round == 1 && question.isPiRoundFinished()) {
+			question.setPiRound(round + 1);
+		}
+
+		question.setActive(true);
+		question.setPiRoundActive(true);
+		question.setPiRoundStartTime(date.getTime());
+		question.setPiRoundEndTime(endDate.getTime());
+
+		update(question);
+		this.publisher.publishEvent(new PiRoundDelayedStartEvent(this, session, question));
 
 		timer.schedule(new TimerTask() {
 			@Override
@@ -240,15 +247,6 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				questionService.startNewPiRound(questionId, user);
 			}
 		}, endDate);
-
-		timerList.put(questionId, timer);
-		question.setActive(true);
-		question.setPiRoundActive(true);
-		question.setPiRoundStartTime(date.getTime());
-		question.setPiRoundEndTime(endDate.getTime());
-		update(question);
-
-		this.publisher.publishEvent(new PiRoundDelayedStartEvent(this, session, question));
 	}
 
 	@Override

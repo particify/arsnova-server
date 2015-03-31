@@ -40,6 +40,7 @@ public class Question {
 	private int piRound;
 	private long piRoundEndTime = 0;
 	private long piRoundStartTime = 0;
+	private boolean piRoundFinished = false;
 	private boolean piRoundActive = false;
 	private boolean showStatistic; // sic
 	private boolean showAnswer;
@@ -230,6 +231,14 @@ public class Question {
 
 	public void setPiRoundActive(boolean piRoundActive) {
 		this.piRoundActive = piRoundActive;
+	}
+
+	public boolean isPiRoundFinished() {
+		return piRoundFinished;
+	}
+
+	public void setPiRoundFinished(boolean piRoundFinished) {
+		this.piRoundFinished = piRoundFinished;
 	}
 
 	public boolean isShowStatistic() {

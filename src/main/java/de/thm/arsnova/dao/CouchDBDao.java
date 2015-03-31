@@ -511,9 +511,29 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return null;
 	}
 
-	private Document toQuestionDocument(final Session session, final Question question) {
+	private HashMap<String, Object> getRoundMangementState(final Question question) {
+		final HashMap<String, Object> map = new HashMap<String, Object>();
 		final long time = new Date().getTime();
-		final Document q = new Document();
+
+		if(time > question.getPiRoundEndTime()
+			&& question.isPiRoundActive()) {
+			map.put("piRoundEndTime", 0);
+			map.put("piRoundStartTime", 0);
+			map.put("piRoundActive", false);
+			map.put("piRoundFinished", true);
+		} else {
+			map.put("piRoundFinished", false);
+			map.put("piRoundActive", question.isPiRoundActive());
+			map.put("piRoundEndTime", question.getPiRoundEndTime());
+			map.put("piRoundStartTime", question.getPiRoundStartTime());
+		}
+
+		return map;
+	}
+
+	private Document toQuestionDocument(final Session session, final Question question) {
+		Document q = new Document();
+
 		q.put("type", "skill_question");
 		q.put("questionType", question.getQuestionType());
 		q.put("questionVariant", question.getQuestionVariant());
@@ -553,17 +573,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		q.put("gridScaleFactor", question.getGridScaleFactor());
 		q.put("imageQuestion", question.isImageQuestion());
 		q.put("textAnswerEnabled", question.isTextAnswerEnabled());
-
-		if(time > question.getPiRoundEndTime()) {
-			q.put("piRoundEndTime", 0);
-			q.put("piRoundStartTime", 0);
-			q.put("piRoundActive", false);
-		} else {
-			q.put("piRoundActive", question.isPiRoundActive());
-			q.put("piRoundEndTime", question.getPiRoundEndTime());
-			q.put("piRoundStartTime", question.getPiRoundStartTime());
-		}
-
+		q.putAll(getRoundMangementState(question));
+		
 		return q;
 	}
 
@@ -610,16 +621,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			q.put("scaleFactor", question.getScaleFactor());
 			q.put("gridScaleFactor", question.getGridScaleFactor());
 			q.put("imageQuestion", question.isImageQuestion());
-
-			if(time > question.getPiRoundEndTime()) {
-				q.put("piRoundEndTime", 0);
-				q.put("piRoundStartTime", 0);
-				q.put("piRoundActive", false);
-			} else {
-				q.put("piRoundActive", question.isPiRoundActive());
-				q.put("piRoundEndTime", question.getPiRoundEndTime());
-				q.put("piRoundStartTime", question.getPiRoundStartTime());
-			}
+			q.putAll(getRoundMangementState(question));
 
 			database.saveDocument(q);
 			question.set_rev(q.getRev());
