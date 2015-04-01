@@ -895,7 +895,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		List<String> tmpList = sortOrder.getSortOrder();
 		tmpList.add(toBeAdded);
 		sortOrder.setSortOrder(tmpList);
-		if("alphabet".equals(sortOrder.getSortType())) {
+		if("alphabetical".equals(sortOrder.getSortType())) {
 			sortOrder = alphabeticalSort(sortOrder);
 		}
 		return databaseDao.createOrUpdateSortOrder(sortOrder);
