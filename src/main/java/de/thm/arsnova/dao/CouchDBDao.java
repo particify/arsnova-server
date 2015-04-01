@@ -2090,7 +2090,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		String viewName = "skill_question/questions_by_ids";
 		NovaView view = new NovaView(viewName);
 		view.setKeys(ids);
-		view.setIncludeDocs(true);
 		final List<Document> questiondocs = getDatabase().view(view).getResults();
 		if (questiondocs == null || questiondocs.isEmpty()) {
 			return null;
