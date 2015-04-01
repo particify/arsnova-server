@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class Session implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
+	
 	private String type;
 	private String name;
 	private String shortName;
@@ -321,4 +321,5 @@ public class Session implements Serializable {
 		Session other = (Session) obj;
 		return this.keyword.equals(other.keyword);
 	}
+
 }

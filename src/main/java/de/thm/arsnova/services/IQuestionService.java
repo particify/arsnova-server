@@ -9,11 +9,11 @@
  *
  * ARSnova Backend is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.	 If not, see <http://www.gnu.org/licenses/>.
  */
 package de.thm.arsnova.services;
 
@@ -24,6 +24,7 @@ import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.User;
 
 public interface IQuestionService {
@@ -138,4 +139,10 @@ public interface IQuestionService {
 	int getAbstentionAnswerCount(String questionId);
 
 	String getImage(String questionId, String answerId);
+
+	String getSubjectSortType(String sessionkey, String isPreparation);
+
+	SortOrder setSort(String sessionkey, String subject, String sortType, String isPreparation, String[] sortOrder);
+
+	String getQuestionSortType(String sessionkey, String isPreparation, String subject);
 }
