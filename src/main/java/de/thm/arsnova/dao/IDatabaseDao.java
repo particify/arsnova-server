@@ -207,4 +207,6 @@ public interface IDatabaseDao {
 	SortOrder getSortOrder(String sessionkey, String questionVariant, String subject);
 	
 	void deleteSortOrder(SortOrder sortOrder);
+	
+	List<Question> getQuestionsByIds(List<String> ids);
 }

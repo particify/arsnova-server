@@ -941,35 +941,28 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	}
 
 	public List<Question> getQuestionsBySortOrder(SortOrder subjectSortOrder, boolean onlyActive) {
-		if (subjectSortOrder.getSortOrder() == null) {
-			return null;
-		}
 		if (subjectSortOrder.getSortOrder().isEmpty()) {
 			return null;
 		}
-		List<Question> questions = new ArrayList<Question>();
+		List<String> questionIds = new ArrayList<String>();
 		List<String> subjects = subjectSortOrder.getSortOrder();
 		for (String sub : subjects) {
 			SortOrder questionSortOrder = databaseDao.getSortOrder(subjectSortOrder.getSessionId(), subjectSortOrder.getQuestionVariant(), sub);
 			if (questionSortOrder == null) {
 				continue;
 			}
-			List<String> questionIds = questionSortOrder.getSortOrder();
-			for (String t : questionIds) {
-				Question tempQuestion = getQuestion(t);
-				if (tempQuestion == null) {
-					continue;
-				}
-				if (onlyActive) {
-					if (tempQuestion.isActive()) {
-						questions.add(tempQuestion);
-					}
-				}
-				else {
-					questions.add(tempQuestion);
+			questionIds.addAll(questionSortOrder.getSortOrder());
+		}
+		List<Question> questions = databaseDao.getQuestionsByIds(questionIds);
+		
+		if (onlyActive) {
+			for (Question q : questions) {
+				if (!(q.isActive())) {
+					questions.remove(q);
 				}
 			}
 		}
+		
 		return questions;
 	}
 
