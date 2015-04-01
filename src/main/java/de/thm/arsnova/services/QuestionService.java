@@ -956,11 +956,13 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		List<Question> questions = databaseDao.getQuestionsByIds(questionIds);
 		
 		if (onlyActive) {
+			List<Question> tempquestions = new ArrayList<Question>();
 			for (Question q : questions) {
-				if (!(q.isActive())) {
-					questions.remove(q);
+				if (q.isActive()) {
+					tempquestions.add(q);
 				}
 			}
+			questions = tempquestions;
 		}
 		
 		return questions;
