@@ -519,8 +519,6 @@ public class Question {
 			this.setPiRoundStartTime(0);
 			this.setPiRoundActive(false);
 			this.setPiRoundFinished(true);
-		} else {
-			this.setPiRoundFinished(false);
 		}
 	}
 

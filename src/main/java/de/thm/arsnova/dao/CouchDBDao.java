@@ -1491,6 +1491,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 					document.getJSONObject().getJSONObject("value").getJSONArray("possibleAnswers"),
 					PossibleAnswer.class
 					);
+			question.updateRoundManagementState();
 			question.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
 			question.setSessionKeyword(session.getKeyword());
 			if (!"freetext".equals(question.getQuestionType()) && 0 == question.getPiRound()) {

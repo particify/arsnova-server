@@ -238,7 +238,10 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 
 		cancelDelayedPiRoundChange(questionId);
+
 		question.setActive(false);
+		question.setPiRoundEndTime(0);
+		question.updateRoundManagementState();
 		update(question, user);
 
 		this.publisher.publishEvent(new PiRoundEndEvent(this, session, question));
@@ -263,6 +266,8 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 		question.setActive(true);
 		question.setPiRoundActive(true);
+		question.setShowStatistic(false);
+		question.setPiRoundFinished(false);
 		question.setPiRoundStartTime(date.getTime());
 		question.setPiRoundEndTime(endDate.getTime());
 
