@@ -512,7 +512,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	private Document toQuestionDocument(final Session session, final Question question) {
-		final Document q = new Document();
+		Document q = new Document();
+
+		question.updateRoundManagementState();
 		q.put("type", "skill_question");
 		q.put("questionType", question.getQuestionType());
 		q.put("questionVariant", question.getQuestionVariant());
@@ -525,6 +527,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		q.put("possibleAnswers", question.getPossibleAnswers());
 		q.put("noCorrect", question.isNoCorrect());
 		q.put("piRound", question.getPiRound());
+		q.put("piRoundStartTime", question.getPiRoundStartTime());
+		q.put("piRoundEndTime", question.getPiRoundEndTime());
+		q.put("piRoundFinished", question.isPiRoundFinished());
+		q.put("piRoundActive", question.isPiRoundActive());
 		q.put("showStatistic", question.isShowStatistic());
 		q.put("showAnswer", question.isShowAnswer());
 		q.put("abstention", question.isAbstention());
@@ -553,7 +559,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		q.put("imageQuestion", question.isImageQuestion());
 		q.put("textAnswerEnabled", question.isTextAnswerEnabled());
 		q.put("timestamp", question.getTimestamp());
-
 		return q;
 	}
 
@@ -566,6 +571,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public Question updateQuestion(final Question question) {
 		try {
 			final Document q = database.getDocument(question.get_id());
+
+			question.updateRoundManagementState();
 			q.put("subject", question.getSubject());
 			q.put("text", question.getText());
 			q.put("active", question.isActive());
@@ -573,6 +580,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			q.put("possibleAnswers", question.getPossibleAnswers());
 			q.put("noCorrect", question.isNoCorrect());
 			q.put("piRound", question.getPiRound());
+			q.put("piRoundStartTime", question.getPiRoundStartTime());
+			q.put("piRoundEndTime", question.getPiRoundEndTime());
+			q.put("piRoundFinished", question.isPiRoundFinished());
+			q.put("piRoundActive", question.isPiRoundActive());
 			q.put("showStatistic", question.isShowStatistic());
 			q.put("showAnswer", question.isShowAnswer());
 			q.put("abstention", question.isAbstention());
@@ -650,6 +661,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			final JSONArray possibleAnswers = q.getJSONObject().getJSONArray("possibleAnswers");
 			@SuppressWarnings("unchecked")
 			final Collection<PossibleAnswer> answers = JSONArray.toCollection(possibleAnswers, PossibleAnswer.class);
+
+			question.updateRoundManagementState();
 			question.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
 			question.setSessionKeyword(getSessionKeyword(question.getSessionId()));
 			return question;
@@ -1478,6 +1491,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 					document.getJSONObject().getJSONObject("value").getJSONArray("possibleAnswers"),
 					PossibleAnswer.class
 					);
+			question.updateRoundManagementState();
 			question.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
 			question.setSessionKeyword(session.getKeyword());
 			if (!"freetext".equals(question.getQuestionType()) && 0 == question.getPiRound()) {
@@ -2074,7 +2088,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 		return null;
 	}
-	
+
 	@Override
 	public void deleteSortOrder(SortOrder sortOrder) {
 		try {
@@ -2084,13 +2098,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			LOGGER.error("Could not delete SortOrder {}", sortOrder.get_id());
 		}
 	}
-	
+
 	@Override
 	public List<Question> getQuestionsByIds(List<String> ids) {
 		String viewName = "skill_question/questions_by_ids";
 		NovaView view = new NovaView(viewName);
 		view.setKeys(ids);
-		view.setIncludeDocs(true);
 		final List<Document> questiondocs = getDatabase().view(view).getResults();
 		if (questiondocs == null || questiondocs.isEmpty()) {
 			return null;

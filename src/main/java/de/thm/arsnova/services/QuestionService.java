@@ -229,18 +229,19 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	}
 
 	@Override
-	public void startNewPiRound(final String questionId, User user) {
+	public void startNewPiRound(final String questionId, User user) {		
+		final Question question = databaseDao.getQuestion(questionId);
+		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+
 		if(null == user) {
 			user = userService.getCurrentUser();
 		}
 
 		cancelDelayedPiRoundChange(questionId);
 
-		final Question question = databaseDao.getQuestion(questionId);
-		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
-
-		question.setPiRound(question.getPiRound() + 1);
 		question.setActive(false);
+		question.setPiRoundEndTime(0);
+		question.updateRoundManagementState();
 		update(question, user);
 
 		this.publisher.publishEvent(new PiRoundEndEvent(this, session, question));
@@ -249,15 +250,29 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
 	public void startNewPiRoundDelayed(final String questionId, final int time) {
-		final Timer timer = new Timer();
-		final Date date = new Date();
-		final Date endDate = new Date(date.getTime() + (time * 1000));
 		final IQuestionService questionService = this;
 		final User user = userService.getCurrentUser();
 		final Question question = databaseDao.getQuestion(questionId);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 
-		cancelDelayedPiRoundChange(questionId);
+		final Date date = new Date();
+		final Timer timer = new Timer();
+		final Date endDate = new Date(date.getTime() + (time * 1000));
+		final int round = question.getPiRound();
+
+		if(round == 1 && question.isPiRoundFinished()) {
+			question.setPiRound(round + 1);
+		}
+
+		question.setActive(true);
+		question.setPiRoundActive(true);
+		question.setShowStatistic(false);
+		question.setPiRoundFinished(false);
+		question.setPiRoundStartTime(date.getTime());
+		question.setPiRoundEndTime(endDate.getTime());
+
+		update(question);
+		this.publisher.publishEvent(new PiRoundDelayedStartEvent(this, session, question));
 
 		timer.schedule(new TimerTask() {
 			@Override
@@ -265,14 +280,6 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				questionService.startNewPiRound(questionId, user);
 			}
 		}, endDate);
-
-		timerList.put(questionId, timer);
-		question.setPiRoundActive(true);
-		question.setPiRoundStartTime(date.getTime());
-		question.setPiRoundEndTime(endDate.getTime());
-		update(question);
-
-		this.publisher.publishEvent(new PiRoundDelayedStartEvent(this, session, question));
 	}
 
 	@Override
@@ -444,6 +451,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			if (0 == answer.getPiRound() && !"freetext".equals(question.getQuestionType())) {
 				answer.setPiRound(1);
 			}
+
 			// discard all answers that aren't in the same piRound as the question
 			if (answer.getPiRound() == question.getPiRound()) {
 				filteredAnswers.add(answer);

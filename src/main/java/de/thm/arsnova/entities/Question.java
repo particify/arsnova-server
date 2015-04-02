@@ -17,6 +17,7 @@
  */
 package de.thm.arsnova.entities;
 
+import java.util.Date;
 import java.util.List;
 
 public class Question {
@@ -38,9 +39,10 @@ public class Question {
 	private int number;
 	private int duration;
 	private int piRound;
-	private long piRoundEndTime;
-	private long piRoundStartTime;
-	private boolean piRoundActive;
+	private long piRoundEndTime = 0;
+	private long piRoundStartTime = 0;
+	private boolean piRoundFinished = false;
+	private boolean piRoundActive = false;
 	private boolean showStatistic; // sic
 	private boolean showAnswer;
 	private boolean abstention;
@@ -230,6 +232,14 @@ public class Question {
 
 	public void setPiRoundActive(boolean piRoundActive) {
 		this.piRoundActive = piRoundActive;
+	}
+
+	public boolean isPiRoundFinished() {
+		return piRoundFinished;
+	}
+
+	public void setPiRoundFinished(boolean piRoundFinished) {
+		this.piRoundFinished = piRoundFinished;
 	}
 
 	public boolean isShowStatistic() {
@@ -467,7 +477,6 @@ public class Question {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((_id == null) ? 0 : _id.hashCode());
-		result = prime * result + ((_rev == null) ? 0 : _rev.hashCode());
 		return result;
 	}
 
@@ -487,13 +496,6 @@ public class Question {
 		} else if (!_id.equals(other._id)) {
 			return false;
 		}
-		if (_rev == null) {
-			if (other._rev != null) {
-				return false;
-			}
-		} else if (!_rev.equals(other._rev)) {
-			return false;
-		}
 		return true;
 	}
 
@@ -506,6 +508,17 @@ public class Question {
 			return calculateGridValue(answer);
 		} else {
 			return calculateRegularValue(answer);
+		}
+	}
+
+	public void updateRoundManagementState() {
+		final long time = new Date().getTime();
+
+		if(time > this.getPiRoundEndTime() && this.isPiRoundActive()) {
+			this.setPiRoundEndTime(0);
+			this.setPiRoundStartTime(0);
+			this.setPiRoundActive(false);
+			this.setPiRoundFinished(true);
 		}
 	}
 
