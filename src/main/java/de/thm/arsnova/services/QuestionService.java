@@ -940,7 +940,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		databaseDao.deleteSortOrder(sortOrder);
 	}
 
-	public List<Question> getQuestionsBySortOrder(SortOrder subjectSortOrder, boolean onlyActive) {
+	public List<Question> getQuestionsBySortOrder(SortOrder subjectSortOrder, boolean all) {
 		if (subjectSortOrder.getSortOrder().isEmpty()) {
 			return null;
 		}
@@ -955,14 +955,14 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 		List<Question> questions = databaseDao.getQuestionsByIds(questionIds);
 		
-		if (onlyActive) {
+		if (!all) {
 			List<Question> tempquestions = new ArrayList<Question>();
 			for (Question q : questions) {
 				if (q.isActive()) {
 					tempquestions.add(q);
 				}
 			}
-			questions = tempquestions;
+			return tempquestions;
 		}
 		
 		return questions;
