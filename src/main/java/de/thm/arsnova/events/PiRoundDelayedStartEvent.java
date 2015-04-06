@@ -33,11 +33,14 @@ public class PiRoundDelayedStartEvent extends SessionEvent {
 
 	private final Long endTime;
 
+	private final String questionVariant;
+
 	public PiRoundDelayedStartEvent(Object source, Session session, Question question) {
 		super(source, session);
 		this.questionId = question.get_id();
 		this.startTime = question.getPiRoundStartTime();
 		this.endTime = question.getPiRoundEndTime();
+		this.questionVariant = question.getQuestionVariant();
 	}
 
 	@Override
@@ -57,13 +60,17 @@ public class PiRoundDelayedStartEvent extends SessionEvent {
 		return endTime;
 	}
 
+	public String getQuestionVariant() {
+		return questionVariant;
+	}
+
 	public HashMap<String, String> getPiRoundInformations() {
 		HashMap<String, String> map = new HashMap<String, String>();
 
 		map.put("id", getQuestionId());
 		map.put("endTime", getEndTime().toString());
 		map.put("startTime", getStartTime().toString());
-		map.put("actualTime", String.valueOf(new Date().getTime()));
+		map.put("variant", questionVariant);
 
 		return map;
 	}
