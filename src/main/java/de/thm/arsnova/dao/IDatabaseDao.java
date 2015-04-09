@@ -197,15 +197,15 @@ public interface IDatabaseDao {
 	SessionInfo importSession(User user, ImportExportSession importSession);
 
 	Statistics getStatistics();
-	
+
 	List<String> getSubjects(Session session, String questionVariant);
-	
+
 	List<String> getQuestionIdsBySubject(Session session, String questionVariant, String subject);
-	
+
 	SortOrder createOrUpdateSortOrder(SortOrder sortOrder);
-	
+
 	SortOrder getSortOrder(String sessionkey, String questionVariant, String subject);
-	
+
 	void deleteSortOrder(SortOrder sortOrder);
 
 	List<Question> getQuestionsByIds(List<String> ids, Session session);

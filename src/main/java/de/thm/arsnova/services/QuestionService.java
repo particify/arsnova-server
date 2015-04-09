@@ -229,7 +229,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	}
 
 	@Override
-	public void startNewPiRound(final String questionId, User user) {		
+	public void startNewPiRound(final String questionId, User user) {
 		final Question question = databaseDao.getQuestion(questionId);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 
@@ -908,7 +908,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 		return databaseDao.createOrUpdateSortOrder(sortOrder);
 	}
-	
+
 	public void deleteQuestionFromSortOrder(Question question){
 		SortOrder sortOrder = databaseDao.getSortOrder(question.getSessionId(), question.getQuestionVariant(), question.getSubject());
 		if (sortOrder != null) {
@@ -933,7 +933,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			}
 		}
 	}
-	
+
 	public void deleteSortOrder(Session session, String questionVariant, String subject) {
 		SortOrder sortOrder = databaseDao.getSortOrder(session.get_id(), questionVariant, subject);
 		if (sortOrder == null) {
@@ -972,7 +972,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			}
 			return tempquestions;
 		}
-		
+
 		return questions;
 	}
 
