@@ -57,6 +57,7 @@ import com.fourspaces.couchdb.Document;
 import com.fourspaces.couchdb.Results;
 import com.fourspaces.couchdb.RowResult;
 import com.fourspaces.couchdb.View;
+import com.fourspaces.couchdb.View.StaleMode;
 import com.fourspaces.couchdb.ViewResults;
 
 import de.thm.arsnova.connector.model.Course;
@@ -1106,6 +1107,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			statsView.setGroup(true);
 			creatorView.setGroup(true);
 			studentUserView.setGroup(true);
+			statsView.setStale(StaleMode.UPDATE_AFTER);
+			creatorView.setStale(StaleMode.UPDATE_AFTER);
+			studentUserView.setStale(StaleMode.UPDATE_AFTER);
 
 			final ViewResults statsResults = getDatabase().view(statsView);
 			final ViewResults creatorResults = getDatabase().view(creatorView);
