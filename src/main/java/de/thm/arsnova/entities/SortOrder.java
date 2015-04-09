@@ -84,5 +84,53 @@ public class SortOrder {
 
 	public String get_rev() {
 		return _rev;
-	} 
+	}
+
+	@Override
+	public int hashCode() {
+		// auto-generated!
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((questionVariant == null) ? 0 : questionVariant.hashCode());
+		result = prime * result + ((sessionId == null) ? 0 : sessionId.hashCode());
+		result = prime * result + ((subject == null) ? 0 : subject.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		// auto-generated!
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		SortOrder other = (SortOrder) obj;
+		if (questionVariant == null) {
+			if (other.questionVariant != null) {
+				return false;
+			}
+		} else if (!questionVariant.equals(other.questionVariant)) {
+			return false;
+		}
+		if (sessionId == null) {
+			if (other.sessionId != null) {
+				return false;
+			}
+		} else if (!sessionId.equals(other.sessionId)) {
+			return false;
+		}
+		if (subject == null) {
+			if (other.subject != null) {
+				return false;
+			}
+		} else if (!subject.equals(other.subject)) {
+			return false;
+		}
+		return true;
+	}
 }

@@ -2017,6 +2017,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return qids;
 	}
 
+	@Cacheable(value = "sortorder", key = "#p0.concat('-').concat(#p1).concat('-').concat(#p2)")
 	@Override
 	public SortOrder getSortOrder(String sessionId, String questionVariant, String subject) {
 		String viewString = "";
@@ -2057,6 +2058,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return sortOrder;
 	}
 
+	@CachePut(value = "sortorder", key ="#sortOrder.sessionId.concat('-').concat(#sortOrder.questionVariant).concat('-').concat(#sortOrder.subject)")
 	@Override
 	public SortOrder createOrUpdateSortOrder(SortOrder sortOrder) {
 		try {
@@ -2089,6 +2091,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return null;
 	}
 
+	@CacheEvict(value = "sortorder", key ="#sortOrder.sessionId.concat('-').concat(#sortOrder.questionVariant).concat('-').concat(#sortOrder.subject)")
 	@Override
 	public void deleteSortOrder(SortOrder sortOrder) {
 		try {
