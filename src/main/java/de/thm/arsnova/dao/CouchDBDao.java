@@ -2104,9 +2104,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<Question> getQuestionsByIds(List<String> ids) {
-		String viewName = "skill_question/questions_by_ids";
-		NovaView view = new NovaView(viewName);
+		NovaView view = new NovaView("_all_docs");
 		view.setKeys(ids);
+		view.setIncludeDocs(true);
 		final List<Document> questiondocs = getDatabase().view(view).getResults();
 		if (questiondocs == null || questiondocs.isEmpty()) {
 			return null;
@@ -2118,12 +2118,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		morpherRegistry.registerMorpher(dynaMorpher);
 		for (final Document document : questiondocs) {
 			final Question question = (Question) JSONObject.toBean(
-					document.getJSONObject().getJSONObject("value"),
+					document.getJSONObject().getJSONObject("doc"),
 					Question.class
 					);
 			@SuppressWarnings("unchecked")
 			final Collection<PossibleAnswer> answers = JSONArray.toCollection(
-					document.getJSONObject().getJSONObject("value").getJSONArray("possibleAnswers"),
+					document.getJSONObject().getJSONObject("doc").getJSONArray("possibleAnswers"),
 					PossibleAnswer.class
 					);
 			Session session = getSessionFromId(question.getSessionId());
