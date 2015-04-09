@@ -29,43 +29,43 @@ public class SortOrder {
 
 	private String _id;
 	private String _rev;
-	
+
 	public void setSessionId(final String sessionId) {
 		this.sessionId = sessionId;
 	}
-	
+
 	public String getSessionId() {
-		return this.sessionId;	 
+		return this.sessionId;
 	}
-	
+
 	public void setSortType(final String sortType) {
 		this.sortType = sortType;
 	}
-	
+
 	public String getSortType() {
 		return this.sortType;
 	}
-	
+
 	public void setQuestionVariant(final String questionVariant) {
 		this.questionVariant = questionVariant;
 	}
-	
+
 	public String getQuestionVariant() {
 		return this.questionVariant;
 	}
-	
+
 	public void setSubject(final String subject) {
 		this.subject = subject;
 	}
-	
+
 	public String getSubject() {
 		return this.subject;
 	}
-	
+
 	public void setSortOrder(final List<String> sortOrder) {
 		this.sortOrder = sortOrder;
 	}
-	
+
 	public List<String> getSortOrder() {
 		return this.sortOrder;
 	}

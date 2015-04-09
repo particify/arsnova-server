@@ -2096,7 +2096,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public void deleteSortOrder(SortOrder sortOrder) {
 		try {
 			this.deleteDocument(sortOrder.get_id());
-			return;
 		} catch (IOException e) {
 			LOGGER.error("Could not delete SortOrder {}", sortOrder.get_id());
 		}
