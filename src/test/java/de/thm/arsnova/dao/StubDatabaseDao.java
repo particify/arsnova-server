@@ -574,38 +574,38 @@ public class StubDatabaseDao implements IDatabaseDao {
 		stats.setInterposedQuestions(0);
 		return stats;
 	}
-	
+
 	@Override
 	public List<String> getSubjects(Session session, String questionVariant) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	@Override
 	public List<String> getQuestionIdsBySubject(Session session, String questionVariant, String subject) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	@Override
 	public SortOrder createOrUpdateSortOrder(SortOrder sortOrder) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	@Override
 	public SortOrder getSortOrder(String sessionkey, String questionVariant, String subject) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	@Override
 	public void deleteSortOrder(SortOrder sortOrder) {
 		// TODO Auto-generated method stub
 	}
-	
+
 	@Override
-	public List<Question> getQuestionsByIds(List<String> ids) {
+	public List<Question> getQuestionsByIds(List<String> ids, Session session) {
 		// TODO Auto-generated method stub
 		return null;
 	}

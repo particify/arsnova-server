@@ -2102,7 +2102,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	public List<Question> getQuestionsByIds(List<String> ids) {
+	public List<Question> getQuestionsByIds(List<String> ids, final Session session) {
 		NovaView view = new NovaView("_all_docs");
 		view.setKeys(ids);
 		view.setIncludeDocs(true);
@@ -2125,7 +2125,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 					document.getJSONObject().getJSONObject("doc").getJSONArray("possibleAnswers"),
 					PossibleAnswer.class
 					);
-			Session session = getSessionFromId(question.getSessionId());
 			question.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
 			question.setSessionKeyword(session.getKeyword());
 			if (!"freetext".equals(question.getQuestionType()) && 0 == question.getPiRound()) {

@@ -633,7 +633,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			return null;
 		}
 		final User user = userService.getCurrentUser();
-		return getQuestionsBySortOrder(subjectSortOrder, session.isCreator(user));
+		return getQuestionsBySortOrder(subjectSortOrder, session, user);
 	}
 
 	@Override
@@ -660,7 +660,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			return null;
 		}
 		final User user = userService.getCurrentUser();
-		return getQuestionsBySortOrder(subjectSortOrder, session.isCreator(user));
+		return getQuestionsBySortOrder(subjectSortOrder, session, user);
 	}
 
 	private Session getSession(final String sessionkey) {
@@ -948,7 +948,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		databaseDao.deleteSortOrder(sortOrder);
 	}
 
-	public List<Question> getQuestionsBySortOrder(SortOrder subjectSortOrder, boolean all) {
+	private List<Question> getQuestionsBySortOrder(SortOrder subjectSortOrder, final Session session, final User user) {
 		if (subjectSortOrder.getSortOrder().isEmpty()) {
 			return null;
 		}
@@ -961,9 +961,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			}
 			questionIds.addAll(questionSortOrder.getSortOrder());
 		}
-		List<Question> questions = databaseDao.getQuestionsByIds(questionIds);
-		
-		if (!all) {
+		List<Question> questions = databaseDao.getQuestionsByIds(questionIds, session);
+
+		if (!session.isCreator(user)) {
 			List<Question> tempquestions = new ArrayList<Question>();
 			for (Question q : questions) {
 				if (q.isActive()) {
