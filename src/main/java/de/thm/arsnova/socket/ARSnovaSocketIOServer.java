@@ -48,7 +48,7 @@ import com.corundumstudio.socketio.protocol.PacketType;
 
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.entities.transport.LearningProgressType;
+import de.thm.arsnova.entities.transport.LearningProgressOptions;
 import de.thm.arsnova.events.ChangeLearningProgress;
 import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
 import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
@@ -200,17 +200,17 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 		});
 
 		server.addEventListener(
-				"setLearningProgressType",
-				LearningProgressType.class,
-				new DataListener<LearningProgressType>() {
+				"setLearningProgressOptions",
+				LearningProgressOptions.class,
+				new DataListener<LearningProgressOptions>() {
 			@Override
-			public void onData(SocketIOClient client, LearningProgressType progressType, AckRequest ack) {
+			public void onData(SocketIOClient client, LearningProgressOptions progressOptions, AckRequest ack) {
 				final User user = userService.getUser2SocketId(client.getSessionId());
-				final de.thm.arsnova.entities.Session session = sessionService.getSessionInternal(progressType.getSessionKeyword(), user);
+				final de.thm.arsnova.entities.Session session = sessionService.getSessionInternal(progressOptions.getSessionKeyword(), user);
 				if (session.isCreator(user)) {
-					session.setLearningProgressType(progressType.getLearningProgressType());
+					session.setLearningProgressOptions(progressOptions.toEntity());
 					sessionService.updateSessionInternal(session, user);
-					broadcastInSession(session.getKeyword(), "learningProgressType", progressType.getLearningProgressType());
+					broadcastInSession(session.getKeyword(), "learningProgressOptions", progressOptions.toEntity());
 				}
 			}
 		});
@@ -351,7 +351,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 		client.sendEvent("countLectureQuestionAnswers", questionService.countLectureQuestionAnswersInternal(sessionKey));
 		client.sendEvent("countPreparationQuestionAnswers", questionService.countPreparationQuestionAnswersInternal(sessionKey));
 		client.sendEvent("activeUserCountData", sessionService.activeUsers(sessionKey));
-		client.sendEvent("learningProgressType", session.getLearningProgressType());
+		client.sendEvent("learningProgressOptions", session.getLearningProgressOptions());
 		final de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
 		client.sendEvent("feedbackData", fb.getValues());
 		try {

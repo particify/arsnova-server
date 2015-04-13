@@ -17,11 +17,13 @@
  */
 package de.thm.arsnova.entities.transport;
 
-public class LearningProgressType {
+public class LearningProgressOptions {
 
 	private String sessionKeyword;
 
-	private String learningProgressType;
+	private String type;
+
+	private String questionVariant;
 
 	public String getSessionKeyword() {
 		return sessionKeyword;
@@ -31,11 +33,26 @@ public class LearningProgressType {
 		this.sessionKeyword = sessionKeyword;
 	}
 
-	public String getLearningProgressType() {
-		return learningProgressType;
+	public String getType() {
+		return type;
 	}
 
-	public void setLearningProgressType(String learningProgressType) {
-		this.learningProgressType = learningProgressType;
+	public void setType(String learningProgressType) {
+		this.type = learningProgressType;
+	}
+
+	public String getQuestionVariant() {
+		return questionVariant;
+	}
+
+	public void setQuestionVariant(String questionVariant) {
+		this.questionVariant = questionVariant;
+	}
+
+	public de.thm.arsnova.entities.LearningProgressOptions toEntity() {
+		de.thm.arsnova.entities.LearningProgressOptions entity = new de.thm.arsnova.entities.LearningProgressOptions();
+		entity.setType(this.getType());
+		entity.setQuestionVariant(this.getQuestionVariant());
+		return entity;
 	}
 }

@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class Session implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private String type;
 	private String name;
 	private String shortName;
@@ -37,7 +37,7 @@ public class Session implements Serializable {
 	private String courseId;
 	private List<String> _conflicts;
 	private long creationTime;
-	private String learningProgressType = "questions";
+	private LearningProgressOptions learningProgressOptions;
 	private SessionFeature features;
 
 	private String ppAuthorName;
@@ -71,7 +71,7 @@ public class Session implements Serializable {
 		copy.courseType = original.courseType;
 		copy.courseId = original.courseId;
 		copy.creationTime = original.creationTime;
-		copy.learningProgressType = original.learningProgressType;
+		copy.learningProgressOptions = new LearningProgressOptions(original.learningProgressOptions);
 		copy.features = new SessionFeature(original.features);
 		// public pool
 		copy.ppAuthorName = original.ppAuthorName;
@@ -203,12 +203,12 @@ public class Session implements Serializable {
 		this.creationTime = creationTime;
 	}
 
-	public String getLearningProgressType() {
-		return learningProgressType;
+	public LearningProgressOptions getLearningProgressOptions() {
+		return learningProgressOptions;
 	}
 
-	public void setLearningProgressType(String learningProgressType) {
-		this.learningProgressType = learningProgressType;
+	public void setLearningProgressOptions(LearningProgressOptions learningProgressOptions) {
+		this.learningProgressOptions = learningProgressOptions;
 	}
 
 	public SessionFeature getFeatures() {
