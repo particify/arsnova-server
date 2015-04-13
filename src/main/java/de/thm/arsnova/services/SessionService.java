@@ -315,18 +315,18 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public LearningProgressValues getLearningProgress(final String sessionkey, final String progressType) {
+	public LearningProgressValues getLearningProgress(final String sessionkey, final String progressType, final String questionVariant) {
 		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
-		LearningProgress learningProgress = learningProgressFactory.createFromType(progressType);
+		LearningProgress learningProgress = learningProgressFactory.create(progressType, questionVariant);
 		return learningProgress.getCourseProgress(session);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public LearningProgressValues getMyLearningProgress(final String sessionkey, final String progressType) {
+	public LearningProgressValues getMyLearningProgress(final String sessionkey, final String progressType, final String questionVariant) {
 		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
-		LearningProgress learningProgress = learningProgressFactory.createFromType(progressType);
+		LearningProgress learningProgress = learningProgressFactory.create(progressType, questionVariant);
 		return learningProgress.getMyProgress(session, user);
 	}
 

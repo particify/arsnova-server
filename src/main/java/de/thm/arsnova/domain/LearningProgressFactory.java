@@ -50,12 +50,15 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 	private ApplicationEventPublisher publisher;
 
 	@Override
-	public LearningProgress createFromType(String progressType) {
+	public LearningProgress create(String progressType, String questionVariant) {
+		VariantLearningProgress learningProgress;
 		if (progressType.equals("questions")) {
-			return new QuestionBasedLearningProgress(databaseDao);
+			learningProgress = new QuestionBasedLearningProgress(databaseDao);
 		} else {
-			return new PointBasedLearningProgress(databaseDao);
+			learningProgress = new PointBasedLearningProgress(databaseDao);
 		}
+		learningProgress.setQuestionVariant(questionVariant);
+		return learningProgress;
 	}
 
 	@Override

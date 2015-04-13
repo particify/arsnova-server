@@ -235,18 +235,20 @@ public class SessionController extends AbstractController {
 	public LearningProgressValues learningProgress(
 			@PathVariable final String sessionkey,
 			@RequestParam(value = "type", defaultValue = "questions") final String progressType,
+			@RequestParam(value = "variant", required = false) final String questionVariant,
 			final HttpServletResponse response
 			) {
-		return sessionService.getLearningProgress(sessionkey, progressType);
+		return sessionService.getLearningProgress(sessionkey, progressType, questionVariant);
 	}
 
 	@RequestMapping(value = "/{sessionkey}/mylearningprogress", method = RequestMethod.GET)
 	public LearningProgressValues myLearningProgress(
 			@PathVariable final String sessionkey,
 			@RequestParam(value = "type", defaultValue = "questions") final String progressType,
+			@RequestParam(value = "variant", required = false) final String questionVariant,
 			final HttpServletResponse response
 			) {
-		return sessionService.getMyLearningProgress(sessionkey, progressType);
+		return sessionService.getMyLearningProgress(sessionkey, progressType, questionVariant);
 	}
 
 	@RequestMapping(value = "/{sessionkey}/features", method = RequestMethod.GET)

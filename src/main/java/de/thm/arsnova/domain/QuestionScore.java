@@ -28,12 +28,15 @@ public class QuestionScore implements Iterable<UserScore> {
 
 	private String questionId;
 
+	private String questionVariant;
+
 	private int maximumScore;
 
 	private List<UserScore> userScores = new ArrayList<UserScore>();
 
-	public QuestionScore(String questionId, int maximumScore) {
+	public QuestionScore(String questionId, String questionVariant, int maximumScore) {
 		this.questionId = questionId;
+		this.questionVariant = questionVariant;
 		this.maximumScore = maximumScore;
 	}
 
@@ -80,5 +83,9 @@ public class QuestionScore implements Iterable<UserScore> {
 		for (UserScore score : userScores) {
 			users.add(score.getUsername());
 		}
+	}
+
+	public boolean isVariant(String questionVariant) {
+		return this.questionVariant.equals(questionVariant);
 	}
 }

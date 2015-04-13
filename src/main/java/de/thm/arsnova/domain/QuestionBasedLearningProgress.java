@@ -18,88 +18,85 @@
 package de.thm.arsnova.domain;
 
 import de.thm.arsnova.dao.IDatabaseDao;
-import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
 
-public class QuestionBasedLearningProgress implements LearningProgress {
-
-	private IDatabaseDao databaseDao;
+public class QuestionBasedLearningProgress extends VariantLearningProgress {
 
 	public QuestionBasedLearningProgress(IDatabaseDao dao) {
-		this.databaseDao = dao;
+		super(dao);
 	}
 
 	@Override
-	public LearningProgressValues getCourseProgress(Session session) {
-		CourseScore courseScore = databaseDao.getLearningProgress(session);
+	protected LearningProgressValues createCourseProgress() {
 		LearningProgressValues lpv = new LearningProgressValues();
-		lpv.setCourseProgress(calculateCourseProgress(courseScore));
+		lpv.setCourseProgress(calculateCourseProgress());
 		lpv.setNumQuestions(courseScore.getQuestionCount());
 		lpv.setNumUsers(courseScore.getTotalUserCount());
 		return lpv;
 	}
 
-	private int calculateCourseProgress(CourseScore courseScore) {
-		// calculate percent, cap results to 100
-		return (int) Math.min(100, Math.round(correctAnswerRatio(courseScore)*100));
-	}
-
-	private double correctAnswerRatio(CourseScore courseScore) {
+	private int calculateCourseProgress() {
 		double ratio = 0;
 		for (QuestionScore questionScore : courseScore) {
-			int numAnswers = questionScore.getUserCount();
-			int numAnswersCorrect = 0;
-			int requiredScore = questionScore.getMaximum();
 			if (!questionScore.hasScores()) {
 				continue;
 			}
-			for (UserScore userScore : questionScore) {
-				if (userScore.hasScore(requiredScore)) {
-					numAnswersCorrect++;
-				}
-			}
+			int numAnswers = questionScore.getUserCount();
 			if (numAnswers != 0) {
-				ratio += (double)numAnswersCorrect / (numAnswers * courseScore.getQuestionCount());
+				ratio += (double)countCorrectAnswers(questionScore) / (numAnswers * courseScore.getQuestionCount());
 			}
 		}
-		return ratio;
+		return (int) Math.min(100, Math.round(ratio*100));
+	}
+
+	private int countCorrectAnswers(QuestionScore questionScore) {
+		int requiredScore = questionScore.getMaximum();
+		int numAnswersCorrect = 0;
+		for (UserScore userScore : questionScore) {
+			if (userScore.hasScore(requiredScore)) {
+				numAnswersCorrect++;
+			}
+		}
+		return numAnswersCorrect;
 	}
 
 	@Override
-	public LearningProgressValues getMyProgress(Session session, User user) {
-		CourseScore courseScore = databaseDao.getLearningProgress(session);
-
-		int courseProgress = calculateCourseProgress(courseScore);
-
-		int numQuestionsCorrect = numQuestionsCorrectForUser(user, courseScore);
-		final double myLearningProgress = numQuestionsCorrect / (double)(courseScore.getQuestionCount());
-		// calculate percent, cap results to 100
-		final int percentage = (int) Math.min(100, Math.round(myLearningProgress*100));
+	protected LearningProgressValues createMyProgress(User user) {
 		LearningProgressValues lpv = new LearningProgressValues();
-		lpv.setCourseProgress(courseProgress);
-		lpv.setMyProgress(percentage);
+		lpv.setCourseProgress(calculateCourseProgress());
+		lpv.setMyProgress(myPercentage(numQuestionsCorrectForUser(user), courseScore.getQuestionCount()));
 		lpv.setNumQuestions(courseScore.getQuestionCount());
 		lpv.setNumUsers(courseScore.getTotalUserCount());
 		return lpv;
 	}
 
-	private int numQuestionsCorrectForUser(User user, CourseScore courseScore) {
-		// compare user's values to the maximum number for each question to determine the answers' correctness
-		// mapping (questionId -> 1 if correct, 0 if incorrect)
+	private int numQuestionsCorrectForUser(User user) {
 		int numQuestionsCorrect = 0;
 		for (QuestionScore questionScore : courseScore) {
-			int requiredScore = questionScore.getMaximum();
-			for (UserScore userScore : questionScore) {
-				if (!userScore.isUser(user)) {
-					continue;
-				}
-				if (userScore.hasScore(requiredScore)) {
-					numQuestionsCorrect++;
-				}
+			numQuestionsCorrect += countCorrectAnswersForUser(user, questionScore);
+		}
+		return numQuestionsCorrect;
+	}
+
+	private int countCorrectAnswersForUser(User user, QuestionScore questionScore) {
+		int numQuestionsCorrect = 0;
+		int requiredScore = questionScore.getMaximum();
+		for (UserScore userScore : questionScore) {
+			if (!userScore.isUser(user)) {
+				continue;
+			}
+			if (userScore.hasScore(requiredScore)) {
+				numQuestionsCorrect++;
 			}
 		}
 		return numQuestionsCorrect;
 	}
+
+	private int myPercentage(int numQuestionsCorrect, int questionCount) {
+		final double myLearningProgress = numQuestionsCorrect / (double)questionCount;
+		return (int) Math.min(100, Math.round(myLearningProgress*100));
+	}
+
 
 }

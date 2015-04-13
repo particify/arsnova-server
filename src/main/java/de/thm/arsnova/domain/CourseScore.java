@@ -21,19 +21,28 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import de.thm.arsnova.entities.User;
 
 public class CourseScore implements Iterable<QuestionScore> {
 
-	private final Map<String, QuestionScore> scores = new HashMap<String, QuestionScore>();
+	private final Map<String, QuestionScore> scores;
 
-	public void add(String questionId, int questionScore) {
+	public CourseScore() {
+		this(new HashMap<String, QuestionScore>());
+	}
+
+	public CourseScore(Map<String, QuestionScore> theScores) {
+		this.scores = theScores;
+	}
+
+	public void addQuestion(String questionId, String questionVariant, int questionScore) {
 		if (questionScore == 0) {
 			return;
 		}
-		scores.put(questionId, new QuestionScore(questionId, questionScore));
+		scores.put(questionId, new QuestionScore(questionId, questionVariant, questionScore));
 	}
 
 	/**
@@ -43,7 +52,7 @@ public class CourseScore implements Iterable<QuestionScore> {
 	 * @param username
 	 * @param userscore
 	 */
-	public void add(String questionId, String username, int userscore) {
+	public void addAnswer(String questionId, String username, int userscore) {
 		if (!scores.containsKey(questionId)) {
 			// Precondition failed, ignore this element.
 			// Most likely this is a question that has no learning progress value.
@@ -55,6 +64,18 @@ public class CourseScore implements Iterable<QuestionScore> {
 		}
 		QuestionScore questionScore = scores.get(questionId);
 		questionScore.add(username, userscore);
+	}
+
+	public CourseScore filterVariant(String questionVariant) {
+		Map<String, QuestionScore> newScores = new HashMap<String, QuestionScore>();
+		for (Entry<String, QuestionScore> entry : this.scores.entrySet()) {
+			String questionId = entry.getKey();
+			QuestionScore questionScore = entry.getValue();
+			if (questionScore.isVariant(questionVariant)) {
+				newScores.put(questionId, questionScore);
+			}
+		}
+		return new CourseScore(newScores);
 	}
 
 	public int getMaximumScore() {

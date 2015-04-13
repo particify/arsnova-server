@@ -18,29 +18,25 @@
 package de.thm.arsnova.domain;
 
 import de.thm.arsnova.dao.IDatabaseDao;
-import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
 
-public class PointBasedLearningProgress implements LearningProgress {
-
-	private IDatabaseDao databaseDao;
+public class PointBasedLearningProgress extends VariantLearningProgress {
 
 	public PointBasedLearningProgress(IDatabaseDao dao) {
-		this.databaseDao = dao;
+		super(dao);
 	}
 
 	@Override
-	public LearningProgressValues getCourseProgress(Session session) {
-		CourseScore courseScore = databaseDao.getLearningProgress(session);
+	protected LearningProgressValues createCourseProgress() {
 		LearningProgressValues lpv = new LearningProgressValues();
-		lpv.setCourseProgress(calculateCourseScore(courseScore));
+		lpv.setCourseProgress(coursePercentage());
 		lpv.setNumQuestions(courseScore.getQuestionCount());
 		lpv.setNumUsers(courseScore.getTotalUserCount());
 		return lpv;
 	}
 
-	private int calculateCourseScore(CourseScore courseScore) {
+	private int coursePercentage() {
 		final double courseMaximumValue = courseScore.getMaximumScore();
 		final double userTotalValue = courseScore.getTotalUserScore();
 		final double numUsers = courseScore.getTotalUserCount();
@@ -53,25 +49,22 @@ public class PointBasedLearningProgress implements LearningProgress {
 	}
 
 	@Override
-	public LearningProgressValues getMyProgress(Session session, User user) {
-		CourseScore courseScore = databaseDao.getLearningProgress(session);
-		int courseProgress = calculateCourseScore(courseScore);
-
-		final double courseMaximumValue = courseScore.getMaximumScore();
-		final double userTotalValue = courseScore.getTotalUserScore(user);
-
+	protected LearningProgressValues createMyProgress(User user) {
 		LearningProgressValues lpv = new LearningProgressValues();
-		lpv.setCourseProgress(courseProgress);
+		lpv.setCourseProgress(coursePercentage());
 		lpv.setNumQuestions(courseScore.getQuestionCount());
 		lpv.setNumUsers(courseScore.getTotalUserCount());
-		if (courseMaximumValue == 0) {
-			return lpv;
-		}
-		final double myProgress = userTotalValue / courseMaximumValue;
-		final int myLearningProgress = (int)Math.min(100, Math.round(myProgress*100));
-		lpv.setMyProgress(myLearningProgress);
-
+		lpv.setMyProgress(myPercentage(user));
 		return lpv;
 	}
 
+	private int myPercentage(User user) {
+		final double courseMaximumValue = courseScore.getMaximumScore();
+		final double userTotalValue = courseScore.getTotalUserScore(user);
+		if (courseMaximumValue == 0) {
+			return 0;
+		}
+		final double myProgress = userTotalValue / courseMaximumValue;
+		return (int)Math.min(100, Math.round(myProgress*100));
+	}
 }

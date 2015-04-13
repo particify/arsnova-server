@@ -19,6 +19,6 @@ package de.thm.arsnova.domain;
 
 public interface ILearningProgressFactory {
 
-	public abstract LearningProgress createFromType(String progressType);
+	public abstract LearningProgress create(String progressType, String questionVariant);
 
 }

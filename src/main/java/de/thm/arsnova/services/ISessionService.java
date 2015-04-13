@@ -57,9 +57,9 @@ public interface ISessionService {
 
 	void deleteSession(String sessionkey);
 
-	LearningProgressValues getLearningProgress(String sessionkey, String progressType);
+	LearningProgressValues getLearningProgress(String sessionkey, String progressType, String questionVariant);
 
-	LearningProgressValues getMyLearningProgress(String sessionkey, String progressType);
+	LearningProgressValues getMyLearningProgress(String sessionkey, String progressType, String questionVariant);
 
 	List<SessionInfo> getMySessionsInfo();
 
