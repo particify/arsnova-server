@@ -81,6 +81,7 @@ public class CacheBuster implements ICacheBuster, NovaEventVisitor {
 	@Override
 	public void visit(StatusSessionEvent event) {}
 
+	@CacheEvict("statistics")
 	@Override
 	public void visit(ChangeLearningProgress changeLearningProgress) {}
 

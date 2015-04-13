@@ -1097,6 +1097,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return null;
 	}
 
+	@Cacheable("statistics")
 	@Override
 	public Statistics getStatistics() {
 		final Statistics stats = new Statistics();
