@@ -2041,7 +2041,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 		ViewResults results = this.getDatabase().view(view);
 
-		if (results == null || results.getResults() == null || results.getJSONArray("rows").optJSONObject(0) == null) {
+		if (isEmptyResults(results)) {
 			return null;
 		}
 
