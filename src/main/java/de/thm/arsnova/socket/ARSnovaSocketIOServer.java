@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -57,10 +58,13 @@ import de.thm.arsnova.events.DeleteAnswerEvent;
 import de.thm.arsnova.events.DeleteFeedbackForSessionsEvent;
 import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
 import de.thm.arsnova.events.DeleteQuestionEvent;
+import de.thm.arsnova.events.LockQuestionEvent;
+import de.thm.arsnova.events.LockQuestionsEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
+import de.thm.arsnova.events.NewQuestionsEvent;
 import de.thm.arsnova.events.NovaEventVisitor;
 import de.thm.arsnova.events.PiRoundDelayedStartEvent;
 import de.thm.arsnova.events.PiRoundEndEvent;
@@ -411,10 +415,25 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 		broadcastInSession(session.getKeyword(), "audQuestionAvail", audienceQuestion.get_id());
 	}
 
-	public void reportLecturerQuestionAvailable(final de.thm.arsnova.entities.Session session, final Question lecturerQuestion) {
+	public void reportLecturerQuestionAvailable(final de.thm.arsnova.entities.Session session, final List<de.thm.arsnova.entities.Question> qs) {
+		List<Question> questions = new ArrayList<Question>();
+		for (de.thm.arsnova.entities.Question q : qs) {
+			questions.add(new Question(q));
+		}
+
 		/* TODO role handling implementation, send this only to users with role audience */
-		broadcastInSession(session.getKeyword(), "lecQuestionAvail", lecturerQuestion.get_id()); // deprecated!
-		broadcastInSession(session.getKeyword(), "lecturerQuestionAvailable", lecturerQuestion);
+		if (qs.size() > 0) {
+			broadcastInSession(session.getKeyword(), "lecQuestionAvail", questions.get(0).get_id()); // deprecated!
+		}
+		broadcastInSession(session.getKeyword(), "lecturerQuestionAvailable", questions);
+	}
+
+	public void reportLecturerQuestionsLocked(final de.thm.arsnova.entities.Session session, final List<de.thm.arsnova.entities.Question> qs) {
+		List<Question> questions = new ArrayList<Question>();
+		for (de.thm.arsnova.entities.Question q : qs) {
+			questions.add(new Question(q));
+		}
+		broadcastInSession(session.getKeyword(), "lecturerQuestionLocked", questions);
 	}
 
 	public void reportSessionStatus(final String sessionKey, final boolean active) {
@@ -439,7 +458,22 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 
 	@Override
 	public void visit(NewQuestionEvent event) {
-		this.reportLecturerQuestionAvailable(event.getSession(), new Question(event.getQuestion()));
+		this.reportLecturerQuestionAvailable(event.getSession(), Arrays.asList(event.getQuestion()));
+	}
+
+	@Override
+	public void visit(LockQuestionEvent event) {
+		this.reportLecturerQuestionsLocked(event.getSession(), Arrays.asList(event.getQuestion()));
+	}
+
+	@Override
+	public void visit(NewQuestionsEvent event) {
+		this.reportLecturerQuestionAvailable(event.getSession(), event.getQuestions());
+	}
+
+	@Override
+	public void visit(LockQuestionsEvent event) {
+		this.reportLecturerQuestionsLocked(event.getSession(), event.getQuestions());
 	}
 
 	@Override

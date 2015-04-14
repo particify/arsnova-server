@@ -28,10 +28,13 @@ import de.thm.arsnova.events.DeleteAnswerEvent;
 import de.thm.arsnova.events.DeleteFeedbackForSessionsEvent;
 import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
 import de.thm.arsnova.events.DeleteQuestionEvent;
+import de.thm.arsnova.events.LockQuestionEvent;
+import de.thm.arsnova.events.LockQuestionsEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
+import de.thm.arsnova.events.NewQuestionsEvent;
 import de.thm.arsnova.events.NovaEventVisitor;
 import de.thm.arsnova.events.PiRoundDelayedStartEvent;
 import de.thm.arsnova.events.PiRoundEndEvent;
@@ -52,6 +55,15 @@ public class CacheBuster implements ICacheBuster, NovaEventVisitor {
 
 	@Override
 	public void visit(NewQuestionEvent event) {}
+
+	@Override
+	public void visit(NewQuestionsEvent newQuestionsEvent) {}
+
+	@Override
+	public void visit(LockQuestionEvent lockQuestionEvent) {}
+
+	@Override
+	public void visit(LockQuestionsEvent lockQuestionsEvent) {}
 
 	@CacheEvict(value = "answers", key = "#event.Session")
 	@Override

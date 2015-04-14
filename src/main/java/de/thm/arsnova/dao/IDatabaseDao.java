@@ -170,7 +170,7 @@ public interface IDatabaseDao {
 
 	void publishQuestions(Session session, boolean publish, List<Question> questions);
 
-	void publishAllQuestions(Session session, boolean publish);
+	List<Question> publishAllQuestions(Session session, boolean publish);
 
 	void deleteAllQuestionsAnswers(Session session);
 

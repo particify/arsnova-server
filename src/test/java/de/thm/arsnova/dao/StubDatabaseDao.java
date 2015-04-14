@@ -409,9 +409,9 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public void publishAllQuestions(Session session, boolean publish) {
+	public List<Question> publishAllQuestions(Session session, boolean publish) {
 		// TODO Auto-generated method stub
-
+		return null;
 	}
 
 	@Override

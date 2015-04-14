@@ -32,10 +32,13 @@ import de.thm.arsnova.events.DeleteAnswerEvent;
 import de.thm.arsnova.events.DeleteFeedbackForSessionsEvent;
 import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
 import de.thm.arsnova.events.DeleteQuestionEvent;
+import de.thm.arsnova.events.LockQuestionEvent;
+import de.thm.arsnova.events.LockQuestionsEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
+import de.thm.arsnova.events.NewQuestionsEvent;
 import de.thm.arsnova.events.NovaEventVisitor;
 import de.thm.arsnova.events.PiRoundDelayedStartEvent;
 import de.thm.arsnova.events.PiRoundEndEvent;
@@ -70,6 +73,24 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
 	public void visit(NewQuestionEvent event) {
+		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
+	}
+
+	@CacheEvict(value = "learningprogress", key = "#event.Session")
+	@Override
+	public void visit(NewQuestionsEvent event) {
+		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
+	}
+
+	@CacheEvict(value = "learningprogress", key = "#event.Session")
+	@Override
+	public void visit(LockQuestionEvent event) {
+		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
+	}
+
+	@CacheEvict(value = "learningprogress", key = "#event.Session")
+	@Override
+	public void visit(LockQuestionsEvent event) {
 		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
 	}
 
@@ -122,14 +143,14 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 	public void visit(ChangeLearningProgress changeLearningProgress) {}
 
 	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
-		this.publisher = publisher;
-	}
-
-	@Override
 	public void visit(PiRoundDelayedStartEvent piRoundDelayedStartEvent) {}
 
 	@Override
 	public void visit(PiRoundEndEvent piRoundEndEvent) {}
+
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+		this.publisher = publisher;
+	}
 
 }

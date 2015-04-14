@@ -1672,9 +1672,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	public void publishAllQuestions(final Session session, final boolean publish) {
+	public List<Question> publishAllQuestions(final Session session, final boolean publish) {
 		final List<Question> questions = getQuestions(new NovaView("skill_question/by_session"), session);
 		publishQuestions(session, publish, questions);
+		return questions;
 	}
 
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),

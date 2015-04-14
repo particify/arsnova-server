@@ -54,9 +54,13 @@ import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
 import de.thm.arsnova.events.DeleteAnswerEvent;
 import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
 import de.thm.arsnova.events.DeleteQuestionEvent;
+import de.thm.arsnova.events.LockQuestionEvent;
+import de.thm.arsnova.events.LockQuestionsEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
+import de.thm.arsnova.events.NewQuestionsEvent;
+import de.thm.arsnova.events.NovaEvent;
 import de.thm.arsnova.events.PiRoundDelayedStartEvent;
 import de.thm.arsnova.events.PiRoundEndEvent;
 import de.thm.arsnova.exceptions.BadRequestException;
@@ -562,6 +566,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		if (!oldQuestion.isActive() && question.isActive()) {
 			final NewQuestionEvent event = new NewQuestionEvent(this, session, result);
 			this.publisher.publishEvent(event);
+		} else if (oldQuestion.isActive() && !question.isActive()) {
+			final LockQuestionEvent event = new LockQuestionEvent(this, session, result);
+			this.publisher.publishEvent(event);
 		}
 
 		return result;
@@ -787,7 +794,14 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		if (!session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
-		databaseDao.publishAllQuestions(session, publish);
+		final List<Question> questions = databaseDao.publishAllQuestions(session, publish);
+		NovaEvent event;
+		if (publish) {
+			event = new NewQuestionsEvent(this, session, questions);
+		} else {
+			event = new LockQuestionsEvent(this, session, questions);
+		}
+		this.publisher.publishEvent(event);
 	}
 
 	@Override
@@ -799,6 +813,13 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			throw new UnauthorizedException();
 		}
 		databaseDao.publishQuestions(session, publish, questions);
+		NovaEvent event;
+		if (publish) {
+			event = new NewQuestionsEvent(this, session, questions);
+		} else {
+			event = new LockQuestionsEvent(this, session, questions);
+		}
+		this.publisher.publishEvent(event);
 	}
 
 	@Override
