@@ -903,7 +903,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		List<String> tmpList = sortOrder.getSortOrder();
 		tmpList.add(toBeAdded);
 		sortOrder.setSortOrder(tmpList);
-		if("alphabetical".equals(sortOrder.getSortType())) {
+		if("alphabet".equals(sortOrder.getSortType())) {
 			sortOrder = alphabeticalSort(sortOrder);
 		}
 		return databaseDao.createOrUpdateSortOrder(sortOrder);
@@ -984,7 +984,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				return null;
 			}
 			subjectSortOrder.setSubject("");
-			subjectSortOrder.setSortType("alphabetical");
+			subjectSortOrder.setSortType("alphabet");
 			subjectSortOrder.setQuestionVariant(questionVariant);
 			subjectSortOrder.setSessionId(session.get_id());
 			alphabeticalSort(subjectSortOrder);
@@ -999,7 +999,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			sortOrder.setSessionId(session.get_id());
 			sortOrder.setSubject(subject);
 			sortOrder.setQuestionVariant(questionVariant);
-			sortOrder.setSortType("alphabetical");
+			sortOrder.setSortType("alphabet");
 			sortOrder.setSortOrder(databaseDao.getQuestionIdsBySubject(session, questionVariant, subject));
 			alphabeticalSort(sortOrder);
 			return databaseDao.createOrUpdateSortOrder(sortOrder);
