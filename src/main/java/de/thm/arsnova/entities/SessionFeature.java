@@ -19,11 +19,11 @@ package de.thm.arsnova.entities;
 
 public class SessionFeature {
 
-	private boolean jitt;
-	private boolean feedback;
-	private boolean interposed;
-	private boolean pi;
-	private boolean learningProgress;
+	private boolean jitt = true;
+	private boolean feedback = true;
+	private boolean interposed = true;
+	private boolean pi = true;
+	private boolean learningProgress = true;
 
 	public SessionFeature(SessionFeature features) {
 		this();

@@ -37,8 +37,8 @@ public class Session implements Serializable {
 	private String courseId;
 	private List<String> _conflicts;
 	private long creationTime;
-	private LearningProgressOptions learningProgressOptions;
-	private SessionFeature features;
+	private LearningProgressOptions learningProgressOptions = new LearningProgressOptions();
+	private SessionFeature features = new SessionFeature();
 
 	private String ppAuthorName;
 	private String ppAuthorMail;

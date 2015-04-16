@@ -19,9 +19,9 @@ package de.thm.arsnova.entities;
 
 public class LearningProgressOptions {
 
-	private String type;
+	private String type = "questions";
 
-	private String questionVariant;
+	private String questionVariant = "";
 
 	public LearningProgressOptions(LearningProgressOptions learningProgressOptions) {
 		this();
