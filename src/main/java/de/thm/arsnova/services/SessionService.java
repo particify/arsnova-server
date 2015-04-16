@@ -37,6 +37,7 @@ import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.domain.ILearningProgressFactory;
 import de.thm.arsnova.domain.LearningProgress;
+import de.thm.arsnova.entities.LearningProgressOptions;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionFeature;
 import de.thm.arsnova.entities.SessionInfo;
@@ -239,6 +240,19 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 				throw new RequestEntityTooLargeException();
 			}
 		}
+
+		// set some default values
+		LearningProgressOptions lpo = new LearningProgressOptions();
+		lpo.setType("questions");
+		session.setLearningProgressOptions(lpo);
+
+		SessionFeature sf = new SessionFeature();
+		sf.setFeedback(true);
+		sf.setInterposed(true);
+		sf.setJitt(true);
+		sf.setLearningProgress(true);
+		sf.setPi(true);
+		session.setFeatures(sf);
 
 		return databaseDao.saveSession(userService.getCurrentUser(), session);
 	}
