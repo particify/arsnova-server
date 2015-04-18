@@ -2124,6 +2124,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		final Morpher dynaMorpher = new BeanMorpher(PossibleAnswer.class, morpherRegistry);
 		morpherRegistry.registerMorpher(dynaMorpher);
 		for (final Document document : questiondocs) {
+			if (!document.optString("error").equals("")) {
+				// Skip documents we could not load. Maybe they were deleted.
+				continue;
+			}
 			final Question question = (Question) JSONObject.toBean(
 					document.getJSONObject().getJSONObject("doc"),
 					Question.class
