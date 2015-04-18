@@ -47,9 +47,11 @@ import de.thm.arsnova.events.StatusSessionEvent;
 @Component
 public class CacheBuster implements ICacheBuster, NovaEventVisitor {
 
+	@CacheEvict("statistics")
 	@Override
 	public void visit(NewInterposedQuestionEvent event) {}
 
+	@CacheEvict("statistics")
 	@Override
 	public void visit(DeleteInterposedQuestionEvent event) {}
 
