@@ -18,6 +18,7 @@
 package de.thm.arsnova.services;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -41,6 +42,7 @@ import de.thm.arsnova.entities.LearningProgressOptions;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionFeature;
 import de.thm.arsnova.entities.SessionInfo;
+import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
@@ -327,6 +329,29 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public void deleteSession(final String sessionkey) {
 		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
+
+		List<String> prepSubjects = databaseDao.getSubjects(session, "preparation");
+		if (prepSubjects == null) {
+			prepSubjects = new ArrayList<String>();
+		} else {
+			prepSubjects.add("");
+		}
+
+		List<String> lectureSubjects = databaseDao.getSubjects(session, "lecture");
+		if (lectureSubjects == null) {
+			lectureSubjects = new ArrayList<String>();
+		} else {
+			lectureSubjects.add("");
+		}
+
+		for (String subject : prepSubjects) {
+			SortOrder sortOrder = databaseDao.getSortOrder(session.get_id(), "preparation", subject);
+			databaseDao.deleteSortOrder(sortOrder);
+		}
+		for (String subject : lectureSubjects) {
+			SortOrder sortOrder = databaseDao.getSortOrder(session.get_id(), "lecture", subject);
+			databaseDao.deleteSortOrder(sortOrder);
+		}
 		databaseDao.deleteAllQuestionsWithAnswers(session);
 		databaseDao.deleteSession(session);
 

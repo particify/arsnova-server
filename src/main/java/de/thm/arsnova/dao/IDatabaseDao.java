@@ -29,9 +29,9 @@ import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
+import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 
 public interface IDatabaseDao {
@@ -204,7 +204,7 @@ public interface IDatabaseDao {
 
 	SortOrder createOrUpdateSortOrder(SortOrder sortOrder);
 
-	SortOrder getSortOrder(String sessionkey, String questionVariant, String subject);
+	SortOrder getSortOrder(String sessionId, String questionVariant, String subject);
 
 	void deleteSortOrder(SortOrder sortOrder);
 
