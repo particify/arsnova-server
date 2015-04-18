@@ -55,4 +55,7 @@ public interface NovaEventVisitor {
 
 	void visit(PiRoundEndEvent piRoundEndEvent);
 
+	void visit(NewSessionEvent newSessionEvent);
+
+	void visit(DeleteSessionEvent deleteSessionEvent);
 }

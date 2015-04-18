@@ -58,6 +58,7 @@ import de.thm.arsnova.events.DeleteAnswerEvent;
 import de.thm.arsnova.events.DeleteFeedbackForSessionsEvent;
 import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
 import de.thm.arsnova.events.DeleteQuestionEvent;
+import de.thm.arsnova.events.DeleteSessionEvent;
 import de.thm.arsnova.events.LockQuestionEvent;
 import de.thm.arsnova.events.LockQuestionsEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
@@ -65,13 +66,14 @@ import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
 import de.thm.arsnova.events.NewQuestionsEvent;
+import de.thm.arsnova.events.NewSessionEvent;
 import de.thm.arsnova.events.NovaEventVisitor;
 import de.thm.arsnova.events.PiRoundDelayedStartEvent;
 import de.thm.arsnova.events.PiRoundEndEvent;
 import de.thm.arsnova.events.StatusSessionEvent;
-import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.IFeedbackService;
 import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.services.ISessionService;
@@ -576,4 +578,10 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	public void visit(ChangeLearningProgress event) {
 		broadcastInSession(event.getSession().getKeyword(), "learningProgressChange", null);
 	}
+
+	@Override
+	public void visit(NewSessionEvent event) {}
+
+	@Override
+	public void visit(DeleteSessionEvent event) {}
 }

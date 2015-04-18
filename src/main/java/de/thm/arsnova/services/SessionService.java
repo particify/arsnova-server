@@ -44,6 +44,8 @@ import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
+import de.thm.arsnova.events.DeleteSessionEvent;
+import de.thm.arsnova.events.NewSessionEvent;
 import de.thm.arsnova.events.StatusSessionEvent;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
@@ -254,7 +256,9 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		sf.setPi(true);
 		session.setFeatures(sf);
 
-		return databaseDao.saveSession(userService.getCurrentUser(), session);
+		final Session result = databaseDao.saveSession(userService.getCurrentUser(), session);
+		this.publisher.publishEvent(new NewSessionEvent(this, result));
+		return result;
 	}
 
 	@Override
@@ -325,6 +329,8 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		databaseDao.deleteAllQuestionsWithAnswers(session);
 		databaseDao.deleteSession(session);
+
+		this.publisher.publishEvent(new DeleteSessionEvent(this, session));
 	}
 
 	@Override

@@ -32,6 +32,7 @@ import de.thm.arsnova.events.DeleteAnswerEvent;
 import de.thm.arsnova.events.DeleteFeedbackForSessionsEvent;
 import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
 import de.thm.arsnova.events.DeleteQuestionEvent;
+import de.thm.arsnova.events.DeleteSessionEvent;
 import de.thm.arsnova.events.LockQuestionEvent;
 import de.thm.arsnova.events.LockQuestionsEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
@@ -39,6 +40,7 @@ import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
 import de.thm.arsnova.events.NewQuestionsEvent;
+import de.thm.arsnova.events.NewSessionEvent;
 import de.thm.arsnova.events.NovaEventVisitor;
 import de.thm.arsnova.events.PiRoundDelayedStartEvent;
 import de.thm.arsnova.events.PiRoundEndEvent;
@@ -149,8 +151,13 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 	public void visit(PiRoundEndEvent piRoundEndEvent) {}
 
 	@Override
+	public void visit(NewSessionEvent event) {}
+
+	@Override
+	public void visit(DeleteSessionEvent event) {}
+
+	@Override
 	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
 		this.publisher = publisher;
 	}
-
 }
