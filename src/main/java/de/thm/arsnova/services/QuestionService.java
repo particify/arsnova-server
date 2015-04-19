@@ -571,6 +571,30 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			this.publisher.publishEvent(event);
 		}
 
+		if (!oldQuestion.getSubject().equals(result.getSubject())) {
+			// Subject changed, question moved to another sort order document
+			deleteQuestionFromSortOrder(oldQuestion);
+		}
+		SortOrder subjectSortOrder = databaseDao.getSortOrder(session.get_id(), result.getQuestionVariant(), "");
+		if (subjectSortOrder != null) {
+			SortOrder questionSortOrder = databaseDao.getSortOrder(session.get_id(), result.getQuestionVariant(), result.getSubject());
+			if (questionSortOrder == null) {
+				List<String> order = new ArrayList<String>();
+				order.add(result.get_id());
+				SortOrder newQSortOrder = new SortOrder();
+				newQSortOrder.setSessionId(result.getSessionId());
+				newQSortOrder.setSubject(result.getSubject());
+				newQSortOrder.setSortType(subjectSortOrder.getSortType());
+				newQSortOrder.setQuestionVariant(subjectSortOrder.getQuestionVariant());
+				newQSortOrder.setSortOrder(order);
+				databaseDao.createOrUpdateSortOrder(newQSortOrder);
+				addToSortOrder(subjectSortOrder, result.getSubject());
+			} else {
+				addToSortOrder(questionSortOrder, result.get_id());
+			}
+		} else {
+			createSortOrder(session, result.getQuestionVariant(), "");
+		}
 		return result;
 	}
 
