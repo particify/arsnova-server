@@ -479,8 +479,12 @@ public class LecturerQuestionController extends AbstractController {
 	public String getQuestionSortType(
 			@RequestParam(required = true) final String sessionkey,
 			@RequestParam(required = true) final String subject,
-			@RequestParam(required = true) final String ispreparation
+			@RequestParam(required = true, defaultValue = "false") final boolean ispreparation
 			) {
-		return questionService.getQuestionSortType(sessionkey, ispreparation, subject);
+		String sortType = questionService.getQuestionSortType(sessionkey, ispreparation, subject);
+		if (sortType == null) {
+			throw new NoContentException();
+		}
+		return sortType;
 	}
 }

@@ -144,5 +144,5 @@ public interface IQuestionService {
 
 	SortOrder setSort(String sessionkey, String subject, String sortType, String isPreparation, String[] sortOrder);
 
-	String getQuestionSortType(String sessionkey, String isPreparation, String subject);
+	String getQuestionSortType(String sessionkey, boolean isPreparation, String subject);
 }

@@ -934,13 +934,16 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	}
 
 	@Override
-	public String getQuestionSortType(String sessionkey, String isPreparation, String subject) {
+	public String getQuestionSortType(String sessionkey, boolean isPreparation, String subject) {
 		Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		String questionVariant = "lecture";
-		if ("true".equals(isPreparation)) {
+		if (isPreparation) {
 			questionVariant = "preparation";
 		}
 		SortOrder sortOrder = databaseDao.getSortOrder(session.get_id(), questionVariant, subject);
+		if (sortOrder == null) {
+			return null;
+		}
 		return sortOrder.getSortType();
 	}
 
