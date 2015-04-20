@@ -68,6 +68,7 @@ import de.thm.arsnova.events.NewQuestionEvent;
 import de.thm.arsnova.events.NewQuestionsEvent;
 import de.thm.arsnova.events.NewSessionEvent;
 import de.thm.arsnova.events.NovaEventVisitor;
+import de.thm.arsnova.events.PiRoundCancelEvent;
 import de.thm.arsnova.events.PiRoundDelayedStartEvent;
 import de.thm.arsnova.events.PiRoundEndEvent;
 import de.thm.arsnova.events.StatusSessionEvent;
@@ -526,6 +527,14 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 		final String sessionKey = event.getSession().getKeyword();
 
 		broadcastInSession(sessionKey, "endPiRound", event.getQuestionId());
+	}
+
+	@Async
+	@Override
+	public void visit(PiRoundCancelEvent event) {
+		final String sessionKey = event.getSession().getKeyword();
+
+		broadcastInSession(sessionKey, "cancelPiRound", event.getQuestionId());
 	}
 
 	@Override

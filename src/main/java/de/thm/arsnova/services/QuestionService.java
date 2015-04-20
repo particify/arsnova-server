@@ -61,6 +61,7 @@ import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
 import de.thm.arsnova.events.NewQuestionsEvent;
 import de.thm.arsnova.events.NovaEvent;
+import de.thm.arsnova.events.PiRoundCancelEvent;
 import de.thm.arsnova.events.PiRoundDelayedStartEvent;
 import de.thm.arsnova.events.PiRoundEndEvent;
 import de.thm.arsnova.exceptions.BadRequestException;
@@ -284,6 +285,28 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				questionService.startNewPiRound(questionId, user);
 			}
 		}, endDate);
+	}
+
+	@Override
+	public void cancelPiRoundChange(final String questionId) {
+		final Question question = databaseDao.getQuestion(questionId);
+		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+
+		cancelDelayedPiRoundChange(questionId);
+
+		if(question.getPiRound() == 1) {
+			question.setPiRoundFinished(false);
+		} else {
+			question.setPiRound(1);
+			question.setPiRoundFinished(true);
+		}
+
+		question.setPiRoundActive(false);
+		question.setPiRoundStartTime(0);
+		question.setPiRoundEndTime(0);
+		update(question);
+
+		this.publisher.publishEvent(new PiRoundCancelEvent(this, session, question));
 	}
 
 	@Override

@@ -85,7 +85,7 @@ public class LecturerQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{questionId}/startNewPiRound", method = RequestMethod.GET)
-	public void startSecondPiRound(
+	public void startPiRound(
 			@PathVariable final String questionId,
 			@RequestParam(value = "time", defaultValue = "0", required = false) final int time
 			) {
@@ -95,6 +95,13 @@ public class LecturerQuestionController extends AbstractController {
 		} else {
 			questionService.startNewPiRoundDelayed(questionId, time);
 		}
+	}
+
+	@RequestMapping(value = "/{questionId}/cancelDelayedPiRound", method = RequestMethod.GET)
+	public void cancelPiRound(
+			@PathVariable final String questionId
+			) {
+		questionService.cancelPiRoundChange(questionId);
 	}
 
 	@RequestMapping(value = "/{questionId}/publish", method = RequestMethod.POST)

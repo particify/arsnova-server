@@ -38,6 +38,7 @@ import de.thm.arsnova.events.NewQuestionEvent;
 import de.thm.arsnova.events.NewQuestionsEvent;
 import de.thm.arsnova.events.NewSessionEvent;
 import de.thm.arsnova.events.NovaEventVisitor;
+import de.thm.arsnova.events.PiRoundCancelEvent;
 import de.thm.arsnova.events.PiRoundDelayedStartEvent;
 import de.thm.arsnova.events.PiRoundEndEvent;
 import de.thm.arsnova.events.StatusSessionEvent;
@@ -107,6 +108,9 @@ public class CacheBuster implements ICacheBuster, NovaEventVisitor {
 	@Override
 	public void visit(PiRoundEndEvent piRoundEndEvent) {}
 
+	@Override
+	public void visit(PiRoundCancelEvent piRoundCancelEvent) {}
+
 	@CacheEvict("statistics")
 	@Override
 	public void visit(NewSessionEvent newSessionEvent) {}
@@ -114,4 +118,5 @@ public class CacheBuster implements ICacheBuster, NovaEventVisitor {
 	@CacheEvict("statistics")
 	@Override
 	public void visit(DeleteSessionEvent deleteSessionEvent) {}
+
 }

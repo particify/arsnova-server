@@ -46,7 +46,9 @@ public interface IQuestionService {
 
 	void startNewPiRoundDelayed(String questionId, int time);
 
-	public void cancelDelayedPiRoundChange(final String questionId);
+	void cancelPiRoundChange(String questionId);
+
+	void cancelDelayedPiRoundChange(String questionId);
 
 	List<String> getUnAnsweredQuestionIds(String sessionKey);
 
