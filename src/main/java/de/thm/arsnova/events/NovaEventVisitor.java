@@ -49,7 +49,7 @@ public interface NovaEventVisitor {
 
 	void visit(StatusSessionEvent statusSessionEvent);
 
-	void visit(ChangeLearningProgress changeLearningProgress);
+	void visit(ChangeLearningProgressEvent changeLearningProgress);
 
 	void visit(PiRoundDelayedStartEvent piRoundDelayedStartEvent);
 

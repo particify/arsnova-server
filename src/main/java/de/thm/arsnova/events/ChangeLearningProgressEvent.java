@@ -19,11 +19,11 @@ package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.Session;
 
-public class ChangeLearningProgress extends SessionEvent {
+public class ChangeLearningProgressEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public ChangeLearningProgress(Object source, Session session) {
+	public ChangeLearningProgressEvent(Object source, Session session) {
 		super(source, session);
 	}
 

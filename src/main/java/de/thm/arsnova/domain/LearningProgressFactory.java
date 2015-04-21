@@ -24,7 +24,7 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Component;
 
 import de.thm.arsnova.dao.IDatabaseDao;
-import de.thm.arsnova.events.ChangeLearningProgress;
+import de.thm.arsnova.events.ChangeLearningProgressEvent;
 import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
 import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
 import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
@@ -76,61 +76,61 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
 	public void visit(NewQuestionEvent event) {
-		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
+		this.publisher.publishEvent(new ChangeLearningProgressEvent(this, event.getSession()));
 	}
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
 	public void visit(NewQuestionsEvent event) {
-		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
+		this.publisher.publishEvent(new ChangeLearningProgressEvent(this, event.getSession()));
 	}
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
 	public void visit(LockQuestionEvent event) {
-		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
+		this.publisher.publishEvent(new ChangeLearningProgressEvent(this, event.getSession()));
 	}
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
 	public void visit(LockQuestionsEvent event) {
-		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
+		this.publisher.publishEvent(new ChangeLearningProgressEvent(this, event.getSession()));
 	}
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
 	public void visit(NewAnswerEvent event) {
-		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
+		this.publisher.publishEvent(new ChangeLearningProgressEvent(this, event.getSession()));
 	}
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
 	public void visit(DeleteAnswerEvent event) {
-		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
+		this.publisher.publishEvent(new ChangeLearningProgressEvent(this, event.getSession()));
 	}
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
 	public void visit(DeleteQuestionEvent event) {
-		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
+		this.publisher.publishEvent(new ChangeLearningProgressEvent(this, event.getSession()));
 	}
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
 	public void visit(DeleteAllQuestionsAnswersEvent event) {
-		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
+		this.publisher.publishEvent(new ChangeLearningProgressEvent(this, event.getSession()));
 	}
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
 	public void visit(DeleteAllPreparationAnswersEvent event) {
-		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
+		this.publisher.publishEvent(new ChangeLearningProgressEvent(this, event.getSession()));
 	}
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
 	public void visit(DeleteAllLectureAnswersEvent event) {
-		this.publisher.publishEvent(new ChangeLearningProgress(this, event.getSession()));
+		this.publisher.publishEvent(new ChangeLearningProgressEvent(this, event.getSession()));
 	}
 
 	@Override
@@ -143,7 +143,7 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 	public void visit(StatusSessionEvent statusSessionEvent) {}
 
 	@Override
-	public void visit(ChangeLearningProgress changeLearningProgress) {}
+	public void visit(ChangeLearningProgressEvent changeLearningProgress) {}
 
 	@Override
 	public void visit(PiRoundDelayedStartEvent piRoundDelayedStartEvent) {}
