@@ -103,7 +103,7 @@ We will cover all three in the following sections.
 
 You will need to do some configuration work upfront: add a new directory
 "arsnova" in `/etc`, and create a copy of
-[arsnova.properties.example](src/main/webapp/arsnova.properties.example) named
+[arsnova.properties.example](src/main/resources/arsnova.properties.example) named
 `arsnova.properties` in this directory. Then change the settings to match your
 environment, e.g. you might want to change the URLs.
 
