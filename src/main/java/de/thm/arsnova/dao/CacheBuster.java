@@ -50,11 +50,11 @@ import de.thm.arsnova.events.StatusSessionEvent;
 @Component
 public class CacheBuster implements ICacheBuster, NovaEventVisitor {
 
-	@CacheEvict("statistics")
+	@CacheEvict(value = "statistics", allEntries = true)
 	@Override
 	public void visit(NewInterposedQuestionEvent event) {}
 
-	@CacheEvict("statistics")
+	@CacheEvict(value = "statistics", allEntries = true)
 	@Override
 	public void visit(DeleteInterposedQuestionEvent event) {}
 
@@ -98,7 +98,7 @@ public class CacheBuster implements ICacheBuster, NovaEventVisitor {
 	@Override
 	public void visit(StatusSessionEvent event) {}
 
-	@CacheEvict("statistics")
+	@CacheEvict(value = "statistics", allEntries = true)
 	@Override
 	public void visit(ChangeLearningProgressEvent changeLearningProgress) {}
 
@@ -111,11 +111,11 @@ public class CacheBuster implements ICacheBuster, NovaEventVisitor {
 	@Override
 	public void visit(PiRoundCancelEvent piRoundCancelEvent) {}
 
-	@CacheEvict("statistics")
+	@CacheEvict(value = "statistics", allEntries = true)
 	@Override
 	public void visit(NewSessionEvent newSessionEvent) {}
 
-	@CacheEvict("statistics")
+	@CacheEvict(value = "statistics", allEntries = true)
 	@Override
 	public void visit(DeleteSessionEvent deleteSessionEvent) {}
 
