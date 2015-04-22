@@ -687,7 +687,11 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			return null;
 		}
 		final User user = userService.getCurrentUser();
-		return getQuestionsBySortOrder(subjectSortOrder, session, user);
+		if (session.isCreator(user)) {
+			return databaseDao.getLectureQuestionsForTeachers(session);
+		} else {
+			return databaseDao.getLectureQuestionsForUsers(session);
+		}
 	}
 
 	@Override
@@ -714,7 +718,11 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			return null;
 		}
 		final User user = userService.getCurrentUser();
-		return getQuestionsBySortOrder(subjectSortOrder, session, user);
+		if (session.isCreator(user)) {
+			return databaseDao.getPreparationQuestionsForTeachers(session);
+		} else {
+			return databaseDao.getPreparationQuestionsForUsers(session);
+		}
 	}
 
 	private Session getSession(final String sessionkey) {
