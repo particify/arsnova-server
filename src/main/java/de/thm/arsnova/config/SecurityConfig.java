@@ -65,6 +65,7 @@ import org.springframework.security.web.authentication.Http403ForbiddenEntryPoin
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.header.writers.HstsHeaderWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.context.ServletContextAware;
 
@@ -115,6 +116,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 	protected void configure(HttpSecurity http) throws Exception {
 		http.exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint());
 		http.csrf().disable();
+		http.headers()
+			.cacheControl()
+			.contentTypeOptions()
+			.frameOptions()
+			.xssProtection()
+			.addHeaderWriter(new HstsHeaderWriter(false));
 
 		if (casEnabled) {
 			http.addFilter(casAuthenticationFilter());
