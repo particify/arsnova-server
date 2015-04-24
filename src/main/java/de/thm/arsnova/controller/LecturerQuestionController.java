@@ -104,6 +104,13 @@ public class LecturerQuestionController extends AbstractController {
 		questionService.cancelPiRoundChange(questionId);
 	}
 
+	@RequestMapping(value = "/{questionId}/resetPiRoundState", method = RequestMethod.GET)
+	public void resetPiQuestion(
+			@PathVariable final String questionId
+			) {
+		questionService.resetPiRoundState(questionId);
+	}
+
 	@RequestMapping(value = "/{questionId}/publish", method = RequestMethod.POST)
 	public void publishQuestion(
 			@PathVariable final String questionId,

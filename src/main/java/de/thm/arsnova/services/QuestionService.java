@@ -64,6 +64,7 @@ import de.thm.arsnova.events.NovaEvent;
 import de.thm.arsnova.events.PiRoundCancelEvent;
 import de.thm.arsnova.events.PiRoundDelayedStartEvent;
 import de.thm.arsnova.events.PiRoundEndEvent;
+import de.thm.arsnova.events.PiRoundResetEvent;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -263,20 +264,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final Date date = new Date();
 		final Timer timer = new Timer();
 		final Date endDate = new Date(date.getTime() + (time * 1000));
-		final int round = question.getPiRound();
-
-		if(round == 1 && question.isPiRoundFinished()) {
-			question.setPiRound(round + 1);
-		}
-
-		question.setActive(true);
-		question.setPiRoundActive(true);
-		question.setShowStatistic(false);
-		question.setPiRoundFinished(false);
-		question.setPiRoundStartTime(date.getTime());
-		question.setPiRoundEndTime(endDate.getTime());
-
+		question.updateRoundStartVariables(date, endDate);
 		update(question);
+
 		this.publisher.publishEvent(new PiRoundDelayedStartEvent(this, session, question));
 
 		timer.schedule(new TimerTask() {
@@ -293,6 +283,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 
 		cancelDelayedPiRoundChange(questionId);
+		question.resetRoundManagementState();
 
 		if(question.getPiRound() == 1) {
 			question.setPiRoundFinished(false);
@@ -301,11 +292,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			question.setPiRoundFinished(true);
 		}
 
-		question.setPiRoundActive(false);
-		question.setPiRoundStartTime(0);
-		question.setPiRoundEndTime(0);
 		update(question);
-
 		this.publisher.publishEvent(new PiRoundCancelEvent(this, session, question));
 	}
 
@@ -318,6 +305,18 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			timerList.remove(questionId);
 			timer.purge();
 		}
+	}
+
+	@Override
+	public void resetPiRoundState(final String questionId) {
+		final Question question = databaseDao.getQuestion(questionId);
+		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+
+		question.setPiRound(1);
+		question.resetRoundManagementState();
+		databaseDao.deleteAnswers(question);
+		update(question);
+		this.publisher.publishEvent(new PiRoundResetEvent(this, session, question));
 	}
 
 	private Session getSessionWithAuthCheck(final String sessionKeyword) {

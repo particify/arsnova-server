@@ -511,6 +511,19 @@ public class Question {
 		}
 	}
 
+	public void updateRoundStartVariables(Date start, Date end) {
+		if(this.getPiRound() == 1 && this.isPiRoundFinished()) {
+			this.setPiRound(2);
+		}
+
+		this.setActive(true);
+		this.setPiRoundActive(true);
+		this.setShowStatistic(false);
+		this.setPiRoundFinished(false);
+		this.setPiRoundStartTime(start.getTime());
+		this.setPiRoundEndTime(end.getTime());
+	}
+
 	public void updateRoundManagementState() {
 		final long time = new Date().getTime();
 
@@ -520,6 +533,15 @@ public class Question {
 			this.setPiRoundActive(false);
 			this.setPiRoundFinished(true);
 		}
+	}
+
+	public void resetRoundManagementState() {
+		this.setActive(false);
+		this.setPiRoundEndTime(0);
+		this.setPiRoundStartTime(0);
+		this.setPiRoundActive(false);
+		this.setPiRoundFinished(false);
+		this.setShowStatistic(false);
 	}
 
 	private int calculateRegularValue(Answer answer) {

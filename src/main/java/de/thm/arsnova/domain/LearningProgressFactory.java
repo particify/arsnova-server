@@ -45,6 +45,7 @@ import de.thm.arsnova.events.NovaEventVisitor;
 import de.thm.arsnova.events.PiRoundCancelEvent;
 import de.thm.arsnova.events.PiRoundDelayedStartEvent;
 import de.thm.arsnova.events.PiRoundEndEvent;
+import de.thm.arsnova.events.PiRoundResetEvent;
 import de.thm.arsnova.events.StatusSessionEvent;
 
 @Component
@@ -153,6 +154,9 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 
 	@Override
 	public void visit(PiRoundCancelEvent piRoundCancelEvent) {}
+
+	@Override
+	public void visit(PiRoundResetEvent piRoundResetEvent) {}
 
 	@Override
 	public void visit(NewSessionEvent event) {}

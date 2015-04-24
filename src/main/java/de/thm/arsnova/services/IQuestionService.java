@@ -50,6 +50,8 @@ public interface IQuestionService {
 
 	void cancelDelayedPiRoundChange(String questionId);
 
+	void resetPiRoundState(String questionId);
+
 	List<String> getUnAnsweredQuestionIds(String sessionKey);
 
 	Answer getMyAnswer(String questionId);
@@ -147,4 +149,5 @@ public interface IQuestionService {
 	SortOrder setSort(String sessionkey, String subject, String sortType, String isPreparation, String[] sortOrder);
 
 	String getQuestionSortType(String sessionkey, boolean isPreparation, String subject);
+
 }

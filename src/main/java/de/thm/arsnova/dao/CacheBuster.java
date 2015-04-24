@@ -41,6 +41,7 @@ import de.thm.arsnova.events.NovaEventVisitor;
 import de.thm.arsnova.events.PiRoundCancelEvent;
 import de.thm.arsnova.events.PiRoundDelayedStartEvent;
 import de.thm.arsnova.events.PiRoundEndEvent;
+import de.thm.arsnova.events.PiRoundResetEvent;
 import de.thm.arsnova.events.StatusSessionEvent;
 
 /**
@@ -110,6 +111,9 @@ public class CacheBuster implements ICacheBuster, NovaEventVisitor {
 
 	@Override
 	public void visit(PiRoundCancelEvent piRoundCancelEvent) {}
+
+	@Override
+	public void visit(PiRoundResetEvent piRoundResetEvent) {}
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@Override
