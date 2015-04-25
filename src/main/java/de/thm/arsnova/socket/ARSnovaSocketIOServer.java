@@ -61,6 +61,7 @@ import de.thm.arsnova.events.DeleteQuestionEvent;
 import de.thm.arsnova.events.DeleteSessionEvent;
 import de.thm.arsnova.events.LockQuestionEvent;
 import de.thm.arsnova.events.LockQuestionsEvent;
+import de.thm.arsnova.events.LockVotingEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
@@ -543,6 +544,13 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 		final String sessionKey = event.getSession().getKeyword();
 
 		broadcastInSession(sessionKey, "resetPiRound", event.getQuestionId());
+	}
+
+	@Override
+	public void visit(LockVotingEvent event) {
+		final String sessionKey = event.getSession().getKeyword();
+
+		broadcastInSession(sessionKey, "lockVoting", event.getVotingAdmission());
 	}
 
 	@Override

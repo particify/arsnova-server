@@ -43,6 +43,7 @@ public class Question {
 	private long piRoundStartTime = 0;
 	private boolean piRoundFinished = false;
 	private boolean piRoundActive = false;
+	private boolean votingDisabled;
 	private boolean showStatistic; // sic
 	private boolean showAnswer;
 	private boolean abstention;
@@ -464,6 +465,14 @@ public class Question {
 
 	public void setTextAnswerEnabled(boolean textAnswerEnabled) {
 		this.textAnswerEnabled = textAnswerEnabled;
+	}
+
+	public boolean isVotingDisabled() {
+		return votingDisabled;
+	}
+
+	public void setVotingDisabled(boolean votingDisabled) {
+		this.votingDisabled = votingDisabled;
 	}
 
 	@Override

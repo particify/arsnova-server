@@ -522,6 +522,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		q.put("subject", question.getSubject());
 		q.put("text", question.getText());
 		q.put("active", question.isActive());
+		q.put("votingDisabled", question.isVotingDisabled());
 		q.put("number", 0); // TODO: This number is now unused. A clean up is necessary.
 		q.put("releasedFor", question.getReleasedFor());
 		q.put("possibleAnswers", question.getPossibleAnswers());
@@ -576,6 +577,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			q.put("subject", question.getSubject());
 			q.put("text", question.getText());
 			q.put("active", question.isActive());
+			q.put("votingDisabled", question.isVotingDisabled());
 			q.put("releasedFor", question.getReleasedFor());
 			q.put("possibleAnswers", question.getPossibleAnswers());
 			q.put("noCorrect", question.isNoCorrect());

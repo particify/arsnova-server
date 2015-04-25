@@ -111,6 +111,16 @@ public class LecturerQuestionController extends AbstractController {
 		questionService.resetPiRoundState(questionId);
 	}
 
+	@RequestMapping(value = "/{questionId}/disableVoting", method = RequestMethod.GET)
+	public void setVotingAdmission(
+			@PathVariable final String questionId,
+			@RequestParam(required = true) final Boolean disable
+			) {
+		if (disable != null) {
+			questionService.setVotingAdmission(questionId, disable);
+		}
+	}
+
 	@RequestMapping(value = "/{questionId}/publish", method = RequestMethod.POST)
 	public void publishQuestion(
 			@PathVariable final String questionId,

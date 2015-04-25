@@ -56,6 +56,7 @@ import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
 import de.thm.arsnova.events.DeleteQuestionEvent;
 import de.thm.arsnova.events.LockQuestionEvent;
 import de.thm.arsnova.events.LockQuestionsEvent;
+import de.thm.arsnova.events.LockVotingEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
@@ -317,6 +318,16 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		databaseDao.deleteAnswers(question);
 		update(question);
 		this.publisher.publishEvent(new PiRoundResetEvent(this, session, question));
+	}
+
+	@Override
+	public void setVotingAdmission(final String questionId, final boolean disable) {
+		final Question question = databaseDao.getQuestion(questionId);
+		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+		question.setVotingDisabled(disable);
+		
+		databaseDao.updateQuestion(question);
+		this.publisher.publishEvent(new LockVotingEvent(this, session, question));
 	}
 
 	private Session getSessionWithAuthCheck(final String sessionKeyword) {
