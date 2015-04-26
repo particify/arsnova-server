@@ -8,7 +8,7 @@
 
 	<properties>
 		<org.springframework-version>4.1.6.RELEASE</org.springframework-version>
-		<org.springframework.security-version>3.2.7.RELEASE</org.springframework.security-version>
+		<org.springframework.security-version>4.0.1.RELEASE</org.springframework.security-version>
 		<org.springframework.integration-mail-version>4.1.3.RELEASE</org.springframework.integration-mail-version>
 		<com.fasterxml.jackson-version>2.5.3</com.fasterxml.jackson-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

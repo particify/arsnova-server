@@ -117,10 +117,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 		http.exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint());
 		http.csrf().disable();
 		http.headers()
-			.cacheControl()
-			.contentTypeOptions()
-			.frameOptions()
-			.xssProtection()
 			.addHeaderWriter(new HstsHeaderWriter(false));
 
 		if (casEnabled) {
@@ -295,7 +291,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 	@Bean
 	public ServiceProperties casServiceProperties() {
 		ServiceProperties properties = new ServiceProperties();
-		properties.setService(rootUrl + servletContext.getContextPath() + "/j_spring_cas_security_check");
+		properties.setService(rootUrl + servletContext.getContextPath() + "/login/cas");
 		properties.setSendRenew(false);
 
 		return properties;
