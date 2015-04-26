@@ -246,8 +246,8 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 		cancelDelayedPiRoundChange(questionId);
 
-		question.setActive(false);
 		question.setPiRoundEndTime(0);
+		question.setVotingDisabled(true);
 		question.updateRoundManagementState();
 		update(question, user);
 
@@ -268,6 +268,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		question.updateRoundStartVariables(date, endDate);
 		update(question);
 
+		timerList.put(questionId, timer);
 		this.publisher.publishEvent(new PiRoundDelayedStartEvent(this, session, question));
 
 		timer.schedule(new TimerTask() {
@@ -312,6 +313,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	public void resetPiRoundState(final String questionId) {
 		final Question question = databaseDao.getQuestion(questionId);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+		cancelDelayedPiRoundChange(questionId);
 
 		question.setPiRound(1);
 		question.resetRoundManagementState();

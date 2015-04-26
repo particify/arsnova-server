@@ -528,6 +528,7 @@ public class Question {
 		this.setActive(true);
 		this.setPiRoundActive(true);
 		this.setShowStatistic(false);
+		this.setVotingDisabled(false);
 		this.setPiRoundFinished(false);
 		this.setPiRoundStartTime(start.getTime());
 		this.setPiRoundEndTime(end.getTime());
@@ -545,9 +546,9 @@ public class Question {
 	}
 
 	public void resetRoundManagementState() {
-		this.setActive(false);
 		this.setPiRoundEndTime(0);
 		this.setPiRoundStartTime(0);
+		this.setVotingDisabled(true);
 		this.setPiRoundActive(false);
 		this.setPiRoundFinished(false);
 		this.setShowStatistic(false);
