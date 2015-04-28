@@ -236,6 +236,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	}
 
 	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
 	public void startNewPiRound(final String questionId, User user) {
 		final Question question = databaseDao.getQuestion(questionId);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
@@ -280,6 +281,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	}
 
 	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
 	public void cancelPiRoundChange(final String questionId) {
 		final Question question = databaseDao.getQuestion(questionId);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
@@ -310,6 +312,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	}
 
 	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
 	public void resetPiRoundState(final String questionId) {
 		final Question question = databaseDao.getQuestion(questionId);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
@@ -323,6 +326,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	}
 
 	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
 	public void setVotingAdmission(final String questionId, final boolean disable) {
 		final Question question = databaseDao.getQuestion(questionId);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());

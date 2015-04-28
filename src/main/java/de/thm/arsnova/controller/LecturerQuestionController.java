@@ -84,7 +84,7 @@ public class LecturerQuestionController extends AbstractController {
 		}
 	}
 
-	@RequestMapping(value = "/{questionId}/startNewPiRound", method = RequestMethod.GET)
+	@RequestMapping(value = "/{questionId}/startNewPiRound", method = RequestMethod.POST)
 	public void startPiRound(
 			@PathVariable final String questionId,
 			@RequestParam(value = "time", defaultValue = "0", required = false) final int time
@@ -97,21 +97,21 @@ public class LecturerQuestionController extends AbstractController {
 		}
 	}
 
-	@RequestMapping(value = "/{questionId}/cancelDelayedPiRound", method = RequestMethod.GET)
+	@RequestMapping(value = "/{questionId}/cancelDelayedPiRound", method = RequestMethod.POST)
 	public void cancelPiRound(
 			@PathVariable final String questionId
 			) {
 		questionService.cancelPiRoundChange(questionId);
 	}
 
-	@RequestMapping(value = "/{questionId}/resetPiRoundState", method = RequestMethod.GET)
+	@RequestMapping(value = "/{questionId}/resetPiRoundState", method = RequestMethod.POST)
 	public void resetPiQuestion(
 			@PathVariable final String questionId
 			) {
 		questionService.resetPiRoundState(questionId);
 	}
 
-	@RequestMapping(value = "/{questionId}/disableVoting", method = RequestMethod.GET)
+	@RequestMapping(value = "/{questionId}/disableVoting", method = RequestMethod.POST)
 	public void setVotingAdmission(
 			@PathVariable final String questionId,
 			@RequestParam(required = true) final Boolean disable
