@@ -526,6 +526,7 @@ public class Question {
 		}
 
 		this.setActive(true);
+		this.setShowAnswer(false);
 		this.setPiRoundActive(true);
 		this.setShowStatistic(false);
 		this.setVotingDisabled(false);
@@ -552,6 +553,7 @@ public class Question {
 		this.setPiRoundActive(false);
 		this.setPiRoundFinished(false);
 		this.setShowStatistic(false);
+		this.setShowAnswer(false);
 	}
 
 	private int calculateRegularValue(Answer answer) {
