@@ -30,13 +30,16 @@ public class QuestionScore implements Iterable<UserScore> {
 
 	private String questionVariant;
 
+	private int piRound;
+
 	private int maximumScore;
 
 	private List<UserScore> userScores = new ArrayList<UserScore>();
 
-	public QuestionScore(String questionId, String questionVariant, int maximumScore) {
+	public QuestionScore(String questionId, String questionVariant, int piRound, int maximumScore) {
 		this.questionId = questionId;
 		this.questionVariant = questionVariant;
+		this.piRound = piRound;
 		this.maximumScore = maximumScore;
 	}
 
@@ -53,8 +56,10 @@ public class QuestionScore implements Iterable<UserScore> {
 		return this.userScores.size() > 0;
 	}
 
-	public void add(String username, int userscore) {
-		userScores.add(new UserScore(username, userscore));
+	public void add(int piRound, String username, int userscore) {
+		if (this.piRound == piRound) {
+			userScores.add(new UserScore(username, userscore));
+		}
 	}
 
 	public int getTotalUserScore() {

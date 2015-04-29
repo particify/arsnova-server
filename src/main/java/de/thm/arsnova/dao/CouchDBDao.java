@@ -1805,7 +1805,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			JSONObject value = d.getJSONObject("value");
 			int questionScore = value.getInt("value");
 			String questionVariant = value.getString("questionVariant");
-			courseScore.addQuestion(questionId, questionVariant, questionScore);
+			int piRound = value.getInt("piRound");
+			courseScore.addQuestion(questionId, questionVariant, piRound, questionScore);
 		}
 		// collect mapping (questionId -> (user -> value))
 		for (Document d : answerSumResult) {
@@ -1813,7 +1814,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			JSONObject value = d.getJSONObject("value");
 			String questionId = value.getString("questionId");
 			int userscore = value.getInt("score");
-			courseScore.addAnswer(questionId, username, userscore);
+			int piRound = value.getInt("piRound");
+			courseScore.addAnswer(questionId, piRound, username, userscore);
 		}
 		return courseScore;
 	}

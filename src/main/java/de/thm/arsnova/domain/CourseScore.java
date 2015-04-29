@@ -38,11 +38,11 @@ public class CourseScore implements Iterable<QuestionScore> {
 		this.scores = theScores;
 	}
 
-	public void addQuestion(String questionId, String questionVariant, int questionScore) {
+	public void addQuestion(String questionId, String questionVariant, int piRound, int questionScore) {
 		if (questionScore == 0) {
 			return;
 		}
-		scores.put(questionId, new QuestionScore(questionId, questionVariant, questionScore));
+		scores.put(questionId, new QuestionScore(questionId, questionVariant, piRound, questionScore));
 	}
 
 	/**
@@ -52,7 +52,7 @@ public class CourseScore implements Iterable<QuestionScore> {
 	 * @param username
 	 * @param userscore
 	 */
-	public void addAnswer(String questionId, String username, int userscore) {
+	public void addAnswer(String questionId, int piRound, String username, int userscore) {
 		if (!scores.containsKey(questionId)) {
 			// Precondition failed, ignore this element.
 			// Most likely this is a question that has no learning progress value.
@@ -63,7 +63,7 @@ public class CourseScore implements Iterable<QuestionScore> {
 			return;
 		}
 		QuestionScore questionScore = scores.get(questionId);
-		questionScore.add(username, userscore);
+		questionScore.add(piRound, username, userscore);
 	}
 
 	public CourseScore filterVariant(String questionVariant) {

@@ -33,6 +33,20 @@ public class QuestionBasedLearningProgressTest {
 	private CourseScore courseScore;
 	private VariantLearningProgress lp;
 
+	private int id = 1;
+
+	private String addQuestion(String questionVariant, int points) {
+		final String questionId = "question" + (id++);
+		final int piRound = 1;
+		courseScore.addQuestion(questionId, questionVariant, piRound, points);
+		return questionId;
+	}
+
+	private void addAnswer(String questionId, User user, int points) {
+		final int piRound = 1;
+		courseScore.addAnswer(questionId, piRound, user.getUsername(), points);
+	}
+
 	@Before
 	public void setUp() {
 		this.courseScore = new CourseScore();
@@ -49,8 +63,8 @@ public class QuestionBasedLearningProgressTest {
 		final int questionMaxValue = 0;
 		final int userScore = 0;
 		User user = new TestUser("username");
-		courseScore.addQuestion("question-id", "lecture", questionMaxValue);
-		courseScore.addAnswer("question-id", user.getUsername(), userScore);
+		String questionId = this.addQuestion("lecture", questionMaxValue);
+		this.addAnswer(questionId, user, userScore);
 
 		LearningProgressValues expected = new LearningProgressValues();
 		expected.setCourseProgress(0);
@@ -64,10 +78,10 @@ public class QuestionBasedLearningProgressTest {
 	@Test
 	public void shouldIgnoreQuestionsWithoutCorrectAnswersInQuestionCount() {
 		User user = new TestUser("username");
-		courseScore.addQuestion("question-without-correct-answers", "lecture", 0);
-		courseScore.addQuestion("question-with-correct-answers", "lecture", 50);
-		courseScore.addAnswer("question-without-correct-answers", user.getUsername(), 0);
-		courseScore.addAnswer("question-with-correct-answers", user.getUsername(), 50);
+		courseScore.addQuestion("question-without-correct-answers", "lecture", 1, 0);
+		courseScore.addQuestion("question-with-correct-answers", "lecture", 1, 50);
+		courseScore.addAnswer("question-without-correct-answers", 1, user.getUsername(), 0);
+		courseScore.addAnswer("question-with-correct-answers", 1, user.getUsername(), 50);
 
 		LearningProgressValues expected = new LearningProgressValues();
 		expected.setCourseProgress(100);
@@ -83,11 +97,11 @@ public class QuestionBasedLearningProgressTest {
 	 */
 	@Test
 	public void shouldCalculatePercentageOfOneQuestionWithSomeWrongAnswers() {
-		courseScore.addQuestion("question", "lecture", 10);
+		String questionId = this.addQuestion("lecture", 10);
 		for (int i = 0; i < 99; i++) {
-			courseScore.addAnswer("question", new TestUser("user"+i).getUsername(), 10);
+			this.addAnswer(questionId, new TestUser("user"+i), 10);
 		}
-		courseScore.addAnswer("question", new TestUser("user-with-a-wrong-answer").getUsername(), 0);
+		this.addAnswer(questionId, new TestUser("user-with-a-wrong-answer"), 0);
 
 		int expected = 99;
 		int actual = lp.getCourseProgress(null).getCourseProgress();
@@ -103,16 +117,16 @@ public class QuestionBasedLearningProgressTest {
 	@Test
 	public void shouldCalculatePercentageOfMultipleQuestionsAndAnswers() {
 		// two questions
-		courseScore.addQuestion("question1", "lecture", 10);
-		courseScore.addQuestion("question2", "lecture", 10);
+		String q1 = this.addQuestion("lecture", 10);
+		String q2 = this.addQuestion("lecture", 10);
 		// two users
 		User u1 = new TestUser("user1");
 		User u2 = new TestUser("user2");
 		// four answers, last one is wrong
-		courseScore.addAnswer("question1", u1.getUsername(), 10);
-		courseScore.addAnswer("question1", u2.getUsername(), 10);
-		courseScore.addAnswer("question2", u1.getUsername(), 10);
-		courseScore.addAnswer("question2", u2.getUsername(), 0);
+		this.addAnswer(q1, u1, 10);
+		this.addAnswer(q1, u2, 10);
+		this.addAnswer(q2, u1, 10);
+		this.addAnswer(q2, u2, 0);
 
 		int expected = 75;
 		int actual = lp.getCourseProgress(null).getCourseProgress();
@@ -123,14 +137,14 @@ public class QuestionBasedLearningProgressTest {
 	@Test
 	public void shouldNotBeBiasedByPointsOrAnswerCount() {
 		// two questions
-		courseScore.addQuestion("question1", "lecture", 1000);
-		courseScore.addQuestion("question2", "lecture", 1);
+		String q1 = this.addQuestion("lecture", 1000);
+		String q2 = this.addQuestion("lecture", 1);
 		// first question has many answers, all of them correct
 		for (int i = 0; i < 100; i++) {
-			courseScore.addAnswer("question1", new TestUser("user"+i).getUsername(), 1000);
+			this.addAnswer(q1, new TestUser("user"+i), 1000);
 		}
 		// second question has one wrong answer
-		courseScore.addAnswer("question2",  new TestUser("another-user").getUsername(), 0);
+		this.addAnswer(q2,  new TestUser("another-user"), 0);
 
 		int expected = 50;
 		int actual = lp.getCourseProgress(null).getCourseProgress();
@@ -140,15 +154,15 @@ public class QuestionBasedLearningProgressTest {
 
 	@Test
 	public void shouldFilterBasedOnQuestionVariant() {
-		courseScore.addQuestion("question1", "lecture", 100);
-		courseScore.addQuestion("question2", "preparation", 100);
+		String q1 = this.addQuestion("lecture", 100);
+		String q2 = this.addQuestion("preparation", 100);
 		User u1 = new TestUser("user1");
 		User u2 = new TestUser("user2");
 		// first question is answered correctly, second one is not
-		courseScore.addAnswer("question1", u1.getUsername(), 100);
-		courseScore.addAnswer("question1", u2.getUsername(), 100);
-		courseScore.addAnswer("question2", u1.getUsername(), 0);
-		courseScore.addAnswer("question2", u2.getUsername(), 0);
+		this.addAnswer(q1, u1, 100);
+		this.addAnswer(q1, u2, 100);
+		this.addAnswer(q2, u1, 0);
+		this.addAnswer(q2, u2, 0);
 
 		lp.setQuestionVariant("lecture");
 		LearningProgressValues lectureProgress = lp.getCourseProgress(null);
@@ -161,6 +175,29 @@ public class QuestionBasedLearningProgressTest {
 		assertEquals(100, myLectureProgress.getMyProgress());
 		assertEquals(0, prepProgress.getCourseProgress());
 		assertEquals(0, myPrepProgress.getMyProgress());
+	}
+
+	@Test
+	public void shouldConsiderAnswersOfSamePiRound() {
+		User u1 = new TestUser("user1");
+		User u2 = new TestUser("user2");
+		// question is in round 2
+		courseScore.addQuestion("q1", "lecture", 2, 100);
+		// 25 points in round 1, 75 points in round two for the first user
+		courseScore.addAnswer("q1", 1, u1.getUsername(), 25);
+		courseScore.addAnswer("q1", 2, u1.getUsername(), 100);
+		// 75 points in round 1, 25 points in round two for the second user
+		courseScore.addAnswer("q1", 1, u2.getUsername(), 100);
+		courseScore.addAnswer("q1", 2, u2.getUsername(), 25);
+
+		LearningProgressValues u1Progress = lp.getMyProgress(null, u1);
+		LearningProgressValues u2Progress = lp.getMyProgress(null, u2);
+
+		// only the answer for round 2 should be considered
+		assertEquals(50, u1Progress.getCourseProgress());
+		assertEquals(100, u1Progress.getMyProgress());
+		assertEquals(50, u2Progress.getCourseProgress());
+		assertEquals(0, u2Progress.getMyProgress());
 	}
 
 }

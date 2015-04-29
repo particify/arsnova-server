@@ -34,6 +34,20 @@ public class PointBasedLearningProgressTest {
 	private CourseScore courseScore;
 	private VariantLearningProgress lp;
 
+	private int id = 1;
+
+	private String addQuestion(String questionVariant, int points) {
+		final String questionId = "question" + (id++);
+		final int piRound = 1;
+		courseScore.addQuestion(questionId, questionVariant, piRound, points);
+		return questionId;
+	}
+
+	private void addAnswer(String questionId, User user, int points) {
+		final int piRound = 1;
+		courseScore.addAnswer(questionId, piRound, user.getUsername(), points);
+	}
+
 	@Before
 	public void setUp() {
 		this.courseScore = new CourseScore();
@@ -44,15 +58,15 @@ public class PointBasedLearningProgressTest {
 
 	@Test
 	public void shouldFilterBasedOnQuestionVariant() {
-		courseScore.addQuestion("question1", "lecture", 100);
-		courseScore.addQuestion("question2", "preparation", 100);
+		String q1 = this.addQuestion("lecture", 100);
+		String q2 = this.addQuestion("preparation", 100);
 		User u1 = new TestUser("user1");
 		User u2 = new TestUser("user2");
 		// first question is answered correctly, second one is not
-		courseScore.addAnswer("question1", u1.getUsername(), 100);
-		courseScore.addAnswer("question1", u2.getUsername(), 100);
-		courseScore.addAnswer("question2", u1.getUsername(), 0);
-		courseScore.addAnswer("question2", u2.getUsername(), 0);
+		this.addAnswer(q1, u1, 100);
+		this.addAnswer(q1, u2, 100);
+		this.addAnswer(q2, u1, 0);
+		this.addAnswer(q2, u2, 0);
 
 		lp.setQuestionVariant("lecture");
 		LearningProgressValues lectureProgress = lp.getCourseProgress(null);
@@ -65,5 +79,28 @@ public class PointBasedLearningProgressTest {
 		assertEquals(100, myLectureProgress.getMyProgress());
 		assertEquals(0, prepProgress.getCourseProgress());
 		assertEquals(0, myPrepProgress.getMyProgress());
+	}
+
+	@Test
+	public void shouldConsiderAnswersOfSamePiRound() {
+		User u1 = new TestUser("user1");
+		User u2 = new TestUser("user2");
+		// question is in round 2
+		courseScore.addQuestion("q1", "lecture", 2, 100);
+		// 25 points in round 1, 75 points in round two for the first user
+		courseScore.addAnswer("q1", 1, u1.getUsername(), 25);
+		courseScore.addAnswer("q1", 2, u1.getUsername(), 75);
+		// 75 points in round 1, 25 points in round two for the second user
+		courseScore.addAnswer("q1", 1, u2.getUsername(), 75);
+		courseScore.addAnswer("q1", 2, u2.getUsername(), 25);
+
+		LearningProgressValues u1Progress = lp.getMyProgress(null, u1);
+		LearningProgressValues u2Progress = lp.getMyProgress(null, u2);
+
+		// only the answer for round 2 should be considered
+		assertEquals(50, u1Progress.getCourseProgress());
+		assertEquals(75, u1Progress.getMyProgress());
+		assertEquals(50, u2Progress.getCourseProgress());
+		assertEquals(25, u2Progress.getMyProgress());
 	}
 }
