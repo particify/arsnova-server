@@ -17,8 +17,6 @@
  */
 package de.thm.arsnova.services;
 
-import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -769,17 +767,6 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public SimpleEntry<String, List<Integer>> getAnswerAndAbstentionCountByQuestion(final String questionid) {
-		final List<Integer> countList = Arrays.asList(
-			getAnswerCount(questionid),
-			getAbstentionAnswerCount(questionid)
-		);
-
-		return new AbstractMap.SimpleEntry<String, List<Integer>>(questionid, countList);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
 	public int countLectureQuestionAnswers(final String sessionkey) {
 		return this.countLectureQuestionAnswersInternal(sessionkey);
 	}
@@ -791,6 +778,22 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	public int countLectureQuestionAnswersInternal(final String sessionkey) {
 		return databaseDao.countLectureQuestionAnswers(getSession(sessionkey));
+	}
+
+	@Override
+	public Map<String, Object> getAnswerAndAbstentionCountInternal(final String questionId) {
+		final Question question = getQuestion(questionId);
+		HashMap<String, Object> map = new HashMap<String, Object>();
+
+		if (question == null) {
+			return null;
+		}
+
+		map.put("_id", questionId);
+		map.put("answers", databaseDao.getAnswerCount(question, question.getPiRound()));
+		map.put("abstentions", databaseDao.getAbstentionAnswerCount(questionId));
+
+		return map;
 	}
 
 	@Override

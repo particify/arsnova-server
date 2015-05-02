@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.services;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
+import java.util.Map;
 
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.InterposedQuestion;
@@ -104,7 +104,7 @@ public interface IQuestionService {
 
 	int getPreparationQuestionCount(String sessionkey);
 
-	SimpleEntry<String, List<Integer>> getAnswerAndAbstentionCountByQuestion(String questionid);
+	Map<String, Object> getAnswerAndAbstentionCountInternal(String questionid);
 
 	int countLectureQuestionAnswers(String sessionkey);
 
