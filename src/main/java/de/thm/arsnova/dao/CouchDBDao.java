@@ -1582,30 +1582,16 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<String> getUnAnsweredLectureQuestionIds(final Session session, final User user) {
-		final NovaView view = new NovaView("answer/variant_by_user");
+		final NovaView view = new NovaView("answer/variant_by_user_and_piround");
 		view.setKey(user.getUsername(), session.get_id(), "lecture");
-		return collectUnansweredQuestionIds(getLectureQuestionIds(session), view);
-	}
-
-	private List<String> getLectureQuestionIds(final Session session) {
-		NovaView view = new NovaView("skill_question/lecture_question_ids_by_session_for_all");
-		view.setStartKeyArray(session.get_id());
-		view.setEndKeyArray(session.get_id(), "{}");
-		return collectQuestionIds(view);
+		return collectUnansweredQuestionIdsByPiRound(getLectureQuestionsForUsers(session), view);
 	}
 
 	@Override
 	public List<String> getUnAnsweredPreparationQuestionIds(final Session session, final User user) {
-		final NovaView view = new NovaView("answer/variant_by_user");
+		final NovaView view = new NovaView("answer/variant_by_user_and_piround");
 		view.setKey(user.getUsername(), session.get_id(), "preparation");
-		return collectUnansweredQuestionIds(getPreparationQuestionIds(session), view);
-	}
-
-	private List<String> getPreparationQuestionIds(final Session session) {
-		NovaView view = new NovaView("skill_question/preparation_question_ids_by_session_for_all");
-		view.setStartKeyArray(session.get_id());
-		view.setEndKeyArray(session.get_id(), "{}");
-		return collectQuestionIds(view);
+		return collectUnansweredQuestionIdsByPiRound(getPreparationQuestionsForUsers(session), view);
 	}
 
 	private List<String> collectUnansweredQuestionIds(
@@ -1625,6 +1611,29 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				unanswered.add(questionId);
 			}
 		}
+		return unanswered;
+	}
+
+	private List<String> collectUnansweredQuestionIdsByPiRound(
+			final List<Question> questions,
+			final NovaView view
+			) {
+		final ViewResults answeredQuestions = getDatabase().view(view);
+
+		final Map<String, Integer> answered = new HashMap<String, Integer>();
+		for (final Document d : answeredQuestions.getResults()) {
+			answered.put(d.getJSONArray("value").getString(0), d.getJSONArray("value").getInt(1));
+		}
+
+		final List<String> unanswered = new ArrayList<String>();
+
+		for (final Question question : questions) {
+			if (!answered.containsKey(question.get_id()) || 
+				(answered.containsKey(question.get_id()) && answered.get(question.get_id()) != question.getPiRound())) {
+				unanswered.add(question.get_id());
+			}
+		}
+
 		return unanswered;
 	}
 
