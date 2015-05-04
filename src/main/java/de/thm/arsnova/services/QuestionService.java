@@ -267,8 +267,8 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		question.updateRoundStartVariables(date, endDate);
 		update(question);
 
-		timerList.put(questionId, timer);
 		this.publisher.publishEvent(new PiRoundDelayedStartEvent(this, session, question));
+		timerList.put(questionId, timer);
 
 		timer.schedule(new TimerTask() {
 			@Override

@@ -17,7 +17,6 @@
  */
 package de.thm.arsnova.events;
 
-import java.util.Date;
 import java.util.HashMap;
 
 import de.thm.arsnova.entities.Question;
@@ -26,14 +25,11 @@ import de.thm.arsnova.entities.Session;
 public class PiRoundDelayedStartEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;
-
 	private final String questionId;
-
 	private final Long startTime;
-
 	private final Long endTime;
-
 	private final String questionVariant;
+	private int piRound;
 
 	public PiRoundDelayedStartEvent(Object source, Session session, Question question) {
 		super(source, session);
@@ -41,6 +37,7 @@ public class PiRoundDelayedStartEvent extends SessionEvent {
 		this.startTime = question.getPiRoundStartTime();
 		this.endTime = question.getPiRoundEndTime();
 		this.questionVariant = question.getQuestionVariant();
+		this.piRound = question.getPiRound();
 	}
 
 	@Override
@@ -64,15 +61,19 @@ public class PiRoundDelayedStartEvent extends SessionEvent {
 		return questionVariant;
 	}
 
-	public HashMap<String, String> getPiRoundInformations() {
-		HashMap<String, String> map = new HashMap<String, String>();
+	public Integer getPiRound() {
+		return piRound;
+	}
 
-		map.put("id", getQuestionId());
-		map.put("endTime", getEndTime().toString());
-		map.put("startTime", getStartTime().toString());
-		map.put("variant", questionVariant);
+	public HashMap<String, Object> getPiRoundInformations() {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+
+		map.put("_id", getQuestionId());
+		map.put("endTime", getEndTime());
+		map.put("startTime", getStartTime());
+		map.put("variant", getQuestionVariant());
+		map.put("round", getPiRound());
 
 		return map;
 	}
-
 }

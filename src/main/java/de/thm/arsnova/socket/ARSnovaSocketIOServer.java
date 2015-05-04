@@ -529,7 +529,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	public void visit(PiRoundEndEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
 
-		broadcastInSession(sessionKey, "endPiRound", event.getQuestionId());
+		broadcastInSession(sessionKey, "endPiRound", event.getPiRoundEndInformations());
 	}
 
 	@Async
@@ -544,7 +544,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	public void visit(PiRoundResetEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
 
-		broadcastInSession(sessionKey, "resetPiRound", event.getQuestionId());
+		broadcastInSession(sessionKey, "resetPiRound", event.getPiRoundResetInformations());
 	}
 
 	@Override
