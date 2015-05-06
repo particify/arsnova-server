@@ -8,7 +8,7 @@
 
 	<properties>
 		<io.spring.platform-version>1.1.2.RELEASE</io.spring.platform-version>
-		<com.fasterxml.jackson-version>2.5.1</com.fasterxml.jackson-version>
+		<com.fasterxml.jackson-version>2.5.3</com.fasterxml.jackson-version>
 		<org.springframework.security-version>4.0.1.RELEASE</org.springframework.security-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.url>https://scm.thm.de/arsnova</project.url>
@@ -255,11 +255,18 @@
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>${com.fasterxml.jackson-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
+			<version>${com.fasterxml.jackson-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
+			<version>${com.fasterxml.jackson-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
