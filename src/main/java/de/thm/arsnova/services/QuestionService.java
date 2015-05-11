@@ -83,6 +83,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Autowired
 	private ImageUtils imageUtils;
 
+	@Autowired
+	private CountService countService;
+
 	@Value("${upload.filesize_b}")
 	private int uploadFileSizeByte;
 
@@ -785,19 +788,19 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int getLectureQuestionCount(final String sessionkey) {
-		return databaseDao.getLectureQuestionCount(getSession(sessionkey));
+		return countService.lectureQuestionCount(getSession(sessionkey));
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int getFlashcardCount(final String sessionkey) {
-		return databaseDao.getFlashcardCount(getSession(sessionkey));
+		return countService.flashcardCount(getSession(sessionkey));
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int getPreparationQuestionCount(final String sessionkey) {
-		return databaseDao.getPreparationQuestionCount(getSession(sessionkey));
+		return countService.preparationQuestionCount(getSession(sessionkey));
 	}
 
 	@Override
