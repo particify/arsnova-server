@@ -1084,20 +1084,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return result;
 	}
 
-	public InterposedQuestion getInterposedQuestion(final String sessionKey, final String documentId) {
-		try {
-			final Document document = getDatabase().getDocument(documentId);
-			if (document == null) {
-				LOGGER.error("Document is NULL");
-				return null;
-			}
-			return (InterposedQuestion) JSONObject.toBean(document.getJSONObject(), InterposedQuestion.class);
-		} catch (final IOException e) {
-			LOGGER.error("Error while retrieving interposed question", e);
-		}
-		return null;
-	}
-
 	@Cacheable("statistics")
 	@Override
 	public Statistics getStatistics() {
