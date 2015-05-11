@@ -156,6 +156,11 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 			@Override
 			public void onData(final SocketIOClient client, final Feedback data, final AckRequest ackSender) {
 				final User u = userService.getUser2SocketId(client.getSessionId());
+				if (u == null) {
+					LOGGER.info("Client {} tried to send feedback but is not mapped to a user", client.getSessionId());
+
+					return;
+				}
 				final String sessionKey = userService.getSessionForUser(u.getUsername());
 				LOGGER.debug("Feedback recieved: {}", new Object[] {u, sessionKey, data.getValue()});
 				if (null != sessionKey) {
