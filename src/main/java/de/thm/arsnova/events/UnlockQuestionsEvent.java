@@ -22,13 +22,13 @@ import java.util.List;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 
-public class NewQuestionsEvent extends SessionEvent {
+public class UnlockQuestionsEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;
 
 	private List<Question> questions;
 
-	public NewQuestionsEvent(Object source, Session session, List<Question> questions) {
+	public UnlockQuestionsEvent(Object source, Session session, List<Question> questions) {
 		super(source, session);
 		this.questions = questions;
 	}

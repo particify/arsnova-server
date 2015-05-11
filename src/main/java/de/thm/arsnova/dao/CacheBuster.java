@@ -36,7 +36,7 @@ import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
-import de.thm.arsnova.events.NewQuestionsEvent;
+import de.thm.arsnova.events.UnlockQuestionsEvent;
 import de.thm.arsnova.events.NewSessionEvent;
 import de.thm.arsnova.events.NovaEventVisitor;
 import de.thm.arsnova.events.PiRoundCancelEvent;
@@ -64,7 +64,7 @@ public class CacheBuster implements ICacheBuster, NovaEventVisitor {
 	public void visit(NewQuestionEvent event) {}
 
 	@Override
-	public void visit(NewQuestionsEvent newQuestionsEvent) {}
+	public void visit(UnlockQuestionsEvent newQuestionsEvent) {}
 
 	@Override
 	public void visit(LockQuestionEvent lockQuestionEvent) {}

@@ -58,7 +58,7 @@ import de.thm.arsnova.events.LockVotingEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
-import de.thm.arsnova.events.NewQuestionsEvent;
+import de.thm.arsnova.events.UnlockQuestionsEvent;
 import de.thm.arsnova.events.NovaEvent;
 import de.thm.arsnova.events.PiRoundCancelEvent;
 import de.thm.arsnova.events.PiRoundDelayedStartEvent;
@@ -871,7 +871,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final List<Question> questions = databaseDao.publishAllQuestions(session, publish);
 		NovaEvent event;
 		if (publish) {
-			event = new NewQuestionsEvent(this, session, questions);
+			event = new UnlockQuestionsEvent(this, session, questions);
 		} else {
 			event = new LockQuestionsEvent(this, session, questions);
 		}
@@ -889,7 +889,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		databaseDao.publishQuestions(session, publish, questions);
 		NovaEvent event;
 		if (publish) {
-			event = new NewQuestionsEvent(this, session, questions);
+			event = new UnlockQuestionsEvent(this, session, questions);
 		} else {
 			event = new LockQuestionsEvent(this, session, questions);
 		}

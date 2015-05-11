@@ -40,7 +40,7 @@ import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
-import de.thm.arsnova.events.NewQuestionsEvent;
+import de.thm.arsnova.events.UnlockQuestionsEvent;
 import de.thm.arsnova.events.NewSessionEvent;
 import de.thm.arsnova.events.NovaEventVisitor;
 import de.thm.arsnova.events.PiRoundCancelEvent;
@@ -83,7 +83,7 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
-	public void visit(NewQuestionsEvent event) {
+	public void visit(UnlockQuestionsEvent event) {
 		this.publisher.publishEvent(new ChangeLearningProgressEvent(this, event.getSession()));
 	}
 

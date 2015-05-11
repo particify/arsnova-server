@@ -25,7 +25,7 @@ public interface NovaEventVisitor {
 
 	void visit(NewQuestionEvent newQuestionEvent);
 
-	void visit(NewQuestionsEvent newQuestionsEvent);
+	void visit(UnlockQuestionsEvent newQuestionsEvent);
 
 	void visit(LockQuestionEvent lockQuestionEvent);
 
