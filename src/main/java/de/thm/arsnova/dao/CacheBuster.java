@@ -24,6 +24,7 @@ import de.thm.arsnova.events.ChangeLearningProgressEvent;
 import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
 import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
 import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
+import de.thm.arsnova.events.DeleteAllQuestionsEvent;
 import de.thm.arsnova.events.DeleteAnswerEvent;
 import de.thm.arsnova.events.DeleteFeedbackForSessionsEvent;
 import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
@@ -36,6 +37,7 @@ import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
+import de.thm.arsnova.events.UnlockQuestionEvent;
 import de.thm.arsnova.events.UnlockQuestionsEvent;
 import de.thm.arsnova.events.NewSessionEvent;
 import de.thm.arsnova.events.NovaEventVisitor;
@@ -64,6 +66,9 @@ public class CacheBuster implements ICacheBuster, NovaEventVisitor {
 	public void visit(NewQuestionEvent event) {}
 
 	@Override
+	public void visit(UnlockQuestionEvent event) {}
+
+	@Override
 	public void visit(UnlockQuestionsEvent newQuestionsEvent) {}
 
 	@Override
@@ -81,6 +86,9 @@ public class CacheBuster implements ICacheBuster, NovaEventVisitor {
 
 	@Override
 	public void visit(DeleteQuestionEvent event) {}
+
+	@Override
+	public void visit(DeleteAllQuestionsEvent event) {}
 
 	@Override
 	public void visit(DeleteAllQuestionsAnswersEvent event) {}

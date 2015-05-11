@@ -54,6 +54,7 @@ import de.thm.arsnova.events.ChangeLearningProgressEvent;
 import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
 import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
 import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
+import de.thm.arsnova.events.DeleteAllQuestionsEvent;
 import de.thm.arsnova.events.DeleteAnswerEvent;
 import de.thm.arsnova.events.DeleteFeedbackForSessionsEvent;
 import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
@@ -66,6 +67,7 @@ import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
+import de.thm.arsnova.events.UnlockQuestionEvent;
 import de.thm.arsnova.events.UnlockQuestionsEvent;
 import de.thm.arsnova.events.NewSessionEvent;
 import de.thm.arsnova.events.NovaEventVisitor;
@@ -472,6 +474,11 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	}
 
 	@Override
+	public void visit(UnlockQuestionEvent event) {
+		this.reportLecturerQuestionAvailable(event.getSession(), Arrays.asList(event.getQuestion()));
+	}
+
+	@Override
 	public void visit(LockQuestionEvent event) {
 		this.reportLecturerQuestionsLocked(event.getSession(), Arrays.asList(event.getQuestion()));
 	}
@@ -497,7 +504,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 		final String sessionKey = event.getSession().getKeyword();
 		this.reportAnswersToLecturerQuestionAvailable(event.getSession(), new Question(event.getQuestion()));
 		broadcastInSession(sessionKey, "countQuestionAnswersByQuestionId", questionService.getAnswerAndAbstentionCountInternal(event.getQuestion().get_id()));
-		
+
 		// TODO: These events are currently unused. Uncomment once the client does something with the data.
 		//broadcastInSession(sessionKey, "countLectureQuestionAnswers", questionService.countLectureQuestionAnswersInternal(sessionKey));
 		//broadcastInSession(sessionKey, "countPreparationQuestionAnswers", questionService.countPreparationQuestionAnswersInternal(sessionKey));
@@ -561,6 +568,12 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 
 	@Override
 	public void visit(DeleteQuestionEvent deleteQuestionEvent) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void visit(DeleteAllQuestionsEvent event) {
 		// TODO Auto-generated method stub
 
 	}

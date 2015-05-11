@@ -49,6 +49,7 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
 import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
 import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
+import de.thm.arsnova.events.DeleteAllQuestionsEvent;
 import de.thm.arsnova.events.DeleteAnswerEvent;
 import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
 import de.thm.arsnova.events.DeleteQuestionEvent;
@@ -58,6 +59,7 @@ import de.thm.arsnova.events.LockVotingEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
+import de.thm.arsnova.events.UnlockQuestionEvent;
 import de.thm.arsnova.events.UnlockQuestionsEvent;
 import de.thm.arsnova.events.NovaEvent;
 import de.thm.arsnova.events.PiRoundCancelEvent;
@@ -219,7 +221,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		deleteQuestionFromSortOrder(question);
 		databaseDao.deleteQuestionWithAnswers(question);
 
-		final DeleteQuestionEvent event = new DeleteQuestionEvent(this, session);
+		final DeleteQuestionEvent event = new DeleteQuestionEvent(this, session, question);
 		this.publisher.publishEvent(event);
 	}
 
@@ -229,7 +231,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final Session session = getSessionWithAuthCheck(sessionKeyword);
 		databaseDao.deleteAllQuestionsWithAnswers(session);
 
-		final DeleteQuestionEvent event = new DeleteQuestionEvent(this, session);
+		final DeleteAllQuestionsEvent event = new DeleteAllQuestionsEvent(this, session);
 		this.publisher.publishEvent(event);
 	}
 
@@ -329,7 +331,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final Question question = databaseDao.getQuestion(questionId);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		question.setVotingDisabled(disable);
-		
+
 		databaseDao.updateQuestion(question);
 		this.publisher.publishEvent(new LockVotingEvent(this, session, question));
 	}
@@ -601,7 +603,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final Question result = databaseDao.updateQuestion(question);
 
 		if (!oldQuestion.isActive() && question.isActive()) {
-			final NewQuestionEvent event = new NewQuestionEvent(this, session, result);
+			final UnlockQuestionEvent event = new UnlockQuestionEvent(this, session, result);
 			this.publisher.publishEvent(event);
 		} else if (oldQuestion.isActive() && !question.isActive()) {
 			final LockQuestionEvent event = new LockQuestionEvent(this, session, result);
