@@ -327,12 +327,18 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
-	public void setVotingAdmission(final String questionId, final boolean disable) {
+	public void setVotingAdmission(final String questionId, final boolean disableVoting) {
 		final Question question = databaseDao.getQuestion(questionId);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
-		question.setVotingDisabled(disable);
+		question.setVotingDisabled(disableVoting);
 
-		databaseDao.updateQuestion(question);
+		if (disableVoting == false && !question.isActive()) {
+			question.setActive(true);
+			update(question);
+		} else {
+			databaseDao.updateQuestion(question);
+		}
+		
 		this.publisher.publishEvent(new LockVotingEvent(this, session, question));
 	}
 
