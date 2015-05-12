@@ -37,6 +37,8 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.util.JSONUtils;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -761,13 +763,15 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			@CacheEvict(value = "preparationquestions", allEntries = true),
 			@CacheEvict(value = "flashcardquestions", allEntries = true) })
 	@Override
-	public void deleteQuestionWithAnswers(final Question question) {
+	public Pair<DeletionInfo, DeletionInfo> deleteQuestionWithAnswers(final Question question) {
 		try {
-			deleteAnswers(question);
-			deleteDocument(question.get_id());
+			DeletionInfo answers = deleteAnswers(question);
+			DeletionInfo q = deleteDocument(question.get_id());
+			return new ImmutablePair<DeletionInfo, DeletionInfo>(q, answers);
 		} catch (final IOException e) {
 			LOGGER.error("IOException: Could not delete question {}", question.get_id());
 		}
+		return new ImmutablePair<DeletionInfo, DeletionInfo>(new DeletionInfo(), new DeletionInfo());
 	}
 
 	@Caching(evict = { @CacheEvict("questions"),
@@ -796,14 +800,16 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		deleteAllAnswersWithQuestions(questions);
 	}
 
-	private void deleteDocument(final String documentId) throws IOException {
+	private DeletionInfo deleteDocument(final String documentId) throws IOException {
 		final Document d = getDatabase().getDocument(documentId);
 		getDatabase().deleteDocument(d);
+		return new DeletionInfo(documentId);
 	}
 
 	@CacheEvict("answers")
 	@Override
-	public void deleteAnswers(final Question question) {
+	public DeletionInfo deleteAnswers(final Question question) {
+		List<String> deletedIds = new ArrayList<String>();
 		try {
 			final NovaView view = new NovaView("answer/cleanup");
 			view.setKey(question.get_id());
@@ -816,10 +822,15 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				d.put("_deleted", true);
 				answersToDelete.add(d);
 			}
-			database.bulkSaveDocuments(answersToDelete.toArray(new Document[answersToDelete.size()]));
+			Document[] answerArray = answersToDelete.toArray(new Document[answersToDelete.size()]);
+			database.bulkSaveDocuments(answerArray);
+			for (Document a : answerArray) {
+				deletedIds.add(a.getId());
+			}
 		} catch (final IOException e) {
 			LOGGER.error("IOException: Could not delete answers for question {}", question.get_id());
 		}
+		return new DeletionInfo(deletedIds);
 	}
 
 	@Override

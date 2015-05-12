@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.ImageUtils;
+import de.thm.arsnova.dao.DeletionInfo;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.InterposedQuestion;
@@ -222,9 +224,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			throw new UnauthorizedException();
 		}
 		deleteQuestionFromSortOrder(question);
-		databaseDao.deleteQuestionWithAnswers(question);
+		Pair<DeletionInfo, DeletionInfo> pair = databaseDao.deleteQuestionWithAnswers(question);
 
-		final DeleteQuestionEvent event = new DeleteQuestionEvent(this, session, question);
+		final DeleteQuestionEvent event = new DeleteQuestionEvent(this, session, question, pair.getRight());
 		this.publisher.publishEvent(event);
 	}
 
@@ -815,7 +817,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	 */
 	@Override
 	public int countLectureQuestionAnswersInternal(final String sessionkey) {
-		return databaseDao.countLectureQuestionAnswers(getSession(sessionkey));
+		return countService.lectureQuestionAnswerCount(getSession(sessionkey));
 	}
 
 	@Override
@@ -846,7 +848,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	 */
 	@Override
 	public int countPreparationQuestionAnswersInternal(final String sessionkey) {
-		return databaseDao.countPreparationQuestionAnswers(getSession(sessionkey));
+		return countService.preparationQuestionAnswerCount(getSession(sessionkey));
 	}
 
 	@Override

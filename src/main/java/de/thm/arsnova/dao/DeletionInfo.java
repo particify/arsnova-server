@@ -15,19 +15,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.services;
+package de.thm.arsnova.dao;
 
-import de.thm.arsnova.entities.Session;
+import java.util.ArrayList;
+import java.util.List;
 
-public interface CountService {
+/**
+ * Carries usable information about the documents that have been deleted from the database.
+ */
+public class DeletionInfo {
 
-	int lectureQuestionCount(final Session session);
+	private final List<String> deletedIds;
 
-	int preparationQuestionCount(final Session session);
+	public DeletionInfo(List<String> deletedIds) {
+		this.deletedIds = deletedIds;
+	}
 
-	int flashcardCount(final Session session);
+	public DeletionInfo(String id) {
+		this();
+		this.deletedIds.add(id);
+	}
 
-	int lectureQuestionAnswerCount(final Session session);
+	public DeletionInfo() {
+		this.deletedIds = new ArrayList<String>();
+	}
 
-	int preparationQuestionAnswerCount(final Session session);
+	/**
+	 * @return number of deleted documents
+	 */
+	public int count() {
+		return this.deletedIds.size();
+	}
+
 }

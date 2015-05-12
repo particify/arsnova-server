@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.Answer;
@@ -284,13 +286,15 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public void deleteQuestionWithAnswers(Question question) {
+	public Pair<DeletionInfo, DeletionInfo> deleteQuestionWithAnswers(Question question) {
 		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
-	public void deleteAnswers(Question question) {
+	public DeletionInfo deleteAnswers(Question question) {
 		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override

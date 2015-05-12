@@ -19,6 +19,8 @@ package de.thm.arsnova.dao;
 
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.Answer;
@@ -74,7 +76,12 @@ public interface IDatabaseDao {
 
 	List<String> getQuestionIds(Session session, User user);
 
-	void deleteQuestionWithAnswers(Question question);
+	/**
+	 *
+	 * @param question
+	 * @return Left parameter is the deleted question, right parameter the deleted answers
+	 */
+	Pair<DeletionInfo, DeletionInfo> deleteQuestionWithAnswers(Question question);
 
 	void deleteAllQuestionsWithAnswers(Session session);
 
@@ -118,7 +125,7 @@ public interface IDatabaseDao {
 
 	Question updateQuestion(Question question);
 
-	void deleteAnswers(Question question);
+	DeletionInfo deleteAnswers(Question question);
 
 	Answer saveAnswer(Answer answer, User user, Question question, Session session);
 

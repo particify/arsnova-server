@@ -71,6 +71,10 @@ public class EventedCountService implements CountService, NovaEventVisitor, Appl
 
 	private Map<Session, Integer> flashcardCount = new ConcurrentHashMap<>();
 
+	private Map<Session, Integer> lectureQuestionAnswerCount = new ConcurrentHashMap<>();
+
+	private Map<Session, Integer> preparationQuestionAnswerCount = new ConcurrentHashMap<>();
+
 	@Override
 	public int lectureQuestionCount(final Session session) {
 		if (!lectureQuestionCount.containsKey(session)) {
@@ -97,6 +101,26 @@ public class EventedCountService implements CountService, NovaEventVisitor, Appl
 		}
 		return flashcardCount.get(session);
 	}
+
+	@Override
+	public int lectureQuestionAnswerCount(final Session session) {
+		if (!lectureQuestionAnswerCount.containsKey(session)) {
+			int count = databaseDao.countLectureQuestionAnswers(session);
+			lectureQuestionAnswerCount.put(session, count);
+		}
+		return lectureQuestionAnswerCount.get(session);
+	}
+
+	@Override
+	public int preparationQuestionAnswerCount(final Session session) {
+		if (!preparationQuestionAnswerCount.containsKey(session)) {
+			int count = databaseDao.countPreparationQuestionAnswers(session);
+			preparationQuestionAnswerCount.put(session, count);
+		}
+		return preparationQuestionAnswerCount.get(session);
+	}
+
+	// Events
 
 	@Override
 	public void visit(NewInterposedQuestionEvent event) {
@@ -139,10 +163,30 @@ public class EventedCountService implements CountService, NovaEventVisitor, Appl
 				int count = lectureQuestionCount.get(s);
 				lectureQuestionCount.put(s, count-1);
 			}
+			if (lectureQuestionAnswerCount.containsKey(s)) {
+				int count = lectureQuestionAnswerCount.get(s);
+				count -= event.countDeletedAnswers();
+				if (count < 0) {
+					// Something went wrong. It's better to start over...
+					lectureQuestionAnswerCount.remove(s);
+				} else {
+					lectureQuestionAnswerCount.put(s, count);
+				}
+			}
 		} else if (q.getQuestionVariant().equals("preparation")) {
 			if (preparationQuestionCount.containsKey(s)) {
 				int count = preparationQuestionCount.get(s);
 				preparationQuestionCount.put(s, count-1);
+			}
+			if (preparationQuestionAnswerCount.containsKey(s)) {
+				int count = preparationQuestionAnswerCount.get(s);
+				count -= event.countDeletedAnswers();
+				if (count < 0) {
+					// Something went wrong. It's better to start over...
+					preparationQuestionAnswerCount.remove(s);
+				} else {
+					preparationQuestionAnswerCount.put(s, count);
+				}
 			}
 		} else if (q.getQuestionVariant().equals("flashcard")) {
 			if (flashcardCount.containsKey(s)) {
@@ -158,6 +202,8 @@ public class EventedCountService implements CountService, NovaEventVisitor, Appl
 		lectureQuestionCount.put(s, 0);
 		preparationQuestionCount.put(s, 0);
 		flashcardCount.put(s, 0);
+		lectureQuestionAnswerCount.put(s, 0);
+		preparationQuestionAnswerCount.put(s, 0);
 	}
 
 	@Override
@@ -182,27 +228,53 @@ public class EventedCountService implements CountService, NovaEventVisitor, Appl
 
 	@Override
 	public void visit(NewAnswerEvent event) {
-		// TODO: Future use
+		final Question q = event.getQuestion();
+		final Session s = event.getSession();
+		if (q.getQuestionVariant().equals("lecture")) {
+			if (lectureQuestionAnswerCount.containsKey(s)) {
+				int count = lectureQuestionAnswerCount.get(s);
+				lectureQuestionAnswerCount.put(s, count+1);
+			}
+		} else if (q.getQuestionVariant().equals("preparation")) {
+			if (preparationQuestionAnswerCount.containsKey(s)) {
+				int count = preparationQuestionAnswerCount.get(s);
+				preparationQuestionAnswerCount.put(s, count+1);
+			}
+		}
 	}
 
 	@Override
 	public void visit(DeleteAnswerEvent event) {
-		// TODO: Future use
+		final Question q = event.getQuestion();
+		final Session s = event.getSession();
+		if (q.getQuestionVariant().equals("lecture")) {
+			if (lectureQuestionAnswerCount.containsKey(s)) {
+				int count = lectureQuestionAnswerCount.get(s);
+				lectureQuestionAnswerCount.put(s, count-1);
+			}
+		} else if (q.getQuestionVariant().equals("preparation")) {
+			if (preparationQuestionAnswerCount.containsKey(s)) {
+				int count = preparationQuestionAnswerCount.get(s);
+				preparationQuestionAnswerCount.put(s, count-1);
+			}
+		}
 	}
 
 	@Override
 	public void visit(DeleteAllQuestionsAnswersEvent event) {
-		// TODO: Future use
+		final Session s = event.getSession();
+		preparationQuestionAnswerCount.put(s, 0);
+		lectureQuestionAnswerCount.put(s, 0);
 	}
 
 	@Override
 	public void visit(DeleteAllPreparationAnswersEvent event) {
-		// TODO: Future use
+		preparationQuestionAnswerCount.put(event.getSession(), 0);
 	}
 
 	@Override
 	public void visit(DeleteAllLectureAnswersEvent event) {
-		// TODO: Future use
+		lectureQuestionAnswerCount.put(event.getSession(), 0);
 	}
 
 	@Override
@@ -211,6 +283,8 @@ public class EventedCountService implements CountService, NovaEventVisitor, Appl
 		lectureQuestionCount.remove(s);
 		preparationQuestionCount.remove(s);
 		flashcardCount.remove(s);
+		lectureQuestionAnswerCount.remove(s);
+		preparationQuestionAnswerCount.remove(s);
 	}
 
 	// Unused events
