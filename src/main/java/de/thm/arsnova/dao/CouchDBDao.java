@@ -866,6 +866,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		final ViewResults results = getDatabase().view(view);
 		final int abstentionCount = getAbstentionAnswerCount(questionId);
 		final List<Answer> answers = new ArrayList<Answer>();
+
 		for (final Document d : results.getResults()) {
 			final Answer a = new Answer();
 			a.setAnswerCount(d.getInt("value"));
@@ -873,6 +874,29 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			a.setQuestionId(d.getJSONObject().getJSONArray("key").getString(0));
 			a.setPiRound(piRound);
 			final String answerText = d.getJSONObject().getJSONArray("key").getString(2);
+			a.setAnswerText("null".equals(answerText) ? null : answerText);
+			answers.add(a);
+		}
+		return answers;
+	}
+
+	@Override
+	public List<Answer> getAllAnswers(final Question question) {
+		final String questionId = question.get_id();
+		final NovaView view = new NovaView("skill_question/count_all_answers_by_question");
+		view.setStartKeyArray(questionId);
+		view.setEndKeyArray(questionId, "{}");
+		view.setGroup(true);
+		final ViewResults results = getDatabase().view(view);
+		final int abstentionCount = getAbstentionAnswerCount(questionId);
+
+		final List<Answer> answers = new ArrayList<Answer>();
+		for (final Document d : results.getResults()) {
+			final Answer a = new Answer();
+			a.setAnswerCount(d.getInt("value"));
+			a.setAbstentionCount(abstentionCount);
+			a.setQuestionId(d.getJSONObject().getJSONArray("key").getString(0));
+			final String answerText = d.getJSONObject().getJSONArray("key").getString(1);
 			a.setAnswerText("null".equals(answerText) ? null : answerText);
 			answers.add(a);
 		}
@@ -904,6 +928,20 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		view.setStartKey(question.get_id(), String.valueOf(piRound));
 		view.setEndKey(question.get_id(), String.valueOf(piRound), "{}");
 		final ViewResults results = getDatabase().view(view);
+		if (results.getResults().size() == 0) {
+			return 0;
+		}
+
+		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
+	}
+
+	@Override
+	public int getTotalAnswerCountByQuestion(final Question question) {
+		final NovaView view = new NovaView("skill_question/count_total_answers_by_question");
+		view.setGroup(true);
+		view.setKey(question.get_id());
+		final ViewResults results = getDatabase().view(view);
+
 		if (results.getResults().size() == 0) {
 			return 0;
 		}

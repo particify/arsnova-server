@@ -60,6 +60,8 @@ public interface IQuestionService {
 
 	List<Answer> getAnswers(String questionId);
 
+	List<Answer> getAllAnswers(String questionId);
+
 	int getAnswerCount(String questionId);
 
 	List<Answer> getFreetextAnswers(String questionId);
@@ -67,6 +69,8 @@ public interface IQuestionService {
 	List<Answer> getMyAnswers(String sessionKey);
 
 	int getTotalAnswerCount(String sessionKey);
+
+	int getTotalAnswerCountByQuestion(String questionId);
 
 	int getInterposedCount(String sessionKey);
 

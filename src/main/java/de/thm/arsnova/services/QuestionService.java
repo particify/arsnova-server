@@ -441,6 +441,20 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	public List<Answer> getAllAnswers(final String questionId) {
+		final Question question = getQuestion(questionId);
+		if (question == null) {
+			throw new NotFoundException();
+		}
+		if ("freetext".equals(question.getQuestionType())) {
+			return getFreetextAnswers(questionId);
+		} else {
+			return databaseDao.getAllAnswers(question);
+		}
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
 	public int getAnswerCount(final String questionId) {
 		final Question question = getQuestion(questionId);
 		if (question == null) {
@@ -459,6 +473,17 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 
 		return databaseDao.getAbstentionAnswerCount(questionId);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public int getTotalAnswerCountByQuestion(final String questionId) {
+		final Question question = getQuestion(questionId);
+		if (question == null) {
+			return 0;
+		}
+
+		return databaseDao.getTotalAnswerCountByQuestion(question);
 	}
 
 	@Override

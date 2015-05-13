@@ -325,10 +325,13 @@ public class LecturerQuestionController extends AbstractController {
 	public List<Answer> getAnswers(
 			@PathVariable final String questionId,
 			@RequestParam(value = "piround", required = false) final Integer piRound,
+			@RequestParam(value = "all", required = false, defaultValue = "false") final Boolean allAnswers,
 			final HttpServletResponse response
 			) {
 		List<Answer> answers = null;
-		if (null == piRound) {
+		if (allAnswers) {
+			answers = questionService.getAllAnswers(questionId);
+		} else if (null == piRound) {
 			answers = questionService.getAnswers(questionId);
 		} else {
 			if (piRound < 1 || piRound > 2) {
@@ -423,6 +426,11 @@ public class LecturerQuestionController extends AbstractController {
 	@RequestMapping(value = "/{questionId}/answercount", method = RequestMethod.GET)
 	public int getAnswerCount(@PathVariable final String questionId) {
 		return questionService.getAnswerCount(questionId);
+	}
+
+	@RequestMapping(value = "/{questionId}/totalanswercount", method = RequestMethod.GET)
+	public int getTotalAnswerCountByQuestion(@PathVariable final String questionId) {
+		return questionService.getTotalAnswerCountByQuestion(questionId);
 	}
 
 	@RequestMapping(value = "/{questionId}/answerandabstentioncount", method = RequestMethod.GET)

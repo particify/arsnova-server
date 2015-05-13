@@ -86,7 +86,11 @@ public interface IDatabaseDao {
 
 	List<Answer> getAnswers(Question question);
 
+	List<Answer> getAllAnswers(Question question);
+
 	int getAnswerCount(Question question, int piRound);
+
+	int getTotalAnswerCountByQuestion(Question question);
 
 	int getAbstentionAnswerCount(String questionId);
 
