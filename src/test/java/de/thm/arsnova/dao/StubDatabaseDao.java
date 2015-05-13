@@ -609,4 +609,16 @@ public class StubDatabaseDao implements IDatabaseDao {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public List<Answer> getAllAnswers(Question question) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getTotalAnswerCountByQuestion(Question question) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }
