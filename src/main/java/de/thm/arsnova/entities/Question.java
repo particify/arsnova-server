@@ -556,6 +556,15 @@ public class Question {
 		this.setShowAnswer(false);
 	}
 
+	public void resetQuestionState() {
+		this.setPiRound(1);
+		this.setPiRoundEndTime(0);
+		this.setPiRoundStartTime(0);
+		this.setPiRoundActive(false);
+		this.setPiRoundFinished(false);
+		this.setVotingDisabled(false);
+	}
+
 	private int calculateRegularValue(Answer answer) {
 		String answerText = answer.getAnswerText();
 		for (PossibleAnswer p : this.possibleAnswers) {

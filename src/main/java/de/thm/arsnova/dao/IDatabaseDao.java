@@ -213,4 +213,6 @@ public interface IDatabaseDao {
 	void deleteSortOrder(SortOrder sortOrder);
 
 	List<Question> getQuestionsByIds(List<String> ids, Session session);
+
+	void resetQuestionsRoundState(Session session, List<Question> questions);
 }

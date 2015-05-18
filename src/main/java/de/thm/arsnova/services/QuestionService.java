@@ -384,6 +384,8 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
 	public void deleteAnswers(final String questionId) {
 		final Question question = databaseDao.getQuestion(questionId);
+		question.resetQuestionState();
+		databaseDao.updateQuestion(question);
 		databaseDao.deleteAnswers(question);
 	}
 
