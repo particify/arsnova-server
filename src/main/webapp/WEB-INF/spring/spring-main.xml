@@ -23,7 +23,7 @@
 		<property name="fileEncoding" value="UTF-8" />
 	</bean>
 
-	<context:component-scan base-package="de.thm.arsnova.dao,de.thm.arsnova.events,de.thm.arsnova.security,de.thm.arsnova.services,de.thm.arsnova.config,de.thm.arsnova.domain" />
+	<context:component-scan base-package="de.thm.arsnova.dao,de.thm.arsnova.cache,de.thm.arsnova.events,de.thm.arsnova.security,de.thm.arsnova.services,de.thm.arsnova.config,de.thm.arsnova.domain" />
 
 	<context:annotation-config />
 

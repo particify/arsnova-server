@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.dao;
+package de.thm.arsnova.cache;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -24,6 +24,11 @@ import org.springframework.stereotype.Component;
 import de.thm.arsnova.events.NovaEvent;
 import de.thm.arsnova.events.NovaEventVisitor;
 
+/**
+ * Listener registration for the cache buster.
+ *
+ * Note that this class is necessary in order for the annotations to work.
+ */
 @Component
 public class CacheBustListener implements ApplicationListener<NovaEvent> {
 
