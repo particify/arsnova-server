@@ -149,6 +149,12 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 		this.publisher.publishEvent(new ChangeLearningProgressEvent(this, event.getSession()));
 	}
 
+	@CacheEvict(value = "learningprogress", key = "#event.Session")
+	@Override
+	public void visit(PiRoundResetEvent event) {
+		this.publisher.publishEvent(new ChangeLearningProgressEvent(this, event.getSession()));
+	}
+
 	@Override
 	public void visit(NewFeedbackEvent newFeedbackEvent) {}
 
@@ -169,9 +175,6 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 
 	@Override
 	public void visit(PiRoundCancelEvent piRoundCancelEvent) {}
-
-	@Override
-	public void visit(PiRoundResetEvent piRoundResetEvent) {}
 
 	@Override
 	public void visit(NewSessionEvent event) {}
