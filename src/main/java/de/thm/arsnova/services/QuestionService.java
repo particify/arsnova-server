@@ -468,6 +468,17 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	public int getAnswerCount(final String questionId, final int piRound) {
+		final Question question = getQuestion(questionId);
+		if (question == null) {
+			return 0;
+		}
+
+		return databaseDao.getAnswerCount(question, piRound);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
 	public int getAbstentionAnswerCount(final String questionId) {
 		final Question question = getQuestion(questionId);
 		if (question == null) {

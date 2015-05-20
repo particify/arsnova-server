@@ -428,6 +428,14 @@ public class LecturerQuestionController extends AbstractController {
 		return questionService.getAnswerCount(questionId);
 	}
 
+	@RequestMapping(value = "/{questionId}/allroundanswercount", method = RequestMethod.GET)
+	public List<Integer> getAllAnswerCount(@PathVariable final String questionId) {
+		return Arrays.asList(
+			questionService.getAnswerCount(questionId, 1),
+			questionService.getAnswerCount(questionId, 2)
+		);
+	}
+
 	@RequestMapping(value = "/{questionId}/totalanswercount", method = RequestMethod.GET)
 	public int getTotalAnswerCountByQuestion(@PathVariable final String questionId) {
 		return questionService.getTotalAnswerCountByQuestion(questionId);
