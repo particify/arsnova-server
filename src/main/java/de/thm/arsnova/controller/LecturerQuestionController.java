@@ -111,13 +111,42 @@ public class LecturerQuestionController extends AbstractController {
 		questionService.resetPiRoundState(questionId);
 	}
 
-	@RequestMapping(value = "/{questionId}/disableVoting", method = RequestMethod.POST)
+	@RequestMapping(value = "/{questionId}/disablevote", method = RequestMethod.POST)
 	public void setVotingAdmission(
 			@PathVariable final String questionId,
-			@RequestParam(required = true) final Boolean disable
+			@RequestParam(value = "disable", defaultValue = "false", required = false) final Boolean disableVote
 			) {
-		if (disable != null) {
-			questionService.setVotingAdmission(questionId, disable);
+		boolean disable = false;
+
+		if (disableVote != null) {
+			disable = disableVote;
+		}
+
+		questionService.setVotingAdmission(questionId, disable);
+	}
+
+	@RequestMapping(value = "/disablevote", method = RequestMethod.POST)
+	public void setVotingAdmissionForAllQuestions(
+			@RequestParam final String sessionkey,
+			@RequestParam(value = "disable", defaultValue = "false", required = false) final Boolean disableVote,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false) final boolean lectureQuestionsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) final boolean preparationQuestionsOnly
+			) {
+		boolean disable = false;
+		List<Question> questions;
+
+		if (disableVote != null) {
+			disable = disableVote;
+		}
+
+		if (lectureQuestionsOnly) {
+			questions = questionService.getLectureQuestions(sessionkey);
+			questionService.setVotingAdmissions(sessionkey, disable, questions);
+		} else if (preparationQuestionsOnly) {
+			questions = questionService.getPreparationQuestions(sessionkey);
+			questionService.setVotingAdmissions(sessionkey, disable, questions);
+		} else {
+			questionService.setVotingAdmissionForAllQuestions(sessionkey, disable);
 		}
 	}
 

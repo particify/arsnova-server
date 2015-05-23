@@ -55,7 +55,8 @@ import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
 import de.thm.arsnova.events.DeleteQuestionEvent;
 import de.thm.arsnova.events.LockQuestionEvent;
 import de.thm.arsnova.events.LockQuestionsEvent;
-import de.thm.arsnova.events.LockVotingEvent;
+import de.thm.arsnova.events.LockVoteEvent;
+import de.thm.arsnova.events.LockVotesEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
@@ -66,6 +67,8 @@ import de.thm.arsnova.events.PiRoundCancelEvent;
 import de.thm.arsnova.events.PiRoundDelayedStartEvent;
 import de.thm.arsnova.events.PiRoundEndEvent;
 import de.thm.arsnova.events.PiRoundResetEvent;
+import de.thm.arsnova.events.UnlockVoteEvent;
+import de.thm.arsnova.events.UnlockVotesEvent;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -338,8 +341,49 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		} else {
 			databaseDao.updateQuestion(question);
 		}
-		
-		this.publisher.publishEvent(new LockVotingEvent(this, session, question));
+		NovaEvent event;
+		if (disableVoting) {
+			event = new LockVoteEvent(this, session, question);
+		} else {
+			event = new UnlockVoteEvent(this, session, question);
+		}
+		this.publisher.publishEvent(event);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public void setVotingAdmissions(final String sessionkey, final boolean disableVoting, List<Question> questions) {
+		final User user = getCurrentUser();
+		final Session session = getSession(sessionkey);
+		if (!session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
+		databaseDao.setVotingAdmissions(session, disableVoting, questions);
+		NovaEvent event;
+		if (disableVoting) {
+			event = new LockVotesEvent(this, session, questions);
+		} else {
+			event = new UnlockVotesEvent(this, session, questions);
+		}
+		this.publisher.publishEvent(event);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public void setVotingAdmissionForAllQuestions(final String sessionkey, final boolean disableVoting) {
+		final User user = getCurrentUser();
+		final Session session = getSession(sessionkey);
+		if (!session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
+		final List<Question> questions = databaseDao.setVotingAdmissionForAllQuestions(session, disableVoting);
+		NovaEvent event;
+		if (disableVoting) {
+			event = new LockVotesEvent(this, session, questions);
+		} else {
+			event = new UnlockVotesEvent(this, session, questions);
+		}
+		this.publisher.publishEvent(event);
 	}
 
 	private Session getSessionWithAuthCheck(final String sessionKeyword) {

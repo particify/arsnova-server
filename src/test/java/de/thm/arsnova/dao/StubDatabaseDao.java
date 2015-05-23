@@ -628,4 +628,16 @@ public class StubDatabaseDao implements IDatabaseDao {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void setVotingAdmissions(Session session, boolean disableVoting, List<Question> questions) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public List<Question> setVotingAdmissionForAllQuestions(Session session, boolean disableVoting) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

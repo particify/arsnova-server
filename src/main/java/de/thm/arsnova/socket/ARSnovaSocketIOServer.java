@@ -62,7 +62,8 @@ import de.thm.arsnova.events.DeleteQuestionEvent;
 import de.thm.arsnova.events.DeleteSessionEvent;
 import de.thm.arsnova.events.LockQuestionEvent;
 import de.thm.arsnova.events.LockQuestionsEvent;
-import de.thm.arsnova.events.LockVotingEvent;
+import de.thm.arsnova.events.LockVoteEvent;
+import de.thm.arsnova.events.LockVotesEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
@@ -76,6 +77,8 @@ import de.thm.arsnova.events.PiRoundDelayedStartEvent;
 import de.thm.arsnova.events.PiRoundEndEvent;
 import de.thm.arsnova.events.PiRoundResetEvent;
 import de.thm.arsnova.events.StatusSessionEvent;
+import de.thm.arsnova.events.UnlockVoteEvent;
+import de.thm.arsnova.events.UnlockVotesEvent;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
@@ -532,7 +535,6 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	@Override
 	public void visit(PiRoundDelayedStartEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
-
 		broadcastInSession(sessionKey, "startDelayedPiRound", event.getPiRoundInformations());
 	}
 
@@ -540,7 +542,6 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	@Override
 	public void visit(PiRoundEndEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
-
 		broadcastInSession(sessionKey, "endPiRound", event.getPiRoundEndInformations());
 	}
 
@@ -548,22 +549,43 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	@Override
 	public void visit(PiRoundCancelEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
-
 		broadcastInSession(sessionKey, "cancelPiRound", event.getQuestionId());
 	}
 
 	@Override
 	public void visit(PiRoundResetEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
-
 		broadcastInSession(sessionKey, "resetPiRound", event.getPiRoundResetInformations());
 	}
 
 	@Override
-	public void visit(LockVotingEvent event) {
+	public void visit(LockVoteEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
+		broadcastInSession(sessionKey, "lockVote", event.getVotingAdmission());
+	}
 
-		broadcastInSession(sessionKey, "lockVoting", event.getVotingAdmission());
+	@Override
+	public void visit(UnlockVoteEvent event) {
+		final String sessionKey = event.getSession().getKeyword();
+		broadcastInSession(sessionKey, "unlockVote", event.getVotingAdmission());
+	}
+
+	@Override
+	public void visit(LockVotesEvent event) {
+		List<Question> questions = new ArrayList<Question>();
+		for (de.thm.arsnova.entities.Question q : event.getQuestions()) {
+			questions.add(new Question(q));
+		}
+		broadcastInSession(event.getSession().getKeyword(), "lockVotes", questions);
+	}
+
+	@Override
+	public void visit(UnlockVotesEvent event) {
+		List<Question> questions = new ArrayList<Question>();
+		for (de.thm.arsnova.entities.Question q : event.getQuestions()) {
+			questions.add(new Question(q));
+		}
+		broadcastInSession(event.getSession().getKeyword(), "unlockVotes", questions);
 	}
 
 	@Override
@@ -628,5 +650,4 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 
 	@Override
 	public void visit(DeleteSessionEvent event) {}
-
 }

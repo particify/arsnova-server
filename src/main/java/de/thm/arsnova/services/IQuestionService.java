@@ -156,6 +156,10 @@ public interface IQuestionService {
 
 	String getQuestionSortType(String sessionkey, boolean isPreparation, String subject);
 
-	void setVotingAdmission(String questionId, boolean disable);
+	void setVotingAdmission(String questionId, boolean disableVoting);
+	
+	void setVotingAdmissions(String sessionkey, boolean disableVoting, List<Question> questions);
+
+	void setVotingAdmissionForAllQuestions(String sessionkey, boolean disableVoting);
 
 }

@@ -36,7 +36,8 @@ import de.thm.arsnova.events.DeleteQuestionEvent;
 import de.thm.arsnova.events.DeleteSessionEvent;
 import de.thm.arsnova.events.LockQuestionEvent;
 import de.thm.arsnova.events.LockQuestionsEvent;
-import de.thm.arsnova.events.LockVotingEvent;
+import de.thm.arsnova.events.LockVoteEvent;
+import de.thm.arsnova.events.LockVotesEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
@@ -50,6 +51,8 @@ import de.thm.arsnova.events.PiRoundDelayedStartEvent;
 import de.thm.arsnova.events.PiRoundEndEvent;
 import de.thm.arsnova.events.PiRoundResetEvent;
 import de.thm.arsnova.events.StatusSessionEvent;
+import de.thm.arsnova.events.UnlockVoteEvent;
+import de.thm.arsnova.events.UnlockVotesEvent;
 
 @Component
 public class LearningProgressFactory implements NovaEventVisitor, ILearningProgressFactory, ApplicationEventPublisherAware {
@@ -188,5 +191,15 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 	}
 
 	@Override
-	public void visit(LockVotingEvent lockVotingEvent) {}
+	public void visit(LockVoteEvent lockVoteEvent) {}
+
+	@Override
+	public void visit(LockVotesEvent lockVotesEvent) {}
+
+	@Override
+	public void visit(UnlockVoteEvent unlockVoteEvent) {}
+
+	@Override
+	public void visit(UnlockVotesEvent unlockVotesEvent) {}
+
 }

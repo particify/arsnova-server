@@ -17,45 +17,29 @@
  */
 package de.thm.arsnova.events;
 
-import java.util.HashMap;
+import java.util.List;
 
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 
-public class LockVotingEvent extends SessionEvent {
+public class LockVotesEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Question question;
+	private List<Question> questions;
 
-	public LockVotingEvent(Object source, Session session, Question question) {
+	public LockVotesEvent(Object source, Session session, List<Question> questions) {
 		super(source, session);
-		this.question = question;
+		this.questions = questions;
 	}
 
-	public String getQuestionId() {
-		return this.question.get_id();
-	}
-
-	public String getQuestionVariant() {
-		return this.question.getQuestionVariant();
-	}
-
-	public Boolean getVotingDisabled() {
-		return this.question.isVotingDisabled();
-	}
-
-	public HashMap<String, Object> getVotingAdmission() {
-		HashMap<String, Object> map = new HashMap<String, Object>();
-
-		map.put("_id", getQuestionId());
-		map.put("disable", getVotingDisabled());
-		map.put("variant", getQuestionVariant());
-		return map;
+	public List<Question> getQuestions() {
+		return this.questions;
 	}
 
 	@Override
 	public void accept(NovaEventVisitor visitor) {
 		visitor.visit(this);
 	}
+
 }

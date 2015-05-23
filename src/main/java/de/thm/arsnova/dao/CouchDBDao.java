@@ -1733,6 +1733,40 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 	}
 
+	@Override
+	public List<Question> setVotingAdmissionForAllQuestions(final Session session, final boolean disableVoting) {
+		final List<Question> questions = getQuestions(new NovaView("skill_question/by_session"), session);
+		setVotingAdmissions(session, disableVoting, questions);
+		return questions;
+	}
+
+	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
+			@CacheEvict(value = "skillquestions", allEntries = true),
+			@CacheEvict(value = "lecturequestions", allEntries = true),
+			@CacheEvict(value = "preparationquestions", allEntries = true),
+			@CacheEvict(value = "flashcardquestions", allEntries = true) })
+	@Override
+	public void setVotingAdmissions(final Session session, final boolean disableVoting, List<Question> questions) {
+		for (final Question q : questions) {
+			if (!q.getQuestionType().equals("flashcard")) {
+				q.setVotingDisabled(disableVoting);
+			}
+		}
+		final List<Document> documents = new ArrayList<Document>();
+		for (final Question q : questions) {
+			final Document d = toQuestionDocument(session, q);
+			d.setId(q.get_id());
+			d.setRev(q.get_rev());
+			documents.add(d);
+		}
+
+		try {
+			database.bulkSaveDocuments(documents.toArray(new Document[documents.size()]));
+		} catch (final IOException e) {
+			LOGGER.error("Could not bulk set voting admission for all questions: {}", e.getMessage());
+		}
+	}
+
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public void deleteAllQuestionsAnswers(final Session session) {

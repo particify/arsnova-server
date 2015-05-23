@@ -215,4 +215,8 @@ public interface IDatabaseDao {
 	List<Question> getQuestionsByIds(List<String> ids, Session session);
 
 	void resetQuestionsRoundState(Session session, List<Question> questions);
+
+	void setVotingAdmissions(Session session, boolean disableVoting, List<Question> questions);
+
+	List<Question> setVotingAdmissionForAllQuestions(Session session, boolean disableVoting);
 }

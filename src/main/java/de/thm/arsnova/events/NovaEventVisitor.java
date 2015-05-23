@@ -67,6 +67,12 @@ public interface NovaEventVisitor {
 
 	void visit(DeleteSessionEvent deleteSessionEvent);
 
-	void visit(LockVotingEvent lockVotingEvent);
+	void visit(LockVoteEvent lockVoteEvent);
+
+	void visit(LockVotesEvent lockVotesEvent);
+
+	void visit(UnlockVoteEvent unlockVoteEvent);
+
+	void visit(UnlockVotesEvent unlockVotesEvent);
 
 }
