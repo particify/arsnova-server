@@ -496,7 +496,11 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return database;
 	}
 
-	@CachePut(value = "questions", key="#question")
+	@Caching(evict = {@CacheEvict(value = "skillquestions", allEntries = true),
+			@CacheEvict(value = "lecturequestions", allEntries = true),
+			@CacheEvict(value = "preparationquestions", allEntries = true),
+			@CacheEvict(value = "flashcardquestions", allEntries = true) },
+			put = {@CachePut(value = "questions", key="#question")})
 	@Override
 	public Question saveQuestion(final Session session, final Question question) {
 		final Document q = toQuestionDocument(session, question);
