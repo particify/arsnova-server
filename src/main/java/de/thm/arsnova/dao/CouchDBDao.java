@@ -496,11 +496,11 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return database;
 	}
 
-	@Caching(evict = {@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true, condition = "#question.getQuestionVariant().equals('lecture')"),
-			@CacheEvict(value = "preparationquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('preparation')"),
-			@CacheEvict(value = "flashcardquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('flashcard')") },
-			put = {@CachePut(value = "questions", key="#question")})
+	@Caching(evict = {@CacheEvict(value = "skillquestions", key = "#session"),
+			@CacheEvict(value = "lecturequestions", key = "#session", condition = "#question.getQuestionVariant().equals('lecture')"),
+			@CacheEvict(value = "preparationquestions", key = "#session", condition = "#question.getQuestionVariant().equals('preparation')"),
+			@CacheEvict(value = "flashcardquestions", key = "#session", condition = "#question.getQuestionVariant().equals('flashcard')") },
+			put = {@CachePut(value = "questions", key = "#question")})
 	@Override
 	public Question saveQuestion(final Session session, final Question question) {
 		final Document q = toQuestionDocument(session, question);
@@ -567,6 +567,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return q;
 	}
 
+	/* TODO: Only evict cache entry for the question's session. This requires some refactoring. */
 	@Caching(evict = {@CacheEvict(value = "skillquestions", allEntries = true),
 			@CacheEvict(value = "lecturequestions", allEntries = true, condition = "#question.getQuestionVariant().equals('lecture')"),
 			@CacheEvict(value = "preparationquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('preparation')"),
@@ -759,6 +760,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return collectQuestionIds(view);
 	}
 
+	/* TODO: Only evict cache entry for the question's session. This requires some refactoring. */
 	@Caching(evict = { @CacheEvict("questions"),
 			@CacheEvict(value = "skillquestions", allEntries = true),
 			@CacheEvict(value = "lecturequestions", allEntries = true, condition = "#question.getQuestionVariant().equals('lecture')"),
@@ -775,10 +777,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Caching(evict = { @CacheEvict("questions"),
-			@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true),
-			@CacheEvict(value = "preparationquestions", allEntries = true),
-			@CacheEvict(value = "flashcardquestions", allEntries = true) })
+			@CacheEvict(value = "skillquestions", key = "#session"),
+			@CacheEvict(value = "lecturequestions", key = "#session"),
+			@CacheEvict(value = "preparationquestions", key = "#session"),
+			@CacheEvict(value = "flashcardquestions", key = "#session") })
 	@Override
 	public void deleteAllQuestionsWithAnswers(final Session session) {
 		final NovaView view = new NovaView("skill_question/by_session");
@@ -1579,7 +1581,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict(value = "skillquestions", allEntries = true),
+			@CacheEvict("skillquestions"),
 			@CacheEvict("lecturequestions"),
 			@CacheEvict(value = "answers", allEntries = true)})
 	@Override
@@ -1589,7 +1591,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict(value = "skillquestions", allEntries = true),
+			@CacheEvict("skillquestions"),
 			@CacheEvict("flashcardquestions"),
 			@CacheEvict(value = "answers", allEntries = true)})
 	@Override
@@ -1599,7 +1601,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict(value = "skillquestions", allEntries = true),
+			@CacheEvict("skillquestions"),
 			@CacheEvict("preparationquestions"),
 			@CacheEvict(value = "answers", allEntries = true)})
 	@Override
@@ -1714,10 +1716,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true),
-			@CacheEvict(value = "preparationquestions", allEntries = true),
-			@CacheEvict(value = "flashcardquestions", allEntries = true) })
+			@CacheEvict(value = "skillquestions", key = "#session"),
+			@CacheEvict(value = "lecturequestions", key = "#session"),
+			@CacheEvict(value = "preparationquestions", key = "#session"),
+			@CacheEvict(value = "flashcardquestions", key = "#session") })
 	@Override
 	public void publishQuestions(final Session session, final boolean publish, List<Question> questions) {
 		for (final Question q : questions) {
@@ -1745,10 +1747,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true),
-			@CacheEvict(value = "preparationquestions", allEntries = true),
-			@CacheEvict(value = "flashcardquestions", allEntries = true) })
+			@CacheEvict(value = "skillquestions", key = "#session"),
+			@CacheEvict(value = "lecturequestions", key = "#session"),
+			@CacheEvict(value = "preparationquestions", key = "#session"),
+			@CacheEvict(value = "flashcardquestions", key = "#session") })
 	@Override
 	public void setVotingAdmissions(final Session session, final boolean disableVoting, List<Question> questions) {
 		for (final Question q : questions) {
@@ -1796,10 +1798,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true),
-			@CacheEvict(value = "preparationquestions", allEntries = true),
-			@CacheEvict(value = "flashcardquestions", allEntries = true) })
+			@CacheEvict(value = "skillquestions", key = "#session"),
+			@CacheEvict(value = "lecturequestions", key = "#session"),
+			@CacheEvict(value = "preparationquestions", key = "#session"),
+			@CacheEvict(value = "flashcardquestions", key = "#session") })
 	@Override
 	public void resetQuestionsRoundState(final Session session, List<Question> questions) {
 		for (final Question q : questions) {
