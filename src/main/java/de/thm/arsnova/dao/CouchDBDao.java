@@ -497,9 +497,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Caching(evict = {@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true),
-			@CacheEvict(value = "preparationquestions", allEntries = true),
-			@CacheEvict(value = "flashcardquestions", allEntries = true) },
+			@CacheEvict(value = "lecturequestions", allEntries = true, condition = "#question.getQuestionVariant().equals('lecture')"),
+			@CacheEvict(value = "preparationquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('preparation')"),
+			@CacheEvict(value = "flashcardquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('flashcard')") },
 			put = {@CachePut(value = "questions", key="#question")})
 	@Override
 	public Question saveQuestion(final Session session, final Question question) {
@@ -568,9 +568,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Caching(evict = {@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true),
-			@CacheEvict(value = "preparationquestions", allEntries = true),
-			@CacheEvict(value = "flashcardquestions", allEntries = true) },
+			@CacheEvict(value = "lecturequestions", allEntries = true, condition = "#question.getQuestionVariant().equals('lecture')"),
+			@CacheEvict(value = "preparationquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('preparation')"),
+			@CacheEvict(value = "flashcardquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('flashcard')") },
 			put = {@CachePut("questions")})
 	@Override
 	public Question updateQuestion(final Question question) {
@@ -761,9 +761,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Caching(evict = { @CacheEvict("questions"),
 			@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true),
-			@CacheEvict(value = "preparationquestions", allEntries = true),
-			@CacheEvict(value = "flashcardquestions", allEntries = true) })
+			@CacheEvict(value = "lecturequestions", allEntries = true, condition = "#question.getQuestionVariant().equals('lecture')"),
+			@CacheEvict(value = "preparationquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('preparation')"),
+			@CacheEvict(value = "flashcardquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('flashcard')") })
 	@Override
 	public void deleteQuestionWithAnswers(final Question question) {
 		try {
