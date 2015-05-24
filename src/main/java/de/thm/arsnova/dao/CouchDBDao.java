@@ -1294,7 +1294,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return this.getInfosForVisitedSessions(sessions, user);
 	}
 
-	@CacheEvict(value = "answers", allEntries = true)
+	@CacheEvict(value = "answers", key = "#question")
 	@Override
 	public Answer saveAnswer(final Answer answer, final User user, final Question question, final Session session) {
 		final Document a = new Document();
@@ -1349,6 +1349,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 	}
 
+	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public Answer updateAnswer(final Answer answer) {
@@ -1371,6 +1372,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return null;
 	}
 
+	/* TODO: Only evict cache entry for the answer's session. This requires some refactoring. */
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public void deleteAnswer(final String answerId) {
@@ -1580,6 +1582,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 	}
 
+	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
 			@CacheEvict("skillquestions"),
 			@CacheEvict("lecturequestions"),
@@ -1590,6 +1593,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		deleteAllQuestionDocumentsWithAnswers(session, view);
 	}
 
+	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
 			@CacheEvict("skillquestions"),
 			@CacheEvict("flashcardquestions"),
@@ -1600,6 +1604,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		deleteAllQuestionDocumentsWithAnswers(session, view);
 	}
 
+	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
 			@CacheEvict("skillquestions"),
 			@CacheEvict("preparationquestions"),
@@ -1773,6 +1778,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 	}
 
+	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public void deleteAllQuestionsAnswers(final Session session) {
@@ -1781,6 +1787,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		deleteAllAnswersForQuestions(questions);
 	}
 
+	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public void deleteAllPreparationAnswers(final Session session) {
@@ -1789,6 +1796,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		deleteAllAnswersForQuestions(questions);
 	}
 
+	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public void deleteAllLectureAnswers(final Session session) {
