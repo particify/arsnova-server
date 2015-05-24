@@ -1652,7 +1652,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		final List<String> unanswered = new ArrayList<String>();
 
 		for (final Question question : questions) {
-			if (!answered.containsKey(question.get_id()) || 
+			if (!answered.containsKey(question.get_id()) ||
 				(answered.containsKey(question.get_id()) && answered.get(question.get_id()) != question.getPiRound())) {
 				unanswered.add(question.get_id());
 			}

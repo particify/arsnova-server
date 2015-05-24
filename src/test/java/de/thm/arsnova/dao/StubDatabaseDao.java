@@ -626,13 +626,13 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public void resetQuestionsRoundState(Session session,
 			List<Question> questions) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setVotingAdmissions(Session session, boolean disableVoting, List<Question> questions) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override

@@ -25,9 +25,9 @@ import de.thm.arsnova.entities.User;
 public class AnswerQueueElement {
 
 	private final Session session;
-	
+
 	private final Question question;
-	
+
 	private final Answer answer;
 
 	private final User user;

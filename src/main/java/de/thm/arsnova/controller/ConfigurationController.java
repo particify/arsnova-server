@@ -138,10 +138,10 @@ public class ConfigurationController extends AbstractController {
 
 	@Value("${optional.arsnova-slogan:}")
 	private String arsnovaSlogan;
-	
+
 	@Value("${optional.unipanel-enabled:}")
 	private String uniPanelEnabled;
-	
+
 	@Value("${optional.unipanel-text:}")
 	private String uniPanelText;
 
