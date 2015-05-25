@@ -103,7 +103,7 @@ public class LoginControllerTest {
 	@Test
 	public void testLogoutWithoutRedirect() throws Exception {
 		mockMvc.perform(get("/logout"))
-		.andExpect(status().isMovedTemporarily())
+		.andExpect(status().isTemporaryRedirect())
 		.andExpect(redirectedUrl("/"));
 	}
 }

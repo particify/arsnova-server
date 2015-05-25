@@ -1,5 +1,5 @@
 package de.thm.arsnova.exceptions;
 
-public class RequestEntityTooLargeException extends RuntimeException {
+public class PayloadTooLargeException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 }

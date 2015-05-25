@@ -52,7 +52,7 @@ import de.thm.arsnova.events.StatusSessionEvent;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.exceptions.RequestEntityTooLargeException;
+import de.thm.arsnova.exceptions.PayloadTooLargeException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 
 @Service
@@ -241,7 +241,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 			final int fileSize = (int) ((session.getPpLogo().length() - 814) / 1.37);
 			if (fileSize > uploadFileSizeByte) {
 				LOGGER.error("Could not save file. File is too large with " + fileSize + " Byte.");
-				throw new RequestEntityTooLargeException();
+				throw new PayloadTooLargeException();
 			}
 		}
 
