@@ -184,7 +184,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 					return;
 				}
 				final String oldSessionKey = userService.getSessionForUser(u.getUsername());
-				if (session.getKeyword() == oldSessionKey) {
+				if (session.getKeyword().equals(oldSessionKey)) {
 					return;
 				}
 
