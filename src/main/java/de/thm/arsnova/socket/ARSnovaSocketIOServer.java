@@ -415,7 +415,6 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	}
 
 	public void reportActiveUserCountForSession(final String sessionKey) {
-		/* This check is needed as long as the HTTP polling solution is active simultaneously. */
 		final int count = userService.getUsersInSession(sessionKey).size();
 
 		broadcastInSession(sessionKey, "activeUserCountData", count);
