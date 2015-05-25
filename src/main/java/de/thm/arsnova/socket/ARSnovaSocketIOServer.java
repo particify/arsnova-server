@@ -271,7 +271,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 			}
 		} catch (final Exception e) {
 			/* If exceptions are not caught they could prevent the Socket.IO server from shutting down. */
-			LOGGER.error("Exception caught on Socket.IO shutdown: {}", e.getStackTrace());
+			LOGGER.error("Exception caught on Socket.IO shutdown: {}", e.getMessage());
 		}
 		server.stop();
 
