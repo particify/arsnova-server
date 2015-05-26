@@ -80,7 +80,7 @@ public class CacheBuster implements ICacheBuster, NovaEventVisitor {
 	@Override
 	public void visit(LockQuestionsEvent lockQuestionsEvent) {}
 
-	@CacheEvict(value = "answers", key = "#event.Session")
+	@CacheEvict(value = "answers", key = "#event.Question")
 	@Override
 	public void visit(NewAnswerEvent event) {}
 

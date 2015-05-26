@@ -29,7 +29,12 @@
 
 	<task:annotation-driven />
 
-	<aop:aspectj-autoproxy>
+	<!--
+		expose-proxy is needed to access the proxy object via AopContext.currentProxy() in CouchDBDao. It might have a
+		negative impact on performance but is needed for caching until a better solution is implemented (e.g. use of
+		AspectJ's weaving).
+	-->
+	<aop:aspectj-autoproxy expose-proxy="true">
 		<aop:include name="userSessionAspect" />
 	</aop:aspectj-autoproxy>
 

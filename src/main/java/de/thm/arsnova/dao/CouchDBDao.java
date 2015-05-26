@@ -39,6 +39,7 @@ import net.sf.json.util.JSONUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
@@ -115,6 +116,16 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	public void setSessionService(final ISessionService service) {
 		sessionService = service;
+	}
+
+	/**
+	 * Allows access to the proxy object. It has to be used instead of <code>this</code> for local calls to public
+	 * methods for caching purposes. This is an ugly but necessary temporary workaround until a better solution is
+	 * implemented (e.g. use of AspectJ's weaving).
+	 * @return the proxy for CouchDBDao
+	 */
+	private IDatabaseDao getDatabaseDao() {
+		return (IDatabaseDao) AopContext.currentProxy();
 	}
 
 	@Override
@@ -870,7 +881,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 		view.setGroup(true);
 		final ViewResults results = getDatabase().view(view);
-		final int abstentionCount = getAbstentionAnswerCount(questionId);
+		final int abstentionCount = getDatabaseDao().getAbstentionAnswerCount(questionId);
 		final List<Answer> answers = new ArrayList<Answer>();
 
 		for (final Document d : results.getResults()) {
@@ -894,7 +905,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		view.setEndKeyArray(questionId, "{}");
 		view.setGroup(true);
 		final ViewResults results = getDatabase().view(view);
-		final int abstentionCount = getAbstentionAnswerCount(questionId);
+		final int abstentionCount = getDatabaseDao().getAbstentionAnswerCount(questionId);
 
 		final List<Answer> answers = new ArrayList<Answer>();
 		for (final Document d : results.getResults()) {
@@ -998,7 +1009,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public int getTotalAnswerCount(final String sessionKey) {
-		final Session s = getSessionFromKeyword(sessionKey);
+		final Session s = getDatabaseDao().getSessionFromKeyword(sessionKey);
 		if (s == null) {
 			throw new NotFoundException();
 		}
@@ -1014,7 +1025,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public int getInterposedCount(final String sessionKey) {
-		final Session s = getSessionFromKeyword(sessionKey);
+		final Session s = getDatabaseDao().getSessionFromKeyword(sessionKey);
 		if (s == null) {
 			throw new NotFoundException();
 		}
@@ -1247,7 +1258,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		final List<Session> filteredSessions = new ArrayList<Session>();
 		for (final Session s : allSessions) {
 			try {
-				final Session session = getSessionFromKeyword(s.getKeyword());
+				final Session session = getDatabaseDao().getSessionFromKeyword(s.getKeyword());
 				if (session != null && !session.isCreator(user)) {
 					result.add(session);
 				} else {
@@ -1619,14 +1630,14 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public List<String> getUnAnsweredLectureQuestionIds(final Session session, final User user) {
 		final NovaView view = new NovaView("answer/variant_by_user_and_piround");
 		view.setKey(user.getUsername(), session.get_id(), "lecture");
-		return collectUnansweredQuestionIdsByPiRound(getLectureQuestionsForUsers(session), view);
+		return collectUnansweredQuestionIdsByPiRound(getDatabaseDao().getLectureQuestionsForUsers(session), view);
 	}
 
 	@Override
 	public List<String> getUnAnsweredPreparationQuestionIds(final Session session, final User user) {
 		final NovaView view = new NovaView("answer/variant_by_user_and_piround");
 		view.setKey(user.getUsername(), session.get_id(), "preparation");
-		return collectUnansweredQuestionIdsByPiRound(getPreparationQuestionsForUsers(session), view);
+		return collectUnansweredQuestionIdsByPiRound(getDatabaseDao().getPreparationQuestionsForUsers(session), view);
 	}
 
 	private List<String> collectUnansweredQuestionIds(
@@ -1716,7 +1727,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Question> publishAllQuestions(final Session session, final boolean publish) {
 		final List<Question> questions = getQuestions(new NovaView("skill_question/by_session"), session);
-		publishQuestions(session, publish, questions);
+		getDatabaseDao().publishQuestions(session, publish, questions);
 		return questions;
 	}
 
@@ -1747,7 +1758,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Question> setVotingAdmissionForAllQuestions(final Session session, final boolean disableVoting) {
 		final List<Question> questions = getQuestions(new NovaView("skill_question/by_session"), session);
-		setVotingAdmissions(session, disableVoting, questions);
+		getDatabaseDao().setVotingAdmissions(session, disableVoting, questions);
 		return questions;
 	}
 
@@ -1783,7 +1794,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public void deleteAllQuestionsAnswers(final Session session) {
 		final List<Question> questions = getQuestions(new NovaView("skill_question/by_session"), session);
-		resetQuestionsRoundState(session, questions);
+		getDatabaseDao().resetQuestionsRoundState(session, questions);
 		deleteAllAnswersForQuestions(questions);
 	}
 
@@ -1792,7 +1803,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public void deleteAllPreparationAnswers(final Session session) {
 		final List<Question> questions = getQuestions(new NovaView("skill_question/preparation_question_by_session"), session);
-		resetQuestionsRoundState(session, questions);
+		getDatabaseDao().resetQuestionsRoundState(session, questions);
 		deleteAllAnswersForQuestions(questions);
 	}
 
@@ -1801,7 +1812,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public void deleteAllLectureAnswers(final Session session) {
 		final List<Question> questions = getQuestions(new NovaView("skill_question/lecture_question_by_session"), session);
-		resetQuestionsRoundState(session, questions);
+		getDatabaseDao().resetQuestionsRoundState(session, questions);
 		deleteAllAnswersForQuestions(questions);
 	}
 
@@ -2178,7 +2189,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public SortOrder createOrUpdateSortOrder(SortOrder sortOrder) {
 		try {
-			SortOrder oldSortOrder = getSortOrder(sortOrder.getSessionId(), sortOrder.getQuestionVariant(), sortOrder.getSubject());
+			SortOrder oldSortOrder = getDatabaseDao().getSortOrder(sortOrder.getSessionId(), sortOrder.getQuestionVariant(), sortOrder.getSubject());
 			Document d = new Document();
 
 			String id = "";
