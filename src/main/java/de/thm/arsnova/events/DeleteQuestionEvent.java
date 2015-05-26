@@ -17,22 +17,36 @@
  */
 package de.thm.arsnova.events;
 
+import de.thm.arsnova.dao.DeletionInfo;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 
+/**
+ * This event gets fired when a question is deleted.
+ *
+ * When a question gets deleted, all associated answers are deleted as well. However, the corresponding
+ * DeleteAnswerEvents will *not* get fired.
+ */
 public class DeleteQuestionEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;
 
 	private final Question question;
 
-	public DeleteQuestionEvent(Object source, Session session, Question question) {
+	private final DeletionInfo deletedAnswers;
+
+	public DeleteQuestionEvent(Object source, Session session, Question question, DeletionInfo answerDeletionInfo) {
 		super(source, session);
 		this.question = question;
+		this.deletedAnswers = answerDeletionInfo;
 	}
 
 	public Question getQuestion() {
 		return this.question;
+	}
+
+	public int countDeletedAnswers() {
+		return this.deletedAnswers.count();
 	}
 
 	@Override
