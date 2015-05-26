@@ -496,11 +496,11 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return database;
 	}
 
-	@Caching(evict = {@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true),
-			@CacheEvict(value = "preparationquestions", allEntries = true),
-			@CacheEvict(value = "flashcardquestions", allEntries = true) },
-			put = {@CachePut(value = "questions", key="#question")})
+	@Caching(evict = {@CacheEvict(value = "skillquestions", key = "#session"),
+			@CacheEvict(value = "lecturequestions", key = "#session", condition = "#question.getQuestionVariant().equals('lecture')"),
+			@CacheEvict(value = "preparationquestions", key = "#session", condition = "#question.getQuestionVariant().equals('preparation')"),
+			@CacheEvict(value = "flashcardquestions", key = "#session", condition = "#question.getQuestionVariant().equals('flashcard')") },
+			put = {@CachePut(value = "questions", key = "#question")})
 	@Override
 	public Question saveQuestion(final Session session, final Question question) {
 		final Document q = toQuestionDocument(session, question);
@@ -567,10 +567,11 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return q;
 	}
 
+	/* TODO: Only evict cache entry for the question's session. This requires some refactoring. */
 	@Caching(evict = {@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true),
-			@CacheEvict(value = "preparationquestions", allEntries = true),
-			@CacheEvict(value = "flashcardquestions", allEntries = true) },
+			@CacheEvict(value = "lecturequestions", allEntries = true, condition = "#question.getQuestionVariant().equals('lecture')"),
+			@CacheEvict(value = "preparationquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('preparation')"),
+			@CacheEvict(value = "flashcardquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('flashcard')") },
 			put = {@CachePut("questions")})
 	@Override
 	public Question updateQuestion(final Question question) {
@@ -759,11 +760,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return collectQuestionIds(view);
 	}
 
+	/* TODO: Only evict cache entry for the question's session. This requires some refactoring. */
 	@Caching(evict = { @CacheEvict("questions"),
 			@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true),
-			@CacheEvict(value = "preparationquestions", allEntries = true),
-			@CacheEvict(value = "flashcardquestions", allEntries = true) })
+			@CacheEvict(value = "lecturequestions", allEntries = true, condition = "#question.getQuestionVariant().equals('lecture')"),
+			@CacheEvict(value = "preparationquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('preparation')"),
+			@CacheEvict(value = "flashcardquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('flashcard')") })
 	@Override
 	public void deleteQuestionWithAnswers(final Question question) {
 		try {
@@ -775,10 +777,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Caching(evict = { @CacheEvict("questions"),
-			@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true),
-			@CacheEvict(value = "preparationquestions", allEntries = true),
-			@CacheEvict(value = "flashcardquestions", allEntries = true) })
+			@CacheEvict(value = "skillquestions", key = "#session"),
+			@CacheEvict(value = "lecturequestions", key = "#session"),
+			@CacheEvict(value = "preparationquestions", key = "#session"),
+			@CacheEvict(value = "flashcardquestions", key = "#session") })
 	@Override
 	public void deleteAllQuestionsWithAnswers(final Session session) {
 		final NovaView view = new NovaView("skill_question/by_session");
@@ -1292,7 +1294,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return this.getInfosForVisitedSessions(sessions, user);
 	}
 
-	@CacheEvict(value = "answers", allEntries = true)
+	@CacheEvict(value = "answers", key = "#question")
 	@Override
 	public Answer saveAnswer(final Answer answer, final User user, final Question question, final Session session) {
 		final Document a = new Document();
@@ -1347,6 +1349,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 	}
 
+	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public Answer updateAnswer(final Answer answer) {
@@ -1369,6 +1372,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return null;
 	}
 
+	/* TODO: Only evict cache entry for the answer's session. This requires some refactoring. */
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public void deleteAnswer(final String answerId) {
@@ -1578,8 +1582,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 	}
 
+	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict(value = "skillquestions", allEntries = true),
+			@CacheEvict("skillquestions"),
 			@CacheEvict("lecturequestions"),
 			@CacheEvict(value = "answers", allEntries = true)})
 	@Override
@@ -1588,8 +1593,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		deleteAllQuestionDocumentsWithAnswers(session, view);
 	}
 
+	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict(value = "skillquestions", allEntries = true),
+			@CacheEvict("skillquestions"),
 			@CacheEvict("flashcardquestions"),
 			@CacheEvict(value = "answers", allEntries = true)})
 	@Override
@@ -1598,8 +1604,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		deleteAllQuestionDocumentsWithAnswers(session, view);
 	}
 
+	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict(value = "skillquestions", allEntries = true),
+			@CacheEvict("skillquestions"),
 			@CacheEvict("preparationquestions"),
 			@CacheEvict(value = "answers", allEntries = true)})
 	@Override
@@ -1714,10 +1721,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true),
-			@CacheEvict(value = "preparationquestions", allEntries = true),
-			@CacheEvict(value = "flashcardquestions", allEntries = true) })
+			@CacheEvict(value = "skillquestions", key = "#session"),
+			@CacheEvict(value = "lecturequestions", key = "#session"),
+			@CacheEvict(value = "preparationquestions", key = "#session"),
+			@CacheEvict(value = "flashcardquestions", key = "#session") })
 	@Override
 	public void publishQuestions(final Session session, final boolean publish, List<Question> questions) {
 		for (final Question q : questions) {
@@ -1745,10 +1752,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true),
-			@CacheEvict(value = "preparationquestions", allEntries = true),
-			@CacheEvict(value = "flashcardquestions", allEntries = true) })
+			@CacheEvict(value = "skillquestions", key = "#session"),
+			@CacheEvict(value = "lecturequestions", key = "#session"),
+			@CacheEvict(value = "preparationquestions", key = "#session"),
+			@CacheEvict(value = "flashcardquestions", key = "#session") })
 	@Override
 	public void setVotingAdmissions(final Session session, final boolean disableVoting, List<Question> questions) {
 		for (final Question q : questions) {
@@ -1771,6 +1778,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 	}
 
+	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public void deleteAllQuestionsAnswers(final Session session) {
@@ -1779,6 +1787,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		deleteAllAnswersForQuestions(questions);
 	}
 
+	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public void deleteAllPreparationAnswers(final Session session) {
@@ -1787,6 +1796,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		deleteAllAnswersForQuestions(questions);
 	}
 
+	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public void deleteAllLectureAnswers(final Session session) {
@@ -1796,10 +1806,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true),
-			@CacheEvict(value = "preparationquestions", allEntries = true),
-			@CacheEvict(value = "flashcardquestions", allEntries = true) })
+			@CacheEvict(value = "skillquestions", key = "#session"),
+			@CacheEvict(value = "lecturequestions", key = "#session"),
+			@CacheEvict(value = "preparationquestions", key = "#session"),
+			@CacheEvict(value = "flashcardquestions", key = "#session") })
 	@Override
 	public void resetQuestionsRoundState(final Session session, List<Question> questions) {
 		for (final Question q : questions) {
