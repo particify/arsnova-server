@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.entities;
 
+/**
+ * A session's settings regarding the calculation of the learning progress.
+ */
 public class LearningProgressOptions {
 
 	private String type = "questions";

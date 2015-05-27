@@ -23,6 +23,9 @@ import org.springframework.stereotype.Service;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Statistics;
 
+/**
+ * Performs all statistics related operations.
+ */
 @Service
 public class StatisticsService implements IStatisticsService {
 

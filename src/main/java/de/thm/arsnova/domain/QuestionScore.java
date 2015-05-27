@@ -24,6 +24,9 @@ import java.util.Set;
 
 import de.thm.arsnova.entities.User;
 
+/**
+ * Calculates learning progress score for a specific question.
+ */
 public class QuestionScore implements Iterable<UserScore> {
 
 	private String questionId;

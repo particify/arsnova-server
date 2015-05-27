@@ -24,6 +24,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.User;
 
+/**
+ * A user's answer to a question.
+ */
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class Answer {
 

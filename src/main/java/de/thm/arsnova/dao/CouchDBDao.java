@@ -82,6 +82,9 @@ import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.ISessionService;
 
+/**
+ * Database implementation based on CouchDB.
+ */
 @Component("databaseDao")
 public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware {
 
@@ -1421,6 +1424,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return result;
 	}
 
+	/**
+	 * Adds convenience methods to CouchDB4J's view class.
+	 */
 	private static class ExtendedView extends NovaView {
 
 		public ExtendedView(final String fullname) {

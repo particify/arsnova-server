@@ -20,6 +20,9 @@ package de.thm.arsnova.events;
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.Session;
 
+/**
+ * Fires whenever a new interposed (aka. feedback or audience) question is added.
+ */
 public class NewInterposedQuestionEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;

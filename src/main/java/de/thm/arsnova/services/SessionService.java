@@ -55,6 +55,9 @@ import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.PayloadTooLargeException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 
+/**
+ * Performs all session related operations.
+ */
 @Service
 public class SessionService implements ISessionService, ApplicationEventPublisherAware {
 

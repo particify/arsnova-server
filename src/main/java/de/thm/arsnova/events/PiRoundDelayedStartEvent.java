@@ -22,6 +22,10 @@ import java.util.HashMap;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 
+/**
+ * Fires whenever a delayed peer instruction round is initiated. The delayed part denotes that this round might not
+ * have been started yet.
+ */
 public class PiRoundDelayedStartEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;

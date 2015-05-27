@@ -37,6 +37,9 @@ import de.thm.arsnova.socket.ARSnovaSocket;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 import de.thm.arsnova.ImageUtils;
 
+/**
+ * Loads property file and configures non-security related beans and components.
+ */
 @Configuration
 @EnableCaching
 public class ExtraConfig {

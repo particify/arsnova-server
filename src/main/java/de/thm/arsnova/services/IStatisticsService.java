@@ -19,6 +19,9 @@ package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Statistics;
 
+/**
+ * The functionality the statistics service should provide.
+ */
 public interface IStatisticsService {
 	Statistics getStatistics();
 }

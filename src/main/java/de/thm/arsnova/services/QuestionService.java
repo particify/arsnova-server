@@ -74,6 +74,9 @@ import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 
+/**
+ * Performs all question, interposed question, and answer related operations.
+ */
 @Service
 public class QuestionService implements IQuestionService, ApplicationEventPublisherAware {
 

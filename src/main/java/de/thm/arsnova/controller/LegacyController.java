@@ -29,6 +29,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.web.DeprecatedApi;
 
+/**
+ * This controller forwards requests from deprecated URLs to their new controller, where the requests are handled.
+ */
 @Controller
 public class LegacyController extends AbstractController {
 

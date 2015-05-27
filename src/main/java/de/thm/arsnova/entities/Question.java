@@ -20,6 +20,9 @@ package de.thm.arsnova.entities;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * A question the teacher is asking.
+ */
 public class Question {
 
 	private String type;

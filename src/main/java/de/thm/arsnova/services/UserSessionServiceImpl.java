@@ -27,6 +27,9 @@ import org.springframework.stereotype.Component;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
+/**
+ * This service is used to assign and check for a specific role.
+ */
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class UserSessionServiceImpl implements UserSessionService, Serializable {

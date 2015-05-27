@@ -24,6 +24,9 @@ import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
+/**
+ * This class is used to allow the import and export of a session.
+ */
 public class ImportExportSession {
 
 	private ImportExportSesssion session;

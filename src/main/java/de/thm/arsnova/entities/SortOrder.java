@@ -19,6 +19,9 @@ package de.thm.arsnova.entities;
 
 import java.util.List;
 
+/**
+ * Defines how a question list should be sorted.
+ */
 public class SortOrder {
 
 	private String sessionId;

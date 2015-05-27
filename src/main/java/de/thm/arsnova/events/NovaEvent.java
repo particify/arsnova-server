@@ -19,6 +19,9 @@ package de.thm.arsnova.events;
 
 import org.springframework.context.ApplicationEvent;
 
+/**
+ * Base class of an ARSnova event.
+ */
 public abstract class NovaEvent extends ApplicationEvent {
 
 	private static final long serialVersionUID = 1L;

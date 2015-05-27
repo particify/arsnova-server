@@ -27,6 +27,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * Sets response headers to allow CORS requests.
+ */
 @Component
 public class CorsFilter extends OncePerRequestFilter {
 

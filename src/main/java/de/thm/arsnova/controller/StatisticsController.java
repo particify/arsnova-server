@@ -27,6 +27,9 @@ import de.thm.arsnova.services.IStatisticsService;
 import de.thm.arsnova.web.CacheControl;
 import de.thm.arsnova.web.DeprecatedApi;
 
+/**
+ * Allows retrieval of several statistics such as the number of active users.
+ */
 @RestController
 public class StatisticsController extends AbstractController {
 

@@ -20,6 +20,10 @@ package de.thm.arsnova.entities;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Summary information of a specific session. For example, this is used to display list entries of 'my sessions' as well
+ * as 'my visited sessions'.
+ */
 public class SessionInfo {
 
 	private String name;

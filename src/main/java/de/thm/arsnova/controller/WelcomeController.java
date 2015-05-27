@@ -38,6 +38,9 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import de.thm.arsnova.exceptions.NoContentException;
 
+/**
+ * Default controller that handles requests which have not set a path.
+ */
 @Controller
 public class WelcomeController extends AbstractController {
 

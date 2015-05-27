@@ -90,6 +90,9 @@ import de.thm.arsnova.socket.message.Feedback;
 import de.thm.arsnova.socket.message.Question;
 import de.thm.arsnova.socket.message.Session;
 
+/**
+ * Web socket implementation based on Socket.io.
+ */
 @Component
 public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 

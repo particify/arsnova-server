@@ -22,6 +22,9 @@ import java.util.HashMap;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 
+/**
+ * Fires whenever voting on a question is disabled.
+ */
 public class LockVoteEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;

@@ -21,6 +21,9 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
 
+/**
+ * Defines the core functionality which the learning progress calculation should provide.
+ */
 public interface LearningProgress {
 
 	public LearningProgressValues getCourseProgress(Session session);

@@ -54,6 +54,11 @@ import de.thm.arsnova.events.StatusSessionEvent;
 import de.thm.arsnova.events.UnlockVoteEvent;
 import de.thm.arsnova.events.UnlockVotesEvent;
 
+/**
+ * Creates a learning progress implementation.
+ *
+ * This class additionally clears all learning progress caches and reports this via event system.
+ */
 @Component
 public class LearningProgressFactory implements NovaEventVisitor, ILearningProgressFactory, ApplicationEventPublisherAware {
 

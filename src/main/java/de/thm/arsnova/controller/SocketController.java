@@ -37,6 +37,9 @@ import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.services.UserSessionService;
 import de.thm.arsnova.socket.ARSnovaSocket;
 
+/**
+ * Initiates the socket communication.
+ */
 @RestController
 @RequestMapping("/socket")
 public class SocketController extends AbstractController {

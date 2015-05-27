@@ -39,6 +39,9 @@ import de.thm.arsnova.exceptions.PreconditionFailedException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.exceptions.PayloadTooLargeException;
 
+/**
+ * Translates security/authentication related exceptions into HTTP status codes.
+ */
 @ControllerAdvice
 public class SecurityExceptionControllerAdvice {
 

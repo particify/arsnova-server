@@ -20,6 +20,9 @@ package de.thm.arsnova.entities.transport;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A question a student is asking. Also known as feedback or audience question.
+ */
 public class InterposedQuestion {
 
 	private String id;

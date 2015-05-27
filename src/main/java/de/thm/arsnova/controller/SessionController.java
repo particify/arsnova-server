@@ -51,6 +51,9 @@ import de.thm.arsnova.services.SessionService.SessionNameComparator;
 import de.thm.arsnova.services.SessionService.SessionShortNameComparator;
 import de.thm.arsnova.web.DeprecatedApi;
 
+/**
+ * Handles requests related to ARSnova sessions.
+ */
 @RestController
 @RequestMapping("/session")
 public class SessionController extends AbstractController {

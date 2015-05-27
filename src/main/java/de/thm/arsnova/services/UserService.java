@@ -71,6 +71,9 @@ import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 
+/**
+ * Performs all user related operations.
+ */
 @Service
 public class UserService implements IUserService {
 

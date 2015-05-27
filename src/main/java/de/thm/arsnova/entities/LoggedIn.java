@@ -20,6 +20,9 @@ package de.thm.arsnova.entities;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Once a user joins a session, this class is used to identify a returning user.
+ */
 public class LoggedIn {
 
 	private String _id;

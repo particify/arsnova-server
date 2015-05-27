@@ -28,6 +28,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 
 import de.thm.arsnova.services.UserSessionService;
 
+/**
+ * Represents a user.
+ */
 public class User implements Serializable {
 	public static final String GOOGLE = "google";
 	public static final String TWITTER = "twitter";

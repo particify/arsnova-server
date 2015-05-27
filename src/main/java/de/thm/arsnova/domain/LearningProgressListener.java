@@ -24,6 +24,11 @@ import org.springframework.stereotype.Component;
 import de.thm.arsnova.events.NovaEvent;
 import de.thm.arsnova.events.NovaEventVisitor;
 
+/**
+ * Listener registration for the learning progress.
+ *
+ * Note that this class is necessary in order for the annotations to work.
+ */
 @Component
 public class LearningProgressListener implements ApplicationListener<NovaEvent> {
 

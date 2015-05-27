@@ -19,6 +19,11 @@ package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+/**
+ * Both a regular (single choice, evaluation, etc.) as well as a freetext answer.
+ *
+ * This class has additional fields to transport generated answer statistics.
+ */
 public class Answer {
 
 	private String _id;

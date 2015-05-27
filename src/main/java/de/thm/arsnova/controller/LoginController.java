@@ -64,6 +64,9 @@ import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.services.UserSessionService;
 
+/**
+ * Handles authentication specific requests.
+ */
 @Controller
 public class LoginController extends AbstractController {
 

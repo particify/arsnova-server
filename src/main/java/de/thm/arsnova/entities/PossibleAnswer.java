@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.entities;
 
+/**
+ * This class represents an answer option of a question.
+ */
 public class PossibleAnswer {
 
 	private String id;

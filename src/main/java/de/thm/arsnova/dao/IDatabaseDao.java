@@ -34,6 +34,9 @@ import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 
+/**
+ * All methods the database must support.
+ */
 public interface IDatabaseDao {
 	Session getSessionFromKeyword(String keyword);
 

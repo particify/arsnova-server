@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.entities;
 
+/**
+ * A login service description. For example, this class is used to display the login buttons in ARSnova mobile.
+ */
 public class ServiceDescription {
 	private String id;
 	private String name;

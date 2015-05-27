@@ -44,6 +44,9 @@ import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.web.DeprecatedApi;
 
+/**
+ * Handles requests related to questions teachers are asking their students.
+ */
 @RestController
 @RequestMapping("/lecturerquestion")
 public class LecturerQuestionController extends AbstractController {

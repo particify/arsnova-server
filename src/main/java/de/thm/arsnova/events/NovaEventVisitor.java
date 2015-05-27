@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.events;
 
+/**
+ * Listeners wanting to receive ARSnova's internal events should implement this interface.
+ */
 public interface NovaEventVisitor {
 
 	void visit(NewInterposedQuestionEvent newInterposedQuestionEvent);

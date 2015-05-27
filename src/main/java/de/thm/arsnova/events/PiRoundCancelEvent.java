@@ -20,6 +20,9 @@ package de.thm.arsnova.events;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 
+/**
+ * Fires whenever a peer instruction round is canceled.
+ */
 public class PiRoundCancelEvent extends PiRoundEndEvent {
 
 	private static final long serialVersionUID = 1L;

@@ -19,6 +19,9 @@ package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.Session;
 
+/**
+ * Fires whenever the status of a session changes, i.e., it is enabled or disabled.
+ */
 public class StatusSessionEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;

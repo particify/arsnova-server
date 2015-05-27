@@ -20,6 +20,9 @@ package de.thm.arsnova.events;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 
+/**
+ * Fires whenever a question is enabled, i.e., it becomes visible to students.
+ */
 public class UnlockQuestionEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;

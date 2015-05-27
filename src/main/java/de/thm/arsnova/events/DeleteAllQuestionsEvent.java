@@ -19,6 +19,10 @@ package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.Session;
 
+/**
+ * Fires whenever all questions of a session are deleted. Note that this implies that all answers are deleted as well,
+ * even though the specific answer events are not fired.
+ */
 public class DeleteAllQuestionsEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;

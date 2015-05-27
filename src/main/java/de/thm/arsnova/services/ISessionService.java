@@ -28,6 +28,9 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
 
+/**
+ * The functionality the session service should provide.
+ */
 public interface ISessionService {
 	Session getSession(String keyword);
 

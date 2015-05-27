@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.socket.message;
 
+/**
+ * Represents a question.
+ */
 public class Question {
 
 	private final String _id;

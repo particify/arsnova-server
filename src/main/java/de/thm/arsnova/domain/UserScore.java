@@ -19,6 +19,9 @@ package de.thm.arsnova.domain;
 
 import de.thm.arsnova.entities.User;
 
+/**
+ * The learning progress answer score of a particular user.
+ */
 public class UserScore {
 
 	private String username;

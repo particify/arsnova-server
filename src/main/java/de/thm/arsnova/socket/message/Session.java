@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.socket.message;
 
+/**
+ * Represents a session.
+ */
 public class Session {
 	private String keyword;
 

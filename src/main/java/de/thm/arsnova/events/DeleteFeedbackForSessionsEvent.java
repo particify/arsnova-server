@@ -22,6 +22,9 @@ import java.util.Set;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
+/**
+ * Fires whenever the feedback of a specific user has been reset.
+ */
 public class DeleteFeedbackForSessionsEvent extends NovaEvent {
 
 	private static final long serialVersionUID = 1L;

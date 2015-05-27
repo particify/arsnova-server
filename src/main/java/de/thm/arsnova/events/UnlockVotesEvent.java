@@ -22,6 +22,9 @@ import java.util.List;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 
+/**
+ * Fires whenever voting of multiple questions is enabled.
+ */
 public class UnlockVotesEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;

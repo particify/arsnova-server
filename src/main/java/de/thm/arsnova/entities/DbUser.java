@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.entities;
 
+/**
+ * A user account for ARSnova's own registration and login process.
+ */
 public class DbUser {
 	private String id;
 	private String rev;

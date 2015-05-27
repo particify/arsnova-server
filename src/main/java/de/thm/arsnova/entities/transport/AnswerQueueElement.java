@@ -22,6 +22,10 @@ import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
+/**
+ * An answer that is about to get saved in the database. Answers are not saved immediately, they are instead stored
+ * in a queue that is cleared at specific intervals.
+ */
 public class AnswerQueueElement {
 
 	private final Session session;

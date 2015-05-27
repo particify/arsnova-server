@@ -27,6 +27,9 @@ import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.User;
 
+/**
+ * The functionality the question service should provide.
+ */
 public interface IQuestionService {
 	Question saveQuestion(Question question);
 

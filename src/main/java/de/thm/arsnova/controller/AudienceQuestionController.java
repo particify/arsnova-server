@@ -37,6 +37,9 @@ import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.web.DeprecatedApi;
 
+/**
+ * Handles requests related to audience questions, which are also called interposed or feedback questions.
+ */
 @RestController
 @RequestMapping("/audiencequestion")
 public class AudienceQuestionController extends AbstractController {

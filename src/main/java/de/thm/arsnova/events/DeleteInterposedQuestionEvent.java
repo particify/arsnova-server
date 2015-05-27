@@ -20,6 +20,9 @@ package de.thm.arsnova.events;
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.Session;
 
+/**
+ * Fires whenever an interposed question is deleted.
+ */
 public class DeleteInterposedQuestionEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;
