@@ -22,14 +22,16 @@ import java.util.HashMap;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
@@ -59,11 +61,17 @@ public class WelcomeController extends AbstractController {
 			@RequestParam(required = true) final String url
 		) {
 		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+		SimpleClientHttpRequestFactory rf = (SimpleClientHttpRequestFactory) restTemplate.getRequestFactory();
+		rf.setConnectTimeout(2000);
+		rf.setReadTimeout(2000);
 
-		if (!HttpStatus.OK.equals(response.getStatusCode()) ||
-			response.getHeaders().containsKey("x-frame-options")) {
+		try {
+			HttpHeaders headers = restTemplate.headForHeaders(url);
+			if (headers.isEmpty() || headers.containsKey("x-frame-options")) {
 				throw new NoContentException();
+			}
+		} catch (RestClientException e) {
+			throw new NoContentException();
 		}
 	}
 }
