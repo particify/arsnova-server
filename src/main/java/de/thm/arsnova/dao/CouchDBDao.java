@@ -870,6 +870,27 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getObjectFromId(final String documentId, final Class<T> klass) {
+		T obj = null;
+		try {
+			final Document doc = getDatabase().getDocument(documentId);
+			if (doc == null) {
+				return null;
+			}
+			// TODO: This needs some more error checking...
+			obj = (T) JSONObject.toBean(doc.getJSONObject(), klass);
+		} catch (IOException e) {
+			return null;
+		} catch (ClassCastException e) {
+			return null;
+		} catch (net.sf.json.JSONException e) {
+			return null;
+		}
+		return obj;
+	}
+
 	@Override
 	public List<Answer> getAnswers(final Question question, final int piRound) {
 		final String questionId = question.get_id();
@@ -1375,8 +1396,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			a.put("abstention", answer.isAbstention());
 			a.put("questionValue", answer.getQuestionValue());
 			a.put("answerImage", answer.getAnswerImage());
-
 			a.put("answerThumbnailImage", answer.getAnswerThumbnailImage());
+			a.put("read", answer.isRead());
 			database.saveDocument(a);
 			answer.set_rev(a.getRev());
 			return answer;

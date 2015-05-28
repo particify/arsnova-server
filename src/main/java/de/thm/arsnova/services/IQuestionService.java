@@ -59,6 +59,8 @@ public interface IQuestionService {
 
 	Answer getMyAnswer(String questionId);
 
+	void readFreetextAnswer(String answerId, User user);
+
 	List<Answer> getAnswers(String questionId, int piRound);
 
 	List<Answer> getAnswers(String questionId);

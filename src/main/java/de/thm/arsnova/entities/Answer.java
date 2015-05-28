@@ -38,6 +38,7 @@ public class Answer {
 	private int piRound;
 	private String user;
 	private long timestamp;
+	private boolean read;
 	private int answerCount = 1;
 	private boolean abstention;
 	private int abstentionCount;
@@ -148,6 +149,14 @@ public class Answer {
 
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
+	}
+
+	public boolean isRead() {
+		return read;
+	}
+
+	public void setRead(boolean read) {
+		this.read = read;
 	}
 
 	public final int getAnswerCount() {

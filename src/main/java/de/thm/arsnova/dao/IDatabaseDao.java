@@ -222,4 +222,6 @@ public interface IDatabaseDao {
 	void setVotingAdmissions(Session session, boolean disableVoting, List<Question> questions);
 
 	List<Question> setVotingAdmissionForAllQuestions(Session session, boolean disableVoting);
+
+	<T> T getObjectFromId(String documentId, Class<T> klass);
 }

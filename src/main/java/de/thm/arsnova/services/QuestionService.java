@@ -463,6 +463,22 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	}
 
 	@Override
+	public void readFreetextAnswer(final String answerId, final User user) {
+		final Answer answer = databaseDao.getObjectFromId(answerId, Answer.class);
+		if (answer == null) {
+			throw new NotFoundException();
+		}
+		if (answer.isRead()) {
+			return;
+		}
+		final Session session = databaseDao.getSessionFromId(answer.getSessionId());
+		if (session.isCreator(user)) {
+			answer.setRead(true);
+			databaseDao.updateAnswer(answer);
+		}
+	}
+
+	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Answer> getAnswers(final String questionId, final int piRound) {
 		final Question question = databaseDao.getQuestion(questionId);

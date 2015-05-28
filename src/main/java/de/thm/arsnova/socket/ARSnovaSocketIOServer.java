@@ -221,6 +221,18 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 			}
 		});
 
+		server.addEventListener("readFreetextAnswer", String.class, new DataListener<String>() {
+			@Override
+			public void onData(SocketIOClient client, String answerId, AckRequest ackRequest) {
+				final User user = userService.getUser2SocketId(client.getSessionId());
+				try {
+					questionService.readFreetextAnswer(answerId, user);
+				} catch (NotFoundException | UnauthorizedException e) {
+					LOGGER.error("Marking answer {} as read failed for user {} with exception {}", answerId, user, e.getMessage());
+				}
+			}
+		});
+
 		server.addEventListener(
 				"setLearningProgressOptions",
 				LearningProgressOptions.class,
