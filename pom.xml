@@ -11,6 +11,7 @@
 		<org.springframework.security-version>4.0.2.RELEASE</org.springframework.security-version>
 		<org.springframework.integration-mail-version>4.1.6.RELEASE</org.springframework.integration-mail-version>
 		<com.fasterxml.jackson-version>2.6.0</com.fasterxml.jackson-version>
+		<springfoxVersion>2.0.1</springfoxVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<sonar.language>java</sonar.language>
 		<mobile.production.path>../arsnova-mobile/src/main/webapp/build/production/ARSnova</mobile.production.path>
@@ -108,6 +109,11 @@
 			<id>sonatypesnapshots</id>
 			<name>Sonatype Snapshot Repository</name>
 			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+		</repository>
+		<repository>
+			<id>springfoxsnapshots</id>
+			<name>Springfox Swagger</name>
+			<url>http://oss.jfrog.org/artifactory/oss-snapshot-local/</url>
 		</repository>
 	</repositories>
 
@@ -298,6 +304,17 @@
 			<artifactId>apacheds-server-jndi</artifactId>
 			<version>1.5.5</version>
 			<scope>runtime</scope>
+		</dependency>
+		<!-- Springfox (Swagger) -->
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>${springfoxVersion}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>${springfoxVersion}</version>
 		</dependency>
 	</dependencies>
 
