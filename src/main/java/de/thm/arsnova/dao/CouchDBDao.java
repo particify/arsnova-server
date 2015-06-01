@@ -84,6 +84,21 @@ import de.thm.arsnova.services.ISessionService;
 
 /**
  * Database implementation based on CouchDB.
+ *
+ * Note to developers:
+ *
+ * This class makes use of Spring Framework's caching annotations. When you are about to add new functionality,
+ * you should also think about the possibility of caching. Ideally, your methods should be dependent on domain
+ * objects like Session or Question, which can be used as cache keys. Relying on plain String objects as a key, e.g.
+ * by passing only a Session's keyword, will make your cache annotations less readable. You will also need to think
+ * about cases where your cache needs to be updated and evicted.
+ *
+ * In order to use cached methods from within this object, you have to use the getDatabaseDao() method instead of
+ * using the "this" pointer. This is because caching is only available if the method is called through a Spring Proxy,
+ * which is not the case when using "this".
+ *
+ * @see <a href="http://docs.spring.io/spring/docs/current/spring-framework-reference/html/cache.html">Spring Framework's Cache Abstraction</a>
+ * @see <a href="https://github.com/thm-projects/arsnova-backend/wiki/Caching">Caching in ARSnova explained</a>
  */
 @Component("databaseDao")
 public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware {
