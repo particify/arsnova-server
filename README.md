@@ -150,6 +150,14 @@ this location, you may skip the override, and just use:
 
 	mvn jetty:run
 
+### Further Documentation
+
+Please see our [Wiki][Wiki] for an in-depth look at development topics such as [Caching][Caching] and [ARSnova's event system][Event-System].
+
+[Wiki]: https://github.com/thm-projects/arsnova-backend/wiki
+[Caching]: https://github.com/thm-projects/arsnova-backend/wiki/Caching
+[Event-System]: https://github.com/thm-projects/arsnova-backend/wiki/Event-System
+
 ## Production Use
 
 If you intend to use ARSnova in productive environments, you will have to do
