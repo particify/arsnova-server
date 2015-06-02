@@ -37,7 +37,7 @@ public interface IQuestionService {
 
 	Question getQuestion(String id);
 
-	List<Question> getSkillQuestions(String sessionkey);
+	List<Question> getSkillQuestions(String sessionkey, int offset, int limit);
 
 	int getSkillQuestionCount(String sessionkey);
 
@@ -71,7 +71,8 @@ public interface IQuestionService {
 
 	int getAnswerCount(String questionId, int piRound);
 
-	List<Answer> getFreetextAnswers(String questionId);
+	List<Answer> getFreetextAnswers(String questionId, int offset, int limit);
+
 
 	List<Answer> getMyAnswers(String sessionKey);
 
@@ -83,7 +84,7 @@ public interface IQuestionService {
 
 	InterposedReadingCount getInterposedReadingCount(String sessionKey, String username);
 
-	List<InterposedQuestion> getInterposedQuestions(String sessionKey);
+	List<InterposedQuestion> getInterposedQuestions(String sessionKey, int offset, int limit);
 
 	InterposedQuestion readInterposedQuestion(String questionId);
 
@@ -103,11 +104,11 @@ public interface IQuestionService {
 
 	void deleteInterposedQuestion(String questionId);
 
-	List<Question> getLectureQuestions(String sessionkey);
+	List<Question> getLectureQuestions(String sessionkey, int offset, int limit);
 
-	List<Question> getFlashcards(String sessionkey);
+	List<Question> getFlashcards(String sessionkey, int offset, int limit);
 
-	List<Question> getPreparationQuestions(String sessionkey);
+	List<Question> getPreparationQuestions(String sessionkey, int offset, int limit);
 
 	int getLectureQuestionCount(String sessionkey);
 

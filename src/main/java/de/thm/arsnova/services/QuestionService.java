@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,13 +103,13 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Question> getSkillQuestions(final String sessionkey) {
+	public List<Question> getSkillQuestions(final String sessionkey, final int offset, final int limit) {
 		final Session session = getSession(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
-			return databaseDao.getSkillQuestionsForTeachers(session);
+			return databaseDao.getSkillQuestionsForTeachers(session, offset, limit);
 		} else {
-			return databaseDao.getSkillQuestionsForUsers(session);
+			return databaseDao.getSkillQuestionsForUsers(session, offset, limit);
 		}
 	}
 
@@ -486,7 +485,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			throw new NotFoundException();
 		}
 		return "freetext".equals(question.getQuestionType())
-				? getFreetextAnswers(questionId)
+				? getFreetextAnswers(questionId, -1, -1)
 						: databaseDao.getAnswers(question, piRound);
 	}
 
@@ -498,7 +497,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			throw new NotFoundException();
 		}
 		if ("freetext".equals(question.getQuestionType())) {
-			return getFreetextAnswers(questionId);
+			return getFreetextAnswers(questionId, -1, -1);
 		} else {
 			return databaseDao.getAnswers(question);
 		}
@@ -512,7 +511,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			throw new NotFoundException();
 		}
 		if ("freetext".equals(question.getQuestionType())) {
-			return getFreetextAnswers(questionId);
+			return getFreetextAnswers(questionId, -1, -1);
 		} else {
 			return databaseDao.getAllAnswers(question);
 		}
@@ -564,8 +563,8 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getFreetextAnswers(final String questionId) {
-		final List<Answer> answers = databaseDao.getFreetextAnswers(questionId);
+	public List<Answer> getFreetextAnswers(final String questionId, final int offset, final int limit) {
+		final List<Answer> answers = databaseDao.getFreetextAnswers(questionId, offset, limit);
 		if (answers == null) {
 			throw new NotFoundException();
 		}
@@ -582,7 +581,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	public List<Answer> getMyAnswers(final String sessionKey) {
 		final Session session = getSession(sessionKey);
 		// Load questions first because we are only interested in answers of the latest piRound.
-		final List<Question> questions = databaseDao.getSkillQuestionsForUsers(session);
+		final List<Question> questions = databaseDao.getSkillQuestionsForUsers(session, -1, -1);
 		final Map<String, Question> questionIdToQuestion = new HashMap<String, Question>();
 		for (final Question question : questions) {
 			questionIdToQuestion.put(question.get_id(), question);
@@ -644,13 +643,13 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<InterposedQuestion> getInterposedQuestions(final String sessionKey) {
+	public List<InterposedQuestion> getInterposedQuestions(final String sessionKey, final int offset, final int limit) {
 		final Session session = this.getSession(sessionKey);
 		final User user = getCurrentUser();
 		if (session.isCreator(user)) {
-			return databaseDao.getInterposedQuestions(session);
+			return databaseDao.getInterposedQuestions(session, offset, limit);
 		} else {
-			return databaseDao.getInterposedQuestions(session, user);
+			return databaseDao.getInterposedQuestions(session, user, offset, limit);
 		}
 	}
 
@@ -800,7 +799,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Question> getLectureQuestions(final String sessionkey) {
+	public List<Question> getLectureQuestions(final String sessionkey, final int offset, final int limit) {
 		final Session session = getSession(sessionkey);
 		SortOrder subjectSortOrder = databaseDao.getSortOrder(session.get_id(), "lecture", "");
 		if (subjectSortOrder == null) {
@@ -811,27 +810,27 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 		final User user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
-			return databaseDao.getLectureQuestionsForTeachers(session);
+			return databaseDao.getLectureQuestionsForTeachers(session, offset, limit);
 		} else {
-			return databaseDao.getLectureQuestionsForUsers(session);
+			return databaseDao.getLectureQuestionsForUsers(session, offset, limit);
 		}
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Question> getFlashcards(final String sessionkey) {
+	public List<Question> getFlashcards(final String sessionkey, final int offset, final int limit) {
 		final Session session = getSession(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
-			return databaseDao.getFlashcardsForTeachers(session);
+			return databaseDao.getFlashcardsForTeachers(session, offset, limit);
 		} else {
-			return databaseDao.getFlashcardsForUsers(session);
+			return databaseDao.getFlashcardsForUsers(session, offset, limit);
 		}
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Question> getPreparationQuestions(final String sessionkey) {
+	public List<Question> getPreparationQuestions(final String sessionkey, final int offset, final int limit) {
 		final Session session = getSession(sessionkey);
 		SortOrder subjectSortOrder = databaseDao.getSortOrder(session.get_id(), "preparation", "");
 		if (subjectSortOrder == null) {
@@ -842,9 +841,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 		final User user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
-			return databaseDao.getPreparationQuestionsForTeachers(session);
+			return databaseDao.getPreparationQuestionsForTeachers(session, offset, limit);
 		} else {
-			return databaseDao.getPreparationQuestionsForUsers(session);
+			return databaseDao.getPreparationQuestionsForUsers(session, offset, limit);
 		}
 	}
 

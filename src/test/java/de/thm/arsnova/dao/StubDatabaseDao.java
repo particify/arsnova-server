@@ -155,7 +155,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Session> getMySessions(User user) {
+	public List<Session> getMySessions(User user, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -209,7 +209,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Answer> getFreetextAnswers(String questionId) {
+	public List<Answer> getFreetextAnswers(String questionId, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -232,7 +232,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<InterposedQuestion> getInterposedQuestions(Session session) {
+	public List<InterposedQuestion> getInterposedQuestions(Session session, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -254,7 +254,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Session> getMyVisitedSessions(User user) {
+	public List<Session> getMyVisitedSessions(User user, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -445,7 +445,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<InterposedQuestion> getInterposedQuestions(Session session, User user) {
+	public List<InterposedQuestion> getInterposedQuestions(Session session, User user, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -463,13 +463,13 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<SessionInfo> getMySessionsInfo(User user) {
+	public List<SessionInfo> getMySessionsInfo(User user, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<SessionInfo> getMyVisitedSessionsInfo(User currentUser) {
+	public List<SessionInfo> getMyVisitedSessionsInfo(User currentUser, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -499,49 +499,49 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Question> getSkillQuestionsForUsers(Session session) {
+	public List<Question> getSkillQuestionsForUsers(Session session, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Question> getSkillQuestionsForTeachers(Session session) {
+	public List<Question> getSkillQuestionsForTeachers(Session session, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Question> getLectureQuestionsForUsers(Session session) {
+	public List<Question> getLectureQuestionsForUsers(Session session, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Question> getLectureQuestionsForTeachers(Session session) {
+	public List<Question> getLectureQuestionsForTeachers(Session session, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Question> getFlashcardsForUsers(Session session) {
+	public List<Question> getFlashcardsForUsers(Session session, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Question> getFlashcardsForTeachers(Session session) {
+	public List<Question> getFlashcardsForTeachers(Session session, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Question> getPreparationQuestionsForUsers(Session session) {
+	public List<Question> getPreparationQuestionsForUsers(Session session, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Question> getPreparationQuestionsForTeachers(Session session) {
+	public List<Question> getPreparationQuestionsForTeachers(Session session, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}

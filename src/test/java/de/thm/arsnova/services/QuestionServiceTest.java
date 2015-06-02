@@ -86,13 +86,13 @@ public class QuestionServiceTest {
 	@Test(expected = AuthenticationCredentialsNotFoundException.class)
 	public void testShouldNotReturnQuestionsIfNotAuthenticated() {
 		setAuthenticated(false, "nobody");
-		questionService.getSkillQuestions("12345678");
+		questionService.getSkillQuestions("12345678", -1, -1);
 	}
 
 	@Test(expected = NotFoundException.class)
 	public void testShouldFindQuestionsForNonExistantSession() {
 		setAuthenticated(true, "ptsr00");
-		questionService.getSkillQuestions("00000000");
+		questionService.getSkillQuestions("00000000", -1, -1);
 	}
 
 	@Test
