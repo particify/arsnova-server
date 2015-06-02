@@ -21,6 +21,7 @@
 	<mvc:interceptors>
 		<bean class="de.thm.arsnova.web.CacheControlInterceptorHandler" />
 		<bean class="de.thm.arsnova.web.DeprecatedApiInterceptorHandler" />
+		<bean class="de.thm.arsnova.web.ResponseInterceptorHandler" />
 	</mvc:interceptors>
 
 	<aop:aspectj-autoproxy />

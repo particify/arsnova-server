@@ -17,13 +17,16 @@
  */
 package de.thm.arsnova.aop;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,37 +34,62 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import de.thm.arsnova.controller.PaginationController;
+import de.thm.arsnova.services.ResponseProviderService;
 
 @Component
 @Aspect
 @Profile("!test")
 public class RangeAspect {
+
 	@Autowired
 	private HttpServletRequest request;
+
+	@Autowired
+	private ResponseProviderService responseProviderService;
 
 	private final Pattern rangePattern = Pattern.compile("^items=([0-9]+)-([0-9]+)?$");
 
 	private static final Logger logger = LoggerFactory.getLogger(RangeAspect.class);
 
-	/** Sets start and end parameters based on range header
+	/** Sets start and end parameters based on request's range header
+	 * and sets content range header for the response
 	 *
 	 * @param controller
+	 * @throws Throwable
 	 */
-	@Before("execution(* de.thm.arsnova.controller.*.*(..)) && this(controller) && @annotation(de.thm.arsnova.web.Pagination)")
-	public void parsePaginationRange(final PaginationController controller) {
+	@Around("execution(java.util.List+ de.thm.arsnova.controller.*.*(..)) && this(controller) && @annotation(de.thm.arsnova.web.Pagination)")
+	public Object handlePaginationRange(ProceedingJoinPoint pjp, final PaginationController controller) throws Throwable {
+		logger.debug("handlePaginationRange");
 		String rangeHeader = request.getHeader("Range");
 		Matcher matcher = null;
+		int start = -1;
+		int end = -1;
+
 		if (rangeHeader != null) {
 			matcher = rangePattern.matcher(rangeHeader);
 		}
 
 		if (matcher != null && matcher.matches()) {
-			int start = matcher.group(1) != null ? Integer.valueOf(matcher.group(1)) : -1;
-			int end = matcher.group(2) != null ? Integer.valueOf(matcher.group(2)) : -1;
+			start = matcher.group(1) != null ? Integer.valueOf(matcher.group(1)) : -1;
+			end = matcher.group(2) != null ? Integer.valueOf(matcher.group(2)) : -1;
 			logger.debug("Pagination: {}-{}", start, end);
-			controller.setRange(start, end);
-		} else {
-			controller.setRange(-1, -1);
 		}
+		controller.setRange(start, end);
+
+		List<?> list = (List<?>) pjp.proceed();
+
+		if (matcher != null && matcher.matches()) {
+			/* Header format: "items <start>-<end>/<total>"
+			 *
+			 * The value for end is calculated since the result list
+			 * could be shorter than requested.
+			 *
+			 * TODO: Set correct value for total */
+			String rangeStr = String.format("items %d-%d/%d", start, start + list.size() - 1, -1);
+			HttpServletResponse response = responseProviderService.getResponse();
+			response.addHeader("Content-Range", rangeStr);
+		}
+
+		return list;
 	}
 }
