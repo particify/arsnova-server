@@ -154,6 +154,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Session> getMySessions(final User user, final int start, final int limit) {
 		final NovaView view = new NovaView("session/by_creator");
+		if (start > 0) {
+			view.setSkip(start);
+		}
+		if (limit > 0) {
+			view.setLimit(limit);
+		}
 		view.setStartKeyArray(user.getUsername());
 		view.setEndKeyArray(user.getUsername(), "{}");
 
@@ -406,14 +412,30 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Question> getSkillQuestionsForUsers(final Session session, final int start, final int limit) {
 		String viewName = "skill_question/by_session_for_all_full";
-		return getQuestions(new NovaView(viewName), session);
+		NovaView view = new NovaView(viewName);
+		if (start > 0) {
+			view.setSkip(start);
+		}
+		if (limit > 0) {
+			view.setLimit(limit);
+		}
+
+		return getQuestions(view, session);
 	}
 
 	@Cacheable("skillquestions")
 	@Override
 	public List<Question> getSkillQuestionsForTeachers(final Session session, final int start, final int limit) {
 		String viewName = "skill_question/by_session_sorted_by_subject_and_text";
-		return getQuestions(new NovaView(viewName), session);
+		NovaView view = new NovaView(viewName);
+		if (start > 0) {
+			view.setSkip(start);
+		}
+		if (limit > 0) {
+			view.setLimit(limit);
+		}
+
+		return getQuestions(view, session);
 	}
 
 	@Override
@@ -1013,6 +1035,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public List<Answer> getFreetextAnswers(final String questionId, final int start, final int limit) {
 		final List<Answer> answers = new ArrayList<Answer>();
 		final NovaView view = new NovaView("skill_question/freetext_answers_full");
+		if (start > 0) {
+			view.setSkip(start);
+		}
+		if (limit > 0) {
+			view.setLimit(limit);
+		}
 		view.setKey(questionId);
 		final ViewResults results = getDatabase().view(view);
 		if (results.getResults().isEmpty()) {
@@ -1144,6 +1172,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<InterposedQuestion> getInterposedQuestions(final Session session, final int start, final int limit) {
 		final NovaView view = new NovaView("interposed_question/by_session_full");
+		if (start > 0) {
+			view.setSkip(start);
+		}
+		if (limit > 0) {
+			view.setLimit(limit);
+		}
 		view.setKey(session.get_id());
 		final ViewResults questions = getDatabase().view(view);
 		if (questions == null || questions.isEmpty()) {
@@ -1155,6 +1189,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<InterposedQuestion> getInterposedQuestions(final Session session, final User user, final int start, final int limit) {
 		final NovaView view = new NovaView("interposed_question/by_session_and_creator");
+		if (start > 0) {
+			view.setSkip(start);
+		}
+		if (limit > 0) {
+			view.setLimit(limit);
+		}
 		view.setKey(session.get_id(), user.getUsername());
 		final ViewResults questions = getDatabase().view(view);
 		if (questions == null || questions.isEmpty()) {
@@ -1278,6 +1318,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Session> getMyVisitedSessions(final User user, final int start, final int limit) {
 		final NovaView view = new NovaView("logged_in/visited_sessions_by_user");
+		if (start > 0) {
+			view.setSkip(start);
+		}
+		if (limit > 0) {
+			view.setLimit(limit);
+		}
 		view.setKey(user.getUsername());
 		final ViewResults sessions = getDatabase().view(view);
 		final List<Session> allSessions = new ArrayList<Session>();
@@ -1521,39 +1567,87 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Question> getLectureQuestionsForUsers(final Session session, final int start, final int limit) {
 		String viewName = "skill_question/lecture_question_by_session_for_all";
-		return getQuestions(new NovaView(viewName), session);
+		NovaView view = new NovaView(viewName);
+		if (start > 0) {
+			view.setSkip(start);
+		}
+		if (limit > 0) {
+			view.setLimit(limit);
+		}
+
+		return getQuestions(view, session);
 	}
 
 	@Override
 	public List<Question> getLectureQuestionsForTeachers(final Session session, final int start, final int limit) {
 		String viewName = "skill_question/lecture_question_by_session";
-		return getQuestions(new NovaView(viewName), session);
+		NovaView view = new NovaView(viewName);
+		if (start > 0) {
+			view.setSkip(start);
+		}
+		if (limit > 0) {
+			view.setLimit(limit);
+		}
+
+		return getQuestions(view, session);
 	}
 
 	@Cacheable("flashcardquestions")
 	@Override
 	public List<Question> getFlashcardsForUsers(final Session session, final int start, final int limit) {
 		String viewName = "skill_question/flashcard_by_session_for_all";
-		return getQuestions(new NovaView(viewName), session);
+		NovaView view = new NovaView(viewName);
+		if (start > 0) {
+			view.setSkip(start);
+		}
+		if (limit > 0) {
+			view.setLimit(limit);
+		}
+
+		return getQuestions(view, session);
 	}
 
 	@Override
 	public List<Question> getFlashcardsForTeachers(final Session session, final int start, final int limit) {
 		String viewName = "skill_question/flashcard_by_session";
-		return getQuestions(new NovaView(viewName), session);
+		NovaView view = new NovaView(viewName);
+		if (start > 0) {
+			view.setSkip(start);
+		}
+		if (limit > 0) {
+			view.setLimit(limit);
+		}
+
+		return getQuestions(view, session);
 	}
 
 	@Cacheable("preparationquestions")
 	@Override
 	public List<Question> getPreparationQuestionsForUsers(final Session session, final int start, final int limit) {
 		String viewName = "skill_question/preparation_question_by_session_for_all";
-		return getQuestions(new NovaView(viewName), session);
+		NovaView view = new NovaView(viewName);
+		if (start > 0) {
+			view.setSkip(start);
+		}
+		if (limit > 0) {
+			view.setLimit(limit);
+		}
+
+		return getQuestions(view, session);
 	}
 
 	@Override
 	public List<Question> getPreparationQuestionsForTeachers(final Session session, final int start, final int limit) {
 		String viewName = "skill_question/preparation_question_by_session";
-		return getQuestions(new NovaView(viewName), session);
+		NovaView view = new NovaView(viewName);
+		if (start > 0) {
+			view.setSkip(start);
+		}
+		if (limit > 0) {
+			view.setLimit(limit);
+		}
+
+		return getQuestions(view, session);
 	}
 
 	private List<Question> getQuestions(final NovaView view, final Session session) {
