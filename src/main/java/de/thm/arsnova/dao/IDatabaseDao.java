@@ -65,9 +65,9 @@ public interface IDatabaseDao {
 	@Deprecated
 	List<Question> getSkillQuestions(User user, Session session);
 
-	List<Question> getSkillQuestionsForUsers(Session session, final int start, final int limit);
+	List<Question> getSkillQuestionsForUsers(Session session);
 
-	List<Question> getSkillQuestionsForTeachers(Session session, final int start, final int limit);
+	List<Question> getSkillQuestionsForTeachers(Session session);
 
 	int getSkillQuestionCount(Session session);
 
@@ -139,17 +139,17 @@ public interface IDatabaseDao {
 
 	void deleteSession(Session session);
 
-	List<Question> getLectureQuestionsForUsers(Session session, final int start, final int limit);
+	List<Question> getLectureQuestionsForUsers(Session session);
 
-	List<Question> getLectureQuestionsForTeachers(Session session, final int start, final int limit);
+	List<Question> getLectureQuestionsForTeachers(Session session);
 
-	List<Question> getFlashcardsForUsers(Session session, final int start, final int limit);
+	List<Question> getFlashcardsForUsers(Session session);
 
-	List<Question> getFlashcardsForTeachers(Session session, final int start, final int limit);
+	List<Question> getFlashcardsForTeachers(Session session);
 
-	List<Question> getPreparationQuestionsForUsers(Session session, final int start, final int limit);
+	List<Question> getPreparationQuestionsForUsers(Session session);
 
-	List<Question> getPreparationQuestionsForTeachers(Session session, final int start, final int limit);
+	List<Question> getPreparationQuestionsForTeachers(Session session);
 
 	int getLectureQuestionCount(Session session);
 

@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.thm.arsnova.PaginationListDecorator;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.exceptions.BadRequestException;
@@ -144,10 +145,10 @@ public class LecturerQuestionController extends PaginationController {
 		}
 
 		if (lectureQuestionsOnly) {
-			questions = questionService.getLectureQuestions(sessionkey, -1, -1);
+			questions = questionService.getLectureQuestions(sessionkey);
 			questionService.setVotingAdmissions(sessionkey, disable, questions);
 		} else if (preparationQuestionsOnly) {
-			questions = questionService.getPreparationQuestions(sessionkey, -1, -1);
+			questions = questionService.getPreparationQuestions(sessionkey);
 			questionService.setVotingAdmissions(sessionkey, disable, questions);
 		} else {
 			questionService.setVotingAdmissionForAllQuestions(sessionkey, disable);
@@ -181,10 +182,10 @@ public class LecturerQuestionController extends PaginationController {
 		}
 
 		if (lectureQuestionsOnly) {
-			questions = questionService.getLectureQuestions(sessionkey, -1, -1);
+			questions = questionService.getLectureQuestions(sessionkey);
 			questionService.publishQuestions(sessionkey, publish, questions);
 		} else if (preparationQuestionsOnly) {
-			questions = questionService.getPreparationQuestions(sessionkey, -1, -1);
+			questions = questionService.getPreparationQuestions(sessionkey);
 			questionService.publishQuestions(sessionkey, publish, questions);
 		} else {
 			questionService.publishAll(sessionkey, p);
@@ -226,19 +227,20 @@ public class LecturerQuestionController extends PaginationController {
 			) {
 		List<Question> questions;
 		if (lectureQuestionsOnly) {
-			questions = questionService.getLectureQuestions(sessionkey, offset, limit);
+			questions = questionService.getLectureQuestions(sessionkey);
 		} else if (flashcardsOnly) {
-			questions = questionService.getFlashcards(sessionkey, offset, limit);
+			questions = questionService.getFlashcards(sessionkey);
 		} else if (preparationQuestionsOnly) {
-			questions = questionService.getPreparationQuestions(sessionkey, offset, limit);
+			questions = questionService.getPreparationQuestions(sessionkey);
 		} else {
-			questions = questionService.getSkillQuestions(sessionkey, offset, limit);
+			questions = questionService.getSkillQuestions(sessionkey);
 		}
 		if (questions == null || questions.isEmpty()) {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
 			return null;
 		}
-		return questions;
+
+		return new PaginationListDecorator<Question>(questions, offset, limit);
 	}
 
 	@RequestMapping(value = { "/" }, method = RequestMethod.DELETE)
@@ -364,16 +366,16 @@ public class LecturerQuestionController extends PaginationController {
 			) {
 		List<Answer> answers = null;
 		if (allAnswers) {
-			answers = questionService.getAllAnswers(questionId);
+			answers = questionService.getAllAnswers(questionId, -1, -1);
 		} else if (null == piRound) {
-			answers = questionService.getAnswers(questionId);
+			answers = questionService.getAnswers(questionId, offset, limit);
 		} else {
 			if (piRound < 1 || piRound > 2) {
 				response.setStatus(HttpStatus.BAD_REQUEST.value());
 
 				return null;
 			}
-			answers = questionService.getAnswers(questionId, piRound);
+			answers = questionService.getAnswers(questionId, piRound, offset, limit);
 		}
 		if (answers == null) {
 			return new ArrayList<Answer>();

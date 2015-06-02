@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import de.thm.arsnova.PaginationListDecorator;
 import de.thm.arsnova.controller.PaginationController;
 import de.thm.arsnova.services.ResponseProviderService;
 
@@ -79,13 +80,18 @@ public class RangeAspect {
 		List<?> list = (List<?>) pjp.proceed();
 
 		if (matcher != null && matcher.matches()) {
+			int totalSize = -1;
+			if (list instanceof PaginationListDecorator) {
+				PaginationListDecorator<?> pl = (PaginationListDecorator<?>) list;
+				totalSize = pl.getTotalSize();
+			}
+
 			/* Header format: "items <start>-<end>/<total>"
 			 *
 			 * The value for end is calculated since the result list
 			 * could be shorter than requested.
-			 *
-			 * TODO: Set correct value for total */
-			String rangeStr = String.format("items %d-%d/%d", start, start + list.size() - 1, -1);
+			 */
+			String rangeStr = String.format("items %d-%d/%d", start, start + list.size() - 1, totalSize);
 			HttpServletResponse response = responseProviderService.getResponse();
 			response.addHeader("Content-Range", rangeStr);
 		}

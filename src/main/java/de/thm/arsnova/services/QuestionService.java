@@ -103,13 +103,13 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Question> getSkillQuestions(final String sessionkey, final int offset, final int limit) {
+	public List<Question> getSkillQuestions(final String sessionkey) {
 		final Session session = getSession(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
-			return databaseDao.getSkillQuestionsForTeachers(session, offset, limit);
+			return databaseDao.getSkillQuestionsForTeachers(session);
 		} else {
-			return databaseDao.getSkillQuestionsForUsers(session, offset, limit);
+			return databaseDao.getSkillQuestionsForUsers(session);
 		}
 	}
 
@@ -479,25 +479,25 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getAnswers(final String questionId, final int piRound) {
+	public List<Answer> getAnswers(final String questionId, final int piRound, final int offset, final int limit) {
 		final Question question = databaseDao.getQuestion(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
 		return "freetext".equals(question.getQuestionType())
-				? getFreetextAnswers(questionId, -1, -1)
+				? getFreetextAnswers(questionId, offset, limit)
 						: databaseDao.getAnswers(question, piRound);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getAnswers(final String questionId) {
+	public List<Answer> getAnswers(final String questionId, final int offset, final int limit) {
 		final Question question = getQuestion(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
 		if ("freetext".equals(question.getQuestionType())) {
-			return getFreetextAnswers(questionId, -1, -1);
+			return getFreetextAnswers(questionId, offset, limit);
 		} else {
 			return databaseDao.getAnswers(question);
 		}
@@ -505,13 +505,13 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getAllAnswers(final String questionId) {
+	public List<Answer> getAllAnswers(final String questionId, final int offset, final int limit) {
 		final Question question = getQuestion(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
 		if ("freetext".equals(question.getQuestionType())) {
-			return getFreetextAnswers(questionId, -1, -1);
+			return getFreetextAnswers(questionId, offset, limit);
 		} else {
 			return databaseDao.getAllAnswers(question);
 		}
@@ -581,7 +581,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	public List<Answer> getMyAnswers(final String sessionKey) {
 		final Session session = getSession(sessionKey);
 		// Load questions first because we are only interested in answers of the latest piRound.
-		final List<Question> questions = databaseDao.getSkillQuestionsForUsers(session, -1, -1);
+		final List<Question> questions = databaseDao.getSkillQuestionsForUsers(session);
 		final Map<String, Question> questionIdToQuestion = new HashMap<String, Question>();
 		for (final Question question : questions) {
 			questionIdToQuestion.put(question.get_id(), question);
@@ -799,7 +799,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Question> getLectureQuestions(final String sessionkey, final int offset, final int limit) {
+	public List<Question> getLectureQuestions(final String sessionkey) {
 		final Session session = getSession(sessionkey);
 		SortOrder subjectSortOrder = databaseDao.getSortOrder(session.get_id(), "lecture", "");
 		if (subjectSortOrder == null) {
@@ -810,27 +810,27 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 		final User user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
-			return databaseDao.getLectureQuestionsForTeachers(session, offset, limit);
+			return databaseDao.getLectureQuestionsForTeachers(session);
 		} else {
-			return databaseDao.getLectureQuestionsForUsers(session, offset, limit);
+			return databaseDao.getLectureQuestionsForUsers(session);
 		}
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Question> getFlashcards(final String sessionkey, final int offset, final int limit) {
+	public List<Question> getFlashcards(final String sessionkey) {
 		final Session session = getSession(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
-			return databaseDao.getFlashcardsForTeachers(session, offset, limit);
+			return databaseDao.getFlashcardsForTeachers(session);
 		} else {
-			return databaseDao.getFlashcardsForUsers(session, offset, limit);
+			return databaseDao.getFlashcardsForUsers(session);
 		}
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Question> getPreparationQuestions(final String sessionkey, final int offset, final int limit) {
+	public List<Question> getPreparationQuestions(final String sessionkey) {
 		final Session session = getSession(sessionkey);
 		SortOrder subjectSortOrder = databaseDao.getSortOrder(session.get_id(), "preparation", "");
 		if (subjectSortOrder == null) {
@@ -841,9 +841,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 		final User user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
-			return databaseDao.getPreparationQuestionsForTeachers(session, offset, limit);
+			return databaseDao.getPreparationQuestionsForTeachers(session);
 		} else {
-			return databaseDao.getPreparationQuestionsForUsers(session, offset, limit);
+			return databaseDao.getPreparationQuestionsForUsers(session);
 		}
 	}
 
@@ -1042,7 +1042,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	public String getImage(String questionId, String answerId) {
-		final List<Answer> answers = getAnswers(questionId);
+		final List<Answer> answers = getAnswers(questionId, -1, -1);
 		Answer answer = null;
 
 		for (Answer a : answers) {

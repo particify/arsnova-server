@@ -499,49 +499,49 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Question> getSkillQuestionsForUsers(Session session, final int start, final int limit) {
+	public List<Question> getSkillQuestionsForUsers(Session session) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Question> getSkillQuestionsForTeachers(Session session, final int start, final int limit) {
+	public List<Question> getSkillQuestionsForTeachers(Session session) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Question> getLectureQuestionsForUsers(Session session, final int start, final int limit) {
+	public List<Question> getLectureQuestionsForUsers(Session session) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Question> getLectureQuestionsForTeachers(Session session, final int start, final int limit) {
+	public List<Question> getLectureQuestionsForTeachers(Session session) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Question> getFlashcardsForUsers(Session session, final int start, final int limit) {
+	public List<Question> getFlashcardsForUsers(Session session) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Question> getFlashcardsForTeachers(Session session, final int start, final int limit) {
+	public List<Question> getFlashcardsForTeachers(Session session) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Question> getPreparationQuestionsForUsers(Session session, final int start, final int limit) {
+	public List<Question> getPreparationQuestionsForUsers(Session session) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Question> getPreparationQuestionsForTeachers(Session session, final int start, final int limit) {
+	public List<Question> getPreparationQuestionsForTeachers(Session session) {
 		// TODO Auto-generated method stub
 		return null;
 	}
