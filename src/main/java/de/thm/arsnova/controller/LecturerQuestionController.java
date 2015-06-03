@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.thm.arsnova.PaginationListDecorator;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.exceptions.BadRequestException;
@@ -43,13 +44,14 @@ import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.web.DeprecatedApi;
+import de.thm.arsnova.web.Pagination;
 
 /**
  * Handles requests related to questions teachers are asking their students.
  */
 @RestController
 @RequestMapping("/lecturerquestion")
-public class LecturerQuestionController extends AbstractController {
+public class LecturerQuestionController extends PaginationController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(LecturerQuestionController.class);
 
@@ -215,6 +217,7 @@ public class LecturerQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
+	@Pagination
 	public List<Question> getSkillQuestions(
 			@RequestParam final String sessionkey,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
@@ -236,7 +239,8 @@ public class LecturerQuestionController extends AbstractController {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
 			return null;
 		}
-		return questions;
+
+		return new PaginationListDecorator<Question>(questions, offset, limit);
 	}
 
 	@RequestMapping(value = { "/" }, method = RequestMethod.DELETE)
@@ -362,16 +366,16 @@ public class LecturerQuestionController extends AbstractController {
 			) {
 		List<Answer> answers = null;
 		if (allAnswers) {
-			answers = questionService.getAllAnswers(questionId);
+			answers = questionService.getAllAnswers(questionId, -1, -1);
 		} else if (null == piRound) {
-			answers = questionService.getAnswers(questionId);
+			answers = questionService.getAnswers(questionId, offset, limit);
 		} else {
 			if (piRound < 1 || piRound > 2) {
 				response.setStatus(HttpStatus.BAD_REQUEST.value());
 
 				return null;
 			}
-			answers = questionService.getAnswers(questionId, piRound);
+			answers = questionService.getAnswers(questionId, piRound, offset, limit);
 		}
 		if (answers == null) {
 			return new ArrayList<Answer>();
@@ -484,8 +488,9 @@ public class LecturerQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{questionId}/freetextanswer/", method = RequestMethod.GET)
+	@Pagination
 	public List<Answer> getFreetextAnswers(@PathVariable final String questionId) {
-		return questionService.getFreetextAnswers(questionId);
+		return questionService.getFreetextAnswers(questionId, offset, limit);
 	}
 
 	@DeprecatedApi

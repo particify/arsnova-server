@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -480,25 +479,25 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getAnswers(final String questionId, final int piRound) {
+	public List<Answer> getAnswers(final String questionId, final int piRound, final int offset, final int limit) {
 		final Question question = databaseDao.getQuestion(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
 		return "freetext".equals(question.getQuestionType())
-				? getFreetextAnswers(questionId)
+				? getFreetextAnswers(questionId, offset, limit)
 						: databaseDao.getAnswers(question, piRound);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getAnswers(final String questionId) {
+	public List<Answer> getAnswers(final String questionId, final int offset, final int limit) {
 		final Question question = getQuestion(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
 		if ("freetext".equals(question.getQuestionType())) {
-			return getFreetextAnswers(questionId);
+			return getFreetextAnswers(questionId, offset, limit);
 		} else {
 			return databaseDao.getAnswers(question);
 		}
@@ -506,13 +505,13 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getAllAnswers(final String questionId) {
+	public List<Answer> getAllAnswers(final String questionId, final int offset, final int limit) {
 		final Question question = getQuestion(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
 		if ("freetext".equals(question.getQuestionType())) {
-			return getFreetextAnswers(questionId);
+			return getFreetextAnswers(questionId, offset, limit);
 		} else {
 			return databaseDao.getAllAnswers(question);
 		}
@@ -564,8 +563,8 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getFreetextAnswers(final String questionId) {
-		final List<Answer> answers = databaseDao.getFreetextAnswers(questionId);
+	public List<Answer> getFreetextAnswers(final String questionId, final int offset, final int limit) {
+		final List<Answer> answers = databaseDao.getFreetextAnswers(questionId, offset, limit);
 		if (answers == null) {
 			throw new NotFoundException();
 		}
@@ -644,13 +643,13 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<InterposedQuestion> getInterposedQuestions(final String sessionKey) {
+	public List<InterposedQuestion> getInterposedQuestions(final String sessionKey, final int offset, final int limit) {
 		final Session session = this.getSession(sessionKey);
 		final User user = getCurrentUser();
 		if (session.isCreator(user)) {
-			return databaseDao.getInterposedQuestions(session);
+			return databaseDao.getInterposedQuestions(session, offset, limit);
 		} else {
-			return databaseDao.getInterposedQuestions(session, user);
+			return databaseDao.getInterposedQuestions(session, user, offset, limit);
 		}
 	}
 
@@ -1043,7 +1042,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	public String getImage(String questionId, String answerId) {
-		final List<Answer> answers = getAnswers(questionId);
+		final List<Answer> answers = getAnswers(questionId, -1, -1);
 		Answer answer = null;
 
 		for (Answer a : answers) {

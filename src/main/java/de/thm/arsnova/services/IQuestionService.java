@@ -61,17 +61,17 @@ public interface IQuestionService {
 
 	void readFreetextAnswer(String answerId, User user);
 
-	List<Answer> getAnswers(String questionId, int piRound);
+	List<Answer> getAnswers(String questionId, int piRound, int offset, int limit);
 
-	List<Answer> getAnswers(String questionId);
+	List<Answer> getAnswers(String questionId, int offset, int limit);
 
-	List<Answer> getAllAnswers(String questionId);
+	List<Answer> getAllAnswers(String questionId, int offset, int limit);
 
 	int getAnswerCount(String questionId);
 
 	int getAnswerCount(String questionId, int piRound);
 
-	List<Answer> getFreetextAnswers(String questionId);
+	List<Answer> getFreetextAnswers(String questionId, int offset, int limit);
 
 	List<Answer> getMyAnswers(String sessionKey);
 
@@ -83,7 +83,7 @@ public interface IQuestionService {
 
 	InterposedReadingCount getInterposedReadingCount(String sessionKey, String username);
 
-	List<InterposedQuestion> getInterposedQuestions(String sessionKey);
+	List<InterposedQuestion> getInterposedQuestions(String sessionKey, int offset, int limit);
 
 	InterposedQuestion readInterposedQuestion(String questionId);
 

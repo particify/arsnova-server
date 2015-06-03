@@ -187,8 +187,8 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Session> getMySessions() {
-		return databaseDao.getMySessions(userService.getCurrentUser());
+	public List<Session> getMySessions(final int offset, final int limit) {
+		return databaseDao.getMySessions(userService.getCurrentUser(), offset, limit);
 	}
 
 	@Override
@@ -205,21 +205,21 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<SessionInfo> getMySessionsInfo() {
+	public List<SessionInfo> getMySessionsInfo(final int offset, final int limit) {
 		final User user = userService.getCurrentUser();
-		return databaseDao.getMySessionsInfo(user);
+		return databaseDao.getMySessionsInfo(user, offset, limit);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Session> getMyVisitedSessions() {
-		return databaseDao.getMyVisitedSessions(userService.getCurrentUser());
+	public List<Session> getMyVisitedSessions(final int offset, final int limit) {
+		return databaseDao.getMyVisitedSessions(userService.getCurrentUser(), offset, limit);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<SessionInfo> getMyVisitedSessionsInfo() {
-		return databaseDao.getMyVisitedSessionsInfo(userService.getCurrentUser());
+	public List<SessionInfo> getMyVisitedSessionsInfo(final int offset, final int limit) {
+		return databaseDao.getMyVisitedSessionsInfo(userService.getCurrentUser(), offset, limit);
 	}
 
 	@Override
