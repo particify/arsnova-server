@@ -22,6 +22,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+
 import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.services.IStatisticsService;
 import de.thm.arsnova.web.CacheControl;
@@ -31,11 +34,15 @@ import de.thm.arsnova.web.DeprecatedApi;
  * Allows retrieval of several statistics such as the number of active users.
  */
 @RestController
+@Api(value = "/statistics", description = "the Statistic API")
 public class StatisticsController extends AbstractController {
 
 	@Autowired
 	private IStatisticsService statisticsService;
 
+	@ApiOperation(value = "Retrieves global statistics",
+				  nickname = "getStatistics",
+				  notes = "Request encoding: none, Repsonse structure: none, encoding-type: application/json")
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics")
 	@CacheControl(maxAge = 60, policy = CacheControl.Policy.PUBLIC)
 	public Statistics getStatistics() {

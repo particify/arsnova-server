@@ -31,6 +31,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
+import com.wordnik.swagger.annotations.Authorization;
+import com.wordnik.swagger.annotations.AuthorizationScope;
+
 import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.transport.InterposedQuestion;
 import de.thm.arsnova.exceptions.BadRequestException;
@@ -43,6 +51,7 @@ import de.thm.arsnova.web.Pagination;
  */
 @RestController
 @RequestMapping("/audiencequestion")
+@Api(value = "/audiencequestion", description = "the Audience Question API")
 public class AudienceQuestionController extends PaginationController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(AudienceQuestionController.class);
@@ -50,34 +59,62 @@ public class AudienceQuestionController extends PaginationController {
 	@Autowired
 	private IQuestionService questionService;
 
+	@ApiOperation(value = "Count all the questions in current session",
+				  nickname = "getAudienceQuestionCount",
+				  notes = "getInterposedCount(String sessionkey, String user)"/*,
+				  authorizations = {
+			          @Authorization(
+			                  value = "arsnovaoauth",
+			                  scopes = {
+			                          @AuthorizationScope(
+			                                  scope = "getInterposedCount:questions",
+			                                  description = "Count all the questions in current session")
+			                          }
+			                  )
+			    }*/)
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	@DeprecatedApi
-	public int getInterposedCount(@RequestParam final String sessionkey) {
+	public int getInterposedCount(@ApiParam(value="Session-Key from current session", required=true) @RequestParam final String sessionkey) {
 		return questionService.getInterposedCount(sessionkey);
 	}
 
+	@ApiOperation(value = "count all unread interposed questions",
+				  nickname = "getUnreadInterposedCount",
+				  notes = "getUnreadInterposedCount(String sessionkey, String user)")
 	@RequestMapping(value = "/readcount", method = RequestMethod.GET)
 	@DeprecatedApi
-	public InterposedReadingCount getUnreadInterposedCount(@RequestParam("sessionkey") final String sessionkey, String user) {
+	public InterposedReadingCount getUnreadInterposedCount(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam("sessionkey") final String sessionkey, String user) {
 		return questionService.getInterposedReadingCount(sessionkey, user);
 	}
 
+	@ApiOperation(value = "Retrieves all Interposed Questions for a Session",
+				  nickname = "getInterposedQuestions",
+				  notes = "Repsonse structure: InterposedQuestion[], encoding-type: application/json")
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
-	public List<InterposedQuestion> getInterposedQuestions(@RequestParam final String sessionkey) {
+	public List<InterposedQuestion> getInterposedQuestions(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey) {
 		return InterposedQuestion.fromList(questionService.getInterposedQuestions(sessionkey, offset, limit));
 	}
 
+	@ApiOperation(value = "Retrieves an InterposedQuestion",
+				  nickname = "getInterposedQuestion",
+				  notes = "Repsonse structure: InterposedQuestion, encoding-type: application/json")
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
-	public InterposedQuestion getInterposedQuestion(@PathVariable final String questionId) {
+	public InterposedQuestion getInterposedQuestion(@ApiParam(value = "ID of the question that needs to be deleted", required = true) @PathVariable final String questionId) {
 		return new InterposedQuestion(questionService.readInterposedQuestion(questionId));
 	}
 
+	@ApiOperation(value = "Creates a new Interposed Question for a Session and returns the InterposedQuestion's data",
+				  nickname = "postInterposedQuestion",
+				  notes = "Repsonse structure: InterposedQuestion, encoding-type: application/json")
+	@ApiResponses(value = {
+    	@ApiResponse(code = 400, message = "Bad Request - The Api cannot or will not process the request due to something that is perceived to be a client error")
+    })
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void postInterposedQuestion(
-			@RequestParam final String sessionkey,
-			@RequestBody final de.thm.arsnova.entities.InterposedQuestion question
+			@ApiParam(value="Session-Key from current session", required=true) @RequestParam final String sessionkey,
+			@ApiParam(value="the body from the new question", required=true) @RequestBody final de.thm.arsnova.entities.InterposedQuestion question
 			) {
 		if (questionService.saveQuestion(question)) {
 			return;
@@ -86,8 +123,11 @@ public class AudienceQuestionController extends PaginationController {
 		throw new BadRequestException();
 	}
 
+	@ApiOperation(value = "Deletes an InterposedQuestion",
+				  nickname = "deleteInterposedQuestion",
+				  notes = "Repsonse structure: none, encoding-type: application/json")
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)
-	public void deleteInterposedQuestion(@PathVariable final String questionId) {
+	public void deleteInterposedQuestion(@ApiParam(value = "ID of the question that needs to be deleted", required=true) @PathVariable final String questionId) {
 		questionService.deleteInterposedQuestion(questionId);
 	}
 }

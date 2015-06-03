@@ -32,6 +32,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
+
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.services.UserSessionService;
@@ -42,6 +48,7 @@ import de.thm.arsnova.socket.ARSnovaSocket;
  */
 @RestController
 @RequestMapping("/socket")
+@Api(value = "/socket", description = "the Socket API")
 public class SocketController extends AbstractController {
 
 	@Autowired
@@ -55,8 +62,16 @@ public class SocketController extends AbstractController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SocketController.class);
 
+	@ApiOperation(value = "requested to assign Websocket session",
+				  nickname = "authorize",
+				  notes = "Request encoding: none, Repsonse structure: none, encoding-type: application/json")
+	@ApiResponses(value = {
+		@ApiResponse(code = 204, message = "No Content - successfully processed the request"),
+		@ApiResponse(code = 400, message = "Bad Request - The Api cannot or will not process the request due to something that is perceived to be a client error"),
+		@ApiResponse(code = 403, message = "Forbidden - The request was a valid request, but the Api is refusing to respond to it")
+	})
 	@RequestMapping(method = RequestMethod.POST, value = "/assign")
-	public void authorize(@RequestBody final Map<String, String> sessionMap, final HttpServletResponse response) {
+	public void authorize(@ApiParam(value="sessionMap", required=true) @RequestBody final Map<String, String> sessionMap, @ApiParam(value="response", required=true) final HttpServletResponse response) {
 		String socketid = sessionMap.get("session");
 		if (null == socketid) {
 			LOGGER.debug("Expected property 'session' missing", socketid);
@@ -74,6 +89,9 @@ public class SocketController extends AbstractController {
 		response.setStatus(HttpStatus.NO_CONTENT.value());
 	}
 
+	@ApiOperation(value = "retrieves a socket url",
+				  nickname = "getSocketUrl",
+				  notes = "Request encoding: none, Repsonse structure: none, encoding-type: application/json")
 	@RequestMapping(value = "/url", method = RequestMethod.GET)
 	public String getSocketUrl(final HttpServletRequest request) {
 		StringBuilder url = new StringBuilder();
