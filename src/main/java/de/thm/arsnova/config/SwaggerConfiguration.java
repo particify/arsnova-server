@@ -1,8 +1,29 @@
 package de.thm.arsnova.config;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
+import springfox.documentation.service.ApiInfo;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+@Configuration
+@EnableWebMvc
 @EnableSwagger2
+@ComponentScan(basePackages = {"de.thm.arsnova.controller","de.thm.arsnova.domain"})
 public class SwaggerConfiguration {
-	//api version und Beschreibung einfügen
+
+	@Bean
+	public Docket customImplementation() {
+		return new Docket(DocumentationType.SWAGGER_2)
+		.apiInfo(getApiInfo());
+	}
+
+	private ApiInfo getApiInfo() {
+		return new ApiInfo("ARSnova API's", "Swagger Interface for RESTful APIs", "1.0", "",
+				"arsnova@thm.de", "Apache License 2.0", "");
+	}
 }
