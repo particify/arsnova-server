@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.controller;
 
+/**
+ * Adds pagination properties to controllers.
+ */
 public class PaginationController extends AbstractController {
 	protected int offset = -1;
 	protected int limit = -1;

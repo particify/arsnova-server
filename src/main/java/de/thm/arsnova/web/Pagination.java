@@ -23,6 +23,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Marks controller methods for pagination. For pagination to work the controller class has to specialize
+ * {@link de.thm.arsnova.controller.PaginationController} and the return value has to be a List.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
 @Documented

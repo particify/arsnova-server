@@ -26,6 +26,10 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import de.thm.arsnova.services.ResponseProviderService;
 
+/**
+ *  Injects a {@link HttpServletResponse} into {@link ResponseProviderService} to allow access to it outside of
+ *  Controllers.
+ */
 @Component
 public class ResponseInterceptorHandler extends HandlerInterceptorAdapter {
 

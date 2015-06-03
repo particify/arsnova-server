@@ -37,6 +37,11 @@ import de.thm.arsnova.PaginationListDecorator;
 import de.thm.arsnova.controller.PaginationController;
 import de.thm.arsnova.services.ResponseProviderService;
 
+/**
+ * An aspect which parses requests for pagination parameters in a "Range" header and adds a "Content-Range" header to
+ * the response. It only applies to methods of {@link PaginationController}s annotated with
+ * {@link de.thm.arsnova.web.Pagination} which return a {@link List}.
+ */
 @Component
 @Aspect
 @Profile("!test")
@@ -52,8 +57,7 @@ public class RangeAspect {
 
 	private static final Logger logger = LoggerFactory.getLogger(RangeAspect.class);
 
-	/** Sets start and end parameters based on request's range header
-	 * and sets content range header for the response
+	/** Sets start and end parameters based on request's range header and sets content range header for the response.
 	 *
 	 * @param controller
 	 * @throws Throwable

@@ -22,6 +22,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+/**
+ * Extends {@link List}s with the ability to paginate.
+ *
+ * @param <T> type of the List items
+ */
 public class PaginationListDecorator<T> implements List<T> {
 	private final List<T> list;
 	private List<T> subList;
@@ -45,30 +50,48 @@ public class PaginationListDecorator<T> implements List<T> {
 		}
 	}
 
+	/**
+	 * @return the original (not paginated) List
+	 */
 	public List<T> getList() {
 		return list;
 	}
 
+	/**
+	 * @return the number of skipped items
+	 */
 	public int getOffset() {
 		return offset;
 	}
 
+	/**
+	 * @param offset the number of items to be skipped
+	 */
 	public void setOffset(final int offset) {
 		this.offset = offset;
 		checkRange();
 		subList = list.subList(this.offset, this.offset + this.limit);
 	}
 
+	/**
+	 * @return the size limit of the paginated list
+	 */
 	public int getLimit() {
 		return limit;
 	}
 
+	/**
+	 * @param limit the size limit for the resulting list
+	 */
 	public void setLimit(final int limit) {
 		this.limit = limit;
 		checkRange();
 		subList = list.subList(this.offset, this.offset + this.limit);
 	}
 
+	/**
+	 * @return the size of the original (not paginated) List
+	 */
 	public int getTotalSize() {
 		return list.size();
 	}
