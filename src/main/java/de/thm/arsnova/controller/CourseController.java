@@ -30,6 +30,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
@@ -43,6 +48,7 @@ import de.thm.arsnova.services.IUserService;
  * Provides access to a user's courses in an LMS such as Moodle.
  */
 @RestController
+@Api(value = "/course", description = "the Course API")
 public class CourseController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(CourseController.class);
@@ -52,9 +58,16 @@ public class CourseController extends AbstractController {
 
 	@Autowired
 	private IUserService userService;
-
+     
+	@ApiOperation(value = "retrieves a User Courses",
+			      nickname = "myCourses",
+			      notes = "Request encoding: none, Repsonse structure: none, encoding-type: application/json")
+    @ApiResponses(value = {
+	@ApiResponse(code = 200, message = "successful API requests")
+              })	
 	@RequestMapping(value = "/mycourses", method = RequestMethod.GET)
 	public List<Course> myCourses(
+		    @ApiParam(value="sort my courses by name", required=true)
 			@RequestParam(value = "sortby", defaultValue = "name") final String sortby
 			) {
 
@@ -106,3 +119,4 @@ public class CourseController extends AbstractController {
 		}
 	}
 }
+
