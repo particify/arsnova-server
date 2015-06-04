@@ -30,6 +30,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import springfox.documentation.annotations.ApiIgnore;
+
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
@@ -43,6 +45,7 @@ import de.thm.arsnova.exceptions.PayloadTooLargeException;
  * Translates security/authentication related exceptions into HTTP status codes.
  */
 @ControllerAdvice
+@ApiIgnore
 public class SecurityExceptionControllerAdvice {
 
 	@ResponseStatus(HttpStatus.NOT_FOUND)

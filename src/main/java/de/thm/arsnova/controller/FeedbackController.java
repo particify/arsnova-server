@@ -28,6 +28,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import springfox.documentation.annotations.ApiIgnore;
+
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -42,6 +44,7 @@ import de.thm.arsnova.web.DeprecatedApi;
  * @see de.thm.arsnova.socket.ARSnovaSocketIOServer
  */
 @RestController
+@ApiIgnore
 public class FeedbackController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(FeedbackController.class);

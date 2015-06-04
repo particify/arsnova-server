@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import springfox.documentation.annotations.ApiIgnore;
+
 import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.web.DeprecatedApi;
 
@@ -33,6 +35,7 @@ import de.thm.arsnova.web.DeprecatedApi;
  * This controller forwards requests from deprecated URLs to their new controller, where the requests are handled.
  */
 @Controller
+@ApiIgnore
 public class LegacyController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(LegacyController.class);
