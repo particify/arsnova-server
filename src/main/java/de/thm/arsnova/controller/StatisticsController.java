@@ -42,25 +42,28 @@ public class StatisticsController extends AbstractController {
 
 	@ApiOperation(value = "Retrieves global statistics",
 				  nickname = "getStatistics",
-				  notes = "Request encoding: none, Repsonse structure: none, encoding-type: application/json")
+				  notes = "getStatistics()")
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics")
 	@CacheControl(maxAge = 60, policy = CacheControl.Policy.PUBLIC)
 	public Statistics getStatistics() {
 		return statisticsService.getStatistics();
 	}
 
+	@ApiOperation(hidden=true, value="")
 	@DeprecatedApi
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics/activeusercount", produces = "text/plain")
 	public String countActiveUsers() {
 		return Integer.toString(statisticsService.getStatistics().getActiveUsers());
 	}
 
+	@ApiOperation(hidden=true, value="")
 	@DeprecatedApi
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics/loggedinusercount", produces = "text/plain")
 	public String countLoggedInUsers() {
 		return Integer.toString(statisticsService.getStatistics().getLoggedinUsers());
 	}
 
+	@ApiOperation(hidden=true, value="")
 	@DeprecatedApi
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics/sessioncount", produces = "text/plain")
 	public String countSessions() {

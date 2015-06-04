@@ -378,6 +378,7 @@ public class LecturerQuestionController extends PaginationController {
 		}
 	}
 
+	@ApiOperation(hidden=true, value="")
 	@DeprecatedApi
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	public int getSkillQuestionCount(
@@ -409,6 +410,7 @@ public class LecturerQuestionController extends PaginationController {
 		questionService.deleteQuestion(questionId);
 	}
 
+	@ApiOperation(hidden=true, value="")
 	@DeprecatedApi
 	@RequestMapping(value = "/unanswered", method = RequestMethod.GET)
 	public List<String> getUnAnsweredSkillQuestionIds(
@@ -446,6 +448,7 @@ public class LecturerQuestionController extends PaginationController {
 	 * @throws ForbiddenException
 	 *             if not logged in
 	 */
+	@ApiOperation(hidden=true, value="")
 	@DeprecatedApi
 	@RequestMapping(value = "/{questionId}/myanswer", method = RequestMethod.GET)
 	public Answer getMyAnswer(
@@ -630,6 +633,7 @@ public class LecturerQuestionController extends PaginationController {
 	 * @throws ForbiddenException
 	 *             if not logged in
 	 */
+	@ApiOperation(hidden=true, value="")
 	@DeprecatedApi
 	@RequestMapping(value = "/{questionId}/answercount", method = RequestMethod.GET)
 	public int getAnswerCount(@PathVariable final String questionId) {
@@ -681,12 +685,14 @@ public class LecturerQuestionController extends PaginationController {
 		return questionService.getFreetextAnswers(questionId, offset, limit);
 	}
 
+	@ApiOperation(hidden=true, value="")
 	@DeprecatedApi
 	@RequestMapping(value = "/myanswers", method = RequestMethod.GET)
 	public List<Answer> getMyAnswers(@RequestParam final String sessionkey) {
 		return questionService.getMyAnswers(sessionkey);
 	}
 
+	@ApiOperation(hidden=true, value="")
 	@DeprecatedApi
 	@RequestMapping(value = "/answercount", method = RequestMethod.GET)
 	public int getTotalAnswerCount(
