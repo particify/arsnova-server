@@ -59,32 +59,23 @@ public class AudienceQuestionController extends PaginationController {
 	@Autowired
 	private IQuestionService questionService;
 
-	/*@ApiOperation(value = "Count all the questions in current session",
+	@ApiOperation(value = "Count all the questions in current session",
+				  //parameters {( deprecated = "true" )}
 				  nickname = "getAudienceQuestionCount",
-				  notes = "getInterposedCount(String sessionkey, String user)",
-				  authorizations = {
-			          @Authorization(
-			                  value = "arsnovaoauth",
-			                  scopes = {
-			                          @AuthorizationScope(
-			                                  scope = "getInterposedCount:questions",
-			                                  description = "Count all the questions in current session")
-			                          }
-			                  )
-			    })*/
+				  notes = "getInterposedCount(String sessionkey, String user)")
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	@DeprecatedApi
-	@ApiOperation(hidden=true, value="")
+	@Deprecated
 	public int getInterposedCount(@ApiParam(value="Session-Key from current session", required=true) @RequestParam final String sessionkey) {
 		return questionService.getInterposedCount(sessionkey);
 	}
 
-	/*@ApiOperation(value = "count all unread interposed questions",
+	@ApiOperation(value = "count all unread interposed questions",
 				  nickname = "getUnreadInterposedCount",
-				  notes = "getUnreadInterposedCount(String sessionkey, String user)")*/
+				  notes = "getUnreadInterposedCount(String sessionkey, String user)")
 	@RequestMapping(value = "/readcount", method = RequestMethod.GET)
 	@DeprecatedApi
-	@ApiOperation(hidden=true, value="")
+	@Deprecated
 	public InterposedReadingCount getUnreadInterposedCount(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam("sessionkey") final String sessionkey, String user) {
 		return questionService.getInterposedReadingCount(sessionkey, user);
 	}

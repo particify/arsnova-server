@@ -49,22 +49,31 @@ public class StatisticsController extends AbstractController {
 		return statisticsService.getStatistics();
 	}
 
-	@ApiOperation(hidden=true, value="")
+	@ApiOperation(value = "Retrieves the amount of all active users",
+				  nickname = "countActiveUsers",
+				  notes = "countActiveUsers()")
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics/activeusercount", produces = "text/plain")
 	public String countActiveUsers() {
 		return Integer.toString(statisticsService.getStatistics().getActiveUsers());
 	}
 
-	@ApiOperation(hidden=true, value="")
+	@ApiOperation(value = "Retrieves the amount of all currently logged in users",
+				  nickname = "countLoggedInUsers",
+				  notes = "countLoggedInUsers()")
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics/loggedinusercount", produces = "text/plain")
 	public String countLoggedInUsers() {
 		return Integer.toString(statisticsService.getStatistics().getLoggedinUsers());
 	}
 
-	@ApiOperation(hidden=true, value="")
+	@ApiOperation(value = "Retrieves the total amount of all sessions",
+				  nickname = "countSessions",
+				  notes = "countSessions()")
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics/sessioncount", produces = "text/plain")
 	public String countSessions() {
 		return Integer.toString(statisticsService.getStatistics().getOpenSessions()

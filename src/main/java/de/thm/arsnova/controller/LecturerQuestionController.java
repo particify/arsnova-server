@@ -378,8 +378,15 @@ public class LecturerQuestionController extends PaginationController {
 		}
 	}
 
-	@ApiOperation(hidden=true, value="")
+	@ApiOperation(value = "Get the am ount of skill questions by the sessionkey",
+			nickname = "getSkillQuestionCount",
+			notes = "getSkillQuestionCount(" +
+				"@RequestParam final String sessionkey," +
+				"@RequestParam(value = \"lecturequestionsonly\", defaultValue = \"false\") final boolean lectureQuestionsOnly," +
+				"@RequestParam(value = \"flashcardsonly\", defaultValue = \"false\") final boolean flashcardsOnly," +
+				"@RequestParam(value = \"preparationquestionsonly\", defaultValue = \"false\") final boolean preparationQuestionsOnly)")
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	public int getSkillQuestionCount(
 			@RequestParam final String sessionkey,
@@ -410,8 +417,15 @@ public class LecturerQuestionController extends PaginationController {
 		questionService.deleteQuestion(questionId);
 	}
 
-	@ApiOperation(hidden=true, value="")
+	@ApiOperation(value = "Get unanswered skill question ID by provided session ID",
+			nickname = "getUnAnsweredSkillQuestionIds",
+			notes = "getUnAnsweredSkillQuestionIds(" +
+				"@RequestParam final String sessionkey," +
+				"@RequestParam(value = \"lecturequestionsonly\", defaultValue = \"false\") final boolean lectureQuestionsOnly," +
+				"@RequestParam(value = \"preparationquestionsonly\", defaultValue = \"false\") final boolean preparationQuestionsOnly)"
+	)
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/unanswered", method = RequestMethod.GET)
 	public List<String> getUnAnsweredSkillQuestionIds(
 			@RequestParam final String sessionkey,
@@ -448,8 +462,14 @@ public class LecturerQuestionController extends PaginationController {
 	 * @throws ForbiddenException
 	 *             if not logged in
 	 */
-	@ApiOperation(hidden=true, value="")
+	@ApiOperation(value = "Get my answer for a question, identified by provided question ID",
+			nickname = "getMyAnswer",
+			notes = "getMyAnswer(" +
+				"@PathVariable final String questionId," +
+				"final HttpServletResponse response)"
+	)
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/{questionId}/myanswer", method = RequestMethod.GET)
 	public Answer getMyAnswer(
 			@PathVariable final String questionId,
@@ -633,8 +653,12 @@ public class LecturerQuestionController extends PaginationController {
 	 * @throws ForbiddenException
 	 *             if not logged in
 	 */
-	@ApiOperation(hidden=true, value="")
+	@ApiOperation(value = "Get the amount of answers for a question, identified by question ID",
+			nickname = "getAnswerCount",
+			notes = "getAnswerCount(@PathVariable final String questionId)"
+	)
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/{questionId}/answercount", method = RequestMethod.GET)
 	public int getAnswerCount(@PathVariable final String questionId) {
 		return questionService.getAnswerCount(questionId);
@@ -685,15 +709,26 @@ public class LecturerQuestionController extends PaginationController {
 		return questionService.getFreetextAnswers(questionId, offset, limit);
 	}
 
-	@ApiOperation(hidden=true, value="")
+	@ApiOperation(value = "Get my answers of an session, identified by the sessionkey",
+			nickname = "getMyAnswers",
+			notes = "getMyAnswers(@RequestParam final String sessionkey)"
+	)
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/myanswers", method = RequestMethod.GET)
 	public List<Answer> getMyAnswers(@RequestParam final String sessionkey) {
 		return questionService.getMyAnswers(sessionkey);
 	}
 
-	@ApiOperation(hidden=true, value="")
+	@ApiOperation(value = "Get the total amount of answers of an session, identified by the sessionkey",
+			nickname = "getTotalAnswerCount",
+			notes = "getTotalAnswerCount(" +
+				"@RequestParam final String sessionkey," +
+				"@RequestParam(value = \"lecturequestionsonly\", defaultValue = \"false\") final boolean lectureQuestionsOnly," +
+				"@RequestParam(value = \"preparationquestionsonly\", defaultValue = \"false\") final boolean preparationQuestionsOnly)"
+	)
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/answercount", method = RequestMethod.GET)
 	public int getTotalAnswerCount(
 			@RequestParam final String sessionkey,

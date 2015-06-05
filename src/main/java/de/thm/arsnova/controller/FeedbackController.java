@@ -28,7 +28,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import springfox.documentation.annotations.ApiIgnore;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.User;
@@ -44,7 +47,7 @@ import de.thm.arsnova.web.DeprecatedApi;
  * @see de.thm.arsnova.socket.ARSnovaSocketIOServer
  */
 @RestController
-@ApiIgnore
+@Api(value = "/feedback", description = "the deprecated Feedback API")
 public class FeedbackController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(FeedbackController.class);
@@ -55,13 +58,24 @@ public class FeedbackController extends AbstractController {
 	@Autowired
 	private IUserService userService;
 
+	@ApiOperation(value = "Get feedback from a session",
+				  nickname = "getFeedback",
+				  notes = "getFeedback(@PathVariable final String sessionkey)")
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.GET)
 	public Feedback getFeedback(@PathVariable final String sessionkey) {
 		return feedbackService.getFeedback(sessionkey);
 	}
 
+	@ApiOperation(value = "Get own feedback from a session",
+				  nickname = "getMyFeedback",
+				  notes = "getMyFeedback(@PathVariable final String sessionkey)")
+	@ApiResponses(value = {
+    		@ApiResponse(code = 404, message = "Not Found - The requested resource could not be found but may be available again in the future.")
+	})
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/myfeedback", method = RequestMethod.GET)
 	public Integer getMyFeedback(@PathVariable final String sessionkey) {
 		Integer value = feedbackService.getMyFeedback(sessionkey, userService.getCurrentUser());
@@ -71,25 +85,43 @@ public class FeedbackController extends AbstractController {
 		throw new NotFoundException();
 	}
 
+	@ApiOperation(value = "Get amout of feedback from a session",
+				  nickname = "getFeedbackCount",
+				  notes = "getFeedbackCount(@PathVariable final String sessionkey)")
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/feedbackcount", method = RequestMethod.GET)
 	public int getFeedbackCount(@PathVariable final String sessionkey) {
 		return feedbackService.getFeedbackCount(sessionkey);
 	}
 
+	@ApiOperation(value = "Get the average feedback (rounded) from a session",
+				  nickname = "getAverageFeedbackRounded",
+				  notes = "getAverageFeedbackRounded(@PathVariable final String sessionkey)")
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/roundedaveragefeedback", method = RequestMethod.GET)
 	public long getAverageFeedbackRounded(@PathVariable final String sessionkey) {
 		return feedbackService.getAverageFeedbackRounded(sessionkey);
 	}
 
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/averagefeedback", method = RequestMethod.GET)
 	public double getAverageFeedback(@PathVariable final String sessionkey) {
 		return feedbackService.getAverageFeedback(sessionkey);
 	}
 
+	@ApiOperation(value = "Post feedback for a session",
+				  nickname = "postFeedback",
+				  notes = "postFeedback(" +
+					"@PathVariable final String sessionkey," +
+					"@RequestBody final int value)")
+	@ApiResponses(value = {
+    		@ApiResponse(code = 404, message = "Not Found - The requested resource could not be found but may be available again in the future.")
+	})
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Feedback postFeedback(

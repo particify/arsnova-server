@@ -90,8 +90,11 @@ public class SessionController extends PaginationController {
 		sessionService.deleteSession(sessionkey);
 	}
 
+	@ApiOperation(value = "count active users",
+				  nickname = "countActiveUsers",
+				  notes = "countActiveUsers(@ApiParam(value = \"Session-Key from current session\", required = true)")
 	@DeprecatedApi
-	@ApiOperation(hidden=true, value="")
+	@Deprecated
 	@RequestMapping(value = "/{sessionkey}/activeusercount", method = RequestMethod.GET)
 	public int countActiveUsers(@ApiParam(value = "Session-Key from current session", required = true) @PathVariable final String sessionkey) {
 		return sessionService.activeUsers(sessionkey);
