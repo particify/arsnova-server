@@ -1528,6 +1528,15 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			s.put("name", session.getName());
 			s.put("shortName", session.getShortName());
 			s.put("active", session.isActive());
+                        s.put("ppAuthorName", session.getPpAuthorName());
+                        s.put("ppAuthorMail", session.getPpAuthorMail());
+                        s.put("ppUniversity", session.getPpUniversity());
+                        s.put("ppLogo", session.getPpLogo());
+                        s.put("ppSubject", session.getPpSubject());
+                        s.put("ppLicense", session.getPpLicense());
+                        s.put("ppDescription", session.getPpDescription());
+                        s.put("ppFaculty", session.getPpFaculty());
+                        s.put("ppLevel", session.getPpLevel());
 			s.put("learningProgressOptions", JSONObject.fromObject(session.getLearningProgressOptions()));
 			s.put("features", JSONObject.fromObject(session.getFeatures()));
 			database.saveDocument(s);
