@@ -17,9 +17,12 @@
  */
 package de.thm.arsnova.entities;
 
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 /**
  * A session's settings regarding the calculation of the learning progress.
  */
+@ApiModel( value = "learning progress options" , description = "the learning progress API")
 public class LearningProgressOptions {
 
 	private String type = "questions";
@@ -34,6 +37,7 @@ public class LearningProgressOptions {
 
 	public LearningProgressOptions() {}
 
+	@ApiModelProperty(position = 1, required = true, value = "used to display the Type")
 	public String getType() {
 		return type;
 	}
@@ -42,6 +46,7 @@ public class LearningProgressOptions {
 		this.type = learningProgressType;
 	}
 
+	@ApiModelProperty(position = 2, required = true, value = "used to display question variant")
 	public String getQuestionVariant() {
 		return questionVariant;
 	}

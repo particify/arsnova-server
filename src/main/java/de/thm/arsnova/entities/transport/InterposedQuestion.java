@@ -19,17 +19,20 @@ package de.thm.arsnova.entities.transport;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
  * A question a student is asking. Also known as feedback or audience question.
  */
+@ApiModel(value = "audiencequestion/{questionId}" , description = "the Interposed Question API")
 public class InterposedQuestion {
 
-	private String id;
-	private String subject;
-	private String text;
-	private long timestamp;
-	private boolean read;
+	 private String id;
+	 private String subject;
+	 private String text;
+	 private long timestamp;
+	 private boolean read;
 
 	public static List<InterposedQuestion> fromList(List<de.thm.arsnova.entities.InterposedQuestion> questions) {
 		ArrayList<InterposedQuestion> interposedQuestions = new ArrayList<InterposedQuestion>();
@@ -40,15 +43,21 @@ public class InterposedQuestion {
 	}
 
 	public InterposedQuestion(de.thm.arsnova.entities.InterposedQuestion question) {
+		
 		this.id = question.get_id();
+		
 		this.subject = question.getSubject();
+		
 		this.text = question.getText();
+		
 		this.timestamp = question.getTimestamp();
+		
 		this.read = question.isRead();
 	}
 
 	public InterposedQuestion() {}
 
+	@ApiModelProperty(position = 1, required = true, value = "used to display Id")
 	public String getId() {
 		return id;
 	}
@@ -57,6 +66,7 @@ public class InterposedQuestion {
 		this.id = id;
 	}
 
+	@ApiModelProperty(position = 2, required = true, value = "used to display Subject")
 	public String getSubject() {
 		return subject;
 	}
@@ -65,6 +75,7 @@ public class InterposedQuestion {
 		this.subject = subject;
 	}
 
+	@ApiModelProperty(position = 3, required = true, value = "used to display Text")
 	public String getText() {
 		return text;
 	}
@@ -73,6 +84,7 @@ public class InterposedQuestion {
 		this.text = text;
 	}
 
+	@ApiModelProperty(position = 4, required = true, value = "used to display Timetamp")
 	public long getTimestamp() {
 		return timestamp;
 	}
@@ -81,6 +93,7 @@ public class InterposedQuestion {
 		this.timestamp = timestamp;
 	}
 
+	@ApiModelProperty(position = 5, required = true, value = "is read")
 	public boolean isRead() {
 		return read;
 	}

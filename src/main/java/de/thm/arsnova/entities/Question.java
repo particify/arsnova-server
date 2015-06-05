@@ -19,10 +19,13 @@ package de.thm.arsnova.entities;
 
 import java.util.Date;
 import java.util.List;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
  * A question the teacher is asking.
  */
+@ApiModel( value = "lecturerquestion" , description = "the Question API")
 public class Question {
 
 	private String type;
@@ -80,6 +83,7 @@ public class Question {
 	private String hint;
 	private String solution;
 
+	@ApiModelProperty(position = 1, required = true, value = "used to display type")
 	public final String getType() {
 		return type;
 	}
@@ -88,6 +92,7 @@ public class Question {
 		this.type = type;
 	}
 
+	@ApiModelProperty(position = 2, required = true, value = "used to display the question type")
 	public final String getQuestionType() {
 		return questionType;
 	}
@@ -96,6 +101,7 @@ public class Question {
 		this.questionType = questionType;
 	}
 
+	@ApiModelProperty(position = 3, required = true, value = "used to display question variant")
 	public final String getQuestionVariant() {
 		return questionVariant;
 	}
@@ -103,7 +109,7 @@ public class Question {
 	public final void setQuestionVariant(final String questionVariant) {
 		this.questionVariant = questionVariant;
 	}
-
+	@ApiModelProperty(position = 4, required = true, value = "used to display subject")
 	public final String getSubject() {
 		return subject;
 	}
@@ -112,6 +118,7 @@ public class Question {
 		this.subject = subject;
 	}
 
+	@ApiModelProperty(position = 5, required = true, value = "used to display text")
 	public final String getText() {
 		return text;
 	}
@@ -120,6 +127,7 @@ public class Question {
 		this.text = text;
 	}
 
+	@ApiModelProperty(position = 6, required = true, value = "active")
 	public final boolean isActive() {
 		return active;
 	}
@@ -128,6 +136,7 @@ public class Question {
 		this.active = active;
 	}
 
+	@ApiModelProperty(position = 7, required = true, value = "used to display released for")
 	public final String getReleasedFor() {
 		return releasedFor;
 	}
@@ -136,6 +145,7 @@ public class Question {
 		this.releasedFor = releasedFor;
 	}
 
+	@ApiModelProperty(position = 8, required = true, value = "used to display possible answers")
 	public final List<PossibleAnswer> getPossibleAnswers() {
 		return possibleAnswers;
 	}
@@ -144,6 +154,7 @@ public class Question {
 		this.possibleAnswers = possibleAnswers;
 	}
 
+	@ApiModelProperty(position = 9, required = true, value = "no correct")
 	public final boolean isNoCorrect() {
 		return noCorrect;
 	}
@@ -152,6 +163,7 @@ public class Question {
 		this.noCorrect = noCorrect;
 	}
 
+	@ApiModelProperty(position = 10, required = true, value = "used to display session id")
 	public final String getSessionId() {
 		return sessionId;
 	}
@@ -160,6 +172,7 @@ public class Question {
 		this.sessionId = sessionId;
 	}
 
+	@ApiModelProperty(position = 11, required = true, value = "used to display session id")
 	public final String getSession() {
 		return sessionId;
 	}
@@ -168,6 +181,7 @@ public class Question {
 		sessionId = session;
 	}
 
+	@ApiModelProperty(position = 12, required = true, value = "used to display session keyword")
 	public final String getSessionKeyword() {
 		return sessionKeyword;
 	}
@@ -176,6 +190,7 @@ public class Question {
 		sessionKeyword = keyword;
 	}
 
+	@ApiModelProperty(position = 13, required = true, value = "used to display timestamp")
 	public final long getTimestamp() {
 		return timestamp;
 	}
@@ -184,6 +199,7 @@ public class Question {
 		this.timestamp = timestamp;
 	}
 
+	@ApiModelProperty(position = 14, required = true, value = "used to display number")
 	public final int getNumber() {
 		return number;
 	}
@@ -192,10 +208,12 @@ public class Question {
 		this.number = number;
 	}
 
+	@ApiModelProperty(position = 15, required = true, value = "used to display duration")
 	public final int getDuration() {
 		return duration;
 	}
 
+	@ApiModelProperty(position = 16, required = true, value = "used to display image Question")
 	public final boolean isImageQuestion() {
 		return imageQuestion;
 	}
@@ -208,6 +226,7 @@ public class Question {
 		this.duration = duration;
 	}
 
+	@ApiModelProperty(position = 17, required = true, value = "used to display pi Round")
 	public int getPiRound() {
 		return piRound;
 	}
@@ -216,6 +235,7 @@ public class Question {
 		this.piRound = piRound;
 	}
 
+	@ApiModelProperty(position = 18, required = true, value = "used to display pi round end time")
 	public long getPiRoundEndTime() {
 		return piRoundEndTime;
 	}
@@ -224,6 +244,7 @@ public class Question {
 		this.piRoundEndTime = piRoundEndTime;
 	}
 
+	@ApiModelProperty(position = 19, required = true, value = "used to display pi round start time")
 	public long getPiRoundStartTime() {
 		return piRoundStartTime;
 	}
@@ -232,6 +253,7 @@ public class Question {
 		this.piRoundStartTime = piRoundStartTime;
 	}
 
+	@ApiModelProperty(position = 20, required = true, value = "piRoundActive ")
 	public boolean isPiRoundActive() {
 		return piRoundActive;
 	}
@@ -240,6 +262,7 @@ public class Question {
 		this.piRoundActive = piRoundActive;
 	}
 
+	@ApiModelProperty(position = 21, required = true, value = "piRoundFinished ")
 	public boolean isPiRoundFinished() {
 		return piRoundFinished;
 	}
@@ -248,6 +271,7 @@ public class Question {
 		this.piRoundFinished = piRoundFinished;
 	}
 
+	@ApiModelProperty(position = 22, required = true, value = "used to display showStatistic")
 	public boolean isShowStatistic() {
 		return showStatistic;
 	}
@@ -256,6 +280,7 @@ public class Question {
 		this.showStatistic = showStatistic;
 	}
 
+	@ApiModelProperty(position = 23, required = true, value = "used to display cvIsColored")
 	public boolean getCvIsColored() {
 		return cvIsColored;
 	}
@@ -264,6 +289,7 @@ public class Question {
 		this.cvIsColored = cvIsColored;
 	}
 
+	@ApiModelProperty(position = 24, required = true, value = "used to display showAnswer")
 	public boolean isShowAnswer() {
 		return showAnswer;
 	}
@@ -272,6 +298,7 @@ public class Question {
 		this.showAnswer = showAnswer;
 	}
 
+	@ApiModelProperty(position = 25, required = true, value = "used to display abstention")
 	public boolean isAbstention() {
 		return abstention;
 	}
@@ -280,6 +307,7 @@ public class Question {
 		this.abstention = abstention;
 	}
 
+	@ApiModelProperty(position = 26, required = true, value = "used to display _id")
 	public final String get_id() {
 		return _id;
 	}
@@ -288,6 +316,7 @@ public class Question {
 		this._id = _id;
 	}
 
+	@ApiModelProperty(position = 27, required = true, value = "used to display _rev")
 	public final String get_rev() {
 		return _rev;
 	}
@@ -296,6 +325,7 @@ public class Question {
 		this._rev = _rev;
 	}
 
+	@ApiModelProperty(position = 28, required = true, value = "used to display image")
 	public String getImage() {
 		return image;
 	}
@@ -304,6 +334,7 @@ public class Question {
 		this.image = image;
 	}
 
+	@ApiModelProperty(position = 29, required = true, value = "used to display fcImage")
 	public String getFcImage() {
 		return fcImage;
 	}
@@ -312,6 +343,7 @@ public class Question {
 		this.fcImage = fcImage;
 	}
 
+	@ApiModelProperty(position = 30, required = true, value = "used to display gridSize")
 	public int getGridSize() {
 		return gridSize;
 	}
@@ -320,6 +352,7 @@ public class Question {
 		this.gridSize = gridSize;
 	}
 
+	@ApiModelProperty(position = 31, required = true, value = "used to display offsetX")
 	public int getOffsetX() {
 		return offsetX;
 	}
@@ -328,6 +361,7 @@ public class Question {
 		this.offsetX = offsetX;
 	}
 
+	@ApiModelProperty(position = 32, required = true, value = "used to display offsetY")
 	public int getOffsetY() {
 		return offsetY;
 	}
@@ -336,6 +370,7 @@ public class Question {
 		this.offsetY = offsetY;
 	}
 
+	@ApiModelProperty(position = 33, required = true, value = "used to display zoomLvl")
 	public int getZoomLvl() {
 		return zoomLvl;
 	}
@@ -344,6 +379,7 @@ public class Question {
 		this.zoomLvl = zoomLvl;
 	}
 
+	@ApiModelProperty(position = 34, required = true, value = "used to display gridOffsetX")
 	public int getGridOffsetX() {
 		return gridOffsetX;
 	}
@@ -352,6 +388,7 @@ public class Question {
 		this.gridOffsetX = gridOffsetX;
 	}
 
+	@ApiModelProperty(position = 35, required = true, value = "used to display gridOffsetY")
 	public int getGridOffsetY() {
 		return gridOffsetY;
 	}
@@ -360,6 +397,7 @@ public class Question {
 		this.gridOffsetY = gridOffsetY;
 	}
 
+	@ApiModelProperty(position = 36, required = true, value = "used to display  grid zoom lvl")
 	public int getGridZoomLvl() {
 		return gridZoomLvl;
 	}
@@ -368,6 +406,7 @@ public class Question {
 		this.gridZoomLvl = gridZoomLvl;
 	}
 
+	@ApiModelProperty(position = 37, required = true, value = "used to display grid size X")
 	public int getGridSizeX() {
 		return gridSizeX;
 	}
@@ -376,6 +415,7 @@ public class Question {
 		this.gridSizeX = gridSizeX;
 	}
 
+	@ApiModelProperty(position = 38, required = true, value = "used to display grid size Y ")
 	public int getGridSizeY() {
 		return gridSizeY;
 	}
@@ -384,6 +424,7 @@ public class Question {
 		this.gridSizeY = gridSizeY;
 	}
 
+	@ApiModelProperty(position = 39, required = true, value = "grid is hidden")
 	public boolean getGridIsHidden() {
 		return gridIsHidden;
 	}
@@ -392,6 +433,7 @@ public class Question {
 		this.gridIsHidden = gridIsHidden;
 	}
 
+	@ApiModelProperty(position = 40, required = true, value = "used to display image rotation")
 	public int getImgRotation() {
 		return imgRotation;
 	}
@@ -400,6 +442,7 @@ public class Question {
 		this.imgRotation = imgRotation;
 	}
 
+	@ApiModelProperty(position = 41, required = true, value = "used to display toggel fields left")
 	public boolean getToggleFieldsLeft() {
 		return toggleFieldsLeft;
 	}
@@ -408,6 +451,7 @@ public class Question {
 		this.toggleFieldsLeft = toggleFieldsLeft;
 	}
 
+	@ApiModelProperty(position = 42, required = true, value = "used to display number clickable fields")
 	public int getNumClickableFields() {
 		return numClickableFields;
 	}
@@ -416,6 +460,7 @@ public class Question {
 		this.numClickableFields = numClickableFields;
 	}
 
+	@ApiModelProperty(position = 43, required = true, value = "used to display threshold correct answers")
 	public int getThresholdCorrectAnswers() {
 		return thresholdCorrectAnswers;
 	}
@@ -424,6 +469,7 @@ public class Question {
 		this.thresholdCorrectAnswers = thresholdCorrectAnswers;
 	}
 
+	@ApiModelProperty(position = 44, required = true, value = "used to display  grid line color")
 	public String getGridLineColor() {
 		return gridLineColor;
 	}
@@ -432,6 +478,7 @@ public class Question {
 		this.gridLineColor = gridLineColor;
 	}
 
+	@ApiModelProperty(position = 45, required = true, value = "used to display  number of dots")
 	public int getNumberOfDots() {
 		return numberOfDots;
 	}
@@ -440,6 +487,7 @@ public class Question {
 		this.numberOfDots = numberOfDots;
 	}
 
+	@ApiModelProperty(position = 46, required = true, value = "used to display the grid type")
 	public String getGridType() {
 		return gridType;
 	}
@@ -452,6 +500,7 @@ public class Question {
 		this.scaleFactor = scaleFactor;
 	}
 
+	@ApiModelProperty(position = 47, required = true, value = "used to display scale factor")
 	public String getScaleFactor() {
 		return this.scaleFactor;
 	}
@@ -460,10 +509,12 @@ public class Question {
 		this.gridScaleFactor = scaleFactor;
 	}
 
+	@ApiModelProperty(position = 48, required = true, value = "used to display grid scale factor")
 	public String getGridScaleFactor() {
 		return this.gridScaleFactor;
 	}
 
+	@ApiModelProperty(position = 49, required = true, value = "enabled text nswer")
 	public boolean isTextAnswerEnabled() {
 		return this.textAnswerEnabled;
 	}
@@ -472,6 +523,7 @@ public class Question {
 		this.textAnswerEnabled = textAnswerEnabled;
 	}
 
+	@ApiModelProperty(position = 50, required = true, value = "voting disabled")
 	public boolean isVotingDisabled() {
 		return votingDisabled;
 	}

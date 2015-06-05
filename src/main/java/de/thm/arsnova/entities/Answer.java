@@ -18,12 +18,15 @@
 package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
  * Both a regular (single choice, evaluation, etc.) as well as a freetext answer.
  *
  * This class has additional fields to transport generated answer statistics.
  */
+@ApiModel( value = "Answer" , description = "the Answer API")
 public class Answer {
 
 	private String _id;
@@ -50,6 +53,7 @@ public class Answer {
 		this.type = "skill_question_answer";
 	}
 
+	@ApiModelProperty(position = 1, required = true, value = "used to display _id")
 	public final String get_id() {
 		return _id;
 	}
@@ -58,6 +62,7 @@ public class Answer {
 		this._id = _id;
 	}
 
+	@ApiModelProperty(position = 2, required = true, value = "used to display _rev")
 	public final String get_rev() {
 		return _rev;
 	}
@@ -66,6 +71,7 @@ public class Answer {
 		this._rev = _rev;
 	}
 
+	@ApiModelProperty(position = 3, required = true, value = "used to display type")
 	public final String getType() {
 		return type;
 	}
@@ -74,6 +80,7 @@ public class Answer {
 		this.type = type;
 	}
 
+	@ApiModelProperty(position = 4, required = true, value = "used to display session id")
 	public final String getSessionId() {
 		return sessionId;
 	}
@@ -82,6 +89,7 @@ public class Answer {
 		this.sessionId = sessionId;
 	}
 
+	@ApiModelProperty(position = 5, required = true, value = "used to display question id")
 	public final String getQuestionId() {
 		return questionId;
 	}
@@ -90,6 +98,7 @@ public class Answer {
 		this.questionId = questionId;
 	}
 
+	@ApiModelProperty(position = 6, required = true, value = "used to display answer text")
 	public final String getAnswerText() {
 		return answerText;
 	}
@@ -98,6 +107,7 @@ public class Answer {
 		this.answerText = answerText;
 	}
 
+	@ApiModelProperty(position = 7, required = true, value = "used to display answer subject")
 	public final String getAnswerSubject() {
 		return answerSubject;
 	}
@@ -106,6 +116,7 @@ public class Answer {
 		this.answerSubject = answerSubject;
 	}
 
+	@ApiModelProperty(position = 8, required = true, value = "used to displaypi round ")
 	public int getPiRound() {
 		return piRound;
 	}
@@ -117,11 +128,13 @@ public class Answer {
 	/* TODO: use JsonViews instead of JsonIgnore when supported by Spring (4.1)
 	 * http://wiki.fasterxml.com/JacksonJsonViews
 	 * https://jira.spring.io/browse/SPR-7156 */
+	@ApiModelProperty(position = 9, required = true, value = "used to display user")
 	@JsonIgnore
 	public final String getUser() {
 		return user;
 	}
 
+	@ApiModelProperty(position = 10, required = true, value = "used to display answer image")
 	@JsonIgnore
 	public String getAnswerImage() {
 		return answerImage;
@@ -131,6 +144,7 @@ public class Answer {
 		this.answerImage = answerImage;
 	}
 
+	@ApiModelProperty(position = 11, required = true, value = "used to display answer thumbnail image")
 	public String getAnswerThumbnailImage() {
 		return answerThumbnailImage;
 	}
@@ -143,6 +157,7 @@ public class Answer {
 		this.user = user;
 	}
 
+	@ApiModelProperty(position = 12, required = true, value = "used to display timestamp")
 	public long getTimestamp() {
 		return timestamp;
 	}
@@ -151,6 +166,7 @@ public class Answer {
 		this.timestamp = timestamp;
 	}
 
+	@ApiModelProperty(position = 13, required = true, value = "read")
 	public boolean isRead() {
 		return read;
 	}
@@ -159,6 +175,7 @@ public class Answer {
 		this.read = read;
 	}
 
+	@ApiModelProperty(position = 14, required = true, value = "used to display answer count")
 	public final int getAnswerCount() {
 		return answerCount;
 	}
@@ -167,6 +184,7 @@ public class Answer {
 		this.answerCount = answerCount;
 	}
 
+	@ApiModelProperty(position = 15, required = true, value = "used to display abstention")
 	public boolean isAbstention() {
 		return abstention;
 	}
@@ -175,6 +193,7 @@ public class Answer {
 		this.abstention = abstention;
 	}
 
+	@ApiModelProperty(position = 16, required = true, value = "used to display abtention count ")
 	public int getAbstentionCount() {
 		return abstentionCount;
 	}
@@ -183,6 +202,7 @@ public class Answer {
 		this.abstentionCount = abstentionCount;
 	}
 
+	@ApiModelProperty(position = 17, required = true, value = "used to display question variant")
 	public String getQuestionVariant() {
 		return questionVariant;
 	}
@@ -191,6 +211,7 @@ public class Answer {
 		this.questionVariant = questionVariant;
 	}
 
+	@ApiModelProperty(position = 18, required = true, value = "used to display question value")
 	public int getQuestionValue() {
 		return questionValue;
 	}
