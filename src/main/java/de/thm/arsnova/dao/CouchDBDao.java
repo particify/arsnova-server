@@ -432,7 +432,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	@Cacheable("sessions")
 	public Session getSessionFromKeyword(final String keyword) {
 		final NovaView view = new NovaView("session/by_keyword");
 		view.setKey(keyword);
