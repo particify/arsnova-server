@@ -18,7 +18,7 @@ Minor features and changes:
 Project management: Klaus Quibeldey-Cirkel  
 Lead programming: Andreas Gärtner, Daniel Gerhardt, Christoph Thelen  
 Contributions: Felix Schmidt, Artjom Siebert, Daniel Vogel  
-Sponsoring: [AG QLS](https://www.thm.de/zqe/qmnetzwerk/agqls),
+Sponsoring: [AG QLS](https://www.thm.de/site/en/hochschule/service/ag-qls.html),
 [HMWK](https://wissenschaft.hessen.de/wissenschaft/it-neue-medien/kompetenznetz-e-learning-hessen)  
 
 
