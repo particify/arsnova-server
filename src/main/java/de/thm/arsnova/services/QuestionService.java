@@ -343,7 +343,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		} else {
 			databaseDao.updateQuestion(question);
 		}
-		
+
 		this.publisher.publishEvent(new LockVotingEvent(this, session, question));
 	}
 
@@ -790,19 +790,19 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int getLectureQuestionCount(final String sessionkey) {
-		return countService.lectureQuestionCount(getSession(sessionkey));
+		return countService.countLectureQuestions(getSession(sessionkey));
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int getFlashcardCount(final String sessionkey) {
-		return countService.flashcardCount(getSession(sessionkey));
+		return countService.countFlashcards(getSession(sessionkey));
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int getPreparationQuestionCount(final String sessionkey) {
-		return countService.preparationQuestionCount(getSession(sessionkey));
+		return countService.countPreparationQuestionAnswers(getSession(sessionkey));
 	}
 
 	@Override
@@ -817,7 +817,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	 */
 	@Override
 	public int countLectureQuestionAnswersInternal(final String sessionkey) {
-		return countService.lectureQuestionAnswerCount(getSession(sessionkey));
+		return countService.countLectureQuestionAnswers(getSession(sessionkey));
 	}
 
 	@Override
@@ -848,7 +848,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	 */
 	@Override
 	public int countPreparationQuestionAnswersInternal(final String sessionkey) {
-		return countService.preparationQuestionAnswerCount(getSession(sessionkey));
+		return countService.countPreparationQuestionAnswers(getSession(sessionkey));
 	}
 
 	@Override

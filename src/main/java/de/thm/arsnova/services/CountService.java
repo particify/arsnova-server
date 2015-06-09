@@ -21,13 +21,13 @@ import de.thm.arsnova.entities.Session;
 
 public interface CountService {
 
-	int lectureQuestionCount(final Session session);
+	int countLectureQuestions(final Session session);
 
-	int preparationQuestionCount(final Session session);
+	int countPreparationQuestions(final Session session);
 
-	int flashcardCount(final Session session);
+	int countFlashcards(final Session session);
 
-	int lectureQuestionAnswerCount(final Session session);
+	int countLectureQuestionAnswers(final Session session);
 
-	int preparationQuestionAnswerCount(final Session session);
+	int countPreparationQuestionAnswers(final Session session);
 }

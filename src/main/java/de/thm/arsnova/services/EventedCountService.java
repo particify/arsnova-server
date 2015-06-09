@@ -76,7 +76,7 @@ public class EventedCountService implements CountService, NovaEventVisitor, Appl
 	private Map<Session, Integer> preparationQuestionAnswerCount = new ConcurrentHashMap<>();
 
 	@Override
-	public int lectureQuestionCount(final Session session) {
+	public int countLectureQuestions(final Session session) {
 		if (!lectureQuestionCount.containsKey(session)) {
 			int count = databaseDao.getLectureQuestionCount(session);
 			lectureQuestionCount.put(session, count);
@@ -85,7 +85,7 @@ public class EventedCountService implements CountService, NovaEventVisitor, Appl
 	}
 
 	@Override
-	public int preparationQuestionCount(final Session session) {
+	public int countPreparationQuestions(final Session session) {
 		if (!preparationQuestionCount.containsKey(session)) {
 			int count = databaseDao.getPreparationQuestionCount(session);
 			preparationQuestionCount.put(session, count);
@@ -94,7 +94,7 @@ public class EventedCountService implements CountService, NovaEventVisitor, Appl
 	}
 
 	@Override
-	public int flashcardCount(final Session session) {
+	public int countFlashcards(final Session session) {
 		if (!flashcardCount.containsKey(session)) {
 			int count = databaseDao.getFlashcardCount(session);
 			flashcardCount.put(session, count);
@@ -103,7 +103,7 @@ public class EventedCountService implements CountService, NovaEventVisitor, Appl
 	}
 
 	@Override
-	public int lectureQuestionAnswerCount(final Session session) {
+	public int countLectureQuestionAnswers(final Session session) {
 		if (!lectureQuestionAnswerCount.containsKey(session)) {
 			int count = databaseDao.countLectureQuestionAnswers(session);
 			lectureQuestionAnswerCount.put(session, count);
@@ -112,7 +112,7 @@ public class EventedCountService implements CountService, NovaEventVisitor, Appl
 	}
 
 	@Override
-	public int preparationQuestionAnswerCount(final Session session) {
+	public int countPreparationQuestionAnswers(final Session session) {
 		if (!preparationQuestionAnswerCount.containsKey(session)) {
 			int count = databaseDao.countPreparationQuestionAnswers(session);
 			preparationQuestionAnswerCount.put(session, count);
