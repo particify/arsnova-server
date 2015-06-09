@@ -139,12 +139,6 @@ public class ConfigurationController extends AbstractController {
 	@Value("${optional.arsnova-slogan:}")
 	private String arsnovaSlogan;
 
-	@Value("${optional.unipanel-enabled:}")
-	private String uniPanelEnabled;
-
-	@Value("${optional.unipanel-text:}")
-	private String uniPanelText;
-
 	@Value("${pp.session-levels.de}")
 	private String ppLevelsDe;
 
@@ -200,12 +194,6 @@ public class ConfigurationController extends AbstractController {
 		}
 		if (!"".equals(arsnovaSlogan)) {
 			config.put("arsnovaSlogan", arsnovaSlogan);
-		}
-		if (!"".equals(uniPanelEnabled)) {
-			config.put("uniPanelEnabled", uniPanelEnabled);
-		}
-		if (!"".equals(uniPanelText)) {
-			config.put("uniPanelText", uniPanelText);
 		}
 		if (!"".equals(maxUploadFilesize)) {
 			config.put("maxUploadFilesize", maxUploadFilesize);

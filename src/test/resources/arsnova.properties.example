@@ -213,10 +213,6 @@ session.demo-id=
 # label underneath ARSnova logo
 optional.arsnova-slogan=Audience Response System
 
-# optional: Panel with Text about the University
-optional.unipanel-enabled=false
-optional.unipanel-text=Placeholder for UniPanel-Text
-
 # Links which are displayed in the frontend applications
 #
 links.blog.url=https://arsnova.eu/blog/
