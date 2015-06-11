@@ -41,7 +41,7 @@ public class Answer {
 
 	private boolean abstention;
 
-	@ApiModelProperty(position = 1, required = true, value = "used to display text answer")
+	@ApiModelProperty(required = true, value = "used to display text answer")
 	public String getAnswerText() {
 		return answerText;
 	}
@@ -49,7 +49,7 @@ public class Answer {
 	public void setAnswerText(String answerText) {
 		this.answerText = answerText;
 	}
-	@ApiModelProperty(position = 2, required = true, value = "used to display subject answer")
+	@ApiModelProperty(required = true, value = "used to display subject answer")
 	public String getAnswerSubject() {
 		return answerSubject;
 	}
@@ -58,7 +58,7 @@ public class Answer {
 		this.answerSubject = answerSubject;
 	}
 
-	@ApiModelProperty(position = 3, required = true, value = "abstention")
+	@ApiModelProperty(required = true, value = "abstention")
 	public boolean isAbstention() {
 		return abstention;
 	}
@@ -92,7 +92,7 @@ public class Answer {
 		return theAnswer;
 	}
 
-	@ApiModelProperty(position = 4, required = true, value = "used to display image answer")
+	@ApiModelProperty(required = true, value = "used to display image answer")
 	public String getAnswerImage() {
 		return answerImage;
 	}

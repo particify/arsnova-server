@@ -38,7 +38,7 @@ public class Statistics {
 	private int interposedQuestions;
 	private int conceptQuestions;
 
-	@ApiModelProperty(position = 1, required = true, notes = "used to display Answers")
+	@ApiModelProperty(required = true, notes = "used to display Answers")
 	public int getAnswers() {
 		return answers;
 	}
@@ -47,7 +47,7 @@ public class Statistics {
 		this.answers = answers;
 	}
 
-	@ApiModelProperty(position = 2, required = true, notes = "used to display Lecture Questions")
+	@ApiModelProperty(required = true, notes = "used to display Lecture Questions")
 	public int getLectureQuestions() {
 		return lectureQuestions;
 	}
@@ -56,7 +56,7 @@ public class Statistics {
 		this.lectureQuestions = questions;
 	}
 
-	@ApiModelProperty(position = 3, required = true, notes = "used to display prepartion Questions")
+	@ApiModelProperty(required = true, notes = "used to display prepartion Questions")
 	public int getPreparationQuestions() {
 		return preparationQuestions;
 	}
@@ -65,12 +65,12 @@ public class Statistics {
 		this.preparationQuestions = questions;
 	}
 
-	@ApiModelProperty(position = 4, required = true, notes = "used to display Questions")
+	@ApiModelProperty(required = true, notes = "used to display Questions")
 	public int getQuestions() {
 		return getLectureQuestions() + getPreparationQuestions();
 	}
 
-	@ApiModelProperty(position = 5, required = true, notes = "used to display open Sessions")
+	@ApiModelProperty(required = true, notes = "used to display open Sessions")
 	public int getOpenSessions() {
 		return openSessions;
 	}
@@ -79,7 +79,7 @@ public class Statistics {
 		this.openSessions = openSessions;
 	}
 
-	@ApiModelProperty(position = 6, required = true, notes = "used to display closed Sessions")
+	@ApiModelProperty(required = true, notes = "used to display closed Sessions")
 	public int getClosedSessions() {
 		return closedSessions;
 	}
@@ -88,12 +88,12 @@ public class Statistics {
 		this.closedSessions = closedSessions;
 	}
 
-	@ApiModelProperty(position = 7, required = true, notes = "used to display Sessions")
+	@ApiModelProperty(required = true, notes = "used to display Sessions")
 	public int getSessions() {
 		return getOpenSessions() + getClosedSessions();
 	}
 
-	@ApiModelProperty(position = 8, required = true, notes = "used to display Active Users")
+	@ApiModelProperty(required = true, notes = "used to display Active Users")
 	public int getActiveUsers() {
 		return activeUsers;
 	}
@@ -102,7 +102,7 @@ public class Statistics {
 		this.activeUsers = activeUsers;
 	}
 
-	@ApiModelProperty(position = 9, required = true, notes = "used to display logged in Users")
+	@ApiModelProperty(required = true, notes = "used to display logged in Users")
 	public int getLoggedinUsers() {
 		return loggedinUsers;
 	}
@@ -111,7 +111,7 @@ public class Statistics {
 		this.loggedinUsers = loggedinUsers;
 	}
 
-	@ApiModelProperty(position = 10, required = true, notes = "used to display interposed Questions")
+	@ApiModelProperty(required = true, notes = "used to display interposed Questions")
 	public int getInterposedQuestions() {
 		return interposedQuestions;
 	}
@@ -120,7 +120,7 @@ public class Statistics {
 		this.interposedQuestions = interposedQuestions;
 	}
 
-	@ApiModelProperty(position = 11, required = true, notes = "used to display creators")
+	@ApiModelProperty(required = true, notes = "used to display creators")
 	public int getCreators() {
 		return creators;
 	}
@@ -129,7 +129,7 @@ public class Statistics {
 		this.creators = creators;
 	}
 
-	@ApiModelProperty(position = 12, required = true, notes = "used to display concept Questions")
+	@ApiModelProperty(required = true, notes = "used to display concept Questions")
 	public int getConceptQuestions() {
 		return conceptQuestions;
 	}
@@ -138,7 +138,7 @@ public class Statistics {
 		this.conceptQuestions = conceptQuestions;
 	}
 
-	@ApiModelProperty(position = 13, required = true, notes = "used to display active Students")
+	@ApiModelProperty(required = true, notes = "used to display active Students")
 	public int getActiveStudents() {
 		return activeStudents;
 	}

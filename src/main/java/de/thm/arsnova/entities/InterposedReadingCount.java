@@ -39,7 +39,7 @@ public class InterposedReadingCount {
 		this.unread = 0;
 	}
 
-	@ApiModelProperty(position = 1, required = true, value = "used to display read interposed questions")
+	@ApiModelProperty(required = true, value = "used to display read interposed questions")
 	public int getRead() {
 		return read;
 	}
@@ -48,7 +48,7 @@ public class InterposedReadingCount {
 		this.read = read;
 	}
 
-	@ApiModelProperty(position = 2, required = true, value = "used to display unread interposed questions")
+	@ApiModelProperty(required = true, value = "used to display unread interposed questions")
 	public int getUnread() {
 		return unread;
 	}
@@ -57,7 +57,7 @@ public class InterposedReadingCount {
 		this.unread = unread;
 	}
 
-	@ApiModelProperty(position = 3, required = true, value = "used to display Total questions")
+	@ApiModelProperty(required = true, value = "used to display Total questions")
 	public int getTotal() {
 		return getRead() + getUnread();
 	}

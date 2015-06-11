@@ -304,8 +304,8 @@ public class SessionController extends PaginationController {
 	@RequestMapping(value = "/{sessionkey}/learningprogress", method = RequestMethod.GET)
 	public LearningProgressValues learningProgress(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
-			@ApiParam(value = "progress type", required = true) @RequestParam(value = "type", defaultValue = "questions") final String progressType,
-			@ApiParam(value = "question variant", required = true) @RequestParam(value = "questionVariant", required = false) final String questionVariant,
+			@ApiParam(value = "progress type", required = false) @RequestParam(value = "type", defaultValue = "questions") final String progressType,
+			@ApiParam(value = "question variant", required = false) @RequestParam(value = "questionVariant", required = false) final String questionVariant,
 			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
 			) {
 		return sessionService.getLearningProgress(sessionkey, progressType, questionVariant);

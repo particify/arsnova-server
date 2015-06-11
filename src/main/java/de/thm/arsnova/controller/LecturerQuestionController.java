@@ -378,7 +378,7 @@ public class LecturerQuestionController extends PaginationController {
 		}
 	}
 
-	@ApiOperation(value = "Get the am ount of skill questions by the sessionkey",
+	@ApiOperation(value = "Get the amount of skill questions by the sessionkey",
 			nickname = "getSkillQuestionCount",
 			notes = "getSkillQuestionCount(" +
 				"@RequestParam final String sessionkey," +

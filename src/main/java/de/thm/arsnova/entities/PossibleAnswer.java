@@ -31,7 +31,7 @@ public class PossibleAnswer {
 	private boolean correct;
 	private int value;
 
-	@ApiModelProperty(position = 1, required = true, value = "used to display id")
+	@ApiModelProperty(required = true, value = "used to display id")
 	public String getId() {
 		return this.id;
 	}
@@ -40,7 +40,7 @@ public class PossibleAnswer {
 		this.id = id;
 	}
 
-	@ApiModelProperty(position = 3, required = true, value = "used to display text")
+	@ApiModelProperty(required = true, value = "used to display text")
 	public String getText() {
 		return text;
 	}
@@ -49,7 +49,7 @@ public class PossibleAnswer {
 		this.text = text;
 	}
 
-	@ApiModelProperty(position = 4, required = true, value = "correct")
+	@ApiModelProperty(required = true, value = "correct")
 	public boolean isCorrect() {
 		return correct;
 	}
@@ -58,7 +58,7 @@ public class PossibleAnswer {
 		this.correct = correct;
 	}
 
-	@ApiModelProperty(position = 5, required = true, value = "used to display value")
+	@ApiModelProperty(required = true, value = "used to display value")
 	public int getValue() {
 		return value;
 	}

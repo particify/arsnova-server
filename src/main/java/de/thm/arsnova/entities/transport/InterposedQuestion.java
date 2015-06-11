@@ -57,7 +57,7 @@ public class InterposedQuestion {
 
 	public InterposedQuestion() {}
 
-	@ApiModelProperty(position = 1, required = true, value = "used to display Id")
+	@ApiModelProperty(required = true, value = "used to display Id")
 	public String getId() {
 		return id;
 	}
@@ -66,7 +66,7 @@ public class InterposedQuestion {
 		this.id = id;
 	}
 
-	@ApiModelProperty(position = 2, required = true, value = "used to display Subject")
+	@ApiModelProperty(required = true, value = "used to display Subject")
 	public String getSubject() {
 		return subject;
 	}
@@ -75,7 +75,7 @@ public class InterposedQuestion {
 		this.subject = subject;
 	}
 
-	@ApiModelProperty(position = 3, required = true, value = "used to display Text")
+	@ApiModelProperty(required = true, value = "used to display Text")
 	public String getText() {
 		return text;
 	}
@@ -84,7 +84,7 @@ public class InterposedQuestion {
 		this.text = text;
 	}
 
-	@ApiModelProperty(position = 4, required = true, value = "used to display Timetamp")
+	@ApiModelProperty(required = true, value = "used to display Timetamp")
 	public long getTimestamp() {
 		return timestamp;
 	}
@@ -93,7 +93,7 @@ public class InterposedQuestion {
 		this.timestamp = timestamp;
 	}
 
-	@ApiModelProperty(position = 5, required = true, value = "is read")
+	@ApiModelProperty(required = true, value = "is read")
 	public boolean isRead() {
 		return read;
 	}

@@ -42,14 +42,14 @@ public class InterposedQuestion {
 	private boolean read;
 	private String creator;
 
-	@ApiModelProperty(position = 1, required = true, value = "used to display question id")
+	@ApiModelProperty(required = true, value = "used to display question id")
 	public String get_id() {
 		return _id;
 	}
 	public void set_id(String _id) {
 		this._id = _id;
 	}
-	@ApiModelProperty(position = 2, required = true, value = "used to display rev")
+	@ApiModelProperty(required = true, value = "used to display rev")
 	public String get_rev() {
 		return _rev;
 	}
@@ -57,7 +57,7 @@ public class InterposedQuestion {
 		this._rev = _rev;
 	}
 	
-	@ApiModelProperty(position = 3, required = true, value = "is read")
+	@ApiModelProperty(required = true, value = "is read")
 	public boolean isRead() {
 		return read;
 	}
@@ -65,7 +65,7 @@ public class InterposedQuestion {
 		this.read = read;
 	}
 	
-	@ApiModelProperty(position = 4, required = true, value = "used to display The type")
+	@ApiModelProperty(required = true, value = "used to display The type")
 	public String getType() {
 		return type;
 	}
@@ -73,7 +73,7 @@ public class InterposedQuestion {
 		this.type = type;
 	}
 	
-	@ApiModelProperty(position = 5, required = true, value = "used to display Subject")
+	@ApiModelProperty(required = true, value = "used to display Subject")
 	public String getSubject() {
 		return subject;
 	}
@@ -81,7 +81,7 @@ public class InterposedQuestion {
 		this.subject = subject;
 	}
 	
-	@ApiModelProperty(position = 6, required = true, value = "used to display Text")
+	@ApiModelProperty(required = true, value = "used to display Text")
 	public String getText() {
 		return text;
 	}
@@ -89,7 +89,7 @@ public class InterposedQuestion {
 		this.text = text;
 	}
 	
-	@ApiModelProperty(position = 7, required = true, value = "used to display Session id")
+	@ApiModelProperty(required = true, value = "used to display Session id")
 	public String getSessionId() {
 		return sessionId;
 	}
@@ -97,7 +97,7 @@ public class InterposedQuestion {
 		this.sessionId = sessionId;
 	}
 	
-	@ApiModelProperty(position = 8, required = true, value = "used to display Timetamp")
+	@ApiModelProperty(required = true, value = "used to display Timetamp")
 	public long getTimestamp() {
 		return timestamp;
 	}

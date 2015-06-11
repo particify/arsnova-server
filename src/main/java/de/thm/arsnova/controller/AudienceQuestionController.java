@@ -60,7 +60,6 @@ public class AudienceQuestionController extends PaginationController {
 	private IQuestionService questionService;
 
 	@ApiOperation(value = "Count all the questions in current session",
-				  //parameters {( deprecated = "true" )}
 				  nickname = "getAudienceQuestionCount",
 				  notes = "getInterposedCount(String sessionkey, String user)")
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
