@@ -82,6 +82,29 @@ public class PointBasedLearningProgressTest {
 	}
 
 	@Test
+	public void shouldNotContainRoundingErrors() {
+		// Total of 300 Points
+		String q1 = this.addQuestion("lecture", 100);
+		String q2 = this.addQuestion("lecture", 100);
+		String q3 = this.addQuestion("lecture", 100);
+		User u1 = new TestUser("user1");
+		User u2 = new TestUser("user2");
+		// Both users achieve 200 points
+		this.addAnswer(q1, u1, 100);
+		this.addAnswer(q1, u2, 100);
+		this.addAnswer(q2, u1, 0);
+		this.addAnswer(q2, u2, 0);
+		this.addAnswer(q3, u1, 100);
+		this.addAnswer(q3, u2, 100);
+
+		lp.setQuestionVariant("lecture");
+		LearningProgressValues u1LectureProgress = lp.getMyProgress(null, u1);
+		// 200 / 300 = 0,67
+		assertEquals(67, u1LectureProgress.getCourseProgress());
+		assertEquals(67, u1LectureProgress.getMyProgress());
+	}
+
+	@Test
 	public void shouldConsiderAnswersOfSamePiRound() {
 		User u1 = new TestUser("user1");
 		User u2 = new TestUser("user2");

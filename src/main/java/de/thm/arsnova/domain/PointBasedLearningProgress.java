@@ -40,9 +40,9 @@ public class PointBasedLearningProgress extends VariantLearningProgress {
 	}
 
 	private int coursePercentage() {
-		final double courseMaximumValue = courseScore.getMaximumScore();
-		final double userTotalValue = courseScore.getTotalUserScore();
-		final double numUsers = courseScore.getTotalUserCount();
+		final int courseMaximumValue = courseScore.getMaximumScore();
+		final int userTotalValue = courseScore.getTotalUserScore();
+		final int numUsers = courseScore.getTotalUserCount();
 		if (courseMaximumValue == 0 || numUsers == 0) {
 			return 0;
 		}
@@ -62,7 +62,7 @@ public class PointBasedLearningProgress extends VariantLearningProgress {
 	}
 
 	private int myPercentage(User user) {
-		final double courseMaximumValue = courseScore.getMaximumScore();
+		final int courseMaximumValue = courseScore.getMaximumScore();
 		final double userTotalValue = courseScore.getTotalUserScore(user);
 		if (courseMaximumValue == 0) {
 			return 0;
