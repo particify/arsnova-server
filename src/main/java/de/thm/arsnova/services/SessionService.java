@@ -232,21 +232,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 				throw new ForbiddenException();
 			}
 		}
-		if (session.getPpLogo() != null) {
-			if (session.getPpLogo().startsWith("http")) {
-				final String base64ImageString = imageUtils.encodeImageToString(session.getPpLogo());
-				if (base64ImageString == null) {
-					throw new BadRequestException();
-				}
-				session.setPpLogo(base64ImageString);
-			}
-			// base64 adds offset to filesize, formula taken from: http://en.wikipedia.org/wiki/Base64#MIME
-			final int fileSize = (int) ((session.getPpLogo().length() - 814) / 1.37);
-			if (fileSize > uploadFileSizeByte) {
-				LOGGER.error("Could not save file. File is too large with " + fileSize + " Byte.");
-				throw new PayloadTooLargeException();
-			}
-		}
+		handleLogo(session);
 
 		// set some default values
 		LearningProgressOptions lpo = new LearningProgressOptions();
@@ -313,7 +299,26 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#session, 'owner')")
 	public Session updateSession(final String sessionkey, final Session session) {
-		return databaseDao.updateSession(session);
+		final Session existingSession = databaseDao.getSessionFromKeyword(sessionkey);
+
+		existingSession.setActive(session.isActive());
+		existingSession.setShortName(session.getShortName());
+		existingSession.setPpAuthorName(session.getPpAuthorName());
+		existingSession.setPpAuthorMail(session.getPpAuthorMail());
+		existingSession.setShortName(session.getShortName());
+		existingSession.setPpAuthorName(session.getPpAuthorName());
+		existingSession.setPpFaculty(session.getPpFaculty());
+		existingSession.setName(session.getName());
+		existingSession.setPpUniversity(session.getPpUniversity());
+		existingSession.setPpDescription(session.getPpDescription());
+		existingSession.setPpLevel(session.getPpLevel());
+		existingSession.setPpLicense(session.getPpLicense());
+		existingSession.setPpSubject(session.getPpSubject());
+		
+		handleLogo(session);
+		existingSession.setPpLogo(session.getPpLogo());
+
+		return databaseDao.updateSession(existingSession);
 	}
 
 	/*
@@ -408,5 +413,30 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		}
 		session.setFeatures(features);
 		return databaseDao.updateSession(session).getFeatures();
+	}
+	
+	/**
+	 * 
+	 * @param session 
+	 * @throws PayloadTooLargeException
+	 * @throws BadRequestException
+	 */
+	private void handleLogo(Session session) {
+		if (session.getPpLogo() != null) {
+			if (session.getPpLogo().startsWith("http")) {
+				final String base64ImageString = imageUtils.encodeImageToString(session.getPpLogo());
+				if (base64ImageString == null) {
+					throw new BadRequestException();
+				}
+				session.setPpLogo(base64ImageString);
+			}
+
+			// base64 adds offset to filesize, formula taken from: http://en.wikipedia.org/wiki/Base64#MIME
+			final int fileSize = (int) ((session.getPpLogo().length() - 814) / 1.37);
+			if (fileSize > uploadFileSizeByte) {
+				LOGGER.error("Could not save file. File is too large with " + fileSize + " Byte.");
+				throw new PayloadTooLargeException();
+			}
+		}
 	}
 }
