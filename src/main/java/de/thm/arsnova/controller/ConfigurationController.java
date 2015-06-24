@@ -136,7 +136,7 @@ public class ConfigurationController extends AbstractController {
 	@Value("${session.demo-id:}")
 	private String demoSessionKey;
 
-	@Value("${ui.arsnova-slogan:}")
+	@Value("${ui.slogan:}")
 	private String arsnovaSlogan;
 
 	@Value("${pp.session-levels.de}")
