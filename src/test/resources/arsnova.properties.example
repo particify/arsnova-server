@@ -188,17 +188,17 @@ features.public-pool.enabled=false
 ################################################################################
 # Customization
 ################################################################################
-# minutes, after which the feedback is deleted
+# Minutes, after which the feedback is deleted
 feedback.cleanup=10
 
-# maximal filesize in bytes
+# Maximal filesize in bytes
 upload.filesize_b=1048576
 
-# maximal thumbnail size in pixels
+# Maximal thumbnail size in pixels
 imageupload.thumbnail.width=200
 imageupload.thumbnail.height=200
 
-# maximal number of answer options allowed for a skill question
+# Maximal number of answer options allowed for a skill question
 question.answer-option-limit=8
 
 # Enable Markdown and MathJax parsing in answer options. Formatting in answer
@@ -207,11 +207,11 @@ question.answer-option-limit=8
 # effect if neither MathJax nor Markdown are enabled.
 question.parse-answer-option-formatting=false
 
-# optional: demo session id to show above session login button
+# Demo session id to show above session login button
 session.demo-id=
 
-# label underneath ARSnova logo
-optional.arsnova-slogan=Audience Response System
+# Label underneath ARSnova logo
+ui.arsnova-slogan=Audience Response System
 
 # Links which are displayed in the frontend applications
 #
