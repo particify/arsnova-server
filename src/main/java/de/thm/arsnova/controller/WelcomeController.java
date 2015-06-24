@@ -36,6 +36,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
+import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.NoContentException;
 
 /**
@@ -61,8 +62,14 @@ public class WelcomeController extends AbstractController {
 	@RequestMapping(value = "/checkframeoptionsheader", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public void checkFrameOptionsHeader(
-			@RequestParam(required = true) final String url
+			@RequestParam(required = true) final String url,
+			final HttpServletRequest request
 		) {
+		/* Block requests from the server itself to prevent DoS attacks caused by request loops */
+		if ("127.0.0.1".equals(request.getRemoteAddr())) {
+			throw new BadRequestException();
+		}
+
 		RestTemplate restTemplate = new RestTemplate();
 		SimpleClientHttpRequestFactory rf = (SimpleClientHttpRequestFactory) restTemplate.getRequestFactory();
 		rf.setConnectTimeout(2000);
