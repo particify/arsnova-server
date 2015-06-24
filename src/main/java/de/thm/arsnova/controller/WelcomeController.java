@@ -58,7 +58,7 @@ public class WelcomeController extends AbstractController {
 		return new HashMap<String, Object>();
 	}
 
-	@RequestMapping(value = "/checkFrameOptionsHeader", method = RequestMethod.GET)
+	@RequestMapping(value = "/checkframeoptionsheader", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public void checkFrameOptionsHeader(
 			@RequestParam(required = true) final String url

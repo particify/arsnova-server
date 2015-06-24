@@ -89,7 +89,7 @@ public class LecturerQuestionController extends PaginationController {
 		}
 	}
 
-	@RequestMapping(value = "/{questionId}/startNewPiRound", method = RequestMethod.POST)
+	@RequestMapping(value = "/{questionId}/startnewpiround", method = RequestMethod.POST)
 	public void startPiRound(
 			@PathVariable final String questionId,
 			@RequestParam(value = "time", defaultValue = "0", required = false) final int time
@@ -102,14 +102,14 @@ public class LecturerQuestionController extends PaginationController {
 		}
 	}
 
-	@RequestMapping(value = "/{questionId}/cancelDelayedPiRound", method = RequestMethod.POST)
+	@RequestMapping(value = "/{questionId}/canceldelayedpiround", method = RequestMethod.POST)
 	public void cancelPiRound(
 			@PathVariable final String questionId
 			) {
 		questionService.cancelPiRoundChange(questionId);
 	}
 
-	@RequestMapping(value = "/{questionId}/resetPiRoundState", method = RequestMethod.POST)
+	@RequestMapping(value = "/{questionId}/resetpiroundstate", method = RequestMethod.POST)
 	public void resetPiQuestion(
 			@PathVariable final String questionId
 			) {
