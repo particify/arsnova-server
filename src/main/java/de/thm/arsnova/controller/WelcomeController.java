@@ -17,6 +17,10 @@
  */
 package de.thm.arsnova.controller;
 
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 
 import javax.servlet.http.HttpServletRequest;
@@ -67,6 +71,15 @@ public class WelcomeController extends AbstractController {
 		) {
 		/* Block requests from the server itself to prevent DoS attacks caused by request loops */
 		if ("127.0.0.1".equals(request.getRemoteAddr())) {
+			throw new BadRequestException();
+		}
+		/* Block requests to servers in private networks */
+		try {
+			final InetAddress addr = InetAddress.getByName(new URL(url).getHost());
+			if (addr.isSiteLocalAddress()) {
+				throw new BadRequestException();
+			}
+		} catch (UnknownHostException | MalformedURLException e) {
 			throw new BadRequestException();
 		}
 
