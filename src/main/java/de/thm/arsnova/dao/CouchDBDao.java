@@ -1614,36 +1614,25 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	private List<Question> getQuestions(final NovaView view, final Session session) {
 		view.setStartKeyArray(session.get_id());
 		view.setEndKeyArray(session.get_id(), "{}");
-		final ViewResults questions = getDatabase().view(view);
-		if (questions == null || questions.isEmpty()) {
+		final ViewResults viewResults = getDatabase().view(view);
+		if (viewResults == null || viewResults.isEmpty()) {
 			return null;
 		}
-		final List<Question> result = new ArrayList<Question>();
 
-		final MorpherRegistry morpherRegistry = JSONUtils.getMorpherRegistry();
-		final Morpher dynaMorpher = new BeanMorpher(PossibleAnswer.class, morpherRegistry);
-		morpherRegistry.registerMorpher(dynaMorpher);
-		for (final Document document : questions.getResults()) {
-			final Question question = (Question) JSONObject.toBean(
-					document.getJSONObject().getJSONObject("value"),
-					Question.class
-					);
-			@SuppressWarnings("unchecked")
-			final
-			Collection<PossibleAnswer> answers = JSONArray.toCollection(
-					document.getJSONObject().getJSONObject("value").getJSONArray("possibleAnswers"),
-					PossibleAnswer.class
-					);
+		final List<Question> questions = new ArrayList<Question>();
+
+		Results<Question> results = getDatabase().queryView(view, Question.class);
+		for (final RowResult<Question> row : results.getRows()) {
+			Question question = row.getValue();
 			question.updateRoundManagementState();
-			question.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
 			question.setSessionKeyword(session.getKeyword());
 			if (!"freetext".equals(question.getQuestionType()) && 0 == question.getPiRound()) {
 				/* needed for legacy questions whose piRound property has not been set */
 				question.setPiRound(1);
 			}
-			result.add(question);
+			questions.add(question);
 		}
-		return result;
+		return questions;
 	}
 
 	@Override
