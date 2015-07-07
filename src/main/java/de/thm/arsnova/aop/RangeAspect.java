@@ -83,7 +83,7 @@ public class RangeAspect {
 
 		List<?> list = (List<?>) pjp.proceed();
 
-		if (matcher != null && matcher.matches()) {
+		if (list != null && matcher != null && matcher.matches()) {
 			int totalSize = -1;
 			if (list instanceof PaginationListDecorator) {
 				PaginationListDecorator<?> pl = (PaginationListDecorator<?>) list;
