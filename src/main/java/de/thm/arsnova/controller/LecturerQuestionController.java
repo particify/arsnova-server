@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.thm.arsnova.PaginationListDecorator;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.exceptions.BadRequestException;
@@ -43,10 +44,14 @@ import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.web.DeprecatedApi;
+import de.thm.arsnova.web.Pagination;
 
+/**
+ * Handles requests related to questions teachers are asking their students.
+ */
 @RestController
 @RequestMapping("/lecturerquestion")
-public class LecturerQuestionController extends AbstractController {
+public class LecturerQuestionController extends PaginationController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(LecturerQuestionController.class);
 
@@ -84,7 +89,7 @@ public class LecturerQuestionController extends AbstractController {
 		}
 	}
 
-	@RequestMapping(value = "/{questionId}/startNewPiRound", method = RequestMethod.POST)
+	@RequestMapping(value = "/{questionId}/startnewpiround", method = RequestMethod.POST)
 	public void startPiRound(
 			@PathVariable final String questionId,
 			@RequestParam(value = "time", defaultValue = "0", required = false) final int time
@@ -97,27 +102,56 @@ public class LecturerQuestionController extends AbstractController {
 		}
 	}
 
-	@RequestMapping(value = "/{questionId}/cancelDelayedPiRound", method = RequestMethod.POST)
+	@RequestMapping(value = "/{questionId}/canceldelayedpiround", method = RequestMethod.POST)
 	public void cancelPiRound(
 			@PathVariable final String questionId
 			) {
 		questionService.cancelPiRoundChange(questionId);
 	}
 
-	@RequestMapping(value = "/{questionId}/resetPiRoundState", method = RequestMethod.POST)
+	@RequestMapping(value = "/{questionId}/resetpiroundstate", method = RequestMethod.POST)
 	public void resetPiQuestion(
 			@PathVariable final String questionId
 			) {
 		questionService.resetPiRoundState(questionId);
 	}
 
-	@RequestMapping(value = "/{questionId}/disableVoting", method = RequestMethod.POST)
+	@RequestMapping(value = "/{questionId}/disablevote", method = RequestMethod.POST)
 	public void setVotingAdmission(
 			@PathVariable final String questionId,
-			@RequestParam(required = true) final Boolean disable
+			@RequestParam(value = "disable", defaultValue = "false", required = false) final Boolean disableVote
 			) {
-		if (disable != null) {
-			questionService.setVotingAdmission(questionId, disable);
+		boolean disable = false;
+
+		if (disableVote != null) {
+			disable = disableVote;
+		}
+
+		questionService.setVotingAdmission(questionId, disable);
+	}
+
+	@RequestMapping(value = "/disablevote", method = RequestMethod.POST)
+	public void setVotingAdmissionForAllQuestions(
+			@RequestParam final String sessionkey,
+			@RequestParam(value = "disable", defaultValue = "false", required = false) final Boolean disableVote,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false) final boolean lectureQuestionsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) final boolean preparationQuestionsOnly
+			) {
+		boolean disable = false;
+		List<Question> questions;
+
+		if (disableVote != null) {
+			disable = disableVote;
+		}
+
+		if (lectureQuestionsOnly) {
+			questions = questionService.getLectureQuestions(sessionkey);
+			questionService.setVotingAdmissions(sessionkey, disable, questions);
+		} else if (preparationQuestionsOnly) {
+			questions = questionService.getPreparationQuestions(sessionkey);
+			questionService.setVotingAdmissions(sessionkey, disable, questions);
+		} else {
+			questionService.setVotingAdmissionForAllQuestions(sessionkey, disable);
 		}
 	}
 
@@ -183,6 +217,7 @@ public class LecturerQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
+	@Pagination
 	public List<Question> getSkillQuestions(
 			@RequestParam final String sessionkey,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
@@ -204,7 +239,8 @@ public class LecturerQuestionController extends AbstractController {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
 			return null;
 		}
-		return questions;
+
+		return new PaginationListDecorator<Question>(questions, offset, limit);
 	}
 
 	@RequestMapping(value = { "/" }, method = RequestMethod.DELETE)
@@ -325,18 +361,21 @@ public class LecturerQuestionController extends AbstractController {
 	public List<Answer> getAnswers(
 			@PathVariable final String questionId,
 			@RequestParam(value = "piround", required = false) final Integer piRound,
+			@RequestParam(value = "all", required = false, defaultValue = "false") final Boolean allAnswers,
 			final HttpServletResponse response
 			) {
 		List<Answer> answers = null;
-		if (null == piRound) {
-			answers = questionService.getAnswers(questionId);
+		if (allAnswers) {
+			answers = questionService.getAllAnswers(questionId, -1, -1);
+		} else if (null == piRound) {
+			answers = questionService.getAnswers(questionId, offset, limit);
 		} else {
 			if (piRound < 1 || piRound > 2) {
 				response.setStatus(HttpStatus.BAD_REQUEST.value());
 
 				return null;
 			}
-			answers = questionService.getAnswers(questionId, piRound);
+			answers = questionService.getAnswers(questionId, piRound, offset, limit);
 		}
 		if (answers == null) {
 			return new ArrayList<Answer>();
@@ -425,6 +464,19 @@ public class LecturerQuestionController extends AbstractController {
 		return questionService.getAnswerCount(questionId);
 	}
 
+	@RequestMapping(value = "/{questionId}/allroundanswercount", method = RequestMethod.GET)
+	public List<Integer> getAllAnswerCount(@PathVariable final String questionId) {
+		return Arrays.asList(
+			questionService.getAnswerCount(questionId, 1),
+			questionService.getAnswerCount(questionId, 2)
+		);
+	}
+
+	@RequestMapping(value = "/{questionId}/totalanswercount", method = RequestMethod.GET)
+	public int getTotalAnswerCountByQuestion(@PathVariable final String questionId) {
+		return questionService.getTotalAnswerCountByQuestion(questionId);
+	}
+
 	@RequestMapping(value = "/{questionId}/answerandabstentioncount", method = RequestMethod.GET)
 	public List<Integer> getAnswerAndAbstentionCount(@PathVariable final String questionId) {
 		List<Integer> list = Arrays.asList(
@@ -436,8 +488,9 @@ public class LecturerQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{questionId}/freetextanswer/", method = RequestMethod.GET)
+	@Pagination
 	public List<Answer> getFreetextAnswers(@PathVariable final String questionId) {
-		return questionService.getFreetextAnswers(questionId);
+		return questionService.getFreetextAnswers(questionId, offset, limit);
 	}
 
 	@DeprecatedApi

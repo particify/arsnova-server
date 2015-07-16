@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.entities;
 
+/**
+ * Wrapper class for counting read and unread interposed questions for a session or a single user.
+ */
 public class InterposedReadingCount {
 
 	private int read;

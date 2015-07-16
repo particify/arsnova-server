@@ -20,6 +20,9 @@ package de.thm.arsnova.entities;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * A question the teacher is asking.
+ */
 public class Question {
 
 	private String type;
@@ -554,6 +557,15 @@ public class Question {
 		this.setPiRoundFinished(false);
 		this.setShowStatistic(false);
 		this.setShowAnswer(false);
+	}
+
+	public void resetQuestionState() {
+		this.setPiRound(1);
+		this.setPiRoundEndTime(0);
+		this.setPiRoundStartTime(0);
+		this.setPiRoundActive(false);
+		this.setPiRoundFinished(false);
+		this.setVotingDisabled(false);
 	}
 
 	private int calculateRegularValue(Answer answer) {

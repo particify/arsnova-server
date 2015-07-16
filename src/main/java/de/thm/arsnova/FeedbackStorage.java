@@ -32,6 +32,9 @@ import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
+/**
+ * In-memory storage of feedback data.
+ */
 public class FeedbackStorage {
 	private static class FeedbackStorageObject {
 		private final int value;

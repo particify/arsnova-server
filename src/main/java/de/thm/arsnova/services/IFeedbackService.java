@@ -20,6 +20,9 @@ package de.thm.arsnova.services;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.User;
 
+/**
+ * The functionality the feedback service should provide.
+ */
 public interface IFeedbackService {
 	void cleanFeedbackVotes();
 

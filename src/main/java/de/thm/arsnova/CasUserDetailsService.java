@@ -28,6 +28,9 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+/**
+ * Class to load a user based on the results from CAS.
+ */
 @Service
 public class CasUserDetailsService extends AbstractCasAssertionUserDetailsService {
 

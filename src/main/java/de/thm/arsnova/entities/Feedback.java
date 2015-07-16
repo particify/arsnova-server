@@ -20,6 +20,9 @@ package de.thm.arsnova.entities;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The feedback values of a single session.
+ */
 public class Feedback {
 	public static final int MIN_FEEDBACK_TYPE = 0;
 	public static final int MAX_FEEDBACK_TYPE = 3;

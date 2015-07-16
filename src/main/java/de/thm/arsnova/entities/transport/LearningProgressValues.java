@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.entities.transport;
 
+/**
+ * The calculated learning progress along with meta-data.
+ */
 public class LearningProgressValues {
 
 	private int courseProgress;

@@ -23,7 +23,7 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
 
 /**
- * Base class for the Learning Progress feature that allows filtering on the question variant.
+ * Base class for the learning progress feature that allows filtering on the question variant.
  */
 abstract class VariantLearningProgress implements LearningProgress {
 

@@ -34,6 +34,9 @@ import org.springframework.stereotype.Service;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.DbUser;
 
+/**
+ * Class to load a user based on the username.
+ */
 @Service
 public class DbUserDetailsService implements UserDetailsService {
 	@Autowired

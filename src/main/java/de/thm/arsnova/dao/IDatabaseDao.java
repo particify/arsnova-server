@@ -34,10 +34,13 @@ import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 
+/**
+ * All methods the database must support.
+ */
 public interface IDatabaseDao {
 	Session getSessionFromKeyword(String keyword);
 
-	List<Session> getMySessions(User user);
+	List<Session> getMySessions(User user, final int start, final int limit);
 
 	List<Session> getPublicPoolSessions();
 
@@ -86,11 +89,15 @@ public interface IDatabaseDao {
 
 	List<Answer> getAnswers(Question question);
 
+	List<Answer> getAllAnswers(Question question);
+
 	int getAnswerCount(Question question, int piRound);
+
+	int getTotalAnswerCountByQuestion(Question question);
 
 	int getAbstentionAnswerCount(String questionId);
 
-	List<Answer> getFreetextAnswers(String questionId);
+	List<Answer> getFreetextAnswers(String questionId, final int start, final int limit);
 
 	List<Answer> getMyAnswers(User me, Session session);
 
@@ -102,15 +109,15 @@ public interface IDatabaseDao {
 
 	InterposedReadingCount getInterposedReadingCount(Session session, User user);
 
-	List<InterposedQuestion> getInterposedQuestions(Session session);
+	List<InterposedQuestion> getInterposedQuestions(Session session, final int start, final int limit);
 
-	List<InterposedQuestion> getInterposedQuestions(Session session, User user);
+	List<InterposedQuestion> getInterposedQuestions(Session session, User user, final int start, final int limit);
 
 	InterposedQuestion getInterposedQuestion(String questionId);
 
 	void markInterposedQuestionAsRead(InterposedQuestion question);
 
-	List<Session> getMyVisitedSessions(User user);
+	List<Session> getMyVisitedSessions(User user, final int start, final int limit);
 
 	Question updateQuestion(Question question);
 
@@ -182,13 +189,13 @@ public interface IDatabaseDao {
 
 	CourseScore getLearningProgress(Session session);
 
-	List<SessionInfo> getMySessionsInfo(User user);
+	List<SessionInfo> getMySessionsInfo(User user, final int start, final int limit);
 
 	List<SessionInfo> getPublicPoolSessionsInfo();
 
 	List<SessionInfo> getMyPublicPoolSessionsInfo(final User user);
 
-	List<SessionInfo> getMyVisitedSessionsInfo(User currentUser);
+	List<SessionInfo> getMyVisitedSessionsInfo(User currentUser, final int start, final int limit);
 
 	void deleteAllPreparationAnswers(Session session);
 
@@ -209,4 +216,12 @@ public interface IDatabaseDao {
 	void deleteSortOrder(SortOrder sortOrder);
 
 	List<Question> getQuestionsByIds(List<String> ids, Session session);
+
+	void resetQuestionsRoundState(Session session, List<Question> questions);
+
+	void setVotingAdmissions(Session session, boolean disableVoting, List<Question> questions);
+
+	List<Question> setVotingAdmissionForAllQuestions(Session session, boolean disableVoting);
+
+	<T> T getObjectFromId(String documentId, Class<T> klass);
 }

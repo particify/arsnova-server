@@ -35,6 +35,9 @@ import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.services.UserSessionService;
 
+/**
+ * Handles requests related to ARSnova's own user registration and login process.
+ */
 @Controller
 @RequestMapping("/user")
 public class UserController extends AbstractController {

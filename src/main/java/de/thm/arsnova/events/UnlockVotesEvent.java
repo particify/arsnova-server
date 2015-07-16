@@ -15,9 +15,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.dao;
+package de.thm.arsnova.events;
+
+import java.util.List;
+
+import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Session;
 
 /**
- * This interface is used as a tag to make Spring dependency injection happy...
+ * Fires whenever voting of multiple questions is enabled.
  */
-public interface ICacheBuster {}
+public class UnlockVotesEvent extends SessionEvent {
+
+	private static final long serialVersionUID = 1L;
+
+	private List<Question> questions;
+
+	public UnlockVotesEvent(Object source, Session session, List<Question> questions) {
+		super(source, session);
+		this.questions = questions;
+	}
+
+	public List<Question> getQuestions() {
+		return this.questions;
+	}
+
+	@Override
+	public void accept(NovaEventVisitor visitor) {
+		visitor.visit(this);
+	}
+
+}

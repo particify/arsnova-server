@@ -17,7 +17,9 @@
  */
 package de.thm.arsnova.entities;
 
-
+/**
+ * A session a user has visited previously.
+ */
 public class VisitedSession {
 	private String _id;
 	private String name;

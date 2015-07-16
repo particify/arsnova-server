@@ -20,6 +20,9 @@ package de.thm.arsnova.events;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 
+/**
+ * Fires whenever a single answer is deleted.
+ */
 public class DeleteAnswerEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;

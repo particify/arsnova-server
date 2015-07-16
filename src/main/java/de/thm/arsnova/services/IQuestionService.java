@@ -27,6 +27,9 @@ import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.User;
 
+/**
+ * The functionality the question service should provide.
+ */
 public interface IQuestionService {
 	Question saveQuestion(Question question);
 
@@ -56,23 +59,31 @@ public interface IQuestionService {
 
 	Answer getMyAnswer(String questionId);
 
-	List<Answer> getAnswers(String questionId, int piRound);
+	void readFreetextAnswer(String answerId, User user);
 
-	List<Answer> getAnswers(String questionId);
+	List<Answer> getAnswers(String questionId, int piRound, int offset, int limit);
+
+	List<Answer> getAnswers(String questionId, int offset, int limit);
+
+	List<Answer> getAllAnswers(String questionId, int offset, int limit);
 
 	int getAnswerCount(String questionId);
 
-	List<Answer> getFreetextAnswers(String questionId);
+	int getAnswerCount(String questionId, int piRound);
+
+	List<Answer> getFreetextAnswers(String questionId, int offset, int limit);
 
 	List<Answer> getMyAnswers(String sessionKey);
 
 	int getTotalAnswerCount(String sessionKey);
 
+	int getTotalAnswerCountByQuestion(String questionId);
+
 	int getInterposedCount(String sessionKey);
 
 	InterposedReadingCount getInterposedReadingCount(String sessionKey, String username);
 
-	List<InterposedQuestion> getInterposedQuestions(String sessionKey);
+	List<InterposedQuestion> getInterposedQuestions(String sessionKey, int offset, int limit);
 
 	InterposedQuestion readInterposedQuestion(String questionId);
 
@@ -150,6 +161,10 @@ public interface IQuestionService {
 
 	String getQuestionSortType(String sessionkey, boolean isPreparation, String subject);
 
-	void setVotingAdmission(String questionId, boolean disable);
+	void setVotingAdmission(String questionId, boolean disableVoting);
+
+	void setVotingAdmissions(String sessionkey, boolean disableVoting, List<Question> questions);
+
+	void setVotingAdmissionForAllQuestions(String sessionkey, boolean disableVoting);
 
 }

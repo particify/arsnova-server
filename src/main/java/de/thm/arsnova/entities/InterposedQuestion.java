@@ -19,6 +19,9 @@ package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+/**
+ * A question the user is asking the teacher. Also known as feedback or audience question.
+ */
 public class InterposedQuestion {
 
 	private String _id;

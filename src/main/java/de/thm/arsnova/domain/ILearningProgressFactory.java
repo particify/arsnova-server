@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.domain;
 
+/**
+ * Interface for Spring dependency injection.
+ */
 public interface ILearningProgressFactory {
 
 	public abstract LearningProgress create(String progressType, String questionVariant);

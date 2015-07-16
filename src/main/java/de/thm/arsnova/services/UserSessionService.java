@@ -22,6 +22,9 @@ import java.util.UUID;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
+/**
+ * The functionality the user-session service should provide.
+ */
 public interface UserSessionService {
 
 	enum Role {

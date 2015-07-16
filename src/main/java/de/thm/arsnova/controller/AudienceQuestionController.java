@@ -36,10 +36,14 @@ import de.thm.arsnova.entities.transport.InterposedQuestion;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.web.DeprecatedApi;
+import de.thm.arsnova.web.Pagination;
 
+/**
+ * Handles requests related to audience questions, which are also called interposed or feedback questions.
+ */
 @RestController
 @RequestMapping("/audiencequestion")
-public class AudienceQuestionController extends AbstractController {
+public class AudienceQuestionController extends PaginationController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(AudienceQuestionController.class);
 
@@ -59,8 +63,9 @@ public class AudienceQuestionController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
+	@Pagination
 	public List<InterposedQuestion> getInterposedQuestions(@RequestParam final String sessionkey) {
-		return InterposedQuestion.fromList(questionService.getInterposedQuestions(sessionkey));
+		return InterposedQuestion.fromList(questionService.getInterposedQuestions(sessionkey, offset, limit));
 	}
 
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)

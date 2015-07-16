@@ -17,14 +17,25 @@
  */
 package de.thm.arsnova.events;
 
+import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 
+/**
+ * Fires whenever a question is deleted.
+ */
 public class DeleteQuestionEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public DeleteQuestionEvent(Object source, Session session) {
+	private final Question question;
+
+	public DeleteQuestionEvent(Object source, Session session, Question question) {
 		super(source, session);
+		this.question = question;
+	}
+
+	public Question getQuestion() {
+		return this.question;
 	}
 
 	@Override

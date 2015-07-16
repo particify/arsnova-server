@@ -39,6 +39,9 @@ import de.thm.arsnova.exceptions.NotImplementedException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.IUserService;
 
+/**
+ * Provides access to a user's courses in an LMS such as Moodle.
+ */
 @RestController
 public class CourseController extends AbstractController {
 

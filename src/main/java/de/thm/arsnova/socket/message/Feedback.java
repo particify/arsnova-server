@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.socket.message;
 
+/**
+ * The feedback values.
+ */
 public class Feedback {
 
 	private int value;

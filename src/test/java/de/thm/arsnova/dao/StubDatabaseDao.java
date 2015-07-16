@@ -155,7 +155,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Session> getMySessions(User user) {
+	public List<Session> getMySessions(User user, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -209,7 +209,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Answer> getFreetextAnswers(String questionId) {
+	public List<Answer> getFreetextAnswers(String questionId, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -232,7 +232,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<InterposedQuestion> getInterposedQuestions(Session session) {
+	public List<InterposedQuestion> getInterposedQuestions(Session session, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -254,7 +254,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Session> getMyVisitedSessions(User user) {
+	public List<Session> getMyVisitedSessions(User user, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -445,7 +445,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<InterposedQuestion> getInterposedQuestions(Session session, User user) {
+	public List<InterposedQuestion> getInterposedQuestions(Session session, User user, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -463,13 +463,13 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<SessionInfo> getMySessionsInfo(User user) {
+	public List<SessionInfo> getMySessionsInfo(User user, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<SessionInfo> getMyVisitedSessionsInfo(User currentUser) {
+	public List<SessionInfo> getMyVisitedSessionsInfo(User currentUser, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -606,6 +606,43 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public List<Question> getQuestionsByIds(List<String> ids, Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Answer> getAllAnswers(Question question) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getTotalAnswerCountByQuestion(Question question) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void resetQuestionsRoundState(Session session,
+			List<Question> questions) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setVotingAdmissions(Session session, boolean disableVoting, List<Question> questions) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public List<Question> setVotingAdmissionForAllQuestions(Session session, boolean disableVoting) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public <T> T getObjectFromId(String documentId, Class<T> klass) {
 		// TODO Auto-generated method stub
 		return null;
 	}

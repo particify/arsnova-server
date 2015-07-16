@@ -80,6 +80,9 @@ import de.thm.arsnova.LoginAuthenticationSucessHandler;
 import de.thm.arsnova.security.ApplicationPermissionEvaluator;
 import de.thm.arsnova.security.DbUserDetailsService;
 
+/**
+ * Loads property file and configures components used for authentication.
+ */
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @EnableWebSecurity

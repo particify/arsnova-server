@@ -28,6 +28,9 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
 
+/**
+ * The functionality the session service should provide.
+ */
 public interface ISessionService {
 	Session getSession(String keyword);
 
@@ -39,9 +42,9 @@ public interface ISessionService {
 
 	String generateKeyword();
 
-	List<Session> getMySessions();
+	List<Session> getMySessions(int offset, int limit);
 
-	List<Session> getMyVisitedSessions();
+	List<Session> getMyVisitedSessions(int offset, int limit);
 
 	int countSessions(List<Course> courses);
 
@@ -61,13 +64,13 @@ public interface ISessionService {
 
 	LearningProgressValues getMyLearningProgress(String sessionkey, String progressType, String questionVariant);
 
-	List<SessionInfo> getMySessionsInfo();
+	List<SessionInfo> getMySessionsInfo(int offset, int limit);
 
 	List<SessionInfo> getPublicPoolSessionsInfo();
 
 	List<SessionInfo> getMyPublicPoolSessionsInfo();
 
-	List<SessionInfo> getMyVisitedSessionsInfo();
+	List<SessionInfo> getMyVisitedSessionsInfo(int offset, int limit);
 
 	SessionInfo importSession(ImportExportSession session);
 

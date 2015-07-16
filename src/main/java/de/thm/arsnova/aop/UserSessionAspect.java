@@ -25,6 +25,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.services.UserSessionService;
 
+/**
+ * Assigns a session to the {@link de.thm.arsnova.services.UserSessionService} whenever a user joins a
+ * session.
+ */
 @Aspect
 public class UserSessionAspect {
 

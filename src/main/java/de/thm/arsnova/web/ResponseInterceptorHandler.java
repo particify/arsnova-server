@@ -15,24 +15,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.dao;
+package de.thm.arsnova.web;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import de.thm.arsnova.events.NovaEvent;
-import de.thm.arsnova.events.NovaEventVisitor;
+import de.thm.arsnova.services.ResponseProviderService;
 
+/**
+ *  Injects a {@link HttpServletResponse} into {@link ResponseProviderService} to allow access to it outside of
+ *  Controllers.
+ */
 @Component
-public class CacheBustListener implements ApplicationListener<NovaEvent> {
+public class ResponseInterceptorHandler extends HandlerInterceptorAdapter {
 
 	@Autowired
-	private ICacheBuster cacheBuster;
+	ResponseProviderService responseProviderService;
 
 	@Override
-	public void onApplicationEvent(NovaEvent event) {
-		event.accept((NovaEventVisitor) cacheBuster);
-	}
+	public boolean preHandle(
+		HttpServletRequest request,
+		HttpServletResponse response,
+		Object handler
+	) throws Exception {
+		responseProviderService.setResponse(response);
+
+		return true;
+	};
 
 }

@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.entities;
 
+/**
+ * Contains fields that describe which specific feature is activated for a session.
+ */
 public class SessionFeature {
 
 	private boolean jitt = true;

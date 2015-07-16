@@ -26,6 +26,9 @@ import java.util.Set;
 
 import de.thm.arsnova.entities.User;
 
+/**
+ * Calculates the learning progress for users and their courses.
+ */
 public class CourseScore implements Iterable<QuestionScore> {
 
 	private final Map<String, QuestionScore> scores;

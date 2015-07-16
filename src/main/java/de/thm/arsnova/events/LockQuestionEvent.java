@@ -20,6 +20,9 @@ package de.thm.arsnova.events;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 
+/**
+ * Fires whenever a question is disabled, i.e., it is hidden from students.
+ */
 public class LockQuestionEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;

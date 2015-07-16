@@ -24,6 +24,9 @@ import java.util.UUID;
 import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.User;
 
+/**
+ * The functionality the user service should provide.
+ */
 public interface IUserService {
 	User getCurrentUser();
 

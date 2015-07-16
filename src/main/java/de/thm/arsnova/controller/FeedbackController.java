@@ -35,6 +35,12 @@ import de.thm.arsnova.services.IFeedbackService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.web.DeprecatedApi;
 
+/**
+ * Handles requests concerning the user's feedback, i.e., "too fast" or "faster, please". This HTTP API is
+ * deprecated in favor of the socket implementation.
+ *
+ * @see de.thm.arsnova.socket.ARSnovaSocketIOServer
+ */
 @RestController
 public class FeedbackController extends AbstractController {
 

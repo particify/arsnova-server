@@ -22,6 +22,9 @@ import java.util.List;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 
+/**
+ * Fires whenever a set of questions are disabled, i.e., they are hidden from students.
+ */
 public class LockQuestionsEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;

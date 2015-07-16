@@ -21,6 +21,10 @@ import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
 
+/**
+ * Calculates learning progress based on overall correctness of an answer. A question is answered correctly if and
+ * only if the maximum question value possible has been achieved.
+ */
 public class QuestionBasedLearningProgress extends VariantLearningProgress {
 
 	public QuestionBasedLearningProgress(IDatabaseDao dao) {

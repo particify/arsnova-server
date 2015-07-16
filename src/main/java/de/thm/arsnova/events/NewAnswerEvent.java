@@ -22,6 +22,9 @@ import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
+/**
+ * Fires whenever a new answer is added.
+ */
 public class NewAnswerEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;

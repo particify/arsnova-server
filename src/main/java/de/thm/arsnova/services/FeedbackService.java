@@ -42,6 +42,9 @@ import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 
+/**
+ * Performs all feedback related operations.
+ */
 @Service
 public class FeedbackService implements IFeedbackService, ApplicationEventPublisherAware {
 

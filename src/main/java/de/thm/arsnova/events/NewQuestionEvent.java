@@ -20,6 +20,9 @@ package de.thm.arsnova.events;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 
+/**
+ * Fires whenever a new question is added.
+ */
 public class NewQuestionEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;

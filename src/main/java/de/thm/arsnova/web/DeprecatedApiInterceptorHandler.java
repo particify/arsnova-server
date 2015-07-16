@@ -24,6 +24,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+/**
+ * Adds a "deprecated" header to any HTTP response that is served by a controller method with the {@link DeprecatedApi}
+ * annotation.
+ */
 @Component
 public class DeprecatedApiInterceptorHandler extends HandlerInterceptorAdapter {
 

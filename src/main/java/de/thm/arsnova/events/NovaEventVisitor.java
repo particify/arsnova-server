@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.events;
 
+/**
+ * Listeners wanting to receive ARSnova's internal events should implement this interface.
+ */
 public interface NovaEventVisitor {
 
 	void visit(NewInterposedQuestionEvent newInterposedQuestionEvent);
@@ -25,7 +28,9 @@ public interface NovaEventVisitor {
 
 	void visit(NewQuestionEvent newQuestionEvent);
 
-	void visit(NewQuestionsEvent newQuestionsEvent);
+	void visit(UnlockQuestionEvent unlockQuestionEvent);
+
+	void visit(UnlockQuestionsEvent newQuestionsEvent);
 
 	void visit(LockQuestionEvent lockQuestionEvent);
 
@@ -36,6 +41,8 @@ public interface NovaEventVisitor {
 	void visit(DeleteAnswerEvent deleteAnswerEvent);
 
 	void visit(DeleteQuestionEvent deleteQuestionEvent);
+
+	void visit(DeleteAllQuestionsEvent deleteAllQuestionsEvent);
 
 	void visit(DeleteAllQuestionsAnswersEvent deleteAllAnswersEvent);
 
@@ -63,6 +70,12 @@ public interface NovaEventVisitor {
 
 	void visit(DeleteSessionEvent deleteSessionEvent);
 
-	void visit(LockVotingEvent lockVotingEvent);
+	void visit(LockVoteEvent lockVoteEvent);
+
+	void visit(LockVotesEvent lockVotesEvent);
+
+	void visit(UnlockVoteEvent unlockVoteEvent);
+
+	void visit(UnlockVotesEvent unlockVotesEvent);
 
 }

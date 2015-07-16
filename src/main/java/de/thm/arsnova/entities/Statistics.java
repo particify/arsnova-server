@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.entities;
 
+/**
+ * Collection of several statistics about ARSnova.
+ */
 public class Statistics {
 
 	private int answers;

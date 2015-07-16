@@ -19,6 +19,9 @@ package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.Session;
 
+/**
+ * Fires whenever all answers of all lecture questions of a session are deleted.
+ */
 public class DeleteAllLectureAnswersEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;

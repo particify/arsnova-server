@@ -19,6 +19,9 @@ package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.Session;
 
+/**
+ * Fires whenever the feedback changes.
+ */
 public class NewFeedbackEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;

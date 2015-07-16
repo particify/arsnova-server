@@ -28,6 +28,7 @@ import de.thm.arsnova.events.ChangeLearningProgressEvent;
 import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
 import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
 import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
+import de.thm.arsnova.events.DeleteAllQuestionsEvent;
 import de.thm.arsnova.events.DeleteAnswerEvent;
 import de.thm.arsnova.events.DeleteFeedbackForSessionsEvent;
 import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
@@ -35,12 +36,14 @@ import de.thm.arsnova.events.DeleteQuestionEvent;
 import de.thm.arsnova.events.DeleteSessionEvent;
 import de.thm.arsnova.events.LockQuestionEvent;
 import de.thm.arsnova.events.LockQuestionsEvent;
-import de.thm.arsnova.events.LockVotingEvent;
+import de.thm.arsnova.events.LockVoteEvent;
+import de.thm.arsnova.events.LockVotesEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
-import de.thm.arsnova.events.NewQuestionsEvent;
+import de.thm.arsnova.events.UnlockQuestionEvent;
+import de.thm.arsnova.events.UnlockQuestionsEvent;
 import de.thm.arsnova.events.NewSessionEvent;
 import de.thm.arsnova.events.NovaEventVisitor;
 import de.thm.arsnova.events.PiRoundCancelEvent;
@@ -48,7 +51,14 @@ import de.thm.arsnova.events.PiRoundDelayedStartEvent;
 import de.thm.arsnova.events.PiRoundEndEvent;
 import de.thm.arsnova.events.PiRoundResetEvent;
 import de.thm.arsnova.events.StatusSessionEvent;
+import de.thm.arsnova.events.UnlockVoteEvent;
+import de.thm.arsnova.events.UnlockVotesEvent;
 
+/**
+ * Creates a learning progress implementation.
+ *
+ * This class additionally clears all learning progress caches and reports this via event system.
+ */
 @Component
 public class LearningProgressFactory implements NovaEventVisitor, ILearningProgressFactory, ApplicationEventPublisherAware {
 
@@ -83,7 +93,13 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
-	public void visit(NewQuestionsEvent event) {
+	public void visit(UnlockQuestionEvent event) {
+		this.publisher.publishEvent(new ChangeLearningProgressEvent(this, event.getSession()));
+	}
+
+	@CacheEvict(value = "learningprogress", key = "#event.Session")
+	@Override
+	public void visit(UnlockQuestionsEvent event) {
 		this.publisher.publishEvent(new ChangeLearningProgressEvent(this, event.getSession()));
 	}
 
@@ -119,6 +135,12 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
+	public void visit(DeleteAllQuestionsEvent event) {
+		this.publisher.publishEvent(new ChangeLearningProgressEvent(this, event.getSession()));
+	}
+
+	@CacheEvict(value = "learningprogress", key = "#event.Session")
+	@Override
 	public void visit(DeleteAllQuestionsAnswersEvent event) {
 		this.publisher.publishEvent(new ChangeLearningProgressEvent(this, event.getSession()));
 	}
@@ -132,6 +154,12 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
 	public void visit(DeleteAllLectureAnswersEvent event) {
+		this.publisher.publishEvent(new ChangeLearningProgressEvent(this, event.getSession()));
+	}
+
+	@CacheEvict(value = "learningprogress", key = "#event.Session")
+	@Override
+	public void visit(PiRoundResetEvent event) {
 		this.publisher.publishEvent(new ChangeLearningProgressEvent(this, event.getSession()));
 	}
 
@@ -157,9 +185,6 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 	public void visit(PiRoundCancelEvent piRoundCancelEvent) {}
 
 	@Override
-	public void visit(PiRoundResetEvent piRoundResetEvent) {}
-
-	@Override
 	public void visit(NewSessionEvent event) {}
 
 	@Override
@@ -171,5 +196,15 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 	}
 
 	@Override
-	public void visit(LockVotingEvent lockVotingEvent) {}
+	public void visit(LockVoteEvent lockVoteEvent) {}
+
+	@Override
+	public void visit(LockVotesEvent lockVotesEvent) {}
+
+	@Override
+	public void visit(UnlockVoteEvent unlockVoteEvent) {}
+
+	@Override
+	public void visit(UnlockVotesEvent unlockVotesEvent) {}
+
 }

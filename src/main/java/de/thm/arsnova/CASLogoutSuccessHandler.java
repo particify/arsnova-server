@@ -30,6 +30,9 @@ import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
+/**
+ * This class gets called when a user has been successfully logged out from CAS.
+ */
 public class CASLogoutSuccessHandler implements LogoutSuccessHandler {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(CASLogoutSuccessHandler.class);

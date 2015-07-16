@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,26 +48,34 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
 import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
 import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
+import de.thm.arsnova.events.DeleteAllQuestionsEvent;
 import de.thm.arsnova.events.DeleteAnswerEvent;
 import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
 import de.thm.arsnova.events.DeleteQuestionEvent;
 import de.thm.arsnova.events.LockQuestionEvent;
 import de.thm.arsnova.events.LockQuestionsEvent;
-import de.thm.arsnova.events.LockVotingEvent;
+import de.thm.arsnova.events.LockVoteEvent;
+import de.thm.arsnova.events.LockVotesEvent;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.events.NewInterposedQuestionEvent;
 import de.thm.arsnova.events.NewQuestionEvent;
-import de.thm.arsnova.events.NewQuestionsEvent;
+import de.thm.arsnova.events.UnlockQuestionEvent;
+import de.thm.arsnova.events.UnlockQuestionsEvent;
 import de.thm.arsnova.events.NovaEvent;
 import de.thm.arsnova.events.PiRoundCancelEvent;
 import de.thm.arsnova.events.PiRoundDelayedStartEvent;
 import de.thm.arsnova.events.PiRoundEndEvent;
 import de.thm.arsnova.events.PiRoundResetEvent;
+import de.thm.arsnova.events.UnlockVoteEvent;
+import de.thm.arsnova.events.UnlockVotesEvent;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 
+/**
+ * Performs all question, interposed question, and answer related operations.
+ */
 @Service
 public class QuestionService implements IQuestionService, ApplicationEventPublisherAware {
 
@@ -219,7 +226,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		deleteQuestionFromSortOrder(question);
 		databaseDao.deleteQuestionWithAnswers(question);
 
-		final DeleteQuestionEvent event = new DeleteQuestionEvent(this, session);
+		final DeleteQuestionEvent event = new DeleteQuestionEvent(this, session, question);
 		this.publisher.publishEvent(event);
 	}
 
@@ -229,7 +236,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final Session session = getSessionWithAuthCheck(sessionKeyword);
 		databaseDao.deleteAllQuestionsWithAnswers(session);
 
-		final DeleteQuestionEvent event = new DeleteQuestionEvent(this, session);
+		final DeleteAllQuestionsEvent event = new DeleteAllQuestionsEvent(this, session);
 		this.publisher.publishEvent(event);
 	}
 
@@ -325,13 +332,60 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
-	public void setVotingAdmission(final String questionId, final boolean disable) {
+	public void setVotingAdmission(final String questionId, final boolean disableVoting) {
 		final Question question = databaseDao.getQuestion(questionId);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
-		question.setVotingDisabled(disable);
-		
-		databaseDao.updateQuestion(question);
-		this.publisher.publishEvent(new LockVotingEvent(this, session, question));
+		question.setVotingDisabled(disableVoting);
+
+		if (disableVoting == false && !question.isActive()) {
+			question.setActive(true);
+			update(question);
+		} else {
+			databaseDao.updateQuestion(question);
+		}
+		NovaEvent event;
+		if (disableVoting) {
+			event = new LockVoteEvent(this, session, question);
+		} else {
+			event = new UnlockVoteEvent(this, session, question);
+		}
+		this.publisher.publishEvent(event);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public void setVotingAdmissions(final String sessionkey, final boolean disableVoting, List<Question> questions) {
+		final User user = getCurrentUser();
+		final Session session = getSession(sessionkey);
+		if (!session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
+		databaseDao.setVotingAdmissions(session, disableVoting, questions);
+		NovaEvent event;
+		if (disableVoting) {
+			event = new LockVotesEvent(this, session, questions);
+		} else {
+			event = new UnlockVotesEvent(this, session, questions);
+		}
+		this.publisher.publishEvent(event);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public void setVotingAdmissionForAllQuestions(final String sessionkey, final boolean disableVoting) {
+		final User user = getCurrentUser();
+		final Session session = getSession(sessionkey);
+		if (!session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
+		final List<Question> questions = databaseDao.setVotingAdmissionForAllQuestions(session, disableVoting);
+		NovaEvent event;
+		if (disableVoting) {
+			event = new LockVotesEvent(this, session, questions);
+		} else {
+			event = new UnlockVotesEvent(this, session, questions);
+		}
+		this.publisher.publishEvent(event);
 	}
 
 	private Session getSessionWithAuthCheck(final String sessionKeyword) {
@@ -376,6 +430,8 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
 	public void deleteAnswers(final String questionId) {
 		final Question question = databaseDao.getQuestion(questionId);
+		question.resetQuestionState();
+		databaseDao.updateQuestion(question);
 		databaseDao.deleteAnswers(question);
 	}
 
@@ -406,28 +462,58 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	}
 
 	@Override
+	public void readFreetextAnswer(final String answerId, final User user) {
+		final Answer answer = databaseDao.getObjectFromId(answerId, Answer.class);
+		if (answer == null) {
+			throw new NotFoundException();
+		}
+		if (answer.isRead()) {
+			return;
+		}
+		final Session session = databaseDao.getSessionFromId(answer.getSessionId());
+		if (session.isCreator(user)) {
+			answer.setRead(true);
+			databaseDao.updateAnswer(answer);
+		}
+	}
+
+	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getAnswers(final String questionId, final int piRound) {
+	public List<Answer> getAnswers(final String questionId, final int piRound, final int offset, final int limit) {
 		final Question question = databaseDao.getQuestion(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
 		return "freetext".equals(question.getQuestionType())
-				? getFreetextAnswers(questionId)
+				? getFreetextAnswers(questionId, offset, limit)
 						: databaseDao.getAnswers(question, piRound);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getAnswers(final String questionId) {
+	public List<Answer> getAnswers(final String questionId, final int offset, final int limit) {
 		final Question question = getQuestion(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
 		if ("freetext".equals(question.getQuestionType())) {
-			return getFreetextAnswers(questionId);
+			return getFreetextAnswers(questionId, offset, limit);
 		} else {
 			return databaseDao.getAnswers(question);
+		}
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public List<Answer> getAllAnswers(final String questionId, final int offset, final int limit) {
+		final Question question = getQuestion(questionId);
+		if (question == null) {
+			throw new NotFoundException();
+		}
+		if ("freetext".equals(question.getQuestionType())) {
+			return getFreetextAnswers(questionId, offset, limit);
+		} else {
+			return databaseDao.getAllAnswers(question);
 		}
 	}
 
@@ -444,6 +530,17 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	public int getAnswerCount(final String questionId, final int piRound) {
+		final Question question = getQuestion(questionId);
+		if (question == null) {
+			return 0;
+		}
+
+		return databaseDao.getAnswerCount(question, piRound);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
 	public int getAbstentionAnswerCount(final String questionId) {
 		final Question question = getQuestion(questionId);
 		if (question == null) {
@@ -455,8 +552,19 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getFreetextAnswers(final String questionId) {
-		final List<Answer> answers = databaseDao.getFreetextAnswers(questionId);
+	public int getTotalAnswerCountByQuestion(final String questionId) {
+		final Question question = getQuestion(questionId);
+		if (question == null) {
+			return 0;
+		}
+
+		return databaseDao.getTotalAnswerCountByQuestion(question);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public List<Answer> getFreetextAnswers(final String questionId, final int offset, final int limit) {
+		final List<Answer> answers = databaseDao.getFreetextAnswers(questionId, offset, limit);
 		if (answers == null) {
 			throw new NotFoundException();
 		}
@@ -535,13 +643,13 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<InterposedQuestion> getInterposedQuestions(final String sessionKey) {
+	public List<InterposedQuestion> getInterposedQuestions(final String sessionKey, final int offset, final int limit) {
 		final Session session = this.getSession(sessionKey);
 		final User user = getCurrentUser();
 		if (session.isCreator(user)) {
-			return databaseDao.getInterposedQuestions(session);
+			return databaseDao.getInterposedQuestions(session, offset, limit);
 		} else {
-			return databaseDao.getInterposedQuestions(session, user);
+			return databaseDao.getInterposedQuestions(session, user, offset, limit);
 		}
 	}
 
@@ -601,7 +709,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final Question result = databaseDao.updateQuestion(question);
 
 		if (!oldQuestion.isActive() && question.isActive()) {
-			final NewQuestionEvent event = new NewQuestionEvent(this, session, result);
+			final UnlockQuestionEvent event = new UnlockQuestionEvent(this, session, result);
 			this.publisher.publishEvent(event);
 		} else if (oldQuestion.isActive() && !question.isActive()) {
 			final LockQuestionEvent event = new LockQuestionEvent(this, session, result);
@@ -871,7 +979,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final List<Question> questions = databaseDao.publishAllQuestions(session, publish);
 		NovaEvent event;
 		if (publish) {
-			event = new NewQuestionsEvent(this, session, questions);
+			event = new UnlockQuestionsEvent(this, session, questions);
 		} else {
 			event = new LockQuestionsEvent(this, session, questions);
 		}
@@ -889,7 +997,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		databaseDao.publishQuestions(session, publish, questions);
 		NovaEvent event;
 		if (publish) {
-			event = new NewQuestionsEvent(this, session, questions);
+			event = new UnlockQuestionsEvent(this, session, questions);
 		} else {
 			event = new LockQuestionsEvent(this, session, questions);
 		}
@@ -934,7 +1042,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	public String getImage(String questionId, String answerId) {
-		final List<Answer> answers = getAnswers(questionId);
+		final List<Answer> answers = getAnswers(questionId, -1, -1);
 		Answer answer = null;
 
 		for (Answer a : answers) {

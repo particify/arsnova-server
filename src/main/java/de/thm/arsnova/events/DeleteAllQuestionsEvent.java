@@ -17,24 +17,18 @@
  */
 package de.thm.arsnova.events;
 
-import java.util.List;
-
-import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 
-public class NewQuestionsEvent extends SessionEvent {
+/**
+ * Fires whenever all questions of a session are deleted. Note that this implies that all answers are deleted as well,
+ * even though the specific answer events are not fired.
+ */
+public class DeleteAllQuestionsEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	private List<Question> questions;
-
-	public NewQuestionsEvent(Object source, Session session, List<Question> questions) {
+	public DeleteAllQuestionsEvent(Object source, Session session) {
 		super(source, session);
-		this.questions = questions;
-	}
-
-	public List<Question> getQuestions() {
-		return this.questions;
 	}
 
 	@Override

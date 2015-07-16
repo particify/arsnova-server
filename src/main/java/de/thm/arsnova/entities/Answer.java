@@ -19,6 +19,11 @@ package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+/**
+ * Both a regular (single choice, evaluation, etc.) as well as a freetext answer.
+ *
+ * This class has additional fields to transport generated answer statistics.
+ */
 public class Answer {
 
 	private String _id;
@@ -33,6 +38,7 @@ public class Answer {
 	private int piRound;
 	private String user;
 	private long timestamp;
+	private boolean read;
 	private int answerCount = 1;
 	private boolean abstention;
 	private int abstentionCount;
@@ -143,6 +149,14 @@ public class Answer {
 
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
+	}
+
+	public boolean isRead() {
+		return read;
+	}
+
+	public void setRead(boolean read) {
+		this.read = read;
 	}
 
 	public final int getAnswerCount() {

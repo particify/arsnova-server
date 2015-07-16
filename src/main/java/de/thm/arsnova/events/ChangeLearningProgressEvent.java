@@ -19,6 +19,9 @@ package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.Session;
 
+/**
+ * Fires whenever a learning progress related value changes.
+ */
 public class ChangeLearningProgressEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;

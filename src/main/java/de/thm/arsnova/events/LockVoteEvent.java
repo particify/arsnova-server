@@ -22,13 +22,16 @@ import java.util.HashMap;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 
-public class LockVotingEvent extends SessionEvent {
+/**
+ * Fires whenever voting on a question is disabled.
+ */
+public class LockVoteEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;
 
 	private final Question question;
 
-	public LockVotingEvent(Object source, Session session, Question question) {
+	public LockVoteEvent(Object source, Session session, Question question) {
 		super(source, session);
 		this.question = question;
 	}
@@ -49,7 +52,6 @@ public class LockVotingEvent extends SessionEvent {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 
 		map.put("_id", getQuestionId());
-		map.put("disable", getVotingDisabled());
 		map.put("variant", getQuestionVariant());
 		return map;
 	}

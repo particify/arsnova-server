@@ -22,6 +22,9 @@ import java.util.HashMap;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 
+/**
+ * Fires whenever a peer instruction round is reset.
+ */
 public class PiRoundResetEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;
