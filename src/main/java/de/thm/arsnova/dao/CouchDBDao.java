@@ -1166,7 +1166,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		if (limit > 0) {
 			view.setLimit(limit);
 		}
-		view.setKey(session.get_id());
+		view.setDescending(true);
+		view.setStartKeyArray(session.get_id(), "{}");
+		view.setEndKeyArray(session.get_id());
 		final ViewResults questions = getDatabase().view(view);
 		if (questions == null || questions.isEmpty()) {
 			return null;
@@ -1183,7 +1185,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		if (limit > 0) {
 			view.setLimit(limit);
 		}
-		view.setKey(session.get_id(), user.getUsername());
+		view.setDescending(true);
+		view.setStartKeyArray(session.get_id(), user.getUsername(), "{}");
+		view.setEndKeyArray(session.get_id(), user.getUsername());
 		final ViewResults questions = getDatabase().view(view);
 		if (questions == null || questions.isEmpty()) {
 			return null;
