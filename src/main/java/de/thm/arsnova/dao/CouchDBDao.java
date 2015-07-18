@@ -1029,7 +1029,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		if (limit > 0) {
 			view.setLimit(limit);
 		}
-		view.setKey(questionId);
+		view.setDescending(true);
+		view.setStartKeyArray(questionId, "{}");
+		view.setEndKeyArray(questionId);
 		final ViewResults results = getDatabase().view(view);
 		if (results.getResults().isEmpty()) {
 			return answers;
