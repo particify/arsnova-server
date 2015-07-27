@@ -167,4 +167,8 @@ public interface IQuestionService {
 
 	void setVotingAdmissionForAllQuestions(String sessionkey, boolean disableVoting);
 
+	String getQuestionImage(String questionId);
+
+	String getQuestionFcImage(String questionId);
+
 }

@@ -1060,6 +1060,30 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	}
 
 	@Override
+	public String getQuestionImage(String questionId) {
+		Question question = databaseDao.getQuestion(questionId);
+		String imageData = question.getImage();
+
+		if (imageData == null) {
+			imageData = "";
+		}
+
+		return imageData;
+	}
+
+	@Override
+	public String getQuestionFcImage(String questionId) {
+		Question question = databaseDao.getQuestion(questionId);
+		String imageData = question.getFcImage();
+
+		if (imageData == null) {
+			imageData = "";
+		}
+
+		return imageData;
+	}
+
+	@Override
 	public String getSubjectSortType(String sessionkey, String isPreparation) {
 		Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		String questionVariant = "lecture";

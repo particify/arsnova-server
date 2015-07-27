@@ -89,6 +89,19 @@ public class LecturerQuestionController extends PaginationController {
 		}
 	}
 
+	@RequestMapping(value = "/{questionId}/questionimage", method = RequestMethod.GET)
+	public String getQuestionImage(
+			@PathVariable final String questionId,
+			@RequestParam(value = "fcImage", defaultValue = "false", required = false) final boolean fcImage
+			) {
+
+		if (fcImage) {
+			return questionService.getQuestionFcImage(questionId);
+		} else {
+			return questionService.getQuestionImage(questionId);
+		}
+	}
+
 	@RequestMapping(value = "/{questionId}/startnewpiround", method = RequestMethod.POST)
 	public void startPiRound(
 			@PathVariable final String questionId,
