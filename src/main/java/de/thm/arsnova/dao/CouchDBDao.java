@@ -1640,6 +1640,11 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				/* needed for legacy questions whose piRound property has not been set */
 				question.setPiRound(1);
 			}
+
+			if (question.getImage() != null) {
+				question.setImage("true");
+			}
+
 			questions.add(question);
 		}
 		return questions;
@@ -2358,6 +2363,11 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				/* needed for legacy questions whose piRound property has not been set */
 				question.setPiRound(1);
 			}
+
+			if (question.getImage() != null) {
+				question.setImage("true");
+			}
+
 			result.add(question);
 		}
 		return result;
