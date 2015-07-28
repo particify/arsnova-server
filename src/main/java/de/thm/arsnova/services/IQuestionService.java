@@ -171,4 +171,6 @@ public interface IQuestionService {
 
 	String getQuestionFcImage(String questionId);
 
+	List<Question> replaceImageData(List<Question> questions);
+
 }

@@ -847,6 +847,18 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 	}
 
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public List<Question> replaceImageData(final List<Question> questions) {
+		for (Question q : questions) {
+			if (q.getImage() != null) {
+				q.setImage("true");
+			}
+		}
+
+		return questions;
+	}
+
 	private Session getSession(final String sessionkey) {
 		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		if (session == null) {

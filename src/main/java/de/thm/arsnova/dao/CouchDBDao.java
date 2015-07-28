@@ -1641,10 +1641,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				question.setPiRound(1);
 			}
 
-			if (question.getImage() != null) {
-				question.setImage("true");
-			}
-
 			questions.add(question);
 		}
 		return questions;

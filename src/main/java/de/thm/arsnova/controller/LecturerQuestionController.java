@@ -236,6 +236,7 @@ public class LecturerQuestionController extends PaginationController {
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
 			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly,
+			@RequestParam(value = "requestImageData", defaultValue = "false") final boolean requestImageData,
 			final HttpServletResponse response
 			) {
 		List<Question> questions;
@@ -251,6 +252,8 @@ public class LecturerQuestionController extends PaginationController {
 		if (questions == null || questions.isEmpty()) {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
 			return null;
+		} else if (!requestImageData) {
+			questions = questionService.replaceImageData(questions);
 		}
 
 		return new PaginationListDecorator<Question>(questions, offset, limit);
