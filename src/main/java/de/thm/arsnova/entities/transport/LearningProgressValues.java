@@ -28,6 +28,10 @@ public class LearningProgressValues {
 
 	private int numQuestions;
 
+	private int numerator;
+
+	private int denominator;
+
 	private int numUsers;
 
 	public int getCourseProgress() {
@@ -52,6 +56,22 @@ public class LearningProgressValues {
 
 	public void setNumQuestions(int numQuestions) {
 		this.numQuestions = numQuestions;
+	}
+
+	public int getNumerator() {
+		return numerator;
+	}
+
+	public void setNumerator(int numerator) {
+		this.numerator = numerator;
+	}
+
+	public int getDenominator() {
+		return denominator;
+	}
+
+	public void setDenominator(int denominator) {
+		this.denominator = denominator;
 	}
 
 	public int getNumUsers() {
