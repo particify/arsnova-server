@@ -128,15 +128,21 @@ public class PointBasedLearningProgressTest {
 	}
 
 	@Test
-	public void shouldIncludeNominatorAndDenominatorOfResult() {
+	public void shouldIncludeNominatorAndDenominatorOfResultExcludingStudentCount() {
 		// two questions
 		String q1 = this.addQuestion("lecture", 10);
 		String q2 = this.addQuestion("lecture", 10);
-		// one user
+		// three users
 		User u1 = new TestUser("user1");
-		// two answers, last one is wrong
+		User u2 = new TestUser("user2");
+		User u3 = new TestUser("user3");
+		// six answers
 		this.addAnswer(q1, u1, 10);
 		this.addAnswer(q2, u1, 0);
+		this.addAnswer(q1, u2, 10);
+		this.addAnswer(q2, u2, 0);
+		this.addAnswer(q1, u3, 10);
+		this.addAnswer(q2, u3, 0);
 
 		int numerator = lp.getCourseProgress(null).getNumerator();
 		int denominator = lp.getCourseProgress(null).getDenominator();

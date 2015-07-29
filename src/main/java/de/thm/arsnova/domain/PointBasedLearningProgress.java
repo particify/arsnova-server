@@ -36,8 +36,8 @@ public class PointBasedLearningProgress extends VariantLearningProgress {
 		lpv.setCourseProgress(coursePercentage());
 		lpv.setNumQuestions(courseScore.getQuestionCount());
 		lpv.setNumUsers(courseScore.getTotalUserCount());
-		lpv.setNumerator(courseScore.getTotalUserScore());
-		lpv.setDenominator(courseScore.getMaximumScore() * courseScore.getTotalUserCount());
+		lpv.setNumerator(courseScore.getTotalUserScore()/courseScore.getTotalUserCount());
+		lpv.setDenominator(courseScore.getMaximumScore());
 		return lpv;
 	}
 
