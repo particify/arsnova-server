@@ -212,17 +212,17 @@ public class QuestionBasedLearningProgressTest {
 		// six answers
 		this.addAnswer(q1, u1, 10);
 		this.addAnswer(q2, u1, -100);
-		this.addAnswer(q1, u2, 10);
+		this.addAnswer(q1, u2, -100);
 		this.addAnswer(q2, u2, -100);
-		this.addAnswer(q1, u3, 10);
+		this.addAnswer(q1, u3, -100);
 		this.addAnswer(q2, u3, -100);
 
 		int numerator = lp.getCourseProgress(null).getNumerator();
 		int denominator = lp.getCourseProgress(null).getDenominator();
 
 		// If the percentage is wrong, then we need to adapt this test case!
-		assertEquals("Precondition failed -- The underlying calculation has changed", 50, lp.getCourseProgress(null).getCourseProgress());
-		assertEquals(1, numerator);
+		assertEquals("Precondition failed -- The underlying calculation has changed", 17, lp.getCourseProgress(null).getCourseProgress());
+		assertEquals(0, numerator);
 		assertEquals(2, denominator);
 	}
 

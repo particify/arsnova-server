@@ -33,12 +33,15 @@ public class QuestionBasedLearningProgress extends VariantLearningProgress {
 
 	@Override
 	protected LearningProgressValues createCourseProgress() {
+		final int courseProgress = calculateCourseProgress();
+		final int numerator = courseScore.getQuestionCount()*courseProgress/100;
+		final int denominator = courseScore.getQuestionCount();
 		LearningProgressValues lpv = new LearningProgressValues();
-		lpv.setCourseProgress(calculateCourseProgress());
+		lpv.setCourseProgress(courseProgress);
 		lpv.setNumQuestions(courseScore.getQuestionCount());
 		lpv.setNumUsers(courseScore.getTotalUserCount());
-		lpv.setNumerator(countCorrectAnswers()/courseScore.getTotalUserCount());
-		lpv.setDenominator(courseScore.getQuestionCount());
+		lpv.setNumerator(numerator);
+		lpv.setDenominator(denominator);
 		return lpv;
 	}
 
@@ -65,17 +68,6 @@ public class QuestionBasedLearningProgress extends VariantLearningProgress {
 			}
 		}
 		return numAnswersCorrect;
-	}
-
-	private int countCorrectAnswers() {
-		int answers = 0;
-		for (QuestionScore questionScore : courseScore) {
-			if (!questionScore.hasScores()) {
-				continue;
-			}
-			answers += countCorrectAnswers(questionScore);
-		}
-		return answers;
 	}
 
 	@Override
