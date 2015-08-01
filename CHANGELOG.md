@@ -1,5 +1,31 @@
 # Changelog
 
+## 2.2
+This release massively improves performance of ARSnova and contains a critical
+bugfix so it is highly recommended to upgrade. Because of the newly introduced
+caching method, it might be necessary to increase the Java memory limit for
+servlet containers.
+
+Major features:
+* Performance improvements: Database queries are now cached by the backend.
+  Answers are written to the database in batches.
+* Pagination support: The range of results can now be limited.
+* The API has been extended to support features introduced with ARSnova Mobile
+  2.2.
+
+Bugfixes:
+* User content consisting of JSON could not be loaded and rendered connected
+  data unloadable as well.
+
+**This version is brought to you by:**  
+Project management: Klaus Quibeldey-Cirkel  
+Lead programming: Andreas Gärtner, Daniel Gerhardt, Christoph Thelen  
+Contributions: Dominik Hikade, Tom Käsler, Maximilian Klingelhöfer,
+Michael Sann, Jan Sladek, Katharina Staden  
+Sponsoring: [AG QLS](https://www.thm.de/site/en/hochschule/service/ag-qls.html),
+[HMWK](https://wissenschaft.hessen.de/wissenschaft/it-neue-medien/kompetenznetz-e-learning-hessen)  
+
+
 ## 2.1
 Major features:
 * Public Pool (experimental): It is now possible to share sessions with other
