@@ -265,7 +265,7 @@ public class SessionController extends PaginationController {
 		return sessionService.getSessionFeatures(sessionkey);
 	}
 
-	@RequestMapping(value = "/{sessionkey}/features", method = RequestMethod.PATCH)
+	@RequestMapping(value = "/{sessionkey}/features", method = RequestMethod.PUT)
 	public SessionFeature changeSessionFeatures(
 			@PathVariable final String sessionkey,
 			@RequestBody final SessionFeature features,
