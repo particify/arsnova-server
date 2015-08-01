@@ -7,9 +7,9 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<org.springframework-version>4.1.6.RELEASE</org.springframework-version>
-		<org.springframework.security-version>4.0.1.RELEASE</org.springframework.security-version>
-		<org.springframework.integration-mail-version>4.1.5.RELEASE</org.springframework.integration-mail-version>
+		<org.springframework-version>4.2.0.RELEASE</org.springframework-version>
+		<org.springframework.security-version>4.0.2.RELEASE</org.springframework.security-version>
+		<org.springframework.integration-mail-version>4.1.6.RELEASE</org.springframework.integration-mail-version>
 		<com.fasterxml.jackson-version>2.5.4</com.fasterxml.jackson-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.url>https://scm.thm.de/arsnova</project.url>
