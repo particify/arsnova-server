@@ -33,10 +33,15 @@ public class QuestionBasedLearningProgress extends VariantLearningProgress {
 
 	@Override
 	protected LearningProgressValues createCourseProgress() {
+		final int courseProgress = calculateCourseProgress();
+		final int numerator = courseScore.getQuestionCount()*courseProgress/100;
+		final int denominator = courseScore.getQuestionCount();
 		LearningProgressValues lpv = new LearningProgressValues();
-		lpv.setCourseProgress(calculateCourseProgress());
+		lpv.setCourseProgress(courseProgress);
 		lpv.setNumQuestions(courseScore.getQuestionCount());
 		lpv.setNumUsers(courseScore.getTotalUserCount());
+		lpv.setNumerator(numerator);
+		lpv.setDenominator(denominator);
 		return lpv;
 	}
 
@@ -67,11 +72,15 @@ public class QuestionBasedLearningProgress extends VariantLearningProgress {
 
 	@Override
 	protected LearningProgressValues createMyProgress(User user) {
+		final int numerator = numQuestionsCorrectForUser(user);
+		final int denominator = courseScore.getQuestionCount();
 		LearningProgressValues lpv = new LearningProgressValues();
 		lpv.setCourseProgress(calculateCourseProgress());
-		lpv.setMyProgress(myPercentage(numQuestionsCorrectForUser(user), courseScore.getQuestionCount()));
+		lpv.setMyProgress(myPercentage(numerator, denominator));
 		lpv.setNumQuestions(courseScore.getQuestionCount());
 		lpv.setNumUsers(courseScore.getTotalUserCount());
+		lpv.setNumerator(numerator);
+		lpv.setDenominator(denominator);
 		return lpv;
 	}
 

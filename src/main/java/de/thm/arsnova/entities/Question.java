@@ -77,6 +77,8 @@ public class Question {
 	private String gridScaleFactor;
 	private boolean imageQuestion;
 	private boolean textAnswerEnabled;
+	private String hint;
+	private String solution;
 
 	public final String getType() {
 		return type;
@@ -476,6 +478,22 @@ public class Question {
 
 	public void setVotingDisabled(boolean votingDisabled) {
 		this.votingDisabled = votingDisabled;
+	}
+
+	public String getHint() {
+		return hint;
+	}
+
+	public void setHint(String hint) {
+		this.hint = hint;
+	}
+
+	public String getSolution() {
+		return solution;
+	}
+
+	public void setSolution(String solution) {
+		this.solution = solution;
 	}
 
 	@Override

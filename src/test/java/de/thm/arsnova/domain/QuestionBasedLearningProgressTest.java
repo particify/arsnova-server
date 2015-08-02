@@ -200,4 +200,30 @@ public class QuestionBasedLearningProgressTest {
 		assertEquals(0, u2Progress.getMyProgress());
 	}
 
+	@Test
+	public void shouldIncludeNominatorAndDenominatorOfResultExcludingStudentCount() {
+		// two questions
+		String q1 = this.addQuestion("lecture", 10);
+		String q2 = this.addQuestion("lecture", 10);
+		// three users
+		User u1 = new TestUser("user1");
+		User u2 = new TestUser("user2");
+		User u3 = new TestUser("user3");
+		// six answers
+		this.addAnswer(q1, u1, 10);
+		this.addAnswer(q2, u1, -100);
+		this.addAnswer(q1, u2, -100);
+		this.addAnswer(q2, u2, -100);
+		this.addAnswer(q1, u3, -100);
+		this.addAnswer(q2, u3, -100);
+
+		int numerator = lp.getCourseProgress(null).getNumerator();
+		int denominator = lp.getCourseProgress(null).getDenominator();
+
+		// If the percentage is wrong, then we need to adapt this test case!
+		assertEquals("Precondition failed -- The underlying calculation has changed", 17, lp.getCourseProgress(null).getCourseProgress());
+		assertEquals(0, numerator);
+		assertEquals(2, denominator);
+	}
+
 }

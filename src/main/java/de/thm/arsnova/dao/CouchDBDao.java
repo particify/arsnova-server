@@ -539,7 +539,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			@CacheEvict(value = "lecturequestions", key = "#session", condition = "#question.getQuestionVariant().equals('lecture')"),
 			@CacheEvict(value = "preparationquestions", key = "#session", condition = "#question.getQuestionVariant().equals('preparation')"),
 			@CacheEvict(value = "flashcardquestions", key = "#session", condition = "#question.getQuestionVariant().equals('flashcard')") },
-			put = {@CachePut(value = "questions", key = "#question")})
+			put = {@CachePut(value = "questions", key = "#question._id")})
 	@Override
 	public Question saveQuestion(final Session session, final Question question) {
 		final Document q = toQuestionDocument(session, question);
@@ -603,6 +603,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		q.put("imageQuestion", question.isImageQuestion());
 		q.put("textAnswerEnabled", question.isTextAnswerEnabled());
 		q.put("timestamp", question.getTimestamp());
+		q.put("hint", question.getHint());
+		q.put("solution", question.getSolution());
 		return q;
 	}
 
@@ -611,7 +613,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			@CacheEvict(value = "lecturequestions", allEntries = true, condition = "#question.getQuestionVariant().equals('lecture')"),
 			@CacheEvict(value = "preparationquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('preparation')"),
 			@CacheEvict(value = "flashcardquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('flashcard')") },
-			put = {@CachePut("questions")})
+			put = {@CachePut(value = "questions", key = "#question._id")})
 	@Override
 	public Question updateQuestion(final Question question) {
 		try {
@@ -656,6 +658,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			q.put("scaleFactor", question.getScaleFactor());
 			q.put("gridScaleFactor", question.getGridScaleFactor());
 			q.put("imageQuestion", question.isImageQuestion());
+			q.put("hint", question.getHint());
+			q.put("solution", question.getSolution());
 
 			database.saveDocument(q);
 			question.set_rev(q.getRev());
@@ -800,7 +804,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	/* TODO: Only evict cache entry for the question's session. This requires some refactoring. */
-	@Caching(evict = { @CacheEvict("questions"),
+	@Caching(evict = { @CacheEvict(value = "questions", key = "#question._id"),
 			@CacheEvict(value = "skillquestions", allEntries = true),
 			@CacheEvict(value = "lecturequestions", allEntries = true, condition = "#question.getQuestionVariant().equals('lecture')"),
 			@CacheEvict(value = "preparationquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('preparation')"),
@@ -815,7 +819,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 	}
 
-	@Caching(evict = { @CacheEvict("questions"),
+	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
 			@CacheEvict(value = "skillquestions", key = "#session"),
 			@CacheEvict(value = "lecturequestions", key = "#session"),
 			@CacheEvict(value = "preparationquestions", key = "#session"),
@@ -1029,7 +1033,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		if (limit > 0) {
 			view.setLimit(limit);
 		}
-		view.setKey(questionId);
+		view.setDescending(true);
+		view.setStartKeyArray(questionId, "{}");
+		view.setEndKeyArray(questionId);
 		final ViewResults results = getDatabase().view(view);
 		if (results.getResults().isEmpty()) {
 			return answers;
@@ -1166,7 +1172,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		if (limit > 0) {
 			view.setLimit(limit);
 		}
-		view.setKey(session.get_id());
+		view.setDescending(true);
+		view.setStartKeyArray(session.get_id(), "{}");
+		view.setEndKeyArray(session.get_id());
 		final ViewResults questions = getDatabase().view(view);
 		if (questions == null || questions.isEmpty()) {
 			return null;
@@ -1183,7 +1191,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		if (limit > 0) {
 			view.setLimit(limit);
 		}
-		view.setKey(session.get_id(), user.getUsername());
+		view.setDescending(true);
+		view.setStartKeyArray(session.get_id(), user.getUsername(), "{}");
+		view.setEndKeyArray(session.get_id(), user.getUsername());
 		final ViewResults questions = getDatabase().view(view);
 		if (questions == null || questions.isEmpty()) {
 			return null;
@@ -1630,6 +1640,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				/* needed for legacy questions whose piRound property has not been set */
 				question.setPiRound(1);
 			}
+
 			questions.add(question);
 		}
 		return questions;
@@ -2348,6 +2359,11 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				/* needed for legacy questions whose piRound property has not been set */
 				question.setPiRound(1);
 			}
+
+			if (question.getImage() != null) {
+				question.setImage("true");
+			}
+
 			result.add(question);
 		}
 		return result;

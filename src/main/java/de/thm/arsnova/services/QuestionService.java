@@ -847,6 +847,18 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 	}
 
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public List<Question> replaceImageData(final List<Question> questions) {
+		for (Question q : questions) {
+			if (q.getImage() != null) {
+				q.setImage("true");
+			}
+		}
+
+		return questions;
+	}
+
 	private Session getSession(final String sessionkey) {
 		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		if (session == null) {
@@ -1057,6 +1069,30 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 
 		return answer.getAnswerImage();
+	}
+
+	@Override
+	public String getQuestionImage(String questionId) {
+		Question question = databaseDao.getQuestion(questionId);
+		String imageData = question.getImage();
+
+		if (imageData == null) {
+			imageData = "";
+		}
+
+		return imageData;
+	}
+
+	@Override
+	public String getQuestionFcImage(String questionId) {
+		Question question = databaseDao.getQuestion(questionId);
+		String imageData = question.getFcImage();
+
+		if (imageData == null) {
+			imageData = "";
+		}
+
+		return imageData;
 	}
 
 	@Override
