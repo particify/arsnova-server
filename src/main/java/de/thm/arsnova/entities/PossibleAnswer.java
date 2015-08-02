@@ -17,6 +17,8 @@
  */
 package de.thm.arsnova.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * This class represents an answer option of a question.
  */
@@ -31,7 +33,7 @@ public class PossibleAnswer {
 		return this.id;
 	}
 
-	public void setId(String id) {
+	public void setId(final String id) {
 		this.id = id;
 	}
 
@@ -39,15 +41,17 @@ public class PossibleAnswer {
 		return text;
 	}
 
-	public void setText(String text) {
+	public void setText(final String text) {
 		this.text = text;
 	}
 
+	@JsonIgnore
 	public boolean isCorrect() {
 		return correct;
 	}
 
-	public void setCorrect(boolean correct) {
+	@JsonIgnore
+	public void setCorrect(final boolean correct) {
 		this.correct = correct;
 	}
 
@@ -55,7 +59,7 @@ public class PossibleAnswer {
 		return value;
 	}
 
-	public void setValue(int value) {
+	public void setValue(final int value) {
 		this.value = value;
 	}
 
