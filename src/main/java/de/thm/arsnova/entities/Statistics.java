@@ -23,7 +23,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 /**
  * Collection of several statistics about ARSnova.
  */
-@ApiModel(value = "statistics" , description = "the Statistic API")
+@ApiModel(value = "statistics", description = "the Statistic API")
 public class Statistics {
 
 	private int answers;

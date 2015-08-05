@@ -22,7 +22,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 /**
  * Contains fields that describe which specific feature is activated for a session.
  */
-@ApiModel( value = "session feature" , description = "the Session feature API")
+@ApiModel(value = "session feature", description = "the Session feature API")
 public class SessionFeature {
 
 	private boolean jitt = true;

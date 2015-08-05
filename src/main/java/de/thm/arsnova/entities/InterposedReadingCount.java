@@ -23,7 +23,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 /**
  * Wrapper class for counting read and unread interposed questions for a session or a single user.
  */
-@ApiModel(value = "audiencequestion/readcount" , description = "the Interposed reading count API")
+@ApiModel(value = "audiencequestion/readcount", description = "the Interposed reading count API")
 public class InterposedReadingCount {
 
 	private int read;

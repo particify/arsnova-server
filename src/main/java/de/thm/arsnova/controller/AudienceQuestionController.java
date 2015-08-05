@@ -36,8 +36,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
-import com.wordnik.swagger.annotations.Authorization;
-import com.wordnik.swagger.annotations.AuthorizationScope;
 
 import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.transport.InterposedQuestion;
@@ -60,8 +58,8 @@ public class AudienceQuestionController extends PaginationController {
 	private IQuestionService questionService;
 
 	@ApiOperation(value = "Count all the questions in current session",
-				  nickname = "getAudienceQuestionCount",
-				  notes = "getInterposedCount(String sessionkey, String user)")
+			nickname = "getAudienceQuestionCount",
+			notes = "getInterposedCount(String sessionkey, String user)")
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	@DeprecatedApi
 	@Deprecated
@@ -70,8 +68,8 @@ public class AudienceQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "count all unread interposed questions",
-				  nickname = "getUnreadInterposedCount",
-				  notes = "getUnreadInterposedCount(String sessionkey, String user)")
+			nickname = "getUnreadInterposedCount",
+			notes = "getUnreadInterposedCount(String sessionkey, String user)")
 	@RequestMapping(value = "/readcount", method = RequestMethod.GET)
 	@DeprecatedApi
 	@Deprecated
@@ -80,8 +78,8 @@ public class AudienceQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Retrieves all Interposed Questions for a Session",
-				  nickname = "getInterposedQuestions",
-				  notes = "Repsonse structure: InterposedQuestion[], encoding-type: application/json")
+			nickname = "getInterposedQuestions",
+			notes = "Repsonse structure: InterposedQuestion[], encoding-type: application/json")
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
 	public List<InterposedQuestion> getInterposedQuestions(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey) {
@@ -89,19 +87,19 @@ public class AudienceQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Retrieves an InterposedQuestion",
-				  nickname = "getInterposedQuestion",
-				  notes = "Repsonse structure: InterposedQuestion, encoding-type: application/json")
+			nickname = "getInterposedQuestion",
+			notes = "Repsonse structure: InterposedQuestion, encoding-type: application/json")
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
 	public InterposedQuestion getInterposedQuestion(@ApiParam(value = "ID of the question that needs to be deleted", required = true) @PathVariable final String questionId) {
 		return new InterposedQuestion(questionService.readInterposedQuestion(questionId));
 	}
 
 	@ApiOperation(value = "Creates a new Interposed Question for a Session and returns the InterposedQuestion's data",
-				  nickname = "postInterposedQuestion",
-				  notes = "Repsonse structure: InterposedQuestion, encoding-type: application/json")
+			nickname = "postInterposedQuestion",
+			notes = "Repsonse structure: InterposedQuestion, encoding-type: application/json")
 	@ApiResponses(value = {
-    	@ApiResponse(code = 400, message = "Bad Request - The Api cannot or will not process the request due to something that is perceived to be a client error")
-    })
+		@ApiResponse(code = 400, message = "Bad Request - The Api cannot or will not process the request due to something that is perceived to be a client error")
+	})
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void postInterposedQuestion(
@@ -116,8 +114,8 @@ public class AudienceQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Deletes an InterposedQuestion",
-				  nickname = "deleteInterposedQuestion",
-				  notes = "Repsonse structure: none, encoding-type: application/json")
+			nickname = "deleteInterposedQuestion",
+			notes = "Repsonse structure: none, encoding-type: application/json")
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)
 	public void deleteInterposedQuestion(@ApiParam(value = "ID of the question that needs to be deleted", required=true) @PathVariable final String questionId) {
 		questionService.deleteInterposedQuestion(questionId);

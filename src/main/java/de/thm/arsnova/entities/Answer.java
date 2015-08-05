@@ -26,7 +26,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
  *
  * This class has additional fields to transport generated answer statistics.
  */
-@ApiModel( value = "Answer" , description = "the Answer API")
+@ApiModel(value = "Answer", description = "the Answer API")
 public class Answer {
 
 	private String _id;

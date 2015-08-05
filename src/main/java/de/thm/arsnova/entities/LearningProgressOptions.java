@@ -22,7 +22,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 /**
  * A session's settings regarding the calculation of the learning progress.
  */
-@ApiModel( value = "learning progress options" , description = "the learning progress API")
+@ApiModel(value = "learning progress options", description = "the learning progress API")
 public class LearningProgressOptions {
 
 	private String type = "questions";

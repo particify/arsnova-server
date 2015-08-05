@@ -26,7 +26,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
  * Summary information of a specific session. For example, this is used to display list entries of 'my sessions' as well
  * as 'my visited sessions'.
  */
-@ApiModel( value = "session/import" , description = "the session info API")
+@ApiModel(value = "session/import", description = "the session info API")
 public class SessionInfo {
 
 	private String name;

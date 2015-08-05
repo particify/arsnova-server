@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * Represents an ARSnova session.
  */
-@ApiModel( value = "session" , description = "the Session API")
+@ApiModel(value = "session", description = "the Session API")
 public class Session implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -221,7 +221,7 @@ public class Session implements Serializable {
 	public void setCreationTime(long creationTime) {
 		this.creationTime = creationTime;
 	}
-	
+
 	@ApiModelProperty(required = true, value = "used to display learnin progress options")
 	public LearningProgressOptions getLearningProgressOptions() {
 		return learningProgressOptions;
@@ -257,7 +257,7 @@ public class Session implements Serializable {
 	public void setPpAuthorMail(final String ppAuthorMail) {
 		this.ppAuthorMail = ppAuthorMail;
 	}
-	
+
 	@ApiModelProperty(required = true, value = "used to display university")
 	public String getPpUniversity() {
 		return ppUniversity;

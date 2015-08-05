@@ -758,8 +758,8 @@ public class LecturerQuestionController extends PaginationController {
 	@RequestMapping(value = "/subjectsort", method = RequestMethod.POST)
 	public void setSubjectSortOrder(
 			@RequestParam(required = true) final String sessionkey,
-            		@RequestParam(required = true) final String sorttype,
-            		@RequestParam(required = true) final String ispreparation,
+			@RequestParam(required = true) final String sorttype,
+			@RequestParam(required = true) final String ispreparation,
 			@RequestBody String[] sortOrder
 			) {
 		try {

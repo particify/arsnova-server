@@ -59,8 +59,8 @@ public class FeedbackController extends AbstractController {
 	private IUserService userService;
 
 	@ApiOperation(value = "Get feedback from a session",
-				  nickname = "getFeedback",
-				  notes = "getFeedback(@PathVariable final String sessionkey)")
+			nickname = "getFeedback",
+			notes = "getFeedback(@PathVariable final String sessionkey)")
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.GET)
@@ -69,10 +69,10 @@ public class FeedbackController extends AbstractController {
 	}
 
 	@ApiOperation(value = "Get own feedback from a session",
-				  nickname = "getMyFeedback",
-				  notes = "getMyFeedback(@PathVariable final String sessionkey)")
+			nickname = "getMyFeedback",
+			notes = "getMyFeedback(@PathVariable final String sessionkey)")
 	@ApiResponses(value = {
-    		@ApiResponse(code = 404, message = "Not Found - The requested resource could not be found but may be available again in the future.")
+		@ApiResponse(code = 404, message = "Not Found - The requested resource could not be found but may be available again in the future.")
 	})
 	@DeprecatedApi
 	@Deprecated
@@ -86,8 +86,8 @@ public class FeedbackController extends AbstractController {
 	}
 
 	@ApiOperation(value = "Get amout of feedback from a session",
-				  nickname = "getFeedbackCount",
-				  notes = "getFeedbackCount(@PathVariable final String sessionkey)")
+			nickname = "getFeedbackCount",
+			notes = "getFeedbackCount(@PathVariable final String sessionkey)")
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/feedbackcount", method = RequestMethod.GET)
@@ -96,8 +96,8 @@ public class FeedbackController extends AbstractController {
 	}
 
 	@ApiOperation(value = "Get the average feedback (rounded) from a session",
-				  nickname = "getAverageFeedbackRounded",
-				  notes = "getAverageFeedbackRounded(@PathVariable final String sessionkey)")
+			nickname = "getAverageFeedbackRounded",
+			notes = "getAverageFeedbackRounded(@PathVariable final String sessionkey)")
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/roundedaveragefeedback", method = RequestMethod.GET)
@@ -113,12 +113,12 @@ public class FeedbackController extends AbstractController {
 	}
 
 	@ApiOperation(value = "Post feedback for a session",
-				  nickname = "postFeedback",
-				  notes = "postFeedback(" +
-					"@PathVariable final String sessionkey," +
-					"@RequestBody final int value)")
+			nickname = "postFeedback",
+			notes = "postFeedback(" +
+			"@PathVariable final String sessionkey," +
+			"@RequestBody final int value)")
 	@ApiResponses(value = {
-    		@ApiResponse(code = 404, message = "Not Found - The requested resource could not be found but may be available again in the future.")
+		@ApiResponse(code = 404, message = "Not Found - The requested resource could not be found but may be available again in the future.")
 	})
 	@DeprecatedApi
 	@Deprecated

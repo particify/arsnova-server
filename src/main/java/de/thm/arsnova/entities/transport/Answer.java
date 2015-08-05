@@ -30,7 +30,7 @@ import de.thm.arsnova.entities.User;
  * A user's answer to a question.
  */
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-@ApiModel( value = "session/answer" , description = "the Answer API")
+@ApiModel(value = "session/answer", description = "the Answer API")
 public class Answer {
 
 	private String answerSubject;
@@ -49,6 +49,7 @@ public class Answer {
 	public void setAnswerText(String answerText) {
 		this.answerText = answerText;
 	}
+
 	@ApiModelProperty(required = true, value = "used to display subject answer")
 	public String getAnswerSubject() {
 		return answerSubject;

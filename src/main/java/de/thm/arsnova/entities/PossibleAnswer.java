@@ -23,7 +23,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 /**
  * This class represents an answer option of a question.
  */
-@ApiModel( value = "session/answer" , description = "the Possible Answer API")
+@ApiModel(value = "session/answer", description = "the Possible Answer API")
 public class PossibleAnswer {
 
 	private String id;

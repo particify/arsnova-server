@@ -25,7 +25,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 /**
  * A question the teacher is asking.
  */
-@ApiModel( value = "lecturerquestion" , description = "the Question API")
+@ApiModel(value = "lecturerquestion", description = "the Question API")
 public class Question {
 
 	private String type;
@@ -109,6 +109,7 @@ public class Question {
 	public final void setQuestionVariant(final String questionVariant) {
 		this.questionVariant = questionVariant;
 	}
+
 	@ApiModelProperty(required = true, value = "used to display subject")
 	public final String getSubject() {
 		return subject;

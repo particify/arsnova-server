@@ -23,7 +23,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 /**
  * The calculated learning progress along with meta-data.
  */
-@ApiModel( value = "session/{sessionkey}/learningprogress" , description = "the learning progress API")
+@ApiModel(value = "session/{sessionkey}/learningprogress", description = "the learning progress API")
 public class LearningProgressValues {
 
 	private int courseProgress;

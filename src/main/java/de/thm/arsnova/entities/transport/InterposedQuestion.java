@@ -25,14 +25,14 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 /**
  * A question a student is asking. Also known as feedback or audience question.
  */
-@ApiModel(value = "audiencequestion/{questionId}" , description = "the Interposed Question API")
+@ApiModel(value = "audiencequestion/{questionId}", description = "the Interposed Question API")
 public class InterposedQuestion {
 
-	 private String id;
-	 private String subject;
-	 private String text;
-	 private long timestamp;
-	 private boolean read;
+	private String id;
+	private String subject;
+	private String text;
+	private long timestamp;
+	private boolean read;
 
 	public static List<InterposedQuestion> fromList(List<de.thm.arsnova.entities.InterposedQuestion> questions) {
 		ArrayList<InterposedQuestion> interposedQuestions = new ArrayList<InterposedQuestion>();
@@ -43,15 +43,10 @@ public class InterposedQuestion {
 	}
 
 	public InterposedQuestion(de.thm.arsnova.entities.InterposedQuestion question) {
-		
 		this.id = question.get_id();
-		
 		this.subject = question.getSubject();
-		
 		this.text = question.getText();
-		
 		this.timestamp = question.getTimestamp();
-		
 		this.read = question.isRead();
 	}
 

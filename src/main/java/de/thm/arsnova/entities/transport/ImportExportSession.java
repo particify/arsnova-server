@@ -29,7 +29,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 /**
  * This class is used to allow the import and export of a session.
  */
-@ApiModel( value = "session/import and export" , description = "the import export session API")
+@ApiModel(value = "session/import and export", description = "the import export session API")
 public class ImportExportSession {
 
 	private ImportExportSesssion session;
@@ -199,7 +199,7 @@ public class ImportExportSession {
 			this.ppAuthorMail = ppAuthorMail;
 		}
 
-		@ApiModelProperty( required = true, value = "used to display university")
+		@ApiModelProperty(required = true, value = "used to display university")
 		public String getPpUniversity() {
 			return ppUniversity;
 		}
