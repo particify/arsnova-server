@@ -63,11 +63,9 @@ public class LecturerQuestionController extends PaginationController {
 
 	@Autowired
 	private IQuestionService questionService;
-	
+
 	@ApiOperation(value = "Get question with provided question Id",
-			nickname = "getQuestion",
-			notes = "getQuestion(@PathVariable final String questionId)"
-	)
+			nickname = "getQuestion")
 	@ApiResponses(value = {
 		@ApiResponse(code = 404, message = "Not Found - The requested resource could not be found but may be available again in the future.")
 	})
@@ -82,9 +80,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Post provided question",
-			nickname = "postQuestion",
-			notes = "postQuestion(@RequestBody final Question question)"
-	)
+			nickname = "postQuestion")
 	@ApiResponses(value = {
 		@ApiResponse(code = 400, message = "Bad Request - The Api cannot or will not process the request due to something that is perceived to be a client error")
 	})
@@ -98,9 +94,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Update the question, identified by provided id, with the provided question in the Request Body",
-			nickname = "updateQuestion",
-			notes = "updateQuestion(@PathVariable final String questionId,@RequestBody final Question question)"
-	)
+			nickname = "updateQuestion")
 	@ApiResponses(value = {
 		@ApiResponse(code = 400, message = "Bad Request - The Api cannot or will not process the request due to something that is perceived to be a client error")
 	})
@@ -117,10 +111,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Start new Pi Round on question, identified by provided id, with an optional time",
-			nickname = "startPiRound",
-			notes = "startPiRound(@PathVariable final String questionId," +
- 				"@RequestParam(value = \"time\", defaultValue = \"0\", required = false) final int time)"
-	)
+			nickname = "startPiRound")
 	@RequestMapping(value = "/{questionId}/questionimage", method = RequestMethod.GET)
 	public String getQuestionImage(
 			@PathVariable final String questionId,
@@ -149,9 +140,7 @@ public class LecturerQuestionController extends PaginationController {
 
 	@RequestMapping(value = "/{questionId}/canceldelayedpiround", method = RequestMethod.POST)
 	@ApiOperation(value = "Cancel Pi Round on question, identified by provided id",
-			nickname = "cancelPiRound",
-			notes = "cancelPiRound(@PathVariable final String questionId)"
-	)
+			nickname = "cancelPiRound")
 	public void cancelPiRound(
 			@PathVariable final String questionId
 			) {
@@ -160,9 +149,7 @@ public class LecturerQuestionController extends PaginationController {
 
 	@RequestMapping(value = "/{questionId}/resetpiroundstate", method = RequestMethod.POST)
 	@ApiOperation(value = "Reset Pi Round on question, identified by provided id",
-			nickname = "resetPiQuestion",
-			notes = "resetPiQuestion(@PathVariable final String questionId)"
-	)
+			nickname = "resetPiQuestion")
 	public void resetPiQuestion(
 			@PathVariable final String questionId
 			) {
@@ -170,10 +157,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Set voting admission on question, identified by provided id",
-			nickname = "setVotingAdmission",
-			notes = "setVotingAdmission(@PathVariable final String questionId," +
-				"@RequestParam(value = \"disable\", defaultValue = \"false\", required = false) final Boolean disableVote)"
-	)
+			nickname = "setVotingAdmission")
 	@RequestMapping(value = "/{questionId}/disablevote", method = RequestMethod.POST)
 	public void setVotingAdmission(
 			@PathVariable final String questionId,
@@ -189,13 +173,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Set voting admission for all questions",
-			nickname = "setVotingAdmissionForAllQuestions",
-			notes = "setVotingAdmissionForAllQuestions(" +
-				"@RequestParam final String sessionkey," +
-				"@RequestParam(value = \"disable\", defaultValue = \"false\", required = false) final Boolean disableVote," +
-				"@RequestParam(value = \"lecturequestionsonly\", defaultValue = \"false\", required = false) final boolean lectureQuestionsOnly," +
-				"@RequestParam(value = \"preparationquestionsonly\", defaultValue = \"false\", required = false) final boolean preparationQuestionsOnly)"
-	)
+			nickname = "setVotingAdmissionForAllQuestions")
 	@RequestMapping(value = "/disablevote", method = RequestMethod.POST)
 	public void setVotingAdmissionForAllQuestions(
 			@RequestParam final String sessionkey,
@@ -222,12 +200,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Publish a question, identified by provided id and question in Request Body.",
-			nickname = "publishQuestion",
-			notes = "publishQuestion(" +
-				"@PathVariable final String questionId," +
-				"@RequestParam(required = false) final Boolean publish," +
-				"@RequestBody final Question question)"
-	)
+			nickname = "publishQuestion")
 	@RequestMapping(value = "/{questionId}/publish", method = RequestMethod.POST)
 	public void publishQuestion(
 			@PathVariable final String questionId,
@@ -241,13 +214,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Publish all questions",
-			nickname = "publishAllQuestions",
-			notes = "publishAllQuestions(" +
-				"@RequestParam final String sessionkey," +
-				"@RequestParam(required = false) final Boolean publish," +
-				"@RequestParam(value = \"lecturequestionsonly\", defaultValue = \"false\", required = false) final boolean lectureQuestionsOnly," +
-				"@RequestParam(value = \"preparationquestionsonly\", defaultValue = \"false\", required = false) final boolean preparationQuestionsOnly)"
-	)
+			nickname = "publishAllQuestions")
 	@RequestMapping(value = "/publish", method = RequestMethod.POST)
 	public void publishAllQuestions(
 			@RequestParam final String sessionkey,
@@ -274,12 +241,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Publish statistics from question with provided id",
-			nickname = "publishStatistics",
-			notes = "publishStatistics(" +
-				"@PathVariable final String questionId," +
-				"@RequestParam(required = false) final Boolean showStatistics," +
-				"@RequestBody final Question question)"
-	)
+			nickname = "publishStatistics")
 	@RequestMapping(value = "/{questionId}/publishstatistics", method = RequestMethod.POST)
 	public void publishStatistics(
 			@PathVariable final String questionId,
@@ -293,12 +255,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Publish correct answer from question with provided id",
-			nickname = "publishCorrectAnswer",
-			notes = "publishCorrectAnswer(" +
-				"@PathVariable final String questionId," +
-				"@RequestParam(required = false) final Boolean showCorrectAnswer," +
-				"@RequestBody final Question question)"
-	)
+			nickname = "publishCorrectAnswer")
 	@RequestMapping(value = "/{questionId}/publishcorrectanswer", method = RequestMethod.POST)
 	public void publishCorrectAnswer(
 			@PathVariable final String questionId,
@@ -312,14 +269,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Get skill questions",
-			nickname = "getSkillQuestions",
-			notes = "getSkillQuestions(" +
-				"@RequestParam final String sessionkey," +
-				"@RequestParam(value = \"lecturequestionsonly\", defaultValue = \"false\") final boolean lectureQuestionsOnly," +
-				"@RequestParam(value = \"flashcardsonly\", defaultValue = \"false\") final boolean flashcardsOnly," +
-				"@RequestParam(value = \"preparationquestionsonly\", defaultValue = \"false\") final boolean preparationQuestionsOnly," +
-				"final HttpServletResponse response)"
-	)
+			nickname = "getSkillQuestions")
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
 	public List<Question> getSkillQuestions(
@@ -351,14 +301,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Delete skill questions",
-			nickname = "deleteSkillQuestions",
-			notes = "deleteSkillQuestions(" +
-				"@RequestParam final String sessionkey," +
-				"@RequestParam(value = \"lecturequestionsonly\", defaultValue = \"false\") final boolean lectureQuestionsOnly," +
-				"@RequestParam(value = \"flashcardsonly\", defaultValue = \"false\") final boolean flashcardsOnly," +
-				"@RequestParam(value = \"preparationquestionsonly\", defaultValue = \"false\") final boolean preparationQuestionsOnly," +
-				"final HttpServletResponse response)"
-	)
+			nickname = "deleteSkillQuestions")
 	@RequestMapping(value = { "/" }, method = RequestMethod.DELETE)
 	public void deleteSkillQuestions(
 			@RequestParam final String sessionkey,
@@ -379,12 +322,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Get the amount of skill questions by the sessionkey",
-			nickname = "getSkillQuestionCount",
-			notes = "getSkillQuestionCount(" +
-				"@RequestParam final String sessionkey," +
-				"@RequestParam(value = \"lecturequestionsonly\", defaultValue = \"false\") final boolean lectureQuestionsOnly," +
-				"@RequestParam(value = \"flashcardsonly\", defaultValue = \"false\") final boolean flashcardsOnly," +
-				"@RequestParam(value = \"preparationquestionsonly\", defaultValue = \"false\") final boolean preparationQuestionsOnly)")
+			nickname = "getSkillQuestionCount")
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
@@ -406,10 +344,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Delete answers and questions",
-			nickname = "deleteAnswersAndQuestion",
-			notes = "deleteAnswersAndQuestion(" +
-				"@PathVariable final String questionId)"
-	)
+			nickname = "deleteAnswersAndQuestion")
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)
 	public void deleteAnswersAndQuestion(
 			@PathVariable final String questionId
@@ -418,12 +353,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Get unanswered skill question ID by provided session ID",
-			nickname = "getUnAnsweredSkillQuestionIds",
-			notes = "getUnAnsweredSkillQuestionIds(" +
-				"@RequestParam final String sessionkey," +
-				"@RequestParam(value = \"lecturequestionsonly\", defaultValue = \"false\") final boolean lectureQuestionsOnly," +
-				"@RequestParam(value = \"preparationquestionsonly\", defaultValue = \"false\") final boolean preparationQuestionsOnly)"
-	)
+			nickname = "getUnAnsweredSkillQuestionIds")
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/unanswered", method = RequestMethod.GET)
@@ -463,11 +393,7 @@ public class LecturerQuestionController extends PaginationController {
 	 *             if not logged in
 	 */
 	@ApiOperation(value = "Get my answer for a question, identified by provided question ID",
-			nickname = "getMyAnswer",
-			notes = "getMyAnswer(" +
-				"@PathVariable final String questionId," +
-				"final HttpServletResponse response)"
-	)
+			nickname = "getMyAnswer")
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/{questionId}/myanswer", method = RequestMethod.GET)
@@ -502,13 +428,7 @@ public class LecturerQuestionController extends PaginationController {
 	 *             if not logged in
 	 */
 	@ApiOperation(value = "Get answers for a question, identified by provided question ID",
-			nickname = "getAnswers",
-			notes = "getAnswers(" +
-				"@PathVariable final String questionId," +
-				"@RequestParam(value = \"piround\", required = false) final Integer piRound," +
-				"@RequestParam(value = \"all\", required = false, defaultValue = \"false\") final Boolean allAnswers," +
-				"final HttpServletResponse response)"
-	)
+			nickname = "getAnswers")
 	@RequestMapping(value = "/{questionId}/answer/", method = RequestMethod.GET)
 	public List<Answer> getAnswers(
 			@PathVariable final String questionId,
@@ -536,12 +456,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Save answer, provided in the Request Body, for a question, identified by provided question ID",
-			nickname = "saveAnswer",
-			notes = "saveAnswer(" +
-				"@PathVariable final String questionId," +
-				"@RequestBody final de.thm.arsnova.entities.transport.Answer answer," +
-				"final HttpServletResponse response)"
-	)
+			nickname = "saveAnswer")
 	@RequestMapping(value = "/{questionId}/answer/", method = RequestMethod.POST)
 	public Answer saveAnswer(
 			@PathVariable final String questionId,
@@ -552,13 +467,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Update answer, provided in Request Body, identified by question ID and answer ID",
-			nickname = "updateAnswer",
-			notes = "updateAnswer(" +
-				"@PathVariable final String questionId," +
-				"@PathVariable final String answerId," +
-				"@RequestBody final Answer answer," +
-				"final HttpServletResponse response)"
-	)
+			nickname = "updateAnswer")
 	@RequestMapping(value = "/{questionId}/answer/{answerId}", method = RequestMethod.PUT)
 	public Answer updateAnswer(
 			@PathVariable final String questionId,
@@ -570,12 +479,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Get Image, identified by question ID and answer ID",
-			nickname = "getImage",
-			notes = "getImage(" +
-				"@PathVariable final String questionId," +
-				"@PathVariable final String answerId," +
-				"final HttpServletResponse response)"
-	)
+			nickname = "getImage")
 	@RequestMapping(value = "/{questionId}/answer/{answerId}/image", method = RequestMethod.GET)
 	public String getImage(
 			@PathVariable final String questionId,
@@ -587,12 +491,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Delete answer, identified by question ID and answer ID",
-			nickname = "deleteAnswer",
-			notes = "deleteAnswer(" +
-				"@PathVariable final String questionId," +
-				"@PathVariable final String answerId," +
-				"final HttpServletResponse response)"
-	)
+			nickname = "deleteAnswer")
 	@RequestMapping(value = "/{questionId}/answer/{answerId}", method = RequestMethod.DELETE)
 	public void deleteAnswer(
 			@PathVariable final String questionId,
@@ -603,11 +502,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Delete answers from a question, identified by question ID",
-			nickname = "deleteAnswers",
-			notes = "deleteAnswers(" +
-				"@PathVariable final String questionId," +
-				"final HttpServletResponse response)"
-	)
+			nickname = "deleteAnswers")
 	@RequestMapping(value = "/{questionId}/answer/", method = RequestMethod.DELETE)
 	public void deleteAnswers(
 			@PathVariable final String questionId,
@@ -617,13 +512,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Delete all answers and questions from a session, identified by sessionkey",
-			nickname = "deleteAllQuestionsAnswers",
-			notes = "deleteAllQuestionsAnswers(" +
-				"@RequestParam final String sessionkey," +
-				"@RequestParam(value = \"lecturequestionsonly\", defaultValue = \"false\") final boolean lectureQuestionsOnly," +
-				"@RequestParam(value = \"preparationquestionsonly\", defaultValue = \"false\") final boolean preparationQuestionsOnly," +
-				"final HttpServletResponse response)"
-	)
+			nickname = "deleteAllQuestionsAnswers")
 	@RequestMapping(value = "/answers", method = RequestMethod.DELETE)
 	public void deleteAllQuestionsAnswers(
 			@RequestParam final String sessionkey,
@@ -654,9 +543,7 @@ public class LecturerQuestionController extends PaginationController {
 	 *             if not logged in
 	 */
 	@ApiOperation(value = "Get the amount of answers for a question, identified by question ID",
-			nickname = "getAnswerCount",
-			notes = "getAnswerCount(@PathVariable final String questionId)"
-	)
+			nickname = "getAnswerCount")
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/{questionId}/answercount", method = RequestMethod.GET)
@@ -665,9 +552,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Get the amount of answers for a question, identified by the question ID",
-			nickname = "getAllAnswerCount",
-			notes = "getAllAnswerCount(@PathVariable final String questionId)"
-	)
+			nickname = "getAllAnswerCount")
 	@RequestMapping(value = "/{questionId}/allroundanswercount", method = RequestMethod.GET)
 	public List<Integer> getAllAnswerCount(@PathVariable final String questionId) {
 		return Arrays.asList(
@@ -677,18 +562,14 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Get the total amount of answers by a question, identified by the question ID",
-			nickname = "getTotalAnswerCountByQuestion",
-			notes = "getTotalAnswerCountByQuestion(@PathVariable final String questionId)"
-	)
+			nickname = "getTotalAnswerCountByQuestion")
 	@RequestMapping(value = "/{questionId}/totalanswercount", method = RequestMethod.GET)
 	public int getTotalAnswerCountByQuestion(@PathVariable final String questionId) {
 		return questionService.getTotalAnswerCountByQuestion(questionId);
 	}
 
 	@ApiOperation(value = "Get the amount of answers and abstention answers by a question, identified by the question ID",
-			nickname = "getAnswerAndAbstentionCount",
-			notes = "getAnswerAndAbstentionCount(@PathVariable final String questionId)"
-	)
+			nickname = "getAnswerAndAbstentionCount")
 	@RequestMapping(value = "/{questionId}/answerandabstentioncount", method = RequestMethod.GET)
 	public List<Integer> getAnswerAndAbstentionCount(@PathVariable final String questionId) {
 		List<Integer> list = Arrays.asList(
@@ -700,9 +581,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Get all Freetext answers by a question, identified by the question ID",
-			nickname = "getFreetextAnswers",
-			notes = "getFreetextAnswers(@PathVariable final String questionId)"
-	)
+			nickname = "getFreetextAnswers")
 	@RequestMapping(value = "/{questionId}/freetextanswer/", method = RequestMethod.GET)
 	@Pagination
 	public List<Answer> getFreetextAnswers(@PathVariable final String questionId) {
@@ -710,9 +589,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Get my answers of an session, identified by the sessionkey",
-			nickname = "getMyAnswers",
-			notes = "getMyAnswers(@RequestParam final String sessionkey)"
-	)
+			nickname = "getMyAnswers")
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/myanswers", method = RequestMethod.GET)
@@ -721,12 +598,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Get the total amount of answers of an session, identified by the sessionkey",
-			nickname = "getTotalAnswerCount",
-			notes = "getTotalAnswerCount(" +
-				"@RequestParam final String sessionkey," +
-				"@RequestParam(value = \"lecturequestionsonly\", defaultValue = \"false\") final boolean lectureQuestionsOnly," +
-				"@RequestParam(value = \"preparationquestionsonly\", defaultValue = \"false\") final boolean preparationQuestionsOnly)"
-	)
+			nickname = "getTotalAnswerCount")
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/answercount", method = RequestMethod.GET)
@@ -745,13 +617,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Set the sort order of the subjects from a session, identified by the sessionkey",
-			nickname = "setSubjectSortOrder",
-			notes = "setSubjectSortOrder(" +
-				"@RequestParam(required = true) final String sessionkey," +
-            			"@RequestParam(required = true) final String sorttype," +
-            			"@RequestParam(required = true) final String ispreparation," +
-				"@RequestBody String[] sortOrder)"
-	)
+			nickname = "setSubjectSortOrder")
 	@ApiResponses(value = {
 		@ApiResponse(code = 400, message = "Bad Request - The Api cannot or will not process the request due to something that is perceived to be a client error")
 	})
@@ -768,13 +634,9 @@ public class LecturerQuestionController extends PaginationController {
 			throw new BadRequestException();
 		}
 	}
-	
+
 	@ApiOperation(value = "Get the sort order of the subjects from a session, identified by the sessionkey",
-			nickname = "getSubjectSortType",
-			notes = "getSubjectSortType(" +
-				"@RequestParam(required = true) final String sessionkey," +
-				"@RequestParam(required = true) final String ispreparation)"
-	)
+			nickname = "getSubjectSortType")
 	@RequestMapping(value = "/subjectsort", method = RequestMethod.GET)
 	public String getSubjectSortType(
 			@RequestParam(required = true) final String sessionkey,
@@ -784,14 +646,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Set the sort order of the questions from a subject in a session, identified by the sessionkey",
-			nickname = "setQuestionSortOrder",
-			notes = "setQuestionSortOrder(" +
-				"@RequestParam(required = true) final String sessionkey," +
-				"@RequestParam(required = true) final String subject," +
-				"@RequestParam(required = true) final String sorttype," +
-				"@RequestParam(required = true) final String ispreparation," +
-				"@RequestBody String[] sortOrder)"
-	)
+			nickname = "setQuestionSortOrder")
 	@ApiResponses(value = {
 		@ApiResponse(code = 400, message = "Bad Request - The Api cannot or will not process the request due to something that is perceived to be a client error")
 	})
@@ -811,12 +666,7 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Get the sort order of the questions from a subject in a session, identified by the sessionkey",
-			nickname = "getQuestionSortType",
-			notes = "getQuestionSortType(" +
-				"@RequestParam(required = true) final String sessionkey," +
-				"@RequestParam(required = true) final String subject," +
-				"@RequestParam(required = true, defaultValue = \"false\") final boolean ispreparation)"
-	)
+			nickname = "getQuestionSortType")
 	@ApiResponses(value = {
 		@ApiResponse(code = 204, message = "No Content - successfully processed the request")
 	})

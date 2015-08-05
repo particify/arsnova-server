@@ -75,24 +75,21 @@ public class SessionController extends PaginationController {
 	private IUserService userService;
 
 	@ApiOperation(value = "Count all the questions in current session",
-			nickname = "joinSession",
-			notes = "Repsonse structure: none, encoding-type: application/json")
+			nickname = "joinSession")
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.GET)
 	public Session joinSession(@ApiParam(value = "Session-Key from current session", required = true) @PathVariable final String sessionkey) {
 		return Session.anonymizedCopy(sessionService.getSession(sessionkey));
 	}
 
 	@ApiOperation(value = "deletes a session",
-			nickname = "deleteSession",
-			notes = "Repsonse structure: none, encoding-type: application/json")
+			nickname = "deleteSession")
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.DELETE)
 	public void deleteSession(@ApiParam(value = "Session-Key from current session", required = true) @PathVariable final String sessionkey) {
 		sessionService.deleteSession(sessionkey);
 	}
 
 	@ApiOperation(value = "count active users",
-			nickname = "countActiveUsers",
-			notes = "countActiveUsers(@ApiParam(value = \"Session-Key from current session\", required = true)")
+			nickname = "countActiveUsers")
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/{sessionkey}/activeusercount", method = RequestMethod.GET)
@@ -101,8 +98,7 @@ public class SessionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Creates a new Session and returns the Session's data",
-			nickname = "postNewSession",
-			notes = "Repsonse structure: Session, encoding-type: application/json")
+			nickname = "postNewSession")
 	@ApiResponses(value = {
 		@ApiResponse(code = 201, message = "The request has been fulfilled and resulted in a new resource being created"),
 		@ApiResponse(code = 503, message = "Service Unavailable - The Api is currently unavailable (because it is overloaded or down for maintenance)")
@@ -134,8 +130,7 @@ public class SessionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "updates a session",
-			nickname = "postNewSession",
-			notes = "Request encoding: none, Repsonse structure: Session, encoding-type: application/json")
+			nickname = "postNewSession")
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.PUT)
 	public Session updateSession(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
@@ -145,8 +140,7 @@ public class SessionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Retrieves a list of Sessions",
-			nickname = "getSessions",
-			notes = "Request encoding: Query string, Repsonse structure: Session[], encoding-type: application/json")
+			nickname = "getSessions")
 	@ApiResponses(value = {
 		@ApiResponse(code = 204, message = "No Content - successfully processed the request"),
 		@ApiResponse(code = 501, message = "Not implemented - The Api either does not recognize the request method, or it lacks the ability to fulfil the request")
@@ -196,8 +190,7 @@ public class SessionController extends PaginationController {
 	 * @return
 	 */
 	@ApiOperation(value = "Retrieves a Session",
-			nickname = "getMySessions",
-			notes = "Request encoding: none, Repsonse structure: Session, encoding-type: application/json")
+			nickname = "getMySessions")
 	@ApiResponses(value = {
 		@ApiResponse(code = 204, message = "No Content - successfully processed the request")
 	})
@@ -229,8 +222,7 @@ public class SessionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Retrieves all public pool sessions for the current user",
-			nickname = "getMyPublicPoolSessions",
-			notes = "Request encoding: none, Repsonse structure: Session[], encoding-type: application/json")
+			nickname = "getMyPublicPoolSessions")
 	@ApiResponses(value = {
 		@ApiResponse(code = 204, message = "No Content - successfully processed the request")
 	})
@@ -249,8 +241,7 @@ public class SessionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Retrieves all public pool sessions",
-			nickname = "getMyPublicPoolSessions",
-			notes = "Request encoding: none, Repsonse structure: Session[], encoding-type: application/json")
+			nickname = "getMyPublicPoolSessions")
 	@ApiResponses(value = {
 		@ApiResponse(code = 204, message = "No Content - successfully processed the request")
 	})
@@ -269,8 +260,7 @@ public class SessionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "imports a session",
-			nickname = "importSession",
-			notes = "Request encoding: none, Repsonse structure: Session[], encoding-type: application/json")
+			nickname = "importSession")
 	@RequestMapping(value = "/import", method = RequestMethod.POST)
 	public SessionInfo importSession(
 			@ApiParam(value = "current session", required = true) @RequestBody final ImportExportSession session,
@@ -280,8 +270,7 @@ public class SessionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Locks or unlocks a Session",
-			nickname = "lockSession",
-			notes = "Request encoding: Query string, Repsonse structure: Session, encoding-type: application/json")
+			nickname = "lockSession")
 	@ApiResponses(value = {
 		@ApiResponse(code = 404, message = "Not Found - The requested resource could not be found but may be available again in the future")
 	})
@@ -299,8 +288,7 @@ public class SessionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "retrieves a value for the learning progress",
-			nickname = "learningProgress",
-			notes = "Request encoding: none, Repsonse structure: LearningProgressValues[], encoding-type: application/json")
+			nickname = "learningProgress")
 	@RequestMapping(value = "/{sessionkey}/learningprogress", method = RequestMethod.GET)
 	public LearningProgressValues learningProgress(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
@@ -312,8 +300,7 @@ public class SessionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "retrieves a value for the learning progress for the current user",
-			nickname = "myLearningProgress",
-			notes = "Request encoding: none, Repsonse structure: LearningProgressValues, encoding-type: application/json")
+			nickname = "myLearningProgress")
 	@RequestMapping(value = "/{sessionkey}/mylearningprogress", method = RequestMethod.GET)
 	public LearningProgressValues myLearningProgress(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
@@ -325,8 +312,7 @@ public class SessionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "retrieves all session features",
-			nickname = "sessionFeatures",
-			notes = "Request encoding: none, Repsonse structure: SessionFeature, encoding-type: application/json")
+			nickname = "sessionFeatures")
 	@RequestMapping(value = "/{sessionkey}/features", method = RequestMethod.GET)
 	public SessionFeature sessionFeatures(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
@@ -337,8 +323,7 @@ public class SessionController extends PaginationController {
 
 	@RequestMapping(value = "/{sessionkey}/features", method = RequestMethod.PUT)
 	@ApiOperation(value = "change all session features",
-			nickname = "changeSessionFeatures",
-			notes = "Request encoding: none, Repsonse structure: SessionFeature, encoding-type: application/json")
+			nickname = "changeSessionFeatures")
 	public SessionFeature changeSessionFeatures(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
 			@ApiParam(value = "session feature", required = true) @RequestBody final SessionFeature features,

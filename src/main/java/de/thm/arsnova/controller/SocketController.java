@@ -63,8 +63,7 @@ public class SocketController extends AbstractController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SocketController.class);
 
 	@ApiOperation(value = "requested to assign Websocket session",
-			nickname = "authorize",
-			notes = "Request encoding: none, Repsonse structure: none, encoding-type: application/json")
+			nickname = "authorize")
 	@ApiResponses(value = {
 		@ApiResponse(code = 204, message = "No Content - successfully processed the request"),
 		@ApiResponse(code = 400, message = "Bad Request - The Api cannot or will not process the request due to something that is perceived to be a client error"),
@@ -90,8 +89,7 @@ public class SocketController extends AbstractController {
 	}
 
 	@ApiOperation(value = "retrieves a socket url",
-			nickname = "getSocketUrl",
-			notes = "Request encoding: none, Repsonse structure: none, encoding-type: application/json")
+			nickname = "getSocketUrl")
 	@RequestMapping(value = "/url", method = RequestMethod.GET)
 	public String getSocketUrl(final HttpServletRequest request) {
 		StringBuilder url = new StringBuilder();

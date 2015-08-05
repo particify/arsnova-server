@@ -41,8 +41,7 @@ public class StatisticsController extends AbstractController {
 	private IStatisticsService statisticsService;
 
 	@ApiOperation(value = "Retrieves global statistics",
-			nickname = "getStatistics",
-			notes = "getStatistics()")
+			nickname = "getStatistics")
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics")
 	@CacheControl(maxAge = 60, policy = CacheControl.Policy.PUBLIC)
 	public Statistics getStatistics() {
@@ -50,8 +49,7 @@ public class StatisticsController extends AbstractController {
 	}
 
 	@ApiOperation(value = "Retrieves the amount of all active users",
-			nickname = "countActiveUsers",
-			notes = "countActiveUsers()")
+			nickname = "countActiveUsers")
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics/activeusercount", produces = "text/plain")
@@ -60,8 +58,7 @@ public class StatisticsController extends AbstractController {
 	}
 
 	@ApiOperation(value = "Retrieves the amount of all currently logged in users",
-			nickname = "countLoggedInUsers",
-			notes = "countLoggedInUsers()")
+			nickname = "countLoggedInUsers")
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics/loggedinusercount", produces = "text/plain")
@@ -70,8 +67,7 @@ public class StatisticsController extends AbstractController {
 	}
 
 	@ApiOperation(value = "Retrieves the total amount of all sessions",
-			nickname = "countSessions",
-			notes = "countSessions()")
+			nickname = "countSessions")
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(method = RequestMethod.GET, value = "/statistics/sessioncount", produces = "text/plain")

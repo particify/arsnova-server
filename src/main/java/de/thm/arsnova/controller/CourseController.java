@@ -60,10 +60,7 @@ public class CourseController extends AbstractController {
 	private IUserService userService;
 
 	@ApiOperation(value = "retrieves a User Courses",
-			nickname = "myCourses",
-			notes = "myCourses(" +
-			"@ApiParam(value=\"sort my courses by name\", required=true)" +
-			"@RequestParam(value = \"sortby\", defaultValue = \"name\") final String sortby)")
+			nickname = "myCourses")
 	@ApiResponses(value = {
 		@ApiResponse(code = 200, message = "successful API requests")
 	})
