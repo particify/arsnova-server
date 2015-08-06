@@ -11,7 +11,6 @@
 		<org.springframework.security-version>4.0.2.RELEASE</org.springframework.security-version>
 		<org.springframework.integration-mail-version>4.1.6.RELEASE</org.springframework.integration-mail-version>
 		<com.fasterxml.jackson-version>2.6.0</com.fasterxml.jackson-version>
-		<springfoxVersion>2.0.1</springfoxVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<sonar.language>java</sonar.language>
 		<mobile.production.path>../arsnova-mobile/src/main/webapp/build/production/ARSnova</mobile.production.path>
@@ -109,11 +108,6 @@
 			<id>sonatypesnapshots</id>
 			<name>Sonatype Snapshot Repository</name>
 			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-		</repository>
-		<repository>
-			<id>springfoxsnapshots</id>
-			<name>Springfox Swagger</name>
-			<url>http://oss.jfrog.org/artifactory/oss-snapshot-local/</url>
 		</repository>
 	</repositories>
 
@@ -305,16 +299,10 @@
 			<version>1.5.5</version>
 			<scope>runtime</scope>
 		</dependency>
-		<!-- Springfox (Swagger) -->
 		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger2</artifactId>
-			<version>${springfoxVersion}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger-ui</artifactId>
-			<version>${springfoxVersion}</version>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-annotations</artifactId>
+			<version>1.5.2</version>
 		</dependency>
 	</dependencies>
 
@@ -416,6 +404,38 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
 				<version>2.6</version>
+			</plugin>
+			<plugin>
+				<groupId>com.github.kongchen</groupId>
+				<artifactId>swagger-maven-plugin</artifactId>
+				<version>3.1.0</version>
+				<configuration>
+					<apiSources>
+						<apiSource>
+							<springmvc>true</springmvc>
+							<locations>de.thm.arsnova.controller;de.thm.arsnova.entities</locations>
+							<schemes>http,https</schemes>
+							<basePath>/</basePath>
+							<info>
+								<title>ARSnova API Documentation</title>
+								<version>${project.version}</version>
+								<description>This is the documentation of the ARSnova API</description>
+								<contact>
+									<email>info@arsnova.eu</email>
+								</contact>
+							</info>
+							<swaggerDirectory>${project.build.directory}/classes</swaggerDirectory>
+						</apiSource>
+					</apiSources>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
