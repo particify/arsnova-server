@@ -21,8 +21,6 @@ import java.util.HashMap;
 
 import javax.servlet.http.HttpServletRequest;
 
-import springfox.documentation.annotations.ApiIgnore;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +35,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * in case the backend application is deployed as root context.
  */
 @Controller
-@ApiIgnore
 @RequestMapping({"/configuration", "/arsnova-config"})
 public class ConfigurationController extends AbstractController {
 	@Value("${security.guest.enabled}")

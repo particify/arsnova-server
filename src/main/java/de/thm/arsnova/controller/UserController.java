@@ -31,8 +31,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import springfox.documentation.annotations.ApiIgnore;
-
 import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.services.UserSessionService;
@@ -41,7 +39,6 @@ import de.thm.arsnova.services.UserSessionService;
  * Handles requests related to ARSnova's own user registration and login process.
  */
 @Controller
-@ApiIgnore
 @RequestMapping("/user")
 public class UserController extends AbstractController {
 	@Value("${security.guest.enabled}")

@@ -18,8 +18,8 @@
 package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.wordnik.swagger.annotations.ApiModel;
-import com.wordnik.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Both a regular (single choice, evaluation, etc.) as well as a freetext answer.

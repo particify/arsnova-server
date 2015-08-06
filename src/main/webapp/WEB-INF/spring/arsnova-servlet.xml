@@ -27,11 +27,7 @@
 	<aop:aspectj-autoproxy />
 
 	<!-- Enables swgger ui-->
-	<mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/"/>
-	<mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/>
-
-	<!-- Include a swagger configuration-->
-	<bean name="/SwaggerConfiguration" class="de.thm.arsnova.config.SwaggerConfiguration"/>
+	<mvc:resources mapping="swagger.json" location="classpath:/"/>
 
 	<bean id="propertyPlaceholderConfigurer"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"

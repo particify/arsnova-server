@@ -19,8 +19,8 @@ package de.thm.arsnova.entities;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.wordnik.swagger.annotations.ApiModel;
-import com.wordnik.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Summary information of a specific session. For example, this is used to display list entries of 'my sessions' as well

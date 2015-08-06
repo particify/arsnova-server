@@ -48,7 +48,6 @@ import de.thm.arsnova.ImageUtils;
 @EnableWebMvc
 @Configuration
 @EnableCaching
-@Import(SwaggerConfiguration.class)
 public class ExtraConfig extends WebMvcConfigurerAdapter {
 
 	@Autowired
@@ -123,14 +122,5 @@ public class ExtraConfig extends WebMvcConfigurerAdapter {
 	@Bean
 	public ImageUtils imageUtils() {
 		return new ImageUtils();
-	}
-
-	@Override
-	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		registry.addResourceHandler("swagger-ui.html")
-				.addResourceLocations("classpath:/META-INF/resources/");
-
-		registry.addResourceHandler("/webjars/**")
-				.addResourceLocations("classpath:/META-INF/resources/webjars/");
 	}
 }

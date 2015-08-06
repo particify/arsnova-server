@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.entities.transport;
 
-import com.wordnik.swagger.annotations.ApiModel;
-import com.wordnik.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * The calculated learning progress along with meta-data.

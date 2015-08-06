@@ -40,8 +40,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
-import springfox.documentation.annotations.ApiIgnore;
-
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.NoContentException;
 
@@ -49,7 +47,6 @@ import de.thm.arsnova.exceptions.NoContentException;
  * Default controller that handles requests which have not set a path.
  */
 @Controller
-@ApiIgnore
 public class WelcomeController extends AbstractController {
 
 	@Value("${mobile.path}")

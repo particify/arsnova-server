@@ -57,8 +57,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
-import springfox.documentation.annotations.ApiIgnore;
-
 import de.thm.arsnova.entities.ServiceDescription;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
@@ -70,7 +68,6 @@ import de.thm.arsnova.services.UserSessionService;
  * Handles authentication specific requests.
  */
 @Controller
-@ApiIgnore
 public class LoginController extends AbstractController {
 
 	private static final int MAX_USERNAME_LENGTH = 15;

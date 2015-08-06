@@ -20,8 +20,8 @@ package de.thm.arsnova.entities.transport;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.wordnik.swagger.annotations.ApiModel;
-import com.wordnik.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.User;
