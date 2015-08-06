@@ -23,6 +23,7 @@ package de.thm.arsnova.entities;
 public class SessionFeature {
 
 	private boolean jitt = true;
+	private boolean lecture = true;
 	private boolean feedback = true;
 	private boolean interposed = true;
 	private boolean pi = true;
@@ -31,6 +32,7 @@ public class SessionFeature {
 	public SessionFeature(SessionFeature features) {
 		this();
 		if (features != null) {
+			this.lecture = features.lecture;
 			this.jitt = features.jitt;
 			this.feedback = features.feedback;
 			this.interposed = features.interposed;
@@ -40,6 +42,14 @@ public class SessionFeature {
 	}
 
 	public SessionFeature() {}
+
+	public boolean isLecture() {
+		return lecture;
+	}
+
+	public void setLecture(boolean lecture) {
+		this.lecture = lecture;
+	}
 
 	public boolean isJitt() {
 		return jitt;

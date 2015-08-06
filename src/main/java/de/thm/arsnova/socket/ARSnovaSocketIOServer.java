@@ -60,6 +60,7 @@ import de.thm.arsnova.events.DeleteFeedbackForSessionsEvent;
 import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
 import de.thm.arsnova.events.DeleteQuestionEvent;
 import de.thm.arsnova.events.DeleteSessionEvent;
+import de.thm.arsnova.events.FeatureChangeEvent;
 import de.thm.arsnova.events.LockQuestionEvent;
 import de.thm.arsnova.events.LockQuestionsEvent;
 import de.thm.arsnova.events.LockVoteEvent;
@@ -600,6 +601,12 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 			questions.add(new Question(q));
 		}
 		broadcastInSession(event.getSession().getKeyword(), "unlockVotes", questions);
+	}
+
+	@Override
+	public void visit(FeatureChangeEvent event) {
+		final String sessionKey = event.getSession().getKeyword();
+		broadcastInSession(sessionKey, "featureChange", event.getSession().getFeatures());
 	}
 
 	@Override

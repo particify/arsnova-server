@@ -34,6 +34,7 @@ import de.thm.arsnova.events.DeleteFeedbackForSessionsEvent;
 import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
 import de.thm.arsnova.events.DeleteQuestionEvent;
 import de.thm.arsnova.events.DeleteSessionEvent;
+import de.thm.arsnova.events.FeatureChangeEvent;
 import de.thm.arsnova.events.LockQuestionEvent;
 import de.thm.arsnova.events.LockQuestionsEvent;
 import de.thm.arsnova.events.LockVoteEvent;
@@ -206,5 +207,8 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 
 	@Override
 	public void visit(UnlockVotesEvent unlockVotesEvent) {}
+
+	@Override
+	public void visit(FeatureChangeEvent featureChangeEvent) {}
 
 }

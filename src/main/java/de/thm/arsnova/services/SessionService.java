@@ -47,6 +47,7 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
 import de.thm.arsnova.events.DeleteSessionEvent;
+import de.thm.arsnova.events.FeatureChangeEvent;
 import de.thm.arsnova.events.NewSessionEvent;
 import de.thm.arsnova.events.StatusSessionEvent;
 import de.thm.arsnova.exceptions.BadRequestException;
@@ -240,6 +241,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		session.setLearningProgressOptions(lpo);
 
 		SessionFeature sf = new SessionFeature();
+		sf.setLecture(true);
 		sf.setFeedback(true);
 		sf.setInterposed(true);
 		sf.setJitt(true);
@@ -412,6 +414,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 			throw new UnauthorizedException();
 		}
 		session.setFeatures(features);
+		this.publisher.publishEvent(new FeatureChangeEvent(this, session));
 		return databaseDao.updateSession(session).getFeatures();
 	}
 	
