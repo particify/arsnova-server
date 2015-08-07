@@ -12,7 +12,6 @@
 		<org.springframework.integration-mail-version>4.1.6.RELEASE</org.springframework.integration-mail-version>
 		<com.fasterxml.jackson-version>2.6.0</com.fasterxml.jackson-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.url>https://scm.thm.de/arsnova</project.url>
 		<sonar.language>java</sonar.language>
 		<mobile.production.path>../arsnova-mobile/src/main/webapp/build/production/ARSnova</mobile.production.path>
 		<mobile.testing.path>../arsnova-mobile/src/main/webapp/build/testing/ARSnova</mobile.testing.path>
@@ -24,40 +23,27 @@
 		<developer>
 			<name>Klaus Quibeldey-Cirkel</name>
 			<organization>Technische Hochschule Mittelhessen</organization>
-			<organizationUrl>http://www.thm.de</organizationUrl>
+			<organizationUrl>https://www.thm.de</organizationUrl>
 		</developer>
 		<developer>
 			<name>Andreas Gärtner</name>
 			<organization>Technische Hochschule Mittelhessen</organization>
-			<organizationUrl>http://www.thm.de</organizationUrl>
+			<organizationUrl>https://www.thm.de</organizationUrl>
 			<email>andreas.gaertner@mni.thm.de</email>
 		</developer>
 		<developer>
 			<name>Daniel Gerhardt</name>
 			<organization>Technische Hochschule Mittelhessen</organization>
-			<organizationUrl>http://www.thm.de</organizationUrl>
+			<organizationUrl>https://www.thm.de</organizationUrl>
 			<email>daniel.gerhardt@mni.thm.de</email>
 		</developer>
 		<developer>
 			<name>Christoph Thelen</name>
 			<organization>Technische Hochschule Mittelhessen</organization>
-			<organizationUrl>http://www.thm.de</organizationUrl>
+			<organizationUrl>https://www.thm.de</organizationUrl>
 			<email>christoph.thelen@mni.thm.de</email>
 		</developer>
-		<developer>
-			<name>Paul-Christian Volkmer</name>
-			<organization>Technische Hochschule Mittelhessen</organization>
-			<organizationUrl>http://www.thm.de</organizationUrl>
-			<email>paul-christian.volkmer@mni.thm.de</email>
-		</developer>
 	</developers>
-
-	<distributionManagement>
-		<site>
-			<id>website</id>
-			<url>https://arsnova.eu</url>
-		</site>
-	</distributionManagement>
 
 	<issueManagement>
 		<system>Redmine</system>
@@ -72,13 +58,13 @@
 	<scm>
 		<url>https://github.com/thm-projects/arsnova-backend</url>
 		<connection>scm:git:https://github.com/thm-projects/arsnova-backend.git</connection>
-		<developerConnection>scm:git:ssh://gitorious@scm.thm.de/arsnova/arsnova-backend.git</developerConnection>
+		<developerConnection>scm:git:ssh://git@git.thm.de/arsnova/arsnova-backend.git</developerConnection>
 	</scm>
 
 	<licenses>
 		<license>
 			<name>GNU General Public License v3.0 or later</name>
-			<url>http://www.gnu.org/licenses/gpl.txt</url>
+			<url>https://www.gnu.org/licenses/gpl.txt</url>
 		</license>
 	</licenses>
 
@@ -106,17 +92,17 @@
 		<repository>
 			<id>thmrepo</id>
 			<name>THM Maven Repository</name>
-			<url>http://maven.mni.thm.de/content/repositories</url>
+			<url>https://maven.mni.thm.de/content/repositories</url>
 		</repository>
 		<repository>
 			<id>thmreposnapshots</id>
 			<name>THM Maven Snapshot Repository</name>
-			<url>http://maven.mni.thm.de/content/repositories/snapshots</url>
+			<url>https://maven.mni.thm.de/content/repositories/snapshots</url>
 		</repository>
 		<repository>
 			<id>thmmirror</id>
 			<name>THM Maven Mirror</name>
-			<url>http://maven.mni.thm.de/content/groups/public</url>
+			<url>https://maven.mni.thm.de/content/groups/public</url>
 		</repository>
 		<repository>
 			<id>sonatypesnapshots</id>
@@ -418,8 +404,9 @@
 
 	<name>ARSnova Backend</name>
 	<description>ARSnova is a great audience response system</description>
+	<url>https://arsnova.github.eu</url>
 	<organization>
 		<name>Technische Hochschule Mittelhessen</name>
-		<url>http://www.thm.de</url>
+		<url>https://www.thm.de</url>
 	</organization>
 </project>
