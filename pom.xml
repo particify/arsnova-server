@@ -320,6 +320,7 @@
 					<scanIntervalSeconds>1</scanIntervalSeconds>
 					<webApp>
 						<overrideDescriptor>src/main/webapp/WEB-INF/web-dev.xml</overrideDescriptor>
+						<webInfIncludeJarPattern>^$</webInfIncludeJarPattern>
 					</webApp>
 					<contextHandlers>
 						<contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
