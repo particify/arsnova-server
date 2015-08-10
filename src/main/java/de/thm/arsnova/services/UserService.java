@@ -222,9 +222,9 @@ public class UserService implements IUserService {
 		if (null == tries) {
 			tries = 0;
 		}
-		if (tries < 5) {
+		if (tries < loginTryLimit) {
 			loginTries.put(addr, ++tries);
-			if (5 == tries) {
+			if (loginTryLimit == tries) {
 				LOGGER.info("Temporarily banned {} from login.", new Object[] {addr});
 				loginBans.add(addr);
 			}
