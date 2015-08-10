@@ -415,7 +415,7 @@
 							<springmvc>true</springmvc>
 							<locations>de.thm.arsnova.controller;de.thm.arsnova.entities</locations>
 							<schemes>http,https</schemes>
-							<basePath>/</basePath>
+							<basePath>/api</basePath>
 							<info>
 								<title>ARSnova API Documentation</title>
 								<version>${project.version}</version>
