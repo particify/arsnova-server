@@ -70,7 +70,7 @@ public class FeedbackController extends AbstractController {
 	@ApiOperation(value = "Get own feedback from a session",
 			nickname = "getMyFeedback")
 	@ApiResponses(value = {
-		@ApiResponse(code = 404, message = "Not Found - The requested resource could not be found but may be available again in the future.")
+		@ApiResponse(code = 404, message = HTML_STATUS_404)
 	})
 	@DeprecatedApi
 	@Deprecated
@@ -111,7 +111,7 @@ public class FeedbackController extends AbstractController {
 	@ApiOperation(value = "Post feedback for a session",
 			nickname = "postFeedback")
 	@ApiResponses(value = {
-		@ApiResponse(code = 404, message = "Not Found - The requested resource could not be found but may be available again in the future.")
+		@ApiResponse(code = 404, message = HTML_STATUS_404)
 	})
 	@DeprecatedApi
 	@Deprecated

@@ -62,7 +62,7 @@ public class CourseController extends AbstractController {
 	@ApiOperation(value = "retrieves a User Courses",
 			nickname = "myCourses")
 	@ApiResponses(value = {
-		@ApiResponse(code = 200, message = "successful API requests")
+		@ApiResponse(code = 200, message = HTML_STATUS_200)
 	})
 	@RequestMapping(value = "/mycourses", method = RequestMethod.GET)
 	public List<Course> myCourses(

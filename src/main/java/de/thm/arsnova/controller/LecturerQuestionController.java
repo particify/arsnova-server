@@ -67,7 +67,7 @@ public class LecturerQuestionController extends PaginationController {
 	@ApiOperation(value = "Get question with provided question Id",
 			nickname = "getQuestion")
 	@ApiResponses(value = {
-		@ApiResponse(code = 404, message = "Not Found - The requested resource could not be found but may be available again in the future.")
+		@ApiResponse(code = 404, message = HTML_STATUS_404)
 	})
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
 	public Question getQuestion(@PathVariable final String questionId) {
@@ -82,7 +82,7 @@ public class LecturerQuestionController extends PaginationController {
 	@ApiOperation(value = "Post provided question",
 			nickname = "postQuestion")
 	@ApiResponses(value = {
-		@ApiResponse(code = 400, message = "Bad Request - The Api cannot or will not process the request due to something that is perceived to be a client error")
+		@ApiResponse(code = 400, message = HTML_STATUS_400)
 	})
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -96,7 +96,7 @@ public class LecturerQuestionController extends PaginationController {
 	@ApiOperation(value = "Update the question, identified by provided id, with the provided question in the Request Body",
 			nickname = "updateQuestion")
 	@ApiResponses(value = {
-		@ApiResponse(code = 400, message = "Bad Request - The Api cannot or will not process the request due to something that is perceived to be a client error")
+		@ApiResponse(code = 400, message = HTML_STATUS_400)
 	})
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.PUT)
 	public Question updateQuestion(
@@ -619,7 +619,7 @@ public class LecturerQuestionController extends PaginationController {
 	@ApiOperation(value = "Set the sort order of the subjects from a session, identified by the sessionkey",
 			nickname = "setSubjectSortOrder")
 	@ApiResponses(value = {
-		@ApiResponse(code = 400, message = "Bad Request - The Api cannot or will not process the request due to something that is perceived to be a client error")
+		@ApiResponse(code = 400, message = HTML_STATUS_400)
 	})
 	@RequestMapping(value = "/subjectsort", method = RequestMethod.POST)
 	public void setSubjectSortOrder(
@@ -648,7 +648,7 @@ public class LecturerQuestionController extends PaginationController {
 	@ApiOperation(value = "Set the sort order of the questions from a subject in a session, identified by the sessionkey",
 			nickname = "setQuestionSortOrder")
 	@ApiResponses(value = {
-		@ApiResponse(code = 400, message = "Bad Request - The Api cannot or will not process the request due to something that is perceived to be a client error")
+		@ApiResponse(code = 400, message = HTML_STATUS_400)
 	})
 	@RequestMapping(value = "/questionsort", method = RequestMethod.POST)
 	public void setQuestionSortOrder(
@@ -668,7 +668,7 @@ public class LecturerQuestionController extends PaginationController {
 	@ApiOperation(value = "Get the sort order of the questions from a subject in a session, identified by the sessionkey",
 			nickname = "getQuestionSortType")
 	@ApiResponses(value = {
-		@ApiResponse(code = 204, message = "No Content - successfully processed the request")
+		@ApiResponse(code = 204, message = HTML_STATUS_204)
 	})
 	@RequestMapping(value = "/questionsort", method = RequestMethod.GET)
 	public String getQuestionSortType(

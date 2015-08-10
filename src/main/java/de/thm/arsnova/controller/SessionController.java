@@ -100,8 +100,8 @@ public class SessionController extends PaginationController {
 	@ApiOperation(value = "Creates a new Session and returns the Session's data",
 			nickname = "postNewSession")
 	@ApiResponses(value = {
-		@ApiResponse(code = 201, message = "The request has been fulfilled and resulted in a new resource being created"),
-		@ApiResponse(code = 503, message = "Service Unavailable - The Api is currently unavailable (because it is overloaded or down for maintenance)")
+		@ApiResponse(code = 201, message = HTML_STATUS_201),
+		@ApiResponse(code = 503, message = HTML_STATUS_503)
 	})
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -142,8 +142,8 @@ public class SessionController extends PaginationController {
 	@ApiOperation(value = "Retrieves a list of Sessions",
 			nickname = "getSessions")
 	@ApiResponses(value = {
-		@ApiResponse(code = 204, message = "No Content - successfully processed the request"),
-		@ApiResponse(code = 501, message = "Not implemented - The Api either does not recognize the request method, or it lacks the ability to fulfil the request")
+		@ApiResponse(code = 204, message = HTML_STATUS_204),
+		@ApiResponse(code = 501, message = HTML_STATUS_501)
 	})
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
@@ -192,7 +192,7 @@ public class SessionController extends PaginationController {
 	@ApiOperation(value = "Retrieves a Session",
 			nickname = "getMySessions")
 	@ApiResponses(value = {
-		@ApiResponse(code = 204, message = "No Content - successfully processed the request")
+		@ApiResponse(code = 204, message = HTML_STATUS_204)
 	})
 	@RequestMapping(value = "/", method = RequestMethod.GET, params = "statusonly=true")
 	@Pagination
@@ -224,7 +224,7 @@ public class SessionController extends PaginationController {
 	@ApiOperation(value = "Retrieves all public pool sessions for the current user",
 			nickname = "getMyPublicPoolSessions")
 	@ApiResponses(value = {
-		@ApiResponse(code = 204, message = "No Content - successfully processed the request")
+		@ApiResponse(code = 204, message = HTML_STATUS_204)
 	})
 	@RequestMapping(value = "/publicpool", method = RequestMethod.GET, params = "statusonly=true")
 	public List<SessionInfo> getMyPublicPoolSessions(
@@ -243,7 +243,7 @@ public class SessionController extends PaginationController {
 	@ApiOperation(value = "Retrieves all public pool sessions",
 			nickname = "getMyPublicPoolSessions")
 	@ApiResponses(value = {
-		@ApiResponse(code = 204, message = "No Content - successfully processed the request")
+		@ApiResponse(code = 204, message = HTML_STATUS_204)
 	})
 	@RequestMapping(value = "/publicpool", method = RequestMethod.GET)
 	public List<SessionInfo> getPublicPoolSessions(
@@ -272,7 +272,7 @@ public class SessionController extends PaginationController {
 	@ApiOperation(value = "Locks or unlocks a Session",
 			nickname = "lockSession")
 	@ApiResponses(value = {
-		@ApiResponse(code = 404, message = "Not Found - The requested resource could not be found but may be available again in the future")
+		@ApiResponse(code = 404, message = HTML_STATUS_404)
 	})
 	@RequestMapping(value = "/{sessionkey}/lock", method = RequestMethod.POST)
 	public Session lockSession(

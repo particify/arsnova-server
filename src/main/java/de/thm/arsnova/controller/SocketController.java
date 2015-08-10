@@ -65,9 +65,9 @@ public class SocketController extends AbstractController {
 	@ApiOperation(value = "requested to assign Websocket session",
 			nickname = "authorize")
 	@ApiResponses(value = {
-		@ApiResponse(code = 204, message = "No Content - successfully processed the request"),
-		@ApiResponse(code = 400, message = "Bad Request - The Api cannot or will not process the request due to something that is perceived to be a client error"),
-		@ApiResponse(code = 403, message = "Forbidden - The request was a valid request, but the Api is refusing to respond to it")
+		@ApiResponse(code = 204, message = HTML_STATUS_204),
+		@ApiResponse(code = 400, message = HTML_STATUS_400),
+		@ApiResponse(code = 403, message = HTML_STATUS_403)
 	})
 	@RequestMapping(method = RequestMethod.POST, value = "/assign")
 	public void authorize(@ApiParam(value="sessionMap", required=true) @RequestBody final Map<String, String> sessionMap, @ApiParam(value="response", required=true) final HttpServletResponse response) {

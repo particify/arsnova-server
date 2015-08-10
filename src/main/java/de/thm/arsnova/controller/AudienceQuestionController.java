@@ -93,7 +93,7 @@ public class AudienceQuestionController extends PaginationController {
 	@ApiOperation(value = "Creates a new Interposed Question for a Session and returns the InterposedQuestion's data",
 			nickname = "postInterposedQuestion")
 	@ApiResponses(value = {
-		@ApiResponse(code = 400, message = "Bad Request - The Api cannot or will not process the request due to something that is perceived to be a client error")
+		@ApiResponse(code = 400, message = HTML_STATUS_400)
 	})
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
