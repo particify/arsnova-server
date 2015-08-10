@@ -224,7 +224,7 @@ public class SessionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Retrieves all public pool sessions for the current user",
-			nickname = "getMyPublicPoolSessions", response = Session.class, responseContainer = "List")
+			nickname = "getMyPublicPoolSessions")
 	@ApiResponses(value = {
 		@ApiResponse(code = 204, message = HTML_STATUS_204)
 	})
