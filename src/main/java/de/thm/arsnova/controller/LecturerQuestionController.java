@@ -35,6 +35,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
 import de.thm.arsnova.PaginationListDecorator;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Question;
@@ -51,6 +56,7 @@ import de.thm.arsnova.web.Pagination;
  */
 @RestController
 @RequestMapping("/lecturerquestion")
+@Api(value = "/lecturerquestion", description = "Operations for Lecture Questions")
 public class LecturerQuestionController extends PaginationController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(LecturerQuestionController.class);
@@ -58,6 +64,11 @@ public class LecturerQuestionController extends PaginationController {
 	@Autowired
 	private IQuestionService questionService;
 
+	@ApiOperation(value = "Get question with provided question Id",
+			nickname = "getQuestion")
+	@ApiResponses(value = {
+		@ApiResponse(code = 404, message = HTML_STATUS_404)
+	})
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
 	public Question getQuestion(@PathVariable final String questionId) {
 		final Question question = questionService.getQuestion(questionId);
@@ -68,6 +79,11 @@ public class LecturerQuestionController extends PaginationController {
 		throw new NotFoundException();
 	}
 
+	@ApiOperation(value = "Post provided question",
+			nickname = "postQuestion")
+	@ApiResponses(value = {
+		@ApiResponse(code = 400, message = HTML_STATUS_400)
+	})
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Question postQuestion(@RequestBody final Question question) {
@@ -77,6 +93,11 @@ public class LecturerQuestionController extends PaginationController {
 		throw new BadRequestException();
 	}
 
+	@ApiOperation(value = "Update the question, identified by provided id, with the provided question in the Request Body",
+			nickname = "updateQuestion")
+	@ApiResponses(value = {
+		@ApiResponse(code = 400, message = HTML_STATUS_400)
+	})
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.PUT)
 	public Question updateQuestion(
 			@PathVariable final String questionId,
@@ -89,6 +110,8 @@ public class LecturerQuestionController extends PaginationController {
 		}
 	}
 
+	@ApiOperation(value = "Start new Pi Round on question, identified by provided id, with an optional time",
+			nickname = "startPiRound")
 	@RequestMapping(value = "/{questionId}/questionimage", method = RequestMethod.GET)
 	public String getQuestionImage(
 			@PathVariable final String questionId,
@@ -116,6 +139,8 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@RequestMapping(value = "/{questionId}/canceldelayedpiround", method = RequestMethod.POST)
+	@ApiOperation(value = "Cancel Pi Round on question, identified by provided id",
+			nickname = "cancelPiRound")
 	public void cancelPiRound(
 			@PathVariable final String questionId
 			) {
@@ -123,12 +148,16 @@ public class LecturerQuestionController extends PaginationController {
 	}
 
 	@RequestMapping(value = "/{questionId}/resetpiroundstate", method = RequestMethod.POST)
+	@ApiOperation(value = "Reset Pi Round on question, identified by provided id",
+			nickname = "resetPiQuestion")
 	public void resetPiQuestion(
 			@PathVariable final String questionId
 			) {
 		questionService.resetPiRoundState(questionId);
 	}
 
+	@ApiOperation(value = "Set voting admission on question, identified by provided id",
+			nickname = "setVotingAdmission")
 	@RequestMapping(value = "/{questionId}/disablevote", method = RequestMethod.POST)
 	public void setVotingAdmission(
 			@PathVariable final String questionId,
@@ -143,6 +172,8 @@ public class LecturerQuestionController extends PaginationController {
 		questionService.setVotingAdmission(questionId, disable);
 	}
 
+	@ApiOperation(value = "Set voting admission for all questions",
+			nickname = "setVotingAdmissionForAllQuestions")
 	@RequestMapping(value = "/disablevote", method = RequestMethod.POST)
 	public void setVotingAdmissionForAllQuestions(
 			@RequestParam final String sessionkey,
@@ -168,6 +199,8 @@ public class LecturerQuestionController extends PaginationController {
 		}
 	}
 
+	@ApiOperation(value = "Publish a question, identified by provided id and question in Request Body.",
+			nickname = "publishQuestion")
 	@RequestMapping(value = "/{questionId}/publish", method = RequestMethod.POST)
 	public void publishQuestion(
 			@PathVariable final String questionId,
@@ -180,6 +213,8 @@ public class LecturerQuestionController extends PaginationController {
 		questionService.update(question);
 	}
 
+	@ApiOperation(value = "Publish all questions",
+			nickname = "publishAllQuestions")
 	@RequestMapping(value = "/publish", method = RequestMethod.POST)
 	public void publishAllQuestions(
 			@RequestParam final String sessionkey,
@@ -205,6 +240,8 @@ public class LecturerQuestionController extends PaginationController {
 		}
 	}
 
+	@ApiOperation(value = "Publish statistics from question with provided id",
+			nickname = "publishStatistics")
 	@RequestMapping(value = "/{questionId}/publishstatistics", method = RequestMethod.POST)
 	public void publishStatistics(
 			@PathVariable final String questionId,
@@ -217,6 +254,8 @@ public class LecturerQuestionController extends PaginationController {
 		questionService.update(question);
 	}
 
+	@ApiOperation(value = "Publish correct answer from question with provided id",
+			nickname = "publishCorrectAnswer")
 	@RequestMapping(value = "/{questionId}/publishcorrectanswer", method = RequestMethod.POST)
 	public void publishCorrectAnswer(
 			@PathVariable final String questionId,
@@ -229,6 +268,8 @@ public class LecturerQuestionController extends PaginationController {
 		questionService.update(question);
 	}
 
+	@ApiOperation(value = "Get skill questions",
+			nickname = "getSkillQuestions")
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
 	public List<Question> getSkillQuestions(
@@ -259,6 +300,8 @@ public class LecturerQuestionController extends PaginationController {
 		return new PaginationListDecorator<Question>(questions, offset, limit);
 	}
 
+	@ApiOperation(value = "Delete skill questions",
+			nickname = "deleteSkillQuestions")
 	@RequestMapping(value = { "/" }, method = RequestMethod.DELETE)
 	public void deleteSkillQuestions(
 			@RequestParam final String sessionkey,
@@ -278,7 +321,10 @@ public class LecturerQuestionController extends PaginationController {
 		}
 	}
 
+	@ApiOperation(value = "Get the amount of skill questions by the sessionkey",
+			nickname = "getSkillQuestionCount")
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	public int getSkillQuestionCount(
 			@RequestParam final String sessionkey,
@@ -297,6 +343,8 @@ public class LecturerQuestionController extends PaginationController {
 		}
 	}
 
+	@ApiOperation(value = "Delete answers and questions",
+			nickname = "deleteAnswersAndQuestion")
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)
 	public void deleteAnswersAndQuestion(
 			@PathVariable final String questionId
@@ -304,7 +352,10 @@ public class LecturerQuestionController extends PaginationController {
 		questionService.deleteQuestion(questionId);
 	}
 
+	@ApiOperation(value = "Get unanswered skill question ID by provided session ID",
+			nickname = "getUnAnsweredSkillQuestionIds")
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/unanswered", method = RequestMethod.GET)
 	public List<String> getUnAnsweredSkillQuestionIds(
 			@RequestParam final String sessionkey,
@@ -341,7 +392,10 @@ public class LecturerQuestionController extends PaginationController {
 	 * @throws ForbiddenException
 	 *             if not logged in
 	 */
+	@ApiOperation(value = "Get my answer for a question, identified by provided question ID",
+			nickname = "getMyAnswer")
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/{questionId}/myanswer", method = RequestMethod.GET)
 	public Answer getMyAnswer(
 			@PathVariable final String questionId,
@@ -373,6 +427,8 @@ public class LecturerQuestionController extends PaginationController {
 	 * @throws ForbiddenException
 	 *             if not logged in
 	 */
+	@ApiOperation(value = "Get answers for a question, identified by provided question ID",
+			nickname = "getAnswers")
 	@RequestMapping(value = "/{questionId}/answer/", method = RequestMethod.GET)
 	public List<Answer> getAnswers(
 			@PathVariable final String questionId,
@@ -399,6 +455,8 @@ public class LecturerQuestionController extends PaginationController {
 		return answers;
 	}
 
+	@ApiOperation(value = "Save answer, provided in the Request Body, for a question, identified by provided question ID",
+			nickname = "saveAnswer")
 	@RequestMapping(value = "/{questionId}/answer/", method = RequestMethod.POST)
 	public Answer saveAnswer(
 			@PathVariable final String questionId,
@@ -408,6 +466,8 @@ public class LecturerQuestionController extends PaginationController {
 		return questionService.saveAnswer(questionId, answer);
 	}
 
+	@ApiOperation(value = "Update answer, provided in Request Body, identified by question ID and answer ID",
+			nickname = "updateAnswer")
 	@RequestMapping(value = "/{questionId}/answer/{answerId}", method = RequestMethod.PUT)
 	public Answer updateAnswer(
 			@PathVariable final String questionId,
@@ -418,6 +478,8 @@ public class LecturerQuestionController extends PaginationController {
 		return questionService.updateAnswer(answer);
 	}
 
+	@ApiOperation(value = "Get Image, identified by question ID and answer ID",
+			nickname = "getImage")
 	@RequestMapping(value = "/{questionId}/answer/{answerId}/image", method = RequestMethod.GET)
 	public String getImage(
 			@PathVariable final String questionId,
@@ -428,6 +490,8 @@ public class LecturerQuestionController extends PaginationController {
 		return questionService.getImage(questionId, answerId);
 	}
 
+	@ApiOperation(value = "Delete answer, identified by question ID and answer ID",
+			nickname = "deleteAnswer")
 	@RequestMapping(value = "/{questionId}/answer/{answerId}", method = RequestMethod.DELETE)
 	public void deleteAnswer(
 			@PathVariable final String questionId,
@@ -437,6 +501,8 @@ public class LecturerQuestionController extends PaginationController {
 		questionService.deleteAnswer(questionId, answerId);
 	}
 
+	@ApiOperation(value = "Delete answers from a question, identified by question ID",
+			nickname = "deleteAnswers")
 	@RequestMapping(value = "/{questionId}/answer/", method = RequestMethod.DELETE)
 	public void deleteAnswers(
 			@PathVariable final String questionId,
@@ -445,6 +511,8 @@ public class LecturerQuestionController extends PaginationController {
 		questionService.deleteAnswers(questionId);
 	}
 
+	@ApiOperation(value = "Delete all answers and questions from a session, identified by sessionkey",
+			nickname = "deleteAllQuestionsAnswers")
 	@RequestMapping(value = "/answers", method = RequestMethod.DELETE)
 	public void deleteAllQuestionsAnswers(
 			@RequestParam final String sessionkey,
@@ -474,12 +542,17 @@ public class LecturerQuestionController extends PaginationController {
 	 * @throws ForbiddenException
 	 *             if not logged in
 	 */
+	@ApiOperation(value = "Get the amount of answers for a question, identified by question ID",
+			nickname = "getAnswerCount")
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/{questionId}/answercount", method = RequestMethod.GET)
 	public int getAnswerCount(@PathVariable final String questionId) {
 		return questionService.getAnswerCount(questionId);
 	}
 
+	@ApiOperation(value = "Get the amount of answers for a question, identified by the question ID",
+			nickname = "getAllAnswerCount")
 	@RequestMapping(value = "/{questionId}/allroundanswercount", method = RequestMethod.GET)
 	public List<Integer> getAllAnswerCount(@PathVariable final String questionId) {
 		return Arrays.asList(
@@ -488,11 +561,15 @@ public class LecturerQuestionController extends PaginationController {
 		);
 	}
 
+	@ApiOperation(value = "Get the total amount of answers by a question, identified by the question ID",
+			nickname = "getTotalAnswerCountByQuestion")
 	@RequestMapping(value = "/{questionId}/totalanswercount", method = RequestMethod.GET)
 	public int getTotalAnswerCountByQuestion(@PathVariable final String questionId) {
 		return questionService.getTotalAnswerCountByQuestion(questionId);
 	}
 
+	@ApiOperation(value = "Get the amount of answers and abstention answers by a question, identified by the question ID",
+			nickname = "getAnswerAndAbstentionCount")
 	@RequestMapping(value = "/{questionId}/answerandabstentioncount", method = RequestMethod.GET)
 	public List<Integer> getAnswerAndAbstentionCount(@PathVariable final String questionId) {
 		List<Integer> list = Arrays.asList(
@@ -503,19 +580,27 @@ public class LecturerQuestionController extends PaginationController {
 		return list;
 	}
 
+	@ApiOperation(value = "Get all Freetext answers by a question, identified by the question ID",
+			nickname = "getFreetextAnswers")
 	@RequestMapping(value = "/{questionId}/freetextanswer/", method = RequestMethod.GET)
 	@Pagination
 	public List<Answer> getFreetextAnswers(@PathVariable final String questionId) {
 		return questionService.getFreetextAnswers(questionId, offset, limit);
 	}
 
+	@ApiOperation(value = "Get my answers of an session, identified by the sessionkey",
+			nickname = "getMyAnswers")
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/myanswers", method = RequestMethod.GET)
 	public List<Answer> getMyAnswers(@RequestParam final String sessionkey) {
 		return questionService.getMyAnswers(sessionkey);
 	}
 
+	@ApiOperation(value = "Get the total amount of answers of an session, identified by the sessionkey",
+			nickname = "getTotalAnswerCount")
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/answercount", method = RequestMethod.GET)
 	public int getTotalAnswerCount(
 			@RequestParam final String sessionkey,
@@ -534,8 +619,8 @@ public class LecturerQuestionController extends PaginationController {
 	@RequestMapping(value = "/subjectsort", method = RequestMethod.POST)
 	public void setSubjectSortOrder(
 			@RequestParam(required = true) final String sessionkey,
-            @RequestParam(required = true) final String sorttype,
-            @RequestParam(required = true) final String ispreparation,
+			@RequestParam(required = true) final String sorttype,
+			@RequestParam(required = true) final String ispreparation,
 			@RequestBody String[] sortOrder
 			) {
 		try {
@@ -567,7 +652,7 @@ public class LecturerQuestionController extends PaginationController {
 			throw new BadRequestException();
 		}
 	}
-
+    
 	@RequestMapping(value = "/questionsort", method = RequestMethod.GET)
 	public String getQuestionSortType(
 			@RequestParam(required = true) final String sessionkey,

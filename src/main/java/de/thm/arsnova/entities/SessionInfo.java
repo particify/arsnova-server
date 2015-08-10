@@ -19,11 +19,14 @@ package de.thm.arsnova.entities;
 
 import java.util.ArrayList;
 import java.util.List;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Summary information of a specific session. For example, this is used to display list entries of 'my sessions' as well
  * as 'my visited sessions'.
  */
+@ApiModel(value = "session/import", description = "the session info API")
 public class SessionInfo {
 
 	private String name;
@@ -64,6 +67,7 @@ public class SessionInfo {
 		return infos;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display name")
 	public String getName() {
 		return name;
 	}
@@ -72,6 +76,7 @@ public class SessionInfo {
 		this.name = name;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display short name")
 	public String getShortName() {
 		return shortName;
 	}
@@ -80,6 +85,7 @@ public class SessionInfo {
 		this.shortName = shortName;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display keyword")
 	public String getKeyword() {
 		return keyword;
 	}
@@ -88,6 +94,7 @@ public class SessionInfo {
 		this.keyword = keyword;
 	}
 
+	@ApiModelProperty(required = true, value = "active")
 	public boolean isActive() {
 		return active;
 	}
@@ -96,6 +103,7 @@ public class SessionInfo {
 		this.active = active;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display the course type")
 	public String getCourseType() {
 		return courseType;
 	}
@@ -104,6 +112,7 @@ public class SessionInfo {
 		this.courseType = courseType;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display the session type")
 	public String getSessionType() {
 		return sessionType;
 	}
@@ -112,6 +121,7 @@ public class SessionInfo {
 		this.sessionType = sessionType;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display level")
 	public String getPpLevel() {
 		return ppLevel;
 	}
@@ -120,6 +130,7 @@ public class SessionInfo {
 		this.ppLevel = ppLevel;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display subject")
 	public String getPpSubject() {
 		return ppSubject;
 	}
@@ -128,6 +139,7 @@ public class SessionInfo {
 		this.ppSubject = ppSubject;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display questions number")
 	public int getNumQuestions() {
 		return numQuestions;
 	}
@@ -136,6 +148,7 @@ public class SessionInfo {
 		this.numQuestions = numQuestions;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display answers number")
 	public int getNumAnswers() {
 		return numAnswers;
 	}
@@ -144,6 +157,7 @@ public class SessionInfo {
 		this.numAnswers = numAnswers;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display interposed number")
 	public int getNumInterposed() {
 		return numInterposed;
 	}
@@ -152,6 +166,7 @@ public class SessionInfo {
 		this.numInterposed = numInterposed;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display unanswered number")
 	public int getNumUnanswered() {
 		return numUnanswered;
 	}
@@ -160,6 +175,7 @@ public class SessionInfo {
 		this.numUnanswered = numUnanswered;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display creation time")
 	public long getCreationTime() {
 		return creationTime;
 	}
@@ -168,6 +184,7 @@ public class SessionInfo {
 		this.creationTime = creationTime;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display unread interposed number")
 	public int getNumUnredInterposed() {
 		return numUnredInterposed;
 	}

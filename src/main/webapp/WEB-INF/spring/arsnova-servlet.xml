@@ -26,6 +26,9 @@
 
 	<aop:aspectj-autoproxy />
 
+	<!-- Enables swgger ui-->
+	<mvc:resources mapping="swagger.json" location="classpath:/"/>
+
 	<bean id="propertyPlaceholderConfigurer"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
 		p:ignoreUnresolvablePlaceholders="false" p:ignoreResourceNotFound="true">

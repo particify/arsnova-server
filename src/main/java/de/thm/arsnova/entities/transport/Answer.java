@@ -20,6 +20,8 @@ package de.thm.arsnova.entities.transport;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.User;
@@ -28,6 +30,7 @@ import de.thm.arsnova.entities.User;
  * A user's answer to a question.
  */
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@ApiModel(value = "session/answer", description = "the Answer API")
 public class Answer {
 
 	private String answerSubject;
@@ -38,6 +41,7 @@ public class Answer {
 
 	private boolean abstention;
 
+	@ApiModelProperty(required = true, value = "used to display text answer")
 	public String getAnswerText() {
 		return answerText;
 	}
@@ -46,6 +50,7 @@ public class Answer {
 		this.answerText = answerText;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display subject answer")
 	public String getAnswerSubject() {
 		return answerSubject;
 	}
@@ -54,6 +59,7 @@ public class Answer {
 		this.answerSubject = answerSubject;
 	}
 
+	@ApiModelProperty(required = true, value = "abstention")
 	public boolean isAbstention() {
 		return abstention;
 	}
@@ -87,6 +93,7 @@ public class Answer {
 		return theAnswer;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display image answer")
 	public String getAnswerImage() {
 		return answerImage;
 	}

@@ -19,12 +19,15 @@ package de.thm.arsnova.entities;
 
 import java.io.Serializable;
 import java.util.List;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Represents an ARSnova session.
  */
+@ApiModel(value = "session", description = "the Session API")
 public class Session implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -93,6 +96,7 @@ public class Session implements Serializable {
 		return copy;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display the Type")
 	public String getType() {
 		return type;
 	}
@@ -101,6 +105,7 @@ public class Session implements Serializable {
 		this.type = type;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display name")
 	public String getName() {
 		return name;
 	}
@@ -109,6 +114,7 @@ public class Session implements Serializable {
 		this.name = name;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display short name")
 	public String getShortName() {
 		return shortName;
 	}
@@ -117,6 +123,7 @@ public class Session implements Serializable {
 		this.shortName = shortName;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display keyword")
 	public String getKeyword() {
 		return keyword;
 	}
@@ -125,6 +132,7 @@ public class Session implements Serializable {
 		this.keyword = keyword;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display creator")
 	public String getCreator() {
 		return creator;
 	}
@@ -133,6 +141,7 @@ public class Session implements Serializable {
 		this.creator = creator;
 	}
 
+	@ApiModelProperty(required = true, value = "is active")
 	public boolean isActive() {
 		return active;
 	}
@@ -141,6 +150,7 @@ public class Session implements Serializable {
 		this.active = active;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display the last owner activity")
 	public long getLastOwnerActivity() {
 		return lastOwnerActivity;
 	}
@@ -153,6 +163,7 @@ public class Session implements Serializable {
 		_id = id;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display id")
 	public String get_id() {
 		return _id;
 	}
@@ -161,6 +172,7 @@ public class Session implements Serializable {
 		_rev = rev;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display rev")
 	public String get_rev() {
 		return _rev;
 	}
@@ -169,6 +181,7 @@ public class Session implements Serializable {
 		_conflicts = conflicts;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display conflicts")
 	public List<String> get_conflicts() {
 		return _conflicts;
 	}
@@ -177,6 +190,7 @@ public class Session implements Serializable {
 		return user.getUsername().equals(creator);
 	}
 
+	@ApiModelProperty(required = true, value = "used to display course type")
 	public String getCourseType() {
 		return courseType;
 	}
@@ -185,6 +199,7 @@ public class Session implements Serializable {
 		this.courseType = courseType;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display coures id")
 	public String getCourseId() {
 		return courseId;
 	}
@@ -198,6 +213,7 @@ public class Session implements Serializable {
 		return getCourseId() != null && !getCourseId().isEmpty();
 	}
 
+	@ApiModelProperty(required = true, value = "used to display the creation time")
 	public long getCreationTime() {
 		return creationTime;
 	}
@@ -206,6 +222,7 @@ public class Session implements Serializable {
 		this.creationTime = creationTime;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display learnin progress options")
 	public LearningProgressOptions getLearningProgressOptions() {
 		return learningProgressOptions;
 	}
@@ -214,6 +231,7 @@ public class Session implements Serializable {
 		this.learningProgressOptions = learningProgressOptions;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display features")
 	public SessionFeature getFeatures() {
 		return features;
 	}
@@ -222,6 +240,7 @@ public class Session implements Serializable {
 		this.features = features;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display author name")
 	public String getPpAuthorName() {
 		return ppAuthorName;
 	}
@@ -230,6 +249,7 @@ public class Session implements Serializable {
 		this.ppAuthorName = ppAuthorName;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display author mail")
 	public String getPpAuthorMail() {
 		return ppAuthorMail;
 	}
@@ -238,6 +258,7 @@ public class Session implements Serializable {
 		this.ppAuthorMail = ppAuthorMail;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display university")
 	public String getPpUniversity() {
 		return ppUniversity;
 	}
@@ -246,6 +267,7 @@ public class Session implements Serializable {
 		this.ppUniversity = ppUniversity;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display logo")
 	public String getPpLogo() {
 		return ppLogo;
 	}
@@ -254,6 +276,7 @@ public class Session implements Serializable {
 		this.ppLogo = ppLogo;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display subject")
 	public String getPpSubject() {
 		return ppSubject;
 	}
@@ -262,6 +285,7 @@ public class Session implements Serializable {
 		this.ppSubject = ppSubject;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display license")
 	public String getPpLicense() {
 		return ppLicense;
 	}
@@ -270,6 +294,7 @@ public class Session implements Serializable {
 		this.ppLicense = ppLicense;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display description")
 	public String getPpDescription() {
 		return ppDescription;
 	}
@@ -278,6 +303,7 @@ public class Session implements Serializable {
 		this.ppDescription = ppDescription;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display faculty")
 	public String getPpFaculty() {
 		return ppFaculty;
 	}
@@ -286,6 +312,7 @@ public class Session implements Serializable {
 		this.ppFaculty = ppFaculty;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display level")
 	public String getPpLevel() {
 		return ppLevel;
 	}
@@ -294,6 +321,7 @@ public class Session implements Serializable {
 		this.ppLevel = ppLevel;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display the session type")
 	public String getSessionType() {
 		return sessionType;
 	}

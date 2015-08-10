@@ -16,10 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.thm.arsnova.entities;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Contains fields that describe which specific feature is activated for a session.
  */
+@ApiModel(value = "session feature", description = "the Session feature API")
 public class SessionFeature {
 
 	private boolean jitt = true;
@@ -51,6 +54,7 @@ public class SessionFeature {
 		this.lecture = lecture;
 	}
 
+	@ApiModelProperty(required = true, value = "jitt")
 	public boolean isJitt() {
 		return jitt;
 	}
@@ -59,6 +63,7 @@ public class SessionFeature {
 		this.jitt = jitt;
 	}
 
+	@ApiModelProperty(required = true, value = "feedback")
 	public boolean isFeedback() {
 		return feedback;
 	}
@@ -67,6 +72,7 @@ public class SessionFeature {
 		this.feedback = feedback;
 	}
 
+	@ApiModelProperty(required = true, value = "interposed")
 	public boolean isInterposed() {
 		return interposed;
 	}
@@ -75,6 +81,7 @@ public class SessionFeature {
 		this.interposed = interposed;
 	}
 
+	@ApiModelProperty(required = true, value = "pi")
 	public boolean isPi() {
 		return pi;
 	}
@@ -83,6 +90,7 @@ public class SessionFeature {
 		this.pi = pi;
 	}
 
+	@ApiModelProperty(required = true, value = "learning progress")
 	public boolean isLearningProgress() {
 		return learningProgress;
 	}

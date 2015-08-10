@@ -18,10 +18,13 @@
 package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * A question the user is asking the teacher. Also known as feedback or audience question.
  */
+@ApiModel(value = "audiencequestion", description = "the Interposed Question API")
 public class InterposedQuestion {
 
 	private String _id;
@@ -39,48 +42,63 @@ public class InterposedQuestion {
 	private boolean read;
 	private String creator;
 
+	@ApiModelProperty(required = true, value = "used to display question id")
 	public String get_id() {
 		return _id;
 	}
 	public void set_id(String _id) {
 		this._id = _id;
 	}
+
+	@ApiModelProperty(required = true, value = "used to display rev")
 	public String get_rev() {
 		return _rev;
 	}
 	public void set_rev(String _rev) {
 		this._rev = _rev;
 	}
+
+	@ApiModelProperty(required = true, value = "is read")
 	public boolean isRead() {
 		return read;
 	}
 	public void setRead(boolean read) {
 		this.read = read;
 	}
+
+	@ApiModelProperty(required = true, value = "used to display The type")
 	public String getType() {
 		return type;
 	}
 	public void setType(String type) {
 		this.type = type;
 	}
+
+	@ApiModelProperty(required = true, value = "used to display Subject")
 	public String getSubject() {
 		return subject;
 	}
 	public void setSubject(String subject) {
 		this.subject = subject;
 	}
+
+	@ApiModelProperty(required = true, value = "used to display Text")
 	public String getText() {
 		return text;
 	}
 	public void setText(String text) {
 		this.text = text;
 	}
+
+	@ApiModelProperty(required = true, value = "used to display Session id")
 	public String getSessionId() {
 		return sessionId;
 	}
 	public void setSessionId(String sessionId) {
 		this.sessionId = sessionId;
 	}
+
+	@ApiModelProperty(required = true, value = "used to display Timetamp")
 	public long getTimestamp() {
 		return timestamp;
 	}
