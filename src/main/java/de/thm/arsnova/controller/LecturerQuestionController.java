@@ -616,11 +616,6 @@ public class LecturerQuestionController extends PaginationController {
 		}
 	}
 
-	@ApiOperation(value = "Set the sort order of the subjects from a session, identified by the sessionkey",
-			nickname = "setSubjectSortOrder")
-	@ApiResponses(value = {
-		@ApiResponse(code = 400, message = HTML_STATUS_400)
-	})
 	@RequestMapping(value = "/subjectsort", method = RequestMethod.POST)
 	public void setSubjectSortOrder(
 			@RequestParam(required = true) final String sessionkey,
@@ -635,8 +630,6 @@ public class LecturerQuestionController extends PaginationController {
 		}
 	}
 
-	@ApiOperation(value = "Get the sort order of the subjects from a session, identified by the sessionkey",
-			nickname = "getSubjectSortType")
 	@RequestMapping(value = "/subjectsort", method = RequestMethod.GET)
 	public String getSubjectSortType(
 			@RequestParam(required = true) final String sessionkey,
@@ -645,11 +638,6 @@ public class LecturerQuestionController extends PaginationController {
 		return questionService.getSubjectSortType(sessionkey, ispreparation);
 	}
 
-	@ApiOperation(value = "Set the sort order of the questions from a subject in a session, identified by the sessionkey",
-			nickname = "setQuestionSortOrder")
-	@ApiResponses(value = {
-		@ApiResponse(code = 400, message = HTML_STATUS_400)
-	})
 	@RequestMapping(value = "/questionsort", method = RequestMethod.POST)
 	public void setQuestionSortOrder(
 			@RequestParam(required = true) final String sessionkey,
@@ -664,12 +652,7 @@ public class LecturerQuestionController extends PaginationController {
 			throw new BadRequestException();
 		}
 	}
-
-	@ApiOperation(value = "Get the sort order of the questions from a subject in a session, identified by the sessionkey",
-			nickname = "getQuestionSortType")
-	@ApiResponses(value = {
-		@ApiResponse(code = 204, message = HTML_STATUS_204)
-	})
+    
 	@RequestMapping(value = "/questionsort", method = RequestMethod.GET)
 	public String getQuestionSortType(
 			@RequestParam(required = true) final String sessionkey,

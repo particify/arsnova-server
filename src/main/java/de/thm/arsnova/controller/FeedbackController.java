@@ -47,7 +47,6 @@ import de.thm.arsnova.web.DeprecatedApi;
  * @see de.thm.arsnova.socket.ARSnovaSocketIOServer
  */
 @RestController
-@Api(value = "/feedback", description = "the deprecated Feedback API")
 public class FeedbackController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(FeedbackController.class);
@@ -58,8 +57,6 @@ public class FeedbackController extends AbstractController {
 	@Autowired
 	private IUserService userService;
 
-	@ApiOperation(value = "Get feedback from a session",
-			nickname = "getFeedback")
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.GET)
@@ -67,11 +64,6 @@ public class FeedbackController extends AbstractController {
 		return feedbackService.getFeedback(sessionkey);
 	}
 
-	@ApiOperation(value = "Get own feedback from a session",
-			nickname = "getMyFeedback")
-	@ApiResponses(value = {
-		@ApiResponse(code = 404, message = HTML_STATUS_404)
-	})
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/myfeedback", method = RequestMethod.GET)
@@ -83,8 +75,6 @@ public class FeedbackController extends AbstractController {
 		throw new NotFoundException();
 	}
 
-	@ApiOperation(value = "Get amout of feedback from a session",
-			nickname = "getFeedbackCount")
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/feedbackcount", method = RequestMethod.GET)
@@ -92,8 +82,6 @@ public class FeedbackController extends AbstractController {
 		return feedbackService.getFeedbackCount(sessionkey);
 	}
 
-	@ApiOperation(value = "Get the average feedback (rounded) from a session",
-			nickname = "getAverageFeedbackRounded")
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/roundedaveragefeedback", method = RequestMethod.GET)
@@ -108,11 +96,6 @@ public class FeedbackController extends AbstractController {
 		return feedbackService.getAverageFeedback(sessionkey);
 	}
 
-	@ApiOperation(value = "Post feedback for a session",
-			nickname = "postFeedback")
-	@ApiResponses(value = {
-		@ApiResponse(code = 404, message = HTML_STATUS_404)
-	})
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.POST)

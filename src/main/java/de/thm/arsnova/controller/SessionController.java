@@ -74,8 +74,10 @@ public class SessionController extends PaginationController {
 	@Autowired
 	private IUserService userService;
 
-	@ApiOperation(value = "Count all the questions in current session",
+	@ApiOperation(value = "join a session",
 			nickname = "joinSession")
+	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.GET)
 	public Session joinSession(@ApiParam(value = "Session-Key from current session", required = true) @PathVariable final String sessionkey) {
 		return Session.anonymizedCopy(sessionService.getSession(sessionkey));
@@ -222,7 +224,7 @@ public class SessionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Retrieves all public pool sessions for the current user",
-			nickname = "getMyPublicPoolSessions")
+			nickname = "getMyPublicPoolSessions", response = Session.class, responseContainer = "List")
 	@ApiResponses(value = {
 		@ApiResponse(code = 204, message = HTML_STATUS_204)
 	})

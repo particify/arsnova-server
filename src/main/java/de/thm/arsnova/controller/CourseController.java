@@ -48,7 +48,6 @@ import de.thm.arsnova.services.IUserService;
  * Provides access to a user's courses in an LMS such as Moodle.
  */
 @RestController
-@Api(value = "/course", description = "the Course API")
 public class CourseController extends AbstractController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(CourseController.class);
@@ -59,11 +58,6 @@ public class CourseController extends AbstractController {
 	@Autowired
 	private IUserService userService;
 
-	@ApiOperation(value = "retrieves a User Courses",
-			nickname = "myCourses")
-	@ApiResponses(value = {
-		@ApiResponse(code = 200, message = HTML_STATUS_200)
-	})
 	@RequestMapping(value = "/mycourses", method = RequestMethod.GET)
 	public List<Course> myCourses(
 			@ApiParam(value="sort my courses by name", required=true)
