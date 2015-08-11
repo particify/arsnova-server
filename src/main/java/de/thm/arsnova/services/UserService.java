@@ -17,6 +17,7 @@
  */
 package de.thm.arsnova.services;
 
+import com.codahale.metrics.annotation.Gauge;
 import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationToken;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.DbUser;
@@ -50,6 +51,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriUtils;
+import org.stagemonitor.core.metrics.MonitorGauges;
 
 import javax.annotation.PreDestroy;
 import javax.mail.MessagingException;
@@ -65,6 +67,7 @@ import java.util.regex.Pattern;
  * Performs all user related operations.
  */
 @Service
+@MonitorGauges
 public class UserService implements IUserService {
 
 	private static final int LOGIN_TRY_RESET_DELAY_MS = 30 * 1000;
@@ -325,6 +328,7 @@ public class UserService implements IUserService {
 	}
 
 	@Override
+	@Gauge
 	public int loggedInUsers() {
 		return user2session.size();
 	}
