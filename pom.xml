@@ -292,6 +292,11 @@
 			<artifactId>swagger-annotations</artifactId>
 			<version>1.5.12</version>
 		</dependency>
+		<dependency>
+			<groupId>org.stagemonitor</groupId>
+			<artifactId>stagemonitor-web</artifactId>
+			<version>0.31.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -381,11 +386,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>aspectj-maven-plugin</artifactId>
-				<version>1.9</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

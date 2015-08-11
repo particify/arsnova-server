@@ -24,6 +24,8 @@
 		<bean class="de.thm.arsnova.web.ResponseInterceptorHandler" />
 	</mvc:interceptors>
 
+	<bean id="requestMappingHandlerMapping" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" primary="true"></bean>
+
 	<aop:aspectj-autoproxy />
 
 	<!-- Enables swgger ui-->
