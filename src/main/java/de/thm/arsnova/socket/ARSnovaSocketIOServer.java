@@ -17,6 +17,8 @@
  */
 package de.thm.arsnova.socket;
 
+import com.codahale.metrics.annotation.Metered;
+import com.codahale.metrics.annotation.Timed;
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.Configuration;
 import com.corundumstudio.socketio.SocketConfig;
@@ -131,6 +133,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 
 		server.addEventListener("setFeedback", Feedback.class, new DataListener<Feedback>() {
 			@Override
+			@Timed(name = "setFeedbackEvent.onData")
 			public void onData(final SocketIOClient client, final Feedback data, final AckRequest ackSender) {
 				final User u = userService.getUser2SocketId(client.getSessionId());
 				if (u == null) {
@@ -154,6 +157,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 
 		server.addEventListener("setSession", Session.class, new DataListener<Session>() {
 			@Override
+			@Timed(name = "setSessionEvent.onData")
 			public void onData(final SocketIOClient client, final Session session, final AckRequest ackSender) {
 				final User u = userService.getUser2SocketId(client.getSessionId());
 				if (null == u) {
@@ -183,6 +187,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 				de.thm.arsnova.entities.transport.InterposedQuestion.class,
 				new DataListener<de.thm.arsnova.entities.transport.InterposedQuestion>() {
 			@Override
+			@Timed(name = "readInterposedQuestionEvent.onData")
 			public void onData(
 					SocketIOClient client,
 					de.thm.arsnova.entities.transport.InterposedQuestion question,
@@ -213,6 +218,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 				LearningProgressOptions.class,
 				new DataListener<LearningProgressOptions>() {
 			@Override
+			@Timed(name = "setLearningProgressOptionsEvent.onData")
 			public void onData(SocketIOClient client, LearningProgressOptions progressOptions, AckRequest ack) {
 				final User user = userService.getUser2SocketId(client.getSessionId());
 				final de.thm.arsnova.entities.Session session = sessionService.getSessionInternal(progressOptions.getSessionKeyword(), user);
@@ -226,11 +232,13 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 
 		server.addConnectListener(new ConnectListener() {
 			@Override
+			@Timed
 			public void onConnect(final SocketIOClient client) { }
 		});
 
 		server.addDisconnectListener(new DisconnectListener() {
 			@Override
+			@Timed
 			public void onDisconnect(final SocketIOClient client) {
 				if (
 						userService == null
@@ -500,6 +508,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 
 	@Async
 	@Override
+	@Timed(name = "visit.NewAnswerEvent")
 	public void visit(NewAnswerEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
 		this.reportAnswersToLecturerQuestionAvailable(event.getSession(), new Question(event.getQuestion()));
@@ -518,6 +527,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 
 	@Async
 	@Override
+	@Timed(name = "visit.DeleteAnswerEvent")
 	public void visit(DeleteAnswerEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
 		this.reportAnswersToLecturerQuestionAvailable(event.getSession(), new Question(event.getQuestion()));
@@ -528,6 +538,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 
 	@Async
 	@Override
+	@Timed(name = "visit.PiRoundDelayedStartEvent")
 	public void visit(PiRoundDelayedStartEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
 		broadcastInSession(sessionKey, "startDelayedPiRound", event.getPiRoundInformations());
@@ -535,6 +546,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 
 	@Async
 	@Override
+	@Timed(name = "visit.PiRoundEndEvent")
 	public void visit(PiRoundEndEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
 		broadcastInSession(sessionKey, "endPiRound", event.getPiRoundEndInformations());
@@ -542,6 +554,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 
 	@Async
 	@Override
+	@Timed(name = "visit.PiRoundCancelEvent")
 	public void visit(PiRoundCancelEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
 		broadcastInSession(sessionKey, "cancelPiRound", event.getQuestionId());
