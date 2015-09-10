@@ -356,11 +356,15 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 		for (String subject : prepSubjects) {
 			SortOrder sortOrder = databaseDao.getSortOrder(session.get_id(), "preparation", subject);
-			databaseDao.deleteSortOrder(sortOrder);
+			if (sortOrder != null) {
+				databaseDao.deleteSortOrder(sortOrder);
+			}
 		}
 		for (String subject : lectureSubjects) {
 			SortOrder sortOrder = databaseDao.getSortOrder(session.get_id(), "lecture", subject);
-			databaseDao.deleteSortOrder(sortOrder);
+			if (sortOrder != null) {
+				databaseDao.deleteSortOrder(sortOrder);
+			}
 		}
 		databaseDao.deleteAllQuestionsWithAnswers(session);
 		databaseDao.deleteSession(session);
