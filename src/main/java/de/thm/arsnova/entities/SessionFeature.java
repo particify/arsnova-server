@@ -25,6 +25,13 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(value = "session feature", description = "the Session feature API")
 public class SessionFeature {
 
+	private boolean custom = true;
+	private boolean clicker = false;
+	private boolean peerGrading = false;
+	private boolean liveFeedback = false;
+	private boolean flashcard = false;
+	private boolean total = false;
+
 	private boolean jitt = true;
 	private boolean lecture = true;
 	private boolean feedback = true;
@@ -35,6 +42,12 @@ public class SessionFeature {
 	public SessionFeature(SessionFeature features) {
 		this();
 		if (features != null) {
+			this.custom = features.custom;
+			this.clicker = features.clicker;
+			this.peerGrading = features.peerGrading;
+			this.liveFeedback = features.liveFeedback;
+			this.flashcard = features.flashcard;
+			this.total = features.total;
 			this.lecture = features.lecture;
 			this.jitt = features.jitt;
 			this.feedback = features.feedback;
@@ -97,6 +110,54 @@ public class SessionFeature {
 
 	public void setLearningProgress(boolean learningProgress) {
 		this.learningProgress = learningProgress;
+	}
+
+	public boolean isCustom() {
+		return custom;
+	}
+
+	public void setCustom(boolean custom) {
+		this.custom = custom;
+	}
+
+	public boolean isClicker() {
+		return clicker;
+	}
+
+	public void setClicker(boolean clicker) {
+		this.clicker = clicker;
+	}
+
+	public boolean isPeerGrading() {
+		return peerGrading;
+	}
+
+	public void setPeerGrading(boolean peerGrading) {
+		this.peerGrading = peerGrading;
+	}
+
+	public boolean isFlashcard() {
+		return flashcard;
+	}
+
+	public void setFlashcard(boolean flashcard) {
+		this.flashcard = flashcard;
+	}
+
+	public boolean isTotal() {
+		return total;
+	}
+
+	public void setTotal(boolean total) {
+		this.total = total;
+	}
+
+	public boolean isLiveFeedback() {
+		return liveFeedback;
+	}
+
+	public void setLiveFeedback(boolean liveFeedback) {
+		this.liveFeedback = liveFeedback;
 	}
 
 }
