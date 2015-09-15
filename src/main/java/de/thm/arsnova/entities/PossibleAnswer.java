@@ -23,7 +23,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * This class represents an answer option of a question.
  */
-@ApiModel(value = "session/answer", description = "the Possible Answer API")
+@ApiModel(value = "session/answer", description = "the Possible Answer entity")
 public class PossibleAnswer {
 
 	private String id;
@@ -31,7 +31,7 @@ public class PossibleAnswer {
 	private boolean correct;
 	private int value;
 
-	@ApiModelProperty(required = true, value = "used to display id")
+	@ApiModelProperty(required = true, value = "the id")
 	public String getId() {
 		return this.id;
 	}
@@ -40,7 +40,7 @@ public class PossibleAnswer {
 		this.id = id;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display text")
+	@ApiModelProperty(required = true, value = "the text")
 	public String getText() {
 		return text;
 	}
@@ -49,7 +49,7 @@ public class PossibleAnswer {
 		this.text = text;
 	}
 
-	@ApiModelProperty(required = true, value = "correct")
+	@ApiModelProperty(required = true, value = "true for a correct answer")
 	public boolean isCorrect() {
 		return correct;
 	}
@@ -58,7 +58,7 @@ public class PossibleAnswer {
 		this.correct = correct;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display value")
+	@ApiModelProperty(required = true, value = "the value")
 	public int getValue() {
 		return value;
 	}

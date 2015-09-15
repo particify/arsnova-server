@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * A question the user is asking the teacher. Also known as feedback or audience question.
  */
-@ApiModel(value = "audiencequestion", description = "the Interposed Question API")
+@ApiModel(value = "audiencequestion", description = "the interposed question entity")
 public class InterposedQuestion {
 
 	private String _id;
@@ -42,7 +42,7 @@ public class InterposedQuestion {
 	private boolean read;
 	private String creator;
 
-	@ApiModelProperty(required = true, value = "used to display question id")
+	@ApiModelProperty(required = true, value = "the couchDB ID")
 	public String get_id() {
 		return _id;
 	}
@@ -50,7 +50,7 @@ public class InterposedQuestion {
 		this._id = _id;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display rev")
+	@ApiModelProperty(required = true, value = "the couchDB revision Nr.")
 	public String get_rev() {
 		return _rev;
 	}
@@ -66,7 +66,7 @@ public class InterposedQuestion {
 		this.read = read;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display The type")
+	@ApiModelProperty(required = true, value = "used to display the type")
 	public String getType() {
 		return type;
 	}
@@ -74,7 +74,7 @@ public class InterposedQuestion {
 		this.type = type;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display Subject")
+	@ApiModelProperty(required = true, value = "the Subject")
 	public String getSubject() {
 		return subject;
 	}
@@ -82,7 +82,7 @@ public class InterposedQuestion {
 		this.subject = subject;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display Text")
+	@ApiModelProperty(required = true, value = "the Text")
 	public String getText() {
 		return text;
 	}
@@ -90,7 +90,7 @@ public class InterposedQuestion {
 		this.text = text;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display Session id")
+	@ApiModelProperty(required = true, value = "ID of the session, the question is assigned to")
 	public String getSessionId() {
 		return sessionId;
 	}
@@ -98,7 +98,7 @@ public class InterposedQuestion {
 		this.sessionId = sessionId;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display Timetamp")
+	@ApiModelProperty(required = true, value = "creation date timestamp")
 	public long getTimestamp() {
 		return timestamp;
 	}

@@ -23,7 +23,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * Wrapper class for counting read and unread interposed questions for a session or a single user.
  */
-@ApiModel(value = "audiencequestion/readcount", description = "the Interposed reading count API")
+@ApiModel(value = "audiencequestion/readcount", description = "the interposed reading count entity")
 public class InterposedReadingCount {
 
 	private int read;
@@ -39,7 +39,7 @@ public class InterposedReadingCount {
 		this.unread = 0;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display read interposed questions")
+	@ApiModelProperty(required = true, value = "the number of read interposed questions")
 	public int getRead() {
 		return read;
 	}
@@ -48,7 +48,7 @@ public class InterposedReadingCount {
 		this.read = read;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display unread interposed questions")
+	@ApiModelProperty(required = true, value = "the nuber of unread interposed questions")
 	public int getUnread() {
 		return unread;
 	}
@@ -57,7 +57,7 @@ public class InterposedReadingCount {
 		this.unread = unread;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display Total questions")
+	@ApiModelProperty(required = true, value = "the number of total interposed questions")
 	public int getTotal() {
 		return getRead() + getUnread();
 	}
