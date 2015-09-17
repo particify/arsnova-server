@@ -146,7 +146,7 @@ public class LoginController extends AbstractController {
 			@RequestParam(value = "role", required = false) final UserSessionService.Role role,
 			final HttpServletRequest request,
 			final HttpServletResponse response
-	) throws IOException {
+			) throws IOException {
 		String addr = request.getRemoteAddr();
 		if (userService.isBannedFromLogin(addr)) {
 			response.sendError(429, "Too Many Requests");
@@ -178,8 +178,8 @@ public class LoginController extends AbstractController {
 			if (!"".equals(username) && !"".equals(password)) {
 				org.springframework.security.core.userdetails.User user =
 						new org.springframework.security.core.userdetails.User(
-							username, password, true, true, true, true, this.getAuthorities()
-						);
+								username, password, true, true, true, true, getAuthorities()
+								);
 
 				Authentication token = new UsernamePasswordAuthenticationToken(user, password, getAuthorities());
 				try {
@@ -209,7 +209,7 @@ public class LoginController extends AbstractController {
 			org.springframework.security.core.userdetails.User user =
 					new org.springframework.security.core.userdetails.User(
 							username, "", true, true, true, true, authorities
-					);
+							);
 			Authentication token = new UsernamePasswordAuthenticationToken(user, null, authorities);
 
 			SecurityContextHolder.getContext().setAuthentication(token);
@@ -226,7 +226,7 @@ public class LoginController extends AbstractController {
 			@RequestParam(value = "failureurl", defaultValue = "/") String failureUrl,
 			final HttpServletRequest request,
 			final HttpServletResponse response
-	) throws IOException, ServletException {
+			) throws IOException, ServletException {
 		View result = null;
 
 		/* Use URLs from a request parameters for redirection as long as the
@@ -242,36 +242,36 @@ public class LoginController extends AbstractController {
 		/* Handle proxy
 		 * TODO: It might be better, to support the proposed standard: http://tools.ietf.org/html/rfc7239 */
 		int port = "".equals(request.getHeader("X-Forwarded-Port"))
-				? Integer.valueOf(request.getHeader("X-Forwarded-Port")) : request.getServerPort();
-		if ("https".equals(request.getScheme())) {
-			if (443 != port) {
-				serverUrl = serverUrl + ":" + String.valueOf(port);
-			}
-		} else {
-			if (80 != port) {
-				serverUrl = serverUrl + ":" + String.valueOf(port);
-			}
-		}
+				? Integer.parseInt(request.getHeader("X-Forwarded-Port")) : request.getServerPort();
+				if ("https".equals(request.getScheme())) {
+					if (443 != port) {
+						serverUrl = serverUrl + ":" + String.valueOf(port);
+					}
+				} else {
+					if (80 != port) {
+						serverUrl = serverUrl + ":" + String.valueOf(port);
+					}
+				}
 
-		request.getSession().setAttribute("ars-login-success-url", serverUrl + successUrl);
-		request.getSession().setAttribute("ars-login-failure-url", serverUrl + failureUrl);
+				request.getSession().setAttribute("ars-login-success-url", serverUrl + successUrl);
+				request.getSession().setAttribute("ars-login-failure-url", serverUrl + failureUrl);
 
-		if ("cas".equals(type)) {
-			casEntryPoint.commence(request, response, null);
-		} else if ("twitter".equals(type)) {
-			final String authUrl = twitterProvider.getAuthorizationUrl(new HttpUserSession(request));
-			result = new RedirectView(authUrl);
-		} else if ("facebook".equals(type)) {
-			facebookProvider.setFields("id,link");
-			facebookProvider.setScope("");
-			final String authUrl = facebookProvider.getAuthorizationUrl(new HttpUserSession(request));
-			result = new RedirectView(authUrl);
-		} else if ("google".equals(type)) {
-			final String authUrl = googleProvider.getAuthorizationUrl(new HttpUserSession(request));
-			result = new RedirectView(authUrl);
-		}
+				if ("cas".equals(type)) {
+					casEntryPoint.commence(request, response, null);
+				} else if ("twitter".equals(type)) {
+					final String authUrl = twitterProvider.getAuthorizationUrl(new HttpUserSession(request));
+					result = new RedirectView(authUrl);
+				} else if ("facebook".equals(type)) {
+					facebookProvider.setFields("id,link");
+					facebookProvider.setScope("");
+					final String authUrl = facebookProvider.getAuthorizationUrl(new HttpUserSession(request));
+					result = new RedirectView(authUrl);
+				} else if ("google".equals(type)) {
+					final String authUrl = googleProvider.getAuthorizationUrl(new HttpUserSession(request));
+					result = new RedirectView(authUrl);
+				}
 
-		return result;
+				return result;
 	}
 
 	@RequestMapping(value = { "/auth/", "/whoami" }, method = RequestMethod.GET)
@@ -309,10 +309,10 @@ public class LoginController extends AbstractController {
 
 		if ("true".equals(guestEnabled)) {
 			ServiceDescription sdesc = new ServiceDescription(
-				"guest",
-				"Guest",
-				null
-			);
+					"guest",
+					"Guest",
+					null
+					);
 			sdesc.setOrder(guestOrder);
 			if (!"true".equals(guestLecturerEnabled)) {
 				sdesc.setAllowLecturer(false);
@@ -322,73 +322,73 @@ public class LoginController extends AbstractController {
 
 		if ("true".equals(customLoginEnabled) && !"".equals(customLoginDialog)) {
 			ServiceDescription sdesc = new ServiceDescription(
-				"custom",
-				customLoginTitle,
-				customizationPath + "/" + customLoginDialog + "?redirect={0}",
-				customLoginImage
-			);
+					"custom",
+					customLoginTitle,
+					customizationPath + "/" + customLoginDialog + "?redirect={0}",
+					customLoginImage
+					);
 			sdesc.setOrder(customLoginOrder);
 			services.add(sdesc);
 		}
 
 		if ("true".equals(dbAuthEnabled) && !"".equals(dbAuthDialog)) {
 			ServiceDescription sdesc = new ServiceDescription(
-				"arsnova",
-				dbAuthTitle,
-				customizationPath + "/" + dbAuthDialog + "?redirect={0}",
-				dbAuthImage
-			);
+					"arsnova",
+					dbAuthTitle,
+					customizationPath + "/" + dbAuthDialog + "?redirect={0}",
+					dbAuthImage
+					);
 			sdesc.setOrder(dbAuthOrder);
 			services.add(sdesc);
 		}
 
 		if ("true".equals(ldapEnabled) && !"".equals(ldapDialog)) {
 			ServiceDescription sdesc = new ServiceDescription(
-				"ldap",
-				ldapTitle,
-				customizationPath + "/" + ldapDialog + "?redirect={0}",
-				ldapImage
-			);
+					"ldap",
+					ldapTitle,
+					customizationPath + "/" + ldapDialog + "?redirect={0}",
+					ldapImage
+					);
 			sdesc.setOrder(ldapOrder);
 			services.add(sdesc);
 		}
 
 		if ("true".equals(casEnabled)) {
 			ServiceDescription sdesc = new ServiceDescription(
-				"cas",
-				casTitle,
-				MessageFormat.format(dialogUrl, "cas")
-			);
+					"cas",
+					casTitle,
+					MessageFormat.format(dialogUrl, "cas")
+					);
 			sdesc.setOrder(casOrder);
 			services.add(sdesc);
 		}
 
 		if ("true".equals(facebookEnabled)) {
 			ServiceDescription sdesc = new ServiceDescription(
-				"facebook",
-				"Facebook",
-				MessageFormat.format(dialogUrl, "facebook")
-			);
+					"facebook",
+					"Facebook",
+					MessageFormat.format(dialogUrl, "facebook")
+					);
 			sdesc.setOrder(facebookOrder);
 			services.add(sdesc);
 		}
 
 		if ("true".equals(googleEnabled)) {
 			ServiceDescription sdesc = new ServiceDescription(
-				"google",
-				"Google",
-				MessageFormat.format(dialogUrl, "google")
-			);
+					"google",
+					"Google",
+					MessageFormat.format(dialogUrl, "google")
+					);
 			sdesc.setOrder(googleOrder);
 			services.add(sdesc);
 		}
 
 		if ("true".equals(twitterEnabled)) {
 			ServiceDescription sdesc = new ServiceDescription(
-				"twitter",
-				"Twitter",
-				MessageFormat.format(dialogUrl, "twitter")
-			);
+					"twitter",
+					"Twitter",
+					MessageFormat.format(dialogUrl, "twitter")
+					);
 			sdesc.setOrder(twitterOrder);
 			services.add(sdesc);
 		}
