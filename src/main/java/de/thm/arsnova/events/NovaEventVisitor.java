@@ -78,4 +78,6 @@ public interface NovaEventVisitor {
 
 	void visit(UnlockVotesEvent unlockVotesEvent);
 
+	void visit(FeatureChangeEvent featureChangeEvent);
+
 }

@@ -17,9 +17,13 @@
  */
 package de.thm.arsnova.entities;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * This class represents an answer option of a question.
  */
+@ApiModel(value = "session/answer", description = "the Possible Answer API")
 public class PossibleAnswer {
 
 	private String id;
@@ -27,6 +31,7 @@ public class PossibleAnswer {
 	private boolean correct;
 	private int value;
 
+	@ApiModelProperty(required = true, value = "used to display id")
 	public String getId() {
 		return this.id;
 	}
@@ -35,6 +40,7 @@ public class PossibleAnswer {
 		this.id = id;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display text")
 	public String getText() {
 		return text;
 	}
@@ -43,6 +49,7 @@ public class PossibleAnswer {
 		this.text = text;
 	}
 
+	@ApiModelProperty(required = true, value = "correct")
 	public boolean isCorrect() {
 		return correct;
 	}
@@ -51,6 +58,7 @@ public class PossibleAnswer {
 		this.correct = correct;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display value")
 	public int getValue() {
 		return value;
 	}

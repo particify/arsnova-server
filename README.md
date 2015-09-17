@@ -73,9 +73,8 @@ by Maven.
 ### Download
 
 If you have no intention in contributing, you might want to consider downloading
-one of our pre-built WAR archives. You will find them in our
-[Maven repository](https://maven.mni.thm.de/content/repositories/snapshots/de/thm/arsnova/arsnova-backend/2.0.0-SNAPSHOT/),
-but please do note that we are not officially offering these archives.
+one of our pre-built WAR archives. You will find them on our
+[GitHub releases page](https://github.com/thm-projects/arsnova-backend/releases).
 
 ### Building
 
@@ -168,7 +167,7 @@ some additional configuration work.
 In order to build up a full featured server installation containing ARSnova and
 CouchDB you have to install at least the following services:
 
- * Apache Tomcat 7.0.29 (or newer)
+ * Apache Tomcat 7 (or newer)
  * Apache Webserver 2.2 or newer with builtin modules `mod_proxy`,
 `mod_proxy_ajp` and `mod_proxy_http`
  * Apache CouchDB

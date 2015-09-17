@@ -23,10 +23,13 @@ import java.util.List;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * This class is used to allow the import and export of a session.
  */
+@ApiModel(value = "session/import and export", description = "the import export session API")
 public class ImportExportSession {
 
 	private ImportExportSesssion session;
@@ -35,6 +38,7 @@ public class ImportExportSession {
 
 	private List<InterposedQuestion> feedbackQuestions;
 
+	@ApiModelProperty(required = true, value = "used to display session")
 	public ImportExportSesssion getSession() {
 		return session;
 	}
@@ -43,6 +47,7 @@ public class ImportExportSession {
 		this.session = session;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display questions")
 	public List<ImportExportQuestion> getQuestions() {
 		return questions;
 	}
@@ -51,6 +56,7 @@ public class ImportExportSession {
 		this.questions = questions;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display questions feedback")
 	public List<InterposedQuestion> getFeedbackQuestions() {
 		return feedbackQuestions;
 	}
@@ -94,6 +100,7 @@ public class ImportExportSession {
 
 		private List<Answer> answers;
 
+		@ApiModelProperty(required = true, value = " used to display answers")
 		public List<Answer> getAnswers() {
 			return answers;
 		}
@@ -113,6 +120,7 @@ public class ImportExportSession {
 
 		private PublicPool publicPool;
 
+		@ApiModelProperty(required = true, value = "used to display short name")
 		public String getName() {
 			return name;
 		}
@@ -121,6 +129,7 @@ public class ImportExportSession {
 			this.name = name;
 		}
 
+		@ApiModelProperty(required = true, value = "used to display short name")
 		public String getShortName() {
 			return shortName;
 		}
@@ -129,6 +138,7 @@ public class ImportExportSession {
 			this.shortName = shortName;
 		}
 
+		@ApiModelProperty(required = true, value = "active")
 		public boolean isActive() {
 			return active;
 		}
@@ -137,6 +147,7 @@ public class ImportExportSession {
 			this.active = active;
 		}
 
+		@ApiModelProperty(required = true, value = "used to display public pool")
 		public PublicPool getPublicPool() {
 			return publicPool;
 		}
@@ -170,6 +181,7 @@ public class ImportExportSession {
 
 		private String shortName;
 
+		@ApiModelProperty(required = true, value = "used to display author name")
 		public String getPpAuthorName() {
 			return ppAuthorName;
 		}
@@ -178,6 +190,7 @@ public class ImportExportSession {
 			this.ppAuthorName = ppAuthorName;
 		}
 
+		@ApiModelProperty(required = true, value = "used to display author mail")
 		public String getPpAuthorMail() {
 			return ppAuthorMail;
 		}
@@ -186,6 +199,7 @@ public class ImportExportSession {
 			this.ppAuthorMail = ppAuthorMail;
 		}
 
+		@ApiModelProperty(required = true, value = "used to display university")
 		public String getPpUniversity() {
 			return ppUniversity;
 		}
@@ -194,6 +208,7 @@ public class ImportExportSession {
 			this.ppUniversity = ppUniversity;
 		}
 
+		@ApiModelProperty(required = true, value = "used to display logo")
 		public String getPpLogo() {
 			return ppLogo;
 		}
@@ -202,6 +217,7 @@ public class ImportExportSession {
 			this.ppLogo = ppLogo;
 		}
 
+		@ApiModelProperty(required = true, value = "used to display subject")
 		public String getPpSubject() {
 			return ppSubject;
 		}
@@ -210,6 +226,7 @@ public class ImportExportSession {
 			this.ppSubject = ppSubject;
 		}
 
+		@ApiModelProperty(required = true, value = "used to display license")
 		public String getPpLicense() {
 			return ppLicense;
 		}
@@ -218,6 +235,7 @@ public class ImportExportSession {
 			this.ppLicense = ppLicense;
 		}
 
+		@ApiModelProperty(required = true, value = "used to display level")
 		public String getPpLevel() {
 			return ppLevel;
 		}
@@ -226,6 +244,7 @@ public class ImportExportSession {
 			this.ppLevel = ppLevel;
 		}
 
+		@ApiModelProperty(required = true, value = "used to display description")
 		public String getPpDescription() {
 			return ppDescription;
 		}
@@ -234,6 +253,7 @@ public class ImportExportSession {
 			this.ppDescription = ppDescription;
 		}
 
+		@ApiModelProperty(required = true, value = "used to display faculty")
 		public String getPpFaculty() {
 			return ppFaculty;
 		}
@@ -242,6 +262,7 @@ public class ImportExportSession {
 			this.ppFaculty = ppFaculty;
 		}
 
+		@ApiModelProperty(required = true, value = "used to display name")
 		public String getName() {
 			return name;
 		}
@@ -250,6 +271,7 @@ public class ImportExportSession {
 			this.name = name;
 		}
 
+		@ApiModelProperty(required = true, value = "used to display short name")
 		public String getShortName() {
 			return shortName;
 		}

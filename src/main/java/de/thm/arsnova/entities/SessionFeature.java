@@ -16,13 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.thm.arsnova.entities;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Contains fields that describe which specific feature is activated for a session.
  */
+@ApiModel(value = "session feature", description = "the Session feature API")
 public class SessionFeature {
 
+	private boolean custom = true;
+	private boolean clicker = false;
+	private boolean peerGrading = false;
+	private boolean liveFeedback = false;
+	private boolean flashcard = false;
+	private boolean total = false;
+
 	private boolean jitt = true;
+	private boolean lecture = true;
 	private boolean feedback = true;
 	private boolean interposed = true;
 	private boolean pi = true;
@@ -31,6 +42,13 @@ public class SessionFeature {
 	public SessionFeature(SessionFeature features) {
 		this();
 		if (features != null) {
+			this.custom = features.custom;
+			this.clicker = features.clicker;
+			this.peerGrading = features.peerGrading;
+			this.liveFeedback = features.liveFeedback;
+			this.flashcard = features.flashcard;
+			this.total = features.total;
+			this.lecture = features.lecture;
 			this.jitt = features.jitt;
 			this.feedback = features.feedback;
 			this.interposed = features.interposed;
@@ -41,6 +59,15 @@ public class SessionFeature {
 
 	public SessionFeature() {}
 
+	public boolean isLecture() {
+		return lecture;
+	}
+
+	public void setLecture(boolean lecture) {
+		this.lecture = lecture;
+	}
+
+	@ApiModelProperty(required = true, value = "jitt")
 	public boolean isJitt() {
 		return jitt;
 	}
@@ -49,6 +76,7 @@ public class SessionFeature {
 		this.jitt = jitt;
 	}
 
+	@ApiModelProperty(required = true, value = "feedback")
 	public boolean isFeedback() {
 		return feedback;
 	}
@@ -57,6 +85,7 @@ public class SessionFeature {
 		this.feedback = feedback;
 	}
 
+	@ApiModelProperty(required = true, value = "interposed")
 	public boolean isInterposed() {
 		return interposed;
 	}
@@ -65,6 +94,7 @@ public class SessionFeature {
 		this.interposed = interposed;
 	}
 
+	@ApiModelProperty(required = true, value = "pi")
 	public boolean isPi() {
 		return pi;
 	}
@@ -73,12 +103,61 @@ public class SessionFeature {
 		this.pi = pi;
 	}
 
+	@ApiModelProperty(required = true, value = "learning progress")
 	public boolean isLearningProgress() {
 		return learningProgress;
 	}
 
 	public void setLearningProgress(boolean learningProgress) {
 		this.learningProgress = learningProgress;
+	}
+
+	public boolean isCustom() {
+		return custom;
+	}
+
+	public void setCustom(boolean custom) {
+		this.custom = custom;
+	}
+
+	public boolean isClicker() {
+		return clicker;
+	}
+
+	public void setClicker(boolean clicker) {
+		this.clicker = clicker;
+	}
+
+	public boolean isPeerGrading() {
+		return peerGrading;
+	}
+
+	public void setPeerGrading(boolean peerGrading) {
+		this.peerGrading = peerGrading;
+	}
+
+	public boolean isFlashcard() {
+		return flashcard;
+	}
+
+	public void setFlashcard(boolean flashcard) {
+		this.flashcard = flashcard;
+	}
+
+	public boolean isTotal() {
+		return total;
+	}
+
+	public void setTotal(boolean total) {
+		this.total = total;
+	}
+
+	public boolean isLiveFeedback() {
+		return liveFeedback;
+	}
+
+	public void setLiveFeedback(boolean liveFeedback) {
+		this.liveFeedback = liveFeedback;
 	}
 
 }

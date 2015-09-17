@@ -30,6 +30,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.context.annotation.Import;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.client.ConnectorClientImpl;
@@ -37,12 +41,14 @@ import de.thm.arsnova.socket.ARSnovaSocket;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 import de.thm.arsnova.ImageUtils;
 
+
 /**
  * Loads property file and configures non-security related beans and components.
  */
+@EnableWebMvc
 @Configuration
 @EnableCaching
-public class ExtraConfig {
+public class ExtraConfig extends WebMvcConfigurerAdapter {
 
 	@Autowired
 	private Environment env;

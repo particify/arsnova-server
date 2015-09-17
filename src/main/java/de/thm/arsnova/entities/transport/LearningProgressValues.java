@@ -17,9 +17,13 @@
  */
 package de.thm.arsnova.entities.transport;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * The calculated learning progress along with meta-data.
  */
+@ApiModel(value = "session/{sessionkey}/learningprogress", description = "the learning progress API")
 public class LearningProgressValues {
 
 	private int courseProgress;
@@ -34,6 +38,7 @@ public class LearningProgressValues {
 
 	private int numUsers;
 
+	@ApiModelProperty(required = true, value = "used to display course progress")
 	public int getCourseProgress() {
 		return courseProgress;
 	}
@@ -42,6 +47,7 @@ public class LearningProgressValues {
 		this.courseProgress = courseProgress;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display my progress")
 	public int getMyProgress() {
 		return myProgress;
 	}
@@ -50,6 +56,7 @@ public class LearningProgressValues {
 		this.myProgress = myProgress;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display questions number")
 	public int getNumQuestions() {
 		return numQuestions;
 	}
@@ -74,6 +81,7 @@ public class LearningProgressValues {
 		this.denominator = denominator;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display user number")
 	public int getNumUsers() {
 		return numUsers;
 	}

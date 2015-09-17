@@ -15,20 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.controller;
+package de.thm.arsnova.events;
+
+import de.thm.arsnova.entities.Session;
 
 /**
- * Base class of all controllers.
+ * Fires whenever a new session is created.
  */
-public class AbstractController {
-	protected static final String X_DEPRECATED_API = "X-Deprecated-API";
-	protected static final String X_FORWARDED = "X-Forwarded";
-	protected static final String HTML_STATUS_200 = "OK";
-	protected static final String HTML_STATUS_201 = "Created";
-	protected static final String HTML_STATUS_204 = "No Content";
-	protected static final String HTML_STATUS_400 = "Bad request";
-	protected static final String HTML_STATUS_403 = "Forbidden";
-	protected static final String HTML_STATUS_404 = "Not Found";
-	protected static final String HTML_STATUS_501 = "Not Implemented";
-	protected static final String HTML_STATUS_503 = "Service Unavailable";
+public class FeatureChangeEvent extends SessionEvent {
+
+	private static final long serialVersionUID = 1L;
+
+	public FeatureChangeEvent(Object source, Session session) {
+		super(source, session);
+	}
+
+	@Override
+	public void accept(NovaEventVisitor visitor) {
+		visitor.visit(this);
+	}
+
 }

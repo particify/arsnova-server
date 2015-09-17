@@ -17,9 +17,13 @@
  */
 package de.thm.arsnova.entities;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * Wrapper class for counting read and unread interposed questions for a session or a single user.
  */
+@ApiModel(value = "audiencequestion/readcount", description = "the Interposed reading count API")
 public class InterposedReadingCount {
 
 	private int read;
@@ -35,6 +39,7 @@ public class InterposedReadingCount {
 		this.unread = 0;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display read interposed questions")
 	public int getRead() {
 		return read;
 	}
@@ -43,6 +48,7 @@ public class InterposedReadingCount {
 		this.read = read;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display unread interposed questions")
 	public int getUnread() {
 		return unread;
 	}
@@ -51,6 +57,7 @@ public class InterposedReadingCount {
 		this.unread = unread;
 	}
 
+	@ApiModelProperty(required = true, value = "used to display Total questions")
 	public int getTotal() {
 		return getRead() + getUnread();
 	}

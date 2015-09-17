@@ -28,6 +28,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -53,12 +58,14 @@ public class FeedbackController extends AbstractController {
 	private IUserService userService;
 
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.GET)
 	public Feedback getFeedback(@PathVariable final String sessionkey) {
 		return feedbackService.getFeedback(sessionkey);
 	}
 
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/myfeedback", method = RequestMethod.GET)
 	public Integer getMyFeedback(@PathVariable final String sessionkey) {
 		Integer value = feedbackService.getMyFeedback(sessionkey, userService.getCurrentUser());
@@ -69,24 +76,28 @@ public class FeedbackController extends AbstractController {
 	}
 
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/feedbackcount", method = RequestMethod.GET)
 	public int getFeedbackCount(@PathVariable final String sessionkey) {
 		return feedbackService.getFeedbackCount(sessionkey);
 	}
 
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/roundedaveragefeedback", method = RequestMethod.GET)
 	public long getAverageFeedbackRounded(@PathVariable final String sessionkey) {
 		return feedbackService.getAverageFeedbackRounded(sessionkey);
 	}
 
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/averagefeedback", method = RequestMethod.GET)
 	public double getAverageFeedback(@PathVariable final String sessionkey) {
 		return feedbackService.getAverageFeedback(sessionkey);
 	}
 
 	@DeprecatedApi
+	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Feedback postFeedback(

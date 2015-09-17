@@ -32,6 +32,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.services.UserSessionService;
@@ -42,6 +48,7 @@ import de.thm.arsnova.socket.ARSnovaSocket;
  */
 @RestController
 @RequestMapping("/socket")
+@Api(value = "/socket", description = "the Socket API")
 public class SocketController extends AbstractController {
 
 	@Autowired
@@ -55,8 +62,15 @@ public class SocketController extends AbstractController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SocketController.class);
 
+	@ApiOperation(value = "requested to assign Websocket session",
+			nickname = "authorize")
+	@ApiResponses(value = {
+		@ApiResponse(code = 204, message = HTML_STATUS_204),
+		@ApiResponse(code = 400, message = HTML_STATUS_400),
+		@ApiResponse(code = 403, message = HTML_STATUS_403)
+	})
 	@RequestMapping(method = RequestMethod.POST, value = "/assign")
-	public void authorize(@RequestBody final Map<String, String> sessionMap, final HttpServletResponse response) {
+	public void authorize(@ApiParam(value="sessionMap", required=true) @RequestBody final Map<String, String> sessionMap, @ApiParam(value="response", required=true) final HttpServletResponse response) {
 		String socketid = sessionMap.get("session");
 		if (null == socketid) {
 			LOGGER.debug("Expected property 'session' missing", socketid);
@@ -74,6 +88,8 @@ public class SocketController extends AbstractController {
 		response.setStatus(HttpStatus.NO_CONTENT.value());
 	}
 
+	@ApiOperation(value = "retrieves a socket url",
+			nickname = "getSocketUrl")
 	@RequestMapping(value = "/url", method = RequestMethod.GET)
 	public String getSocketUrl(final HttpServletRequest request) {
 		StringBuilder url = new StringBuilder();
