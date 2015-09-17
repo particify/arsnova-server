@@ -17,8 +17,10 @@
  */
 package de.thm.arsnova.entities;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -26,7 +28,7 @@ import io.swagger.annotations.ApiModelProperty;
  * A question the teacher is asking.
  */
 @ApiModel(value = "lecturerquestion", description = "the Question API")
-public class Question {
+public class Question implements Serializable {
 
 	private String type;
 	private String questionType;
@@ -503,21 +505,21 @@ public class Question {
 
 	@ApiModelProperty(required = true, value = "used to display scale factor")
 	public String getScaleFactor() {
-		return this.scaleFactor;
+		return scaleFactor;
 	}
 
 	public void setGridScaleFactor(String scaleFactor) {
-		this.gridScaleFactor = scaleFactor;
+		gridScaleFactor = scaleFactor;
 	}
 
 	@ApiModelProperty(required = true, value = "used to display grid scale factor")
 	public String getGridScaleFactor() {
-		return this.gridScaleFactor;
+		return gridScaleFactor;
 	}
 
 	@ApiModelProperty(required = true, value = "enabled text nswer")
 	public boolean isTextAnswerEnabled() {
-		return this.textAnswerEnabled;
+		return textAnswerEnabled;
 	}
 
 	public void setTextAnswerEnabled(boolean textAnswerEnabled) {
@@ -566,8 +568,12 @@ public class Question {
 	@Override
 	public boolean equals(Object obj) {
 		// auto generated!
-		if (this == obj) return true;
-		if (obj == null) return false;
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
@@ -585,9 +591,9 @@ public class Question {
 	public int calculateValue(Answer answer) {
 		if (answer.isAbstention()) {
 			return 0;
-		} else if (this.questionType.equals("mc")) {
+		} else if (questionType.equals("mc")) {
 			return calculateMultipleChoiceValue(answer);
-		} else if (this.questionType.equals("grid")) {
+		} else if (questionType.equals("grid")) {
 			return calculateGridValue(answer);
 		} else {
 			return calculateRegularValue(answer);
@@ -641,7 +647,7 @@ public class Question {
 
 	private int calculateRegularValue(Answer answer) {
 		String answerText = answer.getAnswerText();
-		for (PossibleAnswer p : this.possibleAnswers) {
+		for (PossibleAnswer p : possibleAnswers) {
 			if (answerText.equals(p.getText())) {
 				return p.getValue();
 			}
@@ -652,9 +658,9 @@ public class Question {
 	private int calculateGridValue(Answer answer) {
 		int value = 0;
 		String[] answers = answer.getAnswerText().split(",");
-		for (int i = 0; i < answers.length; i++) {
-			for (PossibleAnswer p : this.possibleAnswers) {
-				if (answers[i].equals(p.getText())) {
+		for (String answer2 : answers) {
+			for (PossibleAnswer p : possibleAnswers) {
+				if (answer2.equals(p.getText())) {
 					value += p.getValue();
 				}
 			}
@@ -665,9 +671,9 @@ public class Question {
 	private int calculateMultipleChoiceValue(Answer answer) {
 		int value = 0;
 		String[] answers = answer.getAnswerText().split(",");
-		for (int i = 0; i < this.possibleAnswers.size() && i < answers.length; i++) {
+		for (int i = 0; i < possibleAnswers.size() && i < answers.length; i++) {
 			if (answers[i].equals("1")) {
-				PossibleAnswer p = this.possibleAnswers.get(i);
+				PossibleAnswer p = possibleAnswers.get(i);
 				value += p.getValue();
 			}
 		}
