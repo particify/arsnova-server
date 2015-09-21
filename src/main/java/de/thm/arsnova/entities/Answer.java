@@ -26,7 +26,7 @@ import io.swagger.annotations.ApiModelProperty;
  *
  * This class has additional fields to transport generated answer statistics.
  */
-@ApiModel(value = "Answer", description = "the Answer entity")
+@ApiModel(value = "Answer", description = "the answer entity")
 public class Answer {
 
 	private String _id;
@@ -62,7 +62,6 @@ public class Answer {
 		this._id = _id;
 	}
 
-	@ApiModelProperty(required = true, value = "the couchDB revision Nr.")
 	public final String get_rev() {
 		return _rev;
 	}
@@ -71,7 +70,7 @@ public class Answer {
 		this._rev = _rev;
 	}
 
-	@ApiModelProperty(required = true, value = "\"skill_question_answer\" - used to filter in the cochDB")
+	@ApiModelProperty(required = true, value = "\"skill_question_answer\" - used to filter in the couchDB")
 	public final String getType() {
 		return type;
 	}

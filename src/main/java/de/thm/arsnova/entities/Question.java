@@ -27,7 +27,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * A question the teacher is asking.
  */
-@ApiModel(value = "lecturerquestion", description = "the Question entity")
+@ApiModel(value = "lecturerquestion", description = "the question entity")
 public class Question implements Serializable {
 
 	private String type;
@@ -229,7 +229,7 @@ public class Question implements Serializable {
 		this.duration = duration;
 	}
 
-	@ApiModelProperty(required = true, value = "the peer instruction round nr.")
+	@ApiModelProperty(required = true, value = "the peer instruction round no.")
 	public int getPiRound() {
 		return piRound;
 	}
@@ -319,7 +319,6 @@ public class Question implements Serializable {
 		this._id = _id;
 	}
 
-	@ApiModelProperty(required = true, value = "the couchDB revision Nr.")
 	public final String get_rev() {
 		return _rev;
 	}
@@ -445,7 +444,7 @@ public class Question implements Serializable {
 		this.imgRotation = imgRotation;
 	}
 
-	@ApiModelProperty(required = true, value = "the toggeled lef fields")
+	@ApiModelProperty(required = true, value = "the toggled left fields")
 	public boolean getToggleFieldsLeft() {
 		return toggleFieldsLeft;
 	}

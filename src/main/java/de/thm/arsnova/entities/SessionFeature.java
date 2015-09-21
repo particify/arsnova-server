@@ -22,7 +22,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * Contains fields that describe which specific feature is activated for a session.
  */
-@ApiModel(value = "session feature", description = "the Session feature API")
+@ApiModel(value = "session feature", description = "the session feature entity")
 public class SessionFeature {
 
 	private boolean custom = true;
@@ -94,7 +94,7 @@ public class SessionFeature {
 		this.interposed = interposed;
 	}
 
-	@ApiModelProperty(required = true, value = "pi")
+	@ApiModelProperty(required = true, value = "peer instruction")
 	public boolean isPi() {
 		return pi;
 	}

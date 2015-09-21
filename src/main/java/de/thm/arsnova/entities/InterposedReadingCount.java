@@ -48,7 +48,7 @@ public class InterposedReadingCount {
 		this.read = read;
 	}
 
-	@ApiModelProperty(required = true, value = "the nuber of unread interposed questions")
+	@ApiModelProperty(required = true, value = "the number of unread interposed questions")
 	public int getUnread() {
 		return unread;
 	}

@@ -50,7 +50,6 @@ public class InterposedQuestion {
 		this._id = _id;
 	}
 
-	@ApiModelProperty(required = true, value = "the couchDB revision Nr.")
 	public String get_rev() {
 		return _rev;
 	}
@@ -74,7 +73,7 @@ public class InterposedQuestion {
 		this.type = type;
 	}
 
-	@ApiModelProperty(required = true, value = "the Subject")
+	@ApiModelProperty(required = true, value = "the subject")
 	public String getSubject() {
 		return subject;
 	}
