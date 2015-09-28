@@ -247,12 +247,12 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public InterposedQuestion getInterposedQuestion(String questionId) {
-		return interposedQuestion;
+		return this.interposedQuestion;
 	}
 
 	@Override
 	public void markInterposedQuestionAsRead(InterposedQuestion question) {
-		interposedQuestion.setRead(true);
+		this.interposedQuestion.setRead(true);
 	}
 
 	@Override

@@ -505,21 +505,21 @@ public class Question implements Serializable {
 
 	@ApiModelProperty(required = true, value = "used to display scale factor")
 	public String getScaleFactor() {
-		return scaleFactor;
+		return this.scaleFactor;
 	}
 
 	public void setGridScaleFactor(String scaleFactor) {
-		gridScaleFactor = scaleFactor;
+		this.gridScaleFactor = scaleFactor;
 	}
 
 	@ApiModelProperty(required = true, value = "used to display grid scale factor")
 	public String getGridScaleFactor() {
-		return gridScaleFactor;
+		return this.gridScaleFactor;
 	}
 
 	@ApiModelProperty(required = true, value = "enabled text nswer")
 	public boolean isTextAnswerEnabled() {
-		return textAnswerEnabled;
+		return this.textAnswerEnabled;
 	}
 
 	public void setTextAnswerEnabled(boolean textAnswerEnabled) {
@@ -568,12 +568,8 @@ public class Question implements Serializable {
 	@Override
 	public boolean equals(Object obj) {
 		// auto generated!
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
+		if (this == obj) return true;
+		if (obj == null) return false;
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
@@ -591,9 +587,9 @@ public class Question implements Serializable {
 	public int calculateValue(Answer answer) {
 		if (answer.isAbstention()) {
 			return 0;
-		} else if (questionType.equals("mc")) {
+		} else if (this.questionType.equals("mc")) {
 			return calculateMultipleChoiceValue(answer);
-		} else if (questionType.equals("grid")) {
+		} else if (this.questionType.equals("grid")) {
 			return calculateGridValue(answer);
 		} else {
 			return calculateRegularValue(answer);
@@ -647,7 +643,7 @@ public class Question implements Serializable {
 
 	private int calculateRegularValue(Answer answer) {
 		String answerText = answer.getAnswerText();
-		for (PossibleAnswer p : possibleAnswers) {
+		for (PossibleAnswer p : this.possibleAnswers) {
 			if (answerText.equals(p.getText())) {
 				return p.getValue();
 			}
@@ -658,9 +654,9 @@ public class Question implements Serializable {
 	private int calculateGridValue(Answer answer) {
 		int value = 0;
 		String[] answers = answer.getAnswerText().split(",");
-		for (String answer2 : answers) {
-			for (PossibleAnswer p : possibleAnswers) {
-				if (answer2.equals(p.getText())) {
+		for (int i = 0; i < answers.length; i++) {
+			for (PossibleAnswer p : this.possibleAnswers) {
+				if (answers[i].equals(p.getText())) {
 					value += p.getValue();
 				}
 			}
@@ -671,9 +667,9 @@ public class Question implements Serializable {
 	private int calculateMultipleChoiceValue(Answer answer) {
 		int value = 0;
 		String[] answers = answer.getAnswerText().split(",");
-		for (int i = 0; i < possibleAnswers.size() && i < answers.length; i++) {
+		for (int i = 0; i < this.possibleAnswers.size() && i < answers.length; i++) {
 			if (answers[i].equals("1")) {
-				PossibleAnswer p = possibleAnswers.get(i);
+				PossibleAnswer p = this.possibleAnswers.get(i);
 				value += p.getValue();
 			}
 		}
