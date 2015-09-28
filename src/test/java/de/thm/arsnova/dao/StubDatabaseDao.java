@@ -34,9 +34,9 @@ import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
+import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -126,7 +126,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public Question saveQuestion(Session session, Question question) {
-		List<Question> questions = stubQuestions.get(session.get_id());
+		List<Question> questions = stubQuestions.get(session.getKeyword());
 		questions.add(question);
 		stubQuestions.put(session.get_id(), questions);
 
@@ -141,11 +141,13 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public List<Question> getSkillQuestions(User user, Session session) {
-		if (session == null)
+		if (session == null) {
 			throw new NotFoundException();
-		List<Question> questions = stubQuestions.get(session);
-		if (questions == null)
+		}
+		List<Question> questions = stubQuestions.get(session.getKeyword());
+		if (questions == null) {
 			throw new NoContentException();
+		}
 		return questions;
 	}
 

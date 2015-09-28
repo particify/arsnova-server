@@ -75,8 +75,8 @@ public class RangeAspect {
 		}
 
 		if (matcher != null && matcher.matches()) {
-			start = matcher.group(1) != null ? Integer.valueOf(matcher.group(1)) : -1;
-			end = matcher.group(2) != null ? Integer.valueOf(matcher.group(2)) : -1;
+			start = matcher.group(1) != null ? Integer.parseInt(matcher.group(1)) : -1;
+			end = matcher.group(2) != null ? Integer.parseInt(matcher.group(2)) : -1;
 			logger.debug("Pagination: {}-{}", start, end);
 		}
 		controller.setRange(start, end);

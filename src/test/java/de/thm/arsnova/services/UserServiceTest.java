@@ -54,7 +54,7 @@ public class UserServiceTest {
 		objOut.writeObject(socketid2user);
 		objOut.close();
 		ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(out.toByteArray()));
-		Map<UUID, String> actual = (Map<UUID, String>) objIn.readObject();
+		Map<UUID, User> actual = (Map<UUID, User>) objIn.readObject();
 		assertEquals(actual, socketid2user);
 	}
 

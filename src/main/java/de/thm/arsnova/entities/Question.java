@@ -17,8 +17,10 @@
  */
 package de.thm.arsnova.entities;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -26,7 +28,7 @@ import io.swagger.annotations.ApiModelProperty;
  * A question the teacher is asking.
  */
 @ApiModel(value = "lecturerquestion", description = "the Question API")
-public class Question {
+public class Question implements Serializable {
 
 	private String type;
 	private String questionType;
