@@ -172,17 +172,17 @@ features.mathjax.src=//cdn.mathjax.org/mathjax/2.4-latest/MathJax.js
 # tested in a production environment over a longer time frame and/or their
 # behavior will change in future releases.
 #
-features.markdown.enabled=false
-features.learning-progress.enabled=false
-features.students-own-questions.enabled=false
-features.question-format.flashcard.enabled=false
-features.question-format.grid-square.enabled=false
+features.markdown.enabled=true
+features.learning-progress.enabled=true
+features.students-own-questions.enabled=true
+features.question-format.flashcard.enabled=true
+features.question-format.grid-square.enabled=true
 
 # Without enabled session-import-export feature no sessions can be added to the
 # public pool
 #
-features.session-import-export.enabled=false
-features.public-pool.enabled=false
+features.session-import-export.enabled=true
+features.public-pool.enabled=true
 
 
 ################################################################################
@@ -192,11 +192,11 @@ features.public-pool.enabled=false
 feedback.cleanup=10
 
 # Maximal filesize in bytes
-upload.filesize_b=1048576
+upload.filesize_b=4194304
 
 # Maximal thumbnail size in pixels
-imageupload.thumbnail.width=200
-imageupload.thumbnail.height=200
+imageupload.thumbnail.width=400
+imageupload.thumbnail.height=400
 
 # Maximal number of answer options allowed for a skill question
 question.answer-option-limit=8
@@ -205,13 +205,13 @@ question.answer-option-limit=8
 # options should be used cautiously since it could lead to display errors.
 # Answer options will still not be parsed in diagrams. This setting has no
 # effect if neither MathJax nor Markdown are enabled.
-question.parse-answer-option-formatting=false
+question.parse-answer-option-formatting=true
 
 # Demo session id to show above session login button
 session.demo-id=
 
 # Label underneath ARSnova logo
-ui.slogan=Audience Response System
+ui.slogan=Audience Response System (Development)
 
 # Links which are displayed in the frontend applications
 #
