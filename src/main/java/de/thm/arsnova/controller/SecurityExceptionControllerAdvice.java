@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -35,15 +38,28 @@ import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.NotImplementedException;
+import de.thm.arsnova.exceptions.PayloadTooLargeException;
 import de.thm.arsnova.exceptions.PreconditionFailedException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
-import de.thm.arsnova.exceptions.PayloadTooLargeException;
 
 /**
  * Translates security/authentication related exceptions into HTTP status codes.
  */
 @ControllerAdvice
 public class SecurityExceptionControllerAdvice {
+
+	@ExceptionHandler
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public Map<String,String> defaultExceptionHandler(
+			final Exception e,
+			final HttpServletRequest req
+			) {
+		final Map<String, String> result = new HashMap<String, String>();
+		result.put("code", "500");
+		result.put("status", "Internal server error");
+		result.put("message", e.getMessage());
+		return result;
+	}
 
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ExceptionHandler(NotFoundException.class)
