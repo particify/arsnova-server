@@ -211,7 +211,7 @@ question.parse-answer-option-formatting=true
 session.demo-id=
 
 # Label underneath ARSnova logo
-ui.slogan=Audience Response System (Development)
+ui.slogan=Audience Response System
 
 # Links which are displayed in the frontend applications
 #
