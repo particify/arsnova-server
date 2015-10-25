@@ -213,6 +213,13 @@ session.demo-id=
 # Label underneath ARSnova logo
 ui.slogan=Audience Response System
 
+# Splashscreen configuration
+#
+splashscreen.logo-path=resources/images/arsnova.png
+splashscreen.slogan=Audience Response System
+splashscreen.background-color=#E0E0E0
+splashscreen.loading-ind-color=#4A5C66
+
 # Links which are displayed in the frontend applications
 #
 links.blog.url=https://arsnova.eu/blog/
