@@ -26,7 +26,7 @@ import io.swagger.annotations.ApiModelProperty;
  * Summary information of a specific session. For example, this is used to display list entries of 'my sessions' as well
  * as 'my visited sessions'.
  */
-@ApiModel(value = "session/import", description = "the session info API")
+@ApiModel(value = "session/import", description = "the session info entity")
 public class SessionInfo {
 
 	private String name;
@@ -67,7 +67,7 @@ public class SessionInfo {
 		return infos;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display name")
+	@ApiModelProperty(required = true, value = "the name")
 	public String getName() {
 		return name;
 	}
@@ -76,7 +76,7 @@ public class SessionInfo {
 		this.name = name;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display short name")
+	@ApiModelProperty(required = true, value = "the short name")
 	public String getShortName() {
 		return shortName;
 	}
@@ -85,7 +85,7 @@ public class SessionInfo {
 		this.shortName = shortName;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display keyword")
+	@ApiModelProperty(required = true, value = "the keyword")
 	public String getKeyword() {
 		return keyword;
 	}
@@ -94,7 +94,7 @@ public class SessionInfo {
 		this.keyword = keyword;
 	}
 
-	@ApiModelProperty(required = true, value = "active")
+	@ApiModelProperty(required = true, value = "true for active")
 	public boolean isActive() {
 		return active;
 	}
@@ -103,7 +103,7 @@ public class SessionInfo {
 		this.active = active;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display the course type")
+	@ApiModelProperty(required = true, value = "the source the course comes from (example: moodle)")
 	public String getCourseType() {
 		return courseType;
 	}
@@ -112,7 +112,7 @@ public class SessionInfo {
 		this.courseType = courseType;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display the session type")
+	@ApiModelProperty(required = true, value = "the session type")
 	public String getSessionType() {
 		return sessionType;
 	}
@@ -130,7 +130,7 @@ public class SessionInfo {
 		this.ppLevel = ppLevel;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display subject")
+	@ApiModelProperty(required = true, value = "the public pool subject")
 	public String getPpSubject() {
 		return ppSubject;
 	}
@@ -139,7 +139,7 @@ public class SessionInfo {
 		this.ppSubject = ppSubject;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display questions number")
+	@ApiModelProperty(required = true, value = "the number of questions")
 	public int getNumQuestions() {
 		return numQuestions;
 	}
@@ -148,7 +148,7 @@ public class SessionInfo {
 		this.numQuestions = numQuestions;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display answers number")
+	@ApiModelProperty(required = true, value = "the number of answers")
 	public int getNumAnswers() {
 		return numAnswers;
 	}
@@ -166,7 +166,7 @@ public class SessionInfo {
 		this.numInterposed = numInterposed;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display unanswered number")
+	@ApiModelProperty(required = true, value = "the number of unanswered questions")
 	public int getNumUnanswered() {
 		return numUnanswered;
 	}
@@ -175,7 +175,7 @@ public class SessionInfo {
 		this.numUnanswered = numUnanswered;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display creation time")
+	@ApiModelProperty(required = true, value = "the creation timestamp")
 	public long getCreationTime() {
 		return creationTime;
 	}
@@ -184,7 +184,7 @@ public class SessionInfo {
 		this.creationTime = creationTime;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display unread interposed number")
+	@ApiModelProperty(required = true, value = "the number of unread interposed questions")
 	public int getNumUnredInterposed() {
 		return numUnredInterposed;
 	}

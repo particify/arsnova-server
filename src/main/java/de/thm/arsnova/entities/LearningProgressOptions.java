@@ -22,7 +22,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * A session's settings regarding the calculation of the learning progress.
  */
-@ApiModel(value = "learning progress options", description = "the learning progress API")
+@ApiModel(value = "learning progress options", description = "the learning progress entity")
 public class LearningProgressOptions {
 
 	private String type = "questions";
@@ -37,7 +37,7 @@ public class LearningProgressOptions {
 
 	public LearningProgressOptions() {}
 
-	@ApiModelProperty(required = true, value = "used to display the Type")
+	@ApiModelProperty(required = true, value = "the type")
 	public String getType() {
 		return type;
 	}
@@ -46,7 +46,7 @@ public class LearningProgressOptions {
 		this.type = learningProgressType;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display question variant")
+	@ApiModelProperty(required = true, value = "either lecture or preparation")
 	public String getQuestionVariant() {
 		return questionVariant;
 	}
