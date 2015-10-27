@@ -25,9 +25,6 @@ import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -39,13 +36,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import de.thm.arsnova.ImageUtils;
 
 /**
  * Loads property file and configures non-security related beans and components.
  */
 @EnableWebMvc
 @Configuration
-@EnableCaching
 public class ExtraConfig extends WebMvcConfigurerAdapter {
 
 	@Autowired
@@ -120,11 +117,6 @@ public class ExtraConfig extends WebMvcConfigurerAdapter {
 		socketServer.setKeystore(socketKeystore);
 		socketServer.setStorepass(socketStorepass);
 		return socketServer;
-	}
-
-	@Bean
-	public CacheManager cacheManager() {
-		return new ConcurrentMapCacheManager();
 	}
 
 	@Bean
