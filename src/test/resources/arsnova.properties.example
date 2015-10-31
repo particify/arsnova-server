@@ -175,6 +175,7 @@ features.mathjax.src=//cdn.mathjax.org/mathjax/2.4-latest/MathJax.js
 features.markdown.enabled=false
 features.learning-progress.enabled=false
 features.students-own-questions.enabled=false
+features.freetext-imageanswer.enabled=false
 features.question-format.flashcard.enabled=false
 features.question-format.grid-square.enabled=false
 

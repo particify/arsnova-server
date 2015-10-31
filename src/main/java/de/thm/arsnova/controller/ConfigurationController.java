@@ -91,6 +91,9 @@ public class ConfigurationController extends AbstractController {
 	@Value("${features.students-own-questions.enabled:false}")
 	private String studentsOwnQuestions;
 
+	@Value("${features.freetext-imageanswer.enabled:false}")
+	private String imageAnswerEnabled;
+
 	@Value("${features.question-format.flashcard.enabled:false}")
 	private String flashcardEnabled;
 
@@ -224,6 +227,7 @@ public class ConfigurationController extends AbstractController {
 		features.put("markdown", "true".equals(markdownEnabled));
 		features.put("learningProgress", "true".equals(learningProgressEnabled));
 		features.put("studentsOwnQuestions", "true".equals(studentsOwnQuestions));
+		features.put("imageAnswer", "true".equals(imageAnswerEnabled));
 		features.put("flashcard", "true".equals(flashcardEnabled));
 		features.put("gridSquare", "true".equals(gridSquareEnabled));
 		features.put("sessionImportExport", "true".equals(sessionImportExportEnabled));
