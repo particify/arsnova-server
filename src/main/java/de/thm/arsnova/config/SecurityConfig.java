@@ -58,6 +58,7 @@ import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
 import org.springframework.security.ldap.authentication.BindAuthenticator;
 import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
 import org.springframework.security.ldap.authentication.LdapAuthenticator;
+import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
 import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
 import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -99,6 +100,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 	@Value("${security.ldap.enabled}") private boolean ldapEnabled;
 	@Value("${security.ldap.url}") private String ldapUrl;
 	@Value("${security.ldap.user-dn-pattern:}") private String ldapUserDn;
+	@Value("${security.ldap.user-search-base:}") private String ldapSearchBase;
+	@Value("${security.ldap.user-search-filter:}") private String ldapSearchFilter;
 	@Value("${security.ldap.manager-user-dn:}") private String ldapManagerUserDn;
 	@Value("${security.ldap.manager-password:}") private String ldapManagerPassword;
 
@@ -267,7 +270,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 	@Bean
 	public LdapAuthenticator ldapAuthenticator() throws Exception {
 		BindAuthenticator authenticator = new BindAuthenticator(ldapContextSource());
-		authenticator.setUserDnPatterns(new String[] {ldapUserDn});
+		if (!"".equals(ldapSearchFilter)) {
+			authenticator.setUserSearch(new FilterBasedLdapUserSearch(ldapSearchBase, ldapSearchFilter, ldapContextSource()));
+		} else {
+			authenticator.setUserDnPatterns(new String[] {ldapUserDn});
+		}
 
 		return authenticator;
 	}
