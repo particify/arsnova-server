@@ -98,7 +98,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 
 	@Value("${security.ldap.enabled}") private boolean ldapEnabled;
 	@Value("${security.ldap.url}") private String ldapUrl;
-	@Value("${security.ldap.user-dn-pattern}") private String ldapUserDn;
+	@Value("${security.ldap.user-dn-pattern:}") private String ldapUserDn;
+	@Value("${security.ldap.manager-user-dn:}") private String ldapManagerUserDn;
+	@Value("${security.ldap.manager-password:}") private String ldapManagerPassword;
 
 	@Value("${security.cas.enabled}") private boolean casEnabled;
 	@Value("${security.cas-server-url}") private String casUrl;
@@ -254,8 +256,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 	public LdapContextSource ldapContextSource() throws Exception {
 		DefaultSpringSecurityContextSource contextSource = new DefaultSpringSecurityContextSource(ldapUrl);
 		/* TODO: implement support for LDAP bind using manager credentials */
-//		contextSource.setUserDn(ldapManagerUserDn);
-//		contextSource.setPassword(ldapManagerPassword);
+		if (!"".equals(ldapManagerUserDn) && !"".equals(ldapManagerPassword)) {
+			contextSource.setUserDn(ldapManagerUserDn);
+			contextSource.setPassword(ldapManagerPassword);
+		}
 
 		return contextSource;
 	}
