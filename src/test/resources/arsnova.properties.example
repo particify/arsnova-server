@@ -110,7 +110,7 @@ security.ldap.title=LDAP
 security.ldap.login-dialog-path=login-ldap.html
 security.ldap.image=
 security.ldap.order=0
-security.ldap.url=ldap://example.com:33389/dc=example,dc=com
+security.ldap.url=ldaps://example.com:636/dc=example,dc=com
 security.ldap.user-dn-pattern=uid={0},ou=arsnova
 # Set the following properties if you want to use LDAP search instead of binding
 # with a DN pattern
