@@ -148,11 +148,17 @@ public class ConfigurationController extends AbstractController {
 	@Value("${splashscreen.slogan:}")
 	private String splashscreenSlogan;
 
+	@Value("${splashscreen.slogan-color:}")
+	private String splashscreenSloganColor;
+
 	@Value("${splashscreen.background-color:}")
 	private String splashscreenBgColor;
 
 	@Value("${splashscreen.loading-ind-color:}")
 	private String splashscreenLoadingIndColor;
+
+	@Value("${splashscreen.min-delay:}")
+	private String splashscreenDelay;
 
 	@Value("${pp.session-levels.de}")
 	private String ppLevelsDe;
@@ -166,7 +172,7 @@ public class ConfigurationController extends AbstractController {
 		HashMap<String, Object> config = new HashMap<String, Object>();
 		HashMap<String, Boolean> features = new HashMap<String, Boolean>();
 		HashMap<String, String> publicPool = new HashMap<String, String>();
-		HashMap<String, String> splashscreen = new HashMap<String, String>();
+		HashMap<String, Object> splashscreen = new HashMap<String, Object>();
 
 		/* The API path could be unknown to the client in case the request was forwarded */
 		if ("".equals(apiPath)) {
@@ -251,11 +257,17 @@ public class ConfigurationController extends AbstractController {
 		if (!"".equals(splashscreenSlogan)) {
 			splashscreen.put("slogan", splashscreenSlogan);
 		}
+		if (!"".equals(splashscreenSloganColor)) {
+			splashscreen.put("sloganColor", splashscreenSloganColor);
+		}
 		if (!"".equals(splashscreenBgColor)) {
 			splashscreen.put("bgcolor", splashscreenBgColor);
 		}
 		if (!"".equals(splashscreenLoadingIndColor)) {
 			splashscreen.put("loadIndColor", splashscreenLoadingIndColor);
+		}
+		if (!"".equals(splashscreenDelay)) {
+			splashscreen.put("minDelay", Integer.valueOf(splashscreenDelay));
 		}
 
 		if (!"".equals(trackingTrackerUrl)) {
