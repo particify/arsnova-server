@@ -23,7 +23,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * Collection of several statistics about ARSnova.
  */
-@ApiModel(value = "statistics", description = "the Statistic API")
+@ApiModel(value = "statistics", description = "the statistic entity")
 public class Statistics {
 
 	private int answers;
@@ -38,7 +38,7 @@ public class Statistics {
 	private int interposedQuestions;
 	private int conceptQuestions;
 
-	@ApiModelProperty(required = true, value = "used to display Answers")
+	@ApiModelProperty(required = true, value = "the number of answers")
 	public int getAnswers() {
 		return answers;
 	}
@@ -47,7 +47,7 @@ public class Statistics {
 		this.answers = answers;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display Lecture Questions")
+	@ApiModelProperty(required = true, value = "the number of lecture questions")
 	public int getLectureQuestions() {
 		return lectureQuestions;
 	}
@@ -56,7 +56,7 @@ public class Statistics {
 		this.lectureQuestions = questions;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display prepartion Questions")
+	@ApiModelProperty(required = true, value = "the number of prepartion uestions")
 	public int getPreparationQuestions() {
 		return preparationQuestions;
 	}
@@ -65,12 +65,12 @@ public class Statistics {
 		this.preparationQuestions = questions;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display Questions")
+	@ApiModelProperty(required = true, value = "the total number of questions")
 	public int getQuestions() {
 		return getLectureQuestions() + getPreparationQuestions();
 	}
 
-	@ApiModelProperty(required = true, value = "used to display open Sessions")
+	@ApiModelProperty(required = true, value = "the number of open sessions")
 	public int getOpenSessions() {
 		return openSessions;
 	}
@@ -79,7 +79,7 @@ public class Statistics {
 		this.openSessions = openSessions;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display closed Sessions")
+	@ApiModelProperty(required = true, value = "the number of closed Sessions")
 	public int getClosedSessions() {
 		return closedSessions;
 	}
@@ -88,7 +88,7 @@ public class Statistics {
 		this.closedSessions = closedSessions;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display Sessions")
+	@ApiModelProperty(required = true, value = "the total number of Sessions")
 	public int getSessions() {
 		return getOpenSessions() + getClosedSessions();
 	}
@@ -102,7 +102,7 @@ public class Statistics {
 		this.activeUsers = activeUsers;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display logged in Users")
+	@ApiModelProperty(required = true, value = "the number of users that are logged")
 	public int getLoggedinUsers() {
 		return loggedinUsers;
 	}
@@ -111,7 +111,7 @@ public class Statistics {
 		this.loggedinUsers = loggedinUsers;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display interposed Questions")
+	@ApiModelProperty(required = true, value = "the number of interposed Questions")
 	public int getInterposedQuestions() {
 		return interposedQuestions;
 	}
@@ -120,7 +120,7 @@ public class Statistics {
 		this.interposedQuestions = interposedQuestions;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display creators")
+	@ApiModelProperty(required = true, value = "the number of creators")
 	public int getCreators() {
 		return creators;
 	}
@@ -129,7 +129,7 @@ public class Statistics {
 		this.creators = creators;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display concept Questions")
+	@ApiModelProperty(required = true, value = "the number of concept Questions")
 	public int getConceptQuestions() {
 		return conceptQuestions;
 	}
@@ -138,7 +138,7 @@ public class Statistics {
 		this.conceptQuestions = conceptQuestions;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display active Students")
+	@ApiModelProperty(required = true, value = "the number of active Students")
 	public int getActiveStudents() {
 		return activeStudents;
 	}

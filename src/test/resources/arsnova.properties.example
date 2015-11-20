@@ -175,6 +175,7 @@ features.mathjax.src=//cdn.mathjax.org/mathjax/2.4-latest/MathJax.js
 features.markdown.enabled=false
 features.learning-progress.enabled=false
 features.students-own-questions.enabled=false
+features.freetext-imageanswer.enabled=false
 features.question-format.flashcard.enabled=false
 features.question-format.grid-square.enabled=false
 
@@ -212,6 +213,13 @@ session.demo-id=
 
 # Label underneath ARSnova logo
 ui.slogan=Audience Response System
+
+# Splashscreen configuration
+# Best results are achieved with logos that have the same width and height.
+splashscreen.logo-path=resources/images/arsnova-logo.png
+splashscreen.slogan=Audience Response System
+splashscreen.background-color=#E0E0E0
+splashscreen.loading-ind-color=#4A5C66
 
 # Links which are displayed in the frontend applications
 #

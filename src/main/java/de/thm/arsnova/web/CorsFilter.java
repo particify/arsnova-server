@@ -41,9 +41,13 @@ public class CorsFilter extends OncePerRequestFilter {
 		response.addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
 
 		if (request.getHeader("origin") != null) {
-			response.addHeader("Access-Control-Allow-Origin", request.getHeader("origin"));
+			response.addHeader("Access-Control-Allow-Origin", sanitizeOriginUrl(request.getHeader("origin")));
 		}
 
 		filterChain.doFilter(request, response);
+	}
+
+	private String sanitizeOriginUrl(String originUrl) {
+		return originUrl.replaceAll("[\n\r]+"," ");
 	}
 }

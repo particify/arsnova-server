@@ -91,6 +91,9 @@ public class ConfigurationController extends AbstractController {
 	@Value("${features.students-own-questions.enabled:false}")
 	private String studentsOwnQuestions;
 
+	@Value("${features.freetext-imageanswer.enabled:false}")
+	private String imageAnswerEnabled;
+
 	@Value("${features.question-format.flashcard.enabled:false}")
 	private String flashcardEnabled;
 
@@ -139,6 +142,18 @@ public class ConfigurationController extends AbstractController {
 	@Value("${ui.slogan:}")
 	private String arsnovaSlogan;
 
+	@Value("${splashscreen.logo-path:}")
+	private String splashscreenLogo;
+
+	@Value("${splashscreen.slogan:}")
+	private String splashscreenSlogan;
+
+	@Value("${splashscreen.background-color:}")
+	private String splashscreenBgColor;
+
+	@Value("${splashscreen.loading-ind-color:}")
+	private String splashscreenLoadingIndColor;
+
 	@Value("${pp.session-levels.de}")
 	private String ppLevelsDe;
 
@@ -151,6 +166,7 @@ public class ConfigurationController extends AbstractController {
 		HashMap<String, Object> config = new HashMap<String, Object>();
 		HashMap<String, Boolean> features = new HashMap<String, Boolean>();
 		HashMap<String, String> publicPool = new HashMap<String, String>();
+		HashMap<String, String> splashscreen = new HashMap<String, String>();
 
 		/* The API path could be unknown to the client in case the request was forwarded */
 		if ("".equals(apiPath)) {
@@ -211,6 +227,7 @@ public class ConfigurationController extends AbstractController {
 		features.put("markdown", "true".equals(markdownEnabled));
 		features.put("learningProgress", "true".equals(learningProgressEnabled));
 		features.put("studentsOwnQuestions", "true".equals(studentsOwnQuestions));
+		features.put("imageAnswer", "true".equals(imageAnswerEnabled));
 		features.put("flashcard", "true".equals(flashcardEnabled));
 		features.put("gridSquare", "true".equals(gridSquareEnabled));
 		features.put("sessionImportExport", "true".equals(sessionImportExportEnabled));
@@ -224,6 +241,21 @@ public class ConfigurationController extends AbstractController {
 			publicPool.put("logoMaxFilesize", ppLogoMaxFilesize);
 			publicPool.put("levelsDe", ppLevelsDe);
 			publicPool.put("levelsEn", ppLevelsEn);
+		}
+
+		config.put("splashscreen", splashscreen);
+
+		if (!"".equals(splashscreenLogo)) {
+			splashscreen.put("logo", splashscreenLogo);
+		}
+		if (!"".equals(splashscreenSlogan)) {
+			splashscreen.put("slogan", splashscreenSlogan);
+		}
+		if (!"".equals(splashscreenBgColor)) {
+			splashscreen.put("bgcolor", splashscreenBgColor);
+		}
+		if (!"".equals(splashscreenLoadingIndColor)) {
+			splashscreen.put("loadIndColor", splashscreenLoadingIndColor);
 		}
 
 		if (!"".equals(trackingTrackerUrl)) {
