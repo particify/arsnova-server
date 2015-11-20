@@ -8,8 +8,6 @@
 
 	<properties>
 		<io.spring.platform-version>2.0.0.RELEASE</io.spring.platform-version>
-		<com.fasterxml.jackson-version>2.6.0</com.fasterxml.jackson-version>
-		<org.springframework.security-version>4.0.2.RELEASE</org.springframework.security-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<sonar.language>java</sonar.language>
 		<mobile.production.path>../arsnova-mobile/src/main/webapp/build/production/ARSnova</mobile.production.path>
