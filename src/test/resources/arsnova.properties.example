@@ -218,10 +218,14 @@ ui.slogan=Audience Response System
 # Best results are achieved with logos that have the same width and height.
 splashscreen.logo-path=resources/images/arsnova-logo.png
 splashscreen.slogan=Audience Response System
-splashscreen.slogan-color=#4A5C66
-splashscreen.background-color=#E0E0E0
-splashscreen.loading-ind-color=#4A5C66
 splashscreen.min-delay=3000
+
+# Splash screen colors
+# These settings override the default colors of the frontend theme.
+#
+#splashscreen.slogan-color=
+#splashscreen.background-color=
+#splashscreen.loading-ind-color=
 
 # Links which are displayed in the frontend applications
 #
