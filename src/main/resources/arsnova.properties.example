@@ -82,7 +82,7 @@ security.custom-login.order=0
 # registration-mail.body: Text body used for registration e-mail. {0} will be
 #     replaced by the value of activation-path.
 #
-security.user-db.enabled=false
+security.user-db.enabled=true
 security.user-db.title=ARSnova
 security.user-db.login-dialog-path=account.html
 security.user-db.activation-path=account.html
@@ -218,8 +218,8 @@ ui.slogan=Audience Response System
 # Best results are achieved with logos that have the same width and height.
 splashscreen.logo-path=resources/images/arsnova-logo.png
 splashscreen.slogan=Audience Response System
-splashscreen.slogan-color=$splashscreen-slogan-text-color
-splashscreen.background-color=$splashscreen-background-color
+splashscreen.slogan-color=#4A5C66
+splashscreen.background-color=#E0E0E0
 splashscreen.loading-ind-color=#4A5C66
 splashscreen.min-delay=3000
 
