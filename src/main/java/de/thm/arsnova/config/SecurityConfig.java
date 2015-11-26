@@ -260,6 +260,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 		DefaultSpringSecurityContextSource contextSource = new DefaultSpringSecurityContextSource(ldapUrl);
 		/* TODO: implement support for LDAP bind using manager credentials */
 		if (!"".equals(ldapManagerUserDn) && !"".equals(ldapManagerPassword)) {
+			logger.debug("ldapManagerUserDn: {}", ldapManagerUserDn);
 			contextSource.setUserDn(ldapManagerUserDn);
 			contextSource.setPassword(ldapManagerPassword);
 		}
@@ -271,8 +272,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 	public LdapAuthenticator ldapAuthenticator() throws Exception {
 		BindAuthenticator authenticator = new BindAuthenticator(ldapContextSource());
 		if (!"".equals(ldapSearchFilter)) {
+			logger.debug("ldapSearch: {} {}", ldapSearchBase, ldapSearchFilter);
 			authenticator.setUserSearch(new FilterBasedLdapUserSearch(ldapSearchBase, ldapSearchFilter, ldapContextSource()));
 		} else {
+			logger.debug("ldapUserDn: {}", ldapUserDn);
 			authenticator.setUserDnPatterns(new String[] {ldapUserDn});
 		}
 
