@@ -110,11 +110,15 @@ security.ldap.title=LDAP
 security.ldap.login-dialog-path=login-ldap.html
 security.ldap.image=
 security.ldap.order=0
-security.ldap.url=ldap://example.com:33389/dc=example,dc=com
+security.ldap.url=ldaps://example.com:636/dc=example,dc=com
 security.ldap.user-dn-pattern=uid={0},ou=arsnova
-# Not yet implemented parameters
+# Set the following properties if you want to use LDAP search instead of binding
+# with a DN pattern
 #security.ldap.user-search-filter=(uid={0})
 #security.ldap.user-search-base="ou=people"
+# Configure the LDAP manager user if anonymous binding is not allowed
+#security.ldap.manager-user-dn=cn=arsnova-manager,dc=example,dc=com
+#security.ldap.manager-password=arsnova
 
 # CAS authentication
 #

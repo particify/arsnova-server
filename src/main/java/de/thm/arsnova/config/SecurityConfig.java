@@ -58,6 +58,7 @@ import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
 import org.springframework.security.ldap.authentication.BindAuthenticator;
 import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
 import org.springframework.security.ldap.authentication.LdapAuthenticator;
+import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
 import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
 import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -98,7 +99,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 
 	@Value("${security.ldap.enabled}") private boolean ldapEnabled;
 	@Value("${security.ldap.url}") private String ldapUrl;
-	@Value("${security.ldap.user-dn-pattern}") private String ldapUserDn;
+	@Value("${security.ldap.user-dn-pattern:}") private String ldapUserDn;
+	@Value("${security.ldap.user-search-base:}") private String ldapSearchBase;
+	@Value("${security.ldap.user-search-filter:}") private String ldapSearchFilter;
+	@Value("${security.ldap.manager-user-dn:}") private String ldapManagerUserDn;
+	@Value("${security.ldap.manager-password:}") private String ldapManagerPassword;
 
 	@Value("${security.cas.enabled}") private boolean casEnabled;
 	@Value("${security.cas-server-url}") private String casUrl;
@@ -254,8 +259,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 	public LdapContextSource ldapContextSource() throws Exception {
 		DefaultSpringSecurityContextSource contextSource = new DefaultSpringSecurityContextSource(ldapUrl);
 		/* TODO: implement support for LDAP bind using manager credentials */
-//		contextSource.setUserDn(ldapManagerUserDn);
-//		contextSource.setPassword(ldapManagerPassword);
+		if (!"".equals(ldapManagerUserDn) && !"".equals(ldapManagerPassword)) {
+			logger.debug("ldapManagerUserDn: {}", ldapManagerUserDn);
+			contextSource.setUserDn(ldapManagerUserDn);
+			contextSource.setPassword(ldapManagerPassword);
+		}
 
 		return contextSource;
 	}
@@ -263,7 +271,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 	@Bean
 	public LdapAuthenticator ldapAuthenticator() throws Exception {
 		BindAuthenticator authenticator = new BindAuthenticator(ldapContextSource());
-		authenticator.setUserDnPatterns(new String[] {ldapUserDn});
+		if (!"".equals(ldapSearchFilter)) {
+			logger.debug("ldapSearch: {} {}", ldapSearchBase, ldapSearchFilter);
+			authenticator.setUserSearch(new FilterBasedLdapUserSearch(ldapSearchBase, ldapSearchFilter, ldapContextSource()));
+		} else {
+			logger.debug("ldapUserDn: {}", ldapUserDn);
+			authenticator.setUserDnPatterns(new String[] {ldapUserDn});
+		}
 
 		return authenticator;
 	}
