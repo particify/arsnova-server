@@ -213,6 +213,9 @@ question.answer-option-limit=8
 question.parse-answer-option-formatting=true
 
 # Demo session id to show above session login button
+# You can freely use the demo session of arsnova.eu/mobile 
+# which can be imported from the repro:
+# https://github.com/thm-projects/arsnova-mobile/tree/master/demo-sessions
 session.demo-id=
 
 # Label underneath ARSnova logo
