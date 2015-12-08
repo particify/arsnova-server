@@ -110,6 +110,21 @@ public class FeedbackService implements IFeedbackService, ApplicationEventPublis
 	}
 
 	@Override
+	public void cleanFeedbackVotesInSession(final String keyword, final int cleanupFeedbackDelayInMins) {
+		final Session session = databaseDao.getSessionFromKeyword(keyword);
+		List<User> affectedUsers = feedbackStorage.cleanFeedbackVotesInSession(session, cleanupFeedbackDelayInMins);
+		Set<Session> sessionSet = new HashSet<Session>();
+		sessionSet.add(session);
+
+		// Send feedback reset event to all affected users
+		for (User user : affectedUsers) {
+			this.publisher.publishEvent(new DeleteFeedbackForSessionsEvent(this, sessionSet, user));
+		}
+		// send the new feedback to all clients in affected session
+		this.publisher.publishEvent(new NewFeedbackEvent(this, session));
+	}
+
+	@Override
 	public Feedback getFeedback(final String keyword) {
 		final Session session = databaseDao.getSessionFromKeyword(keyword);
 		if (session == null) {

@@ -26,6 +26,8 @@ import de.thm.arsnova.entities.User;
 public interface IFeedbackService {
 	void cleanFeedbackVotes();
 
+	void cleanFeedbackVotesInSession(String keyword, int cleanupFeedbackDelayInMins);
+
 	Feedback getFeedback(String keyword);
 
 	int getFeedbackCount(String keyword);
