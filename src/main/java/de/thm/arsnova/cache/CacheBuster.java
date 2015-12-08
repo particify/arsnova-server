@@ -31,6 +31,7 @@ import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
 import de.thm.arsnova.events.DeleteQuestionEvent;
 import de.thm.arsnova.events.DeleteSessionEvent;
 import de.thm.arsnova.events.FeatureChangeEvent;
+import de.thm.arsnova.events.LockFeedbackEvent;
 import de.thm.arsnova.events.LockQuestionEvent;
 import de.thm.arsnova.events.LockQuestionsEvent;
 import de.thm.arsnova.events.LockVoteEvent;
@@ -150,5 +151,8 @@ public class CacheBuster implements ICacheBuster, NovaEventVisitor {
 
 	@Override
 	public void visit(FeatureChangeEvent featureChangeEvent) {}
+
+	@Override
+	public void visit(LockFeedbackEvent lockFeedbackEvent) {}
 
 }

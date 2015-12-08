@@ -61,6 +61,7 @@ import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
 import de.thm.arsnova.events.DeleteQuestionEvent;
 import de.thm.arsnova.events.DeleteSessionEvent;
 import de.thm.arsnova.events.FeatureChangeEvent;
+import de.thm.arsnova.events.LockFeedbackEvent;
 import de.thm.arsnova.events.LockQuestionEvent;
 import de.thm.arsnova.events.LockQuestionsEvent;
 import de.thm.arsnova.events.LockVoteEvent;
@@ -171,9 +172,15 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 					return;
 				}
 				final String sessionKey = userService.getSessionForUser(u.getUsername());
-				LOGGER.debug("Feedback recieved: {}", new Object[] {u, sessionKey, data.getValue()});
-				if (null != sessionKey) {
-					feedbackService.saveFeedback(sessionKey, data.getValue(), u);
+				final de.thm.arsnova.entities.Session session = sessionService.getSessionInternal(sessionKey, u);
+
+				if (session.getFeedbackLock()) {
+					LOGGER.debug("Feedback save blocked: {}", new Object[] {u, sessionKey, data.getValue()});
+				} else {
+					LOGGER.debug("Feedback recieved: {}", new Object[] {u, sessionKey, data.getValue()});
+					if (null != sessionKey) {
+						feedbackService.saveFeedback(sessionKey, data.getValue(), u);
+					}
 				}
 			}
 		});
@@ -607,6 +614,11 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	public void visit(FeatureChangeEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
 		broadcastInSession(sessionKey, "featureChange", event.getSession().getFeatures());
+	}
+
+	@Override
+	public void visit(LockFeedbackEvent event) {
+		broadcastInSession(event.getSession().getKeyword(), "lockFeedback", event.getSession().getFeedbackLock());
 	}
 
 	@Override
