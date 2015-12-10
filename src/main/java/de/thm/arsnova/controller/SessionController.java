@@ -334,6 +334,17 @@ public class SessionController extends PaginationController {
 		return sessionService.changeSessionFeatures(sessionkey, features);
 	}
 
+	@RequestMapping(value = "/{sessionkey}/lockfeedbackinput", method = RequestMethod.POST)
+	@ApiOperation(value = "locks input of user live feedback",
+			nickname = "lockFeedbackInput")
+	public boolean lockFeedbackInput(
+			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
+			@ApiParam(value="lock", required=true) @RequestParam(required = true) final Boolean lock,
+			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
+			) {
+		return sessionService.lockFeedbackInput(sessionkey, lock);
+	}
+
 	/* internal redirections */
 
 	@RequestMapping(value = "/{sessionKey}/lecturerquestion")

@@ -48,6 +48,7 @@ import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
 import de.thm.arsnova.events.DeleteSessionEvent;
 import de.thm.arsnova.events.FeatureChangeEvent;
+import de.thm.arsnova.events.LockFeedbackEvent;
 import de.thm.arsnova.events.NewSessionEvent;
 import de.thm.arsnova.events.StatusSessionEvent;
 import de.thm.arsnova.exceptions.BadRequestException;
@@ -103,6 +104,9 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 	@Autowired
 	private IUserService userService;
+
+	@Autowired
+	private IFeedbackService feedbackService;
 
 	@Autowired
 	private ILearningProgressFactory learningProgressFactory;
@@ -316,7 +320,8 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		existingSession.setPpLevel(session.getPpLevel());
 		existingSession.setPpLicense(session.getPpLicense());
 		existingSession.setPpSubject(session.getPpSubject());
-		
+		existingSession.setFeedbackLock(session.getFeedbackLock());
+
 		handleLogo(session);
 		existingSession.setPpLogo(session.getPpLogo());
 
@@ -421,7 +426,23 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		this.publisher.publishEvent(new FeatureChangeEvent(this, session));
 		return databaseDao.updateSession(session).getFeatures();
 	}
-	
+
+	@Override
+	public boolean lockFeedbackInput(String sessionkey, Boolean lock) {
+		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
+		final User user = userService.getCurrentUser();
+		if (!session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
+		if (!lock) {
+			feedbackService.cleanFeedbackVotesInSession(sessionkey, 0);
+		}
+
+		session.setFeedbackLock(lock);
+		this.publisher.publishEvent(new LockFeedbackEvent(this, session));
+		return databaseDao.updateSession(session).getFeedbackLock();
+	}
+
 	/**
 	 * 
 	 * @param session 

@@ -119,28 +119,33 @@ public class FeedbackStorage {
 	public Map<Session, List<User>> cleanFeedbackVotes(final int cleanupFeedbackDelay) {
 		final Map<Session, List<User>> removedFeedbackOfUsersInSession = new HashMap<Session, List<User>>();
 		for (final Session session : data.keySet()) {
-			List<User> affectedUsers = cleanFeedbackVotesInSession(session, cleanupFeedbackDelay);
-			if (!affectedUsers.isEmpty()) {
-				removedFeedbackOfUsersInSession.put(session, affectedUsers);
+			if (!session.getFeatures().isLiveClicker()) {
+				List<User> affectedUsers = cleanFeedbackVotesInSession(session, cleanupFeedbackDelay);
+				if (!affectedUsers.isEmpty()) {
+					removedFeedbackOfUsersInSession.put(session, affectedUsers);
+				}
 			}
 		}
 		return removedFeedbackOfUsersInSession;
 	}
 
-	private List<User> cleanFeedbackVotesInSession(final Session session, final int cleanupFeedbackDelayInMins) {
+	@Transactional(isolation = Isolation.READ_COMMITTED)
+	public List<User> cleanFeedbackVotesInSession(final Session session, final int cleanupFeedbackDelayInMins) {
 		final long timelimitInMillis = TimeUnit.MILLISECONDS.convert(cleanupFeedbackDelayInMins, TimeUnit.MINUTES);
 		final Date maxAllowedTime = new Date(System.currentTimeMillis() - timelimitInMillis);
 
 		final Map<User, FeedbackStorageObject> sessionFeedbacks = data.get(session);
 		final List<User> affectedUsers = new ArrayList<User>();
 
-		for (final Map.Entry<User, FeedbackStorageObject> entry : sessionFeedbacks.entrySet()) {
-			final User user = entry.getKey();
-			final FeedbackStorageObject feedback = entry.getValue();
-			final boolean timeIsUp = feedback.getTimestamp().before(maxAllowedTime);
-			if (timeIsUp) {
-				sessionFeedbacks.remove(user);
-				affectedUsers.add(user);
+		if (sessionFeedbacks != null) {
+			for (final Map.Entry<User, FeedbackStorageObject> entry : sessionFeedbacks.entrySet()) {
+				final User user = entry.getKey();
+				final FeedbackStorageObject feedback = entry.getValue();
+				final boolean timeIsUp = feedback.getTimestamp().before(maxAllowedTime);
+				if (timeIsUp) {
+					sessionFeedbacks.remove(user);
+					affectedUsers.add(user);
+				}
 			}
 		}
 		return affectedUsers;

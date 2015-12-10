@@ -29,6 +29,7 @@ public class SessionFeature {
 	private boolean clicker = false;
 	private boolean peerGrading = false;
 	private boolean liveFeedback = false;
+	private boolean liveClicker = false;
 	private boolean flashcard = false;
 	private boolean total = false;
 
@@ -46,6 +47,7 @@ public class SessionFeature {
 			this.clicker = features.clicker;
 			this.peerGrading = features.peerGrading;
 			this.liveFeedback = features.liveFeedback;
+			this.liveClicker = features.liveClicker;
 			this.flashcard = features.flashcard;
 			this.total = features.total;
 			this.lecture = features.lecture;
@@ -158,6 +160,14 @@ public class SessionFeature {
 
 	public void setLiveFeedback(boolean liveFeedback) {
 		this.liveFeedback = liveFeedback;
+	}
+
+	public boolean isLiveClicker() {
+		return liveClicker;
+	}
+
+	public void setLiveClicker(boolean liveClicker) {
+		this.liveClicker = liveClicker;
 	}
 
 }

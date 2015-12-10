@@ -488,6 +488,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		sessionDocument.put("ppLevel", session.getPpLevel());
 		sessionDocument.put("sessionType", session.getSessionType());
 		sessionDocument.put("features", JSONObject.fromObject(session.getFeatures()));
+		sessionDocument.put("feedbackLock", false);
 		try {
 			database.saveDocument(sessionDocument);
 		} catch (final IOException e) {
@@ -1549,6 +1550,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			s.put("ppLevel", session.getPpLevel());
 			s.put("learningProgressOptions", JSONObject.fromObject(session.getLearningProgressOptions()));
 			s.put("features", JSONObject.fromObject(session.getFeatures()));
+			s.put("feedbackLock", session.getFeedbackLock());
 			database.saveDocument(s);
 			session.set_rev(s.getRev());
 

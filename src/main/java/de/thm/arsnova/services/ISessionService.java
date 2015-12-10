@@ -77,4 +77,6 @@ public interface ISessionService {
 	SessionFeature getSessionFeatures(String sessionkey);
 
 	SessionFeature changeSessionFeatures(String sessionkey, SessionFeature features);
+
+	boolean lockFeedbackInput(String sessionkey, Boolean lock);
 }

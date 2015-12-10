@@ -15,28 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.services;
+package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.Feedback;
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.Session;
 
 /**
- * The functionality the feedback service should provide.
+ * Fires whenever voting on a question is disabled.
  */
-public interface IFeedbackService {
-	void cleanFeedbackVotes();
+public class LockFeedbackEvent extends SessionEvent {
 
-	void cleanFeedbackVotesInSession(String keyword, int cleanupFeedbackDelayInMins);
+	private static final long serialVersionUID = 1L;
 
-	Feedback getFeedback(String keyword);
+	public LockFeedbackEvent(Object source, Session session) {
+		super(source, session);
+	}
 
-	int getFeedbackCount(String keyword);
-
-	double getAverageFeedback(String sessionkey);
-
-	long getAverageFeedbackRounded(String sessionkey);
-
-	boolean saveFeedback(String keyword, int value, User user);
-
-	Integer getMyFeedback(String keyword, User user);
+	@Override
+	public void accept(NovaEventVisitor visitor) {
+		visitor.visit(this);
+	}
 }

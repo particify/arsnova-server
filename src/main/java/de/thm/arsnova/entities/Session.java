@@ -56,6 +56,7 @@ public class Session implements Serializable {
 	private String ppFaculty;
 	private String ppLevel;
 	private String sessionType;
+	private boolean feedbackLock;
 
 	private String _id;
 	private String _rev;
@@ -90,6 +91,7 @@ public class Session implements Serializable {
 		copy.ppFaculty = original.ppFaculty;
 		copy.ppLevel = original.ppLevel;
 		copy.sessionType = original.sessionType;
+		copy.feedbackLock = original.feedbackLock;
 
 		copy._id = original._id;
 		copy._rev = original._rev;
@@ -327,6 +329,15 @@ public class Session implements Serializable {
 
 	public void setSessionType(final String sessionType) {
 		this.sessionType = sessionType;
+	}
+
+	@ApiModelProperty(required = true, value = "the feedback lock status")
+	public boolean getFeedbackLock() {
+		return feedbackLock;
+	}
+
+	public void setFeedbackLock(Boolean lock) {
+		this.feedbackLock = lock;
 	}
 
 	@Override
