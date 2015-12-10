@@ -137,13 +137,15 @@ public class FeedbackStorage {
 		final Map<User, FeedbackStorageObject> sessionFeedbacks = data.get(session);
 		final List<User> affectedUsers = new ArrayList<User>();
 
-		for (final Map.Entry<User, FeedbackStorageObject> entry : sessionFeedbacks.entrySet()) {
-			final User user = entry.getKey();
-			final FeedbackStorageObject feedback = entry.getValue();
-			final boolean timeIsUp = feedback.getTimestamp().before(maxAllowedTime);
-			if (timeIsUp) {
-				sessionFeedbacks.remove(user);
-				affectedUsers.add(user);
+		if (sessionFeedbacks != null) {
+			for (final Map.Entry<User, FeedbackStorageObject> entry : sessionFeedbacks.entrySet()) {
+				final User user = entry.getKey();
+				final FeedbackStorageObject feedback = entry.getValue();
+				final boolean timeIsUp = feedback.getTimestamp().before(maxAllowedTime);
+				if (timeIsUp) {
+					sessionFeedbacks.remove(user);
+					affectedUsers.add(user);
+				}
 			}
 		}
 		return affectedUsers;
