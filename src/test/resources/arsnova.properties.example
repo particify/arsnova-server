@@ -213,6 +213,9 @@ question.answer-option-limit=8
 question.parse-answer-option-formatting=true
 
 # Demo session id to show above session login button
+# You can freely use the demo session of https://arsnova.eu/mobile which can be
+# imported from the repro:
+# https://github.com/thm-projects/arsnova-mobile/tree/master/demo-sessions
 session.demo-id=
 
 # Label underneath ARSnova logo
@@ -220,16 +223,17 @@ ui.slogan=Audience Response System
 
 # Splashscreen configuration
 # Best results are achieved with logos that have the same width and height.
-splashscreen.logo-path=resources/images/arsnova-logo.png
-splashscreen.slogan=Audience Response System
-splashscreen.min-delay=3000
+#
+ui.splashscreen.logo-path=resources/images/arsnova-logo.png
+ui.splashscreen.slogan=Audience Response System
+ui.splashscreen.min-delay=3000
 
 # Splash screen colors
 # These settings override the default colors of the frontend theme.
 #
-#splashscreen.slogan-color=
-#splashscreen.background-color=
-#splashscreen.loading-ind-color=
+#ui.splashscreen.slogan-color=
+#ui.splashscreen.background-color=
+#ui.splashscreen.loading-ind-color=
 
 # Links which are displayed in the frontend applications
 #

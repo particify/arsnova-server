@@ -142,22 +142,22 @@ public class ConfigurationController extends AbstractController {
 	@Value("${ui.slogan:}")
 	private String arsnovaSlogan;
 
-	@Value("${splashscreen.logo-path:}")
+	@Value("${ui.splashscreen.logo-path:}")
 	private String splashscreenLogo;
 
-	@Value("${splashscreen.slogan:}")
+	@Value("${ui.splashscreen.slogan:}")
 	private String splashscreenSlogan;
 
-	@Value("${splashscreen.slogan-color:}")
+	@Value("${ui.splashscreen.slogan-color:}")
 	private String splashscreenSloganColor;
 
-	@Value("${splashscreen.background-color:}")
+	@Value("${ui.splashscreen.background-color:}")
 	private String splashscreenBgColor;
 
-	@Value("${splashscreen.loading-ind-color:}")
+	@Value("${ui.splashscreen.loading-ind-color:}")
 	private String splashscreenLoadingIndColor;
 
-	@Value("${splashscreen.min-delay:}")
+	@Value("${ui.splashscreen.min-delay:}")
 	private String splashscreenDelay;
 
 	@Value("${pp.session-levels.de}")
