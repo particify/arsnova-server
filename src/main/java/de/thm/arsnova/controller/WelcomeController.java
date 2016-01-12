@@ -22,7 +22,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -52,6 +55,9 @@ public class WelcomeController extends AbstractController {
 	@Value("${mobile.path}")
 	private String mobileContextPath;
 
+	@Resource(name="versionInfoProperties")
+	private Properties versionInfoProperties;
+
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public View home(final HttpServletRequest request) {
 		return new RedirectView(mobileContextPath + "/", false);
@@ -59,8 +65,19 @@ public class WelcomeController extends AbstractController {
 
 	@RequestMapping(value = "/", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
-	public HashMap<String, Object> jsonHome(final HttpServletRequest request) {
-		return new HashMap<String, Object>();
+	public Map<String, Object> jsonHome(final HttpServletRequest request) {
+		Map<String, Object> response = new HashMap<>();
+		Map<String, Object> version = new HashMap<>();
+
+		version.put("string", versionInfoProperties.getProperty("version.string"));
+		version.put("buildTime", versionInfoProperties.getProperty("version.build-time"));
+		version.put("gitCommitId", versionInfoProperties.getProperty("version.git.commit-id"));
+		version.put("gitDirty", Boolean.parseBoolean(versionInfoProperties.getProperty("version.git.dirty")));
+
+		response.put("productName", "arsnova-backend");
+		response.put("version", version);
+
+		return response;
 	}
 
 	@RequestMapping(value = "/checkframeoptionsheader", method = RequestMethod.POST)

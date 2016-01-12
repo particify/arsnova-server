@@ -19,6 +19,7 @@ package de.thm.arsnova.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
@@ -74,6 +75,14 @@ public class ExtraConfig extends WebMvcConfigurerAdapter {
 		configurer.setIgnoreResourceNotFound(true);
 		configurer.setIgnoreUnresolvablePlaceholders(false);
 		return configurer;
+	}
+
+	@Bean
+	public PropertiesFactoryBean versionInfoProperties() {
+		PropertiesFactoryBean propertiesFactoryBean = new PropertiesFactoryBean();
+		propertiesFactoryBean.setLocation(new ClassPathResource("version.properties"));
+
+		return propertiesFactoryBean;
 	}
 
 	@Bean(name = "connectorClient")
