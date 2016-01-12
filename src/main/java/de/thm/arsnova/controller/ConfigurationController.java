@@ -231,7 +231,6 @@ public class ConfigurationController extends AbstractController {
 
 		features.put("mathJax", "true".equals(mathJaxEnabled));
 		features.put("markdown", "true".equals(markdownEnabled));
-		features.put("learningProgress", "true".equals(learningProgressEnabled));
 		features.put("studentsOwnQuestions", "true".equals(studentsOwnQuestions));
 		features.put("imageAnswer", "true".equals(imageAnswerEnabled));
 		features.put("flashcard", "true".equals(flashcardEnabled));
