@@ -298,8 +298,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public Session getSessionFromId(String sessionId) {
-		// TODO Auto-generated method stub
-		return null;
+		return stubSessions.get(sessionId);
 	}
 
 	@Override
