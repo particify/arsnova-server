@@ -26,10 +26,10 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(value = "audiencequestion/readcount", description = "the interposed reading count entity")
 public class InterposedReadingCount {
 
-	private int read;
-	private int unread;
+	private long read;
+	private long unread;
 
-	public InterposedReadingCount(int readCount, int unreadCount) {
+	public InterposedReadingCount(long readCount, long unreadCount) {
 		this.read = readCount;
 		this.unread = unreadCount;
 	}
@@ -40,16 +40,16 @@ public class InterposedReadingCount {
 	}
 
 	@ApiModelProperty(required = true, value = "the number of read interposed questions")
-	public int getRead() {
+	public long getRead() {
 		return read;
 	}
 
-	public void setRead(int read) {
+	public void setRead(long read) {
 		this.read = read;
 	}
 
 	@ApiModelProperty(required = true, value = "the number of unread interposed questions")
-	public int getUnread() {
+	public long getUnread() {
 		return unread;
 	}
 
@@ -58,7 +58,7 @@ public class InterposedReadingCount {
 	}
 
 	@ApiModelProperty(required = true, value = "the number of total interposed questions")
-	public int getTotal() {
+	public long getTotal() {
 		return getRead() + getUnread();
 	}
 }

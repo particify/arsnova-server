@@ -39,6 +39,9 @@ couchdb.name=arsnova
 couchdb.username=admin
 couchdb.password=
 
+couchbase.host=localhost
+couchbase.bucketName=arsnova
+couchbase.bucketPassword=
 
 ################################################################################
 # E-Mail

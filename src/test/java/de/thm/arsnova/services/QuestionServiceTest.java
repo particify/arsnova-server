@@ -106,11 +106,11 @@ public class QuestionServiceTest {
 		setAuthenticated(true, "ptsr00");
 		final InterposedQuestion theQ = new InterposedQuestion();
 		theQ.setRead(false);
-		theQ.set_id("the internal id");
+		theQ.setId("the internal id");
 		theQ.setSessionId("12345678");
 		databaseDao.interposedQuestion = theQ;
 
-		questionService.readInterposedQuestion(theQ.get_id());
+		questionService.readInterposedQuestion(theQ.getId());
 
 		assertTrue(theQ.isRead());
 	}
@@ -120,12 +120,12 @@ public class QuestionServiceTest {
 		setAuthenticated(true, "regular user");
 		final InterposedQuestion theQ = new InterposedQuestion();
 		theQ.setRead(false);
-		theQ.set_id("the internal id");
+		theQ.setId("the internal id");
 		theQ.setSessionId("12345678");
 		theQ.setCreator("regular user");
 		databaseDao.interposedQuestion = theQ;
 
-		questionService.readInterposedQuestion(theQ.get_id());
+		questionService.readInterposedQuestion(theQ.getId());
 
 		assertFalse(theQ.isRead());
 	}

@@ -689,7 +689,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		q.put("creator", user.getUsername());
 		try {
 			database.saveDocument(q);
-			question.set_id(q.getId());
+			question.setId(q.getId());
 			question.set_rev(q.getRev());
 
 			return question;
@@ -1086,23 +1086,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	public int getInterposedCount(final String sessionKey) {
-		final Session s = getDatabaseDao().getSessionFromKeyword(sessionKey);
-		if (s == null) {
-			throw new NotFoundException();
-		}
-
-		final NovaView view = new NovaView("interposed_question/count_by_session");
-		view.setKey(s.get_id());
-		view.setGroup(true);
-		final ViewResults results = getDatabase().view(view);
-		if (results.size() == 0 || results.getResults().size() == 0) {
-			return 0;
-		}
-		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
-	}
-
-	@Override
 	public InterposedReadingCount getInterposedReadingCount(final Session session) {
 		final NovaView view = new NovaView("interposed_question/count_by_session_reading");
 		view.setStartKeyArray(session.get_id());
@@ -1211,7 +1194,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 					InterposedQuestion.class
 					);
 			question.setSessionId(session.getKeyword());
-			question.set_id(document.getId());
+			question.setId(document.getId());
 			result.add(question);
 		}
 		return result;
@@ -1306,11 +1289,11 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public void markInterposedQuestionAsRead(final InterposedQuestion question) {
 		try {
 			question.setRead(true);
-			final Document document = getDatabase().getDocument(question.get_id());
+			final Document document = getDatabase().getDocument(question.getId());
 			document.put("read", question.isRead());
 			getDatabase().saveDocument(document);
 		} catch (final IOException e) {
-			LOGGER.error("Coulg not mark interposed question as read {}", question.get_id());
+			LOGGER.error("Coulg not mark interposed question as read {}", question.getId());
 		}
 	}
 
@@ -1481,9 +1464,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public void deleteInterposedQuestion(final InterposedQuestion question) {
 		try {
-			deleteDocument(question.get_id());
+			deleteDocument(question.getId());
 		} catch (final IOException e) {
-			LOGGER.error("Could not delete interposed question {} because of {}", question.get_id(), e.getMessage());
+			LOGGER.error("Could not delete interposed question {} because of {}", question.getId(), e.getMessage());
 		}
 	}
 

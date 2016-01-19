@@ -105,8 +105,6 @@ public interface IDatabaseDao {
 
 	int getTotalAnswerCount(String sessionKey);
 
-	int getInterposedCount(String sessionKey);
-
 	InterposedReadingCount getInterposedReadingCount(Session session);
 
 	InterposedReadingCount getInterposedReadingCount(Session session, User user);

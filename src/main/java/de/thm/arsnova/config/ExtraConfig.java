@@ -17,11 +17,6 @@
  */
 package de.thm.arsnova.config;
 
-import de.thm.arsnova.ImageUtils;
-import de.thm.arsnova.connector.client.ConnectorClient;
-import de.thm.arsnova.connector.client.ConnectorClientImpl;
-import de.thm.arsnova.socket.ARSnovaSocket;
-import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
@@ -36,9 +31,15 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.couchbase.repository.config.EnableCouchbaseRepositories;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import de.thm.arsnova.ImageUtils;
+import de.thm.arsnova.connector.client.ConnectorClient;
+import de.thm.arsnova.connector.client.ConnectorClientImpl;
+import de.thm.arsnova.socket.ARSnovaSocket;
+import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 
 /**
  * Loads property file and configures non-security related beans and components.
@@ -46,6 +47,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @EnableWebMvc
 @Configuration
 @EnableCaching
+@EnableCouchbaseRepositories("de.thm.arsnova.repositories")
 public class ExtraConfig extends WebMvcConfigurerAdapter {
 
 	@Autowired
