@@ -19,9 +19,14 @@ package de.thm.arsnova.security;
 
 import java.io.Serializable;
 
+import java.util.Arrays;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.scribe.up.profile.facebook.FacebookProfile;
 import org.scribe.up.profile.google.Google2Profile;
 import org.scribe.up.profile.twitter.TwitterProfile;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -40,6 +45,11 @@ import de.thm.arsnova.exceptions.UnauthorizedException;
  * Provides access control methods that can be used in annotations.
  */
 public class ApplicationPermissionEvaluator implements PermissionEvaluator {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationPermissionEvaluator.class);
+
+	@Value("${security.adminaccount}")
+	private String adminaccount;
 
 	@Autowired
 	private IDatabaseDao dao;
@@ -84,6 +94,15 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				&& checkInterposedQuestionPermission(username, targetId, permission)
 				) {
 			return true;
+		} else if (
+		/*TODO only account from own database*/
+				"motd".equals(targetType)
+				&& permission.equals("admin")
+				) {
+			String[] splittedNames = adminaccount.split(",");
+			if (Arrays.asList(splittedNames).contains(username)) {
+				return true;
+			}
 		}
 		return false;
 	}

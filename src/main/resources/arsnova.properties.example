@@ -24,6 +24,9 @@ security.storepass=arsnova
 socketio.ip=0.0.0.0
 socketio.port=10443
 
+# admin account
+security.adminaccount=
+
 
 ################################################################################
 # Database

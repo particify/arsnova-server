@@ -33,6 +33,8 @@ import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
+import de.thm.arsnova.entities.Motd;
+import de.thm.arsnova.entities.MotdList;
 
 /**
  * All methods the database must support.
@@ -224,4 +226,28 @@ public interface IDatabaseDao {
 	List<Question> setVotingAdmissionForAllQuestions(Session session, boolean disableVoting);
 
 	<T> T getObjectFromId(String documentId, Class<T> klass);
+
+	List<Motd> getAdminMotds();
+
+	List<Motd> getMotdsForAll();
+
+	List<Motd> getMotdsForLoggedIn();
+
+	List<Motd> getMotdsForTutors();
+
+	List<Motd> getMotdsForStudents();
+
+	List<Motd> getMotdsForSession(final String sessionkey);
+
+	List<Motd> getMotds(NovaView view);
+
+	Motd getMotdByKey(String key);
+
+	Motd createOrUpdateMotd(Motd motd);
+
+	void deleteMotd(Motd motd);
+
+	MotdList getMotdListForUser(final String username);
+
+	MotdList createOrUpdateMotdList(MotdList motdlist);
 }

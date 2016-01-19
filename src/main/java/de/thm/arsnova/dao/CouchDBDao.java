@@ -29,6 +29,8 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Date;
+import java.util.StringTokenizer;
 
 import net.sf.ezmorph.Morpher;
 import net.sf.ezmorph.MorpherRegistry;
@@ -81,6 +83,8 @@ import de.thm.arsnova.entities.transport.ImportExportSession.ImportExportQuestio
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.ISessionService;
+import de.thm.arsnova.entities.Motd;
+import de.thm.arsnova.entities.MotdList;
 
 /**
  * Database implementation based on CouchDB.
@@ -2334,10 +2338,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		view.setIncludeDocs(true);
 		final List<Document> questiondocs = getDatabase().view(view).getResults();
 		if (questiondocs == null || questiondocs.isEmpty()) {
+
 			return null;
 		}
 		final List<Question> result = new ArrayList<Question>();
-
 		final MorpherRegistry morpherRegistry = JSONUtils.getMorpherRegistry();
 		final Morpher dynaMorpher = new BeanMorpher(PossibleAnswer.class, morpherRegistry);
 		morpherRegistry.registerMorpher(dynaMorpher);
@@ -2370,4 +2374,184 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 		return result;
 	}
+
+	@Override
+	public List<Motd> getAdminMotds() {
+		NovaView view = new NovaView("motd/admin");
+		return getMotds(view);
+	}
+
+	@Override
+	@Cacheable(cacheNames = "motds", key = "'all'")
+	public List<Motd> getMotdsForAll() {
+		NovaView view = new NovaView("motd/for_all");
+		return getMotds(view);
+	}
+
+	@Override
+	@Cacheable(cacheNames = "motds", key = "'loggedIn'")
+	public List<Motd> getMotdsForLoggedIn() {
+		NovaView view = new NovaView("motd/for_loggedin");
+		return getMotds(view);
+	}
+
+	@Override
+	@Cacheable(cacheNames = "motds", key = "'tutors'")
+	public List<Motd> getMotdsForTutors() {
+		NovaView view = new NovaView("motd/for_tutors");
+		return getMotds(view);
+	}
+
+	@Override
+	@Cacheable(cacheNames = "motds", key = "'students'")
+	public List<Motd> getMotdsForStudents() {
+		NovaView view = new NovaView("motd/for_students");
+		return getMotds(view);
+	}
+
+	@Override
+	@Cacheable(cacheNames = "motds", key = "('session').concat(#p0)")
+	public List<Motd> getMotdsForSession(final String sessionkey) {
+		NovaView view = new NovaView("motd/by_sessionkey");
+		view.setKey(sessionkey);
+		return getMotds(view);
+	}
+
+	@Override
+	public List<Motd> getMotds(NovaView view) {
+		final ViewResults motddocs = this.getDatabase().view(view);
+		List<Motd> motdlist = new ArrayList<Motd>();
+		for (final Document d : motddocs.getResults()) {
+			Motd motd = new Motd();
+			motd.set_id(d.getId());
+			motd.set_rev(d.getJSONObject("value").getString("_rev"));
+			motd.setMotdkey(d.getJSONObject("value").getString("motdkey"));
+			Date start = new Date(Long.parseLong(d.getJSONObject("value").getString("startdate")));
+			motd.setStartdate(start);
+			Date end = new Date(Long.parseLong(d.getJSONObject("value").getString("enddate")));
+			motd.setEnddate(end);
+			motd.setTitle(d.getJSONObject("value").getString("title"));
+			motd.setText(d.getJSONObject("value").getString("text"));
+			motd.setAudience(d.getJSONObject("value").getString("audience"));
+			motd.setSessionkey(d.getJSONObject("value").getString("sessionkey"));
+			motdlist.add(motd);
+		}
+		return motdlist;
+	}
+
+	@Override
+	public Motd getMotdByKey(String key) {
+		NovaView view = new NovaView("motd/by_keyword");
+		view.setKey(key);
+		Motd motd = new Motd();
+
+		ViewResults results = this.getDatabase().view(view);
+
+		for (final Document d : results.getResults()) {
+			motd.set_id(d.getId());
+			motd.set_rev(d.getJSONObject("value").getString("_rev"));
+			motd.setMotdkey(d.getJSONObject("value").getString("motdkey"));
+			Date start = new Date(Long.parseLong(d.getJSONObject("value").getString("startdate")));
+			motd.setStartdate(start);
+			Date end = new Date(Long.parseLong(d.getJSONObject("value").getString("enddate")));
+			motd.setEnddate(end);
+			motd.setTitle(d.getJSONObject("value").getString("title"));
+			motd.setText(d.getJSONObject("value").getString("text"));
+			motd.setAudience(d.getJSONObject("value").getString("audience"));
+			motd.setSessionkey(d.getJSONObject("value").getString("sessionkey"));
+		}
+
+		return motd;
+	}
+
+	@Override
+	@CacheEvict(cacheNames = "motds", key = "#p0.audience.concat(#p0.sessionkey)")
+	public Motd createOrUpdateMotd(Motd motd) {
+		try {
+			String id = motd.get_id();
+			String rev = motd.get_rev();
+			Document d = new Document();
+
+			if (null != id) {
+				d = database.getDocument(id, rev);
+			}
+			if (motd.getMotdkey() == null) {
+				motd.setMotdkey(sessionService.generateKeyword());
+			}
+			d.put("type", "motd");
+			d.put("motdkey", motd.getMotdkey());
+			d.put("startdate", String.valueOf(motd.getStartdate().getTime()));
+			d.put("enddate", String.valueOf(motd.getEnddate().getTime()));
+			d.put("title", motd.getTitle());
+			d.put("text", motd.getText());
+			d.put("audience", motd.getAudience());
+			d.put("sessionkey", motd.getSessionkey());
+
+			database.saveDocument(d, id);
+			motd.set_id(d.getId());
+			motd.set_rev(d.getRev());
+
+			return motd;
+		} catch (IOException e) {
+			LOGGER.error("Could not save motd {}", motd);
+		}
+
+		return null;
+	}
+
+	@Override
+	@CacheEvict(cacheNames = "motds", key = "#p0.audience.concat(#p0.sessionkey)")
+	public void deleteMotd(Motd motd) {
+		try {
+			this.deleteDocument(motd.get_id());
+		} catch (IOException e) {
+			LOGGER.error("Could not delete Motd {}", motd.get_id());
+		}
+	}
+
+	@Override
+	@Cacheable(cacheNames = "motdlist", key = "#p0")
+	public MotdList getMotdListForUser(final String username) {
+		NovaView view = new NovaView("motd/list_by_username");
+		view.setKey(username);
+
+		ViewResults results = this.getDatabase().view(view);
+
+		MotdList motdlist = new MotdList();
+		for (final Document d : results.getResults()) {
+			motdlist.set_id(d.getId());
+			motdlist.set_rev(d.getJSONObject("value").getString("_rev"));
+			motdlist.setUsername(d.getJSONObject("value").getString("username"));
+			motdlist.setMotdkeys(d.getJSONObject("value").getString("motdkeys"));
+		}
+		return motdlist;
+	}
+
+	@Override
+	@CachePut(cacheNames = "motdlist", key = "#p0.username")
+	public MotdList createOrUpdateMotdList(MotdList motdlist) {
+		try {
+			String id = motdlist.get_id();
+			String rev = motdlist.get_rev();
+			Document d = new Document();
+
+			if (null != id) {
+				d = database.getDocument(id, rev);
+			}
+			d.put("type","motdlist");
+			d.put("username", motdlist.getUsername());
+			d.put("motdkeys", motdlist.getMotdkeys());
+
+			database.saveDocument(d, id);
+			motdlist.set_id(d.getId());
+			motdlist.set_rev(d.getRev());
+
+			return motdlist;
+		} catch (IOException e) {
+			LOGGER.error("Could not save motdlist {}", motdlist);
+		}
+
+		return null;
+	}
+
 }
