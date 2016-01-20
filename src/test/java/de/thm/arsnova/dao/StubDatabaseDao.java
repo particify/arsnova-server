@@ -37,6 +37,8 @@ import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.Motd;
+import de.thm.arsnova.entities.MotdList;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -645,6 +647,76 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public <T> T getObjectFromId(String documentId, Class<T> klass) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Motd> getAdminMotds() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Motd> getMotdsForAll() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Motd> getMotdsForLoggedIn() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Motd> getMotdsForTutors() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Motd> getMotdsForStudents() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Motd> getMotdsForSession(final String sessionkey) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Motd> getMotds(NovaView view) {
+		return null;
+	}
+
+	@Override
+	public Motd getMotdByKey(String key) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Motd createOrUpdateMotd(Motd motd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void deleteMotd(Motd motd) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public MotdList getMotdListForUser(final String username) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public MotdList createOrUpdateMotdList(MotdList motdlist) {
 		// TODO Auto-generated method stub
 		return null;
 	}

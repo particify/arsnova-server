@@ -134,6 +134,9 @@ public class UserService implements IUserService {
 	@Value("${security.authentication.login-try-limit}")
 	private int loginTryLimit;
 
+	@Value("${security.adminaccount}")
+	private String adminaccount;
+
 	private Pattern mailPattern;
 	private BytesKeyGenerator keygen;
 	private BCryptPasswordEncoder encoder;
@@ -187,6 +190,9 @@ public class UserService implements IUserService {
 				user.setType(User.ARSNOVA);
 			}
 		}
+
+		String[] splittedNames = adminaccount.split(",");
+		user.setAdmin(Arrays.asList(splittedNames).contains(user.getUsername()));
 
 		if (user == null || user.getUsername().equals("anonymous")) {
 			throw new UnauthorizedException();

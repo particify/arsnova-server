@@ -45,6 +45,7 @@ public class User implements Serializable {
 	private String username;
 	private String type;
 	private UserSessionService.Role role;
+	private boolean isAdmin;
 
 	public User(Google2Profile profile) {
 		setUsername(profile.getEmail());
@@ -102,6 +103,14 @@ public class User implements Serializable {
 
 	public boolean hasRole(UserSessionService.Role role) {
 		return this.role == role;
+	}
+
+	public void setAdmin(boolean a) {
+		this.isAdmin = a;
+	}
+
+	public boolean isAdmin() {
+		return this.isAdmin;
 	}
 
 	@Override
