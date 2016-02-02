@@ -82,20 +82,11 @@ public class ConfigurationController extends AbstractController {
 	@Value("${features.mathjax.src:}")
 	private String mathJaxSrc;
 
-	@Value("${features.markdown.enabled:false}")
-	private String markdownEnabled;
-
-	@Value("${features.learning-progress.enabled:false}")
-	private String learningProgressEnabled;
-
 	@Value("${features.students-own-questions.enabled:false}")
 	private String studentsOwnQuestions;
 
 	@Value("${features.freetext-imageanswer.enabled:false}")
 	private String imageAnswerEnabled;
-
-	@Value("${features.question-format.flashcard.enabled:false}")
-	private String flashcardEnabled;
 
 	@Value("${features.question-format.grid-square.enabled:false}")
 	private String gridSquareEnabled;
@@ -230,10 +221,10 @@ public class ConfigurationController extends AbstractController {
 		config.put("features", features);
 
 		features.put("mathJax", "true".equals(mathJaxEnabled));
-		features.put("markdown", "true".equals(markdownEnabled));
+		/* Keep the markdown property for now since the frontend still depends on it */
+		features.put("markdown", true);
 		features.put("studentsOwnQuestions", "true".equals(studentsOwnQuestions));
 		features.put("imageAnswer", "true".equals(imageAnswerEnabled));
-		features.put("flashcard", "true".equals(flashcardEnabled));
 		features.put("gridSquare", "true".equals(gridSquareEnabled));
 		features.put("sessionImportExport", "true".equals(sessionImportExportEnabled));
 		features.put("publicPool", "true".equals(publicPoolEnabled));

@@ -177,16 +177,12 @@ connector.password=test
 features.mathjax.enabled=true
 features.mathjax.src=//cdn.mathjax.org/mathjax/2.4-latest/MathJax.js
 
-# Enable Markdown for text formatting, links and embedded media
-features.markdown.enabled=true
-
 # The following features are considered experimental because they have not been
 # tested in a production environment over a longer time frame and/or their
 # behavior will change in future releases.
 #
 features.students-own-questions.enabled=true
 features.freetext-imageanswer.enabled=true
-features.question-format.flashcard.enabled=true
 features.question-format.grid-square.enabled=true
 
 # Without enabled session-import-export feature no sessions can be added to the
