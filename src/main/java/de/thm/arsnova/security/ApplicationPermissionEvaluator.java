@@ -48,8 +48,8 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationPermissionEvaluator.class);
 
-	@Value("${security.adminaccount}")
-	private String adminaccount;
+	@Value("${security.admin-accounts}")
+	private String adminAccounts;
 
 	@Autowired
 	private IDatabaseDao dao;
@@ -99,7 +99,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				"motd".equals(targetType)
 				&& permission.equals("admin")
 				) {
-			String[] splittedNames = adminaccount.split(",");
+			String[] splittedNames = adminAccounts.split(",");
 			if (Arrays.asList(splittedNames).contains(username)) {
 				return true;
 			}
