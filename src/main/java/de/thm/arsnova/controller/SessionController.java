@@ -17,6 +17,7 @@
  */
 package de.thm.arsnova.controller;
 
+import org.springframework.context.annotation.Import;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionFeature;
@@ -266,6 +267,26 @@ public class SessionController extends PaginationController {
 			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
 			) {
 		return sessionService.importSession(session);
+	}
+
+	@ApiOperation(value = "export sessions", nickname = "exportSession")
+	@RequestMapping(value = "/export", method = RequestMethod.GET)
+	public List<ImportExportSession> exportSession(
+			@ApiParam(value = "comma seperated list of sessionkeys", required = true) @PathVariable final String sessionkeys,
+			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
+		) {
+		List<ImportExportSession> sessions = new ArrayList<ImportExportSession>();
+		ImportExportSession temp;
+		String[] splittedKeys = sessionkeys.split(",");
+		for (String key : splittedKeys) {
+			sessionService.setActive(key, false);
+			temp = sessionService.exportSession(key);
+			if (temp != null) {
+				sessions.add(temp);
+			}
+			sessionService.setActive(key, true);
+		}
+		return sessions;
 	}
 
 	@ApiOperation(value = "Locks or unlocks a Session",

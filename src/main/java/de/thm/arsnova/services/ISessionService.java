@@ -74,6 +74,8 @@ public interface ISessionService {
 
 	SessionInfo importSession(ImportExportSession session);
 
+	ImportExportSession exportSession(String sessionkey);
+
 	SessionFeature getSessionFeatures(String sessionkey);
 
 	SessionFeature changeSessionFeatures(String sessionkey, SessionFeature features);

@@ -2189,6 +2189,11 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
+	public ImportExportQuestion exportSession(String sessionkey) {
+
+	}
+
+	@Override
 	public List<String> getSubjects(Session session, String questionVariant) {
 		String viewString = "";
 		if ("lecture".equals(questionVariant)) {

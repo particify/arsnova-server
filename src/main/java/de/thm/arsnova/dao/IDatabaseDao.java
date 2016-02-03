@@ -205,6 +205,8 @@ public interface IDatabaseDao {
 
 	SessionInfo importSession(User user, ImportExportSession importSession);
 
+	ImportExportSession exportSession(String sessionkey);
+
 	Statistics getStatistics();
 
 	List<String> getSubjects(Session session, String questionVariant);

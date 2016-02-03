@@ -405,6 +405,12 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	}
 
 	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	public ImportExportSession exportSession(String sessionkey) {
+		return databaseDao.exportSession(sessionkey);
+	}
+
+	@Override
 	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
 		this.publisher = publisher;
 	}
