@@ -67,7 +67,7 @@ public class SocketController extends AbstractController {
 		@ApiResponse(code = 403, message = HTML_STATUS_403)
 	})
 	@RequestMapping(method = RequestMethod.POST, value = "/assign")
-	public void authorize(@ApiParam(value="sessionMap", required=true) @RequestBody final Map<String, String> sessionMap, @ApiParam(value="response", required=true) final HttpServletResponse response) {
+	public void authorize(@ApiParam(value = "sessionMap", required = true) @RequestBody final Map < String, String> sessionMap, @ApiParam(value = "response", required = true) final HttpServletResponse response) {
 		String socketid = sessionMap.get("session");
 		if (null == socketid) {
 			LOGGER.debug("Expected property 'session' missing", socketid);

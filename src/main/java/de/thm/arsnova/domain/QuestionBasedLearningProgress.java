@@ -34,7 +34,7 @@ public class QuestionBasedLearningProgress extends VariantLearningProgress {
 	@Override
 	protected LearningProgressValues createCourseProgress() {
 		final int courseProgress = calculateCourseProgress();
-		final int numerator = courseScore.getQuestionCount()*courseProgress/100;
+		final int numerator = courseScore.getQuestionCount() * courseProgress / 100;
 		final int denominator = courseScore.getQuestionCount();
 		LearningProgressValues lpv = new LearningProgressValues();
 		lpv.setCourseProgress(courseProgress);
@@ -53,10 +53,10 @@ public class QuestionBasedLearningProgress extends VariantLearningProgress {
 			}
 			int numAnswers = questionScore.getUserCount();
 			if (numAnswers != 0) {
-				ratio += (double)countCorrectAnswers(questionScore) / (numAnswers * courseScore.getQuestionCount());
+				ratio += (double) countCorrectAnswers(questionScore) / (numAnswers * courseScore.getQuestionCount());
 			}
 		}
-		return (int) Math.min(100, Math.round(ratio*100));
+		return (int) Math.min(100, Math.round(ratio * 100));
 	}
 
 	private int countCorrectAnswers(QuestionScore questionScore) {
@@ -107,8 +107,8 @@ public class QuestionBasedLearningProgress extends VariantLearningProgress {
 	}
 
 	private int myPercentage(int numQuestionsCorrect, int questionCount) {
-		final double myLearningProgress = numQuestionsCorrect / (double)questionCount;
-		return (int) Math.min(100, Math.round(myLearningProgress*100));
+		final double myLearningProgress = numQuestionsCorrect / (double) questionCount;
+		return (int) Math.min(100, Math.round(myLearningProgress * 100));
 	}
 
 

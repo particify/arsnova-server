@@ -47,6 +47,6 @@ public class CorsFilter extends OncePerRequestFilter {
 	}
 
 	private String sanitizeOriginUrl(String originUrl) {
-		return originUrl.replaceAll("[\n\r]+"," ");
+		return originUrl.replaceAll("[\n\r]+", " ");
 	}
 }

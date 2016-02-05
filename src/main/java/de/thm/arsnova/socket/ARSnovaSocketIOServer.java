@@ -646,8 +646,8 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	}
 
 	@Override
-	public void visit(NewSessionEvent event) {}
+	public void visit(NewSessionEvent event) { }
 
 	@Override
-	public void visit(DeleteSessionEvent event) {}
+	public void visit(DeleteSessionEvent event) { }
 }

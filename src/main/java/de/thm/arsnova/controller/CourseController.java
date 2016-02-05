@@ -55,7 +55,7 @@ public class CourseController extends AbstractController {
 
 	@RequestMapping(value = "/mycourses", method = RequestMethod.GET)
 	public List<Course> myCourses(
-			@ApiParam(value="sort my courses by name", required=true)
+			@ApiParam(value = "sort my courses by name", required = true)
 			@RequestParam(value = "sortby", defaultValue = "name") final String sortby
 			) {
 

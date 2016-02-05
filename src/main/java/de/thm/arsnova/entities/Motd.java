@@ -88,7 +88,7 @@ public class Motd {
 		return audience;
 	}
 
-	public void setAudience(String a){
+	public void setAudience(String a) {
 		audience = a;
 	}
 
@@ -97,7 +97,7 @@ public class Motd {
 		return sessionkey;
 	}
 
-	public void setSessionkey(String a){
+	public void setSessionkey(String a) {
 		sessionkey = a;
 	}
 

@@ -596,7 +596,7 @@ public class Question implements Serializable {
 	}
 
 	public void updateRoundStartVariables(Date start, Date end) {
-		if(this.getPiRound() == 1 && this.isPiRoundFinished()) {
+		if (this.getPiRound() == 1 && this.isPiRoundFinished()) {
 			this.setPiRound(2);
 		}
 
@@ -613,7 +613,7 @@ public class Question implements Serializable {
 	public void updateRoundManagementState() {
 		final long time = new Date().getTime();
 
-		if(time > this.getPiRoundEndTime() && this.isPiRoundActive()) {
+		if (time > this.getPiRoundEndTime() && this.isPiRoundActive()) {
 			this.setPiRoundEndTime(0);
 			this.setPiRoundStartTime(0);
 			this.setPiRoundActive(false);

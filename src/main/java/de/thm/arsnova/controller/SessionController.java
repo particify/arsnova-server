@@ -147,9 +147,9 @@ public class SessionController extends PaginationController {
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
 	public List<Session> getSessions(
-			@ApiParam(value="ownedOnly", required=true) @RequestParam(value = "ownedonly", defaultValue = "false") final boolean ownedOnly,
-			@ApiParam(value="visitedOnly", required=true) @RequestParam(value = "visitedonly", defaultValue = "false") final boolean visitedOnly,
-			@ApiParam(value="sortby", required=true) @RequestParam(value = "sortby", defaultValue = "name") final String sortby,
+			@ApiParam(value = "ownedOnly", required = true) @RequestParam(value = "ownedonly", defaultValue = "false") final boolean ownedOnly,
+			@ApiParam(value = "visitedOnly", required = true) @RequestParam(value = "visitedonly", defaultValue = "false") final boolean visitedOnly,
+			@ApiParam(value = "sortby", required = true) @RequestParam(value = "sortby", defaultValue = "name") final String sortby,
 			final HttpServletResponse response
 			) {
 		List<Session> sessions = null;
@@ -276,7 +276,7 @@ public class SessionController extends PaginationController {
 	@RequestMapping(value = "/{sessionkey}/lock", method = RequestMethod.POST)
 	public Session lockSession(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
-			@ApiParam(value="lock", required=true) @RequestParam(required = false) final Boolean lock,
+			@ApiParam(value = "lock", required = true) @RequestParam(required = false) final Boolean lock,
 			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
 			) {
 		if (lock != null) {
@@ -336,7 +336,7 @@ public class SessionController extends PaginationController {
 			nickname = "lockFeedbackInput")
 	public boolean lockFeedbackInput(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
-			@ApiParam(value="lock", required=true) @RequestParam(required = true) final Boolean lock,
+			@ApiParam(value = "lock", required = true) @RequestParam(required = true) final Boolean lock,
 			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
 			) {
 		return sessionService.lockFeedbackInput(sessionkey, lock);

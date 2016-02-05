@@ -99,7 +99,7 @@ public class MotdService implements IMotdService {
 			List<Motd> returns = new ArrayList<Motd>();
 			HashSet<String> keys = new HashSet(500);  // Or a more realistic size
 			StringTokenizer st = new StringTokenizer(motdlist.getMotdkeys(), ",");
-			while(st.hasMoreTokens())
+			while (st.hasMoreTokens())
    			keys.add(st.nextToken());
 			for (Motd motd : list) {
 				if (!keys.contains(motd.getMotdkey())) {

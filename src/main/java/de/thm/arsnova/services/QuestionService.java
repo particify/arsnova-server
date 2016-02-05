@@ -224,7 +224,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final Question question = databaseDao.getQuestion(questionId);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 
-		if(null == user) {
+		if (null == user) {
 			user = userService.getCurrentUser();
 		}
 
@@ -272,7 +272,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		cancelDelayedPiRoundChange(questionId);
 		question.resetRoundManagementState();
 
-		if(question.getPiRound() == 1) {
+		if (question.getPiRound() == 1) {
 			question.setPiRoundFinished(false);
 		} else {
 			question.setPiRound(1);
@@ -287,7 +287,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	public void cancelDelayedPiRoundChange(final String questionId) {
 		Timer timer = timerList.get(questionId);
 
-		if(null != timer) {
+		if (null != timer) {
 			timer.cancel();
 			timerList.remove(questionId);
 			timer.purge();
@@ -1123,13 +1123,13 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		List<String> tmpList = sortOrder.getSortOrder();
 		tmpList.add(toBeAdded);
 		sortOrder.setSortOrder(tmpList);
-		if("alphabet".equals(sortOrder.getSortType())) {
+		if ("alphabet".equals(sortOrder.getSortType())) {
 			sortOrder = alphabeticalSort(sortOrder);
 		}
 		return databaseDao.createOrUpdateSortOrder(sortOrder);
 	}
 
-	public void deleteQuestionFromSortOrder(Question question){
+	public void deleteQuestionFromSortOrder(Question question) {
 		SortOrder sortOrder = databaseDao.getSortOrder(question.getSessionId(), question.getQuestionVariant(), question.getSubject());
 		if (sortOrder != null) {
 			List<String> tempSortOrder = sortOrder.getSortOrder();
@@ -1226,7 +1226,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 	}
 
-	public SortOrder alphabeticalSort(SortOrder sortOrder){
+	public SortOrder alphabeticalSort(SortOrder sortOrder) {
 		if (sortOrder.getSortOrder() == null) {
 			return null;
 		}

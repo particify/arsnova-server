@@ -1773,8 +1773,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		final List<String> unanswered = new ArrayList<String>();
 
 		for (final Question question : questions) {
-			if (!answered.containsKey(question.get_id()) ||
-				(answered.containsKey(question.get_id()) && answered.get(question.get_id()) != question.getPiRound())) {
+			if (!answered.containsKey(question.get_id())
+					|| (answered.containsKey(question.get_id()) && answered.get(question.get_id()) != question.getPiRound())) {
 				unanswered.add(question.get_id());
 			}
 		}
@@ -2275,7 +2275,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			List<String> sort = new ArrayList<String>();
 			JSONArray json = d.getJSONObject("value").getJSONArray("sortOrder");
 			int len = json.size();
-			for (int i=0; i<len; i++) {
+			for (int i = 0; i < len; i++) {
 				sort.add(json.getString(i));
 			}
 			sortOrder.setSortOrder(sort);
@@ -2284,7 +2284,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return sortOrder;
 	}
 
-	@CachePut(value = "sortorder", key ="#sortOrder.sessionId.concat('-').concat(#sortOrder.questionVariant).concat('-').concat(#sortOrder.subject)")
+	@CachePut(value = "sortorder", key = "#sortOrder.sessionId.concat('-').concat(#sortOrder.questionVariant).concat('-').concat(#sortOrder.subject)")
 	@Override
 	public SortOrder createOrUpdateSortOrder(SortOrder sortOrder) {
 		try {
@@ -2317,7 +2317,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return null;
 	}
 
-	@CacheEvict(value = "sortorder", key ="#sortOrder.sessionId.concat('-').concat(#sortOrder.questionVariant).concat('-').concat(#sortOrder.subject)")
+	@CacheEvict(value = "sortorder", key = "#sortOrder.sessionId.concat('-').concat(#sortOrder.questionVariant).concat('-').concat(#sortOrder.subject)")
 	@Override
 	public void deleteSortOrder(SortOrder sortOrder) {
 		try {
@@ -2534,7 +2534,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			if (null != id) {
 				d = database.getDocument(id, rev);
 			}
-			d.put("type","motdlist");
+			d.put("type", "motdlist");
 			d.put("username", motdlist.getUsername());
 			d.put("motdkeys", motdlist.getMotdkeys());
 

@@ -128,7 +128,7 @@ public class LecturerQuestionController extends PaginationController {
 			@RequestParam(value = "time", defaultValue = "0", required = false) final int time
 			) {
 
-		if(time == 0) {
+		if (time == 0) {
 			questionService.startNewPiRound(questionId, null);
 		} else {
 			questionService.startNewPiRoundDelayed(questionId, time);
@@ -621,7 +621,7 @@ public class LecturerQuestionController extends PaginationController {
 			@RequestBody String[] sortOrder
 			) {
 		try {
-			questionService.setSort(sessionkey, "", sorttype, ispreparation, sortOrder) ;
+			questionService.setSort(sessionkey, "", sorttype, ispreparation, sortOrder);
 		} catch (final Exception e) {
 			throw new BadRequestException();
 		}

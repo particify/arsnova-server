@@ -51,7 +51,7 @@ public class InterposedQuestion {
 		this.read = question.isRead();
 	}
 
-	public InterposedQuestion() {}
+	public InterposedQuestion() { }
 
 	@ApiModelProperty(required = true, value = "used to display Id")
 	public String getId() {

@@ -35,7 +35,7 @@ public class LearningProgressOptions {
 		this.questionVariant = learningProgressOptions.getQuestionVariant();
 	}
 
-	public LearningProgressOptions() {}
+	public LearningProgressOptions() { }
 
 	@ApiModelProperty(required = true, value = "the type")
 	public String getType() {

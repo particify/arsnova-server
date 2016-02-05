@@ -48,7 +48,7 @@ public class SecurityExceptionControllerAdvice {
 
 	@ExceptionHandler
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public Map<String,String> defaultExceptionHandler(
+	public Map<String, String> defaultExceptionHandler(
 			final Exception e,
 			final HttpServletRequest req
 			) {

@@ -53,7 +53,7 @@ public class WelcomeController extends AbstractController {
 	@Value("${mobile.path}")
 	private String mobileContextPath;
 
-	@Resource(name="versionInfoProperties")
+	@Resource(name = "versionInfoProperties")
 	private Properties versionInfoProperties;
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)

@@ -60,7 +60,7 @@ public class AudienceQuestionController extends PaginationController {
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	@DeprecatedApi
 	@Deprecated
-	public int getInterposedCount(@ApiParam(value="Session-Key from current session", required=true) @RequestParam final String sessionkey) {
+	public int getInterposedCount(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey) {
 		return questionService.getInterposedCount(sessionkey);
 	}
 
@@ -96,8 +96,8 @@ public class AudienceQuestionController extends PaginationController {
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void postInterposedQuestion(
-			@ApiParam(value="Session-Key from current session", required=true) @RequestParam final String sessionkey,
-			@ApiParam(value="the body from the new question", required=true) @RequestBody final de.thm.arsnova.entities.InterposedQuestion question
+			@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey,
+			@ApiParam(value = "the body from the new question", required = true) @RequestBody final de.thm.arsnova.entities.InterposedQuestion question
 			) {
 		if (questionService.saveQuestion(question)) {
 			return;
@@ -109,7 +109,7 @@ public class AudienceQuestionController extends PaginationController {
 	@ApiOperation(value = "Deletes an InterposedQuestion",
 			nickname = "deleteInterposedQuestion")
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)
-	public void deleteInterposedQuestion(@ApiParam(value = "ID of the question that needs to be deleted", required=true) @PathVariable final String questionId) {
+	public void deleteInterposedQuestion(@ApiParam(value = "ID of the question that needs to be deleted", required = true) @PathVariable final String questionId) {
 		questionService.deleteInterposedQuestion(questionId);
 	}
 }

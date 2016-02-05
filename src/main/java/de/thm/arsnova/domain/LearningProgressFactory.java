@@ -51,10 +51,10 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 	}
 
 	@Override
-	public void visit(NewInterposedQuestionEvent event) {}
+	public void visit(NewInterposedQuestionEvent event) { }
 
 	@Override
-	public void visit(DeleteInterposedQuestionEvent deleteInterposedQuestionEvent) {}
+	public void visit(DeleteInterposedQuestionEvent deleteInterposedQuestionEvent) { }
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
@@ -135,31 +135,31 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 	}
 
 	@Override
-	public void visit(NewFeedbackEvent newFeedbackEvent) {}
+	public void visit(NewFeedbackEvent newFeedbackEvent) { }
 
 	@Override
-	public void visit(DeleteFeedbackForSessionsEvent deleteFeedbackEvent) {}
+	public void visit(DeleteFeedbackForSessionsEvent deleteFeedbackEvent) { }
 
 	@Override
-	public void visit(StatusSessionEvent statusSessionEvent) {}
+	public void visit(StatusSessionEvent statusSessionEvent) { }
 
 	@Override
-	public void visit(ChangeLearningProgressEvent changeLearningProgress) {}
+	public void visit(ChangeLearningProgressEvent changeLearningProgress) { }
 
 	@Override
-	public void visit(PiRoundDelayedStartEvent piRoundDelayedStartEvent) {}
+	public void visit(PiRoundDelayedStartEvent piRoundDelayedStartEvent) { }
 
 	@Override
-	public void visit(PiRoundEndEvent piRoundEndEvent) {}
+	public void visit(PiRoundEndEvent piRoundEndEvent) { }
 
 	@Override
-	public void visit(PiRoundCancelEvent piRoundCancelEvent) {}
+	public void visit(PiRoundCancelEvent piRoundCancelEvent) { }
 
 	@Override
-	public void visit(NewSessionEvent event) {}
+	public void visit(NewSessionEvent event) { }
 
 	@Override
-	public void visit(DeleteSessionEvent event) {}
+	public void visit(DeleteSessionEvent event) { }
 
 	@Override
 	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
@@ -167,21 +167,21 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 	}
 
 	@Override
-	public void visit(LockVoteEvent lockVoteEvent) {}
+	public void visit(LockVoteEvent lockVoteEvent) { }
 
 	@Override
-	public void visit(LockVotesEvent lockVotesEvent) {}
+	public void visit(LockVotesEvent lockVotesEvent) { }
 
 	@Override
-	public void visit(UnlockVoteEvent unlockVoteEvent) {}
+	public void visit(UnlockVoteEvent unlockVoteEvent) { }
 
 	@Override
-	public void visit(UnlockVotesEvent unlockVotesEvent) {}
+	public void visit(UnlockVotesEvent unlockVotesEvent) { }
 
 	@Override
-	public void visit(FeatureChangeEvent featureChangeEvent) {}
+	public void visit(FeatureChangeEvent featureChangeEvent) { }
 
 	@Override
-	public void visit(LockFeedbackEvent lockFeedbackEvent) {}
+	public void visit(LockFeedbackEvent lockFeedbackEvent) { }
 
 }

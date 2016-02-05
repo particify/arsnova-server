@@ -58,7 +58,7 @@ public class SessionInfo {
 		this.ppSubject = session.getPpSubject();
 	}
 
-	public SessionInfo() {}
+	public SessionInfo() { }
 
 	public static List<SessionInfo> fromSessionList(List<Session> sessions) {
 		List<SessionInfo> infos = new ArrayList<SessionInfo>();
