@@ -1,6 +1,6 @@
 /*
  * This file is part of ARSnova Backend.
- * Copyright (C) 2012-2015 The ARSnova Team
+ * Copyright (C) 2012-2016 The ARSnova Team
  *
  * ARSnova Backend is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
