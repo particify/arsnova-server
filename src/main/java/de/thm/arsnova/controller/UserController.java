@@ -17,9 +17,9 @@
  */
 package de.thm.arsnova.controller;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import de.thm.arsnova.entities.DbUser;
+import de.thm.arsnova.services.IUserService;
+import de.thm.arsnova.services.UserSessionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +31,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import de.thm.arsnova.entities.DbUser;
-import de.thm.arsnova.services.IUserService;
-import de.thm.arsnova.services.UserSessionService;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Handles requests related to ARSnova's own user registration and login process.

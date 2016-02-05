@@ -18,9 +18,8 @@
  */
 package de.thm.arsnova.services;
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-
 import de.thm.arsnova.entities.User;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 public class StubUserService extends UserService {
 

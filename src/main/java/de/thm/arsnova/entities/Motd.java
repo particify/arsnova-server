@@ -17,10 +17,10 @@
  */
 package de.thm.arsnova.entities;
 
-import java.util.Date;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
+import java.util.Date;
 
 /**
  * This class represents a message of the day.

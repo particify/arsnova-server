@@ -17,10 +17,11 @@
  */
 package de.thm.arsnova.entities;
 
-import java.util.ArrayList;
-import java.util.List;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Summary information of a specific session. For example, this is used to display list entries of 'my sessions' as well

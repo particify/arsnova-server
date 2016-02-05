@@ -1,7 +1,6 @@
 package de.thm.arsnova.config;
 
-import static org.junit.Assert.assertNull;
-
+import de.thm.arsnova.connector.client.ConnectorClient;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import de.thm.arsnova.connector.client.ConnectorClient;
+import static org.junit.Assert.assertNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration

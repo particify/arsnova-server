@@ -17,6 +17,29 @@
  */
 package de.thm.arsnova.services;
 
+import de.thm.arsnova.ImageUtils;
+import de.thm.arsnova.dao.IDatabaseDao;
+import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.InterposedReadingCount;
+import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.SortOrder;
+import de.thm.arsnova.entities.User;
+import de.thm.arsnova.events.*;
+import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.exceptions.ForbiddenException;
+import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.exceptions.UnauthorizedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,51 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import de.thm.arsnova.ImageUtils;
-import de.thm.arsnova.dao.IDatabaseDao;
-import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.InterposedQuestion;
-import de.thm.arsnova.entities.InterposedReadingCount;
-import de.thm.arsnova.entities.Question;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.SortOrder;
-import de.thm.arsnova.entities.User;
-import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
-import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
-import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
-import de.thm.arsnova.events.DeleteAllQuestionsEvent;
-import de.thm.arsnova.events.DeleteAnswerEvent;
-import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
-import de.thm.arsnova.events.DeleteQuestionEvent;
-import de.thm.arsnova.events.LockQuestionEvent;
-import de.thm.arsnova.events.LockQuestionsEvent;
-import de.thm.arsnova.events.LockVoteEvent;
-import de.thm.arsnova.events.LockVotesEvent;
-import de.thm.arsnova.events.NewAnswerEvent;
-import de.thm.arsnova.events.NewInterposedQuestionEvent;
-import de.thm.arsnova.events.NewQuestionEvent;
-import de.thm.arsnova.events.UnlockQuestionEvent;
-import de.thm.arsnova.events.UnlockQuestionsEvent;
-import de.thm.arsnova.events.NovaEvent;
-import de.thm.arsnova.events.PiRoundCancelEvent;
-import de.thm.arsnova.events.PiRoundDelayedStartEvent;
-import de.thm.arsnova.events.PiRoundEndEvent;
-import de.thm.arsnova.events.PiRoundResetEvent;
-import de.thm.arsnova.events.UnlockVoteEvent;
-import de.thm.arsnova.events.UnlockVotesEvent;
-import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.exceptions.ForbiddenException;
-import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.exceptions.UnauthorizedException;
 
 /**
  * Performs all question, interposed question, and answer related operations.

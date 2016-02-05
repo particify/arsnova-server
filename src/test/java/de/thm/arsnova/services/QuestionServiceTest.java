@@ -18,13 +18,10 @@
  */
 package de.thm.arsnova.services;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import de.thm.arsnova.dao.StubDatabaseDao;
+import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.exceptions.NotFoundException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,10 +37,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import de.thm.arsnova.dao.StubDatabaseDao;
-import de.thm.arsnova.entities.InterposedQuestion;
-import de.thm.arsnova.entities.Question;
-import de.thm.arsnova.exceptions.NotFoundException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @WebAppConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)

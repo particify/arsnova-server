@@ -18,9 +18,10 @@
  */
 package de.thm.arsnova.services;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
+import de.thm.arsnova.dao.StubDatabaseDao;
+import de.thm.arsnova.entities.TestUser;
+import de.thm.arsnova.exceptions.NoContentException;
+import de.thm.arsnova.exceptions.NotFoundException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,10 +32,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import de.thm.arsnova.dao.StubDatabaseDao;
-import de.thm.arsnova.entities.TestUser;
-import de.thm.arsnova.exceptions.NoContentException;
-import de.thm.arsnova.exceptions.NotFoundException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @WebAppConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)

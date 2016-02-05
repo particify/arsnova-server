@@ -17,12 +17,14 @@
  */
 package de.thm.arsnova.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.exceptions.ForbiddenException;
+import de.thm.arsnova.exceptions.NoContentException;
+import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.exceptions.NotImplementedException;
+import de.thm.arsnova.exceptions.PayloadTooLargeException;
+import de.thm.arsnova.exceptions.PreconditionFailedException;
+import de.thm.arsnova.exceptions.UnauthorizedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -33,14 +35,10 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.exceptions.ForbiddenException;
-import de.thm.arsnova.exceptions.NoContentException;
-import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.exceptions.NotImplementedException;
-import de.thm.arsnova.exceptions.PayloadTooLargeException;
-import de.thm.arsnova.exceptions.PreconditionFailedException;
-import de.thm.arsnova.exceptions.UnauthorizedException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Translates security/authentication related exceptions into HTTP status codes.

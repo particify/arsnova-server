@@ -17,13 +17,12 @@
  */
 package de.thm.arsnova.aop;
 
+import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.services.UserSessionService;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.services.UserSessionService;
 
 /**
  * Assigns a session to the {@link de.thm.arsnova.services.UserSessionService} whenever a user joins a

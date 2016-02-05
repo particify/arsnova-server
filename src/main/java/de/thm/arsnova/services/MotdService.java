@@ -17,33 +17,21 @@
  */
 package de.thm.arsnova.services;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Date;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.StringTokenizer;
-
+import de.thm.arsnova.dao.IDatabaseDao;
+import de.thm.arsnova.entities.Motd;
+import de.thm.arsnova.entities.MotdList;
+import de.thm.arsnova.entities.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import de.thm.arsnova.dao.IDatabaseDao;
-import de.thm.arsnova.entities.User;
-import de.thm.arsnova.entities.Motd;
-import de.thm.arsnova.entities.MotdList;
-import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.exceptions.ForbiddenException;
-import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.exceptions.PayloadTooLargeException;
-import de.thm.arsnova.exceptions.UnauthorizedException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.StringTokenizer;
 /**
  * Performs all question, interposed question, and answer related operations.
  */

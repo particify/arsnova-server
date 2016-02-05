@@ -17,13 +17,9 @@
  */
 package de.thm.arsnova.aop;
 
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import de.thm.arsnova.PaginationListDecorator;
+import de.thm.arsnova.controller.PaginationController;
+import de.thm.arsnova.services.ResponseProviderService;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -33,9 +29,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import de.thm.arsnova.PaginationListDecorator;
-import de.thm.arsnova.controller.PaginationController;
-import de.thm.arsnova.services.ResponseProviderService;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * An aspect which parses requests for pagination parameters in a "Range" header and adds a "Content-Range" header to

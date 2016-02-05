@@ -17,8 +17,17 @@
  */
 package de.thm.arsnova.controller;
 
-import java.util.List;
-
+import de.thm.arsnova.entities.InterposedReadingCount;
+import de.thm.arsnova.entities.transport.InterposedQuestion;
+import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.services.IQuestionService;
+import de.thm.arsnova.web.DeprecatedApi;
+import de.thm.arsnova.web.Pagination;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,18 +40,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-
-import de.thm.arsnova.entities.InterposedReadingCount;
-import de.thm.arsnova.entities.transport.InterposedQuestion;
-import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.services.IQuestionService;
-import de.thm.arsnova.web.DeprecatedApi;
-import de.thm.arsnova.web.Pagination;
+import java.util.List;
 
 /**
  * Handles requests related to audience questions, which are also called interposed or feedback questions.

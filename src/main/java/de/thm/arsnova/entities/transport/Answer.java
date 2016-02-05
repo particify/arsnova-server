@@ -17,14 +17,13 @@
  */
 package de.thm.arsnova.entities.transport;
 
-import java.util.Date;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
+import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.User;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import de.thm.arsnova.entities.Question;
-import de.thm.arsnova.entities.User;
+import java.util.Date;
 
 /**
  * A user's answer to a question.

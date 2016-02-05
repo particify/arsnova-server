@@ -17,14 +17,13 @@
  */
 package de.thm.arsnova.web;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import de.thm.arsnova.services.ResponseProviderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import de.thm.arsnova.services.ResponseProviderService;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  *  Injects a {@link HttpServletResponse} into {@link ResponseProviderService} to allow access to it outside of

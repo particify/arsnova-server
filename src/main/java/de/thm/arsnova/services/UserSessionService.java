@@ -17,10 +17,10 @@
  */
 package de.thm.arsnova.services;
 
-import java.util.UUID;
-
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+
+import java.util.UUID;
 
 /**
  * The functionality the user-session service should provide.

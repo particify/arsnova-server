@@ -17,15 +17,15 @@
  */
 package de.thm.arsnova.services;
 
-import java.util.List;
-import java.util.Map;
-
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.User;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * The functionality the question service should provide.

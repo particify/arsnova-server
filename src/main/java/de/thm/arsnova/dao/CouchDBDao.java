@@ -17,28 +17,41 @@
  */
 package de.thm.arsnova.dao;
 
-import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.Date;
-import java.util.StringTokenizer;
-
+import com.fourspaces.couchdb.Database;
+import com.fourspaces.couchdb.Document;
+import com.fourspaces.couchdb.Results;
+import com.fourspaces.couchdb.RowResult;
+import com.fourspaces.couchdb.View;
+import com.fourspaces.couchdb.ViewResults;
+import de.thm.arsnova.connector.model.Course;
+import de.thm.arsnova.domain.CourseScore;
+import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.DbUser;
+import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.InterposedReadingCount;
+import de.thm.arsnova.entities.LoggedIn;
+import de.thm.arsnova.entities.Motd;
+import de.thm.arsnova.entities.MotdList;
+import de.thm.arsnova.entities.PossibleAnswer;
+import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.SessionInfo;
+import de.thm.arsnova.entities.SortOrder;
+import de.thm.arsnova.entities.Statistics;
+import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.VisitedSession;
+import de.thm.arsnova.entities.transport.AnswerQueueElement;
+import de.thm.arsnova.entities.transport.ImportExportSession;
+import de.thm.arsnova.entities.transport.ImportExportSession.ImportExportQuestion;
+import de.thm.arsnova.events.NewAnswerEvent;
+import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.services.ISessionService;
 import net.sf.ezmorph.Morpher;
 import net.sf.ezmorph.MorpherRegistry;
 import net.sf.ezmorph.bean.BeanMorpher;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.util.JSONUtils;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopContext;
@@ -55,36 +68,19 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fourspaces.couchdb.Database;
-import com.fourspaces.couchdb.Document;
-import com.fourspaces.couchdb.Results;
-import com.fourspaces.couchdb.RowResult;
-import com.fourspaces.couchdb.View;
-import com.fourspaces.couchdb.ViewResults;
-
-import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.domain.CourseScore;
-import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.DbUser;
-import de.thm.arsnova.entities.InterposedQuestion;
-import de.thm.arsnova.entities.InterposedReadingCount;
-import de.thm.arsnova.entities.LoggedIn;
-import de.thm.arsnova.entities.PossibleAnswer;
-import de.thm.arsnova.entities.Question;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.SessionInfo;
-import de.thm.arsnova.entities.SortOrder;
-import de.thm.arsnova.entities.Statistics;
-import de.thm.arsnova.entities.User;
-import de.thm.arsnova.entities.VisitedSession;
-import de.thm.arsnova.entities.transport.AnswerQueueElement;
-import de.thm.arsnova.entities.transport.ImportExportSession;
-import de.thm.arsnova.entities.transport.ImportExportSession.ImportExportQuestion;
-import de.thm.arsnova.events.NewAnswerEvent;
-import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.services.ISessionService;
-import de.thm.arsnova.entities.Motd;
-import de.thm.arsnova.entities.MotdList;
+import java.io.IOException;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Database implementation based on CouchDB.

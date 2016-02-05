@@ -17,14 +17,14 @@
  */
 package de.thm.arsnova.domain;
 
+import de.thm.arsnova.entities.User;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import de.thm.arsnova.entities.User;
 
 /**
  * Calculates the learning progress for users and their courses.

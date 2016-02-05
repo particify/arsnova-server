@@ -17,6 +17,12 @@
  */
 package de.thm.arsnova.controller;
 
+import de.thm.arsnova.entities.Feedback;
+import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.services.IFeedbackService;
+import de.thm.arsnova.services.IUserService;
+import de.thm.arsnova.web.DeprecatedApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,18 +33,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-
-import de.thm.arsnova.entities.Feedback;
-import de.thm.arsnova.entities.User;
-import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.services.IFeedbackService;
-import de.thm.arsnova.services.IUserService;
-import de.thm.arsnova.web.DeprecatedApi;
 
 /**
  * Handles requests concerning the user's feedback, i.e., "too fast" or "faster, please". This HTTP API is

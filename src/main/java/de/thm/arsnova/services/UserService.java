@@ -17,24 +17,13 @@
  */
 package de.thm.arsnova.services;
 
-import java.io.UnsupportedEncodingException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
-
-import javax.annotation.PreDestroy;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-
+import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationToken;
+import de.thm.arsnova.dao.IDatabaseDao;
+import de.thm.arsnova.entities.DbUser;
+import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.exceptions.UnauthorizedException;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.scribe.up.profile.facebook.FacebookProfile;
@@ -62,14 +51,22 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriUtils;
 
-import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationToken;
-
-import de.thm.arsnova.dao.IDatabaseDao;
-import de.thm.arsnova.entities.DbUser;
-import de.thm.arsnova.entities.User;
-import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.exceptions.UnauthorizedException;
+import javax.annotation.PreDestroy;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import java.io.UnsupportedEncodingException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 /**
  * Performs all user related operations.

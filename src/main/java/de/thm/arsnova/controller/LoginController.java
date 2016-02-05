@@ -17,16 +17,12 @@
  */
 package de.thm.arsnova.controller;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import de.thm.arsnova.entities.ServiceDescription;
+import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.services.IUserService;
+import de.thm.arsnova.services.UserSessionService;
 import org.scribe.up.provider.impl.FacebookProvider;
 import org.scribe.up.provider.impl.Google2Provider;
 import org.scribe.up.provider.impl.TwitterProvider;
@@ -57,12 +53,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
-import de.thm.arsnova.entities.ServiceDescription;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.User;
-import de.thm.arsnova.exceptions.UnauthorizedException;
-import de.thm.arsnova.services.IUserService;
-import de.thm.arsnova.services.UserSessionService;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Handles authentication specific requests.

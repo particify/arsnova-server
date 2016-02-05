@@ -17,12 +17,12 @@
  */
 package de.thm.arsnova.domain;
 
+import de.thm.arsnova.entities.User;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import de.thm.arsnova.entities.User;
 
 /**
  * Calculates learning progress score for a specific question.

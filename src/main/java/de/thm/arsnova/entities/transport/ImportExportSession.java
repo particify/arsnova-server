@@ -17,14 +17,14 @@
  */
 package de.thm.arsnova.entities.transport;
 
-import java.util.Date;
-import java.util.List;
-
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * This class is used to allow the import and export of a session.
