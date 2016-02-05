@@ -17,10 +17,10 @@
  */
 package de.thm.arsnova.entities;
 
-import java.util.Date;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
+import java.util.Date;
 
 /**
  * This class represents a message of the day.
@@ -88,7 +88,7 @@ public class Motd {
 		return audience;
 	}
 
-	public void setAudience(String a){
+	public void setAudience(String a) {
 		audience = a;
 	}
 
@@ -97,7 +97,7 @@ public class Motd {
 		return sessionkey;
 	}
 
-	public void setSessionkey(String a){
+	public void setSessionkey(String a) {
 		sessionkey = a;
 	}
 

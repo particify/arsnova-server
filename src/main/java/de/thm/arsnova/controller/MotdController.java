@@ -17,21 +17,18 @@
  */
 package de.thm.arsnova.controller;
 
-import java.util.Date;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Arrays;
-
-import javax.servlet.http.HttpServletResponse;
-
+import de.thm.arsnova.entities.Motd;
+import de.thm.arsnova.entities.MotdList;
+import de.thm.arsnova.services.IMotdService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,16 +37,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-
-import de.thm.arsnova.entities.Motd;
-import de.thm.arsnova.entities.MotdList;
-import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.services.IMotdService;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -84,12 +75,10 @@ public class MotdController extends AbstractController {
 		if (adminview) {
 			if (sessionkey.equals("null")) {
 				motds = motdService.getAdminMotds();
-			}
-			else {
+			} else {
 				motds = motdService.getAllSessionMotds(sessionkey);
 			}
-		}
-		else {
+		} else {
 			motds = motdService.getCurrentMotds(client, audience, sessionkey);
 		}
 		return motds;
@@ -110,8 +99,7 @@ public class MotdController extends AbstractController {
 			Motd newMotd = new Motd();
 			if (motd.getAudience().equals("session") && motd.getSessionkey() != null) {
 				newMotd = motdService.saveSessionMotd(motd.getSessionkey(), motd);
-			}
-			else {
+			} else {
 				newMotd = motdService.saveMotd(motd);
 			}
 			if (newMotd == null) {
@@ -119,8 +107,7 @@ public class MotdController extends AbstractController {
 				return null;
 			}
 			return newMotd;
-		}
-		else {
+		} else {
 			response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
 			return null;
 		}
@@ -134,8 +121,7 @@ public class MotdController extends AbstractController {
 			) {
 		if (motd.getAudience().equals("session") && motd.getSessionkey() != null) {
 			return motdService.updateSessionMotd(motd.getSessionkey(), motd);
-		}
-		else {
+		} else {
 			return motdService.updateMotd(motd);
 		}
 	}
@@ -146,8 +132,7 @@ public class MotdController extends AbstractController {
 		Motd motd = motdService.getMotd(motdkey);
 		if (motd.getAudience().equals("session")) {
 			motdService.deleteSessionMotd(motd.getSessionkey(), motd);
-		}
-		else {
+		} else {
 			motdService.deleteMotd(motd);
 		}
 	}

@@ -17,12 +17,15 @@
  */
 package de.thm.arsnova.controller;
 
-import java.util.Map;
-import java.util.UUID;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import de.thm.arsnova.entities.User;
+import de.thm.arsnova.services.IUserService;
+import de.thm.arsnova.services.UserSessionService;
+import de.thm.arsnova.socket.ARSnovaSocket;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,16 +35,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-
-import de.thm.arsnova.entities.User;
-import de.thm.arsnova.services.IUserService;
-import de.thm.arsnova.services.UserSessionService;
-import de.thm.arsnova.socket.ARSnovaSocket;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Initiates the socket communication.
@@ -70,7 +67,7 @@ public class SocketController extends AbstractController {
 		@ApiResponse(code = 403, message = HTML_STATUS_403)
 	})
 	@RequestMapping(method = RequestMethod.POST, value = "/assign")
-	public void authorize(@ApiParam(value="sessionMap", required=true) @RequestBody final Map<String, String> sessionMap, @ApiParam(value="response", required=true) final HttpServletResponse response) {
+	public void authorize(@ApiParam(value = "sessionMap", required = true) @RequestBody final Map < String, String> sessionMap, @ApiParam(value = "response", required = true) final HttpServletResponse response) {
 		String socketid = sessionMap.get("session");
 		if (null == socketid) {
 			LOGGER.debug("Expected property 'session' missing", socketid);

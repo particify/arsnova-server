@@ -17,11 +17,15 @@
  */
 package de.thm.arsnova.config;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.servlet.ServletContext;
-
+import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationProvider;
+import com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationEntryPoint;
+import com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationFilter;
+import de.thm.arsnova.CASLogoutSuccessHandler;
+import de.thm.arsnova.CasUserDetailsService;
+import de.thm.arsnova.LoginAuthenticationFailureHandler;
+import de.thm.arsnova.LoginAuthenticationSucessHandler;
+import de.thm.arsnova.security.ApplicationPermissionEvaluator;
+import de.thm.arsnova.security.DbUserDetailsService;
 import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
 import org.scribe.up.provider.impl.FacebookProvider;
 import org.scribe.up.provider.impl.Google2Provider;
@@ -70,16 +74,9 @@ import org.springframework.security.web.header.writers.HstsHeaderWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.context.ServletContextAware;
 
-import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationProvider;
-import com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationEntryPoint;
-import com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationFilter;
-
-import de.thm.arsnova.CASLogoutSuccessHandler;
-import de.thm.arsnova.CasUserDetailsService;
-import de.thm.arsnova.LoginAuthenticationFailureHandler;
-import de.thm.arsnova.LoginAuthenticationSucessHandler;
-import de.thm.arsnova.security.ApplicationPermissionEvaluator;
-import de.thm.arsnova.security.DbUserDetailsService;
+import javax.servlet.ServletContext;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Loads property file and configures components used for authentication.

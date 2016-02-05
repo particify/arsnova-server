@@ -17,12 +17,12 @@
  */
 package de.thm.arsnova.services;
 
+import de.thm.arsnova.entities.DbUser;
+import de.thm.arsnova.entities.User;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-
-import de.thm.arsnova.entities.DbUser;
-import de.thm.arsnova.entities.User;
 
 /**
  * The functionality the user service should provide.

@@ -17,8 +17,17 @@
  */
 package de.thm.arsnova.controller;
 
-import java.util.List;
-
+import de.thm.arsnova.entities.InterposedReadingCount;
+import de.thm.arsnova.entities.transport.InterposedQuestion;
+import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.services.IQuestionService;
+import de.thm.arsnova.web.DeprecatedApi;
+import de.thm.arsnova.web.Pagination;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,18 +40,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-
-import de.thm.arsnova.entities.InterposedReadingCount;
-import de.thm.arsnova.entities.transport.InterposedQuestion;
-import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.services.IQuestionService;
-import de.thm.arsnova.web.DeprecatedApi;
-import de.thm.arsnova.web.Pagination;
+import java.util.List;
 
 /**
  * Handles requests related to audience questions, which are also called interposed or feedback questions.
@@ -62,7 +60,7 @@ public class AudienceQuestionController extends PaginationController {
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	@DeprecatedApi
 	@Deprecated
-	public int getInterposedCount(@ApiParam(value="Session-Key from current session", required=true) @RequestParam final String sessionkey) {
+	public int getInterposedCount(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey) {
 		return questionService.getInterposedCount(sessionkey);
 	}
 
@@ -98,8 +96,8 @@ public class AudienceQuestionController extends PaginationController {
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void postInterposedQuestion(
-			@ApiParam(value="Session-Key from current session", required=true) @RequestParam final String sessionkey,
-			@ApiParam(value="the body from the new question", required=true) @RequestBody final de.thm.arsnova.entities.InterposedQuestion question
+			@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey,
+			@ApiParam(value = "the body from the new question", required = true) @RequestBody final de.thm.arsnova.entities.InterposedQuestion question
 			) {
 		if (questionService.saveQuestion(question)) {
 			return;
@@ -111,7 +109,7 @@ public class AudienceQuestionController extends PaginationController {
 	@ApiOperation(value = "Deletes an InterposedQuestion",
 			nickname = "deleteInterposedQuestion")
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)
-	public void deleteInterposedQuestion(@ApiParam(value = "ID of the question that needs to be deleted", required=true) @PathVariable final String questionId) {
+	public void deleteInterposedQuestion(@ApiParam(value = "ID of the question that needs to be deleted", required = true) @PathVariable final String questionId) {
 		questionService.deleteInterposedQuestion(questionId);
 	}
 }

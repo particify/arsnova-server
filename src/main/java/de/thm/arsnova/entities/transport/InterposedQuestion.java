@@ -17,10 +17,11 @@
  */
 package de.thm.arsnova.entities.transport;
 
-import java.util.ArrayList;
-import java.util.List;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A question a student is asking. Also known as feedback or audience question.
@@ -50,7 +51,7 @@ public class InterposedQuestion {
 		this.read = question.isRead();
 	}
 
-	public InterposedQuestion() {}
+	public InterposedQuestion() { }
 
 	@ApiModelProperty(required = true, value = "used to display Id")
 	public String getId() {

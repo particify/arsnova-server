@@ -17,40 +17,9 @@
  */
 package de.thm.arsnova.cache;
 
+import de.thm.arsnova.events.*;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
-
-import de.thm.arsnova.events.ChangeLearningProgressEvent;
-import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
-import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
-import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
-import de.thm.arsnova.events.DeleteAllQuestionsEvent;
-import de.thm.arsnova.events.DeleteAnswerEvent;
-import de.thm.arsnova.events.DeleteFeedbackForSessionsEvent;
-import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
-import de.thm.arsnova.events.DeleteQuestionEvent;
-import de.thm.arsnova.events.DeleteSessionEvent;
-import de.thm.arsnova.events.FeatureChangeEvent;
-import de.thm.arsnova.events.LockFeedbackEvent;
-import de.thm.arsnova.events.LockQuestionEvent;
-import de.thm.arsnova.events.LockQuestionsEvent;
-import de.thm.arsnova.events.LockVoteEvent;
-import de.thm.arsnova.events.LockVotesEvent;
-import de.thm.arsnova.events.NewAnswerEvent;
-import de.thm.arsnova.events.NewFeedbackEvent;
-import de.thm.arsnova.events.NewInterposedQuestionEvent;
-import de.thm.arsnova.events.NewQuestionEvent;
-import de.thm.arsnova.events.UnlockQuestionEvent;
-import de.thm.arsnova.events.UnlockQuestionsEvent;
-import de.thm.arsnova.events.NewSessionEvent;
-import de.thm.arsnova.events.NovaEventVisitor;
-import de.thm.arsnova.events.PiRoundCancelEvent;
-import de.thm.arsnova.events.PiRoundDelayedStartEvent;
-import de.thm.arsnova.events.PiRoundEndEvent;
-import de.thm.arsnova.events.PiRoundResetEvent;
-import de.thm.arsnova.events.StatusSessionEvent;
-import de.thm.arsnova.events.UnlockVoteEvent;
-import de.thm.arsnova.events.UnlockVotesEvent;
 
 /**
  * This class is used to evict caches based on events. The events carry all necessary information to clear the
@@ -61,98 +30,98 @@ public class CacheBuster implements ICacheBuster, NovaEventVisitor {
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@Override
-	public void visit(NewInterposedQuestionEvent event) {}
+	public void visit(NewInterposedQuestionEvent event) { }
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@Override
-	public void visit(DeleteInterposedQuestionEvent event) {}
+	public void visit(DeleteInterposedQuestionEvent event) { }
 
 	@Override
-	public void visit(NewQuestionEvent event) {}
+	public void visit(NewQuestionEvent event) { }
 
 	@Override
-	public void visit(UnlockQuestionEvent event) {}
+	public void visit(UnlockQuestionEvent event) { }
 
 	@Override
-	public void visit(UnlockQuestionsEvent newQuestionsEvent) {}
+	public void visit(UnlockQuestionsEvent newQuestionsEvent) { }
 
 	@Override
-	public void visit(LockQuestionEvent lockQuestionEvent) {}
+	public void visit(LockQuestionEvent lockQuestionEvent) { }
 
 	@Override
-	public void visit(LockQuestionsEvent lockQuestionsEvent) {}
+	public void visit(LockQuestionsEvent lockQuestionsEvent) { }
 
 	@CacheEvict(value = "answers", key = "#event.Question")
 	@Override
-	public void visit(NewAnswerEvent event) {}
+	public void visit(NewAnswerEvent event) { }
 
 	@Override
-	public void visit(DeleteAnswerEvent event) {}
+	public void visit(DeleteAnswerEvent event) { }
 
 	@Override
-	public void visit(DeleteQuestionEvent event) {}
+	public void visit(DeleteQuestionEvent event) { }
 
 	@Override
-	public void visit(DeleteAllQuestionsEvent event) {}
+	public void visit(DeleteAllQuestionsEvent event) { }
 
 	@Override
-	public void visit(DeleteAllQuestionsAnswersEvent event) {}
+	public void visit(DeleteAllQuestionsAnswersEvent event) { }
 
 	@Override
-	public void visit(DeleteAllPreparationAnswersEvent event) {}
+	public void visit(DeleteAllPreparationAnswersEvent event) { }
 
 	@Override
-	public void visit(DeleteAllLectureAnswersEvent event) {}
+	public void visit(DeleteAllLectureAnswersEvent event) { }
 
 	@Override
-	public void visit(NewFeedbackEvent event) {}
+	public void visit(NewFeedbackEvent event) { }
 
 	@Override
-	public void visit(DeleteFeedbackForSessionsEvent event) {}
+	public void visit(DeleteFeedbackForSessionsEvent event) { }
 
 	@Override
-	public void visit(StatusSessionEvent event) {}
-
-	@CacheEvict(value = "statistics", allEntries = true)
-	@Override
-	public void visit(ChangeLearningProgressEvent changeLearningProgress) {}
-
-	@Override
-	public void visit(PiRoundDelayedStartEvent piRoundDelayedStartEvent) {}
-
-	@Override
-	public void visit(PiRoundEndEvent piRoundEndEvent) {}
-
-	@Override
-	public void visit(PiRoundCancelEvent piRoundCancelEvent) {}
-
-	@Override
-	public void visit(PiRoundResetEvent piRoundResetEvent) {}
+	public void visit(StatusSessionEvent event) { }
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@Override
-	public void visit(NewSessionEvent newSessionEvent) {}
+	public void visit(ChangeLearningProgressEvent changeLearningProgress) { }
+
+	@Override
+	public void visit(PiRoundDelayedStartEvent piRoundDelayedStartEvent) { }
+
+	@Override
+	public void visit(PiRoundEndEvent piRoundEndEvent) { }
+
+	@Override
+	public void visit(PiRoundCancelEvent piRoundCancelEvent) { }
+
+	@Override
+	public void visit(PiRoundResetEvent piRoundResetEvent) { }
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@Override
-	public void visit(DeleteSessionEvent deleteSessionEvent) {}
+	public void visit(NewSessionEvent newSessionEvent) { }
+
+	@CacheEvict(value = "statistics", allEntries = true)
+	@Override
+	public void visit(DeleteSessionEvent deleteSessionEvent) { }
 
 	@Override
-	public void visit(LockVoteEvent lockVoteEvent) {}
+	public void visit(LockVoteEvent lockVoteEvent) { }
 
 	@Override
-	public void visit(LockVotesEvent lockVotesEvent) {}
+	public void visit(LockVotesEvent lockVotesEvent) { }
 
 	@Override
-	public void visit(UnlockVoteEvent unlockVoteEvent) {}
+	public void visit(UnlockVoteEvent unlockVoteEvent) { }
 
 	@Override
-	public void visit(UnlockVotesEvent unlockVotesEvent) {}
+	public void visit(UnlockVotesEvent unlockVotesEvent) { }
 
 	@Override
-	public void visit(FeatureChangeEvent featureChangeEvent) {}
+	public void visit(FeatureChangeEvent featureChangeEvent) { }
 
 	@Override
-	public void visit(LockFeedbackEvent lockFeedbackEvent) {}
+	public void visit(LockFeedbackEvent lockFeedbackEvent) { }
 
 }

@@ -17,10 +17,11 @@
  */
 package de.thm.arsnova.entities;
 
-import java.util.ArrayList;
-import java.util.List;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Summary information of a specific session. For example, this is used to display list entries of 'my sessions' as well
@@ -57,7 +58,7 @@ public class SessionInfo {
 		this.ppSubject = session.getPpSubject();
 	}
 
-	public SessionInfo() {}
+	public SessionInfo() { }
 
 	public static List<SessionInfo> fromSessionList(List<Session> sessions) {
 		List<SessionInfo> infos = new ArrayList<SessionInfo>();
@@ -205,8 +206,12 @@ public class SessionInfo {
 	@Override
 	public boolean equals(Object obj) {
 		// auto generated!
-		if (this == obj) return true;
-		if (obj == null) return false;
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
 		if (getClass() != obj.getClass()) {
 			return false;
 		}

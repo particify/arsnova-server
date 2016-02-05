@@ -17,18 +17,16 @@
  */
 package de.thm.arsnova.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.services.IStatisticsService;
 import de.thm.arsnova.web.CacheControl;
 import de.thm.arsnova.web.DeprecatedApi;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Allows retrieval of several statistics such as the number of active users.

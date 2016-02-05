@@ -17,28 +17,41 @@
  */
 package de.thm.arsnova.dao;
 
-import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.Date;
-import java.util.StringTokenizer;
-
+import com.fourspaces.couchdb.Database;
+import com.fourspaces.couchdb.Document;
+import com.fourspaces.couchdb.Results;
+import com.fourspaces.couchdb.RowResult;
+import com.fourspaces.couchdb.View;
+import com.fourspaces.couchdb.ViewResults;
+import de.thm.arsnova.connector.model.Course;
+import de.thm.arsnova.domain.CourseScore;
+import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.DbUser;
+import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.InterposedReadingCount;
+import de.thm.arsnova.entities.LoggedIn;
+import de.thm.arsnova.entities.Motd;
+import de.thm.arsnova.entities.MotdList;
+import de.thm.arsnova.entities.PossibleAnswer;
+import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.SessionInfo;
+import de.thm.arsnova.entities.SortOrder;
+import de.thm.arsnova.entities.Statistics;
+import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.VisitedSession;
+import de.thm.arsnova.entities.transport.AnswerQueueElement;
+import de.thm.arsnova.entities.transport.ImportExportSession;
+import de.thm.arsnova.entities.transport.ImportExportSession.ImportExportQuestion;
+import de.thm.arsnova.events.NewAnswerEvent;
+import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.services.ISessionService;
 import net.sf.ezmorph.Morpher;
 import net.sf.ezmorph.MorpherRegistry;
 import net.sf.ezmorph.bean.BeanMorpher;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.util.JSONUtils;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopContext;
@@ -55,36 +68,19 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fourspaces.couchdb.Database;
-import com.fourspaces.couchdb.Document;
-import com.fourspaces.couchdb.Results;
-import com.fourspaces.couchdb.RowResult;
-import com.fourspaces.couchdb.View;
-import com.fourspaces.couchdb.ViewResults;
-
-import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.domain.CourseScore;
-import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.DbUser;
-import de.thm.arsnova.entities.InterposedQuestion;
-import de.thm.arsnova.entities.InterposedReadingCount;
-import de.thm.arsnova.entities.LoggedIn;
-import de.thm.arsnova.entities.PossibleAnswer;
-import de.thm.arsnova.entities.Question;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.SessionInfo;
-import de.thm.arsnova.entities.SortOrder;
-import de.thm.arsnova.entities.Statistics;
-import de.thm.arsnova.entities.User;
-import de.thm.arsnova.entities.VisitedSession;
-import de.thm.arsnova.entities.transport.AnswerQueueElement;
-import de.thm.arsnova.entities.transport.ImportExportSession;
-import de.thm.arsnova.entities.transport.ImportExportSession.ImportExportQuestion;
-import de.thm.arsnova.events.NewAnswerEvent;
-import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.services.ISessionService;
-import de.thm.arsnova.entities.Motd;
-import de.thm.arsnova.entities.MotdList;
+import java.io.IOException;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Database implementation based on CouchDB.
@@ -1777,8 +1773,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		final List<String> unanswered = new ArrayList<String>();
 
 		for (final Question question : questions) {
-			if (!answered.containsKey(question.get_id()) ||
-				(answered.containsKey(question.get_id()) && answered.get(question.get_id()) != question.getPiRound())) {
+			if (!answered.containsKey(question.get_id())
+					|| (answered.containsKey(question.get_id()) && answered.get(question.get_id()) != question.getPiRound())) {
 				unanswered.add(question.get_id());
 			}
 		}
@@ -2197,8 +2193,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		String viewString = "";
 		if ("lecture".equals(questionVariant)) {
 			viewString = "skill_question/lecture_question_subjects_by_session";
-		}
-		else {
+		} else {
 			viewString = "skill_question/preparation_question_subjects_by_session";
 		}
 		NovaView view = new NovaView(viewString);
@@ -2225,8 +2220,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		String viewString = "";
 		if ("lecture".equals(questionVariant)) {
 			viewString = "skill_question/lecture_question_ids_by_session_and_subject";
-		}
-		else {
+		} else {
 			viewString = "skill_question/preparation_question_ids_by_session_and_subject";
 		}
 		NovaView view = new NovaView(viewString);
@@ -2253,8 +2247,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		String viewString = "";
 		if ("preparation".equals(questionVariant)) {
 			viewString = "sort_order/preparation_question_sort_order_by_sessionid_and_subject";
-		}
-		else if ("lecture".equals(questionVariant)) {
+		} else if ("lecture".equals(questionVariant)) {
 			viewString = "sort_order/lecture_question_sort_order_by_sessionid_and_subject";
 		}
 
@@ -2279,7 +2272,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			List<String> sort = new ArrayList<String>();
 			JSONArray json = d.getJSONObject("value").getJSONArray("sortOrder");
 			int len = json.size();
-			for (int i=0; i<len; i++) {
+			for (int i = 0; i < len; i++) {
 				sort.add(json.getString(i));
 			}
 			sortOrder.setSortOrder(sort);
@@ -2288,7 +2281,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return sortOrder;
 	}
 
-	@CachePut(value = "sortorder", key ="#sortOrder.sessionId.concat('-').concat(#sortOrder.questionVariant).concat('-').concat(#sortOrder.subject)")
+	@CachePut(value = "sortorder", key = "#sortOrder.sessionId.concat('-').concat(#sortOrder.questionVariant).concat('-').concat(#sortOrder.subject)")
 	@Override
 	public SortOrder createOrUpdateSortOrder(SortOrder sortOrder) {
 		try {
@@ -2321,7 +2314,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return null;
 	}
 
-	@CacheEvict(value = "sortorder", key ="#sortOrder.sessionId.concat('-').concat(#sortOrder.questionVariant).concat('-').concat(#sortOrder.subject)")
+	@CacheEvict(value = "sortorder", key = "#sortOrder.sessionId.concat('-').concat(#sortOrder.questionVariant).concat('-').concat(#sortOrder.subject)")
 	@Override
 	public void deleteSortOrder(SortOrder sortOrder) {
 		try {
@@ -2538,7 +2531,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			if (null != id) {
 				d = database.getDocument(id, rev);
 			}
-			d.put("type","motdlist");
+			d.put("type", "motdlist");
 			d.put("username", motdlist.getUsername());
 			d.put("motdkeys", motdlist.getMotdkeys());
 

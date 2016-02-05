@@ -17,13 +17,11 @@
  */
 package de.thm.arsnova.services;
 
-import java.util.List;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
-
 import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.entities.MotdList;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * The functionality the motd service should provide.

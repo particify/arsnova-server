@@ -17,21 +17,6 @@
  */
 package de.thm.arsnova.services;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
 import de.thm.arsnova.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
@@ -56,6 +41,20 @@ import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.PayloadTooLargeException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Performs all session related operations.
@@ -444,8 +443,8 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	}
 
 	/**
-	 * 
-	 * @param session 
+	 *
+	 * @param session
 	 * @throws PayloadTooLargeException
 	 * @throws BadRequestException
 	 */

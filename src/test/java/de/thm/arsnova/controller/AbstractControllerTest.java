@@ -1,15 +1,14 @@
 package de.thm.arsnova.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import de.thm.arsnova.services.StubUserService;
 import org.junit.After;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import de.thm.arsnova.services.StubUserService;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class AbstractControllerTest {
 

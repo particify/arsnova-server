@@ -17,12 +17,12 @@
  */
 package de.thm.arsnova.entities;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * A question the teacher is asking.
@@ -567,8 +567,12 @@ public class Question implements Serializable {
 	@Override
 	public boolean equals(Object obj) {
 		// auto generated!
-		if (this == obj) return true;
-		if (obj == null) return false;
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
@@ -596,7 +600,7 @@ public class Question implements Serializable {
 	}
 
 	public void updateRoundStartVariables(Date start, Date end) {
-		if(this.getPiRound() == 1 && this.isPiRoundFinished()) {
+		if (this.getPiRound() == 1 && this.isPiRoundFinished()) {
 			this.setPiRound(2);
 		}
 
@@ -613,7 +617,7 @@ public class Question implements Serializable {
 	public void updateRoundManagementState() {
 		final long time = new Date().getTime();
 
-		if(time > this.getPiRoundEndTime() && this.isPiRoundActive()) {
+		if (time > this.getPiRoundEndTime() && this.isPiRoundActive()) {
 			this.setPiRoundEndTime(0);
 			this.setPiRoundStartTime(0);
 			this.setPiRoundActive(false);

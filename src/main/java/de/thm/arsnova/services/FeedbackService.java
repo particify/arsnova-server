@@ -17,21 +17,6 @@
  */
 package de.thm.arsnova.services;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
 import de.thm.arsnova.FeedbackStorage;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Feedback;
@@ -41,6 +26,19 @@ import de.thm.arsnova.events.DeleteFeedbackForSessionsEvent;
 import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Performs all feedback related operations.

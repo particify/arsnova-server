@@ -17,6 +17,8 @@
  */
 package de.thm.arsnova.controller;
 
+import de.thm.arsnova.services.IQuestionService;
+import de.thm.arsnova.web.DeprecatedApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +27,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import de.thm.arsnova.services.IQuestionService;
-import de.thm.arsnova.web.DeprecatedApi;
 
 /**
  * This controller forwards requests from deprecated URLs to their new controller, where the requests are handled.

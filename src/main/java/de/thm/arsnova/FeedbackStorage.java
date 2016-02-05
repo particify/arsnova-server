@@ -17,6 +17,12 @@
  */
 package de.thm.arsnova;
 
+import de.thm.arsnova.entities.Feedback;
+import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.User;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,13 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
-
-import de.thm.arsnova.entities.Feedback;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.User;
 
 /**
  * In-memory storage of feedback data.

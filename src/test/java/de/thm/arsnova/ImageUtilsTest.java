@@ -1,21 +1,18 @@
 package de.thm.arsnova;
 
-import de.thm.arsnova.ImageUtils;
-import static de.thm.arsnova.ImageUtils.IMAGE_PREFIX_START;
-import static de.thm.arsnova.ImageUtils.IMAGE_PREFIX_MIDDLE;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+
+import static de.thm.arsnova.ImageUtils.IMAGE_PREFIX_MIDDLE;
+import static de.thm.arsnova.ImageUtils.IMAGE_PREFIX_START;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration

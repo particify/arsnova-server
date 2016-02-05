@@ -1,6 +1,17 @@
 package de.thm.arsnova.services;
 
-import static org.junit.Assert.assertEquals;
+import de.thm.arsnova.entities.User;
+import org.jasig.cas.client.authentication.AttributePrincipalImpl;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
+import org.scribe.up.profile.google.Google2AttributesDefinition;
+import org.scribe.up.profile.google.Google2Profile;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -14,19 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.jasig.cas.client.authentication.AttributePrincipalImpl;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
-import org.scribe.up.profile.google.Google2AttributesDefinition;
-import org.scribe.up.profile.google.Google2Profile;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.test.context.ActiveProfiles;
-
-import de.thm.arsnova.entities.User;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(BlockJUnit4ClassRunner.class)
 @ActiveProfiles("test")

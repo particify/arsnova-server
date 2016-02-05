@@ -17,10 +17,10 @@
  */
 package de.thm.arsnova.events;
 
-import java.util.Set;
-
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+
+import java.util.Set;
 
 /**
  * Fires whenever the feedback of a specific user has been reset.

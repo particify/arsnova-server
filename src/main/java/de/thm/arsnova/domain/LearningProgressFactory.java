@@ -17,44 +17,13 @@
  */
 package de.thm.arsnova.domain;
 
+import de.thm.arsnova.dao.IDatabaseDao;
+import de.thm.arsnova.events.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Component;
-
-import de.thm.arsnova.dao.IDatabaseDao;
-import de.thm.arsnova.events.ChangeLearningProgressEvent;
-import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
-import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
-import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
-import de.thm.arsnova.events.DeleteAllQuestionsEvent;
-import de.thm.arsnova.events.DeleteAnswerEvent;
-import de.thm.arsnova.events.DeleteFeedbackForSessionsEvent;
-import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
-import de.thm.arsnova.events.DeleteQuestionEvent;
-import de.thm.arsnova.events.DeleteSessionEvent;
-import de.thm.arsnova.events.FeatureChangeEvent;
-import de.thm.arsnova.events.LockFeedbackEvent;
-import de.thm.arsnova.events.LockQuestionEvent;
-import de.thm.arsnova.events.LockQuestionsEvent;
-import de.thm.arsnova.events.LockVoteEvent;
-import de.thm.arsnova.events.LockVotesEvent;
-import de.thm.arsnova.events.NewAnswerEvent;
-import de.thm.arsnova.events.NewFeedbackEvent;
-import de.thm.arsnova.events.NewInterposedQuestionEvent;
-import de.thm.arsnova.events.NewQuestionEvent;
-import de.thm.arsnova.events.UnlockQuestionEvent;
-import de.thm.arsnova.events.UnlockQuestionsEvent;
-import de.thm.arsnova.events.NewSessionEvent;
-import de.thm.arsnova.events.NovaEventVisitor;
-import de.thm.arsnova.events.PiRoundCancelEvent;
-import de.thm.arsnova.events.PiRoundDelayedStartEvent;
-import de.thm.arsnova.events.PiRoundEndEvent;
-import de.thm.arsnova.events.PiRoundResetEvent;
-import de.thm.arsnova.events.StatusSessionEvent;
-import de.thm.arsnova.events.UnlockVoteEvent;
-import de.thm.arsnova.events.UnlockVotesEvent;
 
 /**
  * Creates a learning progress implementation.
@@ -82,10 +51,10 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 	}
 
 	@Override
-	public void visit(NewInterposedQuestionEvent event) {}
+	public void visit(NewInterposedQuestionEvent event) { }
 
 	@Override
-	public void visit(DeleteInterposedQuestionEvent deleteInterposedQuestionEvent) {}
+	public void visit(DeleteInterposedQuestionEvent deleteInterposedQuestionEvent) { }
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override
@@ -166,31 +135,31 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 	}
 
 	@Override
-	public void visit(NewFeedbackEvent newFeedbackEvent) {}
+	public void visit(NewFeedbackEvent newFeedbackEvent) { }
 
 	@Override
-	public void visit(DeleteFeedbackForSessionsEvent deleteFeedbackEvent) {}
+	public void visit(DeleteFeedbackForSessionsEvent deleteFeedbackEvent) { }
 
 	@Override
-	public void visit(StatusSessionEvent statusSessionEvent) {}
+	public void visit(StatusSessionEvent statusSessionEvent) { }
 
 	@Override
-	public void visit(ChangeLearningProgressEvent changeLearningProgress) {}
+	public void visit(ChangeLearningProgressEvent changeLearningProgress) { }
 
 	@Override
-	public void visit(PiRoundDelayedStartEvent piRoundDelayedStartEvent) {}
+	public void visit(PiRoundDelayedStartEvent piRoundDelayedStartEvent) { }
 
 	@Override
-	public void visit(PiRoundEndEvent piRoundEndEvent) {}
+	public void visit(PiRoundEndEvent piRoundEndEvent) { }
 
 	@Override
-	public void visit(PiRoundCancelEvent piRoundCancelEvent) {}
+	public void visit(PiRoundCancelEvent piRoundCancelEvent) { }
 
 	@Override
-	public void visit(NewSessionEvent event) {}
+	public void visit(NewSessionEvent event) { }
 
 	@Override
-	public void visit(DeleteSessionEvent event) {}
+	public void visit(DeleteSessionEvent event) { }
 
 	@Override
 	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
@@ -198,21 +167,21 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 	}
 
 	@Override
-	public void visit(LockVoteEvent lockVoteEvent) {}
+	public void visit(LockVoteEvent lockVoteEvent) { }
 
 	@Override
-	public void visit(LockVotesEvent lockVotesEvent) {}
+	public void visit(LockVotesEvent lockVotesEvent) { }
 
 	@Override
-	public void visit(UnlockVoteEvent unlockVoteEvent) {}
+	public void visit(UnlockVoteEvent unlockVoteEvent) { }
 
 	@Override
-	public void visit(UnlockVotesEvent unlockVotesEvent) {}
+	public void visit(UnlockVotesEvent unlockVotesEvent) { }
 
 	@Override
-	public void visit(FeatureChangeEvent featureChangeEvent) {}
+	public void visit(FeatureChangeEvent featureChangeEvent) { }
 
 	@Override
-	public void visit(LockFeedbackEvent lockFeedbackEvent) {}
+	public void visit(LockFeedbackEvent lockFeedbackEvent) { }
 
 }

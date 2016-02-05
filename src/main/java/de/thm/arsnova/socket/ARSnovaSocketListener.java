@@ -17,12 +17,11 @@
  */
 package de.thm.arsnova.socket;
 
+import de.thm.arsnova.events.NovaEvent;
+import de.thm.arsnova.events.NovaEventVisitor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
-
-import de.thm.arsnova.events.NovaEvent;
-import de.thm.arsnova.events.NovaEventVisitor;
 
 /**
  * An external Listener is required because otherwise the event methods are not called through a Spring proxy.

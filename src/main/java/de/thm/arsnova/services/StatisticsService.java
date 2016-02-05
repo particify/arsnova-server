@@ -17,11 +17,10 @@
  */
 package de.thm.arsnova.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Statistics;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Performs all statistics related operations.

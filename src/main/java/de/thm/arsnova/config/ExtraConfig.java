@@ -17,6 +17,11 @@
  */
 package de.thm.arsnova.config;
 
+import de.thm.arsnova.ImageUtils;
+import de.thm.arsnova.connector.client.ConnectorClient;
+import de.thm.arsnova.connector.client.ConnectorClientImpl;
+import de.thm.arsnova.socket.ARSnovaSocket;
+import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
@@ -31,16 +36,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import org.springframework.context.annotation.Import;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-
-import de.thm.arsnova.connector.client.ConnectorClient;
-import de.thm.arsnova.connector.client.ConnectorClientImpl;
-import de.thm.arsnova.socket.ARSnovaSocket;
-import de.thm.arsnova.socket.ARSnovaSocketIOServer;
-import de.thm.arsnova.ImageUtils;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 
 /**

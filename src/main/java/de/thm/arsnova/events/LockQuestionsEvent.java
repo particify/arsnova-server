@@ -17,10 +17,10 @@
  */
 package de.thm.arsnova.events;
 
-import java.util.List;
-
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
+
+import java.util.List;
 
 /**
  * Fires whenever a set of questions are disabled, i.e., they are hidden from students.

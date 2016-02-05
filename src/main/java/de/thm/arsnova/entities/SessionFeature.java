@@ -59,7 +59,7 @@ public class SessionFeature {
 		}
 	}
 
-	public SessionFeature() {}
+	public SessionFeature() { }
 
 	public boolean isLecture() {
 		return lecture;

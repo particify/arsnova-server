@@ -17,25 +17,6 @@
  */
 package de.thm.arsnova.controller;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.connector.model.UserRole;
@@ -43,6 +24,20 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.NotImplementedException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.IUserService;
+import io.swagger.annotations.ApiParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Provides access to a user's courses in an LMS such as Moodle.
@@ -60,7 +55,7 @@ public class CourseController extends AbstractController {
 
 	@RequestMapping(value = "/mycourses", method = RequestMethod.GET)
 	public List<Course> myCourses(
-			@ApiParam(value="sort my courses by name", required=true)
+			@ApiParam(value = "sort my courses by name", required = true)
 			@RequestParam(value = "sortby", defaultValue = "name") final String sortby
 			) {
 

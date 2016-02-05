@@ -17,17 +17,8 @@
  */
 package de.thm.arsnova.controller;
 
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-
+import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.exceptions.NoContentException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -43,8 +34,15 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
-import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.exceptions.NoContentException;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Default controller that handles requests which have not set a path.
@@ -55,7 +53,7 @@ public class WelcomeController extends AbstractController {
 	@Value("${mobile.path}")
 	private String mobileContextPath;
 
-	@Resource(name="versionInfoProperties")
+	@Resource(name = "versionInfoProperties")
 	private Properties versionInfoProperties;
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)

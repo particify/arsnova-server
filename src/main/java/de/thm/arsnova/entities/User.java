@@ -17,8 +17,7 @@
  */
 package de.thm.arsnova.entities;
 
-import java.io.Serializable;
-
+import de.thm.arsnova.services.UserSessionService;
 import org.jasig.cas.client.authentication.AttributePrincipal;
 import org.scribe.up.profile.facebook.FacebookProfile;
 import org.scribe.up.profile.google.Google2Profile;
@@ -26,7 +25,7 @@ import org.scribe.up.profile.twitter.TwitterProfile;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
-import de.thm.arsnova.services.UserSessionService;
+import java.io.Serializable;
 
 /**
  * Represents a user.

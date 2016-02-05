@@ -17,6 +17,29 @@
  */
 package de.thm.arsnova.services;
 
+import de.thm.arsnova.ImageUtils;
+import de.thm.arsnova.dao.IDatabaseDao;
+import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.InterposedReadingCount;
+import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.SortOrder;
+import de.thm.arsnova.entities.User;
+import de.thm.arsnova.events.*;
+import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.exceptions.ForbiddenException;
+import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.exceptions.UnauthorizedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,51 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import de.thm.arsnova.ImageUtils;
-import de.thm.arsnova.dao.IDatabaseDao;
-import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.InterposedQuestion;
-import de.thm.arsnova.entities.InterposedReadingCount;
-import de.thm.arsnova.entities.Question;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.SortOrder;
-import de.thm.arsnova.entities.User;
-import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
-import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
-import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
-import de.thm.arsnova.events.DeleteAllQuestionsEvent;
-import de.thm.arsnova.events.DeleteAnswerEvent;
-import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
-import de.thm.arsnova.events.DeleteQuestionEvent;
-import de.thm.arsnova.events.LockQuestionEvent;
-import de.thm.arsnova.events.LockQuestionsEvent;
-import de.thm.arsnova.events.LockVoteEvent;
-import de.thm.arsnova.events.LockVotesEvent;
-import de.thm.arsnova.events.NewAnswerEvent;
-import de.thm.arsnova.events.NewInterposedQuestionEvent;
-import de.thm.arsnova.events.NewQuestionEvent;
-import de.thm.arsnova.events.UnlockQuestionEvent;
-import de.thm.arsnova.events.UnlockQuestionsEvent;
-import de.thm.arsnova.events.NovaEvent;
-import de.thm.arsnova.events.PiRoundCancelEvent;
-import de.thm.arsnova.events.PiRoundDelayedStartEvent;
-import de.thm.arsnova.events.PiRoundEndEvent;
-import de.thm.arsnova.events.PiRoundResetEvent;
-import de.thm.arsnova.events.UnlockVoteEvent;
-import de.thm.arsnova.events.UnlockVotesEvent;
-import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.exceptions.ForbiddenException;
-import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.exceptions.UnauthorizedException;
 
 /**
  * Performs all question, interposed question, and answer related operations.
@@ -167,12 +145,10 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				newQSortOrder.setSortOrder(s);
 				databaseDao.createOrUpdateSortOrder(newQSortOrder);
 				addToSortOrder(subjectSortOrder, question.getSubject());
-			}
-			else {
+			} else {
 				addToSortOrder(questionSortOrder, question.get_id());
 			}
-		}
-		else {
+		} else {
 			createSortOrder(session, question.getQuestionVariant(), "");
 		}
 
@@ -246,7 +222,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final Question question = databaseDao.getQuestion(questionId);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 
-		if(null == user) {
+		if (null == user) {
 			user = userService.getCurrentUser();
 		}
 
@@ -294,7 +270,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		cancelDelayedPiRoundChange(questionId);
 		question.resetRoundManagementState();
 
-		if(question.getPiRound() == 1) {
+		if (question.getPiRound() == 1) {
 			question.setPiRoundFinished(false);
 		} else {
 			question.setPiRound(1);
@@ -309,7 +285,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	public void cancelDelayedPiRoundChange(final String questionId) {
 		Timer timer = timerList.get(questionId);
 
-		if(null != timer) {
+		if (null != timer) {
 			timer.cancel();
 			timerList.remove(questionId);
 			timer.purge();
@@ -1145,13 +1121,13 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		List<String> tmpList = sortOrder.getSortOrder();
 		tmpList.add(toBeAdded);
 		sortOrder.setSortOrder(tmpList);
-		if("alphabet".equals(sortOrder.getSortType())) {
+		if ("alphabet".equals(sortOrder.getSortType())) {
 			sortOrder = alphabeticalSort(sortOrder);
 		}
 		return databaseDao.createOrUpdateSortOrder(sortOrder);
 	}
 
-	public void deleteQuestionFromSortOrder(Question question){
+	public void deleteQuestionFromSortOrder(Question question) {
 		SortOrder sortOrder = databaseDao.getSortOrder(question.getSessionId(), question.getQuestionVariant(), question.getSubject());
 		if (sortOrder != null) {
 			List<String> tempSortOrder = sortOrder.getSortOrder();
@@ -1165,12 +1141,10 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				subjectSortOrder.setSortOrder(tempSubSort);
 				if (subjectSortOrder.getSortOrder().isEmpty()) {
 					databaseDao.deleteSortOrder(subjectSortOrder);
-				}
-				else {
+				} else {
 					databaseDao.createOrUpdateSortOrder(subjectSortOrder);
 				}
-			}
-			else {
+			} else {
 				databaseDao.createOrUpdateSortOrder(sortOrder);
 			}
 		}
@@ -1235,8 +1209,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				createSortOrder(session, questionVariant, sub);
 			}
 			return databaseDao.createOrUpdateSortOrder(subjectSortOrder);
-		}
-		else {
+		} else {
 			SortOrder sortOrder = new SortOrder();
 			sortOrder.setSessionId(session.get_id());
 			sortOrder.setSubject(subject);
@@ -1248,7 +1221,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 	}
 
-	public SortOrder alphabeticalSort(SortOrder sortOrder){
+	public SortOrder alphabeticalSort(SortOrder sortOrder) {
 		if (sortOrder.getSortOrder() == null) {
 			return null;
 		}
@@ -1260,8 +1233,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			Collections.sort(subjects);
 			sortOrder.setSortOrder(subjects);
 			return sortOrder;
-		}
-		else {
+		} else {
 			Hashtable<String, String> hash = new Hashtable<>();
 			for (String qid : sortOrder.getSortOrder()) {
 				Question question = getQuestion(qid);

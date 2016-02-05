@@ -17,25 +17,6 @@
  */
 package de.thm.arsnova.socket;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.annotation.PreDestroy;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Required;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
-
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.Configuration;
 import com.corundumstudio.socketio.SocketConfig;
@@ -46,41 +27,10 @@ import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
 import com.corundumstudio.socketio.protocol.Packet;
 import com.corundumstudio.socketio.protocol.PacketType;
-
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.LearningProgressOptions;
-import de.thm.arsnova.events.ChangeLearningProgressEvent;
-import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
-import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
-import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
-import de.thm.arsnova.events.DeleteAllQuestionsEvent;
-import de.thm.arsnova.events.DeleteAnswerEvent;
-import de.thm.arsnova.events.DeleteFeedbackForSessionsEvent;
-import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
-import de.thm.arsnova.events.DeleteQuestionEvent;
-import de.thm.arsnova.events.DeleteSessionEvent;
-import de.thm.arsnova.events.FeatureChangeEvent;
-import de.thm.arsnova.events.LockFeedbackEvent;
-import de.thm.arsnova.events.LockQuestionEvent;
-import de.thm.arsnova.events.LockQuestionsEvent;
-import de.thm.arsnova.events.LockVoteEvent;
-import de.thm.arsnova.events.LockVotesEvent;
-import de.thm.arsnova.events.NewAnswerEvent;
-import de.thm.arsnova.events.NewFeedbackEvent;
-import de.thm.arsnova.events.NewInterposedQuestionEvent;
-import de.thm.arsnova.events.NewQuestionEvent;
-import de.thm.arsnova.events.UnlockQuestionEvent;
-import de.thm.arsnova.events.UnlockQuestionsEvent;
-import de.thm.arsnova.events.NewSessionEvent;
-import de.thm.arsnova.events.NovaEventVisitor;
-import de.thm.arsnova.events.PiRoundCancelEvent;
-import de.thm.arsnova.events.PiRoundDelayedStartEvent;
-import de.thm.arsnova.events.PiRoundEndEvent;
-import de.thm.arsnova.events.PiRoundResetEvent;
-import de.thm.arsnova.events.StatusSessionEvent;
-import de.thm.arsnova.events.UnlockVoteEvent;
-import de.thm.arsnova.events.UnlockVotesEvent;
+import de.thm.arsnova.events.*;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
@@ -91,6 +41,23 @@ import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.message.Feedback;
 import de.thm.arsnova.socket.message.Question;
 import de.thm.arsnova.socket.message.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Required;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PreDestroy;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Web socket implementation based on Socket.io.
@@ -677,8 +644,8 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	}
 
 	@Override
-	public void visit(NewSessionEvent event) {}
+	public void visit(NewSessionEvent event) { }
 
 	@Override
-	public void visit(DeleteSessionEvent event) {}
+	public void visit(DeleteSessionEvent event) { }
 }

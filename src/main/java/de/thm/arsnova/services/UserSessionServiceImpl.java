@@ -17,15 +17,14 @@
  */
 package de.thm.arsnova.services;
 
-import java.io.Serializable;
-import java.util.UUID;
-
+import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.User;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.User;
+import java.io.Serializable;
+import java.util.UUID;
 
 /**
  * This service is used to assign and check for a specific role.

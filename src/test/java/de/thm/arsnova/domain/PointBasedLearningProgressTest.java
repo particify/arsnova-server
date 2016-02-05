@@ -17,17 +17,16 @@
  */
 package de.thm.arsnova.domain;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.TestUser;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class PointBasedLearningProgressTest {
 

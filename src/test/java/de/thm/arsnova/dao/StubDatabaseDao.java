@@ -18,11 +18,6 @@
  */
 package de.thm.arsnova.dao;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.Answer;
@@ -31,17 +26,22 @@ import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.LoggedIn;
+import de.thm.arsnova.entities.Motd;
+import de.thm.arsnova.entities.MotdList;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.entities.Motd;
-import de.thm.arsnova.entities.MotdList;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class StubDatabaseDao implements IDatabaseDao {
 

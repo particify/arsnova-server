@@ -17,12 +17,20 @@
  */
 package de.thm.arsnova.controller;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.servlet.http.HttpServletResponse;
-
+import de.thm.arsnova.PaginationListDecorator;
+import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.exceptions.ForbiddenException;
+import de.thm.arsnova.exceptions.NoContentException;
+import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.services.IQuestionService;
+import de.thm.arsnova.web.DeprecatedApi;
+import de.thm.arsnova.web.Pagination;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,21 +43,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-
-import de.thm.arsnova.PaginationListDecorator;
-import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.Question;
-import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.exceptions.ForbiddenException;
-import de.thm.arsnova.exceptions.NoContentException;
-import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.services.IQuestionService;
-import de.thm.arsnova.web.DeprecatedApi;
-import de.thm.arsnova.web.Pagination;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Handles requests related to questions teachers are asking their students.
@@ -131,7 +128,7 @@ public class LecturerQuestionController extends PaginationController {
 			@RequestParam(value = "time", defaultValue = "0", required = false) final int time
 			) {
 
-		if(time == 0) {
+		if (time == 0) {
 			questionService.startNewPiRound(questionId, null);
 		} else {
 			questionService.startNewPiRoundDelayed(questionId, time);
@@ -624,7 +621,7 @@ public class LecturerQuestionController extends PaginationController {
 			@RequestBody String[] sortOrder
 			) {
 		try {
-			questionService.setSort(sessionkey, "", sorttype, ispreparation, sortOrder) ;
+			questionService.setSort(sessionkey, "", sorttype, ispreparation, sortOrder);
 		} catch (final Exception e) {
 			throw new BadRequestException();
 		}
@@ -652,7 +649,7 @@ public class LecturerQuestionController extends PaginationController {
 			throw new BadRequestException();
 		}
 	}
-    
+
 	@RequestMapping(value = "/questionsort", method = RequestMethod.GET)
 	public String getQuestionSortType(
 			@RequestParam(required = true) final String sessionkey,

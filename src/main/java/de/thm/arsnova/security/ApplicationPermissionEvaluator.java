@@ -17,29 +17,26 @@
  */
 package de.thm.arsnova.security;
 
-import java.io.Serializable;
-
-import java.util.Arrays;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.scribe.up.profile.facebook.FacebookProfile;
-import org.scribe.up.profile.google.Google2Profile;
-import org.scribe.up.profile.twitter.TwitterProfile;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.PermissionEvaluator;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-
 import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationToken;
-
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.UnauthorizedException;
+import org.scribe.up.profile.facebook.FacebookProfile;
+import org.scribe.up.profile.google.Google2Profile;
+import org.scribe.up.profile.twitter.TwitterProfile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.PermissionEvaluator;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+
+import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * Provides access control methods that can be used in annotations.

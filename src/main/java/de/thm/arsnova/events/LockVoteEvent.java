@@ -17,10 +17,10 @@
  */
 package de.thm.arsnova.events;
 
-import java.util.HashMap;
-
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
+
+import java.util.HashMap;
 
 /**
  * Fires whenever voting on a question is disabled.
