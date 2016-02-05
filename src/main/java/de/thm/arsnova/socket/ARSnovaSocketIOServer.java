@@ -529,10 +529,8 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 		final String sessionKey = event.getSession().getKeyword();
 		this.reportAnswersToLecturerQuestionAvailable(event.getSession(), new Question(event.getQuestion()));
 		broadcastInSession(sessionKey, "countQuestionAnswersByQuestionId", questionService.getAnswerAndAbstentionCountInternal(event.getQuestion().get_id()));
-
-		// TODO: These events are currently unused. Uncomment once the client does something with the data.
-		//broadcastInSession(sessionKey, "countLectureQuestionAnswers", questionService.countLectureQuestionAnswersInternal(sessionKey));
-		//broadcastInSession(sessionKey, "countPreparationQuestionAnswers", questionService.countPreparationQuestionAnswersInternal(sessionKey));
+		broadcastInSession(sessionKey, "countLectureQuestionAnswers", questionService.countLectureQuestionAnswersInternal(sessionKey));
+		broadcastInSession(sessionKey, "countPreparationQuestionAnswers", questionService.countPreparationQuestionAnswersInternal(sessionKey));
 
 		// Update the unanswered count for the question variant that was answered.
 		final de.thm.arsnova.entities.Question question = event.getQuestion();
