@@ -82,9 +82,6 @@ public class ConfigurationController extends AbstractController {
 	@Value("${features.mathjax.src:}")
 	private String mathJaxSrc;
 
-	@Value("${features.students-own-questions.enabled:false}")
-	private String studentsOwnQuestions;
-
 	@Value("${features.freetext-imageanswer.enabled:false}")
 	private String imageAnswerEnabled;
 
@@ -223,7 +220,6 @@ public class ConfigurationController extends AbstractController {
 		features.put("mathJax", "true".equals(mathJaxEnabled));
 		/* Keep the markdown property for now since the frontend still depends on it */
 		features.put("markdown", true);
-		features.put("studentsOwnQuestions", "true".equals(studentsOwnQuestions));
 		features.put("imageAnswer", "true".equals(imageAnswerEnabled));
 		features.put("gridSquare", "true".equals(gridSquareEnabled));
 		features.put("sessionImportExport", "true".equals(sessionImportExportEnabled));

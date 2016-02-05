@@ -181,7 +181,6 @@ features.mathjax.src=//cdn.mathjax.org/mathjax/2.4-latest/MathJax.js
 # tested in a production environment over a longer time frame and/or their
 # behavior will change in future releases.
 #
-features.students-own-questions.enabled=true
 features.freetext-imageanswer.enabled=true
 features.question-format.grid-square.enabled=true
 
