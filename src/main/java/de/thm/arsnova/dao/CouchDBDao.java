@@ -2193,8 +2193,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		String viewString = "";
 		if ("lecture".equals(questionVariant)) {
 			viewString = "skill_question/lecture_question_subjects_by_session";
-		}
-		else {
+		} else {
 			viewString = "skill_question/preparation_question_subjects_by_session";
 		}
 		NovaView view = new NovaView(viewString);
@@ -2221,8 +2220,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		String viewString = "";
 		if ("lecture".equals(questionVariant)) {
 			viewString = "skill_question/lecture_question_ids_by_session_and_subject";
-		}
-		else {
+		} else {
 			viewString = "skill_question/preparation_question_ids_by_session_and_subject";
 		}
 		NovaView view = new NovaView(viewString);
@@ -2249,8 +2247,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		String viewString = "";
 		if ("preparation".equals(questionVariant)) {
 			viewString = "sort_order/preparation_question_sort_order_by_sessionid_and_subject";
-		}
-		else if ("lecture".equals(questionVariant)) {
+		} else if ("lecture".equals(questionVariant)) {
 			viewString = "sort_order/lecture_question_sort_order_by_sessionid_and_subject";
 		}
 

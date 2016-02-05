@@ -75,12 +75,10 @@ public class MotdController extends AbstractController {
 		if (adminview) {
 			if (sessionkey.equals("null")) {
 				motds = motdService.getAdminMotds();
-			}
-			else {
+			} else {
 				motds = motdService.getAllSessionMotds(sessionkey);
 			}
-		}
-		else {
+		} else {
 			motds = motdService.getCurrentMotds(client, audience, sessionkey);
 		}
 		return motds;
@@ -101,8 +99,7 @@ public class MotdController extends AbstractController {
 			Motd newMotd = new Motd();
 			if (motd.getAudience().equals("session") && motd.getSessionkey() != null) {
 				newMotd = motdService.saveSessionMotd(motd.getSessionkey(), motd);
-			}
-			else {
+			} else {
 				newMotd = motdService.saveMotd(motd);
 			}
 			if (newMotd == null) {
@@ -110,8 +107,7 @@ public class MotdController extends AbstractController {
 				return null;
 			}
 			return newMotd;
-		}
-		else {
+		} else {
 			response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
 			return null;
 		}
@@ -125,8 +121,7 @@ public class MotdController extends AbstractController {
 			) {
 		if (motd.getAudience().equals("session") && motd.getSessionkey() != null) {
 			return motdService.updateSessionMotd(motd.getSessionkey(), motd);
-		}
-		else {
+		} else {
 			return motdService.updateMotd(motd);
 		}
 	}
@@ -137,8 +132,7 @@ public class MotdController extends AbstractController {
 		Motd motd = motdService.getMotd(motdkey);
 		if (motd.getAudience().equals("session")) {
 			motdService.deleteSessionMotd(motd.getSessionkey(), motd);
-		}
-		else {
+		} else {
 			motdService.deleteMotd(motd);
 		}
 	}

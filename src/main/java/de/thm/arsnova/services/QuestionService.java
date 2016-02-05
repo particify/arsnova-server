@@ -145,12 +145,10 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				newQSortOrder.setSortOrder(s);
 				databaseDao.createOrUpdateSortOrder(newQSortOrder);
 				addToSortOrder(subjectSortOrder, question.getSubject());
-			}
-			else {
+			} else {
 				addToSortOrder(questionSortOrder, question.get_id());
 			}
-		}
-		else {
+		} else {
 			createSortOrder(session, question.getQuestionVariant(), "");
 		}
 
@@ -1143,12 +1141,10 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				subjectSortOrder.setSortOrder(tempSubSort);
 				if (subjectSortOrder.getSortOrder().isEmpty()) {
 					databaseDao.deleteSortOrder(subjectSortOrder);
-				}
-				else {
+				} else {
 					databaseDao.createOrUpdateSortOrder(subjectSortOrder);
 				}
-			}
-			else {
+			} else {
 				databaseDao.createOrUpdateSortOrder(sortOrder);
 			}
 		}
@@ -1213,8 +1209,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				createSortOrder(session, questionVariant, sub);
 			}
 			return databaseDao.createOrUpdateSortOrder(subjectSortOrder);
-		}
-		else {
+		} else {
 			SortOrder sortOrder = new SortOrder();
 			sortOrder.setSessionId(session.get_id());
 			sortOrder.setSubject(subject);
@@ -1238,8 +1233,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			Collections.sort(subjects);
 			sortOrder.setSortOrder(subjects);
 			return sortOrder;
-		}
-		else {
+		} else {
 			Hashtable<String, String> hash = new Hashtable<>();
 			for (String qid : sortOrder.getSortOrder()) {
 				Question question = getQuestion(qid);
