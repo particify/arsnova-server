@@ -16,14 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.thm.arsnova.entities;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
+import java.io.Serializable;
 
 /**
  * Contains fields that describe which specific feature is activated for a session.
  */
 @ApiModel(value = "session feature", description = "the session feature entity")
-public class SessionFeature {
+public class SessionFeature implements Serializable {
 
 	private boolean custom = true;
 	private boolean clicker = false;

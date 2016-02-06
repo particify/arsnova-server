@@ -19,11 +19,14 @@ package de.thm.arsnova.entities;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
+import java.io.Serializable;
+
 /**
  * A session's settings regarding the calculation of the learning progress.
  */
 @ApiModel(value = "learning progress options", description = "the learning progress entity")
-public class LearningProgressOptions {
+public class LearningProgressOptions implements Serializable {
 
 	private String type = "questions";
 

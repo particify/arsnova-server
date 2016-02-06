@@ -21,11 +21,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.io.Serializable;
+
 /**
  * A question the user is asking the teacher. Also known as feedback or audience question.
  */
 @ApiModel(value = "audiencequestion", description = "the interposed question entity")
-public class InterposedQuestion {
+public class InterposedQuestion implements Serializable {
 
 	private String _id;
 	private String _rev;

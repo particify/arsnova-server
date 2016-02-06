@@ -23,6 +23,7 @@ import de.thm.arsnova.entities.User;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -30,7 +31,7 @@ import java.util.Date;
  */
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 @ApiModel(value = "session/answer", description = "the Answer API")
-public class Answer {
+public class Answer implements Serializable {
 
 	private String answerSubject;
 

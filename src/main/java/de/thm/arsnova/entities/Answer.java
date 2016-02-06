@@ -21,13 +21,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.io.Serializable;
+
 /**
  * Both a regular (single choice, evaluation, etc.) as well as a freetext answer.
  *
  * This class has additional fields to transport generated answer statistics.
  */
 @ApiModel(value = "Answer", description = "the answer entity")
-public class Answer {
+public class Answer implements Serializable {
 
 	private String _id;
 	private String _rev;

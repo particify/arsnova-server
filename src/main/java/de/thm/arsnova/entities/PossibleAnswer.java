@@ -20,11 +20,13 @@ package de.thm.arsnova.entities;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.io.Serializable;
+
 /**
  * This class represents an answer option of a question.
  */
 @ApiModel(value = "session/answer", description = "the possible answer entity")
-public class PossibleAnswer {
+public class PossibleAnswer implements Serializable {
 
 	private String id;
 	private String text;
