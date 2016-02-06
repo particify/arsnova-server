@@ -226,7 +226,7 @@
 		<dependency>
 			<groupId>com.corundumstudio.socketio</groupId>
 			<artifactId>netty-socketio</artifactId>
-			<version>1.7.8</version>
+			<version>1.7.9</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.inject</groupId>
@@ -290,7 +290,7 @@
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-annotations</artifactId>
-			<version>1.5.6</version>
+			<version>1.5.7</version>
 		</dependency>
 	</dependencies>
 
