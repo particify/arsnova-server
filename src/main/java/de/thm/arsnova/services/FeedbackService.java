@@ -47,6 +47,7 @@ import java.util.Set;
 public class FeedbackService implements IFeedbackService, ApplicationEventPublisherAware {
 
 	private static final int DEFAULT_SCHEDULER_DELAY = 5000;
+	private static final double Z_THRESHOLD = 0.1;
 
 	/**
 	 * minutes, after which the feedback is deleted
@@ -152,7 +153,7 @@ public class FeedbackService implements IFeedbackService, ApplicationEventPublis
 		final double sum = values.get(Feedback.FEEDBACK_OK) + values.get(Feedback.FEEDBACK_SLOWER) * 2
 				+ values.get(Feedback.FEEDBACK_AWAY) * 3;
 
-		if (count == 0) {
+		if (Math.abs(count) < Z_THRESHOLD) {
 			throw new NoContentException();
 		}
 		return sum / count;
