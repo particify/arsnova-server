@@ -37,7 +37,10 @@ public class Answer implements Serializable {
 	private String sessionId;
 	private String questionId;
 	private String answerText;
+	private String answerTextRaw;
 	private String answerSubject;
+	private double freeTextScore;
+	private boolean successfulFreeTextAnswer;
 	private String questionVariant;
 	private int questionValue;
 	private int piRound;
@@ -108,6 +111,14 @@ public class Answer implements Serializable {
 		this.answerText = answerText;
 	}
 
+	public final String getAnswerTextRaw() {
+		return this.answerTextRaw;
+	}
+
+	public final void setAnswerTextRaw(final String answerTextRaw) {
+		this.answerTextRaw = answerTextRaw;
+	}
+
 	@ApiModelProperty(required = true, value = "the answer subject")
 	public final String getAnswerSubject() {
 		return answerSubject;
@@ -115,6 +126,22 @@ public class Answer implements Serializable {
 
 	public final void setAnswerSubject(final String answerSubject) {
 		this.answerSubject = answerSubject;
+	}
+
+	public final double getFreeTextScore() {
+		return this.freeTextScore;
+	}
+
+	public final void setFreeTextScore(final double freeTextScore) {
+		this.freeTextScore = freeTextScore;
+	}
+
+	public final boolean isSuccessfulFreeTextAnswer() {
+		return this.successfulFreeTextAnswer;
+	}
+
+	public final void setSuccessfulFreeTextAnswer(final boolean successfulFreeTextAnswer) {
+		this.successfulFreeTextAnswer = successfulFreeTextAnswer;
 	}
 
 	@ApiModelProperty(required = true, value = "the peer instruction round nr.")

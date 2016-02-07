@@ -732,6 +732,15 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		Answer theAnswer = answer.generateAnswerEntity(user, question);
 		if ("freetext".equals(question.getQuestionType())) {
 			imageUtils.generateThumbnailImage(theAnswer);
+			theAnswer.setAnswerTextRaw(new String(theAnswer.getAnswerText()));
+
+			if (question.isStrictMode()) {
+				question.checkTextStricktOptions(theAnswer);
+			}
+			if (question.isFixedAnswer()) {
+				theAnswer.setFreeTextScore(question.evaluateCorrectAnswerFixedText(theAnswer.getAnswerTextRaw()));
+				theAnswer.setSuccessfulFreeTextAnswer(question.isSuccessfulFreeTextAnswer(theAnswer.getAnswerTextRaw()));
+			}
 		}
 
 		return databaseDao.saveAnswer(theAnswer, user, question, getSession(question.getSessionKeyword()));
@@ -749,6 +758,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final Question question = getQuestion(answer.getQuestionId());
 		if ("freetext".equals(question.getQuestionType())) {
 			imageUtils.generateThumbnailImage(realAnswer);
+			question.checkTextStricktOptions(realAnswer);
 		}
 		final Answer result = databaseDao.updateAnswer(realAnswer);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
