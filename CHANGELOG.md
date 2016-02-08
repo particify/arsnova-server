@@ -1,5 +1,40 @@
 # Changelog
 
+## 2.3
+Major features:
+* Improved LDAP authentication support: Additional settings for LDAP search and
+  a privileged LDAP user have been added.
+* Usernames for admin accounts can now be set up in the configuration file.
+  These accounts are privileged to create global "Messages of the Day".
+  Additional privileges might be added for them in future releases.
+* Splash screen settings have been added to override the frontend theme's
+  defaults.
+* The API has been extended to support features introduced with ARSnova Mobile
+  2.3.
+
+Minor features and changes:
+* Markdown formatting, learning progress, student's own questions and the
+  question format flashcard are now active by default and can no longer be
+  disabled for the whole ARSnova installation.
+
+Bugfixes:
+* The `security.authentication.login-try-limit` setting now works as intended.
+
+Changes for developers:
+* API documentation is now exposed in Swagger format.
+* Startup time of Jetty has been significantly reduced.
+* Version information is now saved with builds and exposed by the API.
+
+**This version is brought to you by:**  
+Project management: Klaus Quibeldey-Cirkel  
+Lead programming: Andreas Gärtner, Daniel Gerhardt, Tom "tekay" Käsler,
+Christoph Thelen  
+Contributions: Eduard Ellert, Tjark Wilhelm Hoeck, Mohamed Sami Jarmoud, Stefan
+Schmeißer, Paul-Christian Volkmer  
+Sponsoring: [AG QLS](https://www.thm.de/site/en/hochschule/service/ag-qls.html),
+[HMWK](https://wissenschaft.hessen.de/wissenschaft/it-neue-medien/kompetenznetz-e-learning-hessen)  
+
+
 ## 2.2
 This release massively improves performance of ARSnova and contains a critical
 bugfix so it is highly recommended to upgrade. Because of the newly introduced
