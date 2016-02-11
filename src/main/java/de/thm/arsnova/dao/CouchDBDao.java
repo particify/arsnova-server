@@ -1623,6 +1623,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return getQuestions(view, session);
 	}
 
+	@Override
+	public List<Question> getAllSkillQuestions(final Session session) {
+		final List<Question> questions = getQuestions(new NovaView("skill_question/by_session"), session);
+		return questions;
+	}
+
 	private List<Question> getQuestions(final NovaView view, final Session session) {
 		view.setStartKeyArray(session.get_id());
 		view.setEndKeyArray(session.get_id(), "{}");
@@ -2189,8 +2195,27 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	public ImportExportQuestion exportSession(String sessionkey) {
-
+	public ImportExportSession exportSession(String sessionkey) {
+		ImportExportSession ies = new ImportExportSession();
+		Session session = getDatabaseDao().getSessionFromKeyword(sessionkey);
+		ies.setSessionFromSessionObject(session);
+		List<Question> questionList = getDatabaseDao().getAllSkillQuestions(session);
+		for (Question q : questionList) {
+			List<de.thm.arsnova.entities.transport.Answer> aL = new ArrayList<de.thm.arsnova.entities.transport.Answer>();
+			for (Answer a : this.getDatabaseDao().getAllAnswers(q)) {
+				de.thm.arsnova.entities.transport.Answer ta = new de.thm.arsnova.entities.transport.Answer(a);
+				aL.add(ta);
+			}
+			ies.addQuestionWithAnswers(q, aL);
+		}
+		List<de.thm.arsnova.entities.transport.InterposedQuestion> iL = new ArrayList<de.thm.arsnova.entities.transport.InterposedQuestion>();
+		for (InterposedQuestion i : getDatabaseDao().getInterposedQuestions(session, 0, 0)) {
+			de.thm.arsnova.entities.transport.InterposedQuestion ti = new de.thm.arsnova.entities.transport.InterposedQuestion(i);
+			iL.add(ti);
+		}
+		ies.setFeedbackQuestions(iL);
+		ies.setMotds(getDatabaseDao().getMotdsForSession(session.getKeyword()));
+		return ies;
 	}
 
 	@Override

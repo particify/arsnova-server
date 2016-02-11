@@ -41,6 +41,13 @@ public class Answer implements Serializable {
 
 	private boolean abstention;
 
+	public Answer(de.thm.arsnova.entities.Answer a) {
+		answerSubject = a.getAnswerSubject();
+		answerText = a.getAnswerText();
+		answerImage = a.getAnswerImage();
+		abstention = a.isAbstention();
+	}
+
 	@ApiModelProperty(required = true, value = "used to display text answer")
 	public String getAnswerText() {
 		return answerText;

@@ -17,9 +17,11 @@
  */
 package de.thm.arsnova.entities.transport;
 
+import java.util.ArrayList;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.Motd;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -37,6 +39,13 @@ public class ImportExportSession {
 	private List<ImportExportQuestion> questions;
 
 	private List<InterposedQuestion> feedbackQuestions;
+
+	private List<Motd> motds;
+
+	public ImportExportSession() {
+		questions = new ArrayList<ImportExportQuestion>();
+		feedbackQuestions = new ArrayList<InterposedQuestion>();
+	}
 
 	@ApiModelProperty(required = true, value = "used to display session")
 	public ImportExportSesssion getSession() {
@@ -63,6 +72,30 @@ public class ImportExportSession {
 
 	public void setFeedbackQuestions(List<InterposedQuestion> feedbackQuestions) {
 		this.feedbackQuestions = feedbackQuestions;
+	}
+
+	public List<Motd> getMotds() {
+		return motds;
+	}
+
+	public void setMotds(List<Motd> mL) {
+		this.motds = mL;
+	}
+
+	public void setSessionFromSessionObject(Session s) {
+		ImportExportSesssion iesession = new ImportExportSesssion();
+		iesession.setName(s.getName());
+		iesession.setShortName(s.getShortName());
+		iesession.setActive(s.isActive());
+		PublicPool p = new PublicPool();
+		p.setPpFromSession(s);
+		iesession.setPublicPool(p);
+		session = iesession;
+	}
+
+	public void addQuestionWithAnswers(Question q, List<Answer> aL) {
+		ImportExportQuestion ieq = new ImportExportQuestion(q);
+		ieq.setAnswers(aL);
 	}
 
 	public Session generateSessionEntity(User user) {
@@ -99,6 +132,53 @@ public class ImportExportSession {
 	public static class ImportExportQuestion extends Question {
 
 		private List<Answer> answers;
+
+		public ImportExportQuestion(Question q) {
+			setType(q.getType());
+			setQuestionType(q.getQuestionType());
+			setQuestionVariant(q.getQuestionVariant());
+			setSubject(q.getSubject());
+			setText(q.getText());
+			setActive(q.isActive());
+			setReleasedFor(q.getReleasedFor());
+			setPossibleAnswers(q.getPossibleAnswers());
+			setNoCorrect(q.isNoCorrect());
+			setSessionId(q.getSessionId());
+			setSessionKeyword(q.getSessionKeyword());
+			setTimestamp(q.getTimestamp());
+			setNumber(q.getNumber());
+			setDuration(q.getDuration());
+			setPiRound(q.getPiRound());
+			setPiRoundEndTime(q.getPiRoundEndTime());
+			setPiRoundStartTime(q.getPiRoundStartTime());
+			setPiRoundFinished(q.isPiRoundFinished());
+			setVotingDisabled(q.isVotingDisabled());
+			setShowStatistic(q.isShowStatistic());
+			setShowAnswer(q.isShowAnswer());
+			setAbstention(q.isAbstention());
+			setImage(q.getImage());
+			setFcImage(q.getFcImage());
+			setOffsetX(q.getOffsetX());
+			setOffsetY(q.getOffsetY());
+			setGridZoomLvl(q.getGridZoomLvl());
+			setGridSizeX(q.getGridSizeX());
+			setGridSizeY(q.getGridSizeY());
+			setGridIsHidden(q.getGridIsHidden());
+			setImgRotation(q.getImgRotation());
+			setToggleFieldsLeft(q.getToggleFieldsLeft());
+			setNumClickableFields(q.getNumClickableFields());
+			setThresholdCorrectAnswers(q.getThresholdCorrectAnswers());
+			setCvIsColored(q.getCvIsColored());
+			setGridLineColor(q.getGridLineColor());
+			setNumberOfDots(q.getNumberOfDots());
+			setGridType(q.getGridType());
+			setScaleFactor(q.getScaleFactor());
+			setGridScaleFactor(q.getGridScaleFactor());
+			setImageQuestion(q.isImageQuestion());
+			setTextAnswerEnabled(q.isTextAnswerEnabled());
+			setHint(q.getHint());
+			setSolution(q.getSolution());
+		}
 
 		@ApiModelProperty(required = true, value = " used to display answers")
 		public List<Answer> getAnswers() {
@@ -180,6 +260,20 @@ public class ImportExportSession {
 		private String name;
 
 		private String shortName;
+
+		public void setPpFromSession(Session s) {
+			ppAuthorName = s.getPpAuthorName();
+			ppAuthorMail = s.getPpAuthorMail();
+			ppUniversity = s.getPpUniversity();
+			ppLogo = s.getPpLogo();
+			ppSubject = s.getPpSubject();
+			ppLicense = s.getPpLicense();
+			ppLevel = s.getPpLevel();
+			ppDescription = s.getPpDescription();
+			ppFaculty = s.getPpFaculty();
+			name = s.getName();
+			shortName = s.getShortName();
+		}
 
 		@ApiModelProperty(required = true, value = "used to display author name")
 		public String getPpAuthorName() {

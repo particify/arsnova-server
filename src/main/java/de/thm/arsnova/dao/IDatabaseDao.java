@@ -153,6 +153,8 @@ public interface IDatabaseDao {
 
 	List<Question> getPreparationQuestionsForTeachers(Session session);
 
+	List<Question> getAllSkillQuestions(Session session);
+
 	int getLectureQuestionCount(Session session);
 
 	int getFlashcardCount(Session session);
