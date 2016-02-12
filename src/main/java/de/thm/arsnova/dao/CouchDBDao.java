@@ -2117,6 +2117,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		List<Document> answers = new ArrayList<Document>();
 		// We can then push answers together with interposed questions in one large bulk request
 		List<Document> interposedQuestions = new ArrayList<Document>();
+		// Motds shouldn't be forgotten
+		List<Document> motds = new ArrayList<Document>();
 		try {
 			// add session id to all questions and generate documents
 			for (ImportExportQuestion question : importSession.getQuestions()) {
@@ -2163,8 +2165,20 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				q.put("creator", "");
 				interposedQuestions.add(q);
 			}
+			for (Motd m : importSession.getMotds()) {
+				final Document d = new Document();
+				d.put("type", "motd");
+				d.put("motdkey", m.getMotdkey());
+				d.put("title", m.getTitle());
+				d.put("audience", m.getAudience());
+				d.put("sessionkey", session.getKeyword());
+				d.put("startdate", String.valueOf(m.getStartdate()));
+				d.put("enddate", String.valueOf(m.getEnddate()));
+				motds.add(d);
+			}
 			List<Document> documents = new ArrayList<Document>(answers);
 			documents.addAll(interposedQuestions);
+			documents.addAll(motds);
 			database.bulkSaveDocuments(documents.toArray(new Document[documents.size()]));
 		} catch (IOException e) {
 			LOGGER.error("Could not import this session: {}", e.getMessage());
