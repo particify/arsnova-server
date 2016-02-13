@@ -272,7 +272,9 @@ public class SessionController extends PaginationController {
 	@ApiOperation(value = "export sessions", nickname = "exportSession")
 	@RequestMapping(value = "/export", method = RequestMethod.GET)
 	public List<ImportExportSession> exportSession(
-			@ApiParam(value = "comma seperated list of sessionkeys", required = true) @RequestParam(value ="sessionkeys", defaultValue = "") final String sessionkeys,
+			@ApiParam(value = "comma seperated list of sessionkeys", required = true) @RequestParam(value = "sessionkeys", defaultValue = "") final String sessionkeys,
+			@ApiParam(value = "wether statistics shall be exported", required = true) @RequestParam(value = "withAnswerStatistics", defaultValue = "false") final Boolean withAnswerStatistics,
+			@ApiParam(value = "wether interposed questions shall be exported", required = true) @RequestParam(value = "withFeedbackQuestions", defaultValue = "false") final Boolean withFeedbackQuestions,
 			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
 		) {
 		List<ImportExportSession> sessions = new ArrayList<ImportExportSession>();
