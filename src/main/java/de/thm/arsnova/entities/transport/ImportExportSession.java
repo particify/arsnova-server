@@ -25,6 +25,7 @@ import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.entities.SessionInfo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.springframework.context.annotation.Import;
 
 import java.util.Date;
 import java.util.List;
@@ -48,6 +49,8 @@ public class ImportExportSession {
 	public ImportExportSession() {
 		questions = new ArrayList<ImportExportQuestion>();
 		feedbackQuestions = new ArrayList<InterposedQuestion>();
+		motds = new ArrayList<Motd>();
+		sessionInfo = null;
 	}
 
 	@ApiModelProperty(required = true, value = "used to display session")
@@ -107,6 +110,7 @@ public class ImportExportSession {
 	public void addQuestionWithAnswers(Question q, List<Answer> aL) {
 		ImportExportQuestion ieq = new ImportExportQuestion(q);
 		ieq.setAnswers(aL);
+		questions.add(ieq);
 	}
 
 	public Session generateSessionEntity(User user) {
@@ -143,6 +147,10 @@ public class ImportExportSession {
 	public static class ImportExportQuestion extends Question {
 
 		private List<Answer> answers;
+
+		public ImportExportQuestion() {
+
+		}
 
 		public ImportExportQuestion(Question q) {
 			setType(q.getType());

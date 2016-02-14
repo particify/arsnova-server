@@ -2117,7 +2117,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		List<Document> answers = new ArrayList<Document>();
 		// We can then push answers together with interposed questions in one large bulk request
 		List<Document> interposedQuestions = new ArrayList<Document>();
-		// Motds shouldn't be forgotten
+		// Motds shouldn't be forgotten, too
 		List<Document> motds = new ArrayList<Document>();
 		try {
 			// add session id to all questions and generate documents
@@ -2177,8 +2177,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				motds.add(d);
 			}
 			List<Document> documents = new ArrayList<Document>(answers);
-			documents.addAll(interposedQuestions);
-			documents.addAll(motds);
+			database.bulkSaveDocuments(interposedQuestions.toArray(new Document[interposedQuestions.size()]));
+			database.bulkSaveDocuments(motds.toArray(new Document[motds.size()]));
 			database.bulkSaveDocuments(documents.toArray(new Document[documents.size()]));
 		} catch (IOException e) {
 			LOGGER.error("Could not import this session: {}", e.getMessage());
@@ -2186,7 +2186,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			this.deleteSession(session);
 			return null;
 		}
-		return calculateSessionInfo(importSession, session);
+		return this.calculateSessionInfo(importSession, session);
 	}
 
 	@Override
