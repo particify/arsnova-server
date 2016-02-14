@@ -2186,30 +2186,11 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			this.deleteSession(session);
 			return null;
 		}
-		// Calculate some statistics...
-		int unreadInterposed = 0;
-		for (de.thm.arsnova.entities.transport.InterposedQuestion i : importSession.getFeedbackQuestions()) {
-			if (!i.isRead()) {
-				unreadInterposed++;
-			}
-		}
-		int numUnanswered = 0;
-		for (ImportExportQuestion question : importSession.getQuestions()) {
-			if (question.getAnswers().size() == 0) {
-				numUnanswered++;
-			}
-		}
-		final SessionInfo info = new SessionInfo(session);
-		info.setNumQuestions(questions.size());
-		info.setNumUnanswered(numUnanswered);
-		info.setNumAnswers(answers.size());
-		info.setNumInterposed(interposedQuestions.size());
-		info.setNumUnredInterposed(unreadInterposed);
-		return info;
+		return calculateSessionInfo(importSession, session);
 	}
 
 	@Override
-	public ImportExportSession exportSession(String sessionkey) {
+	public ImportExportSession exportSession(String sessionkey, Boolean withAnswerStatistics, Boolean withFeedbackQuestions) {
 		ImportExportSession ies = new ImportExportSession();
 		Session session = getDatabaseDao().getSessionFromKeyword(sessionkey);
 		ies.setSessionFromSessionObject(session);
@@ -2222,14 +2203,43 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			}
 			ies.addQuestionWithAnswers(q, aL);
 		}
-		List<de.thm.arsnova.entities.transport.InterposedQuestion> iL = new ArrayList<de.thm.arsnova.entities.transport.InterposedQuestion>();
-		for (InterposedQuestion i : getDatabaseDao().getInterposedQuestions(session, 0, 0)) {
-			de.thm.arsnova.entities.transport.InterposedQuestion ti = new de.thm.arsnova.entities.transport.InterposedQuestion(i);
-			iL.add(ti);
+		if (withFeedbackQuestions) {
+			List<de.thm.arsnova.entities.transport.InterposedQuestion> iL = new ArrayList<de.thm.arsnova.entities.transport.InterposedQuestion>();
+			for (InterposedQuestion i : getDatabaseDao().getInterposedQuestions(session, 0, 0)) {
+				de.thm.arsnova.entities.transport.InterposedQuestion ti = new de.thm.arsnova.entities.transport.InterposedQuestion(i);
+				iL.add(ti);
+			}
+			ies.setFeedbackQuestions(iL);
 		}
-		ies.setFeedbackQuestions(iL);
+		if (withAnswerStatistics) {
+			ies.setSessionInfo(this.calculateSessionInfo(ies, session));
+		}
 		ies.setMotds(getDatabaseDao().getMotdsForSession(session.getKeyword()));
 		return ies;
+	}
+
+	public SessionInfo calculateSessionInfo(ImportExportSession ies, Session s) {
+		int unreadInterposed = 0;
+		int numUnanswered = 0;
+		int numAnswers = 0;
+		for (de.thm.arsnova.entities.transport.InterposedQuestion i : ies.getFeedbackQuestions()) {
+			if (!i.isRead()) {
+				unreadInterposed++;
+			}
+		}
+		for (ImportExportQuestion question : ies.getQuestions()) {
+			numAnswers += question.getAnswers().size();
+			if (question.getAnswers().size() == 0) {
+				numUnanswered++;
+			}
+		}
+		final SessionInfo info = new SessionInfo(s);
+		info.setNumQuestions(ies.getQuestions().size());
+		info.setNumUnanswered(numUnanswered);
+		info.setNumAnswers(numAnswers);
+		info.setNumInterposed(ies.getFeedbackQuestions().size());
+		info.setNumUnredInterposed(unreadInterposed);
+		return info;
 	}
 
 	@Override

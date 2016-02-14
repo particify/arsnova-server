@@ -22,6 +22,7 @@ import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.Motd;
+import de.thm.arsnova.entities.SessionInfo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -41,6 +42,8 @@ public class ImportExportSession {
 	private List<InterposedQuestion> feedbackQuestions;
 
 	private List<Motd> motds;
+
+	private SessionInfo sessionInfo;
 
 	public ImportExportSession() {
 		questions = new ArrayList<ImportExportQuestion>();
@@ -80,6 +83,14 @@ public class ImportExportSession {
 
 	public void setMotds(List<Motd> mL) {
 		this.motds = mL;
+	}
+
+	public SessionInfo getSessionInfo() {
+		return sessionInfo;
+	}
+
+	public void setSessionInfo(SessionInfo si) {
+		sessionInfo = si;
 	}
 
 	public void setSessionFromSessionObject(Session s) {

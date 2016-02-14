@@ -282,7 +282,7 @@ public class SessionController extends PaginationController {
 		String[] splittedKeys = sessionkeys.split(",");
 		for (String key : splittedKeys) {
 			sessionService.setActive(key, false);
-			temp = sessionService.exportSession(key);
+			temp = sessionService.exportSession(key, withAnswerStatistics, withFeedbackQuestions);
 			if (temp != null) {
 				sessions.add(temp);
 			}

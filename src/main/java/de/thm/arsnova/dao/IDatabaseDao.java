@@ -207,7 +207,7 @@ public interface IDatabaseDao {
 
 	SessionInfo importSession(User user, ImportExportSession importSession);
 
-	ImportExportSession exportSession(String sessionkey);
+	ImportExportSession exportSession(String sessionkey, Boolean withAnswerStatistics, Boolean withFeedbackQuestions);
 
 	Statistics getStatistics();
 

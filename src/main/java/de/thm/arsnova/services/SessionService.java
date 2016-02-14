@@ -406,8 +406,8 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
-	public ImportExportSession exportSession(String sessionkey) {
-		return databaseDao.exportSession(sessionkey);
+	public ImportExportSession exportSession(String sessionkey, Boolean withAnswerStatistics, Boolean withFeedbackQuestions) {
+		return databaseDao.exportSession(sessionkey, withAnswerStatistics, withFeedbackQuestions);
 	}
 
 	@Override
