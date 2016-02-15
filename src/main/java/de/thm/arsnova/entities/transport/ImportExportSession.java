@@ -177,8 +177,12 @@ public class ImportExportSession {
 			setAbstention(q.isAbstention());
 			setImage(q.getImage());
 			setFcImage(q.getFcImage());
+			setGridSize(q.getGridSize());
 			setOffsetX(q.getOffsetX());
 			setOffsetY(q.getOffsetY());
+			setZoomLvl(q.getZoomLvl());
+			setGridOffsetX(q.getGridOffsetX());
+			setGridOffsetY(q.getGridOffsetY());
 			setGridZoomLvl(q.getGridZoomLvl());
 			setGridSizeX(q.getGridSizeX());
 			setGridSizeY(q.getGridSizeY());

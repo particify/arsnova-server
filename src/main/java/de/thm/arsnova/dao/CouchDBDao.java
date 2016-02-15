@@ -2201,6 +2201,16 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				de.thm.arsnova.entities.transport.Answer ta = new de.thm.arsnova.entities.transport.Answer(a);
 				aL.add(ta);
 			}
+			// getAllAnswers does not grep for whole answer object so i need to add empty entries for abstentions
+			int i = this.getDatabaseDao().getAbstentionAnswerCount(q.get_id());
+			for (int b = 0; b < i; b++){
+				de.thm.arsnova.entities.transport.Answer ans = new de.thm.arsnova.entities.transport.Answer();
+				ans.setAnswerSubject("");
+				ans.setAnswerImage("");
+				ans.setAnswerText("");
+				ans.setAbstention(true);
+				aL.add(ans);
+			}
 			ies.addQuestionWithAnswers(q, aL);
 		}
 		if (withFeedbackQuestions) {

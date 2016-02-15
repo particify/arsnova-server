@@ -41,6 +41,10 @@ public class Answer implements Serializable {
 
 	private boolean abstention;
 
+	public Answer() {
+
+	}
+
 	public Answer(de.thm.arsnova.entities.Answer a) {
 		answerSubject = a.getAnswerSubject();
 		answerText = a.getAnswerText();
