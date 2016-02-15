@@ -76,6 +76,8 @@ public interface ISessionService {
 
 	ImportExportSession exportSession(String sessionkey, Boolean withAnswerStatistics, Boolean withFeedbackQuestions);
 
+	SessionInfo copySessionToPublicPool(String sessionkey, de.thm.arsnova.entities.transport.ImportExportSession.PublicPool pp);
+
 	SessionFeature getSessionFeatures(String sessionkey);
 
 	SessionFeature changeSessionFeatures(String sessionkey, SessionFeature features);
