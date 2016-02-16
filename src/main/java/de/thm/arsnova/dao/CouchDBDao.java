@@ -2190,26 +2190,28 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	public ImportExportSession exportSession(String sessionkey, Boolean withAnswerStatistics, Boolean withFeedbackQuestions) {
+	public ImportExportSession exportSession(String sessionkey, Boolean withAnswerStatistics, Boolean withFeedbackQuestions, Boolean withAnswers) {
 		ImportExportSession ies = new ImportExportSession();
 		Session session = getDatabaseDao().getSessionFromKeyword(sessionkey);
 		ies.setSessionFromSessionObject(session);
 		List<Question> questionList = getDatabaseDao().getAllSkillQuestions(session);
 		for (Question q : questionList) {
 			List<de.thm.arsnova.entities.transport.Answer> aL = new ArrayList<de.thm.arsnova.entities.transport.Answer>();
-			for (Answer a : this.getDatabaseDao().getAllAnswers(q)) {
-				de.thm.arsnova.entities.transport.Answer ta = new de.thm.arsnova.entities.transport.Answer(a);
-				aL.add(ta);
-			}
-			// getAllAnswers does not grep for whole answer object so i need to add empty entries for abstentions
-			int i = this.getDatabaseDao().getAbstentionAnswerCount(q.get_id());
-			for (int b = 0; b < i; b++){
-				de.thm.arsnova.entities.transport.Answer ans = new de.thm.arsnova.entities.transport.Answer();
-				ans.setAnswerSubject("");
-				ans.setAnswerImage("");
-				ans.setAnswerText("");
-				ans.setAbstention(true);
-				aL.add(ans);
+			if (withAnswers) {
+				for (Answer a : this.getDatabaseDao().getAllAnswers(q)) {
+					de.thm.arsnova.entities.transport.Answer ta = new de.thm.arsnova.entities.transport.Answer(a);
+					aL.add(ta);
+				}
+				// getAllAnswers does not grep for whole answer object so i need to add empty entries for abstentions
+				int i = this.getDatabaseDao().getAbstentionAnswerCount(q.get_id());
+				for (int b = 0; b < i; b++) {
+					de.thm.arsnova.entities.transport.Answer ans = new de.thm.arsnova.entities.transport.Answer();
+					ans.setAnswerSubject("");
+					ans.setAnswerImage("");
+					ans.setAnswerText("");
+					ans.setAbstention(true);
+					aL.add(ans);
+				}
 			}
 			ies.addQuestionWithAnswers(q, aL);
 		}
