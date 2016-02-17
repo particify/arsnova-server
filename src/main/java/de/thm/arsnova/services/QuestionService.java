@@ -112,15 +112,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 
 		// convert imageurl to base64 if neccessary
-		if ("grid".equals(question.getQuestionType())) {
-			if (question.getImage().startsWith("http")) {
-				final String base64ImageString = imageUtils.encodeImageToString(question.getImage());
-				if (base64ImageString == null) {
-					throw new BadRequestException();
-				}
-				question.setImage(base64ImageString);
-			}
-
+		if ("grid".equals(question.getQuestionType()) && !question.getImage().startsWith("http")) {
 			// base64 adds offset to filesize, formula taken from: http://en.wikipedia.org/wiki/Base64#MIME
 			final int fileSize = (int) ((question.getImage().length() - 814) / 1.37);
 			if (fileSize > uploadFileSizeByte) {
@@ -827,7 +819,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated()")
 	public List<Question> replaceImageData(final List<Question> questions) {
 		for (Question q : questions) {
-			if (q.getImage() != null) {
+			if (q.getImage() != null && q.getImage().startsWith("data:image/")) {
 				q.setImage("true");
 			}
 		}
