@@ -32,6 +32,7 @@ public class SessionFeature implements Serializable {
 	private boolean clicker = false;
 	private boolean peerGrading = false;
 	private boolean liveFeedback = false;
+	private boolean interposedFeedback = false;
 	private boolean liveClicker = false;
 	private boolean flashcard = false;
 	private boolean total = false;
@@ -50,6 +51,7 @@ public class SessionFeature implements Serializable {
 			this.clicker = features.clicker;
 			this.peerGrading = features.peerGrading;
 			this.liveFeedback = features.liveFeedback;
+			this.interposedFeedback = features.interposedFeedback;
 			this.liveClicker = features.liveClicker;
 			this.flashcard = features.flashcard;
 			this.total = features.total;
@@ -163,6 +165,14 @@ public class SessionFeature implements Serializable {
 
 	public void setLiveFeedback(boolean liveFeedback) {
 		this.liveFeedback = liveFeedback;
+	}
+
+	public boolean isInterposedFeedback() {
+		return interposedFeedback;
+	}
+
+	public void setInterposedFeedback(boolean interposedFeedback) {
+		this.interposedFeedback = interposedFeedback;
 	}
 
 	public boolean isLiveClicker() {
