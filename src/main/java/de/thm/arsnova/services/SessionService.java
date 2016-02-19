@@ -407,13 +407,13 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public ImportExportSession exportSession(String sessionkey, Boolean withAnswerStatistics, Boolean withFeedbackQuestions) {
-		return databaseDao.exportSession(sessionkey, withAnswerStatistics, withFeedbackQuestions, true);
+		return databaseDao.exportSession(sessionkey, withAnswerStatistics, withFeedbackQuestions);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public SessionInfo copySessionToPublicPool(String sessionkey, de.thm.arsnova.entities.transport.ImportExportSession.PublicPool pp) {
-		ImportExportSession temp = databaseDao.exportSession(sessionkey, false, false, false);
+		ImportExportSession temp = databaseDao.exportSession(sessionkey, false, false);
 		temp.getSession().setPublicPool(pp);
 		final User user = userService.getCurrentUser();
 		return databaseDao.importSession(user, temp);

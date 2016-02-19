@@ -2190,7 +2190,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	public ImportExportSession exportSession(String sessionkey, Boolean withAnswerStatistics, Boolean withFeedbackQuestions, Boolean withAnswers) {
+	public ImportExportSession exportSession(String sessionkey, Boolean withAnswers, Boolean withFeedbackQuestions) {
 		ImportExportSession ies = new ImportExportSession();
 		Session session = getDatabaseDao().getSessionFromKeyword(sessionkey);
 		ies.setSessionFromSessionObject(session);
@@ -2223,7 +2223,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			}
 			ies.setFeedbackQuestions(iL);
 		}
-		if (withAnswerStatistics) {
+		if (withAnswers) {
 			ies.setSessionInfo(this.calculateSessionInfo(ies, session));
 		}
 		ies.setMotds(getDatabaseDao().getMotdsForSession(session.getKeyword()));
