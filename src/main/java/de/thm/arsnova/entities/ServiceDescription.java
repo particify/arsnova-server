@@ -26,7 +26,7 @@ public class ServiceDescription {
 	private String dialogUrl;
 	private String image;
 	private int order = 0;
-	private boolean allowLecturer = true;
+	private String[] allowedRoles;
 
 	public ServiceDescription(String id, String name, String dialogUrl) {
 		this.id = id;
@@ -34,20 +34,21 @@ public class ServiceDescription {
 		this.dialogUrl = dialogUrl;
 	}
 
-	public ServiceDescription(String id, String name, String dialogUrl, String image) {
+	public ServiceDescription(String id, String name, String dialogUrl, String[] allowedRoles) {
 		this.id = id;
 		this.name = name;
 		this.dialogUrl = dialogUrl;
+		this.allowedRoles = allowedRoles;
+	}
+
+	public ServiceDescription(String id, String name, String dialogUrl, String[] allowedRoles, String image) {
+		this.id = id;
+		this.name = name;
+		this.dialogUrl = dialogUrl;
+		this.allowedRoles = allowedRoles;
 		if (!"".equals(image)) {
 			this.image = image;
 		}
-	}
-
-	public ServiceDescription(String id, String name, String dialogUrl, boolean allowLecturer) {
-		this.id = id;
-		this.name = name;
-		this.dialogUrl = dialogUrl;
-		this.allowLecturer = allowLecturer;
 	}
 
 	public String getId() {
@@ -90,11 +91,11 @@ public class ServiceDescription {
 		this.order = order;
 	}
 
-	public boolean isAllowLecturer() {
-		return allowLecturer;
+	public String[] getAllowedRoles() {
+		return allowedRoles;
 	}
 
-	public void setAllowLecturer(boolean allowLecturer) {
-		this.allowLecturer = allowLecturer;
+	public void setAllowedRoles(String[] roles) {
+		this.allowedRoles = allowedRoles;
 	}
 }
