@@ -502,7 +502,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public ImportExportSession exportSession(String sessionkey) {
+	public ImportExportSession exportSession(String sessionkey, Boolean withAnswer, Boolean withFeedbackQuestions) {
 		// TODO Auto.generated method stub
 		return null;
 	}
