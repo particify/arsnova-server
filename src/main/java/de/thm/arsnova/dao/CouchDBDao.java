@@ -2191,65 +2191,65 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public ImportExportSession exportSession(String sessionkey, Boolean withAnswers, Boolean withFeedbackQuestions) {
-		ImportExportSession ies = new ImportExportSession();
+		ImportExportSession importExportSession = new ImportExportSession();
 		Session session = getDatabaseDao().getSessionFromKeyword(sessionkey);
-		ies.setSessionFromSessionObject(session);
+		importExportSession.setSessionFromSessionObject(session);
 		List<Question> questionList = getDatabaseDao().getAllSkillQuestions(session);
-		for (Question q : questionList) {
-			List<de.thm.arsnova.entities.transport.Answer> aL = new ArrayList<de.thm.arsnova.entities.transport.Answer>();
+		for (Question question : questionList) {
+			List<de.thm.arsnova.entities.transport.Answer> answerList = new ArrayList<de.thm.arsnova.entities.transport.Answer>();
 			if (withAnswers) {
-				for (Answer a : this.getDatabaseDao().getAllAnswers(q)) {
-					de.thm.arsnova.entities.transport.Answer ta = new de.thm.arsnova.entities.transport.Answer(a);
-					aL.add(ta);
+				for (Answer a : this.getDatabaseDao().getAllAnswers(question)) {
+					de.thm.arsnova.entities.transport.Answer transportAnswer = new de.thm.arsnova.entities.transport.Answer(a);
+					answerList.add(transportAnswer);
 				}
 				// getAllAnswers does not grep for whole answer object so i need to add empty entries for abstentions
-				int i = this.getDatabaseDao().getAbstentionAnswerCount(q.get_id());
+				int i = this.getDatabaseDao().getAbstentionAnswerCount(question.get_id());
 				for (int b = 0; b < i; b++) {
 					de.thm.arsnova.entities.transport.Answer ans = new de.thm.arsnova.entities.transport.Answer();
 					ans.setAnswerSubject("");
 					ans.setAnswerImage("");
 					ans.setAnswerText("");
 					ans.setAbstention(true);
-					aL.add(ans);
+					answerList.add(ans);
 				}
 			}
-			ies.addQuestionWithAnswers(q, aL);
+			importExportSession.addQuestionWithAnswers(question, answerList);
 		}
 		if (withFeedbackQuestions) {
-			List<de.thm.arsnova.entities.transport.InterposedQuestion> iL = new ArrayList<de.thm.arsnova.entities.transport.InterposedQuestion>();
+			List<de.thm.arsnova.entities.transport.InterposedQuestion> interposedQuestionList = new ArrayList<de.thm.arsnova.entities.transport.InterposedQuestion>();
 			for (InterposedQuestion i : getDatabaseDao().getInterposedQuestions(session, 0, 0)) {
-				de.thm.arsnova.entities.transport.InterposedQuestion ti = new de.thm.arsnova.entities.transport.InterposedQuestion(i);
-				iL.add(ti);
+				de.thm.arsnova.entities.transport.InterposedQuestion transportInterposedQuestion = new de.thm.arsnova.entities.transport.InterposedQuestion(i);
+				interposedQuestionList.add(transportInterposedQuestion);
 			}
-			ies.setFeedbackQuestions(iL);
+			importExportSession.setFeedbackQuestions(interposedQuestionList);
 		}
 		if (withAnswers) {
-			ies.setSessionInfo(this.calculateSessionInfo(ies, session));
+			importExportSession.setSessionInfo(this.calculateSessionInfo(importExportSession, session));
 		}
-		ies.setMotds(getDatabaseDao().getMotdsForSession(session.getKeyword()));
-		return ies;
+		importExportSession.setMotds(getDatabaseDao().getMotdsForSession(session.getKeyword()));
+		return importExportSession;
 	}
 
-	public SessionInfo calculateSessionInfo(ImportExportSession ies, Session s) {
+	public SessionInfo calculateSessionInfo(ImportExportSession importExportSession, Session session) {
 		int unreadInterposed = 0;
 		int numUnanswered = 0;
 		int numAnswers = 0;
-		for (de.thm.arsnova.entities.transport.InterposedQuestion i : ies.getFeedbackQuestions()) {
+		for (de.thm.arsnova.entities.transport.InterposedQuestion i : importExportSession.getFeedbackQuestions()) {
 			if (!i.isRead()) {
 				unreadInterposed++;
 			}
 		}
-		for (ImportExportQuestion question : ies.getQuestions()) {
+		for (ImportExportQuestion question : importExportSession.getQuestions()) {
 			numAnswers += question.getAnswers().size();
 			if (question.getAnswers().size() == 0) {
 				numUnanswered++;
 			}
 		}
-		final SessionInfo info = new SessionInfo(s);
-		info.setNumQuestions(ies.getQuestions().size());
+		final SessionInfo info = new SessionInfo(session);
+		info.setNumQuestions(importExportSession.getQuestions().size());
 		info.setNumUnanswered(numUnanswered);
 		info.setNumAnswers(numAnswers);
-		info.setNumInterposed(ies.getFeedbackQuestions().size());
+		info.setNumInterposed(importExportSession.getFeedbackQuestions().size());
 		info.setNumUnredInterposed(unreadInterposed);
 		return info;
 	}

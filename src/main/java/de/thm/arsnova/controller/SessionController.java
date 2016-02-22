@@ -295,12 +295,12 @@ public class SessionController extends PaginationController {
 	@RequestMapping(value = "/{sessionkey}/copytopublicpool", method = RequestMethod.POST)
 	public SessionInfo copyToPublicPool(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
-			@ApiParam(value = "public pool attributes for session", required = true) @RequestBody final de.thm.arsnova.entities.transport.ImportExportSession.PublicPool pp
+			@ApiParam(value = "public pool attributes for session", required = true) @RequestBody final de.thm.arsnova.entities.transport.ImportExportSession.PublicPool publicPool
 			) {
 		sessionService.setActive(sessionkey, false);
-		SessionInfo sheesh = sessionService.copySessionToPublicPool(sessionkey, pp);
+		SessionInfo sessionInfo = sessionService.copySessionToPublicPool(sessionkey, publicPool);
 		sessionService.setActive(sessionkey, true);
-		return sheesh;
+		return sessionInfo;
 	}
 
 
