@@ -153,6 +153,8 @@ public interface IDatabaseDao {
 
 	List<Question> getPreparationQuestionsForTeachers(Session session);
 
+	List<Question> getAllSkillQuestions(Session session);
+
 	int getLectureQuestionCount(Session session);
 
 	int getFlashcardCount(Session session);
@@ -204,6 +206,8 @@ public interface IDatabaseDao {
 	void deleteAllLectureAnswers(Session session);
 
 	SessionInfo importSession(User user, ImportExportSession importSession);
+
+	ImportExportSession exportSession(String sessionkey, Boolean withAnswer, Boolean withFeedbackQuestions);
 
 	Statistics getStatistics();
 

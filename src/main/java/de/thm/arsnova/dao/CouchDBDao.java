@@ -1623,6 +1623,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return getQuestions(view, session);
 	}
 
+	@Override
+	public List<Question> getAllSkillQuestions(final Session session) {
+		final List<Question> questions = getQuestions(new NovaView("skill_question/by_session"), session);
+		return questions;
+	}
+
 	private List<Question> getQuestions(final NovaView view, final Session session) {
 		view.setStartKeyArray(session.get_id());
 		view.setEndKeyArray(session.get_id(), "{}");
@@ -2111,6 +2117,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		List<Document> answers = new ArrayList<Document>();
 		// We can then push answers together with interposed questions in one large bulk request
 		List<Document> interposedQuestions = new ArrayList<Document>();
+		// Motds shouldn't be forgotten, too
+		List<Document> motds = new ArrayList<Document>();
 		try {
 			// add session id to all questions and generate documents
 			for (ImportExportQuestion question : importSession.getQuestions()) {
@@ -2157,8 +2165,20 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				q.put("creator", "");
 				interposedQuestions.add(q);
 			}
+			for (Motd m : importSession.getMotds()) {
+				final Document d = new Document();
+				d.put("type", "motd");
+				d.put("motdkey", m.getMotdkey());
+				d.put("title", m.getTitle());
+				d.put("audience", m.getAudience());
+				d.put("sessionkey", session.getKeyword());
+				d.put("startdate", String.valueOf(m.getStartdate()));
+				d.put("enddate", String.valueOf(m.getEnddate()));
+				motds.add(d);
+			}
 			List<Document> documents = new ArrayList<Document>(answers);
-			documents.addAll(interposedQuestions);
+			database.bulkSaveDocuments(interposedQuestions.toArray(new Document[interposedQuestions.size()]));
+			database.bulkSaveDocuments(motds.toArray(new Document[motds.size()]));
 			database.bulkSaveDocuments(documents.toArray(new Document[documents.size()]));
 		} catch (IOException e) {
 			LOGGER.error("Could not import this session: {}", e.getMessage());
@@ -2166,24 +2186,70 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			this.deleteSession(session);
 			return null;
 		}
-		// Calculate some statistics...
+		return this.calculateSessionInfo(importSession, session);
+	}
+
+	@Override
+	public ImportExportSession exportSession(String sessionkey, Boolean withAnswers, Boolean withFeedbackQuestions) {
+		ImportExportSession importExportSession = new ImportExportSession();
+		Session session = getDatabaseDao().getSessionFromKeyword(sessionkey);
+		importExportSession.setSessionFromSessionObject(session);
+		List<Question> questionList = getDatabaseDao().getAllSkillQuestions(session);
+		for (Question question : questionList) {
+			List<de.thm.arsnova.entities.transport.Answer> answerList = new ArrayList<de.thm.arsnova.entities.transport.Answer>();
+			if (withAnswers) {
+				for (Answer a : this.getDatabaseDao().getAllAnswers(question)) {
+					de.thm.arsnova.entities.transport.Answer transportAnswer = new de.thm.arsnova.entities.transport.Answer(a);
+					answerList.add(transportAnswer);
+				}
+				// getAllAnswers does not grep for whole answer object so i need to add empty entries for abstentions
+				int i = this.getDatabaseDao().getAbstentionAnswerCount(question.get_id());
+				for (int b = 0; b < i; b++) {
+					de.thm.arsnova.entities.transport.Answer ans = new de.thm.arsnova.entities.transport.Answer();
+					ans.setAnswerSubject("");
+					ans.setAnswerImage("");
+					ans.setAnswerText("");
+					ans.setAbstention(true);
+					answerList.add(ans);
+				}
+			}
+			importExportSession.addQuestionWithAnswers(question, answerList);
+		}
+		if (withFeedbackQuestions) {
+			List<de.thm.arsnova.entities.transport.InterposedQuestion> interposedQuestionList = new ArrayList<de.thm.arsnova.entities.transport.InterposedQuestion>();
+			for (InterposedQuestion i : getDatabaseDao().getInterposedQuestions(session, 0, 0)) {
+				de.thm.arsnova.entities.transport.InterposedQuestion transportInterposedQuestion = new de.thm.arsnova.entities.transport.InterposedQuestion(i);
+				interposedQuestionList.add(transportInterposedQuestion);
+			}
+			importExportSession.setFeedbackQuestions(interposedQuestionList);
+		}
+		if (withAnswers) {
+			importExportSession.setSessionInfo(this.calculateSessionInfo(importExportSession, session));
+		}
+		importExportSession.setMotds(getDatabaseDao().getMotdsForSession(session.getKeyword()));
+		return importExportSession;
+	}
+
+	public SessionInfo calculateSessionInfo(ImportExportSession importExportSession, Session session) {
 		int unreadInterposed = 0;
-		for (de.thm.arsnova.entities.transport.InterposedQuestion i : importSession.getFeedbackQuestions()) {
+		int numUnanswered = 0;
+		int numAnswers = 0;
+		for (de.thm.arsnova.entities.transport.InterposedQuestion i : importExportSession.getFeedbackQuestions()) {
 			if (!i.isRead()) {
 				unreadInterposed++;
 			}
 		}
-		int numUnanswered = 0;
-		for (ImportExportQuestion question : importSession.getQuestions()) {
+		for (ImportExportQuestion question : importExportSession.getQuestions()) {
+			numAnswers += question.getAnswers().size();
 			if (question.getAnswers().size() == 0) {
 				numUnanswered++;
 			}
 		}
 		final SessionInfo info = new SessionInfo(session);
-		info.setNumQuestions(questions.size());
+		info.setNumQuestions(importExportSession.getQuestions().size());
 		info.setNumUnanswered(numUnanswered);
-		info.setNumAnswers(answers.size());
-		info.setNumInterposed(interposedQuestions.size());
+		info.setNumAnswers(numAnswers);
+		info.setNumInterposed(importExportSession.getFeedbackQuestions().size());
 		info.setNumUnredInterposed(unreadInterposed);
 		return info;
 	}

@@ -17,6 +17,7 @@
  */
 package de.thm.arsnova.controller;
 
+import org.springframework.context.annotation.Import;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionFeature;
@@ -267,6 +268,40 @@ public class SessionController extends PaginationController {
 			) {
 		return sessionService.importSession(session);
 	}
+
+	@ApiOperation(value = "export sessions", nickname = "exportSession")
+	@RequestMapping(value = "/export", method = RequestMethod.GET)
+	public List<ImportExportSession> exportSession(
+			@ApiParam(value = "sessionkey", required = true) @RequestParam(value = "sessionkey", defaultValue = "") final List<String> sessionkey,
+			@ApiParam(value = "wether statistics shall be exported", required = true) @RequestParam(value = "withAnswerStatistics", defaultValue = "false") final Boolean withAnswerStatistics,
+			@ApiParam(value = "wether interposed questions shall be exported", required = true) @RequestParam(value = "withFeedbackQuestions", defaultValue = "false") final Boolean withFeedbackQuestions,
+			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
+		) {
+		List<ImportExportSession> sessions = new ArrayList<ImportExportSession>();
+		ImportExportSession temp;
+		for (String key : sessionkey) {
+			sessionService.setActive(key, false);
+			temp = sessionService.exportSession(key, withAnswerStatistics, withFeedbackQuestions);
+			if (temp != null) {
+				sessions.add(temp);
+			}
+			sessionService.setActive(key, true);
+		}
+		return sessions;
+	}
+
+	@ApiOperation(value = "copy a session to the public pool if enabled")
+	@RequestMapping(value = "/{sessionkey}/copytopublicpool", method = RequestMethod.POST)
+	public SessionInfo copyToPublicPool(
+			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
+			@ApiParam(value = "public pool attributes for session", required = true) @RequestBody final de.thm.arsnova.entities.transport.ImportExportSession.PublicPool publicPool
+			) {
+		sessionService.setActive(sessionkey, false);
+		SessionInfo sessionInfo = sessionService.copySessionToPublicPool(sessionkey, publicPool);
+		sessionService.setActive(sessionkey, true);
+		return sessionInfo;
+	}
+
 
 	@ApiOperation(value = "Locks or unlocks a Session",
 			nickname = "lockSession")

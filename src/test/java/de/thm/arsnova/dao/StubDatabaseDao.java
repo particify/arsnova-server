@@ -502,6 +502,12 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
+	public ImportExportSession exportSession(String sessionkey, Boolean withAnswer, Boolean withFeedbackQuestions) {
+		// TODO Auto.generated method stub
+		return null;
+	}
+
+	@Override
 	public List<Question> getSkillQuestionsForUsers(Session session) {
 		// TODO Auto-generated method stub
 		return null;
@@ -545,6 +551,12 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public List<Question> getPreparationQuestionsForTeachers(Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Question> getAllSkillQuestions(Session session) {
 		// TODO Auto-generated method stub
 		return null;
 	}
