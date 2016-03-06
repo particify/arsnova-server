@@ -31,6 +31,7 @@ public class SessionFeature implements Serializable {
 	private boolean custom = true;
 	private boolean clicker = false;
 	private boolean peerGrading = false;
+	private boolean twitterWall = false;
 	private boolean liveFeedback = false;
 	private boolean interposedFeedback = false;
 	private boolean liveClicker = false;
@@ -50,6 +51,7 @@ public class SessionFeature implements Serializable {
 			this.custom = features.custom;
 			this.clicker = features.clicker;
 			this.peerGrading = features.peerGrading;
+			this.twitterWall = features.twitterWall;
 			this.liveFeedback = features.liveFeedback;
 			this.interposedFeedback = features.interposedFeedback;
 			this.liveClicker = features.liveClicker;
@@ -181,6 +183,14 @@ public class SessionFeature implements Serializable {
 
 	public void setLiveClicker(boolean liveClicker) {
 		this.liveClicker = liveClicker;
+	}
+
+	public boolean isTwitterWall() {
+		return twitterWall;
+	}
+
+	public void setTwitterWall(boolean twitterWall) {
+		this.twitterWall = twitterWall;
 	}
 
 }
