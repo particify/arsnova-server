@@ -23,6 +23,7 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.entities.SessionInfo;
+import de.thm.arsnova.entities.SessionFeature;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.springframework.context.annotation.Import;
@@ -44,12 +45,15 @@ public class ImportExportSession {
 
 	private List<Motd> motds;
 
+	private SessionFeature sessionFeature;
+
 	private SessionInfo sessionInfo;
 
 	public ImportExportSession() {
 		questions = new ArrayList<ImportExportQuestion>();
 		feedbackQuestions = new ArrayList<InterposedQuestion>();
 		motds = new ArrayList<Motd>();
+		sessionFeature = null;
 		sessionInfo = null;
 	}
 
@@ -88,6 +92,14 @@ public class ImportExportSession {
 		this.motds = mL;
 	}
 
+	public SessionFeature getSessionFeature() {
+		return sessionFeature;
+	}
+
+	public void setSessionFeature(SessionFeature sF) {
+		sessionFeature = sF;
+	}
+
 	public SessionInfo getSessionInfo() {
 		return sessionInfo;
 	}
@@ -104,6 +116,7 @@ public class ImportExportSession {
 		PublicPool p = new PublicPool();
 		p.setPpFromSession(s);
 		iesession.setPublicPool(p);
+		sessionFeature = s.getFeatures();
 		session = iesession;
 	}
 

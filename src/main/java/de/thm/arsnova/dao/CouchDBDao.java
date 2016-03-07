@@ -2108,6 +2108,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public SessionInfo importSession(User user, ImportExportSession importSession) {
 		final Session session = this.saveSession(user, importSession.generateSessionEntity(user));
+		sessionService.changeSessionFeatures(session.getKeyword(), importSession.getSessionFeature());
 		List<Document> questions = new ArrayList<Document>();
 		// We need to remember which answers belong to which question.
 		// The answers need a questionId, so we first store the questions to get the IDs.
