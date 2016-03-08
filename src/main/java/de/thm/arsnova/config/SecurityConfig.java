@@ -62,8 +62,8 @@ import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
 import org.springframework.security.ldap.authentication.BindAuthenticator;
 import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
 import org.springframework.security.ldap.authentication.LdapAuthenticator;
+import org.springframework.security.ldap.authentication.NullLdapAuthoritiesPopulator;
 import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
-import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
 import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
@@ -281,7 +281,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 
 	@Bean
 	public LdapAuthoritiesPopulator ldapAuthoritiesPopulator() throws Exception {
-		return new DefaultLdapAuthoritiesPopulator(ldapContextSource(), null);
+		return new NullLdapAuthoritiesPopulator();
 	}
 
 	// CAS Authentication Configuration
