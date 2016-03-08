@@ -132,6 +132,7 @@ public class FeedbackStorage {
 	public List<User> cleanFeedbackVotesInSession(final Session session, final int cleanupFeedbackDelayInMins) {
 		final long timelimitInMillis = TimeUnit.MILLISECONDS.convert(cleanupFeedbackDelayInMins, TimeUnit.MINUTES);
 		final Date maxAllowedTime = new Date(System.currentTimeMillis() - timelimitInMillis);
+		final boolean forceClean = cleanupFeedbackDelayInMins == 0;
 
 		final Map<User, FeedbackStorageObject> sessionFeedbacks = data.get(session);
 		final List<User> affectedUsers = new ArrayList<User>();
@@ -141,7 +142,8 @@ public class FeedbackStorage {
 				final User user = entry.getKey();
 				final FeedbackStorageObject feedback = entry.getValue();
 				final boolean timeIsUp = feedback.getTimestamp().before(maxAllowedTime);
-				if (timeIsUp) {
+				final boolean isAwayFeedback = getMyFeedback(session, user).equals(Feedback.FEEDBACK_AWAY);
+				if (forceClean || timeIsUp && !isAwayFeedback) {
 					sessionFeedbacks.remove(user);
 					affectedUsers.add(user);
 				}
