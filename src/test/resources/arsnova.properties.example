@@ -197,6 +197,9 @@ features.public-pool.enabled=true
 # Minutes, after which the feedback is deleted
 feedback.cleanup=10
 
+# Number of "you've lost me"/"abgehängt" votes, starting to show warning sign
+feedback.warning=5
+
 # Maximal filesize in bytes
 upload.filesize_b=4194304
 

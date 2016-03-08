@@ -75,6 +75,9 @@ public class ConfigurationController extends AbstractController {
 	@Value("${links.presenter-documentation.url}")
 	private String presenterDocumentationUrl;
 
+	@Value("${feedback.warning:5}")
+	private String feedbackWarningOffset;
+
 	@Value("${features.mathjax.enabled:true}")
 	private String mathJaxEnabled;
 
@@ -212,6 +215,7 @@ public class ConfigurationController extends AbstractController {
 		}
 
 		config.put("answerOptionLimit", Integer.valueOf(answerOptionLimit));
+		config.put("feedbackWarningOffset", Integer.valueOf(feedbackWarningOffset));
 		config.put("parseAnswerOptionFormatting", Boolean.valueOf(parseAnswerOptionFormatting));
 
 		config.put("features", features);
