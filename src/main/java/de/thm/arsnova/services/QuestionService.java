@@ -262,7 +262,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		cancelDelayedPiRoundChange(questionId);
 		question.resetRoundManagementState();
 
-		if (question.getPiRound() == 1) {
+		if (0 == question.getPiRound() || 1 == question.getPiRound()) {
 			question.setPiRoundFinished(false);
 		} else {
 			question.setPiRound(1);
@@ -291,7 +291,12 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		cancelDelayedPiRoundChange(questionId);
 
-		question.setPiRound(1);
+		if ("freetext".equals(question.getQuestionType())) {
+			question.setPiRound(0);
+		} else {
+			question.setPiRound(1);
+		}
+
 		question.resetRoundManagementState();
 		databaseDao.deleteAnswers(question);
 		update(question);
@@ -493,7 +498,11 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			return 0;
 		}
 
-		return databaseDao.getAnswerCount(question, question.getPiRound());
+		if ("freetext".equals(question.getQuestionType())) {
+			return databaseDao.getTotalAnswerCountByQuestion(question);
+		} else {
+			return databaseDao.getAnswerCount(question, question.getPiRound());
+		}
 	}
 
 	@Override

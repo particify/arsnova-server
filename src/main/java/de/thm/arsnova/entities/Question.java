@@ -636,12 +636,17 @@ public class Question implements Serializable {
 	}
 
 	public void resetQuestionState() {
-		this.setPiRound(1);
 		this.setPiRoundEndTime(0);
 		this.setPiRoundStartTime(0);
 		this.setPiRoundActive(false);
 		this.setPiRoundFinished(false);
 		this.setVotingDisabled(false);
+
+		if ("freetext".equals(this.getQuestionType())) {
+			this.setPiRound(0);
+		} else {
+			this.setPiRound(1);
+		}
 	}
 
 	private int calculateRegularValue(Answer answer) {
