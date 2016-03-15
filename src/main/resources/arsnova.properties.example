@@ -214,7 +214,7 @@ question.answer-option-limit=8
 # options should be used cautiously since it could lead to display errors.
 # Answer options will still not be parsed in diagrams. This setting has no
 # effect if neither MathJax nor Markdown are enabled.
-question.parse-answer-option-formatting=true
+question.parse-answer-option-formatting=false
 
 # Demo session id to show above session login button
 # You can freely use the demo session of https://arsnova.eu/mobile which can be
