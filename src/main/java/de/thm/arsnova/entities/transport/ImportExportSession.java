@@ -45,7 +45,7 @@ public class ImportExportSession {
 
 	private List<Motd> motds;
 
-	private SessionFeature sessionFeature;
+	private SessionFeature sessionFeature = new SessionFeature();
 
 	private SessionInfo sessionInfo;
 
@@ -53,7 +53,6 @@ public class ImportExportSession {
 		questions = new ArrayList<ImportExportQuestion>();
 		feedbackQuestions = new ArrayList<InterposedQuestion>();
 		motds = new ArrayList<Motd>();
-		sessionFeature = null;
 		sessionInfo = null;
 	}
 
@@ -132,6 +131,7 @@ public class ImportExportSession {
 		s.setActive(session.isActive());
 		s.setName(session.getName());
 		s.setShortName(session.getShortName());
+		s.setFeatures(session.getSessionFeature());
 		// public pool
 		if (session.getPublicPool() != null) {
 			// overwrite name and shortname
@@ -236,6 +236,8 @@ public class ImportExportSession {
 
 		private PublicPool publicPool;
 
+		private SessionFeature sessionFeature;
+
 		@ApiModelProperty(required = true, value = "used to display short name")
 		public String getName() {
 			return name;
@@ -270,6 +272,14 @@ public class ImportExportSession {
 
 		public void setPublicPool(PublicPool publicPool) {
 			this.publicPool = publicPool;
+		}
+
+		public SessionFeature getSessionFeature() {
+			return this.sessionFeature;
+		}
+
+		public void setSessionFeature(SessionFeature sF) {
+			this.sessionFeature = sF;
 		}
 	}
 
