@@ -23,6 +23,7 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.entities.SessionInfo;
+import de.thm.arsnova.entities.SessionFeature;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.springframework.context.annotation.Import;
@@ -43,6 +44,8 @@ public class ImportExportSession {
 	private List<InterposedQuestion> feedbackQuestions;
 
 	private List<Motd> motds;
+
+	private SessionFeature sessionFeature = new SessionFeature();
 
 	private SessionInfo sessionInfo;
 
@@ -88,6 +91,14 @@ public class ImportExportSession {
 		this.motds = mL;
 	}
 
+	public SessionFeature getSessionFeature() {
+		return sessionFeature;
+	}
+
+	public void setSessionFeature(SessionFeature sF) {
+		sessionFeature = sF;
+	}
+
 	public SessionInfo getSessionInfo() {
 		return sessionInfo;
 	}
@@ -104,6 +115,7 @@ public class ImportExportSession {
 		PublicPool p = new PublicPool();
 		p.setPpFromSession(s);
 		iesession.setPublicPool(p);
+		sessionFeature = s.getFeatures();
 		session = iesession;
 	}
 
@@ -119,6 +131,7 @@ public class ImportExportSession {
 		s.setActive(session.isActive());
 		s.setName(session.getName());
 		s.setShortName(session.getShortName());
+		s.setFeatures(session.getSessionFeature());
 		// public pool
 		if (session.getPublicPool() != null) {
 			// overwrite name and shortname
@@ -223,6 +236,8 @@ public class ImportExportSession {
 
 		private PublicPool publicPool;
 
+		private SessionFeature sessionFeature;
+
 		@ApiModelProperty(required = true, value = "used to display short name")
 		public String getName() {
 			return name;
@@ -257,6 +272,14 @@ public class ImportExportSession {
 
 		public void setPublicPool(PublicPool publicPool) {
 			this.publicPool = publicPool;
+		}
+
+		public SessionFeature getSessionFeature() {
+			return this.sessionFeature;
+		}
+
+		public void setSessionFeature(SessionFeature sF) {
+			this.sessionFeature = sF;
 		}
 	}
 

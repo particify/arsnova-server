@@ -2170,10 +2170,11 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				d.put("type", "motd");
 				d.put("motdkey", m.getMotdkey());
 				d.put("title", m.getTitle());
+				d.put("text", m.getText());
 				d.put("audience", m.getAudience());
 				d.put("sessionkey", session.getKeyword());
-				d.put("startdate", String.valueOf(m.getStartdate()));
-				d.put("enddate", String.valueOf(m.getEnddate()));
+				d.put("startdate", String.valueOf(m.getStartdate().getTime()));
+				d.put("enddate", String.valueOf(m.getEnddate().getTime()));
 				motds.add(d);
 			}
 			List<Document> documents = new ArrayList<Document>(answers);
