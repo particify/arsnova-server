@@ -21,11 +21,11 @@ sync_mirror:
     - staging
   allow_failure: true
   script:
-    - git clone --bare $CI_BUILD_REPO mirror.git
+    - git clone --bare "$CI_BUILD_REPO" mirror.git
     - cd mirror.git
     - git update-ref -d refs/tags/production
     - git update-ref -d refs/tags/staging
-    - git push --mirror $MIRROR_REPO
+    - git push --mirror "$MIRROR_REPO"
 
 sonar:
   stage: analysis
@@ -66,11 +66,11 @@ tomcat_production:
   only:
     - production
   script:
-    - curl --upload-file $WAR_FILE https://$PROD_TOMCAT_USER:$PROD_TOMCAT_PASSWORD@$PROD_TOMCAT_HOST/manager/deploy?path=%2Fapi
+    - curl --fail --upload-file "$WAR_FILE" "https://$PROD_TOMCAT_USER:$PROD_TOMCAT_PASSWORD@$PROD_TOMCAT_HOST/manager/text/deploy?path=%2Fapi&update=true"
 
 tomcat_development:
   stage: deploy
   only:
     - staging
   script:
-    - curl --upload-file $WAR_FILE https://$DEV_TOMCAT_USER:$DEV_TOMCAT_PASSWORD@$DEV_TOMCAT_HOST/manager/deploy?path=%2Fapi
+    - curl --fail --upload-file "$WAR_FILE" "https://$DEV_TOMCAT_USER:$DEV_TOMCAT_PASSWORD@$DEV_TOMCAT_HOST/manager/text/deploy?path=%2Fapi&update=true"
