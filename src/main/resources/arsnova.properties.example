@@ -39,6 +39,22 @@ couchdb.name=arsnova
 couchdb.username=admin
 couchdb.password=
 
+################################################################################
+# Cache
+################################################################################
+# The cache to be used.
+# Available values are: concurrent-map-cache, memcache
+# Defaults to concurrent-map-cache
+#cache.type=
+
+# The hosts name providing the cache.
+#cache.host=
+
+# The hosts name providing the cache.
+#cache.port=
+
+# The expiration time. Defaults to 1800 sec. Will be ignored for concurrent-map-cache
+#cache.expiration=
 
 ################################################################################
 # E-Mail

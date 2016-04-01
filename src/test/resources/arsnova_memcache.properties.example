@@ -45,7 +45,7 @@ couchdb.password=
 # The cache to be used.
 # Available values are: concurrent-map-cache, memcache
 # Defaults to concurrent-map-cache
-#cache.type=
+cache.type=memcache
 
 # The hosts name providing the cache.
 #cache.host=
