@@ -62,6 +62,8 @@ public class ExtraConfig extends WebMvcConfigurerAdapter {
 	@Value(value = "${security.keystore}") private String socketKeystore;
 	@Value(value = "${security.storepass}") private String socketStorepass;
 
+	private static int testPortOffset = 0;
+
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		final PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
@@ -110,7 +112,7 @@ public class ExtraConfig extends WebMvcConfigurerAdapter {
 	@Profile("test")
 	@Bean(name = "socketServer", initMethod = "startServer", destroyMethod = "stopServer")
 	public ARSnovaSocket socketTestServer() {
-		final int testSocketPort = 1234;
+		final int testSocketPort = 1234 + testPortOffset++ % 10;
 		final ARSnovaSocketIOServer socketServer = new ARSnovaSocketIOServer();
 		socketServer.setHostIp(socketIp);
 		socketServer.setPortNumber(socketPort + testSocketPort);
