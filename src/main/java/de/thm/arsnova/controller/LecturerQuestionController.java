@@ -90,6 +90,21 @@ public class LecturerQuestionController extends PaginationController {
 		throw new BadRequestException();
 	}
 
+	@ApiOperation(value = "Post provided questions", nickname = "bulkPostQuestions")
+	@ApiResponses(value = {
+		@ApiResponse(code = 400, message = HTML_STATUS_400)
+	})
+	@RequestMapping(value = "/bulk", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.CREATED)
+	public List<Question> bulkPostQuestions(@RequestBody final List<Question> questions) {
+		for (final Question question : questions) {
+			if (questionService.saveQuestion(question) == null) {
+				throw new BadRequestException();
+			}
+		}
+		return questions;
+	}
+
 	@ApiOperation(value = "Update the question, identified by provided id, with the provided question in the Request Body",
 			nickname = "updateQuestion")
 	@ApiResponses(value = {
