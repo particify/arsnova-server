@@ -1563,7 +1563,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	@CacheEvict("sessions")
+	@Caching(evict = { @CacheEvict("sessions"), @CacheEvict(cacheNames="sessions", key="#p0.keyword") })
 	public void deleteSession(final Session session) {
 		try {
 			deleteDocument(session.get_id());
