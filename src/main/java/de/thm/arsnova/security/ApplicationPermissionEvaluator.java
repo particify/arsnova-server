@@ -75,7 +75,12 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final String targetType,
 			final Object permission
 			) {
+		/** TODO only allow accounts from arsnova db **/
 		final String username = getUsername(authentication);
+		String[] splittedAdminNames = adminAccounts.split(",");
+		if (Arrays.asList(splittedAdminNames).contains(username)) {
+			return true;
+		}
 
 		if (
 				"session".equals(targetType)
@@ -91,15 +96,6 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				&& checkInterposedQuestionPermission(username, targetId, permission)
 				) {
 			return true;
-		} else if (
-		/*TODO only account from own database*/
-				"motd".equals(targetType)
-				&& permission.equals("admin")
-				) {
-			String[] splittedNames = adminAccounts.split(",");
-			if (Arrays.asList(splittedNames).contains(username)) {
-				return true;
-			}
 		}
 		return false;
 	}
