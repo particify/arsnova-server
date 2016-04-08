@@ -1559,6 +1559,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		try {
 			final Document s = database.getDocument(session.get_id());
 			s.put("name", session.getName());
+			s.put("creator", session.getCreator());
 			s.put("shortName", session.getShortName());
 			s.put("active", session.isActive());
 			s.put("ppAuthorName", session.getPpAuthorName());
