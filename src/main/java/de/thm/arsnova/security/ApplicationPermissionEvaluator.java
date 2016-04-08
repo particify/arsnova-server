@@ -58,8 +58,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Object permission
 			) {
 		final String username = getUsername(authentication);
-
-		if (
+		if (checkAdminPermission(username)) {
+			return true;
+		} else if (
 				targetDomainObject instanceof Session
 				&& checkSessionPermission(username, ((Session) targetDomainObject).getKeyword(), permission)
 				) {
@@ -75,14 +76,10 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final String targetType,
 			final Object permission
 			) {
-		/** TODO only allow accounts from arsnova db **/
 		final String username = getUsername(authentication);
-		String[] splittedAdminNames = adminAccounts.split(",");
-		if (Arrays.asList(splittedAdminNames).contains(username)) {
+		if (checkAdminPermission(username)) {
 			return true;
-		}
-
-		if (
+		} else if (
 				"session".equals(targetType)
 				&& checkSessionPermission(username, targetId, permission)) {
 			return true;
@@ -95,6 +92,15 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				"interposedquestion".equals(targetType)
 				&& checkInterposedQuestionPermission(username, targetId, permission)
 				) {
+			return true;
+		}
+		return false;
+	}
+
+	private boolean checkAdminPermission(final String username) {
+		/** TODO only allow accounts from arsnova db **/
+		String[] splittedAdminNames = adminAccounts.split(",");
+		if (Arrays.asList(splittedAdminNames).contains(username)) {
 			return true;
 		}
 		return false;
