@@ -59,6 +59,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -75,39 +76,46 @@ public class LoginController extends AbstractController {
 	@Value("${customization.path}") private String customizationPath;
 
 	@Value("${security.guest.enabled}") private String guestEnabled;
-	@Value("${security.guest.lecturer.enabled}") private String guestLecturerEnabled;
+	@Value("${security.guest.allowed-roles:speaker,student}") private String[] guestRoles;
 	@Value("${security.guest.order}") private int guestOrder;
 
 	@Value("${security.custom-login.enabled}") private String customLoginEnabled;
+	@Value("${security.custom-login.allowed-roles:speaker,student}") private String[] customLoginRoles;
 	@Value("${security.custom-login.title:University}") private String customLoginTitle;
 	@Value("${security.custom-login.login-dialog-path}") private String customLoginDialog;
 	@Value("${security.custom-login.image:}") private String customLoginImage;
 	@Value("${security.custom-login.order}") private int customLoginOrder;
 
 	@Value("${security.user-db.enabled}") private String dbAuthEnabled;
+	@Value("${security.user-db.allowed-roles:speaker,student}") private String[] dbAuthRoles;
 	@Value("${security.user-db.title:ARSnova}") private String dbAuthTitle;
 	@Value("${security.user-db.login-dialog-path}") private String dbAuthDialog;
 	@Value("${security.user-db.image:}") private String dbAuthImage;
 	@Value("${security.user-db.order}") private int dbAuthOrder;
 
 	@Value("${security.ldap.enabled}") private String ldapEnabled;
+	@Value("${security.ldap.allowed-roles:speaker,student}") private String[] ldapRoles;
 	@Value("${security.ldap.title:LDAP}") private String ldapTitle;
 	@Value("${security.ldap.login-dialog-path}") private String ldapDialog;
 	@Value("${security.ldap.image:}") private String ldapImage;
 	@Value("${security.ldap.order}") private int ldapOrder;
 
 	@Value("${security.cas.enabled}") private String casEnabled;
+	@Value("${security.cas.allowed-roles:speaker,student}") private String[] casRoles;
 	@Value("${security.cas.title:CAS}") private String casTitle;
 	@Value("${security.cas.image:}") private String casImage;
 	@Value("${security.cas.order}") private int casOrder;
 
 	@Value("${security.facebook.enabled}") private String facebookEnabled;
+	@Value("${security.facebook.enabled-roles:speaker,student}") private String[] facebookRoles;
 	@Value("${security.facebook.order}") private int facebookOrder;
 
 	@Value("${security.google.enabled}") private String googleEnabled;
+	@Value("${security.google.allowed-roles:speaker,student}") private String[] googleRoles;
 	@Value("${security.google.order}") private int googleOrder;
 
 	@Value("${security.twitter.enabled}") private String twitterEnabled;
+	@Value("${security.twitter.allowed-roles:speaker,student}") private String[] twitterRoles;
 	@Value("${security.twitter.order}") private int twitterOrder;
 
 	@Autowired(required = false)
@@ -309,12 +317,10 @@ public class LoginController extends AbstractController {
 			ServiceDescription sdesc = new ServiceDescription(
 				"guest",
 				"Guest",
-				null
+				null,
+				guestRoles
 			);
 			sdesc.setOrder(guestOrder);
-			if (!"true".equals(guestLecturerEnabled)) {
-				sdesc.setAllowLecturer(false);
-			}
 			services.add(sdesc);
 		}
 
@@ -323,6 +329,7 @@ public class LoginController extends AbstractController {
 				"custom",
 				customLoginTitle,
 				customizationPath + "/" + customLoginDialog + "?redirect={0}",
+				customLoginRoles,
 				customLoginImage
 			);
 			sdesc.setOrder(customLoginOrder);
@@ -334,6 +341,7 @@ public class LoginController extends AbstractController {
 				"arsnova",
 				dbAuthTitle,
 				customizationPath + "/" + dbAuthDialog + "?redirect={0}",
+				dbAuthRoles,
 				dbAuthImage
 			);
 			sdesc.setOrder(dbAuthOrder);
@@ -345,6 +353,7 @@ public class LoginController extends AbstractController {
 				"ldap",
 				ldapTitle,
 				customizationPath + "/" + ldapDialog + "?redirect={0}",
+				ldapRoles,
 				ldapImage
 			);
 			sdesc.setOrder(ldapOrder);
@@ -355,7 +364,8 @@ public class LoginController extends AbstractController {
 			ServiceDescription sdesc = new ServiceDescription(
 				"cas",
 				casTitle,
-				MessageFormat.format(dialogUrl, "cas")
+				MessageFormat.format(dialogUrl, "cas"),
+				casRoles
 			);
 			sdesc.setOrder(casOrder);
 			services.add(sdesc);
@@ -365,7 +375,8 @@ public class LoginController extends AbstractController {
 			ServiceDescription sdesc = new ServiceDescription(
 				"facebook",
 				"Facebook",
-				MessageFormat.format(dialogUrl, "facebook")
+				MessageFormat.format(dialogUrl, "facebook"),
+				facebookRoles
 			);
 			sdesc.setOrder(facebookOrder);
 			services.add(sdesc);
@@ -375,7 +386,8 @@ public class LoginController extends AbstractController {
 			ServiceDescription sdesc = new ServiceDescription(
 				"google",
 				"Google",
-				MessageFormat.format(dialogUrl, "google")
+				MessageFormat.format(dialogUrl, "google"),
+				googleRoles
 			);
 			sdesc.setOrder(googleOrder);
 			services.add(sdesc);
@@ -385,7 +397,8 @@ public class LoginController extends AbstractController {
 			ServiceDescription sdesc = new ServiceDescription(
 				"twitter",
 				"Twitter",
-				MessageFormat.format(dialogUrl, "twitter")
+				MessageFormat.format(dialogUrl, "twitter"),
+				twitterRoles
 			);
 			sdesc.setOrder(twitterOrder);
 			services.add(sdesc);

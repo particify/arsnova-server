@@ -64,13 +64,14 @@ security.authentication.login-try-limit=50
 # Guest authentication
 #
 security.guest.enabled=true
+security.guest.allowed-roles=speaker,student
 security.guest.order=0
-security.guest.lecturer.enabled=true
 
 # Setup combined login if you want to use a single, customized login page
 # which is used for multiple authentication services.
 #
 security.custom-login.enabled=false
+security.custom-login.allowed-roles=speaker,student
 security.custom-login.title=University
 security.custom-login.login-dialog-path=
 security.custom-login.image=
@@ -88,6 +89,7 @@ security.custom-login.order=0
 #     replaced by the value of activation-path.
 #
 security.user-db.enabled=true
+security.user-db.allowed-roles=speaker,student
 security.user-db.title=ARSnova
 security.user-db.login-dialog-path=account.html
 security.user-db.activation-path=account.html
@@ -111,6 +113,7 @@ security.user-db.reset-password-mail.body=You requested to reset your \
 #     server. {0} will be replaced with the user ID by ARSnova.
 #
 security.ldap.enabled=false
+security.ldap.allowed-roles=speaker,student
 security.ldap.title=LDAP
 security.ldap.login-dialog-path=login-ldap.html
 security.ldap.image=
@@ -128,6 +131,7 @@ security.ldap.user-dn-pattern=uid={0},ou=arsnova
 # CAS authentication
 #
 security.cas.enabled=false
+security.cas.allowed-roles=speaker,student
 security.cas.title=CAS
 security.cas.image=
 security.cas.order=0
@@ -141,6 +145,7 @@ security.cas-server-url=https://example.com/cas
 # Facebook
 #
 security.facebook.enabled=false
+security.facebook.allowed-roles=speaker,student
 security.facebook.order=0
 security.facebook.key=
 security.facebook.secret=
@@ -148,6 +153,7 @@ security.facebook.secret=
 # Twitter
 #
 security.twitter.enabled=false
+security.twitter.allowed-roles=speaker,student
 security.twitter.order=0
 security.twitter.key=
 security.twitter.secret=
@@ -155,6 +161,7 @@ security.twitter.secret=
 # Google
 #
 security.google.enabled=false
+security.google.allowed-roles=speaker,student
 security.google.order=0
 security.google.key=
 security.google.secret=
