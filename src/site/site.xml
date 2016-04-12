@@ -7,7 +7,7 @@
 	<skin>
 		<groupId>org.apache.maven.skins</groupId>
 		<artifactId>maven-fluido-skin</artifactId>
-		<version>1.2.1</version>
+		<version>1.5</version>
 	</skin>
 
 	<custom>
@@ -39,7 +39,9 @@
 
 	<body>
 		<head>
+			<![CDATA[
 			<link rel="stylesheet" type="text/css" href="css/thm-theme.css" />
+			]]>
 		</head>
 		<links>
 			<item name="THM" href="http://www.thm.de/" />
@@ -63,6 +65,5 @@
 			<item name="Source Repository" href="source-repository.html" />
 			<item name="Metrics" href="cobertura/index.html" />
 		</menu>
-
 	</body>
 </project>
