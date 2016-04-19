@@ -77,8 +77,15 @@ public class SessionController extends PaginationController {
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.GET)
-	public Session joinSession(@ApiParam(value = "Session-Key from current session", required = true) @PathVariable final String sessionkey) {
-		return Session.anonymizedCopy(sessionService.getSession(sessionkey));
+	public Session joinSession(
+			@ApiParam(value = "Session-Key from current session", required = true) @PathVariable final String sessionkey,
+			@ApiParam(value = "Adminflag", required = false) @RequestParam(value = "admin", defaultValue = "false")	final boolean admin
+			) {
+		if (admin) {
+			return sessionService.getSessionForAdmin(sessionkey);
+		} else {
+			return sessionService.getSession(sessionkey);
+		}
 	}
 
 	@ApiOperation(value = "deletes a session",

@@ -34,6 +34,8 @@ import java.util.UUID;
 public interface ISessionService {
 	Session getSession(String keyword);
 
+	Session getSessionForAdmin(final String keyword);
+
 	Session getSessionInternal(String keyword, User user);
 
 	Session saveSession(Session session);

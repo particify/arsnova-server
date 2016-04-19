@@ -160,7 +160,13 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	@PreAuthorize("isAuthenticated()")
 	public Session getSession(final String keyword) {
 		final User user = userService.getCurrentUser();
-		return this.getSessionInternal(keyword, user);
+		return Session.anonymizedCopy(this.getSessionInternal(keyword, user));
+	}
+
+	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	public Session getSessionForAdmin(final String keyword) {
+		final Session session = databaseDao.getSessionFromKeyword(keyword);
+		return session;
 	}
 
 	/*
