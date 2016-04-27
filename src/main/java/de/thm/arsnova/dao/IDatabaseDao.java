@@ -44,6 +44,8 @@ public interface IDatabaseDao {
 
 	List<Session> getMySessions(User user, final int start, final int limit);
 
+	List<Session> getSessionsForUsername(String username, final int start, final int limit);
+
 	List<Session> getPublicPoolSessions();
 
 	List<Session> getMyPublicPoolSessions(User user);
@@ -120,6 +122,8 @@ public interface IDatabaseDao {
 	void markInterposedQuestionAsRead(InterposedQuestion question);
 
 	List<Session> getMyVisitedSessions(User user, final int start, final int limit);
+
+	List<Session> getVisitedSessionsForUsername(String username, final int start, final int limit);
 
 	Question updateQuestion(Question question);
 

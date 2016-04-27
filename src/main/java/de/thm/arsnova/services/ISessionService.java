@@ -44,6 +44,10 @@ public interface ISessionService {
 
 	String generateKeyword();
 
+	List<Session> getUserSessions(String username);
+
+	List<Session> getUserVisitedSessions(String username);
+
 	List<Session> getMySessions(int offset, int limit);
 
 	List<Session> getMyVisitedSessions(int offset, int limit);

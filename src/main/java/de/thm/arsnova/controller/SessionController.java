@@ -158,9 +158,24 @@ public class SessionController extends PaginationController {
 			@ApiParam(value = "ownedOnly", required = true) @RequestParam(value = "ownedonly", defaultValue = "false") final boolean ownedOnly,
 			@ApiParam(value = "visitedOnly", required = true) @RequestParam(value = "visitedonly", defaultValue = "false") final boolean visitedOnly,
 			@ApiParam(value = "sortby", required = true) @RequestParam(value = "sortby", defaultValue = "name") final String sortby,
+			@ApiParam(value = "for a given username. admin rights needed", required = false) @RequestParam(value =
+					"username", defaultValue = "") final String username,
 			final HttpServletResponse response
 			) {
 		List<Session> sessions = null;
+
+		if (username.equals("")) try {
+			if (ownedOnly && !visitedOnly) {
+				sessions = sessionService.getUserSessions(username);
+			} else if (visitedOnly && !ownedOnly) {
+				sessions = sessionService.getUserVisitedSessions(username);
+			} else {
+				response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
+				return null;
+			}
+		} catch (final AccessDeniedException e) {
+			throw new UnauthorizedException();
+		}
 
 		/* TODO implement all parameter combinations, implement use of user parameter */
 		try {

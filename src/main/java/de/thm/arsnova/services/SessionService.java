@@ -196,6 +196,12 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	}
 
 	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	public List<Session> getUserSessions(String username) {
+		return databaseDao.getSessionsForUsername(username, 0, 0);
+	}
+
+	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Session> getMySessions(final int offset, final int limit) {
 		return databaseDao.getMySessions(userService.getCurrentUser(), offset, limit);
@@ -224,6 +230,12 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	@PreAuthorize("isAuthenticated()")
 	public List<Session> getMyVisitedSessions(final int offset, final int limit) {
 		return databaseDao.getMyVisitedSessions(userService.getCurrentUser(), offset, limit);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	public List<Session> getUserVisitedSessions(String username) {
+		return databaseDao.getVisitedSessionsForUsername(username, 0, 0);
 	}
 
 	@Override

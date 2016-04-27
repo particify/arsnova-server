@@ -153,6 +153,11 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<Session> getMySessions(final User user, final int start, final int limit) {
+		return this.getDatabaseDao().getSessionsForUsername(user.getUsername(), start, limit);
+	}
+
+	@Override
+	public List<Session> getSessionsForUsername(String username, final int start, final int limit) {
 		final NovaView view = new NovaView("session/by_creator");
 		if (start > 0) {
 			view.setSkip(start);
@@ -160,8 +165,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		if (limit > 0) {
 			view.setLimit(limit);
 		}
-		view.setStartKeyArray(user.getUsername());
-		view.setEndKeyArray(user.getUsername(), "{}");
+		view.setStartKeyArray(username);
+		view.setEndKeyArray(username, "{}");
 
 		final Results<Session> results = getDatabase().queryView(view, Session.class);
 
@@ -1349,8 +1354,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			if (d.getJSONObject().optJSONArray("value") != null) {
 				@SuppressWarnings("unchecked")
 				final Collection<Session> visitedSessions =	 JSONArray.toCollection(
-					d.getJSONObject().getJSONArray("value"),
-					Session.class
+						d.getJSONObject().getJSONArray("value"),
+						Session.class
 				);
 				allSessions.addAll(visitedSessions);
 			}
@@ -1394,6 +1399,72 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			getDatabase().saveDocument(doc);
 		} catch (IOException e) {
 			LOGGER.error("Could not clean up logged_in document of {}", user.getUsername());
+		}
+		return result;
+	}
+
+	@Override
+	public List<Session> getVisitedSessionsForUsername(String username, final int start, final int limit) {
+		final NovaView view = new NovaView("logged_in/visited_sessions_by_user");
+		if (start > 0) {
+			view.setSkip(start);
+		}
+		if (limit > 0) {
+			view.setLimit(limit);
+		}
+		view.setKey(username);
+		final ViewResults sessions = getDatabase().view(view);
+		final List<Session> allSessions = new ArrayList<Session>();
+		for (final Document d : sessions.getResults()) {
+			// Not all users have visited sessions
+			if (d.getJSONObject().optJSONArray("value") != null) {
+				@SuppressWarnings("unchecked")
+				final Collection<Session> visitedSessions =	 JSONArray.toCollection(
+						d.getJSONObject().getJSONArray("value"),
+						Session.class
+				);
+				allSessions.addAll(visitedSessions);
+			}
+		}
+		// Filter sessions that don't exist anymore, also filter my own sessions
+		final List<Session> result = new ArrayList<Session>();
+		final List<Session> filteredSessions = new ArrayList<Session>();
+		for (final Session s : allSessions) {
+			try {
+				final Session session = getDatabaseDao().getSessionFromKeyword(s.getKeyword());
+				if (session != null && !(session.getCreator().equals(username))) {
+					result.add(session);
+				} else {
+					filteredSessions.add(s);
+				}
+			} catch (final NotFoundException e) {
+				filteredSessions.add(s);
+			}
+		}
+		if (filteredSessions.isEmpty()) {
+			return result;
+		}
+		// Update document to remove sessions that don't exist anymore
+		try {
+			List<VisitedSession> visitedSessions = new ArrayList<VisitedSession>();
+			for (final Session s : result) {
+				visitedSessions.add(new VisitedSession(s));
+			}
+			final LoggedIn loggedIn = new LoggedIn();
+			final Document loggedInDocument = getDatabase().getDocument(sessions.getResults().get(0).getString("id"));
+			loggedIn.setSessionId(loggedInDocument.getString("sessionId"));
+			loggedIn.setUser(username);
+			loggedIn.setTimestamp(loggedInDocument.getLong("timestamp"));
+			loggedIn.setType(loggedInDocument.getString("type"));
+			loggedIn.setVisitedSessions(visitedSessions);
+			loggedIn.set_id(loggedInDocument.getId());
+			loggedIn.set_rev(loggedInDocument.getRev());
+
+			final JSONObject json = JSONObject.fromObject(loggedIn);
+			final Document doc = new Document(json);
+			getDatabase().saveDocument(doc);
+		} catch (IOException e) {
+			LOGGER.error("Could not clean up logged_in document of {}", username);
 		}
 		return result;
 	}
