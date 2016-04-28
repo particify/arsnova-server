@@ -164,6 +164,12 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
+	public List<Session> getSessionsForUsername(String username, final int start, final int limit) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public List<Session> getPublicPoolSessions() {
 		// TODO Auto-generated method stub
 		return null;
@@ -473,6 +479,12 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public List<SessionInfo> getMyVisitedSessionsInfo(User currentUser, final int start, final int limit) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Session> getVisitedSessionsForUsername(String username, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
 	}
