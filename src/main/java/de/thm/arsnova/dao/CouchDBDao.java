@@ -1657,6 +1657,21 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	@Caching(evict = { @CacheEvict("sessions"), @CacheEvict(cacheNames = "sessions", key = "#p0.keyword") })
+	public Session changeSessionCreator(Session session, final String newCreator) {
+		try {
+			final Document s = database.getDocument(session.get_id());
+			s.put("creator", newCreator);
+			database.saveDocument(s);
+			session.set_rev(s.getRev());
+		} catch (final IOException e) {
+			LOGGER.error("Could not lock session {}", session);
+		}
+
+		return session;
+	}
+
+	@Override
+	@Caching(evict = { @CacheEvict("sessions"), @CacheEvict(cacheNames="sessions", key="#p0.keyword") })
 	public void deleteSession(final Session session) {
 		try {
 			deleteDocument(session.get_id());

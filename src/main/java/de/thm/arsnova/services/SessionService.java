@@ -345,6 +345,16 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		return databaseDao.updateSession(existingSession);
 	}
 
+	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
+	public Session changeSessionCreator(String sessionkey, String newCreator) {
+		final Session existingSession = databaseDao.getSessionFromKeyword(sessionkey);
+		if (existingSession == null) {
+			throw new RuntimeException("Error while trying to get the session with sessionkey: " + sessionkey);
+		}
+		return databaseDao.changeSessionCreator(existingSession, newCreator);
+	}
+
 	/*
 	 * The "internal" suffix means it is called by internal services that have no authentication!
 	 * TODO: Find a better way of doing this...

@@ -143,6 +143,8 @@ public interface IDatabaseDao {
 
 	Session updateSession(Session session);
 
+	Session changeSessionCreator(Session session, String newCreator);
+
 	void deleteSession(Session session);
 
 	List<Question> getLectureQuestionsForUsers(Session session);

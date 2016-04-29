@@ -146,6 +146,15 @@ public class SessionController extends PaginationController {
 		return sessionService.updateSession(sessionkey, session);
 	}
 
+	@ApiOperation(value = "change the session creator (owner)", nickname = "changeSessionCreator")
+	@RequestMapping(value = "/{sessionkey}/changecreator", method = RequestMethod.PUT)
+	public Session changeSessionCreator(
+			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
+			@ApiParam(value = "new session creator", required = true) @RequestBody final String newCreator
+			) {
+		return sessionService.changeSessionCreator(sessionkey, newCreator);
+	}
+
 	@ApiOperation(value = "Retrieves a list of Sessions",
 			nickname = "getSessions")
 	@ApiResponses(value = {

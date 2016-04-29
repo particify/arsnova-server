@@ -62,6 +62,8 @@ public interface ISessionService {
 
 	Session updateSession(String sessionkey, Session session);
 
+	Session changeSessionCreator(String sessionkey, String newCreator);
+
 	Session updateSessionInternal(Session session, User user);
 
 	void deleteSession(String sessionkey);
