@@ -25,6 +25,7 @@ import de.thm.arsnova.CasUserDetailsService;
 import de.thm.arsnova.LoginAuthenticationFailureHandler;
 import de.thm.arsnova.LoginAuthenticationSucessHandler;
 import de.thm.arsnova.security.ApplicationPermissionEvaluator;
+import de.thm.arsnova.security.CustomLdapUserDetailsMapper;
 import de.thm.arsnova.security.DbUserDetailsService;
 import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
 import org.scribe.up.provider.impl.FacebookProvider;
@@ -65,6 +66,7 @@ import org.springframework.security.ldap.authentication.LdapAuthenticator;
 import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
 import org.springframework.security.ldap.userdetails.DefaultLdapAuthoritiesPopulator;
 import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
+import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
@@ -96,6 +98,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 
 	@Value("${security.ldap.enabled}") private boolean ldapEnabled;
 	@Value("${security.ldap.url}") private String ldapUrl;
+	@Value("${security.ldap.user-id-attr:uid}") private String ldapUserIdAttr;
 	@Value("${security.ldap.user-dn-pattern:}") private String ldapUserDn;
 	@Value("${security.ldap.user-search-base:}") private String ldapSearchBase;
 	@Value("${security.ldap.user-search-filter:}") private String ldapSearchFilter;
@@ -249,7 +252,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 
 	@Bean
 	public LdapAuthenticationProvider ldapAuthenticationProvider() throws Exception {
-		return new LdapAuthenticationProvider(ldapAuthenticator(), ldapAuthoritiesPopulator());
+		LdapAuthenticationProvider ldapAuthenticationProvider = new LdapAuthenticationProvider(ldapAuthenticator(), ldapAuthoritiesPopulator());
+		ldapAuthenticationProvider.setUserDetailsContextMapper(customLdapUserDetailsMapper());
+
+		return ldapAuthenticationProvider;
 	}
 
 	@Bean
@@ -282,6 +288,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 	@Bean
 	public LdapAuthoritiesPopulator ldapAuthoritiesPopulator() throws Exception {
 		return new DefaultLdapAuthoritiesPopulator(ldapContextSource(), null);
+	}
+
+	@Bean
+	public LdapUserDetailsMapper customLdapUserDetailsMapper() {
+		logger.debug("ldapUserIdAttr: {}", ldapUserIdAttr);
+
+		return new CustomLdapUserDetailsMapper(ldapUserIdAttr);
 	}
 
 	// CAS Authentication Configuration
