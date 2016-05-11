@@ -173,31 +173,33 @@ public class SessionController extends PaginationController {
 			) {
 		List<Session> sessions = null;
 
-		if (username.equals("")) try {
-			if (ownedOnly && !visitedOnly) {
-				sessions = sessionService.getUserSessions(username);
-			} else if (visitedOnly && !ownedOnly) {
-				sessions = sessionService.getUserVisitedSessions(username);
-			} else {
-				response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
-				return null;
+		if (!username.equals("")) {
+			try {
+				if (ownedOnly && !visitedOnly) {
+					sessions = sessionService.getUserSessions(username);
+				} else if (visitedOnly && !ownedOnly) {
+					sessions = sessionService.getUserVisitedSessions(username);
+				} else {
+					response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
+					return null;
+				}
+			} catch (final AccessDeniedException e) {
+				throw new UnauthorizedException();
 			}
-		} catch (final AccessDeniedException e) {
-			throw new UnauthorizedException();
-		}
-
-		/* TODO implement all parameter combinations, implement use of user parameter */
-		try {
-			if (ownedOnly && !visitedOnly) {
-				sessions = sessionService.getMySessions(offset, limit);
-			} else if (visitedOnly && !ownedOnly) {
-				sessions = sessionService.getMyVisitedSessions(offset, limit);
-			} else {
-				response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
-				return null;
+		} else {
+			/* TODO implement all parameter combinations, implement use of user parameter */
+			try {
+				if (ownedOnly && !visitedOnly) {
+					sessions = sessionService.getMySessions(offset, limit);
+				} else if (visitedOnly && !ownedOnly) {
+					sessions = sessionService.getMyVisitedSessions(offset, limit);
+				} else {
+					response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
+					return null;
+				}
+			} catch (final AccessDeniedException e) {
+				throw new UnauthorizedException();
 			}
-		} catch (final AccessDeniedException e) {
-			throw new UnauthorizedException();
 		}
 
 		if (sessions == null || sessions.isEmpty()) {

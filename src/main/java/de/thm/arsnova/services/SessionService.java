@@ -233,7 +233,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	@PreAuthorize("isAuthenticated() and hasPermission(1, 'motd', 'admin')")
 	public List<Session> getUserVisitedSessions(String username) {
 		return databaseDao.getVisitedSessionsForUsername(username, 0, 0);
 	}
