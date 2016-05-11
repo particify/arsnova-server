@@ -191,7 +191,7 @@ public class LoginController extends AbstractController {
 				try {
 					Authentication auth = ldapAuthenticationProvider.authenticate(token);
 					if (auth.isAuthenticated()) {
-						SecurityContextHolder.getContext().setAuthentication(token);
+						SecurityContextHolder.getContext().setAuthentication(auth);
 						request.getSession(true).setAttribute(
 								HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
 								SecurityContextHolder.getContext());

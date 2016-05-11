@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.3.1
+Bug fixes:
+* Case-insensitive user IDs are now correctly handled for LDAP authentication.
+* LDAP authentication does no longer request unnecessary user attributes.
+
 ## 2.3
 Major features:
 * Improved LDAP authentication support: Additional settings for LDAP search and
@@ -17,7 +22,7 @@ Minor features and changes:
   question format flashcard are now active by default and can no longer be
   disabled for the whole ARSnova installation.
 
-Bugfixes:
+Bug fixes:
 * The `security.authentication.login-try-limit` setting now works as intended.
 
 Changes for developers:
@@ -48,7 +53,7 @@ Major features:
 * The API has been extended to support features introduced with ARSnova Mobile
   2.2.
 
-Bugfixes:
+Bug fixes:
 * User content consisting of JSON could not be loaded and rendered connected
   data unloadable as well.
 
