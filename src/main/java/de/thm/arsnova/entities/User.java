@@ -24,6 +24,7 @@ import org.scribe.up.profile.google.Google2Profile;
 import org.scribe.up.profile.twitter.TwitterProfile;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
 
