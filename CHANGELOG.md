@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.3.1
+Bug fixes:
+* Case-insensitive user IDs are now correctly handled for LDAP authentication.
+* LDAP authentication does no longer request unnecessary user attributes.
+
 ## 2.3
 Major features:
 * Improved LDAP authentication support: Additional settings for LDAP search and
