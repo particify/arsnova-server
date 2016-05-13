@@ -40,21 +40,6 @@ import javax.servlet.http.HttpServletResponse;
 @Controller
 @RequestMapping("/user")
 public class UserController extends AbstractController {
-	@Value("${security.guest.enabled}")
-	private String guestEnabled;
-	@Value("${security.guest.lecturer.enabled}")
-	private String guestLecturerEnabled;
-	@Value("${security.cas.enabled}")
-	private String casEnabled;
-	@Value("${security.ldap.enabled}")
-	private String ldapEnabled;
-	@Value("${security.facebook.enabled}")
-	private String facebookEnabled;
-	@Value("${security.google.enabled}")
-	private String googleEnabled;
-	@Value("${security.twitter.enabled}")
-	private String twitterEnabled;
-
 	@Autowired
 	private DaoAuthenticationProvider daoProvider;
 
