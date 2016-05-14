@@ -44,6 +44,7 @@ public class SessionFeature implements Serializable {
 	private boolean interposed = true;
 	private boolean pi = true;
 	private boolean learningProgress = true;
+	private boolean slides = false;
 
 	public SessionFeature(SessionFeature features) {
 		this();
@@ -63,6 +64,7 @@ public class SessionFeature implements Serializable {
 			this.interposed = features.interposed;
 			this.pi = features.pi;
 			this.learningProgress = features.learningProgress;
+			this.slides = features.slides;
 		}
 	}
 
@@ -191,6 +193,14 @@ public class SessionFeature implements Serializable {
 
 	public void setTwitterWall(boolean twitterWall) {
 		this.twitterWall = twitterWall;
+	}
+
+	public boolean isSlides() {
+		return slides;
+	}
+
+	public void setSlides(boolean slides) {
+		this.slides = slides;
 	}
 
 }
