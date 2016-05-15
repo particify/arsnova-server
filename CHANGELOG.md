@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.3.2
+This release fixes a security vulnerability in the account management API. It is
+highly recommended to upgrade if you are using database authentication.
+
+Additional changes:
+* Libraries have been upgraded to fix potential bugs
+
 ## 2.2.1
 This release fixes a security vulnerability in the account management API. It is
 highly recommended to upgrade if you are using database authentication.
