@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.2.1
+This release fixes a security vulnerability in the account management API. It is
+highly recommended to upgrade if you are using database authentication.
+
+Additional bug fixes:
+* The `security.authentication.login-try-limit` setting now works as intended.
+
 ## 2.1.1
 This release fixes a security vulnerability in the account management API. It is
 highly recommended to upgrade if you are using database authentication.
