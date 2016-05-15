@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.3
+This release fixes a security vulnerability in the account management API. It is
+highly recommended to upgrade if you are using database authentication.
+
+Additional changes:
+* Libraries have been upgraded to fix potential bugs
+* Some unnecessary log warnings for Websocket communication are filtered
+
 ## 2.0.2
 This release updates dependencies. The updated library for Socket.IO support
 fixes memory leaks and disables SSL 3.0 support (POODLE vulnerability).
