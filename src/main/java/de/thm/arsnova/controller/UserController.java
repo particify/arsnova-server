@@ -95,7 +95,7 @@ public class UserController extends AbstractController {
 		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 	}
 
-	@RequestMapping(value = { "/{username}" }, method = RequestMethod.DELETE)
+	@RequestMapping(value = { "/{username}/" }, method = RequestMethod.DELETE)
 	public final void activate(
 			@PathVariable final String username,
 			final HttpServletRequest request,
