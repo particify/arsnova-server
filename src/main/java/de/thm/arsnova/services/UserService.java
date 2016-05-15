@@ -426,7 +426,7 @@ public class UserService implements IUserService {
 	public DbUser deleteDbUser(String username) {
 		User user = getCurrentUser();
 		if (!user.getUsername().equals(username)
-				&& SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+				&& !SecurityContextHolder.getContext().getAuthentication().getAuthorities()
 						.contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
 			throw new UnauthorizedException();
 		}
