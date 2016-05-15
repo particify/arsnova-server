@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.1.1
+This release fixes a security vulnerability in the account management API. It is
+highly recommended to upgrade if you are using database authentication.
+
+Additional changes:
+* Libraries have been upgraded to fix potential bugs
+
+## 2.0.3
+This release fixes a security vulnerability in the account management API. It is
+highly recommended to upgrade if you are using database authentication.
+
+Additional changes:
+* Libraries have been upgraded to fix potential bugs
+* Some unnecessary log warnings for Websocket communication are filtered
+
 ## 2.2
 This release massively improves performance of ARSnova and contains a critical
 bugfix so it is highly recommended to upgrade. Because of the newly introduced
