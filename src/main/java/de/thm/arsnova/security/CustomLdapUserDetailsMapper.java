@@ -26,8 +26,8 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
 										  Collection<? extends GrantedAuthority> authorities) {
 		String ldapUsername = ctx.getStringAttribute(userIdAttr);
 		if (ldapUsername == null) {
-			LOGGER.warn("LDAP attribute {} not set. Falling back to user provided username.", userIdAttr);
-			ldapUsername = username;
+			LOGGER.warn("LDAP attribute {} not set. Falling back to lowercased user provided username.", userIdAttr);
+			ldapUsername = username.toLowerCase();
 		}
 		UserDetails userDetails = super.mapUserFromContext(ctx, ldapUsername, authorities);
 

@@ -46,8 +46,9 @@ public class DbUserDetailsService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) {
-		LOGGER.debug("Load user: " + username);
-		DbUser dbUser = dao.getUser(username);
+		String uid = username.toLowerCase();
+		LOGGER.debug("Load user: " + uid);
+		DbUser dbUser = dao.getUser(uid);
 		if (null == dbUser) {
 			throw new UsernameNotFoundException("User does not exist.");
 		}
@@ -56,7 +57,7 @@ public class DbUserDetailsService implements UserDetailsService {
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_DB_USER"));
 
-		return new User(username, dbUser.getPassword(),
+		return new User(uid, dbUser.getPassword(),
 				null == dbUser.getActivationKey(), true, true, true,
 				grantedAuthorities);
 	}

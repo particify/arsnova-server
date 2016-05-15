@@ -327,11 +327,13 @@ public class UserService implements IUserService {
 
 	@Override
 	public DbUser getDbUser(String username) {
-		return databaseDao.getUser(username);
+		return databaseDao.getUser(username.toLowerCase());
 	}
 
 	@Override
 	public DbUser createDbUser(String username, String password) {
+		String lcUsername = username.toLowerCase();
+
 		if (null == keygen) {
 			keygen = KeyGenerators.secureRandom(32);
 		}
@@ -340,16 +342,16 @@ public class UserService implements IUserService {
 			parseMailAddressPattern();
 		}
 
-		if (null == mailPattern || !mailPattern.matcher(username).matches()) {
+		if (null == mailPattern || !mailPattern.matcher(lcUsername).matches()) {
 			return null;
 		}
 
-		if (null != databaseDao.getUser(username)) {
+		if (null != databaseDao.getUser(lcUsername)) {
 			return null;
 		}
 
 		DbUser dbUser = new DbUser();
-		dbUser.setUsername(username);
+		dbUser.setUsername(lcUsername);
 		dbUser.setPassword(encodePassword(password));
 		dbUser.setActivationKey(RandomStringUtils.randomAlphanumeric(32));
 		dbUser.setCreation(System.currentTimeMillis());
@@ -425,13 +427,13 @@ public class UserService implements IUserService {
 	@Override
 	public DbUser deleteDbUser(String username) {
 		User user = getCurrentUser();
-		if (!user.getUsername().equals(username)
+		if (!user.getUsername().equals(username.toLowerCase())
 				&& !SecurityContextHolder.getContext().getAuthentication().getAuthorities()
 						.contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
 			throw new UnauthorizedException();
 		}
 
-		DbUser dbUser = databaseDao.getUser(username);
+		DbUser dbUser = getDbUser(username);
 		if (null == dbUser) {
 			throw new NotFoundException();
 		}
@@ -443,7 +445,7 @@ public class UserService implements IUserService {
 
 	@Override
 	public void initiatePasswordReset(String username) {
-		DbUser dbUser = databaseDao.getUser(username);
+		DbUser dbUser = getDbUser(username);
 		if (null == dbUser) {
 			throw new NotFoundException();
 		}
