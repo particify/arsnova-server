@@ -1,5 +1,29 @@
 # Changelog
 
+## 2.4
+Major features:
+* Support for new use case and feature settings has been added.
+
+Minor features and changes:
+* New API endpoints have been added to reduce requests on session imports.
+* Session use case and feature settings are now included in exports and imports.
+* Authentication providers can now be enabled separately for students and
+  lecturers.
+* A new suspended votes offset setting has been added.
+* JSON export and import now include session info and feature settings.
+
+Bug fixes:
+* Deleted sessions are now correctly evicted from cache.
+* Answer count calculation for free text questions has been fixed.
+
+**This version is brought to you by:**  
+Project management: Klaus Quibeldey-Cirkel  
+Lead programming: Andreas Gärtner, Daniel Gerhardt, Tom "tekay" Käsler  
+Contributions: Paul-Christian Volkmer  
+Sponsoring: [AG QLS](https://www.thm.de/site/en/hochschule/service/ag-qls.html),
+[HMWK](https://wissenschaft.hessen.de/wissenschaft/it-neue-medien/kompetenznetz-e-learning-hessen)
+
+
 ## 2.3.2
 This release fixes a security vulnerability in the account management API. It is
 highly recommended to upgrade if you are using database authentication.
