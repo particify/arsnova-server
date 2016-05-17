@@ -129,27 +129,22 @@ public class ImportExportSession {
 		final Session s = new Session();
 		// import fields
 		s.setActive(session.isActive());
-		s.setName(session.getName());
-		s.setShortName(session.getShortName());
+		// overwrite name and shortname
+		s.setName(session.getPublicPool().getName());
+		s.setShortName(session.getPublicPool().getShortName());
+		// mark as public pool session
+		s.setSessionType(session.getSessionType());
 		s.setFeatures(session.getSessionFeature());
-		// public pool
-		if (session.getPublicPool() != null) {
-			// overwrite name and shortname
-			s.setName(session.getPublicPool().getName());
-			s.setShortName(session.getPublicPool().getShortName());
-			// set pool fields
-			s.setPpAuthorMail(session.getPublicPool().getPpAuthorMail());
-			s.setPpAuthorName(session.getPublicPool().getPpAuthorName());
-			s.setPpDescription(session.getPublicPool().getPpDescription());
-			s.setPpFaculty(session.getPublicPool().getPpFaculty());
-			s.setPpLevel(session.getPublicPool().getPpLevel());
-			s.setPpLicense(session.getPublicPool().getPpLicense());
-			s.setPpLogo(session.getPublicPool().getPpLogo());
-			s.setPpSubject(session.getPublicPool().getPpSubject());
-			s.setPpUniversity(session.getPublicPool().getPpUniversity());
-			// mark as public pool session
-			s.setSessionType("public_pool");
-		}
+		// set pool fields (which are also used as a session info)
+		s.setPpAuthorMail(session.getPublicPool().getPpAuthorMail());
+		s.setPpAuthorName(session.getPublicPool().getPpAuthorName());
+		s.setPpDescription(session.getPublicPool().getPpDescription());
+		s.setPpFaculty(session.getPublicPool().getPpFaculty());
+		s.setPpLevel(session.getPublicPool().getPpLevel());
+		s.setPpLicense(session.getPublicPool().getPpLicense());
+		s.setPpLogo(session.getPublicPool().getPpLogo());
+		s.setPpSubject(session.getPublicPool().getPpSubject());
+		s.setPpUniversity(session.getPublicPool().getPpUniversity());
 		// other fields
 		s.setType("session");
 		s.setCreator(user.getUsername());
@@ -232,6 +227,8 @@ public class ImportExportSession {
 
 		private String shortName;
 
+		private String sessionType;
+
 		private boolean active;
 
 		private PublicPool publicPool;
@@ -245,6 +242,15 @@ public class ImportExportSession {
 
 		public void setName(String name) {
 			this.name = name;
+		}
+
+		@ApiModelProperty(required = false, value = "used to identify public pool sessions")
+		public String getSessionType() {
+			return sessionType;
+		}
+
+		public void setSessionType(String sessionType) {
+			this.sessionType = sessionType;
 		}
 
 		@ApiModelProperty(required = true, value = "used to display short name")
