@@ -5,6 +5,10 @@ Major features:
 * Support for new use case and feature settings has been added.
 
 Minor features and changes:
+* User content is assigned to a single account regardless of case used at
+  login/registration for database authentication. For LDAP authentication the
+  UID attribute is requested from the server instead of relying on the user's
+  input to ensure correct assignment.
 * New API endpoints have been added to reduce requests on session imports.
 * Session use case and feature settings are now included in exports and imports.
 * Authentication providers can now be enabled separately for students and
