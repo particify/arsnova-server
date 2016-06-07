@@ -35,7 +35,12 @@ public class Answer implements Serializable {
 
 	private String answerSubject;
 
+	private String answerSubjectRaw;
+
 	private String answerText;
+	private String answerTextRaw;
+	private double freeTextScore;
+	private boolean successfulFreeTextAnswer;
 
 	private String answerImage;
 
@@ -70,6 +75,38 @@ public class Answer implements Serializable {
 		this.answerSubject = answerSubject;
 	}
 
+	public final String getAnswerTextRaw() {
+		return this.answerTextRaw;
+	}
+
+	public final void setAnswerTextRaw(final String answerTextRaw) {
+		this.answerTextRaw = answerTextRaw;
+	}
+
+	public final String getAnswerSubjectRaw() {
+		return this.answerSubjectRaw;
+	}
+
+	public final void setAnswerSubjectRaw(final String answerSubjectRaw) {
+		this.answerSubjectRaw = answerSubjectRaw;
+	}
+
+	public final double getFreeTextScore() {
+		return this.freeTextScore;
+	}
+
+	public final void setFreeTextScore(final double freeTextScore) {
+		this.freeTextScore = freeTextScore;
+	}
+
+	public final boolean isSuccessfulFreeTextAnswer() {
+		return this.successfulFreeTextAnswer;
+	}
+
+	public final void setSuccessfulFreeTextAnswer(final boolean successfulFreeTextAnswer) {
+		this.successfulFreeTextAnswer = successfulFreeTextAnswer;
+	}
+
 	@ApiModelProperty(required = true, value = "abstention")
 	public boolean isAbstention() {
 		return abstention;
@@ -85,6 +122,7 @@ public class Answer implements Serializable {
 		de.thm.arsnova.entities.Answer theAnswer = new de.thm.arsnova.entities.Answer();
 		theAnswer.setAnswerSubject(this.getAnswerSubject());
 		theAnswer.setAnswerText(this.getAnswerText());
+		theAnswer.setAnswerTextRaw(this.getAnswerTextRaw());
 		theAnswer.setSessionId(question.getSessionId());
 		theAnswer.setUser(user.getUsername());
 		theAnswer.setQuestionId(question.get_id());
