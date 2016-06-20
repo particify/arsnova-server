@@ -19,6 +19,8 @@ sync_mirror:
   except:
     - production
     - staging
+  tags:
+    - git
   allow_failure: true
   script:
     - mkdir ~/.ssh && echo "$GITHUB_HOST_KEY" > ~/.ssh/known_hosts
