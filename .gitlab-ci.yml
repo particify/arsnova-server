@@ -19,8 +19,12 @@ sync_mirror:
   except:
     - production
     - staging
+  tags:
+    - git
   allow_failure: true
   script:
+    - mkdir ~/.ssh && echo "$GITHUB_HOST_KEY" > ~/.ssh/known_hosts
+    - eval $(ssh-agent -s) && ssh-add <(echo "$GITHUB_DEPLOY_KEY")
     - git clone --bare "$CI_BUILD_REPO" mirror.git
     - cd mirror.git
     - git update-ref -d refs/tags/production
