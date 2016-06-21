@@ -1415,7 +1415,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		a.put("questionValue", answer.getQuestionValue());
 		a.put("answerText", answer.getAnswerText());
 		a.put("answerTextRaw", answer.getAnswerTextRaw());
-		a.put("freeTextScore", answer.getFreeTextScore());
 		a.put("successfulFreeTextAnswer", answer.isSuccessfulFreeTextAnswer());
 		a.put("timestamp", answer.getTimestamp());
 		a.put("user", user.getUsername());
@@ -1470,7 +1469,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			a.put("answerSubject", answer.getAnswerSubject());
 			a.put("answerText", answer.getAnswerText());
 			a.put("answerTextRaw", answer.getAnswerTextRaw());
-			a.put("freeTextScore", answer.getFreeTextScore());
 			a.put("successfulFreeTextAnswer", answer.isSuccessfulFreeTextAnswer());
 			a.put("timestamp", answer.getTimestamp());
 			a.put("abstention", answer.isAbstention());
@@ -2166,7 +2164,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 					answerDoc.put("questionValue", a.getQuestionValue());
 					answerDoc.put("answerText", a.getAnswerText());
 					answerDoc.put("answerTextRaw", a.getAnswerTextRaw());
-					answerDoc.put("freeTextScore", a.getFreeTextScore());
 					answerDoc.put("timestamp", a.getTimestamp());
 					answerDoc.put("piRound", a.getPiRound());
 					answerDoc.put("abstention", a.isAbstention());
