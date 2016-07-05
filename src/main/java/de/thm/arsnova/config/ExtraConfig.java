@@ -17,6 +17,7 @@
  */
 package de.thm.arsnova.config;
 
+import de.thm.arsnova.web.CorsFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
@@ -36,6 +37,9 @@ import de.thm.arsnova.connector.client.ConnectorClientImpl;
 import de.thm.arsnova.socket.ARSnovaSocket;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 import de.thm.arsnova.ImageUtils;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * Loads property file and configures non-security related beans and components.
@@ -57,6 +61,7 @@ public class ExtraConfig {
 	@Value(value = "${security.ssl}") private boolean socketUseSll;
 	@Value(value = "${security.keystore}") private String socketKeystore;
 	@Value(value = "${security.storepass}") private String socketStorepass;
+	@Value(value = "${security.cors.origins:}") private String[] corsOrigins;
 
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
@@ -68,6 +73,11 @@ public class ExtraConfig {
 		configurer.setIgnoreResourceNotFound(true);
 		configurer.setIgnoreUnresolvablePlaceholders(false);
 		return configurer;
+	}
+
+	@Bean
+	public CorsFilter corsFilter() {
+		return new CorsFilter(Arrays.asList(corsOrigins));
 	}
 
 	@Bean(name = "connectorClient")
