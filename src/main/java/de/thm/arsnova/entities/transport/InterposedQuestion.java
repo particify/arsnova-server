@@ -44,7 +44,7 @@ public class InterposedQuestion {
 	}
 
 	public InterposedQuestion(de.thm.arsnova.entities.InterposedQuestion question) {
-		this.id = question.get_id();
+		this.id = question.getId();
 		this.subject = question.getSubject();
 		this.text = question.getText();
 		this.timestamp = question.getTimestamp();
@@ -52,6 +52,17 @@ public class InterposedQuestion {
 	}
 
 	public InterposedQuestion() { }
+
+	public de.thm.arsnova.entities.InterposedQuestion toEntity(String sessionKey) {
+		de.thm.arsnova.entities.InterposedQuestion entity = new de.thm.arsnova.entities.InterposedQuestion();
+		entity.setId(this.getId());
+		entity.setSubject(this.getSubject());
+		entity.setText(this.getText());
+		entity.setTimestamp(this.getTimestamp());
+		entity.setSessionId(sessionKey);
+		entity.setRead(this.isRead());
+		return entity;
+	}
 
 	@ApiModelProperty(required = true, value = "used to display Id")
 	public String getId() {

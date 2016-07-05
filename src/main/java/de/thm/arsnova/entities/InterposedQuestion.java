@@ -17,11 +17,14 @@
  */
 package de.thm.arsnova.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.io.Serializable;
+
+import org.springframework.data.annotation.Id;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * A question the user is asking the teacher. Also known as feedback or audience question.
@@ -29,9 +32,10 @@ import java.io.Serializable;
 @ApiModel(value = "audiencequestion", description = "the interposed question entity")
 public class InterposedQuestion implements Serializable {
 
-	private String _id;
+	@Id
+	private String id;
 	private String _rev;
-	private String type;
+	private String type = "interposed_question";
 	private String subject;
 	private String text;
 	/* FIXME sessionId actually is used to hold the sessionKey.
@@ -40,16 +44,17 @@ public class InterposedQuestion implements Serializable {
 	 * refactoring since the client application depends on the
 	 * current naming */
 	private String sessionId;
+	private Session session;
 	private long timestamp;
 	private boolean read;
 	private String creator;
 
 	@ApiModelProperty(required = true, value = "the couchDB ID")
-	public String get_id() {
-		return _id;
+	public String getId() {
+		return id;
 	}
-	public void set_id(String _id) {
-		this._id = _id;
+	public void setId(String _id) {
+		this.id = _id;
 	}
 
 	public String get_rev() {

@@ -17,13 +17,9 @@
  */
 package de.thm.arsnova.security;
 
-import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationToken;
-import de.thm.arsnova.dao.IDatabaseDao;
-import de.thm.arsnova.entities.InterposedQuestion;
-import de.thm.arsnova.entities.Question;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.User;
-import de.thm.arsnova.exceptions.UnauthorizedException;
+import java.io.Serializable;
+import java.util.Arrays;
+
 import org.scribe.up.profile.facebook.FacebookProfile;
 import org.scribe.up.profile.google.Google2Profile;
 import org.scribe.up.profile.twitter.TwitterProfile;
@@ -35,8 +31,15 @@ import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
-import java.io.Serializable;
-import java.util.Arrays;
+import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationToken;
+
+import de.thm.arsnova.dao.IDatabaseDao;
+import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.repositories.InterposedQuestionRepository;
 
 /**
  * Provides access control methods that can be used in annotations.
@@ -50,6 +53,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 	@Autowired
 	private IDatabaseDao dao;
+
+	@Autowired
+	private InterposedQuestionRepository interposedRepository;
 
 	@Override
 	public boolean hasPermission(
@@ -141,7 +147,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Object permission
 			) {
 		if (permission instanceof String && permission.equals("owner")) {
-			final InterposedQuestion question = dao.getInterposedQuestion(targetId.toString());
+			final InterposedQuestion question = interposedRepository.findOne(targetId.toString());
 			if (question != null) {
 				// Does the creator want to delete his own question?
 				if (question.getCreator() != null && question.getCreator().equals(username)) {

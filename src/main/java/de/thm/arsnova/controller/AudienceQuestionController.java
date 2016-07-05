@@ -17,17 +17,14 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.entities.InterposedReadingCount;
-import de.thm.arsnova.entities.transport.InterposedQuestion;
-import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.services.IQuestionService;
-import de.thm.arsnova.web.DeprecatedApi;
-import de.thm.arsnova.web.Pagination;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +37,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import de.thm.arsnova.entities.InterposedReadingCount;
+import de.thm.arsnova.entities.transport.InterposedQuestion;
+import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.services.IQuestionService;
+import de.thm.arsnova.web.DeprecatedApi;
+import de.thm.arsnova.web.Pagination;
 
 /**
  * Handles requests related to audience questions, which are also called interposed or feedback questions.
@@ -54,15 +56,6 @@ public class AudienceQuestionController extends PaginationController {
 
 	@Autowired
 	private IQuestionService questionService;
-
-	@ApiOperation(value = "Count all the questions in current session",
-			nickname = "getAudienceQuestionCount")
-	@RequestMapping(value = "/count", method = RequestMethod.GET)
-	@DeprecatedApi
-	@Deprecated
-	public int getInterposedCount(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey) {
-		return questionService.getInterposedCount(sessionkey);
-	}
 
 	@ApiOperation(value = "count all unread interposed questions",
 			nickname = "getUnreadInterposedCount")
@@ -96,10 +89,10 @@ public class AudienceQuestionController extends PaginationController {
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void postInterposedQuestion(
-			@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey,
-			@ApiParam(value = "the body from the new question", required = true) @RequestBody final de.thm.arsnova.entities.InterposedQuestion question
+			@ApiParam(value="Session-Key from current session", required=true) @RequestParam final String sessionkey,
+			@ApiParam(value="the body from the new question", required=true) @RequestBody final de.thm.arsnova.entities.transport.InterposedQuestion question
 			) {
-		if (questionService.saveQuestion(question)) {
+		if (questionService.saveQuestion(question.toEntity(sessionkey))) {
 			return;
 		}
 

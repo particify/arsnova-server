@@ -416,7 +416,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 
 	public void reportAudienceQuestionAvailable(final de.thm.arsnova.entities.Session session, final InterposedQuestion audienceQuestion) {
 		/* TODO role handling implementation, send this only to users with role lecturer */
-		broadcastInSession(session.getKeyword(), "audQuestionAvail", audienceQuestion.get_id());
+		broadcastInSession(session.getKeyword(), "audQuestionAvail", audienceQuestion.getId());
 	}
 
 	public void reportLecturerQuestionAvailable(final de.thm.arsnova.entities.Session session, final List<de.thm.arsnova.entities.Question> qs) {

@@ -79,8 +79,6 @@ public interface IQuestionService {
 
 	int getTotalAnswerCountByQuestion(String questionId);
 
-	int getInterposedCount(String sessionKey);
-
 	InterposedReadingCount getInterposedReadingCount(String sessionKey, String username);
 
 	List<InterposedQuestion> getInterposedQuestions(String sessionKey, int offset, int limit);

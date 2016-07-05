@@ -102,18 +102,6 @@ public class LegacyController extends AbstractController {
 		questionService.deleteAllInterposedQuestions(sessionKey);
 	}
 
-	@DeprecatedApi
-	@RequestMapping(value = "/session/{sessionKey}/interposedcount", method = RequestMethod.GET)
-	public String redirectQuestionByAudienceCount(@PathVariable final String sessionKey) {
-		return String.format("forward:/audiencequestion/count?sessionkey=%s", sessionKey);
-	}
-
-	@DeprecatedApi
-	@RequestMapping(value = "/session/{sessionKey}/interposedreadingcount", method = RequestMethod.GET)
-	public String redirectQuestionByAudienceReadCount(@PathVariable final String sessionKey) {
-		return String.format("forward:/audiencequestion/readcount?sessionkey=%s", sessionKey);
-	}
-
 	/* generalized routes */
 
 	@DeprecatedApi

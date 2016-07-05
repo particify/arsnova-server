@@ -229,12 +229,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public int getInterposedCount(String sessionKey) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
 	public List<InterposedQuestion> getInterposedQuestions(Session session, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;
@@ -304,8 +298,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public Session getSessionFromId(String sessionId) {
-		// TODO Auto-generated method stub
-		return null;
+		return stubSessions.get(sessionId);
 	}
 
 	@Override

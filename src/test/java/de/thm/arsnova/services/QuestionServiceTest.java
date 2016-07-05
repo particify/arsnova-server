@@ -17,10 +17,13 @@
  */
 package de.thm.arsnova.services;
 
-import de.thm.arsnova.dao.StubDatabaseDao;
-import de.thm.arsnova.entities.InterposedQuestion;
-import de.thm.arsnova.entities.Question;
-import de.thm.arsnova.exceptions.NotFoundException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,12 +39,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import de.thm.arsnova.dao.StubDatabaseDao;
+import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.repositories.StubInterposedQuestionRepository;
 
 @WebAppConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -61,6 +63,9 @@ public class QuestionServiceTest {
 
 	@Autowired
 	private StubDatabaseDao databaseDao;
+
+	@Autowired
+	private StubInterposedQuestionRepository interposedRepository;
 
 	private void setAuthenticated(final boolean isAuthenticated, final String username) {
 		if (isAuthenticated) {
@@ -106,11 +111,11 @@ public class QuestionServiceTest {
 		setAuthenticated(true, "ptsr00");
 		final InterposedQuestion theQ = new InterposedQuestion();
 		theQ.setRead(false);
-		theQ.set_id("the internal id");
+		theQ.setId("the internal id");
 		theQ.setSessionId("12345678");
-		databaseDao.interposedQuestion = theQ;
+		interposedRepository.interposedQuestion = theQ;
 
-		questionService.readInterposedQuestion(theQ.get_id());
+		questionService.readInterposedQuestion(theQ.getId());
 
 		assertTrue(theQ.isRead());
 	}
@@ -120,12 +125,12 @@ public class QuestionServiceTest {
 		setAuthenticated(true, "regular user");
 		final InterposedQuestion theQ = new InterposedQuestion();
 		theQ.setRead(false);
-		theQ.set_id("the internal id");
+		theQ.setId("the internal id");
 		theQ.setSessionId("12345678");
 		theQ.setCreator("regular user");
-		databaseDao.interposedQuestion = theQ;
+		interposedRepository.interposedQuestion = theQ;
 
-		questionService.readInterposedQuestion(theQ.get_id());
+		questionService.readInterposedQuestion(theQ.getId());
 
 		assertFalse(theQ.isRead());
 	}

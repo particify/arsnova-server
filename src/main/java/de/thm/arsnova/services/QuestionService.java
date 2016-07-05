@@ -17,29 +17,6 @@
  */
 package de.thm.arsnova.services;
 
-import de.thm.arsnova.ImageUtils;
-import de.thm.arsnova.dao.IDatabaseDao;
-import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.InterposedQuestion;
-import de.thm.arsnova.entities.InterposedReadingCount;
-import de.thm.arsnova.entities.Question;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.SortOrder;
-import de.thm.arsnova.entities.User;
-import de.thm.arsnova.events.*;
-import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.exceptions.ForbiddenException;
-import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.exceptions.UnauthorizedException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,6 +28,53 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import de.thm.arsnova.ImageUtils;
+import de.thm.arsnova.dao.IDatabaseDao;
+import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.InterposedReadingCount;
+import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.SortOrder;
+import de.thm.arsnova.entities.User;
+import de.thm.arsnova.events.DeleteAllLectureAnswersEvent;
+import de.thm.arsnova.events.DeleteAllPreparationAnswersEvent;
+import de.thm.arsnova.events.DeleteAllQuestionsAnswersEvent;
+import de.thm.arsnova.events.DeleteAllQuestionsEvent;
+import de.thm.arsnova.events.DeleteAnswerEvent;
+import de.thm.arsnova.events.DeleteInterposedQuestionEvent;
+import de.thm.arsnova.events.DeleteQuestionEvent;
+import de.thm.arsnova.events.LockQuestionEvent;
+import de.thm.arsnova.events.LockQuestionsEvent;
+import de.thm.arsnova.events.LockVoteEvent;
+import de.thm.arsnova.events.LockVotesEvent;
+import de.thm.arsnova.events.NewAnswerEvent;
+import de.thm.arsnova.events.NewInterposedQuestionEvent;
+import de.thm.arsnova.events.NewQuestionEvent;
+import de.thm.arsnova.events.NovaEvent;
+import de.thm.arsnova.events.PiRoundCancelEvent;
+import de.thm.arsnova.events.PiRoundDelayedStartEvent;
+import de.thm.arsnova.events.PiRoundEndEvent;
+import de.thm.arsnova.events.PiRoundResetEvent;
+import de.thm.arsnova.events.UnlockQuestionEvent;
+import de.thm.arsnova.events.UnlockQuestionsEvent;
+import de.thm.arsnova.events.UnlockVoteEvent;
+import de.thm.arsnova.events.UnlockVotesEvent;
+import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.exceptions.ForbiddenException;
+import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.repositories.InterposedQuestionRepository;
+
 /**
  * Performs all question, interposed question, and answer related operations.
  */
@@ -59,6 +83,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Autowired
 	private IDatabaseDao databaseDao;
+
+	@Autowired
+	private InterposedQuestionRepository interposedRepository;
 
 	@Autowired
 	private IUserService userService;
@@ -154,7 +181,12 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated()")
 	public boolean saveQuestion(final InterposedQuestion question) {
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
-		final InterposedQuestion result = databaseDao.saveQuestion(session, question, userService.getCurrentUser());
+		question.setSessionId(session.get_id());
+		question.setCreator(userService.getCurrentUser().getUsername());
+		if (question.getId() == null) {
+			question.setId(java.util.UUID.randomUUID().toString());
+		}
+		final InterposedQuestion result = interposedRepository.save(question);
 
 		if (null != result) {
 			final NewInterposedQuestionEvent event = new NewInterposedQuestionEvent(this, session, result);
@@ -373,13 +405,13 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'interposedquestion', 'owner')")
 	public void deleteInterposedQuestion(final String questionId) {
-		final InterposedQuestion question = databaseDao.getInterposedQuestion(questionId);
+		final InterposedQuestion question = interposedRepository.findOne(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
-		databaseDao.deleteInterposedQuestion(question);
+		interposedRepository.delete(question);
 
-		final Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
+		final Session session = databaseDao.getSessionFromId(question.getSessionId());
 		final DeleteInterposedQuestionEvent event = new DeleteInterposedQuestionEvent(this, session, question);
 		this.publisher.publishEvent(event);
 	}
@@ -392,10 +424,11 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			throw new UnauthorizedException();
 		}
 		final User user = getCurrentUser();
+		// FIXME: As of v4.0: Couchbase Server does not yet support a true DELETE statement.
 		if (session.isCreator(user)) {
-			databaseDao.deleteAllInterposedQuestions(session);
+			interposedRepository.delete(interposedRepository.findBySession(session.get_id()));
 		} else {
-			databaseDao.deleteAllInterposedQuestions(session, user);
+			interposedRepository.delete(interposedRepository.findBySessionAndCreator(session.get_id(), user.getUsername()));
 		}
 	}
 
@@ -595,26 +628,19 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getInterposedCount(final String sessionKey) {
-		return databaseDao.getInterposedCount(sessionKey);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
 	public InterposedReadingCount getInterposedReadingCount(final String sessionKey, String username) {
 		final Session session = databaseDao.getSessionFromKeyword(sessionKey);
 		if (session == null) {
 			throw new NotFoundException();
 		}
 		if (username == null) {
-			return databaseDao.getInterposedReadingCount(session);
+			return interposedRepository.countReadingBySession(session);
 		} else {
 			User currentUser = userService.getCurrentUser();
 			if (!currentUser.getUsername().equals(username)) {
 				throw new ForbiddenException();
 			}
-
-			return databaseDao.getInterposedReadingCount(session, currentUser);
+			return interposedRepository.countReadingBySessionAndCreator(session, currentUser);
 		}
 	}
 
@@ -623,11 +649,17 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	public List<InterposedQuestion> getInterposedQuestions(final String sessionKey, final int offset, final int limit) {
 		final Session session = this.getSession(sessionKey);
 		final User user = getCurrentUser();
+		List<InterposedQuestion> result;
 		if (session.isCreator(user)) {
-			return databaseDao.getInterposedQuestions(session, offset, limit);
+			result = interposedRepository.findBySession(session.get_id());
 		} else {
-			return databaseDao.getInterposedQuestions(session, user, offset, limit);
+			result = interposedRepository.findBySessionAndCreator(session.get_id(), user.getUsername());
 		}
+		// FIXME: As of v2.0, Spring Data Couchbase does not yet support pages or slices.
+		if (offset < 0 || offset+limit > result.size()) {
+			return result;
+		}
+		return result.subList(offset, offset+limit);
 	}
 
 	@Override
@@ -643,16 +675,17 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	 */
 	@Override
 	public InterposedQuestion readInterposedQuestionInternal(final String questionId, User user) {
-		final InterposedQuestion question = databaseDao.getInterposedQuestion(questionId);
+		final InterposedQuestion question = interposedRepository.findOne(questionId);
 		if (question == null) {
 			throw new NotFoundException();
 		}
-		final Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
+		final Session session = databaseDao.getSessionFromId(question.getSessionId());
 		if (!question.isCreator(user) && !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
 		if (session.isCreator(user)) {
-			databaseDao.markInterposedQuestionAsRead(question);
+			question.setRead(true);
+			interposedRepository.save(question);
 		}
 		return question;
 	}

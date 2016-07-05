@@ -11,8 +11,8 @@
 		<property name="databaseDao" ref="databaseDao" />
 	</bean>
 
-	<bean id="databaseDao" class="de.thm.arsnova.dao.StubDatabaseDao">
-	</bean>
+	<bean id="databaseDao" class="de.thm.arsnova.dao.StubDatabaseDao" />
+	<bean id="interposedRepository" class="de.thm.arsnova.repositories.StubInterposedQuestionRepository" />
 
 	<bean id="userService" class="de.thm.arsnova.services.StubUserService" />
 
