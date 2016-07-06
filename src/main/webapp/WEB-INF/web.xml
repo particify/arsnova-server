@@ -63,7 +63,7 @@
 
 	<filter>
 		<filter-name>corsFilter</filter-name>
-		<filter-class>de.thm.arsnova.web.CorsFilter</filter-class>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
 		<async-supported>true</async-supported>
 	</filter>
 	<filter-mapping>

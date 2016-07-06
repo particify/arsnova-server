@@ -17,36 +17,52 @@
  */
 package de.thm.arsnova.web;
 
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.util.List;
 
-/**
- * Sets response headers to allow CORS requests.
- */
-@Component
-public class CorsFilter extends OncePerRequestFilter {
+public class CorsFilter extends org.springframework.web.filter.CorsFilter {
+	protected final Logger logger = LoggerFactory.getLogger(CorsFilter.class);
 
-	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
-		response.addHeader("Access-Control-Allow-Credentials", "true");
-		response.addHeader("Access-Control-Allow-Methods", "GET");
-		response.addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
-
-		if (request.getHeader("origin") != null) {
-			response.addHeader("Access-Control-Allow-Origin", sanitizeOriginUrl(request.getHeader("origin")));
-		}
-
-		filterChain.doFilter(request, response);
+	public CorsFilter(List<String> origins) {
+		super(configurationSource(origins));
+		logger.info("CorsFilter initialized. Allowed origins: {}", origins);
 	}
 
-	private String sanitizeOriginUrl(String originUrl) {
-		return originUrl.replaceAll("[\n\r]+", " ");
+	private static UrlBasedCorsConfigurationSource configurationSource(List<String> origins) {
+		CorsConfiguration config;
+		UrlBasedCorsConfigurationSource source;
+
+		/* Grant full access from specified origins */
+		config = new CorsConfiguration();
+		config.setAllowedOrigins(origins);
+		config.addAllowedHeader("Accept");
+		config.addAllowedHeader("Content-Type");
+		config.addAllowedHeader("X-Requested-With");
+		config.addAllowedMethod("GET");
+		config.addAllowedMethod("POST");
+		config.addAllowedMethod("PUT");
+		config.addAllowedMethod("DELETE");
+		config.setAllowCredentials(true);
+		source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", config);
+
+		/* Grant limited access from all origins */
+		config = new CorsConfiguration();
+		config.addAllowedOrigin("*");
+		config.addAllowedHeader("Accept");
+		config.addAllowedHeader("X-Requested-With");
+		config.addAllowedMethod("GET");
+		config.setAllowCredentials(true);
+		source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/", config);
+		source.registerCorsConfiguration("/arsnova-config", config);
+		source.registerCorsConfiguration("/configuration/", config);
+		source.registerCorsConfiguration("/statistics", config);
+
+		return source;
 	}
 }

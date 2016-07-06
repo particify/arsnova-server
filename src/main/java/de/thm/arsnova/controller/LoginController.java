@@ -75,46 +75,46 @@ public class LoginController extends AbstractController {
 	@Value("${api.path:}") private String apiPath;
 	@Value("${customization.path}") private String customizationPath;
 
-	@Value("${security.guest.enabled}") private String guestEnabled;
+	@Value("${security.guest.enabled}") private boolean guestEnabled;
 	@Value("${security.guest.allowed-roles:speaker,student}") private String[] guestRoles;
 	@Value("${security.guest.order}") private int guestOrder;
 
-	@Value("${security.custom-login.enabled}") private String customLoginEnabled;
+	@Value("${security.custom-login.enabled}") private boolean customLoginEnabled;
 	@Value("${security.custom-login.allowed-roles:speaker,student}") private String[] customLoginRoles;
 	@Value("${security.custom-login.title:University}") private String customLoginTitle;
 	@Value("${security.custom-login.login-dialog-path}") private String customLoginDialog;
 	@Value("${security.custom-login.image:}") private String customLoginImage;
 	@Value("${security.custom-login.order}") private int customLoginOrder;
 
-	@Value("${security.user-db.enabled}") private String dbAuthEnabled;
+	@Value("${security.user-db.enabled}") private boolean dbAuthEnabled;
 	@Value("${security.user-db.allowed-roles:speaker,student}") private String[] dbAuthRoles;
 	@Value("${security.user-db.title:ARSnova}") private String dbAuthTitle;
 	@Value("${security.user-db.login-dialog-path}") private String dbAuthDialog;
 	@Value("${security.user-db.image:}") private String dbAuthImage;
 	@Value("${security.user-db.order}") private int dbAuthOrder;
 
-	@Value("${security.ldap.enabled}") private String ldapEnabled;
+	@Value("${security.ldap.enabled}") private boolean ldapEnabled;
 	@Value("${security.ldap.allowed-roles:speaker,student}") private String[] ldapRoles;
 	@Value("${security.ldap.title:LDAP}") private String ldapTitle;
 	@Value("${security.ldap.login-dialog-path}") private String ldapDialog;
 	@Value("${security.ldap.image:}") private String ldapImage;
 	@Value("${security.ldap.order}") private int ldapOrder;
 
-	@Value("${security.cas.enabled}") private String casEnabled;
+	@Value("${security.cas.enabled}") private boolean casEnabled;
 	@Value("${security.cas.allowed-roles:speaker,student}") private String[] casRoles;
 	@Value("${security.cas.title:CAS}") private String casTitle;
 	@Value("${security.cas.image:}") private String casImage;
 	@Value("${security.cas.order}") private int casOrder;
 
-	@Value("${security.facebook.enabled}") private String facebookEnabled;
+	@Value("${security.facebook.enabled}") private boolean facebookEnabled;
 	@Value("${security.facebook.enabled-roles:speaker,student}") private String[] facebookRoles;
 	@Value("${security.facebook.order}") private int facebookOrder;
 
-	@Value("${security.google.enabled}") private String googleEnabled;
+	@Value("${security.google.enabled}") private boolean googleEnabled;
 	@Value("${security.google.allowed-roles:speaker,student}") private String[] googleRoles;
 	@Value("${security.google.order}") private int googleOrder;
 
-	@Value("${security.twitter.enabled}") private String twitterEnabled;
+	@Value("${security.twitter.enabled}") private boolean twitterEnabled;
 	@Value("${security.twitter.allowed-roles:speaker,student}") private String[] twitterRoles;
 	@Value("${security.twitter.order}") private int twitterOrder;
 
@@ -162,7 +162,7 @@ public class LoginController extends AbstractController {
 
 		userSessionService.setRole(role);
 
-		if ("arsnova".equals(type)) {
+		if (dbAuthEnabled && "arsnova".equals(type)) {
 			Authentication authRequest = new UsernamePasswordAuthenticationToken(username, password);
 			try {
 				Authentication auth = daoProvider.authenticate(authRequest);
@@ -180,7 +180,7 @@ public class LoginController extends AbstractController {
 
 			userService.increaseFailedLoginCount(addr);
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
-		} else if ("ldap".equals(type)) {
+		} else if (ldapEnabled && "ldap".equals(type)) {
 			if (!"".equals(username) && !"".equals(password)) {
 				org.springframework.security.core.userdetails.User user =
 						new org.springframework.security.core.userdetails.User(
@@ -206,7 +206,7 @@ public class LoginController extends AbstractController {
 				userService.increaseFailedLoginCount(addr);
 				response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			}
-		} else if ("guest".equals(type)) {
+		} else if (guestEnabled && "guest".equals(type)) {
 			List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 			authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
 			if (username == null || !username.startsWith("Guest") || username.length() != MAX_USERNAME_LENGTH) {
@@ -221,6 +221,8 @@ public class LoginController extends AbstractController {
 			SecurityContextHolder.getContext().setAuthentication(token);
 			request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
 					SecurityContextHolder.getContext());
+		} else {
+			response.setStatus(HttpStatus.BAD_REQUEST.value());
 		}
 	}
 
@@ -262,19 +264,21 @@ public class LoginController extends AbstractController {
 		request.getSession().setAttribute("ars-login-success-url", serverUrl + successUrl);
 		request.getSession().setAttribute("ars-login-failure-url", serverUrl + failureUrl);
 
-		if ("cas".equals(type)) {
+		if (casEnabled && "cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);
-		} else if ("twitter".equals(type)) {
+		} else if (twitterEnabled && "twitter".equals(type)) {
 			final String authUrl = twitterProvider.getAuthorizationUrl(new HttpUserSession(request));
 			result = new RedirectView(authUrl);
-		} else if ("facebook".equals(type)) {
+		} else if (facebookEnabled && "facebook".equals(type)) {
 			facebookProvider.setFields("id,link");
 			facebookProvider.setScope("");
 			final String authUrl = facebookProvider.getAuthorizationUrl(new HttpUserSession(request));
 			result = new RedirectView(authUrl);
-		} else if ("google".equals(type)) {
+		} else if (googleEnabled && "google".equals(type)) {
 			final String authUrl = googleProvider.getAuthorizationUrl(new HttpUserSession(request));
 			result = new RedirectView(authUrl);
+		} else {
+			response.setStatus(HttpStatus.BAD_REQUEST.value());
 		}
 
 		return result;
@@ -313,7 +317,7 @@ public class LoginController extends AbstractController {
 		/* The first parameter is replaced by the backend, the second one by the frondend */
 		String dialogUrl = apiPath + "/auth/dialog?type={0}&successurl='{0}'";
 
-		if ("true".equals(guestEnabled)) {
+		if (guestEnabled) {
 			ServiceDescription sdesc = new ServiceDescription(
 				"guest",
 				"Guest",
@@ -324,7 +328,7 @@ public class LoginController extends AbstractController {
 			services.add(sdesc);
 		}
 
-		if ("true".equals(customLoginEnabled) && !"".equals(customLoginDialog)) {
+		if (customLoginEnabled && !"".equals(customLoginDialog)) {
 			ServiceDescription sdesc = new ServiceDescription(
 				"custom",
 				customLoginTitle,
@@ -336,7 +340,7 @@ public class LoginController extends AbstractController {
 			services.add(sdesc);
 		}
 
-		if ("true".equals(dbAuthEnabled) && !"".equals(dbAuthDialog)) {
+		if (dbAuthEnabled && !"".equals(dbAuthDialog)) {
 			ServiceDescription sdesc = new ServiceDescription(
 				"arsnova",
 				dbAuthTitle,
@@ -348,7 +352,7 @@ public class LoginController extends AbstractController {
 			services.add(sdesc);
 		}
 
-		if ("true".equals(ldapEnabled) && !"".equals(ldapDialog)) {
+		if (ldapEnabled && !"".equals(ldapDialog)) {
 			ServiceDescription sdesc = new ServiceDescription(
 				"ldap",
 				ldapTitle,
@@ -360,7 +364,7 @@ public class LoginController extends AbstractController {
 			services.add(sdesc);
 		}
 
-		if ("true".equals(casEnabled)) {
+		if (casEnabled) {
 			ServiceDescription sdesc = new ServiceDescription(
 				"cas",
 				casTitle,
@@ -371,7 +375,7 @@ public class LoginController extends AbstractController {
 			services.add(sdesc);
 		}
 
-		if ("true".equals(facebookEnabled)) {
+		if (facebookEnabled) {
 			ServiceDescription sdesc = new ServiceDescription(
 				"facebook",
 				"Facebook",
@@ -382,7 +386,7 @@ public class LoginController extends AbstractController {
 			services.add(sdesc);
 		}
 
-		if ("true".equals(googleEnabled)) {
+		if (googleEnabled) {
 			ServiceDescription sdesc = new ServiceDescription(
 				"google",
 				"Google",
@@ -393,7 +397,7 @@ public class LoginController extends AbstractController {
 			services.add(sdesc);
 		}
 
-		if ("true".equals(twitterEnabled)) {
+		if (twitterEnabled) {
 			ServiceDescription sdesc = new ServiceDescription(
 				"twitter",
 				"Twitter",

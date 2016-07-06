@@ -57,6 +57,8 @@ security.authentication.login-try-limit=50
 
 # Configuration parameters for authentication services:
 # enabled: enable or disable the service
+# allowed-roles: enable/disable service for a specific role (valid roles: speaker, student)
+#   (security note: this is currently only handled by the frontend!)
 # title: the title which is displayed by frontends
 # login-dialog-path: URL of a login dialog page
 # image: an image which is used for frontend buttons
@@ -64,13 +66,14 @@ security.authentication.login-try-limit=50
 # Guest authentication
 #
 security.guest.enabled=true
+security.guest.allowed-roles=speaker,student
 security.guest.order=0
-security.guest.lecturer.enabled=true
 
 # Setup combined login if you want to use a single, customized login page
 # which is used for multiple authentication services.
 #
 security.custom-login.enabled=false
+security.custom-login.allowed-roles=speaker,student
 security.custom-login.title=University
 security.custom-login.login-dialog-path=
 security.custom-login.image=
@@ -88,6 +91,7 @@ security.custom-login.order=0
 #     replaced by the value of activation-path.
 #
 security.user-db.enabled=true
+security.user-db.allowed-roles=speaker,student
 security.user-db.title=ARSnova
 security.user-db.login-dialog-path=account.html
 security.user-db.activation-path=account.html
@@ -111,6 +115,7 @@ security.user-db.reset-password-mail.body=You requested to reset your \
 #     server. {0} will be replaced with the user ID by ARSnova.
 #
 security.ldap.enabled=false
+security.ldap.allowed-roles=speaker,student
 security.ldap.title=LDAP
 security.ldap.login-dialog-path=login-ldap.html
 security.ldap.image=
@@ -128,6 +133,7 @@ security.ldap.user-dn-pattern=uid={0},ou=arsnova
 # CAS authentication
 #
 security.cas.enabled=false
+security.cas.allowed-roles=speaker,student
 security.cas.title=CAS
 security.cas.image=
 security.cas.order=0
@@ -141,6 +147,7 @@ security.cas-server-url=https://example.com/cas
 # Facebook
 #
 security.facebook.enabled=false
+security.facebook.allowed-roles=speaker,student
 security.facebook.order=0
 security.facebook.key=
 security.facebook.secret=
@@ -148,6 +155,7 @@ security.facebook.secret=
 # Twitter
 #
 security.twitter.enabled=false
+security.twitter.allowed-roles=speaker,student
 security.twitter.order=0
 security.twitter.key=
 security.twitter.secret=
@@ -155,9 +163,19 @@ security.twitter.secret=
 # Google
 #
 security.google.enabled=false
+security.google.allowed-roles=speaker,student
 security.google.order=0
 security.google.key=
 security.google.secret=
+
+
+################################################################################
+# Cross-Origin Resource Sharing
+################################################################################
+# CORS grants full API access to client-side (browser) applications from other
+# domains. Multiple entries are separated by commas. Untrusted and vulnerable
+# applications running on these domains pose a security risk to ARSnova users.
+#security.cors.origins=https://
 
 
 ################################################################################
@@ -214,7 +232,7 @@ question.answer-option-limit=8
 # options should be used cautiously since it could lead to display errors.
 # Answer options will still not be parsed in diagrams. This setting has no
 # effect if neither MathJax nor Markdown are enabled.
-question.parse-answer-option-formatting=true
+question.parse-answer-option-formatting=false
 
 # Demo session id to show above session login button
 # You can freely use the demo session of https://arsnova.eu/mobile which can be

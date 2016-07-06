@@ -1,5 +1,49 @@
 # Changelog
 
+## 2.4.1
+This release fixes a security vulnerability caused by the CORS implementation.
+Origins allowed for CORS can now be set in the configuration via
+`security.cors.origins`. (Reported by Rainer Rillke at Wikimedia)
+
+Additionally, authentication via disabled services is now entirely blocked to
+fix a security vulnerability allowing guest access despite the setting
+`security.guest.enabled=false`. (Reported by Rainer Rillke at Wikimedia)
+
+Additional changes:
+* Libraries have been upgraded to fix potential bugs
+
+## 2.3.3
+This release fixes a security vulnerability caused by the CORS implementation.
+Origins allowed for CORS can now be set in the configuration via
+`security.cors.origins`. (Reported by Rainer Rillke at Wikimedia)
+
+Additional changes:
+* Libraries have been upgraded to fix potential bugs
+
+## 2.2.2
+This release fixes a security vulnerability caused by the CORS implementation.
+Origins allowed for CORS can now be set in the configuration via
+`security.cors.origins`. (Reported by Rainer Rillke at Wikimedia)
+
+Additional changes:
+* Libraries have been upgraded to fix potential bugs
+
+## 2.1.2
+This release fixes a security vulnerability caused by the CORS implementation.
+Support for cross-origin requests has been removed. Use ARSnova version 2.2 or
+newer for proper CORS. (Reported by Rainer Rillke at Wikimedia)
+
+Additional changes:
+* Libraries have been upgraded to fix potential bugs
+
+## 2.0.4
+This release fixes a security vulnerability caused by the CORS implementation.
+Support for cross-origin requests has been removed. Use ARSnova version 2.2 or
+newer for proper CORS. (Reported by Rainer Rillke at Wikimedia)
+
+Additional changes:
+* Libraries have been upgraded to fix potential bugs
+
 ## 2.4
 Major features:
 * Support for new use case and feature settings has been added.
