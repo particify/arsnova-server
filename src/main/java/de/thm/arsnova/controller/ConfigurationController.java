@@ -36,9 +36,6 @@ import java.util.HashMap;
 @Controller
 @RequestMapping({"/configuration", "/arsnova-config"})
 public class ConfigurationController extends AbstractController {
-	@Value("${security.guest.enabled}")
-	private String guestEnabled;
-
 	public static final Logger LOGGER = LoggerFactory
 			.getLogger(ConfigurationController.class);
 
