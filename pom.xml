@@ -181,12 +181,12 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.12</version>
+			<version>1.7.21</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.7.12</version>
+			<version>1.7.21</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
@@ -231,7 +231,7 @@
 		<dependency>
 			<groupId>com.corundumstudio.socketio</groupId>
 			<artifactId>netty-socketio</artifactId>
-			<version>1.7.7</version>
+			<version>1.7.8</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.inject</groupId>
@@ -315,7 +315,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.2.13.v20150730</version>
+				<version>9.2.17.v20160517</version>
 				<configuration>
 					<scanIntervalSeconds>1</scanIntervalSeconds>
 					<webApp>
@@ -344,7 +344,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
-				<version>2.6</version>
+				<version>3.0.2</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
