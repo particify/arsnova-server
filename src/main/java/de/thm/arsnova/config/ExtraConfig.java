@@ -18,6 +18,7 @@
 package de.thm.arsnova.config;
 
 import de.thm.arsnova.ImageUtils;
+import de.thm.arsnova.web.CorsFilter;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.client.ConnectorClientImpl;
 import de.thm.arsnova.socket.ARSnovaSocket;
@@ -40,6 +41,9 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 
+import java.util.Arrays;
+import java.util.Collections;
+
 /**
  * Loads property file and configures non-security related beans and components.
  */
@@ -61,6 +65,7 @@ public class ExtraConfig extends WebMvcConfigurerAdapter {
 	@Value(value = "${security.ssl}") private boolean socketUseSll;
 	@Value(value = "${security.keystore}") private String socketKeystore;
 	@Value(value = "${security.storepass}") private String socketStorepass;
+	@Value(value = "${security.cors.origins:}") private String[] corsOrigins;
 
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
@@ -80,6 +85,11 @@ public class ExtraConfig extends WebMvcConfigurerAdapter {
 		propertiesFactoryBean.setLocation(new ClassPathResource("version.properties"));
 
 		return propertiesFactoryBean;
+	}
+
+	@Bean
+	public CorsFilter corsFilter() {
+		return new CorsFilter(Arrays.asList(corsOrigins));
 	}
 
 	@Bean(name = "connectorClient")
