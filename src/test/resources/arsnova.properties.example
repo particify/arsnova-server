@@ -57,6 +57,8 @@ security.authentication.login-try-limit=50
 
 # Configuration parameters for authentication services:
 # enabled: enable or disable the service
+# allowed-roles: enable/disable service for a specific role (valid roles: speaker, student)
+#   (security note: this is currently only handled by the frontend!)
 # title: the title which is displayed by frontends
 # login-dialog-path: URL of a login dialog page
 # image: an image which is used for frontend buttons
