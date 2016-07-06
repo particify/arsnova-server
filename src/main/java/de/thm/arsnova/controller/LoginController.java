@@ -162,7 +162,7 @@ public class LoginController extends AbstractController {
 
 		userSessionService.setRole(role);
 
-		if ("arsnova".equals(type)) {
+		if (dbAuthEnabled && "arsnova".equals(type)) {
 			Authentication authRequest = new UsernamePasswordAuthenticationToken(username, password);
 			try {
 				Authentication auth = daoProvider.authenticate(authRequest);
@@ -180,7 +180,7 @@ public class LoginController extends AbstractController {
 
 			userService.increaseFailedLoginCount(addr);
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
-		} else if ("ldap".equals(type)) {
+		} else if (ldapEnabled && "ldap".equals(type)) {
 			if (!"".equals(username) && !"".equals(password)) {
 				org.springframework.security.core.userdetails.User user =
 						new org.springframework.security.core.userdetails.User(
@@ -206,7 +206,7 @@ public class LoginController extends AbstractController {
 				userService.increaseFailedLoginCount(addr);
 				response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			}
-		} else if ("guest".equals(type)) {
+		} else if (guestEnabled && "guest".equals(type)) {
 			List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 			authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
 			if (username == null || !username.startsWith("Guest") || username.length() != MAX_USERNAME_LENGTH) {
@@ -221,6 +221,8 @@ public class LoginController extends AbstractController {
 			SecurityContextHolder.getContext().setAuthentication(token);
 			request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
 					SecurityContextHolder.getContext());
+		} else {
+			response.setStatus(HttpStatus.BAD_REQUEST.value());
 		}
 	}
 
@@ -262,19 +264,21 @@ public class LoginController extends AbstractController {
 		request.getSession().setAttribute("ars-login-success-url", serverUrl + successUrl);
 		request.getSession().setAttribute("ars-login-failure-url", serverUrl + failureUrl);
 
-		if ("cas".equals(type)) {
+		if (casEnabled && "cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);
-		} else if ("twitter".equals(type)) {
+		} else if (twitterEnabled && "twitter".equals(type)) {
 			final String authUrl = twitterProvider.getAuthorizationUrl(new HttpUserSession(request));
 			result = new RedirectView(authUrl);
-		} else if ("facebook".equals(type)) {
+		} else if (facebookEnabled && "facebook".equals(type)) {
 			facebookProvider.setFields("id,link");
 			facebookProvider.setScope("");
 			final String authUrl = facebookProvider.getAuthorizationUrl(new HttpUserSession(request));
 			result = new RedirectView(authUrl);
-		} else if ("google".equals(type)) {
+		} else if (googleEnabled && "google".equals(type)) {
 			final String authUrl = googleProvider.getAuthorizationUrl(new HttpUserSession(request));
 			result = new RedirectView(authUrl);
+		} else {
+			response.setStatus(HttpStatus.BAD_REQUEST.value());
 		}
 
 		return result;
