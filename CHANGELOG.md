@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.3.3
+This release fixes a security vulnerability caused by the CORS implementation.
+Origins allowed for CORS can now be set in the configuration via
+`security.cors.origins`. (Reported by Rainer Rillke at Wikimedia)
+
+Additional changes:
+* Libraries have been upgraded to fix potential bugs
+
 ## 2.2.2
 This release fixes a security vulnerability caused by the CORS implementation.
 Origins allowed for CORS can now be set in the configuration via
