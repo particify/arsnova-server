@@ -161,6 +161,15 @@ security.google.secret=
 
 
 ################################################################################
+# Cross-Origin Resource Sharing
+################################################################################
+# CORS grants full API access to client-side (browser) applications from other
+# domains. Multiple entries are separated by commas. Untrusted and vulnerable
+# applications running on these domains pose a security risk to ARSnova users.
+#security.cors.origins=https://
+
+
+################################################################################
 # ARSnova Connector (for LMS)
 ################################################################################
 connector.enable=false
