@@ -8,8 +8,8 @@
 
 	<properties>
 		<org.springframework-version>4.0.9.RELEASE</org.springframework-version>
-		<org.springframework.security-version>3.2.7.RELEASE</org.springframework.security-version>
-		<org.springframework.integration-mail-version>4.0.7.RELEASE</org.springframework.integration-mail-version>
+		<org.springframework.security-version>3.2.9.RELEASE</org.springframework.security-version>
+		<org.springframework.integration-mail-version>4.0.8.RELEASE</org.springframework.integration-mail-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.url>https://scm.thm.de/arsnova</project.url>
 		<sonar.language>java</sonar.language>
@@ -199,12 +199,12 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.12</version>
+			<version>1.7.21</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.7.12</version>
+			<version>1.7.21</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
@@ -261,7 +261,7 @@
 		<dependency>
 			<groupId>com.corundumstudio.socketio</groupId>
 			<artifactId>netty-socketio</artifactId>
-			<version>1.7.7</version>
+			<version>1.7.8</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.inject</groupId>
@@ -350,7 +350,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.2.11.v20150529</version>
+				<version>9.2.17.v20160517</version>
 				<configuration>
 					<scanIntervalSeconds>1</scanIntervalSeconds>
 					<webApp>
@@ -379,7 +379,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
-				<version>2.6</version>
+				<version>3.0.2</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
