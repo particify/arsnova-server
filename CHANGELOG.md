@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.4
+This release fixes a security vulnerability caused by the CORS implementation.
+Support for cross-origin requests has been removed. Use ARSnova version 2.2 or
+newer for proper CORS. (Reported by Rainer Rillke at Wikimedia)
+
+Additional changes:
+* Libraries have been upgraded to fix potential bugs
+
 ## 2.0.3
 This release fixes a security vulnerability in the account management API. It is
 highly recommended to upgrade if you are using database authentication.
