@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.4.1
+This release fixes a security vulnerability caused by the CORS implementation.
+Origins allowed for CORS can now be set in the configuration via
+`security.cors.origins`. (Reported by Rainer Rillke at Wikimedia)
+
+Additionally, authentication via disabled services is now entirely blocked to
+fix a security vulnerability allowing guest access despite the setting
+`security.guest.enabled=false`. (Reported by Rainer Rillke at Wikimedia)
+
+Additional changes:
+* Libraries have been upgraded to fix potential bugs
+
 ## 2.3.3
 This release fixes a security vulnerability caused by the CORS implementation.
 Origins allowed for CORS can now be set in the configuration via
