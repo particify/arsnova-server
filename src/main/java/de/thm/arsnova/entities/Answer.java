@@ -39,7 +39,6 @@ public class Answer implements Serializable {
 	private String answerText;
 	private String answerTextRaw;
 	private String answerSubject;
-	private double freeTextScore;
 	private boolean successfulFreeTextAnswer;
 	private String questionVariant;
 	private int questionValue;
@@ -126,14 +125,6 @@ public class Answer implements Serializable {
 
 	public final void setAnswerSubject(final String answerSubject) {
 		this.answerSubject = answerSubject;
-	}
-
-	public final double getFreeTextScore() {
-		return this.freeTextScore;
-	}
-
-	public final void setFreeTextScore(final double freeTextScore) {
-		this.freeTextScore = freeTextScore;
 	}
 
 	public final boolean isSuccessfulFreeTextAnswer() {

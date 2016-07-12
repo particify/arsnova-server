@@ -738,7 +738,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 				question.checkTextStricktOptions(theAnswer);
 			}
 			if (question.isFixedAnswer()) {
-				theAnswer.setFreeTextScore(question.evaluateCorrectAnswerFixedText(theAnswer.getAnswerTextRaw()));
+				theAnswer.setQuestionValue(question.evaluateCorrectAnswerFixedText(theAnswer.getAnswerTextRaw()));
 				theAnswer.setSuccessfulFreeTextAnswer(question.isSuccessfulFreeTextAnswer(theAnswer.getAnswerTextRaw()));
 			}
 		}

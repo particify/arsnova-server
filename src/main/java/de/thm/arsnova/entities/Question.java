@@ -60,7 +60,7 @@ public class Question implements Serializable {
 	private boolean ignorePunctuation;
 	private boolean fixedAnswer;
 	private boolean strictMode;
-	private double rating;
+	private int rating;
 	private String correctAnswer;
 	private String _id;
 	private String _rev;
@@ -357,11 +357,11 @@ public class Question implements Serializable {
 		this.strictMode = strictMode;
 	}
 
-	public final double getRating() {
+	public final int getRating() {
 		return this.rating;
 	}
 
-	public final void setRating(final double rating) {
+	public final void setRating(final int rating) {
 		this.rating = rating;
 	}
 
@@ -690,7 +690,7 @@ public class Question implements Serializable {
 		answer.setAnswerTextRaw(this.checkWhitespaces(answer.getAnswerTextRaw()));
 	}
 
-	public double evaluateCorrectAnswerFixedText(String answerTextRaw) {
+	public int evaluateCorrectAnswerFixedText(String answerTextRaw) {
 		if (answerTextRaw != null) {
 			if (answerTextRaw.equals(this.getCorrectAnswer())) {
 				return this.getRating();
