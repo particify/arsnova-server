@@ -42,6 +42,9 @@ public class ConfigurationController extends AbstractController {
 	@Value("${api.path:}")
 	private String apiPath;
 
+	@Value("${socketio.proxy-path:}")
+	private String socketioPath;
+
 	@Value("${customization.path}")
 	private String customizationPath;
 
@@ -167,6 +170,10 @@ public class ConfigurationController extends AbstractController {
 		}
 		config.put("apiPath", apiPath);
 
+
+		if (!"".equals(socketioPath)) {
+			config.put("socketioPath", socketioPath);
+		}
 		if (!"".equals(customizationPath)) {
 			config.put("customizationPath", customizationPath);
 		}

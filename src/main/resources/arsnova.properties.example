@@ -15,14 +15,17 @@ customization.path=/customization
 mobile.path=/mobile
 presenter.path=/presenter
 
-# SSL configuration
-security.ssl=false
-security.keystore=/etc/arsnova/arsnova.jks
-security.storepass=arsnova
-
 # WebSockets server
-socketio.ip=0.0.0.0
-socketio.port=10443
+socketio.bind-address=localhost
+socketio.port=8090
+# SSL/TLS configuration
+# To enable SSL for Socket.IO you have to import your key and certificate files into a Java Key Store. If you tunnel
+# WebSocket connections through a proxy server, you can skip this configuration.
+# See https://docs.oracle.com/javase/8/docs/technotes/tools/unix/keytool.html
+#
+#socketio.ssl.jks-file=/etc/arsnova/arsnova.jks
+#socketio.ssl.jks-password=arsnova
+#socketio.proxy-path=/socket.io
 
 # Admin accounts
 # Usernames of the accounts which are allowed to manage global messages of the

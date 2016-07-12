@@ -59,11 +59,10 @@ public class ExtraConfig extends WebMvcConfigurerAdapter {
 	@Value(value = "${connector.username}") private String connectorUsername;
 	@Value(value = "${connector.password}") private String connectorPassword;
 
-	@Value(value = "${socketio.ip}") private String socketIp;
+	@Value(value = "${socketio.bind-address}") private String socketAddress;
 	@Value(value = "${socketio.port}") private int socketPort;
-	@Value(value = "${security.ssl}") private boolean socketUseSll;
-	@Value(value = "${security.keystore}") private String socketKeystore;
-	@Value(value = "${security.storepass}") private String socketStorepass;
+	@Value(value = "${socketio.ssl.jks-file:}") private String socketKeystore;
+	@Value(value = "${socketio.ssl.jks-password:}") private String socketKeystorePassword;
 	@Value(value = "${security.cors.origins:}") private String[] corsOrigins;
 
 	private static int testPortOffset = 0;
@@ -110,11 +109,11 @@ public class ExtraConfig extends WebMvcConfigurerAdapter {
 	@Bean(name = "socketServer", initMethod = "startServer", destroyMethod = "stopServer")
 	public ARSnovaSocket socketServer() {
 		final ARSnovaSocketIOServer socketServer = new ARSnovaSocketIOServer();
-		socketServer.setHostIp(socketIp);
+		socketServer.setHostIp(socketAddress);
 		socketServer.setPortNumber(socketPort);
-		socketServer.setUseSSL(socketUseSll);
+		socketServer.setUseSSL(!socketKeystore.isEmpty());
 		socketServer.setKeystore(socketKeystore);
-		socketServer.setStorepass(socketStorepass);
+		socketServer.setStorepass(socketKeystorePassword);
 		return socketServer;
 	}
 
@@ -123,11 +122,11 @@ public class ExtraConfig extends WebMvcConfigurerAdapter {
 	public ARSnovaSocket socketTestServer() {
 		final int testSocketPort = 1234 + testPortOffset++ % 10;
 		final ARSnovaSocketIOServer socketServer = new ARSnovaSocketIOServer();
-		socketServer.setHostIp(socketIp);
+		socketServer.setHostIp(socketAddress);
 		socketServer.setPortNumber(socketPort + testSocketPort);
-		socketServer.setUseSSL(socketUseSll);
+		socketServer.setUseSSL(!socketKeystore.isEmpty());
 		socketServer.setKeystore(socketKeystore);
-		socketServer.setStorepass(socketStorepass);
+		socketServer.setStorepass(socketKeystorePassword);
 		return socketServer;
 	}
 

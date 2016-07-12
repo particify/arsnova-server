@@ -6,6 +6,6 @@
 
 	<bean id="socketServer" class="de.thm.arsnova.socket.ARSnovaSocketIOServer"
 		init-method="startServer" destroy-method="stopServer" scope="singleton"
-		p:portNumber="11443" p:hostIp="${socketio.ip}" p:useSSL="${security.ssl}" p:keystore="${security.keystore}"
-		p:storepass="${security.storepass}" />
+		p:portNumber="11443" p:hostIp="localhost" p:useSSL="false" p:keystore=""
+		p:storepass="" />
 </beans>
