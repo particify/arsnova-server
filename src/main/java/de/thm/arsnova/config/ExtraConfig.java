@@ -42,7 +42,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 
 
 import java.util.Arrays;
-import java.util.Collections;
 
 /**
  * Loads property file and configures non-security related beans and components.
