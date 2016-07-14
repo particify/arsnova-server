@@ -246,12 +246,17 @@ public class LoginController extends AbstractController {
 			failureUrl = "/";
 		}
 
-		String serverUrl = request.getScheme() + "://" + request.getServerName();
 		/* Handle proxy
 		 * TODO: It might be better, to support the proposed standard: http://tools.ietf.org/html/rfc7239 */
-		int port = "".equals(request.getHeader("X-Forwarded-Port"))
+		String host = null != request.getHeader("X-Forwarded-Host")
+				? request.getHeader("X-Forwarded-Port") : request.getServerName();
+		int port = null != request.getHeader("X-Forwarded-Port")
 				? Integer.valueOf(request.getHeader("X-Forwarded-Port")) : request.getServerPort();
-		if ("https".equals(request.getScheme())) {
+		String scheme = null != request.getHeader("X-Forwarded-Proto")
+				? request.getHeader("X-Forwarded-Proto") : request.getScheme();
+
+		String serverUrl = scheme + "://" + host;
+		if ("https".equals(scheme)) {
 			if (443 != port) {
 				serverUrl = serverUrl + ":" + String.valueOf(port);
 			}
