@@ -982,7 +982,11 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			a.setAbstentionCount(abstentionCount);
 			a.setQuestionId(d.getJSONObject().getJSONArray("key").getString(0));
 			final String answerText = d.getJSONObject().getJSONArray("key").getString(1);
+			final String answerSubject = d.getJSONObject().getJSONArray("key").getString(2);
+			final boolean successfulFreeTextAnswer = d.getJSONObject().getJSONArray("key").getBoolean(3);
 			a.setAnswerText("null".equals(answerText) ? null : answerText);
+			a.setAnswerSubject("null".equals(answerSubject) ? null : answerSubject);
+			a.setSuccessfulFreeTextAnswer(successfulFreeTextAnswer);
 			answers.add(a);
 		}
 		return answers;
@@ -2167,6 +2171,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 					answerDoc.put("timestamp", a.getTimestamp());
 					answerDoc.put("piRound", a.getPiRound());
 					answerDoc.put("abstention", a.isAbstention());
+					answerDoc.put("successfulFreeTextAnswer", a.isSuccessfulFreeTextAnswer());
 					// we do not store the user's name
 					answerDoc.put("user", "");
 					answers.add(answerDoc);

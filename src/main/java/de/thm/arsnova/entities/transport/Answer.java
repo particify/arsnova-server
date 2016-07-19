@@ -55,6 +55,7 @@ public class Answer implements Serializable {
 		answerText = a.getAnswerText();
 		answerImage = a.getAnswerImage();
 		abstention = a.isAbstention();
+		successfulFreeTextAnswer = a.isSuccessfulFreeTextAnswer();
 	}
 
 	@ApiModelProperty(required = true, value = "used to display text answer")
@@ -99,6 +100,7 @@ public class Answer implements Serializable {
 		this.freeTextScore = freeTextScore;
 	}
 
+	@ApiModelProperty(required = true, value = "successfulFreeTextAnswer")
 	public final boolean isSuccessfulFreeTextAnswer() {
 		return this.successfulFreeTextAnswer;
 	}
@@ -132,6 +134,7 @@ public class Answer implements Serializable {
 		// calculate learning progress value after all properties are set
 		theAnswer.setQuestionValue(question.calculateValue(theAnswer));
 		theAnswer.setAnswerImage(this.getAnswerImage());
+		theAnswer.setSuccessfulFreeTextAnswer(this.isSuccessfulFreeTextAnswer());
 
 		if ("freetext".equals(question.getQuestionType())) {
 			theAnswer.setPiRound(0);
