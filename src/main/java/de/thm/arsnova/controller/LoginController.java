@@ -249,7 +249,7 @@ public class LoginController extends AbstractController {
 		/* Handle proxy
 		 * TODO: It might be better, to support the proposed standard: http://tools.ietf.org/html/rfc7239 */
 		String host = null != request.getHeader("X-Forwarded-Host")
-				? request.getHeader("X-Forwarded-Port") : request.getServerName();
+				? request.getHeader("X-Forwarded-Host") : request.getServerName();
 		int port = null != request.getHeader("X-Forwarded-Port")
 				? Integer.valueOf(request.getHeader("X-Forwarded-Port")) : request.getServerPort();
 		String scheme = null != request.getHeader("X-Forwarded-Proto")
