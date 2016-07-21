@@ -271,7 +271,7 @@ public class SessionController extends PaginationController {
 
 	@ApiOperation(value = "export sessions", nickname = "exportSession")
 	@RequestMapping(value = "/export", method = RequestMethod.GET)
-	public List<ImportExportSession> exportSession(
+	public List<ImportExportSession> getExport(
 			@ApiParam(value = "sessionkey", required = true) @RequestParam(value = "sessionkey", defaultValue = "") final List<String> sessionkey,
 			@ApiParam(value = "wether statistics shall be exported", required = true) @RequestParam(value = "withAnswerStatistics", defaultValue = "false") final Boolean withAnswerStatistics,
 			@ApiParam(value = "wether interposed questions shall be exported", required = true) @RequestParam(value = "withFeedbackQuestions", defaultValue = "false") final Boolean withFeedbackQuestions,
@@ -322,9 +322,9 @@ public class SessionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "retrieves a value for the learning progress",
-			nickname = "learningProgress")
+			nickname = "getLearningProgress")
 	@RequestMapping(value = "/{sessionkey}/learningprogress", method = RequestMethod.GET)
-	public LearningProgressValues learningProgress(
+	public LearningProgressValues getLearningProgress(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
 			@ApiParam(value = "progress type", required = false) @RequestParam(value = "type", defaultValue = "questions") final String progressType,
 			@ApiParam(value = "question variant", required = false) @RequestParam(value = "questionVariant", required = false) final String questionVariant,
@@ -334,9 +334,9 @@ public class SessionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "retrieves a value for the learning progress for the current user",
-			nickname = "myLearningProgress")
+			nickname = "getMyLearningProgress")
 	@RequestMapping(value = "/{sessionkey}/mylearningprogress", method = RequestMethod.GET)
-	public LearningProgressValues myLearningProgress(
+	public LearningProgressValues getMyLearningProgress(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
 			@RequestParam(value = "type", defaultValue = "questions") final String progressType,
 			@RequestParam(value = "questionVariant", required = false) final String questionVariant,
@@ -346,9 +346,9 @@ public class SessionController extends PaginationController {
 	}
 
 	@ApiOperation(value = "retrieves all session features",
-			nickname = "sessionFeatures")
+			nickname = "getSessionFeatures")
 	@RequestMapping(value = "/{sessionkey}/features", method = RequestMethod.GET)
-	public SessionFeature sessionFeatures(
+	public SessionFeature getSessionFeatures(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
 			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
 			) {
