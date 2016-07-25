@@ -20,10 +20,12 @@ package de.thm.arsnova.services;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Statistics;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 /**
- * Performs all statistics related operations.
+ * Performs all statistics related operations. To reduce pressure on the database, data is cached for a fixed amount of
+ * time.
  */
 @Service
 public class StatisticsService implements IStatisticsService {
@@ -34,9 +36,15 @@ public class StatisticsService implements IStatisticsService {
 	@Autowired
 	private IUserService userService;
 
+	private Statistics statistics = new Statistics();
+
+	@Scheduled(initialDelay = 0, fixedRate = 300000)
+	private void refreshStatistics() {
+		statistics = databaseDao.getStatistics();
+	}
+
 	@Override
 	public Statistics getStatistics() {
-		final Statistics statistics = databaseDao.getStatistics();
 		statistics.setActiveUsers(userService.loggedInUsers());
 		return statistics;
 	}
