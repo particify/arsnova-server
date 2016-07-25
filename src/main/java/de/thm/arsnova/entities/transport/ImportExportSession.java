@@ -209,6 +209,12 @@ public class ImportExportSession {
 			setTextAnswerEnabled(q.isTextAnswerEnabled());
 			setHint(q.getHint());
 			setSolution(q.getSolution());
+			setCorrectAnswer(q.getCorrectAnswer());
+			setFixedAnswer(q.isFixedAnswer());
+			setIgnoreCaseSensitive(q.isIgnoreCaseSensitive());
+			setIgnorePunctuation(q.isIgnorePunctuation());
+			setIgnoreWhitespaces(q.isIgnoreWhitespaces());
+			setRating(q.getRating());
 		}
 
 		@ApiModelProperty(required = true, value = " used to display answers")
