@@ -684,7 +684,7 @@ public class Question implements Serializable {
 		return answerText;
 	}
 
-	public void checkTextStricktOptions(Answer answer) {
+	public void checkTextStrictOptions(Answer answer) {
 		answer.setAnswerTextRaw(this.checkCaseSensitive(answer.getAnswerTextRaw()));
 		answer.setAnswerTextRaw(this.checkPunctuation(answer.getAnswerTextRaw()));
 		answer.setAnswerTextRaw(this.checkWhitespaces(answer.getAnswerTextRaw()));

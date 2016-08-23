@@ -735,7 +735,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			theAnswer.setAnswerTextRaw(new String(theAnswer.getAnswerText()));
 
 			if (question.isStrictMode()) {
-				question.checkTextStricktOptions(theAnswer);
+				question.checkTextStrictOptions(theAnswer);
 			}
 			if (question.isFixedAnswer()) {
 				theAnswer.setQuestionValue(question.evaluateCorrectAnswerFixedText(theAnswer.getAnswerTextRaw()));
@@ -758,7 +758,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final Question question = getQuestion(answer.getQuestionId());
 		if ("freetext".equals(question.getQuestionType())) {
 			imageUtils.generateThumbnailImage(realAnswer);
-			question.checkTextStricktOptions(realAnswer);
+			question.checkTextStrictOptions(realAnswer);
 		}
 		final Answer result = databaseDao.updateAnswer(realAnswer);
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
