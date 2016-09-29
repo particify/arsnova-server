@@ -160,7 +160,13 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	@PreAuthorize("isAuthenticated()")
 	public Session getSession(final String keyword) {
 		final User user = userService.getCurrentUser();
-		return this.getSessionInternal(keyword, user);
+		return Session.anonymizedCopy(this.getSessionInternal(keyword, user));
+	}
+
+	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	public Session getSessionForAdmin(final String keyword) {
+		final Session session = databaseDao.getSessionFromKeyword(keyword);
+		return session;
 	}
 
 	/*
@@ -187,6 +193,12 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 			}
 		}
 		return session;
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	public List<Session> getUserSessions(String username) {
+		return databaseDao.getSessionsForUsername(username, 0, 0);
 	}
 
 	@Override
@@ -218,6 +230,12 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	@PreAuthorize("isAuthenticated()")
 	public List<Session> getMyVisitedSessions(final int offset, final int limit) {
 		return databaseDao.getMyVisitedSessions(userService.getCurrentUser(), offset, limit);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(1, 'motd', 'admin')")
+	public List<Session> getUserVisitedSessions(String username) {
+		return databaseDao.getVisitedSessionsForUsername(username, 0, 0);
 	}
 
 	@Override
@@ -325,6 +343,16 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		existingSession.setPpLogo(session.getPpLogo());
 
 		return databaseDao.updateSession(existingSession);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
+	public Session changeSessionCreator(String sessionkey, String newCreator) {
+		final Session existingSession = databaseDao.getSessionFromKeyword(sessionkey);
+		if (existingSession == null) {
+			throw new RuntimeException("Error while trying to get the session with sessionkey: " + sessionkey);
+		}
+		return databaseDao.changeSessionCreator(existingSession, newCreator);
 	}
 
 	/*

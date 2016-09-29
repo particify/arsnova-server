@@ -34,6 +34,8 @@ import java.util.UUID;
 public interface ISessionService {
 	Session getSession(String keyword);
 
+	Session getSessionForAdmin(final String keyword);
+
 	Session getSessionInternal(String keyword, User user);
 
 	Session saveSession(Session session);
@@ -41,6 +43,10 @@ public interface ISessionService {
 	boolean sessionKeyAvailable(String keyword);
 
 	String generateKeyword();
+
+	List<Session> getUserSessions(String username);
+
+	List<Session> getUserVisitedSessions(String username);
 
 	List<Session> getMySessions(int offset, int limit);
 
@@ -55,6 +61,8 @@ public interface ISessionService {
 	Session joinSession(String keyword, UUID socketId);
 
 	Session updateSession(String sessionkey, Session session);
+
+	Session changeSessionCreator(String sessionkey, String newCreator);
 
 	Session updateSessionInternal(Session session, User user);
 

@@ -58,8 +58,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Object permission
 			) {
 		final String username = getUsername(authentication);
-
-		if (
+		if (checkAdminPermission(username)) {
+			return true;
+		} else if (
 				targetDomainObject instanceof Session
 				&& checkSessionPermission(username, ((Session) targetDomainObject).getKeyword(), permission)
 				) {
@@ -76,8 +77,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Object permission
 			) {
 		final String username = getUsername(authentication);
-
-		if (
+		if (checkAdminPermission(username)) {
+			return true;
+		} else if (
 				"session".equals(targetType)
 				&& checkSessionPermission(username, targetId, permission)) {
 			return true;
@@ -91,15 +93,15 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				&& checkInterposedQuestionPermission(username, targetId, permission)
 				) {
 			return true;
-		} else if (
-		/*TODO only account from own database*/
-				"motd".equals(targetType)
-				&& permission.equals("admin")
-				) {
-			String[] splittedNames = adminAccounts.split(",");
-			if (Arrays.asList(splittedNames).contains(username)) {
-				return true;
-			}
+		}
+		return false;
+	}
+
+	private boolean checkAdminPermission(final String username) {
+		/** TODO only allow accounts from arsnova db **/
+		String[] splittedAdminNames = adminAccounts.split(",");
+		if (Arrays.asList(splittedAdminNames).contains(username)) {
+			return true;
 		}
 		return false;
 	}

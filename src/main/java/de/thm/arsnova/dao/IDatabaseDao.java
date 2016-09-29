@@ -44,6 +44,8 @@ public interface IDatabaseDao {
 
 	List<Session> getMySessions(User user, final int start, final int limit);
 
+	List<Session> getSessionsForUsername(String username, final int start, final int limit);
+
 	List<Session> getPublicPoolSessions();
 
 	List<Session> getMyPublicPoolSessions(User user);
@@ -121,6 +123,8 @@ public interface IDatabaseDao {
 
 	List<Session> getMyVisitedSessions(User user, final int start, final int limit);
 
+	List<Session> getVisitedSessionsForUsername(String username, final int start, final int limit);
+
 	Question updateQuestion(Question question);
 
 	void deleteAnswers(Question question);
@@ -138,6 +142,8 @@ public interface IDatabaseDao {
 	List<Session> getCourseSessions(List<Course> courses);
 
 	Session updateSession(Session session);
+
+	Session changeSessionCreator(Session session, String newCreator);
 
 	void deleteSession(Session session);
 

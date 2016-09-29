@@ -77,8 +77,15 @@ public class SessionController extends PaginationController {
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.GET)
-	public Session joinSession(@ApiParam(value = "Session-Key from current session", required = true) @PathVariable final String sessionkey) {
-		return Session.anonymizedCopy(sessionService.getSession(sessionkey));
+	public Session joinSession(
+			@ApiParam(value = "Session-Key from current session", required = true) @PathVariable final String sessionkey,
+			@ApiParam(value = "Adminflag", required = false) @RequestParam(value = "admin", defaultValue = "false")	final boolean admin
+			) {
+		if (admin) {
+			return sessionService.getSessionForAdmin(sessionkey);
+		} else {
+			return sessionService.getSession(sessionkey);
+		}
 	}
 
 	@ApiOperation(value = "deletes a session",
@@ -139,6 +146,15 @@ public class SessionController extends PaginationController {
 		return sessionService.updateSession(sessionkey, session);
 	}
 
+	@ApiOperation(value = "change the session creator (owner)", nickname = "changeSessionCreator")
+	@RequestMapping(value = "/{sessionkey}/changecreator", method = RequestMethod.PUT)
+	public Session changeSessionCreator(
+			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
+			@ApiParam(value = "new session creator", required = true) @RequestBody final String newCreator
+			) {
+		return sessionService.changeSessionCreator(sessionkey, newCreator);
+	}
+
 	@ApiOperation(value = "Retrieves a list of Sessions",
 			nickname = "getSessions")
 	@ApiResponses(value = {
@@ -151,22 +167,39 @@ public class SessionController extends PaginationController {
 			@ApiParam(value = "ownedOnly", required = true) @RequestParam(value = "ownedonly", defaultValue = "false") final boolean ownedOnly,
 			@ApiParam(value = "visitedOnly", required = true) @RequestParam(value = "visitedonly", defaultValue = "false") final boolean visitedOnly,
 			@ApiParam(value = "sortby", required = true) @RequestParam(value = "sortby", defaultValue = "name") final String sortby,
+			@ApiParam(value = "for a given username. admin rights needed", required = false) @RequestParam(value =
+					"username", defaultValue = "") final String username,
 			final HttpServletResponse response
 			) {
 		List<Session> sessions = null;
 
-		/* TODO implement all parameter combinations, implement use of user parameter */
-		try {
-			if (ownedOnly && !visitedOnly) {
-				sessions = sessionService.getMySessions(offset, limit);
-			} else if (visitedOnly && !ownedOnly) {
-				sessions = sessionService.getMyVisitedSessions(offset, limit);
-			} else {
-				response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
-				return null;
+		if (!username.equals("")) {
+			try {
+				if (ownedOnly && !visitedOnly) {
+					sessions = sessionService.getUserSessions(username);
+				} else if (visitedOnly && !ownedOnly) {
+					sessions = sessionService.getUserVisitedSessions(username);
+				} else {
+					response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
+					return null;
+				}
+			} catch (final AccessDeniedException e) {
+				throw new UnauthorizedException();
 			}
-		} catch (final AccessDeniedException e) {
-			throw new UnauthorizedException();
+		} else {
+			/* TODO implement all parameter combinations, implement use of user parameter */
+			try {
+				if (ownedOnly && !visitedOnly) {
+					sessions = sessionService.getMySessions(offset, limit);
+				} else if (visitedOnly && !ownedOnly) {
+					sessions = sessionService.getMyVisitedSessions(offset, limit);
+				} else {
+					response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
+					return null;
+				}
+			} catch (final AccessDeniedException e) {
+				throw new UnauthorizedException();
+			}
 		}
 
 		if (sessions == null || sessions.isEmpty()) {
