@@ -96,6 +96,9 @@ public class ConfigurationController extends AbstractController {
 	@Value("${features.public-pool.enabled:false}")
 	private String publicPoolEnabled;
 
+	@Value("${features.export-to-click.enabled:false}")
+	private String exportToClickEnabled;
+
 	@Value("${question.answer-option-limit:8}")
 	private String answerOptionLimit;
 
@@ -231,6 +234,7 @@ public class ConfigurationController extends AbstractController {
 		features.put("gridSquare", "true".equals(gridSquareEnabled));
 		features.put("sessionImportExport", "true".equals(sessionImportExportEnabled));
 		features.put("publicPool", "true".equals(publicPoolEnabled));
+		features.put("exportToClick", "true".equals(exportToClickEnabled));
 
 		// add public pool configuration on demand
 		if (features.get("publicPool")) {

@@ -210,7 +210,7 @@ features.question-format.grid-square.enabled=true
 #
 features.session-import-export.enabled=true
 features.public-pool.enabled=true
-
+features.export-to-click.enabled=true
 
 ################################################################################
 # Customization
