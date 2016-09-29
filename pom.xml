@@ -325,7 +325,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.2.19.v20160908</version>
+				<version>9.3.12.v20160915</version>
 				<configuration>
 					<scanIntervalSeconds>1</scanIntervalSeconds>
 					<webApp>
@@ -333,11 +333,11 @@
 						<webInfIncludeJarPattern>^$</webInfIncludeJarPattern>
 					</webApp>
 					<contextHandlers>
-						<contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
+						<contextHandler implementation="org.eclipse.jetty.maven.plugin.JettyWebAppContext">
 							<contextPath>/mobile</contextPath>
 							<resourceBase>${mobile.path}</resourceBase>
 						</contextHandler>
-						<contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
+						<contextHandler implementation="org.eclipse.jetty.maven.plugin.JettyWebAppContext">
 							<contextPath>/customization</contextPath>
 							<resourceBase>${customization.path}</resourceBase>
 						</contextHandler>

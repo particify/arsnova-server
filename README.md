@@ -85,7 +85,7 @@ Because all dependencies are handled by Maven, a complete build is done with:
 
 	mvn install
 
-*Note:* Java 1.7 JDK is required and must be installed prior to building
+*Note:* Java 1.8 JDK is required and must be installed prior to building
 ARSnova.
 
 ### Requirements
