@@ -918,6 +918,15 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		return databaseDao.countPreparationQuestionAnswers(getSession(sessionkey));
 	}
 
+	/*
+	 * The "internal" suffix means it is called by internal services that have no authentication!
+	 * TODO: Find a better way of doing this...
+	 */
+	@Override
+	public int countFlashcardsForUserInternal(final String sessionkey) {
+		return databaseDao.getFlashcardsForUsers(getSession(sessionkey)).size();
+	}
+
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public void deleteLectureQuestions(final String sessionkey) {
