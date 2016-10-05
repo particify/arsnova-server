@@ -2340,6 +2340,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			viewString = "sort_order/preparation_question_sort_order_by_sessionid_and_subject";
 		} else if ("lecture".equals(questionVariant)) {
 			viewString = "sort_order/lecture_question_sort_order_by_sessionid_and_subject";
+		} else if ("flashcard".equals(questionVariant)) {
+			return null;
 		}
 
 		NovaView view = new NovaView(viewString);
