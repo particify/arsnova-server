@@ -125,6 +125,8 @@ public interface IQuestionService {
 
 	int countPreparationQuestionAnswersInternal(String sessionkey);
 
+	int countFlashcardsForUserInternal(String sessionkey);
+
 	void deleteLectureQuestions(String sessionkey);
 
 	void deleteFlashcards(String sessionkey);

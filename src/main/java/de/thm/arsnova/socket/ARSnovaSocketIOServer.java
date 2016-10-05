@@ -359,6 +359,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 		client.sendEvent("unansweredPreparationQuestions", questionService.getUnAnsweredPreparationQuestionIds(sessionKey, user));
 		client.sendEvent("countLectureQuestionAnswers", questionService.countLectureQuestionAnswersInternal(sessionKey));
 		client.sendEvent("countPreparationQuestionAnswers", questionService.countPreparationQuestionAnswersInternal(sessionKey));
+		client.sendEvent("countFlashcards", questionService.countFlashcardsForUserInternal(sessionKey));
 		client.sendEvent("activeUserCountData", sessionService.activeUsers(sessionKey));
 		client.sendEvent("learningProgressOptions", session.getLearningProgressOptions());
 		final de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
