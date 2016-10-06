@@ -184,4 +184,7 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 	@Override
 	public void visit(LockFeedbackEvent lockFeedbackEvent) { }
 
+	@Override
+	public void visit(FlipFlashcardsEvent flipFlashcardsEvent) { }
+
 }

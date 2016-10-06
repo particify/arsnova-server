@@ -355,15 +355,22 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	 */
 	public void reportSessionDataToClient(final String sessionKey, final User user, final SocketIOClient client) {
 		final de.thm.arsnova.entities.Session session = sessionService.getSessionInternal(sessionKey, user);
+		final de.thm.arsnova.entities.SessionFeature features = sessionService.getSessionFeatures(sessionKey);
+		
 		client.sendEvent("unansweredLecturerQuestions", questionService.getUnAnsweredLectureQuestionIds(sessionKey, user));
 		client.sendEvent("unansweredPreparationQuestions", questionService.getUnAnsweredPreparationQuestionIds(sessionKey, user));
 		client.sendEvent("countLectureQuestionAnswers", questionService.countLectureQuestionAnswersInternal(sessionKey));
 		client.sendEvent("countPreparationQuestionAnswers", questionService.countPreparationQuestionAnswersInternal(sessionKey));
-		client.sendEvent("countFlashcards", questionService.countFlashcardsForUserInternal(sessionKey));
 		client.sendEvent("activeUserCountData", sessionService.activeUsers(sessionKey));
 		client.sendEvent("learningProgressOptions", session.getLearningProgressOptions());
 		final de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
 		client.sendEvent("feedbackData", fb.getValues());
+
+		if (features.isFlashcard() || features.isFlashcardFeature()) {
+			client.sendEvent("countFlashcards", questionService.countFlashcardsForUserInternal(sessionKey));
+			client.sendEvent("flipFlashcards", session.getFlipFlashcards());
+		}
+
 		try {
 			final long averageFeedback = feedbackService.getAverageFeedbackRounded(sessionKey);
 			client.sendEvent("feedbackDataRoundedAverage", averageFeedback);
@@ -579,12 +586,23 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	@Override
 	public void visit(FeatureChangeEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
-		broadcastInSession(sessionKey, "featureChange", event.getSession().getFeatures());
+		final de.thm.arsnova.entities.SessionFeature features = event.getSession().getFeatures();
+		broadcastInSession(sessionKey, "featureChange", features);
+
+		if (features.isFlashcard() || features.isFlashcardFeature()) {
+			broadcastInSession(sessionKey, "countFlashcards", questionService.countFlashcardsForUserInternal(sessionKey));
+			broadcastInSession(sessionKey, "flipFlashcards", event.getSession().getFlipFlashcards());
+		}
 	}
 
 	@Override
 	public void visit(LockFeedbackEvent event) {
 		broadcastInSession(event.getSession().getKeyword(), "lockFeedback", event.getSession().getFeedbackLock());
+	}
+	
+	@Override
+	public void visit(FlipFlashcardsEvent event) {
+		broadcastInSession(event.getSession().getKeyword(), "flipFlashcards", event.getSession().getFlipFlashcards());
 	}
 
 	@Override

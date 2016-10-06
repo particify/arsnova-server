@@ -33,6 +33,7 @@ import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
 import de.thm.arsnova.events.DeleteSessionEvent;
 import de.thm.arsnova.events.FeatureChangeEvent;
+import de.thm.arsnova.events.FlipFlashcardsEvent;
 import de.thm.arsnova.events.LockFeedbackEvent;
 import de.thm.arsnova.events.NewSessionEvent;
 import de.thm.arsnova.events.StatusSessionEvent;
@@ -456,6 +457,18 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		session.setFeedbackLock(lock);
 		this.publisher.publishEvent(new LockFeedbackEvent(this, session));
 		return databaseDao.updateSession(session).getFeedbackLock();
+	}
+	
+	@Override
+	public boolean flipFlashcards(String sessionkey, Boolean flip) {
+		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
+		final User user = userService.getCurrentUser();
+		if (!session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
+		session.setFlipFlashcards(flip);
+		this.publisher.publishEvent(new FlipFlashcardsEvent(this, session));
+		return databaseDao.updateSession(session).getFlipFlashcards();
 	}
 
 	/**

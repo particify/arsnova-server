@@ -83,4 +83,6 @@ public interface ISessionService {
 	SessionFeature changeSessionFeatures(String sessionkey, SessionFeature features);
 
 	boolean lockFeedbackInput(String sessionkey, Boolean lock);
+	
+	boolean flipFlashcards(String sessionkey, Boolean flip);
 }
