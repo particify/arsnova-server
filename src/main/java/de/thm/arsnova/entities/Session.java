@@ -57,6 +57,7 @@ public class Session implements Serializable {
 	private String ppLevel;
 	private String sessionType;
 	private boolean feedbackLock;
+	private boolean flipFlashcards;
 
 	private String _id;
 	private String _rev;
@@ -92,6 +93,7 @@ public class Session implements Serializable {
 		copy.ppLevel = original.ppLevel;
 		copy.sessionType = original.sessionType;
 		copy.feedbackLock = original.feedbackLock;
+		copy.flipFlashcards = original.flipFlashcards;
 
 		copy._id = original._id;
 		copy._rev = original._rev;
@@ -338,6 +340,15 @@ public class Session implements Serializable {
 
 	public void setFeedbackLock(Boolean lock) {
 		this.feedbackLock = lock;
+	}
+	
+	@ApiModelProperty(required = true, value = "the flashcard flip condition")
+	public boolean getFlipFlashcards() {
+		return flipFlashcards;
+	}
+
+	public void setFlipFlashcards(Boolean flip) {
+		this.flipFlashcards = flip;
 	}
 
 	@Override

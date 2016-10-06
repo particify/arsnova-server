@@ -125,4 +125,7 @@ public class CacheBuster implements ICacheBuster, NovaEventVisitor {
 	@Override
 	public void visit(LockFeedbackEvent lockFeedbackEvent) { }
 
+	@Override
+	public void visit(FlipFlashcardsEvent flipFlashcardsEvent) { }
+
 }
