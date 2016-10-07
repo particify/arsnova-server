@@ -44,6 +44,7 @@ public class SessionFeature implements Serializable {
 	private boolean interposed = true;
 	private boolean pi = true;
 	private boolean learningProgress = true;
+	private boolean flashcardFeature = true;
 	private boolean slides = false;
 
 	public SessionFeature(SessionFeature features) {
@@ -56,6 +57,7 @@ public class SessionFeature implements Serializable {
 			this.liveFeedback = features.liveFeedback;
 			this.interposedFeedback = features.interposedFeedback;
 			this.liveClicker = features.liveClicker;
+			this.flashcardFeature = features.flashcardFeature;
 			this.flashcard = features.flashcard;
 			this.total = features.total;
 			this.lecture = features.lecture;
@@ -145,6 +147,14 @@ public class SessionFeature implements Serializable {
 
 	public void setPeerGrading(boolean peerGrading) {
 		this.peerGrading = peerGrading;
+	}
+
+	public boolean isFlashcardFeature() {
+		return flashcardFeature;
+	}
+
+	public void setFlashcardFeature(boolean flashcardFeature) {
+		this.flashcardFeature = flashcardFeature;
 	}
 
 	public boolean isFlashcard() {

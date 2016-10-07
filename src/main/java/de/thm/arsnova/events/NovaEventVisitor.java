@@ -81,4 +81,6 @@ public interface NovaEventVisitor {
 	void visit(FeatureChangeEvent featureChangeEvent);
 
 	void visit(LockFeedbackEvent lockFeedbackEvent);
+	
+	void visit(FlipFlashcardsEvent flipFlashcardsEvent);
 }

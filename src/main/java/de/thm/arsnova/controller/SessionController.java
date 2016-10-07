@@ -409,6 +409,17 @@ public class SessionController extends PaginationController {
 			) {
 		return sessionService.lockFeedbackInput(sessionkey, lock);
 	}
+	
+	@RequestMapping(value = "/{sessionkey}/flipflashcards", method = RequestMethod.POST)
+	@ApiOperation(value = "flip all flashcards in session",
+			nickname = "lockFeedbackInput")
+	public boolean flipFlashcards(
+			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
+			@ApiParam(value = "flip", required = true) @RequestParam(required = true) final Boolean flip,
+			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
+			) {
+		return sessionService.flipFlashcards(sessionkey, flip);
+	}
 
 	/* internal redirections */
 
