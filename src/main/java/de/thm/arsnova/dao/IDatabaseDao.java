@@ -29,7 +29,6 @@ import de.thm.arsnova.entities.MotdList;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
-import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
@@ -220,12 +219,6 @@ public interface IDatabaseDao {
 	List<String> getSubjects(Session session, String questionVariant);
 
 	List<String> getQuestionIdsBySubject(Session session, String questionVariant, String subject);
-
-	SortOrder createOrUpdateSortOrder(SortOrder sortOrder);
-
-	SortOrder getSortOrder(String sessionId, String questionVariant, String subject);
-
-	void deleteSortOrder(SortOrder sortOrder);
 
 	List<Question> getQuestionsByIds(List<String> ids, Session session);
 

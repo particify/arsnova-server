@@ -27,7 +27,6 @@ import de.thm.arsnova.entities.LearningProgressOptions;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionFeature;
 import de.thm.arsnova.entities.SessionInfo;
-import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
@@ -380,25 +379,6 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 			prepSubjects.add("");
 		}
 
-		List<String> lectureSubjects = databaseDao.getSubjects(session, "lecture");
-		if (lectureSubjects == null) {
-			lectureSubjects = new ArrayList<String>();
-		} else {
-			lectureSubjects.add("");
-		}
-
-		for (String subject : prepSubjects) {
-			SortOrder sortOrder = databaseDao.getSortOrder(session.get_id(), "preparation", subject);
-			if (sortOrder != null) {
-				databaseDao.deleteSortOrder(sortOrder);
-			}
-		}
-		for (String subject : lectureSubjects) {
-			SortOrder sortOrder = databaseDao.getSortOrder(session.get_id(), "lecture", subject);
-			if (sortOrder != null) {
-				databaseDao.deleteSortOrder(sortOrder);
-			}
-		}
 		databaseDao.deleteAllQuestionsWithAnswers(session);
 		databaseDao.deleteSession(session);
 
@@ -486,7 +466,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		this.publisher.publishEvent(new LockFeedbackEvent(this, session));
 		return databaseDao.updateSession(session).getFeedbackLock();
 	}
-	
+
 	@Override
 	public boolean flipFlashcards(String sessionkey, Boolean flip) {
 		final Session session = databaseDao.getSessionFromKeyword(sessionkey);

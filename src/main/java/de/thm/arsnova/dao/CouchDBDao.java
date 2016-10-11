@@ -36,7 +36,6 @@ import de.thm.arsnova.entities.PossibleAnswer;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
-import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.VisitedSession;
@@ -2416,91 +2415,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 
 		return qids;
-	}
-
-	@Cacheable(value = "sortorder", key = "#p0.concat('-').concat(#p1).concat('-').concat(#p2)")
-	@Override
-	public SortOrder getSortOrder(String sessionId, String questionVariant, String subject) {
-		String viewString = "";
-		if ("preparation".equals(questionVariant)) {
-			viewString = "sort_order/preparation_question_sort_order_by_sessionid_and_subject";
-		} else if ("lecture".equals(questionVariant)) {
-			viewString = "sort_order/lecture_question_sort_order_by_sessionid_and_subject";
-		} else if ("flashcard".equals(questionVariant)) {
-			return null;
-		}
-
-		NovaView view = new NovaView(viewString);
-		view.setKey(sessionId, subject);
-
-		ViewResults results = this.getDatabase().view(view);
-
-		if (isEmptyResults(results)) {
-			return null;
-		}
-
-		SortOrder sortOrder = new SortOrder();
-
-		for (final Document d : results.getResults()) {
-			sortOrder.set_id(d.getJSONObject("value").getString("_id"));
-			sortOrder.set_rev(d.getJSONObject("value").getString("_rev"));
-			sortOrder.setSessionId(d.getJSONObject("value").getString("sessionId"));
-			sortOrder.setSubject(d.getJSONObject("value").getString("subject"));
-			sortOrder.setSortType(d.getJSONObject("value").getString("sortType"));
-			sortOrder.setQuestionVariant(d.getJSONObject("value").getString("questionVariant"));
-			List<String> sort = new ArrayList<String>();
-			JSONArray json = d.getJSONObject("value").getJSONArray("sortOrder");
-			int len = json.size();
-			for (int i = 0; i < len; i++) {
-				sort.add(json.getString(i));
-			}
-			sortOrder.setSortOrder(sort);
-		}
-
-		return sortOrder;
-	}
-
-	@CachePut(value = "sortorder", key = "#sortOrder.sessionId.concat('-').concat(#sortOrder.questionVariant).concat('-').concat(#sortOrder.subject)")
-	@Override
-	public SortOrder createOrUpdateSortOrder(SortOrder sortOrder) {
-		try {
-			SortOrder oldSortOrder = getDatabaseDao().getSortOrder(sortOrder.getSessionId(), sortOrder.getQuestionVariant(), sortOrder.getSubject());
-			Document d = new Document();
-
-			String id = "";
-			String rev = "";
-			if (oldSortOrder != null) {
-				id = oldSortOrder.get_id();
-				rev = oldSortOrder.get_rev();
-				d = database.getDocument(id, rev);
-			}
-
-			d.put("type", "sort_order");
-			d.put("sessionId", sortOrder.getSessionId());
-			d.put("sortType", sortOrder.getSortType());
-			d.put("questionVariant", sortOrder.getQuestionVariant());
-			d.put("subject", sortOrder.getSubject());
-			d.put("sortOrder", sortOrder.getSortOrder());
-
-			database.saveDocument(d, id);
-			sortOrder.set_id(d.getId());
-			sortOrder.set_rev(d.getRev());
-
-			return sortOrder;
-		} catch (IOException e) {
-			LOGGER.error("Could not save sort {}", sortOrder);
-		}
-		return null;
-	}
-
-	@CacheEvict(value = "sortorder", key = "#sortOrder.sessionId.concat('-').concat(#sortOrder.questionVariant).concat('-').concat(#sortOrder.subject)")
-	@Override
-	public void deleteSortOrder(SortOrder sortOrder) {
-		try {
-			this.deleteDocument(sortOrder.get_id());
-		} catch (IOException e) {
-			LOGGER.error("Could not delete SortOrder {}", sortOrder.get_id());
-		}
 	}
 
 	@Override
