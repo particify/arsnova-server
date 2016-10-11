@@ -21,7 +21,6 @@ import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
-import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.User;
 
 import java.util.List;
@@ -156,12 +155,6 @@ public interface IQuestionService {
 	int getAbstentionAnswerCount(String questionId);
 
 	String getImage(String questionId, String answerId);
-
-	String getSubjectSortType(String sessionkey, String isPreparation);
-
-	SortOrder setSort(String sessionkey, String subject, String sortType, String isPreparation, String[] sortOrder);
-
-	String getQuestionSortType(String sessionkey, boolean isPreparation, String subject);
 
 	void setVotingAdmission(String questionId, boolean disableVoting);
 

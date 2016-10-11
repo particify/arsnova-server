@@ -30,7 +30,6 @@ import de.thm.arsnova.entities.MotdList;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
-import de.thm.arsnova.entities.SortOrder;
 import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
@@ -618,23 +617,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public List<String> getQuestionIdsBySubject(Session session, String questionVariant, String subject) {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public SortOrder createOrUpdateSortOrder(SortOrder sortOrder) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public SortOrder getSortOrder(String sessionkey, String questionVariant, String subject) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void deleteSortOrder(SortOrder sortOrder) {
-		// TODO Auto-generated method stub
 	}
 
 	@Override
