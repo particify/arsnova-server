@@ -343,10 +343,14 @@ public class UserService implements IUserService {
 		}
 
 		if (null == mailPattern || !mailPattern.matcher(lcUsername).matches()) {
+			LOGGER.info("User registration failed. {} does not match pattern.", lcUsername);
+
 			return null;
 		}
 
 		if (null != databaseDao.getUser(lcUsername)) {
+			LOGGER.info("User registration failed. {} already exists.", lcUsername);
+
 			return null;
 		}
 
@@ -359,6 +363,8 @@ public class UserService implements IUserService {
 		DbUser result = databaseDao.createOrUpdateUser(dbUser);
 		if (null != result) {
 			sendActivationEmail(result);
+		} else {
+			LOGGER.error("User registration failed. {} could not be created.", lcUsername);
 		}
 
 		return result;
@@ -447,15 +453,22 @@ public class UserService implements IUserService {
 	public void initiatePasswordReset(String username) {
 		DbUser dbUser = getDbUser(username);
 		if (null == dbUser) {
+			LOGGER.info("Password reset failed. User {} does not exist.", username);
+
 			throw new NotFoundException();
 		}
 		if (System.currentTimeMillis() < dbUser.getPasswordResetTime() + REPEATED_PASSWORD_RESET_DELAY_MS) {
+			LOGGER.info("Password reset failed. The reset delay for User {} is still active.", username);
+
 			throw new BadRequestException();
 		}
 
 		dbUser.setPasswordResetKey(RandomStringUtils.randomAlphanumeric(32));
 		dbUser.setPasswordResetTime(System.currentTimeMillis());
-		databaseDao.createOrUpdateUser(dbUser);
+
+		if (null == databaseDao.createOrUpdateUser(dbUser)) {
+			LOGGER.error("Password reset failed. {} could not be updated.", username);
+		}
 
 		String resetPasswordUrl;
 		try {
@@ -479,9 +492,13 @@ public class UserService implements IUserService {
 	@Override
 	public boolean resetPassword(DbUser dbUser, String key, String password) {
 		if (null == key || "".equals(key) || !key.equals(dbUser.getPasswordResetKey())) {
+			LOGGER.info("Password reset failed. Invalid key provided for User {}.", dbUser.getUsername());
+
 			return false;
 		}
 		if (System.currentTimeMillis() > dbUser.getPasswordResetTime() + PASSWORD_RESET_KEY_DURABILITY_MS) {
+			LOGGER.info("Password reset failed. Key provided for User {} is no longer valid.", dbUser.getUsername());
+
 			dbUser.setPasswordResetKey(null);
 			dbUser.setPasswordResetTime(0);
 			updateDbUser(dbUser);
@@ -491,7 +508,9 @@ public class UserService implements IUserService {
 
 		dbUser.setPassword(encodePassword(password));
 		dbUser.setPasswordResetKey(null);
-		updateDbUser(dbUser);
+		if (null == updateDbUser(dbUser)) {
+			LOGGER.error("Password reset failed. {} could not be updated.", dbUser.getUsername());
+		}
 
 		return true;
 	}
