@@ -219,7 +219,7 @@ features.export-to-click.enabled=true
 feedback.cleanup=10
 
 # Number of "you've lost me"/"abgehängt" votes, starting to show warning sign
-feedback.warning=5
+feedback.warning=15
 
 # Maximal filesize in bytes
 upload.filesize_b=4194304
