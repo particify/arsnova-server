@@ -196,6 +196,8 @@ public interface IDatabaseDao {
 
 	boolean deleteUser(DbUser dbUser);
 
+	boolean deleteInactiveUsers(long lastActivityBefore);
+
 	CourseScore getLearningProgress(Session session);
 
 	List<SessionInfo> getMySessionsInfo(User user, final int start, final int limit);
