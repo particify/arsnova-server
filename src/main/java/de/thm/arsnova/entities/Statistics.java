@@ -37,6 +37,7 @@ public class Statistics {
 	private int loggedinUsers;
 	private int interposedQuestions;
 	private int conceptQuestions;
+	private int flashcards;
 
 	@ApiModelProperty(required = true, value = "the number of answers")
 	public int getAnswers() {
@@ -118,6 +119,15 @@ public class Statistics {
 
 	public void setInterposedQuestions(int interposedQuestions) {
 		this.interposedQuestions = interposedQuestions;
+	}
+
+	@ApiModelProperty(required = true, value = "the number of flashcards")
+	public int getFlashcards() {
+		return flashcards;
+	}
+
+	public void setFlashcards(int flashcards) {
+		this.flashcards = flashcards;
 	}
 
 	@ApiModelProperty(required = true, value = "the number of creators")
