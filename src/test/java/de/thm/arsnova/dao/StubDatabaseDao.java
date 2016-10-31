@@ -346,6 +346,12 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
+	public boolean deleteInactiveGuestSessions(long lastActivityBefore) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
 	public void deleteAllQuestionsWithAnswers(Session session) {
 		// TODO Auto-generated method stub
 

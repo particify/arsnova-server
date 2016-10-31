@@ -47,6 +47,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -98,6 +99,9 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		}
 	}
 
+	private static final long SESSION_INACTIVITY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
+	private static final long SESSION_INACTIVITY_THRESHOLD_MS = 90 * 24 * 60 * 60 * 1000L;
+
 	@Autowired
 	private IDatabaseDao databaseDao;
 
@@ -122,6 +126,14 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	private ApplicationEventPublisher publisher;
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(SessionService.class);
+
+	@Scheduled(fixedDelay = SESSION_INACTIVITY_CHECK_INTERVAL_MS)
+	public void deleteInactiveSessions() {
+		LOGGER.info("Delete inactive sessions.");
+		long unixTime = System.currentTimeMillis();
+		long lastActivityBefore = unixTime - SESSION_INACTIVITY_THRESHOLD_MS;
+		databaseDao.deleteInactiveGuestSessions(lastActivityBefore);
+	}
 
 	public void setDatabaseDao(final IDatabaseDao newDatabaseDao) {
 		databaseDao = newDatabaseDao;
