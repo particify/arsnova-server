@@ -1282,6 +1282,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 					case "conceptQuestions":
 						stats.setConceptQuestions(stats.getConceptQuestions() + value);
 						break;
+					case "flashcards":
+						stats.setFlashcards(stats.getFlashcards() + value);
+						break;
 					}
 				}
 			}
