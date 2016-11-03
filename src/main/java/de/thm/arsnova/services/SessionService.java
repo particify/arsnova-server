@@ -99,8 +99,8 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		}
 	}
 
-	private static final long SESSION_INACTIVITY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
-	private static final long SESSION_INACTIVITY_THRESHOLD_MS = 90 * 24 * 60 * 60 * 1000L;
+	private static final long SESSION_INACTIVITY_CHECK_INTERVAL_MS = 60 * 1000L; // 30 * 60 * 1000L;
+	private static final long SESSION_INACTIVITY_THRESHOLD_MS = 3 * 60 * 1000L; // 90 * 24 * 60 * 60 * 1000L;
 
 	@Autowired
 	private IDatabaseDao databaseDao;
