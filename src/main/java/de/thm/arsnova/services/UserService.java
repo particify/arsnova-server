@@ -75,8 +75,8 @@ public class UserService implements IUserService {
 
 	private static final int PASSWORD_RESET_KEY_DURABILITY_MS = 2 * 60 * 60 * 1000;
 
-	private static final long ACTIVATION_KEY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
-	private static final long ACTIVATION_KEY_DURABILITY_MS = 6 * 60 * 60 * 1000L;
+	private static final long ACTIVATION_KEY_CHECK_INTERVAL_MS = 60 * 1000L; // 30 * 60 * 1000L;
+	private static final long ACTIVATION_KEY_DURABILITY_MS = 2 * 60 * 1000L; // 6 * 60 * 60 * 1000L;
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
