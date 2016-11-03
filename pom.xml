@@ -194,7 +194,7 @@
 		<dependency>
 			<groupId>de.thm.couchdb4j</groupId>
 			<artifactId>couchdb4j</artifactId>
-			<version>0.5</version>
+			<version>0.6</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
