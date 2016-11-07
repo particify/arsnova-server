@@ -801,7 +801,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public Session updateSessionOwnerActivity(final Session session) {
 		try {
 			/* Do not clutter CouchDB. Only update once every 3 hours. */
-			if (session.getLastOwnerActivity() > System.currentTimeMillis() - 3 * 3600000) {
+			if (session.getLastOwnerActivity() > System.currentTimeMillis() - 60 * 1000) {
 				return session;
 			}
 
@@ -1677,9 +1677,30 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public void deleteSession(final Session session) {
 		try {
 			deleteDocument(session.get_id());
+			LOGGER.debug("Deleted session document {} and related data.", session.get_id());
 		} catch (final IOException e) {
 			LOGGER.error("Could not delete session {}", session);
 		}
+	}
+
+	@Override
+	public boolean deleteInactiveGuestSessions(long lastActivityBefore) {
+		NovaView view = new NovaView("session/by_last_activity_for_guests");
+		view.setEndKey(lastActivityBefore);
+		List<Document> results = this.getDatabase().view(view).getResults();
+
+		for (Document oldDoc : results) {
+			Session s = new Session();
+			s.set_id(oldDoc.getId());
+			s.set_rev(oldDoc.getJSONObject("value").getString("_rev"));
+			deleteSession(s);
+		}
+
+		if (results.size() > 0) {
+			LOGGER.info("Deleted {} inactive guest sessions.", results.size());
+		}
+
+		return false;
 	}
 
 	@Cacheable("lecturequestions")

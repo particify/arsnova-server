@@ -146,6 +146,8 @@ public interface IDatabaseDao {
 
 	void deleteSession(Session session);
 
+	boolean deleteInactiveGuestSessions(long lastActivityBefore);
+
 	List<Question> getLectureQuestionsForUsers(Session session);
 
 	List<Question> getLectureQuestionsForTeachers(Session session);
