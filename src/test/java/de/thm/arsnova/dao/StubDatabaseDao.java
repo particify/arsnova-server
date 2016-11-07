@@ -459,6 +459,12 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
+	public boolean deleteInactiveUsers(long lastActivityBefore) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
 	public List<InterposedQuestion> getInterposedQuestions(Session session, User user, final int start, final int limit) {
 		// TODO Auto-generated method stub
 		return null;

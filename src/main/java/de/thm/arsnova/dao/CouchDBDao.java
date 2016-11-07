@@ -2216,6 +2216,36 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
+	public boolean deleteInactiveUsers(long lastActivityBefore) {
+		try {
+			NovaView view = new NovaView("user/inactive_by_creation");
+			view.setEndKey(lastActivityBefore);
+			List<Document> results = this.getDatabase().view(view).getResults();
+
+			final List<Document> newDocs = new ArrayList<Document>();
+			for (Document oldDoc : results) {
+				final Document newDoc = new Document();
+				newDoc.setId(oldDoc.getId());
+				newDoc.setRev(oldDoc.getJSONObject("value").getString("_rev"));
+				newDoc.put("_deleted", true);
+				newDocs.add(newDoc);
+				LOGGER.debug("Marked user document {} for deletion.", oldDoc.getId());
+			}
+
+			if (newDocs.size() > 0) {
+				getDatabase().bulkSaveDocuments(newDocs.toArray(new Document[newDocs.size()]));
+				LOGGER.info("Deleted {} inactive users.", newDocs.size());
+			}
+
+			return true;
+		} catch (IOException e) {
+			LOGGER.error("Could not delete inactive users.");
+		}
+
+		return false;
+	}
+
+	@Override
 	public SessionInfo importSession(User user, ImportExportSession importSession) {
 		final Session session = this.saveSession(user, importSession.generateSessionEntity(user));
 		List<Document> questions = new ArrayList<Document>();

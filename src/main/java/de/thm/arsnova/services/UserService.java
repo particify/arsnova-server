@@ -56,15 +56,8 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
@@ -81,6 +74,9 @@ public class UserService implements IUserService {
 	private static final int REPEATED_PASSWORD_RESET_DELAY_MS = 3 * 60 * 1000;
 
 	private static final int PASSWORD_RESET_KEY_DURABILITY_MS = 2 * 60 * 60 * 1000;
+
+	private static final long ACTIVATION_KEY_CHECK_INTERVAL_MS = 60 * 1000L; // 30 * 60 * 1000L;
+	private static final long ACTIVATION_KEY_DURABILITY_MS = 2 * 60 * 1000L; // 6 * 60 * 60 * 1000L;
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
@@ -159,6 +155,14 @@ public class UserService implements IUserService {
 			LOGGER.info("Reset temporary login bans.");
 			loginBans.clear();
 		}
+	}
+
+	@Scheduled(fixedDelay = ACTIVATION_KEY_CHECK_INTERVAL_MS)
+	public void deleteInactiveUsers() {
+		LOGGER.info("Delete inactive users.");
+		long unixTime = System.currentTimeMillis();
+		long lastActivityBefore = unixTime - ACTIVATION_KEY_DURABILITY_MS;
+		databaseDao.deleteInactiveUsers(lastActivityBefore);
 	}
 
 	@Override
