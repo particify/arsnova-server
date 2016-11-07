@@ -1674,6 +1674,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public void deleteSession(final Session session) {
 		try {
 			deleteDocument(session.get_id());
+			LOGGER.debug("Deleted session document {} and related data.", session.get_id());
 		} catch (final IOException e) {
 			LOGGER.error("Could not delete session {}", session);
 		}
@@ -1681,29 +1682,19 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public boolean deleteInactiveGuestSessions(long lastActivityBefore) {
-		try {
-			NovaView view = new NovaView("session/by_last_activity_for_guests");
-			view.setEndKey(lastActivityBefore);
-			List<Document> results = this.getDatabase().view(view).getResults();
+		NovaView view = new NovaView("session/by_last_activity_for_guests");
+		view.setEndKey(lastActivityBefore);
+		List<Document> results = this.getDatabase().view(view).getResults();
 
-			final List<Document> newDocs = new ArrayList<Document>();
-			for (Document oldDoc : results) {
-				final Document newDoc = new Document();
-				newDoc.setId(oldDoc.getId());
-				newDoc.setRev(oldDoc.getJSONObject("value").getString("_rev"));
-				newDoc.put("_deleted", true);
-				newDocs.add(newDoc);
-				LOGGER.debug("Marked session document {} for deletion.", oldDoc.getId());
-			}
+		for (Document oldDoc : results) {
+			Session s = new Session();
+			s.set_id(oldDoc.getId());
+			s.set_rev(oldDoc.getJSONObject("value").getString("_rev"));
+			deleteSession(s);
+		}
 
-			if (newDocs.size() > 0) {
-				getDatabase().bulkSaveDocuments(newDocs.toArray(new Document[newDocs.size()]));
-				LOGGER.info("Deleted {} inactive guest sessions.", newDocs.size());
-			}
-
-			return true;
-		} catch (IOException e) {
-			LOGGER.error("Could not delete inactive guest sessions.");
+		if (results.size() > 0) {
+			LOGGER.info("Deleted {} inactive guest sessions.", results.size());
 		}
 
 		return false;
