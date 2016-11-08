@@ -2625,6 +2625,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			d.put("title", motd.getTitle());
 			d.put("text", motd.getText());
 			d.put("audience", motd.getAudience());
+			d.put("sessionId", motd.getSessionId());
 			d.put("sessionkey", motd.getSessionkey());
 
 			database.saveDocument(d, id);

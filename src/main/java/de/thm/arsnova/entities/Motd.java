@@ -34,6 +34,7 @@ public class Motd {
   private String title;
   private String text;
 	private String audience;
+	private String sessionId;
 	private String sessionkey;
 	private String _id;
 	private String _rev;
@@ -90,6 +91,14 @@ public class Motd {
 
 	public void setAudience(String a) {
 		audience = a;
+	}
+
+	public String getSessionId() {
+		return sessionId;
+	}
+
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
 	}
 
 	@ApiModelProperty(required = true, value = "when audience equals session, the sessionkey referes to the session the messages belong to")

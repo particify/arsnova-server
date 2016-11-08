@@ -20,6 +20,7 @@ package de.thm.arsnova.services;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.entities.MotdList;
+import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,9 @@ public class MotdService implements IMotdService {
 
 	@Autowired
 	private IUserService userService;
+
+	@Autowired
+	private ISessionService sessionService;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(QuestionService.class);
 
@@ -122,14 +126,17 @@ public class MotdService implements IMotdService {
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public Motd saveSessionMotd(final String sessionkey, final Motd motd) {
+		Session session = sessionService.getSession(sessionkey);
+		motd.setSessionId(session.get_id());
+
 		return databaseDao.createOrUpdateMotd(motd);
 	}
 
-  @Override
-  @PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
-  public Motd updateMotd(final Motd motd) {
-    return databaseDao.createOrUpdateMotd(motd);
-  }
+	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
+	public Motd updateMotd(final Motd motd) {
+		return databaseDao.createOrUpdateMotd(motd);
+	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
