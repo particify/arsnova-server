@@ -801,7 +801,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public Session updateSessionOwnerActivity(final Session session) {
 		try {
 			/* Do not clutter CouchDB. Only update once every 3 hours. */
-			if (session.getLastOwnerActivity() > System.currentTimeMillis() - 60 * 1000) {
+			if (session.getLastOwnerActivity() > System.currentTimeMillis() - 3 * 3600000) {
 				return session;
 			}
 
