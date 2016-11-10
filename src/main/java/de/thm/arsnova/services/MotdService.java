@@ -21,6 +21,7 @@ import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.entities.MotdList;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.exceptions.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,35 +114,47 @@ public class MotdService implements IMotdService {
 		}
 	}
 
-  @Override
-  @PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
-  public Motd saveMotd(final Motd motd) {
-    return databaseDao.createOrUpdateMotd(motd);
-  }
+	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
+	public Motd saveMotd(final Motd motd) {
+		return createOrUpdateMotd(motd);
+	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public Motd saveSessionMotd(final String sessionkey, final Motd motd) {
-		return databaseDao.createOrUpdateMotd(motd);
+		return createOrUpdateMotd(motd);
 	}
 
-  @Override
-  @PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
-  public Motd updateMotd(final Motd motd) {
-    return databaseDao.createOrUpdateMotd(motd);
-  }
+	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
+	public Motd updateMotd(final Motd motd) {
+		return createOrUpdateMotd(motd);
+	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public Motd updateSessionMotd(final String sessionkey, final Motd motd) {
+		return createOrUpdateMotd(motd);
+	}
+
+	private Motd createOrUpdateMotd(final Motd motd) {
+		if (motd.getMotdkey() != null) {
+			Motd oldMotd = databaseDao.getMotdByKey(motd.getMotdkey());
+			if (!(motd.get_id().equals(oldMotd.get_id()) && motd.getSessionkey().equals(oldMotd.getSessionkey())
+					&& motd.getAudience().equals(oldMotd.getAudience()))) {
+				throw new BadRequestException();
+			}
+		}
+
 		return databaseDao.createOrUpdateMotd(motd);
 	}
 
-  @Override
-  @PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
-  public void deleteMotd(Motd motd) {
+	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
+	public void deleteMotd(Motd motd) {
 		databaseDao.deleteMotd(motd);
-  }
+	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")

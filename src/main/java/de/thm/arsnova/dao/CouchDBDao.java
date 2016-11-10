@@ -2534,12 +2534,11 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 			if (null != id) {
 				d = database.getDocument(id, rev);
-			}
-			if (motd.getMotdkey() == null) {
+			} else {
 				motd.setMotdkey(sessionService.generateKeyword());
+				d.put("motdkey", motd.getMotdkey());
 			}
 			d.put("type", "motd");
-			d.put("motdkey", motd.getMotdkey());
 			d.put("startdate", String.valueOf(motd.getStartdate().getTime()));
 			d.put("enddate", String.valueOf(motd.getEnddate().getTime()));
 			d.put("title", motd.getTitle());
