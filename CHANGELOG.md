@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.4.2
+This release fixes a minor security vulnerability which allowed an attacker to
+remove a MotD from a session without being the creator.
+
+Additional changes:
+* Libraries have been upgraded to fix potential bugs
+
 ## 2.3.4
 This release fixes a minor security vulnerability which allowed an attacker to
 remove a MotD from a session without being the creator.
