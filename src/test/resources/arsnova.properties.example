@@ -210,7 +210,7 @@ features.question-format.grid-square.enabled=true
 #
 features.session-import-export.enabled=true
 features.public-pool.enabled=true
-
+features.export-to-click.enabled=true
 
 ################################################################################
 # Customization
@@ -219,7 +219,7 @@ features.public-pool.enabled=true
 feedback.cleanup=10
 
 # Number of "you've lost me"/"abgehängt" votes, starting to show warning sign
-feedback.warning=5
+feedback.warning=15
 
 # Maximal filesize in bytes
 upload.filesize_b=4194304
