@@ -243,6 +243,9 @@ question.parse-answer-option-formatting=false
 # https://github.com/thm-projects/arsnova-mobile/tree/master/demo-sessions
 session.demo-id=
 
+# Delete guest sessions automatically after X days of owner inactivity.
+#session.guest-session.cleanup-days=180
+
 # Label underneath ARSnova logo
 ui.slogan=Audience Response System
 
