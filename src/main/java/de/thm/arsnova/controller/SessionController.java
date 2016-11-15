@@ -112,7 +112,7 @@ public class SessionController extends PaginationController {
 	})
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Session postNewSession(@ApiParam(value = "current session", required = true) @RequestBody final Session session, @ApiParam(value = "http servlet response", required = true) final HttpServletResponse response) {
+	public Session postNewSession(@ApiParam(value = "current session", required = true) @RequestBody final Session session, final HttpServletResponse response) {
 		if (session != null && session.isCourseSession()) {
 			final List<Course> courses = new ArrayList<Course>();
 			final Course course = new Course();
@@ -232,7 +232,7 @@ public class SessionController extends PaginationController {
 	public List<SessionInfo> getMySessions(
 			@ApiParam(value = "visitedOnly", required = true) @RequestParam(value = "visitedonly", defaultValue = "false") final boolean visitedOnly,
 			@ApiParam(value = "sort by", required = false) @RequestParam(value = "sortby", defaultValue = "name") final String sortby,
-			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
+			final HttpServletResponse response
 			) {
 		List<SessionInfo> sessions;
 		if (!visitedOnly) {
@@ -261,7 +261,7 @@ public class SessionController extends PaginationController {
 	})
 	@RequestMapping(value = "/publicpool", method = RequestMethod.GET, params = "statusonly=true")
 	public List<SessionInfo> getMyPublicPoolSessions(
-			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
+			final HttpServletResponse response
 			) {
 		List<SessionInfo> sessions = sessionService.getMyPublicPoolSessionsInfo();
 
@@ -280,7 +280,7 @@ public class SessionController extends PaginationController {
 	})
 	@RequestMapping(value = "/publicpool", method = RequestMethod.GET)
 	public List<SessionInfo> getPublicPoolSessions(
-			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
+			final HttpServletResponse response
 			) {
 		List<SessionInfo> sessions = sessionService.getPublicPoolSessionsInfo();
 
@@ -297,7 +297,7 @@ public class SessionController extends PaginationController {
 	@RequestMapping(value = "/import", method = RequestMethod.POST)
 	public SessionInfo importSession(
 			@ApiParam(value = "current session", required = true) @RequestBody final ImportExportSession session,
-			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
+			final HttpServletResponse response
 			) {
 		return sessionService.importSession(session);
 	}
@@ -308,7 +308,7 @@ public class SessionController extends PaginationController {
 			@ApiParam(value = "sessionkey", required = true) @RequestParam(value = "sessionkey", defaultValue = "") final List<String> sessionkey,
 			@ApiParam(value = "wether statistics shall be exported", required = true) @RequestParam(value = "withAnswerStatistics", defaultValue = "false") final Boolean withAnswerStatistics,
 			@ApiParam(value = "wether interposed questions shall be exported", required = true) @RequestParam(value = "withFeedbackQuestions", defaultValue = "false") final Boolean withFeedbackQuestions,
-			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
+			final HttpServletResponse response
 		) {
 		List<ImportExportSession> sessions = new ArrayList<ImportExportSession>();
 		ImportExportSession temp;
@@ -345,7 +345,7 @@ public class SessionController extends PaginationController {
 	public Session lockSession(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
 			@ApiParam(value = "lock", required = true) @RequestParam(required = false) final Boolean lock,
-			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
+			final HttpServletResponse response
 			) {
 		if (lock != null) {
 			return sessionService.setActive(sessionkey, lock);
@@ -361,7 +361,7 @@ public class SessionController extends PaginationController {
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
 			@ApiParam(value = "progress type", required = false) @RequestParam(value = "type", defaultValue = "questions") final String progressType,
 			@ApiParam(value = "question variant", required = false) @RequestParam(value = "questionVariant", required = false) final String questionVariant,
-			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
+			final HttpServletResponse response
 			) {
 		return sessionService.getLearningProgress(sessionkey, progressType, questionVariant);
 	}
@@ -373,7 +373,7 @@ public class SessionController extends PaginationController {
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
 			@RequestParam(value = "type", defaultValue = "questions") final String progressType,
 			@RequestParam(value = "questionVariant", required = false) final String questionVariant,
-			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
+			final HttpServletResponse response
 			) {
 		return sessionService.getMyLearningProgress(sessionkey, progressType, questionVariant);
 	}
@@ -383,7 +383,7 @@ public class SessionController extends PaginationController {
 	@RequestMapping(value = "/{sessionkey}/features", method = RequestMethod.GET)
 	public SessionFeature getSessionFeatures(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
-			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
+			final HttpServletResponse response
 			) {
 		return sessionService.getSessionFeatures(sessionkey);
 	}
@@ -394,7 +394,7 @@ public class SessionController extends PaginationController {
 	public SessionFeature changeSessionFeatures(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
 			@ApiParam(value = "session feature", required = true) @RequestBody final SessionFeature features,
-			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
+			final HttpServletResponse response
 			) {
 		return sessionService.changeSessionFeatures(sessionkey, features);
 	}
@@ -405,18 +405,18 @@ public class SessionController extends PaginationController {
 	public boolean lockFeedbackInput(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
 			@ApiParam(value = "lock", required = true) @RequestParam(required = true) final Boolean lock,
-			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
+			final HttpServletResponse response
 			) {
 		return sessionService.lockFeedbackInput(sessionkey, lock);
 	}
-	
+
 	@RequestMapping(value = "/{sessionkey}/flipflashcards", method = RequestMethod.POST)
 	@ApiOperation(value = "flip all flashcards in session",
 			nickname = "lockFeedbackInput")
 	public boolean flipFlashcards(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
 			@ApiParam(value = "flip", required = true) @RequestParam(required = true) final Boolean flip,
-			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
+			final HttpServletResponse response
 			) {
 		return sessionService.flipFlashcards(sessionkey, flip);
 	}
