@@ -93,7 +93,7 @@ public class MotdController extends AbstractController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public Motd postNewMotd(
 			@ApiParam(value = "current motd", required = true) @RequestBody final Motd motd,
-			@ApiParam(value = "http servlet response", required = true) final HttpServletResponse response
+			final HttpServletResponse response
 			) {
 		if (motd != null) {
 			Motd newMotd = new Motd();
