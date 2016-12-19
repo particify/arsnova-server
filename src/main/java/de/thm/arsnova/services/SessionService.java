@@ -100,7 +100,6 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	}
 
 	private static final long SESSION_INACTIVITY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
-	private static final long SESSION_INACTIVITY_THRESHOLD_MS = 90 * 24 * 60 * 60 * 1000L;
 
 	@Autowired
 	private IDatabaseDao databaseDao;
@@ -120,6 +119,9 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	@Autowired
 	private ImageUtils imageUtils;
 
+	@Value("${session.guest-session.cleanup-days:0}")
+	private int guestSessionInactivityThresholdDays;
+
 	@Value("${pp.logofilesize_b}")
 	private int uploadFileSizeByte;
 
@@ -129,10 +131,22 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 	@Scheduled(fixedDelay = SESSION_INACTIVITY_CHECK_INTERVAL_MS)
 	public void deleteInactiveSessions() {
-		LOGGER.info("Delete inactive sessions.");
-		long unixTime = System.currentTimeMillis();
-		long lastActivityBefore = unixTime - SESSION_INACTIVITY_THRESHOLD_MS;
-		databaseDao.deleteInactiveGuestSessions(lastActivityBefore);
+		if (guestSessionInactivityThresholdDays > 0) {
+			LOGGER.info("Delete inactive sessions.");
+			long unixTime = System.currentTimeMillis();
+			long lastActivityBefore = unixTime - guestSessionInactivityThresholdDays * 24 * 60 * 60 * 1000L;
+			databaseDao.deleteInactiveGuestSessions(lastActivityBefore);
+		}
+	}
+
+	@Scheduled(fixedDelay = SESSION_INACTIVITY_CHECK_INTERVAL_MS)
+	public void deleteInactiveVisitedSessionLists() {
+		if (guestSessionInactivityThresholdDays > 0) {
+			LOGGER.info("Delete lists of visited session for inactive users.");
+			long unixTime = System.currentTimeMillis();
+			long lastActivityBefore = unixTime - guestSessionInactivityThresholdDays * 24 * 60 * 60 * 1000L;
+			databaseDao.deleteInactiveGuestVisitedSessionLists(lastActivityBefore);
+		}
 	}
 
 	public void setDatabaseDao(final IDatabaseDao newDatabaseDao) {

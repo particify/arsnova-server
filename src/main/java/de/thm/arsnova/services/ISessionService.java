@@ -95,4 +95,6 @@ public interface ISessionService {
 	boolean flipFlashcards(String sessionkey, Boolean flip);
 
 	void deleteInactiveSessions();
+
+	void deleteInactiveVisitedSessionLists();
 }
