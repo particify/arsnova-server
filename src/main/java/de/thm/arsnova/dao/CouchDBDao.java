@@ -1703,6 +1703,36 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return false;
 	}
 
+	@Override
+	public boolean deleteInactiveGuestVisitedSessionLists(long lastActivityBefore) {
+		try {
+			NovaView view = new NovaView("logged_in/by_last_activity_for_guests");
+			view.setEndKey(lastActivityBefore);
+			List<Document> results = this.getDatabase().view(view).getResults();
+
+			final List<Document> newDocs = new ArrayList<Document>();
+			for (Document oldDoc : results) {
+				final Document newDoc = new Document();
+				newDoc.setId(oldDoc.getId());
+				newDoc.setRev(oldDoc.getJSONObject("value").getString("_rev"));
+				newDoc.put("_deleted", true);
+				newDocs.add(newDoc);
+				LOGGER.debug("Marked logged_in document {} for deletion.", oldDoc.getId());
+			}
+
+			if (newDocs.size() > 0) {
+				getDatabase().bulkSaveDocuments(newDocs.toArray(new Document[newDocs.size()]));
+				LOGGER.info("Deleted {} visited session lists of inactive users.", newDocs.size());
+			}
+
+			return true;
+		} catch (IOException e) {
+			LOGGER.error("Could not delete visited session lists of inactive users.");
+		}
+
+		return false;
+	}
+
 	@Cacheable("lecturequestions")
 	@Override
 	public List<Question> getLectureQuestionsForUsers(final Session session) {

@@ -139,6 +139,16 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		}
 	}
 
+	@Scheduled(fixedDelay = SESSION_INACTIVITY_CHECK_INTERVAL_MS)
+	public void deleteInactiveVisitedSessionLists() {
+		if (guestSessionInactivityThresholdDays > 0) {
+			LOGGER.info("Delete lists of visited session for inactive users.");
+			long unixTime = System.currentTimeMillis();
+			long lastActivityBefore = unixTime - guestSessionInactivityThresholdDays * 24 * 60 * 60 * 1000L;
+			databaseDao.deleteInactiveGuestVisitedSessionLists(lastActivityBefore);
+		}
+	}
+
 	public void setDatabaseDao(final IDatabaseDao newDatabaseDao) {
 		databaseDao = newDatabaseDao;
 	}
