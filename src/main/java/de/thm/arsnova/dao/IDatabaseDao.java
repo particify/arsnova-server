@@ -19,26 +19,31 @@ package de.thm.arsnova.dao;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
-import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.DbUser;
-import de.thm.arsnova.entities.InterposedQuestion;
-import de.thm.arsnova.entities.InterposedReadingCount;
-import de.thm.arsnova.entities.LoggedIn;
-import de.thm.arsnova.entities.Motd;
-import de.thm.arsnova.entities.MotdList;
-import de.thm.arsnova.entities.Question;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.SessionInfo;
-import de.thm.arsnova.entities.Statistics;
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.*;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * All methods the database must support.
  */
 public interface IDatabaseDao {
+	/**
+	 *
+	 * @param event type of the event
+	 * @param payload arbitrary logging data
+	 * @param level severity of the event
+	 */
+	void log(String event, Map<String, Object> payload, LogEntry.LogLevel level);
+
+	/**
+	 *
+	 * @param event type of the event
+	 * @param payload arbitrary logging data
+	 */
+	void log(String event, Map<String, Object> payload);
+
 	Session getSessionFromKeyword(String keyword);
 
 	List<Session> getMySessions(User user, final int start, final int limit);

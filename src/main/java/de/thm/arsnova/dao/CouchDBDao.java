@@ -25,20 +25,7 @@ import com.fourspaces.couchdb.View;
 import com.fourspaces.couchdb.ViewResults;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
-import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.DbUser;
-import de.thm.arsnova.entities.InterposedQuestion;
-import de.thm.arsnova.entities.InterposedReadingCount;
-import de.thm.arsnova.entities.LoggedIn;
-import de.thm.arsnova.entities.Motd;
-import de.thm.arsnova.entities.MotdList;
-import de.thm.arsnova.entities.PossibleAnswer;
-import de.thm.arsnova.entities.Question;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.SessionInfo;
-import de.thm.arsnova.entities.Statistics;
-import de.thm.arsnova.entities.User;
-import de.thm.arsnova.entities.VisitedSession;
+import de.thm.arsnova.entities.*;
 import de.thm.arsnova.entities.transport.AnswerQueueElement;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.ImportExportSession.ImportExportQuestion;
@@ -148,6 +135,26 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
 		this.publisher = publisher;
+	}
+
+	@Override
+	public void log(String event, Map<String, Object> payload, LogEntry.LogLevel level) {
+		final Document d = new Document();
+		d.put("timestamp", System.currentTimeMillis());
+		d.put("type", "log");
+		d.put("event", event);
+		d.put("level", level.ordinal());
+		d.put("payload", payload);
+		try {
+			database.saveDocument(d);
+		} catch (final IOException e) {
+			LOGGER.error("Logging of '{}' event to database failed.", event);
+		}
+	}
+
+	@Override
+	public void log(String event, Map<String, Object> payload) {
+		log(event, payload, LogEntry.LogLevel.INFO);
 	}
 
 	@Override

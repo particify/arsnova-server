@@ -19,19 +19,7 @@ package de.thm.arsnova.dao;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
-import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.DbUser;
-import de.thm.arsnova.entities.Feedback;
-import de.thm.arsnova.entities.InterposedQuestion;
-import de.thm.arsnova.entities.InterposedReadingCount;
-import de.thm.arsnova.entities.LoggedIn;
-import de.thm.arsnova.entities.Motd;
-import de.thm.arsnova.entities.MotdList;
-import de.thm.arsnova.entities.Question;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.SessionInfo;
-import de.thm.arsnova.entities.Statistics;
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.*;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -117,6 +105,16 @@ public class StubDatabaseDao implements IDatabaseDao {
 	@Override
 	public boolean sessionKeyAvailable(String keyword) {
 		return (stubSessions.get(keyword) == null);
+	}
+
+	@Override
+	public void log(String event, Map<String, Object> payload, LogEntry.LogLevel level) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void log(String event, Map<String, Object> payload) {
+		// TODO Auto-generated method stub
 	}
 
 	@Override
