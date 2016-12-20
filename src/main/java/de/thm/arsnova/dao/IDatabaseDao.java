@@ -44,6 +44,21 @@ public interface IDatabaseDao {
 	 */
 	void log(String event, Map<String, Object> payload);
 
+	/**
+	 *
+	 * @param event type of the event
+	 * @param level severity of the event
+	 * @param rawPayload key/value pairs of arbitrary logging data
+	 */
+	void log(String event, LogEntry.LogLevel level, Object... rawPayload);
+
+	/**
+	 *
+	 * @param event type of the event
+	 * @param rawPayload key/value pairs of arbitrary logging data
+	 */
+	void log(String event, Object... rawPayload);
+
 	Session getSessionFromKeyword(String keyword);
 
 	List<Session> getMySessions(User user, final int start, final int limit);

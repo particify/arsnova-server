@@ -158,6 +158,23 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
+	public void log(String event, LogEntry.LogLevel level, Object... rawPayload) {
+		if (rawPayload.length % 2 != 0) {
+			throw new IllegalArgumentException("");
+		}
+		Map<String, Object> payload = new HashMap<>();
+		for (int i = 0; i < rawPayload.length; i += 2) {
+			payload.put((String) rawPayload[i], rawPayload[i + 1]);
+		}
+		log(event, payload, LogEntry.LogLevel.INFO);
+	}
+
+	@Override
+	public void log(String event, Object... rawPayload) {
+		log(event, LogEntry.LogLevel.INFO, rawPayload);
+	}
+
+	@Override
 	public List<Session> getMySessions(final User user, final int start, final int limit) {
 		return this.getDatabaseDao().getSessionsForUsername(user.getUsername(), start, limit);
 	}
