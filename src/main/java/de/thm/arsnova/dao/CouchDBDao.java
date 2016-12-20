@@ -1693,6 +1693,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			Session s = new Session();
 			s.set_id(oldDoc.getId());
 			s.set_rev(oldDoc.getJSONObject("value").getString("_rev"));
+			deleteAllQuestionsWithAnswers(s);
 			deleteSession(s);
 		}
 
