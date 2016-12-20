@@ -1703,6 +1703,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			deleteAllQuestionsWithAnswers(session);
 			deleteDocument(session.get_id());
 			LOGGER.debug("Deleted session document {} and related data.", session.get_id());
+			log("delete", "type", "session", "id", session.get_id());
 		} catch (final IOException e) {
 			LOGGER.error("Could not delete session {}", session);
 		}
@@ -1712,7 +1713,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public boolean deleteInactiveGuestSessions(long lastActivityBefore) {
 		NovaView view = new NovaView("session/by_last_activity_for_guests");
 		view.setEndKey(lastActivityBefore);
-		List<Document> results = this.getDatabase().view(view).getResults();
+		final List<Document> results = this.getDatabase().view(view).getResults();
 
 		for (Document oldDoc : results) {
 			Session s = new Session();
@@ -1723,6 +1724,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 		if (results.size() > 0) {
 			LOGGER.info("Deleted {} inactive guest sessions.", results.size());
+			log("cleanup", "type", "session", "count", results.size());
 		}
 
 		return false;
@@ -1734,20 +1736,24 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			NovaView view = new NovaView("logged_in/by_last_activity_for_guests");
 			view.setEndKey(lastActivityBefore);
 			List<Document> results = this.getDatabase().view(view).getResults();
+			Map<String, Object> log = new HashMap<>();
 
 			final List<Document> newDocs = new ArrayList<Document>();
-			for (Document oldDoc : results) {
+			for (final Document oldDoc : results) {
 				final Document newDoc = new Document();
 				newDoc.setId(oldDoc.getId());
 				newDoc.setRev(oldDoc.getJSONObject("value").getString("_rev"));
 				newDoc.put("_deleted", true);
 				newDocs.add(newDoc);
 				LOGGER.debug("Marked logged_in document {} for deletion.", oldDoc.getId());
+				/* Use log type 'user' since effectively the user is deleted in case of guests */
+				log("delete", "type", "user", "id", oldDoc.getId());
 			}
 
 			if (newDocs.size() > 0) {
 				getDatabase().bulkSaveDocuments(newDocs.toArray(new Document[newDocs.size()]));
 				LOGGER.info("Deleted {} visited session lists of inactive users.", newDocs.size());
+				log("cleanup", "type", "visitedsessions", "count", newDocs.size());
 			}
 
 			return true;
@@ -2279,9 +2285,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	public boolean deleteUser(DbUser dbUser) {
+	public boolean deleteUser(final DbUser dbUser) {
 		try {
 			this.deleteDocument(dbUser.getId());
+			log("delete", "type", "user", "id", dbUser.getId());
 
 			return true;
 		} catch (IOException e) {
@@ -2311,6 +2318,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			if (newDocs.size() > 0) {
 				getDatabase().bulkSaveDocuments(newDocs.toArray(new Document[newDocs.size()]));
 				LOGGER.info("Deleted {} inactive users.", newDocs.size());
+				log("cleanup", "type", "user", "count", newDocs.size());
 			}
 
 			return true;
