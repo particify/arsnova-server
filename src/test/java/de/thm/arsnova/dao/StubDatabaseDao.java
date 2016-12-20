@@ -300,13 +300,15 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public void deleteQuestionWithAnswers(Question question) {
+	public int deleteQuestionWithAnswers(Question question) {
 		// TODO Auto-generated method stub
+		return 0;
 	}
 
 	@Override
-	public void deleteAnswers(Question question) {
+	public int deleteAnswers(Question question) {
 		// TODO Auto-generated method stub
+		return 0;
 	}
 
 	@Override
@@ -349,26 +351,24 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public void deleteSession(Session session) {
-		// TODO Auto-generated method stub
+	public int[] deleteSession(Session session) {
+		return new int[] { 0,0 };
 	}
 
 	@Override
-	public boolean deleteInactiveGuestSessions(long lastActivityBefore) {
-		// TODO Auto-generated method stub
-		return false;
+	public int[] deleteInactiveGuestSessions(long lastActivityBefore) {
+		return new int[] { 0,0 };
 	}
 
 	@Override
-	public boolean deleteInactiveGuestVisitedSessionLists(long lastActivityBefore) {
+	public int deleteInactiveGuestVisitedSessionLists(long lastActivityBefore) {
 		// TODO Auto-generated method stub
-		return false;
+		return 0;
 	}
 
 	@Override
-	public void deleteAllQuestionsWithAnswers(Session session) {
-		// TODO Auto-generated method stub
-
+	public int[] deleteAllQuestionsWithAnswers(Session session) {
+		return new int[] { 0, 0 };
 	}
 
 	@Override
@@ -402,21 +402,18 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public void deleteAllLectureQuestionsWithAnswers(Session session) {
-		// TODO Auto-generated method stub
-
+	public int[] deleteAllLectureQuestionsWithAnswers(Session session) {
+		return new int[] { 0, 0 };
 	}
 
 	@Override
-	public void deleteAllFlashcardsWithAnswers(Session session) {
-		// TODO Auto-generated method stub
-
+	public int[] deleteAllFlashcardsWithAnswers(Session session) {
+		return new int[] { 0, 0 };
 	}
 
 	@Override
-	public void deleteAllPreparationQuestionsWithAnswers(Session session) {
-		// TODO Auto-generated method stub
-
+	public int[] deleteAllPreparationQuestionsWithAnswers(Session session) {
+		return new int[] { 0, 0 };
 	}
 
 	@Override
@@ -432,8 +429,8 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public void deleteAllInterposedQuestions(Session session) {
-		// TODO Auto-generated method stub
+	public int deleteAllInterposedQuestions(Session session) {
+		return 0;
 	}
 
 	@Override
@@ -449,9 +446,9 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public void deleteAllQuestionsAnswers(Session session) {
+	public int deleteAllQuestionsAnswers(Session session) {
 		// TODO Auto-generated method stub
-
+		return 0;
 	}
 
 	@Override
@@ -479,9 +476,9 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public boolean deleteInactiveUsers(long lastActivityBefore) {
+	public int deleteInactiveUsers(long lastActivityBefore) {
 		// TODO Auto-generated method stub
-		return false;
+		return 0;
 	}
 
 	@Override
@@ -491,9 +488,9 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public void deleteAllInterposedQuestions(Session session, User user) {
+	public int deleteAllInterposedQuestions(Session session, User user) {
 		// TODO Auto-generated method stub
-
+		return 0;
 	}
 
 	@Override
@@ -521,15 +518,15 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public void deleteAllPreparationAnswers(Session session) {
+	public int deleteAllPreparationAnswers(Session session) {
 		// TODO Auto-generated method stub
-
+		return 0;
 	}
 
 	@Override
-	public void deleteAllLectureAnswers(Session session) {
+	public int deleteAllLectureAnswers(Session session) {
 		// TODO Auto-generated method stub
-
+		return 0;
 	}
 
 	@Override

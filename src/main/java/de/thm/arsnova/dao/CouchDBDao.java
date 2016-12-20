@@ -853,13 +853,17 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			@CacheEvict(value = "preparationquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('preparation')"),
 			@CacheEvict(value = "flashcardquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('flashcard')") })
 	@Override
-	public void deleteQuestionWithAnswers(final Question question) {
+	public int deleteQuestionWithAnswers(final Question question) {
 		try {
-			deleteAnswers(question);
+			int count = deleteAnswers(question);
 			deleteDocument(question.get_id());
+
+			return count;
 		} catch (final IOException e) {
 			LOGGER.error("IOException: Could not delete question {}", question.get_id());
 		}
+
+		return 0;
 	}
 
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
@@ -868,12 +872,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			@CacheEvict(value = "preparationquestions", key = "#session"),
 			@CacheEvict(value = "flashcardquestions", key = "#session") })
 	@Override
-	public void deleteAllQuestionsWithAnswers(final Session session) {
+	public int[] deleteAllQuestionsWithAnswers(final Session session) {
 		final NovaView view = new NovaView("skill_question/by_session");
-		deleteAllQuestionDocumentsWithAnswers(session, view);
+		return deleteAllQuestionDocumentsWithAnswers(session, view);
 	}
 
-	private void deleteAllQuestionDocumentsWithAnswers(final Session session, final NovaView view) {
+	private int[] deleteAllQuestionDocumentsWithAnswers(final Session session, final NovaView view) {
 		view.setStartKeyArray(session.get_id());
 		view.setEndKey(session.get_id(), "{}");
 		final ViewResults results = getDatabase().view(view);
@@ -885,7 +889,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			q.set_rev(d.getJSONObject("value").getString("_rev"));
 			questions.add(q);
 		}
-		deleteAllAnswersWithQuestions(questions);
+		return deleteAllAnswersWithQuestions(questions);
 	}
 
 	private void deleteDocument(final String documentId) throws IOException {
@@ -895,7 +899,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@CacheEvict("answers")
 	@Override
-	public void deleteAnswers(final Question question) {
+	public int deleteAnswers(final Question question) {
 		try {
 			final NovaView view = new NovaView("answer/cleanup");
 			view.setKey(question.get_id());
@@ -909,9 +913,13 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				answersToDelete.add(d);
 			}
 			database.bulkSaveDocuments(answersToDelete.toArray(new Document[answersToDelete.size()]));
+
+			return answersToDelete.size();
 		} catch (final IOException e) {
 			LOGGER.error("IOException: Could not delete answers for question {}", question.get_id());
 		}
+
+		return 0;
 	}
 
 	@Override
@@ -1289,6 +1297,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 						stats.setOpenSessions(stats.getOpenSessions() + value);
 						break;
 					case "closedSessions":
+						stats.setClosedSessions(stats.getClosedSessions() + value);
+						break;
+					case "deletedSessions":
+						/* Deleted sessions are not exposed separately for now. */
 						stats.setClosedSessions(stats.getClosedSessions() + value);
 						break;
 					case "answers":
@@ -1698,40 +1710,47 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	@Caching(evict = { @CacheEvict("sessions"), @CacheEvict(cacheNames="sessions", key="#p0.keyword") })
-	public void deleteSession(final Session session) {
+	public int[] deleteSession(final Session session) {
+		int[] count = new int[] { 0, 0 };
 		try {
-			deleteAllQuestionsWithAnswers(session);
+			count = deleteAllQuestionsWithAnswers(session);
 			deleteDocument(session.get_id());
 			LOGGER.debug("Deleted session document {} and related data.", session.get_id());
 			log("delete", "type", "session", "id", session.get_id());
 		} catch (final IOException e) {
 			LOGGER.error("Could not delete session {}", session);
 		}
+
+		return count;
 	}
 
 	@Override
-	public boolean deleteInactiveGuestSessions(long lastActivityBefore) {
+	public int[] deleteInactiveGuestSessions(long lastActivityBefore) {
 		NovaView view = new NovaView("session/by_last_activity_for_guests");
 		view.setEndKey(lastActivityBefore);
 		final List<Document> results = this.getDatabase().view(view).getResults();
+		int[] count = new int[3];
 
 		for (Document oldDoc : results) {
 			Session s = new Session();
 			s.set_id(oldDoc.getId());
 			s.set_rev(oldDoc.getJSONObject("value").getString("_rev"));
-			deleteSession(s);
+			int[] qaCount = deleteSession(s);
+			count[1] += qaCount[0];
+			count[2] += qaCount[1];
 		}
 
 		if (results.size() > 0) {
 			LOGGER.info("Deleted {} inactive guest sessions.", results.size());
 			log("cleanup", "type", "session", "count", results.size());
 		}
+		count[0] = results.size();
 
-		return false;
+		return count;
 	}
 
 	@Override
-	public boolean deleteInactiveGuestVisitedSessionLists(long lastActivityBefore) {
+	public int deleteInactiveGuestVisitedSessionLists(long lastActivityBefore) {
 		try {
 			NovaView view = new NovaView("logged_in/by_last_activity_for_guests");
 			view.setEndKey(lastActivityBefore);
@@ -1756,12 +1775,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				log("cleanup", "type", "visitedsessions", "count", newDocs.size());
 			}
 
-			return true;
+			return newDocs.size();
 		} catch (IOException e) {
 			LOGGER.error("Could not delete visited session lists of inactive users.");
 		}
 
-		return false;
+		return 0;
 	}
 
 	@Cacheable("lecturequestions")
@@ -1896,9 +1915,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			@CacheEvict("lecturequestions"),
 			@CacheEvict(value = "answers", allEntries = true)})
 	@Override
-	public void deleteAllLectureQuestionsWithAnswers(final Session session) {
+	public int[] deleteAllLectureQuestionsWithAnswers(final Session session) {
 		final NovaView view = new NovaView("skill_question/lecture_question_by_session");
-		deleteAllQuestionDocumentsWithAnswers(session, view);
+		return deleteAllQuestionDocumentsWithAnswers(session, view);
 	}
 
 	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
@@ -1907,9 +1926,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			@CacheEvict("flashcardquestions"),
 			@CacheEvict(value = "answers", allEntries = true)})
 	@Override
-	public void deleteAllFlashcardsWithAnswers(final Session session) {
+	public int[] deleteAllFlashcardsWithAnswers(final Session session) {
 		final NovaView view = new NovaView("skill_question/flashcard_by_session");
-		deleteAllQuestionDocumentsWithAnswers(session, view);
+		return deleteAllQuestionDocumentsWithAnswers(session, view);
 	}
 
 	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
@@ -1918,9 +1937,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			@CacheEvict("preparationquestions"),
 			@CacheEvict(value = "answers", allEntries = true)})
 	@Override
-	public void deleteAllPreparationQuestionsWithAnswers(final Session session) {
+	public int[] deleteAllPreparationQuestionsWithAnswers(final Session session) {
 		final NovaView view = new NovaView("skill_question/preparation_question_by_session");
-		deleteAllQuestionDocumentsWithAnswers(session, view);
+		return deleteAllQuestionDocumentsWithAnswers(session, view);
 	}
 
 	@Override
@@ -1993,32 +2012,39 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	public void deleteAllInterposedQuestions(final Session session) {
+	public int deleteAllInterposedQuestions(final Session session) {
 		final NovaView view = new NovaView("interposed_question/by_session");
 		view.setKey(session.get_id());
 		final ViewResults questions = getDatabase().view(view);
-		deleteAllInterposedQuestions(session, questions);
+
+		return deleteAllInterposedQuestions(session, questions);
 	}
 
 	@Override
-	public void deleteAllInterposedQuestions(final Session session, final User user) {
+	public int deleteAllInterposedQuestions(final Session session, final User user) {
 		final NovaView view = new NovaView("interposed_question/by_session_and_creator");
 		view.setKey(session.get_id(), user.getUsername());
 		final ViewResults questions = getDatabase().view(view);
-		deleteAllInterposedQuestions(session, questions);
+
+		return deleteAllInterposedQuestions(session, questions);
 	}
 
-	private void deleteAllInterposedQuestions(final Session session, final ViewResults questions) {
+	private int deleteAllInterposedQuestions(final Session session, final ViewResults questions) {
 		if (questions == null || questions.isEmpty()) {
-			return;
+			return 0;
 		}
-		for (final Document document : questions.getResults()) {
+		List<Document> results = questions.getResults();
+		/* TODO: use bulk delete */
+		for (final Document document : results) {
 			try {
 				deleteDocument(document.getId());
 			} catch (final IOException e) {
 				LOGGER.error("Could not delete all interposed questions {}", session);
 			}
 		}
+
+		/* This does account for failed deletions */
+		return results.size();
 	}
 
 	@Override
@@ -2089,28 +2115,31 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
-	public void deleteAllQuestionsAnswers(final Session session) {
+	public int deleteAllQuestionsAnswers(final Session session) {
 		final List<Question> questions = getQuestions(new NovaView("skill_question/by_session"), session);
 		getDatabaseDao().resetQuestionsRoundState(session, questions);
-		deleteAllAnswersForQuestions(questions);
+
+		return deleteAllAnswersForQuestions(questions);
 	}
 
 	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
-	public void deleteAllPreparationAnswers(final Session session) {
+	public int deleteAllPreparationAnswers(final Session session) {
 		final List<Question> questions = getQuestions(new NovaView("skill_question/preparation_question_by_session"), session);
 		getDatabaseDao().resetQuestionsRoundState(session, questions);
-		deleteAllAnswersForQuestions(questions);
+
+		return deleteAllAnswersForQuestions(questions);
 	}
 
 	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
-	public void deleteAllLectureAnswers(final Session session) {
+	public int deleteAllLectureAnswers(final Session session) {
 		final List<Question> questions = getQuestions(new NovaView("skill_question/lecture_question_by_session"), session);
 		getDatabaseDao().resetQuestionsRoundState(session, questions);
-		deleteAllAnswersForQuestions(questions);
+
+		return deleteAllAnswersForQuestions(questions);
 	}
 
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
@@ -2137,7 +2166,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 	}
 
-	private boolean deleteAllAnswersForQuestions(List<Question> questions) {
+	private int deleteAllAnswersForQuestions(List<Question> questions) {
 		List<String> questionIds = new ArrayList<String>();
 		for (Question q : questions) {
 			questionIds.add(q.get_id());
@@ -2154,14 +2183,16 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 		try {
 			getDatabase().bulkSaveDocuments(allAnswers.toArray(new Document[allAnswers.size()]));
+
+			return allAnswers.size();
 		} catch (IOException e) {
 			LOGGER.error("Could not bulk delete answers: {}", e.getMessage());
-			return false;
 		}
-		return true;
+
+		return 0;
 	}
 
-	private boolean deleteAllAnswersWithQuestions(List<Question> questions) {
+	private int[] deleteAllAnswersWithQuestions(List<Question> questions) {
 		List<String> questionIds = new ArrayList<String>();
 		final List<Document> allQuestions = new ArrayList<Document>();
 		for (Question q : questions) {
@@ -2188,11 +2219,13 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			List<Document> deleteList = new ArrayList<Document>(allAnswers);
 			deleteList.addAll(allQuestions);
 			getDatabase().bulkSaveDocuments(deleteList.toArray(new Document[deleteList.size()]));
+
+			return new int[] { deleteList.size(), result.size() };
 		} catch (IOException e) {
 			LOGGER.error("Could not bulk delete questions and answers: {}", e.getMessage());
-			return false;
 		}
-		return true;
+
+		return new int[] { 0, 0 };
 	}
 
 	@Cacheable("learningprogress")
@@ -2299,7 +2332,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	public boolean deleteInactiveUsers(long lastActivityBefore) {
+	public int deleteInactiveUsers(long lastActivityBefore) {
 		try {
 			NovaView view = new NovaView("user/inactive_by_creation");
 			view.setEndKey(lastActivityBefore);
@@ -2321,12 +2354,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				log("cleanup", "type", "user", "count", newDocs.size());
 			}
 
-			return true;
+			return newDocs.size();
 		} catch (IOException e) {
 			LOGGER.error("Could not delete inactive users.");
 		}
 
-		return false;
+		return 0;
 	}
 
 	@Override

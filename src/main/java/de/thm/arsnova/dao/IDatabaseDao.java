@@ -110,9 +110,9 @@ public interface IDatabaseDao {
 
 	List<String> getQuestionIds(Session session, User user);
 
-	void deleteQuestionWithAnswers(Question question);
+	int deleteQuestionWithAnswers(Question question);
 
-	void deleteAllQuestionsWithAnswers(Session session);
+	int[] deleteAllQuestionsWithAnswers(Session session);
 
 	List<String> getUnAnsweredQuestionIds(Session session, User user);
 
@@ -156,7 +156,7 @@ public interface IDatabaseDao {
 
 	Question updateQuestion(Question question);
 
-	void deleteAnswers(Question question);
+	int deleteAnswers(Question question);
 
 	Answer saveAnswer(Answer answer, User user, Question question, Session session);
 
@@ -179,11 +179,11 @@ public interface IDatabaseDao {
 	 *
 	 * @param session the session for deletion
 	 */
-	void deleteSession(Session session);
+	int[] deleteSession(Session session);
 
-	boolean deleteInactiveGuestSessions(long lastActivityBefore);
+	int[] deleteInactiveGuestSessions(long lastActivityBefore);
 
-	boolean deleteInactiveGuestVisitedSessionLists(long lastActivityBefore);
+	int deleteInactiveGuestVisitedSessionLists(long lastActivityBefore);
 
 	List<Question> getLectureQuestionsForUsers(Session session);
 
@@ -209,25 +209,25 @@ public interface IDatabaseDao {
 
 	int countPreparationQuestionAnswers(Session session);
 
-	void deleteAllLectureQuestionsWithAnswers(Session session);
+	int[] deleteAllLectureQuestionsWithAnswers(Session session);
 
-	void deleteAllFlashcardsWithAnswers(Session session);
+	int[] deleteAllFlashcardsWithAnswers(Session session);
 
-	void deleteAllPreparationQuestionsWithAnswers(Session session);
+	int[] deleteAllPreparationQuestionsWithAnswers(Session session);
 
 	List<String> getUnAnsweredLectureQuestionIds(Session session, User user);
 
 	List<String> getUnAnsweredPreparationQuestionIds(Session session, User user);
 
-	void deleteAllInterposedQuestions(Session session);
+	int deleteAllInterposedQuestions(Session session);
 
-	void deleteAllInterposedQuestions(Session session, User user);
+	int deleteAllInterposedQuestions(Session session, User user);
 
 	void publishQuestions(Session session, boolean publish, List<Question> questions);
 
 	List<Question> publishAllQuestions(Session session, boolean publish);
 
-	void deleteAllQuestionsAnswers(Session session);
+	int deleteAllQuestionsAnswers(Session session);
 
 	DbUser createOrUpdateUser(DbUser user);
 
@@ -235,7 +235,7 @@ public interface IDatabaseDao {
 
 	boolean deleteUser(DbUser dbUser);
 
-	boolean deleteInactiveUsers(long lastActivityBefore);
+	int deleteInactiveUsers(long lastActivityBefore);
 
 	CourseScore getLearningProgress(Session session);
 
@@ -247,9 +247,9 @@ public interface IDatabaseDao {
 
 	List<SessionInfo> getMyVisitedSessionsInfo(User currentUser, final int start, final int limit);
 
-	void deleteAllPreparationAnswers(Session session);
+	int deleteAllPreparationAnswers(Session session);
 
-	void deleteAllLectureAnswers(Session session);
+	int deleteAllLectureAnswers(Session session);
 
 	SessionInfo importSession(User user, ImportExportSession importSession);
 
