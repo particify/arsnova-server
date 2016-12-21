@@ -173,7 +173,6 @@ public class SessionServiceTest {
 
 			sessionService.deleteSession(session.getKeyword());
 
-			verify(mockDatabase).deleteAllQuestionsWithAnswers(session);
 			verify(mockDatabase).deleteSession(session);
 		} finally {
 			ReflectionTestUtils.setField(getTargetObject(sessionService), "databaseDao", tempDatabase);

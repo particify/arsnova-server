@@ -1676,6 +1676,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Caching(evict = { @CacheEvict("sessions"), @CacheEvict(cacheNames="sessions", key="#p0.keyword") })
 	public void deleteSession(final Session session) {
 		try {
+			deleteAllQuestionsWithAnswers(session);
 			deleteDocument(session.get_id());
 			LOGGER.debug("Deleted session document {} and related data.", session.get_id());
 		} catch (final IOException e) {
@@ -1693,7 +1694,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			Session s = new Session();
 			s.set_id(oldDoc.getId());
 			s.set_rev(oldDoc.getJSONObject("value").getString("_rev"));
-			deleteAllQuestionsWithAnswers(s);
 			deleteSession(s);
 		}
 
