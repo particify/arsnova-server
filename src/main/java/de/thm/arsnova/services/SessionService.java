@@ -405,7 +405,6 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 			prepSubjects.add("");
 		}
 
-		databaseDao.deleteAllQuestionsWithAnswers(session);
 		databaseDao.deleteSession(session);
 
 		this.publisher.publishEvent(new DeleteSessionEvent(this, session));

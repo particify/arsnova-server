@@ -144,6 +144,11 @@ public interface IDatabaseDao {
 
 	Session changeSessionCreator(Session session, String newCreator);
 
+	/**
+	 * Deletes a session and related data.
+	 *
+	 * @param session the session for deletion
+	 */
 	void deleteSession(Session session);
 
 	boolean deleteInactiveGuestSessions(long lastActivityBefore);
