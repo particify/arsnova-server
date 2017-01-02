@@ -857,6 +857,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		try {
 			int count = deleteAnswers(question);
 			deleteDocument(question.get_id());
+			log("delete", "type", "question", "answerCount", count);
 
 			return count;
 		} catch (final IOException e) {
@@ -889,7 +890,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			q.set_rev(d.getJSONObject("value").getString("_rev"));
 			questions.add(q);
 		}
-		return deleteAllAnswersWithQuestions(questions);
+
+		int[] count = deleteAllAnswersWithQuestions(questions);
+		log("delete", "type", "question", "questionCount", count[0]);
+		log("delete", "type", "answer", "answerCount", count[1]);
+
+		return count;
 	}
 
 	private void deleteDocument(final String documentId) throws IOException {
@@ -913,6 +919,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				answersToDelete.add(d);
 			}
 			database.bulkSaveDocuments(answersToDelete.toArray(new Document[answersToDelete.size()]));
+			log("delete", "type", "answer", "answerCount", answersToDelete.size());
 
 			return answersToDelete.size();
 		} catch (final IOException e) {
@@ -1604,6 +1611,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public void deleteAnswer(final String answerId) {
 		try {
 			database.deleteDocument(database.getDocument(answerId));
+			log("delete", "type", "answer");
 		} catch (final IOException e) {
 			LOGGER.error("Could not delete answer {} because of {}", answerId, e.getMessage());
 		}
@@ -1613,6 +1621,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public void deleteInterposedQuestion(final InterposedQuestion question) {
 		try {
 			deleteDocument(question.get_id());
+			log("delete", "type", "comment");
 		} catch (final IOException e) {
 			LOGGER.error("Could not delete interposed question {} because of {}", question.get_id(), e.getMessage());
 		}
@@ -1742,7 +1751,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 		if (results.size() > 0) {
 			LOGGER.info("Deleted {} inactive guest sessions.", results.size());
-			log("cleanup", "type", "session", "count", results.size());
+			log("cleanup", "type", "session", "sessionCount", results.size(), "questionCount", count[1], "answerCount", count[2]);
 		}
 		count[0] = results.size();
 
@@ -2044,6 +2053,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 
 		/* This does account for failed deletions */
+		log("delete", "type", "comment", "commentCount", results.size());
+
 		return results.size();
 	}
 
