@@ -19,26 +19,56 @@ package de.thm.arsnova.dao;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
-import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.DbUser;
-import de.thm.arsnova.entities.InterposedQuestion;
-import de.thm.arsnova.entities.InterposedReadingCount;
-import de.thm.arsnova.entities.LoggedIn;
-import de.thm.arsnova.entities.Motd;
-import de.thm.arsnova.entities.MotdList;
-import de.thm.arsnova.entities.Question;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.SessionInfo;
-import de.thm.arsnova.entities.Statistics;
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.*;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * All methods the database must support.
  */
 public interface IDatabaseDao {
+	/**
+	 * Logs an event to the database. Arbitrary data can be attached as payload. Database logging should only be used
+	 * if the logged data is later analyzed by the backend itself. Otherwise use the default logging mechanisms.
+	 *
+	 * @param event type of the event
+	 * @param payload arbitrary logging data
+	 * @param level severity of the event
+	 */
+	void log(String event, Map<String, Object> payload, LogEntry.LogLevel level);
+
+	/**
+	 * Logs an event of informational severity to the database. Arbitrary data can be attached as payload. Database
+	 * logging should only be used if the logged data is later analyzed by the backend itself. Otherwise use the default
+	 * logging mechanisms.
+	 *
+	 * @param event type of the event
+	 * @param payload arbitrary logging data
+	 */
+	void log(String event, Map<String, Object> payload);
+
+	/**
+	 * Logs an event to the database. Arbitrary data can be attached as payload. Database logging should only be used
+	 * if the logged data is later analyzed by the backend itself. Otherwise use the default logging mechanisms.
+	 *
+	 * @param event type of the event
+	 * @param level severity of the event
+	 * @param rawPayload key/value pairs of arbitrary logging data
+	 */
+	void log(String event, LogEntry.LogLevel level, Object... rawPayload);
+
+	/**
+	 * Logs an event of informational severity to the database. Arbitrary data can be attached as payload. Database
+	 * logging should only be used if the logged data is later analyzed by the backend itself. Otherwise use the default
+	 * logging mechanisms.
+	 *
+	 * @param event type of the event
+	 * @param rawPayload key/value pairs of arbitrary logging data
+	 */
+	void log(String event, Object... rawPayload);
+
 	Session getSessionFromKeyword(String keyword);
 
 	List<Session> getMySessions(User user, final int start, final int limit);
@@ -80,9 +110,9 @@ public interface IDatabaseDao {
 
 	List<String> getQuestionIds(Session session, User user);
 
-	void deleteQuestionWithAnswers(Question question);
+	int deleteQuestionWithAnswers(Question question);
 
-	void deleteAllQuestionsWithAnswers(Session session);
+	int[] deleteAllQuestionsWithAnswers(Session session);
 
 	List<String> getUnAnsweredQuestionIds(Session session, User user);
 
@@ -126,7 +156,7 @@ public interface IDatabaseDao {
 
 	Question updateQuestion(Question question);
 
-	void deleteAnswers(Question question);
+	int deleteAnswers(Question question);
 
 	Answer saveAnswer(Answer answer, User user, Question question, Session session);
 
@@ -149,11 +179,11 @@ public interface IDatabaseDao {
 	 *
 	 * @param session the session for deletion
 	 */
-	void deleteSession(Session session);
+	int[] deleteSession(Session session);
 
-	boolean deleteInactiveGuestSessions(long lastActivityBefore);
+	int[] deleteInactiveGuestSessions(long lastActivityBefore);
 
-	boolean deleteInactiveGuestVisitedSessionLists(long lastActivityBefore);
+	int deleteInactiveGuestVisitedSessionLists(long lastActivityBefore);
 
 	List<Question> getLectureQuestionsForUsers(Session session);
 
@@ -179,25 +209,25 @@ public interface IDatabaseDao {
 
 	int countPreparationQuestionAnswers(Session session);
 
-	void deleteAllLectureQuestionsWithAnswers(Session session);
+	int[] deleteAllLectureQuestionsWithAnswers(Session session);
 
-	void deleteAllFlashcardsWithAnswers(Session session);
+	int[] deleteAllFlashcardsWithAnswers(Session session);
 
-	void deleteAllPreparationQuestionsWithAnswers(Session session);
+	int[] deleteAllPreparationQuestionsWithAnswers(Session session);
 
 	List<String> getUnAnsweredLectureQuestionIds(Session session, User user);
 
 	List<String> getUnAnsweredPreparationQuestionIds(Session session, User user);
 
-	void deleteAllInterposedQuestions(Session session);
+	int deleteAllInterposedQuestions(Session session);
 
-	void deleteAllInterposedQuestions(Session session, User user);
+	int deleteAllInterposedQuestions(Session session, User user);
 
 	void publishQuestions(Session session, boolean publish, List<Question> questions);
 
 	List<Question> publishAllQuestions(Session session, boolean publish);
 
-	void deleteAllQuestionsAnswers(Session session);
+	int deleteAllQuestionsAnswers(Session session);
 
 	DbUser createOrUpdateUser(DbUser user);
 
@@ -205,7 +235,7 @@ public interface IDatabaseDao {
 
 	boolean deleteUser(DbUser dbUser);
 
-	boolean deleteInactiveUsers(long lastActivityBefore);
+	int deleteInactiveUsers(long lastActivityBefore);
 
 	CourseScore getLearningProgress(Session session);
 
@@ -217,9 +247,9 @@ public interface IDatabaseDao {
 
 	List<SessionInfo> getMyVisitedSessionsInfo(User currentUser, final int start, final int limit);
 
-	void deleteAllPreparationAnswers(Session session);
+	int deleteAllPreparationAnswers(Session session);
 
-	void deleteAllLectureAnswers(Session session);
+	int deleteAllLectureAnswers(Session session);
 
 	SessionInfo importSession(User user, ImportExportSession importSession);
 
