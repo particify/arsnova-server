@@ -1378,7 +1378,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			document.put("read", question.isRead());
 			getDatabase().saveDocument(document);
 		} catch (final IOException e) {
-			LOGGER.error("Coulg not mark interposed question as read {}", question.get_id());
+			LOGGER.error("Could not mark interposed question as read {}", question.get_id());
 		}
 	}
 
