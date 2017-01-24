@@ -293,9 +293,9 @@
 			<version>1.5.12</version>
 		</dependency>
 		<dependency>
-			<groupId>org.stagemonitor</groupId>
-			<artifactId>stagemonitor-web</artifactId>
-			<version>0.31.0</version>
+			<groupId>com.codahale.metrics</groupId>
+			<artifactId>metrics-annotation</artifactId>
+			<version>3.0.2</version>
 		</dependency>
 	</dependencies>
 
