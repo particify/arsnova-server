@@ -175,6 +175,10 @@
 			<artifactId>spring-security-ldap</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib</artifactId>
 			<version>3.2.4</version>
@@ -194,7 +198,7 @@
 		<dependency>
 			<groupId>de.thm.couchdb4j</groupId>
 			<artifactId>couchdb4j</artifactId>
-			<version>0.6</version>
+			<version>0.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>

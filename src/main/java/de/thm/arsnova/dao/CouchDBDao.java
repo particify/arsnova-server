@@ -23,6 +23,7 @@ import com.fourspaces.couchdb.Results;
 import com.fourspaces.couchdb.RowResult;
 import com.fourspaces.couchdb.View;
 import com.fourspaces.couchdb.ViewResults;
+import com.google.common.collect.Lists;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.*;
@@ -88,6 +89,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 @Component("databaseDao")
 public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware {
+
+	private final int BULK_PARTITION_SIZE = 500;
 
 	@Autowired
 	private ISessionService sessionService;
@@ -911,17 +914,25 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			view.setKey(question.get_id());
 			view.setIncludeDocs(true);
 			final ViewResults results = getDatabase().view(view);
+			final List<List<Document>> partitions = Lists.partition(results.getResults(), BULK_PARTITION_SIZE);
 
-			List<Document> answersToDelete = new ArrayList<Document>();
-			for (final Document a : results.getResults()) {
-				final Document d = new Document(a.getJSONObject("doc"));
-				d.put("_deleted", true);
-				answersToDelete.add(d);
+			int count = 0;
+			for (List<Document> partition: partitions) {
+				List<Document> answersToDelete = new ArrayList<Document>();
+				for (final Document a : partition) {
+					final Document d = new Document(a.getJSONObject("doc"));
+					d.put("_deleted", true);
+					answersToDelete.add(d);
+				}
+				if (database.bulkSaveDocuments(answersToDelete.toArray(new Document[answersToDelete.size()]))) {
+					count += partition.size();
+				} else {
+					LOGGER.error("Could not bulk delete answers");
+				}
 			}
-			database.bulkSaveDocuments(answersToDelete.toArray(new Document[answersToDelete.size()]));
-			log("delete", "type", "answer", "answerCount", answersToDelete.size());
+			log("delete", "type", "answer", "answerCount", count);
 
-			return answersToDelete.size();
+			return count;
 		} catch (final IOException e) {
 			LOGGER.error("IOException: Could not delete answers for question {}", question.get_id());
 		}
@@ -1766,25 +1777,36 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			List<Document> results = this.getDatabase().view(view).getResults();
 			Map<String, Object> log = new HashMap<>();
 
-			final List<Document> newDocs = new ArrayList<Document>();
-			for (final Document oldDoc : results) {
-				final Document newDoc = new Document();
-				newDoc.setId(oldDoc.getId());
-				newDoc.setRev(oldDoc.getJSONObject("value").getString("_rev"));
-				newDoc.put("_deleted", true);
-				newDocs.add(newDoc);
-				LOGGER.debug("Marked logged_in document {} for deletion.", oldDoc.getId());
-				/* Use log type 'user' since effectively the user is deleted in case of guests */
-				log("delete", "type", "user", "id", oldDoc.getId());
+			int count = 0;
+			List<List<Document>> partitions = Lists.partition(results, BULK_PARTITION_SIZE);
+			for (List<Document> partition: partitions) {
+				final List<Document> newDocs = new ArrayList<Document>();
+				for (final Document oldDoc : partition) {
+					final Document newDoc = new Document();
+					newDoc.setId(oldDoc.getId());
+					newDoc.setRev(oldDoc.getJSONObject("value").getString("_rev"));
+					newDoc.put("_deleted", true);
+					newDocs.add(newDoc);
+					LOGGER.debug("Marked logged_in document {} for deletion.", oldDoc.getId());
+					/* Use log type 'user' since effectively the user is deleted in case of guests */
+					log("delete", "type", "user", "id", oldDoc.getId());
+				}
+
+				if (newDocs.size() > 0) {
+					if (getDatabase().bulkSaveDocuments(newDocs.toArray(new Document[newDocs.size()]))) {
+						count += newDocs.size();
+					} else {
+						LOGGER.error("Could not bulk delete visited session lists");
+					}
+				}
 			}
 
-			if (newDocs.size() > 0) {
-				getDatabase().bulkSaveDocuments(newDocs.toArray(new Document[newDocs.size()]));
-				LOGGER.info("Deleted {} visited session lists of inactive users.", newDocs.size());
-				log("cleanup", "type", "visitedsessions", "count", newDocs.size());
+			if (count > 0) {
+				LOGGER.info("Deleted {} visited session lists of inactive users.", count);
+				log("cleanup", "type", "visitedsessions", "count", count);
 			}
 
-			return newDocs.size();
+			return count;
 		} catch (IOException e) {
 			LOGGER.error("Could not delete visited session lists of inactive users.");
 		}
@@ -2349,23 +2371,32 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			view.setEndKey(lastActivityBefore);
 			List<Document> results = this.getDatabase().view(view).getResults();
 
-			final List<Document> newDocs = new ArrayList<Document>();
-			for (Document oldDoc : results) {
-				final Document newDoc = new Document();
-				newDoc.setId(oldDoc.getId());
-				newDoc.setRev(oldDoc.getJSONObject("value").getString("_rev"));
-				newDoc.put("_deleted", true);
-				newDocs.add(newDoc);
-				LOGGER.debug("Marked user document {} for deletion.", oldDoc.getId());
+			int count = 0;
+			final List<List<Document>> partitions = Lists.partition(results, BULK_PARTITION_SIZE);
+			for (List<Document> partition: partitions) {
+				final List<Document> newDocs = new ArrayList<Document>();
+				for (Document oldDoc : partition) {
+					final Document newDoc = new Document();
+					newDoc.setId(oldDoc.getId());
+					newDoc.setRev(oldDoc.getJSONObject("value").getString("_rev"));
+					newDoc.put("_deleted", true);
+					newDocs.add(newDoc);
+					LOGGER.debug("Marked user document {} for deletion.", oldDoc.getId());
+				}
+
+				if (newDocs.size() > 0) {
+					if (getDatabase().bulkSaveDocuments(newDocs.toArray(new Document[newDocs.size()]))) {
+						count += newDocs.size();
+					}
+				}
 			}
 
-			if (newDocs.size() > 0) {
-				getDatabase().bulkSaveDocuments(newDocs.toArray(new Document[newDocs.size()]));
-				LOGGER.info("Deleted {} inactive users.", newDocs.size());
-				log("cleanup", "type", "user", "count", newDocs.size());
+			if (count > 0) {
+				LOGGER.info("Deleted {} inactive users.", count);
+				log("cleanup", "type", "user", "count", count);
 			}
 
-			return newDocs.size();
+			return count;
 		} catch (IOException e) {
 			LOGGER.error("Could not delete inactive users.");
 		}
