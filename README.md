@@ -14,6 +14,17 @@ However, you do not need to download both repositories in order to get started.
 [![Build Status](https://travis-ci.org/thm-projects/arsnova-backend.svg?branch=master)](https://travis-ci.org/thm-projects/arsnova-backend)
 
 
+## Documentation
+
+We provide separate documentations for lectures and students, administrators and developers:
+
+* [For end-users](https://arsnova.thm.de/blog/en/arsnova-manual/)
+* For admins
+	* [Installation](src/site/markdown/installation.md)
+	* [Upgrading](src/site/markdown/upgrade.md)
+* [For developers](src/site/markdown/development.md)
+
+
 ## Credits
 
 ARSnova is powered by Technische Hochschule Mittelhessen - University of Applied Sciences.
