@@ -61,8 +61,5 @@ The current build status for the master branch:
 
 ## Further Documentation
 
-Please see our [Wiki][Wiki] for an in-depth look at development topics such as [Caching][Caching] and [ARSnova's event system][Event-System].
-
-[Wiki]: https://github.com/thm-projects/arsnova-backend/wiki
-[Caching]: https://github.com/thm-projects/arsnova-backend/wiki/Caching
-[Event-System]: https://github.com/thm-projects/arsnova-backend/wiki/Event-System
+* [Caching](development/caching.md)
+* [Event System](development/event-system.md)
