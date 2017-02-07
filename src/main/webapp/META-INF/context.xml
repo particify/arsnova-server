@@ -1,4 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<Context>
-	<Manager pathname="${catalina.base}/sessions/arsnova-war.ser"/>
-</Context>
