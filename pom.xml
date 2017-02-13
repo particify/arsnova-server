@@ -24,33 +24,27 @@
 			<organizationUrl>https://www.thm.de</organizationUrl>
 		</developer>
 		<developer>
-			<name>Andreas Gärtner</name>
-			<organization>Technische Hochschule Mittelhessen</organization>
-			<organizationUrl>https://www.thm.de</organizationUrl>
-			<email>andreas.gaertner@mni.thm.de</email>
-		</developer>
-		<developer>
 			<name>Daniel Gerhardt</name>
 			<organization>Technische Hochschule Mittelhessen</organization>
 			<organizationUrl>https://www.thm.de</organizationUrl>
 			<email>daniel.gerhardt@mni.thm.de</email>
 		</developer>
 		<developer>
-			<name>Christoph Thelen</name>
+			<name>Tom Käsler</name>
 			<organization>Technische Hochschule Mittelhessen</organization>
 			<organizationUrl>https://www.thm.de</organizationUrl>
-			<email>christoph.thelen@mni.thm.de</email>
+			<email>tom.kaesler@mni.thm.de</email>
 		</developer>
 	</developers>
 
 	<issueManagement>
-		<system>Redmine</system>
-		<url>https://scm.thm.de/redmine/projects/arsnova</url>
+		<system>GitLab</system>
+		<url>https://git.thm.de/arsnova/arsnova/issues</url>
 	</issueManagement>
 
 	<ciManagement>
-		<system>Jenkins</system>
-		<url>https://jenkins.mni.thm.de/jenkins/job/ARSnova-Backend/</url>
+		<system>GitLab CI</system>
+		<url>https://git.thm.de/arsnova/arsnova-backend/pipelines</url>
 	</ciManagement>
 
 	<scm>
