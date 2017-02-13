@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 
 <project name="ARSnova" xmlns="http://maven.apache.org/DECORATION/1.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -7,7 +7,7 @@
 	<skin>
 		<groupId>org.apache.maven.skins</groupId>
 		<artifactId>maven-fluido-skin</artifactId>
-		<version>1.5</version>
+		<version>1.6</version>
 	</skin>
 
 	<custom>
@@ -22,8 +22,6 @@
 				<projectId>arsnova</projectId>
 				<widget>stats</widget>
 			</ohloh>
-			<facebookLike />
-			<googlePlusOne />
 		</fluidoSkin>
 	</custom>
 
@@ -44,7 +42,7 @@
 			]]>
 		</head>
 		<links>
-			<item name="THM" href="http://www.thm.de/" />
+			<item name="THM" href="https://www.thm.de/" />
 		</links>
 		<menu name="Overview">
 			<item name="Introduction" href="index.html" />
@@ -52,18 +50,17 @@
 			<item name="The Team" href="team-list.html" />
 		</menu>
 		<menu name="Documentation">
-			<item name="Installation" href="https://github.com/thm-projects/arsnova-war#production-use" />
-			<item name="Development" href="https://github.com/thm-projects/arsnova-war#development" />
+			<item name="Installation" href="installation.html" />
+			<item name="Upgrading" href="upgrade.html" />
+			<item name="Development" href="development.html" />
 			<item name="Dependencies" href="dependencies.html" />
 			<item name="API Docs" href="apidocs/index.html" />
 		</menu>
 		<menu name="Further Information">
-			<item name="Gitorious" href="https://scm.thm.de/arsnova" />
-			<item name="Issue Tracking" href="issue-tracking.html" />
-			<item name="Sonar" href="https://scm.thm.de/sonar/dashboard/index/de.thm.arsnova:arsnova-war" />
-			<item name="Continuous Integration" href="integration.html" />
 			<item name="Source Repository" href="source-repository.html" />
-			<item name="Metrics" href="cobertura/index.html" />
+			<item name="Issue Tracking" href="issue-tracking.html" />
+			<item name="SonarQube Metrics" href="https://scm.thm.de/sonar/dashboard/index/de.thm.arsnova:arsnova-backend" />
+			<item name="Continuous Integration" href="integration.html" />
 		</menu>
 	</body>
 </project>
