@@ -7,7 +7,7 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<io.spring.platform-version>Athens-SR2</io.spring.platform-version>
+		<io.spring.platform-version>Athens-SR3</io.spring.platform-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
@@ -362,7 +362,7 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
+				<groupId>org.sonarsource.scanner.maven</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
 				<version>3.2</version>
 			</plugin>
@@ -374,7 +374,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.7.8</version>
+				<version>0.7.9</version>
 				<executions>
 					<execution>
 						<id>default-prepare-agent</id>
