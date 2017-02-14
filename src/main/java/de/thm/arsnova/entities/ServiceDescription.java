@@ -96,6 +96,6 @@ public class ServiceDescription {
 	}
 
 	public void setAllowedRoles(String[] roles) {
-		this.allowedRoles = allowedRoles;
+		this.allowedRoles = roles;
 	}
 }
