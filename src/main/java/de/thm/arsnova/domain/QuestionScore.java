@@ -29,6 +29,7 @@ import java.util.Set;
  */
 public class QuestionScore implements Iterable<UserScore> {
 
+	/* FIXME: what is questionId used for? */
 	private String questionId;
 
 	private String questionVariant;
@@ -37,7 +38,7 @@ public class QuestionScore implements Iterable<UserScore> {
 
 	private int maximumScore;
 
-	private List<UserScore> userScores = new ArrayList<UserScore>();
+	private List<UserScore> userScores = new ArrayList<>();
 
 	public QuestionScore(String questionId, String questionVariant, int piRound, int maximumScore) {
 		this.questionId = questionId;

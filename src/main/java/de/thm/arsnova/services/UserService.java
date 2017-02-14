@@ -58,8 +58,15 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
@@ -83,10 +90,10 @@ public class UserService implements IUserService {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
-	private static final ConcurrentHashMap<UUID, User> socketid2user = new ConcurrentHashMap<UUID, User>();
+	private static final ConcurrentHashMap<UUID, User> socketid2user = new ConcurrentHashMap<>();
 
 	/* used for Socket.IO online check solution (new) */
-	private static final ConcurrentHashMap<User, String> user2session = new ConcurrentHashMap<User, String>();
+	private static final ConcurrentHashMap<User, String> user2session = new ConcurrentHashMap<>();
 
 	@Autowired
 	private IDatabaseDao databaseDao;
@@ -140,7 +147,7 @@ public class UserService implements IUserService {
 	private Set<String> loginBans;
 
 	{
-		loginTries = new ConcurrentHashMap<String, Byte>();
+		loginTries = new ConcurrentHashMap<>();
 		loginBans = Collections.synchronizedSet(new HashSet<String>());
 	}
 
@@ -266,16 +273,13 @@ public class UserService implements IUserService {
 			return false;
 		}
 		String session = user2session.get(user);
-		if (session == null) {
-			return false;
-		}
 
-		return keyword.equals(session);
+		return session != null && keyword.equals(session);
 	}
 
 	@Override
 	public Set<User> getUsersInSession(final String keyword) {
-		final Set<User> result = new HashSet<User>();
+		final Set<User> result = new HashSet<>();
 		for (final Entry<User, String> e : user2session.entrySet()) {
 			if (e.getValue().equals(keyword)) {
 				result.add(e.getKey());
@@ -378,7 +382,7 @@ public class UserService implements IUserService {
 		return result;
 	}
 
-	public String encodePassword(String password) {
+	private String encodePassword(String password) {
 		if (null == encoder) {
 			encoder = new BCryptPasswordEncoder(12);
 		}
@@ -386,7 +390,7 @@ public class UserService implements IUserService {
 		return encoder.encode(password);
 	}
 
-	public void sendActivationEmail(DbUser dbUser) {
+	private void sendActivationEmail(DbUser dbUser) {
 		String activationUrl;
 		try {
 			activationUrl = MessageFormat.format(
@@ -412,7 +416,7 @@ public class UserService implements IUserService {
 		List<String> domainList = Arrays.asList(allowedEmailDomains.split(","));
 
 		if (domainList.size() > 0) {
-			List<String> patterns = new ArrayList<String>();
+			List<String> patterns = new ArrayList<>();
 			if (domainList.contains("*")) {
 				patterns.add("([a-z0-9-]+\\.)+[a-z0-9-]+");
 			} else {
@@ -532,11 +536,9 @@ public class UserService implements IUserService {
 			helper.setSubject(subject);
 			helper.setText(body);
 
-			LOGGER.info("Sending mail \"{}\" from \"{}\" to \"{}\"", new Object[] {subject, msg.getFrom(), dbUser.getUsername()});
+			LOGGER.info("Sending mail \"{}\" from \"{}\" to \"{}\"", subject, msg.getFrom(), dbUser.getUsername());
 			mailSender.send(msg);
-		} catch (MessagingException e) {
-			LOGGER.warn("Mail \"{}\" could not be sent: {}", subject, e);
-		} catch (MailException e) {
+		} catch (MailException | MessagingException e) {
 			LOGGER.warn("Mail \"{}\" could not be sent: {}", subject, e);
 		}
 	}

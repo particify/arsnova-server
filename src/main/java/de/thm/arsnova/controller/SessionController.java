@@ -17,7 +17,6 @@
  */
 package de.thm.arsnova.controller;
 
-import org.springframework.context.annotation.Import;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionFeature;
@@ -114,7 +113,7 @@ public class SessionController extends PaginationController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public Session postNewSession(@ApiParam(value = "current session", required = true) @RequestBody final Session session, final HttpServletResponse response) {
 		if (session != null && session.isCourseSession()) {
-			final List<Course> courses = new ArrayList<Course>();
+			final List<Course> courses = new ArrayList<>();
 			final Course course = new Course();
 			course.setId(session.getCourseId());
 			courses.add(course);
@@ -171,7 +170,7 @@ public class SessionController extends PaginationController {
 					"username", defaultValue = "") final String username,
 			final HttpServletResponse response
 			) {
-		List<Session> sessions = null;
+		List<Session> sessions;
 
 		if (!username.equals("")) {
 			try {
@@ -218,9 +217,6 @@ public class SessionController extends PaginationController {
 
 	/**
 	 * Returns a list of my own sessions with only the necessary information like name, keyword, or counters.
-	 * @param statusOnly The flag that has to be set in order to get this shortened list.
-	 * @param response
-	 * @return
 	 */
 	@ApiOperation(value = "Retrieves a Session",
 			nickname = "getMySessions")
@@ -310,7 +306,7 @@ public class SessionController extends PaginationController {
 			@ApiParam(value = "wether interposed questions shall be exported", required = true) @RequestParam(value = "withFeedbackQuestions", defaultValue = "false") final Boolean withFeedbackQuestions,
 			final HttpServletResponse response
 		) {
-		List<ImportExportSession> sessions = new ArrayList<ImportExportSession>();
+		List<ImportExportSession> sessions = new ArrayList<>();
 		ImportExportSession temp;
 		for (String key : sessionkey) {
 			sessionService.setActive(key, false);

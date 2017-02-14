@@ -26,7 +26,7 @@ import de.thm.arsnova.entities.transport.LearningProgressValues;
  */
 public interface LearningProgress {
 
-	public LearningProgressValues getCourseProgress(Session session);
+	LearningProgressValues getCourseProgress(Session session);
 
-	public LearningProgressValues getMyProgress(Session session, User user);
+	LearningProgressValues getMyProgress(Session session, User user);
 }

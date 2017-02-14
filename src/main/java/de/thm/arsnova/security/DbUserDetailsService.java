@@ -53,7 +53,7 @@ public class DbUserDetailsService implements UserDetailsService {
 			throw new UsernameNotFoundException("User does not exist.");
 		}
 
-		final List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
+		final List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_DB_USER"));
 

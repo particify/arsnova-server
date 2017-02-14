@@ -56,17 +56,8 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -102,7 +93,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	private ApplicationEventPublisher publisher;
 
-	private final Queue<AbstractMap.SimpleEntry<Document, AnswerQueueElement>> answerQueue = new ConcurrentLinkedQueue<AbstractMap.SimpleEntry<Document, AnswerQueueElement>>();
+	private final Queue<AbstractMap.SimpleEntry<Document, AnswerQueueElement>> answerQueue = new ConcurrentLinkedQueue<>();
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(CouchDBDao.class);
 
@@ -196,7 +187,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 		final Results<Session> results = getDatabase().queryView(view, Session.class);
 
-		final List<Session> result = new ArrayList<Session>();
+		final List<Session> result = new ArrayList<>();
 		for (final RowResult<Session> row : results.getRows()) {
 			final Session session = row.getValue();
 			session.setCreator(row.getKey().getString(0));
@@ -213,7 +204,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 		final ViewResults sessions = getDatabase().view(view);
 
-		final List<Session> result = new ArrayList<Session>();
+		final List<Session> result = new ArrayList<>();
 
 		for (final Document d : sessions.getResults()) {
 			final Session session = (Session) JSONObject.toBean(
@@ -240,7 +231,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 		final ViewResults sessions = getDatabase().view(view);
 
-		final List<Session> result = new ArrayList<Session>();
+		final List<Session> result = new ArrayList<>();
 		for (final Document d : sessions.getResults()) {
 			final Session session = (Session) JSONObject.toBean(
 					d.getJSONObject().getJSONObject("value"),
@@ -258,7 +249,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public List<SessionInfo> getMyPublicPoolSessionsInfo(final User user) {
 		final List<Session> sessions = this.getMyPublicPoolSessions(user);
 		if (sessions.isEmpty()) {
-			return new ArrayList<SessionInfo>();
+			return new ArrayList<>();
 		}
 		return getInfosForSessions(sessions);
 	}
@@ -267,7 +258,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public List<SessionInfo> getMySessionsInfo(final User user, final int start, final int limit) {
 		final List<Session> sessions = this.getMySessions(user, start, limit);
 		if (sessions.isEmpty()) {
-			return new ArrayList<SessionInfo>();
+			return new ArrayList<>();
 		}
 		return getInfosForSessions(sessions);
 	}
@@ -284,7 +275,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		questionCountView.setGroup(true);
 		answerCountView.setSessionIdKeys(sessions);
 		answerCountView.setGroup(true);
-		List<String> unredInterposedQueryKeys = new ArrayList<String>();
+		List<String> unredInterposedQueryKeys = new ArrayList<>();
 		for (Session s : sessions) {
 			unredInterposedQueryKeys.add("[\"" + s.get_id() + "\",\"unread\"]");
 		}
@@ -297,7 +288,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		final ExtendedView answeredQuestionsView = new ExtendedView("answer/by_user");
 		final ExtendedView questionIdsView = new ExtendedView("skill_question/by_session_only_id_for_all");
 		questionIdsView.setSessionIdKeys(sessions);
-		List<String> answeredQuestionQueryKeys = new ArrayList<String>();
+		List<String> answeredQuestionQueryKeys = new ArrayList<>();
 		for (Session s : sessions) {
 			answeredQuestionQueryKeys.add("[\"" + user.getUsername() + "\",\"" + s.get_id() + "\"]");
 		}
@@ -307,8 +298,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	private List<SessionInfo> getVisitedSessionInfoData(List<Session> sessions,
 			ExtendedView answeredQuestionsView, ExtendedView questionIdsView) {
-		final Map<String, Set<String>> answeredQuestionsMap = new HashMap<String, Set<String>>();
-		final Map<String, Set<String>> questionIdMap = new HashMap<String, Set<String>>();
+		final Map<String, Set<String>> answeredQuestionsMap = new HashMap<>();
+		final Map<String, Set<String>> questionIdMap = new HashMap<>();
 		final ViewResults answeredQuestionsViewResults = getDatabase().view(answeredQuestionsView);
 		final ViewResults questionIdsViewResults = getDatabase().view(questionIdsView);
 
@@ -318,7 +309,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			final String questionId = d.getString("value");
 			Set<String> questionIdsInSession = answeredQuestionsMap.get(sessionId);
 			if (questionIdsInSession == null) {
-				questionIdsInSession = new HashSet<String>();
+				questionIdsInSession = new HashSet<>();
 			}
 			questionIdsInSession.add(questionId);
 			answeredQuestionsMap.put(sessionId, questionIdsInSession);
@@ -330,29 +321,29 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			final String questionId = d.getId();
 			Set<String> questionIdsInSession = questionIdMap.get(sessionId);
 			if (questionIdsInSession == null) {
-				questionIdsInSession = new HashSet<String>();
+				questionIdsInSession = new HashSet<>();
 			}
 			questionIdsInSession.add(questionId);
 			questionIdMap.put(sessionId, questionIdsInSession);
 		}
 
 		// For each session, count the question IDs that are not yet answered
-		Map<String, Integer> unansweredQuestionsCountMap = new HashMap<String, Integer>();
+		Map<String, Integer> unansweredQuestionsCountMap = new HashMap<>();
 		for (final Session s : sessions) {
 			if (!questionIdMap.containsKey(s.get_id())) {
 				continue;
 			}
 			// Note: create a copy of the first set so that we don't modify the contents in the original set
-			Set<String> questionIdsInSession = new HashSet<String>(questionIdMap.get(s.get_id()));
+			Set<String> questionIdsInSession = new HashSet<>(questionIdMap.get(s.get_id()));
 			Set<String> answeredQuestionIdsInSession = answeredQuestionsMap.get(s.get_id());
 			if (answeredQuestionIdsInSession == null) {
-				answeredQuestionIdsInSession = new HashSet<String>();
+				answeredQuestionIdsInSession = new HashSet<>();
 			}
 			questionIdsInSession.removeAll(answeredQuestionIdsInSession);
 			unansweredQuestionsCountMap.put(s.get_id(), questionIdsInSession.size());
 		}
 
-		List<SessionInfo> sessionInfos = new ArrayList<SessionInfo>();
+		List<SessionInfo> sessionInfos = new ArrayList<>();
 		for (Session session : sessions) {
 			int numUnanswered = 0;
 
@@ -376,24 +367,24 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		final ViewResults interposedCountViewResults = getDatabase().view(interposedCountView);
 		final ViewResults unredInterposedCountViewResults = getDatabase().view(unredInterposedCountView);
 
-		Map<String, Integer> questionCountMap = new HashMap<String, Integer>();
+		Map<String, Integer> questionCountMap = new HashMap<>();
 		for (final Document d : questionCountViewResults.getResults()) {
 			questionCountMap.put(d.getString("key"), d.getInt("value"));
 		}
-		Map<String, Integer> answerCountMap = new HashMap<String, Integer>();
+		Map<String, Integer> answerCountMap = new HashMap<>();
 		for (final Document d : answerCountViewResults.getResults()) {
 			answerCountMap.put(d.getString("key"), d.getInt("value"));
 		}
-		Map<String, Integer> interposedCountMap = new HashMap<String, Integer>();
+		Map<String, Integer> interposedCountMap = new HashMap<>();
 		for (final Document d : interposedCountViewResults.getResults()) {
 			interposedCountMap.put(d.getString("key"), d.getInt("value"));
 		}
-		Map<String, Integer> unredInterposedCountMap = new HashMap<String, Integer>();
+		Map<String, Integer> unredInterposedCountMap = new HashMap<>();
 		for (final Document d : unredInterposedCountViewResults.getResults()) {
 			unredInterposedCountMap.put(d.getJSONArray("key").getString(0), d.getInt("value"));
 		}
 
-		List<SessionInfo> sessionInfos = new ArrayList<SessionInfo>();
+		List<SessionInfo> sessionInfos = new ArrayList<>();
 		for (Session session : sessions) {
 			int numQuestions = 0;
 			int numAnswers = 0;
@@ -759,7 +750,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			final Collection<PossibleAnswer> answers = JSONArray.toCollection(possibleAnswers, PossibleAnswer.class);
 
 			question.updateRoundManagementState();
-			question.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
+			question.setPossibleAnswers(new ArrayList<>(answers));
 			question.setSessionKeyword(getSessionKeyword(question.getSessionId()));
 			return question;
 		} catch (final IOException e) {
@@ -783,7 +774,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				if (vs != null) {
 					@SuppressWarnings("unchecked")
 					final Collection<VisitedSession> visitedSessions = JSONArray.toCollection(vs, VisitedSession.class);
-					loggedIn.setVisitedSessions(new ArrayList<VisitedSession>(visitedSessions));
+					loggedIn.setVisitedSessions(new ArrayList<>(visitedSessions));
 				}
 
 				/* Do not clutter CouchDB. Only update once every 3 hours per session. */
@@ -815,7 +806,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			if (vs != null) {
 				@SuppressWarnings("unchecked")
 				final Collection<VisitedSession> visitedSessions = JSONArray.toCollection(vs, VisitedSession.class);
-				l.setVisitedSessions(new ArrayList<VisitedSession>(visitedSessions));
+				l.setVisitedSessions(new ArrayList<>(visitedSessions));
 			}
 			return l;
 		} catch (final IOException e) {
@@ -886,7 +877,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		view.setEndKey(session.get_id(), "{}");
 		final ViewResults results = getDatabase().view(view);
 
-		List<Question> questions = new ArrayList<Question>();
+		List<Question> questions = new ArrayList<>();
 		for (final Document d : results.getResults()) {
 			final Question q = new Question();
 			q.set_id(d.getId());
@@ -918,7 +909,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 			int count = 0;
 			for (List<Document> partition: partitions) {
-				List<Document> answersToDelete = new ArrayList<Document>();
+				List<Document> answersToDelete = new ArrayList<>();
 				for (final Document a : partition) {
 					final Document d = new Document(a.getJSONObject("doc"));
 					d.put("_deleted", true);
@@ -971,22 +962,16 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getObjectFromId(final String documentId, final Class<T> klass) {
-		T obj = null;
 		try {
 			final Document doc = getDatabase().getDocument(documentId);
 			if (doc == null) {
 				return null;
 			}
 			// TODO: This needs some more error checking...
-			obj = (T) JSONObject.toBean(doc.getJSONObject(), klass);
-		} catch (IOException e) {
-			return null;
-		} catch (ClassCastException e) {
-			return null;
-		} catch (net.sf.json.JSONException e) {
+			return (T) JSONObject.toBean(doc.getJSONObject(), klass);
+		} catch (ClassCastException | IOException | net.sf.json.JSONException e) {
 			return null;
 		}
-		return obj;
 	}
 
 	@Override
@@ -1004,7 +989,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		view.setGroup(true);
 		final ViewResults results = getDatabase().view(view);
 		final int abstentionCount = getDatabaseDao().getAbstentionAnswerCount(questionId);
-		final List<Answer> answers = new ArrayList<Answer>();
+		final List<Answer> answers = new ArrayList<>();
 
 		for (final Document d : results.getResults()) {
 			final Answer a = new Answer();
@@ -1029,7 +1014,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		final ViewResults results = getDatabase().view(view);
 		final int abstentionCount = getDatabaseDao().getAbstentionAnswerCount(questionId);
 
-		final List<Answer> answers = new ArrayList<Answer>();
+		final List<Answer> answers = new ArrayList<>();
 		for (final Document d : results.getResults()) {
 			final Answer a = new Answer();
 			a.setAnswerCount(d.getInt("value"));
@@ -1098,7 +1083,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<Answer> getFreetextAnswers(final String questionId, final int start, final int limit) {
-		final List<Answer> answers = new ArrayList<Answer>();
+		final List<Answer> answers = new ArrayList<>();
 		final NovaView view = new NovaView("skill_question/freetext_answers_full");
 		if (start > 0) {
 			view.setSkip(start);
@@ -1126,7 +1111,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		final NovaView view = new NovaView("answer/by_user_and_session_full");
 		view.setKey(me.getUsername(), s.get_id());
 		final ViewResults results = getDatabase().view(view);
-		final List<Answer> answers = new ArrayList<Answer>();
+		final List<Answer> answers = new ArrayList<>();
 		if (results == null || results.getResults() == null || results.getResults().isEmpty()) {
 			return answers;
 		}
@@ -1276,7 +1261,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	private List<InterposedQuestion> createInterposedList(
 			final Session session, final ViewResults questions) {
-		final List<InterposedQuestion> result = new ArrayList<InterposedQuestion>();
+		final List<InterposedQuestion> result = new ArrayList<>();
 		for (final Document document : questions.getResults()) {
 			final InterposedQuestion question = (InterposedQuestion) JSONObject.toBean(
 					document.getJSONObject().getJSONObject("value"),
@@ -1344,7 +1329,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			}
 			if (!isEmptyResults(creatorResults)) {
 				final JSONArray rows = creatorResults.getJSONArray("rows");
-				Set<String> creators = new HashSet<String>();
+				Set<String> creators = new HashSet<>();
 				for (int i = 0; i < rows.size(); i++) {
 					final JSONObject row = rows.getJSONObject(i);
 					creators.add(row.getString("key"));
@@ -1353,7 +1338,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			}
 			if (!isEmptyResults(studentUserResults)) {
 				final JSONArray rows = studentUserResults.getJSONArray("rows");
-				Set<String> students = new HashSet<String>();
+				Set<String> students = new HashSet<>();
 				for (int i = 0; i < rows.size(); i++) {
 					final JSONObject row = rows.getJSONObject(i);
 					students.add(row.getString("key"));
@@ -1404,7 +1389,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 		view.setKey(user.getUsername());
 		final ViewResults sessions = getDatabase().view(view);
-		final List<Session> allSessions = new ArrayList<Session>();
+		final List<Session> allSessions = new ArrayList<>();
 		for (final Document d : sessions.getResults()) {
 			// Not all users have visited sessions
 			if (d.getJSONObject().optJSONArray("value") != null) {
@@ -1417,8 +1402,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			}
 		}
 		// Filter sessions that don't exist anymore, also filter my own sessions
-		final List<Session> result = new ArrayList<Session>();
-		final List<Session> filteredSessions = new ArrayList<Session>();
+		final List<Session> result = new ArrayList<>();
+		final List<Session> filteredSessions = new ArrayList<>();
 		for (final Session s : allSessions) {
 			try {
 				final Session session = getDatabaseDao().getSessionFromKeyword(s.getKeyword());
@@ -1436,7 +1421,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 		// Update document to remove sessions that don't exist anymore
 		try {
-			List<VisitedSession> visitedSessions = new ArrayList<VisitedSession>();
+			List<VisitedSession> visitedSessions = new ArrayList<>();
 			for (final Session s : result) {
 				visitedSessions.add(new VisitedSession(s));
 			}
@@ -1470,7 +1455,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 		view.setKey(username);
 		final ViewResults sessions = getDatabase().view(view);
-		final List<Session> allSessions = new ArrayList<Session>();
+		final List<Session> allSessions = new ArrayList<>();
 		for (final Document d : sessions.getResults()) {
 			// Not all users have visited sessions
 			if (d.getJSONObject().optJSONArray("value") != null) {
@@ -1483,8 +1468,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			}
 		}
 		// Filter sessions that don't exist anymore, also filter my own sessions
-		final List<Session> result = new ArrayList<Session>();
-		final List<Session> filteredSessions = new ArrayList<Session>();
+		final List<Session> result = new ArrayList<>();
+		final List<Session> filteredSessions = new ArrayList<>();
 		for (final Session s : allSessions) {
 			try {
 				final Session session = getDatabaseDao().getSessionFromKeyword(s.getKeyword());
@@ -1502,7 +1487,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 		// Update document to remove sessions that don't exist anymore
 		try {
-			List<VisitedSession> visitedSessions = new ArrayList<VisitedSession>();
+			List<VisitedSession> visitedSessions = new ArrayList<>();
 			for (final Session s : result) {
 				visitedSessions.add(new VisitedSession(s));
 			}
@@ -1529,7 +1514,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public List<SessionInfo> getMyVisitedSessionsInfo(final User user, final int start, final int limit) {
 		List<Session> sessions = this.getMyVisitedSessions(user, start, limit);
 		if (sessions.isEmpty()) {
-			return new ArrayList<SessionInfo>();
+			return new ArrayList<>();
 		}
 		return this.getInfosForVisitedSessions(sessions, user);
 	}
@@ -1554,15 +1539,15 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		a.put("answerImage", answer.getAnswerImage());
 		a.put("answerThumbnailImage", answer.getAnswerThumbnailImage());
 		AnswerQueueElement answerQueueElement = new AnswerQueueElement(session, question, answer, user);
-		this.answerQueue.offer(new AbstractMap.SimpleEntry<Document, AnswerQueueElement>(a, answerQueueElement));
+		this.answerQueue.offer(new AbstractMap.SimpleEntry<>(a, answerQueueElement));
 		return answer;
 	}
 
 	@Scheduled(fixedDelay = 5000)
 	public void flushAnswerQueue() {
-		final Map<Document, Answer> map = new HashMap<Document, Answer>();
-		final List<Document> answerList = new ArrayList<Document>();
-		final List<AnswerQueueElement> elements = new ArrayList<AnswerQueueElement>();
+		final Map<Document, Answer> map = new HashMap<>();
+		final List<Document> answerList = new ArrayList<>();
+		final List<AnswerQueueElement> elements = new ArrayList<>();
 		AbstractMap.SimpleEntry<Document, AnswerQueueElement> entry;
 		while ((entry = this.answerQueue.poll()) != null) {
 			final Document doc = entry.getKey();
@@ -1645,7 +1630,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 		final ViewResults sessions = getDatabase().view(view);
 
-		final List<Session> result = new ArrayList<Session>();
+		final List<Session> result = new ArrayList<>();
 		for (final Document d : sessions.getResults()) {
 			final Session session = (Session) JSONObject.toBean(
 					d.getJSONObject().getJSONObject("value"),
@@ -1661,20 +1646,20 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	 */
 	private static class ExtendedView extends NovaView {
 
-		public ExtendedView(final String fullname) {
+		ExtendedView(final String fullname) {
 			super(fullname);
 		}
 
-		public void setCourseIdKeys(final List<Course> courses) {
-			List<String> courseIds = new ArrayList<String>();
+		void setCourseIdKeys(final List<Course> courses) {
+			List<String> courseIds = new ArrayList<>();
 			for (Course c : courses) {
 				courseIds.add(c.getId());
 			}
 			setKeys(courseIds);
 		}
 
-		public void setSessionIdKeys(final List<Session> sessions) {
-			List<String> sessionIds = new ArrayList<String>();
+		void setSessionIdKeys(final List<Session> sessions) {
+			List<String> sessionIds = new ArrayList<>();
 			for (Session s : sessions) {
 				sessionIds.add(s.get_id());
 			}
@@ -1729,9 +1714,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	@Caching(evict = { @CacheEvict("sessions"), @CacheEvict(cacheNames="sessions", key="#p0.keyword") })
+	@Caching(evict = { @CacheEvict("sessions"), @CacheEvict(cacheNames = "sessions", key = "#p0.keyword") })
 	public int[] deleteSession(final Session session) {
-		int[] count = new int[] { 0, 0 };
+		int[] count = new int[] {0, 0};
 		try {
 			count = deleteAllQuestionsWithAnswers(session);
 			deleteDocument(session.get_id());
@@ -1775,12 +1760,11 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			NovaView view = new NovaView("logged_in/by_last_activity_for_guests");
 			view.setEndKey(lastActivityBefore);
 			List<Document> results = this.getDatabase().view(view).getResults();
-			Map<String, Object> log = new HashMap<>();
 
 			int count = 0;
 			List<List<Document>> partitions = Lists.partition(results, BULK_PARTITION_SIZE);
 			for (List<Document> partition: partitions) {
-				final List<Document> newDocs = new ArrayList<Document>();
+				final List<Document> newDocs = new ArrayList<>();
 				for (final Document oldDoc : partition) {
 					final Document newDoc = new Document();
 					newDoc.setId(oldDoc.getId());
@@ -1867,8 +1851,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<Question> getAllSkillQuestions(final Session session) {
-		final List<Question> questions = getQuestions(new NovaView("skill_question/by_session"), session);
-		return questions;
+		return getQuestions(new NovaView("skill_question/by_session"), session);
 	}
 
 	private List<Question> getQuestions(final NovaView view, final Session session) {
@@ -1879,7 +1862,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			return null;
 		}
 
-		final List<Question> questions = new ArrayList<Question>();
+		final List<Question> questions = new ArrayList<>();
 
 		Results<Question> results = getDatabase().queryView(view, Question.class);
 		for (final RowResult<Question> row : results.getRows()) {
@@ -1993,12 +1976,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			) {
 		final ViewResults answeredQuestions = getDatabase().view(view);
 
-		final List<String> answered = new ArrayList<String>();
+		final List<String> answered = new ArrayList<>();
 		for (final Document d : answeredQuestions.getResults()) {
 			answered.add(d.getString("value"));
 		}
 
-		final List<String> unanswered = new ArrayList<String>();
+		final List<String> unanswered = new ArrayList<>();
 		for (final String questionId : questions) {
 			if (!answered.contains(questionId)) {
 				unanswered.add(questionId);
@@ -2013,12 +1996,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			) {
 		final ViewResults answeredQuestions = getDatabase().view(view);
 
-		final Map<String, Integer> answered = new HashMap<String, Integer>();
+		final Map<String, Integer> answered = new HashMap<>();
 		for (final Document d : answeredQuestions.getResults()) {
 			answered.put(d.getJSONArray("value").getString(0), d.getJSONArray("value").getInt(1));
 		}
 
-		final List<String> unanswered = new ArrayList<String>();
+		final List<String> unanswered = new ArrayList<>();
 
 		for (final Question question : questions) {
 			if (!"slide".equals(question.getQuestionType()) && (!answered.containsKey(question.get_id())
@@ -2033,9 +2016,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	private List<String> collectQuestionIds(final NovaView view) {
 		final ViewResults results = getDatabase().view(view);
 		if (results.getResults().size() == 0) {
-			return new ArrayList<String>();
+			return new ArrayList<>();
 		}
-		final List<String> ids = new ArrayList<String>();
+		final List<String> ids = new ArrayList<>();
 		for (final Document d : results.getResults()) {
 			ids.add(d.getId());
 		}
@@ -2097,7 +2080,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		for (final Question q : questions) {
 			q.setActive(publish);
 		}
-		final List<Document> documents = new ArrayList<Document>();
+		final List<Document> documents = new ArrayList<>();
 		for (final Question q : questions) {
 			final Document d = toQuestionDocument(session, q);
 			d.setId(q.get_id());
@@ -2130,7 +2113,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				q.setVotingDisabled(disableVoting);
 			}
 		}
-		final List<Document> documents = new ArrayList<Document>();
+		final List<Document> documents = new ArrayList<>();
 		for (final Question q : questions) {
 			final Document d = toQuestionDocument(session, q);
 			d.setId(q.get_id());
@@ -2185,7 +2168,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		for (final Question q : questions) {
 			q.resetQuestionState();
 		}
-		final List<Document> documents = new ArrayList<Document>();
+		final List<Document> documents = new ArrayList<>();
 		for (final Question q : questions) {
 			final Document d = toQuestionDocument(session, q);
 			d.setId(q.get_id());
@@ -2200,7 +2183,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	private int deleteAllAnswersForQuestions(List<Question> questions) {
-		List<String> questionIds = new ArrayList<String>();
+		List<String> questionIds = new ArrayList<>();
 		for (Question q : questions) {
 			questionIds.add(q.get_id());
 		}
@@ -2208,7 +2191,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		bulkView.setKeys(questionIds);
 		bulkView.setIncludeDocs(true);
 		final List<Document> result = getDatabase().view(bulkView).getResults();
-		final List<Document> allAnswers = new ArrayList<Document>();
+		final List<Document> allAnswers = new ArrayList<>();
 		for (Document a : result) {
 			final Document d = new Document(a.getJSONObject("doc"));
 			d.put("_deleted", true);
@@ -2226,8 +2209,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	private int[] deleteAllAnswersWithQuestions(List<Question> questions) {
-		List<String> questionIds = new ArrayList<String>();
-		final List<Document> allQuestions = new ArrayList<Document>();
+		List<String> questionIds = new ArrayList<>();
+		final List<Document> allQuestions = new ArrayList<>();
 		for (Question q : questions) {
 			final Document d = new Document();
 			d.put("_id", q.get_id());
@@ -2241,7 +2224,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		bulkView.setIncludeDocs(true);
 		final List<Document> result = getDatabase().view(bulkView).getResults();
 
-		final List<Document> allAnswers = new ArrayList<Document>();
+		final List<Document> allAnswers = new ArrayList<>();
 		for (Document a : result) {
 			final Document d = new Document(a.getJSONObject("doc"));
 			d.put("_deleted", true);
@@ -2249,16 +2232,16 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 
 		try {
-			List<Document> deleteList = new ArrayList<Document>(allAnswers);
+			List<Document> deleteList = new ArrayList<>(allAnswers);
 			deleteList.addAll(allQuestions);
 			getDatabase().bulkSaveDocuments(deleteList.toArray(new Document[deleteList.size()]));
 
-			return new int[] { deleteList.size(), result.size() };
+			return new int[] {deleteList.size(), result.size()};
 		} catch (IOException e) {
 			LOGGER.error("Could not bulk delete questions and answers: {}", e.getMessage());
 		}
 
-		return new int[] { 0, 0 };
+		return new int[] {0, 0};
 	}
 
 	@Cacheable("learningprogress")
@@ -2374,7 +2357,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			int count = 0;
 			final List<List<Document>> partitions = Lists.partition(results, BULK_PARTITION_SIZE);
 			for (List<Document> partition: partitions) {
-				final List<Document> newDocs = new ArrayList<Document>();
+				final List<Document> newDocs = new ArrayList<>();
 				for (Document oldDoc : partition) {
 					final Document newDoc = new Document();
 					newDoc.setId(oldDoc.getId());
@@ -2407,17 +2390,17 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public SessionInfo importSession(User user, ImportExportSession importSession) {
 		final Session session = this.saveSession(user, importSession.generateSessionEntity(user));
-		List<Document> questions = new ArrayList<Document>();
+		List<Document> questions = new ArrayList<>();
 		// We need to remember which answers belong to which question.
 		// The answers need a questionId, so we first store the questions to get the IDs.
 		// Then we update the answer objects and store them as well.
-		Map<Document, ImportExportQuestion> mapping = new HashMap<Document, ImportExportQuestion>();
+		Map<Document, ImportExportQuestion> mapping = new HashMap<>();
 		// Later, generate all answer documents
-		List<Document> answers = new ArrayList<Document>();
+		List<Document> answers = new ArrayList<>();
 		// We can then push answers together with interposed questions in one large bulk request
-		List<Document> interposedQuestions = new ArrayList<Document>();
+		List<Document> interposedQuestions = new ArrayList<>();
 		// Motds shouldn't be forgotten, too
-		List<Document> motds = new ArrayList<Document>();
+		List<Document> motds = new ArrayList<>();
 		try {
 			// add session id to all questions and generate documents
 			for (ImportExportQuestion question : importSession.getQuestions()) {
@@ -2478,7 +2461,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				d.put("enddate", String.valueOf(m.getEnddate().getTime()));
 				motds.add(d);
 			}
-			List<Document> documents = new ArrayList<Document>(answers);
+			List<Document> documents = new ArrayList<>(answers);
 			database.bulkSaveDocuments(interposedQuestions.toArray(new Document[interposedQuestions.size()]));
 			database.bulkSaveDocuments(motds.toArray(new Document[motds.size()]));
 			database.bulkSaveDocuments(documents.toArray(new Document[documents.size()]));
@@ -2498,7 +2481,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		importExportSession.setSessionFromSessionObject(session);
 		List<Question> questionList = getDatabaseDao().getAllSkillQuestions(session);
 		for (Question question : questionList) {
-			List<de.thm.arsnova.entities.transport.Answer> answerList = new ArrayList<de.thm.arsnova.entities.transport.Answer>();
+			List<de.thm.arsnova.entities.transport.Answer> answerList = new ArrayList<>();
 			if (withAnswers) {
 				for (Answer a : this.getDatabaseDao().getAllAnswers(question)) {
 					de.thm.arsnova.entities.transport.Answer transportAnswer = new de.thm.arsnova.entities.transport.Answer(a);
@@ -2518,7 +2501,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			importExportSession.addQuestionWithAnswers(question, answerList);
 		}
 		if (withFeedbackQuestions) {
-			List<de.thm.arsnova.entities.transport.InterposedQuestion> interposedQuestionList = new ArrayList<de.thm.arsnova.entities.transport.InterposedQuestion>();
+			List<de.thm.arsnova.entities.transport.InterposedQuestion> interposedQuestionList = new ArrayList<>();
 			for (InterposedQuestion i : getDatabaseDao().getInterposedQuestions(session, 0, 0)) {
 				de.thm.arsnova.entities.transport.InterposedQuestion transportInterposedQuestion = new de.thm.arsnova.entities.transport.InterposedQuestion(i);
 				interposedQuestionList.add(transportInterposedQuestion);
@@ -2532,7 +2515,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return importExportSession;
 	}
 
-	public SessionInfo calculateSessionInfo(ImportExportSession importExportSession, Session session) {
+	private SessionInfo calculateSessionInfo(ImportExportSession importExportSession, Session session) {
 		int unreadInterposed = 0;
 		int numUnanswered = 0;
 		int numAnswers = 0;
@@ -2558,7 +2541,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<String> getSubjects(Session session, String questionVariant) {
-		String viewString = "";
+		String viewString;
 		if ("lecture".equals(questionVariant)) {
 			viewString = "skill_question/lecture_question_subjects_by_session";
 		} else {
@@ -2578,14 +2561,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			uniqueSubjects.add(d.getString("value"));
 		}
 
-		List<String> uniqueSubjectsList = new ArrayList<>(uniqueSubjects);
-
-		return uniqueSubjectsList;
+		return new ArrayList<>(uniqueSubjects);
 	}
 
 	@Override
 	public List<String> getQuestionIdsBySubject(Session session, String questionVariant, String subject) {
-		String viewString = "";
+		String viewString;
 		if ("lecture".equals(questionVariant)) {
 			viewString = "skill_question/lecture_question_ids_by_session_and_subject";
 		} else {
@@ -2619,7 +2600,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 			return null;
 		}
-		final List<Question> result = new ArrayList<Question>();
+		final List<Question> result = new ArrayList<>();
 		final MorpherRegistry morpherRegistry = JSONUtils.getMorpherRegistry();
 		final Morpher dynaMorpher = new BeanMorpher(PossibleAnswer.class, morpherRegistry);
 		morpherRegistry.registerMorpher(dynaMorpher);
@@ -2637,7 +2618,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 					document.getJSONObject().getJSONObject("doc").getJSONArray("possibleAnswers"),
 					PossibleAnswer.class
 					);
-			question.setPossibleAnswers(new ArrayList<PossibleAnswer>(answers));
+			question.setPossibleAnswers(new ArrayList<>(answers));
 			question.setSessionKeyword(session.getKeyword());
 			if (!"freetext".equals(question.getQuestionType()) && 0 == question.getPiRound()) {
 				/* needed for legacy questions whose piRound property has not been set */
@@ -2698,7 +2679,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Motd> getMotds(NovaView view) {
 		final ViewResults motddocs = this.getDatabase().view(view);
-		List<Motd> motdlist = new ArrayList<Motd>();
+		List<Motd> motdlist = new ArrayList<>();
 		for (final Document d : motddocs.getResults()) {
 			Motd motd = new Motd();
 			motd.set_id(d.getId());

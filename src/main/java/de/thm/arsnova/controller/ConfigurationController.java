@@ -162,10 +162,10 @@ public class ConfigurationController extends AbstractController {
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public HashMap<String, Object> getConfiguration(HttpServletRequest request) {
-		HashMap<String, Object> config = new HashMap<String, Object>();
-		HashMap<String, Boolean> features = new HashMap<String, Boolean>();
-		HashMap<String, String> publicPool = new HashMap<String, String>();
-		HashMap<String, Object> splashscreen = new HashMap<String, Object>();
+		HashMap<String, Object> config = new HashMap<>();
+		HashMap<String, Boolean> features = new HashMap<>();
+		HashMap<String, String> publicPool = new HashMap<>();
+		HashMap<String, Object> splashscreen = new HashMap<>();
 
 		/* The API path could be unknown to the client in case the request was forwarded */
 		if ("".equals(apiPath)) {
@@ -268,7 +268,7 @@ public class ConfigurationController extends AbstractController {
 		}
 
 		if (!"".equals(trackingTrackerUrl)) {
-			HashMap<String, String> tracking = new HashMap<String, String>();
+			HashMap<String, String> tracking = new HashMap<>();
 			config.put("tracking", tracking);
 
 			tracking.put("provider", trackingProvider);

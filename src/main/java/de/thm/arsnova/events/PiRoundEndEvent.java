@@ -52,7 +52,7 @@ public class PiRoundEndEvent extends SessionEvent {
 	}
 
 	public HashMap<String, String> getPiRoundEndInformations() {
-		HashMap<String, String> map = new HashMap<String, String>();
+		HashMap<String, String> map = new HashMap<>();
 
 		map.put("_id", getQuestionId());
 		map.put("variant", getQuestionVariant());

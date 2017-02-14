@@ -41,7 +41,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -140,7 +139,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 		if (twitterEnabled) {
 			http.addFilterAfter(twitterFilter(), CasAuthenticationFilter.class);
 		}
-	};
+	}
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -170,7 +169,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 			auth.authenticationProvider(twitterAuthProvider());
 		}
 		logger.info("Enabled authentication providers: {}", providers);
-	};
+	}
 
 	@Bean
 	@Override
@@ -181,10 +180,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		final PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
-		configurer.setLocations(new Resource[] {
-				new ClassPathResource("arsnova.properties.example"),
-				new FileSystemResource("file:///etc/arsnova/arsnova.properties"),
-		});
+		configurer.setLocations(
+			new ClassPathResource("arsnova.properties.example"),
+			new FileSystemResource("file:///etc/arsnova/arsnova.properties")
+		);
 		configurer.setIgnoreResourceNotFound(true);
 		configurer.setIgnoreUnresolvablePlaceholders(false);
 
@@ -251,7 +250,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 	// LDAP Authentication Configuration
 
 	@Bean
-	public LdapAuthenticationProvider ldapAuthenticationProvider() throws Exception {
+	public LdapAuthenticationProvider ldapAuthenticationProvider() {
 		LdapAuthenticationProvider ldapAuthenticationProvider = new LdapAuthenticationProvider(ldapAuthenticator(), ldapAuthoritiesPopulator());
 		ldapAuthenticationProvider.setUserDetailsContextMapper(customLdapUserDetailsMapper());
 
@@ -259,7 +258,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 	}
 
 	@Bean
-	public LdapContextSource ldapContextSource() throws Exception {
+	public LdapContextSource ldapContextSource() {
 		DefaultSpringSecurityContextSource contextSource = new DefaultSpringSecurityContextSource(ldapUrl);
 		/* TODO: implement support for LDAP bind using manager credentials */
 		if (!"".equals(ldapManagerUserDn) && !"".equals(ldapManagerPassword)) {
@@ -272,7 +271,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 	}
 
 	@Bean
-	public LdapAuthenticator ldapAuthenticator() throws Exception {
+	public LdapAuthenticator ldapAuthenticator() {
 		BindAuthenticator authenticator = new BindAuthenticator(ldapContextSource());
 		authenticator.setUserAttributes(new String[] {ldapUserIdAttr});
 		if (!"".equals(ldapSearchFilter)) {
@@ -287,7 +286,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 	}
 
 	@Bean
-	public LdapAuthoritiesPopulator ldapAuthoritiesPopulator() throws Exception {
+	public LdapAuthoritiesPopulator ldapAuthoritiesPopulator() {
 		return new NullLdapAuthoritiesPopulator();
 	}
 

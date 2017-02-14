@@ -39,9 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -67,7 +65,7 @@ public class LecturerQuestionControllerTest {
 
 	private void setAuthenticated(final boolean isAuthenticated, final String username) {
 		if (isAuthenticated) {
-			final List<GrantedAuthority> ga = new ArrayList<GrantedAuthority>();
+			final List<GrantedAuthority> ga = new ArrayList<>();
 			final UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, "secret", ga);
 			SecurityContextHolder.getContext().setAuthentication(token);
 			userService.setUserAuthenticated(isAuthenticated, username);

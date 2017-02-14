@@ -46,7 +46,7 @@ import org.springframework.security.core.session.SessionRegistryImpl;
 @Profile("test")
 public class TestSecurityConfig extends SecurityConfig {
 	@Override
-	protected void configure(HttpSecurity http) {};
+	protected void configure(HttpSecurity http) {}
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {

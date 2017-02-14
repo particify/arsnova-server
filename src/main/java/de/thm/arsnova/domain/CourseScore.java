@@ -48,13 +48,6 @@ public class CourseScore implements Iterable<QuestionScore> {
 		scores.put(questionId, new QuestionScore(questionId, questionVariant, piRound, questionScore));
 	}
 
-	/**
-	 * @pre questionId has been added before.
-	 * @pre username is set
-	 * @param questionId
-	 * @param username
-	 * @param userscore
-	 */
 	public void addAnswer(String questionId, int piRound, String username, int userscore) {
 		if (!scores.containsKey(questionId)) {
 			// Precondition failed, ignore this element.
@@ -70,7 +63,7 @@ public class CourseScore implements Iterable<QuestionScore> {
 	}
 
 	public CourseScore filterVariant(String questionVariant) {
-		Map<String, QuestionScore> newScores = new HashMap<String, QuestionScore>();
+		Map<String, QuestionScore> newScores = new HashMap<>();
 		for (Entry<String, QuestionScore> entry : this.scores.entrySet()) {
 			String questionId = entry.getKey();
 			QuestionScore questionScore = entry.getValue();
@@ -106,7 +99,7 @@ public class CourseScore implements Iterable<QuestionScore> {
 	}
 
 	public int getTotalUserCount() {
-		Set<String> users = new HashSet<String>();
+		Set<String> users = new HashSet<>();
 		for (QuestionScore questionScore : this) {
 			questionScore.collectUsers(users);
 		}

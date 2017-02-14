@@ -36,7 +36,7 @@ public abstract class AbstractControllerTest {
 	}
 
 	protected void setAuthenticated(final boolean isAuthenticated, final String username) {
-		final List<GrantedAuthority> ga = new ArrayList<GrantedAuthority>();
+		final List<GrantedAuthority> ga = new ArrayList<>();
 		if (isAuthenticated) {
 			final UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, "secret", ga);
 			SecurityContextHolder.getContext().setAuthentication(token);

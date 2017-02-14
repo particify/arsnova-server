@@ -35,7 +35,7 @@ public class Feedback {
 	private final List<Integer> values;
 
 	public Feedback(final int a, final int b, final int c, final int d) {
-		values = new ArrayList<Integer>();
+		values = new ArrayList<>();
 		values.add(a);
 		values.add(b);
 		values.add(c);

@@ -70,7 +70,7 @@ public class PiRoundDelayedStartEvent extends SessionEvent {
 	}
 
 	public HashMap<String, Object> getPiRoundInformations() {
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		HashMap<String, Object> map = new HashMap<>();
 
 		map.put("_id", getQuestionId());
 		map.put("endTime", getEndTime());

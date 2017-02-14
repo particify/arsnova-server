@@ -81,7 +81,7 @@ public class WelcomeController extends AbstractController {
 	@RequestMapping(value = "/checkframeoptionsheader", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
 	public void checkFrameOptionsHeader(
-			@RequestParam(required = true) final String url,
+			@RequestParam final String url,
 			final HttpServletRequest request
 		) {
 		/* Block requests from the server itself to prevent DoS attacks caused by request loops */

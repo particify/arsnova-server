@@ -98,12 +98,10 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	}
 
 	private boolean checkAdminPermission(final String username) {
-		/** TODO only allow accounts from arsnova db **/
+		/* TODO: only allow accounts from arsnova db */
 		String[] splittedAdminNames = adminAccounts.split(",");
-		if (Arrays.asList(splittedAdminNames).contains(username)) {
-			return true;
-		}
-		return false;
+
+		return Arrays.asList(splittedAdminNames).contains(username);
 	}
 
 	private boolean checkSessionPermission(
@@ -128,10 +126,8 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Question question = dao.getQuestion(targetId.toString());
 			if (question != null) {
 				final Session session = dao.getSessionFromId(question.getSessionId());
-				if (session == null) {
-					return false;
-				}
-				return session.getCreator().equals(username);
+
+				return session != null && session.getCreator().equals(username);
 			}
 		}
 		return false;
@@ -151,10 +147,8 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				}
 				// Allow deletion if requested by session owner
 				final Session session = dao.getSessionFromKeyword(question.getSessionId());
-				if (session == null) {
-					return false;
-				}
-				return session.getCreator().equals(username);
+
+				return session != null && session.getCreator().equals(username);
 			}
 		}
 		return false;

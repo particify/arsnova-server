@@ -36,7 +36,7 @@ public class CasUserDetailsService extends AbstractCasAssertionUserDetailsServic
 
 	@Override
 	protected UserDetails loadUserDetails(final Assertion assertion) {
-		final List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
+		final List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 
 		return new User(

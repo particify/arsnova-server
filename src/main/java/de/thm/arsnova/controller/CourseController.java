@@ -69,7 +69,7 @@ public class CourseController extends AbstractController {
 			throw new NotImplementedException();
 		}
 
-		final List<Course> result = new ArrayList<Course>();
+		final List<Course> result = new ArrayList<>();
 
 		for (final Course course : connectorClient.getCourses(currentUser.getUsername()).getCourse()) {
 			if (

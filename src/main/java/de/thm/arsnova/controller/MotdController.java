@@ -38,7 +38,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -67,7 +66,7 @@ public class MotdController extends AbstractController {
 		@ApiParam(value = "audience", required = false) @RequestParam(value = "audience", defaultValue = "all") final String audience,
 		@ApiParam(value = "sessionkey", required = false) @RequestParam(value = "sessionkey", defaultValue = "null") final String sessionkey
 	) {
-		List<Motd> motds = new ArrayList<Motd>();
+		List<Motd> motds;
 		Date client = new Date(System.currentTimeMillis());
 		if (!clientdate.isEmpty()) {
 			client.setTime(Long.parseLong(clientdate));
@@ -96,7 +95,7 @@ public class MotdController extends AbstractController {
 			final HttpServletResponse response
 			) {
 		if (motd != null) {
-			Motd newMotd = new Motd();
+			Motd newMotd;
 			if (motd.getAudience().equals("session") && motd.getSessionkey() != null) {
 				newMotd = motdService.saveSessionMotd(motd.getSessionkey(), motd);
 			} else {

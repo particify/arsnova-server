@@ -234,19 +234,15 @@ public class LecturerQuestionController extends PaginationController {
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false) final boolean lectureQuestionsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) final boolean preparationQuestionsOnly
 			) {
-		boolean p = true;
+		boolean p = publish == null || publish;
 		List<Question> questions;
-
-		if (publish != null) {
-			p = publish;
-		}
 
 		if (lectureQuestionsOnly) {
 			questions = questionService.getLectureQuestions(sessionkey);
-			questionService.publishQuestions(sessionkey, publish, questions);
+			questionService.publishQuestions(sessionkey, p, questions);
 		} else if (preparationQuestionsOnly) {
 			questions = questionService.getPreparationQuestions(sessionkey);
-			questionService.publishQuestions(sessionkey, publish, questions);
+			questionService.publishQuestions(sessionkey, p, questions);
 		} else {
 			questionService.publishAll(sessionkey, p);
 		}
@@ -309,7 +305,7 @@ public class LecturerQuestionController extends PaginationController {
 			questions = questionService.replaceImageData(questions);
 		}
 
-		return new PaginationListDecorator<Question>(questions, offset, limit);
+		return new PaginationListDecorator<>(questions, offset, limit);
 	}
 
 	@ApiOperation(value = "Delete skill questions",
@@ -392,8 +388,6 @@ public class LecturerQuestionController extends PaginationController {
 	/**
 	 * returns a JSON document which represents the given answer of a question.
 	 *
-	 * @param sessionKey
-	 *            Session Keyword to which the question belongs to
 	 * @param questionId
 	 *            CouchDB Question ID for which the given answer should be
 	 *            retrieved
@@ -428,12 +422,9 @@ public class LecturerQuestionController extends PaginationController {
 	 * <tt>answerText</tt>, <tt>answerSubject</tt> and <tt>answerCount</tt>
 	 * properties are set
 	 *
-	 * @param sessionKey
-	 *            Session Keyword to which the question belongs to
 	 * @param questionId
 	 *            CouchDB Question ID for which the given answers should be
 	 *            retrieved
-	 * @return List<{@link Answer}> or {@link NotFoundException}
 	 * @throws NotFoundException
 	 *             if wrong session, wrong question or no answers was given
 	 * @throws ForbiddenException
@@ -448,7 +439,7 @@ public class LecturerQuestionController extends PaginationController {
 			@RequestParam(value = "all", required = false, defaultValue = "false") final Boolean allAnswers,
 			final HttpServletResponse response
 			) {
-		List<Answer> answers = null;
+		List<Answer> answers;
 		if (allAnswers) {
 			answers = questionService.getAllAnswers(questionId, -1, -1);
 		} else if (null == piRound) {
@@ -462,7 +453,7 @@ public class LecturerQuestionController extends PaginationController {
 			answers = questionService.getAnswers(questionId, piRound, offset, limit);
 		}
 		if (answers == null) {
-			return new ArrayList<Answer>();
+			return new ArrayList<>();
 		}
 		return answers;
 	}
@@ -543,8 +534,6 @@ public class LecturerQuestionController extends PaginationController {
 
 	/**
 	 *
-	 * @param sessionKey
-	 *            Session Keyword to which the question belongs to
 	 * @param questionId
 	 *            CouchDB Question ID for which the given answers should be
 	 *            retrieved
@@ -584,12 +573,10 @@ public class LecturerQuestionController extends PaginationController {
 			nickname = "getAnswerAndAbstentionCount")
 	@RequestMapping(value = "/{questionId}/answerandabstentioncount", method = RequestMethod.GET)
 	public List<Integer> getAnswerAndAbstentionCount(@PathVariable final String questionId) {
-		List<Integer> list = Arrays.asList(
+		return Arrays.asList(
 			questionService.getAnswerCount(questionId),
 			questionService.getAbstentionAnswerCount(questionId)
 		);
-
-		return list;
 	}
 
 	@ApiOperation(value = "Get all Freetext answers by a question, identified by the question ID",

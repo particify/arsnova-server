@@ -26,10 +26,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import static de.thm.arsnova.ImageUtils.IMAGE_PREFIX_MIDDLE;
 import static de.thm.arsnova.ImageUtils.IMAGE_PREFIX_START;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration

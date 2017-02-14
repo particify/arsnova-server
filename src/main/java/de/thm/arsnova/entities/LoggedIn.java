@@ -31,7 +31,7 @@ public class LoggedIn {
 	private String user;
 	private String sessionId;
 	private long timestamp;
-	private List<VisitedSession> visitedSessions = new ArrayList<VisitedSession>();
+	private List<VisitedSession> visitedSessions = new ArrayList<>();
 	private List<String> _conflicts;
 
 	public LoggedIn() {
