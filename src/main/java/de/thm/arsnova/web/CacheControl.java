@@ -34,11 +34,11 @@ public @interface CacheControl {
 		PRIVATE("private"),
 		PUBLIC("public");
 
-		private Policy() {
+		Policy() {
 			this.policyString = null;
 		}
 
-		private Policy(String policyString) {
+		Policy(String policyString) {
 			this.policyString = policyString;
 		}
 

@@ -31,7 +31,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -44,18 +43,18 @@ import java.net.URL;
 public class ImageUtils {
 
 	// Or whatever size you want to read in at a time.
-	private static final int CHUNK_SIZE = 4096;
+	static final int CHUNK_SIZE = 4096;
 
 	/** Base64-Mimetype-Prefix start */
-	public static final String IMAGE_PREFIX_START = "data:image/";
+	static final String IMAGE_PREFIX_START = "data:image/";
 
 	/** Base64-Mimetype-Prefix middle part */
-	public static final String IMAGE_PREFIX_MIDDLE = ";base64,";
+	static final String IMAGE_PREFIX_MIDDLE = ";base64,";
 
 	/* default value is 200 pixel in width, set the value in the configuration file */
-	private static final int THUMB_WIDTH_DEFAULT = 200;
+	static final int THUMB_WIDTH_DEFAULT = 200;
 	/* default value is 200 pixel in height, set the value in the configuration file */
-	private static final int THUMB_HEIGHT_DEFAULT = 200;
+	static final int THUMB_HEIGHT_DEFAULT = 200;
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(ImageUtils.class);
 
@@ -74,7 +73,6 @@ public class ImageUtils {
 	public String encodeImageToString(final String imageUrl) {
 
 		final String[] urlParts = imageUrl.split("\\.");
-		final StringBuilder result   = new StringBuilder();
 
 		// get format
 		//
@@ -83,10 +81,7 @@ public class ImageUtils {
 		if (urlParts.length > 0) {
 			final String extension = urlParts[urlParts.length - 1];
 
-			result.append("data:image/" + extension + ";base64,");
-			result.append(Base64.encodeBase64String(convertFileToByteArray(imageUrl)));
-
-			return result.toString();
+			return "data:image/" + extension + ";base64," + Base64.encodeBase64String(convertFileToByteArray(imageUrl));
 		}
 
 		return null;
@@ -98,7 +93,7 @@ public class ImageUtils {
 	 * @param maybeImage The Image as a base64 encoded {@link String}
 	 * @return true if the string is a potentially a base 64 encoded image.
 	 */
-	public boolean isBase64EncodedImage(String maybeImage) {
+	boolean isBase64EncodedImage(String maybeImage) {
 		return extractImageInfo(maybeImage) != null;
 	}
 
@@ -113,7 +108,7 @@ public class ImageUtils {
 	 * @return two-dimensional {@link String}-array containing the information
 	 *         "extension" and the "raw-image-{@link String}"
 	 */
-	public String[] extractImageInfo(final String maybeImage) {
+	String[] extractImageInfo(final String maybeImage) {
 		if (maybeImage == null) {
 			return null;
 		} else if (maybeImage.isEmpty()) {
@@ -159,7 +154,7 @@ public class ImageUtils {
 	 * @return The rescaled Image as Base64-encoded {@link String}, returns null
 	 *         if the passed-on image isn't in a valid format (a Base64-Image).
 	 */
-	public String createCover(String originalImageString, final int width, final int height) {
+	String createCover(String originalImageString, final int width, final int height) {
 		if (!isBase64EncodedImage(originalImageString)) {
 			return null;
 		} else {
@@ -230,41 +225,11 @@ public class ImageUtils {
 
 	/**
 	 * Gets the bytestream of an image url.
-	 * s
-	 * @param  imageUrl The image url as a {@link String}
-	 * @return The <code>byte[]</code> of the image on success, otherwise <code>null</code>.
-	 */
-	public byte[] convertImageToByteArray(final String imageUrl, final String extension) {
-
-		try {
-			final URL url = new URL(imageUrl);
-			final BufferedImage image = ImageIO.read(url);
-			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-			ImageIO.write(image, extension, baos);
-
-			baos.flush();
-			baos.close();
-			return baos.toByteArray();
-
-		} catch (final MalformedURLException e) {
-			LOGGER.error(e.getLocalizedMessage());
-		} catch (final IOException e) {
-			LOGGER.error(e.getLocalizedMessage());
-		}
-
-		return null;
-	}
-
-	/**
-	 * Gets the bytestream of an image url.
 	 *
 	 * @param  imageUrl The image url as a {@link String}
 	 * @return The <code>byte[]</code> of the image on success, otherwise <code>null</code>.
 	 */
-	public byte[] convertFileToByteArray(final String imageUrl) {
-
-
+	byte[] convertFileToByteArray(final String imageUrl) {
 		try {
 			final URL url = new URL(imageUrl);
 			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -282,9 +247,7 @@ public class ImageUtils {
 
 			return baos.toByteArray();
 
-		} catch (final MalformedURLException e) {
-			LOGGER.error(e.getLocalizedMessage());
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			LOGGER.error(e.getLocalizedMessage());
 		}
 

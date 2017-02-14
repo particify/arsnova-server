@@ -17,17 +17,16 @@
  */
 package de.thm.arsnova.entities.transport;
 
-import java.util.ArrayList;
+import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.User;
-import de.thm.arsnova.entities.Motd;
-import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.SessionFeature;
+import de.thm.arsnova.entities.SessionInfo;
+import de.thm.arsnova.entities.User;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.context.annotation.Import;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -50,9 +49,9 @@ public class ImportExportSession {
 	private SessionInfo sessionInfo;
 
 	public ImportExportSession() {
-		questions = new ArrayList<ImportExportQuestion>();
-		feedbackQuestions = new ArrayList<InterposedQuestion>();
-		motds = new ArrayList<Motd>();
+		questions = new ArrayList<>();
+		feedbackQuestions = new ArrayList<>();
+		motds = new ArrayList<>();
 		sessionInfo = null;
 	}
 

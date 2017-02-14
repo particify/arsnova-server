@@ -61,7 +61,7 @@ public class SessionInfo {
 	public SessionInfo() { }
 
 	public static List<SessionInfo> fromSessionList(List<Session> sessions) {
-		List<SessionInfo> infos = new ArrayList<SessionInfo>();
+		List<SessionInfo> infos = new ArrayList<>();
 		for (Session s : sessions) {
 			infos.add(new SessionInfo(s));
 		}

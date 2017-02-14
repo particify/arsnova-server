@@ -43,13 +43,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @WebAppConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -72,7 +68,7 @@ public class SessionServiceTest {
 
 	private void setAuthenticated(final boolean isAuthenticated, final String username) {
 		if (isAuthenticated) {
-			final List<GrantedAuthority> ga = new ArrayList<GrantedAuthority>();
+			final List<GrantedAuthority> ga = new ArrayList<>();
 			final UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, "secret", ga);
 			SecurityContextHolder.getContext().setAuthentication(token);
 			userService.setUserAuthenticated(isAuthenticated, username);

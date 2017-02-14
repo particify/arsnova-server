@@ -31,10 +31,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class StubDatabaseDao implements IDatabaseDao {
 
-	private static Map<String, Session> stubSessions = new ConcurrentHashMap<String, Session>();
-	private static Map<String, Feedback> stubFeedbacks = new ConcurrentHashMap<String, Feedback>();
-	private static Map<String, List<Question>> stubQuestions = new ConcurrentHashMap<String, List<Question>>();
-	private static Map<String, User> stubUsers = new ConcurrentHashMap<String, User>();
+	private static Map<String, Session> stubSessions = new ConcurrentHashMap<>();
+	private static Map<String, Feedback> stubFeedbacks = new ConcurrentHashMap<>();
+	private static Map<String, List<Question>> stubQuestions = new ConcurrentHashMap<>();
+	private static Map<String, User> stubUsers = new ConcurrentHashMap<>();
 
 	public InterposedQuestion interposedQuestion;
 
@@ -91,7 +91,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	private void fillWithDummyQuestions() {
-		List<Question> questions = new ArrayList<Question>();
+		List<Question> questions = new ArrayList<>();
 		questions.add(new Question());
 		stubQuestions.put("12345678", questions);
 	}
@@ -232,7 +232,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public List<Answer> getMyAnswers(User user, Session session) {
-		return new ArrayList<Answer>();
+		return new ArrayList<>();
 	}
 
 	@Override

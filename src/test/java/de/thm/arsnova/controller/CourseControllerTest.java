@@ -71,7 +71,7 @@ public class CourseControllerTest {
 
 	private void setAuthenticated(final boolean isAuthenticated, final String username) {
 		if (isAuthenticated) {
-			final List<GrantedAuthority> ga = new ArrayList<GrantedAuthority>();
+			final List<GrantedAuthority> ga = new ArrayList<>();
 			final UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, "secret", ga);
 			SecurityContextHolder.getContext().setAuthentication(token);
 			userService.setUserAuthenticated(isAuthenticated, username);

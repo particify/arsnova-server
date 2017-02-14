@@ -35,10 +35,6 @@ public class UserSessionAspect {
 	private UserSessionService userSessionService;
 
 	/** Sets current user and ARSnova session in session scoped UserSessionService
-	 *
-	 * @param jp
-	 * @param keyword
-	 * @param session
 	 */
 	@AfterReturning(
 			pointcut = "execution(public * de.thm.arsnova.services.SessionService.joinSession(..)) && args(keyword)",

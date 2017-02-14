@@ -23,7 +23,6 @@ import de.thm.arsnova.services.UserSessionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,7 +51,7 @@ public class UserController extends AbstractController {
 	public static final Logger LOGGER = LoggerFactory
 			.getLogger(UserController.class);
 
-	@RequestMapping(value = { "/register" }, method = RequestMethod.POST)
+	@RequestMapping(value = "/register", method = RequestMethod.POST)
 	public void register(@RequestParam final String username,
 			@RequestParam final String password,
 			final HttpServletRequest request, final HttpServletResponse response) {
@@ -64,7 +63,7 @@ public class UserController extends AbstractController {
 		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 	}
 
-	@RequestMapping(value = { "/{username}/activate" }, method = { RequestMethod.POST,
+	@RequestMapping(value = "/{username}/activate", method = { RequestMethod.POST,
 			RequestMethod.GET })
 	public void activate(
 			@PathVariable final String username,
@@ -81,7 +80,7 @@ public class UserController extends AbstractController {
 		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 	}
 
-	@RequestMapping(value = { "/{username}/" }, method = RequestMethod.DELETE)
+	@RequestMapping(value = "/{username}/", method = RequestMethod.DELETE)
 	public void activate(
 			@PathVariable final String username,
 			final HttpServletRequest request,
@@ -91,7 +90,7 @@ public class UserController extends AbstractController {
 		}
 	}
 
-	@RequestMapping(value = { "/{username}/resetpassword" }, method = RequestMethod.POST)
+	@RequestMapping(value = "/{username}/resetpassword", method = RequestMethod.POST)
 	public void resetPassword(
 			@PathVariable final String username,
 			@RequestParam(required = false) final String key,

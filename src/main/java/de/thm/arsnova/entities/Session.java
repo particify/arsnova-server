@@ -65,7 +65,7 @@ public class Session implements Serializable {
 	/**
 	 * Returns a copy of the given session without any information that identifies a person.
 	 * @param original The session to create a anonymized copy of
-	 * @return
+	 * @return The anonymized copy of the session
 	 */
 	public static Session anonymizedCopy(final Session original) {
 		final Session copy = new Session();
@@ -341,7 +341,7 @@ public class Session implements Serializable {
 	public void setFeedbackLock(Boolean lock) {
 		this.feedbackLock = lock;
 	}
-	
+
 	@ApiModelProperty(required = true, value = "the flashcard flip condition")
 	public boolean getFlipFlashcards() {
 		return flipFlashcards;

@@ -700,10 +700,7 @@ public class Question implements Serializable {
 	}
 
 	public boolean isSuccessfulFreeTextAnswer(String answerTextRaw) {
-		if (answerTextRaw != null) {
-			return answerTextRaw.equals(this.getCorrectAnswer());
-		}
-		return false;
+		return answerTextRaw != null && answerTextRaw.equals(this.getCorrectAnswer());
 	}
 
 	public void updateRoundStartVariables(Date start, Date end) {
@@ -769,9 +766,9 @@ public class Question implements Serializable {
 	private int calculateGridValue(Answer answer) {
 		int value = 0;
 		String[] answers = answer.getAnswerText().split(",");
-		for (int i = 0; i < answers.length; i++) {
+		for (String a : answers) {
 			for (PossibleAnswer p : this.possibleAnswers) {
-				if (answers[i].equals(p.getText())) {
+				if (a.equals(p.getText())) {
 					value += p.getValue();
 				}
 			}

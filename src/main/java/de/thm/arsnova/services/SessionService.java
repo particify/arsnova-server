@@ -52,7 +52,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -191,8 +190,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public Session getSessionForAdmin(final String keyword) {
-		final Session session = databaseDao.getSessionFromKeyword(keyword);
-		return session;
+		return databaseDao.getSessionFromKeyword(keyword);
 	}
 
 	/*
@@ -398,13 +396,6 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	public void deleteSession(final String sessionkey) {
 		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
 
-		List<String> prepSubjects = databaseDao.getSubjects(session, "preparation");
-		if (prepSubjects == null) {
-			prepSubjects = new ArrayList<String>();
-		} else {
-			prepSubjects.add("");
-		}
-
 		databaseDao.deleteSession(session);
 
 		this.publisher.publishEvent(new DeleteSessionEvent(this, session));
@@ -504,12 +495,6 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		return databaseDao.updateSession(session).getFlipFlashcards();
 	}
 
-	/**
-	 *
-	 * @param session
-	 * @throws PayloadTooLargeException
-	 * @throws BadRequestException
-	 */
 	private void handleLogo(Session session) {
 		if (session.getPpLogo() != null) {
 			if (session.getPpLogo().startsWith("http")) {

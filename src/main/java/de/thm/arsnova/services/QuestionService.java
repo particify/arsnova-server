@@ -40,11 +40,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -72,7 +69,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(QuestionService.class);
 
-	private HashMap<String, Timer> timerList = new HashMap<String, Timer>();
+	private HashMap<String, Timer> timerList = new HashMap<>();
 
 	public void setDatabaseDao(final IDatabaseDao databaseDao) {
 		this.databaseDao = databaseDao;
@@ -287,7 +284,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
 		question.setVotingDisabled(disableVoting);
 
-		if (disableVoting == false && !question.isActive()) {
+		if (!disableVoting && !question.isActive()) {
 			question.setActive(true);
 			update(question);
 		} else {
@@ -536,14 +533,14 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final Session session = getSession(sessionKey);
 		// Load questions first because we are only interested in answers of the latest piRound.
 		final List<Question> questions = databaseDao.getSkillQuestionsForUsers(session);
-		final Map<String, Question> questionIdToQuestion = new HashMap<String, Question>();
+		final Map<String, Question> questionIdToQuestion = new HashMap<>();
 		for (final Question question : questions) {
 			questionIdToQuestion.put(question.get_id(), question);
 		}
 
 		/* filter answers by active piRound per question */
 		final List<Answer> answers = databaseDao.getMyAnswers(userService.getCurrentUser(), session);
-		final List<Answer> filteredAnswers = new ArrayList<Answer>();
+		final List<Answer> filteredAnswers = new ArrayList<>();
 		for (final Answer answer : answers) {
 			final Question question = questionIdToQuestion.get(answer.getQuestionId());
 			if (question == null) {
@@ -685,7 +682,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		if ("freetext".equals(question.getQuestionType())) {
 			imageUtils.generateThumbnailImage(theAnswer);
 			if (question.isFixedAnswer() && question.getText() != null) {
-				theAnswer.setAnswerTextRaw(new String(theAnswer.getAnswerText()));
+				theAnswer.setAnswerTextRaw(theAnswer.getAnswerText());
 
 				if (question.isStrictMode()) {
 					question.checkTextStrictOptions(theAnswer);
@@ -828,7 +825,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	public Map<String, Object> getAnswerAndAbstentionCountInternal(final String questionId) {
 		final Question question = getQuestion(questionId);
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		HashMap<String, Object> map = new HashMap<>();
 
 		if (question == null) {
 			return null;

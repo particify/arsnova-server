@@ -44,6 +44,6 @@ public class ResponseInterceptorHandler extends HandlerInterceptorAdapter {
 		responseProviderService.setResponse(response);
 
 		return true;
-	};
+	}
 
 }

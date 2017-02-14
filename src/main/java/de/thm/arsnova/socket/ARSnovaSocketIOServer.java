@@ -17,7 +17,6 @@
  */
 package de.thm.arsnova.socket;
 
-import com.codahale.metrics.annotation.Metered;
 import com.codahale.metrics.annotation.Timed;
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.Configuration;
@@ -55,7 +54,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -110,9 +109,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	}
 
 	public void startServer() {
-		/**
-		 * hack: listen to ipv4 adresses
-		 */
+		/* hack: listen to ipv4 adresses */
 		System.setProperty("java.net.preferIPv4Stack", "true");
 
 		SocketConfig soConfig = new SocketConfig();
@@ -145,9 +142,9 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 				final de.thm.arsnova.entities.Session session = sessionService.getSessionInternal(sessionKey, u);
 
 				if (session.getFeedbackLock()) {
-					LOGGER.debug("Feedback save blocked: {}", new Object[] {u, sessionKey, data.getValue()});
+					LOGGER.debug("Feedback save blocked: {}", u, sessionKey, data.getValue());
 				} else {
-					LOGGER.debug("Feedback recieved: {}", new Object[] {u, sessionKey, data.getValue()});
+					LOGGER.debug("Feedback recieved: {}", u, sessionKey, data.getValue());
 					if (null != sessionKey) {
 						feedbackService.saveFeedback(sessionKey, data.getValue(), u);
 					}
@@ -322,7 +319,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	}
 
 	public void reportDeletedFeedback(final User user, final Set<de.thm.arsnova.entities.Session> arsSessions) {
-		final List<String> keywords = new ArrayList<String>();
+		final List<String> keywords = new ArrayList<>();
 		for (final de.thm.arsnova.entities.Session session : arsSessions) {
 			keywords.add(session.getKeyword());
 		}
@@ -330,7 +327,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	}
 
 	private List<UUID> findConnectionIdForUser(final User user) {
-		final List<UUID> result = new ArrayList<UUID>();
+		final List<UUID> result = new ArrayList<>();
 		for (final Entry<UUID, User> e : userService.socketId2User()) {
 			final UUID someUsersConnectionId = e.getKey();
 			final User someUser = e.getValue();
@@ -356,15 +353,11 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	/**
 	 * Currently only sends the feedback data to the client. Should be used for all
 	 * relevant Socket.IO data, the client needs to know after joining a session.
-	 *
-	 * @param sessionKey
-	 * @param user
-	 * @param client
 	 */
 	public void reportSessionDataToClient(final String sessionKey, final User user, final SocketIOClient client) {
 		final de.thm.arsnova.entities.Session session = sessionService.getSessionInternal(sessionKey, user);
 		final de.thm.arsnova.entities.SessionFeature features = sessionService.getSessionFeatures(sessionKey);
-		
+
 		client.sendEvent("unansweredLecturerQuestions", questionService.getUnAnsweredLectureQuestionIds(sessionKey, user));
 		client.sendEvent("unansweredPreparationQuestions", questionService.getUnAnsweredPreparationQuestionIds(sessionKey, user));
 		client.sendEvent("countLectureQuestionAnswers", questionService.countLectureQuestionAnswersInternal(sessionKey));
@@ -436,7 +429,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	}
 
 	public void reportLecturerQuestionAvailable(final de.thm.arsnova.entities.Session session, final List<de.thm.arsnova.entities.Question> qs) {
-		List<Question> questions = new ArrayList<Question>();
+		List<Question> questions = new ArrayList<>();
 		for (de.thm.arsnova.entities.Question q : qs) {
 			questions.add(new Question(q));
 		}
@@ -449,7 +442,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	}
 
 	public void reportLecturerQuestionsLocked(final de.thm.arsnova.entities.Session session, final List<de.thm.arsnova.entities.Question> qs) {
-		List<Question> questions = new ArrayList<Question>();
+		List<Question> questions = new ArrayList<>();
 		for (de.thm.arsnova.entities.Question q : qs) {
 			questions.add(new Question(q));
 		}
@@ -461,8 +454,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	}
 
 	public void broadcastInSession(final String sessionKey, final String eventName, final Object data) {
-		/**
-		 * collect a list of users which are in the current session iterate over
+		/* collect a list of users which are in the current session iterate over
 		 * all connected clients and if send feedback, if user is in current
 		 * session
 		 */
@@ -478,17 +470,17 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 
 	@Override
 	public void visit(NewQuestionEvent event) {
-		this.reportLecturerQuestionAvailable(event.getSession(), Arrays.asList(event.getQuestion()));
+		this.reportLecturerQuestionAvailable(event.getSession(), Collections.singletonList(event.getQuestion()));
 	}
 
 	@Override
 	public void visit(UnlockQuestionEvent event) {
-		this.reportLecturerQuestionAvailable(event.getSession(), Arrays.asList(event.getQuestion()));
+		this.reportLecturerQuestionAvailable(event.getSession(), Collections.singletonList(event.getQuestion()));
 	}
 
 	@Override
 	public void visit(LockQuestionEvent event) {
-		this.reportLecturerQuestionsLocked(event.getSession(), Arrays.asList(event.getQuestion()));
+		this.reportLecturerQuestionsLocked(event.getSession(), Collections.singletonList(event.getQuestion()));
 	}
 
 	@Override
@@ -580,7 +572,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 
 	@Override
 	public void visit(LockVotesEvent event) {
-		List<Question> questions = new ArrayList<Question>();
+		List<Question> questions = new ArrayList<>();
 		for (de.thm.arsnova.entities.Question q : event.getQuestions()) {
 			questions.add(new Question(q));
 		}
@@ -589,7 +581,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 
 	@Override
 	public void visit(UnlockVotesEvent event) {
-		List<Question> questions = new ArrayList<Question>();
+		List<Question> questions = new ArrayList<>();
 		for (de.thm.arsnova.entities.Question q : event.getQuestions()) {
 			questions.add(new Question(q));
 		}
@@ -612,7 +604,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	public void visit(LockFeedbackEvent event) {
 		broadcastInSession(event.getSession().getKeyword(), "lockFeedback", event.getSession().getFeedbackLock());
 	}
-	
+
 	@Override
 	public void visit(FlipFlashcardsEvent event) {
 		broadcastInSession(event.getSession().getKeyword(), "flipFlashcards", event.getSession().getFlipFlashcards());

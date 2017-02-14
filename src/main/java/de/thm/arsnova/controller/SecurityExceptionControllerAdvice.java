@@ -52,7 +52,7 @@ public class SecurityExceptionControllerAdvice {
 			final Exception e,
 			final HttpServletRequest req
 			) {
-		final Map<String, String> result = new HashMap<String, String>();
+		final Map<String, String> result = new HashMap<>();
 		result.put("code", "500");
 		result.put("status", "Internal server error");
 		result.put("message", e.getMessage());

@@ -48,20 +48,20 @@ import static org.junit.Assert.assertEquals;
 @ActiveProfiles("test")
 public class UserServiceTest {
 
-	private static final ConcurrentHashMap<UUID, User> socketid2user = new ConcurrentHashMap<UUID, User>();
-	private static final ConcurrentHashMap<String, String> user2session = new ConcurrentHashMap<String, String>();
+	private static final ConcurrentHashMap<UUID, User> socketid2user = new ConcurrentHashMap<>();
+	private static final ConcurrentHashMap<String, String> user2session = new ConcurrentHashMap<>();
 
 	@Test
 	public void testSocket2UserPersistence() throws IOException, ClassNotFoundException {
 		socketid2user.put(UUID.randomUUID(), new User(new UsernamePasswordAuthenticationToken("ptsr00", UUID.randomUUID())));
 		socketid2user.put(UUID.randomUUID(), new User(new AttributePrincipalImpl("ptstr0")));
 
-		Map<String, Object> attributes = new HashMap<String, Object>();
+		Map<String, Object> attributes = new HashMap<>();
 		attributes.put(Google2AttributesDefinition.EMAIL, "mail@host.com");
 		Google2Profile profile = new Google2Profile("ptsr00", attributes);
 
 		socketid2user.put(UUID.randomUUID(), new User(profile));
-		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+		List<GrantedAuthority> authorities = new ArrayList<>();
 		authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
 		socketid2user.put(UUID.randomUUID(), new User(new AnonymousAuthenticationToken("ptsr00", UUID.randomUUID(), authorities)));
 

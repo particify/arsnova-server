@@ -44,9 +44,8 @@ public class LoginAuthenticationSucessHandler extends
 		if (session == null || session.getAttribute("ars-login-success-url") == null) {
 			return targetUrl;
 		}
-		String redirect = (String) session.getAttribute("ars-login-success-url");
 
-		return redirect;
+		return (String) session.getAttribute("ars-login-success-url");
 	}
 
 	public void setTargetUrl(final String url) {

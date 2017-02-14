@@ -46,8 +46,7 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
 			LOGGER.warn("LDAP attribute {} not set. Falling back to lowercased user provided username.", userIdAttr);
 			ldapUsername = username.toLowerCase();
 		}
-		UserDetails userDetails = super.mapUserFromContext(ctx, ldapUsername, authorities);
 
-		return userDetails;
+		 return super.mapUserFromContext(ctx, ldapUsername, authorities);
 	}
 }

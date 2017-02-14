@@ -49,7 +49,7 @@ public class UnlockVoteEvent extends SessionEvent {
 	}
 
 	public HashMap<String, Object> getVotingAdmission() {
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		HashMap<String, Object> map = new HashMap<>();
 
 		map.put("_id", getQuestionId());
 		map.put("variant", getQuestionVariant());

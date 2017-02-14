@@ -56,9 +56,6 @@ public class RangeAspect {
 	private static final Logger logger = LoggerFactory.getLogger(RangeAspect.class);
 
 	/** Sets start and end parameters based on request's range header and sets content range header for the response.
-	 *
-	 * @param controller
-	 * @throws Throwable
 	 */
 	@Around("execution(java.util.List+ de.thm.arsnova.controller.*.*(..)) && this(controller) && @annotation(de.thm.arsnova.web.Pagination)")
 	public Object handlePaginationRange(ProceedingJoinPoint pjp, final PaginationController controller) throws Throwable {

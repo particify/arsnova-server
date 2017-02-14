@@ -36,7 +36,7 @@ public class InterposedQuestion {
 	private boolean read;
 
 	public static List<InterposedQuestion> fromList(List<de.thm.arsnova.entities.InterposedQuestion> questions) {
-		ArrayList<InterposedQuestion> interposedQuestions = new ArrayList<InterposedQuestion>();
+		ArrayList<InterposedQuestion> interposedQuestions = new ArrayList<>();
 		for (de.thm.arsnova.entities.InterposedQuestion question : questions) {
 			interposedQuestions.add(new InterposedQuestion(question));
 		}

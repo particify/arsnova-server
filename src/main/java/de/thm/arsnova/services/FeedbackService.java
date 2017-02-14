@@ -80,7 +80,7 @@ public class FeedbackService implements IFeedbackService, ApplicationEventPublis
 		 * sessions to a single user in one go instead of sending multiple messages for each session. Hence,
 		 * we need the mapping (User -> Sessions)
 		 */
-		final Map<User, Set<Session>> affectedSessionsOfUsers = new HashMap<User, Set<Session>>();
+		final Map<User, Set<Session>> affectedSessionsOfUsers = new HashMap<>();
 
 		for (Map.Entry<Session, List<User>> entry : deletedFeedbackOfUsersInSession.entrySet()) {
 			final Session session = entry.getKey();
@@ -90,7 +90,7 @@ public class FeedbackService implements IFeedbackService, ApplicationEventPublis
 				if (affectedSessionsOfUsers.containsKey(user)) {
 					affectedSessions = affectedSessionsOfUsers.get(user);
 				} else {
-					affectedSessions = new HashSet<Session>();
+					affectedSessions = new HashSet<>();
 				}
 				affectedSessions.add(session);
 				affectedSessionsOfUsers.put(user, affectedSessions);
@@ -112,7 +112,7 @@ public class FeedbackService implements IFeedbackService, ApplicationEventPublis
 	public void cleanFeedbackVotesInSession(final String keyword, final int cleanupFeedbackDelayInMins) {
 		final Session session = databaseDao.getSessionFromKeyword(keyword);
 		List<User> affectedUsers = feedbackStorage.cleanFeedbackVotesInSession(session, cleanupFeedbackDelayInMins);
-		Set<Session> sessionSet = new HashSet<Session>();
+		Set<Session> sessionSet = new HashSet<>();
 		sessionSet.add(session);
 
 		// Send feedback reset event to all affected users

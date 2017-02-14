@@ -91,9 +91,6 @@ public interface IDatabaseDao {
 
 	/**
 	 * @deprecated Use getSkillQuestionsForUsers or getSkillQuestionsForTeachers
-	 * @param user
-	 * @param session
-	 * @return
 	 */
 	@Deprecated
 	List<Question> getSkillQuestions(User user, Session session);

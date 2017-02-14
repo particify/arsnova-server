@@ -23,8 +23,6 @@ import de.thm.arsnova.entities.MotdList;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.BadRequestException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -48,8 +46,6 @@ public class MotdService implements IMotdService {
 
 	@Autowired
 	private ISessionService sessionService;
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(QuestionService.class);
 
 	public void setDatabaseDao(final IDatabaseDao databaseDao) {
 		this.databaseDao = databaseDao;
@@ -75,7 +71,7 @@ public class MotdService implements IMotdService {
 
 	@Override
 	public List<Motd> getCurrentMotds(final Date clientdate, final String audience, final String sessionkey) {
-		List<Motd> motds = new ArrayList<Motd>();
+		final List<Motd> motds;
 		switch (audience) {
 			case "all": motds = databaseDao.getMotdsForAll(); break;
 			case "loggedIn": motds = databaseDao.getMotdsForLoggedIn(); break;
@@ -89,7 +85,7 @@ public class MotdService implements IMotdService {
 
   @Override
   public List<Motd> filterMotdsByDate(List<Motd> list, Date clientdate) {
-		List<Motd> returns = new ArrayList<Motd>();
+		List<Motd> returns = new ArrayList<>();
 		for (Motd motd : list) {
 			if (motd.getStartdate().before(clientdate) && motd.getEnddate().after(clientdate)) {
 				returns.add(motd);
@@ -101,8 +97,8 @@ public class MotdService implements IMotdService {
 	@Override
 	public List<Motd> filterMotdsByList(List<Motd> list, MotdList motdlist) {
 		if (motdlist != null && motdlist.getMotdkeys() != null && !motdlist.getMotdkeys().isEmpty()) {
-			List<Motd> returns = new ArrayList<Motd>();
-			HashSet<String> keys = new HashSet(500);  // Or a more realistic size
+			List<Motd> returns = new ArrayList<>();
+			HashSet<String> keys = new HashSet<>(500);  // Or a more realistic size
 			StringTokenizer st = new StringTokenizer(motdlist.getMotdkeys(), ",");
 			while (st.hasMoreTokens()) {
 				keys.add(st.nextToken());

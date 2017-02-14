@@ -58,7 +58,7 @@ public class FeedbackStorage {
 	}
 
 	private final Map<Session, Map<User, FeedbackStorageObject>> data =
-			new ConcurrentHashMap<Session, Map<User, FeedbackStorageObject>>();
+			new ConcurrentHashMap<>();
 
 	public Feedback getFeedback(final Session session) {
 		int a = 0;
@@ -116,7 +116,7 @@ public class FeedbackStorage {
 
 	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public Map<Session, List<User>> cleanFeedbackVotes(final int cleanupFeedbackDelay) {
-		final Map<Session, List<User>> removedFeedbackOfUsersInSession = new HashMap<Session, List<User>>();
+		final Map<Session, List<User>> removedFeedbackOfUsersInSession = new HashMap<>();
 		for (final Session session : data.keySet()) {
 			if (!session.getFeatures().isLiveClicker()) {
 				List<User> affectedUsers = cleanFeedbackVotesInSession(session, cleanupFeedbackDelay);
@@ -135,7 +135,7 @@ public class FeedbackStorage {
 		final boolean forceClean = cleanupFeedbackDelayInMins == 0;
 
 		final Map<User, FeedbackStorageObject> sessionFeedbacks = data.get(session);
-		final List<User> affectedUsers = new ArrayList<User>();
+		final List<User> affectedUsers = new ArrayList<>();
 
 		if (sessionFeedbacks != null) {
 			for (final Map.Entry<User, FeedbackStorageObject> entry : sessionFeedbacks.entrySet()) {

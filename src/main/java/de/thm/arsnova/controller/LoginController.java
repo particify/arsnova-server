@@ -59,7 +59,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -207,7 +206,7 @@ public class LoginController extends AbstractController {
 				response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			}
 		} else if (guestEnabled && "guest".equals(type)) {
-			List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+			List<GrantedAuthority> authorities = new ArrayList<>();
 			authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
 			if (username == null || !username.startsWith("Guest") || username.length() != MAX_USERNAME_LENGTH) {
 				username = "Guest" + Sha512DigestUtils.shaHex(request.getSession().getId()).substring(0, MAX_GUESTHASH_LENGTH);
@@ -314,7 +313,7 @@ public class LoginController extends AbstractController {
 	@RequestMapping(value = { "/auth/services" }, method = RequestMethod.GET)
 	@ResponseBody
 	public List<ServiceDescription> getServices(final HttpServletRequest request) {
-		List<ServiceDescription> services = new ArrayList<ServiceDescription>();
+		List<ServiceDescription> services = new ArrayList<>();
 
 		if ("".equals(apiPath)) {
 			apiPath = request.getContextPath();
@@ -417,7 +416,7 @@ public class LoginController extends AbstractController {
 	}
 
 	private Collection<GrantedAuthority> getAuthorities() {
-		List<GrantedAuthority> authList = new ArrayList<GrantedAuthority>();
+		List<GrantedAuthority> authList = new ArrayList<>();
 		authList.add(new SimpleGrantedAuthority("ROLE_USER"));
 		return authList;
 	}
