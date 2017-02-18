@@ -24,7 +24,6 @@ import com.fourspaces.couchdb.RowResult;
 import com.fourspaces.couchdb.View;
 import com.fourspaces.couchdb.ViewResults;
 import com.google.common.collect.Lists;
-import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.*;
 import de.thm.arsnova.entities.transport.AnswerQueueElement;
@@ -56,9 +55,24 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+<<<<<<< f52814dff8f49a4095b9208bd3a75c7147c764cc
 import java.util.*;
+=======
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+>>>>>>> Show user his course sessions he has not yet visited or did not create
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.logging.Level;
 
 /**
  * Database implementation based on CouchDB.
@@ -259,6 +273,15 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		final List<Session> sessions = this.getMySessions(user, start, limit);
 		if (sessions.isEmpty()) {
 			return new ArrayList<>();
+		}
+		return getInfosForSessions(sessions);
+	}
+
+	@Override
+	public List<SessionInfo> getRelevantCourseSessionsInfo(int[] courses, final int start, final int limit, final User currentUser) {
+		final List<Session> sessions = this.getRelevantCourseSessions(courses, start, limit, currentUser);
+		if (sessions.isEmpty()) {
+			return new ArrayList<SessionInfo>();
 		}
 		return getInfosForSessions(sessions);
 	}
@@ -1624,12 +1647,16 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	public List<Session> getCourseSessions(final List<Course> courses) {
+	public List<Session> getCoursesForSession(final int[] courses, final int start, final int limit) {
 		final ExtendedView view = new ExtendedView("session/by_courseid");
+		if (start > 0) {
+			view.setSkip(start);
+		}
+		if (limit > 0) {
+			view.setLimit(limit);
+		}
 		view.setCourseIdKeys(courses);
-
 		final ViewResults sessions = getDatabase().view(view);
-
 		final List<Session> result = new ArrayList<>();
 		for (final Document d : sessions.getResults()) {
 			final Session session = (Session) JSONObject.toBean(
@@ -1638,6 +1665,24 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 					);
 			result.add(session);
 		}
+		return result;
+	}
+
+	@Override
+	public List<Session> getRelevantCourseSessions(final int[] courses, final int start, final int limit, final User currentUser) {
+		final List<Session> result = getCoursesForSession(courses, start, limit);
+
+		//Filter results so we don't see redundant sessions in session selection
+		List<Session> visitedSessions = this.getMyVisitedSessions(currentUser, -1, -1);
+		List<Session> mySessions = this.getMySessions(currentUser, -1, -1);
+		Iterator<Session> it;
+		for (it = result.iterator(); it.hasNext();) {
+			Session s = it.next();
+			if ((visitedSessions != null && visitedSessions.contains(s)) || (mySessions != null && mySessions.contains(s))) {
+				it.remove();
+			}
+		}
+
 		return result;
 	}
 
@@ -1650,12 +1695,28 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			super(fullname);
 		}
 
+<<<<<<< f52814dff8f49a4095b9208bd3a75c7147c764cc
 		void setCourseIdKeys(final List<Course> courses) {
 			List<String> courseIds = new ArrayList<>();
 			for (Course c : courses) {
 				courseIds.add(c.getId());
+=======
+		public void setCourseIdKeys(final int[] courses) {
+			String s = "[";
+			for (int i : courses) {
+				if (s.length() == 1) {
+					s += "\"" + i + "\"";
+				} else {
+					s += ",\"" + i + "\"";
+				}
 			}
-			setKeys(courseIds);
+			s += "]";
+			try {
+				this.keys = URLEncoder.encode(s, "UTF-8");
+			} catch (UnsupportedEncodingException ex) {
+				java.util.logging.Logger.getLogger(CouchDBDao.class.getName()).log(Level.SEVERE, null, ex);
+>>>>>>> Show user his course sessions he has not yet visited or did not create
+			}
 		}
 
 		void setSessionIdKeys(final List<Session> sessions) {

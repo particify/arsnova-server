@@ -215,6 +215,25 @@ public class SessionController extends PaginationController {
 		return sessions;
 	}
 
+	@ApiOperation(value = "Retrieves a list of Sessions that were created for the given courses, "
+			+ "EXCLUDING the sessions the current user created himself or has already visited",
+			nickname = "getSessionsForCourses")
+	@ApiResponses(value = {
+		@ApiResponse(code = 204, message = HTML_STATUS_204)
+	})
+	@RequestMapping(value = "/relevantFromCourse", method = RequestMethod.GET)
+	@Pagination
+	public List<SessionInfo> getUserRelevantSessionsForCourses(
+			@ApiParam(value = "courses", required = true) @RequestParam(value = "courses", defaultValue = "null") int[] courses,
+			final HttpServletResponse response
+			) {
+		if (courses.length == 0) {
+			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+			return null;
+		}
+		return sessionService.getRelevantCourseSessionsInfo(courses, offset, limit);
+	}
+
 	/**
 	 * Returns a list of my own sessions with only the necessary information like name, keyword, or counters.
 	 */

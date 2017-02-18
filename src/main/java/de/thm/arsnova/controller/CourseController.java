@@ -56,8 +56,10 @@ public class CourseController extends AbstractController {
 	@RequestMapping(value = "/mycourses", method = RequestMethod.GET)
 	public List<Course> myCourses(
 			@ApiParam(value = "sort my courses by name", required = true)
-			@RequestParam(value = "sortby", defaultValue = "name") final String sortby
-			) {
+			@RequestParam(value = "sortby", defaultValue = "name") final String sortby,
+			@ApiParam(value = "whether to return only courses where user is teacher", required = false)
+			@RequestParam(value = "onlyTeacher", defaultValue = "true") final boolean onlyTeacher
+	) {
 
 		final User currentUser = userService.getCurrentUser();
 
@@ -72,10 +74,8 @@ public class CourseController extends AbstractController {
 		final List<Course> result = new ArrayList<>();
 
 		for (final Course course : connectorClient.getCourses(currentUser.getUsername()).getCourse()) {
-			if (
-					course.getMembership().isMember()
-					&& course.getMembership().getUserrole().equals(UserRole.TEACHER)
-					) {
+			if (course.getMembership().isMember()
+					&& (!onlyTeacher || course.getMembership().getUserrole().equals(UserRole.TEACHER))) {
 				result.add(course);
 			}
 		}

@@ -52,6 +52,8 @@ public interface ISessionService {
 
 	List<Session> getMyVisitedSessions(int offset, int limit);
 
+	List<Session> getRelevantCourseSessions(final int[] courses, final int start, final int limit);
+
 	int countSessions(List<Course> courses);
 
 	int activeUsers(String sessionkey);
@@ -79,6 +81,8 @@ public interface ISessionService {
 	List<SessionInfo> getMyPublicPoolSessionsInfo();
 
 	List<SessionInfo> getMyVisitedSessionsInfo(int offset, int limit);
+
+	List<SessionInfo> getRelevantCourseSessionsInfo(final int[] courses, final int start, final int limit);
 
 	SessionInfo importSession(ImportExportSession session);
 

@@ -17,7 +17,6 @@
  */
 package de.thm.arsnova.dao;
 
-import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.*;
 import de.thm.arsnova.entities.transport.ImportExportSession;
@@ -165,11 +164,11 @@ public interface IDatabaseDao {
 
 	void deleteInterposedQuestion(InterposedQuestion question);
 
-	List<Session> getCourseSessions(List<Course> courses);
-
 	Session updateSession(Session session);
 
 	Session changeSessionCreator(Session session, String newCreator);
+
+	List<Session> getRelevantCourseSessions(int[] courses, final int start, final int limit, final User currentUser);
 
 	/**
 	 * Deletes a session and related data.
@@ -243,6 +242,10 @@ public interface IDatabaseDao {
 	List<SessionInfo> getMyPublicPoolSessionsInfo(final User user);
 
 	List<SessionInfo> getMyVisitedSessionsInfo(User currentUser, final int start, final int limit);
+
+	List<SessionInfo> getRelevantCourseSessionsInfo(int[] courses, final int start, final int limit, final User currentUser);
+
+	List<Session> getCoursesForSession(final int[] courses, final int start, final int limit);
 
 	int deleteAllPreparationAnswers(Session session);
 

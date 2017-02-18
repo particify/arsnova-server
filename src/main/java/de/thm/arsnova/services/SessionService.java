@@ -270,6 +270,12 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	public List<SessionInfo> getRelevantCourseSessionsInfo(int[] courses, final int start, final int limit) {
+		return databaseDao.getRelevantCourseSessionsInfo(courses, start, limit, userService.getCurrentUser());
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
 	public Session saveSession(final Session session) {
 		if (connectorClient != null && session.getCourseId() != null) {
 			if (!connectorClient.getMembership(
@@ -319,11 +325,21 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 	@Override
 	public int countSessions(final List<Course> courses) {
-		final List<Session> sessions = databaseDao.getCourseSessions(courses);
+		int[] ids = new int[courses.size()];
+		for (int i = 0; i < courses.size(); i++) {
+			ids[i] = Integer.valueOf(courses.get(i).getId());
+		}
+		final List<Session> sessions = databaseDao.getCoursesForSession(ids, -1, -1);
 		if (sessions == null) {
 			return 0;
 		}
 		return sessions.size();
+	}
+
+	@Override
+	public List<Session> getRelevantCourseSessions(final int[] courses, final int start, final int limit) {
+		List<Session> moodleCourses = databaseDao.getRelevantCourseSessions(courses, start, limit, userService.getCurrentUser());
+		return moodleCourses;
 	}
 
 	@Override
