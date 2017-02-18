@@ -55,23 +55,11 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-<<<<<<< f52814dff8f49a4095b9208bd3a75c7147c764cc
 import java.util.*;
-=======
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
->>>>>>> Show user his course sessions he has not yet visited or did not create
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.logging.Level;
 
 /**
@@ -1695,27 +1683,20 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			super(fullname);
 		}
 
-<<<<<<< f52814dff8f49a4095b9208bd3a75c7147c764cc
-		void setCourseIdKeys(final List<Course> courses) {
-			List<String> courseIds = new ArrayList<>();
-			for (Course c : courses) {
-				courseIds.add(c.getId());
-=======
 		public void setCourseIdKeys(final int[] courses) {
-			String s = "[";
-			for (int i : courses) {
-				if (s.length() == 1) {
-					s += "\"" + i + "\"";
-				} else {
-					s += ",\"" + i + "\"";
-				}
-			}
-			s += "]";
 			try {
+				String s = "[";
+				for (int i : courses) {
+					if (s.length() == 1) {
+						s += "\"" + i + "\"";
+					} else {
+						s += ",\"" + i + "\"";
+					}
+				}
+				s += "]";
 				this.keys = URLEncoder.encode(s, "UTF-8");
 			} catch (UnsupportedEncodingException ex) {
 				java.util.logging.Logger.getLogger(CouchDBDao.class.getName()).log(Level.SEVERE, null, ex);
->>>>>>> Show user his course sessions he has not yet visited or did not create
 			}
 		}
 
