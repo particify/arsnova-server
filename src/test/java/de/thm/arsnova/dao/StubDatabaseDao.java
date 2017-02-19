@@ -334,11 +334,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Session> getCourseSessions(List<Course> courses) {
-		return null;
-	}
-
-	@Override
 	public Session updateSession(Session session) {
 		// TODO Auto-generated method stub
 		return null;
@@ -755,8 +750,21 @@ public class StubDatabaseDao implements IDatabaseDao {
 		return null;
 	}
 
-        @Override
-        public List<SessionInfo> getCourseSessionsInfo(List<Course> courses) {
-            return null;
-        }
+	@Override
+	public List<Session> getRelevantCourseSessions(int[] courses, int start, int limit, User currentUser) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<SessionInfo> getRelevantCourseSessionsInfo(int[] courses, int start, int limit, User currentUser) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Session> getCoursesForSession(int[] courses, int start, int limit) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
