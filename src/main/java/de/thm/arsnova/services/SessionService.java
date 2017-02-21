@@ -212,7 +212,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		}
 		if (connectorClient != null && session.isCourseSession()) {
 			final String courseid = session.getCourseId();
-			if (!connectorClient.getMembership(userService.getCurrentUser().getUsername(), courseid).isMember()) {
+			if (!connectorClient.getMembership(user.getUsername(), courseid).isMember()) {
 				throw new ForbiddenException();
 			}
 		}
