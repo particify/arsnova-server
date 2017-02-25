@@ -352,7 +352,6 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		existingSession.setShortName(session.getShortName());
 		existingSession.setPpAuthorName(session.getPpAuthorName());
 		existingSession.setPpAuthorMail(session.getPpAuthorMail());
-		existingSession.setShortName(session.getShortName());
 		existingSession.setPpAuthorName(session.getPpAuthorName());
 		existingSession.setPpFaculty(session.getPpFaculty());
 		existingSession.setName(session.getName());
