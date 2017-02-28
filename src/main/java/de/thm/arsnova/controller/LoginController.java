@@ -107,7 +107,7 @@ public class LoginController extends AbstractController {
 	@Value("${security.cas.order}") private int casOrder;
 
 	@Value("${security.facebook.enabled}") private boolean facebookEnabled;
-	@Value("${security.facebook.enabled-roles:speaker,student}") private String[] facebookRoles;
+	@Value("${security.facebook.allowed-roles:speaker,student}") private String[] facebookRoles;
 	@Value("${security.facebook.order}") private int facebookOrder;
 
 	@Value("${security.google.enabled}") private boolean googleEnabled;
