@@ -361,6 +361,8 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		existingSession.setPpLicense(session.getPpLicense());
 		existingSession.setPpSubject(session.getPpSubject());
 		existingSession.setFeedbackLock(session.getFeedbackLock());
+		existingSession.setCourseId(session.getCourseId());
+		existingSession.setCourseType(session.getCourseType());
 
 		handleLogo(session);
 		existingSession.setPpLogo(session.getPpLogo());
