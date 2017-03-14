@@ -177,7 +177,7 @@
 		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib</artifactId>
-			<version>3.2.4</version>
+			<version>3.2.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -325,7 +325,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.2.20.v20161216</version>
+				<version>9.2.21.v20170120</version>
 				<configuration>
 					<scanIntervalSeconds>1</scanIntervalSeconds>
 					<webApp>
