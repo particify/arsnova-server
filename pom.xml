@@ -7,7 +7,7 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<io.spring.platform-version>Athens-SR3</io.spring.platform-version>
+		<io.spring.platform-version>Brussels-SR1</io.spring.platform-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
