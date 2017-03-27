@@ -155,10 +155,6 @@ public class ImportExportSession {
 
 		private List<Answer> answers;
 
-		public ImportExportQuestion() {
-
-		}
-
 		public ImportExportQuestion(Question q) {
 			setType(q.getType());
 			setQuestionType(q.getQuestionType());

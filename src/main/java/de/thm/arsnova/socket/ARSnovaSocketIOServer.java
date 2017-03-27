@@ -230,7 +230,9 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 		server.addConnectListener(new ConnectListener() {
 			@Override
 			@Timed
-			public void onConnect(final SocketIOClient client) { }
+			public void onConnect(final SocketIOClient client) {
+				/* No implementation - only used for monitoring */
+			}
 		});
 
 		server.addDisconnectListener(new DisconnectListener() {
