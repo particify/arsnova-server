@@ -42,7 +42,7 @@ import java.util.Arrays;
 public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 	@Value("${security.admin-accounts}")
-	private String adminAccounts;
+	private String[] adminAccounts;
 
 	@Autowired
 	private IDatabaseDao dao;
@@ -95,9 +95,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 	private boolean checkAdminPermission(final String username) {
 		/* TODO: only allow accounts from arsnova db */
-		String[] splittedAdminNames = adminAccounts.split(",");
-
-		return Arrays.asList(splittedAdminNames).contains(username);
+		return Arrays.asList(adminAccounts).contains(username);
 	}
 
 	private boolean checkSessionPermission(
