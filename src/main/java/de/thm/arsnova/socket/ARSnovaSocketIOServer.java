@@ -512,9 +512,9 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 
 		// Update the unanswered count for the question variant that was answered.
 		final de.thm.arsnova.entities.Question question = event.getQuestion();
-		if (question.getQuestionVariant().equals("lecture")) {
+		if ("lecture".equals(question.getQuestionVariant())) {
 			sendToUser(event.getUser(), "unansweredLecturerQuestions", questionService.getUnAnsweredLectureQuestionIds(sessionKey, event.getUser()));
-		} else if (question.getQuestionVariant().equals("preparation")) {
+		} else if ("preparation".equals(question.getQuestionVariant())) {
 			sendToUser(event.getUser(), "unansweredPreparationQuestions", questionService.getUnAnsweredPreparationQuestionIds(sessionKey, event.getUser()));
 		}
 	}

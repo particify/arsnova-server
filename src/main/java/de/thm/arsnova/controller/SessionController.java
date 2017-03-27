@@ -172,7 +172,7 @@ public class SessionController extends PaginationController {
 			) {
 		List<Session> sessions;
 
-		if (!username.equals("")) {
+		if (!"".equals(username)) {
 			try {
 				if (ownedOnly && !visitedOnly) {
 					sessions = sessionService.getUserSessions(username);
@@ -206,7 +206,7 @@ public class SessionController extends PaginationController {
 			return null;
 		}
 
-		if (sortby != null && sortby.equals("shortname")) {
+		if ("shortname".equals(sortby)) {
 			Collections.sort(sessions, new SessionShortNameComparator());
 		} else {
 			Collections.sort(sessions, new SessionNameComparator());
@@ -242,7 +242,7 @@ public class SessionController extends PaginationController {
 			return null;
 		}
 
-		if (sortby != null && sortby.equals("shortname")) {
+		if ("shortname".equals(sortby)) {
 			Collections.sort(sessions, new SessionInfoShortNameComparator());
 		} else {
 			Collections.sort(sessions, new SessionInfoNameComparator());

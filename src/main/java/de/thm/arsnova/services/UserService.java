@@ -202,7 +202,7 @@ public class UserService implements IUserService {
 			}
 		}
 
-		if (user == null || user.getUsername().equals("anonymous")) {
+		if (user == null || "anonymous".equals(user.getUsername())) {
 			throw new UnauthorizedException();
 		}
 

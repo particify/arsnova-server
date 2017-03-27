@@ -1200,9 +1200,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		} else if (fstkey.size() == 3) {
 			type = fstkey.getString(2);
 		}
-		if (type.equals("read")) {
+		if ("read".equals(type)) {
 			read = fst.optInt("value");
-		} else if (type.equals("unread")) {
+		} else if ("unread".equals(type)) {
 			unread = fst.optInt("value");
 		}
 
@@ -1213,9 +1213,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			} else {
 				type = sndkey.getString(2);
 			}
-			if (type.equals("read")) {
+			if ("read".equals(type)) {
 				read = snd.optInt("value");
-			} else if (type.equals("unread")) {
+			} else if ("unread".equals(type)) {
 				unread = snd.optInt("value");
 			}
 		}
@@ -2110,7 +2110,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public void setVotingAdmissions(final Session session, final boolean disableVoting, List<Question> questions) {
 		for (final Question q : questions) {
-			if (!q.getQuestionType().equals("flashcard")) {
+			if (!"flashcard".equals(q.getQuestionType())) {
 				q.setVotingDisabled(disableVoting);
 			}
 		}
@@ -2606,7 +2606,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		final Morpher dynaMorpher = new BeanMorpher(PossibleAnswer.class, morpherRegistry);
 		morpherRegistry.registerMorpher(dynaMorpher);
 		for (final Document document : questiondocs) {
-			if (!document.optString("error").equals("")) {
+			if (!"".equals(document.optString("error"))) {
 				// Skip documents we could not load. Maybe they were deleted.
 				continue;
 			}

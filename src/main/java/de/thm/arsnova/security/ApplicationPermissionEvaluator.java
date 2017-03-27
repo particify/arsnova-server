@@ -103,9 +103,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Serializable targetId,
 			final Object permission
 			) {
-		if (permission instanceof String && (permission.equals("owner") || permission.equals("write"))) {
+		if (permission instanceof String && ("owner".equals(permission) || "write".equals(permission))) {
 			return dao.getSessionFromKeyword(targetId.toString()).getCreator().equals(username);
-		} else if (permission instanceof String && permission.equals("read")) {
+		} else if (permission instanceof String && "read".equals(permission)) {
 			return dao.getSessionFromKeyword(targetId.toString()).isActive();
 		}
 		return false;
@@ -116,7 +116,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Serializable targetId,
 			final Object permission
 			) {
-		if (permission instanceof String && permission.equals("owner")) {
+		if (permission instanceof String && "owner".equals(permission)) {
 			final Question question = dao.getQuestion(targetId.toString());
 			if (question != null) {
 				final Session session = dao.getSessionFromId(question.getSessionId());
@@ -132,7 +132,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Serializable targetId,
 			final Object permission
 			) {
-		if (permission instanceof String && permission.equals("owner")) {
+		if (permission instanceof String && "owner".equals(permission)) {
 			final InterposedQuestion question = dao.getInterposedQuestion(targetId.toString());
 			if (question != null) {
 				// Does the creator want to delete his own question?
