@@ -39,6 +39,7 @@ import net.sf.ezmorph.bean.BeanMorpher;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.util.JSONUtils;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopContext;
@@ -122,7 +123,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	 * implemented (e.g. use of AspectJ's weaving).
 	 * @return the proxy for CouchDBDao
 	 */
-	private IDatabaseDao getDatabaseDao() {
+	private @NonNull IDatabaseDao getDatabaseDao() {
 		return (IDatabaseDao) AopContext.currentProxy();
 	}
 
