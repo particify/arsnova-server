@@ -31,7 +31,7 @@ import java.util.Collection;
  * to get a consistent ID despite case insensitivity.
  */
 public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
-	public static final Logger LOGGER = LoggerFactory.getLogger(CustomLdapUserDetailsMapper.class);
+	public static final Logger logger = LoggerFactory.getLogger(CustomLdapUserDetailsMapper.class);
 
 	private String userIdAttr;
 
@@ -43,7 +43,7 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
 										  Collection<? extends GrantedAuthority> authorities) {
 		String ldapUsername = ctx.getStringAttribute(userIdAttr);
 		if (ldapUsername == null) {
-			LOGGER.warn("LDAP attribute {} not set. Falling back to lowercased user provided username.", userIdAttr);
+			logger.warn("LDAP attribute {} not set. Falling back to lowercased user provided username.", userIdAttr);
 			ldapUsername = username.toLowerCase();
 		}
 

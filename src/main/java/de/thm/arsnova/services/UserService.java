@@ -88,7 +88,7 @@ public class UserService implements IUserService {
 	private static final long ACTIVATION_KEY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
 	private static final long ACTIVATION_KEY_DURABILITY_MS = 6 * 60 * 60 * 1000L;
 
-	public static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
+	public static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
 	private static final ConcurrentHashMap<UUID, User> socketid2user = new ConcurrentHashMap<>();
 
@@ -154,7 +154,7 @@ public class UserService implements IUserService {
 	@Scheduled(fixedDelay = LOGIN_TRY_RESET_DELAY_MS)
 	public void resetLoginTries() {
 		if (loginTries.size() > 0) {
-			LOGGER.debug("Reset failed login counters.");
+			logger.debug("Reset failed login counters.");
 			loginTries.clear();
 		}
 	}
@@ -162,14 +162,14 @@ public class UserService implements IUserService {
 	@Scheduled(fixedDelay = LOGIN_BAN_RESET_DELAY_MS)
 	public void resetLoginBans() {
 		if (loginBans.size() > 0) {
-			LOGGER.info("Reset temporary login bans.");
+			logger.info("Reset temporary login bans.");
 			loginBans.clear();
 		}
 	}
 
 	@Scheduled(fixedDelay = ACTIVATION_KEY_CHECK_INTERVAL_MS)
 	public void deleteInactiveUsers() {
-		LOGGER.info("Delete inactive users.");
+		logger.info("Delete inactive users.");
 		long unixTime = System.currentTimeMillis();
 		long lastActivityBefore = unixTime - ACTIVATION_KEY_DURABILITY_MS;
 		databaseDao.deleteInactiveUsers(lastActivityBefore);
@@ -241,7 +241,7 @@ public class UserService implements IUserService {
 		if (tries < loginTryLimit) {
 			loginTries.put(addr, ++tries);
 			if (loginTryLimit == tries) {
-				LOGGER.info("Temporarily banned {} from login.", new Object[] {addr});
+				logger.info("Temporarily banned {} from login.", new Object[] {addr});
 				loginBans.add(addr);
 			}
 		}
@@ -301,7 +301,7 @@ public class UserService implements IUserService {
 	public void removeUserFromSessionBySocketId(final UUID socketId) {
 		final User user = socketid2user.get(socketId);
 		if (null == user) {
-			LOGGER.warn("null == user for socket {}", socketId);
+			logger.warn("null == user for socket {}", socketId);
 
 			return;
 		}
@@ -321,7 +321,7 @@ public class UserService implements IUserService {
 
 	@PreDestroy
 	public void destroy() {
-		LOGGER.error("Destroy UserService");
+		logger.error("Destroy UserService");
 	}
 
 	@Override
@@ -355,13 +355,13 @@ public class UserService implements IUserService {
 		}
 
 		if (null == mailPattern || !mailPattern.matcher(lcUsername).matches()) {
-			LOGGER.info("User registration failed. {} does not match pattern.", lcUsername);
+			logger.info("User registration failed. {} does not match pattern.", lcUsername);
 
 			return null;
 		}
 
 		if (null != databaseDao.getUser(lcUsername)) {
-			LOGGER.info("User registration failed. {} already exists.", lcUsername);
+			logger.info("User registration failed. {} already exists.", lcUsername);
 
 			return null;
 		}
@@ -376,7 +376,7 @@ public class UserService implements IUserService {
 		if (null != result) {
 			sendActivationEmail(result);
 		} else {
-			LOGGER.error("User registration failed. {} could not be created.", lcUsername);
+			logger.error("User registration failed. {} could not be created.", lcUsername);
 		}
 
 		return result;
@@ -402,7 +402,7 @@ public class UserService implements IUserService {
 				dbUser.getActivationKey()
 			);
 		} catch (UnsupportedEncodingException e1) {
-			LOGGER.error(e1.getMessage());
+			logger.error(e1.getMessage());
 
 			return;
 		}
@@ -429,7 +429,7 @@ public class UserService implements IUserService {
 			}
 
 			mailPattern = Pattern.compile("[a-z0-9._-]+?@(" + StringUtils.join(patterns, "|") + ")", Pattern.CASE_INSENSITIVE);
-			LOGGER.info("Allowed e-mail addresses (pattern) for registration: " + mailPattern.pattern());
+			logger.info("Allowed e-mail addresses (pattern) for registration: " + mailPattern.pattern());
 		}
 	}
 
@@ -465,12 +465,12 @@ public class UserService implements IUserService {
 	public void initiatePasswordReset(String username) {
 		DbUser dbUser = getDbUser(username);
 		if (null == dbUser) {
-			LOGGER.info("Password reset failed. User {} does not exist.", username);
+			logger.info("Password reset failed. User {} does not exist.", username);
 
 			throw new NotFoundException();
 		}
 		if (System.currentTimeMillis() < dbUser.getPasswordResetTime() + REPEATED_PASSWORD_RESET_DELAY_MS) {
-			LOGGER.info("Password reset failed. The reset delay for User {} is still active.", username);
+			logger.info("Password reset failed. The reset delay for User {} is still active.", username);
 
 			throw new BadRequestException();
 		}
@@ -479,7 +479,7 @@ public class UserService implements IUserService {
 		dbUser.setPasswordResetTime(System.currentTimeMillis());
 
 		if (null == databaseDao.createOrUpdateUser(dbUser)) {
-			LOGGER.error("Password reset failed. {} could not be updated.", username);
+			logger.error("Password reset failed. {} could not be updated.", username);
 		}
 
 		String resetPasswordUrl;
@@ -493,7 +493,7 @@ public class UserService implements IUserService {
 				dbUser.getPasswordResetKey()
 			);
 		} catch (UnsupportedEncodingException e1) {
-			LOGGER.error(e1.getMessage());
+			logger.error(e1.getMessage());
 
 			return;
 		}
@@ -504,12 +504,12 @@ public class UserService implements IUserService {
 	@Override
 	public boolean resetPassword(DbUser dbUser, String key, String password) {
 		if (null == key || "".equals(key) || !key.equals(dbUser.getPasswordResetKey())) {
-			LOGGER.info("Password reset failed. Invalid key provided for User {}.", dbUser.getUsername());
+			logger.info("Password reset failed. Invalid key provided for User {}.", dbUser.getUsername());
 
 			return false;
 		}
 		if (System.currentTimeMillis() > dbUser.getPasswordResetTime() + PASSWORD_RESET_KEY_DURABILITY_MS) {
-			LOGGER.info("Password reset failed. Key provided for User {} is no longer valid.", dbUser.getUsername());
+			logger.info("Password reset failed. Key provided for User {} is no longer valid.", dbUser.getUsername());
 
 			dbUser.setPasswordResetKey(null);
 			dbUser.setPasswordResetTime(0);
@@ -521,7 +521,7 @@ public class UserService implements IUserService {
 		dbUser.setPassword(encodePassword(password));
 		dbUser.setPasswordResetKey(null);
 		if (null == updateDbUser(dbUser)) {
-			LOGGER.error("Password reset failed. {} could not be updated.", dbUser.getUsername());
+			logger.error("Password reset failed. {} could not be updated.", dbUser.getUsername());
 		}
 
 		return true;
@@ -536,10 +536,10 @@ public class UserService implements IUserService {
 			helper.setSubject(subject);
 			helper.setText(body);
 
-			LOGGER.info("Sending mail \"{}\" from \"{}\" to \"{}\"", subject, msg.getFrom(), dbUser.getUsername());
+			logger.info("Sending mail \"{}\" from \"{}\" to \"{}\"", subject, msg.getFrom(), dbUser.getUsername());
 			mailSender.send(msg);
 		} catch (MailException | MessagingException e) {
-			LOGGER.warn("Mail \"{}\" could not be sent: {}", subject, e);
+			logger.warn("Mail \"{}\" could not be sent: {}", subject, e);
 		}
 	}
 }

@@ -17,8 +17,6 @@
  */
 package de.thm.arsnova;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,8 +30,6 @@ public class LoginAuthenticationSucessHandler extends
 		SimpleUrlAuthenticationSuccessHandler {
 
 	private String targetUrl;
-
-	public static final Logger LOGGER = LoggerFactory.getLogger(LoginAuthenticationSucessHandler.class);
 
 	@Override
 	protected String determineTargetUrl(

@@ -27,8 +27,6 @@ import de.thm.arsnova.exceptions.UnauthorizedException;
 import org.scribe.up.profile.facebook.FacebookProfile;
 import org.scribe.up.profile.google.Google2Profile;
 import org.scribe.up.profile.twitter.TwitterProfile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.PermissionEvaluator;
@@ -42,8 +40,6 @@ import java.util.Arrays;
  * Provides access control methods that can be used in annotations.
  */
 public class ApplicationPermissionEvaluator implements PermissionEvaluator {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationPermissionEvaluator.class);
 
 	@Value("${security.admin-accounts}")
 	private String adminAccounts;

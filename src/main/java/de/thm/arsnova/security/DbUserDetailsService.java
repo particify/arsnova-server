@@ -41,13 +41,13 @@ public class DbUserDetailsService implements UserDetailsService {
 	@Autowired
 	private IDatabaseDao dao;
 
-	public static final Logger LOGGER = LoggerFactory
+	public static final Logger logger = LoggerFactory
 			.getLogger(DbUserDetailsService.class);
 
 	@Override
 	public UserDetails loadUserByUsername(String username) {
 		String uid = username.toLowerCase();
-		LOGGER.debug("Load user: " + uid);
+		logger.debug("Load user: " + uid);
 		DbUser dbUser = dao.getUser(uid);
 		if (null == dbUser) {
 			throw new UsernameNotFoundException("User does not exist.");

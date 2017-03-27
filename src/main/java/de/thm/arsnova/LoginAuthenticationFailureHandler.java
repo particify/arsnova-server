@@ -17,8 +17,6 @@
  */
 package de.thm.arsnova;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
@@ -39,8 +37,6 @@ public class LoginAuthenticationFailureHandler extends
 
 	private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 	private String failureUrl;
-
-	public static final Logger LOGGER = LoggerFactory.getLogger(LoginAuthenticationFailureHandler.class);
 
 	@Override
 	public void onAuthenticationFailure(

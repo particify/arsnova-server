@@ -126,12 +126,12 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 	private ApplicationEventPublisher publisher;
 
-	public static final Logger LOGGER = LoggerFactory.getLogger(SessionService.class);
+	public static final Logger logger = LoggerFactory.getLogger(SessionService.class);
 
 	@Scheduled(fixedDelay = SESSION_INACTIVITY_CHECK_INTERVAL_MS)
 	public void deleteInactiveSessions() {
 		if (guestSessionInactivityThresholdDays > 0) {
-			LOGGER.info("Delete inactive sessions.");
+			logger.info("Delete inactive sessions.");
 			long unixTime = System.currentTimeMillis();
 			long lastActivityBefore = unixTime - guestSessionInactivityThresholdDays * 24 * 60 * 60 * 1000L;
 			databaseDao.deleteInactiveGuestSessions(lastActivityBefore);
@@ -141,7 +141,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	@Scheduled(fixedDelay = SESSION_INACTIVITY_CHECK_INTERVAL_MS)
 	public void deleteInactiveVisitedSessionLists() {
 		if (guestSessionInactivityThresholdDays > 0) {
-			LOGGER.info("Delete lists of visited session for inactive users.");
+			logger.info("Delete lists of visited session for inactive users.");
 			long unixTime = System.currentTimeMillis();
 			long lastActivityBefore = unixTime - guestSessionInactivityThresholdDays * 24 * 60 * 60 * 1000L;
 			databaseDao.deleteInactiveGuestVisitedSessionLists(lastActivityBefore);
@@ -508,7 +508,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 			// base64 adds offset to filesize, formula taken from: http://en.wikipedia.org/wiki/Base64#MIME
 			final int fileSize = (int) ((session.getPpLogo().length() - 814) / 1.37);
 			if (fileSize > uploadFileSizeByte) {
-				LOGGER.error("Could not save file. File is too large with " + fileSize + " Byte.");
+				logger.error("Could not save file. File is too large with " + fileSize + " Byte.");
 				throw new PayloadTooLargeException();
 			}
 		}

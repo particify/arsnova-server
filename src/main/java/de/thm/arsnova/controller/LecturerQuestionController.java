@@ -56,7 +56,7 @@ import java.util.List;
 @Api(value = "/lecturerquestion", description = "Operations for Lecture Questions")
 public class LecturerQuestionController extends PaginationController {
 
-	public static final Logger LOGGER = LoggerFactory.getLogger(LecturerQuestionController.class);
+	public static final Logger logger = LoggerFactory.getLogger(LecturerQuestionController.class);
 
 	@Autowired
 	private IQuestionService questionService;

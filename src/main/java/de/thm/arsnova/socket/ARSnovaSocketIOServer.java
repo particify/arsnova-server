@@ -78,7 +78,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	@Autowired
 	private IQuestionService questionService;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ARSnovaSocketIOServer.class);
+	private static final Logger logger = LoggerFactory.getLogger(ARSnovaSocketIOServer.class);
 
 	private int portNumber;
 	private String hostIp;
@@ -94,7 +94,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 
 	@PreDestroy
 	public void closeAllSessions() {
-		LOGGER.info("Close all websockets due to @PreDestroy");
+		logger.info("Close all websockets due to @PreDestroy");
 		for (final SocketIOClient c : server.getAllClients()) {
 			c.disconnect();
 		}
@@ -104,7 +104,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 			c.send(new Packet(PacketType.DISCONNECT));
 			clientCount++;
 		}
-		LOGGER.info("Pending websockets at @PreDestroy: {}", clientCount);
+		logger.info("Pending websockets at @PreDestroy: {}", clientCount);
 		server.stop();
 	}
 
@@ -123,7 +123,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 				config.setKeyStore(stream);
 				config.setKeyStorePassword(storepass);
 			} catch (final FileNotFoundException e) {
-				LOGGER.error("Keystore {} not found on filesystem", keystore);
+				logger.error("Keystore {} not found on filesystem", keystore);
 			}
 		}
 		server = new SocketIOServer(config);
@@ -134,7 +134,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 			public void onData(final SocketIOClient client, final Feedback data, final AckRequest ackSender) {
 				final User u = userService.getUser2SocketId(client.getSessionId());
 				if (u == null) {
-					LOGGER.info("Client {} tried to send feedback but is not mapped to a user", client.getSessionId());
+					logger.info("Client {} tried to send feedback but is not mapped to a user", client.getSessionId());
 
 					return;
 				}
@@ -142,9 +142,9 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 				final de.thm.arsnova.entities.Session session = sessionService.getSessionInternal(sessionKey, u);
 
 				if (session.getFeedbackLock()) {
-					LOGGER.debug("Feedback save blocked: {}", u, sessionKey, data.getValue());
+					logger.debug("Feedback save blocked: {}", u, sessionKey, data.getValue());
 				} else {
-					LOGGER.debug("Feedback recieved: {}", u, sessionKey, data.getValue());
+					logger.debug("Feedback recieved: {}", u, sessionKey, data.getValue());
 					if (null != sessionKey) {
 						feedbackService.saveFeedback(sessionKey, data.getValue(), u);
 					}
@@ -158,7 +158,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 			public void onData(final SocketIOClient client, final Session session, final AckRequest ackSender) {
 				final User u = userService.getUser2SocketId(client.getSessionId());
 				if (null == u) {
-					LOGGER.info("Client {} requested to join session but is not mapped to a user", client.getSessionId());
+					logger.info("Client {} requested to join session but is not mapped to a user", client.getSessionId());
 
 					return;
 				}
@@ -193,7 +193,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 				try {
 					questionService.readInterposedQuestionInternal(question.getId(), user);
 				} catch (NotFoundException | UnauthorizedException e) {
-					LOGGER.error("Loading of question {} failed for user {} with exception {}", question.getId(), user, e.getMessage());
+					logger.error("Loading of question {} failed for user {} with exception {}", question.getId(), user, e.getMessage());
 				}
 			}
 		});
@@ -205,7 +205,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 				try {
 					questionService.readFreetextAnswer(answerId, user);
 				} catch (NotFoundException | UnauthorizedException e) {
-					LOGGER.error("Marking answer {} as read failed for user {} with exception {}", answerId, user, e.getMessage());
+					logger.error("Marking answer {} as read failed for user {} with exception {}", answerId, user, e.getMessage());
 				}
 			}
 		});
@@ -259,14 +259,14 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	}
 
 	public void stopServer() {
-		LOGGER.trace("In stopServer method of class: {}", getClass().getName());
+		logger.trace("In stopServer method of class: {}", getClass().getName());
 		try {
 			for (final SocketIOClient client : server.getAllClients()) {
 				client.disconnect();
 			}
 		} catch (final Exception e) {
 			/* If exceptions are not caught they could prevent the Socket.IO server from shutting down. */
-			LOGGER.error("Exception caught on Socket.IO shutdown: {}", e.getMessage());
+			logger.error("Exception caught on Socket.IO shutdown: {}", e.getMessage());
 		}
 		server.stop();
 

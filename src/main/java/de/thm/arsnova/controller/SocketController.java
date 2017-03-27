@@ -57,7 +57,7 @@ public class SocketController extends AbstractController {
 	@Autowired
 	private ARSnovaSocket server;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(SocketController.class);
+	private static final Logger logger = LoggerFactory.getLogger(SocketController.class);
 
 	@ApiOperation(value = "requested to assign Websocket session",
 			nickname = "authorize")
@@ -70,13 +70,13 @@ public class SocketController extends AbstractController {
 	public void authorize(@ApiParam(value = "sessionMap", required = true) @RequestBody final Map <String, String> sessionMap, @ApiParam(value = "response", required = true) final HttpServletResponse response) {
 		String socketid = sessionMap.get("session");
 		if (null == socketid) {
-			LOGGER.debug("Expected property 'session' missing");
+			logger.debug("Expected property 'session' missing");
 			response.setStatus(HttpStatus.BAD_REQUEST.value());
 			return;
 		}
 		User u = userService.getCurrentUser();
 		if (null == u) {
-			LOGGER.debug("Client {} requested to assign Websocket session but has not authenticated", socketid);
+			logger.debug("Client {} requested to assign Websocket session but has not authenticated", socketid);
 			response.setStatus(HttpStatus.FORBIDDEN.value());
 			return;
 		}

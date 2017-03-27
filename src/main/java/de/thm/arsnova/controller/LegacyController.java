@@ -19,8 +19,6 @@ package de.thm.arsnova.controller;
 
 import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.web.DeprecatedApi;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,8 +31,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 public class LegacyController extends AbstractController {
-
-	public static final Logger LOGGER = LoggerFactory.getLogger(LegacyController.class);
 
 	@Autowired
 	private IQuestionService questionService;

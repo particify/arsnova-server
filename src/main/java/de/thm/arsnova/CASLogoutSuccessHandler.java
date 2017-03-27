@@ -34,7 +34,7 @@ import java.io.IOException;
  */
 public class CASLogoutSuccessHandler implements LogoutSuccessHandler {
 
-	public static final Logger LOGGER = LoggerFactory.getLogger(CASLogoutSuccessHandler.class);
+	public static final Logger logger = LoggerFactory.getLogger(CASLogoutSuccessHandler.class);
 
 	private String casUrl;
 	private String defaultTarget;
@@ -50,7 +50,7 @@ public class CASLogoutSuccessHandler implements LogoutSuccessHandler {
 		/* Typo in "referer" intended. It is in the spec. */
 		String referrer = request.getHeader("referer");
 		if (response.isCommitted()) {
-			LOGGER.info("Response has already been committed. Unable to redirect to target");
+			logger.info("Response has already been committed. Unable to redirect to target");
 			return;
 		}
 		redirectStrategy.sendRedirect(
