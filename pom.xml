@@ -288,7 +288,7 @@
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-annotations</artifactId>
-			<version>1.5.12</version>
+			<version>1.5.13</version>
 		</dependency>
 		<dependency>
 			<groupId>com.codahale.metrics</groupId>
@@ -333,7 +333,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.4.2.v20170220</version>
+				<version>9.4.3.v20170317</version>
 				<configuration>
 					<scanIntervalSeconds>1</scanIntervalSeconds>
 					<webApp>
@@ -363,7 +363,7 @@
 			<plugin>
 				<groupId>org.sonarsource.scanner.maven</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
-				<version>3.2</version>
+				<version>3.3.0.603</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
