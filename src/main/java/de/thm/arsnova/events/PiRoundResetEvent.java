@@ -21,6 +21,7 @@ import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Fires whenever a peer instruction round is reset.
@@ -51,8 +52,8 @@ public class PiRoundResetEvent extends SessionEvent {
 		return questionVariant;
 	}
 
-	public HashMap<String, String> getPiRoundResetInformations() {
-		HashMap<String, String> map = new HashMap<>();
+	public Map<String, String> getPiRoundResetInformations() {
+		Map<String, String> map = new HashMap<>();
 
 		map.put("_id", getQuestionId());
 		map.put("variant", getQuestionVariant());

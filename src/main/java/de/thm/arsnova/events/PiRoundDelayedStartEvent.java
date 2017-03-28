@@ -21,6 +21,7 @@ import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Fires whenever a delayed peer instruction round is initiated. The delayed part denotes that this round might not
@@ -69,8 +70,8 @@ public class PiRoundDelayedStartEvent extends SessionEvent {
 		return piRound;
 	}
 
-	public HashMap<String, Object> getPiRoundInformations() {
-		HashMap<String, Object> map = new HashMap<>();
+	public Map<String, Object> getPiRoundInformations() {
+		Map<String, Object> map = new HashMap<>();
 
 		map.put("_id", getQuestionId());
 		map.put("endTime", getEndTime());
