@@ -13,7 +13,7 @@ We recommend to use the latest (LTS) versions of the distributions.
 
 For Debian 8 you need to enable the backports repository to install Java 8:
 
-	# grep '^deb .*jessie-backports' -q /etc/apt/sources.list || echo "deb http://ftp.fh-giessen.de/debian/ jessie-backports main" >> /etc/apt/sources.list
+	# grep '^deb .*jessie-backports' -q /etc/apt/sources.list || echo "deb http://ftp.debian.org/debian jessie-backports main" >> /etc/apt/sources.list
 
 
 ### Hardware
