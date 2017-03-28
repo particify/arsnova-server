@@ -437,7 +437,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 		}
 
 		/* TODO role handling implementation, send this only to users with role audience */
-		if (qs.size() > 0) {
+		if (!qs.isEmpty()) {
 			broadcastInSession(session.getKeyword(), "lecQuestionAvail", questions.get(0).get_id()); // deprecated!
 		}
 		broadcastInSession(session.getKeyword(), "lecturerQuestionAvailable", questions);

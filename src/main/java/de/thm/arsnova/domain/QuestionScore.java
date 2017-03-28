@@ -57,7 +57,7 @@ public class QuestionScore implements Iterable<UserScore> {
 	}
 
 	public boolean hasScores() {
-		return this.userScores.size() > 0;
+		return !this.userScores.isEmpty();
 	}
 
 	public void add(int piRound, String username, int userscore) {

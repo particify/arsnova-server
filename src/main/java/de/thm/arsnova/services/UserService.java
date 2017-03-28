@@ -153,7 +153,7 @@ public class UserService implements IUserService {
 
 	@Scheduled(fixedDelay = LOGIN_TRY_RESET_DELAY_MS)
 	public void resetLoginTries() {
-		if (loginTries.size() > 0) {
+		if (!loginTries.isEmpty()) {
 			logger.debug("Reset failed login counters.");
 			loginTries.clear();
 		}
@@ -161,7 +161,7 @@ public class UserService implements IUserService {
 
 	@Scheduled(fixedDelay = LOGIN_BAN_RESET_DELAY_MS)
 	public void resetLoginBans() {
-		if (loginBans.size() > 0) {
+		if (!loginBans.isEmpty()) {
 			logger.info("Reset temporary login bans.");
 			loginBans.clear();
 		}
@@ -415,7 +415,7 @@ public class UserService implements IUserService {
 
 		List<String> domainList = Arrays.asList(allowedEmailDomains.split(","));
 
-		if (domainList.size() > 0) {
+		if (!domainList.isEmpty()) {
 			List<String> patterns = new ArrayList<>();
 			if (domainList.contains("*")) {
 				patterns.add("([a-z0-9-]+\\.)+[a-z0-9-]+");

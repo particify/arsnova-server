@@ -1044,7 +1044,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		view.setKey(questionId);
 		view.setGroup(true);
 		final ViewResults results = getDatabase().view(view);
-		if (results.getResults().size() == 0) {
+		if (results.getResults().isEmpty()) {
 			return 0;
 		}
 		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
@@ -1057,7 +1057,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		view.setStartKey(question.get_id(), String.valueOf(piRound));
 		view.setEndKey(question.get_id(), String.valueOf(piRound), "{}");
 		final ViewResults results = getDatabase().view(view);
-		if (results.getResults().size() == 0) {
+		if (results.getResults().isEmpty()) {
 			return 0;
 		}
 
@@ -1071,7 +1071,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		view.setKey(question.get_id());
 		final ViewResults results = getDatabase().view(view);
 
-		if (results.getResults().size() == 0) {
+		if (results.getResults().isEmpty()) {
 			return 0;
 		}
 
@@ -1079,7 +1079,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	private boolean isEmptyResults(final ViewResults results) {
-		return results == null || results.getResults().isEmpty() || results.getJSONArray("rows").size() == 0;
+		return results == null || results.getResults().isEmpty() || results.getJSONArray("rows").isEmpty();
 	}
 
 	@Override
@@ -1137,7 +1137,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		final NovaView view = new NovaView("skill_question/count_answers_by_session");
 		view.setKey(s.get_id());
 		final ViewResults results = getDatabase().view(view);
-		if (results.getResults().size() == 0) {
+		if (results.getResults().isEmpty()) {
 			return 0;
 		}
 		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
@@ -1154,7 +1154,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		view.setKey(s.get_id());
 		view.setGroup(true);
 		final ViewResults results = getDatabase().view(view);
-		if (results.size() == 0 || results.getResults().size() == 0) {
+		if (results.isEmpty() || results.getResults().isEmpty()) {
 			return 0;
 		}
 		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
@@ -1180,7 +1180,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	private InterposedReadingCount getInterposedReadingCount(final NovaView view) {
 		final ViewResults results = getDatabase().view(view);
-		if (results.size() == 0 || results.getResults().size() == 0) {
+		if (results.isEmpty() || results.getResults().isEmpty()) {
 			return new InterposedReadingCount();
 		}
 		// A complete result looks like this. Note that the second row is optional, and that the first one may be
@@ -1746,7 +1746,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			count[2] += qaCount[1];
 		}
 
-		if (results.size() > 0) {
+		if (!results.isEmpty()) {
 			logger.info("Deleted {} inactive guest sessions.", results.size());
 			log("cleanup", "type", "session", "sessionCount", results.size(), "questionCount", count[1], "answerCount", count[2]);
 		}
@@ -1777,7 +1777,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 					log("delete", "type", "user", "id", oldDoc.getId());
 				}
 
-				if (newDocs.size() > 0) {
+				if (!newDocs.isEmpty()) {
 					if (getDatabase().bulkSaveDocuments(newDocs.toArray(new Document[newDocs.size()]))) {
 						count += newDocs.size();
 					} else {
@@ -1918,7 +1918,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		final NovaView view = new NovaView("skill_question/count_answers_by_session_and_question_variant");
 		view.setKey(session.get_id(), variant);
 		final ViewResults results = getDatabase().view(view);
-		if (results.getResults().size() == 0) {
+		if (results.getResults().isEmpty()) {
 			return 0;
 		}
 		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
@@ -2016,7 +2016,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	private List<String> collectQuestionIds(final NovaView view) {
 		final ViewResults results = getDatabase().view(view);
-		if (results.getResults().size() == 0) {
+		if (results.getResults().isEmpty()) {
 			return new ArrayList<>();
 		}
 		final List<String> ids = new ArrayList<>();
@@ -2527,7 +2527,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 		for (ImportExportQuestion question : importExportSession.getQuestions()) {
 			numAnswers += question.getAnswers().size();
-			if (question.getAnswers().size() == 0) {
+			if (question.getAnswers().isEmpty()) {
 				numUnanswered++;
 			}
 		}
