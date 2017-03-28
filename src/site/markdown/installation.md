@@ -192,3 +192,9 @@ At last, disable the default site configuration and enable the newly created one
 
 	# a2dissite default
 	# a2ensite arsnova
+
+
+## Docker
+
+If you want to run ARSnova in a containerized environment, you can use our Docker images.
+Have a look at our [deployment instructions](https://github.com/thm-projects/arsnova-docker) for Docker.
