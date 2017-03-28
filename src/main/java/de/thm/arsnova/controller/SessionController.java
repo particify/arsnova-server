@@ -63,7 +63,7 @@ import java.util.List;
 @Api(value = "/session", description = "the Session Controller API")
 public class SessionController extends PaginationController {
 
-	public static final Logger logger = LoggerFactory.getLogger(SessionController.class);
+	private static final Logger logger = LoggerFactory.getLogger(SessionController.class);
 
 	@Autowired
 	private ISessionService sessionService;

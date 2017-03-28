@@ -43,7 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class FeedbackController extends AbstractController {
 
-	public static final Logger logger = LoggerFactory.getLogger(FeedbackController.class);
+	private static final Logger logger = LoggerFactory.getLogger(FeedbackController.class);
 
 	@Autowired
 	private IFeedbackService feedbackService;

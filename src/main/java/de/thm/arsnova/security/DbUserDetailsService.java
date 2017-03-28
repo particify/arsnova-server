@@ -41,7 +41,7 @@ public class DbUserDetailsService implements UserDetailsService {
 	@Autowired
 	private IDatabaseDao dao;
 
-	public static final Logger logger = LoggerFactory
+	private static final Logger logger = LoggerFactory
 			.getLogger(DbUserDetailsService.class);
 
 	@Override

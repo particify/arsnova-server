@@ -96,7 +96,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	private final Queue<AbstractMap.SimpleEntry<Document, AnswerQueueElement>> answerQueue = new ConcurrentLinkedQueue<>();
 
-	public static final Logger logger = LoggerFactory.getLogger(CouchDBDao.class);
+	private static final Logger logger = LoggerFactory.getLogger(CouchDBDao.class);
 
 	@Value("${couchdb.host}")
 	public void setDatabaseHost(final String newDatabaseHost) {

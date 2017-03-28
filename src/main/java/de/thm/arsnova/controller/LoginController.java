@@ -141,7 +141,7 @@ public class LoginController extends AbstractController {
 	@Autowired
 	private UserSessionService userSessionService;
 
-	public static final Logger logger = LoggerFactory.getLogger(LoginController.class);
+	private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
 	@RequestMapping(value = { "/auth/login", "/doLogin" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public void doLogin(

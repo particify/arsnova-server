@@ -48,7 +48,7 @@ public class UserController extends AbstractController {
 	@Autowired
 	private UserSessionService userSessionService;
 
-	public static final Logger logger = LoggerFactory
+	private static final Logger logger = LoggerFactory
 			.getLogger(UserController.class);
 
 	@RequestMapping(value = "/register", method = RequestMethod.POST)

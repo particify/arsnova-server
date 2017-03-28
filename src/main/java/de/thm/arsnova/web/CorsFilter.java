@@ -25,7 +25,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 public class CorsFilter extends org.springframework.web.filter.CorsFilter {
-	protected final Logger logger = LoggerFactory.getLogger(CorsFilter.class);
+	private final Logger logger = LoggerFactory.getLogger(CorsFilter.class);
 
 	public CorsFilter(List<String> origins) {
 		super(configurationSource(origins));

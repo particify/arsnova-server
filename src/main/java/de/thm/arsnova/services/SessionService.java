@@ -126,7 +126,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 	private ApplicationEventPublisher publisher;
 
-	public static final Logger logger = LoggerFactory.getLogger(SessionService.class);
+	private static final Logger logger = LoggerFactory.getLogger(SessionService.class);
 
 	@Scheduled(fixedDelay = SESSION_INACTIVITY_CHECK_INTERVAL_MS)
 	public void deleteInactiveSessions() {

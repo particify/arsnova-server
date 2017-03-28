@@ -88,7 +88,7 @@ public class UserService implements IUserService {
 	private static final long ACTIVATION_KEY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
 	private static final long ACTIVATION_KEY_DURABILITY_MS = 6 * 60 * 60 * 1000L;
 
-	public static final Logger logger = LoggerFactory.getLogger(UserService.class);
+	private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
 	private static final ConcurrentHashMap<UUID, User> socketid2user = new ConcurrentHashMap<>();
 

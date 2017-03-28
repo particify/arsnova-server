@@ -31,7 +31,7 @@ import java.util.Collection;
  * to get a consistent ID despite case insensitivity.
  */
 public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
-	public static final Logger logger = LoggerFactory.getLogger(CustomLdapUserDetailsMapper.class);
+	private static final Logger logger = LoggerFactory.getLogger(CustomLdapUserDetailsMapper.class);
 
 	private String userIdAttr;
 

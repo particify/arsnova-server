@@ -67,7 +67,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	private ApplicationEventPublisher publisher;
 
-	public static final Logger logger = LoggerFactory.getLogger(QuestionService.class);
+	private static final Logger logger = LoggerFactory.getLogger(QuestionService.class);
 
 	private HashMap<String, Timer> timerList = new HashMap<>();
 

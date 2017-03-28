@@ -37,7 +37,7 @@ import java.util.Map;
 @Controller
 @RequestMapping({"/configuration", "/arsnova-config"})
 public class ConfigurationController extends AbstractController {
-	public static final Logger logger = LoggerFactory
+	private static final Logger logger = LoggerFactory
 			.getLogger(ConfigurationController.class);
 
 	@Value("${api.path:}")

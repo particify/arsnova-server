@@ -45,7 +45,7 @@ import java.util.List;
 @RestController
 public class CourseController extends AbstractController {
 
-	public static final Logger logger = LoggerFactory.getLogger(CourseController.class);
+	private static final Logger logger = LoggerFactory.getLogger(CourseController.class);
 
 	@Autowired(required = false)
 	private ConnectorClient connectorClient;

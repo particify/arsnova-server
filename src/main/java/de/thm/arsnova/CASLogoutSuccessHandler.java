@@ -34,7 +34,7 @@ import java.io.IOException;
  */
 public class CASLogoutSuccessHandler implements LogoutSuccessHandler {
 
-	public static final Logger logger = LoggerFactory.getLogger(CASLogoutSuccessHandler.class);
+	private static final Logger logger = LoggerFactory.getLogger(CASLogoutSuccessHandler.class);
 
 	private String casUrl;
 	private String defaultTarget;
