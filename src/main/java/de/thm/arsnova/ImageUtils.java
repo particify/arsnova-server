@@ -56,7 +56,7 @@ public class ImageUtils {
 	/* default value is 200 pixel in height, set the value in the configuration file */
 	static final int THUMB_HEIGHT_DEFAULT = 200;
 
-	public static final Logger LOGGER = LoggerFactory.getLogger(ImageUtils.class);
+	private static final Logger logger = LoggerFactory.getLogger(ImageUtils.class);
 
 	@Value("${imageupload.thumbnail.width}")
 	private int thumbWidth = THUMB_WIDTH_DEFAULT;
@@ -200,7 +200,7 @@ public class ImageUtils {
 
 				return result.toString();
 			} catch (IOException e) {
-				LOGGER.error(e.getLocalizedMessage());
+				logger.error(e.getLocalizedMessage());
 				return null;
 			}
 		}
@@ -248,7 +248,7 @@ public class ImageUtils {
 			return baos.toByteArray();
 
 		} catch (IOException e) {
-			LOGGER.error(e.getLocalizedMessage());
+			logger.error(e.getLocalizedMessage());
 		}
 
 		return null;

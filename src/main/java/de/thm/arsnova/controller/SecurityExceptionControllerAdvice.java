@@ -62,16 +62,19 @@ public class SecurityExceptionControllerAdvice {
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ExceptionHandler(NotFoundException.class)
 	public void handleNotFoundException(final Exception e, final HttpServletRequest request) {
+		/* No implementation - handled solely by annotations */
 	}
 
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	@ExceptionHandler(UnauthorizedException.class)
 	public void handleUnauthorizedException(final Exception e, final HttpServletRequest request) {
+		/* No implementation - handled solely by annotations */
 	}
 
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	@ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
 	public void handleAuthenticationCredentialsNotFoundException(final Exception e, final HttpServletRequest request) {
+		/* No implementation - handled solely by annotations */
 	}
 
 	@ExceptionHandler(AccessDeniedException.class)
@@ -95,30 +98,36 @@ public class SecurityExceptionControllerAdvice {
 	@ResponseStatus(HttpStatus.FORBIDDEN)
 	@ExceptionHandler(ForbiddenException.class)
 	public void handleForbiddenException(final Exception e, final HttpServletRequest request) {
+		/* No implementation - handled solely by annotations */
 	}
 
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@ExceptionHandler(NoContentException.class)
 	public void handleNoContentException(final Exception e, final HttpServletRequest request) {
+		/* No implementation - handled solely by annotations */
 	}
 
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(BadRequestException.class)
 	public void handleBadRequestException(final Exception e, final HttpServletRequest request) {
+		/* No implementation - handled solely by annotations */
 	}
 
 	@ResponseStatus(HttpStatus.PRECONDITION_FAILED)
 	@ExceptionHandler(PreconditionFailedException.class)
 	public void handlePreconditionFailedException(final Exception e, final HttpServletRequest request) {
+		/* No implementation - handled solely by annotations */
 	}
 
 	@ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
 	@ExceptionHandler(NotImplementedException.class)
 	public void handleNotImplementedException(final Exception e, final HttpServletRequest request) {
+		/* No implementation - handled solely by annotations */
 	}
 
 	@ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
 	@ExceptionHandler(PayloadTooLargeException.class)
 	public void handlePayloadTooLargeException(final Exception e, final HttpServletRequest request) {
+		/* No implementation - handled solely by annotations */
 	}
 }

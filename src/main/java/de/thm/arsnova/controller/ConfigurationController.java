@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The ConfigurationController provides frontend clients with information necessary to correctly interact with the
@@ -36,7 +37,7 @@ import java.util.HashMap;
 @Controller
 @RequestMapping({"/configuration", "/arsnova-config"})
 public class ConfigurationController extends AbstractController {
-	public static final Logger LOGGER = LoggerFactory
+	private static final Logger logger = LoggerFactory
 			.getLogger(ConfigurationController.class);
 
 	@Value("${api.path:}")
@@ -161,11 +162,11 @@ public class ConfigurationController extends AbstractController {
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
-	public HashMap<String, Object> getConfiguration(HttpServletRequest request) {
-		HashMap<String, Object> config = new HashMap<>();
-		HashMap<String, Boolean> features = new HashMap<>();
-		HashMap<String, String> publicPool = new HashMap<>();
-		HashMap<String, Object> splashscreen = new HashMap<>();
+	public Map<String, Object> getConfiguration(HttpServletRequest request) {
+		Map<String, Object> config = new HashMap<>();
+		Map<String, Boolean> features = new HashMap<>();
+		Map<String, String> publicPool = new HashMap<>();
+		Map<String, Object> splashscreen = new HashMap<>();
 
 		/* The API path could be unknown to the client in case the request was forwarded */
 		if ("".equals(apiPath)) {
@@ -268,7 +269,7 @@ public class ConfigurationController extends AbstractController {
 		}
 
 		if (!"".equals(trackingTrackerUrl)) {
-			HashMap<String, String> tracking = new HashMap<>();
+			Map<String, String> tracking = new HashMap<>();
 			config.put("tracking", tracking);
 
 			tracking.put("provider", trackingProvider);

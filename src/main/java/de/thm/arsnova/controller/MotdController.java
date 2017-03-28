@@ -25,8 +25,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,8 +47,6 @@ import java.util.List;
 @Api(value = "/motd", description = "the Motd Controller API")
 public class MotdController extends AbstractController {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(MotdController.class);
-
 	@Autowired
 	private IMotdService motdService;
 
@@ -72,7 +68,7 @@ public class MotdController extends AbstractController {
 			client.setTime(Long.parseLong(clientdate));
 		}
 		if (adminview) {
-			if (sessionkey.equals("null")) {
+			if ("null".equals(sessionkey)) {
 				motds = motdService.getAdminMotds();
 			} else {
 				motds = motdService.getAllSessionMotds(sessionkey);
@@ -96,7 +92,7 @@ public class MotdController extends AbstractController {
 			) {
 		if (motd != null) {
 			Motd newMotd;
-			if (motd.getAudience().equals("session") && motd.getSessionkey() != null) {
+			if ("session".equals(motd.getAudience()) && motd.getSessionkey() != null) {
 				newMotd = motdService.saveSessionMotd(motd.getSessionkey(), motd);
 			} else {
 				newMotd = motdService.saveMotd(motd);
@@ -118,7 +114,7 @@ public class MotdController extends AbstractController {
 			@ApiParam(value = "motdkey from current motd", required = true) @PathVariable final String motdkey,
 			@ApiParam(value = "current motd", required = true) @RequestBody final Motd motd
 			) {
-		if (motd.getAudience().equals("session") && motd.getSessionkey() != null) {
+		if ("session".equals(motd.getAudience()) && motd.getSessionkey() != null) {
 			return motdService.updateSessionMotd(motd.getSessionkey(), motd);
 		} else {
 			return motdService.updateMotd(motd);
@@ -129,7 +125,7 @@ public class MotdController extends AbstractController {
 	@RequestMapping(value = "/{motdkey}", method = RequestMethod.DELETE)
 	public void deleteMotd(@ApiParam(value = "Motd-key from the message that shall be deleted", required = true) @PathVariable final String motdkey) {
 		Motd motd = motdService.getMotd(motdkey);
-		if (motd.getAudience().equals("session")) {
+		if ("session".equals(motd.getAudience())) {
 			motdService.deleteSessionMotd(motd.getSessionkey(), motd);
 		} else {
 			motdService.deleteMotd(motd);

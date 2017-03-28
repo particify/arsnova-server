@@ -141,7 +141,7 @@ public class LoginController extends AbstractController {
 	@Autowired
 	private UserSessionService userSessionService;
 
-	public static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
+	private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
 	@RequestMapping(value = { "/auth/login", "/doLogin" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public void doLogin(
@@ -174,7 +174,7 @@ public class LoginController extends AbstractController {
 					return;
 				}
 			} catch (AuthenticationException e) {
-				LOGGER.info("Authentication failed: {}", e.getMessage());
+				logger.info("Authentication failed: {}", e.getMessage());
 			}
 
 			userService.increaseFailedLoginCount(addr);
@@ -197,9 +197,9 @@ public class LoginController extends AbstractController {
 
 						return;
 					}
-					LOGGER.info("LDAPLOGIN: {}", auth.isAuthenticated());
+					logger.info("LDAPLOGIN: {}", auth.isAuthenticated());
 				} catch (AuthenticationException e) {
-					LOGGER.info("No LDAP login: {}", e);
+					logger.info("No LDAP login: {}", e);
 				}
 
 				userService.increaseFailedLoginCount(addr);

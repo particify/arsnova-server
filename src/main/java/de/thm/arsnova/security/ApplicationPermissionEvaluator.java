@@ -27,8 +27,6 @@ import de.thm.arsnova.exceptions.UnauthorizedException;
 import org.scribe.up.profile.facebook.FacebookProfile;
 import org.scribe.up.profile.google.Google2Profile;
 import org.scribe.up.profile.twitter.TwitterProfile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.PermissionEvaluator;
@@ -43,10 +41,8 @@ import java.util.Arrays;
  */
 public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationPermissionEvaluator.class);
-
 	@Value("${security.admin-accounts}")
-	private String adminAccounts;
+	private String[] adminAccounts;
 
 	@Autowired
 	private IDatabaseDao dao;
@@ -99,9 +95,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 	private boolean checkAdminPermission(final String username) {
 		/* TODO: only allow accounts from arsnova db */
-		String[] splittedAdminNames = adminAccounts.split(",");
-
-		return Arrays.asList(splittedAdminNames).contains(username);
+		return Arrays.asList(adminAccounts).contains(username);
 	}
 
 	private boolean checkSessionPermission(
@@ -109,9 +103,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Serializable targetId,
 			final Object permission
 			) {
-		if (permission instanceof String && (permission.equals("owner") || permission.equals("write"))) {
+		if (permission instanceof String && ("owner".equals(permission) || "write".equals(permission))) {
 			return dao.getSessionFromKeyword(targetId.toString()).getCreator().equals(username);
-		} else if (permission instanceof String && permission.equals("read")) {
+		} else if (permission instanceof String && "read".equals(permission)) {
 			return dao.getSessionFromKeyword(targetId.toString()).isActive();
 		}
 		return false;
@@ -122,7 +116,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Serializable targetId,
 			final Object permission
 			) {
-		if (permission instanceof String && permission.equals("owner")) {
+		if (permission instanceof String && "owner".equals(permission)) {
 			final Question question = dao.getQuestion(targetId.toString());
 			if (question != null) {
 				final Session session = dao.getSessionFromId(question.getSessionId());
@@ -138,7 +132,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Serializable targetId,
 			final Object permission
 			) {
-		if (permission instanceof String && permission.equals("owner")) {
+		if (permission instanceof String && "owner".equals(permission)) {
 			final InterposedQuestion question = dao.getInterposedQuestion(targetId.toString());
 			if (question != null) {
 				// Does the creator want to delete his own question?

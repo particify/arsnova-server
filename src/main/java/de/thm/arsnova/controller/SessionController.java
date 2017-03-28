@@ -63,7 +63,7 @@ import java.util.List;
 @Api(value = "/session", description = "the Session Controller API")
 public class SessionController extends PaginationController {
 
-	public static final Logger LOGGER = LoggerFactory.getLogger(SessionController.class);
+	private static final Logger logger = LoggerFactory.getLogger(SessionController.class);
 
 	@Autowired
 	private ISessionService sessionService;
@@ -172,7 +172,7 @@ public class SessionController extends PaginationController {
 			) {
 		List<Session> sessions;
 
-		if (!username.equals("")) {
+		if (!"".equals(username)) {
 			try {
 				if (ownedOnly && !visitedOnly) {
 					sessions = sessionService.getUserSessions(username);
@@ -206,7 +206,7 @@ public class SessionController extends PaginationController {
 			return null;
 		}
 
-		if (sortby != null && sortby.equals("shortname")) {
+		if ("shortname".equals(sortby)) {
 			Collections.sort(sessions, new SessionShortNameComparator());
 		} else {
 			Collections.sort(sessions, new SessionNameComparator());
@@ -242,7 +242,7 @@ public class SessionController extends PaginationController {
 			return null;
 		}
 
-		if (sortby != null && sortby.equals("shortname")) {
+		if ("shortname".equals(sortby)) {
 			Collections.sort(sessions, new SessionInfoShortNameComparator());
 		} else {
 			Collections.sort(sessions, new SessionInfoNameComparator());

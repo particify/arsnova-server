@@ -653,9 +653,9 @@ public class Question implements Serializable {
 	public int calculateValue(Answer answer) {
 		if (answer.isAbstention()) {
 			return 0;
-		} else if (this.questionType.equals("mc")) {
+		} else if ("mc".equals(this.questionType)) {
 			return calculateMultipleChoiceValue(answer);
-		} else if (this.questionType.equals("grid")) {
+		} else if ("grid".equals(this.questionType)) {
 			return calculateGridValue(answer);
 		} else {
 			return calculateRegularValue(answer);
@@ -780,7 +780,7 @@ public class Question implements Serializable {
 		int value = 0;
 		String[] answers = answer.getAnswerText().split(",");
 		for (int i = 0; i < this.possibleAnswers.size() && i < answers.length; i++) {
-			if (answers[i].equals("1")) {
+			if ("1".equals(answers[i])) {
 				PossibleAnswer p = this.possibleAnswers.get(i);
 				value += p.getValue();
 			}

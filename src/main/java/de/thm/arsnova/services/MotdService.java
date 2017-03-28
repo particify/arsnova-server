@@ -170,7 +170,7 @@ public class MotdService implements IMotdService {
 	@PreAuthorize("isAuthenticated()")
 	public MotdList getMotdListForUser(final String username) {
 		final User user = userService.getCurrentUser();
-		if (username.equals(user.getUsername()) && !user.getType().equals("guest")) {
+		if (username.equals(user.getUsername()) && !"guest".equals(user.getType())) {
 			return databaseDao.getMotdListForUser(username);
 		}
 		return null;

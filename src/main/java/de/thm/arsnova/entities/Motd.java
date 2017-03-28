@@ -142,6 +142,6 @@ public class Motd {
 			return false;
 		}
 		Motd other = (Motd) obj;
-		return (this.getMotdkey().equals(other.getMotdkey()));
+		return this.getMotdkey().equals(other.getMotdkey());
 	}
 }

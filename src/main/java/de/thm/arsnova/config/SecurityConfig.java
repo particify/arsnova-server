@@ -87,7 +87,7 @@ import java.util.List;
 @EnableWebSecurity
 @Profile("!test")
 public class SecurityConfig extends WebSecurityConfigurerAdapter implements ServletContextAware {
-	private final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+	private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
 	private ServletContext servletContext;
 

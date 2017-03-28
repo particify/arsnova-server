@@ -21,6 +21,7 @@ import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Fires whenever voting on a question is disabled.
@@ -48,8 +49,8 @@ public class LockVoteEvent extends SessionEvent {
 		return this.question.isVotingDisabled();
 	}
 
-	public HashMap<String, Object> getVotingAdmission() {
-		HashMap<String, Object> map = new HashMap<>();
+	public Map<String, Object> getVotingAdmission() {
+		Map<String, Object> map = new HashMap<>();
 
 		map.put("_id", getQuestionId());
 		map.put("variant", getQuestionVariant());
