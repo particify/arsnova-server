@@ -1,5 +1,41 @@
 # Changelog
 
+## 2.5
+Major features:
+* Administration API: New endpoints have been added which are accessible by
+  users defined by `security.admin-accounts`.
+* Evaluation of free text answers
+* Proxy support for WebSocket connections: It is now possible to use the same
+  port for standard HTTP requests and WebSocket connections. Additionally, it is
+  no longer necessary to setup a Java key store for TLS if a proxy is used.
+* Auto-deletion of inactive (not activated) users and guest sessions
+
+Minor features and changes:
+* Caching improvements
+* New use case including only comments
+* Export of questions to arsnova.click format
+* Export/import of flashcards to/from arsnova.cards format
+* Flashcards are now handled separately from questions
+
+Configuration changes:
+* `socketio.ip` has been replaced by `socketio.bind-address`
+* `security.ssl` has been removed. `security.keystore` and `security.storepass`
+  have been replaced by `socketio.ssl.jks-file` and `socketio.ssl.jks-password`.
+* New setting: `socketio.proxy-path`
+* The default port for WebSocket connections has been changed to `8090`
+
+With this release we have completely overhauled our [documentation](README.md).
+Additionally, we now provide
+[Docker images](https://github.com/thm-projects/arsnova-docker/).
+
+**This version is brought to you by:**  
+Project management: Klaus Quibeldey-Cirkel  
+Lead programming: Andreas Gärtner, Daniel Gerhardt, Tom "tekay" Käsler  
+Contributions: Robin Drangmeister, Dennis Schönhof  
+Sponsoring: [AG QLS](https://www.thm.de/site/en/hochschule/service/ag-qls.html),
+[HMWK](https://wissenschaft.hessen.de/wissenschaft/it-neue-medien/kompetenznetz-e-learning-hessen)
+
+
 ## 2.4.2
 This release fixes a minor security vulnerability which allowed an attacker to
 remove a MotD from a session without being the creator.
