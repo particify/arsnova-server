@@ -2646,42 +2646,57 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<Motd> getAdminMotds() {
-		NovaView view = new NovaView("motd/admin");
+		final NovaView view = new NovaView("motd/doc_by_audience_for_global");
 		return getMotds(view);
 	}
 
 	@Override
 	@Cacheable(cacheNames = "motds", key = "'all'")
 	public List<Motd> getMotdsForAll() {
-		NovaView view = new NovaView("motd/for_all");
+		final NovaView view = new NovaView("motd/doc_by_audience_for_global");
 		return getMotds(view);
 	}
 
 	@Override
 	@Cacheable(cacheNames = "motds", key = "'loggedIn'")
 	public List<Motd> getMotdsForLoggedIn() {
-		NovaView view = new NovaView("motd/for_loggedin");
+		final NovaView view = new NovaView("motd/doc_by_audience_for_global");
+		view.setKey("loggedIn");
 		return getMotds(view);
 	}
 
 	@Override
 	@Cacheable(cacheNames = "motds", key = "'tutors'")
 	public List<Motd> getMotdsForTutors() {
-		NovaView view = new NovaView("motd/for_tutors");
-		return getMotds(view);
+		final NovaView view1 = new NovaView("motd/doc_by_audience_for_global");
+		final NovaView view2 = new NovaView("motd/doc_by_audience_for_global");
+		view1.setKey("loggedIn");
+		view2.setKey("tutors");
+		final List<Motd> union = new ArrayList<>();
+		union.addAll(getMotds(view1));
+		union.addAll(getMotds(view2));
+
+		return union;
 	}
 
 	@Override
 	@Cacheable(cacheNames = "motds", key = "'students'")
 	public List<Motd> getMotdsForStudents() {
-		NovaView view = new NovaView("motd/for_students");
-		return getMotds(view);
+		final NovaView view1 = new NovaView("motd/doc_by_audience_for_global");
+		final NovaView view2 = new NovaView("motd/doc_by_audience_for_global");
+		view1.setKey("loggedIn");
+		view2.setKey("students");
+		final List<Motd> union = new ArrayList<>();
+		union.addAll(getMotds(view1));
+		union.addAll(getMotds(view2));
+
+		return union;
 	}
 
 	@Override
 	@Cacheable(cacheNames = "motds", key = "('session').concat(#p0)")
 	public List<Motd> getMotdsForSession(final String sessionkey) {
-		NovaView view = new NovaView("motd/by_sessionkey");
+		final NovaView view = new NovaView("motd/doc_by_sessionkey");
 		view.setKey(sessionkey);
 		return getMotds(view);
 	}
@@ -2710,7 +2725,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public Motd getMotdByKey(String key) {
-		NovaView view = new NovaView("motd/by_keyword");
+		final NovaView view = new NovaView("motd/by_motdkey");
+		view.setIncludeDocs(true);
 		view.setKey(key);
 		Motd motd = new Motd();
 
@@ -2718,16 +2734,16 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 		for (final Document d : results.getResults()) {
 			motd.set_id(d.getId());
-			motd.set_rev(d.getJSONObject("value").getString("_rev"));
-			motd.setMotdkey(d.getJSONObject("value").getString("motdkey"));
-			Date start = new Date(Long.parseLong(d.getJSONObject("value").getString("startdate")));
+			motd.set_rev(d.getJSONObject("doc").getString("_rev"));
+			motd.setMotdkey(d.getJSONObject("doc").getString("motdkey"));
+			Date start = new Date(Long.parseLong(d.getJSONObject("doc").getString("startdate")));
 			motd.setStartdate(start);
-			Date end = new Date(Long.parseLong(d.getJSONObject("value").getString("enddate")));
+			Date end = new Date(Long.parseLong(d.getJSONObject("doc").getString("enddate")));
 			motd.setEnddate(end);
-			motd.setTitle(d.getJSONObject("value").getString("title"));
-			motd.setText(d.getJSONObject("value").getString("text"));
-			motd.setAudience(d.getJSONObject("value").getString("audience"));
-			motd.setSessionkey(d.getJSONObject("value").getString("sessionkey"));
+			motd.setTitle(d.getJSONObject("doc").getString("title"));
+			motd.setText(d.getJSONObject("doc").getString("text"));
+			motd.setAudience(d.getJSONObject("doc").getString("audience"));
+			motd.setSessionkey(d.getJSONObject("doc").getString("sessionkey"));
 		}
 
 		return motd;
@@ -2781,7 +2797,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	@Cacheable(cacheNames = "motdlist", key = "#p0")
 	public MotdList getMotdListForUser(final String username) {
-		NovaView view = new NovaView("motd/list_by_username");
+		NovaView view = new NovaView("motdlist/doc_by_username");
 		view.setKey(username);
 
 		ViewResults results = this.getDatabase().view(view);
