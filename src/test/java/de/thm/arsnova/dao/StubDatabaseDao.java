@@ -148,18 +148,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Question> getSkillQuestions(User user, Session session) {
-		if (session == null) {
-			throw new NotFoundException();
-		}
-		List<Question> questions = stubQuestions.get(session.getKeyword());
-		if (questions == null) {
-			throw new NoContentException();
-		}
-		return questions;
-	}
-
-	@Override
 	public int getSkillQuestionCount(Session session) {
 		return stubQuestions.get(session.getKeyword()).size();
 	}
