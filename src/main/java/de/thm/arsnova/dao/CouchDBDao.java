@@ -269,8 +269,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		/* TODO: migrate to new view */
 		final ExtendedView questionCountView = new ExtendedView("content/by_sessionid");
 		final ExtendedView answerCountView = new ExtendedView("answer/by_sessionid");
-		final ExtendedView interposedCountView = new ExtendedView("interposed_question/count_by_session");
-		final ExtendedView unredInterposedCountView = new ExtendedView("interposed_question/count_by_session_reading");
+		final ExtendedView interposedCountView = new ExtendedView("comment/by_sessionid");
+		final ExtendedView unreadInterposedCountView = new ExtendedView("comment/by_sessionid_read");
 
 		interposedCountView.setSessionIdKeys(sessions);
 		interposedCountView.setGroup(true);
@@ -278,13 +278,13 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		questionCountView.setGroup(true);
 		answerCountView.setSessionIdKeys(sessions);
 		answerCountView.setGroup(true);
-		List<String> unredInterposedQueryKeys = new ArrayList<>();
+		List<String> unreadInterposedQueryKeys = new ArrayList<>();
 		for (Session s : sessions) {
-			unredInterposedQueryKeys.add("[\"" + s.get_id() + "\",\"unread\"]");
+			unreadInterposedQueryKeys.add("[\"" + s.get_id() + "\",false]");
 		}
-		unredInterposedCountView.setKeys(unredInterposedQueryKeys);
-		unredInterposedCountView.setGroup(true);
-		return getSessionInfoData(sessions, questionCountView, answerCountView, interposedCountView, unredInterposedCountView);
+		unreadInterposedCountView.setKeys(unreadInterposedQueryKeys);
+		unreadInterposedCountView.setGroup(true);
+		return getSessionInfoData(sessions, questionCountView, answerCountView, interposedCountView, unreadInterposedCountView);
 	}
 
 	private List<SessionInfo> getInfosForVisitedSessions(final List<Session> sessions, final User user) {
@@ -1163,7 +1163,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			throw new NotFoundException();
 		}
 
-		final NovaView view = new NovaView("interposed_question/count_by_session");
+		final NovaView view = new NovaView("comment/by_sessionid");
 		view.setKey(s.get_id());
 		view.setGroup(true);
 		final ViewResults results = getDatabase().view(view);
@@ -1175,7 +1175,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public InterposedReadingCount getInterposedReadingCount(final Session session) {
-		final NovaView view = new NovaView("interposed_question/count_by_session_reading");
+		final NovaView view = new NovaView("comment/by_sessionid_read");
 		view.setStartKeyArray(session.get_id());
 		view.setEndKeyArray(session.get_id(), "{}");
 		view.setGroup(true);
@@ -1184,7 +1184,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public InterposedReadingCount getInterposedReadingCount(final Session session, final User user) {
-		final NovaView view = new NovaView("interposed_question/count_by_session_reading_for_creator");
+		final NovaView view = new NovaView("comment/by_sessionid_creator_read");
 		view.setStartKeyArray(session.get_id(), user.getUsername());
 		view.setEndKeyArray(session.get_id(), user.getUsername(), "{}");
 		view.setGroup(true);
@@ -1203,32 +1203,32 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		// {"key":["cecebabb21b096e592d81f9c1322b877","Guestc9350cf4a3","unread"],"value":1}
 		// ]}
 		int read = 0, unread = 0;
-		String type = "";
+		boolean isRead = false;
 		final JSONObject fst = results.getJSONArray("rows").getJSONObject(0);
 		final JSONObject snd = results.getJSONArray("rows").optJSONObject(1);
 
 		final JSONArray fstkey = fst.getJSONArray("key");
 		if (fstkey.size() == 2) {
-			type = fstkey.getString(1);
+			isRead = fstkey.getBoolean(1);
 		} else if (fstkey.size() == 3) {
-			type = fstkey.getString(2);
+			isRead = fstkey.getBoolean(2);
 		}
-		if ("read".equals(type)) {
+		if (isRead) {
 			read = fst.optInt("value");
-		} else if ("unread".equals(type)) {
+		} else {
 			unread = fst.optInt("value");
 		}
 
 		if (snd != null) {
 			final JSONArray sndkey = snd.getJSONArray("key");
 			if (sndkey.size() == 2) {
-				type = sndkey.getString(1);
+				isRead = sndkey.getBoolean(1);
 			} else {
-				type = sndkey.getString(2);
+				isRead = sndkey.getBoolean(2);
 			}
-			if ("read".equals(type)) {
+			if (isRead) {
 				read = snd.optInt("value");
-			} else if ("unread".equals(type)) {
+			} else {
 				unread = snd.optInt("value");
 			}
 		}
@@ -1237,7 +1237,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<InterposedQuestion> getInterposedQuestions(final Session session, final int start, final int limit) {
-		final NovaView view = new NovaView("interposed_question/by_session_full");
+		final NovaView view = new NovaView("comment/doc_by_sessionid_timestamp");
 		if (start > 0) {
 			view.setSkip(start);
 		}
@@ -1256,7 +1256,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<InterposedQuestion> getInterposedQuestions(final Session session, final User user, final int start, final int limit) {
-		final NovaView view = new NovaView("interposed_question/by_session_and_creator");
+		final NovaView view = new NovaView("comment/doc_by_sessionid_creator_timestamp");
 		if (start > 0) {
 			view.setSkip(start);
 		}
@@ -2072,7 +2072,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public int deleteAllInterposedQuestions(final Session session) {
-		final NovaView view = new NovaView("interposed_question/by_session");
+		final NovaView view = new NovaView("comment/by_sessionid");
 		view.setKey(session.get_id());
 		final ViewResults questions = getDatabase().view(view);
 
@@ -2081,8 +2081,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public int deleteAllInterposedQuestions(final Session session, final User user) {
-		final NovaView view = new NovaView("interposed_question/by_session_and_creator");
-		view.setKey(session.get_id(), user.getUsername());
+		final NovaView view = new NovaView("comment/by_sessionid_creator_read");
+		view.setStartKeyArray(session.get_id(), user.getUsername());
+		view.setEndKeyArray(session.get_id(), user.getUsername(), "{}");
 		final ViewResults questions = getDatabase().view(view);
 
 		return deleteAllInterposedQuestions(session, questions);
