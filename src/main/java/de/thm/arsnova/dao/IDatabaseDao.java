@@ -89,12 +89,6 @@ public interface IDatabaseDao {
 
 	Question getQuestion(String id);
 
-	/**
-	 * @deprecated Use getSkillQuestionsForUsers or getSkillQuestionsForTeachers
-	 */
-	@Deprecated
-	List<Question> getSkillQuestions(User user, Session session);
-
 	List<Question> getSkillQuestionsForUsers(Session session);
 
 	List<Question> getSkillQuestionsForTeachers(Session session);

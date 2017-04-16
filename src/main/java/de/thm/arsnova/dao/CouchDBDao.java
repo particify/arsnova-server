@@ -176,23 +176,23 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<Session> getSessionsForUsername(String username, final int start, final int limit) {
-		final NovaView view = new NovaView("session/by_creator");
+		final NovaView view = new NovaView("session/partial_by_sessiontype_creator_name");
 		if (start > 0) {
 			view.setSkip(start);
 		}
 		if (limit > 0) {
 			view.setLimit(limit);
 		}
-		view.setStartKeyArray(username);
-		view.setEndKeyArray(username, "{}");
+		view.setStartKeyArray("", username);
+		view.setEndKeyArray("", username, "{}");
 
 		final Results<Session> results = getDatabase().queryView(view, Session.class);
 
 		final List<Session> result = new ArrayList<>();
 		for (final RowResult<Session> row : results.getRows()) {
 			final Session session = row.getValue();
-			session.setCreator(row.getKey().getString(0));
-			session.setName(row.getKey().getString(1));
+			session.setCreator(row.getKey().getString(1));
+			session.setName(row.getKey().getString(2));
 			session.set_id(row.getId());
 			result.add(session);
 		}
@@ -201,7 +201,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<Session> getPublicPoolSessions() {
-		final NovaView view = new NovaView("session/public_pool_by_subject");
+		// TODO replace with new view
+		final NovaView view = new NovaView("session/partial_by_ppsubject_name_for_publicpool");
 
 		final ViewResults sessions = getDatabase().view(view);
 
@@ -226,9 +227,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<Session> getMyPublicPoolSessions(final User user) {
-		final NovaView view = new NovaView("session/public_pool_by_creator");
-		view.setStartKeyArray(user.getUsername());
-		view.setEndKeyArray(user.getUsername(), "{}");
+		final NovaView view = new NovaView("session/partial_by_sessiontype_creator_name");
+		view.setStartKeyArray("public_pool", user.getUsername());
+		view.setEndKeyArray("public_pool", user.getUsername(), "{}");
 
 		final ViewResults sessions = getDatabase().view(view);
 
@@ -238,8 +239,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 					d.getJSONObject().getJSONObject("value"),
 					Session.class
 					);
-			session.setCreator(d.getJSONObject().getJSONArray("key").getString(0));
-			session.setName(d.getJSONObject().getJSONArray("key").getString(1));
+			session.setCreator(d.getJSONObject().getJSONArray("key").getString(1));
+			session.setName(d.getJSONObject().getJSONArray("key").getString(2));
 			session.set_id(d.getId());
 			result.add(session);
 		}
@@ -265,10 +266,11 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	private List<SessionInfo> getInfosForSessions(final List<Session> sessions) {
-		final ExtendedView questionCountView = new ExtendedView("skill_question/count_by_session");
-		final ExtendedView answerCountView = new ExtendedView("skill_question/count_answers_by_session");
-		final ExtendedView interposedCountView = new ExtendedView("interposed_question/count_by_session");
-		final ExtendedView unredInterposedCountView = new ExtendedView("interposed_question/count_by_session_reading");
+		/* TODO: migrate to new view */
+		final ExtendedView questionCountView = new ExtendedView("content/by_sessionid");
+		final ExtendedView answerCountView = new ExtendedView("answer/by_sessionid");
+		final ExtendedView interposedCountView = new ExtendedView("comment/by_sessionid");
+		final ExtendedView unreadInterposedCountView = new ExtendedView("comment/by_sessionid_read");
 
 		interposedCountView.setSessionIdKeys(sessions);
 		interposedCountView.setGroup(true);
@@ -276,18 +278,18 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		questionCountView.setGroup(true);
 		answerCountView.setSessionIdKeys(sessions);
 		answerCountView.setGroup(true);
-		List<String> unredInterposedQueryKeys = new ArrayList<>();
+		List<String> unreadInterposedQueryKeys = new ArrayList<>();
 		for (Session s : sessions) {
-			unredInterposedQueryKeys.add("[\"" + s.get_id() + "\",\"unread\"]");
+			unreadInterposedQueryKeys.add("[\"" + s.get_id() + "\",false]");
 		}
-		unredInterposedCountView.setKeys(unredInterposedQueryKeys);
-		unredInterposedCountView.setGroup(true);
-		return getSessionInfoData(sessions, questionCountView, answerCountView, interposedCountView, unredInterposedCountView);
+		unreadInterposedCountView.setKeys(unreadInterposedQueryKeys);
+		unreadInterposedCountView.setGroup(true);
+		return getSessionInfoData(sessions, questionCountView, answerCountView, interposedCountView, unreadInterposedCountView);
 	}
 
 	private List<SessionInfo> getInfosForVisitedSessions(final List<Session> sessions, final User user) {
-		final ExtendedView answeredQuestionsView = new ExtendedView("answer/by_user");
-		final ExtendedView questionIdsView = new ExtendedView("skill_question/by_session_only_id_for_all");
+		final ExtendedView answeredQuestionsView = new ExtendedView("answer/by_user_sessionid");
+		final ExtendedView questionIdsView = new ExtendedView("content/by_sessionid");
 		questionIdsView.setSessionIdKeys(sessions);
 		List<String> answeredQuestionQueryKeys = new ArrayList<>();
 		for (Session s : sessions) {
@@ -414,50 +416,51 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return sessionInfos;
 	}
 
-	/**
-	 * @deprecated The decision to load data depending on the user should be made by a service class, not this
-	 * database class. Please use getSkillQuestionsForUsers or getSkillQuestionsForTeachers as this will enable
-	 * caching.
-	 */
-	@Deprecated
-	@Override
-	public List<Question> getSkillQuestions(final User user, final Session session) {
-		String viewName;
-		if (session.getCreator().equals(user.getUsername())) {
-			viewName = "skill_question/by_session_sorted_by_subject_and_text";
-		} else {
-			viewName = "skill_question/by_session_for_all_full";
-		}
-		return getQuestions(new NovaView(viewName), session);
-	}
-
 	@Cacheable("skillquestions")
 	@Override
 	public List<Question> getSkillQuestionsForUsers(final Session session) {
-		String viewName = "skill_question/by_session_for_all_full";
-		NovaView view = new NovaView(viewName);
+		final List<Question> questions = new ArrayList<>();
+		final String viewName = "content/doc_by_sessionid_variant_active";
+		final NovaView view1 = new NovaView(viewName);
+		final NovaView view2 = new NovaView(viewName);
+		final NovaView view3 = new NovaView(viewName);
+		view1.setStartKey(session.get_id(), "lecture", true);
+		view1.setEndKey(session.get_id(), "lecture", true, "{}");
+		view2.setStartKey(session.get_id(), "preparation", true);
+		view2.setEndKey(session.get_id(), "preparation", true, "{}");
+		view3.setStartKey(session.get_id(), "flashcard", true);
+		view3.setEndKey(session.get_id(), "flashcard", true, "{}");
+		questions.addAll(getQuestions(view1, session));
+		questions.addAll(getQuestions(view2, session));
+		questions.addAll(getQuestions(view3, session));
 
-		return getQuestions(view, session);
+		return questions;
 	}
 
 	@Cacheable("skillquestions")
 	@Override
 	public List<Question> getSkillQuestionsForTeachers(final Session session) {
-		String viewName = "skill_question/by_session_sorted_by_subject_and_text";
-		NovaView view = new NovaView(viewName);
+		final NovaView view = new NovaView("content/doc_by_sessionid_variant_active");
+		view.setStartKey(session.get_id());
+		view.setEndKey(session.get_id(), "{}");
 
 		return getQuestions(view, session);
 	}
 
 	@Override
 	public int getSkillQuestionCount(final Session session) {
-		return getQuestionCount(new NovaView("skill_question/count_by_session"), session);
+		final NovaView view = new NovaView("content/by_sessionid_variant_active");
+		view.setStartKey(session.get_id());
+		view.setEndKey(session.get_id(), "{}");
+
+		return getQuestionCount(view);
 	}
 
 	@Override
 	@Cacheable("sessions")
 	public Session getSessionFromKeyword(final String keyword) {
 		final NovaView view = new NovaView("session/by_keyword");
+		view.setIncludeDocs(true);
 		view.setKey(keyword);
 		final ViewResults results = getDatabase().view(view);
 
@@ -465,7 +468,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			throw new NotFoundException();
 		}
 		return (Session) JSONObject.toBean(
-				results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
+				results.getJSONArray("rows").optJSONObject(0).optJSONObject("doc"),
 				Session.class
 				);
 	}
@@ -473,29 +476,34 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	@Cacheable("sessions")
 	public Session getSessionFromId(final String sessionId) {
-		final NovaView view = new NovaView("session/by_id");
-		view.setKey(sessionId);
+		try {
+			final Document doc = getDatabase().getDocument(sessionId);
+			if (!"session".equals(doc.getString("type"))) {
+				return null;
+			}
 
-		final ViewResults sessions = getDatabase().view(view);
-
-		if (sessions.getJSONArray("rows").optJSONObject(0) == null) {
+			return (Session) JSONObject.toBean(
+					doc.getJSONObject(),
+					Session.class
+					);
+		} catch (IOException e) {
 			return null;
 		}
-		return (Session) JSONObject.toBean(
-				sessions.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
-				Session.class
-				);
 	}
 
 	@Override
 	public Session saveSession(final User user, final Session session) {
+		session.setKeyword(sessionService.generateKeyword());
+		session.setActive(true);
+		session.setFeedbackLock(false);
+
 		final Document sessionDocument = new Document();
 		sessionDocument.put("type", "session");
 		sessionDocument.put("name", session.getName());
 		sessionDocument.put("shortName", session.getShortName());
-		sessionDocument.put("keyword", sessionService.generateKeyword());
+		sessionDocument.put("keyword", session.getKeyword());
 		sessionDocument.put("creator", user.getUsername());
-		sessionDocument.put("active", true);
+		sessionDocument.put("active", session.isActive());
 		sessionDocument.put("courseType", session.getCourseType());
 		sessionDocument.put("courseId", session.getCourseId());
 		sessionDocument.put("creationTime", session.getCreationTime());
@@ -511,14 +519,15 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		sessionDocument.put("ppLevel", session.getPpLevel());
 		sessionDocument.put("sessionType", session.getSessionType());
 		sessionDocument.put("features", JSONObject.fromObject(session.getFeatures()));
-		sessionDocument.put("feedbackLock", false);
+		sessionDocument.put("feedbackLock", session.getFeedbackLock());
 		try {
 			database.saveDocument(sessionDocument);
+			session.set_id(sessionDocument.getId());
 		} catch (final IOException e) {
 			return null;
 		}
-		// session caching is done by loading the created session
-		return getSessionFromKeyword(sessionDocument.getString("keyword"));
+
+		return session.get_id() != null ? session : null;
 	}
 
 	@Override
@@ -836,7 +845,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<String> getQuestionIds(final Session session, final User user) {
-		NovaView view = new NovaView("skill_question/by_session_only_id_for_all");
+		NovaView view = new NovaView("content/by_sessionid_variant_active");
 		view.setKey(session.get_id());
 		return collectQuestionIds(view);
 	}
@@ -869,20 +878,21 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			@CacheEvict(value = "flashcardquestions", key = "#session") })
 	@Override
 	public int[] deleteAllQuestionsWithAnswers(final Session session) {
-		final NovaView view = new NovaView("skill_question/by_session");
-		return deleteAllQuestionDocumentsWithAnswers(session, view);
-	}
-
-	private int[] deleteAllQuestionDocumentsWithAnswers(final Session session, final NovaView view) {
+		final NovaView view = new NovaView("content/by_sessionid_variant_active");
 		view.setStartKeyArray(session.get_id());
 		view.setEndKey(session.get_id(), "{}");
+
+		return deleteAllQuestionDocumentsWithAnswers(view);
+	}
+
+	private int[] deleteAllQuestionDocumentsWithAnswers(final NovaView view) {
 		final ViewResults results = getDatabase().view(view);
 
 		List<Question> questions = new ArrayList<>();
 		for (final Document d : results.getResults()) {
 			final Question q = new Question();
 			q.set_id(d.getId());
-			q.set_rev(d.getJSONObject("value").getString("_rev"));
+			q.set_rev(d.getString("value"));
 			questions.add(q);
 		}
 
@@ -902,7 +912,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public int deleteAnswers(final Question question) {
 		try {
-			final NovaView view = new NovaView("answer/cleanup");
+			final NovaView view = new NovaView("answer/by_questionid");
 			view.setKey(question.get_id());
 			view.setIncludeDocs(true);
 			final ViewResults results = getDatabase().view(view);
@@ -934,15 +944,16 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<String> getUnAnsweredQuestionIds(final Session session, final User user) {
-		final NovaView view = new NovaView("answer/by_user");
-		view.setKey(user.getUsername(), session.get_id());
+		final NovaView view = new NovaView("answer/questionid_by_user_sessionid_variant");
+		view.setStartKeyArray(user.getUsername(), session.get_id());
+		view.setEndKeyArray(user.getUsername(), session.get_id(), "{}");
 		return collectUnansweredQuestionIds(getQuestionIds(session, user), view);
 	}
 
 	@Override
 	public Answer getMyAnswer(final User me, final String questionId, final int piRound) {
 
-		final NovaView view = new NovaView("answer/by_question_and_user_and_piround");
+		final NovaView view = new NovaView("answer/doc_by_questionid_user_piround");
 		if (2 == piRound) {
 			view.setKey(questionId, me.getUsername(), "2");
 		} else {
@@ -978,14 +989,14 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Answer> getAnswers(final Question question, final int piRound) {
 		final String questionId = question.get_id();
-		final NovaView view = new NovaView("skill_question/count_answers_by_question_and_piround");
+		final NovaView view = new NovaView("answer/by_questionid_piround_text_subject");
 		if (2 == piRound) {
-			view.setStartKey(questionId, "2");
-			view.setEndKey(questionId, "2", "{}");
+			view.setStartKey(questionId, 2);
+			view.setEndKey(questionId, 2, "{}");
 		} else {
 			/* needed for legacy questions whose piRound property has not been set */
 			view.setStartKeyArray(questionId);
-			view.setEndKeyArray(questionId, "1", "{}");
+			view.setEndKeyArray(questionId, 1, "{}");
 		}
 		view.setGroup(true);
 		final ViewResults results = getDatabase().view(view);
@@ -998,7 +1009,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			a.setAbstentionCount(abstentionCount);
 			a.setQuestionId(d.getJSONObject().getJSONArray("key").getString(0));
 			a.setPiRound(piRound);
-			final String answerText = d.getJSONObject().getJSONArray("key").getString(2);
+			final String answerText = d.getJSONObject().getJSONArray("key").getString(3);
 			a.setAnswerText("null".equals(answerText) ? null : answerText);
 			answers.add(a);
 		}
@@ -1008,7 +1019,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Answer> getAllAnswers(final Question question) {
 		final String questionId = question.get_id();
-		final NovaView view = new NovaView("skill_question/count_all_answers_by_question");
+		final NovaView view = new NovaView("answer/by_questionid_piround_text_subject");
 		view.setStartKeyArray(questionId);
 		view.setEndKeyArray(questionId, "{}");
 		view.setGroup(true);
@@ -1021,9 +1032,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			a.setAnswerCount(d.getInt("value"));
 			a.setAbstentionCount(abstentionCount);
 			a.setQuestionId(d.getJSONObject().getJSONArray("key").getString(0));
-			final String answerText = d.getJSONObject().getJSONArray("key").getString(1);
-			final String answerSubject = d.getJSONObject().getJSONArray("key").getString(2);
-			final boolean successfulFreeTextAnswer = d.getJSONObject().getJSONArray("key").getBoolean(3);
+			final String answerText = d.getJSONObject().getJSONArray("key").getString(3);
+			final String answerSubject = d.getJSONObject().getJSONArray("key").getString(4);
+			final boolean successfulFreeTextAnswer = d.getJSONObject().getJSONArray("key").getBoolean(5);
 			a.setAnswerText("null".equals(answerText) ? null : answerText);
 			a.setAnswerSubject("null".equals(answerSubject) ? null : answerSubject);
 			a.setSuccessfulFreeTextAnswer(successfulFreeTextAnswer);
@@ -1040,8 +1051,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public int getAbstentionAnswerCount(final String questionId) {
-		final NovaView view = new NovaView("skill_question/count_abstention_answers_by_question");
-		view.setKey(questionId);
+		final NovaView view = new NovaView("answer/by_questionid_piround_text_subject");
+		view.setStartKeyArray(questionId);
+		view.setEndKeyArray(questionId, "{}");
 		view.setGroup(true);
 		final ViewResults results = getDatabase().view(view);
 		if (results.getResults().isEmpty()) {
@@ -1052,10 +1064,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public int getAnswerCount(final Question question, final int piRound) {
-		final NovaView view = new NovaView("skill_question/count_total_answers_by_question_and_piround");
+		final NovaView view = new NovaView("answer/by_questionid_piround_text_subject");
+		view.setStartKey(question.get_id(), piRound);
+		view.setEndKey(question.get_id(), piRound, "{}");
 		view.setGroup(true);
-		view.setStartKey(question.get_id(), String.valueOf(piRound));
-		view.setEndKey(question.get_id(), String.valueOf(piRound), "{}");
 		final ViewResults results = getDatabase().view(view);
 		if (results.getResults().isEmpty()) {
 			return 0;
@@ -1066,9 +1078,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public int getTotalAnswerCountByQuestion(final Question question) {
-		final NovaView view = new NovaView("skill_question/count_total_answers_by_question");
+		final NovaView view = new NovaView("answer/by_questionid_piround_text_subject");
+		view.setStartKeyArray(question.get_id());
+		view.setEndKeyArray(question.get_id(), "{}");
 		view.setGroup(true);
-		view.setKey(question.get_id());
 		final ViewResults results = getDatabase().view(view);
 
 		if (results.getResults().isEmpty()) {
@@ -1085,7 +1098,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Answer> getFreetextAnswers(final String questionId, final int start, final int limit) {
 		final List<Answer> answers = new ArrayList<>();
-		final NovaView view = new NovaView("skill_question/freetext_answers_full");
+		final NovaView view = new NovaView("answer/doc_by_questionid_timestamp");
 		if (start > 0) {
 			view.setSkip(start);
 		}
@@ -1109,7 +1122,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<Answer> getMyAnswers(final User me, final Session s) {
-		final NovaView view = new NovaView("answer/by_user_and_session_full");
+		final NovaView view = new NovaView("answer/doc_by_user_sessionid");
 		view.setKey(me.getUsername(), s.get_id());
 		final ViewResults results = getDatabase().view(view);
 		final List<Answer> answers = new ArrayList<>();
@@ -1134,7 +1147,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			throw new NotFoundException();
 		}
 
-		final NovaView view = new NovaView("skill_question/count_answers_by_session");
+		final NovaView view = new NovaView("answer/by_sessionid_variant");
 		view.setKey(s.get_id());
 		final ViewResults results = getDatabase().view(view);
 		if (results.getResults().isEmpty()) {
@@ -1150,7 +1163,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			throw new NotFoundException();
 		}
 
-		final NovaView view = new NovaView("interposed_question/count_by_session");
+		final NovaView view = new NovaView("comment/by_sessionid");
 		view.setKey(s.get_id());
 		view.setGroup(true);
 		final ViewResults results = getDatabase().view(view);
@@ -1162,7 +1175,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public InterposedReadingCount getInterposedReadingCount(final Session session) {
-		final NovaView view = new NovaView("interposed_question/count_by_session_reading");
+		final NovaView view = new NovaView("comment/by_sessionid_read");
 		view.setStartKeyArray(session.get_id());
 		view.setEndKeyArray(session.get_id(), "{}");
 		view.setGroup(true);
@@ -1171,7 +1184,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public InterposedReadingCount getInterposedReadingCount(final Session session, final User user) {
-		final NovaView view = new NovaView("interposed_question/count_by_session_reading_for_creator");
+		final NovaView view = new NovaView("comment/by_sessionid_creator_read");
 		view.setStartKeyArray(session.get_id(), user.getUsername());
 		view.setEndKeyArray(session.get_id(), user.getUsername(), "{}");
 		view.setGroup(true);
@@ -1190,32 +1203,32 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		// {"key":["cecebabb21b096e592d81f9c1322b877","Guestc9350cf4a3","unread"],"value":1}
 		// ]}
 		int read = 0, unread = 0;
-		String type = "";
+		boolean isRead = false;
 		final JSONObject fst = results.getJSONArray("rows").getJSONObject(0);
 		final JSONObject snd = results.getJSONArray("rows").optJSONObject(1);
 
 		final JSONArray fstkey = fst.getJSONArray("key");
 		if (fstkey.size() == 2) {
-			type = fstkey.getString(1);
+			isRead = fstkey.getBoolean(1);
 		} else if (fstkey.size() == 3) {
-			type = fstkey.getString(2);
+			isRead = fstkey.getBoolean(2);
 		}
-		if ("read".equals(type)) {
+		if (isRead) {
 			read = fst.optInt("value");
-		} else if ("unread".equals(type)) {
+		} else {
 			unread = fst.optInt("value");
 		}
 
 		if (snd != null) {
 			final JSONArray sndkey = snd.getJSONArray("key");
 			if (sndkey.size() == 2) {
-				type = sndkey.getString(1);
+				isRead = sndkey.getBoolean(1);
 			} else {
-				type = sndkey.getString(2);
+				isRead = sndkey.getBoolean(2);
 			}
-			if ("read".equals(type)) {
+			if (isRead) {
 				read = snd.optInt("value");
-			} else if ("unread".equals(type)) {
+			} else {
 				unread = snd.optInt("value");
 			}
 		}
@@ -1224,7 +1237,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<InterposedQuestion> getInterposedQuestions(final Session session, final int start, final int limit) {
-		final NovaView view = new NovaView("interposed_question/by_session_full");
+		final NovaView view = new NovaView("comment/doc_by_sessionid_timestamp");
 		if (start > 0) {
 			view.setSkip(start);
 		}
@@ -1243,7 +1256,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<InterposedQuestion> getInterposedQuestions(final Session session, final User user, final int start, final int limit) {
-		final NovaView view = new NovaView("interposed_question/by_session_and_creator");
+		final NovaView view = new NovaView("comment/doc_by_sessionid_creator_timestamp");
 		if (start > 0) {
 			view.setSkip(start);
 		}
@@ -1627,6 +1640,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Session> getCourseSessions(final List<Course> courses) {
 		final ExtendedView view = new ExtendedView("session/by_courseid");
+		view.setIncludeDocs(true);
 		view.setCourseIdKeys(courses);
 
 		final ViewResults sessions = getDatabase().view(view);
@@ -1634,7 +1648,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		final List<Session> result = new ArrayList<>();
 		for (final Document d : sessions.getResults()) {
 			final Session session = (Session) JSONObject.toBean(
-					d.getJSONObject().getJSONObject("value"),
+					d.getJSONObject().getJSONObject("doc"),
 					Session.class
 					);
 			result.add(session);
@@ -1732,7 +1746,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public int[] deleteInactiveGuestSessions(long lastActivityBefore) {
-		NovaView view = new NovaView("session/by_last_activity_for_guests");
+		NovaView view = new NovaView("session/by_lastactivity_for_guests");
 		view.setEndKey(lastActivityBefore);
 		final List<Document> results = this.getDatabase().view(view).getResults();
 		int[] count = new int[3];
@@ -1802,16 +1816,18 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Cacheable("lecturequestions")
 	@Override
 	public List<Question> getLectureQuestionsForUsers(final Session session) {
-		String viewName = "skill_question/lecture_question_by_session_for_all";
-		NovaView view = new NovaView(viewName);
+		final NovaView view = new NovaView("content/doc_by_sessionid_variant_active");
+		view.setStartKeyArray(session.get_id(), "lecture", true);
+		view.setEndKeyArray(session.get_id(), "lecture", true, "{}");
 
 		return getQuestions(view, session);
 	}
 
 	@Override
 	public List<Question> getLectureQuestionsForTeachers(final Session session) {
-		String viewName = "skill_question/lecture_question_by_session";
-		NovaView view = new NovaView(viewName);
+		final NovaView view = new NovaView("content/doc_by_sessionid_variant_active");
+		view.setStartKeyArray(session.get_id(), "lecture");
+		view.setEndKeyArray(session.get_id(), "lecture", "{}");
 
 		return getQuestions(view, session);
 	}
@@ -1819,16 +1835,18 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Cacheable("flashcardquestions")
 	@Override
 	public List<Question> getFlashcardsForUsers(final Session session) {
-		String viewName = "skill_question/flashcard_by_session_for_all";
-		NovaView view = new NovaView(viewName);
+		final NovaView view = new NovaView("content/doc_by_sessionid_variant_active");
+		view.setStartKeyArray(session.get_id(), "flashcard", true);
+		view.setEndKeyArray(session.get_id(), "flashcard", true, "{}");
 
 		return getQuestions(view, session);
 	}
 
 	@Override
 	public List<Question> getFlashcardsForTeachers(final Session session) {
-		String viewName = "skill_question/flashcard_by_session";
-		NovaView view = new NovaView(viewName);
+		final NovaView view = new NovaView("content/doc_by_sessionid_variant_active");
+		view.setStartKeyArray(session.get_id(), "flashcard");
+		view.setEndKeyArray(session.get_id(), "{}");
 
 		return getQuestions(view, session);
 	}
@@ -1836,28 +1854,32 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Cacheable("preparationquestions")
 	@Override
 	public List<Question> getPreparationQuestionsForUsers(final Session session) {
-		String viewName = "skill_question/preparation_question_by_session_for_all";
-		NovaView view = new NovaView(viewName);
+		final NovaView view = new NovaView("content/doc_by_sessionid_variant_active");
+		view.setStartKeyArray(session.get_id(), "preparation", true);
+		view.setEndKeyArray(session.get_id(), "preparation", true, "{}");
 
 		return getQuestions(view, session);
 	}
 
 	@Override
 	public List<Question> getPreparationQuestionsForTeachers(final Session session) {
-		String viewName = "skill_question/preparation_question_by_session";
-		NovaView view = new NovaView(viewName);
+		final NovaView view = new NovaView("content/doc_by_sessionid_variant_active");
+		view.setStartKeyArray(session.get_id(), "preparation");
+		view.setEndKeyArray(session.get_id(), "preparation", "{}");
 
 		return getQuestions(view, session);
 	}
 
 	@Override
 	public List<Question> getAllSkillQuestions(final Session session) {
-		return getQuestions(new NovaView("skill_question/by_session"), session);
+		final NovaView view = new NovaView("content/doc_by_sessionid_variant_active");
+		view.setStartKeyArray(session.get_id());
+		view.setEndKeyArray(session.get_id(), "{}");
+
+		return getQuestions(view, session);
 	}
 
 	private List<Question> getQuestions(final NovaView view, final Session session) {
-		view.setStartKeyArray(session.get_id());
-		view.setEndKeyArray(session.get_id(), "{}");
 		final ViewResults viewResults = getDatabase().view(view);
 		if (viewResults == null || viewResults.isEmpty()) {
 			return null;
@@ -1882,21 +1904,33 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public int getLectureQuestionCount(final Session session) {
-		return getQuestionCount(new NovaView("skill_question/lecture_question_count_by_session"), session);
+		final NovaView view = new NovaView("content/by_sessionid_variant_active");
+		view.setStartKeyArray(session.get_id(), "lecture");
+		view.setEndKeyArray(session.get_id(), "lecture", "{}");
+
+		return getQuestionCount(view);
 	}
 
 	@Override
 	public int getFlashcardCount(final Session session) {
-		return getQuestionCount(new NovaView("skill_question/flashcard_count_by_session"), session);
+		final NovaView view = new NovaView("content/by_sessionid_variant_active");
+		view.setStartKeyArray(session.get_id(), "flashcard");
+		view.setEndKeyArray(session.get_id(), "flashcard", "{}");
+
+		return getQuestionCount(view);
 	}
 
 	@Override
 	public int getPreparationQuestionCount(final Session session) {
-		return getQuestionCount(new NovaView("skill_question/preparation_question_count_by_session"), session);
+		final NovaView view = new NovaView("content/by_sessionid_variant_active");
+		view.setStartKeyArray(session.get_id(), "preparation");
+		view.setEndKeyArray(session.get_id(), "preparation", "{}");
+
+		return getQuestionCount(view);
 	}
 
-	private int getQuestionCount(final NovaView view, final Session session) {
-		view.setKey(session.get_id());
+	private int getQuestionCount(final NovaView view) {
+		view.setReduce(true);
 		final ViewResults results = getDatabase().view(view);
 		if (results.getJSONArray("rows").optJSONObject(0) == null) {
 			return 0;
@@ -1915,8 +1949,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	private int countQuestionVariantAnswers(final Session session, final String variant) {
-		final NovaView view = new NovaView("skill_question/count_answers_by_session_and_question_variant");
+		final NovaView view = new NovaView("answer/by_sessionid_variant");
 		view.setKey(session.get_id(), variant);
+		view.setReduce(true);
 		final ViewResults results = getDatabase().view(view);
 		if (results.getResults().isEmpty()) {
 			return 0;
@@ -1931,8 +1966,11 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			@CacheEvict(value = "answers", allEntries = true)})
 	@Override
 	public int[] deleteAllLectureQuestionsWithAnswers(final Session session) {
-		final NovaView view = new NovaView("skill_question/lecture_question_by_session");
-		return deleteAllQuestionDocumentsWithAnswers(session, view);
+		final NovaView view = new NovaView("content/by_sessionid_variant_active");
+		view.setStartKeyArray(session.get_id(), "lecture");
+		view.setEndKey(session.get_id(), "lecture", "{}");
+
+		return deleteAllQuestionDocumentsWithAnswers(view);
 	}
 
 	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
@@ -1942,8 +1980,11 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			@CacheEvict(value = "answers", allEntries = true)})
 	@Override
 	public int[] deleteAllFlashcardsWithAnswers(final Session session) {
-		final NovaView view = new NovaView("skill_question/flashcard_by_session");
-		return deleteAllQuestionDocumentsWithAnswers(session, view);
+		final NovaView view = new NovaView("content/by_sessionid_variant_active");
+		view.setStartKeyArray(session.get_id(), "flashcard");
+		view.setEndKey(session.get_id(), "flashcard", "{}");
+
+		return deleteAllQuestionDocumentsWithAnswers(view);
 	}
 
 	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
@@ -1953,20 +1994,23 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			@CacheEvict(value = "answers", allEntries = true)})
 	@Override
 	public int[] deleteAllPreparationQuestionsWithAnswers(final Session session) {
-		final NovaView view = new NovaView("skill_question/preparation_question_by_session");
-		return deleteAllQuestionDocumentsWithAnswers(session, view);
+		final NovaView view = new NovaView("content/by_sessionid_variant_active");
+		view.setStartKeyArray(session.get_id(), "preparation");
+		view.setEndKey(session.get_id(), "preparation", "{}");
+
+		return deleteAllQuestionDocumentsWithAnswers(view);
 	}
 
 	@Override
 	public List<String> getUnAnsweredLectureQuestionIds(final Session session, final User user) {
-		final NovaView view = new NovaView("answer/variant_by_user_and_piround");
+		final NovaView view = new NovaView("answer/questionid_piround_by_user_sessionid_variant");
 		view.setKey(user.getUsername(), session.get_id(), "lecture");
 		return collectUnansweredQuestionIdsByPiRound(getDatabaseDao().getLectureQuestionsForUsers(session), view);
 	}
 
 	@Override
 	public List<String> getUnAnsweredPreparationQuestionIds(final Session session, final User user) {
-		final NovaView view = new NovaView("answer/variant_by_user_and_piround");
+		final NovaView view = new NovaView("answer/questionid_piround_by_user_sessionid_variant");
 		view.setKey(user.getUsername(), session.get_id(), "preparation");
 		return collectUnansweredQuestionIdsByPiRound(getDatabaseDao().getPreparationQuestionsForUsers(session), view);
 	}
@@ -2028,7 +2072,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public int deleteAllInterposedQuestions(final Session session) {
-		final NovaView view = new NovaView("interposed_question/by_session");
+		final NovaView view = new NovaView("comment/by_sessionid");
 		view.setKey(session.get_id());
 		final ViewResults questions = getDatabase().view(view);
 
@@ -2037,8 +2081,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public int deleteAllInterposedQuestions(final Session session, final User user) {
-		final NovaView view = new NovaView("interposed_question/by_session_and_creator");
-		view.setKey(session.get_id(), user.getUsername());
+		final NovaView view = new NovaView("comment/by_sessionid_creator_read");
+		view.setStartKeyArray(session.get_id(), user.getUsername());
+		view.setEndKeyArray(session.get_id(), user.getUsername(), "{}");
 		final ViewResults questions = getDatabase().view(view);
 
 		return deleteAllInterposedQuestions(session, questions);
@@ -2066,8 +2111,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<Question> publishAllQuestions(final Session session, final boolean publish) {
-		final List<Question> questions = getQuestions(new NovaView("skill_question/by_session"), session);
+		final NovaView view = new NovaView("content/doc_by_sessionid_variant_active");
+		view.setStartKeyArray(session.get_id());
+		view.setEndKeyArray(session.get_id(), "{}");
+		final List<Question> questions = getQuestions(view, session);
 		getDatabaseDao().publishQuestions(session, publish, questions);
+
 		return questions;
 	}
 
@@ -2097,8 +2146,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<Question> setVotingAdmissionForAllQuestions(final Session session, final boolean disableVoting) {
-		final List<Question> questions = getQuestions(new NovaView("skill_question/by_session"), session);
+		final NovaView view = new NovaView("content/doc_by_sessionid_variant_active");
+		view.setStartKeyArray(session.get_id());
+		view.setEndKeyArray(session.get_id(), "{}");
+		final List<Question> questions = getQuestions(view, session);
 		getDatabaseDao().setVotingAdmissions(session, disableVoting, questions);
+
 		return questions;
 	}
 
@@ -2133,7 +2186,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public int deleteAllQuestionsAnswers(final Session session) {
-		final List<Question> questions = getQuestions(new NovaView("skill_question/by_session"), session);
+		final NovaView view = new NovaView("content/doc_by_sessionid_variant_active");
+		view.setStartKeyArray(session.get_id());
+		view.setEndKeyArray(session.get_id(), "{}");
+		final List<Question> questions = getQuestions(view, session);
 		getDatabaseDao().resetQuestionsRoundState(session, questions);
 
 		return deleteAllAnswersForQuestions(questions);
@@ -2143,7 +2199,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public int deleteAllPreparationAnswers(final Session session) {
-		final List<Question> questions = getQuestions(new NovaView("skill_question/preparation_question_by_session"), session);
+		final NovaView view = new NovaView("content/doc_by_sessionid_variant_active");
+		view.setStartKeyArray(session.get_id(), "preparation");
+		view.setEndKeyArray(session.get_id(), "preparation", "{}");
+		final List<Question> questions = getQuestions(view, session);
 		getDatabaseDao().resetQuestionsRoundState(session, questions);
 
 		return deleteAllAnswersForQuestions(questions);
@@ -2153,7 +2212,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public int deleteAllLectureAnswers(final Session session) {
-		final List<Question> questions = getQuestions(new NovaView("skill_question/lecture_question_by_session"), session);
+		final NovaView view = new NovaView("content/doc_by_sessionid_variant_active");
+		view.setStartKeyArray(session.get_id(), "lecture");
+		view.setEndKeyArray(session.get_id(), "lecture", "{}");
+		final List<Question> questions = getQuestions(view, session);
 		getDatabaseDao().resetQuestionsRoundState(session, questions);
 
 		return deleteAllAnswersForQuestions(questions);
@@ -2188,7 +2250,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		for (Question q : questions) {
 			questionIds.add(q.get_id());
 		}
-		final NovaView bulkView = new NovaView("answer/cleanup");
+		final NovaView bulkView = new NovaView("answer/by_questionid");
 		bulkView.setKeys(questionIds);
 		bulkView.setIncludeDocs(true);
 		final List<Document> result = getDatabase().view(bulkView).getResults();
@@ -2220,7 +2282,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			questionIds.add(q.get_id());
 			allQuestions.add(d);
 		}
-		final NovaView bulkView = new NovaView("answer/cleanup");
+		final NovaView bulkView = new NovaView("answer/by_questionid");
 		bulkView.setKeys(questionIds);
 		bulkView.setIncludeDocs(true);
 		final List<Document> result = getDatabase().view(bulkView).getResults();
@@ -2320,7 +2382,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public DbUser getUser(String username) {
-		NovaView view = new NovaView("user/all");
+		NovaView view = new NovaView("user/doc_by_username");
 		view.setKey(username);
 		ViewResults results = this.getDatabase().view(view);
 
@@ -2351,7 +2413,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public int deleteInactiveUsers(long lastActivityBefore) {
 		try {
-			NovaView view = new NovaView("user/inactive_by_creation");
+			NovaView view = new NovaView("user/by_creation_for_inactive");
 			view.setEndKey(lastActivityBefore);
 			List<Document> results = this.getDatabase().view(view).getResults();
 
@@ -2542,14 +2604,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<String> getSubjects(Session session, String questionVariant) {
-		String viewString;
-		if ("lecture".equals(questionVariant)) {
-			viewString = "skill_question/lecture_question_subjects_by_session";
-		} else {
-			viewString = "skill_question/preparation_question_subjects_by_session";
-		}
-		NovaView view = new NovaView(viewString);
-		view.setKey(session.get_id());
+		final NovaView view = new NovaView("content/by_sessionid_variant_active");
+		view.setStartKeyArray(session.get_id(), questionVariant);
+		view.setEndKeyArray(session.get_id(), questionVariant, "{}");
 		ViewResults results = this.getDatabase().view(view);
 
 		if (results.getJSONArray("rows").optJSONObject(0) == null) {
@@ -2559,22 +2616,18 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		Set<String> uniqueSubjects = new HashSet<>();
 
 		for (final Document d : results.getResults()) {
-			uniqueSubjects.add(d.getString("value"));
+			uniqueSubjects.add(d.getJSONArray("key").getString(3));
 		}
 
 		return new ArrayList<>(uniqueSubjects);
 	}
 
+	/* TODO: remove if this method is no longer used */
 	@Override
 	public List<String> getQuestionIdsBySubject(Session session, String questionVariant, String subject) {
-		String viewString;
-		if ("lecture".equals(questionVariant)) {
-			viewString = "skill_question/lecture_question_ids_by_session_and_subject";
-		} else {
-			viewString = "skill_question/preparation_question_ids_by_session_and_subject";
-		}
-		NovaView view = new NovaView(viewString);
-		view.setKey(session.get_id(), subject);
+		final NovaView view = new NovaView("content/by_sessionid_variant_active");
+		view.setStartKeyArray(session.get_id(), questionVariant, 1,	subject);
+		view.setEndKeyArray(session.get_id(), questionVariant, 1, subject, "{}");
 		ViewResults results = this.getDatabase().view(view);
 
 		if (results.getJSONArray("rows").optJSONObject(0) == null) {
@@ -2584,7 +2637,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		List<String> qids = new ArrayList<>();
 
 		for (final Document d : results.getResults()) {
-			final String s = d.getString("value");
+			final String s = d.getId();
 			qids.add(s);
 		}
 
@@ -2637,42 +2690,57 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<Motd> getAdminMotds() {
-		NovaView view = new NovaView("motd/admin");
+		final NovaView view = new NovaView("motd/doc_by_audience_for_global");
 		return getMotds(view);
 	}
 
 	@Override
 	@Cacheable(cacheNames = "motds", key = "'all'")
 	public List<Motd> getMotdsForAll() {
-		NovaView view = new NovaView("motd/for_all");
+		final NovaView view = new NovaView("motd/doc_by_audience_for_global");
 		return getMotds(view);
 	}
 
 	@Override
 	@Cacheable(cacheNames = "motds", key = "'loggedIn'")
 	public List<Motd> getMotdsForLoggedIn() {
-		NovaView view = new NovaView("motd/for_loggedin");
+		final NovaView view = new NovaView("motd/doc_by_audience_for_global");
+		view.setKey("loggedIn");
 		return getMotds(view);
 	}
 
 	@Override
 	@Cacheable(cacheNames = "motds", key = "'tutors'")
 	public List<Motd> getMotdsForTutors() {
-		NovaView view = new NovaView("motd/for_tutors");
-		return getMotds(view);
+		final NovaView view1 = new NovaView("motd/doc_by_audience_for_global");
+		final NovaView view2 = new NovaView("motd/doc_by_audience_for_global");
+		view1.setKey("loggedIn");
+		view2.setKey("tutors");
+		final List<Motd> union = new ArrayList<>();
+		union.addAll(getMotds(view1));
+		union.addAll(getMotds(view2));
+
+		return union;
 	}
 
 	@Override
 	@Cacheable(cacheNames = "motds", key = "'students'")
 	public List<Motd> getMotdsForStudents() {
-		NovaView view = new NovaView("motd/for_students");
-		return getMotds(view);
+		final NovaView view1 = new NovaView("motd/doc_by_audience_for_global");
+		final NovaView view2 = new NovaView("motd/doc_by_audience_for_global");
+		view1.setKey("loggedIn");
+		view2.setKey("students");
+		final List<Motd> union = new ArrayList<>();
+		union.addAll(getMotds(view1));
+		union.addAll(getMotds(view2));
+
+		return union;
 	}
 
 	@Override
 	@Cacheable(cacheNames = "motds", key = "('session').concat(#p0)")
 	public List<Motd> getMotdsForSession(final String sessionkey) {
-		NovaView view = new NovaView("motd/by_sessionkey");
+		final NovaView view = new NovaView("motd/doc_by_sessionkey");
 		view.setKey(sessionkey);
 		return getMotds(view);
 	}
@@ -2701,7 +2769,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public Motd getMotdByKey(String key) {
-		NovaView view = new NovaView("motd/by_keyword");
+		final NovaView view = new NovaView("motd/by_motdkey");
+		view.setIncludeDocs(true);
 		view.setKey(key);
 		Motd motd = new Motd();
 
@@ -2709,16 +2778,16 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 		for (final Document d : results.getResults()) {
 			motd.set_id(d.getId());
-			motd.set_rev(d.getJSONObject("value").getString("_rev"));
-			motd.setMotdkey(d.getJSONObject("value").getString("motdkey"));
-			Date start = new Date(Long.parseLong(d.getJSONObject("value").getString("startdate")));
+			motd.set_rev(d.getJSONObject("doc").getString("_rev"));
+			motd.setMotdkey(d.getJSONObject("doc").getString("motdkey"));
+			Date start = new Date(Long.parseLong(d.getJSONObject("doc").getString("startdate")));
 			motd.setStartdate(start);
-			Date end = new Date(Long.parseLong(d.getJSONObject("value").getString("enddate")));
+			Date end = new Date(Long.parseLong(d.getJSONObject("doc").getString("enddate")));
 			motd.setEnddate(end);
-			motd.setTitle(d.getJSONObject("value").getString("title"));
-			motd.setText(d.getJSONObject("value").getString("text"));
-			motd.setAudience(d.getJSONObject("value").getString("audience"));
-			motd.setSessionkey(d.getJSONObject("value").getString("sessionkey"));
+			motd.setTitle(d.getJSONObject("doc").getString("title"));
+			motd.setText(d.getJSONObject("doc").getString("text"));
+			motd.setAudience(d.getJSONObject("doc").getString("audience"));
+			motd.setSessionkey(d.getJSONObject("doc").getString("sessionkey"));
 		}
 
 		return motd;
@@ -2772,7 +2841,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	@Cacheable(cacheNames = "motdlist", key = "#p0")
 	public MotdList getMotdListForUser(final String username) {
-		NovaView view = new NovaView("motd/list_by_username");
+		NovaView view = new NovaView("motdlist/doc_by_username");
 		view.setKey(username);
 
 		ViewResults results = this.getDatabase().view(view);
