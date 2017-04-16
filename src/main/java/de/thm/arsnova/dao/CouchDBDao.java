@@ -2382,7 +2382,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public DbUser getUser(String username) {
-		NovaView view = new NovaView("user/all");
+		NovaView view = new NovaView("user/doc_by_username");
 		view.setKey(username);
 		ViewResults results = this.getDatabase().view(view);
 
@@ -2413,7 +2413,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public int deleteInactiveUsers(long lastActivityBefore) {
 		try {
-			NovaView view = new NovaView("user/inactive_by_creation");
+			NovaView view = new NovaView("user/by_creation_for_inactive");
 			view.setEndKey(lastActivityBefore);
 			List<Document> results = this.getDatabase().view(view).getResults();
 
