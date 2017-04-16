@@ -22,12 +22,16 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import de.thm.arsnova.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.client.ConnectorClientImpl;
+import de.thm.arsnova.entities.serialization.CouchDbObjectMapperFactory;
 import de.thm.arsnova.socket.ARSnovaSocket;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 import de.thm.arsnova.web.CacheControlInterceptorHandler;
 import de.thm.arsnova.web.CorsFilter;
 import de.thm.arsnova.web.DeprecatedApiInterceptorHandler;
 import de.thm.arsnova.web.ResponseInterceptorHandler;
+import org.ektorp.impl.StdCouchDbConnector;
+import org.ektorp.impl.StdCouchDbInstance;
+import org.ektorp.spring.HttpClientFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
@@ -97,6 +101,10 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 
 	@Autowired
 	private Environment env;
+
+	@Value("${couchdb.name}") private String couchDbName;
+	@Value("${couchdb.host}") private String couchDbHost;
+	@Value("${couchdb.port}") private int couchDbPort;
 
 	@Value(value = "${connector.enable}") private boolean connectorEnable;
 	@Value(value = "${connector.uri}") private String connectorUri;
@@ -224,6 +232,25 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 	@Bean
 	public CorsFilter corsFilter() {
 		return new CorsFilter(Arrays.asList(corsOrigins));
+	}
+
+	@Bean
+	public StdCouchDbConnector couchDbConnector() throws Exception {
+		return new StdCouchDbConnector(couchDbName, couchDbInstance(), new CouchDbObjectMapperFactory());
+	}
+
+	@Bean
+	public StdCouchDbInstance couchDbInstance() throws Exception {
+		return new StdCouchDbInstance(couchDbHttpClientFactory().getObject());
+	}
+
+	@Bean
+	public HttpClientFactoryBean couchDbHttpClientFactory() throws Exception {
+		final HttpClientFactoryBean factory = new HttpClientFactoryBean();
+		factory.setHost(couchDbHost);
+		factory.setPort(couchDbPort);
+
+		return factory;
 	}
 
 	@Bean(name = "connectorClient")

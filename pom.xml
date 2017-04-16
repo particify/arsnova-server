@@ -191,6 +191,16 @@
 			<version>0.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
+			<groupId>org.ektorp</groupId>
+			<artifactId>org.ektorp</artifactId>
+			<version>1.4.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ektorp</groupId>
+			<artifactId>org.ektorp.spring</artifactId>
+			<version>1.4.4</version>
+		</dependency>
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<scope>provided</scope>
