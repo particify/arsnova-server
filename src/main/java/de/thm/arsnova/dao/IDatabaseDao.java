@@ -181,14 +181,6 @@ public interface IDatabaseDao {
 
 	int deleteAllQuestionsAnswers(Session session);
 
-	DbUser createOrUpdateUser(DbUser user);
-
-	DbUser getUser(String username);
-
-	boolean deleteUser(DbUser dbUser);
-
-	int deleteInactiveUsers(long lastActivityBefore);
-
 	CourseScore getLearningProgress(Session session);
 
 	List<SessionInfo> getMySessionsInfo(User user, final int start, final int limit);

@@ -23,12 +23,15 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import de.thm.arsnova.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.client.ConnectorClientImpl;
+import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.LogEntry;
 import de.thm.arsnova.entities.serialization.CouchDbDocumentModule;
 import de.thm.arsnova.entities.serialization.CouchDbObjectMapperFactory;
 import de.thm.arsnova.entities.serialization.View;
 import de.thm.arsnova.persistance.LogEntryRepository;
+import de.thm.arsnova.persistance.UserRepository;
 import de.thm.arsnova.persistance.couchdb.CouchDbLogEntryRepository;
+import de.thm.arsnova.persistance.couchdb.CouchDbUserRepository;
 import de.thm.arsnova.persistance.couchdb.InitializingCouchDbConnector;
 import de.thm.arsnova.socket.ARSnovaSocket;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
@@ -271,6 +274,11 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 	@Bean
 	public LogEntryRepository logEntryRepository() throws Exception {
 		return new CouchDbLogEntryRepository(LogEntry.class, couchDbConnector(), false);
+	}
+
+	@Bean
+	public UserRepository userRepository() throws Exception {
+		return new CouchDbUserRepository(DbUser.class, couchDbConnector(), false);
 	}
 
 	@Bean(name = "connectorClient")

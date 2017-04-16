@@ -423,33 +423,9 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public DbUser createOrUpdateUser(DbUser user) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public DbUser getUser(String username) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public CourseScore getLearningProgress(Session session) {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public boolean deleteUser(DbUser dbUser) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public int deleteInactiveUsers(long lastActivityBefore) {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	@Override
