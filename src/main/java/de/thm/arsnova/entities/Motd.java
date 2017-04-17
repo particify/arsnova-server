@@ -28,61 +28,61 @@ import java.util.Date;
 @ApiModel(value = "motd", description = "the message of the day entity")
 public class Motd {
 
-  private String motdkey; //ID
-  private Date startdate;
-  private Date enddate;
-  private String title;
-  private String text;
+	private String motdkey; //ID
+	private Date startdate;
+	private Date enddate;
+	private String title;
+	private String text;
 	private String audience;
 	private String sessionId;
 	private String sessionkey;
 	private String _id;
 	private String _rev;
 
-  @ApiModelProperty(required = true, value = "the identification string")
-  public String getMotdkey() {
-    return motdkey;
-  }
+	@ApiModelProperty(required = true, value = "the identification string")
+	public String getMotdkey() {
+		return motdkey;
+	}
 
-  public void setMotdkey(final String key) {
-    motdkey = key;
-  }
+	public void setMotdkey(final String key) {
+		motdkey = key;
+	}
 
 	@ApiModelProperty(required = true, value = "startdate for showing this message (timestamp format)")
-  public Date getStartdate() {
-    return startdate;
-  }
+	public Date getStartdate() {
+		return startdate;
+	}
 
-  public void setStartdate(final Date timestamp) {
-    startdate = timestamp;
-  }
+	public void setStartdate(final Date timestamp) {
+		startdate = timestamp;
+	}
 
-  @ApiModelProperty(required = true, value = "enddate for showing this message (timestamp format)")
-  public Date getEnddate() {
-    return enddate;
-  }
+	@ApiModelProperty(required = true, value = "enddate for showing this message (timestamp format)")
+	public Date getEnddate() {
+		return enddate;
+	}
 
-  public void setEnddate(final Date timestamp) {
-    enddate = timestamp;
-  }
+	public void setEnddate(final Date timestamp) {
+		enddate = timestamp;
+	}
 
-  @ApiModelProperty(required = true, value = "tite of the message")
-  public String getTitle() {
-    return title;
-  }
+	@ApiModelProperty(required = true, value = "tite of the message")
+	public String getTitle() {
+		return title;
+	}
 
-  public void setTitle(final String ttitle) {
-    title = ttitle;
-  }
+	public void setTitle(final String ttitle) {
+		title = ttitle;
+	}
 
-  @ApiModelProperty(required = true, value = "text of the message")
-  public String getText() {
-    return text;
-  }
+	@ApiModelProperty(required = true, value = "text of the message")
+	public String getText() {
+		return text;
+	}
 
-  public void setText(final String ttext) {
-    text = ttext;
-  }
+	public void setText(final String ttext) {
+		text = ttext;
+	}
 
 	@ApiModelProperty(required = true, value = "defines the target audience for this motd (one of the following: 'student', 'tutor', 'loggedIn', 'all')")
 	public String getAudience() {
@@ -110,14 +110,14 @@ public class Motd {
 		sessionkey = a;
 	}
 
-  @ApiModelProperty(required = true, value = "the couchDB ID")
+	@ApiModelProperty(required = true, value = "the couchDB ID")
 	public String get_id() {
 		return _id;
 	}
 
-  public void set_id(final String id) {
-    _id = id;
-  }
+	public void set_id(final String id) {
+		_id = id;
+	}
 
 	public void set_rev(final String rev) {
 		_rev = rev;
