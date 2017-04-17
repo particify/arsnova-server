@@ -26,7 +26,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(value = "motdlist", description = "the motdlist to save the messages a user has confirmed to be read")
 public class MotdList {
 
-  private String motdkeys;
+	private String motdkeys;
 	private String username;
 	private String _id;
 	private String _rev;
@@ -40,23 +40,23 @@ public class MotdList {
 		motdkeys = motds;
 	}
 
-  @ApiModelProperty(required = true, value = "the username")
-  public String getUsername() {
-    return username;
-  }
+	@ApiModelProperty(required = true, value = "the username")
+	public String getUsername() {
+		return username;
+	}
 
-  public void setUsername(final String u) {
+	public void setUsername(final String u) {
 		username = u;
 	}
 
-  @ApiModelProperty(required = true, value = "the couchDB ID")
+	@ApiModelProperty(required = true, value = "the couchDB ID")
 	public String get_id() {
 		return _id;
 	}
 
-  public void set_id(final String id) {
-    _id = id;
-  }
+	public void set_id(final String id) {
+		_id = id;
+	}
 
 	public void set_rev(final String rev) {
 		_rev = rev;
