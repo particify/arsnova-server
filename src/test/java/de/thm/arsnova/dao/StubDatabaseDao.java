@@ -22,14 +22,16 @@ import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.*;
 import de.thm.arsnova.entities.transport.ImportExportSession;
-import de.thm.arsnova.exceptions.NoContentException;
-import de.thm.arsnova.exceptions.NotFoundException;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Profile("test")
+@Service("databaseDao")
 public class StubDatabaseDao implements IDatabaseDao {
 
 	private static Map<String, Session> stubSessions = new ConcurrentHashMap<>();

@@ -4,9 +4,14 @@
 		 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 		 id="WebApp_ID" version="3.0">
 	<context-param>
+		<param-name>contextClass</param-name>
+		<param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+	</context-param>
+	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
-			/WEB-INF/spring/spring-main.xml
+			de.thm.arsnova.config.AppConfig
+			de.thm.arsnova.config.SecurityConfig
 		</param-value>
 	</context-param>
 	<context-param>
@@ -16,12 +21,6 @@
 	<servlet>
 		<servlet-name>arsnova</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<init-param>
-			<param-name>contextConfigLocation</param-name>
-			<param-value>
-				/WEB-INF/spring/arsnova-servlet.xml
-			</param-value>
-		</init-param>
 		<load-on-startup>1</load-on-startup>
 		<async-supported>true</async-supported>
 	</servlet>

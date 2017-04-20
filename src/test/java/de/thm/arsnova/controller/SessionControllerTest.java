@@ -21,36 +21,17 @@ import de.thm.arsnova.services.StubUserService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration
-@ContextConfiguration(locations = {
-		"file:src/main/webapp/WEB-INF/spring/arsnova-servlet.xml",
-		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
-		"file:src/test/resources/test-config.xml",
-		"file:src/test/resources/test-socketioconfig.xml"
-})
-@ActiveProfiles("test")
-public class SessionControllerTest {
+public class SessionControllerTest extends AbstractControllerTest {
 
 	@Autowired
 	private StubUserService userService;
@@ -62,17 +43,6 @@ public class SessionControllerTest {
 
 	@Autowired
 	private WebApplicationContext webApplicationContext;
-
-	private void setAuthenticated(final boolean isAuthenticated, final String username) {
-		if (isAuthenticated) {
-			final List<GrantedAuthority> ga = new ArrayList<>();
-			final UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, "secret", ga);
-			SecurityContextHolder.getContext().setAuthentication(token);
-			userService.setUserAuthenticated(isAuthenticated, username);
-		} else {
-			userService.setUserAuthenticated(isAuthenticated);
-		}
-	}
 
 	@Before
 	public void startup() {

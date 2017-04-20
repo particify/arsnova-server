@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
@@ -30,14 +31,9 @@ import static org.junit.Assert.assertNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@ContextConfiguration(locations = {
-		"file:src/main/webapp/WEB-INF/spring/arsnova-servlet.xml",
-		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
-		"file:src/test/resources/test-config.xml",
-		"file:src/test/resources/test-socketioconfig.xml"
-})
+@ContextConfiguration(classes = {AppConfig.class, TestAppConfig.class, TestSecurityConfig.class})
 @ActiveProfiles("test")
-public class ExtraConfigTest {
+public class AppConfigTest extends AbstractJUnit4SpringContextTests {
 
 	@Autowired(required = false)
 	private ConnectorClient connectorClient;

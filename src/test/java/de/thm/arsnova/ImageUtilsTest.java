@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova;
 
+import de.thm.arsnova.config.AppConfig;
+import de.thm.arsnova.config.TestAppConfig;
+import de.thm.arsnova.config.TestSecurityConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ActiveProfiles;
@@ -30,12 +33,7 @@ import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@ContextConfiguration(locations = {
-		"file:src/main/webapp/WEB-INF/spring/arsnova-servlet.xml",
-		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
-		"file:src/test/resources/test-config.xml",
-		"file:src/test/resources/test-socketioconfig.xml"
-})
+@ContextConfiguration(classes = {AppConfig.class, TestAppConfig.class, TestSecurityConfig.class})
 @ActiveProfiles("test")
 public class ImageUtilsTest {
 

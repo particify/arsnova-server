@@ -17,11 +17,13 @@
  */
 package de.thm.arsnova.services;
 
+import de.thm.arsnova.config.AppConfig;
+import de.thm.arsnova.config.TestAppConfig;
+import de.thm.arsnova.config.TestSecurityConfig;
 import de.thm.arsnova.entities.User;
 import org.jasig.cas.client.authentication.AttributePrincipalImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import org.scribe.up.profile.google.Google2AttributesDefinition;
 import org.scribe.up.profile.google.Google2Profile;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -29,6 +31,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -44,7 +49,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(BlockJUnit4ClassRunner.class)
+@RunWith(SpringJUnit4ClassRunner.class)
+@WebAppConfiguration
+@ContextConfiguration(classes = {AppConfig.class, TestAppConfig.class, TestSecurityConfig.class})
 @ActiveProfiles("test")
 public class UserServiceTest {
 
