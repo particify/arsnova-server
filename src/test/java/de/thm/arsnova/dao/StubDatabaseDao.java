@@ -633,64 +633,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Motd> getAdminMotds() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Motd> getMotdsForAll() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Motd> getMotdsForLoggedIn() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Motd> getMotdsForTutors() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Motd> getMotdsForStudents() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Motd> getMotdsForSession(final String sessionkey) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Motd> getMotds(View view) {
-		return null;
-	}
-
-	@Override
-	public Motd getMotdByKey(String key) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Motd createOrUpdateMotd(Motd motd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void deleteMotd(Motd motd) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
 	public MotdList getMotdListForUser(final String username) {
 		// TODO Auto-generated method stub
 		return null;

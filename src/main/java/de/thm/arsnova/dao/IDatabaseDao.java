@@ -17,7 +17,6 @@
  */
 package de.thm.arsnova.dao;
 
-import com.fourspaces.couchdb.View;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.*;
@@ -214,26 +213,6 @@ public interface IDatabaseDao {
 	List<Question> setVotingAdmissionForAllQuestions(Session session, boolean disableVoting);
 
 	<T> T getObjectFromId(String documentId, Class<T> klass);
-
-	List<Motd> getAdminMotds();
-
-	List<Motd> getMotdsForAll();
-
-	List<Motd> getMotdsForLoggedIn();
-
-	List<Motd> getMotdsForTutors();
-
-	List<Motd> getMotdsForStudents();
-
-	List<Motd> getMotdsForSession(final String sessionkey);
-
-	List<Motd> getMotds(View view);
-
-	Motd getMotdByKey(String key);
-
-	Motd createOrUpdateMotd(Motd motd);
-
-	void deleteMotd(Motd motd);
 
 	MotdList getMotdListForUser(final String username);
 

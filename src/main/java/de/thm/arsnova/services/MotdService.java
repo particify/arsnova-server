@@ -23,6 +23,7 @@ import de.thm.arsnova.entities.MotdList;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.persistance.MotdRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -47,6 +48,9 @@ public class MotdService implements IMotdService {
 	@Autowired
 	private ISessionService sessionService;
 
+	@Autowired
+	private MotdRepository motdRepository;
+
 	public void setDatabaseDao(final IDatabaseDao databaseDao) {
 		this.databaseDao = databaseDao;
 	}
@@ -54,31 +58,31 @@ public class MotdService implements IMotdService {
   @Override
   @PreAuthorize("isAuthenticated()")
   public Motd getMotd(final String key) {
-    return databaseDao.getMotdByKey(key);
+    return motdRepository.getMotdByKey(key);
   }
 
   @Override
   @PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
   public List<Motd> getAdminMotds() {
-    return databaseDao.getAdminMotds();
+    return motdRepository.getAdminMotds();
   }
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public List<Motd> getAllSessionMotds(final String sessionkey) {
-		return databaseDao.getMotdsForSession(sessionkey);
+		return motdRepository.getMotdsForSession(sessionkey);
 	}
 
 	@Override
 	public List<Motd> getCurrentMotds(final Date clientdate, final String audience, final String sessionkey) {
 		final List<Motd> motds;
 		switch (audience) {
-			case "all": motds = databaseDao.getMotdsForAll(); break;
-			case "loggedIn": motds = databaseDao.getMotdsForLoggedIn(); break;
-			case "students": motds = databaseDao.getMotdsForStudents(); break;
-			case "tutors": motds = databaseDao.getMotdsForTutors(); break;
-			case "session": motds = databaseDao.getMotdsForSession(sessionkey); break;
-			default: motds = databaseDao.getMotdsForAll(); break;
+			case "all": motds = motdRepository.getMotdsForAll(); break;
+			case "loggedIn": motds = motdRepository.getMotdsForLoggedIn(); break;
+			case "students": motds = motdRepository.getMotdsForStudents(); break;
+			case "tutors": motds = motdRepository.getMotdsForTutors(); break;
+			case "session": motds = motdRepository.getMotdsForSession(sessionkey); break;
+			default: motds = motdRepository.getMotdsForAll(); break;
 		}
 		return filterMotdsByDate(motds, clientdate);
 	}
@@ -144,26 +148,26 @@ public class MotdService implements IMotdService {
 
 	private Motd createOrUpdateMotd(final Motd motd) {
 		if (motd.getMotdkey() != null) {
-			Motd oldMotd = databaseDao.getMotdByKey(motd.getMotdkey());
-			if (!(motd.get_id().equals(oldMotd.get_id()) && motd.getSessionkey().equals(oldMotd.getSessionkey())
+			Motd oldMotd = motdRepository.getMotdByKey(motd.getMotdkey());
+			if (!(motd.getId().equals(oldMotd.getId()) && motd.getSessionkey().equals(oldMotd.getSessionkey())
 					&& motd.getAudience().equals(oldMotd.getAudience()))) {
 				throw new BadRequestException();
 			}
 		}
 
-		return databaseDao.createOrUpdateMotd(motd);
+		return motdRepository.createOrUpdateMotd(motd);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
 	public void deleteMotd(Motd motd) {
-		databaseDao.deleteMotd(motd);
+		motdRepository.deleteMotd(motd);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public void deleteSessionMotd(final String sessionkey, Motd motd) {
-		databaseDao.deleteMotd(motd);
+		motdRepository.deleteMotd(motd);
 	}
 
 	@Override

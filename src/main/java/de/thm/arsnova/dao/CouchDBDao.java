@@ -33,6 +33,7 @@ import de.thm.arsnova.entities.transport.ImportExportSession.ImportExportQuestio
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.persistance.LogEntryRepository;
+import de.thm.arsnova.persistance.MotdRepository;
 import de.thm.arsnova.services.ISessionService;
 import net.sf.ezmorph.Morpher;
 import net.sf.ezmorph.MorpherRegistry;
@@ -59,8 +60,16 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -90,9 +99,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Autowired
 	private ISessionService sessionService;
 
+	@Autowired
 	private LogEntryRepository dbLogger;
 
 	@Autowired
+	private MotdRepository motdRepo;
+
 	private String databaseHost;
 	private int databasePort;
 	private String databaseName;
@@ -2439,7 +2451,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		if (withAnswers) {
 			importExportSession.setSessionInfo(this.calculateSessionInfo(importExportSession, session));
 		}
-		importExportSession.setMotds(getDatabaseDao().getMotdsForSession(session.getKeyword()));
+		importExportSession.setMotds(motdRepository.getMotdsForSession(session.getKeyword()));
 		return importExportSession;
 	}
 
@@ -2551,156 +2563,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			result.add(question);
 		}
 		return result;
-	}
-
-	@Override
-	public List<Motd> getAdminMotds() {
-		final View view = new View("motd/doc_by_audience_for_global");
-		return getMotds(view);
-	}
-
-	@Override
-	@Cacheable(cacheNames = "motds", key = "'all'")
-	public List<Motd> getMotdsForAll() {
-		final View view = new View("motd/doc_by_audience_for_global");
-		return getMotds(view);
-	}
-
-	@Override
-	@Cacheable(cacheNames = "motds", key = "'loggedIn'")
-	public List<Motd> getMotdsForLoggedIn() {
-		final View view = new View("motd/doc_by_audience_for_global");
-		view.setKey("loggedIn");
-		return getMotds(view);
-	}
-
-	@Override
-	@Cacheable(cacheNames = "motds", key = "'tutors'")
-	public List<Motd> getMotdsForTutors() {
-		final View view1 = new View("motd/doc_by_audience_for_global");
-		final View view2 = new View("motd/doc_by_audience_for_global");
-		view1.setKey("loggedIn");
-		view2.setKey("tutors");
-		final List<Motd> union = new ArrayList<>();
-		union.addAll(getMotds(view1));
-		union.addAll(getMotds(view2));
-
-		return union;
-	}
-
-	@Override
-	@Cacheable(cacheNames = "motds", key = "'students'")
-	public List<Motd> getMotdsForStudents() {
-		final View view1 = new View("motd/doc_by_audience_for_global");
-		final View view2 = new View("motd/doc_by_audience_for_global");
-		view1.setKey("loggedIn");
-		view2.setKey("students");
-		final List<Motd> union = new ArrayList<>();
-		union.addAll(getMotds(view1));
-		union.addAll(getMotds(view2));
-
-		return union;
-	}
-
-	@Override
-	@Cacheable(cacheNames = "motds", key = "('session').concat(#p0)")
-	public List<Motd> getMotdsForSession(final String sessionkey) {
-		final View view = new View("motd/doc_by_sessionkey");
-		view.setKey(sessionkey);
-		return getMotds(view);
-	}
-
-	@Override
-	public List<Motd> getMotds(View view) {
-		final ViewResults motddocs = this.getDatabase().view(view);
-		List<Motd> motdlist = new ArrayList<>();
-		for (final Document d : motddocs.getResults()) {
-			Motd motd = new Motd();
-			motd.set_id(d.getId());
-			motd.set_rev(d.getJSONObject("value").getString("_rev"));
-			motd.setMotdkey(d.getJSONObject("value").getString("motdkey"));
-			Date start = new Date(Long.parseLong(d.getJSONObject("value").getString("startdate")));
-			motd.setStartdate(start);
-			Date end = new Date(Long.parseLong(d.getJSONObject("value").getString("enddate")));
-			motd.setEnddate(end);
-			motd.setTitle(d.getJSONObject("value").getString("title"));
-			motd.setText(d.getJSONObject("value").getString("text"));
-			motd.setAudience(d.getJSONObject("value").getString("audience"));
-			motd.setSessionkey(d.getJSONObject("value").getString("sessionkey"));
-			motdlist.add(motd);
-		}
-		return motdlist;
-	}
-
-	@Override
-	public Motd getMotdByKey(String key) {
-		final View view = new View("motd/by_motdkey");
-		view.setIncludeDocs(true);
-		view.setKey(key);
-		Motd motd = new Motd();
-
-		ViewResults results = this.getDatabase().view(view);
-
-		for (final Document d : results.getResults()) {
-			motd.set_id(d.getId());
-			motd.set_rev(d.getJSONObject("doc").getString("_rev"));
-			motd.setMotdkey(d.getJSONObject("doc").getString("motdkey"));
-			Date start = new Date(Long.parseLong(d.getJSONObject("doc").getString("startdate")));
-			motd.setStartdate(start);
-			Date end = new Date(Long.parseLong(d.getJSONObject("doc").getString("enddate")));
-			motd.setEnddate(end);
-			motd.setTitle(d.getJSONObject("doc").getString("title"));
-			motd.setText(d.getJSONObject("doc").getString("text"));
-			motd.setAudience(d.getJSONObject("doc").getString("audience"));
-			motd.setSessionkey(d.getJSONObject("doc").getString("sessionkey"));
-		}
-
-		return motd;
-	}
-
-	@Override
-	@CacheEvict(cacheNames = "motds", key = "#p0.audience.concat(#p0.sessionkey)")
-	public Motd createOrUpdateMotd(Motd motd) {
-		try {
-			String id = motd.get_id();
-			String rev = motd.get_rev();
-			Document d = new Document();
-
-			if (null != id) {
-				d = database.getDocument(id, rev);
-			} else {
-				motd.setMotdkey(sessionService.generateKeyword());
-				d.put("motdkey", motd.getMotdkey());
-			}
-			d.put("type", "motd");
-			d.put("startdate", String.valueOf(motd.getStartdate().getTime()));
-			d.put("enddate", String.valueOf(motd.getEnddate().getTime()));
-			d.put("title", motd.getTitle());
-			d.put("text", motd.getText());
-			d.put("audience", motd.getAudience());
-			d.put("sessionId", motd.getSessionId());
-			d.put("sessionkey", motd.getSessionkey());
-
-			database.saveDocument(d, id);
-			motd.set_id(d.getId());
-			motd.set_rev(d.getRev());
-
-			return motd;
-		} catch (IOException e) {
-			logger.error("Could not save MotD {}.", motd, e);
-		}
-
-		return null;
-	}
-
-	@Override
-	@CacheEvict(cacheNames = "motds", key = "#p0.audience.concat(#p0.sessionkey)")
-	public void deleteMotd(Motd motd) {
-		try {
-			this.deleteDocument(motd.get_id());
-		} catch (IOException e) {
-			logger.error("Could not delete MotD {}.", motd.get_id(), e);
-		}
 	}
 
 	@Override
