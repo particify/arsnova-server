@@ -17,6 +17,7 @@
  */
 package de.thm.arsnova.dao;
 
+import com.fourspaces.couchdb.View;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.*;
@@ -274,7 +275,7 @@ public interface IDatabaseDao {
 
 	List<Motd> getMotdsForSession(final String sessionkey);
 
-	List<Motd> getMotds(NovaView view);
+	List<Motd> getMotds(View view);
 
 	Motd getMotdByKey(String key);
 

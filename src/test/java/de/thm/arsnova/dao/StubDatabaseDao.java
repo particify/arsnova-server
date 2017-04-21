@@ -17,6 +17,7 @@
  */
 package de.thm.arsnova.dao;
 
+import com.fourspaces.couchdb.View;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.*;
@@ -710,7 +711,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Motd> getMotds(NovaView view) {
+	public List<Motd> getMotds(View view) {
 		return null;
 	}
 
