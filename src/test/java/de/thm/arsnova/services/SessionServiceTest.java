@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.services;
 
+import de.thm.arsnova.config.AppConfig;
+import de.thm.arsnova.config.TestAppConfig;
+import de.thm.arsnova.config.TestSecurityConfig;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.dao.StubDatabaseDao;
 import de.thm.arsnova.entities.Session;
@@ -48,13 +51,9 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
-@WebAppConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {
-		"file:src/main/webapp/WEB-INF/spring/arsnova-servlet.xml",
-		"file:src/main/webapp/WEB-INF/spring/spring-main.xml",
-		"file:src/test/resources/test-config.xml"
-})
+@WebAppConfiguration
+@ContextConfiguration(classes = {AppConfig.class, TestAppConfig.class, TestSecurityConfig.class})
 @ActiveProfiles("test")
 public class SessionServiceTest {
 

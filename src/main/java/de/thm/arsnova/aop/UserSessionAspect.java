@@ -23,12 +23,14 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Assigns a session to the {@link de.thm.arsnova.services.UserSessionService} whenever a user joins a
  * session.
  */
 @Aspect
+@Service
 public class UserSessionAspect {
 
 	@Autowired

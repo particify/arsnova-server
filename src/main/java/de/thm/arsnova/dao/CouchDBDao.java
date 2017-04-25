@@ -51,8 +51,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,7 +80,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @see <a href="http://docs.spring.io/spring/docs/current/spring-framework-reference/html/cache.html">Spring Framework's Cache Abstraction</a>
  * @see <a href="https://github.com/thm-projects/arsnova-backend/wiki/Caching">Caching in ARSnova explained</a>
  */
-@Component("databaseDao")
+@Profile("!test")
+@Service("databaseDao")
 public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware {
 
 	private static final int BULK_PARTITION_SIZE = 500;
