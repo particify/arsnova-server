@@ -41,24 +41,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Translates security/authentication related exceptions into HTTP status codes.
+ * Translates exceptions into HTTP status codes.
  */
 @ControllerAdvice
-public class SecurityExceptionControllerAdvice {
-
-	@ExceptionHandler
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public Map<String, String> defaultExceptionHandler(
-			final Exception e,
-			final HttpServletRequest req
-			) {
-		final Map<String, String> result = new HashMap<>();
-		result.put("code", "500");
-		result.put("status", "Internal server error");
-		result.put("message", e.getMessage());
-		return result;
-	}
-
+public class ControllerExceptionHandler {
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ExceptionHandler(NotFoundException.class)
 	public void handleNotFoundException(final Exception e, final HttpServletRequest request) {
