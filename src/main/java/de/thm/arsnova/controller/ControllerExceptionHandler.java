@@ -26,6 +26,7 @@ import de.thm.arsnova.exceptions.PayloadTooLargeException;
 import de.thm.arsnova.exceptions.PreconditionFailedException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
@@ -124,6 +125,13 @@ public class ControllerExceptionHandler extends AbstractControllerExceptionHandl
 	@ResponseBody
 	@ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
 	public Map<String, Object> handlePayloadTooLargeException(final Exception e, final HttpServletRequest request) {
+		return handleException(e);
+	}
+
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public Map<String, Object> handleHttpMessageNotReadableException(final Exception e, final HttpServletRequest request) {
 		return handleException(e);
 	}
 }
