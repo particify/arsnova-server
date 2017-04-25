@@ -89,15 +89,15 @@ public class CourseControllerTest {
 	public void testShouldIndicateNotImplementedIfInactiveClient() throws Exception {
 		setAuthenticated(true, "ptsr00");
 
-		mockMvc.perform(get("/mycourses").accept(MediaType.TEXT_PLAIN))
-		.andExpect(status().isNotImplemented());
+		mockMvc.perform(get("/mycourses").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotImplemented());
 	}
 
 	@Test
 	public void testShouldNotReturnCurrentUsersCoursesIfUnauthorized() throws Exception {
 		setAuthenticated(false, "nobody");
 
-		mockMvc.perform(get("/mycourses").accept(MediaType.TEXT_PLAIN))
-		.andExpect(status().isUnauthorized());
+		mockMvc.perform(get("/mycourses").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isUnauthorized());
 	}
 }
