@@ -8,15 +8,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
-public class DefaultExceptionHandler {
+public class DefaultControllerExceptionHandler extends AbstractControllerExceptionHandler {
 	@ExceptionHandler
 	@ResponseBody
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public Map<String, String> defaultExceptionHandler(
+	public Map<String, Object> defaultExceptionHandler(
 			final Exception e,
 			final HttpServletRequest req
 	) throws Exception {
@@ -26,11 +25,7 @@ public class DefaultExceptionHandler {
 		if (AnnotationUtils.findAnnotation(e.getClass(), ResponseStatus.class) != null) {
 			throw e;
 		}
-		final Map<String, String> result = new HashMap<>();
-		result.put("code", "500");
-		result.put("status", "Internal server error");
-		result.put("message", e.getMessage());
 
-		return result;
+		return handleException(e);
 	}
 }

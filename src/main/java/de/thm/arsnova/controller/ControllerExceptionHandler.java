@@ -33,87 +33,97 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Translates exceptions into HTTP status codes.
  */
 @ControllerAdvice
-public class ControllerExceptionHandler {
-	@ResponseStatus(HttpStatus.NOT_FOUND)
+public class ControllerExceptionHandler extends AbstractControllerExceptionHandler {
 	@ExceptionHandler(NotFoundException.class)
-	public void handleNotFoundException(final Exception e, final HttpServletRequest request) {
-		/* No implementation - handled solely by annotations */
+	@ResponseBody
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public Map<String, Object> handleNotFoundException(final Exception e, final HttpServletRequest request) {
+		return handleException(e);
 	}
 
-	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	@ExceptionHandler(UnauthorizedException.class)
-	public void handleUnauthorizedException(final Exception e, final HttpServletRequest request) {
-		/* No implementation - handled solely by annotations */
+	@ResponseBody
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+	public Map<String, Object> handleUnauthorizedException(final Exception e, final HttpServletRequest request) {
+		return handleException(e);
 	}
 
-	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	@ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
-	public void handleAuthenticationCredentialsNotFoundException(final Exception e, final HttpServletRequest request) {
-		/* No implementation - handled solely by annotations */
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+	@ResponseBody
+	public Map<String, Object> handleAuthenticationCredentialsNotFoundException(final Exception e, final HttpServletRequest request) {
+		return handleException(e);
 	}
 
 	@ExceptionHandler(AccessDeniedException.class)
-	public void handleAccessDeniedException(
+	@ResponseBody
+	public Map<String, Object> handleAccessDeniedException(
 			final Exception e,
 			final HttpServletRequest request,
 			final HttpServletResponse response
 			) {
 		final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (
-				authentication == null
+		if (authentication == null
 				|| authentication.getPrincipal() == null
-				|| authentication instanceof AnonymousAuthenticationToken
-				) {
+				|| authentication instanceof AnonymousAuthenticationToken) {
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
-			return;
+		} else {
+			response.setStatus(HttpStatus.FORBIDDEN.value());
 		}
-		response.setStatus(HttpStatus.FORBIDDEN.value());
+
+		return handleException(e);
 	}
 
-	@ResponseStatus(HttpStatus.FORBIDDEN)
 	@ExceptionHandler(ForbiddenException.class)
-	public void handleForbiddenException(final Exception e, final HttpServletRequest request) {
-		/* No implementation - handled solely by annotations */
+	@ResponseBody
+	@ResponseStatus(HttpStatus.FORBIDDEN)
+	public Map<String, Object> handleForbiddenException(final Exception e, final HttpServletRequest request) {
+		return handleException(e);
 	}
 
-	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@ExceptionHandler(NoContentException.class)
-	public void handleNoContentException(final Exception e, final HttpServletRequest request) {
-		/* No implementation - handled solely by annotations */
+	@ResponseBody
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public Map<String, Object> handleNoContentException(final Exception e, final HttpServletRequest request) {
+		return handleException(e);
 	}
 
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(BadRequestException.class)
-	public void handleBadRequestException(final Exception e, final HttpServletRequest request) {
-		/* No implementation - handled solely by annotations */
+	@ResponseBody
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public Map<String, Object> handleBadRequestException(final Exception e, final HttpServletRequest request) {
+		return handleException(e);
 	}
 
-	@ResponseStatus(HttpStatus.PRECONDITION_FAILED)
 	@ExceptionHandler(PreconditionFailedException.class)
-	public void handlePreconditionFailedException(final Exception e, final HttpServletRequest request) {
-		/* No implementation - handled solely by annotations */
+	@ResponseBody
+	@ResponseStatus(HttpStatus.PRECONDITION_FAILED)
+	public Map<String, Object> handlePreconditionFailedException(final Exception e, final HttpServletRequest request) {
+		return handleException(e);
 	}
 
-	@ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
 	@ExceptionHandler(NotImplementedException.class)
-	public void handleNotImplementedException(final Exception e, final HttpServletRequest request) {
-		/* No implementation - handled solely by annotations */
+	@ResponseBody
+	@ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
+	public Map<String, Object> handleNotImplementedException(final Exception e, final HttpServletRequest request) {
+		return handleException(e);
 	}
 
-	@ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
 	@ExceptionHandler(PayloadTooLargeException.class)
-	public void handlePayloadTooLargeException(final Exception e, final HttpServletRequest request) {
-		/* No implementation - handled solely by annotations */
+	@ResponseBody
+	@ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
+	public Map<String, Object> handlePayloadTooLargeException(final Exception e, final HttpServletRequest request) {
+		return handleException(e);
 	}
 }
