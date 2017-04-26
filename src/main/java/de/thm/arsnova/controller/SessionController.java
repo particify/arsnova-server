@@ -37,8 +37,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
@@ -62,9 +60,6 @@ import java.util.List;
 @RequestMapping("/session")
 @Api(value = "/session", description = "the Session Controller API")
 public class SessionController extends PaginationController {
-
-	private static final Logger logger = LoggerFactory.getLogger(SessionController.class);
-
 	@Autowired
 	private ISessionService sessionService;
 

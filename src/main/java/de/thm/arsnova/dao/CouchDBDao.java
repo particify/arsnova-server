@@ -143,7 +143,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		try {
 			database.saveDocument(d);
 		} catch (final IOException e) {
-			logger.error("Logging of '{}' event to database failed.", event);
+			logger.error("Logging of '{}' event to database failed.", event, e);
 		}
 	}
 
@@ -535,7 +535,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		if (document.has("keyword")) {
 			return (String) document.get("keyword");
 		}
-		logger.error("No session found for internal id: {}", internalSessionId);
+		logger.error("No session found for internal id {}.", internalSessionId);
 		return null;
 	}
 
@@ -548,11 +548,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 						);
 				database = session.getDatabase(databaseName);
 			} catch (final Exception e) {
-				logger.error(
-						"Cannot connect to CouchDB database '" + databaseName
-						+ "' on host '" + databaseHost
-						+ "' using port " + databasePort
-						);
+				logger.error("Cannot connect to CouchDB database '{}' on host '{}' using port {}.",
+						databaseName, databaseHost, databasePort, e);
 			}
 		}
 
@@ -573,7 +570,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			question.set_rev(q.getRev());
 			return question;
 		} catch (final IOException e) {
-			logger.error("Could not save question {}", question);
+			logger.error("Could not save question {}.", question, e);
 		}
 		return null;
 	}
@@ -704,7 +701,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 			return question;
 		} catch (final IOException e) {
-			logger.error("Could not update question {}", question);
+			logger.error("Could not update question {}.", question, e);
 		}
 
 		return null;
@@ -731,7 +728,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 			return question;
 		} catch (final IOException e) {
-			logger.error("Could not save interposed question {}", question);
+			logger.error("Could not save interposed question {}.", question, e);
 		}
 
 		return null;
@@ -755,7 +752,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			question.setSessionKeyword(getSessionKeyword(question.getSessionId()));
 			return question;
 		} catch (final IOException e) {
-			logger.error("Could not get question with id {}", id);
+			logger.error("Could not get question {}.", id, e);
 		}
 		return null;
 	}
@@ -829,7 +826,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			getDatabase().saveDocument(new Document(json));
 			return session;
 		} catch (final IOException e) {
-			logger.error("Failed to update lastOwnerActivity for Session {}", session);
+			logger.error("Failed to update lastOwnerActivity for session {}.", session, e);
 			return session;
 		}
 	}
@@ -856,7 +853,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 			return count;
 		} catch (final IOException e) {
-			logger.error("IOException: Could not delete question {}", question.get_id());
+			logger.error("Could not delete question {}.", question.get_id(), e);
 		}
 
 		return 0;
@@ -919,14 +916,14 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				if (database.bulkSaveDocuments(answersToDelete.toArray(new Document[answersToDelete.size()]))) {
 					count += partition.size();
 				} else {
-					logger.error("Could not bulk delete answers");
+					logger.error("Could not bulk delete answers.");
 				}
 			}
 			log("delete", "type", "answer", "answerCount", count);
 
 			return count;
 		} catch (final IOException e) {
-			logger.error("IOException: Could not delete answers for question {}", question.get_id());
+			logger.error("Could not delete answers for question {}.", question.get_id(), e);
 		}
 
 		return 0;
@@ -1348,7 +1345,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			}
 			return stats;
 		} catch (final Exception e) {
-			logger.error("Error while retrieving session count", e);
+			logger.error("Could not retrieve session count.", e);
 		}
 		return stats;
 	}
@@ -1362,7 +1359,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			question.setSessionId(getSessionKeyword(question.getSessionId()));
 			return question;
 		} catch (final IOException e) {
-			logger.error("Could not load interposed question {}", questionId);
+			logger.error("Could not load interposed question {}.", questionId, e);
 		}
 		return null;
 	}
@@ -1375,7 +1372,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			document.put("read", question.isRead());
 			getDatabase().saveDocument(document);
 		} catch (final IOException e) {
-			logger.error("Could not mark interposed question as read {}", question.get_id());
+			logger.error("Could not mark interposed question as read {}.", question.get_id(), e);
 		}
 	}
 
@@ -1440,7 +1437,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			final Document doc = new Document(json);
 			getDatabase().saveDocument(doc);
 		} catch (IOException e) {
-			logger.error("Could not clean up logged_in document of {}", user.getUsername());
+			logger.error("Could not clean up logged_in document of {}.", user.getUsername(), e);
 		}
 		return result;
 	}
@@ -1506,7 +1503,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			final Document doc = new Document(json);
 			getDatabase().saveDocument(doc);
 		} catch (IOException e) {
-			logger.error("Could not clean up logged_in document of {}", username);
+			logger.error("Could not clean up logged_in document of {}.", username, e);
 		}
 		return result;
 	}
@@ -1573,7 +1570,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				this.publisher.publishEvent(new NewAnswerEvent(this, e.getSession(), e.getAnswer(), e.getUser(), e.getQuestion()));
 			}
 		} catch (IOException e) {
-			logger.error("Could not bulk save answers from queue");
+			logger.error("Could not bulk save answers from queue.", e);
 		}
 	}
 
@@ -1597,7 +1594,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			answer.set_rev(a.getRev());
 			return answer;
 		} catch (final IOException e) {
-			logger.error("Could not save answer {}", answer);
+			logger.error("Could not update answer {}.", answer, e);
 		}
 		return null;
 	}
@@ -1610,7 +1607,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			database.deleteDocument(database.getDocument(answerId));
 			log("delete", "type", "answer");
 		} catch (final IOException e) {
-			logger.error("Could not delete answer {} because of {}", answerId, e.getMessage());
+			logger.error("Could not delete answer {}.", answerId, e);
 		}
 	}
 
@@ -1620,7 +1617,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			deleteDocument(question.get_id());
 			log("delete", "type", "comment");
 		} catch (final IOException e) {
-			logger.error("Could not delete interposed question {} because of {}", question.get_id(), e.getMessage());
+			logger.error("Could not delete interposed question {}.", question.get_id(), e);
 		}
 	}
 
@@ -1693,7 +1690,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 			return session;
 		} catch (final IOException e) {
-			logger.error("Could not lock session {}", session);
+			logger.error("Could not update session {}.", session, e);
 		}
 
 		return null;
@@ -1708,7 +1705,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			database.saveDocument(s);
 			session.set_rev(s.getRev());
 		} catch (final IOException e) {
-			logger.error("Could not lock session {}", session);
+			logger.error("Could not update creator for session {}.", session, e);
 		}
 
 		return session;
@@ -1724,7 +1721,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			logger.debug("Deleted session document {} and related data.", session.get_id());
 			log("delete", "type", "session", "id", session.get_id());
 		} catch (final IOException e) {
-			logger.error("Could not delete session {}", session);
+			logger.error("Could not delete session {}.", session, e);
 		}
 
 		return count;
@@ -1781,7 +1778,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 					if (getDatabase().bulkSaveDocuments(newDocs.toArray(new Document[newDocs.size()]))) {
 						count += newDocs.size();
 					} else {
-						logger.error("Could not bulk delete visited session lists");
+						logger.error("Could not bulk delete visited session lists.");
 					}
 				}
 			}
@@ -1793,7 +1790,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 			return count;
 		} catch (IOException e) {
-			logger.error("Could not delete visited session lists of inactive users.");
+			logger.error("Could not delete visited session lists of inactive users.", e);
 		}
 
 		return 0;
@@ -2054,7 +2051,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			try {
 				deleteDocument(document.getId());
 			} catch (final IOException e) {
-				logger.error("Could not delete all interposed questions {}", session);
+				logger.error("Could not delete all interposed questions {}.", session, e);
 			}
 		}
 
@@ -2091,7 +2088,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		try {
 			database.bulkSaveDocuments(documents.toArray(new Document[documents.size()]));
 		} catch (final IOException e) {
-			logger.error("Could not bulk publish all questions: {}", e.getMessage());
+			logger.error("Could not bulk publish all questions.", e);
 		}
 	}
 
@@ -2125,7 +2122,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		try {
 			database.bulkSaveDocuments(documents.toArray(new Document[documents.size()]));
 		} catch (final IOException e) {
-			logger.error("Could not bulk set voting admission for all questions: {}", e.getMessage());
+			logger.error("Could not bulk set voting admission for all questions.", e);
 		}
 	}
 
@@ -2179,7 +2176,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		try {
 			database.bulkSaveDocuments(documents.toArray(new Document[documents.size()]));
 		} catch (final IOException e) {
-			logger.error("Could not bulk reset all questions round state: {}", e.getMessage());
+			logger.error("Could not bulk reset all questions round state.", e);
 		}
 	}
 
@@ -2203,7 +2200,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 			return allAnswers.size();
 		} catch (IOException e) {
-			logger.error("Could not bulk delete answers: {}", e.getMessage());
+			logger.error("Could not bulk delete answers.", e);
 		}
 
 		return 0;
@@ -2239,7 +2236,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 			return new int[] {deleteList.size(), result.size()};
 		} catch (IOException e) {
-			logger.error("Could not bulk delete questions and answers: {}", e.getMessage());
+			logger.error("Could not bulk delete questions and answers.", e);
 		}
 
 		return new int[] {0, 0};
@@ -2312,7 +2309,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 			return user;
 		} catch (IOException e) {
-			logger.error("Could not save user {}", user);
+			logger.error("Could not save user {}.", user, e);
 		}
 
 		return null;
@@ -2342,7 +2339,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 			return true;
 		} catch (IOException e) {
-			logger.error("Could not delete user {}", dbUser.getId());
+			logger.error("Could not delete user {}.", dbUser.getId(), e);
 		}
 
 		return false;
@@ -2382,7 +2379,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 			return count;
 		} catch (IOException e) {
-			logger.error("Could not delete inactive users.");
+			logger.error("Could not delete inactive users.", e);
 		}
 
 		return 0;
@@ -2467,7 +2464,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			database.bulkSaveDocuments(motds.toArray(new Document[motds.size()]));
 			database.bulkSaveDocuments(documents.toArray(new Document[documents.size()]));
 		} catch (IOException e) {
-			logger.error("Could not import this session: {}", e.getMessage());
+			logger.error("Could not import session.", e);
 			// Something went wrong, delete this session since we do not want a partial import
 			this.deleteSession(session);
 			return null;
@@ -2753,7 +2750,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 			return motd;
 		} catch (IOException e) {
-			logger.error("Could not save motd {}", motd);
+			logger.error("Could not save MotD {}.", motd, e);
 		}
 
 		return null;
@@ -2765,7 +2762,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		try {
 			this.deleteDocument(motd.get_id());
 		} catch (IOException e) {
-			logger.error("Could not delete Motd {}", motd.get_id());
+			logger.error("Could not delete MotD {}.", motd.get_id(), e);
 		}
 	}
 
@@ -2808,7 +2805,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 			return motdlist;
 		} catch (IOException e) {
-			logger.error("Could not save motdlist {}", motdlist);
+			logger.error("Could not save MotD list {}.", motdlist, e);
 		}
 
 		return null;

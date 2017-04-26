@@ -23,8 +23,6 @@ import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.IFeedbackService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.web.DeprecatedApi;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,9 +40,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class FeedbackController extends AbstractController {
-
-	private static final Logger logger = LoggerFactory.getLogger(FeedbackController.class);
-
 	@Autowired
 	private IFeedbackService feedbackService;
 
@@ -99,14 +94,9 @@ public class FeedbackController extends AbstractController {
 			@RequestBody final int value
 			) {
 		User user = userService.getCurrentUser();
-		if (feedbackService.saveFeedback(sessionkey, value, user)) {
-			Feedback feedback = feedbackService.getFeedback(sessionkey);
-			if (feedback != null) {
-				return feedback;
-			}
-			throw new RuntimeException();
-		}
+		feedbackService.saveFeedback(sessionkey, value, user);
+		Feedback feedback = feedbackService.getFeedback(sessionkey);
 
-		throw new NotFoundException();
+		return feedback;
 	}
 }
