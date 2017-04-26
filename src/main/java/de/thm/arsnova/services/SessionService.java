@@ -374,7 +374,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	public Session changeSessionCreator(String sessionkey, String newCreator) {
 		final Session existingSession = databaseDao.getSessionFromKeyword(sessionkey);
 		if (existingSession == null) {
-			throw new RuntimeException("Error while trying to get the session with sessionkey: " + sessionkey);
+			throw new RuntimeException("Could not load session " + sessionkey + ".");
 		}
 		return databaseDao.changeSessionCreator(existingSession, newCreator);
 	}
@@ -424,7 +424,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		final User user = userService.getCurrentUser();
 		final SessionInfo info = databaseDao.importSession(user, importSession);
 		if (info == null) {
-			throw new RuntimeException("Error while importing the session.");
+			throw new RuntimeException("Could not import session.");
 		}
 		return info;
 	}
@@ -508,7 +508,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 			// base64 adds offset to filesize, formula taken from: http://en.wikipedia.org/wiki/Base64#MIME
 			final int fileSize = (int) ((session.getPpLogo().length() - 814) / 1.37);
 			if (fileSize > uploadFileSizeByte) {
-				logger.error("Could not save file. File is too large with " + fileSize + " Byte.");
+				logger.error("Could not save file. File is too large with {} Byte.", fileSize);
 				throw new PayloadTooLargeException();
 			}
 		}

@@ -20,8 +20,6 @@ package de.thm.arsnova.controller;
 import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.services.UserSessionService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.stereotype.Controller;
@@ -47,9 +45,6 @@ public class UserController extends AbstractController {
 
 	@Autowired
 	private UserSessionService userSessionService;
-
-	private static final Logger logger = LoggerFactory
-			.getLogger(UserController.class);
 
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
 	public void register(@RequestParam final String username,
