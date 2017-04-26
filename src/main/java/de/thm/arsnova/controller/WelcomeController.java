@@ -86,13 +86,13 @@ public class WelcomeController extends AbstractController {
 		) {
 		/* Block requests from the server itself to prevent DoS attacks caused by request loops */
 		if ("127.0.0.1".equals(request.getRemoteAddr())) {
-			throw new BadRequestException();
+			throw new BadRequestException("Access to localhost not allowed.");
 		}
 		/* Block requests to servers in private networks */
 		try {
 			final InetAddress addr = InetAddress.getByName(new URL(url).getHost());
 			if (addr.isSiteLocalAddress()) {
-				throw new BadRequestException();
+				throw new BadRequestException("Access to site-local addresses not allowed.");
 			}
 		} catch (UnknownHostException | MalformedURLException e) {
 			throw new BadRequestException();

@@ -25,6 +25,7 @@ import de.thm.arsnova.exceptions.NotImplementedException;
 import de.thm.arsnova.exceptions.PayloadTooLargeException;
 import de.thm.arsnova.exceptions.PreconditionFailedException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
+import org.slf4j.event.Level;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
@@ -46,25 +47,32 @@ import java.util.Map;
  */
 @ControllerAdvice
 public class ControllerExceptionHandler extends AbstractControllerExceptionHandler {
+	@ExceptionHandler(NoContentException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public Map<String, Object> handleNoContentException(final Exception e, final HttpServletRequest request) {
+		return handleException(e, Level.TRACE);
+	}
+
 	@ExceptionHandler(NotFoundException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	public Map<String, Object> handleNotFoundException(final Exception e, final HttpServletRequest request) {
-		return handleException(e);
+		return handleException(e, Level.TRACE);
 	}
 
 	@ExceptionHandler(UnauthorizedException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	public Map<String, Object> handleUnauthorizedException(final Exception e, final HttpServletRequest request) {
-		return handleException(e);
+		return handleException(e, Level.TRACE);
 	}
 
 	@ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	@ResponseBody
 	public Map<String, Object> handleAuthenticationCredentialsNotFoundException(final Exception e, final HttpServletRequest request) {
-		return handleException(e);
+		return handleException(e, Level.DEBUG);
 	}
 
 	@ExceptionHandler(AccessDeniedException.class)
@@ -83,55 +91,48 @@ public class ControllerExceptionHandler extends AbstractControllerExceptionHandl
 			response.setStatus(HttpStatus.FORBIDDEN.value());
 		}
 
-		return handleException(e);
+		return handleException(e, Level.DEBUG);
 	}
 
 	@ExceptionHandler(ForbiddenException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.FORBIDDEN)
 	public Map<String, Object> handleForbiddenException(final Exception e, final HttpServletRequest request) {
-		return handleException(e);
-	}
-
-	@ExceptionHandler(NoContentException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public Map<String, Object> handleNoContentException(final Exception e, final HttpServletRequest request) {
-		return handleException(e);
+		return handleException(e, Level.DEBUG);
 	}
 
 	@ExceptionHandler(BadRequestException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public Map<String, Object> handleBadRequestException(final Exception e, final HttpServletRequest request) {
-		return handleException(e);
+		return handleException(e, Level.DEBUG);
 	}
 
 	@ExceptionHandler(PreconditionFailedException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.PRECONDITION_FAILED)
 	public Map<String, Object> handlePreconditionFailedException(final Exception e, final HttpServletRequest request) {
-		return handleException(e);
+		return handleException(e, Level.DEBUG);
 	}
 
 	@ExceptionHandler(NotImplementedException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
 	public Map<String, Object> handleNotImplementedException(final Exception e, final HttpServletRequest request) {
-		return handleException(e);
+		return handleException(e, Level.DEBUG);
 	}
 
 	@ExceptionHandler(PayloadTooLargeException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
 	public Map<String, Object> handlePayloadTooLargeException(final Exception e, final HttpServletRequest request) {
-		return handleException(e);
+		return handleException(e, Level.DEBUG);
 	}
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public Map<String, Object> handleHttpMessageNotReadableException(final Exception e, final HttpServletRequest request) {
-		return handleException(e);
+		return handleException(e, Level.DEBUG);
 	}
 }

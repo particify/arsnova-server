@@ -1,5 +1,6 @@
 package de.thm.arsnova.controller;
 
+import org.slf4j.event.Level;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -26,6 +27,6 @@ public class DefaultControllerExceptionHandler extends AbstractControllerExcepti
 			throw e;
 		}
 
-		return handleException(e);
+		return handleException(e, Level.ERROR);
 	}
 }

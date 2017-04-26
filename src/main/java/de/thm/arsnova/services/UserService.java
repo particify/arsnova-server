@@ -241,7 +241,7 @@ public class UserService implements IUserService {
 		if (tries < loginTryLimit) {
 			loginTries.put(addr, ++tries);
 			if (loginTryLimit == tries) {
-				logger.info("Temporarily banned {} from login.", new Object[] {addr});
+				logger.info("Temporarily banned {} from login.", addr);
 				loginBans.add(addr);
 			}
 		}
@@ -301,7 +301,7 @@ public class UserService implements IUserService {
 	public void removeUserFromSessionBySocketId(final UUID socketId) {
 		final User user = socketid2user.get(socketId);
 		if (null == user) {
-			logger.warn("null == user for socket {}", socketId);
+			logger.warn("No user exists for socket {}.", socketId);
 
 			return;
 		}
@@ -401,8 +401,8 @@ public class UserService implements IUserService {
 				UriUtils.encodeQueryParam(dbUser.getUsername(), "UTF-8"),
 				dbUser.getActivationKey()
 			);
-		} catch (UnsupportedEncodingException e1) {
-			logger.error(e1.getMessage());
+		} catch (UnsupportedEncodingException e) {
+			logger.error("Sending of activation mail failed.", e);
 
 			return;
 		}
@@ -429,7 +429,7 @@ public class UserService implements IUserService {
 			}
 
 			mailPattern = Pattern.compile("[a-z0-9._-]+?@(" + StringUtils.join(patterns, "|") + ")", Pattern.CASE_INSENSITIVE);
-			logger.info("Allowed e-mail addresses (pattern) for registration: " + mailPattern.pattern());
+			logger.info("Allowed e-mail addresses (pattern) for registration: '{}'.", mailPattern.pattern());
 		}
 	}
 
@@ -492,8 +492,8 @@ public class UserService implements IUserService {
 				UriUtils.encodeQueryParam(dbUser.getUsername(), "UTF-8"),
 				dbUser.getPasswordResetKey()
 			);
-		} catch (UnsupportedEncodingException e1) {
-			logger.error(e1.getMessage());
+		} catch (UnsupportedEncodingException e) {
+			logger.error("Sending of password reset mail failed.", e);
 
 			return;
 		}
@@ -539,7 +539,7 @@ public class UserService implements IUserService {
 			logger.info("Sending mail \"{}\" from \"{}\" to \"{}\"", subject, msg.getFrom(), dbUser.getUsername());
 			mailSender.send(msg);
 		} catch (MailException | MessagingException e) {
-			logger.warn("Mail \"{}\" could not be sent: {}", subject, e);
+			logger.warn("Mail \"{}\" could not be sent.", subject, e);
 		}
 	}
 }
