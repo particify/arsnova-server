@@ -174,7 +174,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		if (connectorClient != null && session.isCourseSession()) {
 			final String courseid = session.getCourseId();
 			if (!connectorClient.getMembership(user.getUsername(), courseid).isMember()) {
-				throw new ForbiddenException();
+				throw new ForbiddenException("User is no course member.");
 			}
 		}
 
@@ -205,15 +205,15 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		}
 		if (!session.isActive()) {
 			if (user.hasRole(UserSessionService.Role.STUDENT)) {
-				throw new ForbiddenException();
+				throw new ForbiddenException("User is not session creator.");
 			} else if (user.hasRole(UserSessionService.Role.SPEAKER) && !session.isCreator(user)) {
-				throw new ForbiddenException();
+				throw new ForbiddenException("User is not session creator.");
 			}
 		}
 		if (connectorClient != null && session.isCourseSession()) {
 			final String courseid = session.getCourseId();
 			if (!connectorClient.getMembership(user.getUsername(), courseid).isMember()) {
-				throw new ForbiddenException();
+				throw new ForbiddenException("User is no course member.");
 			}
 		}
 		return session;
@@ -336,7 +336,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (!session.isCreator(user)) {
-			throw new ForbiddenException();
+			throw new ForbiddenException("User is not session creator.");
 		}
 		session.setActive(lock);
 		this.publisher.publishEvent(new StatusSessionEvent(this, session));
@@ -374,7 +374,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	public Session changeSessionCreator(String sessionkey, String newCreator) {
 		final Session existingSession = databaseDao.getSessionFromKeyword(sessionkey);
 		if (existingSession == null) {
-			throw new RuntimeException("Could not load session " + sessionkey + ".");
+			throw new NullPointerException("Could not load session " + sessionkey + ".");
 		}
 		return databaseDao.changeSessionCreator(existingSession, newCreator);
 	}
@@ -424,7 +424,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		final User user = userService.getCurrentUser();
 		final SessionInfo info = databaseDao.importSession(user, importSession);
 		if (info == null) {
-			throw new RuntimeException("Could not import session.");
+			throw new NullPointerException("Could not import session.");
 		}
 		return info;
 	}
@@ -460,7 +460,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (!session.isCreator(user)) {
-			throw new UnauthorizedException();
+			throw new UnauthorizedException("User is not session creator.");
 		}
 		session.setFeatures(features);
 		this.publisher.publishEvent(new FeatureChangeEvent(this, session));
@@ -472,7 +472,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (!session.isCreator(user)) {
-			throw new UnauthorizedException();
+			throw new UnauthorizedException("User is not session creator.");
 		}
 		if (!lock) {
 			feedbackService.cleanFeedbackVotesInSession(sessionkey, 0);
@@ -488,7 +488,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (!session.isCreator(user)) {
-			throw new UnauthorizedException();
+			throw new UnauthorizedException("User is not session creator.");
 		}
 		session.setFlipFlashcards(flip);
 		this.publisher.publishEvent(new FlipFlashcardsEvent(this, session));
@@ -500,7 +500,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 			if (session.getPpLogo().startsWith("http")) {
 				final String base64ImageString = imageUtils.encodeImageToString(session.getPpLogo());
 				if (base64ImageString == null) {
-					throw new BadRequestException();
+					throw new BadRequestException("Could not encode image.");
 				}
 				session.setPpLogo(base64ImageString);
 			}
@@ -508,8 +508,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 			// base64 adds offset to filesize, formula taken from: http://en.wikipedia.org/wiki/Base64#MIME
 			final int fileSize = (int) ((session.getPpLogo().length() - 814) / 1.37);
 			if (fileSize > uploadFileSizeByte) {
-				logger.error("Could not save file. File is too large with {} Byte.", fileSize);
-				throw new PayloadTooLargeException();
+				throw new PayloadTooLargeException("Could not save file. File is too large with " + fileSize + " Byte.");
 			}
 		}
 	}

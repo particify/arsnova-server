@@ -94,14 +94,9 @@ public class FeedbackController extends AbstractController {
 			@RequestBody final int value
 			) {
 		User user = userService.getCurrentUser();
-		if (feedbackService.saveFeedback(sessionkey, value, user)) {
-			Feedback feedback = feedbackService.getFeedback(sessionkey);
-			if (feedback != null) {
-				return feedback;
-			}
-			throw new RuntimeException();
-		}
+		feedbackService.saveFeedback(sessionkey, value, user);
+		Feedback feedback = feedbackService.getFeedback(sessionkey);
 
-		throw new NotFoundException();
+		return feedback;
 	}
 }
