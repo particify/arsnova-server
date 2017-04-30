@@ -165,7 +165,6 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 	@Bean
 	public MappingJackson2HttpMessageConverter jsonMessageConverter() {
 		Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
-		builder.serializationInclusion(JsonInclude.Include.NON_NULL);
 		builder.serializationInclusion(JsonInclude.Include.NON_EMPTY);
 		builder.defaultViewInclusion(false);
 		builder.indentOutput(true).simpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
