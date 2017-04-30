@@ -172,27 +172,9 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 		return new MappingJackson2HttpMessageConverter(builder.build());
 	}
 
-//	@Bean
-//	public PropertyPlaceholderConfigurer propertyPlaceholderConfigurer() {
-//		final PropertyPlaceholderConfigurer configurer = new PropertyPlaceholderConfigurer();
-//		configurer.setLocations(
-//				new ClassPathResource("arsnova.properties.example"),
-//				new FileSystemResource("/etc/arsnova/arsnova.properties")
-//		);
-//		configurer.setIgnoreResourceNotFound(true);
-//		configurer.setIgnoreUnresolvablePlaceholders(false);
-//
-//		return configurer;
-//	}
-
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		final PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
-//		configurer.setLocations(
-//			new ClassPathResource("arsnova.properties.example"),
-//			new FileSystemResource("/etc/arsnova/arsnova.properties")
-//		);
-//		configurer.setIgnoreResourceNotFound(true);
 		configurer.setIgnoreUnresolvablePlaceholders(false);
 
 		return configurer;
