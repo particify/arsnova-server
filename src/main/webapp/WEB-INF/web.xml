@@ -70,32 +70,6 @@
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
-	<mime-mapping>
-		<extension>manifest</extension>
-		<mime-type>text/cache-manifest</mime-type>
-	</mime-mapping>
-	<mime-mapping>
-		<extension>json</extension>
-		<mime-type>application/json</mime-type>
-	</mime-mapping>
-
-	<error-page>
-		<error-code>401</error-code>
-		<location>/error/401.html</location>
-	</error-page>
-	<error-page>
-		<error-code>403</error-code>
-		<location>/error/403.html</location>
-	</error-page>
-	<error-page>
-		<error-code>404</error-code>
-		<location>/error/404.html</location>
-	</error-page>
-	<error-page>
-		<error-code>500</error-code>
-		<location>/error/500.html</location>
-	</error-page>
-
 	<session-config>
 		<tracking-mode>COOKIE</tracking-mode>
 	</session-config>
