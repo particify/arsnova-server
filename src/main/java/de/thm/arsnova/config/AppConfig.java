@@ -18,6 +18,7 @@
 package de.thm.arsnova.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import de.thm.arsnova.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.client.ConnectorClientImpl;
@@ -86,6 +87,8 @@ import java.util.List;
 		ignoreResourceNotFound = true
 )
 public class AppConfig extends WebMvcConfigurerAdapter {
+	public static final MediaType API_V2_MEDIA_TYPE = new MediaType("application", "vnd.de.thm.arsnova.v2+json");
+	public static final MediaType API_V3_MEDIA_TYPE = new MediaType("application", "vnd.de.thm.arsnova.v3+json");
 
 	@Autowired
 	private Environment env;
@@ -101,11 +104,13 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 	@Value(value = "${socketio.ssl.jks-password:}") private String socketKeystorePassword;
 	@Value(value = "${security.cors.origins:}") private String[] corsOrigins;
 	@Value(value = "${mail.host}") private String mailHost;
+	@Value(value = "${api.indent-response-body:false}") private boolean apiIndent;
 
 	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 		converters.add(stringMessageConverter());
-		converters.add(jsonMessageConverter());
+		converters.add(defaultJsonMessageConverter());
+		converters.add(apiV2JsonMessageConverter());
 		//converters.add(new MappingJackson2XmlHttpMessageConverter(builder.createXmlMapper(true).build()));
 	}
 
@@ -114,7 +119,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 		configurer.mediaType("json", MediaType.APPLICATION_JSON_UTF8);
 		configurer.mediaType("xml", MediaType.APPLICATION_XML);
 		configurer.mediaType("html", MediaType.TEXT_HTML);
-		configurer.defaultContentType(MediaType.APPLICATION_JSON_UTF8);
+		configurer.defaultContentType(API_V3_MEDIA_TYPE);
 		configurer.favorParameter(true);
 		configurer.favorPathExtension(false);
 	}
@@ -163,13 +168,38 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 	}
 
 	@Bean
-	public MappingJackson2HttpMessageConverter jsonMessageConverter() {
+	public MappingJackson2HttpMessageConverter defaultJsonMessageConverter() {
 		Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
-		builder.serializationInclusion(JsonInclude.Include.NON_EMPTY);
-		builder.defaultViewInclusion(false);
-		builder.indentOutput(true).simpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+		builder
+				.serializationInclusion(JsonInclude.Include.NON_EMPTY)
+				.defaultViewInclusion(false)
+				.indentOutput(apiIndent)
+				.simpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(builder.build());
+		List<MediaType> mediaTypes = new ArrayList<>();
+		mediaTypes.add(API_V3_MEDIA_TYPE);
+		mediaTypes.add(MediaType.APPLICATION_JSON_UTF8);
+		converter.setSupportedMediaTypes(mediaTypes);
 
-		return new MappingJackson2HttpMessageConverter(builder.build());
+		return converter;
+	}
+
+	@Bean
+	public MappingJackson2HttpMessageConverter apiV2JsonMessageConverter() {
+		Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
+		builder
+				.serializationInclusion(JsonInclude.Include.NON_EMPTY)
+				.defaultViewInclusion(false)
+				.indentOutput(apiIndent)
+				.featuresToEnable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+				.featuresToEnable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
+		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(builder.build());
+		List<MediaType> mediaTypes = new ArrayList<>();
+		mediaTypes.add(API_V2_MEDIA_TYPE);
+		mediaTypes.add(MediaType.APPLICATION_JSON_UTF8);
+		converter.setSupportedMediaTypes(mediaTypes);
+
+		return converter;
 	}
 
 	@Bean
