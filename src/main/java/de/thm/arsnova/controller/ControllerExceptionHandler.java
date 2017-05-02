@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -51,6 +52,13 @@ public class ControllerExceptionHandler extends AbstractControllerExceptionHandl
 	@ResponseBody
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public Map<String, Object> handleNoContentException(final Exception e, final HttpServletRequest request) {
+		return handleException(e, Level.TRACE);
+	}
+
+	@ExceptionHandler(NoHandlerFoundException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public Map<String, Object> handleNoHandlerFoundException(final Exception e, final HttpServletRequest request) {
 		return handleException(e, Level.TRACE);
 	}
 
