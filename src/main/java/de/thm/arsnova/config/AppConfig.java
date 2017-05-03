@@ -118,7 +118,6 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 	public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
 		configurer.mediaType("json", MediaType.APPLICATION_JSON_UTF8);
 		configurer.mediaType("xml", MediaType.APPLICATION_XML);
-		configurer.mediaType("html", MediaType.TEXT_HTML);
 		configurer.defaultContentType(API_V3_MEDIA_TYPE);
 		configurer.favorParameter(true);
 		configurer.favorPathExtension(false);
