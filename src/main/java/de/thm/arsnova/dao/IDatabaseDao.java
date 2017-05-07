@@ -17,32 +17,15 @@
  */
 package de.thm.arsnova.dao;
 
-import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.*;
-import de.thm.arsnova.entities.transport.ImportExportSession;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * All methods the database must support.
  */
 public interface IDatabaseDao {
-	Session getSessionFromKeyword(String keyword);
-
-	List<Session> getMySessions(User user, final int start, final int limit);
-
-	List<Session> getSessionsForUsername(String username, final int start, final int limit);
-
-	List<Session> getPublicPoolSessions();
-
-	List<Session> getMyPublicPoolSessions(User user);
-
-	Session saveSession(User user, Session session);
-
-	boolean sessionKeyAvailable(String keyword);
-
 	Question saveQuestion(Session session, Question question);
 
 	InterposedQuestion saveQuestion(Session session, InterposedQuestion question, User user);
@@ -54,10 +37,6 @@ public interface IDatabaseDao {
 	List<Question> getSkillQuestionsForTeachers(Session session);
 
 	int getSkillQuestionCount(Session session);
-
-	LoggedIn registerAsOnlineUser(User u, Session s);
-
-	Session updateSessionOwnerActivity(Session session);
 
 	List<String> getQuestionIds(Session session, User user);
 
@@ -101,10 +80,6 @@ public interface IDatabaseDao {
 
 	void markInterposedQuestionAsRead(InterposedQuestion question);
 
-	List<Session> getMyVisitedSessions(User user, final int start, final int limit);
-
-	List<Session> getVisitedSessionsForUsername(String username, final int start, final int limit);
-
 	Question updateQuestion(Question question);
 
 	int deleteAnswers(Question question);
@@ -113,26 +88,9 @@ public interface IDatabaseDao {
 
 	Answer updateAnswer(Answer answer);
 
-	Session getSessionFromId(String sessionId);
-
 	void deleteAnswer(String answerId);
 
 	void deleteInterposedQuestion(InterposedQuestion question);
-
-	List<Session> getCourseSessions(List<Course> courses);
-
-	Session updateSession(Session session);
-
-	Session changeSessionCreator(Session session, String newCreator);
-
-	/**
-	 * Deletes a session and related data.
-	 *
-	 * @param session the session for deletion
-	 */
-	int[] deleteSession(Session session);
-
-	int[] deleteInactiveGuestSessions(long lastActivityBefore);
 
 	int deleteInactiveGuestVisitedSessionLists(long lastActivityBefore);
 
@@ -182,21 +140,9 @@ public interface IDatabaseDao {
 
 	CourseScore getLearningProgress(Session session);
 
-	List<SessionInfo> getMySessionsInfo(User user, final int start, final int limit);
-
-	List<SessionInfo> getPublicPoolSessionsInfo();
-
-	List<SessionInfo> getMyPublicPoolSessionsInfo(final User user);
-
-	List<SessionInfo> getMyVisitedSessionsInfo(User currentUser, final int start, final int limit);
-
 	int deleteAllPreparationAnswers(Session session);
 
 	int deleteAllLectureAnswers(Session session);
-
-	SessionInfo importSession(User user, ImportExportSession importSession);
-
-	ImportExportSession exportSession(String sessionkey, Boolean withAnswer, Boolean withFeedbackQuestions);
 
 	Statistics getStatistics();
 

@@ -17,25 +17,24 @@
  */
 package de.thm.arsnova.entities;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Once a user joins a session, this class is used to identify a returning user.
  */
-public class LoggedIn {
-
-	private String _id;
-	private String _rev;
-	private String type;
+public class LoggedIn implements Entity {
+	private String id;
+	private String rev;
 	private String user;
 	private String sessionId;
 	private long timestamp;
 	private List<VisitedSession> visitedSessions = new ArrayList<>();
-	private List<String> _conflicts;
 
 	public LoggedIn() {
-		this.type = "logged_in";
 		this.updateTimestamp();
 	}
 
@@ -47,88 +46,80 @@ public class LoggedIn {
 
 	private boolean isAlreadyVisited(Session s) {
 		for (VisitedSession vs : this.visitedSessions) {
-			if (vs.get_id().equals(s.get_id())) {
+			if (vs.getId().equals(s.getId())) {
 				return true;
 			}
 		}
 		return false;
 	}
 
+	@JsonView(View.Persistence.class)
+	public String getId() {
+		return id;
+	}
+
+	@JsonView(View.Persistence.class)
+	public void setId(final String id) {
+		this.id = id;
+	}
+
+	@JsonView(View.Persistence.class)
+	public String getRevision() {
+		return rev;
+	}
+
+	@JsonView(View.Persistence.class)
+	public void setRevision(final String rev) {
+		this.rev = rev;
+	}
+
 	public void updateTimestamp() {
 		this.timestamp = System.currentTimeMillis();
 	}
 
-	public String get_id() {
-		return _id;
-	}
-
-	public void set_id(String _id) {
-		this._id = _id;
-	}
-
-	public String get_rev() {
-		return _rev;
-	}
-
-	public void set_rev(String _rev) {
-		this._rev = _rev;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
+	@JsonView(View.Persistence.class)
 	public String getUser() {
 		return user;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setUser(String user) {
 		this.user = user;
 	}
 
+	@JsonView(View.Persistence.class)
 	public String getSessionId() {
 		return sessionId;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setSessionId(String sessionId) {
 		this.sessionId = sessionId;
 	}
 
+	@JsonView(View.Persistence.class)
 	public long getTimestamp() {
 		return timestamp;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
 	}
 
+	@JsonView(View.Persistence.class)
 	public List<VisitedSession> getVisitedSessions() {
 		return visitedSessions;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setVisitedSessions(List<VisitedSession> visitedSessions) {
 		this.visitedSessions = visitedSessions;
 	}
 
-	public List<String> get_conflicts() {
-		return _conflicts;
-	}
-
-	public void set_conflicts(List<String> _conflicts) {
-		this._conflicts = _conflicts;
-	}
-
-	public boolean hasConflicts() {
-		return !(_conflicts == null || _conflicts.isEmpty());
-	}
-
 	@Override
 	public String toString() {
-		return "LoggedIn [_id=" + _id + ", _rev=" + _rev + ", type=" + type
+		return "LoggedIn [id=" + id + ", rev=" + rev + ", type=" + getType()
 				+ ", user=" + user + ", sessionId=" + sessionId
 				+ ", timestamp=" + timestamp + ", visitedSessions="
 				+ visitedSessions + "]";

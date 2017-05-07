@@ -28,12 +28,11 @@ import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.*;
 import de.thm.arsnova.entities.transport.AnswerQueueElement;
-import de.thm.arsnova.entities.transport.ImportExportSession;
-import de.thm.arsnova.entities.transport.ImportExportSession.ImportExportQuestion;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import de.thm.arsnova.persistance.MotdRepository;
+import de.thm.arsnova.persistance.SessionRepository;
 import de.thm.arsnova.services.ISessionService;
 import net.sf.ezmorph.Morpher;
 import net.sf.ezmorph.MorpherRegistry;
@@ -56,8 +55,6 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -67,7 +64,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -103,7 +99,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	private LogEntryRepository dbLogger;
 
 	@Autowired
-	private MotdRepository motdRepo;
+	private SessionRepository sessionRepository;
+
+	@Autowired
+	private MotdRepository motdRepository;
 
 	private String databaseHost;
 	private int databasePort;
@@ -152,252 +151,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		this.publisher = publisher;
 	}
 
-	@Override
-	public List<Session> getMySessions(final User user, final int start, final int limit) {
-		return this.getDatabaseDao().getSessionsForUsername(user.getUsername(), start, limit);
-	}
-
-	@Override
-	public List<Session> getSessionsForUsername(String username, final int start, final int limit) {
-		final View view = new View("session/partial_by_sessiontype_creator_name");
-		if (start > 0) {
-			view.setSkip(start);
-		}
-		if (limit > 0) {
-			view.setLimit(limit);
-		}
-		view.setStartKeyArray("", username);
-		view.setEndKeyArray("", username, "{}");
-
-		final Results<Session> results = getDatabase().queryView(view, Session.class);
-
-		final List<Session> result = new ArrayList<>();
-		for (final RowResult<Session> row : results.getRows()) {
-			final Session session = row.getValue();
-			session.setCreator(row.getKey().getString(1));
-			session.setName(row.getKey().getString(2));
-			session.set_id(row.getId());
-			result.add(session);
-		}
-		return result;
-	}
-
-	@Override
-	public List<Session> getPublicPoolSessions() {
-		final View view = new View("session/partial_by_ppsubject_name_for_publicpool");
-
-		final ViewResults sessions = getDatabase().view(view);
-
-		final List<Session> result = new ArrayList<>();
-
-		for (final Document d : sessions.getResults()) {
-			final Session session = (Session) JSONObject.toBean(
-					d.getJSONObject().getJSONObject("value"),
-					Session.class
-					);
-			session.set_id(d.getId());
-			result.add(session);
-		}
-		return result;
-	}
-
-	@Override
-	public List<SessionInfo> getPublicPoolSessionsInfo() {
-		final List<Session> sessions = this.getPublicPoolSessions();
-		return getInfosForSessions(sessions);
-	}
-
-	@Override
-	public List<Session> getMyPublicPoolSessions(final User user) {
-		final View view = new View("session/partial_by_sessiontype_creator_name");
-		view.setStartKeyArray("public_pool", user.getUsername());
-		view.setEndKeyArray("public_pool", user.getUsername(), "{}");
-
-		final ViewResults sessions = getDatabase().view(view);
-
-		final List<Session> result = new ArrayList<>();
-		for (final Document d : sessions.getResults()) {
-			final Session session = (Session) JSONObject.toBean(
-					d.getJSONObject().getJSONObject("value"),
-					Session.class
-					);
-			session.setCreator(d.getJSONObject().getJSONArray("key").getString(1));
-			session.setName(d.getJSONObject().getJSONArray("key").getString(2));
-			session.set_id(d.getId());
-			result.add(session);
-		}
-		return result;
-	}
-
-	@Override
-	public List<SessionInfo> getMyPublicPoolSessionsInfo(final User user) {
-		final List<Session> sessions = this.getMyPublicPoolSessions(user);
-		if (sessions.isEmpty()) {
-			return new ArrayList<>();
-		}
-		return getInfosForSessions(sessions);
-	}
-
-	@Override
-	public List<SessionInfo> getMySessionsInfo(final User user, final int start, final int limit) {
-		final List<Session> sessions = this.getMySessions(user, start, limit);
-		if (sessions.isEmpty()) {
-			return new ArrayList<>();
-		}
-		return getInfosForSessions(sessions);
-	}
-
-	private List<SessionInfo> getInfosForSessions(final List<Session> sessions) {
-		/* TODO: migrate to new view */
-		final ExtendedView questionCountView = new ExtendedView("content/by_sessionid");
-		final ExtendedView answerCountView = new ExtendedView("answer/by_sessionid");
-		final ExtendedView interposedCountView = new ExtendedView("comment/by_sessionid");
-		final ExtendedView unreadInterposedCountView = new ExtendedView("comment/by_sessionid_read");
-
-		interposedCountView.setSessionIdKeys(sessions);
-		interposedCountView.setGroup(true);
-		questionCountView.setSessionIdKeys(sessions);
-		questionCountView.setGroup(true);
-		answerCountView.setSessionIdKeys(sessions);
-		answerCountView.setGroup(true);
-		List<String> unreadInterposedQueryKeys = new ArrayList<>();
-		for (Session s : sessions) {
-			unreadInterposedQueryKeys.add("[\"" + s.get_id() + "\",false]");
-		}
-		unreadInterposedCountView.setKeys(unreadInterposedQueryKeys);
-		unreadInterposedCountView.setGroup(true);
-		return getSessionInfoData(sessions, questionCountView, answerCountView, interposedCountView, unreadInterposedCountView);
-	}
-
-	private List<SessionInfo> getInfosForVisitedSessions(final List<Session> sessions, final User user) {
-		final ExtendedView answeredQuestionsView = new ExtendedView("answer/by_user_sessionid");
-		final ExtendedView questionIdsView = new ExtendedView("content/by_sessionid");
-		questionIdsView.setSessionIdKeys(sessions);
-		List<String> answeredQuestionQueryKeys = new ArrayList<>();
-		for (Session s : sessions) {
-			answeredQuestionQueryKeys.add("[\"" + user.getUsername() + "\",\"" + s.get_id() + "\"]");
-		}
-		answeredQuestionsView.setKeys(answeredQuestionQueryKeys);
-		return getVisitedSessionInfoData(sessions, answeredQuestionsView, questionIdsView);
-	}
-
-	private List<SessionInfo> getVisitedSessionInfoData(List<Session> sessions,
-			ExtendedView answeredQuestionsView, ExtendedView questionIdsView) {
-		final Map<String, Set<String>> answeredQuestionsMap = new HashMap<>();
-		final Map<String, Set<String>> questionIdMap = new HashMap<>();
-		final ViewResults answeredQuestionsViewResults = getDatabase().view(answeredQuestionsView);
-		final ViewResults questionIdsViewResults = getDatabase().view(questionIdsView);
-
-		// Maps a session ID to a set of question IDs of answered questions of that session
-		for (final Document d : answeredQuestionsViewResults.getResults()) {
-			final String sessionId = d.getJSONArray("key").getString(1);
-			final String questionId = d.getString("value");
-			Set<String> questionIdsInSession = answeredQuestionsMap.get(sessionId);
-			if (questionIdsInSession == null) {
-				questionIdsInSession = new HashSet<>();
-			}
-			questionIdsInSession.add(questionId);
-			answeredQuestionsMap.put(sessionId, questionIdsInSession);
-		}
-
-		// Maps a session ID to a set of question IDs of that session
-		for (final Document d : questionIdsViewResults.getResults()) {
-			final String sessionId = d.getString("key");
-			final String questionId = d.getId();
-			Set<String> questionIdsInSession = questionIdMap.get(sessionId);
-			if (questionIdsInSession == null) {
-				questionIdsInSession = new HashSet<>();
-			}
-			questionIdsInSession.add(questionId);
-			questionIdMap.put(sessionId, questionIdsInSession);
-		}
-
-		// For each session, count the question IDs that are not yet answered
-		Map<String, Integer> unansweredQuestionsCountMap = new HashMap<>();
-		for (final Session s : sessions) {
-			if (!questionIdMap.containsKey(s.get_id())) {
-				continue;
-			}
-			// Note: create a copy of the first set so that we don't modify the contents in the original set
-			Set<String> questionIdsInSession = new HashSet<>(questionIdMap.get(s.get_id()));
-			Set<String> answeredQuestionIdsInSession = answeredQuestionsMap.get(s.get_id());
-			if (answeredQuestionIdsInSession == null) {
-				answeredQuestionIdsInSession = new HashSet<>();
-			}
-			questionIdsInSession.removeAll(answeredQuestionIdsInSession);
-			unansweredQuestionsCountMap.put(s.get_id(), questionIdsInSession.size());
-		}
-
-		List<SessionInfo> sessionInfos = new ArrayList<>();
-		for (Session session : sessions) {
-			int numUnanswered = 0;
-
-			if (unansweredQuestionsCountMap.containsKey(session.get_id())) {
-				numUnanswered = unansweredQuestionsCountMap.get(session.get_id());
-			}
-			SessionInfo info = new SessionInfo(session);
-			info.setNumUnanswered(numUnanswered);
-			sessionInfos.add(info);
-		}
-		return sessionInfos;
-	}
-
-	private List<SessionInfo> getSessionInfoData(final List<Session> sessions,
-			final ExtendedView questionCountView,
-			final ExtendedView answerCountView,
-			final ExtendedView interposedCountView,
-			final ExtendedView unredInterposedCountView) {
-		final ViewResults questionCountViewResults = getDatabase().view(questionCountView);
-		final ViewResults answerCountViewResults = getDatabase().view(answerCountView);
-		final ViewResults interposedCountViewResults = getDatabase().view(interposedCountView);
-		final ViewResults unredInterposedCountViewResults = getDatabase().view(unredInterposedCountView);
-
-		Map<String, Integer> questionCountMap = new HashMap<>();
-		for (final Document d : questionCountViewResults.getResults()) {
-			questionCountMap.put(d.getString("key"), d.getInt("value"));
-		}
-		Map<String, Integer> answerCountMap = new HashMap<>();
-		for (final Document d : answerCountViewResults.getResults()) {
-			answerCountMap.put(d.getString("key"), d.getInt("value"));
-		}
-		Map<String, Integer> interposedCountMap = new HashMap<>();
-		for (final Document d : interposedCountViewResults.getResults()) {
-			interposedCountMap.put(d.getString("key"), d.getInt("value"));
-		}
-		Map<String, Integer> unredInterposedCountMap = new HashMap<>();
-		for (final Document d : unredInterposedCountViewResults.getResults()) {
-			unredInterposedCountMap.put(d.getJSONArray("key").getString(0), d.getInt("value"));
-		}
-
-		List<SessionInfo> sessionInfos = new ArrayList<>();
-		for (Session session : sessions) {
-			int numQuestions = 0;
-			int numAnswers = 0;
-			int numInterposed = 0;
-			int numUnredInterposed = 0;
-			if (questionCountMap.containsKey(session.get_id())) {
-				numQuestions = questionCountMap.get(session.get_id());
-			}
-			if (answerCountMap.containsKey(session.get_id())) {
-				numAnswers = answerCountMap.get(session.get_id());
-			}
-			if (interposedCountMap.containsKey(session.get_id())) {
-				numInterposed = interposedCountMap.get(session.get_id());
-			}
-			if (unredInterposedCountMap.containsKey(session.get_id())) {
-				numUnredInterposed = unredInterposedCountMap.get(session.get_id());
-			}
-
-			SessionInfo info = new SessionInfo(session);
-			info.setNumQuestions(numQuestions);
-			info.setNumAnswers(numAnswers);
-			info.setNumInterposed(numInterposed);
-			info.setNumUnredInterposed(numUnredInterposed);
-			sessionInfos.add(info);
-		}
-		return sessionInfos;
-	}
-
 	@Cacheable("skillquestions")
 	@Override
 	public List<Question> getSkillQuestionsForUsers(final Session session) {
@@ -406,12 +159,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		final View view1 = new View(viewName);
 		final View view2 = new View(viewName);
 		final View view3 = new View(viewName);
-		view1.setStartKey(session.get_id(), "lecture", true);
-		view1.setEndKey(session.get_id(), "lecture", true, "{}");
-		view2.setStartKey(session.get_id(), "preparation", true);
-		view2.setEndKey(session.get_id(), "preparation", true, "{}");
-		view3.setStartKey(session.get_id(), "flashcard", true);
-		view3.setEndKey(session.get_id(), "flashcard", true, "{}");
+		view1.setStartKey(session.getId(), "lecture", true);
+		view1.setEndKey(session.getId(), "lecture", true, "{}");
+		view2.setStartKey(session.getId(), "preparation", true);
+		view2.setEndKey(session.getId(), "preparation", true, "{}");
+		view3.setStartKey(session.getId(), "flashcard", true);
+		view3.setEndKey(session.getId(), "flashcard", true, "{}");
 		questions.addAll(getQuestions(view1, session));
 		questions.addAll(getQuestions(view2, session));
 		questions.addAll(getQuestions(view3, session));
@@ -423,8 +176,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Question> getSkillQuestionsForTeachers(final Session session) {
 		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKey(session.get_id());
-		view.setEndKey(session.get_id(), "{}");
+		view.setStartKey(session.getId());
+		view.setEndKey(session.getId(), "{}");
 
 		return getQuestions(view, session);
 	}
@@ -432,102 +185,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public int getSkillQuestionCount(final Session session) {
 		final View view = new View("content/by_sessionid_variant_active");
-		view.setStartKey(session.get_id());
-		view.setEndKey(session.get_id(), "{}");
+		view.setStartKey(session.getId());
+		view.setEndKey(session.getId(), "{}");
 
 		return getQuestionCount(view);
-	}
-
-	@Override
-	@Cacheable("sessions")
-	public Session getSessionFromKeyword(final String keyword) {
-		final View view = new View("session/by_keyword");
-		view.setIncludeDocs(true);
-		view.setKey(keyword);
-		final ViewResults results = getDatabase().view(view);
-
-		if (results.getJSONArray("rows").optJSONObject(0) == null) {
-			throw new NotFoundException();
-		}
-		return (Session) JSONObject.toBean(
-				results.getJSONArray("rows").optJSONObject(0).optJSONObject("doc"),
-				Session.class
-				);
-	}
-
-	@Override
-	@Cacheable("sessions")
-	public Session getSessionFromId(final String sessionId) {
-		try {
-			final Document doc = getDatabase().getDocument(sessionId);
-			if (!"session".equals(doc.getString("type"))) {
-				return null;
-			}
-
-			return (Session) JSONObject.toBean(
-					doc.getJSONObject(),
-					Session.class
-					);
-		} catch (IOException e) {
-			return null;
-		}
-	}
-
-	@Override
-	public Session saveSession(final User user, final Session session) {
-		session.setKeyword(sessionService.generateKeyword());
-		session.setActive(true);
-		session.setFeedbackLock(false);
-
-		final Document sessionDocument = new Document();
-		sessionDocument.put("type", "session");
-		sessionDocument.put("name", session.getName());
-		sessionDocument.put("shortName", session.getShortName());
-		sessionDocument.put("keyword", session.getKeyword());
-		sessionDocument.put("creator", user.getUsername());
-		sessionDocument.put("active", session.isActive());
-		sessionDocument.put("courseType", session.getCourseType());
-		sessionDocument.put("courseId", session.getCourseId());
-		sessionDocument.put("creationTime", session.getCreationTime());
-		sessionDocument.put("learningProgressOptions", JSONObject.fromObject(session.getLearningProgressOptions()));
-		sessionDocument.put("ppAuthorName", session.getPpAuthorName());
-		sessionDocument.put("ppAuthorMail", session.getPpAuthorMail());
-		sessionDocument.put("ppUniversity", session.getPpUniversity());
-		sessionDocument.put("ppLogo", session.getPpLogo());
-		sessionDocument.put("ppSubject", session.getPpSubject());
-		sessionDocument.put("ppLicense", session.getPpLicense());
-		sessionDocument.put("ppDescription", session.getPpDescription());
-		sessionDocument.put("ppFaculty", session.getPpFaculty());
-		sessionDocument.put("ppLevel", session.getPpLevel());
-		sessionDocument.put("sessionType", session.getSessionType());
-		sessionDocument.put("features", JSONObject.fromObject(session.getFeatures()));
-		sessionDocument.put("feedbackLock", session.getFeedbackLock());
-		try {
-			database.saveDocument(sessionDocument);
-			session.set_id(sessionDocument.getId());
-		} catch (final IOException e) {
-			return null;
-		}
-
-		return session.get_id() != null ? session : null;
-	}
-
-	@Override
-	public boolean sessionKeyAvailable(final String keyword) {
-		final View view = new View("session/by_keyword");
-		view.setKey(keyword);
-		final ViewResults results = getDatabase().view(view);
-
-		return !results.containsKey(keyword);
-	}
-
-	private String getSessionKeyword(final String internalSessionId) throws IOException {
-		final Document document = getDatabase().getDocument(internalSessionId);
-		if (document.has("keyword")) {
-			return (String) document.get("keyword");
-		}
-		logger.error("No session found for internal id {}.", internalSessionId);
-		return null;
 	}
 
 	private Database getDatabase() {
@@ -580,7 +241,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		q.put("rating", question.getRating());
 		q.put("correctAnswer", question.getCorrectAnswer());
 		q.put("questionVariant", question.getQuestionVariant());
-		q.put("sessionId", session.get_id());
+		q.put("sessionId", session.getId());
 		q.put("subject", question.getSubject());
 		q.put("text", question.getText());
 		q.put("active", question.isActive());
@@ -702,7 +363,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public InterposedQuestion saveQuestion(final Session session, final InterposedQuestion question, User user) {
 		final Document q = new Document();
 		q.put("type", "interposed_question");
-		q.put("sessionId", session.get_id());
+		q.put("sessionId", session.getId());
 		q.put("subject", question.getSubject());
 		q.put("text", question.getText());
 		if (question.getTimestamp() != 0) {
@@ -740,7 +401,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 			question.updateRoundManagementState();
 			question.setPossibleAnswers(new ArrayList<>(answers));
-			question.setSessionKeyword(getSessionKeyword(question.getSessionId()));
+			question.setSessionKeyword(sessionRepository.getSessionFromId(question.getSessionId()).getKeyword());
 			return question;
 		} catch (final IOException e) {
 			logger.error("Could not get question {}.", id, e);
@@ -749,83 +410,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	public LoggedIn registerAsOnlineUser(final User user, final Session session) {
-		try {
-			final View view = new View("logged_in/all");
-			view.setKey(user.getUsername());
-			final ViewResults results = getDatabase().view(view);
-
-			LoggedIn loggedIn = new LoggedIn();
-			if (results.getJSONArray("rows").optJSONObject(0) != null) {
-				final JSONObject json = results.getJSONArray("rows").optJSONObject(0).optJSONObject("value");
-				loggedIn = (LoggedIn) JSONObject.toBean(json, LoggedIn.class);
-				final JSONArray vs = json.optJSONArray("visitedSessions");
-				if (vs != null) {
-					@SuppressWarnings("unchecked")
-					final Collection<VisitedSession> visitedSessions = JSONArray.toCollection(vs, VisitedSession.class);
-					loggedIn.setVisitedSessions(new ArrayList<>(visitedSessions));
-				}
-
-				/* Do not clutter CouchDB. Only update once every 3 hours per session. */
-				if (loggedIn.getSessionId().equals(session.get_id()) && loggedIn.getTimestamp() > System.currentTimeMillis() - 3 * 3600000) {
-					return loggedIn;
-				}
-			}
-
-			loggedIn.setUser(user.getUsername());
-			loggedIn.setSessionId(session.get_id());
-			loggedIn.addVisitedSession(session);
-			loggedIn.updateTimestamp();
-
-			final JSONObject json = JSONObject.fromObject(loggedIn);
-			final Document doc = new Document(json);
-			if (doc.getId().isEmpty()) {
-				// If this is a new user without a logged_in document, we have
-				// to remove the following
-				// pre-filled fields. Otherwise, CouchDB will take these empty
-				// fields as genuine
-				// identifiers, and will throw errors afterwards.
-				doc.remove("_id");
-				doc.remove("_rev");
-			}
-			getDatabase().saveDocument(doc);
-
-			final LoggedIn l = (LoggedIn) JSONObject.toBean(doc.getJSONObject(), LoggedIn.class);
-			final JSONArray vs = doc.getJSONObject().optJSONArray("visitedSessions");
-			if (vs != null) {
-				@SuppressWarnings("unchecked")
-				final Collection<VisitedSession> visitedSessions = JSONArray.toCollection(vs, VisitedSession.class);
-				l.setVisitedSessions(new ArrayList<>(visitedSessions));
-			}
-			return l;
-		} catch (final IOException e) {
-			return null;
-		}
-	}
-
-	@Override
-	@CachePut(value = "sessions")
-	public Session updateSessionOwnerActivity(final Session session) {
-		try {
-			/* Do not clutter CouchDB. Only update once every 3 hours. */
-			if (session.getLastOwnerActivity() > System.currentTimeMillis() - 3 * 3600000) {
-				return session;
-			}
-
-			session.setLastOwnerActivity(System.currentTimeMillis());
-			final JSONObject json = JSONObject.fromObject(session);
-			getDatabase().saveDocument(new Document(json));
-			return session;
-		} catch (final IOException e) {
-			logger.error("Failed to update lastOwnerActivity for session {}.", session, e);
-			return session;
-		}
-	}
-
-	@Override
 	public List<String> getQuestionIds(final Session session, final User user) {
 		View view = new View("content/by_sessionid_variant_active");
-		view.setKey(session.get_id());
+		view.setKey(session.getId());
 		return collectQuestionIds(view);
 	}
 
@@ -858,8 +445,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public int[] deleteAllQuestionsWithAnswers(final Session session) {
 		final View view = new View("content/by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id());
-		view.setEndKey(session.get_id(), "{}");
+		view.setStartKeyArray(session.getId());
+		view.setEndKey(session.getId(), "{}");
 
 		return deleteAllQuestionDocumentsWithAnswers(view);
 	}
@@ -924,8 +511,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<String> getUnAnsweredQuestionIds(final Session session, final User user) {
 		final View view = new View("answer/questionid_by_user_sessionid_variant");
-		view.setStartKeyArray(user.getUsername(), session.get_id());
-		view.setEndKeyArray(user.getUsername(), session.get_id(), "{}");
+		view.setStartKeyArray(user.getUsername(), session.getId());
+		view.setEndKeyArray(user.getUsername(), session.getId(), "{}");
 		return collectUnansweredQuestionIds(getQuestionIds(session, user), view);
 	}
 
@@ -1102,7 +689,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Answer> getMyAnswers(final User me, final Session s) {
 		final View view = new View("answer/doc_by_user_sessionid");
-		view.setKey(me.getUsername(), s.get_id());
+		view.setKey(me.getUsername(), s.getId());
 		final ViewResults results = getDatabase().view(view);
 		final List<Answer> answers = new ArrayList<>();
 		if (results == null || results.getResults() == null || results.getResults().isEmpty()) {
@@ -1113,7 +700,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			a.set_id(d.getId());
 			a.set_rev(d.getRev());
 			a.setUser(me.getUsername());
-			a.setSessionId(s.get_id());
+			a.setSessionId(s.getId());
 			answers.add(a);
 		}
 		return answers;
@@ -1121,13 +708,13 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public int getTotalAnswerCount(final String sessionKey) {
-		final Session s = getDatabaseDao().getSessionFromKeyword(sessionKey);
+		final Session s = sessionRepository.getSessionFromKeyword(sessionKey);
 		if (s == null) {
 			throw new NotFoundException();
 		}
 
 		final View view = new View("answer/by_sessionid_variant");
-		view.setKey(s.get_id());
+		view.setKey(s.getId());
 		final ViewResults results = getDatabase().view(view);
 		if (results.getResults().isEmpty()) {
 			return 0;
@@ -1137,13 +724,13 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public int getInterposedCount(final String sessionKey) {
-		final Session s = getDatabaseDao().getSessionFromKeyword(sessionKey);
+		final Session s = sessionRepository.getSessionFromKeyword(sessionKey);
 		if (s == null) {
 			throw new NotFoundException();
 		}
 
 		final View view = new View("comment/by_sessionid");
-		view.setKey(s.get_id());
+		view.setKey(s.getId());
 		view.setGroup(true);
 		final ViewResults results = getDatabase().view(view);
 		if (results.isEmpty() || results.getResults().isEmpty()) {
@@ -1155,8 +742,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public InterposedReadingCount getInterposedReadingCount(final Session session) {
 		final View view = new View("comment/by_sessionid_read");
-		view.setStartKeyArray(session.get_id());
-		view.setEndKeyArray(session.get_id(), "{}");
+		view.setStartKeyArray(session.getId());
+		view.setEndKeyArray(session.getId(), "{}");
 		view.setGroup(true);
 		return getInterposedReadingCount(view);
 	}
@@ -1164,8 +751,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public InterposedReadingCount getInterposedReadingCount(final Session session, final User user) {
 		final View view = new View("comment/by_sessionid_creator_read");
-		view.setStartKeyArray(session.get_id(), user.getUsername());
-		view.setEndKeyArray(session.get_id(), user.getUsername(), "{}");
+		view.setStartKeyArray(session.getId(), user.getUsername());
+		view.setEndKeyArray(session.getId(), user.getUsername(), "{}");
 		view.setGroup(true);
 		return getInterposedReadingCount(view);
 	}
@@ -1224,8 +811,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			view.setLimit(limit);
 		}
 		view.setDescending(true);
-		view.setStartKeyArray(session.get_id(), "{}");
-		view.setEndKeyArray(session.get_id());
+		view.setStartKeyArray(session.getId(), "{}");
+		view.setEndKeyArray(session.getId());
 		final ViewResults questions = getDatabase().view(view);
 		if (questions == null || questions.isEmpty()) {
 			return null;
@@ -1243,8 +830,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			view.setLimit(limit);
 		}
 		view.setDescending(true);
-		view.setStartKeyArray(session.get_id(), user.getUsername(), "{}");
-		view.setEndKeyArray(session.get_id(), user.getUsername());
+		view.setStartKeyArray(session.getId(), user.getUsername(), "{}");
+		view.setEndKeyArray(session.getId(), user.getUsername());
 		final ViewResults questions = getDatabase().view(view);
 		if (questions == null || questions.isEmpty()) {
 			return null;
@@ -1351,7 +938,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			final Document document = getDatabase().getDocument(questionId);
 			final InterposedQuestion question = (InterposedQuestion) JSONObject.toBean(document.getJSONObject(),
 					InterposedQuestion.class);
-			question.setSessionId(getSessionKeyword(question.getSessionId()));
+			/* TODO: Refactor code so the next line can be removed */
+			question.setSessionId(sessionRepository.getSessionFromKeyword(question.getSessionId()).getId());
 			return question;
 		} catch (final IOException e) {
 			logger.error("Could not load interposed question {}.", questionId, e);
@@ -1369,147 +957,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		} catch (final IOException e) {
 			logger.error("Could not mark interposed question as read {}.", question.get_id(), e);
 		}
-	}
-
-	@Override
-	public List<Session> getMyVisitedSessions(final User user, final int start, final int limit) {
-		final View view = new View("logged_in/visited_sessions_by_user");
-		if (start > 0) {
-			view.setSkip(start);
-		}
-		if (limit > 0) {
-			view.setLimit(limit);
-		}
-		view.setKey(user.getUsername());
-		final ViewResults sessions = getDatabase().view(view);
-		final List<Session> allSessions = new ArrayList<>();
-		for (final Document d : sessions.getResults()) {
-			// Not all users have visited sessions
-			if (d.getJSONObject().optJSONArray("value") != null) {
-				@SuppressWarnings("unchecked")
-				final Collection<Session> visitedSessions =	 JSONArray.toCollection(
-					d.getJSONObject().getJSONArray("value"),
-					Session.class
-				);
-				allSessions.addAll(visitedSessions);
-			}
-		}
-		// Filter sessions that don't exist anymore, also filter my own sessions
-		final List<Session> result = new ArrayList<>();
-		final List<Session> filteredSessions = new ArrayList<>();
-		for (final Session s : allSessions) {
-			try {
-				final Session session = getDatabaseDao().getSessionFromKeyword(s.getKeyword());
-				if (session != null && !session.isCreator(user)) {
-					result.add(session);
-				} else {
-					filteredSessions.add(s);
-				}
-			} catch (final NotFoundException e) {
-				filteredSessions.add(s);
-			}
-		}
-		if (filteredSessions.isEmpty()) {
-			return result;
-		}
-		// Update document to remove sessions that don't exist anymore
-		try {
-			List<VisitedSession> visitedSessions = new ArrayList<>();
-			for (final Session s : result) {
-				visitedSessions.add(new VisitedSession(s));
-			}
-			final LoggedIn loggedIn = new LoggedIn();
-			final Document loggedInDocument = getDatabase().getDocument(sessions.getResults().get(0).getString("id"));
-			loggedIn.setSessionId(loggedInDocument.getString("sessionId"));
-			loggedIn.setUser(user.getUsername());
-			loggedIn.setTimestamp(loggedInDocument.getLong("timestamp"));
-			loggedIn.setType(loggedInDocument.getString("type"));
-			loggedIn.setVisitedSessions(visitedSessions);
-			loggedIn.set_id(loggedInDocument.getId());
-			loggedIn.set_rev(loggedInDocument.getRev());
-
-			final JSONObject json = JSONObject.fromObject(loggedIn);
-			final Document doc = new Document(json);
-			getDatabase().saveDocument(doc);
-		} catch (IOException e) {
-			logger.error("Could not clean up logged_in document of {}.", user.getUsername(), e);
-		}
-		return result;
-	}
-
-	@Override
-	public List<Session> getVisitedSessionsForUsername(String username, final int start, final int limit) {
-		final View view = new View("logged_in/visited_sessions_by_user");
-		if (start > 0) {
-			view.setSkip(start);
-		}
-		if (limit > 0) {
-			view.setLimit(limit);
-		}
-		view.setKey(username);
-		final ViewResults sessions = getDatabase().view(view);
-		final List<Session> allSessions = new ArrayList<>();
-		for (final Document d : sessions.getResults()) {
-			// Not all users have visited sessions
-			if (d.getJSONObject().optJSONArray("value") != null) {
-				@SuppressWarnings("unchecked")
-				final Collection<Session> visitedSessions =	 JSONArray.toCollection(
-						d.getJSONObject().getJSONArray("value"),
-						Session.class
-				);
-				allSessions.addAll(visitedSessions);
-			}
-		}
-		// Filter sessions that don't exist anymore, also filter my own sessions
-		final List<Session> result = new ArrayList<>();
-		final List<Session> filteredSessions = new ArrayList<>();
-		for (final Session s : allSessions) {
-			try {
-				final Session session = getDatabaseDao().getSessionFromKeyword(s.getKeyword());
-				if (session != null && !(session.getCreator().equals(username))) {
-					result.add(session);
-				} else {
-					filteredSessions.add(s);
-				}
-			} catch (final NotFoundException e) {
-				filteredSessions.add(s);
-			}
-		}
-		if (filteredSessions.isEmpty()) {
-			return result;
-		}
-		// Update document to remove sessions that don't exist anymore
-		try {
-			List<VisitedSession> visitedSessions = new ArrayList<>();
-			for (final Session s : result) {
-				visitedSessions.add(new VisitedSession(s));
-			}
-			final LoggedIn loggedIn = new LoggedIn();
-			final Document loggedInDocument = getDatabase().getDocument(sessions.getResults().get(0).getString("id"));
-			loggedIn.setSessionId(loggedInDocument.getString("sessionId"));
-			loggedIn.setUser(username);
-			loggedIn.setTimestamp(loggedInDocument.getLong("timestamp"));
-			loggedIn.setType(loggedInDocument.getString("type"));
-			loggedIn.setVisitedSessions(visitedSessions);
-			loggedIn.set_id(loggedInDocument.getId());
-			loggedIn.set_rev(loggedInDocument.getRev());
-
-			final JSONObject json = JSONObject.fromObject(loggedIn);
-			final Document doc = new Document(json);
-			getDatabase().saveDocument(doc);
-		} catch (IOException e) {
-			logger.error("Could not clean up logged_in document of {}.", username, e);
-		}
-		return result;
-	}
-
-	@Override
-	public List<SessionInfo> getMyVisitedSessionsInfo(final User user, final int start, final int limit) {
-		List<Session> sessions = this.getMyVisitedSessions(user, start, limit);
-		if (sessions.isEmpty()) {
-			return new ArrayList<>();
-		}
-		return this.getInfosForVisitedSessions(sessions, user);
 	}
 
 	@CacheEvict(value = "answers", key = "#question")
@@ -1616,25 +1063,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 	}
 
-	@Override
-	public List<Session> getCourseSessions(final List<Course> courses) {
-		final ExtendedView view = new ExtendedView("session/by_courseid");
-		view.setIncludeDocs(true);
-		view.setCourseIdKeys(courses);
-
-		final ViewResults sessions = getDatabase().view(view);
-
-		final List<Session> result = new ArrayList<>();
-		for (final Document d : sessions.getResults()) {
-			final Session session = (Session) JSONObject.toBean(
-					d.getJSONObject().getJSONObject("doc"),
-					Session.class
-					);
-			result.add(session);
-		}
-		return result;
-	}
-
 	/**
 	 * Adds convenience methods to CouchDB4J's view class.
 	 */
@@ -1655,97 +1083,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		void setSessionIdKeys(final List<Session> sessions) {
 			List<String> sessionIds = new ArrayList<>();
 			for (Session s : sessions) {
-				sessionIds.add(s.get_id());
+				sessionIds.add(s.getId());
 			}
 			setKeys(sessionIds);
 		}
-	}
-
-	@Override
-	@CachePut(value = "sessions")
-	public Session updateSession(final Session session) {
-		try {
-			final Document s = database.getDocument(session.get_id());
-			s.put("name", session.getName());
-			s.put("shortName", session.getShortName());
-			s.put("active", session.isActive());
-			s.put("ppAuthorName", session.getPpAuthorName());
-			s.put("ppAuthorMail", session.getPpAuthorMail());
-			s.put("ppUniversity", session.getPpUniversity());
-			s.put("ppLogo", session.getPpLogo());
-			s.put("ppSubject", session.getPpSubject());
-			s.put("ppLicense", session.getPpLicense());
-			s.put("ppDescription", session.getPpDescription());
-			s.put("ppFaculty", session.getPpFaculty());
-			s.put("ppLevel", session.getPpLevel());
-			s.put("learningProgressOptions", JSONObject.fromObject(session.getLearningProgressOptions()));
-			s.put("features", JSONObject.fromObject(session.getFeatures()));
-			s.put("feedbackLock", session.getFeedbackLock());
-			database.saveDocument(s);
-			session.set_rev(s.getRev());
-
-			return session;
-		} catch (final IOException e) {
-			logger.error("Could not update session {}.", session, e);
-		}
-
-		return null;
-	}
-
-	@Override
-	@Caching(evict = { @CacheEvict("sessions"), @CacheEvict(cacheNames = "sessions", key = "#p0.keyword") })
-	public Session changeSessionCreator(Session session, final String newCreator) {
-		try {
-			final Document s = database.getDocument(session.get_id());
-			s.put("creator", newCreator);
-			database.saveDocument(s);
-			session.set_rev(s.getRev());
-		} catch (final IOException e) {
-			logger.error("Could not update creator for session {}.", session, e);
-		}
-
-		return session;
-	}
-
-	@Override
-	@Caching(evict = { @CacheEvict("sessions"), @CacheEvict(cacheNames = "sessions", key = "#p0.keyword") })
-	public int[] deleteSession(final Session session) {
-		int[] count = new int[] {0, 0};
-		try {
-			count = deleteAllQuestionsWithAnswers(session);
-			deleteDocument(session.get_id());
-			logger.debug("Deleted session document {} and related data.", session.get_id());
-			dbLogger.log("delete", "type", "session", "id", session.get_id());
-		} catch (final IOException e) {
-			logger.error("Could not delete session {}.", session, e);
-		}
-
-		return count;
-	}
-
-	@Override
-	public int[] deleteInactiveGuestSessions(long lastActivityBefore) {
-		View view = new View("session/by_lastactivity_for_guests");
-		view.setEndKey(lastActivityBefore);
-		final List<Document> results = this.getDatabase().view(view).getResults();
-		int[] count = new int[3];
-
-		for (Document oldDoc : results) {
-			Session s = new Session();
-			s.set_id(oldDoc.getId());
-			s.set_rev(oldDoc.getJSONObject("value").getString("_rev"));
-			int[] qaCount = deleteSession(s);
-			count[1] += qaCount[0];
-			count[2] += qaCount[1];
-		}
-
-		if (!results.isEmpty()) {
-			logger.info("Deleted {} inactive guest sessions.", results.size());
-			dbLogger.log("cleanup", "type", "session", "sessionCount", results.size(), "questionCount", count[1], "answerCount", count[2]);
-		}
-		count[0] = results.size();
-
-		return count;
 	}
 
 	@Override
@@ -1796,8 +1137,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Question> getLectureQuestionsForUsers(final Session session) {
 		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id(), "lecture", true);
-		view.setEndKeyArray(session.get_id(), "lecture", true, "{}");
+		view.setStartKeyArray(session.getId(), "lecture", true);
+		view.setEndKeyArray(session.getId(), "lecture", true, "{}");
 
 		return getQuestions(view, session);
 	}
@@ -1805,8 +1146,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Question> getLectureQuestionsForTeachers(final Session session) {
 		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id(), "lecture");
-		view.setEndKeyArray(session.get_id(), "lecture", "{}");
+		view.setStartKeyArray(session.getId(), "lecture");
+		view.setEndKeyArray(session.getId(), "lecture", "{}");
 
 		return getQuestions(view, session);
 	}
@@ -1815,8 +1156,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Question> getFlashcardsForUsers(final Session session) {
 		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id(), "flashcard", true);
-		view.setEndKeyArray(session.get_id(), "flashcard", true, "{}");
+		view.setStartKeyArray(session.getId(), "flashcard", true);
+		view.setEndKeyArray(session.getId(), "flashcard", true, "{}");
 
 		return getQuestions(view, session);
 	}
@@ -1824,8 +1165,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Question> getFlashcardsForTeachers(final Session session) {
 		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id(), "flashcard");
-		view.setEndKeyArray(session.get_id(), "flashcard", "{}");
+		view.setStartKeyArray(session.getId(), "flashcard");
+		view.setEndKeyArray(session.getId(), "flashcard", "{}");
 
 		return getQuestions(view, session);
 	}
@@ -1834,8 +1175,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Question> getPreparationQuestionsForUsers(final Session session) {
 		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id(), "preparation", true);
-		view.setEndKeyArray(session.get_id(), "preparation", true, "{}");
+		view.setStartKeyArray(session.getId(), "preparation", true);
+		view.setEndKeyArray(session.getId(), "preparation", true, "{}");
 
 		return getQuestions(view, session);
 	}
@@ -1843,8 +1184,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Question> getPreparationQuestionsForTeachers(final Session session) {
 		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id(), "preparation");
-		view.setEndKeyArray(session.get_id(), "preparation", "{}");
+		view.setStartKeyArray(session.getId(), "preparation");
+		view.setEndKeyArray(session.getId(), "preparation", "{}");
 
 		return getQuestions(view, session);
 	}
@@ -1852,8 +1193,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Question> getAllSkillQuestions(final Session session) {
 		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id());
-		view.setEndKeyArray(session.get_id(), "{}");
+		view.setStartKeyArray(session.getId());
+		view.setEndKeyArray(session.getId(), "{}");
 
 		return getQuestions(view, session);
 	}
@@ -1884,8 +1225,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public int getLectureQuestionCount(final Session session) {
 		final View view = new View("content/by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id(), "lecture");
-		view.setEndKeyArray(session.get_id(), "lecture", "{}");
+		view.setStartKeyArray(session.getId(), "lecture");
+		view.setEndKeyArray(session.getId(), "lecture", "{}");
 
 		return getQuestionCount(view);
 	}
@@ -1893,8 +1234,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public int getFlashcardCount(final Session session) {
 		final View view = new View("content/by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id(), "flashcard");
-		view.setEndKeyArray(session.get_id(), "flashcard", "{}");
+		view.setStartKeyArray(session.getId(), "flashcard");
+		view.setEndKeyArray(session.getId(), "flashcard", "{}");
 
 		return getQuestionCount(view);
 	}
@@ -1902,8 +1243,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public int getPreparationQuestionCount(final Session session) {
 		final View view = new View("content/by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id(), "preparation");
-		view.setEndKeyArray(session.get_id(), "preparation", "{}");
+		view.setStartKeyArray(session.getId(), "preparation");
+		view.setEndKeyArray(session.getId(), "preparation", "{}");
 
 		return getQuestionCount(view);
 	}
@@ -1929,7 +1270,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	private int countQuestionVariantAnswers(final Session session, final String variant) {
 		final View view = new View("answer/by_sessionid_variant");
-		view.setKey(session.get_id(), variant);
+		view.setKey(session.getId(), variant);
 		view.setReduce(true);
 		final ViewResults results = getDatabase().view(view);
 		if (results.getResults().isEmpty()) {
@@ -1946,8 +1287,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public int[] deleteAllLectureQuestionsWithAnswers(final Session session) {
 		final View view = new View("content/by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id(), "lecture");
-		view.setEndKey(session.get_id(), "lecture", "{}");
+		view.setStartKeyArray(session.getId(), "lecture");
+		view.setEndKey(session.getId(), "lecture", "{}");
 
 		return deleteAllQuestionDocumentsWithAnswers(view);
 	}
@@ -1960,8 +1301,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public int[] deleteAllFlashcardsWithAnswers(final Session session) {
 		final View view = new View("content/by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id(), "flashcard");
-		view.setEndKey(session.get_id(), "flashcard", "{}");
+		view.setStartKeyArray(session.getId(), "flashcard");
+		view.setEndKey(session.getId(), "flashcard", "{}");
 
 		return deleteAllQuestionDocumentsWithAnswers(view);
 	}
@@ -1974,8 +1315,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public int[] deleteAllPreparationQuestionsWithAnswers(final Session session) {
 		final View view = new View("content/by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id(), "preparation");
-		view.setEndKey(session.get_id(), "preparation", "{}");
+		view.setStartKeyArray(session.getId(), "preparation");
+		view.setEndKey(session.getId(), "preparation", "{}");
 
 		return deleteAllQuestionDocumentsWithAnswers(view);
 	}
@@ -1983,14 +1324,14 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<String> getUnAnsweredLectureQuestionIds(final Session session, final User user) {
 		final View view = new View("answer/questionid_piround_by_user_sessionid_variant");
-		view.setKey(user.getUsername(), session.get_id(), "lecture");
+		view.setKey(user.getUsername(), session.getId(), "lecture");
 		return collectUnansweredQuestionIdsByPiRound(getDatabaseDao().getLectureQuestionsForUsers(session), view);
 	}
 
 	@Override
 	public List<String> getUnAnsweredPreparationQuestionIds(final Session session, final User user) {
 		final View view = new View("answer/questionid_piround_by_user_sessionid_variant");
-		view.setKey(user.getUsername(), session.get_id(), "preparation");
+		view.setKey(user.getUsername(), session.getId(), "preparation");
 		return collectUnansweredQuestionIdsByPiRound(getDatabaseDao().getPreparationQuestionsForUsers(session), view);
 	}
 
@@ -2052,7 +1393,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public int deleteAllInterposedQuestions(final Session session) {
 		final View view = new View("comment/by_sessionid");
-		view.setKey(session.get_id());
+		view.setKey(session.getId());
 		final ViewResults questions = getDatabase().view(view);
 
 		return deleteAllInterposedQuestions(session, questions);
@@ -2061,8 +1402,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public int deleteAllInterposedQuestions(final Session session, final User user) {
 		final View view = new View("comment/by_sessionid_creator_read");
-		view.setStartKeyArray(session.get_id(), user.getUsername());
-		view.setEndKeyArray(session.get_id(), user.getUsername(), "{}");
+		view.setStartKeyArray(session.getId(), user.getUsername());
+		view.setEndKeyArray(session.getId(), user.getUsername(), "{}");
 		final ViewResults questions = getDatabase().view(view);
 
 		return deleteAllInterposedQuestions(session, questions);
@@ -2091,8 +1432,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Question> publishAllQuestions(final Session session, final boolean publish) {
 		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id());
-		view.setEndKeyArray(session.get_id(), "{}");
+		view.setStartKeyArray(session.getId());
+		view.setEndKeyArray(session.getId(), "{}");
 		final List<Question> questions = getQuestions(view, session);
 		getDatabaseDao().publishQuestions(session, publish, questions);
 
@@ -2126,8 +1467,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<Question> setVotingAdmissionForAllQuestions(final Session session, final boolean disableVoting) {
 		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id());
-		view.setEndKeyArray(session.get_id(), "{}");
+		view.setStartKeyArray(session.getId());
+		view.setEndKeyArray(session.getId(), "{}");
 		final List<Question> questions = getQuestions(view, session);
 		getDatabaseDao().setVotingAdmissions(session, disableVoting, questions);
 
@@ -2166,8 +1507,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public int deleteAllQuestionsAnswers(final Session session) {
 		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id());
-		view.setEndKeyArray(session.get_id(), "{}");
+		view.setStartKeyArray(session.getId());
+		view.setEndKeyArray(session.getId(), "{}");
 		final List<Question> questions = getQuestions(view, session);
 		getDatabaseDao().resetQuestionsRoundState(session, questions);
 
@@ -2179,8 +1520,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public int deleteAllPreparationAnswers(final Session session) {
 		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id(), "preparation");
-		view.setEndKeyArray(session.get_id(), "preparation", "{}");
+		view.setStartKeyArray(session.getId(), "preparation");
+		view.setEndKeyArray(session.getId(), "preparation", "{}");
 		final List<Question> questions = getQuestions(view, session);
 		getDatabaseDao().resetQuestionsRoundState(session, questions);
 
@@ -2192,8 +1533,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public int deleteAllLectureAnswers(final Session session) {
 		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id(), "lecture");
-		view.setEndKeyArray(session.get_id(), "lecture", "{}");
+		view.setStartKeyArray(session.getId(), "lecture");
+		view.setEndKeyArray(session.getId(), "lecture", "{}");
 		final List<Question> questions = getQuestions(view, session);
 		getDatabaseDao().resetQuestionsRoundState(session, questions);
 
@@ -2291,10 +1632,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public CourseScore getLearningProgress(final Session session) {
 		final View maximumValueView = new View("learning_progress/maximum_value_of_question");
 		final View answerSumView = new View("learning_progress/question_value_achieved_for_user");
-		maximumValueView.setStartKeyArray(session.get_id());
-		maximumValueView.setEndKeyArray(session.get_id(), "{}");
-		answerSumView.setStartKeyArray(session.get_id());
-		answerSumView.setEndKeyArray(session.get_id(), "{}");
+		maximumValueView.setStartKeyArray(session.getId());
+		maximumValueView.setEndKeyArray(session.getId(), "{}");
+		answerSumView.setStartKeyArray(session.getId());
+		answerSumView.setEndKeyArray(session.getId(), "{}");
 
 		final List<Document> maximumValueResult = getDatabase().view(maximumValueView).getResults();
 		final List<Document> answerSumResult = getDatabase().view(answerSumView).getResults();
@@ -2328,162 +1669,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	public SessionInfo importSession(User user, ImportExportSession importSession) {
-		final Session session = this.saveSession(user, importSession.generateSessionEntity(user));
-		List<Document> questions = new ArrayList<>();
-		// We need to remember which answers belong to which question.
-		// The answers need a questionId, so we first store the questions to get the IDs.
-		// Then we update the answer objects and store them as well.
-		Map<Document, ImportExportQuestion> mapping = new HashMap<>();
-		// Later, generate all answer documents
-		List<Document> answers = new ArrayList<>();
-		// We can then push answers together with interposed questions in one large bulk request
-		List<Document> interposedQuestions = new ArrayList<>();
-		// Motds shouldn't be forgotten, too
-		List<Document> motds = new ArrayList<>();
-		try {
-			// add session id to all questions and generate documents
-			for (ImportExportQuestion question : importSession.getQuestions()) {
-				Document doc = toQuestionDocument(session, question);
-				question.setSessionId(session.get_id());
-				questions.add(doc);
-				mapping.put(doc, question);
-			}
-			database.bulkSaveDocuments(questions.toArray(new Document[questions.size()]));
-
-			// bulk import answers together with interposed questions
-			for (Entry<Document, ImportExportQuestion> entry : mapping.entrySet()) {
-				final Document doc = entry.getKey();
-				final ImportExportQuestion question = entry.getValue();
-				question.set_id(doc.getId());
-				question.set_rev(doc.getRev());
-				for (de.thm.arsnova.entities.transport.Answer answer : question.getAnswers()) {
-					final Answer a = answer.generateAnswerEntity(user, question);
-					final Document answerDoc = new Document();
-					answerDoc.put("type", "skill_question_answer");
-					answerDoc.put("sessionId", a.getSessionId());
-					answerDoc.put("questionId", a.getQuestionId());
-					answerDoc.put("answerSubject", a.getAnswerSubject());
-					answerDoc.put("questionVariant", a.getQuestionVariant());
-					answerDoc.put("questionValue", a.getQuestionValue());
-					answerDoc.put("answerText", a.getAnswerText());
-					answerDoc.put("answerTextRaw", a.getAnswerTextRaw());
-					answerDoc.put("timestamp", a.getTimestamp());
-					answerDoc.put("piRound", a.getPiRound());
-					answerDoc.put("abstention", a.isAbstention());
-					answerDoc.put("successfulFreeTextAnswer", a.isSuccessfulFreeTextAnswer());
-					// we do not store the user's name
-					answerDoc.put("user", "");
-					answers.add(answerDoc);
-				}
-			}
-			for (de.thm.arsnova.entities.transport.InterposedQuestion i : importSession.getFeedbackQuestions()) {
-				final Document q = new Document();
-				q.put("type", "interposed_question");
-				q.put("sessionId", session.get_id());
-				q.put("subject", i.getSubject());
-				q.put("text", i.getText());
-				q.put("timestamp", i.getTimestamp());
-				q.put("read", i.isRead());
-				// we do not store the creator's name
-				q.put("creator", "");
-				interposedQuestions.add(q);
-			}
-			for (Motd m : importSession.getMotds()) {
-				final Document d = new Document();
-				d.put("type", "motd");
-				d.put("motdkey", m.getMotdkey());
-				d.put("title", m.getTitle());
-				d.put("text", m.getText());
-				d.put("audience", m.getAudience());
-				d.put("sessionkey", session.getKeyword());
-				d.put("startdate", String.valueOf(m.getStartdate().getTime()));
-				d.put("enddate", String.valueOf(m.getEnddate().getTime()));
-				motds.add(d);
-			}
-			List<Document> documents = new ArrayList<>(answers);
-			database.bulkSaveDocuments(interposedQuestions.toArray(new Document[interposedQuestions.size()]));
-			database.bulkSaveDocuments(motds.toArray(new Document[motds.size()]));
-			database.bulkSaveDocuments(documents.toArray(new Document[documents.size()]));
-		} catch (IOException e) {
-			logger.error("Could not import session.", e);
-			// Something went wrong, delete this session since we do not want a partial import
-			this.deleteSession(session);
-			return null;
-		}
-		return this.calculateSessionInfo(importSession, session);
-	}
-
-	@Override
-	public ImportExportSession exportSession(String sessionkey, Boolean withAnswers, Boolean withFeedbackQuestions) {
-		ImportExportSession importExportSession = new ImportExportSession();
-		Session session = getDatabaseDao().getSessionFromKeyword(sessionkey);
-		importExportSession.setSessionFromSessionObject(session);
-		List<Question> questionList = getDatabaseDao().getAllSkillQuestions(session);
-		for (Question question : questionList) {
-			List<de.thm.arsnova.entities.transport.Answer> answerList = new ArrayList<>();
-			if (withAnswers) {
-				for (Answer a : this.getDatabaseDao().getAllAnswers(question)) {
-					de.thm.arsnova.entities.transport.Answer transportAnswer = new de.thm.arsnova.entities.transport.Answer(a);
-					answerList.add(transportAnswer);
-				}
-				// getAllAnswers does not grep for whole answer object so i need to add empty entries for abstentions
-				int i = this.getDatabaseDao().getAbstentionAnswerCount(question.get_id());
-				for (int b = 0; b < i; b++) {
-					de.thm.arsnova.entities.transport.Answer ans = new de.thm.arsnova.entities.transport.Answer();
-					ans.setAnswerSubject("");
-					ans.setAnswerImage("");
-					ans.setAnswerText("");
-					ans.setAbstention(true);
-					answerList.add(ans);
-				}
-			}
-			importExportSession.addQuestionWithAnswers(question, answerList);
-		}
-		if (withFeedbackQuestions) {
-			List<de.thm.arsnova.entities.transport.InterposedQuestion> interposedQuestionList = new ArrayList<>();
-			for (InterposedQuestion i : getDatabaseDao().getInterposedQuestions(session, 0, 0)) {
-				de.thm.arsnova.entities.transport.InterposedQuestion transportInterposedQuestion = new de.thm.arsnova.entities.transport.InterposedQuestion(i);
-				interposedQuestionList.add(transportInterposedQuestion);
-			}
-			importExportSession.setFeedbackQuestions(interposedQuestionList);
-		}
-		if (withAnswers) {
-			importExportSession.setSessionInfo(this.calculateSessionInfo(importExportSession, session));
-		}
-		importExportSession.setMotds(motdRepository.getMotdsForSession(session.getKeyword()));
-		return importExportSession;
-	}
-
-	private SessionInfo calculateSessionInfo(ImportExportSession importExportSession, Session session) {
-		int unreadInterposed = 0;
-		int numUnanswered = 0;
-		int numAnswers = 0;
-		for (de.thm.arsnova.entities.transport.InterposedQuestion i : importExportSession.getFeedbackQuestions()) {
-			if (!i.isRead()) {
-				unreadInterposed++;
-			}
-		}
-		for (ImportExportQuestion question : importExportSession.getQuestions()) {
-			numAnswers += question.getAnswers().size();
-			if (question.getAnswers().isEmpty()) {
-				numUnanswered++;
-			}
-		}
-		final SessionInfo info = new SessionInfo(session);
-		info.setNumQuestions(importExportSession.getQuestions().size());
-		info.setNumUnanswered(numUnanswered);
-		info.setNumAnswers(numAnswers);
-		info.setNumInterposed(importExportSession.getFeedbackQuestions().size());
-		info.setNumUnredInterposed(unreadInterposed);
-		return info;
-	}
-
-	@Override
 	public List<String> getSubjects(Session session, String questionVariant) {
 		final View view = new View("content/by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id(), questionVariant);
-		view.setEndKeyArray(session.get_id(), questionVariant, "{}");
+		view.setStartKeyArray(session.getId(), questionVariant);
+		view.setEndKeyArray(session.getId(), questionVariant, "{}");
 		ViewResults results = this.getDatabase().view(view);
 
 		if (results.getJSONArray("rows").optJSONObject(0) == null) {
@@ -2503,8 +1692,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public List<String> getQuestionIdsBySubject(Session session, String questionVariant, String subject) {
 		final View view = new View("content/by_sessionid_variant_active");
-		view.setStartKeyArray(session.get_id(), questionVariant, 1,	subject);
-		view.setEndKeyArray(session.get_id(), questionVariant, 1, subject, "{}");
+		view.setStartKeyArray(session.getId(), questionVariant, 1,	subject);
+		view.setEndKeyArray(session.getId(), questionVariant, 1, subject, "{}");
 		ViewResults results = this.getDatabase().view(view);
 
 		if (results.getJSONArray("rows").optJSONObject(0) == null) {

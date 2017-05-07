@@ -23,6 +23,7 @@ import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.persistance.SessionRepository;
 import org.pac4j.oauth.profile.facebook.FacebookProfile;
 import org.pac4j.oauth.profile.google2.Google2Profile;
 import org.pac4j.oauth.profile.twitter.TwitterProfile;
@@ -46,6 +47,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 	@Autowired
 	private IDatabaseDao dao;
+
+	@Autowired
+	private SessionRepository sessionRepository;
 
 	@Override
 	public boolean hasPermission(
@@ -104,9 +108,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Object permission
 			) {
 		if (permission instanceof String && ("owner".equals(permission) || "write".equals(permission))) {
-			return dao.getSessionFromKeyword(targetId.toString()).getCreator().equals(username);
+			return sessionRepository.getSessionFromKeyword(targetId.toString()).getCreator().equals(username);
 		} else if (permission instanceof String && "read".equals(permission)) {
-			return dao.getSessionFromKeyword(targetId.toString()).isActive();
+			return sessionRepository.getSessionFromKeyword(targetId.toString()).isActive();
 		}
 		return false;
 	}
@@ -119,7 +123,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		if (permission instanceof String && "owner".equals(permission)) {
 			final Question question = dao.getQuestion(targetId.toString());
 			if (question != null) {
-				final Session session = dao.getSessionFromId(question.getSessionId());
+				final Session session = sessionRepository.getSessionFromId(question.getSessionId());
 
 				return session != null && session.getCreator().equals(username);
 			}
@@ -140,7 +144,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 					return true;
 				}
 				// Allow deletion if requested by session owner
-				final Session session = dao.getSessionFromKeyword(question.getSessionId());
+				final Session session = sessionRepository.getSessionFromKeyword(question.getSessionId());
 
 				return session != null && session.getCreator().equals(username);
 			}

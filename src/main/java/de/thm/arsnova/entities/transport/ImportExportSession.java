@@ -153,7 +153,6 @@ public class ImportExportSession {
 		s.setPpSubject(session.getPublicPool().getPpSubject());
 		s.setPpUniversity(session.getPublicPool().getPpUniversity());
 		// other fields
-		s.setType("session");
 		s.setCreator(user.getUsername());
 		s.setCreationTime(new Date().getTime());
 		return s;

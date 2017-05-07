@@ -17,11 +17,8 @@
  */
 package de.thm.arsnova.dao;
 
-import com.fourspaces.couchdb.View;
-import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.*;
-import de.thm.arsnova.entities.transport.ImportExportSession;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -100,26 +97,10 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public Session saveSession(User user, Session session) {
-		stubSessions.put(session.getKeyword(), session);
-		return session;
-	}
-
-	@Override
-	public boolean sessionKeyAvailable(String keyword) {
-		return (stubSessions.get(keyword) == null);
-	}
-
-	@Override
-	public Session getSessionFromKeyword(String keyword) {
-		return stubSessions.get(keyword);
-	}
-
-	@Override
 	public Question saveQuestion(Session session, Question question) {
 		List<Question> questions = stubQuestions.get(session.getKeyword());
 		questions.add(question);
-		stubQuestions.put(session.get_id(), questions);
+		stubQuestions.put(session.getId(), questions);
 
 		return question;
 	}
@@ -133,54 +114,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	@Override
 	public int getSkillQuestionCount(Session session) {
 		return stubQuestions.get(session.getKeyword()).size();
-	}
-
-	@Override
-	public List<Session> getMySessions(User user, final int start, final int limit) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Session> getSessionsForUsername(String username, final int start, final int limit) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Session> getPublicPoolSessions() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<SessionInfo> getPublicPoolSessionsInfo() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Session> getMyPublicPoolSessions(User user) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<SessionInfo> getMyPublicPoolSessionsInfo(final User user) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public LoggedIn registerAsOnlineUser(User u, Session s) {
-		stubUsers.put(s.getKeyword(), u);
-		return new LoggedIn();
-	}
-
-	@Override
-	public Session updateSessionOwnerActivity(Session session) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -241,12 +174,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Session> getMyVisitedSessions(User user, final int start, final int limit) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public InterposedReadingCount getInterposedReadingCount(Session session) {
 		// TODO Auto-generated method stub
 		return null;
@@ -289,12 +216,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public Session getSessionFromId(String sessionId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public void deleteAnswer(String answerId) {
 		// TODO Auto-generated method stub
 	}
@@ -302,33 +223,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	@Override
 	public void deleteInterposedQuestion(InterposedQuestion question) {
 		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public List<Session> getCourseSessions(List<Course> courses) {
-		return null;
-	}
-
-	@Override
-	public Session updateSession(Session session) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Session changeSessionCreator(Session session, final String newCreator) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public int[] deleteSession(Session session) {
-		return new int[] { 0,0 };
-	}
-
-	@Override
-	public int[] deleteInactiveGuestSessions(long lastActivityBefore) {
-		return new int[] { 0,0 };
 	}
 
 	@Override
@@ -447,24 +341,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<SessionInfo> getMySessionsInfo(User user, final int start, final int limit) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<SessionInfo> getMyVisitedSessionsInfo(User currentUser, final int start, final int limit) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Session> getVisitedSessionsForUsername(String username, final int start, final int limit) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public int deleteAllPreparationAnswers(Session session) {
 		// TODO Auto-generated method stub
 		return 0;
@@ -480,18 +356,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public int getAbstentionAnswerCount(String questionId) {
 		// TODO Auto-generated method stub
 		return 0;
-	}
-
-	@Override
-	public SessionInfo importSession(User user, ImportExportSession importSession) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ImportExportSession exportSession(String sessionkey, Boolean withAnswer, Boolean withFeedbackQuestions) {
-		// TODO Auto.generated method stub
-		return null;
 	}
 
 	@Override

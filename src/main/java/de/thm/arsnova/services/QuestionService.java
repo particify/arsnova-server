@@ -30,6 +30,7 @@ import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.persistance.SessionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Autowired
 	private IUserService userService;
+
+	@Autowired
+	private SessionRepository sessionRepository;
 
 	@Autowired
 	private ImageUtils imageUtils;
@@ -90,15 +94,15 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int getSkillQuestionCount(final String sessionkey) {
-		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
+		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
 		return databaseDao.getSkillQuestionCount(session);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#question.getSessionKeyword(), 'session', 'owner')")
 	public Question saveQuestion(final Question question) {
-		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
-		question.setSessionId(session.get_id());
+		final Session session = sessionRepository.getSessionFromKeyword(question.getSessionKeyword());
+		question.setSessionId(session.getId());
 		question.setTimestamp(System.currentTimeMillis() / 1000L);
 
 		if ("freetext".equals(question.getQuestionType())) {
@@ -128,7 +132,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public boolean saveQuestion(final InterposedQuestion question) {
-		final Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
+		final Session session = sessionRepository.getSessionFromKeyword(question.getSessionId());
 		final InterposedQuestion result = databaseDao.saveQuestion(session, question, userService.getCurrentUser());
 
 		if (null != result) {
@@ -162,7 +166,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			throw new NotFoundException();
 		}
 
-		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+		final Session session = sessionRepository.getSessionFromKeyword(question.getSessionKeyword());
 		if (session == null) {
 			throw new UnauthorizedException();
 		}
@@ -186,7 +190,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
 	public void startNewPiRound(final String questionId, User user) {
 		final Question question = databaseDao.getQuestion(questionId);
-		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+		final Session session = sessionRepository.getSessionFromKeyword(question.getSessionKeyword());
 
 		if (null == user) {
 			user = userService.getCurrentUser();
@@ -208,7 +212,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		final IQuestionService questionService = this;
 		final User user = userService.getCurrentUser();
 		final Question question = databaseDao.getQuestion(questionId);
-		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+		final Session session = sessionRepository.getSessionFromKeyword(question.getSessionKeyword());
 
 		final Date date = new Date();
 		final Timer timer = new Timer();
@@ -231,7 +235,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
 	public void cancelPiRoundChange(final String questionId) {
 		final Question question = databaseDao.getQuestion(questionId);
-		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+		final Session session = sessionRepository.getSessionFromKeyword(question.getSessionKeyword());
 
 		cancelDelayedPiRoundChange(questionId);
 		question.resetRoundManagementState();
@@ -262,7 +266,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
 	public void resetPiRoundState(final String questionId) {
 		final Question question = databaseDao.getQuestion(questionId);
-		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+		final Session session = sessionRepository.getSessionFromKeyword(question.getSessionKeyword());
 		cancelDelayedPiRoundChange(questionId);
 
 		if ("freetext".equals(question.getQuestionType())) {
@@ -281,7 +285,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'question', 'owner')")
 	public void setVotingAdmission(final String questionId, final boolean disableVoting) {
 		final Question question = databaseDao.getQuestion(questionId);
-		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+		final Session session = sessionRepository.getSessionFromKeyword(question.getSessionKeyword());
 		question.setVotingDisabled(disableVoting);
 
 		if (!disableVoting && !question.isActive()) {
@@ -337,7 +341,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	private Session getSessionWithAuthCheck(final String sessionKeyword) {
 		final User user = userService.getCurrentUser();
-		final Session session = databaseDao.getSessionFromKeyword(sessionKeyword);
+		final Session session = sessionRepository.getSessionFromKeyword(sessionKeyword);
 		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
@@ -353,7 +357,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 		databaseDao.deleteInterposedQuestion(question);
 
-		final Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
+		final Session session = sessionRepository.getSessionFromKeyword(question.getSessionId());
 		final DeleteInterposedQuestionEvent event = new DeleteInterposedQuestionEvent(this, session, question);
 		this.publisher.publishEvent(event);
 	}
@@ -361,7 +365,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public void deleteAllInterposedQuestions(final String sessionKeyword) {
-		final Session session = databaseDao.getSessionFromKeyword(sessionKeyword);
+		final Session session = sessionRepository.getSessionFromKeyword(sessionKeyword);
 		if (session == null) {
 			throw new UnauthorizedException();
 		}
@@ -417,7 +421,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		if (answer.isRead()) {
 			return;
 		}
-		final Session session = databaseDao.getSessionFromId(answer.getSessionId());
+		final Session session = sessionRepository.getSessionFromId(answer.getSessionId());
 		if (session.isCreator(user)) {
 			answer.setRead(true);
 			databaseDao.updateAnswer(answer);
@@ -576,7 +580,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public InterposedReadingCount getInterposedReadingCount(final String sessionKey, String username) {
-		final Session session = databaseDao.getSessionFromKeyword(sessionKey);
+		final Session session = sessionRepository.getSessionFromKeyword(sessionKey);
 		if (session == null) {
 			throw new NotFoundException();
 		}
@@ -621,7 +625,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		if (question == null) {
 			throw new NotFoundException();
 		}
-		final Session session = databaseDao.getSessionFromKeyword(question.getSessionId());
+		final Session session = sessionRepository.getSessionFromKeyword(question.getSessionId());
 		if (!question.isCreator(user) && !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
@@ -646,7 +650,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			throw new NotFoundException();
 		}
 
-		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+		final Session session = sessionRepository.getSessionFromKeyword(question.getSessionKeyword());
 		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
@@ -710,7 +714,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			question.checkTextStrictOptions(realAnswer);
 		}
 		final Answer result = databaseDao.updateAnswer(realAnswer);
-		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+		final Session session = sessionRepository.getSessionFromKeyword(question.getSessionKeyword());
 		this.publisher.publishEvent(new NewAnswerEvent(this, session, result, user, question));
 
 		return result;
@@ -724,7 +728,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			throw new NotFoundException();
 		}
 		final User user = userService.getCurrentUser();
-		final Session session = databaseDao.getSessionFromKeyword(question.getSessionKeyword());
+		final Session session = sessionRepository.getSessionFromKeyword(question.getSessionKeyword());
 		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
@@ -782,7 +786,7 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	}
 
 	private Session getSession(final String sessionkey) {
-		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
+		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
 		if (session == null) {
 			throw new NotFoundException();
 		}

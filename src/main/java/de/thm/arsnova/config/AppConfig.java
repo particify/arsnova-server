@@ -26,14 +26,17 @@ import de.thm.arsnova.connector.client.ConnectorClientImpl;
 import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.LogEntry;
 import de.thm.arsnova.entities.Motd;
+import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.serialization.CouchDbDocumentModule;
 import de.thm.arsnova.entities.serialization.CouchDbObjectMapperFactory;
 import de.thm.arsnova.entities.serialization.View;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import de.thm.arsnova.persistance.MotdRepository;
+import de.thm.arsnova.persistance.SessionRepository;
 import de.thm.arsnova.persistance.UserRepository;
 import de.thm.arsnova.persistance.couchdb.CouchDbLogEntryRepository;
 import de.thm.arsnova.persistance.couchdb.CouchDbMotdRepository;
+import de.thm.arsnova.persistance.couchdb.CouchDbSessionRepository;
 import de.thm.arsnova.persistance.couchdb.CouchDbUserRepository;
 import de.thm.arsnova.persistance.couchdb.InitializingCouchDbConnector;
 import de.thm.arsnova.socket.ARSnovaSocket;
@@ -282,6 +285,11 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 	@Bean
 	public MotdRepository motdRepository() throws Exception {
 		return new CouchDbMotdRepository(Motd.class, couchDbConnector(), false);
+	}
+
+	@Bean
+	public SessionRepository sessionRepository() throws Exception {
+		return new CouchDbSessionRepository(Session.class, couchDbConnector(), false);
 	}
 
 	@Bean

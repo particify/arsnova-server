@@ -18,21 +18,18 @@
 package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * Represents an ARSnova session.
  */
 @ApiModel(value = "session", description = "the session entity")
-public class Session implements Serializable {
-
-	private static final long serialVersionUID = 1L;
-
-	private String type;
+public class Session implements Entity {
+	private String id;
+	private String rev;
 	private String name;
 	private String shortName;
 	private String keyword;
@@ -41,7 +38,6 @@ public class Session implements Serializable {
 	private long lastOwnerActivity;
 	private String courseType;
 	private String courseId;
-	private List<String> _conflicts;
 	private long creationTime;
 	private LearningProgressOptions learningProgressOptions = new LearningProgressOptions();
 	private SessionFeature features = new SessionFeature();
@@ -59,9 +55,6 @@ public class Session implements Serializable {
 	private boolean feedbackLock;
 	private boolean flipFlashcards;
 
-	private String _id;
-	private String _rev;
-
 	/**
 	 * Returns a copy of the given session without any information that identifies a person.
 	 * @param original The session to create a anonymized copy of
@@ -69,7 +62,6 @@ public class Session implements Serializable {
 	 */
 	public static Session anonymizedCopy(final Session original) {
 		final Session copy = new Session();
-		copy.type = original.type;
 		copy.name = original.name;
 		copy.shortName = original.shortName;
 		copy.keyword = original.keyword;
@@ -95,98 +87,95 @@ public class Session implements Serializable {
 		copy.feedbackLock = original.feedbackLock;
 		copy.flipFlashcards = original.flipFlashcards;
 
-		copy._id = original._id;
-		copy._rev = original._rev;
+		copy.id = original.id;
+		copy.rev = original.rev;
 		return copy;
 	}
 
-	@ApiModelProperty(required = true, value = "\"session\" - used to filter in the couchDB")
-	public String getType() {
-		return type;
+	@JsonView({View.Persistence.class, View.Public.class})
+	public String getId() {
+		return id;
 	}
 
-	public void setType(final String type) {
-		this.type = type;
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setId(final String id) {
+		this.id = id;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public String getRevision() {
+		return rev;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setRevision(final String rev) {
+		this.rev = rev;
 	}
 
 	@ApiModelProperty(required = true, value = "the name")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getName() {
 		return name;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setName(final String name) {
 		this.name = name;
 	}
 
 	@ApiModelProperty(required = true, value = "the short name")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getShortName() {
 		return shortName;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setShortName(final String shortName) {
 		this.shortName = shortName;
 	}
 
 	@ApiModelProperty(required = true, value = "the keyword")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getKeyword() {
 		return keyword;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setKeyword(final String keyword) {
 		this.keyword = keyword;
 	}
 
 	@ApiModelProperty(required = true, value = "the session creator")
+	@JsonView(View.Persistence.class)
 	public String getCreator() {
 		return creator;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setCreator(final String creator) {
 		this.creator = creator;
 	}
 
 	@ApiModelProperty(required = true, value = "true for active session")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isActive() {
 		return active;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setActive(final boolean active) {
 		this.active = active;
 	}
 
 	@ApiModelProperty(required = true, value = "timestamp from the last activity of the owner")
+	@JsonView(View.Persistence.class)
 	public long getLastOwnerActivity() {
 		return lastOwnerActivity;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setLastOwnerActivity(final long lastOwnerActivity) {
 		this.lastOwnerActivity = lastOwnerActivity;
-	}
-
-	public void set_id(final String id) {
-		_id = id;
-	}
-
-	@ApiModelProperty(required = true, value = "the couchDB ID")
-	public String get_id() {
-		return _id;
-	}
-
-	public void set_rev(final String rev) {
-		_rev = rev;
-	}
-
-	public String get_rev() {
-		return _rev;
-	}
-
-	public void set_conflicts(final List<String> conflicts) {
-		_conflicts = conflicts;
-	}
-
-	@ApiModelProperty(required = true, value = "potential couchDB conflicts")
-	public List<String> get_conflicts() {
-		return _conflicts;
 	}
 
 	public boolean isCreator(final User user) {
@@ -194,19 +183,23 @@ public class Session implements Serializable {
 	}
 
 	@ApiModelProperty(required = true, value = "the source the course comes from (example: moodle)")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getCourseType() {
 		return courseType;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setCourseType(final String courseType) {
 		this.courseType = courseType;
 	}
 
 	@ApiModelProperty(required = true, value = "the course ID")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getCourseId() {
 		return courseId;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setCourseId(final String courseId) {
 		this.courseId = courseId;
 	}
@@ -217,143 +210,173 @@ public class Session implements Serializable {
 	}
 
 	@ApiModelProperty(required = true, value = "creation timestamp")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public long getCreationTime() {
 		return creationTime;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setCreationTime(long creationTime) {
 		this.creationTime = creationTime;
 	}
 
 	@ApiModelProperty(required = true, value = "the learning progress options")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public LearningProgressOptions getLearningProgressOptions() {
 		return learningProgressOptions;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setLearningProgressOptions(LearningProgressOptions learningProgressOptions) {
 		this.learningProgressOptions = learningProgressOptions;
 	}
 
 	@ApiModelProperty(required = true, value = "the enabled features (e.g. feedback, interposed, learning Progress, lecture)")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public SessionFeature getFeatures() {
 		return features;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setFeatures(SessionFeature features) {
 		this.features = features;
 	}
 
 	@ApiModelProperty(required = true, value = "the public pool author name")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getPpAuthorName() {
 		return ppAuthorName;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setPpAuthorName(final String ppAuthorName) {
 		this.ppAuthorName = ppAuthorName;
 	}
 
 	@ApiModelProperty(required = true, value = "the public pool author email")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getPpAuthorMail() {
 		return ppAuthorMail;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setPpAuthorMail(final String ppAuthorMail) {
 		this.ppAuthorMail = ppAuthorMail;
 	}
 
 	@ApiModelProperty(required = true, value = "the public pool university")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getPpUniversity() {
 		return ppUniversity;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setPpUniversity(final String ppUniversity) {
 		this.ppUniversity = ppUniversity;
 	}
 
 	@ApiModelProperty(required = true, value = "the public pool logo")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getPpLogo() {
 		return ppLogo;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setPpLogo(final String ppLogo) {
 		this.ppLogo = ppLogo;
 	}
 
 	@ApiModelProperty(required = true, value = "used to display subject")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getPpSubject() {
 		return ppSubject;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setPpSubject(final String ppSubject) {
 		this.ppSubject = ppSubject;
 	}
 
 	@ApiModelProperty(required = true, value = "the public pool license")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getPpLicense() {
 		return ppLicense;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setPpLicense(final String ppLicense) {
 		this.ppLicense = ppLicense;
 	}
 
 	@ApiModelProperty(required = true, value = "the public pool description")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getPpDescription() {
 		return ppDescription;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setPpDescription(final String ppDescription) {
 		this.ppDescription = ppDescription;
 	}
 
 	@ApiModelProperty(required = true, value = "the public pool faculty")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getPpFaculty() {
 		return ppFaculty;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setPpFaculty(final String ppFaculty) {
 		this.ppFaculty = ppFaculty;
 	}
 
 	@ApiModelProperty(required = true, value = "the public pool level")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getPpLevel() {
 		return ppLevel;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setPpLevel(final String ppLevel) {
 		this.ppLevel = ppLevel;
 	}
 
 	@ApiModelProperty(required = true, value = "the session type")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getSessionType() {
 		return sessionType;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setSessionType(final String sessionType) {
 		this.sessionType = sessionType;
 	}
 
 	@ApiModelProperty(required = true, value = "the feedback lock status")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean getFeedbackLock() {
 		return feedbackLock;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setFeedbackLock(Boolean lock) {
 		this.feedbackLock = lock;
 	}
 
 	@ApiModelProperty(required = true, value = "the flashcard flip condition")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean getFlipFlashcards() {
 		return flipFlashcards;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setFlipFlashcards(Boolean flip) {
 		this.flipFlashcards = flip;
 	}
 
 	@Override
 	public String toString() {
-		return "Session [keyword=" + keyword + ", type=" + type + ", creator=" + creator + "]";
+		return "Session [keyword=" + keyword + ", type=" + getType() + ", creator=" + creator + "]";
 	}
 
 	@Override

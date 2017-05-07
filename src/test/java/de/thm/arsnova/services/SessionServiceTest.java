@@ -153,30 +153,6 @@ public class SessionServiceTest {
 		sessionService.updateSession(session.getKeyword(), session);
 	}
 
-	@Test
-	@Ignore("Test fails on JDK 8 (ClassCastException)")
-	public void testShouldDeleteAllSessionData() {
-		/* FIXME: fails with ClassCastException on JDK 8 */
-		final IDatabaseDao tempDatabase = (IDatabaseDao) ReflectionTestUtils.getField(getTargetObject(sessionService), "databaseDao");
-		try {
-			setAuthenticated(true, "ptsr00");
-
-			final Session session = new Session();
-			session.setKeyword("12345678");
-			session.setCreator(userService.getCurrentUser().getUsername());
-
-			final IDatabaseDao mockDatabase = mock(IDatabaseDao.class);
-			when(mockDatabase.getSessionFromKeyword(anyString())).thenReturn(session);
-			ReflectionTestUtils.setField(getTargetObject(sessionService), "databaseDao", mockDatabase);
-
-			sessionService.deleteSession(session.getKeyword());
-
-			verify(mockDatabase).deleteSession(session);
-		} finally {
-			ReflectionTestUtils.setField(getTargetObject(sessionService), "databaseDao", tempDatabase);
-		}
-	}
-
 	@Test(expected = AuthenticationCredentialsNotFoundException.class)
 	public void testShouldNotDeleteSessionIfUnauthorized() {
 		setAuthenticated(false, "nobody");

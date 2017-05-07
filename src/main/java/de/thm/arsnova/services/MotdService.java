@@ -128,7 +128,7 @@ public class MotdService implements IMotdService {
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public Motd saveSessionMotd(final String sessionkey, final Motd motd) {
 		Session session = sessionService.getSession(sessionkey);
-		motd.setSessionId(session.get_id());
+		motd.setSessionId(session.getId());
 
 
 		return createOrUpdateMotd(motd);
