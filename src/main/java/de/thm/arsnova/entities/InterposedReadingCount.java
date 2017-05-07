@@ -17,6 +17,8 @@
  */
 package de.thm.arsnova.entities;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -40,6 +42,7 @@ public class InterposedReadingCount {
 	}
 
 	@ApiModelProperty(required = true, value = "the number of read interposed questions")
+	@JsonView(View.Public.class)
 	public int getRead() {
 		return read;
 	}
@@ -49,6 +52,7 @@ public class InterposedReadingCount {
 	}
 
 	@ApiModelProperty(required = true, value = "the number of unread interposed questions")
+	@JsonView(View.Public.class)
 	public int getUnread() {
 		return unread;
 	}
@@ -58,6 +62,7 @@ public class InterposedReadingCount {
 	}
 
 	@ApiModelProperty(required = true, value = "the number of total interposed questions")
+	@JsonView(View.Public.class)
 	public int getTotal() {
 		return getRead() + getUnread();
 	}

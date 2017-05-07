@@ -18,8 +18,10 @@
 package de.thm.arsnova.entities.transport;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -59,6 +61,7 @@ public class Answer implements Serializable {
 	}
 
 	@ApiModelProperty(required = true, value = "used to display text answer")
+	@JsonView(View.Public.class)
 	public String getAnswerText() {
 		return answerText;
 	}
@@ -68,6 +71,7 @@ public class Answer implements Serializable {
 	}
 
 	@ApiModelProperty(required = true, value = "used to display subject answer")
+	@JsonView(View.Public.class)
 	public String getAnswerSubject() {
 		return answerSubject;
 	}
@@ -76,6 +80,7 @@ public class Answer implements Serializable {
 		this.answerSubject = answerSubject;
 	}
 
+	@JsonView(View.Public.class)
 	public final String getAnswerTextRaw() {
 		return this.answerTextRaw;
 	}
@@ -84,6 +89,7 @@ public class Answer implements Serializable {
 		this.answerTextRaw = answerTextRaw;
 	}
 
+	@JsonView(View.Public.class)
 	public final String getAnswerSubjectRaw() {
 		return this.answerSubjectRaw;
 	}
@@ -92,6 +98,7 @@ public class Answer implements Serializable {
 		this.answerSubjectRaw = answerSubjectRaw;
 	}
 
+	@JsonView(View.Public.class)
 	public final double getFreeTextScore() {
 		return this.freeTextScore;
 	}
@@ -110,6 +117,7 @@ public class Answer implements Serializable {
 	}
 
 	@ApiModelProperty(required = true, value = "abstention")
+	@JsonView(View.Public.class)
 	public boolean isAbstention() {
 		return abstention;
 	}
@@ -146,6 +154,7 @@ public class Answer implements Serializable {
 	}
 
 	@ApiModelProperty(required = true, value = "used to display image answer")
+	@JsonView(View.Public.class)
 	public String getAnswerImage() {
 		return answerImage;
 	}

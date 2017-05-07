@@ -17,6 +17,8 @@
  */
 package de.thm.arsnova.entities;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -69,6 +71,7 @@ public class SessionInfo {
 	}
 
 	@ApiModelProperty(required = true, value = "the name")
+	@JsonView(View.Public.class)
 	public String getName() {
 		return name;
 	}
@@ -78,6 +81,7 @@ public class SessionInfo {
 	}
 
 	@ApiModelProperty(required = true, value = "the short name")
+	@JsonView(View.Public.class)
 	public String getShortName() {
 		return shortName;
 	}
@@ -87,6 +91,7 @@ public class SessionInfo {
 	}
 
 	@ApiModelProperty(required = true, value = "the keyword")
+	@JsonView(View.Public.class)
 	public String getKeyword() {
 		return keyword;
 	}
@@ -96,6 +101,7 @@ public class SessionInfo {
 	}
 
 	@ApiModelProperty(required = true, value = "true for active")
+	@JsonView(View.Public.class)
 	public boolean isActive() {
 		return active;
 	}
@@ -105,6 +111,7 @@ public class SessionInfo {
 	}
 
 	@ApiModelProperty(required = true, value = "the source the course comes from (example: moodle)")
+	@JsonView(View.Public.class)
 	public String getCourseType() {
 		return courseType;
 	}
@@ -114,6 +121,7 @@ public class SessionInfo {
 	}
 
 	@ApiModelProperty(required = true, value = "the session type")
+	@JsonView(View.Public.class)
 	public String getSessionType() {
 		return sessionType;
 	}
@@ -123,6 +131,7 @@ public class SessionInfo {
 	}
 
 	@ApiModelProperty(required = true, value = "used to display level")
+	@JsonView(View.Public.class)
 	public String getPpLevel() {
 		return ppLevel;
 	}
@@ -132,6 +141,7 @@ public class SessionInfo {
 	}
 
 	@ApiModelProperty(required = true, value = "the public pool subject")
+	@JsonView(View.Public.class)
 	public String getPpSubject() {
 		return ppSubject;
 	}
@@ -141,6 +151,7 @@ public class SessionInfo {
 	}
 
 	@ApiModelProperty(required = true, value = "the number of questions")
+	@JsonView(View.Public.class)
 	public int getNumQuestions() {
 		return numQuestions;
 	}
@@ -150,6 +161,7 @@ public class SessionInfo {
 	}
 
 	@ApiModelProperty(required = true, value = "the number of answers")
+	@JsonView(View.Public.class)
 	public int getNumAnswers() {
 		return numAnswers;
 	}
@@ -159,6 +171,7 @@ public class SessionInfo {
 	}
 
 	@ApiModelProperty(required = true, value = "used to display interposed number")
+	@JsonView(View.Public.class)
 	public int getNumInterposed() {
 		return numInterposed;
 	}
@@ -168,6 +181,7 @@ public class SessionInfo {
 	}
 
 	@ApiModelProperty(required = true, value = "the number of unanswered questions")
+	@JsonView(View.Public.class)
 	public int getNumUnanswered() {
 		return numUnanswered;
 	}
@@ -177,6 +191,7 @@ public class SessionInfo {
 	}
 
 	@ApiModelProperty(required = true, value = "the creation timestamp")
+	@JsonView(View.Public.class)
 	public long getCreationTime() {
 		return creationTime;
 	}
@@ -186,6 +201,7 @@ public class SessionInfo {
 	}
 
 	@ApiModelProperty(required = true, value = "the number of unread interposed questions")
+	@JsonView(View.Public.class)
 	public int getNumUnredInterposed() {
 		return numUnredInterposed;
 	}

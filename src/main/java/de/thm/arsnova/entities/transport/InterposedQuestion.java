@@ -17,6 +17,8 @@
  */
 package de.thm.arsnova.entities.transport;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -54,6 +56,7 @@ public class InterposedQuestion {
 	public InterposedQuestion() { }
 
 	@ApiModelProperty(required = true, value = "used to display Id")
+	@JsonView(View.Public.class)
 	public String getId() {
 		return id;
 	}
@@ -63,6 +66,7 @@ public class InterposedQuestion {
 	}
 
 	@ApiModelProperty(required = true, value = "used to display Subject")
+	@JsonView(View.Public.class)
 	public String getSubject() {
 		return subject;
 	}
@@ -72,6 +76,7 @@ public class InterposedQuestion {
 	}
 
 	@ApiModelProperty(required = true, value = "used to display Text")
+	@JsonView(View.Public.class)
 	public String getText() {
 		return text;
 	}
@@ -81,6 +86,7 @@ public class InterposedQuestion {
 	}
 
 	@ApiModelProperty(required = true, value = "used to display Timetamp")
+	@JsonView(View.Public.class)
 	public long getTimestamp() {
 		return timestamp;
 	}
@@ -90,6 +96,7 @@ public class InterposedQuestion {
 	}
 
 	@ApiModelProperty(required = true, value = "is read")
+	@JsonView(View.Public.class)
 	public boolean isRead() {
 		return read;
 	}
