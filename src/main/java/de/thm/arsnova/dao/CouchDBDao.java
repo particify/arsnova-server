@@ -161,7 +161,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		for (int i = 0; i < rawPayload.length; i += 2) {
 			payload.put((String) rawPayload[i], rawPayload[i + 1]);
 		}
-		log(event, payload, LogEntry.LogLevel.INFO);
+		log(event, payload, level);
 	}
 
 	@Override
