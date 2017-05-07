@@ -111,26 +111,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public void log(String event, Map<String, Object> payload, LogEntry.LogLevel level) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void log(String event, Map<String, Object> payload) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void log(String event, LogEntry.LogLevel level, Object... rawPayload) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void log(String event, Object... rawPayload) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
 	public Session getSessionFromKeyword(String keyword) {
 		return stubSessions.get(keyword);
 	}

@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.Converter;
 import de.thm.arsnova.entities.Entity;
+import de.thm.arsnova.entities.LogEntry;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +29,7 @@ public class CouchDbTypeFieldConverter implements Converter<Class<? extends Enti
 	private static final Map<Class<? extends Entity>, String> typeMapping = new HashMap<>();
 
 	{
+		typeMapping.put(LogEntry.class, "log");
 	}
 
 	@Override

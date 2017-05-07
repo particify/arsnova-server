@@ -32,6 +32,7 @@ import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.ImportExportSession.ImportExportQuestion;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.persistance.LogEntryRepository;
 import de.thm.arsnova.services.ISessionService;
 import net.sf.ezmorph.Morpher;
 import net.sf.ezmorph.MorpherRegistry;
@@ -89,6 +90,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Autowired
 	private ISessionService sessionService;
 
+	private LogEntryRepository dbLogger;
+
+	@Autowired
 	private String databaseHost;
 	private int databasePort;
 	private String databaseName;
@@ -134,43 +138,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Override
 	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
 		this.publisher = publisher;
-	}
-
-	@Override
-	public void log(String event, Map<String, Object> payload, LogEntry.LogLevel level) {
-		final Document d = new Document();
-		d.put("timestamp", System.currentTimeMillis());
-		d.put("type", "log");
-		d.put("event", event);
-		d.put("level", level.ordinal());
-		d.put("payload", payload);
-		try {
-			database.saveDocument(d);
-		} catch (final IOException e) {
-			logger.error("Logging of '{}' event to database failed.", event, e);
-		}
-	}
-
-	@Override
-	public void log(String event, Map<String, Object> payload) {
-		log(event, payload, LogEntry.LogLevel.INFO);
-	}
-
-	@Override
-	public void log(String event, LogEntry.LogLevel level, Object... rawPayload) {
-		if (rawPayload.length % 2 != 0) {
-			throw new IllegalArgumentException("");
-		}
-		Map<String, Object> payload = new HashMap<>();
-		for (int i = 0; i < rawPayload.length; i += 2) {
-			payload.put((String) rawPayload[i], rawPayload[i + 1]);
-		}
-		log(event, payload, level);
-	}
-
-	@Override
-	public void log(String event, Object... rawPayload) {
-		log(event, LogEntry.LogLevel.INFO, rawPayload);
 	}
 
 	@Override
@@ -861,7 +828,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		try {
 			int count = deleteAnswers(question);
 			deleteDocument(question.get_id());
-			log("delete", "type", "question", "answerCount", count);
+			dbLogger.log("delete", "type", "question", "answerCount", count);
 
 			return count;
 		} catch (final IOException e) {
@@ -897,8 +864,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 
 		int[] count = deleteAllAnswersWithQuestions(questions);
-		log("delete", "type", "question", "questionCount", count[0]);
-		log("delete", "type", "answer", "answerCount", count[1]);
+		dbLogger.log("delete", "type", "question", "questionCount", count[0]);
+		dbLogger.log("delete", "type", "answer", "answerCount", count[1]);
 
 		return count;
 	}
@@ -932,7 +899,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 					logger.error("Could not bulk delete answers.");
 				}
 			}
-			log("delete", "type", "answer", "answerCount", count);
+			dbLogger.log("delete", "type", "answer", "answerCount", count);
 
 			return count;
 		} catch (final IOException e) {
@@ -1621,7 +1588,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public void deleteAnswer(final String answerId) {
 		try {
 			database.deleteDocument(database.getDocument(answerId));
-			log("delete", "type", "answer");
+			dbLogger.log("delete", "type", "answer");
 		} catch (final IOException e) {
 			logger.error("Could not delete answer {}.", answerId, e);
 		}
@@ -1631,7 +1598,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public void deleteInterposedQuestion(final InterposedQuestion question) {
 		try {
 			deleteDocument(question.get_id());
-			log("delete", "type", "comment");
+			dbLogger.log("delete", "type", "comment");
 		} catch (final IOException e) {
 			logger.error("Could not delete interposed question {}.", question.get_id(), e);
 		}
@@ -1736,7 +1703,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			count = deleteAllQuestionsWithAnswers(session);
 			deleteDocument(session.get_id());
 			logger.debug("Deleted session document {} and related data.", session.get_id());
-			log("delete", "type", "session", "id", session.get_id());
+			dbLogger.log("delete", "type", "session", "id", session.get_id());
 		} catch (final IOException e) {
 			logger.error("Could not delete session {}.", session, e);
 		}
@@ -1762,7 +1729,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 		if (!results.isEmpty()) {
 			logger.info("Deleted {} inactive guest sessions.", results.size());
-			log("cleanup", "type", "session", "sessionCount", results.size(), "questionCount", count[1], "answerCount", count[2]);
+			dbLogger.log("cleanup", "type", "session", "sessionCount", results.size(), "questionCount", count[1], "answerCount", count[2]);
 		}
 		count[0] = results.size();
 
@@ -1788,7 +1755,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 					newDocs.add(newDoc);
 					logger.debug("Marked logged_in document {} for deletion.", oldDoc.getId());
 					/* Use log type 'user' since effectively the user is deleted in case of guests */
-					log("delete", "type", "user", "id", oldDoc.getId());
+					dbLogger.log("delete", "type", "user", "id", oldDoc.getId());
 				}
 
 				if (!newDocs.isEmpty()) {
@@ -1802,7 +1769,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 			if (count > 0) {
 				logger.info("Deleted {} visited session lists of inactive users.", count);
-				log("cleanup", "type", "visitedsessions", "count", count);
+				dbLogger.log("cleanup", "type", "visitedsessions", "count", count);
 			}
 
 			return count;
@@ -2104,7 +2071,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 
 		/* This does account for failed deletions */
-		log("delete", "type", "comment", "commentCount", results.size());
+		dbLogger.log("delete", "type", "comment", "commentCount", results.size());
 
 		return results.size();
 	}

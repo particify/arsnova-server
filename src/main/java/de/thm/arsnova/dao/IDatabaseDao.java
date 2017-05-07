@@ -30,46 +30,6 @@ import java.util.Map;
  * All methods the database must support.
  */
 public interface IDatabaseDao {
-	/**
-	 * Logs an event to the database. Arbitrary data can be attached as payload. Database logging should only be used
-	 * if the logged data is later analyzed by the backend itself. Otherwise use the default logging mechanisms.
-	 *
-	 * @param event type of the event
-	 * @param payload arbitrary logging data
-	 * @param level severity of the event
-	 */
-	void log(String event, Map<String, Object> payload, LogEntry.LogLevel level);
-
-	/**
-	 * Logs an event of informational severity to the database. Arbitrary data can be attached as payload. Database
-	 * logging should only be used if the logged data is later analyzed by the backend itself. Otherwise use the default
-	 * logging mechanisms.
-	 *
-	 * @param event type of the event
-	 * @param payload arbitrary logging data
-	 */
-	void log(String event, Map<String, Object> payload);
-
-	/**
-	 * Logs an event to the database. Arbitrary data can be attached as payload. Database logging should only be used
-	 * if the logged data is later analyzed by the backend itself. Otherwise use the default logging mechanisms.
-	 *
-	 * @param event type of the event
-	 * @param level severity of the event
-	 * @param rawPayload key/value pairs of arbitrary logging data
-	 */
-	void log(String event, LogEntry.LogLevel level, Object... rawPayload);
-
-	/**
-	 * Logs an event of informational severity to the database. Arbitrary data can be attached as payload. Database
-	 * logging should only be used if the logged data is later analyzed by the backend itself. Otherwise use the default
-	 * logging mechanisms.
-	 *
-	 * @param event type of the event
-	 * @param rawPayload key/value pairs of arbitrary logging data
-	 */
-	void log(String event, Object... rawPayload);
-
 	Session getSessionFromKeyword(String keyword);
 
 	List<Session> getMySessions(User user, final int start, final int limit);
