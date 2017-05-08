@@ -499,9 +499,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public boolean sessionKeyAvailable(final String keyword) {
 		final View view = new View("session/by_keyword");
+		view.setKey(keyword);
 		final ViewResults results = getDatabase().view(view);
 
 		return !results.containsKey(keyword);
