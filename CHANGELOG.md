@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.4.3
+This release fixes a performance issue on session creation affecting large
+installations.
+
+Bug fixes:
+* WebSocket communication now works correctly for course sessions.
+  (only affects installations using the LMS connector)
+* The configuration parameter `security.facebook.allowed-roles` is now
+  respected.
+
+Additional changes:
+* Libraries have been upgraded to fix potential bugs
+
 ## 2.4.2
 This release fixes a minor security vulnerability which allowed an attacker to
 remove a MotD from a session without being the creator.
