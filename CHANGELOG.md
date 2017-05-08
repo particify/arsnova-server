@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.5.1
+This release fixes a performance issue on session creation affecting large
+installations.
+
+Bug fixes:
+* Session import works again.
+
+Additional changes:
+* Libraries have been upgraded to fix potential bugs
+
 ## 2.4.3
 This release fixes a performance issue on session creation affecting large
 installations.
