@@ -18,12 +18,20 @@
 package de.thm.arsnova.entities.serialization;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(value = {"type"}, allowGetters = true)
 public abstract class CouchDbDocumentMixIn {
-	@JsonProperty("_id") abstract String getId();
+	@JsonProperty("_id")
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	abstract String getId();
+
 	@JsonProperty("_id") abstract void setId(String id);
-	@JsonProperty("_rev") abstract String getRevision();
+
+	@JsonProperty("_rev")
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	abstract String getRevision();
+
 	@JsonProperty("_rev") abstract String setRevision(String rev);
 }
