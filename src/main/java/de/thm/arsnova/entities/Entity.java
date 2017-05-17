@@ -25,7 +25,7 @@ public interface Entity {
 	void setId(String id);
 
 	@JsonView(View.Persistence.class)
-	default String getType() {
-		return getClass().getSimpleName();
+	default Class<? extends Entity> getType() {
+		return getClass();
 	}
 }

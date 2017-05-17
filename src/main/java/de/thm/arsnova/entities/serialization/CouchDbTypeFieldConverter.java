@@ -17,26 +17,31 @@
  */
 package de.thm.arsnova.entities.serialization;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.fasterxml.jackson.databind.util.Converter;
 import de.thm.arsnova.entities.Entity;
+import java.util.HashMap;
+import java.util.Map;
 
-@JsonIgnoreProperties(value = {"type"}, allowGetters = true)
-public abstract class CouchDbDocumentMixIn {
-	@JsonProperty("_id")
-	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	abstract String getId();
+public class CouchDbTypeFieldConverter implements Converter<Class<? extends Entity>, String> {
+	private static final Map<Class<? extends Entity>, String> typeMapping = new HashMap<>();
 
-	@JsonProperty("_id") abstract void setId(String id);
+	{
+	}
 
-	@JsonProperty("_rev")
-	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	abstract String getRevision();
+	@Override
+	public String convert(Class<? extends Entity> aClass) {
+		return typeMapping.get(aClass);
+	}
 
-	@JsonProperty("_rev") abstract String setRevision(String rev);
+	@Override
+	public JavaType getInputType(TypeFactory typeFactory) {
+		return typeFactory.constructGeneralizedType(typeFactory.constructType(Class.class), Entity.class);
+	}
 
-	@JsonSerialize(converter = CouchDbTypeFieldConverter.class)
-	abstract Class<? extends Entity> getType();
+	@Override
+	public JavaType getOutputType(TypeFactory typeFactory) {
+		return typeFactory.constructType(String.class);
+	}
 }
