@@ -91,6 +91,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	private String databaseHost;
 	private int databasePort;
+	private String databaseUsername;
+	private String databasePassword;
 	private String databaseName;
 	private Database database;
 
@@ -108,6 +110,16 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	@Value("${couchdb.port}")
 	public void setDatabasePort(final String newDatabasePort) {
 		databasePort = Integer.parseInt(newDatabasePort);
+	}
+
+	@Value("${couchdb.username}")
+	public final void setDatabaseUsername(final String newDatabaseUsername) {
+		databaseUsername = newDatabaseUsername;
+	}
+
+	@Value("${couchdb.password}")
+	public final void setDatabasePassword(final String newDatabasePassword) {
+		databasePassword = newDatabasePassword;
 	}
 
 	@Value("${couchdb.name}")
@@ -555,7 +567,11 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			try {
 				final com.fourspaces.couchdb.Session session = new com.fourspaces.couchdb.Session(
 						databaseHost,
-						databasePort
+						databasePort,
+						databaseUsername,
+						databasePassword,
+						databaseUsername.length() > 0,
+						false
 						);
 				database = session.getDatabase(databaseName);
 			} catch (final Exception e) {
