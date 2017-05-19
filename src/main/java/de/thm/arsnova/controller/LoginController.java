@@ -53,6 +53,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
+import javax.annotation.PostConstruct;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -117,6 +119,9 @@ public class LoginController extends AbstractController {
 	@Value("${security.twitter.allowed-roles:speaker,student}") private String[] twitterRoles;
 	@Value("${security.twitter.order}") private int twitterOrder;
 
+	@Autowired
+	private ServletContext servletContext;
+
 	@Autowired(required = false)
 	private DaoAuthenticationProvider daoProvider;
 
@@ -142,6 +147,13 @@ public class LoginController extends AbstractController {
 	private UserSessionService userSessionService;
 
 	private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
+
+	@PostConstruct
+	private void init() {
+		if ("".equals(apiPath)) {
+			apiPath = servletContext.getContextPath();
+		}
+	}
 
 	@RequestMapping(value = { "/auth/login", "/doLogin" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public void doLogin(
@@ -302,9 +314,6 @@ public class LoginController extends AbstractController {
 		request.getSession().invalidate();
 		SecurityContextHolder.clearContext();
 		if (auth instanceof CasAuthenticationToken) {
-			if ("".equals(apiPath)) {
-				apiPath = request.getContextPath();
-			}
 			return new RedirectView(apiPath + "/j_spring_cas_security_logout");
 		}
 		return new RedirectView(request.getHeader("referer") != null ? request.getHeader("referer") : "/");
@@ -315,9 +324,6 @@ public class LoginController extends AbstractController {
 	public List<ServiceDescription> getServices(final HttpServletRequest request) {
 		List<ServiceDescription> services = new ArrayList<>();
 
-		if ("".equals(apiPath)) {
-			apiPath = request.getContextPath();
-		}
 		/* The first parameter is replaced by the backend, the second one by the frondend */
 		String dialogUrl = apiPath + "/auth/dialog?type={0}&successurl='{0}'";
 
