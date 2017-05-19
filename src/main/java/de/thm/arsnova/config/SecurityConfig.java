@@ -17,9 +17,6 @@
  */
 package de.thm.arsnova.config;
 
-import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationProvider;
-import com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationEntryPoint;
-import com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationFilter;
 import de.thm.arsnova.CASLogoutSuccessHandler;
 import de.thm.arsnova.CasUserDetailsService;
 import de.thm.arsnova.LoginAuthenticationFailureHandler;
@@ -28,10 +25,12 @@ import de.thm.arsnova.security.ApplicationPermissionEvaluator;
 import de.thm.arsnova.security.CustomLdapUserDetailsMapper;
 import de.thm.arsnova.security.DbUserDetailsService;
 import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
-import org.scribe.up.provider.impl.FacebookProvider;
-import org.scribe.up.provider.impl.Google2Provider;
-import org.scribe.up.provider.impl.Google2Provider.Google2Scope;
-import org.scribe.up.provider.impl.TwitterProvider;
+import org.pac4j.core.client.Client;
+import org.pac4j.core.config.Config;
+import org.pac4j.oauth.client.FacebookClient;
+import org.pac4j.oauth.client.Google2Client;
+import org.pac4j.oauth.client.TwitterClient;
+import org.pac4j.springframework.security.web.CallbackFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,6 +87,7 @@ import java.util.List;
 @EnableWebSecurity
 @Profile("!test")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+	private static final String OAUTH_CALLBACK_PATH_SUFFIX = "/auth/oauth_callback";
 	private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
 	@Autowired
@@ -140,14 +140,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			http.addFilter(casAuthenticationFilter());
 			http.addFilter(casLogoutFilter());
 		}
-		if (googleEnabled) {
-			http.addFilterAfter(googleFilter(), CasAuthenticationFilter.class);
-		}
-		if (facebookEnabled) {
-			http.addFilterAfter(facebookFilter(), CasAuthenticationFilter.class);
-		}
-		if (twitterEnabled) {
-			http.addFilterAfter(twitterFilter(), CasAuthenticationFilter.class);
+
+		if (facebookEnabled || googleEnabled || twitterEnabled) {
+			CallbackFilter callbackFilter = new CallbackFilter(oauthConfig());
+			callbackFilter.setSuffix(OAUTH_CALLBACK_PATH_SUFFIX);
+			http.addFilterAfter(callbackFilter, CasAuthenticationFilter.class);
 		}
 	}
 
@@ -168,15 +165,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		}
 		if (googleEnabled) {
 			providers.add("google");
-			auth.authenticationProvider(googleAuthProvider());
 		}
 		if (facebookEnabled) {
 			providers.add("facebook");
-			auth.authenticationProvider(facebookAuthProvider());
 		}
 		if (twitterEnabled) {
 			providers.add("twitter");
-			auth.authenticationProvider(twitterAuthProvider());
 		}
 		logger.info("Enabled authentication providers: {}", providers);
 	}
@@ -328,7 +322,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public ServiceProperties casServiceProperties() {
 		ServiceProperties properties = new ServiceProperties();
-		properties.setService(rootUrl + servletContext.getContextPath() + "/login/cas");
+		properties.setService(rootUrl + apiPath + "/login/cas");
 		properties.setSendRenew(false);
 
 		return properties;
@@ -375,104 +369,45 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return handler;
 	}
 
-	// Facebook Authentication Configuration
+	// OAuth Authentication Configuration
 
 	@Bean
-	public OAuthAuthenticationEntryPoint facebookEntryPoint() {
-		final OAuthAuthenticationEntryPoint entryPoint = new OAuthAuthenticationEntryPoint();
-		entryPoint.setProvider(facebookProvider());
+	public Config oauthConfig() {
+		List<Client> clients = new ArrayList<>();
+		if (facebookEnabled) {
+			clients.add(facebookClient());
+		}
+		if (googleEnabled) {
+			clients.add(googleClient());
+		}
+		if (twitterEnabled) {
+			clients.add(twitterClient());
+		}
 
-		return entryPoint;
+		return new Config(rootUrl + apiPath + OAUTH_CALLBACK_PATH_SUFFIX, clients);
 	}
 
 	@Bean
-	public FacebookProvider facebookProvider() {
-		final FacebookProvider provider = new FacebookProvider();
-		provider.setKey(facebookKey);
-		provider.setSecret(facebookSecret);
-		provider.setCallbackUrl(rootUrl + servletContext.getContextPath() + "/j_spring_facebook_security_check");
+	public FacebookClient facebookClient() {
+		final FacebookClient client = new FacebookClient(facebookKey, facebookSecret);
+		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH_SUFFIX + "?client_name=FacebookClient");
 
-		return provider;
+		return client;
 	}
 
 	@Bean
-	public OAuthAuthenticationFilter facebookFilter() throws Exception {
-		final OAuthAuthenticationFilter filter = new OAuthAuthenticationFilter("/j_spring_facebook_security_check");
-		filter.setProvider(facebookProvider());
-		filter.setAuthenticationManager(authenticationManager());
-		filter.setAuthenticationFailureHandler(failureHandler());
-		filter.setAuthenticationSuccessHandler(successHandler());
+	public TwitterClient twitterClient() {
+		final TwitterClient client = new TwitterClient(twitterKey, twitterSecret);
+		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH_SUFFIX + "?client_name=TwitterClient");
 
-		return filter;
+		return client;
 	}
 
 	@Bean
-	public OAuthAuthenticationProvider facebookAuthProvider() {
-		final OAuthAuthenticationProvider authProvider = new OAuthAuthenticationProvider();
-		authProvider.setProvider(facebookProvider());
+	public Google2Client googleClient() {
+		final Google2Client client = new Google2Client(googleKey, googleSecret);
+		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH_SUFFIX + "?client_name=Google2Client");
 
-		return authProvider;
-	}
-
-	// Twitter Authentication Configuration
-
-	@Bean
-	public TwitterProvider twitterProvider() {
-		final TwitterProvider provider = new TwitterProvider();
-		provider.setKey(twitterKey);
-		provider.setSecret(twitterSecret);
-		provider.setCallbackUrl(rootUrl + servletContext.getContextPath() + "/j_spring_twitter_security_check");
-
-		return provider;
-	}
-
-	@Bean
-	public OAuthAuthenticationFilter twitterFilter() throws Exception {
-		final OAuthAuthenticationFilter filter = new OAuthAuthenticationFilter("/j_spring_twitter_security_check");
-		filter.setProvider(twitterProvider());
-		filter.setAuthenticationManager(authenticationManager());
-		filter.setAuthenticationFailureHandler(failureHandler());
-		filter.setAuthenticationSuccessHandler(successHandler());
-		return filter;
-	}
-
-	@Bean
-	public OAuthAuthenticationProvider twitterAuthProvider() {
-		final OAuthAuthenticationProvider authProvider = new OAuthAuthenticationProvider();
-		authProvider.setProvider(twitterProvider());
-
-		return authProvider;
-	}
-
-	// Google Authentication Configuration
-
-	@Bean
-	public Google2Provider googleProvider() {
-		final Google2Provider provider = new Google2Provider();
-		provider.setKey(googleKey);
-		provider.setSecret(googleSecret);
-		provider.setCallbackUrl(rootUrl + servletContext.getContextPath() + "/j_spring_google_security_check");
-		provider.setScope(Google2Scope.EMAIL);
-
-		return provider;
-	}
-
-	@Bean
-	public OAuthAuthenticationFilter googleFilter() throws Exception {
-		final OAuthAuthenticationFilter filter = new OAuthAuthenticationFilter("/j_spring_google_security_check");
-		filter.setProvider(googleProvider());
-		filter.setAuthenticationManager(authenticationManager());
-		filter.setAuthenticationFailureHandler(failureHandler());
-		filter.setAuthenticationSuccessHandler(successHandler());
-
-		return filter;
-	}
-
-	@Bean
-	public OAuthAuthenticationProvider googleAuthProvider() {
-		final OAuthAuthenticationProvider authProvider = new OAuthAuthenticationProvider();
-		authProvider.setProvider(googleProvider());
-
-		return authProvider;
+		return client;
 	}
 }

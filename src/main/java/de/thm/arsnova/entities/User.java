@@ -19,9 +19,9 @@ package de.thm.arsnova.entities;
 
 import de.thm.arsnova.services.UserSessionService;
 import org.jasig.cas.client.authentication.AttributePrincipal;
-import org.scribe.up.profile.facebook.FacebookProfile;
-import org.scribe.up.profile.google.Google2Profile;
-import org.scribe.up.profile.twitter.TwitterProfile;
+import org.pac4j.oauth.profile.facebook.FacebookProfile;
+import org.pac4j.oauth.profile.google2.Google2Profile;
+import org.pac4j.oauth.profile.twitter.TwitterProfile;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
@@ -52,12 +52,12 @@ public class User implements Serializable {
 	}
 
 	public User(TwitterProfile profile) {
-		setUsername(profile.getScreenName());
+		setUsername(profile.getUsername());
 		setType(User.TWITTER);
 	}
 
 	public User(FacebookProfile profile) {
-		setUsername(profile.getLink());
+		setUsername(profile.getProfileUrl());
 		setType(User.FACEBOOK);
 	}
 

@@ -22,8 +22,10 @@ import org.jasig.cas.client.authentication.AttributePrincipalImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
-import org.scribe.up.profile.google.Google2AttributesDefinition;
-import org.scribe.up.profile.google.Google2Profile;
+import org.pac4j.oauth.profile.JsonHelper;
+import org.pac4j.oauth.profile.google2.Google2AttributesDefinition;
+import org.pac4j.oauth.profile.google2.Google2Email;
+import org.pac4j.oauth.profile.google2.Google2Profile;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -36,7 +38,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -56,9 +57,13 @@ public class UserServiceTest {
 		socketid2user.put(UUID.randomUUID(), new User(new UsernamePasswordAuthenticationToken("ptsr00", UUID.randomUUID())));
 		socketid2user.put(UUID.randomUUID(), new User(new AttributePrincipalImpl("ptstr0")));
 
-		Map<String, Object> attributes = new HashMap<>();
-		attributes.put(Google2AttributesDefinition.EMAIL, "mail@host.com");
-		Google2Profile profile = new Google2Profile("ptsr00", attributes);
+		Google2Email email = new Google2Email();
+		email.setEmail("mail@host.com");
+		ArrayList<Google2Email> emails = new ArrayList<>();
+		emails.add(email);
+		Google2Profile profile = new Google2Profile();
+		profile.addAttribute(Google2AttributesDefinition.DISPLAY_NAME, "ptsr00");
+		profile.addAttribute(Google2AttributesDefinition.EMAILS, JsonHelper.toJSONString(emails));
 
 		socketid2user.put(UUID.randomUUID(), new User(profile));
 		List<GrantedAuthority> authorities = new ArrayList<>();
