@@ -17,14 +17,11 @@
  */
 package de.thm.arsnova.config;
 
-import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationProvider;
-import com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationEntryPoint;
-import com.github.leleuj.ss.oauth.client.web.OAuthAuthenticationFilter;
 import de.thm.arsnova.CasUserDetailsService;
 import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
-import org.scribe.up.provider.impl.FacebookProvider;
-import org.scribe.up.provider.impl.Google2Provider;
-import org.scribe.up.provider.impl.TwitterProvider;
+import org.pac4j.oauth.client.FacebookClient;
+import org.pac4j.oauth.client.Google2Client;
+import org.pac4j.oauth.client.TwitterClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -103,52 +100,17 @@ public class TestSecurityConfig extends SecurityConfig {
 	}
 
 	@Override
-	public FacebookProvider facebookProvider() {
+	public FacebookClient facebookClient() {
 		return null;
 	}
 
 	@Override
-	public OAuthAuthenticationFilter facebookFilter() {
+	public Google2Client googleClient() {
 		return null;
 	}
 
 	@Override
-	public OAuthAuthenticationProvider facebookAuthProvider() {
-		return null;
-	}
-
-	@Override
-	public OAuthAuthenticationEntryPoint facebookEntryPoint() {
-		return null;
-	}
-
-	@Override
-	public Google2Provider googleProvider() {
-		return null;
-	}
-
-	@Override
-	public OAuthAuthenticationFilter googleFilter() {
-		return null;
-	}
-
-	@Override
-	public OAuthAuthenticationProvider googleAuthProvider() {
-		return null;
-	}
-
-	@Override
-	public TwitterProvider twitterProvider() {
-		return null;
-	}
-
-	@Override
-	public OAuthAuthenticationFilter twitterFilter() {
-		return null;
-	}
-
-	@Override
-	public OAuthAuthenticationProvider twitterAuthProvider() {
+	public TwitterClient twitterClient() {
 		return null;
 	}
 }

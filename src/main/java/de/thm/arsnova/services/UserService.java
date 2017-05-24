@@ -18,7 +18,6 @@
 package de.thm.arsnova.services;
 
 import com.codahale.metrics.annotation.Gauge;
-import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationToken;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.User;
@@ -27,9 +26,10 @@ import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
-import org.scribe.up.profile.facebook.FacebookProfile;
-import org.scribe.up.profile.google.Google2Profile;
-import org.scribe.up.profile.twitter.TwitterProfile;
+import org.pac4j.oauth.profile.facebook.FacebookProfile;
+import org.pac4j.oauth.profile.google2.Google2Profile;
+import org.pac4j.oauth.profile.twitter.TwitterProfile;
+import org.pac4j.springframework.security.authentication.Pac4jAuthenticationToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -184,7 +184,7 @@ public class UserService implements IUserService {
 
 		User user = null;
 
-		if (authentication instanceof OAuthAuthenticationToken) {
+		if (authentication instanceof Pac4jAuthenticationToken) {
 			user = getOAuthUser(authentication);
 		} else if (authentication instanceof CasAuthenticationToken) {
 			final CasAuthenticationToken token = (CasAuthenticationToken) authentication;
@@ -213,15 +213,15 @@ public class UserService implements IUserService {
 
 	private User getOAuthUser(final Authentication authentication) {
 		User user = null;
-		final OAuthAuthenticationToken token = (OAuthAuthenticationToken) authentication;
-		if (token.getUserProfile() instanceof Google2Profile) {
-			final Google2Profile profile = (Google2Profile) token.getUserProfile();
+		final Pac4jAuthenticationToken token = (Pac4jAuthenticationToken) authentication;
+		if (token.getProfile() instanceof Google2Profile) {
+			final Google2Profile profile = (Google2Profile) token.getProfile();
 			user = new User(profile);
-		} else if (token.getUserProfile() instanceof TwitterProfile) {
-			final TwitterProfile profile = (TwitterProfile) token.getUserProfile();
+		} else if (token.getProfile() instanceof TwitterProfile) {
+			final TwitterProfile profile = (TwitterProfile) token.getProfile();
 			user = new User(profile);
-		} else if (token.getUserProfile() instanceof FacebookProfile) {
-			final FacebookProfile profile = (FacebookProfile) token.getUserProfile();
+		} else if (token.getProfile() instanceof FacebookProfile) {
+			final FacebookProfile profile = (FacebookProfile) token.getProfile();
 			user = new User(profile);
 		}
 		return user;
