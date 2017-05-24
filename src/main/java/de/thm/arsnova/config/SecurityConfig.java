@@ -144,6 +144,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		if (facebookEnabled || googleEnabled || twitterEnabled) {
 			CallbackFilter callbackFilter = new CallbackFilter(oauthConfig());
 			callbackFilter.setSuffix(OAUTH_CALLBACK_PATH_SUFFIX);
+			callbackFilter.setDefaultUrl(rootUrl + apiPath + "/");
 			http.addFilterAfter(callbackFilter, CasAuthenticationFilter.class);
 		}
 	}
