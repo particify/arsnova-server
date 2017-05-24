@@ -34,6 +34,7 @@ import org.scribe.up.provider.impl.Google2Provider.Google2Scope;
 import org.scribe.up.provider.impl.TwitterProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -73,8 +74,8 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.header.writers.HstsHeaderWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.web.context.ServletContextAware;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,12 +87,14 @@ import java.util.List;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @EnableWebSecurity
 @Profile("!test")
-public class SecurityConfig extends WebSecurityConfigurerAdapter implements ServletContextAware {
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
+	@Autowired
 	private ServletContext servletContext;
 
 	@Value("${root-url}") private String rootUrl;
+	@Value("${api.path:}") private String apiPath;
 
 	@Value("${security.user-db.enabled}") private boolean dbAuthEnabled;
 
@@ -118,6 +121,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 	@Value("${security.google.enabled}") private boolean googleEnabled;
 	@Value("${security.google.key}") private String googleKey;
 	@Value("${security.google.secret}") private String googleSecret;
+
+	@PostConstruct
+	private void init() {
+		if ("".equals(apiPath)) {
+			apiPath = servletContext.getContextPath();
+		}
+	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -464,10 +474,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Serv
 		authProvider.setProvider(googleProvider());
 
 		return authProvider;
-	}
-
-	@Override
-	public void setServletContext(ServletContext servletContext) {
-		this.servletContext = servletContext;
 	}
 }
