@@ -26,10 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A question a student is asking. Also known as feedback or audience question.
+ * A question a student is asking. Also known as comment, feedback or audience question.
  */
-@ApiModel(value = "audiencequestion/{questionId}", description = "the Interposed Question API")
-public class InterposedQuestion {
+@ApiModel(value = "audiencequestion/{questionId}", description = "the comment API")
+public class Comment {
 
 	private String id;
 	private String subject;
@@ -37,23 +37,23 @@ public class InterposedQuestion {
 	private long timestamp;
 	private boolean read;
 
-	public static List<InterposedQuestion> fromList(List<de.thm.arsnova.entities.InterposedQuestion> questions) {
-		ArrayList<InterposedQuestion> interposedQuestions = new ArrayList<>();
-		for (de.thm.arsnova.entities.InterposedQuestion question : questions) {
-			interposedQuestions.add(new InterposedQuestion(question));
+	public static List<Comment> fromList(List<de.thm.arsnova.entities.Comment> comments) {
+		ArrayList<Comment> transportComments = new ArrayList<>();
+		for (de.thm.arsnova.entities.Comment comment : comments) {
+			transportComments.add(new Comment(comment));
 		}
-		return interposedQuestions;
+		return transportComments;
 	}
 
-	public InterposedQuestion(de.thm.arsnova.entities.InterposedQuestion question) {
-		this.id = question.get_id();
-		this.subject = question.getSubject();
-		this.text = question.getText();
-		this.timestamp = question.getTimestamp();
-		this.read = question.isRead();
+	public Comment(de.thm.arsnova.entities.Comment comment) {
+		this.id = comment.getId();
+		this.subject = comment.getSubject();
+		this.text = comment.getText();
+		this.timestamp = comment.getTimestamp();
+		this.read = comment.isRead();
 	}
 
-	public InterposedQuestion() { }
+	public Comment() { }
 
 	@ApiModelProperty(required = true, value = "used to display Id")
 	@JsonView(View.Public.class)

@@ -20,8 +20,8 @@ package de.thm.arsnova.services;
 import de.thm.arsnova.ImageUtils;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.InterposedQuestion;
-import de.thm.arsnova.entities.InterposedReadingCount;
+import de.thm.arsnova.entities.Comment;
+import de.thm.arsnova.entities.CommentReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
@@ -30,6 +30,7 @@ import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.SessionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +50,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Performs all question, interposed question, and answer related operations.
+ * Performs all question, comment, and answer related operations.
  */
 @Service
 public class QuestionService implements IQuestionService, ApplicationEventPublisherAware {
@@ -62,6 +63,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Autowired
 	private SessionRepository sessionRepository;
+
+	@Autowired
+	private CommentRepository commentRepository;
 
 	@Autowired
 	private ImageUtils imageUtils;
@@ -131,12 +135,12 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public boolean saveQuestion(final InterposedQuestion question) {
-		final Session session = sessionRepository.getSessionFromKeyword(question.getSessionId());
-		final InterposedQuestion result = databaseDao.saveQuestion(session, question, userService.getCurrentUser());
+	public boolean saveQuestion(final Comment comment) {
+		final Session session = sessionRepository.getSessionFromKeyword(comment.getSessionId());
+		final Comment result = commentRepository.saveQuestion(session, comment, userService.getCurrentUser());
 
 		if (null != result) {
-			final NewInterposedQuestionEvent event = new NewInterposedQuestionEvent(this, session, result);
+			final NewCommentEvent event = new NewCommentEvent(this, session, result);
 			this.publisher.publishEvent(event);
 			return true;
 		}
@@ -349,16 +353,16 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'interposedquestion', 'owner')")
-	public void deleteInterposedQuestion(final String questionId) {
-		final InterposedQuestion question = databaseDao.getInterposedQuestion(questionId);
-		if (question == null) {
+	@PreAuthorize("isAuthenticated() and hasPermission(#commentId, 'comment', 'owner')")
+	public void deleteInterposedQuestion(final String commentId) {
+		final Comment comment = commentRepository.getInterposedQuestion(commentId);
+		if (comment == null) {
 			throw new NotFoundException();
 		}
-		databaseDao.deleteInterposedQuestion(question);
+		commentRepository.deleteInterposedQuestion(comment);
 
-		final Session session = sessionRepository.getSessionFromKeyword(question.getSessionId());
-		final DeleteInterposedQuestionEvent event = new DeleteInterposedQuestionEvent(this, session, question);
+		final Session session = sessionRepository.getSessionFromKeyword(comment.getSessionId());
+		final DeleteCommentEvent event = new DeleteCommentEvent(this, session, comment);
 		this.publisher.publishEvent(event);
 	}
 
@@ -371,9 +375,9 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 		final User user = getCurrentUser();
 		if (session.isCreator(user)) {
-			databaseDao.deleteAllInterposedQuestions(session);
+			commentRepository.deleteAllInterposedQuestions(session);
 		} else {
-			databaseDao.deleteAllInterposedQuestions(session, user);
+			commentRepository.deleteAllInterposedQuestions(session, user);
 		}
 	}
 
@@ -574,45 +578,45 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int getInterposedCount(final String sessionKey) {
-		return databaseDao.getInterposedCount(sessionKey);
+		return commentRepository.getInterposedCount(sessionKey);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public InterposedReadingCount getInterposedReadingCount(final String sessionKey, String username) {
+	public CommentReadingCount getInterposedReadingCount(final String sessionKey, String username) {
 		final Session session = sessionRepository.getSessionFromKeyword(sessionKey);
 		if (session == null) {
 			throw new NotFoundException();
 		}
 		if (username == null) {
-			return databaseDao.getInterposedReadingCount(session);
+			return commentRepository.getInterposedReadingCount(session);
 		} else {
 			User currentUser = userService.getCurrentUser();
 			if (!currentUser.getUsername().equals(username)) {
 				throw new ForbiddenException();
 			}
 
-			return databaseDao.getInterposedReadingCount(session, currentUser);
+			return commentRepository.getInterposedReadingCount(session, currentUser);
 		}
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<InterposedQuestion> getInterposedQuestions(final String sessionKey, final int offset, final int limit) {
+	public List<Comment> getInterposedQuestions(final String sessionKey, final int offset, final int limit) {
 		final Session session = this.getSession(sessionKey);
 		final User user = getCurrentUser();
 		if (session.isCreator(user)) {
-			return databaseDao.getInterposedQuestions(session, offset, limit);
+			return commentRepository.getInterposedQuestions(session, offset, limit);
 		} else {
-			return databaseDao.getInterposedQuestions(session, user, offset, limit);
+			return commentRepository.getInterposedQuestions(session, user, offset, limit);
 		}
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public InterposedQuestion readInterposedQuestion(final String questionId) {
+	public Comment readInterposedQuestion(final String commentId) {
 		final User user = userService.getCurrentUser();
-		return this.readInterposedQuestionInternal(questionId, user);
+		return this.readInterposedQuestionInternal(commentId, user);
 	}
 
 	/*
@@ -620,19 +624,19 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 	 * TODO: Find a better way of doing this...
 	 */
 	@Override
-	public InterposedQuestion readInterposedQuestionInternal(final String questionId, User user) {
-		final InterposedQuestion question = databaseDao.getInterposedQuestion(questionId);
-		if (question == null) {
+	public Comment readInterposedQuestionInternal(final String commentId, User user) {
+		final Comment comment = commentRepository.getInterposedQuestion(commentId);
+		if (comment == null) {
 			throw new NotFoundException();
 		}
-		final Session session = sessionRepository.getSessionFromKeyword(question.getSessionId());
-		if (!question.isCreator(user) && !session.isCreator(user)) {
+		final Session session = sessionRepository.getSessionFromId(comment.getSessionId());
+		if (!comment.isCreator(user) && !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
 		if (session.isCreator(user)) {
-			databaseDao.markInterposedQuestionAsRead(question);
+			commentRepository.markInterposedQuestionAsRead(comment);
 		}
-		return question;
+		return comment;
 	}
 
 	@Override

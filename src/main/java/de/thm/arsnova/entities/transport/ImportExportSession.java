@@ -42,7 +42,7 @@ public class ImportExportSession {
 
 	private List<ImportExportQuestion> questions;
 
-	private List<InterposedQuestion> feedbackQuestions;
+	private List<Comment> feedbackQuestions;
 
 	private List<Motd> motds;
 
@@ -79,11 +79,11 @@ public class ImportExportSession {
 
 	@ApiModelProperty(required = true, value = "used to display questions feedback")
 	@JsonView(View.Public.class)
-	public List<InterposedQuestion> getFeedbackQuestions() {
+	public List<Comment> getFeedbackQuestions() {
 		return feedbackQuestions;
 	}
 
-	public void setFeedbackQuestions(List<InterposedQuestion> feedbackQuestions) {
+	public void setFeedbackQuestions(List<Comment> feedbackQuestions) {
 		this.feedbackQuestions = feedbackQuestions;
 	}
 

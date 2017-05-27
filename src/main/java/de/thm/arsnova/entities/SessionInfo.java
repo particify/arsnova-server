@@ -44,8 +44,8 @@ public class SessionInfo {
 
 	private int numQuestions;
 	private int numAnswers;
-	private int numInterposed;
-	private int numUnredInterposed;
+	private int numComments;
+	private int numUnreadComments;
 	private int numUnanswered;
 
 	public SessionInfo(Session session) {
@@ -170,14 +170,16 @@ public class SessionInfo {
 		this.numAnswers = numAnswers;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display interposed number")
+	/* Still named "Interposed" instead of "Comments" here for compatibilty reasons. */
+	@ApiModelProperty(required = true, value = "used to display comment number")
 	@JsonView(View.Public.class)
 	public int getNumInterposed() {
-		return numInterposed;
+		return numComments;
 	}
 
-	public void setNumInterposed(int numInterposed) {
-		this.numInterposed = numInterposed;
+	/* Still named "Interposed" instead of "Comments" here for compatibilty reasons. */
+	public void setNumInterposed(int numComments) {
+		this.numComments = numComments;
 	}
 
 	@ApiModelProperty(required = true, value = "the number of unanswered questions")
@@ -200,14 +202,16 @@ public class SessionInfo {
 		this.creationTime = creationTime;
 	}
 
-	@ApiModelProperty(required = true, value = "the number of unread interposed questions")
+	/* Still named "Interposed" instead of "Comments" here for compatibilty reasons. */
+	@ApiModelProperty(required = true, value = "the number of unread comments")
 	@JsonView(View.Public.class)
 	public int getNumUnredInterposed() {
-		return numUnredInterposed;
+		return numUnreadComments;
 	}
 
-	public void setNumUnredInterposed(int numUnredInterposed) {
-		this.numUnredInterposed = numUnredInterposed;
+	/* Still named "Interposed" instead of "Comments" here for compatibilty reasons. */
+	public void setNumUnredInterposed(int numUnreadComments) {
+		this.numUnreadComments = numUnreadComments;
 	}
 
 	@Override

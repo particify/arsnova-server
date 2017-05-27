@@ -28,8 +28,6 @@ import java.util.List;
 public interface IDatabaseDao {
 	Question saveQuestion(Session session, Question question);
 
-	InterposedQuestion saveQuestion(Session session, InterposedQuestion question, User user);
-
 	Question getQuestion(String id);
 
 	List<Question> getSkillQuestionsForUsers(Session session);
@@ -66,20 +64,6 @@ public interface IDatabaseDao {
 
 	int getTotalAnswerCount(String sessionKey);
 
-	int getInterposedCount(String sessionKey);
-
-	InterposedReadingCount getInterposedReadingCount(Session session);
-
-	InterposedReadingCount getInterposedReadingCount(Session session, User user);
-
-	List<InterposedQuestion> getInterposedQuestions(Session session, final int start, final int limit);
-
-	List<InterposedQuestion> getInterposedQuestions(Session session, User user, final int start, final int limit);
-
-	InterposedQuestion getInterposedQuestion(String questionId);
-
-	void markInterposedQuestionAsRead(InterposedQuestion question);
-
 	Question updateQuestion(Question question);
 
 	int deleteAnswers(Question question);
@@ -89,8 +73,6 @@ public interface IDatabaseDao {
 	Answer updateAnswer(Answer answer);
 
 	void deleteAnswer(String answerId);
-
-	void deleteInterposedQuestion(InterposedQuestion question);
 
 	int deleteInactiveGuestVisitedSessionLists(long lastActivityBefore);
 
@@ -127,10 +109,6 @@ public interface IDatabaseDao {
 	List<String> getUnAnsweredLectureQuestionIds(Session session, User user);
 
 	List<String> getUnAnsweredPreparationQuestionIds(Session session, User user);
-
-	int deleteAllInterposedQuestions(Session session);
-
-	int deleteAllInterposedQuestions(Session session, User user);
 
 	void publishQuestions(Session session, boolean publish, List<Question> questions);
 

@@ -51,10 +51,10 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 	}
 
 	@Override
-	public void visit(NewInterposedQuestionEvent event) { }
+	public void visit(NewCommentEvent event) { }
 
 	@Override
-	public void visit(DeleteInterposedQuestionEvent deleteInterposedQuestionEvent) { }
+	public void visit(DeleteCommentEvent deleteCommentEvent) { }
 
 	@CacheEvict(value = "learningprogress", key = "#event.Session")
 	@Override

@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.entities.InterposedReadingCount;
-import de.thm.arsnova.entities.transport.InterposedQuestion;
+import de.thm.arsnova.entities.CommentReadingCount;
+import de.thm.arsnova.entities.transport.Comment;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.services.IQuestionService;
 import de.thm.arsnova.web.DeprecatedApi;
@@ -41,17 +41,17 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * Handles requests related to audience questions, which are also called interposed or feedback questions.
+ * Handles requests related to comments.
  */
 @RestController
 @RequestMapping("/audiencequestion")
 @Api(value = "/audiencequestion", description = "the Audience Question API")
-public class AudienceQuestionController extends PaginationController {
+public class CommentController extends PaginationController {
 
 	@Autowired
 	private IQuestionService questionService;
 
-	@ApiOperation(value = "Count all the questions in current session",
+	@ApiOperation(value = "Count all the comments in current session",
 			nickname = "getAudienceQuestionCount")
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	@DeprecatedApi
@@ -60,31 +60,31 @@ public class AudienceQuestionController extends PaginationController {
 		return questionService.getInterposedCount(sessionkey);
 	}
 
-	@ApiOperation(value = "count all unread interposed questions",
+	@ApiOperation(value = "count all unread comments",
 			nickname = "getUnreadInterposedCount")
 	@RequestMapping(value = "/readcount", method = RequestMethod.GET)
 	@DeprecatedApi
 	@Deprecated
-	public InterposedReadingCount getUnreadInterposedCount(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam("sessionkey") final String sessionkey, String user) {
+	public CommentReadingCount getUnreadInterposedCount(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam("sessionkey") final String sessionkey, String user) {
 		return questionService.getInterposedReadingCount(sessionkey, user);
 	}
 
-	@ApiOperation(value = "Retrieves all Interposed Questions for a Session",
+	@ApiOperation(value = "Retrieves all Comments for a Session",
 			nickname = "getInterposedQuestions")
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
-	public List<InterposedQuestion> getInterposedQuestions(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey) {
-		return InterposedQuestion.fromList(questionService.getInterposedQuestions(sessionkey, offset, limit));
+	public List<Comment> getInterposedQuestions(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey) {
+		return Comment.fromList(questionService.getInterposedQuestions(sessionkey, offset, limit));
 	}
 
-	@ApiOperation(value = "Retrieves an InterposedQuestion",
+	@ApiOperation(value = "Retrieves an Comment",
 			nickname = "getInterposedQuestion")
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
-	public InterposedQuestion getInterposedQuestion(@ApiParam(value = "ID of the question that needs to be deleted", required = true) @PathVariable final String questionId) {
-		return new InterposedQuestion(questionService.readInterposedQuestion(questionId));
+	public Comment getInterposedQuestion(@ApiParam(value = "ID of the Comment that needs to be deleted", required = true) @PathVariable final String questionId) {
+		return new Comment(questionService.readInterposedQuestion(questionId));
 	}
 
-	@ApiOperation(value = "Creates a new Interposed Question for a Session and returns the InterposedQuestion's data",
+	@ApiOperation(value = "Creates a new Comment for a Session and returns the Comment's data",
 			nickname = "postInterposedQuestion")
 	@ApiResponses(value = {
 		@ApiResponse(code = 400, message = HTML_STATUS_400)
@@ -93,19 +93,19 @@ public class AudienceQuestionController extends PaginationController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public void postInterposedQuestion(
 			@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey,
-			@ApiParam(value = "the body from the new question", required = true) @RequestBody final de.thm.arsnova.entities.InterposedQuestion question
+			@ApiParam(value = "the body from the new comment", required = true) @RequestBody final de.thm.arsnova.entities.Comment comment
 			) {
-		if (questionService.saveQuestion(question)) {
+		if (questionService.saveQuestion(comment)) {
 			return;
 		}
 
 		throw new BadRequestException();
 	}
 
-	@ApiOperation(value = "Deletes an InterposedQuestion",
+	@ApiOperation(value = "Deletes a Comment",
 			nickname = "deleteInterposedQuestion")
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)
-	public void deleteInterposedQuestion(@ApiParam(value = "ID of the question that needs to be deleted", required = true) @PathVariable final String questionId) {
+	public void deleteInterposedQuestion(@ApiParam(value = "ID of the comment that needs to be deleted", required = true) @PathVariable final String questionId) {
 		questionService.deleteInterposedQuestion(questionId);
 	}
 }

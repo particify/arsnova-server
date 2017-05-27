@@ -23,6 +23,7 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.VisitedSession;
+import de.thm.arsnova.entities.transport.Comment;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.persistance.LogEntryRepository;
@@ -294,7 +295,7 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 //		Map<Document, ImportExportSession.ImportExportQuestion> mapping = new HashMap<>();
 //		// Later, generate all answer documents
 //		List<Document> answers = new ArrayList<>();
-//		// We can then push answers together with interposed questions in one large bulk request
+//		// We can then push answers together with comments in one large bulk request
 //		List<Document> interposedQuestions = new ArrayList<>();
 //		// Motds shouldn't be forgotten, too
 //		List<Document> motds = new ArrayList<>();
@@ -334,7 +335,7 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 //					answers.add(answerDoc);
 //				}
 //			}
-//			for (de.thm.arsnova.entities.transport.InterposedQuestion i : importSession.getFeedbackQuestions()) {
+//			for (de.thm.arsnova.entities.transport.Comment i : importSession.getFeedbackQuestions()) {
 //				final Document q = new Document();
 //				q.put("type", "interposed_question");
 //				q.put("sessionId", session.getId());
@@ -400,9 +401,9 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 //			importExportSession.addQuestionWithAnswers(question, answerList);
 //		}
 //		if (withFeedbackQuestions) {
-//			List<de.thm.arsnova.entities.transport.InterposedQuestion> interposedQuestionList = new ArrayList<>();
-//			for (InterposedQuestion i : getDatabaseDao().getInterposedQuestions(session, 0, 0)) {
-//				de.thm.arsnova.entities.transport.InterposedQuestion transportInterposedQuestion = new de.thm.arsnova.entities.transport.InterposedQuestion(i);
+//			List<de.thm.arsnova.entities.transport.Comment> interposedQuestionList = new ArrayList<>();
+//			for (Comment i : getDatabaseDao().getInterposedQuestions(session, 0, 0)) {
+//				de.thm.arsnova.entities.transport.Comment transportInterposedQuestion = new de.thm.arsnova.entities.transport.Comment(i);
 //				interposedQuestionList.add(transportInterposedQuestion);
 //			}
 //			importExportSession.setFeedbackQuestions(interposedQuestionList);
@@ -415,12 +416,12 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 	}
 
 	private SessionInfo calculateSessionInfo(ImportExportSession importExportSession, Session session) {
-		int unreadInterposed = 0;
+		int unreadComments = 0;
 		int numUnanswered = 0;
 		int numAnswers = 0;
-		for (de.thm.arsnova.entities.transport.InterposedQuestion i : importExportSession.getFeedbackQuestions()) {
+		for (Comment i : importExportSession.getFeedbackQuestions()) {
 			if (!i.isRead()) {
-				unreadInterposed++;
+				unreadComments++;
 			}
 		}
 		for (ImportExportSession.ImportExportQuestion question : importExportSession.getQuestions()) {
@@ -434,7 +435,7 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 		info.setNumUnanswered(numUnanswered);
 		info.setNumAnswers(numAnswers);
 		info.setNumInterposed(importExportSession.getFeedbackQuestions().size());
-		info.setNumUnredInterposed(unreadInterposed);
+		info.setNumUnredInterposed(unreadComments);
 		return info;
 	}
 
@@ -509,12 +510,12 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 				.group(true).keys(sessionIds);
 		final ViewQuery answerCountView = createQuery("by_sessionid").designDocId("_design/answer")
 				.group(true).keys(sessionIds);
-		final ViewQuery interposedCountView = createQuery("by_sessionid").designDocId("_design/comment")
+		final ViewQuery commentCountView = createQuery("by_sessionid").designDocId("_design/Comment")
 				.group(true).keys(sessionIds);
-		final ViewQuery unreadInterposedCountView = createQuery("by_sessionid_read").designDocId("_design/comment")
+		final ViewQuery unreadCommentCountView = createQuery("by_sessionid_read").designDocId("_design/Comment")
 				.group(true).keys(sessions.stream().map(session -> ComplexKey.of(session.getId(), false)).collect(Collectors.toList()));
 
-		return getSessionInfoData(sessions, questionCountView, answerCountView, interposedCountView, unreadInterposedCountView);
+		return getSessionInfoData(sessions, questionCountView, answerCountView, commentCountView, unreadCommentCountView);
 	}
 
 	private List<SessionInfo> getInfosForVisitedSessions(final List<Session> sessions, final User user) {
@@ -588,18 +589,18 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 	private List<SessionInfo> getSessionInfoData(final List<Session> sessions,
 												 final ViewQuery questionCountView,
 												 final ViewQuery answerCountView,
-												 final ViewQuery interposedCountView,
-												 final ViewQuery unredInterposedCountView) {
+												 final ViewQuery commentCountView,
+												 final ViewQuery unreadCommentCountView) {
 		Map<String, Integer> questionCountMap = db.queryView(questionCountView).getRows()
 				.stream().map(row -> new AbstractMap.SimpleImmutableEntry<>(row.getKey(), row.getValueAsInt()))
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 		Map<String, Integer> answerCountMap = db.queryView(answerCountView).getRows()
 				.stream().map(row -> new AbstractMap.SimpleImmutableEntry<>(row.getKey(), row.getValueAsInt()))
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-		Map<String, Integer> interposedCountMap = db.queryView(interposedCountView).getRows()
+		Map<String, Integer> commentCountMap = db.queryView(commentCountView).getRows()
 				.stream().map(row -> new AbstractMap.SimpleImmutableEntry<>(row.getKey(), row.getValueAsInt()))
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-		Map<String, Integer> unredInterposedCountMap = db.queryView(unredInterposedCountView).getRows()
+		Map<String, Integer> unreadCommentCountMap = db.queryView(unreadCommentCountView).getRows()
 				.stream().map(row -> new AbstractMap.SimpleImmutableEntry<>(row.getKey(), row.getValueAsInt()))
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
@@ -607,26 +608,26 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 		for (Session session : sessions) {
 			int numQuestions = 0;
 			int numAnswers = 0;
-			int numInterposed = 0;
-			int numUnredInterposed = 0;
+			int numComments = 0;
+			int numUnreadComments = 0;
 			if (questionCountMap.containsKey(session.getId())) {
 				numQuestions = questionCountMap.get(session.getId());
 			}
 			if (answerCountMap.containsKey(session.getId())) {
 				numAnswers = answerCountMap.get(session.getId());
 			}
-			if (interposedCountMap.containsKey(session.getId())) {
-				numInterposed = interposedCountMap.get(session.getId());
+			if (commentCountMap.containsKey(session.getId())) {
+				numComments = commentCountMap.get(session.getId());
 			}
-			if (unredInterposedCountMap.containsKey(session.getId())) {
-				numUnredInterposed = unredInterposedCountMap.get(session.getId());
+			if (unreadCommentCountMap.containsKey(session.getId())) {
+				numUnreadComments = unreadCommentCountMap.get(session.getId());
 			}
 
 			SessionInfo info = new SessionInfo(session);
 			info.setNumQuestions(numQuestions);
 			info.setNumAnswers(numAnswers);
-			info.setNumInterposed(numInterposed);
-			info.setNumUnredInterposed(numUnredInterposed);
+			info.setNumInterposed(numComments);
+			info.setNumUnredInterposed(numUnreadComments);
 			sessionInfos.add(info);
 		}
 		return sessionInfos;

@@ -23,25 +23,25 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * Wrapper class for counting read and unread interposed questions for a session or a single user.
+ * Wrapper class for counting read and unread comments for a session or a single user.
  */
-@ApiModel(value = "audiencequestion/readcount", description = "the interposed reading count entity")
-public class InterposedReadingCount {
+@ApiModel(value = "audiencequestion/readcount", description = "the comment reading count entity")
+public class CommentReadingCount {
 
 	private int read;
 	private int unread;
 
-	public InterposedReadingCount(int readCount, int unreadCount) {
+	public CommentReadingCount(int readCount, int unreadCount) {
 		this.read = readCount;
 		this.unread = unreadCount;
 	}
 
-	public InterposedReadingCount() {
+	public CommentReadingCount() {
 		this.read = 0;
 		this.unread = 0;
 	}
 
-	@ApiModelProperty(required = true, value = "the number of read interposed questions")
+	@ApiModelProperty(required = true, value = "the number of read comments")
 	@JsonView(View.Public.class)
 	public int getRead() {
 		return read;
@@ -51,7 +51,7 @@ public class InterposedReadingCount {
 		this.read = read;
 	}
 
-	@ApiModelProperty(required = true, value = "the number of unread interposed questions")
+	@ApiModelProperty(required = true, value = "the number of unread comments")
 	@JsonView(View.Public.class)
 	public int getUnread() {
 		return unread;
@@ -61,7 +61,7 @@ public class InterposedReadingCount {
 		this.unread = unread;
 	}
 
-	@ApiModelProperty(required = true, value = "the number of total interposed questions")
+	@ApiModelProperty(required = true, value = "the number of total comments")
 	@JsonView(View.Public.class)
 	public int getTotal() {
 		return getRead() + getUnread();

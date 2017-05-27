@@ -17,21 +17,21 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.Session;
 
 /**
- * Fires whenever an interposed question is deleted.
+ * Fires whenever an comment is deleted.
  */
-public class DeleteInterposedQuestionEvent extends SessionEvent {
+public class DeleteCommentEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	private final InterposedQuestion question;
+	private final Comment comment;
 
-	public DeleteInterposedQuestionEvent(Object source, Session session, InterposedQuestion question) {
+	public DeleteCommentEvent(Object source, Session session, Comment comment) {
 		super(source, session);
-		this.question = question;
+		this.comment = comment;
 	}
 
 	@Override
@@ -39,8 +39,8 @@ public class DeleteInterposedQuestionEvent extends SessionEvent {
 		visitor.visit(this);
 	}
 
-	public InterposedQuestion getQuestion() {
-		return question;
+	public Comment getQuestion() {
+		return comment;
 	}
 
 }

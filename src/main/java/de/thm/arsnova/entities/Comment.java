@@ -17,21 +17,18 @@
  */
 package de.thm.arsnova.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import java.io.Serializable;
-
 /**
- * A question the user is asking the teacher. Also known as feedback or audience question.
+ * A question the user is asking the teacher. Also known as comment, feedback or audience question.
  */
-@ApiModel(value = "audiencequestion", description = "the interposed question entity")
-public class InterposedQuestion implements Serializable {
-
-	private String _id;
-	private String _rev;
-	private String type;
+@ApiModel(value = "comment", description = "the comment entity")
+public class Comment implements Entity {
+	private String id;
+	private String rev;
 	private String subject;
 	private String text;
 	/* FIXME sessionId actually is used to hold the sessionKey.
@@ -44,77 +41,87 @@ public class InterposedQuestion implements Serializable {
 	private boolean read;
 	private String creator;
 
-	@ApiModelProperty(required = true, value = "the couchDB ID")
-	public String get_id() {
-		return _id;
-	}
-	public void set_id(String _id) {
-		this._id = _id;
+	@JsonView({View.Persistence.class, View.Public.class})
+	public String getId() {
+		return id;
 	}
 
-	public String get_rev() {
-		return _rev;
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setId(final String id) {
+		this.id = id;
 	}
-	public void set_rev(String _rev) {
-		this._rev = _rev;
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setRevision(final String rev) {
+		this.rev = rev;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public String getRevision() {
+		return rev;
 	}
 
 	@ApiModelProperty(required = true, value = "is read")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isRead() {
 		return read;
 	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setRead(boolean read) {
 		this.read = read;
 	}
 
-	@ApiModelProperty(required = true, value = "used to display the type")
-	public String getType() {
-		return type;
-	}
-	public void setType(String type) {
-		this.type = type;
-	}
-
 	@ApiModelProperty(required = true, value = "the subject")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getSubject() {
 		return subject;
 	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setSubject(String subject) {
 		this.subject = subject;
 	}
 
 	@ApiModelProperty(required = true, value = "the Text")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getText() {
 		return text;
 	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setText(String text) {
 		this.text = text;
 	}
 
-	@ApiModelProperty(required = true, value = "ID of the session, the question is assigned to")
+	@ApiModelProperty(required = true, value = "ID of the session, the comment is assigned to")
+	@JsonView(View.Persistence.class)
 	public String getSessionId() {
 		return sessionId;
 	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setSessionId(String sessionId) {
 		this.sessionId = sessionId;
 	}
 
 	@ApiModelProperty(required = true, value = "creation date timestamp")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public long getTimestamp() {
 		return timestamp;
 	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
 	}
 
-	/* TODO: use JsonViews instead of JsonIgnore when supported by Spring (4.1)
-	 * http://wiki.fasterxml.com/JacksonJsonViews
-	 * https://jira.spring.io/browse/SPR-7156 */
-	@JsonIgnore
+	@JsonView(View.Persistence.class)
 	public String getCreator() {
 		return creator;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setCreator(String creator) {
 		this.creator = creator;
 	}

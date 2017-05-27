@@ -359,33 +359,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return null;
 	}
 
-	@Override
-	public InterposedQuestion saveQuestion(final Session session, final InterposedQuestion question, User user) {
-		final Document q = new Document();
-		q.put("type", "interposed_question");
-		q.put("sessionId", session.getId());
-		q.put("subject", question.getSubject());
-		q.put("text", question.getText());
-		if (question.getTimestamp() != 0) {
-			q.put("timestamp", question.getTimestamp());
-		} else {
-			q.put("timestamp", System.currentTimeMillis());
-		}
-		q.put("read", false);
-		q.put("creator", user.getUsername());
-		try {
-			database.saveDocument(q);
-			question.set_id(q.getId());
-			question.set_rev(q.getRev());
-
-			return question;
-		} catch (final IOException e) {
-			logger.error("Could not save interposed question {}.", question, e);
-		}
-
-		return null;
-	}
-
 	@Cacheable("questions")
 	@Override
 	public Question getQuestion(final String id) {
@@ -722,138 +695,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 	}
 
-	@Override
-	public int getInterposedCount(final String sessionKey) {
-		final Session s = sessionRepository.getSessionFromKeyword(sessionKey);
-		if (s == null) {
-			throw new NotFoundException();
-		}
-
-		final View view = new View("comment/by_sessionid");
-		view.setKey(s.getId());
-		view.setGroup(true);
-		final ViewResults results = getDatabase().view(view);
-		if (results.isEmpty() || results.getResults().isEmpty()) {
-			return 0;
-		}
-		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
-	}
-
-	@Override
-	public InterposedReadingCount getInterposedReadingCount(final Session session) {
-		final View view = new View("comment/by_sessionid_read");
-		view.setStartKeyArray(session.getId());
-		view.setEndKeyArray(session.getId(), "{}");
-		view.setGroup(true);
-		return getInterposedReadingCount(view);
-	}
-
-	@Override
-	public InterposedReadingCount getInterposedReadingCount(final Session session, final User user) {
-		final View view = new View("comment/by_sessionid_creator_read");
-		view.setStartKeyArray(session.getId(), user.getUsername());
-		view.setEndKeyArray(session.getId(), user.getUsername(), "{}");
-		view.setGroup(true);
-		return getInterposedReadingCount(view);
-	}
-
-	private InterposedReadingCount getInterposedReadingCount(final View view) {
-		final ViewResults results = getDatabase().view(view);
-		if (results.isEmpty() || results.getResults().isEmpty()) {
-			return new InterposedReadingCount();
-		}
-		// A complete result looks like this. Note that the second row is optional, and that the first one may be
-		// 'unread' or 'read', i.e., results may be switched around or only one result may be present.
-		// count = {"rows":[
-		// {"key":["cecebabb21b096e592d81f9c1322b877","Guestc9350cf4a3","read"],"value":1},
-		// {"key":["cecebabb21b096e592d81f9c1322b877","Guestc9350cf4a3","unread"],"value":1}
-		// ]}
-		int read = 0, unread = 0;
-		boolean isRead = false;
-		final JSONObject fst = results.getJSONArray("rows").getJSONObject(0);
-		final JSONObject snd = results.getJSONArray("rows").optJSONObject(1);
-
-		final JSONArray fstkey = fst.getJSONArray("key");
-		if (fstkey.size() == 2) {
-			isRead = fstkey.getBoolean(1);
-		} else if (fstkey.size() == 3) {
-			isRead = fstkey.getBoolean(2);
-		}
-		if (isRead) {
-			read = fst.optInt("value");
-		} else {
-			unread = fst.optInt("value");
-		}
-
-		if (snd != null) {
-			final JSONArray sndkey = snd.getJSONArray("key");
-			if (sndkey.size() == 2) {
-				isRead = sndkey.getBoolean(1);
-			} else {
-				isRead = sndkey.getBoolean(2);
-			}
-			if (isRead) {
-				read = snd.optInt("value");
-			} else {
-				unread = snd.optInt("value");
-			}
-		}
-		return new InterposedReadingCount(read, unread);
-	}
-
-	@Override
-	public List<InterposedQuestion> getInterposedQuestions(final Session session, final int start, final int limit) {
-		final View view = new View("comment/doc_by_sessionid_timestamp");
-		if (start > 0) {
-			view.setSkip(start);
-		}
-		if (limit > 0) {
-			view.setLimit(limit);
-		}
-		view.setDescending(true);
-		view.setStartKeyArray(session.getId(), "{}");
-		view.setEndKeyArray(session.getId());
-		final ViewResults questions = getDatabase().view(view);
-		if (questions == null || questions.isEmpty()) {
-			return null;
-		}
-		return createInterposedList(session, questions);
-	}
-
-	@Override
-	public List<InterposedQuestion> getInterposedQuestions(final Session session, final User user, final int start, final int limit) {
-		final View view = new View("comment/doc_by_sessionid_creator_timestamp");
-		if (start > 0) {
-			view.setSkip(start);
-		}
-		if (limit > 0) {
-			view.setLimit(limit);
-		}
-		view.setDescending(true);
-		view.setStartKeyArray(session.getId(), user.getUsername(), "{}");
-		view.setEndKeyArray(session.getId(), user.getUsername());
-		final ViewResults questions = getDatabase().view(view);
-		if (questions == null || questions.isEmpty()) {
-			return null;
-		}
-		return createInterposedList(session, questions);
-	}
-
-	private List<InterposedQuestion> createInterposedList(
-			final Session session, final ViewResults questions) {
-		final List<InterposedQuestion> result = new ArrayList<>();
-		for (final Document document : questions.getResults()) {
-			final InterposedQuestion question = (InterposedQuestion) JSONObject.toBean(
-					document.getJSONObject().getJSONObject("value"),
-					InterposedQuestion.class
-					);
-			question.setSessionId(session.getKeyword());
-			question.set_id(document.getId());
-			result.add(question);
-		}
-		return result;
-	}
-
 	@Cacheable("statistics")
 	@Override
 	public Statistics getStatistics() {
@@ -930,33 +771,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			logger.error("Could not retrieve session count.", e);
 		}
 		return stats;
-	}
-
-	@Override
-	public InterposedQuestion getInterposedQuestion(final String questionId) {
-		try {
-			final Document document = getDatabase().getDocument(questionId);
-			final InterposedQuestion question = (InterposedQuestion) JSONObject.toBean(document.getJSONObject(),
-					InterposedQuestion.class);
-			/* TODO: Refactor code so the next line can be removed */
-			question.setSessionId(sessionRepository.getSessionFromKeyword(question.getSessionId()).getId());
-			return question;
-		} catch (final IOException e) {
-			logger.error("Could not load interposed question {}.", questionId, e);
-		}
-		return null;
-	}
-
-	@Override
-	public void markInterposedQuestionAsRead(final InterposedQuestion question) {
-		try {
-			question.setRead(true);
-			final Document document = getDatabase().getDocument(question.get_id());
-			document.put("read", question.isRead());
-			getDatabase().saveDocument(document);
-		} catch (final IOException e) {
-			logger.error("Could not mark interposed question as read {}.", question.get_id(), e);
-		}
 	}
 
 	@CacheEvict(value = "answers", key = "#question")
@@ -1050,16 +864,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			dbLogger.log("delete", "type", "answer");
 		} catch (final IOException e) {
 			logger.error("Could not delete answer {}.", answerId, e);
-		}
-	}
-
-	@Override
-	public void deleteInterposedQuestion(final InterposedQuestion question) {
-		try {
-			deleteDocument(question.get_id());
-			dbLogger.log("delete", "type", "comment");
-		} catch (final IOException e) {
-			logger.error("Could not delete interposed question {}.", question.get_id(), e);
 		}
 	}
 
@@ -1388,45 +1192,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			ids.add(d.getId());
 		}
 		return ids;
-	}
-
-	@Override
-	public int deleteAllInterposedQuestions(final Session session) {
-		final View view = new View("comment/by_sessionid");
-		view.setKey(session.getId());
-		final ViewResults questions = getDatabase().view(view);
-
-		return deleteAllInterposedQuestions(session, questions);
-	}
-
-	@Override
-	public int deleteAllInterposedQuestions(final Session session, final User user) {
-		final View view = new View("comment/by_sessionid_creator_read");
-		view.setStartKeyArray(session.getId(), user.getUsername());
-		view.setEndKeyArray(session.getId(), user.getUsername(), "{}");
-		final ViewResults questions = getDatabase().view(view);
-
-		return deleteAllInterposedQuestions(session, questions);
-	}
-
-	private int deleteAllInterposedQuestions(final Session session, final ViewResults questions) {
-		if (questions == null || questions.isEmpty()) {
-			return 0;
-		}
-		List<Document> results = questions.getResults();
-		/* TODO: use bulk delete */
-		for (final Document document : results) {
-			try {
-				deleteDocument(document.getId());
-			} catch (final IOException e) {
-				logger.error("Could not delete all interposed questions {}.", session, e);
-			}
-		}
-
-		/* This does account for failed deletions */
-		dbLogger.log("delete", "type", "comment", "commentCount", results.size());
-
-		return results.size();
 	}
 
 	@Override

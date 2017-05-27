@@ -28,7 +28,7 @@ import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
 import com.corundumstudio.socketio.protocol.Packet;
 import com.corundumstudio.socketio.protocol.PacketType;
-import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.LearningProgressOptions;
 import de.thm.arsnova.events.*;
@@ -181,19 +181,19 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 
 		server.addEventListener(
 				"readInterposedQuestion",
-				de.thm.arsnova.entities.transport.InterposedQuestion.class,
-				new DataListener<de.thm.arsnova.entities.transport.InterposedQuestion>() {
+				de.thm.arsnova.entities.transport.Comment.class,
+				new DataListener<de.thm.arsnova.entities.transport.Comment>() {
 			@Override
 			@Timed(name = "readInterposedQuestionEvent.onData")
 			public void onData(
 					SocketIOClient client,
-					de.thm.arsnova.entities.transport.InterposedQuestion question,
+					de.thm.arsnova.entities.transport.Comment comment,
 					AckRequest ackRequest) {
 				final User user = userService.getUser2SocketId(client.getSessionId());
 				try {
-					questionService.readInterposedQuestionInternal(question.getId(), user);
+					questionService.readInterposedQuestionInternal(comment.getId(), user);
 				} catch (NotFoundException | UnauthorizedException e) {
-					logger.error("Loading of question {} failed for user {} with exception {}", question.getId(), user, e.getMessage());
+					logger.error("Loading of comment {} failed for user {} with exception {}", comment.getId(), user, e.getMessage());
 				}
 			}
 		});
@@ -425,9 +425,9 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 		broadcastInSession(session.getKeyword(), "answersToLecQuestionAvail", lecturerQuestion.get_id());
 	}
 
-	public void reportAudienceQuestionAvailable(final de.thm.arsnova.entities.Session session, final InterposedQuestion audienceQuestion) {
+	public void reportAudienceQuestionAvailable(final de.thm.arsnova.entities.Session session, final Comment audienceQuestion) {
 		/* TODO role handling implementation, send this only to users with role lecturer */
-		broadcastInSession(session.getKeyword(), "audQuestionAvail", audienceQuestion.get_id());
+		broadcastInSession(session.getKeyword(), "audQuestionAvail", audienceQuestion.getId());
 	}
 
 	public void reportLecturerQuestionAvailable(final de.thm.arsnova.entities.Session session, final List<de.thm.arsnova.entities.Question> qs) {
@@ -496,7 +496,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	}
 
 	@Override
-	public void visit(NewInterposedQuestionEvent event) {
+	public void visit(NewCommentEvent event) {
 		this.reportAudienceQuestionAvailable(event.getSession(), event.getQuestion());
 	}
 
@@ -643,7 +643,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	}
 
 	@Override
-	public void visit(DeleteInterposedQuestionEvent deleteInterposedQuestionEvent) {
+	public void visit(DeleteCommentEvent deleteCommentEvent) {
 		// TODO Auto-generated method stub
 
 	}

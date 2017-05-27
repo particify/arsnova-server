@@ -18,8 +18,8 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.InterposedQuestion;
-import de.thm.arsnova.entities.InterposedReadingCount;
+import de.thm.arsnova.entities.Comment;
+import de.thm.arsnova.entities.CommentReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.User;
 
@@ -32,7 +32,7 @@ import java.util.Map;
 public interface IQuestionService {
 	Question saveQuestion(Question question);
 
-	boolean saveQuestion(InterposedQuestion question);
+	boolean saveQuestion(Comment comment);
 
 	Question getQuestion(String id);
 
@@ -80,13 +80,13 @@ public interface IQuestionService {
 
 	int getInterposedCount(String sessionKey);
 
-	InterposedReadingCount getInterposedReadingCount(String sessionKey, String username);
+	CommentReadingCount getInterposedReadingCount(String sessionKey, String username);
 
-	List<InterposedQuestion> getInterposedQuestions(String sessionKey, int offset, int limit);
+	List<Comment> getInterposedQuestions(String sessionKey, int offset, int limit);
 
-	InterposedQuestion readInterposedQuestion(String questionId);
+	Comment readInterposedQuestion(String commentId);
 
-	InterposedQuestion readInterposedQuestionInternal(String questionId, User user);
+	Comment readInterposedQuestionInternal(String commentId, User user);
 
 	Question update(Question question);
 
@@ -100,7 +100,7 @@ public interface IQuestionService {
 
 	void deleteAnswer(String questionId, String answerId);
 
-	void deleteInterposedQuestion(String questionId);
+	void deleteInterposedQuestion(String commentId);
 
 	List<Question> getLectureQuestions(String sessionkey);
 

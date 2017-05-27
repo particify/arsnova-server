@@ -21,7 +21,7 @@ import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.config.TestAppConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
 import de.thm.arsnova.dao.StubDatabaseDao;
-import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.exceptions.NotFoundException;
 import org.junit.After;
@@ -101,30 +101,30 @@ public class QuestionServiceTest {
 	@Test
 	public void testShouldMarkInterposedQuestionAsReadIfSessionCreator() throws Exception {
 		setAuthenticated(true, "ptsr00");
-		final InterposedQuestion theQ = new InterposedQuestion();
-		theQ.setRead(false);
-		theQ.set_id("the internal id");
-		theQ.setSessionId("12345678");
-		databaseDao.interposedQuestion = theQ;
+		final Comment comment = new Comment();
+		comment.setRead(false);
+		comment.setId("the internal id");
+		comment.setSessionId("12345678");
+		databaseDao.comment = comment;
 
-		questionService.readInterposedQuestion(theQ.get_id());
+		questionService.readInterposedQuestion(comment.getId());
 
-		assertTrue(theQ.isRead());
+		assertTrue(comment.isRead());
 	}
 
 	@Test
 	public void testShouldNotMarkInterposedQuestionAsReadIfRegularUser() throws Exception {
 		setAuthenticated(true, "regular user");
-		final InterposedQuestion theQ = new InterposedQuestion();
-		theQ.setRead(false);
-		theQ.set_id("the internal id");
-		theQ.setSessionId("12345678");
-		theQ.setCreator("regular user");
-		databaseDao.interposedQuestion = theQ;
+		final Comment comment = new Comment();
+		comment.setRead(false);
+		comment.setId("the internal id");
+		comment.setSessionId("12345678");
+		comment.setCreator("regular user");
+		databaseDao.comment = comment;
 
-		questionService.readInterposedQuestion(theQ.get_id());
+		questionService.readInterposedQuestion(comment.getId());
 
-		assertFalse(theQ.isRead());
+		assertFalse(comment.isRead());
 	}
 
 	@Test(expected = AccessDeniedException.class)

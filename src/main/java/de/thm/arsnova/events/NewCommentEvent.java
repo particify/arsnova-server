@@ -17,25 +17,25 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.Session;
 
 /**
- * Fires whenever a new interposed (aka. feedback or audience) question is added.
+ * Fires whenever a new comment is added.
  */
-public class NewInterposedQuestionEvent extends SessionEvent {
+public class NewCommentEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	private final InterposedQuestion question;
+	private final Comment comment;
 
-	public NewInterposedQuestionEvent(Object source, Session session, InterposedQuestion question) {
+	public NewCommentEvent(Object source, Session session, Comment comment) {
 		super(source, session);
-		this.question = question;
+		this.comment = comment;
 	}
 
-	public InterposedQuestion getQuestion() {
-		return question;
+	public Comment getQuestion() {
+		return comment;
 	}
 
 	@Override

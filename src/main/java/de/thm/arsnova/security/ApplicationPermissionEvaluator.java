@@ -18,11 +18,12 @@
 package de.thm.arsnova.security;
 
 import de.thm.arsnova.dao.IDatabaseDao;
-import de.thm.arsnova.entities.InterposedQuestion;
+import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.SessionRepository;
 import org.pac4j.oauth.profile.facebook.FacebookProfile;
 import org.pac4j.oauth.profile.google2.Google2Profile;
@@ -50,6 +51,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 	@Autowired
 	private SessionRepository sessionRepository;
+
+	@Autowired
+	private CommentRepository commentRepository;
 
 	@Override
 	public boolean hasPermission(
@@ -89,7 +93,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				) {
 			return true;
 		} else if (
-				"interposedquestion".equals(targetType)
+				"comment".equals(targetType)
 				&& checkInterposedQuestionPermission(username, targetId, permission)
 				) {
 			return true;
@@ -137,14 +141,14 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Object permission
 			) {
 		if (permission instanceof String && "owner".equals(permission)) {
-			final InterposedQuestion question = dao.getInterposedQuestion(targetId.toString());
-			if (question != null) {
-				// Does the creator want to delete his own question?
-				if (question.getCreator() != null && question.getCreator().equals(username)) {
+			final Comment comment = commentRepository.getInterposedQuestion(targetId.toString());
+			if (comment != null) {
+				// Does the creator want to delete his own comment?
+				if (comment.getCreator() != null && comment.getCreator().equals(username)) {
 					return true;
 				}
 				// Allow deletion if requested by session owner
-				final Session session = sessionRepository.getSessionFromKeyword(question.getSessionId());
+				final Session session = sessionRepository.getSessionFromKeyword(comment.getSessionId());
 
 				return session != null && session.getCreator().equals(username);
 			}
