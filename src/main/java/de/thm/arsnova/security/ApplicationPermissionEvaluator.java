@@ -17,16 +17,16 @@
  */
 package de.thm.arsnova.security;
 
-import com.github.leleuj.ss.oauth.client.authentication.OAuthAuthenticationToken;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.UnauthorizedException;
-import org.scribe.up.profile.facebook.FacebookProfile;
-import org.scribe.up.profile.google.Google2Profile;
-import org.scribe.up.profile.twitter.TwitterProfile;
+import org.pac4j.oauth.profile.facebook.FacebookProfile;
+import org.pac4j.oauth.profile.google2.Google2Profile;
+import org.pac4j.oauth.profile.twitter.TwitterProfile;
+import org.pac4j.springframework.security.authentication.Pac4jAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.PermissionEvaluator;
@@ -153,18 +153,18 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			throw new UnauthorizedException();
 		}
 
-		if (authentication instanceof OAuthAuthenticationToken) {
+		if (authentication instanceof Pac4jAuthenticationToken) {
 			User user = null;
 
-			final OAuthAuthenticationToken token = (OAuthAuthenticationToken) authentication;
-			if (token.getUserProfile() instanceof Google2Profile) {
-				final Google2Profile profile = (Google2Profile) token.getUserProfile();
+			final Pac4jAuthenticationToken token = (Pac4jAuthenticationToken) authentication;
+			if (token.getProfile() instanceof Google2Profile) {
+				final Google2Profile profile = (Google2Profile) token.getProfile();
 				user = new User(profile);
-			} else if (token.getUserProfile() instanceof TwitterProfile) {
-				final TwitterProfile profile = (TwitterProfile) token.getUserProfile();
+			} else if (token.getProfile() instanceof TwitterProfile) {
+				final TwitterProfile profile = (TwitterProfile) token.getProfile();
 				user = new User(profile);
-			} else if (token.getUserProfile() instanceof FacebookProfile) {
-				final FacebookProfile profile = (FacebookProfile) token.getUserProfile();
+			} else if (token.getProfile() instanceof FacebookProfile) {
+				final FacebookProfile profile = (FacebookProfile) token.getProfile();
 				user = new User(profile);
 			}
 

@@ -23,10 +23,11 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.services.UserSessionService;
-import org.scribe.up.provider.impl.FacebookProvider;
-import org.scribe.up.provider.impl.Google2Provider;
-import org.scribe.up.provider.impl.TwitterProvider;
-import org.scribe.up.session.HttpUserSession;
+import org.pac4j.core.context.J2EContext;
+import org.pac4j.core.exception.HttpAction;
+import org.pac4j.oauth.client.FacebookClient;
+import org.pac4j.oauth.client.Google2Client;
+import org.pac4j.oauth.client.TwitterClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,13 +127,13 @@ public class LoginController extends AbstractController {
 	private DaoAuthenticationProvider daoProvider;
 
 	@Autowired(required = false)
-	private TwitterProvider twitterProvider;
+	private TwitterClient twitterClient;
 
 	@Autowired(required = false)
-	private Google2Provider googleProvider;
+	private Google2Client google2Client;
 
 	@Autowired(required = false)
-	private FacebookProvider facebookProvider;
+	private FacebookClient facebookClient;
 
 	@Autowired(required = false)
 	private LdapAuthenticationProvider ldapAuthenticationProvider;
@@ -245,7 +246,7 @@ public class LoginController extends AbstractController {
 			@RequestParam(value = "failureurl", defaultValue = "/") String failureUrl,
 			final HttpServletRequest request,
 			final HttpServletResponse response
-	) throws IOException, ServletException {
+	) throws HttpAction, IOException, ServletException {
 		View result = null;
 
 		/* Use URLs from a request parameters for redirection as long as the
@@ -283,16 +284,17 @@ public class LoginController extends AbstractController {
 		if (casEnabled && "cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);
 		} else if (twitterEnabled && "twitter".equals(type)) {
-			final String authUrl = twitterProvider.getAuthorizationUrl(new HttpUserSession(request));
-			result = new RedirectView(authUrl);
+			result = new RedirectView(
+					twitterClient.getRedirectAction(new J2EContext(request, response)).getLocation());
 		} else if (facebookEnabled && "facebook".equals(type)) {
-			facebookProvider.setFields("id,link");
-			facebookProvider.setScope("");
-			final String authUrl = facebookProvider.getAuthorizationUrl(new HttpUserSession(request));
-			result = new RedirectView(authUrl);
+			facebookClient.setFields("id,link");
+			facebookClient.setScope("");
+			result = new RedirectView(
+					facebookClient.getRedirectAction(new J2EContext(request, response)).getLocation());
 		} else if (googleEnabled && "google".equals(type)) {
-			final String authUrl = googleProvider.getAuthorizationUrl(new HttpUserSession(request));
-			result = new RedirectView(authUrl);
+			google2Client.setScope(Google2Client.Google2Scope.EMAIL);
+			result = new RedirectView(
+					google2Client.getRedirectAction(new J2EContext(request, response)).getLocation());
 		} else {
 			response.setStatus(HttpStatus.BAD_REQUEST.value());
 		}
