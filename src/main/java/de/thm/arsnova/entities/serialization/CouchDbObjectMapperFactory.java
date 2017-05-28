@@ -17,6 +17,7 @@
  */
 package de.thm.arsnova.entities.serialization;
 
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.impl.StdObjectMapperFactory;
@@ -24,6 +25,8 @@ import org.ektorp.impl.StdObjectMapperFactory;
 public class CouchDbObjectMapperFactory extends StdObjectMapperFactory {
 	public ObjectMapper createObjectMapper(CouchDbConnector connector) {
 		ObjectMapper om = super.createObjectMapper(connector);
+		om.configure(MapperFeature.DEFAULT_VIEW_INCLUSION, false);
+		om.setConfig(om.getSerializationConfig().withView(View.Persistence.class));
 		om.registerModule(new CouchDbDocumentModule());
 
 		return om;
