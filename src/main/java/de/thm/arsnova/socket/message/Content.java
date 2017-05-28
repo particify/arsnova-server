@@ -20,14 +20,14 @@ package de.thm.arsnova.socket.message;
 /**
  * Represents a question.
  */
-public class Question {
+public class Content {
 
 	private final String _id;
 	private final String variant;
 
-	public Question(de.thm.arsnova.entities.Question question) {
-		this._id = question.get_id();
-		this.variant = question.getQuestionVariant();
+	public Content(de.thm.arsnova.entities.Content content) {
+		this._id = content.getId();
+		this.variant = content.getQuestionVariant();
 	}
 
 	public String get_id() {

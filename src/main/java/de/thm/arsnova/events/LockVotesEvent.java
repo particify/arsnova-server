@@ -17,27 +17,27 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Session;
 
 import java.util.List;
 
 /**
- * Fires whenever voting of multiple questions is disabled.
+ * Fires whenever voting of multiple contents is disabled.
  */
 public class LockVotesEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	private List<Question> questions;
+	private List<Content> contents;
 
-	public LockVotesEvent(Object source, Session session, List<Question> questions) {
+	public LockVotesEvent(Object source, Session session, List<Content> contents) {
 		super(source, session);
-		this.questions = questions;
+		this.contents = contents;
 	}
 
-	public List<Question> getQuestions() {
-		return this.questions;
+	public List<Content> getQuestions() {
+		return this.contents;
 	}
 
 	@Override

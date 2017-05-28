@@ -22,7 +22,7 @@ import de.thm.arsnova.config.TestAppConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
 import de.thm.arsnova.dao.StubDatabaseDao;
 import de.thm.arsnova.entities.Comment;
-import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.exceptions.NotFoundException;
 import org.junit.After;
 import org.junit.Before;
@@ -48,10 +48,10 @@ import static org.junit.Assert.*;
 @WebAppConfiguration
 @ContextConfiguration(classes = {AppConfig.class, TestAppConfig.class, TestSecurityConfig.class})
 @ActiveProfiles("test")
-public class QuestionServiceTest {
+public class ContentServiceTest {
 
 	@Autowired
-	private IQuestionService questionService;
+	private IContentService contentService;
 
 	@Autowired
 	private StubUserService userService;
@@ -83,19 +83,19 @@ public class QuestionServiceTest {
 	@Test(expected = AuthenticationCredentialsNotFoundException.class)
 	public void testShouldNotReturnQuestionsIfNotAuthenticated() {
 		setAuthenticated(false, "nobody");
-		questionService.getSkillQuestions("12345678");
+		contentService.getSkillQuestions("12345678");
 	}
 
 	@Test(expected = NotFoundException.class)
 	public void testShouldFindQuestionsForNonExistantSession() {
 		setAuthenticated(true, "ptsr00");
-		questionService.getSkillQuestions("00000000");
+		contentService.getSkillQuestions("00000000");
 	}
 
 	@Test
 	public void testShouldFindQuestions() {
 		setAuthenticated(true, "ptsr00");
-		assertEquals(1, questionService.getSkillQuestionCount("12345678"));
+		assertEquals(1, contentService.getSkillQuestionCount("12345678"));
 	}
 
 	@Test
@@ -107,7 +107,7 @@ public class QuestionServiceTest {
 		comment.setSessionId("12345678");
 		databaseDao.comment = comment;
 
-		questionService.readInterposedQuestion(comment.getId());
+		contentService.readInterposedQuestion(comment.getId());
 
 		assertTrue(comment.isRead());
 	}
@@ -122,7 +122,7 @@ public class QuestionServiceTest {
 		comment.setCreator("regular user");
 		databaseDao.comment = comment;
 
-		questionService.readInterposedQuestion(comment.getId());
+		contentService.readInterposedQuestion(comment.getId());
 
 		assertFalse(comment.isRead());
 	}
@@ -130,21 +130,21 @@ public class QuestionServiceTest {
 	@Test(expected = AccessDeniedException.class)
 	public void testShouldSaveQuestion() throws Exception{
 		setAuthenticated(true, "regular user");
-		final Question question = new Question();
-		question.setSessionKeyword("12345678");
-		question.setQuestionVariant("freetext");
-		questionService.saveQuestion(question);
+		final Content content = new Content();
+		content.setSessionKeyword("12345678");
+		content.setQuestionVariant("freetext");
+		contentService.saveQuestion(content);
 	}
 
 	@Test(expected = AccessDeniedException.class)
 	public void testShouldNotDeleteQuestion() throws Exception{
 		setAuthenticated(true, "otheruser");
-		questionService.deleteQuestion("a1a2a3a4a5a6a7a8a9a");
+		contentService.deleteQuestion("a1a2a3a4a5a6a7a8a9a");
 	}
 
 	@Test(expected = AccessDeniedException.class)
 	public void testShouldNotDeleteInterposedQuestion() throws Exception{
 		setAuthenticated(true, "otheruser");
-		questionService.deleteInterposedQuestion("a1a2a3a4a5a6a7a8a9a");
+		contentService.deleteInterposedQuestion("a1a2a3a4a5a6a7a8a9a");
 	}
 }

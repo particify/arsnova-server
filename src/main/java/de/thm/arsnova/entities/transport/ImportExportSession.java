@@ -18,8 +18,8 @@
 package de.thm.arsnova.entities.transport;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Motd;
-import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionFeature;
 import de.thm.arsnova.entities.SessionInfo;
@@ -40,7 +40,7 @@ public class ImportExportSession {
 
 	private ImportExportSesssion session;
 
-	private List<ImportExportQuestion> questions;
+	private List<ImportExportContent> questions;
 
 	private List<Comment> feedbackQuestions;
 
@@ -69,11 +69,11 @@ public class ImportExportSession {
 
 	@ApiModelProperty(required = true, value = "used to display questions")
 	@JsonView(View.Public.class)
-	public List<ImportExportQuestion> getQuestions() {
+	public List<ImportExportContent> getQuestions() {
 		return questions;
 	}
 
-	public void setQuestions(List<ImportExportQuestion> questions) {
+	public void setQuestions(List<ImportExportContent> questions) {
 		this.questions = questions;
 	}
 
@@ -126,8 +126,8 @@ public class ImportExportSession {
 		session = iesession;
 	}
 
-	public void addQuestionWithAnswers(Question q, List<Answer> aL) {
-		ImportExportQuestion ieq = new ImportExportQuestion(q);
+	public void addQuestionWithAnswers(Content q, List<Answer> aL) {
+		ImportExportContent ieq = new ImportExportContent(q);
 		ieq.setAnswers(aL);
 		questions.add(ieq);
 	}
@@ -158,16 +158,15 @@ public class ImportExportSession {
 		return s;
 	}
 
-	public static class ImportExportQuestion extends Question {
+	public static class ImportExportContent extends Content {
 
 		private List<Answer> answers;
 
-		public ImportExportQuestion() {
+		public ImportExportContent() {
 
 		}
 
-		public ImportExportQuestion(Question q) {
-			setType(q.getType());
+		public ImportExportContent(Content q) {
 			setQuestionType(q.getQuestionType());
 			setQuestionVariant(q.getQuestionVariant());
 			setSubject(q.getSubject());

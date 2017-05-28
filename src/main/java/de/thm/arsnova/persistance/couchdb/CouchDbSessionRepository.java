@@ -292,7 +292,7 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 //		// We need to remember which answers belong to which question.
 //		// The answers need a questionId, so we first store the questions to get the IDs.
 //		// Then we update the answer objects and store them as well.
-//		Map<Document, ImportExportSession.ImportExportQuestion> mapping = new HashMap<>();
+//		Map<Document, ImportExportSession.ImportExportContent> mapping = new HashMap<>();
 //		// Later, generate all answer documents
 //		List<Document> answers = new ArrayList<>();
 //		// We can then push answers together with comments in one large bulk request
@@ -301,7 +301,7 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 //		List<Document> motds = new ArrayList<>();
 //		try {
 //			// add session id to all questions and generate documents
-//			for (ImportExportSession.ImportExportQuestion question : importSession.getQuestions()) {
+//			for (ImportExportSession.ImportExportContent question : importSession.getQuestions()) {
 //				Document doc = toQuestionDocument(session, question);
 //				question.setSessionId(session.getId());
 //				questions.add(doc);
@@ -310,11 +310,11 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 //			database.bulkSaveDocuments(questions.toArray(new Document[questions.size()]));
 //
 //			// bulk import answers together with interposed questions
-//			for (Map.Entry<Document, ImportExportSession.ImportExportQuestion> entry : mapping.entrySet()) {
+//			for (Map.Entry<Document, ImportExportSession.ImportExportContent> entry : mapping.entrySet()) {
 //				final Document doc = entry.getKey();
-//				final ImportExportSession.ImportExportQuestion question = entry.getValue();
+//				final ImportExportSession.ImportExportContent question = entry.getValue();
 //				question.setId(doc.getId());
-//				question.set_rev(doc.getRev());
+//				question.setRevision(doc.getRev());
 //				for (de.thm.arsnova.entities.transport.Answer answer : question.getAnswers()) {
 //					final Answer a = answer.generateAnswerEntity(user, question);
 //					final Document answerDoc = new Document();
@@ -379,8 +379,8 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 //		ImportExportSession importExportSession = new ImportExportSession();
 //		Session session = getDatabaseDao().getSessionFromKeyword(sessionkey);
 //		importExportSession.setSessionFromSessionObject(session);
-//		List<Question> questionList = getDatabaseDao().getAllSkillQuestions(session);
-//		for (Question question : questionList) {
+//		List<Content> questionList = getDatabaseDao().getAllSkillQuestions(session);
+//		for (Content question : questionList) {
 //			List<de.thm.arsnova.entities.transport.Answer> answerList = new ArrayList<>();
 //			if (withAnswers) {
 //				for (Answer a : this.getDatabaseDao().getAllAnswers(question)) {
@@ -424,7 +424,7 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 				unreadComments++;
 			}
 		}
-		for (ImportExportSession.ImportExportQuestion question : importExportSession.getQuestions()) {
+		for (ImportExportSession.ImportExportContent question : importExportSession.getQuestions()) {
 			numAnswers += question.getAnswers().size();
 			if (question.getAnswers().isEmpty()) {
 				numUnanswered++;
@@ -506,7 +506,7 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 	private List<SessionInfo> getInfosForSessions(final List<Session> sessions) {
 		/* TODO: migrate to new view */
 		List<String> sessionIds = sessions.stream().map(Session::getId).collect(Collectors.toList());
-		final ViewQuery questionCountView = createQuery("by_sessionid").designDocId("_design/content")
+		final ViewQuery questionCountView = createQuery("by_sessionid").designDocId("_design/Content")
 				.group(true).keys(sessionIds);
 		final ViewQuery answerCountView = createQuery("by_sessionid").designDocId("_design/answer")
 				.group(true).keys(sessionIds);
@@ -521,7 +521,7 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 	private List<SessionInfo> getInfosForVisitedSessions(final List<Session> sessions, final User user) {
 		final ViewQuery answeredQuestionsView = createQuery("by_user_sessionid").designDocId("_design/answer")
 				.keys(sessions.stream().map(session -> ComplexKey.of(user.getUsername(), session.getId())).collect(Collectors.toList()));
-		final ViewQuery questionIdsView = createQuery("by_sessionid").designDocId("_design/content")
+		final ViewQuery questionIdsView = createQuery("by_sessionid").designDocId("_design/Content")
 				.keys(sessions.stream().map(Session::getId).collect(Collectors.toList()));
 
 		return getVisitedSessionInfoData(sessions, answeredQuestionsView, questionIdsView);

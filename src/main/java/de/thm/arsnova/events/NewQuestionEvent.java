@@ -17,25 +17,25 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Session;
 
 /**
- * Fires whenever a new question is added.
+ * Fires whenever a new content is added.
  */
 public class NewQuestionEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Question question;
+	private final Content content;
 
-	public NewQuestionEvent(Object source, Session session, Question question) {
+	public NewQuestionEvent(Object source, Session session, Content content) {
 		super(source, session);
-		this.question = question;
+		this.content = content;
 	}
 
-	public Question getQuestion() {
-		return question;
+	public Content getQuestion() {
+		return content;
 	}
 
 	@Override

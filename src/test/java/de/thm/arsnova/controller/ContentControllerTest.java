@@ -31,13 +31,13 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-public class LecturerQuestionControllerTest extends AbstractControllerTest {
+public class ContentControllerTest extends AbstractControllerTest {
 
 	@Autowired
 	private StubUserService userService;
 
 	@Autowired
-	private LecturerQuestionController questionController;
+	private ContentController questionController;
 
 	private MockMvc mockMvc;
 

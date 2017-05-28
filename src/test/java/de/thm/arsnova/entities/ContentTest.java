@@ -23,7 +23,7 @@ import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
 
-public class QuestionTest {
+public class ContentTest {
 
 	@SuppressWarnings("serial")
 	@Test
@@ -36,7 +36,7 @@ public class QuestionTest {
 		p2.setText("No");
 		p2.setCorrect(false);
 		p2.setValue(-10);
-		Question q = new Question();
+		Content q = new Content();
 		q.setQuestionType("yesno");
 		q.setPossibleAnswers(new ArrayList<PossibleAnswer>() {{
 			add(p1);
@@ -62,7 +62,7 @@ public class QuestionTest {
 		p2.setText("No");
 		p2.setCorrect(false);
 		p2.setValue(-10);
-		Question q = new Question();
+		Content q = new Content();
 		q.setAbstention(true);
 		q.setPossibleAnswers(new ArrayList<PossibleAnswer>() {{
 			add(p1);
@@ -89,7 +89,7 @@ public class QuestionTest {
 		p3.setText("Maybe");
 		p3.setCorrect(true);
 		p3.setValue(10);
-		Question q = new Question();
+		Content q = new Content();
 		q.setQuestionType("mc");
 		q.setPossibleAnswers(new ArrayList<PossibleAnswer>() {{
 			add(p1);
@@ -134,7 +134,7 @@ public class QuestionTest {
 		p4.setText("1;1");
 		p4.setCorrect(true);
 		p4.setValue(10);
-		Question q = new Question();
+		Content q = new Content();
 		q.setQuestionType("grid");
 		q.setPossibleAnswers(new ArrayList<PossibleAnswer>() {{
 			add(p1);

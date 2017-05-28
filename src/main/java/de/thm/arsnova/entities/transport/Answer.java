@@ -19,7 +19,7 @@ package de.thm.arsnova.entities.transport;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.serialization.View;
 import io.swagger.annotations.ApiModel;
@@ -126,28 +126,28 @@ public class Answer implements Serializable {
 		this.abstention = abstention;
 	}
 
-	public de.thm.arsnova.entities.Answer generateAnswerEntity(final User user, final Question question) {
+	public de.thm.arsnova.entities.Answer generateAnswerEntity(final User user, final Content content) {
 		// rewrite all fields so that no manipulated data gets written
 		// only answerText, answerSubject, and abstention are allowed
 		de.thm.arsnova.entities.Answer theAnswer = new de.thm.arsnova.entities.Answer();
 		theAnswer.setAnswerSubject(this.getAnswerSubject());
 		theAnswer.setAnswerText(this.getAnswerText());
 		theAnswer.setAnswerTextRaw(this.getAnswerTextRaw());
-		theAnswer.setSessionId(question.getSessionId());
+		theAnswer.setSessionId(content.getSessionId());
 		theAnswer.setUser(user.getUsername());
-		theAnswer.setQuestionId(question.get_id());
+		theAnswer.setQuestionId(content.getId());
 		theAnswer.setTimestamp(new Date().getTime());
-		theAnswer.setQuestionVariant(question.getQuestionVariant());
+		theAnswer.setQuestionVariant(content.getQuestionVariant());
 		theAnswer.setAbstention(this.isAbstention());
 		// calculate learning progress value after all properties are set
-		theAnswer.setQuestionValue(question.calculateValue(theAnswer));
+		theAnswer.setQuestionValue(content.calculateValue(theAnswer));
 		theAnswer.setAnswerImage(this.getAnswerImage());
 		theAnswer.setSuccessfulFreeTextAnswer(this.isSuccessfulFreeTextAnswer());
 
-		if ("freetext".equals(question.getQuestionType())) {
+		if ("freetext".equals(content.getQuestionType())) {
 			theAnswer.setPiRound(0);
 		} else {
-			theAnswer.setPiRound(question.getPiRound());
+			theAnswer.setPiRound(content.getPiRound());
 		}
 
 		return theAnswer;

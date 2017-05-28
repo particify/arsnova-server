@@ -26,35 +26,17 @@ import java.util.List;
  * All methods the database must support.
  */
 public interface IDatabaseDao {
-	Question saveQuestion(Session session, Question question);
-
-	Question getQuestion(String id);
-
-	List<Question> getSkillQuestionsForUsers(Session session);
-
-	List<Question> getSkillQuestionsForTeachers(Session session);
-
-	int getSkillQuestionCount(Session session);
-
-	List<String> getQuestionIds(Session session, User user);
-
-	int deleteQuestionWithAnswers(Question question);
-
-	int[] deleteAllQuestionsWithAnswers(Session session);
-
-	List<String> getUnAnsweredQuestionIds(Session session, User user);
-
 	Answer getMyAnswer(User me, String questionId, int piRound);
 
-	List<Answer> getAnswers(Question question, int piRound);
+	List<Answer> getAnswers(Content content, int piRound);
 
-	List<Answer> getAnswers(Question question);
+	List<Answer> getAnswers(Content content);
 
-	List<Answer> getAllAnswers(Question question);
+	List<Answer> getAllAnswers(Content content);
 
-	int getAnswerCount(Question question, int piRound);
+	int getAnswerCount(Content content, int piRound);
 
-	int getTotalAnswerCountByQuestion(Question question);
+	int getTotalAnswerCountByQuestion(Content content);
 
 	int getAbstentionAnswerCount(String questionId);
 
@@ -64,11 +46,9 @@ public interface IDatabaseDao {
 
 	int getTotalAnswerCount(String sessionKey);
 
-	Question updateQuestion(Question question);
+	int deleteAnswers(Content content);
 
-	int deleteAnswers(Question question);
-
-	Answer saveAnswer(Answer answer, User user, Question question, Session session);
+	Answer saveAnswer(Answer answer, User user, Content content, Session session);
 
 	Answer updateAnswer(Answer answer);
 
@@ -76,43 +56,9 @@ public interface IDatabaseDao {
 
 	int deleteInactiveGuestVisitedSessionLists(long lastActivityBefore);
 
-	List<Question> getLectureQuestionsForUsers(Session session);
-
-	List<Question> getLectureQuestionsForTeachers(Session session);
-
-	List<Question> getFlashcardsForUsers(Session session);
-
-	List<Question> getFlashcardsForTeachers(Session session);
-
-	List<Question> getPreparationQuestionsForUsers(Session session);
-
-	List<Question> getPreparationQuestionsForTeachers(Session session);
-
-	List<Question> getAllSkillQuestions(Session session);
-
-	int getLectureQuestionCount(Session session);
-
-	int getFlashcardCount(Session session);
-
-	int getPreparationQuestionCount(Session session);
-
 	int countLectureQuestionAnswers(Session session);
 
 	int countPreparationQuestionAnswers(Session session);
-
-	int[] deleteAllLectureQuestionsWithAnswers(Session session);
-
-	int[] deleteAllFlashcardsWithAnswers(Session session);
-
-	int[] deleteAllPreparationQuestionsWithAnswers(Session session);
-
-	List<String> getUnAnsweredLectureQuestionIds(Session session, User user);
-
-	List<String> getUnAnsweredPreparationQuestionIds(Session session, User user);
-
-	void publishQuestions(Session session, boolean publish, List<Question> questions);
-
-	List<Question> publishAllQuestions(Session session, boolean publish);
 
 	int deleteAllQuestionsAnswers(Session session);
 
@@ -124,21 +70,11 @@ public interface IDatabaseDao {
 
 	Statistics getStatistics();
 
-	List<String> getSubjects(Session session, String questionVariant);
-
-	List<String> getQuestionIdsBySubject(Session session, String questionVariant, String subject);
-
-	List<Question> getQuestionsByIds(List<String> ids, Session session);
-
-	void resetQuestionsRoundState(Session session, List<Question> questions);
-
-	void setVotingAdmissions(Session session, boolean disableVoting, List<Question> questions);
-
-	List<Question> setVotingAdmissionForAllQuestions(Session session, boolean disableVoting);
-
 	<T> T getObjectFromId(String documentId, Class<T> klass);
 
 	MotdList getMotdListForUser(final String username);
 
 	MotdList createOrUpdateMotdList(MotdList motdlist);
+
+	int[] deleteAllAnswersWithQuestions(List<Content> contents);
 }

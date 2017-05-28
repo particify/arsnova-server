@@ -19,8 +19,6 @@ package de.thm.arsnova.dao;
 
 import com.fourspaces.couchdb.Database;
 import com.fourspaces.couchdb.Document;
-import com.fourspaces.couchdb.Results;
-import com.fourspaces.couchdb.RowResult;
 import com.fourspaces.couchdb.View;
 import com.fourspaces.couchdb.ViewResults;
 import com.google.common.collect.Lists;
@@ -30,16 +28,13 @@ import de.thm.arsnova.entities.*;
 import de.thm.arsnova.entities.transport.AnswerQueueElement;
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import de.thm.arsnova.persistance.MotdRepository;
 import de.thm.arsnova.persistance.SessionRepository;
 import de.thm.arsnova.services.ISessionService;
-import net.sf.ezmorph.Morpher;
-import net.sf.ezmorph.MorpherRegistry;
-import net.sf.ezmorph.bean.BeanMorpher;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import net.sf.json.util.JSONUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +44,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.annotation.Profile;
@@ -59,7 +53,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -75,7 +68,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  *
  * This class makes use of Spring Framework's caching annotations. When you are about to add new functionality,
  * you should also think about the possibility of caching. Ideally, your methods should be dependent on domain
- * objects like Session or Question, which can be used as cache keys. Relying on plain String objects as a key, e.g.
+ * objects like Session or Content, which can be used as cache keys. Relying on plain String objects as a key, e.g.
  * by passing only a Session's keyword, will make your cache annotations less readable. You will also need to think
  * about cases where your cache needs to be updated and evicted.
  *
@@ -103,6 +96,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Autowired
 	private MotdRepository motdRepository;
+
+	@Autowired
+	private ContentRepository contentRepository;
 
 	private String databaseHost;
 	private int databasePort;
@@ -151,46 +147,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		this.publisher = publisher;
 	}
 
-	@Cacheable("skillquestions")
-	@Override
-	public List<Question> getSkillQuestionsForUsers(final Session session) {
-		final List<Question> questions = new ArrayList<>();
-		final String viewName = "content/doc_by_sessionid_variant_active";
-		final View view1 = new View(viewName);
-		final View view2 = new View(viewName);
-		final View view3 = new View(viewName);
-		view1.setStartKey(session.getId(), "lecture", true);
-		view1.setEndKey(session.getId(), "lecture", true, "{}");
-		view2.setStartKey(session.getId(), "preparation", true);
-		view2.setEndKey(session.getId(), "preparation", true, "{}");
-		view3.setStartKey(session.getId(), "flashcard", true);
-		view3.setEndKey(session.getId(), "flashcard", true, "{}");
-		questions.addAll(getQuestions(view1, session));
-		questions.addAll(getQuestions(view2, session));
-		questions.addAll(getQuestions(view3, session));
-
-		return questions;
-	}
-
-	@Cacheable("skillquestions")
-	@Override
-	public List<Question> getSkillQuestionsForTeachers(final Session session) {
-		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKey(session.getId());
-		view.setEndKey(session.getId(), "{}");
-
-		return getQuestions(view, session);
-	}
-
-	@Override
-	public int getSkillQuestionCount(final Session session) {
-		final View view = new View("content/by_sessionid_variant_active");
-		view.setStartKey(session.getId());
-		view.setEndKey(session.getId(), "{}");
-
-		return getQuestionCount(view);
-	}
-
 	private Database getDatabase() {
 		if (database == null) {
 			try {
@@ -208,240 +164,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return database;
 	}
 
-	@Caching(evict = {@CacheEvict(value = "skillquestions", key = "#session"),
-			@CacheEvict(value = "lecturequestions", key = "#session", condition = "#question.getQuestionVariant().equals('lecture')"),
-			@CacheEvict(value = "preparationquestions", key = "#session", condition = "#question.getQuestionVariant().equals('preparation')"),
-			@CacheEvict(value = "flashcardquestions", key = "#session", condition = "#question.getQuestionVariant().equals('flashcard')") },
-			put = {@CachePut(value = "questions", key = "#question._id")})
-	@Override
-	public Question saveQuestion(final Session session, final Question question) {
-		final Document q = toQuestionDocument(session, question);
-		try {
-			database.saveDocument(q);
-			question.set_id(q.getId());
-			question.set_rev(q.getRev());
-			return question;
-		} catch (final IOException e) {
-			logger.error("Could not save question {}.", question, e);
-		}
-		return null;
-	}
-
-	private Document toQuestionDocument(final Session session, final Question question) {
-		Document q = new Document();
-
-		question.updateRoundManagementState();
-		q.put("type", "skill_question");
-		q.put("questionType", question.getQuestionType());
-		q.put("ignoreCaseSensitive", question.isIgnoreCaseSensitive());
-		q.put("ignoreWhitespaces", question.isIgnoreWhitespaces());
-		q.put("ignorePunctuation", question.isIgnorePunctuation());
-		q.put("fixedAnswer", question.isFixedAnswer());
-		q.put("strictMode", question.isStrictMode());
-		q.put("rating", question.getRating());
-		q.put("correctAnswer", question.getCorrectAnswer());
-		q.put("questionVariant", question.getQuestionVariant());
-		q.put("sessionId", session.getId());
-		q.put("subject", question.getSubject());
-		q.put("text", question.getText());
-		q.put("active", question.isActive());
-		q.put("votingDisabled", question.isVotingDisabled());
-		q.put("number", 0); // TODO: This number is now unused. A clean up is necessary.
-		q.put("releasedFor", question.getReleasedFor());
-		q.put("possibleAnswers", question.getPossibleAnswers());
-		q.put("noCorrect", question.isNoCorrect());
-		q.put("piRound", question.getPiRound());
-		q.put("piRoundStartTime", question.getPiRoundStartTime());
-		q.put("piRoundEndTime", question.getPiRoundEndTime());
-		q.put("piRoundFinished", question.isPiRoundFinished());
-		q.put("piRoundActive", question.isPiRoundActive());
-		q.put("showStatistic", question.isShowStatistic());
-		q.put("showAnswer", question.isShowAnswer());
-		q.put("abstention", question.isAbstention());
-		q.put("image", question.getImage());
-		q.put("fcImage", question.getFcImage());
-		q.put("gridSize", question.getGridSize());
-		q.put("offsetX", question.getOffsetX());
-		q.put("offsetY", question.getOffsetY());
-		q.put("zoomLvl", question.getZoomLvl());
-		q.put("gridOffsetX", question.getGridOffsetX());
-		q.put("gridOffsetY", question.getGridOffsetY());
-		q.put("gridZoomLvl", question.getGridZoomLvl());
-		q.put("gridSizeX", question.getGridSizeX());
-		q.put("gridSizeY", question.getGridSizeY());
-		q.put("gridIsHidden", question.getGridIsHidden());
-		q.put("imgRotation", question.getImgRotation());
-		q.put("toggleFieldsLeft", question.getToggleFieldsLeft());
-		q.put("numClickableFields", question.getNumClickableFields());
-		q.put("thresholdCorrectAnswers", question.getThresholdCorrectAnswers());
-		q.put("cvIsColored", question.getCvIsColored());
-		q.put("gridLineColor", question.getGridLineColor());
-		q.put("numberOfDots", question.getNumberOfDots());
-		q.put("gridType", question.getGridType());
-		q.put("scaleFactor", question.getScaleFactor());
-		q.put("gridScaleFactor", question.getGridScaleFactor());
-		q.put("imageQuestion", question.isImageQuestion());
-		q.put("textAnswerEnabled", question.isTextAnswerEnabled());
-		q.put("timestamp", question.getTimestamp());
-		q.put("hint", question.getHint());
-		q.put("solution", question.getSolution());
-		return q;
-	}
-
-	/* TODO: Only evict cache entry for the question's session. This requires some refactoring. */
-	@Caching(evict = {@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true, condition = "#question.getQuestionVariant().equals('lecture')"),
-			@CacheEvict(value = "preparationquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('preparation')"),
-			@CacheEvict(value = "flashcardquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('flashcard')") },
-			put = {@CachePut(value = "questions", key = "#question._id")})
-	@Override
-	public Question updateQuestion(final Question question) {
-		try {
-			final Document q = database.getDocument(question.get_id());
-
-			question.updateRoundManagementState();
-			q.put("subject", question.getSubject());
-			q.put("text", question.getText());
-			q.put("active", question.isActive());
-			q.put("votingDisabled", question.isVotingDisabled());
-			q.put("releasedFor", question.getReleasedFor());
-			q.put("possibleAnswers", question.getPossibleAnswers());
-			q.put("noCorrect", question.isNoCorrect());
-			q.put("piRound", question.getPiRound());
-			q.put("piRoundStartTime", question.getPiRoundStartTime());
-			q.put("piRoundEndTime", question.getPiRoundEndTime());
-			q.put("piRoundFinished", question.isPiRoundFinished());
-			q.put("piRoundActive", question.isPiRoundActive());
-			q.put("showStatistic", question.isShowStatistic());
-			q.put("ignoreCaseSensitive", question.isIgnoreCaseSensitive());
-			q.put("ignoreWhitespaces", question.isIgnoreWhitespaces());
-			q.put("ignorePunctuation", question.isIgnorePunctuation());
-			q.put("fixedAnswer", question.isFixedAnswer());
-			q.put("strictMode", question.isStrictMode());
-			q.put("rating", question.getRating());
-			q.put("correctAnswer", question.getCorrectAnswer());
-			q.put("showAnswer", question.isShowAnswer());
-			q.put("abstention", question.isAbstention());
-			q.put("image", question.getImage());
-			q.put("fcImage", question.getFcImage());
-			q.put("gridSize", question.getGridSize());
-			q.put("offsetX", question.getOffsetX());
-			q.put("offsetY", question.getOffsetY());
-			q.put("zoomLvl", question.getZoomLvl());
-			q.put("gridOffsetX", question.getGridOffsetX());
-			q.put("gridOffsetY", question.getGridOffsetY());
-			q.put("gridZoomLvl", question.getGridZoomLvl());
-			q.put("gridSizeX", question.getGridSizeX());
-			q.put("gridSizeY", question.getGridSizeY());
-			q.put("gridIsHidden", question.getGridIsHidden());
-			q.put("imgRotation", question.getImgRotation());
-			q.put("toggleFieldsLeft", question.getToggleFieldsLeft());
-			q.put("numClickableFields", question.getNumClickableFields());
-			q.put("thresholdCorrectAnswers", question.getThresholdCorrectAnswers());
-			q.put("cvIsColored", question.getCvIsColored());
-			q.put("gridLineColor", question.getGridLineColor());
-			q.put("numberOfDots", question.getNumberOfDots());
-			q.put("gridType", question.getGridType());
-			q.put("scaleFactor", question.getScaleFactor());
-			q.put("gridScaleFactor", question.getGridScaleFactor());
-			q.put("imageQuestion", question.isImageQuestion());
-			q.put("hint", question.getHint());
-			q.put("solution", question.getSolution());
-
-			database.saveDocument(q);
-			question.set_rev(q.getRev());
-
-			return question;
-		} catch (final IOException e) {
-			logger.error("Could not update question {}.", question, e);
-		}
-
-		return null;
-	}
-
-	@Cacheable("questions")
-	@Override
-	public Question getQuestion(final String id) {
-		try {
-			final Document q = getDatabase().getDocument(id);
-			if (q == null) {
-				return null;
-			}
-			final Question question = (Question) JSONObject.toBean(q.getJSONObject(), Question.class);
-			final JSONArray possibleAnswers = q.getJSONObject().getJSONArray("possibleAnswers");
-			@SuppressWarnings("unchecked")
-			final Collection<PossibleAnswer> answers = JSONArray.toCollection(possibleAnswers, PossibleAnswer.class);
-
-			question.updateRoundManagementState();
-			question.setPossibleAnswers(new ArrayList<>(answers));
-			question.setSessionKeyword(sessionRepository.getSessionFromId(question.getSessionId()).getKeyword());
-			return question;
-		} catch (final IOException e) {
-			logger.error("Could not get question {}.", id, e);
-		}
-		return null;
-	}
-
-	@Override
-	public List<String> getQuestionIds(final Session session, final User user) {
-		View view = new View("content/by_sessionid_variant_active");
-		view.setKey(session.getId());
-		return collectQuestionIds(view);
-	}
-
-	/* TODO: Only evict cache entry for the question's session. This requires some refactoring. */
-	@Caching(evict = { @CacheEvict(value = "questions", key = "#question._id"),
-			@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true, condition = "#question.getQuestionVariant().equals('lecture')"),
-			@CacheEvict(value = "preparationquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('preparation')"),
-			@CacheEvict(value = "flashcardquestions", allEntries = true, condition = "#question.getQuestionVariant().equals('flashcard')") })
-	@Override
-	public int deleteQuestionWithAnswers(final Question question) {
-		try {
-			int count = deleteAnswers(question);
-			deleteDocument(question.get_id());
-			dbLogger.log("delete", "type", "question", "answerCount", count);
-
-			return count;
-		} catch (final IOException e) {
-			logger.error("Could not delete question {}.", question.get_id(), e);
-		}
-
-		return 0;
-	}
-
-	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict(value = "skillquestions", key = "#session"),
-			@CacheEvict(value = "lecturequestions", key = "#session"),
-			@CacheEvict(value = "preparationquestions", key = "#session"),
-			@CacheEvict(value = "flashcardquestions", key = "#session") })
-	@Override
-	public int[] deleteAllQuestionsWithAnswers(final Session session) {
-		final View view = new View("content/by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId());
-		view.setEndKey(session.getId(), "{}");
-
-		return deleteAllQuestionDocumentsWithAnswers(view);
-	}
-
-	private int[] deleteAllQuestionDocumentsWithAnswers(final View view) {
-		final ViewResults results = getDatabase().view(view);
-
-		List<Question> questions = new ArrayList<>();
-		for (final Document d : results.getResults()) {
-			final Question q = new Question();
-			q.set_id(d.getId());
-			q.set_rev(d.getString("value"));
-			questions.add(q);
-		}
-
-		int[] count = deleteAllAnswersWithQuestions(questions);
-		dbLogger.log("delete", "type", "question", "questionCount", count[0]);
-		dbLogger.log("delete", "type", "answer", "answerCount", count[1]);
-
-		return count;
-	}
-
 	private void deleteDocument(final String documentId) throws IOException {
 		final Document d = getDatabase().getDocument(documentId);
 		getDatabase().deleteDocument(d);
@@ -449,10 +171,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@CacheEvict("answers")
 	@Override
-	public int deleteAnswers(final Question question) {
+	public int deleteAnswers(final Content content) {
 		try {
 			final View view = new View("answer/by_questionid");
-			view.setKey(question.get_id());
+			view.setKey(content.getId());
 			view.setIncludeDocs(true);
 			final ViewResults results = getDatabase().view(view);
 			final List<List<Document>> partitions = Lists.partition(results.getResults(), BULK_PARTITION_SIZE);
@@ -475,18 +197,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 			return count;
 		} catch (final IOException e) {
-			logger.error("Could not delete answers for question {}.", question.get_id(), e);
+			logger.error("Could not delete answers for content {}.", content.getId(), e);
 		}
 
 		return 0;
-	}
-
-	@Override
-	public List<String> getUnAnsweredQuestionIds(final Session session, final User user) {
-		final View view = new View("answer/questionid_by_user_sessionid_variant");
-		view.setStartKeyArray(user.getUsername(), session.getId());
-		view.setEndKeyArray(user.getUsername(), session.getId(), "{}");
-		return collectUnansweredQuestionIds(getQuestionIds(session, user), view);
 	}
 
 	@Override
@@ -526,8 +240,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	public List<Answer> getAnswers(final Question question, final int piRound) {
-		final String questionId = question.get_id();
+	public List<Answer> getAnswers(final Content content, final int piRound) {
+		final String questionId = content.getId();
 		final View view = new View("answer/by_questionid_piround_text_subject");
 		if (2 == piRound) {
 			view.setStartKey(questionId, 2);
@@ -556,8 +270,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	public List<Answer> getAllAnswers(final Question question) {
-		final String questionId = question.get_id();
+	public List<Answer> getAllAnswers(final Content content) {
+		final String questionId = content.getId();
 		final View view = new View("answer/by_questionid_piround_text_subject");
 		view.setStartKeyArray(questionId);
 		view.setEndKeyArray(questionId, "{}");
@@ -584,8 +298,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Cacheable("answers")
 	@Override
-	public List<Answer> getAnswers(final Question question) {
-		return this.getAnswers(question, question.getPiRound());
+	public List<Answer> getAnswers(final Content content) {
+		return this.getAnswers(content, content.getPiRound());
 	}
 
 	@Override
@@ -602,10 +316,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	public int getAnswerCount(final Question question, final int piRound) {
+	public int getAnswerCount(final Content content, final int piRound) {
 		final View view = new View("answer/by_questionid_piround_text_subject");
-		view.setStartKey(question.get_id(), piRound);
-		view.setEndKey(question.get_id(), piRound, "{}");
+		view.setStartKey(content.getId(), piRound);
+		view.setEndKey(content.getId(), piRound, "{}");
 		view.setGroup(true);
 		final ViewResults results = getDatabase().view(view);
 		if (results.getResults().isEmpty()) {
@@ -616,10 +330,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
-	public int getTotalAnswerCountByQuestion(final Question question) {
+	public int getTotalAnswerCountByQuestion(final Content content) {
 		final View view = new View("answer/by_questionid_piround_text_subject");
-		view.setStartKeyArray(question.get_id());
-		view.setEndKeyArray(question.get_id(), "{}");
+		view.setStartKeyArray(content.getId());
+		view.setEndKeyArray(content.getId(), "{}");
 		view.setGroup(true);
 		final ViewResults results = getDatabase().view(view);
 
@@ -773,9 +487,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return stats;
 	}
 
-	@CacheEvict(value = "answers", key = "#question")
+	@CacheEvict(value = "answers", key = "#content")
 	@Override
-	public Answer saveAnswer(final Answer answer, final User user, final Question question, final Session session) {
+	public Answer saveAnswer(final Answer answer, final User user, final Content content, final Session session) {
 		final Document a = new Document();
 		a.put("type", "skill_question_answer");
 		a.put("sessionId", answer.getSessionId());
@@ -792,7 +506,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		a.put("abstention", answer.isAbstention());
 		a.put("answerImage", answer.getAnswerImage());
 		a.put("answerThumbnailImage", answer.getAnswerThumbnailImage());
-		AnswerQueueElement answerQueueElement = new AnswerQueueElement(session, question, answer, user);
+		AnswerQueueElement answerQueueElement = new AnswerQueueElement(session, content, answer, user);
 		this.answerQueue.offer(new AbstractMap.SimpleEntry<>(a, answerQueueElement));
 		return answer;
 	}
@@ -937,131 +651,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return 0;
 	}
 
-	@Cacheable("lecturequestions")
-	@Override
-	public List<Question> getLectureQuestionsForUsers(final Session session) {
-		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId(), "lecture", true);
-		view.setEndKeyArray(session.getId(), "lecture", true, "{}");
-
-		return getQuestions(view, session);
-	}
-
-	@Override
-	public List<Question> getLectureQuestionsForTeachers(final Session session) {
-		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId(), "lecture");
-		view.setEndKeyArray(session.getId(), "lecture", "{}");
-
-		return getQuestions(view, session);
-	}
-
-	@Cacheable("flashcardquestions")
-	@Override
-	public List<Question> getFlashcardsForUsers(final Session session) {
-		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId(), "flashcard", true);
-		view.setEndKeyArray(session.getId(), "flashcard", true, "{}");
-
-		return getQuestions(view, session);
-	}
-
-	@Override
-	public List<Question> getFlashcardsForTeachers(final Session session) {
-		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId(), "flashcard");
-		view.setEndKeyArray(session.getId(), "flashcard", "{}");
-
-		return getQuestions(view, session);
-	}
-
-	@Cacheable("preparationquestions")
-	@Override
-	public List<Question> getPreparationQuestionsForUsers(final Session session) {
-		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId(), "preparation", true);
-		view.setEndKeyArray(session.getId(), "preparation", true, "{}");
-
-		return getQuestions(view, session);
-	}
-
-	@Override
-	public List<Question> getPreparationQuestionsForTeachers(final Session session) {
-		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId(), "preparation");
-		view.setEndKeyArray(session.getId(), "preparation", "{}");
-
-		return getQuestions(view, session);
-	}
-
-	@Override
-	public List<Question> getAllSkillQuestions(final Session session) {
-		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId());
-		view.setEndKeyArray(session.getId(), "{}");
-
-		return getQuestions(view, session);
-	}
-
-	private List<Question> getQuestions(final View view, final Session session) {
-		final ViewResults viewResults = getDatabase().view(view);
-		if (viewResults == null || viewResults.isEmpty()) {
-			return null;
-		}
-
-		final List<Question> questions = new ArrayList<>();
-
-		Results<Question> results = getDatabase().queryView(view, Question.class);
-		for (final RowResult<Question> row : results.getRows()) {
-			Question question = row.getValue();
-			question.updateRoundManagementState();
-			question.setSessionKeyword(session.getKeyword());
-			if (!"freetext".equals(question.getQuestionType()) && 0 == question.getPiRound()) {
-				/* needed for legacy questions whose piRound property has not been set */
-				question.setPiRound(1);
-			}
-
-			questions.add(question);
-		}
-		return questions;
-	}
-
-	@Override
-	public int getLectureQuestionCount(final Session session) {
-		final View view = new View("content/by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId(), "lecture");
-		view.setEndKeyArray(session.getId(), "lecture", "{}");
-
-		return getQuestionCount(view);
-	}
-
-	@Override
-	public int getFlashcardCount(final Session session) {
-		final View view = new View("content/by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId(), "flashcard");
-		view.setEndKeyArray(session.getId(), "flashcard", "{}");
-
-		return getQuestionCount(view);
-	}
-
-	@Override
-	public int getPreparationQuestionCount(final Session session) {
-		final View view = new View("content/by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId(), "preparation");
-		view.setEndKeyArray(session.getId(), "preparation", "{}");
-
-		return getQuestionCount(view);
-	}
-
-	private int getQuestionCount(final View view) {
-		view.setReduce(true);
-		final ViewResults results = getDatabase().view(view);
-		if (results.getJSONArray("rows").optJSONObject(0) == null) {
-			return 0;
-		}
-		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
-	}
-
 	@Override
 	public int countLectureQuestionAnswers(final Session session) {
 		return countQuestionVariantAnswers(session, "lecture");
@@ -1084,256 +673,39 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
-	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict("skillquestions"),
-			@CacheEvict("lecturequestions"),
-			@CacheEvict(value = "answers", allEntries = true)})
-	@Override
-	public int[] deleteAllLectureQuestionsWithAnswers(final Session session) {
-		final View view = new View("content/by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId(), "lecture");
-		view.setEndKey(session.getId(), "lecture", "{}");
-
-		return deleteAllQuestionDocumentsWithAnswers(view);
-	}
-
-	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
-	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict("skillquestions"),
-			@CacheEvict("flashcardquestions"),
-			@CacheEvict(value = "answers", allEntries = true)})
-	@Override
-	public int[] deleteAllFlashcardsWithAnswers(final Session session) {
-		final View view = new View("content/by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId(), "flashcard");
-		view.setEndKey(session.getId(), "flashcard", "{}");
-
-		return deleteAllQuestionDocumentsWithAnswers(view);
-	}
-
-	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
-	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict("skillquestions"),
-			@CacheEvict("preparationquestions"),
-			@CacheEvict(value = "answers", allEntries = true)})
-	@Override
-	public int[] deleteAllPreparationQuestionsWithAnswers(final Session session) {
-		final View view = new View("content/by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId(), "preparation");
-		view.setEndKey(session.getId(), "preparation", "{}");
-
-		return deleteAllQuestionDocumentsWithAnswers(view);
-	}
-
-	@Override
-	public List<String> getUnAnsweredLectureQuestionIds(final Session session, final User user) {
-		final View view = new View("answer/questionid_piround_by_user_sessionid_variant");
-		view.setKey(user.getUsername(), session.getId(), "lecture");
-		return collectUnansweredQuestionIdsByPiRound(getDatabaseDao().getLectureQuestionsForUsers(session), view);
-	}
-
-	@Override
-	public List<String> getUnAnsweredPreparationQuestionIds(final Session session, final User user) {
-		final View view = new View("answer/questionid_piround_by_user_sessionid_variant");
-		view.setKey(user.getUsername(), session.getId(), "preparation");
-		return collectUnansweredQuestionIdsByPiRound(getDatabaseDao().getPreparationQuestionsForUsers(session), view);
-	}
-
-	private List<String> collectUnansweredQuestionIds(
-			final List<String> questions,
-			final View view
-			) {
-		final ViewResults answeredQuestions = getDatabase().view(view);
-
-		final List<String> answered = new ArrayList<>();
-		for (final Document d : answeredQuestions.getResults()) {
-			answered.add(d.getString("value"));
-		}
-
-		final List<String> unanswered = new ArrayList<>();
-		for (final String questionId : questions) {
-			if (!answered.contains(questionId)) {
-				unanswered.add(questionId);
-			}
-		}
-		return unanswered;
-	}
-
-	private List<String> collectUnansweredQuestionIdsByPiRound(
-			final List<Question> questions,
-			final View view
-			) {
-		final ViewResults answeredQuestions = getDatabase().view(view);
-
-		final Map<String, Integer> answered = new HashMap<>();
-		for (final Document d : answeredQuestions.getResults()) {
-			answered.put(d.getJSONArray("value").getString(0), d.getJSONArray("value").getInt(1));
-		}
-
-		final List<String> unanswered = new ArrayList<>();
-
-		for (final Question question : questions) {
-			if (!"slide".equals(question.getQuestionType()) && (!answered.containsKey(question.get_id())
-					|| (answered.containsKey(question.get_id()) && answered.get(question.get_id()) != question.getPiRound()))) {
-				unanswered.add(question.get_id());
-			}
-		}
-
-		return unanswered;
-	}
-
-	private List<String> collectQuestionIds(final View view) {
-		final ViewResults results = getDatabase().view(view);
-		if (results.getResults().isEmpty()) {
-			return new ArrayList<>();
-		}
-		final List<String> ids = new ArrayList<>();
-		for (final Document d : results.getResults()) {
-			ids.add(d.getId());
-		}
-		return ids;
-	}
-
-	@Override
-	public List<Question> publishAllQuestions(final Session session, final boolean publish) {
-		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId());
-		view.setEndKeyArray(session.getId(), "{}");
-		final List<Question> questions = getQuestions(view, session);
-		getDatabaseDao().publishQuestions(session, publish, questions);
-
-		return questions;
-	}
-
-	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict(value = "skillquestions", key = "#session"),
-			@CacheEvict(value = "lecturequestions", key = "#session"),
-			@CacheEvict(value = "preparationquestions", key = "#session"),
-			@CacheEvict(value = "flashcardquestions", key = "#session") })
-	@Override
-	public void publishQuestions(final Session session, final boolean publish, List<Question> questions) {
-		for (final Question q : questions) {
-			q.setActive(publish);
-		}
-		final List<Document> documents = new ArrayList<>();
-		for (final Question q : questions) {
-			final Document d = toQuestionDocument(session, q);
-			d.setId(q.get_id());
-			d.setRev(q.get_rev());
-			documents.add(d);
-		}
-		try {
-			database.bulkSaveDocuments(documents.toArray(new Document[documents.size()]));
-		} catch (final IOException e) {
-			logger.error("Could not bulk publish all questions.", e);
-		}
-	}
-
-	@Override
-	public List<Question> setVotingAdmissionForAllQuestions(final Session session, final boolean disableVoting) {
-		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId());
-		view.setEndKeyArray(session.getId(), "{}");
-		final List<Question> questions = getQuestions(view, session);
-		getDatabaseDao().setVotingAdmissions(session, disableVoting, questions);
-
-		return questions;
-	}
-
-	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict(value = "skillquestions", key = "#session"),
-			@CacheEvict(value = "lecturequestions", key = "#session"),
-			@CacheEvict(value = "preparationquestions", key = "#session"),
-			@CacheEvict(value = "flashcardquestions", key = "#session") })
-	@Override
-	public void setVotingAdmissions(final Session session, final boolean disableVoting, List<Question> questions) {
-		for (final Question q : questions) {
-			if (!"flashcard".equals(q.getQuestionType())) {
-				q.setVotingDisabled(disableVoting);
-			}
-		}
-		final List<Document> documents = new ArrayList<>();
-		for (final Question q : questions) {
-			final Document d = toQuestionDocument(session, q);
-			d.setId(q.get_id());
-			d.setRev(q.get_rev());
-			documents.add(d);
-		}
-
-		try {
-			database.bulkSaveDocuments(documents.toArray(new Document[documents.size()]));
-		} catch (final IOException e) {
-			logger.error("Could not bulk set voting admission for all questions.", e);
-		}
-	}
-
-	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public int deleteAllQuestionsAnswers(final Session session) {
-		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId());
-		view.setEndKeyArray(session.getId(), "{}");
-		final List<Question> questions = getQuestions(view, session);
-		getDatabaseDao().resetQuestionsRoundState(session, questions);
+		final List<Content> contents = contentRepository.getQuestions(session.getId());
+		contentRepository.resetQuestionsRoundState(session, contents);
 
-		return deleteAllAnswersForQuestions(questions);
+		return deleteAllAnswersForQuestions(contents);
 	}
 
 	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public int deleteAllPreparationAnswers(final Session session) {
-		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId(), "preparation");
-		view.setEndKeyArray(session.getId(), "preparation", "{}");
-		final List<Question> questions = getQuestions(view, session);
-		getDatabaseDao().resetQuestionsRoundState(session, questions);
+		final List<Content> contents = contentRepository.getQuestions(session.getId(), "preparation");
+		contentRepository.resetQuestionsRoundState(session, contents);
 
-		return deleteAllAnswersForQuestions(questions);
+		return deleteAllAnswersForQuestions(contents);
 	}
 
 	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public int deleteAllLectureAnswers(final Session session) {
-		final View view = new View("content/doc_by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId(), "lecture");
-		view.setEndKeyArray(session.getId(), "lecture", "{}");
-		final List<Question> questions = getQuestions(view, session);
-		getDatabaseDao().resetQuestionsRoundState(session, questions);
+		final List<Content> contents = contentRepository.getQuestions(session.getId(), "lecture");
+		contentRepository.resetQuestionsRoundState(session, contents);
 
-		return deleteAllAnswersForQuestions(questions);
+		return deleteAllAnswersForQuestions(contents);
 	}
 
-	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict(value = "skillquestions", key = "#session"),
-			@CacheEvict(value = "lecturequestions", key = "#session"),
-			@CacheEvict(value = "preparationquestions", key = "#session"),
-			@CacheEvict(value = "flashcardquestions", key = "#session") })
-	@Override
-	public void resetQuestionsRoundState(final Session session, List<Question> questions) {
-		for (final Question q : questions) {
-			q.resetQuestionState();
-		}
-		final List<Document> documents = new ArrayList<>();
-		for (final Question q : questions) {
-			final Document d = toQuestionDocument(session, q);
-			d.setId(q.get_id());
-			d.setRev(q.get_rev());
-			documents.add(d);
-		}
-		try {
-			database.bulkSaveDocuments(documents.toArray(new Document[documents.size()]));
-		} catch (final IOException e) {
-			logger.error("Could not bulk reset all questions round state.", e);
-		}
-	}
-
-	private int deleteAllAnswersForQuestions(List<Question> questions) {
+	public int deleteAllAnswersForQuestions(List<Content> contents) {
 		List<String> questionIds = new ArrayList<>();
-		for (Question q : questions) {
-			questionIds.add(q.get_id());
+		for (Content q : contents) {
+			questionIds.add(q.getId());
 		}
 		final View bulkView = new View("answer/by_questionid");
 		bulkView.setKeys(questionIds);
@@ -1356,15 +728,15 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return 0;
 	}
 
-	private int[] deleteAllAnswersWithQuestions(List<Question> questions) {
+	public int[] deleteAllAnswersWithQuestions(List<Content> contents) {
 		List<String> questionIds = new ArrayList<>();
 		final List<Document> allQuestions = new ArrayList<>();
-		for (Question q : questions) {
+		for (Content q : contents) {
 			final Document d = new Document();
-			d.put("_id", q.get_id());
-			d.put("_rev", q.get_rev());
+			d.put("_id", q.getId());
+			d.put("_rev", q.getRevision());
 			d.put("_deleted", true);
-			questionIds.add(q.get_id());
+			questionIds.add(q.getId());
 			allQuestions.add(d);
 		}
 		final View bulkView = new View("answer/by_questionid");
@@ -1386,7 +758,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 			return new int[] {deleteList.size(), result.size()};
 		} catch (IOException e) {
-			logger.error("Could not bulk delete questions and answers.", e);
+			logger.error("Could not bulk delete contents and answers.", e);
 		}
 
 		return new int[] {0, 0};
@@ -1431,92 +803,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			courseScore.addAnswer(questionId, piRound, username, userscore);
 		}
 		return courseScore;
-	}
-
-	@Override
-	public List<String> getSubjects(Session session, String questionVariant) {
-		final View view = new View("content/by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId(), questionVariant);
-		view.setEndKeyArray(session.getId(), questionVariant, "{}");
-		ViewResults results = this.getDatabase().view(view);
-
-		if (results.getJSONArray("rows").optJSONObject(0) == null) {
-			return null;
-		}
-
-		Set<String> uniqueSubjects = new HashSet<>();
-
-		for (final Document d : results.getResults()) {
-			uniqueSubjects.add(d.getJSONArray("key").getString(3));
-		}
-
-		return new ArrayList<>(uniqueSubjects);
-	}
-
-	/* TODO: remove if this method is no longer used */
-	@Override
-	public List<String> getQuestionIdsBySubject(Session session, String questionVariant, String subject) {
-		final View view = new View("content/by_sessionid_variant_active");
-		view.setStartKeyArray(session.getId(), questionVariant, 1,	subject);
-		view.setEndKeyArray(session.getId(), questionVariant, 1, subject, "{}");
-		ViewResults results = this.getDatabase().view(view);
-
-		if (results.getJSONArray("rows").optJSONObject(0) == null) {
-			return null;
-		}
-
-		List<String> qids = new ArrayList<>();
-
-		for (final Document d : results.getResults()) {
-			final String s = d.getId();
-			qids.add(s);
-		}
-
-		return qids;
-	}
-
-	@Override
-	public List<Question> getQuestionsByIds(List<String> ids, final Session session) {
-		View view = new View("_all_docs");
-		view.setKeys(ids);
-		view.setIncludeDocs(true);
-		final List<Document> questiondocs = getDatabase().view(view).getResults();
-		if (questiondocs == null || questiondocs.isEmpty()) {
-
-			return null;
-		}
-		final List<Question> result = new ArrayList<>();
-		final MorpherRegistry morpherRegistry = JSONUtils.getMorpherRegistry();
-		final Morpher dynaMorpher = new BeanMorpher(PossibleAnswer.class, morpherRegistry);
-		morpherRegistry.registerMorpher(dynaMorpher);
-		for (final Document document : questiondocs) {
-			if (!"".equals(document.optString("error"))) {
-				// Skip documents we could not load. Maybe they were deleted.
-				continue;
-			}
-			final Question question = (Question) JSONObject.toBean(
-					document.getJSONObject().getJSONObject("doc"),
-					Question.class
-					);
-			@SuppressWarnings("unchecked")
-			final Collection<PossibleAnswer> answers = JSONArray.toCollection(
-					document.getJSONObject().getJSONObject("doc").getJSONArray("possibleAnswers"),
-					PossibleAnswer.class
-					);
-			question.setPossibleAnswers(new ArrayList<>(answers));
-			question.setSessionKeyword(session.getKeyword());
-			if (!"freetext".equals(question.getQuestionType()) && 0 == question.getPiRound()) {
-				/* needed for legacy questions whose piRound property has not been set */
-				question.setPiRound(1);
-			}
-
-			if (question.getImage() != null) {
-				question.setImage("true");
-			}
-
-			result.add(question);
-		}
-		return result;
 	}
 
 	@Override

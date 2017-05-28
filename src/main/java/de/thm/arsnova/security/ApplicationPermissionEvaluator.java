@@ -19,11 +19,12 @@ package de.thm.arsnova.security;
 
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Comment;
-import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.persistance.CommentRepository;
+import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.SessionRepository;
 import org.pac4j.oauth.profile.facebook.FacebookProfile;
 import org.pac4j.oauth.profile.google2.Google2Profile;
@@ -54,6 +55,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 	@Autowired
 	private CommentRepository commentRepository;
+
+	@Autowired
+	private ContentRepository contentRepository;
 
 	@Override
 	public boolean hasPermission(
@@ -88,7 +92,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				&& checkSessionPermission(username, targetId, permission)) {
 			return true;
 		} else if (
-				"question".equals(targetType)
+				"content".equals(targetType)
 				&& checkQuestionPermission(username, targetId, permission)
 				) {
 			return true;
@@ -125,9 +129,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Object permission
 			) {
 		if (permission instanceof String && "owner".equals(permission)) {
-			final Question question = dao.getQuestion(targetId.toString());
-			if (question != null) {
-				final Session session = sessionRepository.getSessionFromId(question.getSessionId());
+			final Content content = contentRepository.getQuestion(targetId.toString());
+			if (content != null) {
+				final Session session = sessionRepository.getSessionFromId(content.getSessionId());
 
 				return session != null && session.getCreator().equals(username);
 			}

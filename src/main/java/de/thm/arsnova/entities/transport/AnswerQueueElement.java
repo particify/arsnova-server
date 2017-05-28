@@ -18,7 +18,7 @@
 package de.thm.arsnova.entities.transport;
 
 import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
@@ -30,15 +30,15 @@ public class AnswerQueueElement {
 
 	private final Session session;
 
-	private final Question question;
+	private final Content content;
 
 	private final Answer answer;
 
 	private final User user;
 
-	public AnswerQueueElement(Session session, Question question, Answer answer, User user) {
+	public AnswerQueueElement(Session session, Content content, Answer answer, User user) {
 		this.session = session;
-		this.question = question;
+		this.content = content;
 		this.answer = answer;
 		this.user = user;
 	}
@@ -47,8 +47,8 @@ public class AnswerQueueElement {
 		return session;
 	}
 
-	public Question getQuestion() {
-		return question;
+	public Content getQuestion() {
+		return content;
 	}
 
 	public Answer getAnswer() {

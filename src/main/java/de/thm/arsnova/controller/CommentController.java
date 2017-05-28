@@ -20,7 +20,7 @@ package de.thm.arsnova.controller;
 import de.thm.arsnova.entities.CommentReadingCount;
 import de.thm.arsnova.entities.transport.Comment;
 import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.services.IQuestionService;
+import de.thm.arsnova.services.IContentService;
 import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.web.Pagination;
 import io.swagger.annotations.Api;
@@ -45,11 +45,11 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/audiencequestion")
-@Api(value = "/audiencequestion", description = "the Audience Question API")
+@Api(value = "/audiencequestion", description = "the Audience Content API")
 public class CommentController extends PaginationController {
 
 	@Autowired
-	private IQuestionService questionService;
+	private IContentService contentService;
 
 	@ApiOperation(value = "Count all the comments in current session",
 			nickname = "getAudienceQuestionCount")
@@ -57,7 +57,7 @@ public class CommentController extends PaginationController {
 	@DeprecatedApi
 	@Deprecated
 	public int getInterposedCount(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey) {
-		return questionService.getInterposedCount(sessionkey);
+		return contentService.getInterposedCount(sessionkey);
 	}
 
 	@ApiOperation(value = "count all unread comments",
@@ -66,7 +66,7 @@ public class CommentController extends PaginationController {
 	@DeprecatedApi
 	@Deprecated
 	public CommentReadingCount getUnreadInterposedCount(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam("sessionkey") final String sessionkey, String user) {
-		return questionService.getInterposedReadingCount(sessionkey, user);
+		return contentService.getInterposedReadingCount(sessionkey, user);
 	}
 
 	@ApiOperation(value = "Retrieves all Comments for a Session",
@@ -74,14 +74,14 @@ public class CommentController extends PaginationController {
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
 	public List<Comment> getInterposedQuestions(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey) {
-		return Comment.fromList(questionService.getInterposedQuestions(sessionkey, offset, limit));
+		return Comment.fromList(contentService.getInterposedQuestions(sessionkey, offset, limit));
 	}
 
 	@ApiOperation(value = "Retrieves an Comment",
 			nickname = "getInterposedQuestion")
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
 	public Comment getInterposedQuestion(@ApiParam(value = "ID of the Comment that needs to be deleted", required = true) @PathVariable final String questionId) {
-		return new Comment(questionService.readInterposedQuestion(questionId));
+		return new Comment(contentService.readInterposedQuestion(questionId));
 	}
 
 	@ApiOperation(value = "Creates a new Comment for a Session and returns the Comment's data",
@@ -95,7 +95,7 @@ public class CommentController extends PaginationController {
 			@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey,
 			@ApiParam(value = "the body from the new comment", required = true) @RequestBody final de.thm.arsnova.entities.Comment comment
 			) {
-		if (questionService.saveQuestion(comment)) {
+		if (contentService.saveQuestion(comment)) {
 			return;
 		}
 
@@ -106,6 +106,6 @@ public class CommentController extends PaginationController {
 			nickname = "deleteInterposedQuestion")
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)
 	public void deleteInterposedQuestion(@ApiParam(value = "ID of the comment that needs to be deleted", required = true) @PathVariable final String questionId) {
-		questionService.deleteInterposedQuestion(questionId);
+		contentService.deleteInterposedQuestion(questionId);
 	}
 }

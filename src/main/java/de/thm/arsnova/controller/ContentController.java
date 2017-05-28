@@ -19,12 +19,12 @@ package de.thm.arsnova.controller;
 
 import de.thm.arsnova.PaginationListDecorator;
 import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.services.IQuestionService;
+import de.thm.arsnova.services.IContentService;
 import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.web.Pagination;
 import io.swagger.annotations.Api;
@@ -52,9 +52,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/lecturerquestion")
 @Api(value = "/lecturerquestion", description = "Operations for Lecture Questions")
-public class LecturerQuestionController extends PaginationController {
+public class ContentController extends PaginationController {
 	@Autowired
-	private IQuestionService questionService;
+	private IContentService contentService;
 
 	@ApiOperation(value = "Get question with provided question Id",
 			nickname = "getQuestion")
@@ -62,56 +62,56 @@ public class LecturerQuestionController extends PaginationController {
 		@ApiResponse(code = 404, message = HTML_STATUS_404)
 	})
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
-	public Question getQuestion(@PathVariable final String questionId) {
-		final Question question = questionService.getQuestion(questionId);
-		if (question != null) {
-			return question;
+	public Content getQuestion(@PathVariable final String questionId) {
+		final Content content = contentService.getQuestion(questionId);
+		if (content != null) {
+			return content;
 		}
 
 		throw new NotFoundException();
 	}
 
-	@ApiOperation(value = "Post provided question",
+	@ApiOperation(value = "Post provided content",
 			nickname = "postQuestion")
 	@ApiResponses(value = {
 		@ApiResponse(code = 400, message = HTML_STATUS_400)
 	})
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Question postQuestion(@RequestBody final Question question) {
-		if (questionService.saveQuestion(question) != null) {
-			return question;
+	public Content postQuestion(@RequestBody final Content content) {
+		if (contentService.saveQuestion(content) != null) {
+			return content;
 		}
 		throw new BadRequestException();
 	}
 
-	@ApiOperation(value = "Post provided questions", nickname = "bulkPostQuestions")
+	@ApiOperation(value = "Post provided contents", nickname = "bulkPostQuestions")
 	@ApiResponses(value = {
 		@ApiResponse(code = 400, message = HTML_STATUS_400)
 	})
 	@RequestMapping(value = "/bulk", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public List<Question> bulkPostQuestions(@RequestBody final List<Question> questions) {
-		for (final Question question : questions) {
-			if (questionService.saveQuestion(question) == null) {
+	public List<Content> bulkPostQuestions(@RequestBody final List<Content> contents) {
+		for (final Content content : contents) {
+			if (contentService.saveQuestion(content) == null) {
 				throw new BadRequestException();
 			}
 		}
-		return questions;
+		return contents;
 	}
 
-	@ApiOperation(value = "Update the question, identified by provided id, with the provided question in the Request Body",
+	@ApiOperation(value = "Update the content, identified by provided id, with the provided content in the Request Body",
 			nickname = "updateQuestion")
 	@ApiResponses(value = {
 		@ApiResponse(code = 400, message = HTML_STATUS_400)
 	})
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.PUT)
-	public Question updateQuestion(
+	public Content updateQuestion(
 			@PathVariable final String questionId,
-			@RequestBody final Question question
+			@RequestBody final Content content
 			) {
 		try {
-			return questionService.update(question);
+			return contentService.update(content);
 		} catch (final Exception e) {
 			throw new BadRequestException();
 		}
@@ -126,9 +126,9 @@ public class LecturerQuestionController extends PaginationController {
 			) {
 
 		if (fcImage) {
-			return questionService.getQuestionFcImage(questionId);
+			return contentService.getQuestionFcImage(questionId);
 		} else {
-			return questionService.getQuestionImage(questionId);
+			return contentService.getQuestionImage(questionId);
 		}
 	}
 
@@ -139,9 +139,9 @@ public class LecturerQuestionController extends PaginationController {
 			) {
 
 		if (time == 0) {
-			questionService.startNewPiRound(questionId, null);
+			contentService.startNewPiRound(questionId, null);
 		} else {
-			questionService.startNewPiRoundDelayed(questionId, time);
+			contentService.startNewPiRoundDelayed(questionId, time);
 		}
 	}
 
@@ -151,7 +151,7 @@ public class LecturerQuestionController extends PaginationController {
 	public void cancelPiRound(
 			@PathVariable final String questionId
 			) {
-		questionService.cancelPiRoundChange(questionId);
+		contentService.cancelPiRoundChange(questionId);
 	}
 
 	@RequestMapping(value = "/{questionId}/resetpiroundstate", method = RequestMethod.POST)
@@ -160,7 +160,7 @@ public class LecturerQuestionController extends PaginationController {
 	public void resetPiQuestion(
 			@PathVariable final String questionId
 			) {
-		questionService.resetPiRoundState(questionId);
+		contentService.resetPiRoundState(questionId);
 	}
 
 	@ApiOperation(value = "Set voting admission on question, identified by provided id",
@@ -176,7 +176,7 @@ public class LecturerQuestionController extends PaginationController {
 			disable = disableVote;
 		}
 
-		questionService.setVotingAdmission(questionId, disable);
+		contentService.setVotingAdmission(questionId, disable);
 	}
 
 	@ApiOperation(value = "Set voting admission for all questions",
@@ -189,35 +189,35 @@ public class LecturerQuestionController extends PaginationController {
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) final boolean preparationQuestionsOnly
 			) {
 		boolean disable = false;
-		List<Question> questions;
+		List<Content> contents;
 
 		if (disableVote != null) {
 			disable = disableVote;
 		}
 
 		if (lectureQuestionsOnly) {
-			questions = questionService.getLectureQuestions(sessionkey);
-			questionService.setVotingAdmissions(sessionkey, disable, questions);
+			contents = contentService.getLectureQuestions(sessionkey);
+			contentService.setVotingAdmissions(sessionkey, disable, contents);
 		} else if (preparationQuestionsOnly) {
-			questions = questionService.getPreparationQuestions(sessionkey);
-			questionService.setVotingAdmissions(sessionkey, disable, questions);
+			contents = contentService.getPreparationQuestions(sessionkey);
+			contentService.setVotingAdmissions(sessionkey, disable, contents);
 		} else {
-			questionService.setVotingAdmissionForAllQuestions(sessionkey, disable);
+			contentService.setVotingAdmissionForAllQuestions(sessionkey, disable);
 		}
 	}
 
-	@ApiOperation(value = "Publish a question, identified by provided id and question in Request Body.",
+	@ApiOperation(value = "Publish a content, identified by provided id and content in Request Body.",
 			nickname = "publishQuestion")
 	@RequestMapping(value = "/{questionId}/publish", method = RequestMethod.POST)
 	public void publishQuestion(
 			@PathVariable final String questionId,
 			@RequestParam(required = false) final Boolean publish,
-			@RequestBody final Question question
+			@RequestBody final Content content
 			) {
 		if (publish != null) {
-			question.setActive(publish);
+			content.setActive(publish);
 		}
-		questionService.update(question);
+		contentService.update(content);
 	}
 
 	@ApiOperation(value = "Publish all questions",
@@ -230,52 +230,52 @@ public class LecturerQuestionController extends PaginationController {
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) final boolean preparationQuestionsOnly
 			) {
 		boolean p = publish == null || publish;
-		List<Question> questions;
+		List<Content> contents;
 
 		if (lectureQuestionsOnly) {
-			questions = questionService.getLectureQuestions(sessionkey);
-			questionService.publishQuestions(sessionkey, p, questions);
+			contents = contentService.getLectureQuestions(sessionkey);
+			contentService.publishQuestions(sessionkey, p, contents);
 		} else if (preparationQuestionsOnly) {
-			questions = questionService.getPreparationQuestions(sessionkey);
-			questionService.publishQuestions(sessionkey, p, questions);
+			contents = contentService.getPreparationQuestions(sessionkey);
+			contentService.publishQuestions(sessionkey, p, contents);
 		} else {
-			questionService.publishAll(sessionkey, p);
+			contentService.publishAll(sessionkey, p);
 		}
 	}
 
-	@ApiOperation(value = "Publish statistics from question with provided id",
+	@ApiOperation(value = "Publish statistics from content with provided id",
 			nickname = "publishStatistics")
 	@RequestMapping(value = "/{questionId}/publishstatistics", method = RequestMethod.POST)
 	public void publishStatistics(
 			@PathVariable final String questionId,
 			@RequestParam(required = false) final Boolean showStatistics,
-			@RequestBody final Question question
+			@RequestBody final Content content
 			) {
 		if (showStatistics != null) {
-			question.setShowStatistic(showStatistics);
+			content.setShowStatistic(showStatistics);
 		}
-		questionService.update(question);
+		contentService.update(content);
 	}
 
-	@ApiOperation(value = "Publish correct answer from question with provided id",
+	@ApiOperation(value = "Publish correct answer from content with provided id",
 			nickname = "publishCorrectAnswer")
 	@RequestMapping(value = "/{questionId}/publishcorrectanswer", method = RequestMethod.POST)
 	public void publishCorrectAnswer(
 			@PathVariable final String questionId,
 			@RequestParam(required = false) final Boolean showCorrectAnswer,
-			@RequestBody final Question question
+			@RequestBody final Content content
 			) {
 		if (showCorrectAnswer != null) {
-			question.setShowAnswer(showCorrectAnswer);
+			content.setShowAnswer(showCorrectAnswer);
 		}
-		questionService.update(question);
+		contentService.update(content);
 	}
 
 	@ApiOperation(value = "Get skill questions",
 			nickname = "getSkillQuestions")
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
-	public List<Question> getSkillQuestions(
+	public List<Content> getSkillQuestions(
 			@RequestParam final String sessionkey,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureQuestionsOnly,
 			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
@@ -283,24 +283,24 @@ public class LecturerQuestionController extends PaginationController {
 			@RequestParam(value = "requestImageData", defaultValue = "false") final boolean requestImageData,
 			final HttpServletResponse response
 			) {
-		List<Question> questions;
+		List<Content> contents;
 		if (lectureQuestionsOnly) {
-			questions = questionService.getLectureQuestions(sessionkey);
+			contents = contentService.getLectureQuestions(sessionkey);
 		} else if (flashcardsOnly) {
-			questions = questionService.getFlashcards(sessionkey);
+			contents = contentService.getFlashcards(sessionkey);
 		} else if (preparationQuestionsOnly) {
-			questions = questionService.getPreparationQuestions(sessionkey);
+			contents = contentService.getPreparationQuestions(sessionkey);
 		} else {
-			questions = questionService.getSkillQuestions(sessionkey);
+			contents = contentService.getSkillQuestions(sessionkey);
 		}
-		if (questions == null || questions.isEmpty()) {
+		if (contents == null || contents.isEmpty()) {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
 			return null;
 		} else if (!requestImageData) {
-			questions = questionService.replaceImageData(questions);
+			contents = contentService.replaceImageData(contents);
 		}
 
-		return new PaginationListDecorator<>(questions, offset, limit);
+		return new PaginationListDecorator<>(contents, offset, limit);
 	}
 
 	@ApiOperation(value = "Delete skill questions",
@@ -314,13 +314,13 @@ public class LecturerQuestionController extends PaginationController {
 			final HttpServletResponse response
 			) {
 		if (lectureQuestionsOnly) {
-			questionService.deleteLectureQuestions(sessionkey);
+			contentService.deleteLectureQuestions(sessionkey);
 		} else if (flashcardsOnly) {
-			questionService.deleteFlashcards(sessionkey);
+			contentService.deleteFlashcards(sessionkey);
 		} else if (preparationQuestionsOnly) {
-			questionService.deletePreparationQuestions(sessionkey);
+			contentService.deletePreparationQuestions(sessionkey);
 		} else {
-			questionService.deleteAllQuestions(sessionkey);
+			contentService.deleteAllQuestions(sessionkey);
 		}
 	}
 
@@ -336,13 +336,13 @@ public class LecturerQuestionController extends PaginationController {
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly
 			) {
 		if (lectureQuestionsOnly) {
-			return questionService.getLectureQuestionCount(sessionkey);
+			return contentService.getLectureQuestionCount(sessionkey);
 		} else if (flashcardsOnly) {
-			return questionService.getFlashcardCount(sessionkey);
+			return contentService.getFlashcardCount(sessionkey);
 		} else if (preparationQuestionsOnly) {
-			return questionService.getPreparationQuestionCount(sessionkey);
+			return contentService.getPreparationQuestionCount(sessionkey);
 		} else {
-			return questionService.getSkillQuestionCount(sessionkey);
+			return contentService.getSkillQuestionCount(sessionkey);
 		}
 	}
 
@@ -352,7 +352,7 @@ public class LecturerQuestionController extends PaginationController {
 	public void deleteAnswersAndQuestion(
 			@PathVariable final String questionId
 			) {
-		questionService.deleteQuestion(questionId);
+		contentService.deleteQuestion(questionId);
 	}
 
 	@ApiOperation(value = "Get unanswered skill question ID by provided session ID",
@@ -367,11 +367,11 @@ public class LecturerQuestionController extends PaginationController {
 			) {
 		List<String> answers;
 		if (lectureQuestionsOnly) {
-			answers = questionService.getUnAnsweredLectureQuestionIds(sessionkey);
+			answers = contentService.getUnAnsweredLectureQuestionIds(sessionkey);
 		} else if (preparationQuestionsOnly) {
-			answers = questionService.getUnAnsweredPreparationQuestionIds(sessionkey);
+			answers = contentService.getUnAnsweredPreparationQuestionIds(sessionkey);
 		} else {
-			answers = questionService.getUnAnsweredQuestionIds(sessionkey);
+			answers = contentService.getUnAnsweredQuestionIds(sessionkey);
 		}
 		if (answers == null || answers.isEmpty()) {
 			throw new NoContentException();
@@ -384,7 +384,7 @@ public class LecturerQuestionController extends PaginationController {
 	 * returns a JSON document which represents the given answer of a question.
 	 *
 	 * @param questionId
-	 *            CouchDB Question ID for which the given answer should be
+	 *            CouchDB Content ID for which the given answer should be
 	 *            retrieved
 	 * @return JSON Document of {@link Answer} or {@link NotFoundException}
 	 * @throws NotFoundException
@@ -402,7 +402,7 @@ public class LecturerQuestionController extends PaginationController {
 			@PathVariable final String questionId,
 			final HttpServletResponse response
 			) {
-		final Answer answer = questionService.getMyAnswer(questionId);
+		final Answer answer = contentService.getMyAnswer(questionId);
 		if (answer == null) {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
 			return null;
@@ -418,7 +418,7 @@ public class LecturerQuestionController extends PaginationController {
 	 * properties are set
 	 *
 	 * @param questionId
-	 *            CouchDB Question ID for which the given answers should be
+	 *            CouchDB Content ID for which the given answers should be
 	 *            retrieved
 	 * @throws NotFoundException
 	 *             if wrong session, wrong question or no answers was given
@@ -436,16 +436,16 @@ public class LecturerQuestionController extends PaginationController {
 			) {
 		List<Answer> answers;
 		if (allAnswers) {
-			answers = questionService.getAllAnswers(questionId, -1, -1);
+			answers = contentService.getAllAnswers(questionId, -1, -1);
 		} else if (null == piRound) {
-			answers = questionService.getAnswers(questionId, offset, limit);
+			answers = contentService.getAnswers(questionId, offset, limit);
 		} else {
 			if (piRound < 1 || piRound > 2) {
 				response.setStatus(HttpStatus.BAD_REQUEST.value());
 
 				return null;
 			}
-			answers = questionService.getAnswers(questionId, piRound, offset, limit);
+			answers = contentService.getAnswers(questionId, piRound, offset, limit);
 		}
 		if (answers == null) {
 			return new ArrayList<>();
@@ -461,7 +461,7 @@ public class LecturerQuestionController extends PaginationController {
 			@RequestBody final de.thm.arsnova.entities.transport.Answer answer,
 			final HttpServletResponse response
 			) {
-		return questionService.saveAnswer(questionId, answer);
+		return contentService.saveAnswer(questionId, answer);
 	}
 
 	@ApiOperation(value = "Update answer, provided in Request Body, identified by question ID and answer ID",
@@ -473,7 +473,7 @@ public class LecturerQuestionController extends PaginationController {
 			@RequestBody final Answer answer,
 			final HttpServletResponse response
 			) {
-		return questionService.updateAnswer(answer);
+		return contentService.updateAnswer(answer);
 	}
 
 	@ApiOperation(value = "Get Image, identified by question ID and answer ID",
@@ -485,7 +485,7 @@ public class LecturerQuestionController extends PaginationController {
 			final HttpServletResponse response
 			) {
 
-		return questionService.getImage(questionId, answerId);
+		return contentService.getImage(questionId, answerId);
 	}
 
 	@ApiOperation(value = "Delete answer, identified by question ID and answer ID",
@@ -496,7 +496,7 @@ public class LecturerQuestionController extends PaginationController {
 			@PathVariable final String answerId,
 			final HttpServletResponse response
 			) {
-		questionService.deleteAnswer(questionId, answerId);
+		contentService.deleteAnswer(questionId, answerId);
 	}
 
 	@ApiOperation(value = "Delete answers from a question, identified by question ID",
@@ -506,7 +506,7 @@ public class LecturerQuestionController extends PaginationController {
 			@PathVariable final String questionId,
 			final HttpServletResponse response
 			) {
-		questionService.deleteAnswers(questionId);
+		contentService.deleteAnswers(questionId);
 	}
 
 	@ApiOperation(value = "Delete all answers and questions from a session, identified by sessionkey",
@@ -519,18 +519,18 @@ public class LecturerQuestionController extends PaginationController {
 			final HttpServletResponse response
 			) {
 		if (lectureQuestionsOnly) {
-			questionService.deleteAllLectureAnswers(sessionkey);
+			contentService.deleteAllLectureAnswers(sessionkey);
 		} else if (preparationQuestionsOnly) {
-			questionService.deleteAllPreparationAnswers(sessionkey);
+			contentService.deleteAllPreparationAnswers(sessionkey);
 		} else {
-			questionService.deleteAllQuestionsAnswers(sessionkey);
+			contentService.deleteAllQuestionsAnswers(sessionkey);
 		}
 	}
 
 	/**
 	 *
 	 * @param questionId
-	 *            CouchDB Question ID for which the given answers should be
+	 *            CouchDB Content ID for which the given answers should be
 	 *            retrieved
 	 * @return count of answers for given question id
 	 * @throws NotFoundException
@@ -544,7 +544,7 @@ public class LecturerQuestionController extends PaginationController {
 	@Deprecated
 	@RequestMapping(value = "/{questionId}/answercount", method = RequestMethod.GET)
 	public int getAnswerCount(@PathVariable final String questionId) {
-		return questionService.getAnswerCount(questionId);
+		return contentService.getAnswerCount(questionId);
 	}
 
 	@ApiOperation(value = "Get the amount of answers for a question, identified by the question ID",
@@ -552,8 +552,8 @@ public class LecturerQuestionController extends PaginationController {
 	@RequestMapping(value = "/{questionId}/allroundanswercount", method = RequestMethod.GET)
 	public List<Integer> getAllAnswerCount(@PathVariable final String questionId) {
 		return Arrays.asList(
-			questionService.getAnswerCount(questionId, 1),
-			questionService.getAnswerCount(questionId, 2)
+			contentService.getAnswerCount(questionId, 1),
+			contentService.getAnswerCount(questionId, 2)
 		);
 	}
 
@@ -561,7 +561,7 @@ public class LecturerQuestionController extends PaginationController {
 			nickname = "getTotalAnswerCountByQuestion")
 	@RequestMapping(value = "/{questionId}/totalanswercount", method = RequestMethod.GET)
 	public int getTotalAnswerCountByQuestion(@PathVariable final String questionId) {
-		return questionService.getTotalAnswerCountByQuestion(questionId);
+		return contentService.getTotalAnswerCountByQuestion(questionId);
 	}
 
 	@ApiOperation(value = "Get the amount of answers and abstention answers by a question, identified by the question ID",
@@ -569,8 +569,8 @@ public class LecturerQuestionController extends PaginationController {
 	@RequestMapping(value = "/{questionId}/answerandabstentioncount", method = RequestMethod.GET)
 	public List<Integer> getAnswerAndAbstentionCount(@PathVariable final String questionId) {
 		return Arrays.asList(
-			questionService.getAnswerCount(questionId),
-			questionService.getAbstentionAnswerCount(questionId)
+			contentService.getAnswerCount(questionId),
+			contentService.getAbstentionAnswerCount(questionId)
 		);
 	}
 
@@ -579,7 +579,7 @@ public class LecturerQuestionController extends PaginationController {
 	@RequestMapping(value = "/{questionId}/freetextanswer/", method = RequestMethod.GET)
 	@Pagination
 	public List<Answer> getFreetextAnswers(@PathVariable final String questionId) {
-		return questionService.getFreetextAnswers(questionId, offset, limit);
+		return contentService.getFreetextAnswers(questionId, offset, limit);
 	}
 
 	@ApiOperation(value = "Get my answers of an session, identified by the sessionkey",
@@ -588,7 +588,7 @@ public class LecturerQuestionController extends PaginationController {
 	@Deprecated
 	@RequestMapping(value = "/myanswers", method = RequestMethod.GET)
 	public List<Answer> getMyAnswers(@RequestParam final String sessionkey) {
-		return questionService.getMyAnswers(sessionkey);
+		return contentService.getMyAnswers(sessionkey);
 	}
 
 	@ApiOperation(value = "Get the total amount of answers of an session, identified by the sessionkey",
@@ -602,11 +602,11 @@ public class LecturerQuestionController extends PaginationController {
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly
 			) {
 		if (lectureQuestionsOnly) {
-			return questionService.countLectureQuestionAnswers(sessionkey);
+			return contentService.countLectureQuestionAnswers(sessionkey);
 		} else if (preparationQuestionsOnly) {
-			return questionService.countPreparationQuestionAnswers(sessionkey);
+			return contentService.countPreparationQuestionAnswers(sessionkey);
 		} else {
-			return questionService.getTotalAnswerCount(sessionkey);
+			return contentService.getTotalAnswerCount(sessionkey);
 		}
 	}
 }

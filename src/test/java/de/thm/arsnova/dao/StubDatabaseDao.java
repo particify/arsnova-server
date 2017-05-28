@@ -33,7 +33,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	private static Map<String, Session> stubSessions = new ConcurrentHashMap<>();
 	private static Map<String, Feedback> stubFeedbacks = new ConcurrentHashMap<>();
-	private static Map<String, List<Question>> stubQuestions = new ConcurrentHashMap<>();
+	private static Map<String, List<Content>> stubQuestions = new ConcurrentHashMap<>();
 	private static Map<String, User> stubUsers = new ConcurrentHashMap<>();
 
 	public Comment comment;
@@ -91,29 +91,9 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	private void fillWithDummyQuestions() {
-		List<Question> questions = new ArrayList<>();
-		questions.add(new Question());
-		stubQuestions.put("12345678", questions);
-	}
-
-	@Override
-	public Question saveQuestion(Session session, Question question) {
-		List<Question> questions = stubQuestions.get(session.getKeyword());
-		questions.add(question);
-		stubQuestions.put(session.getId(), questions);
-
-		return question;
-	}
-
-	@Override
-	public Question getQuestion(String id) {
-		// Simply ... no such question ;-)
-		return null;
-	}
-
-	@Override
-	public int getSkillQuestionCount(Session session) {
-		return stubQuestions.get(session.getKeyword()).size();
+		List<Content> contents = new ArrayList<>();
+		contents.add(new Content());
+		stubQuestions.put("12345678", contents);
 	}
 
 	@Override
@@ -123,7 +103,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public int getAnswerCount(Question question, int piRound) {
+	public int getAnswerCount(Content content, int piRound) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -146,31 +126,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<String> getQuestionIds(Session session, User user) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<String> getUnAnsweredQuestionIds(Session session, User user) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Question updateQuestion(Question question) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public int deleteQuestionWithAnswers(Question question) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int deleteAnswers(Question question) {
+	public int deleteAnswers(Content content) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -193,29 +149,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public int[] deleteAllQuestionsWithAnswers(Session session) {
-		return new int[] { 0, 0 };
-	}
-
-	@Override
-	public int getLectureQuestionCount(Session session) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int getFlashcardCount(Session session) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int getPreparationQuestionCount(Session session) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
 	public int countLectureQuestionAnswers(Session session) {
 		// TODO Auto-generated method stub
 		return 0;
@@ -225,45 +158,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public int countPreparationQuestionAnswers(Session session) {
 		// TODO Auto-generated method stub
 		return 0;
-	}
-
-	@Override
-	public int[] deleteAllLectureQuestionsWithAnswers(Session session) {
-		return new int[] { 0, 0 };
-	}
-
-	@Override
-	public int[] deleteAllFlashcardsWithAnswers(Session session) {
-		return new int[] { 0, 0 };
-	}
-
-	@Override
-	public int[] deleteAllPreparationQuestionsWithAnswers(Session session) {
-		return new int[] { 0, 0 };
-	}
-
-	@Override
-	public List<String> getUnAnsweredLectureQuestionIds(Session session, User user) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<String> getUnAnsweredPreparationQuestionIds(Session session, User user) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void publishQuestions(Session session, boolean publish, List<Question> questions) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public List<Question> publishAllQuestions(Session session, boolean publish) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -297,73 +191,19 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Question> getSkillQuestionsForUsers(Session session) {
+	public List<Answer> getAnswers(Content content, int piRound) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Question> getSkillQuestionsForTeachers(Session session) {
+	public List<Answer> getAnswers(Content content) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Question> getLectureQuestionsForUsers(Session session) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Question> getLectureQuestionsForTeachers(Session session) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Question> getFlashcardsForUsers(Session session) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Question> getFlashcardsForTeachers(Session session) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Question> getPreparationQuestionsForUsers(Session session) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Question> getPreparationQuestionsForTeachers(Session session) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Question> getAllSkillQuestions(Session session) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Answer> getAnswers(Question question, int piRound) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Answer> getAnswers(Question question) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Answer saveAnswer(Answer answer, User user, Question question, Session session) {
+	public Answer saveAnswer(Answer answer, User user, Content content, Session session) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -380,52 +220,15 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<String> getSubjects(Session session, String questionVariant) {
+	public List<Answer> getAllAnswers(Content content) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<String> getQuestionIdsBySubject(Session session, String questionVariant, String subject) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Question> getQuestionsByIds(List<String> ids, Session session) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Answer> getAllAnswers(Question question) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public int getTotalAnswerCountByQuestion(Question question) {
+	public int getTotalAnswerCountByQuestion(Content content) {
 		// TODO Auto-generated method stub
 		return 0;
-	}
-
-	@Override
-	public void resetQuestionsRoundState(Session session,
-			List<Question> questions) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setVotingAdmissions(Session session, boolean disableVoting, List<Question> questions) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public List<Question> setVotingAdmissionForAllQuestions(Session session, boolean disableVoting) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -444,5 +247,11 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public MotdList createOrUpdateMotdList(MotdList motdlist) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public int[] deleteAllAnswersWithQuestions(List<Content> contents) {
+		// TODO Auto-generated method stub
+		return new int[0];
 	}
 }

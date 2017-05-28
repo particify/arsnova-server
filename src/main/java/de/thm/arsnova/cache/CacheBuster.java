@@ -51,7 +51,7 @@ public class CacheBuster implements ICacheBuster, NovaEventVisitor {
 	@Override
 	public void visit(LockQuestionsEvent lockQuestionsEvent) { }
 
-	@CacheEvict(value = "answers", key = "#event.Question")
+	@CacheEvict(value = "answers", key = "#event.content")
 	@Override
 	public void visit(NewAnswerEvent event) { }
 

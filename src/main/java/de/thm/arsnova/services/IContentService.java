@@ -20,7 +20,7 @@ package de.thm.arsnova.services;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.CommentReadingCount;
-import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.User;
 
 import java.util.List;
@@ -29,14 +29,14 @@ import java.util.Map;
 /**
  * The functionality the question service should provide.
  */
-public interface IQuestionService {
-	Question saveQuestion(Question question);
+public interface IContentService {
+	Content saveQuestion(Content content);
 
 	boolean saveQuestion(Comment comment);
 
-	Question getQuestion(String id);
+	Content getQuestion(String id);
 
-	List<Question> getSkillQuestions(String sessionkey);
+	List<Content> getSkillQuestions(String sessionkey);
 
 	int getSkillQuestionCount(String sessionkey);
 
@@ -88,9 +88,9 @@ public interface IQuestionService {
 
 	Comment readInterposedQuestionInternal(String commentId, User user);
 
-	Question update(Question question);
+	Content update(Content content);
 
-	Question update(Question question, User user);
+	Content update(Content content, User user);
 
 	void deleteAnswers(String questionId);
 
@@ -102,11 +102,11 @@ public interface IQuestionService {
 
 	void deleteInterposedQuestion(String commentId);
 
-	List<Question> getLectureQuestions(String sessionkey);
+	List<Content> getLectureQuestions(String sessionkey);
 
-	List<Question> getFlashcards(String sessionkey);
+	List<Content> getFlashcards(String sessionkey);
 
-	List<Question> getPreparationQuestions(String sessionkey);
+	List<Content> getPreparationQuestions(String sessionkey);
 
 	int getLectureQuestionCount(String sessionkey);
 
@@ -144,7 +144,7 @@ public interface IQuestionService {
 
 	void publishAll(String sessionkey, boolean publish);
 
-	void publishQuestions(String sessionkey, boolean publish, List<Question> questions);
+	void publishQuestions(String sessionkey, boolean publish, List<Content> contents);
 
 	void deleteAllQuestionsAnswers(String sessionkey);
 
@@ -158,7 +158,7 @@ public interface IQuestionService {
 
 	void setVotingAdmission(String questionId, boolean disableVoting);
 
-	void setVotingAdmissions(String sessionkey, boolean disableVoting, List<Question> questions);
+	void setVotingAdmissions(String sessionkey, boolean disableVoting, List<Content> contents);
 
 	void setVotingAdmissionForAllQuestions(String sessionkey, boolean disableVoting);
 
@@ -166,6 +166,6 @@ public interface IQuestionService {
 
 	String getQuestionFcImage(String questionId);
 
-	List<Question> replaceImageData(List<Question> questions);
+	List<Content> replaceImageData(List<Content> contents);
 
 }

@@ -36,11 +36,11 @@ import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.IFeedbackService;
-import de.thm.arsnova.services.IQuestionService;
+import de.thm.arsnova.services.IContentService;
 import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.socket.message.Feedback;
-import de.thm.arsnova.socket.message.Question;
+import de.thm.arsnova.socket.message.Content;
 import de.thm.arsnova.socket.message.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +76,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	private ISessionService sessionService;
 
 	@Autowired
-	private IQuestionService questionService;
+	private IContentService contentService;
 
 	private static final Logger logger = LoggerFactory.getLogger(ARSnovaSocketIOServer.class);
 
@@ -191,7 +191,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 					AckRequest ackRequest) {
 				final User user = userService.getUser2SocketId(client.getSessionId());
 				try {
-					questionService.readInterposedQuestionInternal(comment.getId(), user);
+					contentService.readInterposedQuestionInternal(comment.getId(), user);
 				} catch (NotFoundException | UnauthorizedException e) {
 					logger.error("Loading of comment {} failed for user {} with exception {}", comment.getId(), user, e.getMessage());
 				}
@@ -203,7 +203,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 			public void onData(SocketIOClient client, String answerId, AckRequest ackRequest) {
 				final User user = userService.getUser2SocketId(client.getSessionId());
 				try {
-					questionService.readFreetextAnswer(answerId, user);
+					contentService.readFreetextAnswer(answerId, user);
 				} catch (NotFoundException | UnauthorizedException e) {
 					logger.error("Marking answer {} as read failed for user {} with exception {}", answerId, user, e.getMessage());
 				}
@@ -360,17 +360,17 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 		final de.thm.arsnova.entities.Session session = sessionService.getSessionInternal(sessionKey, user);
 		final de.thm.arsnova.entities.SessionFeature features = sessionService.getSessionFeatures(sessionKey);
 
-		client.sendEvent("unansweredLecturerQuestions", questionService.getUnAnsweredLectureQuestionIds(sessionKey, user));
-		client.sendEvent("unansweredPreparationQuestions", questionService.getUnAnsweredPreparationQuestionIds(sessionKey, user));
-		client.sendEvent("countLectureQuestionAnswers", questionService.countLectureQuestionAnswersInternal(sessionKey));
-		client.sendEvent("countPreparationQuestionAnswers", questionService.countPreparationQuestionAnswersInternal(sessionKey));
+		client.sendEvent("unansweredLecturerQuestions", contentService.getUnAnsweredLectureQuestionIds(sessionKey, user));
+		client.sendEvent("unansweredPreparationQuestions", contentService.getUnAnsweredPreparationQuestionIds(sessionKey, user));
+		client.sendEvent("countLectureQuestionAnswers", contentService.countLectureQuestionAnswersInternal(sessionKey));
+		client.sendEvent("countPreparationQuestionAnswers", contentService.countPreparationQuestionAnswersInternal(sessionKey));
 		client.sendEvent("activeUserCountData", sessionService.activeUsers(sessionKey));
 		client.sendEvent("learningProgressOptions", session.getLearningProgressOptions());
 		final de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
 		client.sendEvent("feedbackData", fb.getValues());
 
 		if (features.isFlashcard() || features.isFlashcardFeature()) {
-			client.sendEvent("countFlashcards", questionService.countFlashcardsForUserInternal(sessionKey));
+			client.sendEvent("countFlashcards", contentService.countFlashcardsForUserInternal(sessionKey));
 			client.sendEvent("flipFlashcards", session.getFlipFlashcards());
 		}
 
@@ -421,8 +421,8 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 		broadcastInSession(sessionKey, "activeUserCountData", count);
 	}
 
-	public void reportAnswersToLecturerQuestionAvailable(final de.thm.arsnova.entities.Session session, final Question lecturerQuestion) {
-		broadcastInSession(session.getKeyword(), "answersToLecQuestionAvail", lecturerQuestion.get_id());
+	public void reportAnswersToLecturerQuestionAvailable(final de.thm.arsnova.entities.Session session, final Content content) {
+		broadcastInSession(session.getKeyword(), "answersToLecQuestionAvail", content.get_id());
 	}
 
 	public void reportAudienceQuestionAvailable(final de.thm.arsnova.entities.Session session, final Comment audienceQuestion) {
@@ -430,25 +430,25 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 		broadcastInSession(session.getKeyword(), "audQuestionAvail", audienceQuestion.getId());
 	}
 
-	public void reportLecturerQuestionAvailable(final de.thm.arsnova.entities.Session session, final List<de.thm.arsnova.entities.Question> qs) {
-		List<Question> questions = new ArrayList<>();
-		for (de.thm.arsnova.entities.Question q : qs) {
-			questions.add(new Question(q));
+	public void reportLecturerQuestionAvailable(final de.thm.arsnova.entities.Session session, final List<de.thm.arsnova.entities.Content> qs) {
+		List<Content> contents = new ArrayList<>();
+		for (de.thm.arsnova.entities.Content q : qs) {
+			contents.add(new Content(q));
 		}
 
 		/* TODO role handling implementation, send this only to users with role audience */
 		if (!qs.isEmpty()) {
-			broadcastInSession(session.getKeyword(), "lecQuestionAvail", questions.get(0).get_id()); // deprecated!
+			broadcastInSession(session.getKeyword(), "lecQuestionAvail", contents.get(0).get_id()); // deprecated!
 		}
-		broadcastInSession(session.getKeyword(), "lecturerQuestionAvailable", questions);
+		broadcastInSession(session.getKeyword(), "lecturerQuestionAvailable", contents);
 	}
 
-	public void reportLecturerQuestionsLocked(final de.thm.arsnova.entities.Session session, final List<de.thm.arsnova.entities.Question> qs) {
-		List<Question> questions = new ArrayList<>();
-		for (de.thm.arsnova.entities.Question q : qs) {
-			questions.add(new Question(q));
+	public void reportLecturerQuestionsLocked(final de.thm.arsnova.entities.Session session, final List<de.thm.arsnova.entities.Content> qs) {
+		List<Content> contents = new ArrayList<>();
+		for (de.thm.arsnova.entities.Content q : qs) {
+			contents.add(new Content(q));
 		}
-		broadcastInSession(session.getKeyword(), "lecturerQuestionLocked", questions);
+		broadcastInSession(session.getKeyword(), "lecturerQuestionLocked", contents);
 	}
 
 	public void reportSessionStatus(final String sessionKey, final boolean active) {
@@ -505,17 +505,17 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	@Timed(name = "visit.NewAnswerEvent")
 	public void visit(NewAnswerEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
-		this.reportAnswersToLecturerQuestionAvailable(event.getSession(), new Question(event.getQuestion()));
-		broadcastInSession(sessionKey, "countQuestionAnswersByQuestionId", questionService.getAnswerAndAbstentionCountInternal(event.getQuestion().get_id()));
-		broadcastInSession(sessionKey, "countLectureQuestionAnswers", questionService.countLectureQuestionAnswersInternal(sessionKey));
-		broadcastInSession(sessionKey, "countPreparationQuestionAnswers", questionService.countPreparationQuestionAnswersInternal(sessionKey));
+		this.reportAnswersToLecturerQuestionAvailable(event.getSession(), new Content(event.getContent()));
+		broadcastInSession(sessionKey, "countQuestionAnswersByQuestionId", contentService.getAnswerAndAbstentionCountInternal(event.getContent().getId()));
+		broadcastInSession(sessionKey, "countLectureQuestionAnswers", contentService.countLectureQuestionAnswersInternal(sessionKey));
+		broadcastInSession(sessionKey, "countPreparationQuestionAnswers", contentService.countPreparationQuestionAnswersInternal(sessionKey));
 
-		// Update the unanswered count for the question variant that was answered.
-		final de.thm.arsnova.entities.Question question = event.getQuestion();
-		if ("lecture".equals(question.getQuestionVariant())) {
-			sendToUser(event.getUser(), "unansweredLecturerQuestions", questionService.getUnAnsweredLectureQuestionIds(sessionKey, event.getUser()));
-		} else if ("preparation".equals(question.getQuestionVariant())) {
-			sendToUser(event.getUser(), "unansweredPreparationQuestions", questionService.getUnAnsweredPreparationQuestionIds(sessionKey, event.getUser()));
+		// Update the unanswered count for the content variant that was answered.
+		final de.thm.arsnova.entities.Content content = event.getContent();
+		if ("lecture".equals(content.getQuestionVariant())) {
+			sendToUser(event.getUser(), "unansweredLecturerQuestions", contentService.getUnAnsweredLectureQuestionIds(sessionKey, event.getUser()));
+		} else if ("preparation".equals(content.getQuestionVariant())) {
+			sendToUser(event.getUser(), "unansweredPreparationQuestions", contentService.getUnAnsweredPreparationQuestionIds(sessionKey, event.getUser()));
 		}
 	}
 
@@ -524,10 +524,10 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 	@Timed(name = "visit.DeleteAnswerEvent")
 	public void visit(DeleteAnswerEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
-		this.reportAnswersToLecturerQuestionAvailable(event.getSession(), new Question(event.getQuestion()));
+		this.reportAnswersToLecturerQuestionAvailable(event.getSession(), new Content(event.getQuestion()));
 		// We do not know which user's answer was deleted, so we can't update his 'unanswered' list of questions...
-		broadcastInSession(sessionKey, "countLectureQuestionAnswers", questionService.countLectureQuestionAnswersInternal(sessionKey));
-		broadcastInSession(sessionKey, "countPreparationQuestionAnswers", questionService.countPreparationQuestionAnswersInternal(sessionKey));
+		broadcastInSession(sessionKey, "countLectureQuestionAnswers", contentService.countLectureQuestionAnswersInternal(sessionKey));
+		broadcastInSession(sessionKey, "countPreparationQuestionAnswers", contentService.countPreparationQuestionAnswersInternal(sessionKey));
 	}
 
 	@Async
@@ -574,20 +574,20 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 
 	@Override
 	public void visit(LockVotesEvent event) {
-		List<Question> questions = new ArrayList<>();
-		for (de.thm.arsnova.entities.Question q : event.getQuestions()) {
-			questions.add(new Question(q));
+		List<Content> contents = new ArrayList<>();
+		for (de.thm.arsnova.entities.Content q : event.getQuestions()) {
+			contents.add(new Content(q));
 		}
-		broadcastInSession(event.getSession().getKeyword(), "lockVotes", questions);
+		broadcastInSession(event.getSession().getKeyword(), "lockVotes", contents);
 	}
 
 	@Override
 	public void visit(UnlockVotesEvent event) {
-		List<Question> questions = new ArrayList<>();
-		for (de.thm.arsnova.entities.Question q : event.getQuestions()) {
-			questions.add(new Question(q));
+		List<Content> contents = new ArrayList<>();
+		for (de.thm.arsnova.entities.Content q : event.getQuestions()) {
+			contents.add(new Content(q));
 		}
-		broadcastInSession(event.getSession().getKeyword(), "unlockVotes", questions);
+		broadcastInSession(event.getSession().getKeyword(), "unlockVotes", contents);
 	}
 
 	@Override
@@ -597,7 +597,7 @@ public class ARSnovaSocketIOServer implements ARSnovaSocket, NovaEventVisitor {
 		broadcastInSession(sessionKey, "featureChange", features);
 
 		if (features.isFlashcard() || features.isFlashcardFeature()) {
-			broadcastInSession(sessionKey, "countFlashcards", questionService.countFlashcardsForUserInternal(sessionKey));
+			broadcastInSession(sessionKey, "countFlashcards", contentService.countFlashcardsForUserInternal(sessionKey));
 			broadcastInSession(sessionKey, "flipFlashcards", event.getSession().getFlipFlashcards());
 		}
 	}
