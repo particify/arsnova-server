@@ -25,7 +25,7 @@ sync_mirror:
   script:
     - mkdir ~/.ssh && echo "$GITHUB_HOST_KEY" > ~/.ssh/known_hosts
     - eval $(ssh-agent -s) && ssh-add <(echo "$GITHUB_DEPLOY_KEY")
-    - git clone --bare "$CI_BUILD_REPO" mirror.git
+    - git clone --bare "$CI_REPOSITORY_URL" mirror.git
     - cd mirror.git
     - git update-ref -d refs/tags/production
     - git update-ref -d refs/tags/staging
