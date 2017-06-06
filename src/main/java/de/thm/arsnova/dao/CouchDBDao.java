@@ -25,9 +25,6 @@ import com.google.common.collect.Lists;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.*;
-import de.thm.arsnova.entities.transport.AnswerQueueElement;
-import de.thm.arsnova.events.NewAnswerEvent;
-import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import de.thm.arsnova.persistance.MotdRepository;
@@ -41,25 +38,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.annotation.Profile;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Database implementation based on CouchDB.
@@ -81,7 +71,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 @Profile("!test")
 @Service("databaseDao")
-public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware {
+public class CouchDBDao implements IDatabaseDao {
 
 	private static final int BULK_PARTITION_SIZE = 500;
 
@@ -104,10 +94,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	private int databasePort;
 	private String databaseName;
 	private Database database;
-
-	private ApplicationEventPublisher publisher;
-
-	private final Queue<AbstractMap.SimpleEntry<Document, AnswerQueueElement>> answerQueue = new ConcurrentLinkedQueue<>();
 
 	private static final Logger logger = LoggerFactory.getLogger(CouchDBDao.class);
 
@@ -142,11 +128,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return this;
 	}
 
-	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
-		this.publisher = publisher;
-	}
-
 	private Database getDatabase() {
 		if (database == null) {
 			try {
@@ -169,61 +150,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		getDatabase().deleteDocument(d);
 	}
 
-	@CacheEvict("answers")
-	@Override
-	public int deleteAnswers(final Content content) {
-		try {
-			final View view = new View("answer/by_questionid");
-			view.setKey(content.getId());
-			view.setIncludeDocs(true);
-			final ViewResults results = getDatabase().view(view);
-			final List<List<Document>> partitions = Lists.partition(results.getResults(), BULK_PARTITION_SIZE);
-
-			int count = 0;
-			for (List<Document> partition: partitions) {
-				List<Document> answersToDelete = new ArrayList<>();
-				for (final Document a : partition) {
-					final Document d = new Document(a.getJSONObject("doc"));
-					d.put("_deleted", true);
-					answersToDelete.add(d);
-				}
-				if (database.bulkSaveDocuments(answersToDelete.toArray(new Document[answersToDelete.size()]))) {
-					count += partition.size();
-				} else {
-					logger.error("Could not bulk delete answers.");
-				}
-			}
-			dbLogger.log("delete", "type", "answer", "answerCount", count);
-
-			return count;
-		} catch (final IOException e) {
-			logger.error("Could not delete answers for content {}.", content.getId(), e);
-		}
-
-		return 0;
-	}
-
-	@Override
-	public Answer getMyAnswer(final User me, final String questionId, final int piRound) {
-
-		final View view = new View("answer/doc_by_questionid_user_piround");
-		if (2 == piRound) {
-			view.setKey(questionId, me.getUsername(), "2");
-		} else {
-			/* needed for legacy questions whose piRound property has not been set */
-			view.setStartKey(questionId, me.getUsername());
-			view.setEndKey(questionId, me.getUsername(), "1");
-		}
-		final ViewResults results = getDatabase().view(view);
-		if (results.getResults().isEmpty()) {
-			return null;
-		}
-		return (Answer) JSONObject.toBean(
-				results.getJSONArray("rows").optJSONObject(0).optJSONObject("value"),
-				Answer.class
-				);
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getObjectFromId(final String documentId, final Class<T> klass) {
@@ -239,174 +165,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 	}
 
-	@Override
-	public List<Answer> getAnswers(final Content content, final int piRound) {
-		final String questionId = content.getId();
-		final View view = new View("answer/by_questionid_piround_text_subject");
-		if (2 == piRound) {
-			view.setStartKey(questionId, 2);
-			view.setEndKey(questionId, 2, "{}");
-		} else {
-			/* needed for legacy questions whose piRound property has not been set */
-			view.setStartKeyArray(questionId);
-			view.setEndKeyArray(questionId, 1, "{}");
-		}
-		view.setGroup(true);
-		final ViewResults results = getDatabase().view(view);
-		final int abstentionCount = getDatabaseDao().getAbstentionAnswerCount(questionId);
-		final List<Answer> answers = new ArrayList<>();
-
-		for (final Document d : results.getResults()) {
-			final Answer a = new Answer();
-			a.setAnswerCount(d.getInt("value"));
-			a.setAbstentionCount(abstentionCount);
-			a.setQuestionId(d.getJSONObject().getJSONArray("key").getString(0));
-			a.setPiRound(piRound);
-			final String answerText = d.getJSONObject().getJSONArray("key").getString(3);
-			a.setAnswerText("null".equals(answerText) ? null : answerText);
-			answers.add(a);
-		}
-		return answers;
-	}
-
-	@Override
-	public List<Answer> getAllAnswers(final Content content) {
-		final String questionId = content.getId();
-		final View view = new View("answer/by_questionid_piround_text_subject");
-		view.setStartKeyArray(questionId);
-		view.setEndKeyArray(questionId, "{}");
-		view.setGroup(true);
-		final ViewResults results = getDatabase().view(view);
-		final int abstentionCount = getDatabaseDao().getAbstentionAnswerCount(questionId);
-
-		final List<Answer> answers = new ArrayList<>();
-		for (final Document d : results.getResults()) {
-			final Answer a = new Answer();
-			a.setAnswerCount(d.getInt("value"));
-			a.setAbstentionCount(abstentionCount);
-			a.setQuestionId(d.getJSONObject().getJSONArray("key").getString(0));
-			final String answerText = d.getJSONObject().getJSONArray("key").getString(3);
-			final String answerSubject = d.getJSONObject().getJSONArray("key").getString(4);
-			final boolean successfulFreeTextAnswer = d.getJSONObject().getJSONArray("key").getBoolean(5);
-			a.setAnswerText("null".equals(answerText) ? null : answerText);
-			a.setAnswerSubject("null".equals(answerSubject) ? null : answerSubject);
-			a.setSuccessfulFreeTextAnswer(successfulFreeTextAnswer);
-			answers.add(a);
-		}
-		return answers;
-	}
-
-	@Cacheable("answers")
-	@Override
-	public List<Answer> getAnswers(final Content content) {
-		return this.getAnswers(content, content.getPiRound());
-	}
-
-	@Override
-	public int getAbstentionAnswerCount(final String questionId) {
-		final View view = new View("answer/by_questionid_piround_text_subject");
-		view.setStartKeyArray(questionId);
-		view.setEndKeyArray(questionId, "{}");
-		view.setGroup(true);
-		final ViewResults results = getDatabase().view(view);
-		if (results.getResults().isEmpty()) {
-			return 0;
-		}
-		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
-	}
-
-	@Override
-	public int getAnswerCount(final Content content, final int piRound) {
-		final View view = new View("answer/by_questionid_piround_text_subject");
-		view.setStartKey(content.getId(), piRound);
-		view.setEndKey(content.getId(), piRound, "{}");
-		view.setGroup(true);
-		final ViewResults results = getDatabase().view(view);
-		if (results.getResults().isEmpty()) {
-			return 0;
-		}
-
-		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
-	}
-
-	@Override
-	public int getTotalAnswerCountByQuestion(final Content content) {
-		final View view = new View("answer/by_questionid_piround_text_subject");
-		view.setStartKeyArray(content.getId());
-		view.setEndKeyArray(content.getId(), "{}");
-		view.setGroup(true);
-		final ViewResults results = getDatabase().view(view);
-
-		if (results.getResults().isEmpty()) {
-			return 0;
-		}
-
-		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
-	}
-
 	private boolean isEmptyResults(final ViewResults results) {
 		return results == null || results.getResults().isEmpty() || results.getJSONArray("rows").isEmpty();
-	}
-
-	@Override
-	public List<Answer> getFreetextAnswers(final String questionId, final int start, final int limit) {
-		final List<Answer> answers = new ArrayList<>();
-		final View view = new View("answer/doc_by_questionid_timestamp");
-		if (start > 0) {
-			view.setSkip(start);
-		}
-		if (limit > 0) {
-			view.setLimit(limit);
-		}
-		view.setDescending(true);
-		view.setStartKeyArray(questionId, "{}");
-		view.setEndKeyArray(questionId);
-		final ViewResults results = getDatabase().view(view);
-		if (results.getResults().isEmpty()) {
-			return answers;
-		}
-		for (final Document d : results.getResults()) {
-			final Answer a = (Answer) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Answer.class);
-			a.setQuestionId(questionId);
-			answers.add(a);
-		}
-		return answers;
-	}
-
-	@Override
-	public List<Answer> getMyAnswers(final User me, final Session s) {
-		final View view = new View("answer/doc_by_user_sessionid");
-		view.setKey(me.getUsername(), s.getId());
-		final ViewResults results = getDatabase().view(view);
-		final List<Answer> answers = new ArrayList<>();
-		if (results == null || results.getResults() == null || results.getResults().isEmpty()) {
-			return answers;
-		}
-		for (final Document d : results.getResults()) {
-			final Answer a = (Answer) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Answer.class);
-			a.set_id(d.getId());
-			a.set_rev(d.getRev());
-			a.setUser(me.getUsername());
-			a.setSessionId(s.getId());
-			answers.add(a);
-		}
-		return answers;
-	}
-
-	@Override
-	public int getTotalAnswerCount(final String sessionKey) {
-		final Session s = sessionRepository.getSessionFromKeyword(sessionKey);
-		if (s == null) {
-			throw new NotFoundException();
-		}
-
-		final View view = new View("answer/by_sessionid_variant");
-		view.setKey(s.getId());
-		final ViewResults results = getDatabase().view(view);
-		if (results.getResults().isEmpty()) {
-			return 0;
-		}
-		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
 	}
 
 	@Cacheable("statistics")
@@ -487,100 +247,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return stats;
 	}
 
-	@CacheEvict(value = "answers", key = "#content")
-	@Override
-	public Answer saveAnswer(final Answer answer, final User user, final Content content, final Session session) {
-		final Document a = new Document();
-		a.put("type", "skill_question_answer");
-		a.put("sessionId", answer.getSessionId());
-		a.put("questionId", answer.getQuestionId());
-		a.put("answerSubject", answer.getAnswerSubject());
-		a.put("questionVariant", answer.getQuestionVariant());
-		a.put("questionValue", answer.getQuestionValue());
-		a.put("answerText", answer.getAnswerText());
-		a.put("answerTextRaw", answer.getAnswerTextRaw());
-		a.put("successfulFreeTextAnswer", answer.isSuccessfulFreeTextAnswer());
-		a.put("timestamp", answer.getTimestamp());
-		a.put("user", user.getUsername());
-		a.put("piRound", answer.getPiRound());
-		a.put("abstention", answer.isAbstention());
-		a.put("answerImage", answer.getAnswerImage());
-		a.put("answerThumbnailImage", answer.getAnswerThumbnailImage());
-		AnswerQueueElement answerQueueElement = new AnswerQueueElement(session, content, answer, user);
-		this.answerQueue.offer(new AbstractMap.SimpleEntry<>(a, answerQueueElement));
-		return answer;
-	}
-
-	@Scheduled(fixedDelay = 5000)
-	public void flushAnswerQueue() {
-		final Map<Document, Answer> map = new HashMap<>();
-		final List<Document> answerList = new ArrayList<>();
-		final List<AnswerQueueElement> elements = new ArrayList<>();
-		AbstractMap.SimpleEntry<Document, AnswerQueueElement> entry;
-		while ((entry = this.answerQueue.poll()) != null) {
-			final Document doc = entry.getKey();
-			final Answer answer = entry.getValue().getAnswer();
-			map.put(doc, answer);
-			answerList.add(doc);
-			elements.add(entry.getValue());
-		}
-		if (answerList.isEmpty()) {
-			// no need to send an empty bulk request. ;-)
-			return;
-		}
-		try {
-			getDatabase().bulkSaveDocuments(answerList.toArray(new Document[answerList.size()]));
-			for (Document d : answerList) {
-				final Answer answer = map.get(d);
-				answer.set_id(d.getId());
-				answer.set_rev(d.getRev());
-			}
-			// Send NewAnswerEvents ...
-			for (AnswerQueueElement e : elements) {
-				this.publisher.publishEvent(new NewAnswerEvent(this, e.getSession(), e.getAnswer(), e.getUser(), e.getQuestion()));
-			}
-		} catch (IOException e) {
-			logger.error("Could not bulk save answers from queue.", e);
-		}
-	}
-
-	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
-	@CacheEvict(value = "answers", allEntries = true)
-	@Override
-	public Answer updateAnswer(final Answer answer) {
-		try {
-			final Document a = database.getDocument(answer.get_id());
-			a.put("answerSubject", answer.getAnswerSubject());
-			a.put("answerText", answer.getAnswerText());
-			a.put("answerTextRaw", answer.getAnswerTextRaw());
-			a.put("successfulFreeTextAnswer", answer.isSuccessfulFreeTextAnswer());
-			a.put("timestamp", answer.getTimestamp());
-			a.put("abstention", answer.isAbstention());
-			a.put("questionValue", answer.getQuestionValue());
-			a.put("answerImage", answer.getAnswerImage());
-			a.put("answerThumbnailImage", answer.getAnswerThumbnailImage());
-			a.put("read", answer.isRead());
-			database.saveDocument(a);
-			answer.set_rev(a.getRev());
-			return answer;
-		} catch (final IOException e) {
-			logger.error("Could not update answer {}.", answer, e);
-		}
-		return null;
-	}
-
-	/* TODO: Only evict cache entry for the answer's session. This requires some refactoring. */
-	@CacheEvict(value = "answers", allEntries = true)
-	@Override
-	public void deleteAnswer(final String answerId) {
-		try {
-			database.deleteDocument(database.getDocument(answerId));
-			dbLogger.log("delete", "type", "answer");
-		} catch (final IOException e) {
-			logger.error("Could not delete answer {}.", answerId, e);
-		}
-	}
-
 	/**
 	 * Adds convenience methods to CouchDB4J's view class.
 	 */
@@ -649,119 +315,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 
 		return 0;
-	}
-
-	@Override
-	public int countLectureQuestionAnswers(final Session session) {
-		return countQuestionVariantAnswers(session, "lecture");
-	}
-
-	@Override
-	public int countPreparationQuestionAnswers(final Session session) {
-		return countQuestionVariantAnswers(session, "preparation");
-	}
-
-	private int countQuestionVariantAnswers(final Session session, final String variant) {
-		final View view = new View("answer/by_sessionid_variant");
-		view.setKey(session.getId(), variant);
-		view.setReduce(true);
-		final ViewResults results = getDatabase().view(view);
-		if (results.getResults().isEmpty()) {
-			return 0;
-		}
-		return results.getJSONArray("rows").optJSONObject(0).optInt("value");
-	}
-
-	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
-	@CacheEvict(value = "answers", allEntries = true)
-	@Override
-	public int deleteAllQuestionsAnswers(final Session session) {
-		final List<Content> contents = contentRepository.getQuestions(session.getId());
-		contentRepository.resetQuestionsRoundState(session, contents);
-
-		return deleteAllAnswersForQuestions(contents);
-	}
-
-	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
-	@CacheEvict(value = "answers", allEntries = true)
-	@Override
-	public int deleteAllPreparationAnswers(final Session session) {
-		final List<Content> contents = contentRepository.getQuestions(session.getId(), "preparation");
-		contentRepository.resetQuestionsRoundState(session, contents);
-
-		return deleteAllAnswersForQuestions(contents);
-	}
-
-	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
-	@CacheEvict(value = "answers", allEntries = true)
-	@Override
-	public int deleteAllLectureAnswers(final Session session) {
-		final List<Content> contents = contentRepository.getQuestions(session.getId(), "lecture");
-		contentRepository.resetQuestionsRoundState(session, contents);
-
-		return deleteAllAnswersForQuestions(contents);
-	}
-
-	public int deleteAllAnswersForQuestions(List<Content> contents) {
-		List<String> questionIds = new ArrayList<>();
-		for (Content q : contents) {
-			questionIds.add(q.getId());
-		}
-		final View bulkView = new View("answer/by_questionid");
-		bulkView.setKeys(questionIds);
-		bulkView.setIncludeDocs(true);
-		final List<Document> result = getDatabase().view(bulkView).getResults();
-		final List<Document> allAnswers = new ArrayList<>();
-		for (Document a : result) {
-			final Document d = new Document(a.getJSONObject("doc"));
-			d.put("_deleted", true);
-			allAnswers.add(d);
-		}
-		try {
-			getDatabase().bulkSaveDocuments(allAnswers.toArray(new Document[allAnswers.size()]));
-
-			return allAnswers.size();
-		} catch (IOException e) {
-			logger.error("Could not bulk delete answers.", e);
-		}
-
-		return 0;
-	}
-
-	public int[] deleteAllAnswersWithQuestions(List<Content> contents) {
-		List<String> questionIds = new ArrayList<>();
-		final List<Document> allQuestions = new ArrayList<>();
-		for (Content q : contents) {
-			final Document d = new Document();
-			d.put("_id", q.getId());
-			d.put("_rev", q.getRevision());
-			d.put("_deleted", true);
-			questionIds.add(q.getId());
-			allQuestions.add(d);
-		}
-		final View bulkView = new View("answer/by_questionid");
-		bulkView.setKeys(questionIds);
-		bulkView.setIncludeDocs(true);
-		final List<Document> result = getDatabase().view(bulkView).getResults();
-
-		final List<Document> allAnswers = new ArrayList<>();
-		for (Document a : result) {
-			final Document d = new Document(a.getJSONObject("doc"));
-			d.put("_deleted", true);
-			allAnswers.add(d);
-		}
-
-		try {
-			List<Document> deleteList = new ArrayList<>(allAnswers);
-			deleteList.addAll(allQuestions);
-			getDatabase().bulkSaveDocuments(deleteList.toArray(new Document[deleteList.size()]));
-
-			return new int[] {deleteList.size(), result.size()};
-		} catch (IOException e) {
-			logger.error("Could not bulk delete contents and answers.", e);
-		}
-
-		return new int[] {0, 0};
 	}
 
 	@Cacheable("learningprogress")

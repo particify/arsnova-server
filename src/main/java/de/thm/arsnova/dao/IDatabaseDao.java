@@ -26,47 +26,10 @@ import java.util.List;
  * All methods the database must support.
  */
 public interface IDatabaseDao {
-	Answer getMyAnswer(User me, String questionId, int piRound);
-
-	List<Answer> getAnswers(Content content, int piRound);
-
-	List<Answer> getAnswers(Content content);
-
-	List<Answer> getAllAnswers(Content content);
-
-	int getAnswerCount(Content content, int piRound);
-
-	int getTotalAnswerCountByQuestion(Content content);
-
-	int getAbstentionAnswerCount(String questionId);
-
-	List<Answer> getFreetextAnswers(String questionId, final int start, final int limit);
-
-	List<Answer> getMyAnswers(User me, Session session);
-
-	int getTotalAnswerCount(String sessionKey);
-
-	int deleteAnswers(Content content);
-
-	Answer saveAnswer(Answer answer, User user, Content content, Session session);
-
-	Answer updateAnswer(Answer answer);
-
-	void deleteAnswer(String answerId);
 
 	int deleteInactiveGuestVisitedSessionLists(long lastActivityBefore);
 
-	int countLectureQuestionAnswers(Session session);
-
-	int countPreparationQuestionAnswers(Session session);
-
-	int deleteAllQuestionsAnswers(Session session);
-
 	CourseScore getLearningProgress(Session session);
-
-	int deleteAllPreparationAnswers(Session session);
-
-	int deleteAllLectureAnswers(Session session);
 
 	Statistics getStatistics();
 
@@ -75,6 +38,4 @@ public interface IDatabaseDao {
 	MotdList getMotdListForUser(final String username);
 
 	MotdList createOrUpdateMotdList(MotdList motdlist);
-
-	int[] deleteAllAnswersWithQuestions(List<Content> contents);
 }

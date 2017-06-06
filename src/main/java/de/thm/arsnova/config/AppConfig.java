@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import de.thm.arsnova.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.client.ConnectorClientImpl;
+import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.LogEntry;
@@ -32,12 +33,14 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.serialization.CouchDbDocumentModule;
 import de.thm.arsnova.entities.serialization.CouchDbObjectMapperFactory;
 import de.thm.arsnova.entities.serialization.View;
+import de.thm.arsnova.persistance.AnswerRepository;
 import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import de.thm.arsnova.persistance.MotdRepository;
 import de.thm.arsnova.persistance.SessionRepository;
 import de.thm.arsnova.persistance.UserRepository;
+import de.thm.arsnova.persistance.couchdb.CouchDbAnswerRepository;
 import de.thm.arsnova.persistance.couchdb.CouchDbCommentRepository;
 import de.thm.arsnova.persistance.couchdb.CouchDbContentRepository;
 import de.thm.arsnova.persistance.couchdb.CouchDbLogEntryRepository;
@@ -306,6 +309,11 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 	@Bean
 	public ContentRepository contentRepository() throws Exception {
 		return new CouchDbContentRepository(Content.class, couchDbConnector(), false);
+	}
+
+	@Bean
+	public AnswerRepository answerRepository() throws Exception {
+		return new CouchDbAnswerRepository(Answer.class, couchDbConnector(), false);
 	}
 
 	@Bean

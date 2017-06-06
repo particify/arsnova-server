@@ -504,11 +504,10 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 	}
 
 	private List<SessionInfo> getInfosForSessions(final List<Session> sessions) {
-		/* TODO: migrate to new view */
 		List<String> sessionIds = sessions.stream().map(Session::getId).collect(Collectors.toList());
 		final ViewQuery questionCountView = createQuery("by_sessionid").designDocId("_design/Content")
 				.group(true).keys(sessionIds);
-		final ViewQuery answerCountView = createQuery("by_sessionid").designDocId("_design/answer")
+		final ViewQuery answerCountView = createQuery("by_sessionid").designDocId("_design/Answer")
 				.group(true).keys(sessionIds);
 		final ViewQuery commentCountView = createQuery("by_sessionid").designDocId("_design/Comment")
 				.group(true).keys(sessionIds);
@@ -519,7 +518,7 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 	}
 
 	private List<SessionInfo> getInfosForVisitedSessions(final List<Session> sessions, final User user) {
-		final ViewQuery answeredQuestionsView = createQuery("by_user_sessionid").designDocId("_design/answer")
+		final ViewQuery answeredQuestionsView = createQuery("by_user_sessionid").designDocId("_design/Answer")
 				.keys(sessions.stream().map(session -> ComplexKey.of(user.getUsername(), session.getId())).collect(Collectors.toList()));
 		final ViewQuery questionIdsView = createQuery("by_sessionid").designDocId("_design/Content")
 				.keys(sessions.stream().map(Session::getId).collect(Collectors.toList()));

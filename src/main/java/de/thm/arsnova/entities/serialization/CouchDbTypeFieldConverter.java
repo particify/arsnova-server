@@ -20,6 +20,7 @@ package de.thm.arsnova.entities.serialization;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.Converter;
+import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.Entity;
@@ -41,6 +42,7 @@ public class CouchDbTypeFieldConverter implements Converter<Class<? extends Enti
 		typeMapping.put(Session.class, "session");
 		typeMapping.put(Comment.class, "interposed_question");
 		typeMapping.put(Content.class, "skill_question");
+		typeMapping.put(Answer.class, "skill_question_answer");
 	}
 
 	@Override

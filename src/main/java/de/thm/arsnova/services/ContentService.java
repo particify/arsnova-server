@@ -30,6 +30,7 @@ import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.persistance.AnswerRepository;
 import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.SessionRepository;
@@ -70,6 +71,9 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 
 	@Autowired
 	private ContentRepository contentRepository;
+
+	@Autowired
+	private AnswerRepository answerRepository;
 
 	@Autowired
 	private ImageUtils imageUtils;
@@ -285,7 +289,7 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 		}
 
 		content.resetRoundManagementState();
-		databaseDao.deleteAnswers(content);
+		answerRepository.deleteAnswers(content);
 		update(content);
 		this.publisher.publishEvent(new PiRoundResetEvent(this, session, content));
 	}
@@ -392,7 +396,7 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 		final Content content = contentRepository.getQuestion(questionId);
 		content.resetQuestionState();
 		contentRepository.updateQuestion(content);
-		databaseDao.deleteAnswers(content);
+		answerRepository.deleteAnswers(content);
 	}
 
 	@Override
@@ -418,12 +422,12 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		return databaseDao.getMyAnswer(userService.getCurrentUser(), questionId, content.getPiRound());
+		return answerRepository.getMyAnswer(userService.getCurrentUser(), questionId, content.getPiRound());
 	}
 
 	@Override
 	public void readFreetextAnswer(final String answerId, final User user) {
-		final Answer answer = databaseDao.getObjectFromId(answerId, Answer.class);
+		final Answer answer = answerRepository.get(answerId);
 		if (answer == null) {
 			throw new NotFoundException();
 		}
@@ -433,7 +437,7 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 		final Session session = sessionRepository.getSessionFromId(answer.getSessionId());
 		if (session.isCreator(user)) {
 			answer.setRead(true);
-			databaseDao.updateAnswer(answer);
+			answerRepository.updateAnswer(answer);
 		}
 	}
 
@@ -446,7 +450,7 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 		}
 		return "freetext".equals(content.getQuestionType())
 				? getFreetextAnswers(questionId, offset, limit)
-						: databaseDao.getAnswers(content, piRound);
+						: answerRepository.getAnswers(content, piRound);
 	}
 
 	@Override
@@ -459,7 +463,7 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 		if ("freetext".equals(content.getQuestionType())) {
 			return getFreetextAnswers(questionId, offset, limit);
 		} else {
-			return databaseDao.getAnswers(content);
+			return answerRepository.getAnswers(content);
 		}
 	}
 
@@ -473,7 +477,7 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 		if ("freetext".equals(content.getQuestionType())) {
 			return getFreetextAnswers(questionId, offset, limit);
 		} else {
-			return databaseDao.getAllAnswers(content);
+			return answerRepository.getAllAnswers(content);
 		}
 	}
 
@@ -486,9 +490,9 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 		}
 
 		if ("freetext".equals(content.getQuestionType())) {
-			return databaseDao.getTotalAnswerCountByQuestion(content);
+			return answerRepository.getTotalAnswerCountByQuestion(content);
 		} else {
-			return databaseDao.getAnswerCount(content, content.getPiRound());
+			return answerRepository.getAnswerCount(content, content.getPiRound());
 		}
 	}
 
@@ -500,7 +504,7 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 			return 0;
 		}
 
-		return databaseDao.getAnswerCount(content, piRound);
+		return answerRepository.getAnswerCount(content, piRound);
 	}
 
 	@Override
@@ -511,7 +515,7 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 			return 0;
 		}
 
-		return databaseDao.getAbstentionAnswerCount(questionId);
+		return answerRepository.getAbstentionAnswerCount(questionId);
 	}
 
 	@Override
@@ -522,13 +526,13 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 			return 0;
 		}
 
-		return databaseDao.getTotalAnswerCountByQuestion(content);
+		return answerRepository.getTotalAnswerCountByQuestion(content);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Answer> getFreetextAnswers(final String questionId, final int offset, final int limit) {
-		final List<Answer> answers = databaseDao.getFreetextAnswers(questionId, offset, limit);
+		final List<Answer> answers = answerRepository.getFreetextAnswers(questionId, offset, limit);
 		if (answers == null) {
 			throw new NotFoundException();
 		}
@@ -552,7 +556,7 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 		}
 
 		/* filter answers by active piRound per question */
-		final List<Answer> answers = databaseDao.getMyAnswers(userService.getCurrentUser(), session);
+		final List<Answer> answers = answerRepository.getMyAnswers(userService.getCurrentUser(), session);
 		final List<Answer> filteredAnswers = new ArrayList<>();
 		for (final Answer answer : answers) {
 			final Content content = questionIdToQuestion.get(answer.getQuestionId());
@@ -577,7 +581,7 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int getTotalAnswerCount(final String sessionKey) {
-		return databaseDao.getTotalAnswerCount(sessionKey);
+		return answerRepository.getTotalAnswerCount(sessionKey);
 	}
 
 	@Override
@@ -690,8 +694,12 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 		if (content == null) {
 			throw new NotFoundException();
 		}
+		final Session session = sessionRepository.getSessionFromId(content.getSessionId());
 
 		Answer theAnswer = answer.generateAnswerEntity(user, content);
+		theAnswer.setUser(user.getUsername());
+		theAnswer.setQuestionId(content.getId());
+		theAnswer.setSessionId(session.getId());
 		if ("freetext".equals(content.getQuestionType())) {
 			imageUtils.generateThumbnailImage(theAnswer);
 			if (content.isFixedAnswer() && content.getText() != null) {
@@ -705,7 +713,7 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 			}
 		}
 
-		return databaseDao.saveAnswer(theAnswer, user, content, sessionRepository.getSessionFromId(content.getSessionId()));
+		return answerRepository.saveAnswer(theAnswer, user, content, session);
 	}
 
 	@Override
@@ -722,8 +730,11 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 			imageUtils.generateThumbnailImage(realAnswer);
 			content.checkTextStrictOptions(realAnswer);
 		}
-		final Answer result = databaseDao.updateAnswer(realAnswer);
 		final Session session = sessionRepository.getSessionFromId(content.getSessionId());
+		answer.setUser(user.getUsername());
+		answer.setQuestionId(content.getId());
+		answer.setSessionId(session.getId());
+		final Answer result = answerRepository.updateAnswer(realAnswer);
 		this.publisher.publishEvent(new NewAnswerEvent(this, session, result, user, content));
 
 		return result;
@@ -741,7 +752,7 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
-		databaseDao.deleteAnswer(answerId);
+		answerRepository.deleteAnswer(answerId);
 
 		this.publisher.publishEvent(new DeleteAnswerEvent(this, session, content));
 	}
@@ -832,7 +843,7 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 	 */
 	@Override
 	public int countLectureQuestionAnswersInternal(final String sessionkey) {
-		return databaseDao.countLectureQuestionAnswers(getSession(sessionkey));
+		return answerRepository.countLectureQuestionAnswers(getSession(sessionkey));
 	}
 
 	@Override
@@ -845,8 +856,8 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 		}
 
 		map.put("_id", questionId);
-		map.put("answers", databaseDao.getAnswerCount(content, content.getPiRound()));
-		map.put("abstentions", databaseDao.getAbstentionAnswerCount(questionId));
+		map.put("answers", answerRepository.getAnswerCount(content, content.getPiRound()));
+		map.put("abstentions", answerRepository.getAbstentionAnswerCount(questionId));
 
 		return map;
 	}
@@ -863,7 +874,7 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 	 */
 	@Override
 	public int countPreparationQuestionAnswersInternal(final String sessionkey) {
-		return databaseDao.countPreparationQuestionAnswers(getSession(sessionkey));
+		return answerRepository.countPreparationQuestionAnswers(getSession(sessionkey));
 	}
 
 	/*
@@ -966,7 +977,7 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 		if (!session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
-		databaseDao.deleteAllQuestionsAnswers(session);
+		answerRepository.deleteAllQuestionsAnswers(session);
 
 		this.publisher.publishEvent(new DeleteAllQuestionsAnswersEvent(this, session));
 	}
@@ -975,7 +986,7 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public void deleteAllPreparationAnswers(String sessionkey) {
 		final Session session = getSession(sessionkey);
-		databaseDao.deleteAllPreparationAnswers(session);
+		answerRepository.deleteAllPreparationAnswers(session);
 
 		this.publisher.publishEvent(new DeleteAllPreparationAnswersEvent(this, session));
 	}
@@ -984,7 +995,7 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public void deleteAllLectureAnswers(String sessionkey) {
 		final Session session = getSession(sessionkey);
-		databaseDao.deleteAllLectureAnswers(session);
+		answerRepository.deleteAllLectureAnswers(session);
 
 		this.publisher.publishEvent(new DeleteAllLectureAnswersEvent(this, session));
 	}
@@ -1000,7 +1011,7 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 		Answer answer = null;
 
 		for (Answer a : answers) {
-			if (answerId.equals(a.get_id())) {
+			if (answerId.equals(a.getId())) {
 				answer = a;
 				break;
 			}

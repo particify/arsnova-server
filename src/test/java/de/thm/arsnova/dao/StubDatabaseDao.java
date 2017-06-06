@@ -97,113 +97,13 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public Answer getMyAnswer(User user, String questionId, int piRound) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public int getAnswerCount(Content content, int piRound) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public List<Answer> getFreetextAnswers(String questionId, final int start, final int limit) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Answer> getMyAnswers(User user, Session session) {
-		return new ArrayList<>();
-	}
-
-	@Override
-	public int getTotalAnswerCount(String sessionKey) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int deleteAnswers(Content content) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public Answer updateAnswer(Answer answer) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void deleteAnswer(String answerId) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
 	public int deleteInactiveGuestVisitedSessionLists(long lastActivityBefore) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public int countLectureQuestionAnswers(Session session) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int countPreparationQuestionAnswers(Session session) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int deleteAllQuestionsAnswers(Session session) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
 	public CourseScore getLearningProgress(Session session) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public int deleteAllPreparationAnswers(Session session) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int deleteAllLectureAnswers(Session session) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int getAbstentionAnswerCount(String questionId) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public List<Answer> getAnswers(Content content, int piRound) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Answer> getAnswers(Content content) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Answer saveAnswer(Answer answer, User user, Content content, Session session) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -217,18 +117,6 @@ public class StubDatabaseDao implements IDatabaseDao {
 		stats.setAnswers(0);
 		stats.setInterposedQuestions(0);
 		return stats;
-	}
-
-	@Override
-	public List<Answer> getAllAnswers(Content content) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public int getTotalAnswerCountByQuestion(Content content) {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	@Override
@@ -247,11 +135,5 @@ public class StubDatabaseDao implements IDatabaseDao {
 	public MotdList createOrUpdateMotdList(MotdList motdlist) {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public int[] deleteAllAnswersWithQuestions(List<Content> contents) {
-		// TODO Auto-generated method stub
-		return new int[0];
 	}
 }

@@ -1,9 +1,9 @@
 package de.thm.arsnova.persistance.couchdb;
 
-import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.persistance.AnswerRepository;
 import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import org.ektorp.ComplexKey;
@@ -37,7 +37,7 @@ public class CouchDbContentRepository extends CouchDbRepositorySupport<Content> 
 	private LogEntryRepository dbLogger;
 
 	@Autowired
-	private IDatabaseDao databaseDao;
+	private AnswerRepository answerRepository;
 
 	public CouchDbContentRepository(Class<Content> type, CouchDbConnector db, boolean createIfNotExists) {
 		super(type, db, createIfNotExists);
@@ -145,7 +145,7 @@ public class CouchDbContentRepository extends CouchDbRepositorySupport<Content> 
 	@Override
 	public int deleteQuestionWithAnswers(final Content content) {
 		try {
-			int count = databaseDao.deleteAnswers(content);
+			int count = answerRepository.deleteAnswers(content);
 			db.delete(content);
 			dbLogger.log("delete", "type", "content", "answerCount", count);
 
@@ -181,7 +181,7 @@ public class CouchDbContentRepository extends CouchDbRepositorySupport<Content> 
 			contents.add(q);
 		}
 
-		int[] count = databaseDao.deleteAllAnswersWithQuestions(contents);
+		int[] count = answerRepository.deleteAllAnswersWithQuestions(contents);
 		dbLogger.log("delete", "type", "question", "questionCount", count[0]);
 		dbLogger.log("delete", "type", "answer", "answerCount", count[1]);
 
@@ -191,7 +191,7 @@ public class CouchDbContentRepository extends CouchDbRepositorySupport<Content> 
 	@Override
 	public List<String> getUnAnsweredQuestionIds(final Session session, final User user) {
 		final ViewResult result = db.queryView(createQuery("questionid_by_user_sessionid_variant")
-				.designDocId("_design/answer")
+				.designDocId("_design/Answer")
 				.startKey(ComplexKey.of(user.getUsername(), session.getId()))
 				.endKey(ComplexKey.of(user.getUsername(), session.getId(), ComplexKey.emptyObject())));
 		List<String> answeredIds = new ArrayList<>();
@@ -204,7 +204,7 @@ public class CouchDbContentRepository extends CouchDbRepositorySupport<Content> 
 	@Override
 	public List<String> getUnAnsweredLectureQuestionIds(final Session session, final User user) {
 		final ViewResult result = db.queryView(createQuery("questionid_piround_by_user_sessionid_variant")
-				.designDocId("_design/answer")
+				.designDocId("_design/Answer")
 				.key(ComplexKey.of(user.getUsername(), session.getId(), "lecture")));
 		Map<String, Integer> answeredQuestions = new HashMap<>();
 		for (ViewResult.Row row : result.getRows()) {
@@ -217,7 +217,7 @@ public class CouchDbContentRepository extends CouchDbRepositorySupport<Content> 
 	@Override
 	public List<String> getUnAnsweredPreparationQuestionIds(final Session session, final User user) {
 		final ViewResult result = db.queryView(createQuery("questionid_piround_by_user_sessionid_variant")
-				.designDocId("_design/answer")
+				.designDocId("_design/Answer")
 				.key(ComplexKey.of(user.getUsername(), session.getId(), "preparation")));
 		Map<String, Integer> answeredQuestions = new HashMap<>();
 		for (ViewResult.Row row : result.getRows()) {
