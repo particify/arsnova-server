@@ -67,6 +67,7 @@ import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -174,6 +175,8 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 	@Bean
 	public StringHttpMessageConverter stringMessageConverter() {
 		StringHttpMessageConverter messageConverter = new StringHttpMessageConverter();
+		messageConverter.setDefaultCharset(Charset.forName("UTF-8"));
+		messageConverter.setWriteAcceptCharset(false);
 		List<MediaType> mediaTypes = new ArrayList<>();
 		mediaTypes.add(MediaType.TEXT_PLAIN);
 		messageConverter.setSupportedMediaTypes(mediaTypes);
