@@ -57,13 +57,13 @@ public class WelcomeController extends AbstractController {
 	private Properties versionInfoProperties;
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public View home(final HttpServletRequest request) {
+	public View home() {
 		return new RedirectView(mobileContextPath + "/", false);
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
-	public Map<String, Object> jsonHome(final HttpServletRequest request) {
+	public Map<String, Object> jsonHome() {
 		Map<String, Object> response = new HashMap<>();
 		Map<String, Object> version = new HashMap<>();
 
