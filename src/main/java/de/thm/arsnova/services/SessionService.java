@@ -352,7 +352,6 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		existingSession.setShortName(session.getShortName());
 		existingSession.setPpAuthorName(session.getPpAuthorName());
 		existingSession.setPpAuthorMail(session.getPpAuthorMail());
-		existingSession.setShortName(session.getShortName());
 		existingSession.setPpAuthorName(session.getPpAuthorName());
 		existingSession.setPpFaculty(session.getPpFaculty());
 		existingSession.setName(session.getName());
@@ -362,6 +361,8 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		existingSession.setPpLicense(session.getPpLicense());
 		existingSession.setPpSubject(session.getPpSubject());
 		existingSession.setFeedbackLock(session.getFeedbackLock());
+		existingSession.setCourseId(session.getCourseId());
+		existingSession.setCourseType(session.getCourseType());
 
 		handleLogo(session);
 		existingSession.setPpLogo(session.getPpLogo());
