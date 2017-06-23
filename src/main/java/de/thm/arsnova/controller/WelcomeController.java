@@ -57,13 +57,13 @@ public class WelcomeController extends AbstractController {
 	private Properties versionInfoProperties;
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public View home(final HttpServletRequest request) {
+	public View home() {
 		return new RedirectView(mobileContextPath + "/", false);
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
-	public Map<String, Object> jsonHome(final HttpServletRequest request) {
+	public Map<String, Object> jsonHome() {
 		Map<String, Object> response = new HashMap<>();
 		Map<String, Object> version = new HashMap<>();
 
@@ -85,7 +85,7 @@ public class WelcomeController extends AbstractController {
 			final HttpServletRequest request
 		) {
 		/* Block requests from the server itself to prevent DoS attacks caused by request loops */
-		if ("127.0.0.1".equals(request.getRemoteAddr())) {
+		if ("127.0.0.1".equals(request.getRemoteAddr()) || "::1".equals(request.getRemoteAddr())) {
 			throw new BadRequestException("Access to localhost not allowed.");
 		}
 		/* Block requests to servers in private networks */
