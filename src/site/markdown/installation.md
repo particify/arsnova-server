@@ -25,7 +25,9 @@ This configuration would support up to 500 users.
 ## Configuration
 
 You will need to do some configuration work upfront:
-Create a copy of [arsnova.properties.example](src/main/resources/arsnova.properties.example) at `/etc/arsnova/arsnova.properties`.
+Create a copy of
+[src/main/resources/arsnova.properties.example](../../main/resources/arsnova.properties.example)
+at `/etc/arsnova/arsnova.properties`.
 Then change the settings to match your environment.
 
 You need to change at least the following configuration properties:
@@ -36,7 +38,8 @@ You need to change at least the following configuration properties:
 *A note to Windows users*: our settings are based on Linux and Mac environments.
 We do not officially support Windows, so you have to do some extra steps.
 The property file's path is hard coded in
-[spring-main.xml](src/main/webapp/WEB-INF/spring/spring-main.xml) and in the "Setup Tool" (see "Database Setup").
+[src/main/webapp/WEB-INF/spring/spring-main.xml](../../main/webapp/WEB-INF/spring/spring-main.xml)
+and in the "Setup Tool" (see "Database Setup").
 You want to change the paths to make them match your environment.
 
 
