@@ -49,6 +49,8 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -80,7 +82,9 @@ import java.util.List;
 		"de.thm.arsnova.web"})
 @Configuration
 @EnableAspectJAutoProxy(exposeProxy = true)
+@EnableAsync
 @EnableCaching
+@EnableScheduling
 @EnableWebMvc
 @PropertySource(
 		value = {"classpath:arsnova.properties.example", "file:/etc/arsnova/arsnova.properties"},
