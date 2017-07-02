@@ -18,7 +18,6 @@
 package de.thm.arsnova.services;
 
 import com.codahale.metrics.annotation.Gauge;
-import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.BadRequestException;
@@ -98,9 +97,6 @@ public class UserService implements IUserService {
 
 	@Autowired
 	private UserRepository userRepository;
-
-	@Autowired
-	private IDatabaseDao databaseDao;
 
 	@Autowired
 	private JavaMailSender mailSender;

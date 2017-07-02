@@ -17,7 +17,6 @@
  */
 package de.thm.arsnova.security;
 
-import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Session;
@@ -46,9 +45,6 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 	@Value("${security.admin-accounts}")
 	private String[] adminAccounts;
-
-	@Autowired
-	private IDatabaseDao dao;
 
 	@Autowired
 	private SessionRepository sessionRepository;

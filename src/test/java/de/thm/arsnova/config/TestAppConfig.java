@@ -1,6 +1,5 @@
 package de.thm.arsnova.config;
 
-import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.dao.StubDatabaseDao;
 import de.thm.arsnova.services.StubUserService;
 import de.thm.arsnova.socket.ARSnovaSocket;
@@ -61,7 +60,7 @@ public class TestAppConfig {
 	}
 
 	@Bean
-	public IDatabaseDao databaseDao() {
+	public StubDatabaseDao databaseDao() {
 		return new StubDatabaseDao();
 	}
 

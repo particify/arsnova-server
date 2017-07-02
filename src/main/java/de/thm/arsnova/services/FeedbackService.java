@@ -18,7 +18,6 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.FeedbackStorage;
-import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
@@ -57,18 +56,11 @@ public class FeedbackService implements IFeedbackService, ApplicationEventPublis
 	private int cleanupFeedbackDelay;
 
 	@Autowired
-	private IDatabaseDao databaseDao;
-
-	@Autowired
 	private SessionRepository sessionRepository;
 
 	private FeedbackStorage feedbackStorage;
 
 	private ApplicationEventPublisher publisher;
-
-	public void setDatabaseDao(final IDatabaseDao newDatabaseDao) {
-		databaseDao = newDatabaseDao;
-	}
 
 	@PostConstruct
 	public void init() {

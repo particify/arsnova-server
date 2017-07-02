@@ -18,7 +18,6 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.ImageUtils;
-import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.CommentReadingCount;
@@ -56,10 +55,6 @@ import java.util.TimerTask;
  */
 @Service
 public class ContentService implements IContentService, ApplicationEventPublisherAware {
-
-	@Autowired
-	private IDatabaseDao databaseDao;
-
 	@Autowired
 	private IUserService userService;
 
@@ -86,10 +81,6 @@ public class ContentService implements IContentService, ApplicationEventPublishe
 	private static final Logger logger = LoggerFactory.getLogger(ContentService.class);
 
 	private HashMap<String, Timer> timerList = new HashMap<>();
-
-	public void setDatabaseDao(final IDatabaseDao databaseDao) {
-		this.databaseDao = databaseDao;
-	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")

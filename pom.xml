@@ -186,11 +186,6 @@
 			<artifactId>log4j</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>de.thm.couchdb4j</groupId>
-			<artifactId>couchdb4j</artifactId>
-			<version>0.8-SNAPSHOT</version>
-		</dependency>
-		<dependency>
 			<groupId>org.ektorp</groupId>
 			<artifactId>org.ektorp</artifactId>
 			<version>1.4.4</version>

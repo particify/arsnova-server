@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Profile("test")
 @Service("databaseDao")
-public class StubDatabaseDao implements IDatabaseDao {
+public class StubDatabaseDao {
 
 	private static Map<String, Session> stubSessions = new ConcurrentHashMap<>();
 	private static Map<String, Feedback> stubFeedbacks = new ConcurrentHashMap<>();
@@ -93,11 +93,5 @@ public class StubDatabaseDao implements IDatabaseDao {
 		List<Content> contents = new ArrayList<>();
 		contents.add(new Content());
 		stubQuestions.put("12345678", contents);
-	}
-
-	@Override
-	public <T> T getObjectFromId(String documentId, Class<T> klass) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }
