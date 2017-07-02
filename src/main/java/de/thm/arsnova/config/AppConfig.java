@@ -23,30 +23,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import de.thm.arsnova.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.client.ConnectorClientImpl;
-import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.Comment;
-import de.thm.arsnova.entities.DbUser;
-import de.thm.arsnova.entities.LogEntry;
-import de.thm.arsnova.entities.Motd;
-import de.thm.arsnova.entities.Content;
-import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.*;
 import de.thm.arsnova.entities.serialization.CouchDbDocumentModule;
 import de.thm.arsnova.entities.serialization.CouchDbObjectMapperFactory;
 import de.thm.arsnova.entities.serialization.View;
-import de.thm.arsnova.persistance.AnswerRepository;
-import de.thm.arsnova.persistance.CommentRepository;
-import de.thm.arsnova.persistance.ContentRepository;
-import de.thm.arsnova.persistance.LogEntryRepository;
-import de.thm.arsnova.persistance.MotdRepository;
-import de.thm.arsnova.persistance.SessionRepository;
-import de.thm.arsnova.persistance.UserRepository;
-import de.thm.arsnova.persistance.couchdb.CouchDbAnswerRepository;
-import de.thm.arsnova.persistance.couchdb.CouchDbCommentRepository;
-import de.thm.arsnova.persistance.couchdb.CouchDbContentRepository;
-import de.thm.arsnova.persistance.couchdb.CouchDbLogEntryRepository;
-import de.thm.arsnova.persistance.couchdb.CouchDbMotdRepository;
-import de.thm.arsnova.persistance.couchdb.CouchDbSessionRepository;
-import de.thm.arsnova.persistance.couchdb.CouchDbUserRepository;
+import de.thm.arsnova.persistance.*;
+import de.thm.arsnova.persistance.couchdb.*;
 import de.thm.arsnova.persistance.couchdb.InitializingCouchDbConnector;
 import de.thm.arsnova.socket.ARSnovaSocket;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
@@ -319,6 +301,26 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 	@Bean
 	public UserRepository userRepository() throws Exception {
 		return new CouchDbUserRepository(DbUser.class, couchDbConnector(), false);
+	}
+
+	@Bean
+	public VisitedSessionRepository visitedSessionRepository() throws Exception {
+		return new CouchDbVisitedSessionRepository(VisitedSession.class, couchDbConnector(), false);
+	}
+
+	@Bean
+	public MotdListRepository motdListRepository() throws Exception {
+		return new CouchDbMotdListRepository(MotdList.class, couchDbConnector(), false);
+	}
+
+	@Bean
+	public StatisticsRepository statisticsRepository() throws Exception {
+		return new CouchDbStatisticsRepository(Object.class, couchDbConnector(), false);
+	}
+
+	@Bean
+	public SessionStatisticsRepository sessionStatisticsRepository() throws Exception {
+		return new CouchDbSessionStatisticsRepository(Object.class, couchDbConnector(), false);
 	}
 
 	@Bean(name = "connectorClient")

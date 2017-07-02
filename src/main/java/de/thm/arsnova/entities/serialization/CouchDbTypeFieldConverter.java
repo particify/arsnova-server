@@ -27,6 +27,7 @@ import de.thm.arsnova.entities.Entity;
 import de.thm.arsnova.entities.LogEntry;
 import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.entities.Content;
+import de.thm.arsnova.entities.MotdList;
 import de.thm.arsnova.entities.Session;
 
 import java.util.HashMap;
@@ -39,6 +40,7 @@ public class CouchDbTypeFieldConverter implements Converter<Class<? extends Enti
 		typeMapping.put(LogEntry.class, "log");
 		typeMapping.put(DbUser.class, "userdetails");
 		typeMapping.put(Motd.class, "motd");
+		typeMapping.put(MotdList.class, "motdlist");
 		typeMapping.put(Session.class, "session");
 		typeMapping.put(Comment.class, "interposed_question");
 		typeMapping.put(Content.class, "skill_question");

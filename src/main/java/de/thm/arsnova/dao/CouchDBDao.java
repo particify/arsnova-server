@@ -21,16 +21,13 @@ import com.fourspaces.couchdb.Database;
 import com.fourspaces.couchdb.Document;
 import com.fourspaces.couchdb.View;
 import com.fourspaces.couchdb.ViewResults;
-import com.google.common.collect.Lists;
 import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.*;
 import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import de.thm.arsnova.persistance.MotdRepository;
 import de.thm.arsnova.persistance.SessionRepository;
 import de.thm.arsnova.services.ISessionService;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
@@ -38,18 +35,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Database implementation based on CouchDB.
@@ -72,8 +63,6 @@ import java.util.Set;
 @Profile("!test")
 @Service("databaseDao")
 public class CouchDBDao implements IDatabaseDao {
-
-	private static final int BULK_PARTITION_SIZE = 500;
 
 	@Autowired
 	private ISessionService sessionService;
@@ -169,84 +158,6 @@ public class CouchDBDao implements IDatabaseDao {
 		return results == null || results.getResults().isEmpty() || results.getJSONArray("rows").isEmpty();
 	}
 
-	@Cacheable("statistics")
-	@Override
-	public Statistics getStatistics() {
-		final Statistics stats = new Statistics();
-		try {
-			final View statsView = new View("statistics/statistics");
-			final View creatorView = new View("statistics/unique_session_creators");
-			final View studentUserView = new View("statistics/active_student_users");
-			statsView.setGroup(true);
-			creatorView.setGroup(true);
-			studentUserView.setGroup(true);
-
-			final ViewResults statsResults = getDatabase().view(statsView);
-			final ViewResults creatorResults = getDatabase().view(creatorView);
-			final ViewResults studentUserResults = getDatabase().view(studentUserView);
-
-			if (!isEmptyResults(statsResults)) {
-				final JSONArray rows = statsResults.getJSONArray("rows");
-				for (int i = 0; i < rows.size(); i++) {
-					final JSONObject row = rows.getJSONObject(i);
-					final int value = row.getInt("value");
-					switch (row.getString("key")) {
-					case "openSessions":
-						stats.setOpenSessions(stats.getOpenSessions() + value);
-						break;
-					case "closedSessions":
-						stats.setClosedSessions(stats.getClosedSessions() + value);
-						break;
-					case "deletedSessions":
-						/* Deleted sessions are not exposed separately for now. */
-						stats.setClosedSessions(stats.getClosedSessions() + value);
-						break;
-					case "answers":
-						stats.setAnswers(stats.getAnswers() + value);
-						break;
-					case "lectureQuestions":
-						stats.setLectureQuestions(stats.getLectureQuestions() + value);
-						break;
-					case "preparationQuestions":
-						stats.setPreparationQuestions(stats.getPreparationQuestions() + value);
-						break;
-					case "interposedQuestions":
-						stats.setInterposedQuestions(stats.getInterposedQuestions() + value);
-						break;
-					case "conceptQuestions":
-						stats.setConceptQuestions(stats.getConceptQuestions() + value);
-						break;
-					case "flashcards":
-						stats.setFlashcards(stats.getFlashcards() + value);
-						break;
-					}
-				}
-			}
-			if (!isEmptyResults(creatorResults)) {
-				final JSONArray rows = creatorResults.getJSONArray("rows");
-				Set<String> creators = new HashSet<>();
-				for (int i = 0; i < rows.size(); i++) {
-					final JSONObject row = rows.getJSONObject(i);
-					creators.add(row.getString("key"));
-				}
-				stats.setCreators(creators.size());
-			}
-			if (!isEmptyResults(studentUserResults)) {
-				final JSONArray rows = studentUserResults.getJSONArray("rows");
-				Set<String> students = new HashSet<>();
-				for (int i = 0; i < rows.size(); i++) {
-					final JSONObject row = rows.getJSONObject(i);
-					students.add(row.getString("key"));
-				}
-				stats.setActiveStudents(students.size());
-			}
-			return stats;
-		} catch (final Exception e) {
-			logger.error("Could not retrieve session count.", e);
-		}
-		return stats;
-	}
-
 	/**
 	 * Adds convenience methods to CouchDB4J's view class.
 	 */
@@ -272,135 +183,4 @@ public class CouchDBDao implements IDatabaseDao {
 			setKeys(sessionIds);
 		}
 	}
-
-	@Override
-	public int deleteInactiveGuestVisitedSessionLists(long lastActivityBefore) {
-		try {
-			View view = new View("logged_in/by_last_activity_for_guests");
-			view.setEndKey(lastActivityBefore);
-			List<Document> results = this.getDatabase().view(view).getResults();
-
-			int count = 0;
-			List<List<Document>> partitions = Lists.partition(results, BULK_PARTITION_SIZE);
-			for (List<Document> partition: partitions) {
-				final List<Document> newDocs = new ArrayList<>();
-				for (final Document oldDoc : partition) {
-					final Document newDoc = new Document();
-					newDoc.setId(oldDoc.getId());
-					newDoc.setRev(oldDoc.getJSONObject("value").getString("_rev"));
-					newDoc.put("_deleted", true);
-					newDocs.add(newDoc);
-					logger.debug("Marked logged_in document {} for deletion.", oldDoc.getId());
-					/* Use log type 'user' since effectively the user is deleted in case of guests */
-					dbLogger.log("delete", "type", "user", "id", oldDoc.getId());
-				}
-
-				if (!newDocs.isEmpty()) {
-					if (getDatabase().bulkSaveDocuments(newDocs.toArray(new Document[newDocs.size()]))) {
-						count += newDocs.size();
-					} else {
-						logger.error("Could not bulk delete visited session lists.");
-					}
-				}
-			}
-
-			if (count > 0) {
-				logger.info("Deleted {} visited session lists of inactive users.", count);
-				dbLogger.log("cleanup", "type", "visitedsessions", "count", count);
-			}
-
-			return count;
-		} catch (IOException e) {
-			logger.error("Could not delete visited session lists of inactive users.", e);
-		}
-
-		return 0;
-	}
-
-	@Cacheable("learningprogress")
-	@Override
-	public CourseScore getLearningProgress(final Session session) {
-		final View maximumValueView = new View("learning_progress/maximum_value_of_question");
-		final View answerSumView = new View("learning_progress/question_value_achieved_for_user");
-		maximumValueView.setStartKeyArray(session.getId());
-		maximumValueView.setEndKeyArray(session.getId(), "{}");
-		answerSumView.setStartKeyArray(session.getId());
-		answerSumView.setEndKeyArray(session.getId(), "{}");
-
-		final List<Document> maximumValueResult = getDatabase().view(maximumValueView).getResults();
-		final List<Document> answerSumResult = getDatabase().view(answerSumView).getResults();
-
-		CourseScore courseScore = new CourseScore();
-
-		// no results found
-		if (maximumValueResult.isEmpty() && answerSumResult.isEmpty()) {
-			return courseScore;
-		}
-
-		// collect mapping (questionId -> max value)
-		for (Document d : maximumValueResult) {
-			String questionId = d.getJSONArray("key").getString(1);
-			JSONObject value = d.getJSONObject("value");
-			int questionScore = value.getInt("value");
-			String questionVariant = value.getString("questionVariant");
-			int piRound = value.getInt("piRound");
-			courseScore.addQuestion(questionId, questionVariant, piRound, questionScore);
-		}
-		// collect mapping (questionId -> (user -> value))
-		for (Document d : answerSumResult) {
-			String username = d.getJSONArray("key").getString(1);
-			JSONObject value = d.getJSONObject("value");
-			String questionId = value.getString("questionId");
-			int userscore = value.getInt("score");
-			int piRound = value.getInt("piRound");
-			courseScore.addAnswer(questionId, piRound, username, userscore);
-		}
-		return courseScore;
-	}
-
-	@Override
-	@Cacheable(cacheNames = "motdlist", key = "#p0")
-	public MotdList getMotdListForUser(final String username) {
-		View view = new View("motdlist/doc_by_username");
-		view.setKey(username);
-
-		ViewResults results = this.getDatabase().view(view);
-
-		MotdList motdlist = new MotdList();
-		for (final Document d : results.getResults()) {
-			motdlist.set_id(d.getId());
-			motdlist.set_rev(d.getJSONObject("value").getString("_rev"));
-			motdlist.setUsername(d.getJSONObject("value").getString("username"));
-			motdlist.setMotdkeys(d.getJSONObject("value").getString("motdkeys"));
-		}
-		return motdlist;
-	}
-
-	@Override
-	@CachePut(cacheNames = "motdlist", key = "#p0.username")
-	public MotdList createOrUpdateMotdList(MotdList motdlist) {
-		try {
-			String id = motdlist.get_id();
-			String rev = motdlist.get_rev();
-			Document d = new Document();
-
-			if (null != id) {
-				d = database.getDocument(id, rev);
-			}
-			d.put("type", "motdlist");
-			d.put("username", motdlist.getUsername());
-			d.put("motdkeys", motdlist.getMotdkeys());
-
-			database.saveDocument(d, id);
-			motdlist.set_id(d.getId());
-			motdlist.set_rev(d.getRev());
-
-			return motdlist;
-		} catch (IOException e) {
-			logger.error("Could not save MotD list {}.", motdlist, e);
-		}
-
-		return null;
-	}
-
 }

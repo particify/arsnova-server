@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.services;
 
-import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Statistics;
+import de.thm.arsnova.persistance.StatisticsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -29,18 +29,17 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class StatisticsService implements IStatisticsService {
-
 	@Autowired
-	private IDatabaseDao databaseDao;
+	private StatisticsRepository statisticsRepository;
 
 	@Autowired
 	private IUserService userService;
 
 	private Statistics statistics = new Statistics();
 
-	@Scheduled(initialDelay = 0, fixedRate = 300000)
+	@Scheduled(initialDelay = 0, fixedRate = 10000)
 	private void refreshStatistics() {
-		statistics = databaseDao.getStatistics();
+		statistics = statisticsRepository.getStatistics();
 	}
 
 	@Override

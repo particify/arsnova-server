@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.domain;
 
-import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.events.*;
+import de.thm.arsnova.persistance.SessionStatisticsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 public class LearningProgressFactory implements NovaEventVisitor, ILearningProgressFactory, ApplicationEventPublisherAware {
 
 	@Autowired
-	private IDatabaseDao databaseDao;
+	private SessionStatisticsRepository sessionStatisticsRepository;
 
 	private ApplicationEventPublisher publisher;
 
@@ -42,9 +42,9 @@ public class LearningProgressFactory implements NovaEventVisitor, ILearningProgr
 	public LearningProgress create(String progressType, String questionVariant) {
 		VariantLearningProgress learningProgress;
 		if ("questions".equals(progressType)) {
-			learningProgress = new QuestionBasedLearningProgress(databaseDao);
+			learningProgress = new QuestionBasedLearningProgress(sessionStatisticsRepository);
 		} else {
-			learningProgress = new PointBasedLearningProgress(databaseDao);
+			learningProgress = new PointBasedLearningProgress(sessionStatisticsRepository);
 		}
 		learningProgress.setQuestionVariant(questionVariant);
 		return learningProgress;

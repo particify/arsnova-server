@@ -17,25 +17,9 @@
  */
 package de.thm.arsnova.dao;
 
-import de.thm.arsnova.domain.CourseScore;
-import de.thm.arsnova.entities.*;
-
-import java.util.List;
-
 /**
  * All methods the database must support.
  */
 public interface IDatabaseDao {
-
-	int deleteInactiveGuestVisitedSessionLists(long lastActivityBefore);
-
-	CourseScore getLearningProgress(Session session);
-
-	Statistics getStatistics();
-
 	<T> T getObjectFromId(String documentId, Class<T> klass);
-
-	MotdList getMotdListForUser(final String username);
-
-	MotdList createOrUpdateMotdList(MotdList motdlist);
 }

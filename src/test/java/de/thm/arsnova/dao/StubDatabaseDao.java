@@ -17,7 +17,6 @@
  */
 package de.thm.arsnova.dao;
 
-import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.*;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -97,42 +96,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public int deleteInactiveGuestVisitedSessionLists(long lastActivityBefore) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public CourseScore getLearningProgress(Session session) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Statistics getStatistics() {
-		final Statistics stats = new Statistics();
-		stats.setOpenSessions(3);
-		stats.setClosedSessions(0);
-		stats.setLectureQuestions(0);
-		stats.setAnswers(0);
-		stats.setInterposedQuestions(0);
-		return stats;
-	}
-
-	@Override
 	public <T> T getObjectFromId(String documentId, Class<T> klass) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public MotdList getMotdListForUser(final String username) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public MotdList createOrUpdateMotdList(MotdList motdlist) {
 		// TODO Auto-generated method stub
 		return null;
 	}

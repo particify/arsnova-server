@@ -17,12 +17,12 @@
  */
 package de.thm.arsnova.services;
 
-import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.entities.MotdList;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.persistance.MotdListRepository;
 import de.thm.arsnova.persistance.MotdRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,10 +38,6 @@ import java.util.StringTokenizer;
  */
 @Service
 public class MotdService implements IMotdService {
-
-	@Autowired
-	private IDatabaseDao databaseDao;
-
 	@Autowired
 	private IUserService userService;
 
@@ -51,9 +47,8 @@ public class MotdService implements IMotdService {
 	@Autowired
 	private MotdRepository motdRepository;
 
-	public void setDatabaseDao(final IDatabaseDao databaseDao) {
-		this.databaseDao = databaseDao;
-	}
+	@Autowired
+	private MotdListRepository motdListRepository;
 
   @Override
   @PreAuthorize("isAuthenticated()")
@@ -175,7 +170,7 @@ public class MotdService implements IMotdService {
 	public MotdList getMotdListForUser(final String username) {
 		final User user = userService.getCurrentUser();
 		if (username.equals(user.getUsername()) && !"guest".equals(user.getType())) {
-			return databaseDao.getMotdListForUser(username);
+			return motdListRepository.getMotdListForUser(username);
 		}
 		return null;
 	}
@@ -185,7 +180,7 @@ public class MotdService implements IMotdService {
 	public MotdList saveUserMotdList(MotdList motdList) {
 		final User user = userService.getCurrentUser();
 		if (user.getUsername().equals(motdList.getUsername())) {
-			return databaseDao.createOrUpdateMotdList(motdList);
+			return motdListRepository.createOrUpdateMotdList(motdList);
 		}
 		return null;
 	}
@@ -195,7 +190,7 @@ public class MotdService implements IMotdService {
 	public MotdList updateUserMotdList(MotdList motdList) {
 		final User user = userService.getCurrentUser();
 		if (user.getUsername().equals(motdList.getUsername())) {
-			return databaseDao.createOrUpdateMotdList(motdList);
+			return motdListRepository.createOrUpdateMotdList(motdList);
 		}
 		return null;
 	}

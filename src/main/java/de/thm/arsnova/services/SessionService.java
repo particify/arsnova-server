@@ -20,7 +20,6 @@ package de.thm.arsnova.services;
 import de.thm.arsnova.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.domain.ILearningProgressFactory;
 import de.thm.arsnova.domain.LearningProgress;
 import de.thm.arsnova.entities.LearningProgressOptions;
@@ -42,6 +41,7 @@ import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.PayloadTooLargeException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.persistance.SessionRepository;
+import de.thm.arsnova.persistance.VisitedSessionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,7 +105,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	private static final long SESSION_INACTIVITY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
 
 	@Autowired
-	private IDatabaseDao databaseDao;
+	private VisitedSessionRepository visitedSessionRepository;
 
 	@Autowired
 	private IUserService userService;
@@ -148,12 +148,8 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 			logger.info("Delete lists of visited session for inactive users.");
 			long unixTime = System.currentTimeMillis();
 			long lastActivityBefore = unixTime - guestSessionInactivityThresholdDays * 24 * 60 * 60 * 1000L;
-			databaseDao.deleteInactiveGuestVisitedSessionLists(lastActivityBefore);
+			visitedSessionRepository.deleteInactiveGuestVisitedSessionLists(lastActivityBefore);
 		}
-	}
-
-	public void setDatabaseDao(final IDatabaseDao newDatabaseDao) {
-		databaseDao = newDatabaseDao;
 	}
 
 	@Override
