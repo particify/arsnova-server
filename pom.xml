@@ -8,6 +8,7 @@
 
 	<properties>
 		<io.spring.platform-version>Brussels-SR2</io.spring.platform-version>
+		<org.aspectj-version>1.8.10</org.aspectj-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
@@ -339,6 +340,18 @@
 						</goals>
 					</execution>
 				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.aspectj</groupId>
+						<artifactId>aspectjrt</artifactId>
+						<version>${org.aspectj-version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.aspectj</groupId>
+						<artifactId>aspectjtools</artifactId>
+						<version>${org.aspectj-version}</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
