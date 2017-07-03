@@ -8,12 +8,13 @@ import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.aspectj.EnableSpringConfigured;
 import org.springframework.context.support.SimpleThreadScope;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -32,8 +33,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 		"de.thm.arsnova.web"})
 @Configuration
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class)
-@EnableAspectJAutoProxy(exposeProxy = true)
-@EnableCaching
+@EnableCaching(mode = AdviceMode.ASPECTJ)
+@EnableSpringConfigured
 @EnableWebMvc
 @PropertySource(
 		value = {"classpath:arsnova.properties.example", "file:/etc/arsnova/arsnova.properties"},
