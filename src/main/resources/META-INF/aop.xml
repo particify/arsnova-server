@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aspectj>
+	<weaver options="-verbose -showWeaveInfo">
+		<!-- only weave classes in our application-specific packages -->
+		<include within="de.thm.arsnova..*"/>
+	</weaver>
+
+	<aspects>
+		<aspect name="de.thm.arsnova.aop.RangeAspect"/>
+		<aspect name="de.thm.arsnova.aop.UserSessionAspect"/>
+	</aspects>
+</aspectj>

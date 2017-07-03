@@ -26,8 +26,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Configurable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,9 +39,8 @@ import java.util.regex.Pattern;
  * the response. It only applies to methods of {@link PaginationController}s annotated with
  * {@link de.thm.arsnova.web.Pagination} which return a {@link List}.
  */
-@Component
 @Aspect
-@Profile("!test")
+@Configurable
 public class RangeAspect {
 
 	@Autowired
