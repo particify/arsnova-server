@@ -205,7 +205,6 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@Override
 	public List<Session> getPublicPoolSessions() {
-		// TODO replace with new view
 		final View view = new View("session/partial_by_ppsubject_name_for_publicpool");
 
 		final ViewResults sessions = getDatabase().view(view);
@@ -1847,7 +1846,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public List<Question> getFlashcardsForTeachers(final Session session) {
 		final View view = new View("content/doc_by_sessionid_variant_active");
 		view.setStartKeyArray(session.get_id(), "flashcard");
-		view.setEndKeyArray(session.get_id(), "{}");
+		view.setEndKeyArray(session.get_id(), "flashcard", "{}");
 
 		return getQuestions(view, session);
 	}
