@@ -120,13 +120,15 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	/**
+	 * <strike>
 	 * Allows access to the proxy object. It has to be used instead of <code>this</code> for local calls to public
 	 * methods for caching purposes. This is an ugly but necessary temporary workaround until a better solution is
 	 * implemented (e.g. use of AspectJ's weaving).
 	 * @return the proxy for CouchDBDao
+	 * </strike>
 	 */
 	private @NonNull IDatabaseDao getDatabaseDao() {
-		return (IDatabaseDao) AopContext.currentProxy();
+		return this;
 	}
 
 	@Override
