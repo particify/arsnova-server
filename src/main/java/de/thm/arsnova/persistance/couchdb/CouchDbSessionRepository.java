@@ -86,6 +86,7 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 	}
 
 	@Override
+	@Caching(evict = @CacheEvict(cacheNames = "sessions", key = "#result.keyword"))
 	public Session saveSession(final User user, final Session session) {
 		session.setKeyword(sessionService.generateKeyword());
 		session.setCreator(user.getUsername());
@@ -103,7 +104,6 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 
 	@Override
 	public boolean sessionKeyAvailable(final String keyword) {
-		/* FIXME: caching */
 		return getSessionFromKeyword(keyword) == null;
 	}
 
