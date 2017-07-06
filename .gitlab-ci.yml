@@ -69,6 +69,8 @@ tomcat_production:
   stage: deploy
   only:
     - production
+  tags:
+    - curl
   script:
     - curl --fail --upload-file $WAR_FILE "https://$PROD_TOMCAT_USER:$PROD_TOMCAT_PASSWORD@$PROD_TOMCAT_HOST/manager/text/deploy?path=%2Fapi&update=true"
 
@@ -76,5 +78,7 @@ tomcat_development:
   stage: deploy
   only:
     - staging
+  tags:
+    - curl
   script:
     - curl --fail --upload-file $WAR_FILE "https://$DEV_TOMCAT_USER:$DEV_TOMCAT_PASSWORD@$DEV_TOMCAT_HOST/manager/text/deploy?path=%2Fapi&update=true"
