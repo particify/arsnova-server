@@ -26,13 +26,14 @@ import de.thm.arsnova.connector.client.ConnectorClientImpl;
 import de.thm.arsnova.entities.serialization.CouchDbDocumentModule;
 import de.thm.arsnova.entities.serialization.CouchDbObjectMapperFactory;
 import de.thm.arsnova.entities.serialization.View;
+import de.thm.arsnova.persistance.couchdb.InitializingCouchDbConnector;
 import de.thm.arsnova.socket.ARSnovaSocket;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 import de.thm.arsnova.web.CacheControlInterceptorHandler;
 import de.thm.arsnova.web.CorsFilter;
 import de.thm.arsnova.web.DeprecatedApiInterceptorHandler;
 import de.thm.arsnova.web.ResponseInterceptorHandler;
-import org.ektorp.impl.StdCouchDbConnector;
+import org.ektorp.CouchDbConnector;
 import org.ektorp.impl.StdCouchDbInstance;
 import org.ektorp.spring.HttpClientFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -246,8 +247,8 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 	}
 
 	@Bean
-	public StdCouchDbConnector couchDbConnector() throws Exception {
-		return new StdCouchDbConnector(couchDbName, couchDbInstance(), new CouchDbObjectMapperFactory());
+	public CouchDbConnector couchDbConnector() throws Exception {
+		return new InitializingCouchDbConnector(couchDbName, couchDbInstance(), new CouchDbObjectMapperFactory());
 	}
 
 	@Bean
