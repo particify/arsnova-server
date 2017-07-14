@@ -1,14 +1,7 @@
 var designDoc = {
-	"_id": "_design/logged_in",
+	"_id": "_design/LoggedIn",
 	"language": "javascript",
 	"views": {
-		"visited_sessions_by_user": {
-			"map": function (doc) {
-				if (doc.type === "logged_in") {
-					emit(doc.user, doc.visitedSessions);
-				}
-			}
-		},
 		"all": {
 			"map": function (doc) {
 				if (doc.type === "logged_in"){
@@ -20,6 +13,13 @@ var designDoc = {
 			"map": function (doc) {
 				if (doc.type === "logged_in" && doc.user.indexOf("Guest") === 0) {
 					emit(doc.timestamp || 0, {_rev: doc._rev});
+				}
+			}
+		},
+		"visited_sessions_by_user": {
+			"map": function (doc) {
+				if (doc.type === "logged_in") {
+					emit(doc.user, doc.visitedSessions);
 				}
 			}
 		}

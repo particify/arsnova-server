@@ -1,5 +1,5 @@
 var designDoc = {
-	"_id": "_design/motdlist",
+	"_id": "_design/MotdList",
 	"language": "javascript",
 	"views": {
 		"doc_by_username": {
