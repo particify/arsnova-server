@@ -17,6 +17,8 @@
  */
 package de.thm.arsnova.entities;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -26,7 +28,7 @@ import java.util.Date;
  * This class represents a message of the day.
  */
 @ApiModel(value = "motd", description = "the message of the day entity")
-public class Motd {
+public class Motd implements Entity {
 
 	private String motdkey; //ID
 	private Date startdate;
@@ -36,95 +38,115 @@ public class Motd {
 	private String audience;
 	private String sessionId;
 	private String sessionkey;
-	private String _id;
-	private String _rev;
+	private String id;
+	private String rev;
 
 	@ApiModelProperty(required = true, value = "the identification string")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getMotdkey() {
 		return motdkey;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setMotdkey(final String key) {
 		motdkey = key;
 	}
 
 	@ApiModelProperty(required = true, value = "startdate for showing this message (timestamp format)")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public Date getStartdate() {
 		return startdate;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setStartdate(final Date timestamp) {
 		startdate = timestamp;
 	}
 
 	@ApiModelProperty(required = true, value = "enddate for showing this message (timestamp format)")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public Date getEnddate() {
 		return enddate;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setEnddate(final Date timestamp) {
 		enddate = timestamp;
 	}
 
 	@ApiModelProperty(required = true, value = "tite of the message")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getTitle() {
 		return title;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setTitle(final String ttitle) {
 		title = ttitle;
 	}
 
 	@ApiModelProperty(required = true, value = "text of the message")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getText() {
 		return text;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setText(final String ttext) {
 		text = ttext;
 	}
 
 	@ApiModelProperty(required = true, value = "defines the target audience for this motd (one of the following: 'student', 'tutor', 'loggedIn', 'all')")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getAudience() {
 		return audience;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setAudience(String a) {
 		audience = a;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getSessionId() {
 		return sessionId;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setSessionId(String sessionId) {
 		this.sessionId = sessionId;
 	}
 
 	@ApiModelProperty(required = true, value = "when audience equals session, the sessionkey referes to the session the messages belong to")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getSessionkey() {
 		return sessionkey;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setSessionkey(String a) {
 		sessionkey = a;
 	}
 
 	@ApiModelProperty(required = true, value = "the couchDB ID")
-	public String get_id() {
-		return _id;
+	@JsonView({View.Persistence.class, View.Public.class})
+	public String getId() {
+		return id;
 	}
 
-	public void set_id(final String id) {
-		_id = id;
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setId(final String id) {
+		this.id = id;
 	}
 
-	public void set_rev(final String rev) {
-		_rev = rev;
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setRevision(final String rev) {
+		this.rev = rev;
 	}
 
-	public String get_rev() {
-		return _rev;
+	@JsonView({View.Persistence.class, View.Public.class})
+	public String getRevision() {
+		return rev;
 	}
 
 	@Override

@@ -31,7 +31,7 @@ import static org.junit.Assert.assertNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@ContextConfiguration(classes = {AppConfig.class, TestAppConfig.class, TestSecurityConfig.class})
+@ContextConfiguration(classes = {AppConfig.class, TestAppConfig.class, TestPersistanceConfig.class, TestSecurityConfig.class})
 @ActiveProfiles("test")
 public class AppConfigTest extends AbstractJUnit4SpringContextTests {
 

@@ -17,10 +17,10 @@
  */
 package de.thm.arsnova.domain;
 
-import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
+import de.thm.arsnova.persistance.SessionStatisticsRepository;
 
 /**
  * Base class for the learning progress feature that allows filtering on the question variant.
@@ -31,14 +31,14 @@ abstract class VariantLearningProgress implements LearningProgress {
 
 	private String questionVariant;
 
-	private final IDatabaseDao databaseDao;
+	private final SessionStatisticsRepository sessionStatisticsRepository;
 
-	public VariantLearningProgress(final IDatabaseDao dao) {
-		this.databaseDao = dao;
+	public VariantLearningProgress(final SessionStatisticsRepository sessionStatisticsRepository) {
+		this.sessionStatisticsRepository = sessionStatisticsRepository;
 	}
 
 	private void loadProgress(final Session session) {
-		this.courseScore = databaseDao.getLearningProgress(session);
+		this.courseScore = sessionStatisticsRepository.getLearningProgress(session);
 	}
 
 	public void setQuestionVariant(final String variant) {

@@ -17,6 +17,8 @@
  */
 package de.thm.arsnova.entities.transport;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -39,6 +41,7 @@ public class LearningProgressValues {
 	private int numUsers;
 
 	@ApiModelProperty(required = true, value = "used to display course progress")
+	@JsonView(View.Public.class)
 	public int getCourseProgress() {
 		return courseProgress;
 	}
@@ -48,6 +51,7 @@ public class LearningProgressValues {
 	}
 
 	@ApiModelProperty(required = true, value = "used to display my progress")
+	@JsonView(View.Public.class)
 	public int getMyProgress() {
 		return myProgress;
 	}
@@ -57,6 +61,7 @@ public class LearningProgressValues {
 	}
 
 	@ApiModelProperty(required = true, value = "used to display questions number")
+	@JsonView(View.Public.class)
 	public int getNumQuestions() {
 		return numQuestions;
 	}
@@ -65,6 +70,7 @@ public class LearningProgressValues {
 		this.numQuestions = numQuestions;
 	}
 
+	@JsonView(View.Public.class)
 	public int getNumerator() {
 		return numerator;
 	}
@@ -73,6 +79,7 @@ public class LearningProgressValues {
 		this.numerator = numerator;
 	}
 
+	@JsonView(View.Public.class)
 	public int getDenominator() {
 		return denominator;
 	}
@@ -82,6 +89,7 @@ public class LearningProgressValues {
 	}
 
 	@ApiModelProperty(required = true, value = "used to display user number")
+	@JsonView(View.Public.class)
 	public int getNumUsers() {
 		return numUsers;
 	}

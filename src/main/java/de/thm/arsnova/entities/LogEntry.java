@@ -17,9 +17,13 @@
  */
 package de.thm.arsnova.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
+
 import java.util.Map;
 
-public class LogEntry {
+public class LogEntry implements Entity {
 	public enum LogLevel {
 		TRACE,
 		DEBUG,
@@ -31,69 +35,78 @@ public class LogEntry {
 
 	private String id;
 	private String rev;
-	private long timestamp;
+	private long timestamp = System.currentTimeMillis();
 	private String event;
 	private int level;
 	private Map<String, Object> payload;
 
+	public LogEntry(@JsonProperty String event, @JsonProperty int level, @JsonProperty Map<String, Object> payload) {
+		this.event = event;
+		this.level = level;
+		this.payload = payload;
+	}
+
+	@JsonView(View.Persistence.class)
 	public String getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	@JsonView(View.Persistence.class)
+	public void setId(final String id) {
 		this.id = id;
 	}
 
-	/* CouchDB deserialization */
-	public void set_id(String id) {
-		this.id = id;
+	@JsonView(View.Persistence.class)
+	public void setRevision(final String rev) {
+		this.rev = rev;
 	}
 
-	public String getRev() {
+	@JsonView(View.Persistence.class)
+	public String getRevision() {
 		return rev;
 	}
 
-	public void setRev(String rev) {
-		this.rev = rev;
-	}
-
-	/* CouchDB deserialization */
-	public void set_rev(String rev) {
-		this.rev = rev;
-	}
-
+	@JsonView(View.Persistence.class)
 	public long getTimestamp() {
 		return timestamp;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
 	}
 
+	@JsonView(View.Persistence.class)
 	public String getEvent() {
 		return event;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setEvent(String event) {
 		this.event = event;
 	}
 
+	@JsonView(View.Persistence.class)
 	public int getLevel() {
 		return level;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setLevel(int level) {
 		this.level = level;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setLevel(LogLevel level) {
 		this.level = level.ordinal();
 	}
 
+	@JsonView(View.Persistence.class)
 	public Map<String, Object> getPayload() {
 		return payload;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setPayload(Map<String, Object> payload) {
 		this.payload = payload;
 	}

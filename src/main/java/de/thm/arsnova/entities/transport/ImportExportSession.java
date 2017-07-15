@@ -17,12 +17,14 @@
  */
 package de.thm.arsnova.entities.transport;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Motd;
-import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionFeature;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -38,9 +40,9 @@ public class ImportExportSession {
 
 	private ImportExportSesssion session;
 
-	private List<ImportExportQuestion> questions;
+	private List<ImportExportContent> questions;
 
-	private List<InterposedQuestion> feedbackQuestions;
+	private List<Comment> feedbackQuestions;
 
 	private List<Motd> motds;
 
@@ -56,6 +58,7 @@ public class ImportExportSession {
 	}
 
 	@ApiModelProperty(required = true, value = "used to display session")
+	@JsonView(View.Public.class)
 	public ImportExportSesssion getSession() {
 		return session;
 	}
@@ -65,23 +68,26 @@ public class ImportExportSession {
 	}
 
 	@ApiModelProperty(required = true, value = "used to display questions")
-	public List<ImportExportQuestion> getQuestions() {
+	@JsonView(View.Public.class)
+	public List<ImportExportContent> getQuestions() {
 		return questions;
 	}
 
-	public void setQuestions(List<ImportExportQuestion> questions) {
+	public void setQuestions(List<ImportExportContent> questions) {
 		this.questions = questions;
 	}
 
 	@ApiModelProperty(required = true, value = "used to display questions feedback")
-	public List<InterposedQuestion> getFeedbackQuestions() {
+	@JsonView(View.Public.class)
+	public List<Comment> getFeedbackQuestions() {
 		return feedbackQuestions;
 	}
 
-	public void setFeedbackQuestions(List<InterposedQuestion> feedbackQuestions) {
+	public void setFeedbackQuestions(List<Comment> feedbackQuestions) {
 		this.feedbackQuestions = feedbackQuestions;
 	}
 
+	@JsonView(View.Public.class)
 	public List<Motd> getMotds() {
 		return motds;
 	}
@@ -90,6 +96,7 @@ public class ImportExportSession {
 		this.motds = mL;
 	}
 
+	@JsonView(View.Public.class)
 	public SessionFeature getSessionFeature() {
 		return sessionFeature;
 	}
@@ -98,6 +105,7 @@ public class ImportExportSession {
 		sessionFeature = sF;
 	}
 
+	@JsonView(View.Public.class)
 	public SessionInfo getSessionInfo() {
 		return sessionInfo;
 	}
@@ -118,8 +126,8 @@ public class ImportExportSession {
 		session = iesession;
 	}
 
-	public void addQuestionWithAnswers(Question q, List<Answer> aL) {
-		ImportExportQuestion ieq = new ImportExportQuestion(q);
+	public void addQuestionWithAnswers(Content q, List<Answer> aL) {
+		ImportExportContent ieq = new ImportExportContent(q);
 		ieq.setAnswers(aL);
 		questions.add(ieq);
 	}
@@ -145,22 +153,20 @@ public class ImportExportSession {
 		s.setPpSubject(session.getPublicPool().getPpSubject());
 		s.setPpUniversity(session.getPublicPool().getPpUniversity());
 		// other fields
-		s.setType("session");
 		s.setCreator(user.getUsername());
 		s.setCreationTime(new Date().getTime());
 		return s;
 	}
 
-	public static class ImportExportQuestion extends Question {
+	public static class ImportExportContent extends Content {
 
 		private List<Answer> answers;
 
-		public ImportExportQuestion() {
+		public ImportExportContent() {
 
 		}
 
-		public ImportExportQuestion(Question q) {
-			setType(q.getType());
+		public ImportExportContent(Content q) {
 			setQuestionType(q.getQuestionType());
 			setQuestionVariant(q.getQuestionVariant());
 			setSubject(q.getSubject());
@@ -217,6 +223,7 @@ public class ImportExportSession {
 		}
 
 		@ApiModelProperty(required = true, value = " used to display answers")
+		@JsonView(View.Public.class)
 		public List<Answer> getAnswers() {
 			return answers;
 		}
@@ -241,6 +248,7 @@ public class ImportExportSession {
 		private SessionFeature sessionFeature;
 
 		@ApiModelProperty(required = true, value = "used to display short name")
+		@JsonView(View.Public.class)
 		public String getName() {
 			return name;
 		}
@@ -250,6 +258,7 @@ public class ImportExportSession {
 		}
 
 		@ApiModelProperty(required = false, value = "used to identify public pool sessions")
+		@JsonView(View.Public.class)
 		public String getSessionType() {
 			return sessionType;
 		}
@@ -259,6 +268,7 @@ public class ImportExportSession {
 		}
 
 		@ApiModelProperty(required = true, value = "used to display short name")
+		@JsonView(View.Public.class)
 		public String getShortName() {
 			return shortName;
 		}
@@ -268,6 +278,7 @@ public class ImportExportSession {
 		}
 
 		@ApiModelProperty(required = true, value = "active")
+		@JsonView(View.Public.class)
 		public boolean isActive() {
 			return active;
 		}
@@ -277,6 +288,7 @@ public class ImportExportSession {
 		}
 
 		@ApiModelProperty(required = true, value = "used to display public pool")
+		@JsonView(View.Public.class)
 		public PublicPool getPublicPool() {
 			return publicPool;
 		}
@@ -285,6 +297,7 @@ public class ImportExportSession {
 			this.publicPool = publicPool;
 		}
 
+		@JsonView(View.Public.class)
 		public SessionFeature getSessionFeature() {
 			return this.sessionFeature;
 		}
@@ -333,6 +346,7 @@ public class ImportExportSession {
 		}
 
 		@ApiModelProperty(required = true, value = "used to display author name")
+		@JsonView(View.Public.class)
 		public String getPpAuthorName() {
 			return ppAuthorName;
 		}
@@ -342,6 +356,7 @@ public class ImportExportSession {
 		}
 
 		@ApiModelProperty(required = true, value = "used to display author mail")
+		@JsonView(View.Public.class)
 		public String getPpAuthorMail() {
 			return ppAuthorMail;
 		}
@@ -351,6 +366,7 @@ public class ImportExportSession {
 		}
 
 		@ApiModelProperty(required = true, value = "used to display university")
+		@JsonView(View.Public.class)
 		public String getPpUniversity() {
 			return ppUniversity;
 		}
@@ -360,6 +376,7 @@ public class ImportExportSession {
 		}
 
 		@ApiModelProperty(required = true, value = "used to display logo")
+		@JsonView(View.Public.class)
 		public String getPpLogo() {
 			return ppLogo;
 		}
@@ -369,6 +386,7 @@ public class ImportExportSession {
 		}
 
 		@ApiModelProperty(required = true, value = "used to display subject")
+		@JsonView(View.Public.class)
 		public String getPpSubject() {
 			return ppSubject;
 		}
@@ -378,6 +396,7 @@ public class ImportExportSession {
 		}
 
 		@ApiModelProperty(required = true, value = "used to display license")
+		@JsonView(View.Public.class)
 		public String getPpLicense() {
 			return ppLicense;
 		}
@@ -387,6 +406,7 @@ public class ImportExportSession {
 		}
 
 		@ApiModelProperty(required = true, value = "used to display level")
+		@JsonView(View.Public.class)
 		public String getPpLevel() {
 			return ppLevel;
 		}
@@ -396,6 +416,7 @@ public class ImportExportSession {
 		}
 
 		@ApiModelProperty(required = true, value = "used to display description")
+		@JsonView(View.Public.class)
 		public String getPpDescription() {
 			return ppDescription;
 		}
@@ -405,6 +426,7 @@ public class ImportExportSession {
 		}
 
 		@ApiModelProperty(required = true, value = "used to display faculty")
+		@JsonView(View.Public.class)
 		public String getPpFaculty() {
 			return ppFaculty;
 		}
@@ -414,6 +436,7 @@ public class ImportExportSession {
 		}
 
 		@ApiModelProperty(required = true, value = "used to display name")
+		@JsonView(View.Public.class)
 		public String getName() {
 			return name;
 		}
@@ -423,6 +446,7 @@ public class ImportExportSession {
 		}
 
 		@ApiModelProperty(required = true, value = "used to display short name")
+		@JsonView(View.Public.class)
 		public String getShortName() {
 			return shortName;
 		}

@@ -298,7 +298,7 @@ public class SessionController extends PaginationController {
 	public List<ImportExportSession> getExport(
 			@ApiParam(value = "sessionkey", required = true) @RequestParam(value = "sessionkey", defaultValue = "") final List<String> sessionkey,
 			@ApiParam(value = "wether statistics shall be exported", required = true) @RequestParam(value = "withAnswerStatistics", defaultValue = "false") final Boolean withAnswerStatistics,
-			@ApiParam(value = "wether interposed questions shall be exported", required = true) @RequestParam(value = "withFeedbackQuestions", defaultValue = "false") final Boolean withFeedbackQuestions,
+			@ApiParam(value = "wether comments shall be exported", required = true) @RequestParam(value = "withFeedbackQuestions", defaultValue = "false") final Boolean withFeedbackQuestions,
 			final HttpServletResponse response
 		) {
 		List<ImportExportSession> sessions = new ArrayList<>();

@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.security;
 
-import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.DbUser;
+import de.thm.arsnova.persistance.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ import java.util.List;
 @Service
 public class DbUserDetailsService implements UserDetailsService {
 	@Autowired
-	private IDatabaseDao dao;
+	private UserRepository userRepository;
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(DbUserDetailsService.class);
@@ -48,7 +48,7 @@ public class DbUserDetailsService implements UserDetailsService {
 	public UserDetails loadUserByUsername(String username) {
 		String uid = username.toLowerCase();
 		logger.debug("Load user: " + uid);
-		DbUser dbUser = dao.getUser(uid);
+		DbUser dbUser = userRepository.findUserByUsername(uid);
 		if (null == dbUser) {
 			throw new UsernameNotFoundException("User does not exist.");
 		}

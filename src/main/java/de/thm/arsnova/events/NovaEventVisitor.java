@@ -22,9 +22,9 @@ package de.thm.arsnova.events;
  */
 public interface NovaEventVisitor {
 
-	void visit(NewInterposedQuestionEvent newInterposedQuestionEvent);
+	void visit(NewCommentEvent newCommentEvent);
 
-	void visit(DeleteInterposedQuestionEvent deleteInterposedQuestionEvent);
+	void visit(DeleteCommentEvent deleteCommentEvent);
 
 	void visit(NewQuestionEvent newQuestionEvent);
 
@@ -81,6 +81,6 @@ public interface NovaEventVisitor {
 	void visit(FeatureChangeEvent featureChangeEvent);
 
 	void visit(LockFeedbackEvent lockFeedbackEvent);
-	
+
 	void visit(FlipFlashcardsEvent flipFlashcardsEvent);
 }

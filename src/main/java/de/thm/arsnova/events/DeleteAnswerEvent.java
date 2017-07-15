@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Session;
 
 /**
@@ -27,11 +27,11 @@ public class DeleteAnswerEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Question question;
+	private final Content content;
 
-	public DeleteAnswerEvent(Object source, Session session, Question question) {
+	public DeleteAnswerEvent(Object source, Session session, Content content) {
 		super(source, session);
-		this.question = question;
+		this.content = content;
 	}
 
 	@Override
@@ -39,7 +39,7 @@ public class DeleteAnswerEvent extends SessionEvent {
 		visitor.visit(this);
 	}
 
-	public Question getQuestion() {
-		return question;
+	public Content getQuestion() {
+		return content;
 	}
 }

@@ -17,12 +17,14 @@
  */
 package de.thm.arsnova.security;
 
-import de.thm.arsnova.dao.IDatabaseDao;
-import de.thm.arsnova.entities.InterposedQuestion;
-import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Comment;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.persistance.CommentRepository;
+import de.thm.arsnova.persistance.ContentRepository;
+import de.thm.arsnova.persistance.SessionRepository;
 import org.pac4j.oauth.profile.facebook.FacebookProfile;
 import org.pac4j.oauth.profile.google2.Google2Profile;
 import org.pac4j.oauth.profile.twitter.TwitterProfile;
@@ -45,7 +47,13 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	private String[] adminAccounts;
 
 	@Autowired
-	private IDatabaseDao dao;
+	private SessionRepository sessionRepository;
+
+	@Autowired
+	private CommentRepository commentRepository;
+
+	@Autowired
+	private ContentRepository contentRepository;
 
 	@Override
 	public boolean hasPermission(
@@ -80,12 +88,12 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				&& checkSessionPermission(username, targetId, permission)) {
 			return true;
 		} else if (
-				"question".equals(targetType)
+				"content".equals(targetType)
 				&& checkQuestionPermission(username, targetId, permission)
 				) {
 			return true;
 		} else if (
-				"interposedquestion".equals(targetType)
+				"comment".equals(targetType)
 				&& checkInterposedQuestionPermission(username, targetId, permission)
 				) {
 			return true;
@@ -104,9 +112,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Object permission
 			) {
 		if (permission instanceof String && ("owner".equals(permission) || "write".equals(permission))) {
-			return dao.getSessionFromKeyword(targetId.toString()).getCreator().equals(username);
+			return sessionRepository.getSessionFromKeyword(targetId.toString()).getCreator().equals(username);
 		} else if (permission instanceof String && "read".equals(permission)) {
-			return dao.getSessionFromKeyword(targetId.toString()).isActive();
+			return sessionRepository.getSessionFromKeyword(targetId.toString()).isActive();
 		}
 		return false;
 	}
@@ -117,9 +125,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Object permission
 			) {
 		if (permission instanceof String && "owner".equals(permission)) {
-			final Question question = dao.getQuestion(targetId.toString());
-			if (question != null) {
-				final Session session = dao.getSessionFromId(question.getSessionId());
+			final Content content = contentRepository.getQuestion(targetId.toString());
+			if (content != null) {
+				final Session session = sessionRepository.getSessionFromId(content.getSessionId());
 
 				return session != null && session.getCreator().equals(username);
 			}
@@ -133,14 +141,14 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Object permission
 			) {
 		if (permission instanceof String && "owner".equals(permission)) {
-			final InterposedQuestion question = dao.getInterposedQuestion(targetId.toString());
-			if (question != null) {
-				// Does the creator want to delete his own question?
-				if (question.getCreator() != null && question.getCreator().equals(username)) {
+			final Comment comment = commentRepository.getInterposedQuestion(targetId.toString());
+			if (comment != null) {
+				// Does the creator want to delete his own comment?
+				if (comment.getCreator() != null && comment.getCreator().equals(username)) {
 					return true;
 				}
 				// Allow deletion if requested by session owner
-				final Session session = dao.getSessionFromKeyword(question.getSessionId());
+				final Session session = sessionRepository.getSessionFromKeyword(comment.getSessionId());
 
 				return session != null && session.getCreator().equals(username);
 			}

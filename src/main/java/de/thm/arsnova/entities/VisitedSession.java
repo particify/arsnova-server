@@ -17,11 +17,14 @@
  */
 package de.thm.arsnova.entities;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
+
 /**
  * A session a user has visited previously.
  */
 public class VisitedSession {
-	private String _id;
+	private String id;
 	private String name;
 	private String keyword;
 
@@ -29,38 +32,44 @@ public class VisitedSession {
 	}
 
 	public VisitedSession(Session s) {
-		this._id = s.get_id();
+		this.id = s.getId();
 		this.name = s.getName();
 		this.keyword = s.getKeyword();
 	}
 
-	public String get_id() {
-		return _id;
+	@JsonView({View.Persistence.class, View.Public.class})
+	public String getId() {
+		return id;
 	}
 
-	public void set_id(String _id) {
-		this._id = _id;
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setId(final String id) {
+		this.id = id;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getName() {
 		return name;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getKeyword() {
 		return keyword;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setKeyword(String keyword) {
 		this.keyword = keyword;
 	}
 
 	@Override
 	public String toString() {
-		return "VisitedSession [_id=" + _id + ", name=" + name + ", keyword="
+		return "VisitedSession [id=" + id + ", name=" + name + ", keyword="
 				+ keyword + "]";
 	}
 }

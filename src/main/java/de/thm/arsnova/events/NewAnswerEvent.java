@@ -18,7 +18,7 @@
 package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 
@@ -33,13 +33,13 @@ public class NewAnswerEvent extends SessionEvent {
 
 	private final User user;
 
-	private final Question question;
+	private final Content content;
 
-	public NewAnswerEvent(Object source, Session session, Answer answer, User user, Question question) {
+	public NewAnswerEvent(Object source, Session session, Answer answer, User user, Content content) {
 		super(source, session);
 		this.answer = answer;
 		this.user = user;
-		this.question = question;
+		this.content = content;
 	}
 
 	@Override
@@ -55,7 +55,7 @@ public class NewAnswerEvent extends SessionEvent {
 		return user;
 	}
 
-	public Question getQuestion() {
-		return question;
+	public Content getContent() {
+		return content;
 	}
 }

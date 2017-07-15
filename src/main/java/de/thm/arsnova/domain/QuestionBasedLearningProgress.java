@@ -17,9 +17,9 @@
  */
 package de.thm.arsnova.domain;
 
-import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
+import de.thm.arsnova.persistance.SessionStatisticsRepository;
 
 /**
  * Calculates learning progress based on overall correctness of an answer. A question is answered correctly if and
@@ -27,8 +27,8 @@ import de.thm.arsnova.entities.transport.LearningProgressValues;
  */
 public class QuestionBasedLearningProgress extends VariantLearningProgress {
 
-	public QuestionBasedLearningProgress(IDatabaseDao dao) {
-		super(dao);
+	public QuestionBasedLearningProgress(SessionStatisticsRepository sessionStatisticsRepository) {
+		super(sessionStatisticsRepository);
 	}
 
 	@Override

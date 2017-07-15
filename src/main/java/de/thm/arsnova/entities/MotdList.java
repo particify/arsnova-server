@@ -17,6 +17,8 @@
  */
 package de.thm.arsnova.entities;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -24,45 +26,52 @@ import io.swagger.annotations.ApiModelProperty;
  * This class represents a list of motdkeys for a user.
  */
 @ApiModel(value = "motdlist", description = "the motdlist to save the messages a user has confirmed to be read")
-public class MotdList {
-
+public class MotdList implements Entity {
+	private String id;
+	private String rev;
 	private String motdkeys;
 	private String username;
-	private String _id;
-	private String _rev;
+
+	@ApiModelProperty(required = true, value = "the couchDB ID")
+	@JsonView({View.Persistence.class, View.Public.class})
+	public String getId() {
+		return id;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setId(final String id) {
+		this.id = id;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setRevision(final String rev) {
+		this.rev = rev;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public String getRevision() {
+		return rev;
+	}
 
 	@ApiModelProperty(required = true, value = "the motdkeylist")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getMotdkeys() {
 		return motdkeys;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setMotdkeys(String motds) {
 		motdkeys = motds;
 	}
 
 	@ApiModelProperty(required = true, value = "the username")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getUsername() {
 		return username;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setUsername(final String u) {
 		username = u;
-	}
-
-	@ApiModelProperty(required = true, value = "the couchDB ID")
-	public String get_id() {
-		return _id;
-	}
-
-	public void set_id(final String id) {
-		_id = id;
-	}
-
-	public void set_rev(final String rev) {
-		_rev = rev;
-	}
-
-	public String get_rev() {
-		return _rev;
 	}
 }

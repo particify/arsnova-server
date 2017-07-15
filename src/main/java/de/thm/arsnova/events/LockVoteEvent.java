@@ -17,36 +17,36 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Session;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Fires whenever voting on a question is disabled.
+ * Fires whenever voting on a content is disabled.
  */
 public class LockVoteEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Question question;
+	private final Content content;
 
-	public LockVoteEvent(Object source, Session session, Question question) {
+	public LockVoteEvent(Object source, Session session, Content content) {
 		super(source, session);
-		this.question = question;
+		this.content = content;
 	}
 
 	public String getQuestionId() {
-		return this.question.get_id();
+		return this.content.getId();
 	}
 
 	public String getQuestionVariant() {
-		return this.question.getQuestionVariant();
+		return this.content.getQuestionVariant();
 	}
 
 	public Boolean getVotingDisabled() {
-		return this.question.isVotingDisabled();
+		return this.content.isVotingDisabled();
 	}
 
 	public Map<String, Object> getVotingAdmission() {

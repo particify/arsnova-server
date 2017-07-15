@@ -17,25 +17,25 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Session;
 
 /**
- * Fires whenever a question is disabled, i.e., it is hidden from students.
+ * Fires whenever a content is disabled, i.e., it is hidden from students.
  */
 public class LockQuestionEvent extends SessionEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Question question;
+	private final Content content;
 
-	public LockQuestionEvent(Object source, Session session, Question question) {
+	public LockQuestionEvent(Object source, Session session, Content content) {
 		super(source, session);
-		this.question = question;
+		this.content = content;
 	}
 
-	public Question getQuestion() {
-		return this.question;
+	public Content getQuestion() {
+		return this.content;
 	}
 
 	@Override

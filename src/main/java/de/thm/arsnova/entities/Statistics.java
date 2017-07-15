@@ -17,6 +17,8 @@
  */
 package de.thm.arsnova.entities;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -40,6 +42,7 @@ public class Statistics {
 	private int flashcards;
 
 	@ApiModelProperty(required = true, value = "the number of answers")
+	@JsonView(View.Public.class)
 	public int getAnswers() {
 		return answers;
 	}
@@ -49,6 +52,7 @@ public class Statistics {
 	}
 
 	@ApiModelProperty(required = true, value = "the number of lecture questions")
+	@JsonView(View.Public.class)
 	public int getLectureQuestions() {
 		return lectureQuestions;
 	}
@@ -58,6 +62,7 @@ public class Statistics {
 	}
 
 	@ApiModelProperty(required = true, value = "the number of prepartion uestions")
+	@JsonView(View.Public.class)
 	public int getPreparationQuestions() {
 		return preparationQuestions;
 	}
@@ -67,11 +72,13 @@ public class Statistics {
 	}
 
 	@ApiModelProperty(required = true, value = "the total number of questions")
+	@JsonView(View.Public.class)
 	public int getQuestions() {
 		return getLectureQuestions() + getPreparationQuestions();
 	}
 
 	@ApiModelProperty(required = true, value = "the number of open sessions")
+	@JsonView(View.Public.class)
 	public int getOpenSessions() {
 		return openSessions;
 	}
@@ -81,6 +88,7 @@ public class Statistics {
 	}
 
 	@ApiModelProperty(required = true, value = "the number of closed Sessions")
+	@JsonView(View.Public.class)
 	public int getClosedSessions() {
 		return closedSessions;
 	}
@@ -90,11 +98,13 @@ public class Statistics {
 	}
 
 	@ApiModelProperty(required = true, value = "the total number of Sessions")
+	@JsonView(View.Public.class)
 	public int getSessions() {
 		return getOpenSessions() + getClosedSessions();
 	}
 
 	@ApiModelProperty(required = true, value = "used to display Active Users")
+	@JsonView(View.Public.class)
 	public int getActiveUsers() {
 		return activeUsers;
 	}
@@ -104,6 +114,7 @@ public class Statistics {
 	}
 
 	@ApiModelProperty(required = true, value = "the number of users that are logged")
+	@JsonView(View.Public.class)
 	public int getLoggedinUsers() {
 		return loggedinUsers;
 	}
@@ -113,6 +124,7 @@ public class Statistics {
 	}
 
 	@ApiModelProperty(required = true, value = "the number of interposed Questions")
+	@JsonView(View.Public.class)
 	public int getInterposedQuestions() {
 		return interposedQuestions;
 	}
@@ -122,6 +134,7 @@ public class Statistics {
 	}
 
 	@ApiModelProperty(required = true, value = "the number of flashcards")
+	@JsonView(View.Public.class)
 	public int getFlashcards() {
 		return flashcards;
 	}
@@ -131,6 +144,7 @@ public class Statistics {
 	}
 
 	@ApiModelProperty(required = true, value = "the number of creators")
+	@JsonView(View.Public.class)
 	public int getCreators() {
 		return creators;
 	}
@@ -140,6 +154,7 @@ public class Statistics {
 	}
 
 	@ApiModelProperty(required = true, value = "the number of concept Questions")
+	@JsonView(View.Public.class)
 	public int getConceptQuestions() {
 		return conceptQuestions;
 	}
@@ -149,6 +164,7 @@ public class Statistics {
 	}
 
 	@ApiModelProperty(required = true, value = "the number of active Students")
+	@JsonView(View.Public.class)
 	public int getActiveStudents() {
 		return activeStudents;
 	}

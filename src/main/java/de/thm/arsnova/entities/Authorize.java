@@ -17,10 +17,14 @@
  */
 package de.thm.arsnova.entities;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
+
 public class Authorize {
 	private String user;
 	private String socketid;
 
+	@JsonView(View.Public.class)
 	public final String getUser() {
 		return user;
 	}
@@ -29,6 +33,7 @@ public class Authorize {
 		this.user = user;
 	}
 
+	@JsonView(View.Public.class)
 	public final String getSocketid() {
 		return socketid;
 	}

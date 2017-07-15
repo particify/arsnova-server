@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Session;
 
 /**
@@ -27,8 +27,8 @@ public class PiRoundCancelEvent extends PiRoundEndEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public PiRoundCancelEvent(Object source, Session session, Question question) {
-		super(source, session, question);
+	public PiRoundCancelEvent(Object source, Session session, Content content) {
+		super(source, session, content);
 	}
 
 	@Override

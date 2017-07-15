@@ -19,6 +19,7 @@ package de.thm.arsnova.services;
 
 import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.config.TestAppConfig;
+import de.thm.arsnova.config.TestPersistanceConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
 import de.thm.arsnova.entities.User;
 import org.jasig.cas.client.authentication.AttributePrincipalImpl;
@@ -52,7 +53,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@ContextConfiguration(classes = {AppConfig.class, TestAppConfig.class, TestSecurityConfig.class})
+@ContextConfiguration(classes = {AppConfig.class, TestAppConfig.class, TestPersistanceConfig.class, TestSecurityConfig.class})
 @ActiveProfiles("test")
 public class UserServiceTest {
 

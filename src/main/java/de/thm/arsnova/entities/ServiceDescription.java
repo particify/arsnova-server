@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.entities;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
+
 /**
  * A login service description. For example, this class is used to display the login buttons in ARSnova mobile.
  */
@@ -51,6 +54,7 @@ public class ServiceDescription {
 		}
 	}
 
+	@JsonView(View.Public.class)
 	public String getId() {
 		return id;
 	}
@@ -59,6 +63,7 @@ public class ServiceDescription {
 		this.id = id;
 	}
 
+	@JsonView(View.Public.class)
 	public String getName() {
 		return name;
 	}
@@ -67,6 +72,7 @@ public class ServiceDescription {
 		this.name = name;
 	}
 
+	@JsonView(View.Public.class)
 	public String getDialogUrl() {
 		return dialogUrl;
 	}
@@ -75,6 +81,7 @@ public class ServiceDescription {
 		this.dialogUrl = dialogUrl;
 	}
 
+	@JsonView(View.Public.class)
 	public String getImage() {
 		return image;
 	}
@@ -83,6 +90,7 @@ public class ServiceDescription {
 		this.image = image;
 	}
 
+	@JsonView(View.Public.class)
 	public int getOrder() {
 		return order;
 	}
@@ -91,6 +99,7 @@ public class ServiceDescription {
 		this.order = order;
 	}
 
+	@JsonView(View.Public.class)
 	public String[] getAllowedRoles() {
 		return allowedRoles;
 	}

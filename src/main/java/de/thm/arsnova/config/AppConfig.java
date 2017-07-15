@@ -18,16 +18,27 @@
 package de.thm.arsnova.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import de.thm.arsnova.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.client.ConnectorClientImpl;
+import de.thm.arsnova.entities.*;
+import de.thm.arsnova.entities.serialization.CouchDbDocumentModule;
+import de.thm.arsnova.entities.serialization.CouchDbObjectMapperFactory;
+import de.thm.arsnova.entities.serialization.View;
+import de.thm.arsnova.persistance.*;
+import de.thm.arsnova.persistance.couchdb.*;
+import de.thm.arsnova.persistance.couchdb.InitializingCouchDbConnector;
 import de.thm.arsnova.socket.ARSnovaSocket;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 import de.thm.arsnova.web.CacheControlInterceptorHandler;
 import de.thm.arsnova.web.CorsFilter;
 import de.thm.arsnova.web.DeprecatedApiInterceptorHandler;
 import de.thm.arsnova.web.ResponseInterceptorHandler;
+import org.ektorp.CouchDbConnector;
+import org.ektorp.impl.StdCouchDbInstance;
+import org.ektorp.spring.HttpClientFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
@@ -60,6 +71,7 @@ import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -114,8 +126,8 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 		converters.add(stringMessageConverter());
-		converters.add(defaultJsonMessageConverter());
 		converters.add(apiV2JsonMessageConverter());
+		converters.add(defaultJsonMessageConverter());
 		//converters.add(new MappingJackson2XmlHttpMessageConverter(builder.createXmlMapper(true).build()));
 	}
 
@@ -163,6 +175,8 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 	@Bean
 	public StringHttpMessageConverter stringMessageConverter() {
 		StringHttpMessageConverter messageConverter = new StringHttpMessageConverter();
+		messageConverter.setDefaultCharset(Charset.forName("UTF-8"));
+		messageConverter.setWriteAcceptCharset(false);
 		List<MediaType> mediaTypes = new ArrayList<>();
 		mediaTypes.add(MediaType.TEXT_PLAIN);
 		messageConverter.setSupportedMediaTypes(mediaTypes);
@@ -178,7 +192,9 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 				.defaultViewInclusion(false)
 				.indentOutput(apiIndent)
 				.simpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(builder.build());
+		ObjectMapper mapper = builder.build();
+		mapper.setConfig(mapper.getSerializationConfig().withView(View.Public.class));
+		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
 		List<MediaType> mediaTypes = new ArrayList<>();
 		mediaTypes.add(API_V3_MEDIA_TYPE);
 		mediaTypes.add(MediaType.APPLICATION_JSON_UTF8);
@@ -195,8 +211,11 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 				.defaultViewInclusion(false)
 				.indentOutput(apiIndent)
 				.featuresToEnable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-				.featuresToEnable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
-		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(builder.build());
+				.featuresToEnable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
+				.modules(new CouchDbDocumentModule());
+		ObjectMapper mapper = builder.build();
+		mapper.setConfig(mapper.getSerializationConfig().withView(View.Public.class));
+		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
 		List<MediaType> mediaTypes = new ArrayList<>();
 		mediaTypes.add(API_V2_MEDIA_TYPE);
 		mediaTypes.add(MediaType.APPLICATION_JSON_UTF8);

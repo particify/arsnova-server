@@ -1,7 +1,5 @@
 package de.thm.arsnova.config;
 
-import de.thm.arsnova.dao.IDatabaseDao;
-import de.thm.arsnova.dao.StubDatabaseDao;
 import de.thm.arsnova.services.StubUserService;
 import de.thm.arsnova.socket.ARSnovaSocket;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
@@ -58,11 +56,6 @@ public class TestAppConfig {
 		configurer.addScope("session", new SimpleThreadScope());
 
 		return configurer;
-	}
-
-	@Bean
-	public IDatabaseDao databaseDao() {
-		return new StubDatabaseDao();
 	}
 
 	@Bean(name = "socketServer", initMethod = "startServer", destroyMethod = "stopServer")

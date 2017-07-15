@@ -17,10 +17,13 @@
  */
 package de.thm.arsnova.entities;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
+
 /**
  * A user account for ARSnova's own registration and login process.
  */
-public class DbUser {
+public class DbUser implements Entity {
 	private String id;
 	private String rev;
 	private String username;
@@ -31,90 +34,93 @@ public class DbUser {
 	private long creation;
 	private long lastLogin;
 
+	@JsonView(View.Persistence.class)
 	public String getId() {
 		return id;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setId(String id) {
 		this.id = id;
 	}
 
-	/* CouchDB deserialization */
-	public void set_id(String id) {
-		this.id = id;
-	}
-
+	@JsonView(View.Persistence.class)
 	public String getRev() {
 		return rev;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setRev(String rev) {
 		this.rev = rev;
 	}
 
-	/* CouchDB deserialization */
-	public void set_rev(String rev) {
-		this.rev = rev;
-	}
-
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getUsername() {
 		return username;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setUsername(String username) {
 		this.username = username;
 	}
 
+	@JsonView(View.Persistence.class)
 	public String getPassword() {
 		return password;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setPassword(String password) {
 		this.password = password;
 	}
 
+	@JsonView(View.Persistence.class)
 	public String getActivationKey() {
 		return activationKey;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setActivationKey(String activationKey) {
 		this.activationKey = activationKey;
 	}
 
+	@JsonView(View.Persistence.class)
 	public String getPasswordResetKey() {
 		return passwordResetKey;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setPasswordResetKey(String passwordResetKey) {
 		this.passwordResetKey = passwordResetKey;
 	}
 
+	@JsonView(View.Persistence.class)
 	public long getPasswordResetTime() {
 		return passwordResetTime;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setPasswordResetTime(long passwordResetTime) {
 		this.passwordResetTime = passwordResetTime;
 	}
 
+	@JsonView(View.Persistence.class)
 	public long getCreation() {
 		return creation;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setCreation(long creation) {
 		this.creation = creation;
 	}
 
+	@JsonView(View.Persistence.class)
 	public long getLastLogin() {
 		return lastLogin;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setLastLogin(long lastLogin) {
 		this.lastLogin = lastLogin;
-	}
-
-	/* CouchDB deserialization */
-	public void setType(String type) {
-		/* no op */
 	}
 }

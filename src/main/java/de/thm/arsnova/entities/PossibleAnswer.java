@@ -17,6 +17,8 @@
  */
 package de.thm.arsnova.entities;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -43,28 +45,34 @@ public class PossibleAnswer implements Serializable {
 	}
 
 	@ApiModelProperty(required = true, value = "the text")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getText() {
 		return text;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setText(String text) {
 		this.text = text;
 	}
 
 	@ApiModelProperty(required = true, value = "true for a correct answer")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isCorrect() {
 		return correct;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setCorrect(boolean correct) {
 		this.correct = correct;
 	}
 
 	@ApiModelProperty(required = true, value = "the value")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public int getValue() {
 		return value;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setValue(int value) {
 		this.value = value;
 	}

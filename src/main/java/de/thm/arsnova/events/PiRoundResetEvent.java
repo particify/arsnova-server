@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Session;
 
 import java.util.HashMap;
@@ -33,10 +33,10 @@ public class PiRoundResetEvent extends SessionEvent {
 	private final String questionId;
 	private final String questionVariant;
 
-	public PiRoundResetEvent(Object source, Session session, Question question) {
+	public PiRoundResetEvent(Object source, Session session, Content content) {
 		super(source, session);
-		questionId = question.get_id();
-		questionVariant = question.getQuestionVariant();
+		questionId = content.getId();
+		questionVariant = content.getQuestionVariant();
 	}
 
 	@Override

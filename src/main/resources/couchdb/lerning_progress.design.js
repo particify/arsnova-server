@@ -30,7 +30,7 @@ var designDoc = {
 				 var value = 0, answers = [], positiveAnswers = [], score = 0;
 				 if (doc.type === "skill_question" && ["school", "flashcard"].indexOf(doc.questionType) === -1) {
 				 	if ("freetext" === doc.questionType && !doc.fixedAnswer) { return; }
-					answers = doc.possibleAnswers.map(function(answer) { return answer.value || 0; });
+					answers = doc.possibleAnswers.map(function (answer) { return answer.value || 0; });
 					/* find the maximum value */
 					if (doc.fixedAnswer) { value = doc.rating; }
 					else { value = Math.max.apply(null, [0].concat(answers)); }
@@ -38,9 +38,9 @@ var designDoc = {
 					if (doc.questionType === "vote" && value === 0) { return; }
 					/* special case for mc and grid questions: add up all positive answers. */
 					if (["grid", "mc"].indexOf(doc.questionType) !== -1) {
-						positiveAnswers = answers.filter(function(val) { return val >= 0; });
+						positiveAnswers = answers.filter(function (val) { return val >= 0; });
 						if (positiveAnswers.length > 0) {
-							value = positiveAnswers.reduce(function(prev, cur) { return prev + cur; }, 0);
+							value = positiveAnswers.reduce(function (prev, cur) { return prev + cur; }, 0);
 						}
 					}
 					emit([doc.sessionId, doc._id], {

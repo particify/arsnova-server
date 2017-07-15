@@ -121,6 +121,12 @@
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
 		</dependency>
+		<!-- While commons-logging is not a required dependency, AJC fails without it. -->
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<!-- Spring -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -186,9 +192,14 @@
 			<artifactId>log4j</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>de.thm.couchdb4j</groupId>
-			<artifactId>couchdb4j</artifactId>
-			<version>0.8-SNAPSHOT</version>
+			<groupId>org.ektorp</groupId>
+			<artifactId>org.ektorp</artifactId>
+			<version>1.4.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ektorp</groupId>
+			<artifactId>org.ektorp.spring</artifactId>
+			<version>1.4.4</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>

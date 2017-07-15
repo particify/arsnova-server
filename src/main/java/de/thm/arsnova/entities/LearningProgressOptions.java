@@ -17,6 +17,8 @@
  */
 package de.thm.arsnova.entities;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -41,19 +43,23 @@ public class LearningProgressOptions implements Serializable {
 	public LearningProgressOptions() { }
 
 	@ApiModelProperty(required = true, value = "the type")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getType() {
 		return type;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setType(String learningProgressType) {
 		this.type = learningProgressType;
 	}
 
 	@ApiModelProperty(required = true, value = "either lecture or preparation")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getQuestionVariant() {
 		return questionVariant;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setQuestionVariant(String questionVariant) {
 		this.questionVariant = questionVariant;
 	}

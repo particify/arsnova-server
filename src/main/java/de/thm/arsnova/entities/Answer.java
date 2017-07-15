@@ -18,6 +18,8 @@
 package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -29,10 +31,9 @@ import java.io.Serializable;
  * This class has additional fields to transport generated answer statistics.
  */
 @ApiModel(value = "Answer", description = "the answer entity")
-public class Answer implements Serializable {
-
-	private String _id;
-	private String _rev;
+public class Answer implements Entity {
+	private String id;
+	private String rev;
 	private String type;
 	private String sessionId;
 	private String questionId;
@@ -58,143 +59,158 @@ public class Answer implements Serializable {
 	}
 
 	@ApiModelProperty(required = true, value = "the couchDB ID")
-	public final String get_id() {
-		return _id;
+	@JsonView({View.Persistence.class, View.Public.class})
+	public String getId() {
+		return id;
 	}
 
-	public final void set_id(String _id) {
-		this._id = _id;
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setId(final String id) {
+		this.id = id;
 	}
 
-	public final String get_rev() {
-		return _rev;
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setRevision(final String rev) {
+		this.rev = rev;
 	}
 
-	public final void set_rev(final String _rev) {
-		this._rev = _rev;
-	}
-
-	@ApiModelProperty(required = true, value = "\"skill_question_answer\" - used to filter in the couchDB")
-	public final String getType() {
-		return type;
-	}
-
-	public final void setType(final String type) {
-		this.type = type;
+	@JsonView({View.Persistence.class, View.Public.class})
+	public String getRevision() {
+		return rev;
 	}
 
 	@ApiModelProperty(required = true, value = "ID of the session, the answer is assigned to")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public final String getSessionId() {
 		return sessionId;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public final void setSessionId(final String sessionId) {
 		this.sessionId = sessionId;
 	}
 
 	@ApiModelProperty(required = true, value = "used to display question id")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public final String getQuestionId() {
 		return questionId;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public final void setQuestionId(final String questionId) {
 		this.questionId = questionId;
 	}
 
 	@ApiModelProperty(required = true, value = "the answer text")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public final String getAnswerText() {
 		return answerText;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public final void setAnswerText(final String answerText) {
 		this.answerText = answerText;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public final String getAnswerTextRaw() {
 		return this.answerTextRaw;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public final void setAnswerTextRaw(final String answerTextRaw) {
 		this.answerTextRaw = answerTextRaw;
 	}
 
 	@ApiModelProperty(required = true, value = "the answer subject")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public final String getAnswerSubject() {
 		return answerSubject;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public final void setAnswerSubject(final String answerSubject) {
 		this.answerSubject = answerSubject;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public final boolean isSuccessfulFreeTextAnswer() {
 		return this.successfulFreeTextAnswer;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public final void setSuccessfulFreeTextAnswer(final boolean successfulFreeTextAnswer) {
 		this.successfulFreeTextAnswer = successfulFreeTextAnswer;
 	}
 
 	@ApiModelProperty(required = true, value = "the peer instruction round nr.")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public int getPiRound() {
 		return piRound;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setPiRound(int piRound) {
 		this.piRound = piRound;
 	}
 
-	/* TODO: use JsonViews instead of JsonIgnore when supported by Spring (4.1)
-	 * http://wiki.fasterxml.com/JacksonJsonViews
-	 * https://jira.spring.io/browse/SPR-7156 */
 	@ApiModelProperty(required = true, value = "the user")
-	@JsonIgnore
+	@JsonView(View.Persistence.class)
 	public final String getUser() {
 		return user;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
+	public final void setUser(final String user) {
+		this.user = user;
+	}
+
 	@ApiModelProperty(required = true, value = "the answer image")
-	@JsonIgnore
+	@JsonView(View.Persistence.class)
 	public String getAnswerImage() {
 		return answerImage;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setAnswerImage(String answerImage) {
 		this.answerImage = answerImage;
 	}
 
 	@ApiModelProperty(required = true, value = "the answer thumbnail")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getAnswerThumbnailImage() {
 		return answerThumbnailImage;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setAnswerThumbnailImage(String answerThumbnailImage) {
 		this.answerThumbnailImage = answerThumbnailImage;
 	}
 
-	public final void setUser(final String user) {
-		this.user = user;
-	}
-
 	@ApiModelProperty(required = true, value = "the creation date timestamp")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public long getTimestamp() {
 		return timestamp;
 	}
 
+	@JsonView(View.Persistence.class)
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
 	}
 
 	@ApiModelProperty(required = true, value = "displays whether the answer is read")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isRead() {
 		return read;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setRead(boolean read) {
 		this.read = read;
 	}
 
 	@ApiModelProperty(required = true, value = "the number of answers given. used for statistics")
+	@JsonView(View.Public.class)
 	public final int getAnswerCount() {
 		return answerCount;
 	}
@@ -204,15 +220,18 @@ public class Answer implements Serializable {
 	}
 
 	@ApiModelProperty(required = true, value = "the abstention")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isAbstention() {
 		return abstention;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setAbstention(boolean abstention) {
 		this.abstention = abstention;
 	}
 
 	@ApiModelProperty(required = true, value = "the number of abstentions given. used for statistics")
+	@JsonView(View.Public.class)
 	public int getAbstentionCount() {
 		return abstentionCount;
 	}
@@ -222,19 +241,23 @@ public class Answer implements Serializable {
 	}
 
 	@ApiModelProperty(required = true, value = "either lecture or preparation")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public String getQuestionVariant() {
 		return questionVariant;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setQuestionVariant(String questionVariant) {
 		this.questionVariant = questionVariant;
 	}
 
 	@ApiModelProperty(required = true, value = "used to display question value")
+	@JsonView({View.Persistence.class, View.Public.class})
 	public int getQuestionValue() {
 		return questionValue;
 	}
 
+	@JsonView({View.Persistence.class, View.Public.class})
 	public void setQuestionValue(int questionValue) {
 		this.questionValue = questionValue;
 	}
@@ -255,8 +278,8 @@ public class Answer implements Serializable {
 		// auto generated!
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((_id == null) ? 0 : _id.hashCode());
-		result = prime * result + ((_rev == null) ? 0 : _rev.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((rev == null) ? 0 : rev.hashCode());
 		result = prime * result + ((answerSubject == null) ? 0 : answerSubject.hashCode());
 		result = prime * result + ((answerText == null) ? 0 : answerText.hashCode());
 		result = prime * result + piRound;
@@ -280,18 +303,18 @@ public class Answer implements Serializable {
 			return false;
 		}
 		Answer other = (Answer) obj;
-		if (_id == null) {
-			if (other._id != null) {
+		if (id == null) {
+			if (other.id != null) {
 				return false;
 			}
-		} else if (!_id.equals(other._id)) {
+		} else if (!id.equals(other.id)) {
 			return false;
 		}
-		if (_rev == null) {
-			if (other._rev != null) {
+		if (rev == null) {
+			if (other.rev != null) {
 				return false;
 			}
-		} else if (!_rev.equals(other._rev)) {
+		} else if (!rev.equals(other.rev)) {
 			return false;
 		}
 		if (answerSubject == null) {

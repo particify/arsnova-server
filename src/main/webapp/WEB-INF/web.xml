@@ -11,6 +11,7 @@
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
 			de.thm.arsnova.config.AppConfig
+			de.thm.arsnova.config.PersistanceConfig
 			de.thm.arsnova.config.SecurityConfig
 		</param-value>
 	</context-param>

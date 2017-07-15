@@ -20,7 +20,7 @@ package de.thm.arsnova.events;
 import de.thm.arsnova.entities.Session;
 
 /**
- * Fires whenever a session is deleted. Note that this implies that all related data such as interposed questions,
+ * Fires whenever a session is deleted. Note that this implies that all related data such as comments,
  * lecturer questions, and answers are deleted as well, even though those events are not fired.
  */
 public class DeleteSessionEvent extends SessionEvent {

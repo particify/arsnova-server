@@ -17,17 +17,17 @@
  */
 package de.thm.arsnova.domain;
 
-import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
+import de.thm.arsnova.persistance.SessionStatisticsRepository;
 
 /**
  * Calculates learning progress based on a question's value.
  */
 public class PointBasedLearningProgress extends VariantLearningProgress {
 
-	public PointBasedLearningProgress(IDatabaseDao dao) {
-		super(dao);
+	public PointBasedLearningProgress(SessionStatisticsRepository sessionStatisticsRepository) {
+		super(sessionStatisticsRepository);
 	}
 
 	@Override

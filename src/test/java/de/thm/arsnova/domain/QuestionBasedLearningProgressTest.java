@@ -17,10 +17,10 @@
  */
 package de.thm.arsnova.domain;
 
-import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.TestUser;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
+import de.thm.arsnova.persistance.SessionStatisticsRepository;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -50,7 +50,7 @@ public class QuestionBasedLearningProgressTest {
 	@Before
 	public void setUp() {
 		this.courseScore = new CourseScore();
-		IDatabaseDao db = mock(IDatabaseDao.class);
+		SessionStatisticsRepository db = mock(SessionStatisticsRepository.class);
 		when(db.getLearningProgress(null)).thenReturn(courseScore);
 		this.lp = new QuestionBasedLearningProgress(db);
 	}

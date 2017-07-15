@@ -20,7 +20,6 @@ package de.thm.arsnova.services;
 import de.thm.arsnova.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.domain.ILearningProgressFactory;
 import de.thm.arsnova.domain.LearningProgress;
 import de.thm.arsnova.entities.LearningProgressOptions;
@@ -41,6 +40,8 @@ import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.PayloadTooLargeException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.persistance.SessionRepository;
+import de.thm.arsnova.persistance.VisitedSessionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,9 @@ import java.util.UUID;
  */
 @Service
 public class SessionService implements ISessionService, ApplicationEventPublisherAware {
+
+	@Autowired
+	private SessionRepository sessionRepository;
 
 	public static class SessionNameComparator implements Comparator<Session>, Serializable {
 		private static final long serialVersionUID = 1L;
@@ -101,7 +105,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	private static final long SESSION_INACTIVITY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
 
 	@Autowired
-	private IDatabaseDao databaseDao;
+	private VisitedSessionRepository visitedSessionRepository;
 
 	@Autowired
 	private IUserService userService;
@@ -134,7 +138,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 			logger.info("Delete inactive sessions.");
 			long unixTime = System.currentTimeMillis();
 			long lastActivityBefore = unixTime - guestSessionInactivityThresholdDays * 24 * 60 * 60 * 1000L;
-			databaseDao.deleteInactiveGuestSessions(lastActivityBefore);
+			sessionRepository.deleteInactiveGuestSessions(lastActivityBefore);
 		}
 	}
 
@@ -144,19 +148,15 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 			logger.info("Delete lists of visited session for inactive users.");
 			long unixTime = System.currentTimeMillis();
 			long lastActivityBefore = unixTime - guestSessionInactivityThresholdDays * 24 * 60 * 60 * 1000L;
-			databaseDao.deleteInactiveGuestVisitedSessionLists(lastActivityBefore);
+			visitedSessionRepository.deleteInactiveGuestVisitedSessionLists(lastActivityBefore);
 		}
-	}
-
-	public void setDatabaseDao(final IDatabaseDao newDatabaseDao) {
-		databaseDao = newDatabaseDao;
 	}
 
 	@Override
 	public Session joinSession(final String keyword, final UUID socketId) {
 		/* Socket.IO solution */
 
-		Session session = null != keyword ? databaseDao.getSessionFromKeyword(keyword) : null;
+		Session session = null != keyword ? sessionRepository.getSessionFromKeyword(keyword) : null;
 
 		if (null == session) {
 			userService.removeUserFromSessionBySocketId(socketId);
@@ -167,9 +167,9 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		userService.addUserToSessionBySocketId(socketId, keyword);
 
 		if (session.getCreator().equals(user.getUsername())) {
-			databaseDao.updateSessionOwnerActivity(session);
+			sessionRepository.updateSessionOwnerActivity(session);
 		}
-		databaseDao.registerAsOnlineUser(user, session);
+		sessionRepository.registerAsOnlineUser(user, session);
 
 		if (connectorClient != null && session.isCourseSession()) {
 			final String courseid = session.getCourseId();
@@ -190,7 +190,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public Session getSessionForAdmin(final String keyword) {
-		return databaseDao.getSessionFromKeyword(keyword);
+		return sessionRepository.getSessionFromKeyword(keyword);
 	}
 
 	/*
@@ -199,7 +199,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	 */
 	@Override
 	public Session getSessionInternal(final String keyword, final User user) {
-		final Session session = databaseDao.getSessionFromKeyword(keyword);
+		final Session session = sessionRepository.getSessionFromKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();
 		}
@@ -222,50 +222,50 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public List<Session> getUserSessions(String username) {
-		return databaseDao.getSessionsForUsername(username, 0, 0);
+		return sessionRepository.getSessionsForUsername(username, 0, 0);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Session> getMySessions(final int offset, final int limit) {
-		return databaseDao.getMySessions(userService.getCurrentUser(), offset, limit);
+		return sessionRepository.getMySessions(userService.getCurrentUser(), offset, limit);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<SessionInfo> getPublicPoolSessionsInfo() {
-		return databaseDao.getPublicPoolSessionsInfo();
+		return sessionRepository.getPublicPoolSessionsInfo();
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<SessionInfo> getMyPublicPoolSessionsInfo() {
-		return databaseDao.getMyPublicPoolSessionsInfo(userService.getCurrentUser());
+		return sessionRepository.getMyPublicPoolSessionsInfo(userService.getCurrentUser());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<SessionInfo> getMySessionsInfo(final int offset, final int limit) {
 		final User user = userService.getCurrentUser();
-		return databaseDao.getMySessionsInfo(user, offset, limit);
+		return sessionRepository.getMySessionsInfo(user, offset, limit);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Session> getMyVisitedSessions(final int offset, final int limit) {
-		return databaseDao.getMyVisitedSessions(userService.getCurrentUser(), offset, limit);
+		return sessionRepository.getVisitedSessionsForUsername(userService.getCurrentUser().getUsername(), offset, limit);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(1, 'motd', 'admin')")
 	public List<Session> getUserVisitedSessions(String username) {
-		return databaseDao.getVisitedSessionsForUsername(username, 0, 0);
+		return sessionRepository.getVisitedSessionsForUsername(username, 0, 0);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<SessionInfo> getMyVisitedSessionsInfo(final int offset, final int limit) {
-		return databaseDao.getMyVisitedSessionsInfo(userService.getCurrentUser(), offset, limit);
+		return sessionRepository.getMyVisitedSessionsInfo(userService.getCurrentUser(), offset, limit);
 	}
 
 	@Override
@@ -294,14 +294,14 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		sf.setPi(true);
 		session.setFeatures(sf);
 
-		final Session result = databaseDao.saveSession(userService.getCurrentUser(), session);
+		final Session result = sessionRepository.saveSession(userService.getCurrentUser(), session);
 		this.publisher.publishEvent(new NewSessionEvent(this, result));
 		return result;
 	}
 
 	@Override
 	public boolean sessionKeyAvailable(final String keyword) {
-		return databaseDao.sessionKeyAvailable(keyword);
+		return sessionRepository.sessionKeyAvailable(keyword);
 	}
 
 	@Override
@@ -319,7 +319,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 	@Override
 	public int countSessions(final List<Course> courses) {
-		final List<Session> sessions = databaseDao.getCourseSessions(courses);
+		final List<Session> sessions = sessionRepository.getCourseSessions(courses);
 		if (sessions == null) {
 			return 0;
 		}
@@ -333,20 +333,20 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 	@Override
 	public Session setActive(final String sessionkey, final Boolean lock) {
-		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
+		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (!session.isCreator(user)) {
 			throw new ForbiddenException("User is not session creator.");
 		}
 		session.setActive(lock);
 		this.publisher.publishEvent(new StatusSessionEvent(this, session));
-		return databaseDao.updateSession(session);
+		return sessionRepository.updateSession(session);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#session, 'owner')")
 	public Session updateSession(final String sessionkey, final Session session) {
-		final Session existingSession = databaseDao.getSessionFromKeyword(sessionkey);
+		final Session existingSession = sessionRepository.getSessionFromKeyword(sessionkey);
 
 		existingSession.setActive(session.isActive());
 		existingSession.setShortName(session.getShortName());
@@ -366,17 +366,17 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 		handleLogo(session);
 		existingSession.setPpLogo(session.getPpLogo());
 
-		return databaseDao.updateSession(existingSession);
+		return sessionRepository.updateSession(existingSession);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
 	public Session changeSessionCreator(String sessionkey, String newCreator) {
-		final Session existingSession = databaseDao.getSessionFromKeyword(sessionkey);
+		final Session existingSession = sessionRepository.getSessionFromKeyword(sessionkey);
 		if (existingSession == null) {
 			throw new NullPointerException("Could not load session " + sessionkey + ".");
 		}
-		return databaseDao.changeSessionCreator(existingSession, newCreator);
+		return sessionRepository.changeSessionCreator(existingSession, newCreator);
 	}
 
 	/*
@@ -386,7 +386,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	@Override
 	public Session updateSessionInternal(final Session session, final User user) {
 		if (session.isCreator(user)) {
-			return databaseDao.updateSession(session);
+			return sessionRepository.updateSession(session);
 		}
 		return null;
 	}
@@ -394,9 +394,9 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public void deleteSession(final String sessionkey) {
-		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
+		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
 
-		databaseDao.deleteSession(session);
+		sessionRepository.deleteSession(session);
 
 		this.publisher.publishEvent(new DeleteSessionEvent(this, session));
 	}
@@ -404,7 +404,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public LearningProgressValues getLearningProgress(final String sessionkey, final String progressType, final String questionVariant) {
-		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
+		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
 		LearningProgress learningProgress = learningProgressFactory.create(progressType, questionVariant);
 		return learningProgress.getCourseProgress(session);
 	}
@@ -412,7 +412,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public LearningProgressValues getMyLearningProgress(final String sessionkey, final String progressType, final String questionVariant) {
-		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
+		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
 		LearningProgress learningProgress = learningProgressFactory.create(progressType, questionVariant);
 		return learningProgress.getMyProgress(session, user);
@@ -422,7 +422,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	@PreAuthorize("isAuthenticated()")
 	public SessionInfo importSession(ImportExportSession importSession) {
 		final User user = userService.getCurrentUser();
-		final SessionInfo info = databaseDao.importSession(user, importSession);
+		final SessionInfo info = sessionRepository.importSession(user, importSession);
 		if (info == null) {
 			throw new NullPointerException("Could not import session.");
 		}
@@ -432,17 +432,17 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public ImportExportSession exportSession(String sessionkey, Boolean withAnswerStatistics, Boolean withFeedbackQuestions) {
-		return databaseDao.exportSession(sessionkey, withAnswerStatistics, withFeedbackQuestions);
+		return sessionRepository.exportSession(sessionkey, withAnswerStatistics, withFeedbackQuestions);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public SessionInfo copySessionToPublicPool(String sessionkey, de.thm.arsnova.entities.transport.ImportExportSession.PublicPool pp) {
-		ImportExportSession temp = databaseDao.exportSession(sessionkey, false, false);
+		ImportExportSession temp = sessionRepository.exportSession(sessionkey, false, false);
 		temp.getSession().setPublicPool(pp);
 		temp.getSession().setSessionType("public_pool");
 		final User user = userService.getCurrentUser();
-		return databaseDao.importSession(user, temp);
+		return sessionRepository.importSession(user, temp);
 	}
 
 	@Override
@@ -452,24 +452,24 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 	@Override
 	public SessionFeature getSessionFeatures(String sessionkey) {
-		return databaseDao.getSessionFromKeyword(sessionkey).getFeatures();
+		return sessionRepository.getSessionFromKeyword(sessionkey).getFeatures();
 	}
 
 	@Override
 	public SessionFeature changeSessionFeatures(String sessionkey, SessionFeature features) {
-		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
+		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (!session.isCreator(user)) {
 			throw new UnauthorizedException("User is not session creator.");
 		}
 		session.setFeatures(features);
 		this.publisher.publishEvent(new FeatureChangeEvent(this, session));
-		return databaseDao.updateSession(session).getFeatures();
+		return sessionRepository.updateSession(session).getFeatures();
 	}
 
 	@Override
 	public boolean lockFeedbackInput(String sessionkey, Boolean lock) {
-		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
+		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (!session.isCreator(user)) {
 			throw new UnauthorizedException("User is not session creator.");
@@ -480,19 +480,19 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 
 		session.setFeedbackLock(lock);
 		this.publisher.publishEvent(new LockFeedbackEvent(this, session));
-		return databaseDao.updateSession(session).getFeedbackLock();
+		return sessionRepository.updateSession(session).getFeedbackLock();
 	}
 
 	@Override
 	public boolean flipFlashcards(String sessionkey, Boolean flip) {
-		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
+		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (!session.isCreator(user)) {
 			throw new UnauthorizedException("User is not session creator.");
 		}
 		session.setFlipFlashcards(flip);
 		this.publisher.publishEvent(new FlipFlashcardsEvent(this, session));
-		return databaseDao.updateSession(session).getFlipFlashcards();
+		return sessionRepository.updateSession(session).getFlipFlashcards();
 	}
 
 	private void handleLogo(Session session) {

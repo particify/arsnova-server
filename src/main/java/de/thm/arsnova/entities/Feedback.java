@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.entities;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +45,7 @@ public class Feedback {
 		values.add(d);
 	}
 
+	@JsonView(View.Public.class)
 	public final List<Integer> getValues() {
 		return values;
 	}

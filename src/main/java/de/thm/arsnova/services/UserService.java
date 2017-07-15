@@ -18,12 +18,12 @@
 package de.thm.arsnova.services;
 
 import com.codahale.metrics.annotation.Gauge;
-import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.persistance.UserRepository;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.pac4j.oauth.profile.facebook.FacebookProfile;
@@ -96,7 +96,7 @@ public class UserService implements IUserService {
 	private static final ConcurrentHashMap<User, String> user2session = new ConcurrentHashMap<>();
 
 	@Autowired
-	private IDatabaseDao databaseDao;
+	private UserRepository userRepository;
 
 	@Autowired
 	private JavaMailSender mailSender;
@@ -172,7 +172,7 @@ public class UserService implements IUserService {
 		logger.info("Delete inactive users.");
 		long unixTime = System.currentTimeMillis();
 		long lastActivityBefore = unixTime - ACTIVATION_KEY_DURABILITY_MS;
-		databaseDao.deleteInactiveUsers(lastActivityBefore);
+		userRepository.deleteInactiveUsers(lastActivityBefore);
 	}
 
 	@Override
@@ -339,7 +339,7 @@ public class UserService implements IUserService {
 
 	@Override
 	public DbUser getDbUser(String username) {
-		return databaseDao.getUser(username.toLowerCase());
+		return userRepository.findUserByUsername(username.toLowerCase());
 	}
 
 	@Override
@@ -360,7 +360,7 @@ public class UserService implements IUserService {
 			return null;
 		}
 
-		if (null != databaseDao.getUser(lcUsername)) {
+		if (null != userRepository.findUserByUsername(lcUsername)) {
 			logger.info("User registration failed. {} already exists.", lcUsername);
 
 			return null;
@@ -372,7 +372,7 @@ public class UserService implements IUserService {
 		dbUser.setActivationKey(RandomStringUtils.randomAlphanumeric(32));
 		dbUser.setCreation(System.currentTimeMillis());
 
-		DbUser result = databaseDao.createOrUpdateUser(dbUser);
+		DbUser result = userRepository.createOrUpdateUser(dbUser);
 		if (null != result) {
 			sendActivationEmail(result);
 		} else {
@@ -436,7 +436,7 @@ public class UserService implements IUserService {
 	@Override
 	public DbUser updateDbUser(DbUser dbUser) {
 		if (null != dbUser.getId()) {
-			return databaseDao.createOrUpdateUser(dbUser);
+			return userRepository.createOrUpdateUser(dbUser);
 		}
 
 		return null;
@@ -456,7 +456,7 @@ public class UserService implements IUserService {
 			throw new NotFoundException();
 		}
 
-		databaseDao.deleteUser(dbUser);
+		userRepository.deleteUser(dbUser);
 
 		return dbUser;
 	}
@@ -478,7 +478,7 @@ public class UserService implements IUserService {
 		dbUser.setPasswordResetKey(RandomStringUtils.randomAlphanumeric(32));
 		dbUser.setPasswordResetTime(System.currentTimeMillis());
 
-		if (null == databaseDao.createOrUpdateUser(dbUser)) {
+		if (null == userRepository.createOrUpdateUser(dbUser)) {
 			logger.error("Password reset failed. {} could not be updated.", username);
 		}
 

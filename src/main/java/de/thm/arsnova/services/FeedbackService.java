@@ -18,7 +18,6 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.FeedbackStorage;
-import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
@@ -26,6 +25,7 @@ import de.thm.arsnova.events.DeleteFeedbackForSessionsEvent;
 import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.persistance.SessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
@@ -56,15 +56,11 @@ public class FeedbackService implements IFeedbackService, ApplicationEventPublis
 	private int cleanupFeedbackDelay;
 
 	@Autowired
-	private IDatabaseDao databaseDao;
+	private SessionRepository sessionRepository;
 
 	private FeedbackStorage feedbackStorage;
 
 	private ApplicationEventPublisher publisher;
-
-	public void setDatabaseDao(final IDatabaseDao newDatabaseDao) {
-		databaseDao = newDatabaseDao;
-	}
 
 	@PostConstruct
 	public void init() {
@@ -110,7 +106,7 @@ public class FeedbackService implements IFeedbackService, ApplicationEventPublis
 
 	@Override
 	public void cleanFeedbackVotesInSession(final String keyword, final int cleanupFeedbackDelayInMins) {
-		final Session session = databaseDao.getSessionFromKeyword(keyword);
+		final Session session = sessionRepository.getSessionFromKeyword(keyword);
 		List<User> affectedUsers = feedbackStorage.cleanFeedbackVotesInSession(session, cleanupFeedbackDelayInMins);
 		Set<Session> sessionSet = new HashSet<>();
 		sessionSet.add(session);
@@ -125,7 +121,7 @@ public class FeedbackService implements IFeedbackService, ApplicationEventPublis
 
 	@Override
 	public Feedback getFeedback(final String keyword) {
-		final Session session = databaseDao.getSessionFromKeyword(keyword);
+		final Session session = sessionRepository.getSessionFromKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();
 		}
@@ -142,7 +138,7 @@ public class FeedbackService implements IFeedbackService, ApplicationEventPublis
 
 	@Override
 	public double getAverageFeedback(final String sessionkey) {
-		final Session session = databaseDao.getSessionFromKeyword(sessionkey);
+		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
 		if (session == null) {
 			throw new NotFoundException();
 		}
@@ -166,7 +162,7 @@ public class FeedbackService implements IFeedbackService, ApplicationEventPublis
 
 	@Override
 	public boolean saveFeedback(final String keyword, final int value, final User user) {
-		final Session session = databaseDao.getSessionFromKeyword(keyword);
+		final Session session = sessionRepository.getSessionFromKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();
 		}
@@ -178,7 +174,7 @@ public class FeedbackService implements IFeedbackService, ApplicationEventPublis
 
 	@Override
 	public Integer getMyFeedback(final String keyword, final User user) {
-		final Session session = databaseDao.getSessionFromKeyword(keyword);
+		final Session session = sessionRepository.getSessionFromKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();
 		}

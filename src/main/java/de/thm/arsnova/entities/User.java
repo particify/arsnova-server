@@ -17,6 +17,8 @@
  */
 package de.thm.arsnova.entities;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
 import de.thm.arsnova.services.UserSessionService;
 import org.jasig.cas.client.authentication.AttributePrincipal;
 import org.pac4j.oauth.profile.facebook.FacebookProfile;
@@ -76,6 +78,7 @@ public class User implements Serializable {
 		setType(LDAP);
 	}
 
+	@JsonView(View.Public.class)
 	public String getUsername() {
 		return username;
 	}
@@ -84,6 +87,7 @@ public class User implements Serializable {
 		this.username = username;
 	}
 
+	@JsonView(View.Public.class)
 	public String getType() {
 		return type;
 	}
@@ -108,6 +112,7 @@ public class User implements Serializable {
 		this.isAdmin = a;
 	}
 
+	@JsonView(View.Public.class)
 	public boolean isAdmin() {
 		return this.isAdmin;
 	}

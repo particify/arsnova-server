@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Session;
 
 import java.util.HashMap;
@@ -36,13 +36,13 @@ public class PiRoundDelayedStartEvent extends SessionEvent {
 	private final String questionVariant;
 	private int piRound;
 
-	public PiRoundDelayedStartEvent(Object source, Session session, Question question) {
+	public PiRoundDelayedStartEvent(Object source, Session session, Content content) {
 		super(source, session);
-		this.questionId = question.get_id();
-		this.startTime = question.getPiRoundStartTime();
-		this.endTime = question.getPiRoundEndTime();
-		this.questionVariant = question.getQuestionVariant();
-		this.piRound = question.getPiRound();
+		this.questionId = content.getId();
+		this.startTime = content.getPiRoundStartTime();
+		this.endTime = content.getPiRoundEndTime();
+		this.questionVariant = content.getQuestionVariant();
+		this.piRound = content.getPiRound();
 	}
 
 	@Override
