@@ -22,23 +22,23 @@ import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.persistance.UserRepository;
 import org.ektorp.BulkDeleteDocument;
 import org.ektorp.CouchDbConnector;
+import org.ektorp.DbAccessException;
 import org.ektorp.DocumentOperationResult;
 import org.ektorp.ViewQuery;
 import org.ektorp.ViewResult;
-import org.ektorp.support.CouchDbRepositorySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CouchDbUserRepository extends CouchDbRepositorySupport<DbUser> implements UserRepository {
+public class CouchDbUserRepository extends CouchDbCrudRepository<DbUser> implements UserRepository {
 	private static final int BULK_PARTITION_SIZE = 500;
 
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbUserRepository.class);
 
 	public CouchDbUserRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(DbUser.class, db, createIfNotExists);
+		super(DbUser.class, db, "by_username", createIfNotExists);
 	}
 
 	private void log(Object... strings) {
@@ -46,7 +46,7 @@ public class CouchDbUserRepository extends CouchDbRepositorySupport<DbUser> impl
 	}
 
 	@Override
-	public DbUser createOrUpdateUser(final DbUser user) {
+	public DbUser save(final DbUser user) {
 		final String id = user.getId();
 
 		if (null != id) {
@@ -59,20 +59,19 @@ public class CouchDbUserRepository extends CouchDbRepositorySupport<DbUser> impl
 	}
 
 	@Override
-	public DbUser findUserByUsername(final String username) {
+	public DbUser findByUsername(final String username) {
 		final List<DbUser> users = queryView("by_username", username);
 
 		return !users.isEmpty() ? users.get(0) : null;
 	}
 
 	@Override
-	public boolean deleteUser(final DbUser user) {
+	public void delete(final DbUser user) {
 		if (db.delete(user) != null) {
 			log("delete", "type", "user", "id", user.getId());
-			return true;
 		} else {
 			logger.error("Could not delete user {}", user.getId());
-			return false;
+			throw new DbAccessException("Could not delete document.");
 		}
 	}
 

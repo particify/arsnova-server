@@ -3,10 +3,11 @@ package de.thm.arsnova.persistance;
 import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.CommentReadingCount;
 import de.thm.arsnova.entities.User;
+import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface CommentRepository {
+public interface CommentRepository extends CrudRepository<Comment, String> {
 	int getInterposedCount(String sessionKey);
 	CommentReadingCount getInterposedReadingCount(String sessionId);
 	CommentReadingCount getInterposedReadingCount(String sessionId, User user);

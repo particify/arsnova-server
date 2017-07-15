@@ -48,7 +48,7 @@ public class DbUserDetailsService implements UserDetailsService {
 	public UserDetails loadUserByUsername(String username) {
 		String uid = username.toLowerCase();
 		logger.debug("Load user: " + uid);
-		DbUser dbUser = userRepository.findUserByUsername(uid);
+		DbUser dbUser = userRepository.findByUsername(uid);
 		if (null == dbUser) {
 			throw new UsernameNotFoundException("User does not exist.");
 		}

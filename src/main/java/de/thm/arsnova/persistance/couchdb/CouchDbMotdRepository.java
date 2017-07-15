@@ -21,7 +21,6 @@ import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.persistance.MotdRepository;
 import de.thm.arsnova.services.SessionService;
 import org.ektorp.CouchDbConnector;
-import org.ektorp.support.CouchDbRepositorySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,14 +30,14 @@ import org.springframework.cache.annotation.Cacheable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CouchDbMotdRepository extends CouchDbRepositorySupport<Motd> implements MotdRepository {
+public class CouchDbMotdRepository extends CouchDbCrudRepository<Motd> implements MotdRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbMotdRepository.class);
 
 	@Autowired
 	private SessionService sessionService;
 
 	public CouchDbMotdRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(Motd.class, db, createIfNotExists);
+		super(Motd.class, db, "by_sessionkey", createIfNotExists);
 	}
 
 	@Override

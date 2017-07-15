@@ -12,7 +12,6 @@ import org.ektorp.DocumentNotFoundException;
 import org.ektorp.UpdateConflictException;
 import org.ektorp.ViewQuery;
 import org.ektorp.ViewResult;
-import org.ektorp.support.CouchDbRepositorySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class CouchDbContentRepository extends CouchDbRepositorySupport<Content> implements ContentRepository {
+public class CouchDbContentRepository extends CouchDbCrudRepository<Content> implements ContentRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbContentRepository.class);
 
 	@Autowired
@@ -39,7 +38,7 @@ public class CouchDbContentRepository extends CouchDbRepositorySupport<Content> 
 	private AnswerRepository answerRepository;
 
 	public CouchDbContentRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(Content.class, db, createIfNotExists);
+		super(Content.class, db, "by_sessionid", createIfNotExists);
 	}
 
 	@Cacheable("skillquestions")

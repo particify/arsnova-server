@@ -20,7 +20,6 @@ import org.ektorp.DbAccessException;
 import org.ektorp.DocumentOperationResult;
 import org.ektorp.UpdateConflictException;
 import org.ektorp.ViewResult;
-import org.ektorp.support.CouchDbRepositorySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +34,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
-public class CouchDbAnswerRepository extends CouchDbRepositorySupport<Answer> implements AnswerRepository, ApplicationEventPublisherAware {
+public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> implements AnswerRepository, ApplicationEventPublisherAware {
 	private static final int BULK_PARTITION_SIZE = 500;
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbAnswerRepository.class);
 
@@ -53,7 +52,7 @@ public class CouchDbAnswerRepository extends CouchDbRepositorySupport<Answer> im
 	private ApplicationEventPublisher publisher;
 
 	public CouchDbAnswerRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(Answer.class, db, createIfNotExists);
+		super(Answer.class, db, "by_sessionid", createIfNotExists);
 	}
 
 	@Scheduled(fixedDelay = 5000)

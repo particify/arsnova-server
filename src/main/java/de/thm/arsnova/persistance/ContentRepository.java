@@ -2,10 +2,11 @@ package de.thm.arsnova.persistance;
 
 import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.User;
+import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface ContentRepository {
+public interface ContentRepository extends CrudRepository<Content, String> {
 	List<Content> getQuestions(Object... keys);
 	Content getQuestion(String id);
 	Content saveQuestion(String sessionId, Content content);

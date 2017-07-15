@@ -14,14 +14,13 @@ import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentNotFoundException;
 import org.ektorp.UpdateConflictException;
 import org.ektorp.ViewResult;
-import org.ektorp.support.CouchDbRepositorySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-public class CouchDbCommentRepository extends CouchDbRepositorySupport<Comment> implements CommentRepository {
+public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> implements CommentRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbCommentRepository.class);
 
 	@Autowired
@@ -31,7 +30,7 @@ public class CouchDbCommentRepository extends CouchDbRepositorySupport<Comment> 
 	private SessionRepository sessionRepository;
 
 	public CouchDbCommentRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(Comment.class, db, createIfNotExists);
+		super(Comment.class, db, "by_sessionid", createIfNotExists);
 	}
 
 	@Override

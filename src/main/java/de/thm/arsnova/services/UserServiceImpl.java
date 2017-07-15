@@ -339,7 +339,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public DbUser getDbUser(String username) {
-		return userRepository.findUserByUsername(username.toLowerCase());
+		return userRepository.findByUsername(username.toLowerCase());
 	}
 
 	@Override
@@ -360,7 +360,7 @@ public class UserServiceImpl implements UserService {
 			return null;
 		}
 
-		if (null != userRepository.findUserByUsername(lcUsername)) {
+		if (null != userRepository.findByUsername(lcUsername)) {
 			logger.info("User registration failed. {} already exists.", lcUsername);
 
 			return null;
@@ -372,7 +372,7 @@ public class UserServiceImpl implements UserService {
 		dbUser.setActivationKey(RandomStringUtils.randomAlphanumeric(32));
 		dbUser.setCreation(System.currentTimeMillis());
 
-		DbUser result = userRepository.createOrUpdateUser(dbUser);
+		DbUser result = userRepository.save(dbUser);
 		if (null != result) {
 			sendActivationEmail(result);
 		} else {
@@ -436,7 +436,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public DbUser updateDbUser(DbUser dbUser) {
 		if (null != dbUser.getId()) {
-			return userRepository.createOrUpdateUser(dbUser);
+			return userRepository.save(dbUser);
 		}
 
 		return null;
@@ -456,7 +456,7 @@ public class UserServiceImpl implements UserService {
 			throw new NotFoundException();
 		}
 
-		userRepository.deleteUser(dbUser);
+		userRepository.delete(dbUser);
 
 		return dbUser;
 	}
@@ -478,7 +478,7 @@ public class UserServiceImpl implements UserService {
 		dbUser.setPasswordResetKey(RandomStringUtils.randomAlphanumeric(32));
 		dbUser.setPasswordResetTime(System.currentTimeMillis());
 
-		if (null == userRepository.createOrUpdateUser(dbUser)) {
+		if (null == userRepository.save(dbUser)) {
 			logger.error("Password reset failed. {} could not be updated.", username);
 		}
 

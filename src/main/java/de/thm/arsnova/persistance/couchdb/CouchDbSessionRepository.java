@@ -36,7 +36,6 @@ import org.ektorp.DocumentNotFoundException;
 import org.ektorp.UpdateConflictException;
 import org.ektorp.ViewQuery;
 import org.ektorp.ViewResult;
-import org.ektorp.support.CouchDbRepositorySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +54,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> implements SessionRepository {
+public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> implements SessionRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbSessionRepository.class);
 
 	@Autowired
@@ -68,7 +67,7 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 	private MotdRepository motdRepository;
 
 	public CouchDbSessionRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(Session.class, db, createIfNotExists);
+		super(Session.class, db, "by_keyword", createIfNotExists);
 	}
 
 	@Override

@@ -23,10 +23,11 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
+import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface SessionRepository {
+public interface SessionRepository extends CrudRepository<Session, String> {
 	Session getSessionFromId(String sessionId);
 	Session getSessionFromKeyword(String keyword);
 	Session saveSession(User user, Session session);

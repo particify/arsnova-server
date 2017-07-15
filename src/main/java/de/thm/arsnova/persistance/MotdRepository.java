@@ -18,10 +18,11 @@
 package de.thm.arsnova.persistance;
 
 import de.thm.arsnova.entities.Motd;
+import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface MotdRepository {
+public interface MotdRepository extends CrudRepository<Motd, String> {
 	List<Motd> getAdminMotds();
 	List<Motd> getMotdsForAll();
 	List<Motd> getMotdsForLoggedIn();

@@ -21,10 +21,11 @@ import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface AnswerRepository {
+public interface AnswerRepository extends CrudRepository<Answer, String> {
 	Answer get(String id);
 	Answer getMyAnswer(User me, String questionId, int piRound);
 	List<Answer> getAnswers(String contentId, int piRound);
