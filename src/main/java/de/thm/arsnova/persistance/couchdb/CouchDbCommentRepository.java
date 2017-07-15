@@ -30,8 +30,8 @@ public class CouchDbCommentRepository extends CouchDbRepositorySupport<Comment> 
 	@Autowired
 	private SessionRepository sessionRepository;
 
-	public CouchDbCommentRepository(Class<Comment> type, CouchDbConnector db, boolean createIfNotExists) {
-		super(type, db, createIfNotExists);
+	public CouchDbCommentRepository(CouchDbConnector db, boolean createIfNotExists) {
+		super(Comment.class, db, createIfNotExists);
 	}
 
 	@Override

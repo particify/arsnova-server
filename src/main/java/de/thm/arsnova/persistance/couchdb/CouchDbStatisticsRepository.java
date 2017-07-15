@@ -16,8 +16,8 @@ import java.util.Set;
 public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implements StatisticsRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbStatisticsRepository.class);
 
-	public CouchDbStatisticsRepository(Class type, CouchDbConnector db, boolean createIfNotExists) {
-		super(type, db, "statistics", createIfNotExists);
+	public CouchDbStatisticsRepository(CouchDbConnector db, boolean createIfNotExists) {
+		super(Object.class, db, "statistics", createIfNotExists);
 	}
 
 	@Cacheable("statistics")

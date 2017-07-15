@@ -67,8 +67,8 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 	@Autowired
 	private MotdRepository motdRepository;
 
-	public CouchDbSessionRepository(Class<Session> type, CouchDbConnector db, boolean createIfNotExists) {
-		super(type, db, createIfNotExists);
+	public CouchDbSessionRepository(CouchDbConnector db, boolean createIfNotExists) {
+		super(Session.class, db, createIfNotExists);
 	}
 
 	@Override

@@ -37,8 +37,8 @@ public class CouchDbUserRepository extends CouchDbRepositorySupport<DbUser> impl
 
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbUserRepository.class);
 
-	public CouchDbUserRepository(Class<DbUser> type, CouchDbConnector db, boolean createIfNotExists) {
-		super(type, db, createIfNotExists);
+	public CouchDbUserRepository(CouchDbConnector db, boolean createIfNotExists) {
+		super(DbUser.class, db, createIfNotExists);
 	}
 
 	private void log(Object... strings) {

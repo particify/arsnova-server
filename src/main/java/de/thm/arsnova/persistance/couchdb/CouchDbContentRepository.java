@@ -39,8 +39,8 @@ public class CouchDbContentRepository extends CouchDbRepositorySupport<Content> 
 	@Autowired
 	private AnswerRepository answerRepository;
 
-	public CouchDbContentRepository(Class<Content> type, CouchDbConnector db, boolean createIfNotExists) {
-		super(type, db, createIfNotExists);
+	public CouchDbContentRepository(CouchDbConnector db, boolean createIfNotExists) {
+		super(Content.class, db, createIfNotExists);
 	}
 
 	@Cacheable("skillquestions")

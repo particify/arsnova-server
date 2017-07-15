@@ -52,8 +52,8 @@ public class CouchDbAnswerRepository extends CouchDbRepositorySupport<Answer> im
 
 	private ApplicationEventPublisher publisher;
 
-	public CouchDbAnswerRepository(Class<Answer> type, CouchDbConnector db, boolean createIfNotExists) {
-		super(type, db, createIfNotExists);
+	public CouchDbAnswerRepository(CouchDbConnector db, boolean createIfNotExists) {
+		super(Answer.class, db, createIfNotExists);
 	}
 
 	@Scheduled(fixedDelay = 5000)

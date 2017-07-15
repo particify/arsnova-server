@@ -29,8 +29,8 @@ import java.util.Map;
 public class CouchDbLogEntryRepository extends CouchDbRepositorySupport<LogEntry> implements LogEntryRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbLogEntryRepository.class);
 
-	public CouchDbLogEntryRepository(Class<LogEntry> type, CouchDbConnector db, boolean createIfNotExists) {
-		super(type, db, createIfNotExists);
+	public CouchDbLogEntryRepository(CouchDbConnector db, boolean createIfNotExists) {
+		super(LogEntry.class, db, createIfNotExists);
 	}
 
 	@Override

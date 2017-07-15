@@ -37,8 +37,8 @@ public class CouchDbMotdRepository extends CouchDbRepositorySupport<Motd> implem
 	@Autowired
 	private ISessionService sessionService;
 
-	public CouchDbMotdRepository(Class<Motd> type, CouchDbConnector db, boolean createIfNotExists) {
-		super(type, db, createIfNotExists);
+	public CouchDbMotdRepository(CouchDbConnector db, boolean createIfNotExists) {
+		super(Motd.class, db, createIfNotExists);
 	}
 
 	@Override

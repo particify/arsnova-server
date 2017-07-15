@@ -25,8 +25,8 @@ public class CouchDbVisitedSessionRepository extends CouchDbRepositorySupport<Vi
 	@Autowired
 	private LogEntryRepository dbLogger;
 
-	public CouchDbVisitedSessionRepository(Class<VisitedSession> type, CouchDbConnector db, boolean createIfNotExists) {
-		super(type, db, createIfNotExists);
+	public CouchDbVisitedSessionRepository(CouchDbConnector db, boolean createIfNotExists) {
+		super(VisitedSession.class, db, createIfNotExists);
 	}
 
 	@Override
