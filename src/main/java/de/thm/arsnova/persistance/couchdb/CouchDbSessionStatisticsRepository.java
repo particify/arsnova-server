@@ -11,8 +11,8 @@ import org.ektorp.support.CouchDbRepositorySupport;
 import org.springframework.cache.annotation.Cacheable;
 
 public class CouchDbSessionStatisticsRepository extends CouchDbRepositorySupport implements SessionStatisticsRepository {
-	public CouchDbSessionStatisticsRepository(Class type, CouchDbConnector db, boolean createIfNotExists) {
-		super(type, db, "learning_progress", createIfNotExists);
+	public CouchDbSessionStatisticsRepository(CouchDbConnector db, boolean createIfNotExists) {
+		super(Object.class, db, "learning_progress", createIfNotExists);
 	}
 
 	@Cacheable("learningprogress")

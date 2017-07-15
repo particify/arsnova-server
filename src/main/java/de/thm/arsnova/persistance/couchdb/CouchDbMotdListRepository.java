@@ -15,8 +15,8 @@ import java.util.List;
 public class CouchDbMotdListRepository extends CouchDbRepositorySupport<MotdList> implements MotdListRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbMotdListRepository.class);
 
-	public CouchDbMotdListRepository(Class<MotdList> type, CouchDbConnector db, boolean createIfNotExists) {
-		super(type, db, createIfNotExists);
+	public CouchDbMotdListRepository(CouchDbConnector db, boolean createIfNotExists) {
+		super(MotdList.class, db, createIfNotExists);
 	}
 
 	@Override

@@ -1,14 +1,5 @@
 package de.thm.arsnova.config;
 
-import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.Comment;
-import de.thm.arsnova.entities.Content;
-import de.thm.arsnova.entities.DbUser;
-import de.thm.arsnova.entities.LogEntry;
-import de.thm.arsnova.entities.Motd;
-import de.thm.arsnova.entities.MotdList;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.VisitedSession;
 import de.thm.arsnova.entities.serialization.CouchDbObjectMapperFactory;
 import de.thm.arsnova.persistance.*;
 import de.thm.arsnova.persistance.couchdb.*;
@@ -48,56 +39,56 @@ public class PersistanceConfig {
 
 	@Bean
 	public LogEntryRepository logEntryRepository() throws Exception {
-		return new CouchDbLogEntryRepository(LogEntry.class, couchDbConnector(), false);
+		return new CouchDbLogEntryRepository(couchDbConnector(), false);
 	}
 
 	@Bean
 	public UserRepository userRepository() throws Exception {
-		return new CouchDbUserRepository(DbUser.class, couchDbConnector(), false);
+		return new CouchDbUserRepository(couchDbConnector(), false);
 	}
 
 	@Bean
 	public SessionRepository sessionRepository() throws Exception {
-		return new CouchDbSessionRepository(Session.class, couchDbConnector(), false);
+		return new CouchDbSessionRepository(couchDbConnector(), false);
 	}
 
 	@Bean
 	public CommentRepository commentRepository() throws Exception {
-		return new CouchDbCommentRepository(Comment.class, couchDbConnector(), false);
+		return new CouchDbCommentRepository(couchDbConnector(), false);
 	}
 
 	@Bean
 	public ContentRepository contentRepository() throws Exception {
-		return new CouchDbContentRepository(Content.class, couchDbConnector(), false);
+		return new CouchDbContentRepository(couchDbConnector(), false);
 	}
 
 	@Bean
 	public AnswerRepository answerRepository() throws Exception {
-		return new CouchDbAnswerRepository(Answer.class, couchDbConnector(), false);
+		return new CouchDbAnswerRepository(couchDbConnector(), false);
 	}
 
 	@Bean
 	public MotdRepository motdRepository() throws Exception {
-		return new CouchDbMotdRepository(Motd.class, couchDbConnector(), false);
+		return new CouchDbMotdRepository(couchDbConnector(), false);
 	}
 
 	@Bean
 	public MotdListRepository motdListRepository() throws Exception {
-		return new CouchDbMotdListRepository(MotdList.class, couchDbConnector(), false);
+		return new CouchDbMotdListRepository(couchDbConnector(), false);
 	}
 
 	@Bean
 	public VisitedSessionRepository visitedSessionRepository() throws Exception {
-		return new CouchDbVisitedSessionRepository(VisitedSession.class, couchDbConnector(), false);
+		return new CouchDbVisitedSessionRepository(couchDbConnector(), false);
 	}
 
 	@Bean
 	public StatisticsRepository statisticsRepository() throws Exception {
-		return new CouchDbStatisticsRepository(Object.class, couchDbConnector(), false);
+		return new CouchDbStatisticsRepository(couchDbConnector(), false);
 	}
 
 	@Bean
 	public SessionStatisticsRepository sessionStatisticsRepository() throws Exception {
-		return new CouchDbSessionStatisticsRepository(Object.class, couchDbConnector(), false);
+		return new CouchDbSessionStatisticsRepository(couchDbConnector(), false);
 	}
 }
