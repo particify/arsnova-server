@@ -2,6 +2,7 @@ package de.thm.arsnova.persistance.couchdb;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.ektorp.CouchDbInstance;
+import org.ektorp.DocumentNotFoundException;
 import org.ektorp.impl.ObjectMapperFactory;
 import org.ektorp.impl.StdCouchDbConnector;
 import org.slf4j.Logger;
@@ -62,12 +63,12 @@ public class InitializingCouchDbConnector extends StdCouchDbConnector implements
 					logger.warn("Failed to serialize design doc.", e);
 				}
 			}
-			String rev = getCurrentRevision((String) doc.get("_id"));
-			if (rev == null) {
-				create(doc);
-			} else {
+			try {
+				String rev = getCurrentRevision((String) doc.get("_id"));
 				doc.put("_rev", rev);
 				update(doc);
+			} catch (DocumentNotFoundException e) {
+				create(doc);
 			}
 		});
 	}
