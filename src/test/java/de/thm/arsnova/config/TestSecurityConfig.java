@@ -22,6 +22,7 @@ import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
 import org.pac4j.oauth.client.FacebookClient;
 import org.pac4j.oauth.client.Google2Client;
 import org.pac4j.oauth.client.TwitterClient;
+import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -38,7 +39,7 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 
 @Configuration
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableGlobalMethodSecurity(mode = AdviceMode.ASPECTJ, prePostEnabled = true)
 @EnableWebSecurity
 @Profile("test")
 public class TestSecurityConfig extends SecurityConfig {
