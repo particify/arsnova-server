@@ -17,6 +17,8 @@ public class PersistanceConfig {
 	@Value("${couchdb.name}") private String couchDbName;
 	@Value("${couchdb.host}") private String couchDbHost;
 	@Value("${couchdb.port}") private int couchDbPort;
+	@Value("${couchdb.username:}") private String couchDbUsername;
+	@Value("${couchdb.password:}") private String couchDbPassword;
 
 	@Bean
 	public CouchDbConnector couchDbConnector() throws Exception {
@@ -33,6 +35,10 @@ public class PersistanceConfig {
 		final HttpClientFactoryBean factory = new HttpClientFactoryBean();
 		factory.setHost(couchDbHost);
 		factory.setPort(couchDbPort);
+		if (!couchDbUsername.isEmpty()) {
+			factory.setUsername(couchDbUsername);
+			factory.setPassword(couchDbPassword);
+		}
 
 		return factory;
 	}
