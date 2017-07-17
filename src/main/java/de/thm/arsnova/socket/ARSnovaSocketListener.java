@@ -21,13 +21,13 @@ import de.thm.arsnova.events.NovaEvent;
 import de.thm.arsnova.events.NovaEventVisitor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 /**
  * An external Listener is required because otherwise the event methods are not called through a Spring proxy.
  * This would result in Spring method annotations not working.
  */
-@Service
+@Component
 public class ARSnovaSocketListener implements ApplicationListener<NovaEvent> {
 
 	@Autowired

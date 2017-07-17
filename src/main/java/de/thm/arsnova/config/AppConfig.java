@@ -32,6 +32,7 @@ import de.thm.arsnova.persistance.couchdb.*;
 import de.thm.arsnova.persistance.couchdb.InitializingCouchDbConnector;
 import de.thm.arsnova.socket.ARSnovaSocket;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
+import de.thm.arsnova.socket.ARSnovaSocketListener;
 import de.thm.arsnova.web.CacheControlInterceptorHandler;
 import de.thm.arsnova.web.CorsFilter;
 import de.thm.arsnova.web.DeprecatedApiInterceptorHandler;
@@ -268,6 +269,11 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 		socketServer.setKeystore(socketKeystore);
 		socketServer.setStorepass(socketKeystorePassword);
 		return socketServer;
+	}
+
+	@Bean
+	public ARSnovaSocketListener arsnovaSocketListener() {
+		return new ARSnovaSocketListener();
 	}
 
 	@Bean
