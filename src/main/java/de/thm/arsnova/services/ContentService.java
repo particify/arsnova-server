@@ -32,8 +32,6 @@ import java.util.Map;
 public interface ContentService {
 	Content saveQuestion(Content content);
 
-	boolean saveQuestion(Comment comment);
-
 	Content getQuestion(String id);
 
 	List<Content> getSkillQuestions(String sessionkey);
@@ -78,16 +76,6 @@ public interface ContentService {
 
 	int getTotalAnswerCountByQuestion(String questionId);
 
-	int getInterposedCount(String sessionKey);
-
-	CommentReadingCount getInterposedReadingCount(String sessionKey, String username);
-
-	List<Comment> getInterposedQuestions(String sessionKey, int offset, int limit);
-
-	Comment readInterposedQuestion(String commentId);
-
-	Comment readInterposedQuestionInternal(String commentId, User user);
-
 	Content update(Content content);
 
 	Content update(Content content, User user);
@@ -99,8 +87,6 @@ public interface ContentService {
 	Answer updateAnswer(Answer answer);
 
 	void deleteAnswer(String questionId, String answerId);
-
-	void deleteInterposedQuestion(String commentId);
 
 	List<Content> getLectureQuestions(String sessionkey);
 
@@ -140,8 +126,6 @@ public interface ContentService {
 
 	List<String> getUnAnsweredPreparationQuestionIds(String sessionKey, User user);
 
-	void deleteAllInterposedQuestions(String sessionKeyword);
-
 	void publishAll(String sessionkey, boolean publish);
 
 	void publishQuestions(String sessionkey, boolean publish, List<Content> contents);
@@ -167,5 +151,4 @@ public interface ContentService {
 	String getQuestionFcImage(String questionId);
 
 	List<Content> replaceImageData(List<Content> contents);
-
 }

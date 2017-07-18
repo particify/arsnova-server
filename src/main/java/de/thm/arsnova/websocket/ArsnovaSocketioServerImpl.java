@@ -35,6 +35,7 @@ import de.thm.arsnova.events.*;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.services.CommentService;
 import de.thm.arsnova.services.FeedbackService;
 import de.thm.arsnova.services.ContentService;
 import de.thm.arsnova.services.SessionService;
@@ -77,6 +78,9 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 
 	@Autowired
 	private ContentService contentService;
+
+	@Autowired
+	private CommentService commentService;
 
 	private static final Logger logger = LoggerFactory.getLogger(ArsnovaSocketioServerImpl.class);
 
@@ -191,7 +195,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 					AckRequest ackRequest) {
 				final User user = userService.getUser2SocketId(client.getSessionId());
 				try {
-					contentService.readInterposedQuestionInternal(comment.getId(), user);
+					commentService.readInterposedQuestionInternal(comment.getId(), user);
 				} catch (NotFoundException | UnauthorizedException e) {
 					logger.error("Loading of comment {} failed for user {} with exception {}", comment.getId(), user, e.getMessage());
 				}

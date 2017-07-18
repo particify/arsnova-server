@@ -19,18 +19,14 @@ package de.thm.arsnova.services;
 
 import de.thm.arsnova.util.ImageUtils;
 import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.Comment;
-import de.thm.arsnova.entities.CommentReadingCount;
 import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.events.*;
 import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.persistance.AnswerRepository;
-import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.SessionRepository;
 import org.slf4j.Logger;
@@ -51,7 +47,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Performs all question, comment, and answer related operations.
+ * Performs all content and answer related operations.
  */
 @Service
 public class ContentServiceImpl implements ContentService, ApplicationEventPublisherAware {
@@ -60,9 +56,6 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 
 	@Autowired
 	private SessionRepository sessionRepository;
-
-	@Autowired
-	private CommentRepository commentRepository;
 
 	@Autowired
 	private ContentRepository contentRepository;
@@ -131,20 +124,6 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 		this.publisher.publishEvent(event);
 
 		return result;
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public boolean saveQuestion(final Comment comment) {
-		final Session session = sessionRepository.getSessionFromKeyword(comment.getSessionId());
-		final Comment result = commentRepository.saveQuestion(session, comment, userService.getCurrentUser());
-
-		if (null != result) {
-			final NewCommentEvent event = new NewCommentEvent(this, session, result);
-			this.publisher.publishEvent(event);
-			return true;
-		}
-		return false;
 	}
 
 	@Override
@@ -353,35 +332,6 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#commentId, 'comment', 'owner')")
-	public void deleteInterposedQuestion(final String commentId) {
-		final Comment comment = commentRepository.getInterposedQuestion(commentId);
-		if (comment == null) {
-			throw new NotFoundException();
-		}
-		commentRepository.deleteInterposedQuestion(comment);
-
-		final Session session = sessionRepository.getSessionFromKeyword(comment.getSessionId());
-		final DeleteCommentEvent event = new DeleteCommentEvent(this, session, comment);
-		this.publisher.publishEvent(event);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public void deleteAllInterposedQuestions(final String sessionKeyword) {
-		final Session session = sessionRepository.getSessionFromKeyword(sessionKeyword);
-		if (session == null) {
-			throw new UnauthorizedException();
-		}
-		final User user = getCurrentUser();
-		if (session.isCreator(user)) {
-			commentRepository.deleteAllInterposedQuestions(session);
-		} else {
-			commentRepository.deleteAllInterposedQuestions(session, user);
-		}
-	}
-
-	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'content', 'owner')")
 	public void deleteAnswers(final String questionId) {
 		final Content content = contentRepository.getQuestion(questionId);
@@ -573,70 +523,6 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	@PreAuthorize("isAuthenticated()")
 	public int getTotalAnswerCount(final String sessionKey) {
 		return answerRepository.getTotalAnswerCount(sessionKey);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public int getInterposedCount(final String sessionKey) {
-		return commentRepository.getInterposedCount(sessionKey);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public CommentReadingCount getInterposedReadingCount(final String sessionKey, String username) {
-		final Session session = sessionRepository.getSessionFromKeyword(sessionKey);
-		if (session == null) {
-			throw new NotFoundException();
-		}
-		if (username == null) {
-			return commentRepository.getInterposedReadingCount(session);
-		} else {
-			User currentUser = userService.getCurrentUser();
-			if (!currentUser.getUsername().equals(username)) {
-				throw new ForbiddenException();
-			}
-
-			return commentRepository.getInterposedReadingCount(session, currentUser);
-		}
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public List<Comment> getInterposedQuestions(final String sessionKey, final int offset, final int limit) {
-		final Session session = this.getSession(sessionKey);
-		final User user = getCurrentUser();
-		if (session.isCreator(user)) {
-			return commentRepository.getInterposedQuestions(session, offset, limit);
-		} else {
-			return commentRepository.getInterposedQuestions(session, user, offset, limit);
-		}
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public Comment readInterposedQuestion(final String commentId) {
-		final User user = userService.getCurrentUser();
-		return this.readInterposedQuestionInternal(commentId, user);
-	}
-
-	/*
-	 * The "internal" suffix means it is called by internal services that have no authentication!
-	 * TODO: Find a better way of doing this...
-	 */
-	@Override
-	public Comment readInterposedQuestionInternal(final String commentId, User user) {
-		final Comment comment = commentRepository.getInterposedQuestion(commentId);
-		if (comment == null) {
-			throw new NotFoundException();
-		}
-		final Session session = sessionRepository.getSessionFromId(comment.getSessionId());
-		if (!comment.isCreator(user) && !session.isCreator(user)) {
-			throw new UnauthorizedException();
-		}
-		if (session.isCreator(user)) {
-			commentRepository.markInterposedQuestionAsRead(comment);
-		}
-		return comment;
 	}
 
 	@Override

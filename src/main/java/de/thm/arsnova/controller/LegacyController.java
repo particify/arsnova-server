@@ -17,6 +17,7 @@
  */
 package de.thm.arsnova.controller;
 
+import de.thm.arsnova.services.CommentService;
 import de.thm.arsnova.services.ContentService;
 import de.thm.arsnova.web.DeprecatedApi;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,9 @@ public class LegacyController extends AbstractController {
 
 	@Autowired
 	private ContentService contentService;
+
+	@Autowired
+	private CommentService commentService;
 
 	/* specific routes */
 
@@ -95,7 +99,7 @@ public class LegacyController extends AbstractController {
 	@RequestMapping(value = "/session/{sessionKey}/interposed", method = RequestMethod.DELETE)
 	@ResponseBody
 	public void deleteAllInterposedQuestions(@PathVariable final String sessionKey) {
-		contentService.deleteAllInterposedQuestions(sessionKey);
+		commentService.deleteAllInterposedQuestions(sessionKey);
 	}
 
 	@DeprecatedApi
