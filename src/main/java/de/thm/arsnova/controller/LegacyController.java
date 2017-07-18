@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.services.IContentService;
+import de.thm.arsnova.services.ContentService;
 import de.thm.arsnova.web.DeprecatedApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class LegacyController extends AbstractController {
 
 	@Autowired
-	private IContentService contentService;
+	private ContentService contentService;
 
 	/* specific routes */
 

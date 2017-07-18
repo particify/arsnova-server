@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.config;
 
-import de.thm.arsnova.CasUserDetailsService;
+import de.thm.arsnova.security.CasUserDetailsService;
 import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
 import org.pac4j.oauth.client.FacebookClient;
 import org.pac4j.oauth.client.Google2Client;

@@ -17,14 +17,14 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.PaginationListDecorator;
+import de.thm.arsnova.util.PaginationListDecorator;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.services.IContentService;
+import de.thm.arsnova.services.ContentService;
 import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.web.Pagination;
 import io.swagger.annotations.Api;
@@ -54,7 +54,7 @@ import java.util.List;
 @Api(value = "/lecturerquestion", description = "Operations for Lecture Questions")
 public class ContentController extends PaginationController {
 	@Autowired
-	private IContentService contentService;
+	private ContentService contentService;
 
 	@ApiOperation(value = "Get question with provided question Id",
 			nickname = "getQuestion")

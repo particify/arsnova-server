@@ -20,7 +20,7 @@ package de.thm.arsnova.services;
 import de.thm.arsnova.entities.User;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
-public class StubUserService extends UserService {
+public class StubUserService extends UserServiceImpl {
 
 	private User stubUser = null;
 

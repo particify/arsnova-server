@@ -18,7 +18,7 @@
 package de.thm.arsnova.controller;
 
 import de.thm.arsnova.entities.DbUser;
-import de.thm.arsnova.services.IUserService;
+import de.thm.arsnova.services.UserService;
 import de.thm.arsnova.services.UserSessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -41,7 +41,7 @@ public class UserController extends AbstractController {
 	private DaoAuthenticationProvider daoProvider;
 
 	@Autowired
-	private IUserService userService;
+	private UserService userService;
 
 	@Autowired
 	private UserSessionService userSessionService;

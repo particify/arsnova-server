@@ -1,7 +1,7 @@
 package de.thm.arsnova.persistance.couchdb;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import de.thm.arsnova.domain.CourseScore;
+import de.thm.arsnova.services.score.Score;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.persistance.SessionStatisticsRepository;
 import org.ektorp.ComplexKey;
@@ -17,14 +17,14 @@ public class CouchDbSessionStatisticsRepository extends CouchDbRepositorySupport
 
 	@Cacheable("learningprogress")
 	@Override
-	public CourseScore getLearningProgress(final Session session) {
+	public Score getLearningProgress(final Session session) {
 		final ViewResult maximumValueResult = db.queryView(createQuery("maximum_value_of_question")
 				.startKey(ComplexKey.of(session.getId()))
 				.endKey(ComplexKey.of(session.getId(), ComplexKey.emptyObject())));
 		final ViewResult answerSumResult = db.queryView(createQuery("question_value_achieved_for_user")
 				.startKey(ComplexKey.of(session.getId()))
 				.endKey(ComplexKey.of(session.getId(), ComplexKey.emptyObject())));
-		final CourseScore courseScore = new CourseScore();
+		final Score courseScore = new Score();
 
 		// no results found
 		if (maximumValueResult.isEmpty() && answerSumResult.isEmpty()) {

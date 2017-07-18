@@ -20,7 +20,7 @@ package de.thm.arsnova.controller;
 import de.thm.arsnova.entities.CommentReadingCount;
 import de.thm.arsnova.entities.transport.Comment;
 import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.services.IContentService;
+import de.thm.arsnova.services.ContentService;
 import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.web.Pagination;
 import io.swagger.annotations.Api;
@@ -49,7 +49,7 @@ import java.util.List;
 public class CommentController extends PaginationController {
 
 	@Autowired
-	private IContentService contentService;
+	private ContentService contentService;
 
 	@ApiOperation(value = "Count all the comments in current session",
 			nickname = "getAudienceQuestionCount")

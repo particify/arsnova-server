@@ -17,10 +17,10 @@
  */
 package de.thm.arsnova.config;
 
-import de.thm.arsnova.CASLogoutSuccessHandler;
-import de.thm.arsnova.CasUserDetailsService;
-import de.thm.arsnova.LoginAuthenticationFailureHandler;
-import de.thm.arsnova.LoginAuthenticationSucessHandler;
+import de.thm.arsnova.security.CasLogoutSuccessHandler;
+import de.thm.arsnova.security.CasUserDetailsService;
+import de.thm.arsnova.security.LoginAuthenticationFailureHandler;
+import de.thm.arsnova.security.LoginAuthenticationSucessHandler;
 import de.thm.arsnova.security.ApplicationPermissionEvaluator;
 import de.thm.arsnova.security.CustomLdapUserDetailsMapper;
 import de.thm.arsnova.security.DbUserDetailsService;
@@ -364,7 +364,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public LogoutSuccessHandler casLogoutSuccessHandler() {
-		CASLogoutSuccessHandler handler = new CASLogoutSuccessHandler();
+		CasLogoutSuccessHandler handler = new CasLogoutSuccessHandler();
 		handler.setCasUrl(casUrl);
 		handler.setDefaultTarget(rootUrl);
 

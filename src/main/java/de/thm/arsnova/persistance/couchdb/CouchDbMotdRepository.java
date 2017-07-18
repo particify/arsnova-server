@@ -19,7 +19,7 @@ package de.thm.arsnova.persistance.couchdb;
 
 import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.persistance.MotdRepository;
-import de.thm.arsnova.services.ISessionService;
+import de.thm.arsnova.services.SessionService;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.CouchDbRepositorySupport;
 import org.slf4j.Logger;
@@ -35,7 +35,7 @@ public class CouchDbMotdRepository extends CouchDbRepositorySupport<Motd> implem
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbMotdRepository.class);
 
 	@Autowired
-	private ISessionService sessionService;
+	private SessionService sessionService;
 
 	public CouchDbMotdRepository(CouchDbConnector db, boolean createIfNotExists) {
 		super(Motd.class, db, createIfNotExists);

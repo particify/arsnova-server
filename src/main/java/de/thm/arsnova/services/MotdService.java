@@ -9,189 +9,51 @@
  *
  * ARSnova Backend is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.	 If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.entities.MotdList;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.User;
-import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.persistance.MotdListRepository;
-import de.thm.arsnova.persistance.MotdRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.StringTokenizer;
+
 /**
- * Performs all question, interposed question, and answer related operations.
+ * The functionality the motd service should provide.
  */
-@Service
-public class MotdService implements IMotdService {
-	@Autowired
-	private IUserService userService;
+public interface MotdService {
+	Motd getMotd(String keyword);
 
-	@Autowired
-	private ISessionService sessionService;
+	List<Motd> getAdminMotds();  //all w/o the sessionmotds
 
-	@Autowired
-	private MotdRepository motdRepository;
+	List<Motd> getAllSessionMotds(final String sessionkey);
 
-	@Autowired
-	private MotdListRepository motdListRepository;
+	List<Motd> getCurrentMotds(final Date clientdate, final String audience, final String sessionkey);
 
-  @Override
-  @PreAuthorize("isAuthenticated()")
-  public Motd getMotd(final String key) {
-    return motdRepository.getMotdByKey(key);
-  }
+	List<Motd> filterMotdsByDate(List<Motd> list, Date clientdate);
 
-  @Override
-  @PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
-  public List<Motd> getAdminMotds() {
-    return motdRepository.getAdminMotds();
-  }
+	List<Motd> filterMotdsByList(List<Motd> list, MotdList motdList);
 
-	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
-	public List<Motd> getAllSessionMotds(final String sessionkey) {
-		return motdRepository.getMotdsForSession(sessionkey);
-	}
+	void deleteMotd(Motd motd);
 
-	@Override
-	public List<Motd> getCurrentMotds(final Date clientdate, final String audience, final String sessionkey) {
-		final List<Motd> motds;
-		switch (audience) {
-			case "all": motds = motdRepository.getMotdsForAll(); break;
-			case "loggedIn": motds = motdRepository.getMotdsForLoggedIn(); break;
-			case "students": motds = motdRepository.getMotdsForStudents(); break;
-			case "tutors": motds = motdRepository.getMotdsForTutors(); break;
-			case "session": motds = motdRepository.getMotdsForSession(sessionkey); break;
-			default: motds = motdRepository.getMotdsForAll(); break;
-		}
-		return filterMotdsByDate(motds, clientdate);
-	}
+	void deleteSessionMotd(final String sessionkey, Motd motd);
 
-  @Override
-  public List<Motd> filterMotdsByDate(List<Motd> list, Date clientdate) {
-		List<Motd> returns = new ArrayList<>();
-		for (Motd motd : list) {
-			if (motd.getStartdate().before(clientdate) && motd.getEnddate().after(clientdate)) {
-				returns.add(motd);
-			}
-		}
-		return returns;
-  }
+	Motd saveMotd(Motd motd);
 
-	@Override
-	public List<Motd> filterMotdsByList(List<Motd> list, MotdList motdlist) {
-		if (motdlist != null && motdlist.getMotdkeys() != null && !motdlist.getMotdkeys().isEmpty()) {
-			List<Motd> returns = new ArrayList<>();
-			HashSet<String> keys = new HashSet<>(500);  // Or a more realistic size
-			StringTokenizer st = new StringTokenizer(motdlist.getMotdkeys(), ",");
-			while (st.hasMoreTokens()) {
-				keys.add(st.nextToken());
-			}
-			for (Motd motd : list) {
-				if (!keys.contains(motd.getMotdkey())) {
-					returns.add(motd);
-				}
-			}
-			return returns;
-		} else {
-			return list;
-		}
-	}
+	Motd saveSessionMotd(final String sessionkey, final Motd motd);
 
-	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
-	public Motd saveMotd(final Motd motd) {
-		return createOrUpdateMotd(motd);
-	}
+	Motd updateMotd(Motd motd);
 
-	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
-	public Motd saveSessionMotd(final String sessionkey, final Motd motd) {
-		Session session = sessionService.getSession(sessionkey);
-		motd.setSessionId(session.getId());
+	Motd updateSessionMotd(final String sessionkey, Motd motd);
 
+	MotdList getMotdListForUser(final String username);
 
-		return createOrUpdateMotd(motd);
-	}
+	MotdList saveUserMotdList(MotdList motdList);
 
-	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
-	public Motd updateMotd(final Motd motd) {
-		return createOrUpdateMotd(motd);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
-	public Motd updateSessionMotd(final String sessionkey, final Motd motd) {
-		return createOrUpdateMotd(motd);
-	}
-
-	private Motd createOrUpdateMotd(final Motd motd) {
-		if (motd.getMotdkey() != null) {
-			Motd oldMotd = motdRepository.getMotdByKey(motd.getMotdkey());
-			if (!(motd.getId().equals(oldMotd.getId()) && motd.getSessionkey().equals(oldMotd.getSessionkey())
-					&& motd.getAudience().equals(oldMotd.getAudience()))) {
-				throw new BadRequestException();
-			}
-		}
-
-		return motdRepository.createOrUpdateMotd(motd);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
-	public void deleteMotd(Motd motd) {
-		motdRepository.deleteMotd(motd);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
-	public void deleteSessionMotd(final String sessionkey, Motd motd) {
-		motdRepository.deleteMotd(motd);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public MotdList getMotdListForUser(final String username) {
-		final User user = userService.getCurrentUser();
-		if (username.equals(user.getUsername()) && !"guest".equals(user.getType())) {
-			return motdListRepository.getMotdListForUser(username);
-		}
-		return null;
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public MotdList saveUserMotdList(MotdList motdList) {
-		final User user = userService.getCurrentUser();
-		if (user.getUsername().equals(motdList.getUsername())) {
-			return motdListRepository.createOrUpdateMotdList(motdList);
-		}
-		return null;
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public MotdList updateUserMotdList(MotdList motdList) {
-		final User user = userService.getCurrentUser();
-		if (user.getUsername().equals(motdList.getUsername())) {
-			return motdListRepository.createOrUpdateMotdList(motdList);
-		}
-		return null;
-	}
+	MotdList updateUserMotdList(MotdList userMotdList);
 }

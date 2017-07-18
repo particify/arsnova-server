@@ -25,7 +25,7 @@ import java.util.Set;
 /**
  * Fires whenever the feedback of a specific user has been reset.
  */
-public class DeleteFeedbackForSessionsEvent extends NovaEvent {
+public class DeleteFeedbackForSessionsEvent extends ArsnovaEvent {
 
 	private static final long serialVersionUID = 1L;
 
@@ -48,7 +48,7 @@ public class DeleteFeedbackForSessionsEvent extends NovaEvent {
 	}
 
 	@Override
-	public void accept(NovaEventVisitor visitor) {
+	public void accept(ArsnovaEventVisitor visitor) {
 		visitor.visit(this);
 	}
 

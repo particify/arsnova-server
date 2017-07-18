@@ -29,7 +29,7 @@ import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import de.thm.arsnova.persistance.MotdRepository;
 import de.thm.arsnova.persistance.SessionRepository;
-import de.thm.arsnova.services.ISessionService;
+import de.thm.arsnova.services.SessionService;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentNotFoundException;
@@ -59,7 +59,7 @@ public class CouchDbSessionRepository extends CouchDbRepositorySupport<Session> 
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbSessionRepository.class);
 
 	@Autowired
-	private ISessionService sessionService;
+	private SessionService sessionService;
 
 	@Autowired
 	private LogEntryRepository dbLogger;

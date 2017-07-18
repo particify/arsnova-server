@@ -19,7 +19,7 @@ package de.thm.arsnova.controller;
 
 import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.entities.MotdList;
-import de.thm.arsnova.services.IMotdService;
+import de.thm.arsnova.services.MotdService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -48,7 +48,7 @@ import java.util.List;
 public class MotdController extends AbstractController {
 
 	@Autowired
-	private IMotdService motdService;
+	private MotdService motdService;
 
 	@ApiOperation(value = "get messages. if adminview=false, only messages with startdate<clientdate<enddate are returned")
 	@RequestMapping(value = "/", method = RequestMethod.GET)

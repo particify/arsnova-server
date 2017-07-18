@@ -20,8 +20,9 @@ package de.thm.arsnova.controller;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.services.IFeedbackService;
-import de.thm.arsnova.services.IUserService;
+import de.thm.arsnova.services.FeedbackService;
+import de.thm.arsnova.services.UserService;
+import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 import de.thm.arsnova.web.DeprecatedApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,15 +37,15 @@ import org.springframework.web.bind.annotation.RestController;
  * Handles requests concerning the user's feedback, i.e., "too fast" or "faster, please". This HTTP API is
  * deprecated in favor of the socket implementation.
  *
- * @see de.thm.arsnova.socket.ARSnovaSocketIOServer
+ * @see ArsnovaSocketioServerImpl
  */
 @RestController
 public class FeedbackController extends AbstractController {
 	@Autowired
-	private IFeedbackService feedbackService;
+	private FeedbackService feedbackService;
 
 	@Autowired
-	private IUserService userService;
+	private UserService userService;
 
 	@DeprecatedApi
 	@Deprecated

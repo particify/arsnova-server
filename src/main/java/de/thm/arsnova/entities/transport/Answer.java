@@ -139,7 +139,7 @@ public class Answer implements Serializable {
 		theAnswer.setTimestamp(new Date().getTime());
 		theAnswer.setQuestionVariant(content.getQuestionVariant());
 		theAnswer.setAbstention(this.isAbstention());
-		// calculate learning progress value after all properties are set
+		// calculate score value after all properties are set
 		theAnswer.setQuestionValue(content.calculateValue(theAnswer));
 		theAnswer.setAnswerImage(this.getAnswerImage());
 		theAnswer.setSuccessfulFreeTextAnswer(this.isSuccessfulFreeTextAnswer());

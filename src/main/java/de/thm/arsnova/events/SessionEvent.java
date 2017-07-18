@@ -20,9 +20,9 @@ package de.thm.arsnova.events;
 import de.thm.arsnova.entities.Session;
 
 /**
- * Base class for all {@link NovaEvent}s that are related to a session.
+ * Base class for all {@link ArsnovaEvent}s that are related to a session.
  */
-public abstract class SessionEvent extends NovaEvent {
+public abstract class SessionEvent extends ArsnovaEvent {
 
 	private static final long serialVersionUID = 1L;
 

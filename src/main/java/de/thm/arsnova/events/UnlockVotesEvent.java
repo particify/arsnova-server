@@ -41,7 +41,7 @@ public class UnlockVotesEvent extends SessionEvent {
 	}
 
 	@Override
-	public void accept(NovaEventVisitor visitor) {
+	public void accept(ArsnovaEventVisitor visitor) {
 		visitor.visit(this);
 	}
 
