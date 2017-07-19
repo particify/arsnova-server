@@ -41,7 +41,7 @@ public interface LogEntryRepository {
 	 * @param payload arbitrary logging data
 	 * @param level severity of the event
 	 */
-	default void log(String event, Map<String, Object> payload, LogEntry.LogLevel level) {
+	default void log(final String event, final Map<String, Object> payload, final LogEntry.LogLevel level) {
 		create(event, level, payload);
 	}
 
@@ -53,7 +53,7 @@ public interface LogEntryRepository {
 	 * @param event type of the event
 	 * @param payload arbitrary logging data
 	 */
-	default void log(String event, Map<String, Object> payload) {
+	default void log(final String event, final Map<String, Object> payload) {
 		create(event, LogEntry.LogLevel.INFO, payload);
 	}
 
@@ -65,7 +65,7 @@ public interface LogEntryRepository {
 	 * @param level severity of the event
 	 * @param rawPayload key/value pairs of arbitrary logging data
 	 */
-	default void log(String event, LogEntry.LogLevel level, Object... rawPayload) {
+	default void log(final String event, final LogEntry.LogLevel level, final Object... rawPayload) {
 		if (rawPayload.length % 2 != 0) {
 			throw new IllegalArgumentException("");
 		}
@@ -84,7 +84,7 @@ public interface LogEntryRepository {
 	 * @param event type of the event
 	 * @param rawPayload key/value pairs of arbitrary logging data
 	 */
-	default void log(String event, Object... rawPayload) {
+	default void log(final String event, final Object... rawPayload) {
 		log(event, LogEntry.LogLevel.INFO, rawPayload);
 	}
 }

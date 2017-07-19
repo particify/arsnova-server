@@ -46,10 +46,10 @@ Here is a list of all caches, their keys, and a short description.
 
 Cache name | Key | Description
 -----------|-----|------------
-`skillquestions`| `Session` entity | Contains all questions for the specified session irrespective of their variant.
-`lecturequestions` | `Session` entity | Contains all "lecture" variant questions for the specified session.
-`preparationquestions` | `Session` entity | Contains all "preparation" variant questions for the specified session.
-`flashcardquestions` | `Session` entity | Contains all "flashcard" variant questions for the specified session.
+`skillquestions`| database id of session | Contains all questions for the specified session irrespective of their variant.
+`lecturequestions` | database id of session | Contains all "lecture" variant questions for the specified session.
+`preparationquestions` | database id of session | Contains all "preparation" variant questions for the specified session.
+`flashcardquestions` | database id of session | Contains all "flashcard" variant questions for the specified session.
 `questions` | `Question` entity | Contains single question objects.
 `questions` | database id of question | Although it shares the name of the previously mentioned cache, it is in essence a different cache because the keys are different. This means that the same `Question` object might be associated with two different keys.
 `answers`| `Question` entity | Contains single answer objects.

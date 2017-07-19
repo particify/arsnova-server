@@ -37,7 +37,7 @@ public class CouchDbMotdRepository extends CouchDbRepositorySupport<Motd> implem
 	@Autowired
 	private SessionService sessionService;
 
-	public CouchDbMotdRepository(CouchDbConnector db, boolean createIfNotExists) {
+	public CouchDbMotdRepository(final CouchDbConnector db, final boolean createIfNotExists) {
 		super(Motd.class, db, createIfNotExists);
 	}
 
@@ -84,22 +84,22 @@ public class CouchDbMotdRepository extends CouchDbRepositorySupport<Motd> implem
 		return getMotds("by_sessionkey", sessionkey);
 	}
 
-	private List<Motd> getMotds(String viewName, String key) {
+	private List<Motd> getMotds(final String viewName, final String key) {
 		return queryView(viewName, key);
 	}
 
 	@Override
-	public Motd getMotdByKey(String key) {
-		List<Motd> motd = queryView("by_motdkey", key);
+	public Motd getMotdByKey(final String key) {
+		final List<Motd> motd = queryView("by_motdkey", key);
 
 		return motd.get(0);
 	}
 
 	@Override
 	@CacheEvict(cacheNames = "motds", key = "#p0.audience.concat(#p0.sessionkey)")
-	public Motd createOrUpdateMotd(Motd motd) {
-		String id = motd.getId();
-		String rev = motd.getRevision();
+	public Motd createOrUpdateMotd(final Motd motd) {
+		final String id = motd.getId();
+		final String rev = motd.getRevision();
 
 		if (null != id) {
 			Motd oldMotd = get(id);
@@ -115,7 +115,7 @@ public class CouchDbMotdRepository extends CouchDbRepositorySupport<Motd> implem
 
 	@Override
 	@CacheEvict(cacheNames = "motds", key = "#p0.audience.concat(#p0.sessionkey)")
-	public boolean deleteMotd(Motd motd) {
+	public boolean deleteMotd(final Motd motd) {
 		return db.delete(motd) != null;
 	}
 }

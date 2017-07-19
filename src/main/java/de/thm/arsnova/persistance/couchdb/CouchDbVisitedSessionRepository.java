@@ -25,18 +25,18 @@ public class CouchDbVisitedSessionRepository extends CouchDbRepositorySupport<Vi
 	@Autowired
 	private LogEntryRepository dbLogger;
 
-	public CouchDbVisitedSessionRepository(CouchDbConnector db, boolean createIfNotExists) {
+	public CouchDbVisitedSessionRepository(final CouchDbConnector db, final boolean createIfNotExists) {
 		super(VisitedSession.class, db, createIfNotExists);
 	}
 
 	@Override
-	public int deleteInactiveGuestVisitedSessionLists(long lastActivityBefore) {
+	public int deleteInactiveGuestVisitedSessionLists(final long lastActivityBefore) {
 		try {
-			ViewResult result = db.queryView(createQuery("by_last_activity_for_guests").endKey(lastActivityBefore));
+			final ViewResult result = db.queryView(createQuery("by_last_activity_for_guests").endKey(lastActivityBefore));
 
 			int count = 0;
-			List<List<ViewResult.Row>> partitions = Lists.partition(result.getRows(), BULK_PARTITION_SIZE);
-			for (List<ViewResult.Row> partition: partitions) {
+			final List<List<ViewResult.Row>> partitions = Lists.partition(result.getRows(), BULK_PARTITION_SIZE);
+			for (final List<ViewResult.Row> partition: partitions) {
 				final List<BulkDeleteDocument> newDocs = new ArrayList<>();
 				for (final ViewResult.Row oldDoc : partition) {
 					final BulkDeleteDocument newDoc = new BulkDeleteDocument(oldDoc.getId(), oldDoc.getValueAsNode().get("_rev").asText());
@@ -47,7 +47,7 @@ public class CouchDbVisitedSessionRepository extends CouchDbRepositorySupport<Vi
 				}
 
 				if (!newDocs.isEmpty()) {
-					List<DocumentOperationResult> results = db.executeBulk(newDocs);
+					final List<DocumentOperationResult> results = db.executeBulk(newDocs);
 					count += newDocs.size() - results.size();
 					if (!results.isEmpty()) {
 						logger.error("Could not bulk delete some visited session lists.");
@@ -61,7 +61,7 @@ public class CouchDbVisitedSessionRepository extends CouchDbRepositorySupport<Vi
 			}
 
 			return count;
-		} catch (DbAccessException e) {
+		} catch (final DbAccessException e) {
 			logger.error("Could not delete visited session lists of inactive users.", e);
 		}
 

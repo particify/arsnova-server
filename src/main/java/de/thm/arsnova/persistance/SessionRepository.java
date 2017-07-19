@@ -41,19 +41,19 @@ public interface SessionRepository {
 
 	Session changeSessionCreator(Session session, String newCreator);
 	int[] deleteInactiveGuestSessions(long lastActivityBefore);
-	List<Session> getMySessions(User user, final int start, final int limit);
-	List<Session> getSessionsForUsername(String username, final int start, final int limit);
+	List<Session> getMySessions(User user, int start, int limit);
+	List<Session> getSessionsForUsername(String username, int start, int limit);
 	List<Session> getPublicPoolSessions();
 	List<Session> getMyPublicPoolSessions(User user);
 	boolean sessionKeyAvailable(String keyword);
 	Session updateSessionOwnerActivity(Session session);
-	List<Session> getVisitedSessionsForUsername(String username, final int start, final int limit);
-	List<SessionInfo> getMySessionsInfo(User user, final int start, final int limit);
+	List<Session> getVisitedSessionsForUsername(String username, int start, int limit);
+	List<SessionInfo> getMySessionsInfo(User user, int start, int limit);
 	List<SessionInfo> getPublicPoolSessionsInfo();
-	List<SessionInfo> getMyPublicPoolSessionsInfo(final User user);
-	List<SessionInfo> getMyVisitedSessionsInfo(User currentUser, final int start, final int limit);
+	List<SessionInfo> getMyPublicPoolSessionsInfo(User user);
+	List<SessionInfo> getMyVisitedSessionsInfo(User currentUser, int start, int limit);
 	List<Session> getCourseSessions(List<Course> courses);
 	SessionInfo importSession(User user, ImportExportSession importSession);
 	ImportExportSession exportSession(String sessionkey, Boolean withAnswer, Boolean withFeedbackQuestions);
-	LoggedIn registerAsOnlineUser(final User user, final Session session);
+	LoggedIn registerAsOnlineUser(User user, Session session);
 }

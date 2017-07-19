@@ -38,7 +38,7 @@ public class CommentServiceImpl implements CommentService {
 	@PreAuthorize("isAuthenticated()")
 	public boolean saveQuestion(final Comment comment) {
 		final Session session = sessionRepository.getSessionFromKeyword(comment.getSessionId());
-		final Comment result = commentRepository.saveQuestion(session, comment, userService.getCurrentUser());
+		final Comment result = commentRepository.saveQuestion(session.getId(), comment, userService.getCurrentUser());
 
 		if (null != result) {
 			final NewCommentEvent event = new NewCommentEvent(this, session, result);
@@ -71,9 +71,9 @@ public class CommentServiceImpl implements CommentService {
 		}
 		final User user = getCurrentUser();
 		if (session.isCreator(user)) {
-			commentRepository.deleteAllInterposedQuestions(session);
+			commentRepository.deleteAllInterposedQuestions(session.getId());
 		} else {
-			commentRepository.deleteAllInterposedQuestions(session, user);
+			commentRepository.deleteAllInterposedQuestions(session.getId(), user);
 		}
 	}
 
@@ -91,14 +91,14 @@ public class CommentServiceImpl implements CommentService {
 			throw new NotFoundException();
 		}
 		if (username == null) {
-			return commentRepository.getInterposedReadingCount(session);
+			return commentRepository.getInterposedReadingCount(session.getId());
 		} else {
 			User currentUser = userService.getCurrentUser();
 			if (!currentUser.getUsername().equals(username)) {
 				throw new ForbiddenException();
 			}
 
-			return commentRepository.getInterposedReadingCount(session, currentUser);
+			return commentRepository.getInterposedReadingCount(session.getId(), currentUser);
 		}
 	}
 
@@ -108,9 +108,9 @@ public class CommentServiceImpl implements CommentService {
 		final Session session = this.getSession(sessionKey);
 		final User user = getCurrentUser();
 		if (session.isCreator(user)) {
-			return commentRepository.getInterposedQuestions(session, offset, limit);
+			return commentRepository.getInterposedQuestions(session.getId(), offset, limit);
 		} else {
-			return commentRepository.getInterposedQuestions(session, user, offset, limit);
+			return commentRepository.getInterposedQuestions(session.getId(), user, offset, limit);
 		}
 	}
 

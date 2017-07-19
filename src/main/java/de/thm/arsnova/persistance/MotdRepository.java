@@ -27,7 +27,7 @@ public interface MotdRepository {
 	List<Motd> getMotdsForLoggedIn();
 	List<Motd> getMotdsForTutors();
 	List<Motd> getMotdsForStudents();
-	List<Motd> getMotdsForSession(final String sessionkey);
+	List<Motd> getMotdsForSession(String sessionkey);
 	Motd getMotdByKey(String key);
 	Motd createOrUpdateMotd(Motd motd);
 	boolean deleteMotd(Motd motd);

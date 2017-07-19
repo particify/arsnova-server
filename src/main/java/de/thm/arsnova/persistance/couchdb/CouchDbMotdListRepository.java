@@ -15,20 +15,20 @@ import java.util.List;
 public class CouchDbMotdListRepository extends CouchDbRepositorySupport<MotdList> implements MotdListRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbMotdListRepository.class);
 
-	public CouchDbMotdListRepository(CouchDbConnector db, boolean createIfNotExists) {
+	public CouchDbMotdListRepository(final CouchDbConnector db, final boolean createIfNotExists) {
 		super(MotdList.class, db, createIfNotExists);
 	}
 
 	@Override
 	@Cacheable(cacheNames = "motdlist", key = "#p0")
 	public MotdList getMotdListForUser(final String username) {
-		List<MotdList> motdListList = queryView("by_username", username);
+		final List<MotdList> motdListList = queryView("by_username", username);
 		return motdListList.isEmpty() ? new MotdList() : motdListList.get(0);
 	}
 
 	@Override
 	@CachePut(cacheNames = "motdlist", key = "#p0.username")
-	public MotdList createOrUpdateMotdList(MotdList motdlist) {
+	public MotdList createOrUpdateMotdList(final MotdList motdlist) {
 		try {
 			if (motdlist.getId() != null) {
 				update(motdlist);
@@ -37,7 +37,7 @@ public class CouchDbMotdListRepository extends CouchDbRepositorySupport<MotdList
 			}
 
 			return motdlist;
-		} catch (DbAccessException e) {
+		} catch (final DbAccessException e) {
 			logger.error("Could not save MotD list {}.", motdlist, e);
 		}
 

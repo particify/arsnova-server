@@ -29,13 +29,13 @@ import java.util.Map;
 public class CouchDbLogEntryRepository extends CouchDbRepositorySupport<LogEntry> implements LogEntryRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbLogEntryRepository.class);
 
-	public CouchDbLogEntryRepository(CouchDbConnector db, boolean createIfNotExists) {
+	public CouchDbLogEntryRepository(final CouchDbConnector db, final boolean createIfNotExists) {
 		super(LogEntry.class, db, createIfNotExists);
 	}
 
 	@Override
-	public void create(String event, LogEntry.LogLevel level, Map<String, Object> payload) {
-		LogEntry log = new LogEntry(event, level.ordinal(), payload);
+	public void create(final String event, final LogEntry.LogLevel level, final Map<String, Object> payload) {
+		final LogEntry log = new LogEntry(event, level.ordinal(), payload);
 		try {
 			db.create(log);
 		} catch (final IllegalArgumentException e) {
