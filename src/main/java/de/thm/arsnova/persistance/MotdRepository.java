@@ -23,13 +23,13 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface MotdRepository extends CrudRepository<Motd, String> {
-	List<Motd> getAdminMotds();
-	List<Motd> getMotdsForAll();
-	List<Motd> getMotdsForLoggedIn();
-	List<Motd> getMotdsForTutors();
-	List<Motd> getMotdsForStudents();
-	List<Motd> getMotdsForSession(String sessionkey);
-	Motd getMotdByKey(String key);
-	Motd createOrUpdateMotd(Motd motd);
-	boolean deleteMotd(Motd motd);
+	List<Motd> findGlobalForAdmin();
+	List<Motd> findGlobalForAll();
+	List<Motd> findGlobalForLoggedIn();
+	List<Motd> findGlobalForTutors();
+	List<Motd> findForStudents();
+	List<Motd> findBySessionKey(String sessionkey);
+	Motd findByKey(String key);
+	Motd save(Motd motd);
+	void delete(Motd motd);
 }

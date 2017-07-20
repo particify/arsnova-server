@@ -41,54 +41,54 @@ public class CouchDbMotdRepository extends CouchDbCrudRepository<Motd> implement
 	}
 
 	@Override
-	public List<Motd> getAdminMotds() {
-		return getMotds("by_audience_for_global", null);
+	public List<Motd> findGlobalForAdmin() {
+		return find("by_audience_for_global", null);
 	}
 
 	@Override
 	@Cacheable(cacheNames = "motds", key = "'all'")
-	public List<Motd> getMotdsForAll() {
-		return getMotds("by_audience_for_global", "all");
+	public List<Motd> findGlobalForAll() {
+		return find("by_audience_for_global", "all");
 	}
 
 	@Override
 	@Cacheable(cacheNames = "motds", key = "'loggedIn'")
-	public List<Motd> getMotdsForLoggedIn() {
-		return getMotds("by_audience_for_global", "loggedIn");
+	public List<Motd> findGlobalForLoggedIn() {
+		return find("by_audience_for_global", "loggedIn");
 	}
 
 	@Override
 	@Cacheable(cacheNames = "motds", key = "'tutors'")
-	public List<Motd> getMotdsForTutors() {
+	public List<Motd> findGlobalForTutors() {
 		final List<Motd> union = new ArrayList<>();
-		union.addAll(getMotds("by_audience_for_global", "loggedIn"));
-		union.addAll(getMotds("by_audience_for_global", "tutors"));
+		union.addAll(find("by_audience_for_global", "loggedIn"));
+		union.addAll(find("by_audience_for_global", "tutors"));
 
 		return union;
 	}
 
 	@Override
 	@Cacheable(cacheNames = "motds", key = "'students'")
-	public List<Motd> getMotdsForStudents() {
+	public List<Motd> findForStudents() {
 		final List<Motd> union = new ArrayList<>();
-		union.addAll(getMotds("by_audience_for_global", "loggedIn"));
-		union.addAll(getMotds("by_audience_for_global", "students"));
+		union.addAll(find("by_audience_for_global", "loggedIn"));
+		union.addAll(find("by_audience_for_global", "students"));
 
 		return union;
 	}
 
 	@Override
 	@Cacheable(cacheNames = "motds", key = "('session').concat(#p0)")
-	public List<Motd> getMotdsForSession(final String sessionkey) {
-		return getMotds("by_sessionkey", sessionkey);
+	public List<Motd> findBySessionKey(final String sessionkey) {
+		return find("by_sessionkey", sessionkey);
 	}
 
-	private List<Motd> getMotds(final String viewName, final String key) {
+	private List<Motd> find(final String viewName, final String key) {
 		return queryView(viewName, key);
 	}
 
 	@Override
-	public Motd getMotdByKey(final String key) {
+	public Motd findByKey(final String key) {
 		final List<Motd> motd = queryView("by_motdkey", key);
 
 		return motd.get(0);
@@ -96,7 +96,7 @@ public class CouchDbMotdRepository extends CouchDbCrudRepository<Motd> implement
 
 	@Override
 	@CacheEvict(cacheNames = "motds", key = "#p0.audience.concat(#p0.sessionkey)")
-	public Motd createOrUpdateMotd(final Motd motd) {
+	public Motd save(final Motd motd) {
 		final String id = motd.getId();
 		final String rev = motd.getRevision();
 
@@ -112,9 +112,10 @@ public class CouchDbMotdRepository extends CouchDbCrudRepository<Motd> implement
 		return motd;
 	}
 
+	/* TODO: Redundant -> remove. Move cache handling to service layer. */
 	@Override
 	@CacheEvict(cacheNames = "motds", key = "#p0.audience.concat(#p0.sessionkey)")
-	public boolean deleteMotd(final Motd motd) {
-		return db.delete(motd) != null;
+	public void delete(final Motd motd) {
+		db.delete(motd);
 	}
 }

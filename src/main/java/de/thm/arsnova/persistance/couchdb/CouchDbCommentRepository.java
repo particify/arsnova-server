@@ -11,7 +11,6 @@ import de.thm.arsnova.persistance.LogEntryRepository;
 import de.thm.arsnova.persistance.SessionRepository;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
-import org.ektorp.DocumentNotFoundException;
 import org.ektorp.UpdateConflictException;
 import org.ektorp.ViewResult;
 import org.slf4j.Logger;
@@ -34,13 +33,16 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	}
 
 	@Override
-	public int getInterposedCount(final String sessionKey) {
-		final Session s = sessionRepository.getSessionFromKeyword(sessionKey);
+	public int countBySessionKey(final String sessionKey) {
+		final Session s = sessionRepository.findByKeyword(sessionKey);
 		if (s == null) {
 			throw new NotFoundException();
 		}
 
-		final ViewResult result = db.queryView(createQuery("by_sessionid").key(s.getId()).group(true));
+		final ViewResult result = db.queryView(createQuery("by_sessionid")
+				.key(s.getId())
+				.reduce(true)
+				.group(true));
 		if (result.isEmpty()) {
 			return 0;
 		}
@@ -49,24 +51,26 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	}
 
 	@Override
-	public CommentReadingCount getInterposedReadingCount(final String sessionId) {
+	public CommentReadingCount countReadingBySessionId(final String sessionId) {
 		final ViewResult result = db.queryView(createQuery("by_sessionid_read")
 				.startKey(ComplexKey.of(sessionId))
 				.endKey(ComplexKey.of(sessionId, ComplexKey.emptyObject()))
+				.reduce(true)
 				.group(true));
-		return getInterposedReadingCount(result);
+		return calculateReadingCount(result);
 	}
 
 	@Override
-	public CommentReadingCount getInterposedReadingCount(final String sessionId, final User user) {
+	public CommentReadingCount countReadingBySessionIdAndUser(final String sessionId, final User user) {
 		final ViewResult result = db.queryView(createQuery("by_sessionid_creator_read")
 				.startKey(ComplexKey.of(sessionId, user.getUsername()))
 				.endKey(ComplexKey.of(sessionId, user.getUsername(), ComplexKey.emptyObject()))
+				.reduce(true)
 				.group(true));
-		return getInterposedReadingCount(result);
+		return calculateReadingCount(result);
 	}
 
-	private CommentReadingCount getInterposedReadingCount(final ViewResult viewResult) {
+	private CommentReadingCount calculateReadingCount(final ViewResult viewResult) {
 		if (viewResult.isEmpty()) {
 			return new CommentReadingCount();
 		}
@@ -110,7 +114,7 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	}
 
 	@Override
-	public List<Comment> getInterposedQuestions(final String sessionId, final int start, final int limit) {
+	public List<Comment> findBySessionId(final String sessionId, final int start, final int limit) {
 		final int qSkip = start > 0 ? start : -1;
 		final int qLimit = limit > 0 ? limit : -1;
 
@@ -130,7 +134,7 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	}
 
 	@Override
-	public List<Comment> getInterposedQuestions(final String sessionId, final User user, final int start, final int limit) {
+	public List<Comment> findBySessionIdAndUser(final String sessionId, final User user, final int start, final int limit) {
 		final int qSkip = start > 0 ? start : -1;
 		final int qLimit = limit > 0 ? limit : -1;
 
@@ -149,21 +153,9 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 		return comments;
 	}
 
+	/* TODO: Move to service layer. */
 	@Override
-	public Comment getInterposedQuestion(final String commentId) {
-		try {
-			final Comment comment = get(commentId);
-			/* TODO: Refactor code so the next line can be removed */
-			//comment.setSessionId(sessionRepository.getSessionFromKeyword(comment.getSessionId()).getId());
-			return comment;
-		} catch (final DocumentNotFoundException e) {
-			logger.error("Could not load comment {}.", commentId, e);
-		}
-		return null;
-	}
-
-	@Override
-	public Comment saveQuestion(final String sessionId, final Comment comment, final User user) {
+	public Comment save(final String sessionId, final Comment comment, final User user) {
 		/* TODO: This should be done on the service level. */
 		comment.setSessionId(sessionId);
 		comment.setCreator(user.getUsername());
@@ -182,6 +174,7 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 		return null;
 	}
 
+	/* TODO: Move to service layer. */
 	@Override
 	public void markInterposedQuestionAsRead(final Comment comment) {
 		try {
@@ -193,7 +186,7 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	}
 
 	@Override
-	public void deleteInterposedQuestion(final Comment comment) {
+	public void delete(final Comment comment) {
 		try {
 			db.delete(comment.getId(), comment.getRevision());
 			dbLogger.log("delete", "type", "comment");
@@ -203,22 +196,22 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	}
 
 	@Override
-	public int deleteAllInterposedQuestions(final String sessionId) {
+	public int deleteBySessionId(final String sessionId) {
 		final ViewResult result = db.queryView(createQuery("by_sessionid").key(sessionId));
 
-		return deleteAllInterposedQuestions(sessionId, result);
+		return delete(result);
 	}
 
 	@Override
-	public int deleteAllInterposedQuestions(final String sessionId, final User user) {
+	public int deleteBySessionIdAndUser(final String sessionId, final User user) {
 		final ViewResult result = db.queryView(createQuery("by_sessionid_creator_read")
 				.startKey(ComplexKey.of(sessionId, user.getUsername()))
 				.endKey(ComplexKey.of(sessionId, user.getUsername(), ComplexKey.emptyObject())));
 
-		return deleteAllInterposedQuestions(sessionId, result);
+		return delete(result);
 	}
 
-	private int deleteAllInterposedQuestions(final String sessionId, final ViewResult comments) {
+	private int delete(final ViewResult comments) {
 		if (comments.isEmpty()) {
 			return 0;
 		}
@@ -227,7 +220,7 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 			try {
 				db.delete(row.getId(), row.getValueAsNode().get("rev").asText());
 			} catch (final UpdateConflictException e) {
-				logger.error("Could not delete all comments {}.", sessionId, e);
+				logger.error("Could not delete comments.", e);
 			}
 		}
 

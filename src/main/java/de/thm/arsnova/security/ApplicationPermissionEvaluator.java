@@ -112,9 +112,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Object permission
 			) {
 		if (permission instanceof String && ("owner".equals(permission) || "write".equals(permission))) {
-			return sessionRepository.getSessionFromKeyword(targetId.toString()).getCreator().equals(username);
+			return sessionRepository.findByKeyword(targetId.toString()).getCreator().equals(username);
 		} else if (permission instanceof String && "read".equals(permission)) {
-			return sessionRepository.getSessionFromKeyword(targetId.toString()).isActive();
+			return sessionRepository.findByKeyword(targetId.toString()).isActive();
 		}
 		return false;
 	}
@@ -125,9 +125,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Object permission
 			) {
 		if (permission instanceof String && "owner".equals(permission)) {
-			final Content content = contentRepository.getQuestion(targetId.toString());
+			final Content content = contentRepository.findOne(targetId.toString());
 			if (content != null) {
-				final Session session = sessionRepository.getSessionFromId(content.getSessionId());
+				final Session session = sessionRepository.findOne(content.getSessionId());
 
 				return session != null && session.getCreator().equals(username);
 			}
@@ -141,14 +141,14 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Object permission
 			) {
 		if (permission instanceof String && "owner".equals(permission)) {
-			final Comment comment = commentRepository.getInterposedQuestion(targetId.toString());
+			final Comment comment = commentRepository.findOne(targetId.toString());
 			if (comment != null) {
 				// Does the creator want to delete his own comment?
 				if (comment.getCreator() != null && comment.getCreator().equals(username)) {
 					return true;
 				}
 				// Allow deletion if requested by session owner
-				final Session session = sessionRepository.getSessionFromKeyword(comment.getSessionId());
+				final Session session = sessionRepository.findByKeyword(comment.getSessionId());
 
 				return session != null && session.getCreator().equals(username);
 			}

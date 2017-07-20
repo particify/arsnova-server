@@ -102,7 +102,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 
 	@Override
 	public void cleanFeedbackVotesInSession(final String keyword, final int cleanupFeedbackDelayInMins) {
-		final Session session = sessionRepository.getSessionFromKeyword(keyword);
+		final Session session = sessionRepository.findByKeyword(keyword);
 		List<User> affectedUsers = feedbackStorage.cleanFeedbackVotesInSession(session, cleanupFeedbackDelayInMins);
 		Set<Session> sessionSet = new HashSet<>();
 		sessionSet.add(session);
@@ -117,7 +117,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 
 	@Override
 	public Feedback getFeedback(final String keyword) {
-		final Session session = sessionRepository.getSessionFromKeyword(keyword);
+		final Session session = sessionRepository.findByKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();
 		}
@@ -134,7 +134,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 
 	@Override
 	public double getAverageFeedback(final String sessionkey) {
-		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
+		final Session session = sessionRepository.findByKeyword(sessionkey);
 		if (session == null) {
 			throw new NotFoundException();
 		}
@@ -158,7 +158,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 
 	@Override
 	public boolean saveFeedback(final String keyword, final int value, final User user) {
-		final Session session = sessionRepository.getSessionFromKeyword(keyword);
+		final Session session = sessionRepository.findByKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();
 		}
@@ -170,7 +170,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 
 	@Override
 	public Integer getMyFeedback(final String keyword, final User user) {
-		final Session session = sessionRepository.getSessionFromKeyword(keyword);
+		final Session session = sessionRepository.findByKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();
 		}

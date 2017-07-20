@@ -89,7 +89,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 
 	@CacheEvict("answers")
 	@Override
-	public int deleteAnswers(final String contentId) {
+	public int deleteByContentId(final String contentId) {
 		try {
 			final ViewResult result = db.queryView(createQuery("by_questionid")
 					.key(contentId));
@@ -119,20 +119,20 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	}
 
 	@Override
-	public Answer getMyAnswer(final User me, final String contentId, final int piRound) {
+	public Answer findByQuestionIdUserPiRound(final String contentId, final User user, final int piRound) {
 		final List<Answer> answerList = queryView("by_questionid_user_piround",
-				ComplexKey.of(contentId, me.getUsername(), piRound));
+				ComplexKey.of(contentId, user.getUsername(), piRound));
 		return answerList.isEmpty() ? null : answerList.get(0);
 	}
 
 	@Override
-	public List<Answer> getAnswers(final String contentId, final int piRound) {
+	public List<Answer> findByContentIdPiRound(final String contentId, final int piRound) {
 		final String questionId = contentId;
 		final ViewResult result = db.queryView(createQuery("by_questionid_piround_text_subject")
 						.group(true)
 						.startKey(ComplexKey.of(questionId, piRound))
 						.endKey(ComplexKey.of(questionId, piRound, ComplexKey.emptyObject())));
-		final int abstentionCount = getAbstentionAnswerCount(questionId);
+		final int abstentionCount = countByContentId(questionId);
 
 		final List<Answer> answers = new ArrayList<>();
 		for (final ViewResult.Row d : result) {
@@ -150,12 +150,12 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	}
 
 	@Override
-	public List<Answer> getAllAnswers(final String contentId) {
+	public List<Answer> findByContentId(final String contentId) {
 		final ViewResult result = db.queryView(createQuery("by_questionid_piround_text_subject")
 				.group(true)
 				.startKey(ComplexKey.of(contentId))
 				.endKey(ComplexKey.of(contentId, ComplexKey.emptyObject())));
-		final int abstentionCount = getAbstentionAnswerCount(contentId);
+		final int abstentionCount = countByContentId(contentId);
 
 		final List<Answer> answers = new ArrayList<>();
 		for (final ViewResult.Row d : result.getRows()) {
@@ -176,9 +176,9 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	}
 
 	@Override
-	public int getAbstentionAnswerCount(final String contentId) {
+	public int countByContentId(final String contentId) {
 		final ViewResult result = db.queryView(createQuery("by_questionid_piround_text_subject")
-				//.group(true)
+				.reduce(true)
 				.startKey(ComplexKey.of(contentId))
 				.endKey(ComplexKey.of(contentId, ComplexKey.emptyObject())));
 
@@ -186,9 +186,9 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	}
 
 	@Override
-	public int getAnswerCount(final String contentId, final int round) {
+	public int countByContentIdRound(final String contentId, final int round) {
 		final ViewResult result = db.queryView(createQuery("by_questionid_piround_text_subject")
-				//.group(true)
+				.reduce(true)
 				.startKey(ComplexKey.of(contentId, round))
 				.endKey(ComplexKey.of(contentId, round, ComplexKey.emptyObject())));
 
@@ -196,17 +196,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	}
 
 	@Override
-	public int getTotalAnswerCountByQuestion(final String contentId) {
-		final ViewResult result = db.queryView(createQuery("by_questionid_piround_text_subject")
-				//.group(true)
-				.startKey(ComplexKey.of(contentId))
-				.endKey(ComplexKey.of(contentId, ComplexKey.emptyObject())));
-
-		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
-	}
-
-	@Override
-	public List<Answer> getFreetextAnswers(final String contentId, final int start, final int limit) {
+	public List<Answer> findByContentId(final String contentId, final int start, final int limit) {
 		final int qSkip = start > 0 ? start : -1;
 		final int qLimit = limit > 0 ? limit : -1;
 
@@ -223,13 +213,13 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	}
 
 	@Override
-	public List<Answer> getMyAnswers(final User user, final String sessionId) {
+	public List<Answer> findByUserSessionId(final User user, final String sessionId) {
 		return queryView("by_user_sessionid", ComplexKey.of(user.getUsername(), sessionId));
 	}
 
 	@Override
-	public int getTotalAnswerCount(final String sessionKey) {
-		final Session s = sessionRepository.getSessionFromKeyword(sessionKey);
+	public int countBySessionKey(final String sessionKey) {
+		final Session s = sessionRepository.findByKeyword(sessionKey);
 		if (s == null) {
 			throw new NotFoundException();
 		}
@@ -240,7 +230,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 
 	@CacheEvict(value = "answers", key = "#content")
 	@Override
-	public Answer saveAnswer(final Answer answer, final User user, final Content content, final Session session) {
+	public Answer create(final Answer answer, final User user, final Content content, final Session session) {
 		db.create(answer);
 		this.answerQueue.offer(new AnswerQueueElement(session, content, answer, user));
 
@@ -249,42 +239,40 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 
 	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@CacheEvict(value = "answers", allEntries = true)
-	@Override
-	public Answer updateAnswer(final Answer answer) {
+	public void update(final Answer answer) {
 		try {
-			update(answer);
-			return answer;
+			super.update(answer);
 		} catch (final UpdateConflictException e) {
 			logger.error("Could not update answer {}.", answer, e);
+			throw e;
 		}
-
-		return null;
 	}
 
 	/* TODO: Only evict cache entry for the answer's session. This requires some refactoring. */
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
-	public void deleteAnswer(final String answerId) {
+	public void delete(final String answerId) {
 		try {
 			/* TODO: use id and rev instead of loading the answer */
 			db.delete(get(answerId));
 			dbLogger.log("delete", "type", "answer");
 		} catch (final DbAccessException e) {
 			logger.error("Could not delete answer {}.", answerId, e);
+			throw e;
 		}
 	}
 
 	@Override
-	public int countLectureQuestionAnswers(final String sessionId) {
-		return countQuestionVariantAnswers(sessionId, "lecture");
+	public int countBySessionIdLectureVariant(final String sessionId) {
+		return countBySessionIdVariant(sessionId, "lecture");
 	}
 
 	@Override
-	public int countPreparationQuestionAnswers(final String sessionId) {
-		return countQuestionVariantAnswers(sessionId, "preparation");
+	public int countBySessionIdPreparationVariant(final String sessionId) {
+		return countBySessionIdVariant(sessionId, "preparation");
 	}
 
-	private int countQuestionVariantAnswers(final String sessionId, final String variant) {
+	private int countBySessionIdVariant(final String sessionId, final String variant) {
 		final ViewResult result = db.queryView(createQuery("by_sessionid_variant")
 				.key(ComplexKey.of(sessionId, variant)));
 
@@ -295,7 +283,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public int deleteAllQuestionsAnswers(final String sessionId) {
-		final List<Content> contents = contentRepository.getQuestions(sessionId);
+		final List<Content> contents = contentRepository.findBySessionIdAndVariantAndActive(sessionId);
 		contentRepository.resetQuestionsRoundState(sessionId, contents);
 		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
 
@@ -306,7 +294,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public int deleteAllPreparationAnswers(final String sessionId) {
-		final List<Content> contents = contentRepository.getQuestions(sessionId, "preparation");
+		final List<Content> contents = contentRepository.findBySessionIdAndVariantAndActive(sessionId, "preparation");
 		contentRepository.resetQuestionsRoundState(sessionId, contents);
 		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
 
@@ -317,7 +305,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	@CacheEvict(value = "answers", allEntries = true)
 	@Override
 	public int deleteAllLectureAnswers(final String sessionId) {
-		final List<Content> contents = contentRepository.getQuestions(sessionId, "lecture");
+		final List<Content> contents = contentRepository.findBySessionIdAndVariantAndActive(sessionId, "lecture");
 		contentRepository.resetQuestionsRoundState(sessionId, contents);
 		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
 

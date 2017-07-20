@@ -10,7 +10,6 @@ import org.ektorp.CouchDbConnector;
 import org.ektorp.DbAccessException;
 import org.ektorp.DocumentNotFoundException;
 import org.ektorp.UpdateConflictException;
-import org.ektorp.ViewQuery;
 import org.ektorp.ViewResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,11 +42,11 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	@Cacheable("skillquestions")
 	@Override
-	public List<Content> getSkillQuestionsForUsers(final String sessionId) {
+	public List<Content> findBySessionIdForUsers(final String sessionId) {
 		final List<Content> contents = new ArrayList<>();
-		final List<Content> questions1 = getQuestions(sessionId, "lecture", true);
-		final List<Content> questions2 = getQuestions(sessionId, "preparation", true);
-		final List<Content> questions3 = getQuestions(sessionId, "flashcard", true);
+		final List<Content> questions1 = findBySessionIdAndVariantAndActive(sessionId, "lecture", true);
+		final List<Content> questions2 = findBySessionIdAndVariantAndActive(sessionId, "preparation", true);
+		final List<Content> questions3 = findBySessionIdAndVariantAndActive(sessionId, "flashcard", true);
 		contents.addAll(questions1);
 		contents.addAll(questions2);
 		contents.addAll(questions3);
@@ -57,12 +56,12 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	@Cacheable("skillquestions")
 	@Override
-	public List<Content> getSkillQuestionsForTeachers(final String sessionId) {
-		return getQuestions(new Object[] {sessionId}, sessionId);
+	public List<Content> findBySessionIdForSpeaker(final String sessionId) {
+		return findBySessionIdAndVariantAndActive(new Object[] {sessionId}, sessionId);
 	}
 
 	@Override
-	public int getSkillQuestionCount(final String sessionId) {
+	public int countBySessionId(final String sessionId) {
 		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
 				.startKey(ComplexKey.of(sessionId))
 				.endKey(ComplexKey.of(sessionId, ComplexKey.emptyObject())));
@@ -70,13 +69,14 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		return result.getSize();
 	}
 
+	/* TODO: Move to service layer. */
 	@Caching(evict = {@CacheEvict(value = "skillquestions", key = "#sessionId"),
 			@CacheEvict(value = "lecturequestions", key = "#sessionId", condition = "#content.getQuestionVariant().equals('lecture')"),
 			@CacheEvict(value = "preparationquestions", key = "#sessionId", condition = "#content.getQuestionVariant().equals('preparation')"),
 			@CacheEvict(value = "flashcardquestions", key = "#sessionId", condition = "#content.getQuestionVariant().equals('flashcard')") },
 			put = {@CachePut(value = "questions", key = "#content.id")})
 	@Override
-	public Content saveQuestion(final String sessionId, final Content content) {
+	public Content save(final String sessionId, final Content content) {
 		/* TODO: This should be done on the service level. */
 		content.setSessionId(sessionId);
 		try {
@@ -90,6 +90,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		return null;
 	}
 
+	/* TODO: Move to service layer. */
 	/* TODO: Only evict cache entry for the content's session. This requires some refactoring. */
 	@Caching(evict = {@CacheEvict(value = "skillquestions", allEntries = true),
 			@CacheEvict(value = "lecturequestions", allEntries = true, condition = "#content.getQuestionVariant().equals('lecture')"),
@@ -97,7 +98,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 			@CacheEvict(value = "flashcardquestions", allEntries = true, condition = "#content.getQuestionVariant().equals('flashcard')") },
 			put = {@CachePut(value = "questions", key = "#content.id")})
 	@Override
-	public Content updateQuestion(final Content content) {
+	public void update(final Content content) {
 		try {
 			/* TODO: This should be done on the service level. Make sure that
 			 * sessionId is valid before so the content does not need to be retrieved. */
@@ -106,18 +107,15 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 			content.setRevision(oldContent.getRevision());
 			content.updateRoundManagementState();
 			update(content);
-
-			return content;
 		} catch (final UpdateConflictException e) {
 			logger.error("Could not update content {}.", content, e);
 		}
-
-		return null;
 	}
 
+	/* TODO: Move to service layer. */
 	@Cacheable("questions")
 	@Override
-	public Content getQuestion(final String id) {
+	public Content findOne(final String id) {
 		try {
 			final Content content = get(id);
 			content.updateRoundManagementState();
@@ -132,10 +130,11 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public List<String> getQuestionIds(final String sessionId, final User user) {
+	public List<String> findIdsBySessionId(final String sessionId) {
 		return collectQuestionIds(db.queryView(createQuery("by_sessionid_variant_active").key(sessionId)));
 	}
 
+	/* TODO: Move to service layer. */
 	/* TODO: Only evict cache entry for the content's session. This requires some refactoring. */
 	@Caching(evict = { @CacheEvict(value = "questions", key = "#content.id"),
 			@CacheEvict(value = "skillquestions", allEntries = true),
@@ -145,7 +144,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	@Override
 	public int deleteQuestionWithAnswers(final String contentId) {
 		try {
-			final int count = answerRepository.deleteAnswers(contentId);
+			final int count = answerRepository.deleteByContentId(contentId);
 			db.delete(contentId);
 			dbLogger.log("delete", "type", "content", "answerCount", count);
 
@@ -157,6 +156,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		return 0;
 	}
 
+	/* TODO: Move to service layer. */
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
 			@CacheEvict(value = "skillquestions", key = "#sessionId"),
 			@CacheEvict(value = "lecturequestions", key = "#sessionId"),
@@ -172,6 +172,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		return deleteAllQuestionDocumentsWithAnswers(result);
 	}
 
+	/* TODO: Move to service layer. */
 	private int[] deleteAllQuestionDocumentsWithAnswers(final ViewResult viewResult) {
 		List<Content> contents = new ArrayList<>();
 		for (final ViewResult.Row row : viewResult.getRows()) {
@@ -189,7 +190,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public List<String> getUnAnsweredQuestionIds(final String sessionId, final User user) {
+	public List<String> findUnansweredIdsBySessionIdAndUser(final String sessionId, final User user) {
 		final ViewResult result = db.queryView(createQuery("questionid_by_user_sessionid_variant")
 				.designDocId("_design/Answer")
 				.startKey(ComplexKey.of(user.getUsername(), sessionId))
@@ -198,11 +199,11 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		for (final ViewResult.Row row : result.getRows()) {
 			answeredIds.add(row.getId());
 		}
-		return collectUnansweredQuestionIds(getQuestionIds(sessionId, user), answeredIds);
+		return collectUnansweredQuestionIds(findIdsBySessionId(sessionId), answeredIds);
 	}
 
 	@Override
-	public List<String> getUnAnsweredLectureQuestionIds(final String sessionId, final User user) {
+	public List<String> findUnansweredIdsBySessionIdAndUserOnlyLectureVariant(final String sessionId, final User user) {
 		final ViewResult result = db.queryView(createQuery("questionid_piround_by_user_sessionid_variant")
 				.designDocId("_design/Answer")
 				.key(ComplexKey.of(user.getUsername(), sessionId, "lecture")));
@@ -211,11 +212,11 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 			answeredQuestions.put(row.getId(), row.getKeyAsNode().get(2).asInt());
 		}
 
-		return collectUnansweredQuestionIdsByPiRound(getLectureQuestionsForUsers(sessionId), answeredQuestions);
+		return collectUnansweredQuestionIdsByPiRound(findBySessionIdOnlyLectureVariantAndActive(sessionId), answeredQuestions);
 	}
 
 	@Override
-	public List<String> getUnAnsweredPreparationQuestionIds(final String sessionId, final User user) {
+	public List<String> findUnansweredIdsBySessionIdAndUserOnlyPreparationVariant(final String sessionId, final User user) {
 		final ViewResult result = db.queryView(createQuery("questionid_piround_by_user_sessionid_variant")
 				.designDocId("_design/Answer")
 				.key(ComplexKey.of(user.getUsername(), sessionId, "preparation")));
@@ -224,49 +225,49 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 			answeredQuestions.put(row.getId(), row.getKeyAsNode().get(2).asInt());
 		}
 
-		return collectUnansweredQuestionIdsByPiRound(getPreparationQuestionsForUsers(sessionId), answeredQuestions);
+		return collectUnansweredQuestionIdsByPiRound(findBySessionIdOnlyPreparationVariantAndActive(sessionId), answeredQuestions);
 	}
 
 	@Cacheable("lecturequestions")
 	@Override
-	public List<Content> getLectureQuestionsForUsers(final String sessionId) {
-		return getQuestions(sessionId, "lecture", true);
+	public List<Content> findBySessionIdOnlyLectureVariantAndActive(final String sessionId) {
+		return findBySessionIdAndVariantAndActive(sessionId, "lecture", true);
 	}
 
 	@Override
-	public List<Content> getLectureQuestionsForTeachers(final String sessionId) {
-		return getQuestions(sessionId, "lecture");
+	public List<Content> findBySessionIdOnlyLectureVariant(final String sessionId) {
+		return findBySessionIdAndVariantAndActive(sessionId, "lecture");
 	}
 
 	@Cacheable("flashcardquestions")
 	@Override
-	public List<Content> getFlashcardsForUsers(final String sessionId) {
-		return getQuestions(sessionId, "flashcard", true);
+	public List<Content> findBySessionIdOnlyFlashcardVariantAndActive(final String sessionId) {
+		return findBySessionIdAndVariantAndActive(sessionId, "flashcard", true);
 	}
 
 	@Override
-	public List<Content> getFlashcardsForTeachers(final String sessionId) {
-		return getQuestions(sessionId, "flashcard");
+	public List<Content> findBySessionIdOnlyFlashcardVariant(final String sessionId) {
+		return findBySessionIdAndVariantAndActive(sessionId, "flashcard");
 	}
 
 	@Cacheable("preparationquestions")
 	@Override
-	public List<Content> getPreparationQuestionsForUsers(final String sessionId) {
-		return getQuestions(sessionId, "preparation", true);
+	public List<Content> findBySessionIdOnlyPreparationVariantAndActive(final String sessionId) {
+		return findBySessionIdAndVariantAndActive(sessionId, "preparation", true);
 	}
 
 	@Override
-	public List<Content> getPreparationQuestionsForTeachers(final String sessionId) {
-		return getQuestions(sessionId, "preparation");
+	public List<Content> findBySessionIdOnlyPreparationVariant(final String sessionId) {
+		return findBySessionIdAndVariantAndActive(sessionId, "preparation");
 	}
 
 	@Override
-	public List<Content> getAllSkillQuestions(final String sessionId) {
-		return getQuestions(sessionId);
+	public List<Content> findBySessionId(final String sessionId) {
+		return findBySessionIdAndVariantAndActive(sessionId);
 	}
 
 	@Override
-	public List<Content> getQuestions(final Object... keys) {
+	public List<Content> findBySessionIdAndVariantAndActive(final Object... keys) {
 		final Object[] endKeys = Arrays.copyOf(keys, keys.length + 1);
 		endKeys[keys.length] = ComplexKey.emptyObject();
 		final List<Content> contents = db.queryView(createQuery("by_sessionid_variant_active")
@@ -284,7 +285,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public int getLectureQuestionCount(final String sessionId) {
+	public int countLectureVariantBySessionId(final String sessionId) {
 		/* TODO: reduce code duplication */
 		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
 				.startKey(ComplexKey.of(sessionId, "lecture"))
@@ -294,7 +295,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public int getFlashcardCount(final String sessionId) {
+	public int countFlashcardVariantBySessionId(final String sessionId) {
 		/* TODO: reduce code duplication */
 		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
 				.startKey(ComplexKey.of(sessionId, "flashcard"))
@@ -304,7 +305,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public int getPreparationQuestionCount(final String sessionId) {
+	public int countPreparationVariantBySessionId(final String sessionId) {
 		/* TODO: reduce code duplication */
 		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
 				.startKey(ComplexKey.of(sessionId, "preparation"))
@@ -313,6 +314,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
 	}
 
+	/* TODO: Move to service layer. */
 	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
 			@CacheEvict("skillquestions"),
@@ -328,6 +330,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		return deleteAllQuestionDocumentsWithAnswers(result);
 	}
 
+	/* TODO: Move to service layer. */
 	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
 			@CacheEvict("skillquestions"),
@@ -343,6 +346,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		return deleteAllQuestionDocumentsWithAnswers(result);
 	}
 
+	/* TODO: Move to service layer. */
 	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
 			@CacheEvict("skillquestions"),
@@ -395,6 +399,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		return ids;
 	}
 
+	/* TODO: Move to service layer. */
 	@Override
 	public List<Content> publishAllQuestions(final String sessionId, final boolean publish) {
 		final List<Content> contents = db.queryView(createQuery("by_sessionid_variant_active")
@@ -407,6 +412,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		return contents;
 	}
 
+	/* TODO: Move to service layer. */
 	@Caching(evict = { @CacheEvict(value = "contents", allEntries = true),
 			@CacheEvict(value = "skillquestions", key = "#sessionId"),
 			@CacheEvict(value = "lecturequestions", key = "#sessionId"),
@@ -424,6 +430,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		}
 	}
 
+	/* TODO: Move to service layer. */
 	@Override
 	public List<Content> setVotingAdmissionForAllQuestions(final String sessionId, final boolean disableVoting) {
 		final List<Content> contents = db.queryView(createQuery("by_sessionid_variant_active")
@@ -459,7 +466,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	/* TODO: remove if this method is no longer used */
 	@Override
-	public List<String> getQuestionIdsBySubject(final String sessionId, final String questionVariant, final String subject) {
+	public List<String> findIdsBySessionIdAndVariantAndSubject(final String sessionId, final String questionVariant, final String subject) {
 		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
 				.startKey(ComplexKey.of(sessionId, questionVariant, 1, subject))
 				.endKey(ComplexKey.of(sessionId, questionVariant, 1, subject, ComplexKey.emptyObject())));
@@ -475,12 +482,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public List<Content> getQuestionsByIds(final List<String> ids) {
-		return db.queryView(new ViewQuery().allDocs().keys(ids).includeDocs(true), Content.class);
-	}
-
-	@Override
-	public List<String> getSubjects(final String sessionId, final String questionVariant) {
+	public List<String> findSubjectsBySessionIdAndVariant(final String sessionId, final String questionVariant) {
 		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
 				.startKey(ComplexKey.of(sessionId, questionVariant))
 				.endKey(ComplexKey.of(sessionId, questionVariant, ComplexKey.emptyObject())));
@@ -494,6 +496,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		return new ArrayList<>(uniqueSubjects);
 	}
 
+	/* TODO: Move to service layer. */
 	@Caching(evict = { @CacheEvict(value = "contents", allEntries = true),
 			@CacheEvict(value = "skillquestions", key = "#sessionId"),
 			@CacheEvict(value = "lecturequestions", key = "#sessionId"),

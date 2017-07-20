@@ -53,31 +53,31 @@ public class MotdServiceImpl implements MotdService {
   @Override
   @PreAuthorize("isAuthenticated()")
   public Motd getMotd(final String key) {
-    return motdRepository.getMotdByKey(key);
+    return motdRepository.findByKey(key);
   }
 
   @Override
   @PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
   public List<Motd> getAdminMotds() {
-    return motdRepository.getAdminMotds();
+    return motdRepository.findGlobalForAdmin();
   }
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public List<Motd> getAllSessionMotds(final String sessionkey) {
-		return motdRepository.getMotdsForSession(sessionkey);
+		return motdRepository.findBySessionKey(sessionkey);
 	}
 
 	@Override
 	public List<Motd> getCurrentMotds(final Date clientdate, final String audience, final String sessionkey) {
 		final List<Motd> motds;
 		switch (audience) {
-			case "all": motds = motdRepository.getMotdsForAll(); break;
-			case "loggedIn": motds = motdRepository.getMotdsForLoggedIn(); break;
-			case "students": motds = motdRepository.getMotdsForStudents(); break;
-			case "tutors": motds = motdRepository.getMotdsForTutors(); break;
-			case "session": motds = motdRepository.getMotdsForSession(sessionkey); break;
-			default: motds = motdRepository.getMotdsForAll(); break;
+			case "all": motds = motdRepository.findGlobalForAll(); break;
+			case "loggedIn": motds = motdRepository.findGlobalForLoggedIn(); break;
+			case "students": motds = motdRepository.findForStudents(); break;
+			case "tutors": motds = motdRepository.findGlobalForTutors(); break;
+			case "session": motds = motdRepository.findBySessionKey(sessionkey); break;
+			default: motds = motdRepository.findGlobalForAll(); break;
 		}
 		return filterMotdsByDate(motds, clientdate);
 	}
@@ -143,26 +143,26 @@ public class MotdServiceImpl implements MotdService {
 
 	private Motd createOrUpdateMotd(final Motd motd) {
 		if (motd.getMotdkey() != null) {
-			Motd oldMotd = motdRepository.getMotdByKey(motd.getMotdkey());
+			Motd oldMotd = motdRepository.findByKey(motd.getMotdkey());
 			if (!(motd.getId().equals(oldMotd.getId()) && motd.getSessionkey().equals(oldMotd.getSessionkey())
 					&& motd.getAudience().equals(oldMotd.getAudience()))) {
 				throw new BadRequestException();
 			}
 		}
 
-		return motdRepository.createOrUpdateMotd(motd);
+		return motdRepository.save(motd);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
 	public void deleteMotd(Motd motd) {
-		motdRepository.deleteMotd(motd);
+		motdRepository.delete(motd);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public void deleteSessionMotd(final String sessionkey, Motd motd) {
-		motdRepository.deleteMotd(motd);
+		motdRepository.delete(motd);
 	}
 
 	@Override
@@ -170,7 +170,7 @@ public class MotdServiceImpl implements MotdService {
 	public MotdList getMotdListForUser(final String username) {
 		final User user = userService.getCurrentUser();
 		if (username.equals(user.getUsername()) && !"guest".equals(user.getType())) {
-			return motdListRepository.getMotdListForUser(username);
+			return motdListRepository.findByUsername(username);
 		}
 		return null;
 	}
@@ -180,7 +180,7 @@ public class MotdServiceImpl implements MotdService {
 	public MotdList saveUserMotdList(MotdList motdList) {
 		final User user = userService.getCurrentUser();
 		if (user.getUsername().equals(motdList.getUsername())) {
-			return motdListRepository.createOrUpdateMotdList(motdList);
+			return motdListRepository.save(motdList);
 		}
 		return null;
 	}
@@ -190,7 +190,7 @@ public class MotdServiceImpl implements MotdService {
 	public MotdList updateUserMotdList(MotdList motdList) {
 		final User user = userService.getCurrentUser();
 		if (user.getUsername().equals(motdList.getUsername())) {
-			return motdListRepository.createOrUpdateMotdList(motdList);
+			return motdListRepository.save(motdList);
 		}
 		return null;
 	}

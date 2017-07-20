@@ -28,10 +28,10 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface SessionRepository extends CrudRepository<Session, String> {
-	Session getSessionFromId(String sessionId);
-	Session getSessionFromKeyword(String keyword);
-	Session saveSession(User user, Session session);
-	Session updateSession(Session session);
+	Session findOne(String sessionId);
+	Session findByKeyword(String keyword);
+	Session save(User user, Session session);
+	void update(Session session);
 
 	/**
 	 * Deletes a session and related data.
@@ -42,18 +42,18 @@ public interface SessionRepository extends CrudRepository<Session, String> {
 
 	Session changeSessionCreator(Session session, String newCreator);
 	int[] deleteInactiveGuestSessions(long lastActivityBefore);
-	List<Session> getMySessions(User user, int start, int limit);
-	List<Session> getSessionsForUsername(String username, int start, int limit);
-	List<Session> getPublicPoolSessions();
-	List<Session> getMyPublicPoolSessions(User user);
+	List<Session> findByUser(User user, int start, int limit);
+	List<Session> findByUsername(String username, int start, int limit);
+	List<Session> findAllForPublicPool();
+	List<Session> findForPublicPoolByUser(User user);
 	boolean sessionKeyAvailable(String keyword);
 	Session updateSessionOwnerActivity(Session session);
-	List<Session> getVisitedSessionsForUsername(String username, int start, int limit);
+	List<Session> findVisitedByUsername(String username, int start, int limit);
 	List<SessionInfo> getMySessionsInfo(User user, int start, int limit);
-	List<SessionInfo> getPublicPoolSessionsInfo();
-	List<SessionInfo> getMyPublicPoolSessionsInfo(User user);
-	List<SessionInfo> getMyVisitedSessionsInfo(User currentUser, int start, int limit);
-	List<Session> getCourseSessions(List<Course> courses);
+	List<SessionInfo> findInfosForPublicPool();
+	List<SessionInfo> findInfosForPublicPoolByUser(User user);
+	List<SessionInfo> findInfoForVisitedByUser(User currentUser, int start, int limit);
+	List<Session> findSessionsByCourses(List<Course> courses);
 	SessionInfo importSession(User user, ImportExportSession importSession);
 	ImportExportSession exportSession(String sessionkey, Boolean withAnswer, Boolean withFeedbackQuestions);
 	LoggedIn registerAsOnlineUser(User user, Session session);

@@ -156,7 +156,7 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 	public Session joinSession(final String keyword, final UUID socketId) {
 		/* Socket.IO solution */
 
-		Session session = null != keyword ? sessionRepository.getSessionFromKeyword(keyword) : null;
+		Session session = null != keyword ? sessionRepository.findByKeyword(keyword) : null;
 
 		if (null == session) {
 			userService.removeUserFromSessionBySocketId(socketId);
@@ -190,7 +190,7 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public Session getSessionForAdmin(final String keyword) {
-		return sessionRepository.getSessionFromKeyword(keyword);
+		return sessionRepository.findByKeyword(keyword);
 	}
 
 	/*
@@ -199,7 +199,7 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 	 */
 	@Override
 	public Session getSessionInternal(final String keyword, final User user) {
-		final Session session = sessionRepository.getSessionFromKeyword(keyword);
+		final Session session = sessionRepository.findByKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();
 		}
@@ -222,25 +222,25 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public List<Session> getUserSessions(String username) {
-		return sessionRepository.getSessionsForUsername(username, 0, 0);
+		return sessionRepository.findByUsername(username, 0, 0);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Session> getMySessions(final int offset, final int limit) {
-		return sessionRepository.getMySessions(userService.getCurrentUser(), offset, limit);
+		return sessionRepository.findByUser(userService.getCurrentUser(), offset, limit);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<SessionInfo> getPublicPoolSessionsInfo() {
-		return sessionRepository.getPublicPoolSessionsInfo();
+		return sessionRepository.findInfosForPublicPool();
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<SessionInfo> getMyPublicPoolSessionsInfo() {
-		return sessionRepository.getMyPublicPoolSessionsInfo(userService.getCurrentUser());
+		return sessionRepository.findInfosForPublicPoolByUser(userService.getCurrentUser());
 	}
 
 	@Override
@@ -253,19 +253,19 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Session> getMyVisitedSessions(final int offset, final int limit) {
-		return sessionRepository.getVisitedSessionsForUsername(userService.getCurrentUser().getUsername(), offset, limit);
+		return sessionRepository.findVisitedByUsername(userService.getCurrentUser().getUsername(), offset, limit);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(1, 'motd', 'admin')")
 	public List<Session> getUserVisitedSessions(String username) {
-		return sessionRepository.getVisitedSessionsForUsername(username, 0, 0);
+		return sessionRepository.findVisitedByUsername(username, 0, 0);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<SessionInfo> getMyVisitedSessionsInfo(final int offset, final int limit) {
-		return sessionRepository.getMyVisitedSessionsInfo(userService.getCurrentUser(), offset, limit);
+		return sessionRepository.findInfoForVisitedByUser(userService.getCurrentUser(), offset, limit);
 	}
 
 	@Override
@@ -294,7 +294,7 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 		sf.setPi(true);
 		session.setFeatures(sf);
 
-		final Session result = sessionRepository.saveSession(userService.getCurrentUser(), session);
+		final Session result = sessionRepository.save(userService.getCurrentUser(), session);
 		this.publisher.publishEvent(new NewSessionEvent(this, result));
 		return result;
 	}
@@ -319,7 +319,7 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 
 	@Override
 	public int countSessions(final List<Course> courses) {
-		final List<Session> sessions = sessionRepository.getCourseSessions(courses);
+		final List<Session> sessions = sessionRepository.findSessionsByCourses(courses);
 		if (sessions == null) {
 			return 0;
 		}
@@ -333,20 +333,22 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 
 	@Override
 	public Session setActive(final String sessionkey, final Boolean lock) {
-		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
+		final Session session = sessionRepository.findByKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (!session.isCreator(user)) {
 			throw new ForbiddenException("User is not session creator.");
 		}
 		session.setActive(lock);
 		this.publisher.publishEvent(new StatusSessionEvent(this, session));
-		return sessionRepository.updateSession(session);
+		sessionRepository.update(session);
+
+		return session;
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#session, 'owner')")
 	public Session updateSession(final String sessionkey, final Session session) {
-		final Session existingSession = sessionRepository.getSessionFromKeyword(sessionkey);
+		final Session existingSession = sessionRepository.findByKeyword(sessionkey);
 
 		existingSession.setActive(session.isActive());
 		existingSession.setShortName(session.getShortName());
@@ -366,13 +368,15 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 		handleLogo(session);
 		existingSession.setPpLogo(session.getPpLogo());
 
-		return sessionRepository.updateSession(existingSession);
+		sessionRepository.update(existingSession);
+
+		return session;
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
 	public Session changeSessionCreator(String sessionkey, String newCreator) {
-		final Session existingSession = sessionRepository.getSessionFromKeyword(sessionkey);
+		final Session existingSession = sessionRepository.findByKeyword(sessionkey);
 		if (existingSession == null) {
 			throw new NullPointerException("Could not load session " + sessionkey + ".");
 		}
@@ -386,7 +390,8 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 	@Override
 	public Session updateSessionInternal(final Session session, final User user) {
 		if (session.isCreator(user)) {
-			return sessionRepository.updateSession(session);
+			sessionRepository.update(session);
+			return session;
 		}
 		return null;
 	}
@@ -394,7 +399,7 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
 	public void deleteSession(final String sessionkey) {
-		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
+		final Session session = sessionRepository.findByKeyword(sessionkey);
 
 		sessionRepository.deleteSession(session);
 
@@ -404,7 +409,7 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public ScoreStatistics getLearningProgress(final String sessionkey, final String type, final String questionVariant) {
-		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
+		final Session session = sessionRepository.findByKeyword(sessionkey);
 		ScoreCalculator scoreCalculator = scoreCalculatorFactory.create(type, questionVariant);
 		return scoreCalculator.getCourseProgress(session);
 	}
@@ -412,7 +417,7 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public ScoreStatistics getMyLearningProgress(final String sessionkey, final String type, final String questionVariant) {
-		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
+		final Session session = sessionRepository.findByKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
 		ScoreCalculator scoreCalculator = scoreCalculatorFactory.create(type, questionVariant);
 		return scoreCalculator.getMyProgress(session, user);
@@ -452,24 +457,26 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 
 	@Override
 	public SessionFeature getSessionFeatures(String sessionkey) {
-		return sessionRepository.getSessionFromKeyword(sessionkey).getFeatures();
+		return sessionRepository.findByKeyword(sessionkey).getFeatures();
 	}
 
 	@Override
 	public SessionFeature changeSessionFeatures(String sessionkey, SessionFeature features) {
-		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
+		final Session session = sessionRepository.findByKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (!session.isCreator(user)) {
 			throw new UnauthorizedException("User is not session creator.");
 		}
 		session.setFeatures(features);
 		this.publisher.publishEvent(new FeatureChangeEvent(this, session));
-		return sessionRepository.updateSession(session).getFeatures();
+		sessionRepository.update(session);
+
+		return session.getFeatures();
 	}
 
 	@Override
 	public boolean lockFeedbackInput(String sessionkey, Boolean lock) {
-		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
+		final Session session = sessionRepository.findByKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (!session.isCreator(user)) {
 			throw new UnauthorizedException("User is not session creator.");
@@ -480,19 +487,23 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 
 		session.setFeedbackLock(lock);
 		this.publisher.publishEvent(new LockFeedbackEvent(this, session));
-		return sessionRepository.updateSession(session).getFeedbackLock();
+		sessionRepository.update(session);
+
+		return session.getFeedbackLock();
 	}
 
 	@Override
 	public boolean flipFlashcards(String sessionkey, Boolean flip) {
-		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
+		final Session session = sessionRepository.findByKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (!session.isCreator(user)) {
 			throw new UnauthorizedException("User is not session creator.");
 		}
 		session.setFlipFlashcards(flip);
 		this.publisher.publishEvent(new FlipFlashcardsEvent(this, session));
-		return sessionRepository.updateSession(session).getFlipFlashcards();
+		sessionRepository.update(session);
+
+		return session.getFlipFlashcards();
 	}
 
 	private void handleLogo(Session session) {

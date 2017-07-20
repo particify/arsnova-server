@@ -21,14 +21,15 @@ public class CouchDbMotdListRepository extends CouchDbRepositorySupport<MotdList
 
 	@Override
 	@Cacheable(cacheNames = "motdlist", key = "#p0")
-	public MotdList getMotdListForUser(final String username) {
+	public MotdList findByUsername(final String username) {
 		final List<MotdList> motdListList = queryView("by_username", username);
 		return motdListList.isEmpty() ? new MotdList() : motdListList.get(0);
 	}
 
+	/* TODO: Move to service layer. */
 	@Override
 	@CachePut(cacheNames = "motdlist", key = "#p0.username")
-	public MotdList createOrUpdateMotdList(final MotdList motdlist) {
+	public MotdList save(final MotdList motdlist) {
 		try {
 			if (motdlist.getId() != null) {
 				update(motdlist);

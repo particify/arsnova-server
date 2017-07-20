@@ -81,24 +81,24 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 		final Session session = getSession(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
-			return contentRepository.getSkillQuestionsForTeachers(session.getId());
+			return contentRepository.findBySessionIdForSpeaker(session.getId());
 		} else {
-			return contentRepository.getSkillQuestionsForUsers(session.getId());
+			return contentRepository.findBySessionIdForUsers(session.getId());
 		}
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int getSkillQuestionCount(final String sessionkey) {
-		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
-		return contentRepository.getSkillQuestionCount(session.getId());
+		final Session session = sessionRepository.findByKeyword(sessionkey);
+		return contentRepository.countBySessionId(session.getId());
 	}
 
 	/* FIXME: #content.getSessionKeyword() cannot be checked since keyword is no longer set for content. */
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#content.getSessionKeyword(), 'session', 'owner')")
 	public Content saveQuestion(final Content content) {
-		final Session session = sessionRepository.getSessionFromKeyword(content.getSessionKeyword());
+		final Session session = sessionRepository.findByKeyword(content.getSessionKeyword());
 		content.setSessionId(session.getId());
 		content.setTimestamp(System.currentTimeMillis() / 1000L);
 
@@ -118,7 +118,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 			}
 		}
 
-		final Content result = contentRepository.saveQuestion(session.getId(), content);
+		final Content result = contentRepository.save(session.getId(), content);
 
 		final NewQuestionEvent event = new NewQuestionEvent(this, session, result);
 		this.publisher.publishEvent(event);
@@ -129,7 +129,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public Content getQuestion(final String id) {
-		final Content result = contentRepository.getQuestion(id);
+		final Content result = contentRepository.findOne(id);
 		if (result == null) {
 			return null;
 		}
@@ -144,12 +144,12 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'content', 'owner')")
 	public void deleteQuestion(final String questionId) {
-		final Content content = contentRepository.getQuestion(questionId);
+		final Content content = contentRepository.findOne(questionId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
 
-		final Session session = sessionRepository.getSessionFromId(content.getSessionId());
+		final Session session = sessionRepository.findOne(content.getSessionId());
 		if (session == null) {
 			throw new UnauthorizedException();
 		}
@@ -172,8 +172,8 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'content', 'owner')")
 	public void startNewPiRound(final String questionId, User user) {
-		final Content content = contentRepository.getQuestion(questionId);
-		final Session session = sessionRepository.getSessionFromId(content.getSessionId());
+		final Content content = contentRepository.findOne(questionId);
+		final Session session = sessionRepository.findOne(content.getSessionId());
 
 		if (null == user) {
 			user = userService.getCurrentUser();
@@ -194,8 +194,8 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	public void startNewPiRoundDelayed(final String questionId, final int time) {
 		final ContentService contentService = this;
 		final User user = userService.getCurrentUser();
-		final Content content = contentRepository.getQuestion(questionId);
-		final Session session = sessionRepository.getSessionFromId(content.getSessionId());
+		final Content content = contentRepository.findOne(questionId);
+		final Session session = sessionRepository.findOne(content.getSessionId());
 
 		final Date date = new Date();
 		final Timer timer = new Timer();
@@ -217,8 +217,8 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'content', 'owner')")
 	public void cancelPiRoundChange(final String questionId) {
-		final Content content = contentRepository.getQuestion(questionId);
-		final Session session = sessionRepository.getSessionFromId(content.getSessionId());
+		final Content content = contentRepository.findOne(questionId);
+		final Session session = sessionRepository.findOne(content.getSessionId());
 
 		cancelDelayedPiRoundChange(questionId);
 		content.resetRoundManagementState();
@@ -248,8 +248,8 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'content', 'owner')")
 	public void resetPiRoundState(final String questionId) {
-		final Content content = contentRepository.getQuestion(questionId);
-		final Session session = sessionRepository.getSessionFromId(content.getSessionId());
+		final Content content = contentRepository.findOne(questionId);
+		final Session session = sessionRepository.findOne(content.getSessionId());
 		cancelDelayedPiRoundChange(questionId);
 
 		if ("freetext".equals(content.getQuestionType())) {
@@ -259,7 +259,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 		}
 
 		content.resetRoundManagementState();
-		answerRepository.deleteAnswers(content.getId());
+		answerRepository.deleteByContentId(content.getId());
 		update(content);
 		this.publisher.publishEvent(new PiRoundResetEvent(this, session, content));
 	}
@@ -267,15 +267,15 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'content', 'owner')")
 	public void setVotingAdmission(final String questionId, final boolean disableVoting) {
-		final Content content = contentRepository.getQuestion(questionId);
-		final Session session = sessionRepository.getSessionFromId(content.getSessionId());
+		final Content content = contentRepository.findOne(questionId);
+		final Session session = sessionRepository.findOne(content.getSessionId());
 		content.setVotingDisabled(disableVoting);
 
 		if (!disableVoting && !content.isActive()) {
 			content.setActive(true);
 			update(content);
 		} else {
-			contentRepository.updateQuestion(content);
+			contentRepository.update(content);
 		}
 		ArsnovaEvent event;
 		if (disableVoting) {
@@ -324,7 +324,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 
 	private Session getSessionWithAuthCheck(final String sessionKeyword) {
 		final User user = userService.getCurrentUser();
-		final Session session = sessionRepository.getSessionFromKeyword(sessionKeyword);
+		final Session session = sessionRepository.findByKeyword(sessionKeyword);
 		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
@@ -334,10 +334,10 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'content', 'owner')")
 	public void deleteAnswers(final String questionId) {
-		final Content content = contentRepository.getQuestion(questionId);
+		final Content content = contentRepository.findOne(questionId);
 		content.resetQuestionState();
-		contentRepository.updateQuestion(content);
-		answerRepository.deleteAnswers(content.getId());
+		contentRepository.update(content);
+		answerRepository.deleteByContentId(content.getId());
 	}
 
 	@Override
@@ -345,7 +345,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	public List<String> getUnAnsweredQuestionIds(final String sessionKey) {
 		final User user = getCurrentUser();
 		final Session session = getSession(sessionKey);
-		return contentRepository.getUnAnsweredQuestionIds(session.getId(), user);
+		return contentRepository.findUnansweredIdsBySessionIdAndUser(session.getId(), user);
 	}
 
 	private User getCurrentUser() {
@@ -363,35 +363,35 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		return answerRepository.getMyAnswer(userService.getCurrentUser(), questionId, content.getPiRound());
+		return answerRepository.findByQuestionIdUserPiRound(questionId, userService.getCurrentUser(), content.getPiRound());
 	}
 
 	@Override
 	public void readFreetextAnswer(final String answerId, final User user) {
-		final Answer answer = answerRepository.get(answerId);
+		final Answer answer = answerRepository.findOne(answerId);
 		if (answer == null) {
 			throw new NotFoundException();
 		}
 		if (answer.isRead()) {
 			return;
 		}
-		final Session session = sessionRepository.getSessionFromId(answer.getSessionId());
+		final Session session = sessionRepository.findOne(answer.getSessionId());
 		if (session.isCreator(user)) {
 			answer.setRead(true);
-			answerRepository.updateAnswer(answer);
+			answerRepository.update(answer);
 		}
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Answer> getAnswers(final String questionId, final int piRound, final int offset, final int limit) {
-		final Content content = contentRepository.getQuestion(questionId);
+		final Content content = contentRepository.findOne(questionId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
 		return "freetext".equals(content.getQuestionType())
 				? getFreetextAnswers(questionId, offset, limit)
-						: answerRepository.getAnswers(content.getId(), piRound);
+						: answerRepository.findByContentIdPiRound(content.getId(), piRound);
 	}
 
 	@Override
@@ -404,7 +404,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 		if ("freetext".equals(content.getQuestionType())) {
 			return getFreetextAnswers(questionId, offset, limit);
 		} else {
-			return answerRepository.getAnswers(content.getId(), content.getPiRound());
+			return answerRepository.findByContentIdPiRound(content.getId(), content.getPiRound());
 		}
 	}
 
@@ -418,7 +418,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 		if ("freetext".equals(content.getQuestionType())) {
 			return getFreetextAnswers(questionId, offset, limit);
 		} else {
-			return answerRepository.getAllAnswers(content.getId());
+			return answerRepository.findByContentId(content.getId());
 		}
 	}
 
@@ -431,9 +431,9 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 		}
 
 		if ("freetext".equals(content.getQuestionType())) {
-			return answerRepository.getTotalAnswerCountByQuestion(content.getId());
+			return answerRepository.countByContentId(content.getId());
 		} else {
-			return answerRepository.getAnswerCount(content.getId(), content.getPiRound());
+			return answerRepository.countByContentIdRound(content.getId(), content.getPiRound());
 		}
 	}
 
@@ -445,7 +445,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 			return 0;
 		}
 
-		return answerRepository.getAnswerCount(content.getId(), piRound);
+		return answerRepository.countByContentIdRound(content.getId(), piRound);
 	}
 
 	@Override
@@ -456,7 +456,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 			return 0;
 		}
 
-		return answerRepository.getAbstentionAnswerCount(questionId);
+		return answerRepository.countByContentId(questionId);
 	}
 
 	@Override
@@ -467,13 +467,13 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 			return 0;
 		}
 
-		return answerRepository.getTotalAnswerCountByQuestion(content.getId());
+		return answerRepository.countByContentId(content.getId());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Answer> getFreetextAnswers(final String questionId, final int offset, final int limit) {
-		final List<Answer> answers = answerRepository.getFreetextAnswers(questionId, offset, limit);
+		final List<Answer> answers = answerRepository.findByContentId(questionId, offset, limit);
 		if (answers == null) {
 			throw new NotFoundException();
 		}
@@ -490,14 +490,14 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	public List<Answer> getMyAnswers(final String sessionKey) {
 		final Session session = getSession(sessionKey);
 		// Load contents first because we are only interested in answers of the latest piRound.
-		final List<Content> contents = contentRepository.getSkillQuestionsForUsers(session.getId());
+		final List<Content> contents = contentRepository.findBySessionIdForUsers(session.getId());
 		final Map<String, Content> questionIdToQuestion = new HashMap<>();
 		for (final Content content : contents) {
 			questionIdToQuestion.put(content.getId(), content);
 		}
 
 		/* filter answers by active piRound per question */
-		final List<Answer> answers = answerRepository.getMyAnswers(userService.getCurrentUser(), session.getId());
+		final List<Answer> answers = answerRepository.findByUserSessionId(userService.getCurrentUser(), session.getId());
 		final List<Answer> filteredAnswers = new ArrayList<>();
 		for (final Answer answer : answers) {
 			final Content content = questionIdToQuestion.get(answer.getQuestionId());
@@ -522,7 +522,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int getTotalAnswerCount(final String sessionKey) {
-		return answerRepository.getTotalAnswerCount(sessionKey);
+		return answerRepository.countBySessionKey(sessionKey);
 	}
 
 	@Override
@@ -535,12 +535,12 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public Content update(final Content content, User user) {
-		final Content oldContent = contentRepository.getQuestion(content.getId());
+		final Content oldContent = contentRepository.findOne(content.getId());
 		if (null == oldContent) {
 			throw new NotFoundException();
 		}
 
-		final Session session = sessionRepository.getSessionFromId(content.getSessionId());
+		final Session session = sessionRepository.findOne(content.getSessionId());
 		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
@@ -551,16 +551,16 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 			content.setPiRound(oldContent.getPiRound() > 0 ? oldContent.getPiRound() : 1);
 		}
 
-		final Content result = contentRepository.updateQuestion(content);
+		contentRepository.update(content);
 
 		if (!oldContent.isActive() && content.isActive()) {
-			final UnlockQuestionEvent event = new UnlockQuestionEvent(this, session, result);
+			final UnlockQuestionEvent event = new UnlockQuestionEvent(this, session, content);
 			this.publisher.publishEvent(event);
 		} else if (oldContent.isActive() && !content.isActive()) {
-			final LockQuestionEvent event = new LockQuestionEvent(this, session, result);
+			final LockQuestionEvent event = new LockQuestionEvent(this, session, content);
 			this.publisher.publishEvent(event);
 		}
-		return result;
+		return content;
 	}
 
 	@Override
@@ -571,7 +571,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		final Session session = sessionRepository.getSessionFromId(content.getSessionId());
+		final Session session = sessionRepository.findOne(content.getSessionId());
 
 		Answer theAnswer = answer.generateAnswerEntity(user, content);
 		theAnswer.setUser(user.getUsername());
@@ -590,7 +590,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 			}
 		}
 
-		return answerRepository.saveAnswer(theAnswer, user, content, session);
+		return answerRepository.create(theAnswer, user, content, session);
 	}
 
 	@Override
@@ -607,29 +607,29 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 			imageUtils.generateThumbnailImage(realAnswer);
 			content.checkTextStrictOptions(realAnswer);
 		}
-		final Session session = sessionRepository.getSessionFromId(content.getSessionId());
+		final Session session = sessionRepository.findOne(content.getSessionId());
 		answer.setUser(user.getUsername());
 		answer.setQuestionId(content.getId());
 		answer.setSessionId(session.getId());
-		final Answer result = answerRepository.updateAnswer(realAnswer);
-		this.publisher.publishEvent(new NewAnswerEvent(this, session, result, user, content));
+		answerRepository.update(realAnswer);
+		this.publisher.publishEvent(new NewAnswerEvent(this, session, answer, user, content));
 
-		return result;
+		return answer;
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public void deleteAnswer(final String questionId, final String answerId) {
-		final Content content = contentRepository.getQuestion(questionId);
+		final Content content = contentRepository.findOne(questionId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
 		final User user = userService.getCurrentUser();
-		final Session session = sessionRepository.getSessionFromId(content.getSessionId());
+		final Session session = sessionRepository.findOne(content.getSessionId());
 		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
-		answerRepository.deleteAnswer(answerId);
+		answerRepository.delete(answerId);
 
 		this.publisher.publishEvent(new DeleteAnswerEvent(this, session, content));
 	}
@@ -640,9 +640,9 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 		final Session session = getSession(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
-			return contentRepository.getLectureQuestionsForTeachers(session.getId());
+			return contentRepository.findBySessionIdOnlyLectureVariant(session.getId());
 		} else {
-			return contentRepository.getLectureQuestionsForUsers(session.getId());
+			return contentRepository.findBySessionIdOnlyLectureVariantAndActive(session.getId());
 		}
 	}
 
@@ -652,9 +652,9 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 		final Session session = getSession(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
-			return contentRepository.getFlashcardsForTeachers(session.getId());
+			return contentRepository.findBySessionIdOnlyFlashcardVariant(session.getId());
 		} else {
-			return contentRepository.getFlashcardsForUsers(session.getId());
+			return contentRepository.findBySessionIdOnlyFlashcardVariantAndActive(session.getId());
 		}
 	}
 
@@ -664,9 +664,9 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 		final Session session = getSession(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
-			return contentRepository.getPreparationQuestionsForTeachers(session.getId());
+			return contentRepository.findBySessionIdOnlyPreparationVariant(session.getId());
 		} else {
-			return contentRepository.getPreparationQuestionsForUsers(session.getId());
+			return contentRepository.findBySessionIdOnlyPreparationVariantAndActive(session.getId());
 		}
 	}
 
@@ -683,7 +683,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	}
 
 	private Session getSession(final String sessionkey) {
-		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
+		final Session session = sessionRepository.findByKeyword(sessionkey);
 		if (session == null) {
 			throw new NotFoundException();
 		}
@@ -693,19 +693,19 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int getLectureQuestionCount(final String sessionkey) {
-		return contentRepository.getLectureQuestionCount(getSession(sessionkey).getId());
+		return contentRepository.countLectureVariantBySessionId(getSession(sessionkey).getId());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int getFlashcardCount(final String sessionkey) {
-		return contentRepository.getFlashcardCount(getSession(sessionkey).getId());
+		return contentRepository.countFlashcardVariantBySessionId(getSession(sessionkey).getId());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int getPreparationQuestionCount(final String sessionkey) {
-		return contentRepository.getPreparationQuestionCount(getSession(sessionkey).getId());
+		return contentRepository.countPreparationVariantBySessionId(getSession(sessionkey).getId());
 	}
 
 	@Override
@@ -720,7 +720,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	 */
 	@Override
 	public int countLectureQuestionAnswersInternal(final String sessionkey) {
-		return answerRepository.countLectureQuestionAnswers(getSession(sessionkey).getId());
+		return answerRepository.countBySessionIdLectureVariant(getSession(sessionkey).getId());
 	}
 
 	@Override
@@ -733,8 +733,8 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 		}
 
 		map.put("_id", questionId);
-		map.put("answers", answerRepository.getAnswerCount(content.getId(), content.getPiRound()));
-		map.put("abstentions", answerRepository.getAbstentionAnswerCount(questionId));
+		map.put("answers", answerRepository.countByContentIdRound(content.getId(), content.getPiRound()));
+		map.put("abstentions", answerRepository.countByContentId(questionId));
 
 		return map;
 	}
@@ -751,7 +751,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	 */
 	@Override
 	public int countPreparationQuestionAnswersInternal(final String sessionkey) {
-		return answerRepository.countPreparationQuestionAnswers(getSession(sessionkey).getId());
+		return answerRepository.countBySessionIdPreparationVariant(getSession(sessionkey).getId());
 	}
 
 	/*
@@ -760,7 +760,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	 */
 	@Override
 	public int countFlashcardsForUserInternal(final String sessionkey) {
-		return contentRepository.getFlashcardsForUsers(getSession(sessionkey).getId()).size();
+		return contentRepository.findBySessionIdOnlyFlashcardVariantAndActive(getSession(sessionkey).getId()).size();
 	}
 
 	@Override
@@ -794,7 +794,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	@Override
 	public List<String> getUnAnsweredLectureQuestionIds(final String sessionkey, final User user) {
 		final Session session = getSession(sessionkey);
-		return contentRepository.getUnAnsweredLectureQuestionIds(session.getId(), user);
+		return contentRepository.findUnansweredIdsBySessionIdAndUserOnlyLectureVariant(session.getId(), user);
 	}
 
 	@Override
@@ -807,7 +807,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	@Override
 	public List<String> getUnAnsweredPreparationQuestionIds(final String sessionkey, final User user) {
 		final Session session = getSession(sessionkey);
-		return contentRepository.getUnAnsweredPreparationQuestionIds(session.getId(), user);
+		return contentRepository.findUnansweredIdsBySessionIdAndUserOnlyPreparationVariant(session.getId(), user);
 	}
 
 	@Override
@@ -903,7 +903,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 
 	@Override
 	public String getQuestionImage(String questionId) {
-		Content content = contentRepository.getQuestion(questionId);
+		Content content = contentRepository.findOne(questionId);
 		String imageData = content.getImage();
 
 		if (imageData == null) {
@@ -915,7 +915,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 
 	@Override
 	public String getQuestionFcImage(String questionId) {
-		Content content = contentRepository.getQuestion(questionId);
+		Content content = contentRepository.findOne(questionId);
 		String imageData = content.getFcImage();
 
 		if (imageData == null) {

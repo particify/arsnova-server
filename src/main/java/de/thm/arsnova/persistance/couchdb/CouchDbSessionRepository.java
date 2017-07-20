@@ -72,21 +72,23 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 
 	@Override
 	@Cacheable("sessions")
-	public Session getSessionFromKeyword(final String keyword) {
+	public Session findByKeyword(final String keyword) {
 		final List<Session> session = queryView("by_keyword", keyword);
 
 		return !session.isEmpty() ? session.get(0) : null;
 	}
 
+	/* TODO: Redundant -> remove. Move cache handling to service layer. */
 	@Override
 	@Cacheable("sessions")
-	public Session getSessionFromId(final String sessionId) {
+	public Session findOne(final String sessionId) {
 		return get(sessionId);
 	}
 
+	/* TODO: Move to service layer. */
 	@Override
 	@Caching(evict = @CacheEvict(cacheNames = "sessions", key = "#result.keyword"))
-	public Session saveSession(final User user, final Session session) {
+	public Session save(final User user, final Session session) {
 		session.setKeyword(sessionService.generateKeyword());
 		session.setCreator(user.getUsername());
 		session.setActive(true);
@@ -101,11 +103,13 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 		return session.getId() != null ? session : null;
 	}
 
+	/* TODO: Move to service layer. */
 	@Override
 	public boolean sessionKeyAvailable(final String keyword) {
-		return getSessionFromKeyword(keyword) == null;
+		return findByKeyword(keyword) == null;
 	}
 
+	/* TODO: Move to service layer. */
 	private String getSessionKeyword(final String internalSessionId) throws IOException {
 		final Session session = get(internalSessionId);
 		if (session == null) {
@@ -117,6 +121,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 		return session.getKeyword();
 	}
 
+	/* TODO: Move to service layer. */
 	@Override
 	@CachePut(value = "sessions")
 	public Session updateSessionOwnerActivity(final Session session) {
@@ -137,7 +142,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 	}
 
 	@Override
-	public List<Session> getVisitedSessionsForUsername(final String username, final int start, final int limit) {
+	public List<Session> findVisitedByUsername(final String username, final int start, final int limit) {
 		final int qSkip = start > 0 ? start : -1;
 		final int qLimit = limit > 0 ? limit : -1;
 
@@ -163,7 +168,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 			for (final Session s : visitedSessions) {
 				try {
 					/* FIXME: caching (getSessionFromKeyword) */
-					final Session session = getSessionFromKeyword(s.getKeyword());
+					final Session session = findByKeyword(s.getKeyword());
 					if (session != null && !(session.getCreator().equals(username))) {
 						result.add(session);
 					} else {
@@ -197,8 +202,8 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 	}
 
 	@Override
-	public List<SessionInfo> getMyVisitedSessionsInfo(final User user, final int start, final int limit) {
-		final List<Session> sessions = getVisitedSessionsForUsername(user.getUsername(), start, limit);
+	public List<SessionInfo> findInfoForVisitedByUser(final User user, final int start, final int limit) {
+		final List<Session> sessions = findVisitedByUsername(user.getUsername(), start, limit);
 		if (sessions.isEmpty()) {
 			return new ArrayList<>();
 		}
@@ -206,25 +211,23 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 	}
 
 	@Override
-	public List<Session> getCourseSessions(final List<Course> courses) {
+	public List<Session> findSessionsByCourses(final List<Course> courses) {
 		return queryView("by_courseid",
 				ComplexKey.of(courses.stream().map(Course::getId).collect(Collectors.toList())));
 	}
 
+	/* TODO: Redundant -> remove. Move cache handling to service layer. */
 	@Override
 	@CachePut(value = "sessions")
-	public Session updateSession(final Session session) {
+	public void update(final Session session) {
 		try {
 			update(session);
-
-			return session;
 		} catch (final UpdateConflictException e) {
 			logger.error("Could not update session {}.", session, e);
 		}
-
-		return null;
 	}
 
+	/* TODO: Move to service layer. */
 	@Override
 	@Caching(evict = { @CacheEvict("sessions"), @CacheEvict(cacheNames = "sessions", key = "#p0.keyword") })
 	public Session changeSessionCreator(final Session session, final String newCreator) {
@@ -282,6 +285,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 		return count;
 	}
 
+	/* TODO: Move to service layer. */
 	@Override
 	public SessionInfo importSession(final User user, final ImportExportSession importSession) {
 		/* FIXME: not yet migrated - move to service layer */
@@ -371,6 +375,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 //		return this.calculateSessionInfo(importSession, session);
 	}
 
+	/* TODO: Move to service layer. */
 	@Override
 	public ImportExportSession exportSession(
 			final String sessionkey,
@@ -417,6 +422,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 //		return importExportSession;
 	}
 
+	/* TODO: Move to service layer. */
 	private SessionInfo calculateSessionInfo(final ImportExportSession importExportSession, final Session session) {
 		int unreadComments = 0;
 		int numUnanswered = 0;
@@ -442,12 +448,12 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 	}
 
 	@Override
-	public List<Session> getMySessions(final User user, final int start, final int limit) {
-		return getSessionsForUsername(user.getUsername(), start, limit);
+	public List<Session> findByUser(final User user, final int start, final int limit) {
+		return findByUsername(user.getUsername(), start, limit);
 	}
 
 	@Override
-	public List<Session> getSessionsForUsername(final String username, final int start, final int limit) {
+	public List<Session> findByUsername(final String username, final int start, final int limit) {
 		final int qSkip = start > 0 ? start : -1;
 		final int qLimit = limit > 0 ? limit : -1;
 
@@ -463,19 +469,19 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 	}
 
 	@Override
-	public List<Session> getPublicPoolSessions() {
+	public List<Session> findAllForPublicPool() {
 		// TODO replace with new view
 		return queryView("partial_by_ppsubject_name_for_publicpool");
 	}
 
 	@Override
-	public List<SessionInfo> getPublicPoolSessionsInfo() {
-		final List<Session> sessions = this.getPublicPoolSessions();
+	public List<SessionInfo> findInfosForPublicPool() {
+		final List<Session> sessions = this.findAllForPublicPool();
 		return getInfosForSessions(sessions);
 	}
 
 	@Override
-	public List<Session> getMyPublicPoolSessions(final User user) {
+	public List<Session> findForPublicPoolByUser(final User user) {
 		/* TODO: Only load IDs and check against cache for data. */
 		return db.queryView(
 				createQuery("partial_by_sessiontype_creator_name")
@@ -485,24 +491,27 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 				Session.class);
 	}
 
+	/* TODO: Move to service layer. */
 	@Override
-	public List<SessionInfo> getMyPublicPoolSessionsInfo(final User user) {
-		final List<Session> sessions = this.getMyPublicPoolSessions(user);
+	public List<SessionInfo> findInfosForPublicPoolByUser(final User user) {
+		final List<Session> sessions = this.findForPublicPoolByUser(user);
 		if (sessions.isEmpty()) {
 			return new ArrayList<>();
 		}
 		return getInfosForSessions(sessions);
 	}
 
+	/* TODO: Move to service layer. */
 	@Override
 	public List<SessionInfo> getMySessionsInfo(final User user, final int start, final int limit) {
-		final List<Session> sessions = this.getMySessions(user, start, limit);
+		final List<Session> sessions = this.findByUser(user, start, limit);
 		if (sessions.isEmpty()) {
 			return new ArrayList<>();
 		}
 		return getInfosForSessions(sessions);
 	}
 
+	/* TODO: Move to service layer. */
 	private List<SessionInfo> getInfosForSessions(final List<Session> sessions) {
 		final List<String> sessionIds = sessions.stream().map(Session::getId).collect(Collectors.toList());
 		final ViewQuery questionCountView = createQuery("by_sessionid").designDocId("_design/Content")
@@ -517,6 +526,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 		return getSessionInfoData(sessions, questionCountView, answerCountView, commentCountView, unreadCommentCountView);
 	}
 
+	/* TODO: Move to service layer. */
 	private List<SessionInfo> getInfosForVisitedSessions(final List<Session> sessions, final User user) {
 		final ViewQuery answeredQuestionsView = createQuery("by_user_sessionid").designDocId("_design/Answer")
 				.keys(sessions.stream().map(session -> ComplexKey.of(user.getUsername(), session.getId())).collect(Collectors.toList()));
@@ -526,6 +536,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 		return getVisitedSessionInfoData(sessions, answeredQuestionsView, contentIdsView);
 	}
 
+	/* TODO: Move to service layer. */
 	private List<SessionInfo> getVisitedSessionInfoData(
 			final List<Session> sessions,
 			final ViewQuery answeredQuestionsView,
@@ -587,6 +598,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 		return sessionInfos;
 	}
 
+	/* TODO: Move to service layer. */
 	private List<SessionInfo> getSessionInfoData(
 			final List<Session> sessions,
 			final ViewQuery questionCountView,
@@ -635,6 +647,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 		return sessionInfos;
 	}
 
+	/* TODO: Move to service layer. */
 	@Override
 	public LoggedIn registerAsOnlineUser(final User user, final Session session) {
 		LoggedIn loggedIn = new LoggedIn();

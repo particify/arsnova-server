@@ -37,8 +37,8 @@ public class CommentServiceImpl implements CommentService {
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public boolean saveQuestion(final Comment comment) {
-		final Session session = sessionRepository.getSessionFromKeyword(comment.getSessionId());
-		final Comment result = commentRepository.saveQuestion(session.getId(), comment, userService.getCurrentUser());
+		final Session session = sessionRepository.findByKeyword(comment.getSessionId());
+		final Comment result = commentRepository.save(session.getId(), comment, userService.getCurrentUser());
 
 		if (null != result) {
 			final NewCommentEvent event = new NewCommentEvent(this, session, result);
@@ -51,13 +51,13 @@ public class CommentServiceImpl implements CommentService {
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#commentId, 'comment', 'owner')")
 	public void deleteInterposedQuestion(final String commentId) {
-		final Comment comment = commentRepository.getInterposedQuestion(commentId);
+		final Comment comment = commentRepository.findOne(commentId);
 		if (comment == null) {
 			throw new NotFoundException();
 		}
-		commentRepository.deleteInterposedQuestion(comment);
+		commentRepository.delete(comment);
 
-		final Session session = sessionRepository.getSessionFromKeyword(comment.getSessionId());
+		final Session session = sessionRepository.findByKeyword(comment.getSessionId());
 		final DeleteCommentEvent event = new DeleteCommentEvent(this, session, comment);
 		this.publisher.publishEvent(event);
 	}
@@ -65,40 +65,40 @@ public class CommentServiceImpl implements CommentService {
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public void deleteAllInterposedQuestions(final String sessionKeyword) {
-		final Session session = sessionRepository.getSessionFromKeyword(sessionKeyword);
+		final Session session = sessionRepository.findByKeyword(sessionKeyword);
 		if (session == null) {
 			throw new UnauthorizedException();
 		}
 		final User user = getCurrentUser();
 		if (session.isCreator(user)) {
-			commentRepository.deleteAllInterposedQuestions(session.getId());
+			commentRepository.deleteBySessionId(session.getId());
 		} else {
-			commentRepository.deleteAllInterposedQuestions(session.getId(), user);
+			commentRepository.deleteBySessionIdAndUser(session.getId(), user);
 		}
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int getInterposedCount(final String sessionKey) {
-		return commentRepository.getInterposedCount(sessionKey);
+		return commentRepository.countBySessionKey(sessionKey);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public CommentReadingCount getInterposedReadingCount(final String sessionKey, String username) {
-		final Session session = sessionRepository.getSessionFromKeyword(sessionKey);
+		final Session session = sessionRepository.findByKeyword(sessionKey);
 		if (session == null) {
 			throw new NotFoundException();
 		}
 		if (username == null) {
-			return commentRepository.getInterposedReadingCount(session.getId());
+			return commentRepository.countReadingBySessionId(session.getId());
 		} else {
 			User currentUser = userService.getCurrentUser();
 			if (!currentUser.getUsername().equals(username)) {
 				throw new ForbiddenException();
 			}
 
-			return commentRepository.getInterposedReadingCount(session.getId(), currentUser);
+			return commentRepository.countReadingBySessionIdAndUser(session.getId(), currentUser);
 		}
 	}
 
@@ -108,9 +108,9 @@ public class CommentServiceImpl implements CommentService {
 		final Session session = this.getSession(sessionKey);
 		final User user = getCurrentUser();
 		if (session.isCreator(user)) {
-			return commentRepository.getInterposedQuestions(session.getId(), offset, limit);
+			return commentRepository.findBySessionId(session.getId(), offset, limit);
 		} else {
-			return commentRepository.getInterposedQuestions(session.getId(), user, offset, limit);
+			return commentRepository.findBySessionIdAndUser(session.getId(), user, offset, limit);
 		}
 	}
 
@@ -127,11 +127,11 @@ public class CommentServiceImpl implements CommentService {
 	 */
 	@Override
 	public Comment readInterposedQuestionInternal(final String commentId, User user) {
-		final Comment comment = commentRepository.getInterposedQuestion(commentId);
+		final Comment comment = commentRepository.findOne(commentId);
 		if (comment == null) {
 			throw new NotFoundException();
 		}
-		final Session session = sessionRepository.getSessionFromId(comment.getSessionId());
+		final Session session = sessionRepository.findOne(comment.getSessionId());
 		if (!comment.isCreator(user) && !session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
@@ -150,7 +150,7 @@ public class CommentServiceImpl implements CommentService {
 	}
 
 	private Session getSession(final String sessionkey) {
-		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
+		final Session session = sessionRepository.findByKeyword(sessionkey);
 		if (session == null) {
 			throw new NotFoundException();
 		}
