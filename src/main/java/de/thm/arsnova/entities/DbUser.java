@@ -45,12 +45,12 @@ public class DbUser implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public String getRev() {
+	public String getRevision() {
 		return rev;
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setRev(String rev) {
+	public void setRevision(String rev) {
 		this.rev = rev;
 	}
 
