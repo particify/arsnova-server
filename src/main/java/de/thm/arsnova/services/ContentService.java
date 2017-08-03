@@ -30,17 +30,17 @@ import java.util.Map;
  * The functionality the question service should provide.
  */
 public interface ContentService {
-	Content saveQuestion(Content content);
+	Content save(Content content);
 
-	Content getQuestion(String id);
+	Content get(String id);
 
-	List<Content> getSkillQuestions(String sessionkey);
+	List<Content> getBySessionKey(String sessionkey);
 
-	int getSkillQuestionCount(String sessionkey);
+	int countBySessionKey(String sessionkey);
 
-	void deleteQuestion(String questionId);
+	void delete(String questionId);
 
-	void deleteAllQuestions(String sessionKeyword);
+	void deleteBySessionKey(String sessionKeyword);
 
 	void startNewPiRound(String questionId, User user);
 
@@ -56,7 +56,7 @@ public interface ContentService {
 
 	Answer getMyAnswer(String questionId);
 
-	void readFreetextAnswer(String answerId, User user);
+	void getFreetextAnswerAndMarkRead(String answerId, User user);
 
 	List<Answer> getAnswers(String questionId, int piRound, int offset, int limit);
 
@@ -64,17 +64,17 @@ public interface ContentService {
 
 	List<Answer> getAllAnswers(String questionId, int offset, int limit);
 
-	int getAnswerCount(String questionId);
+	int countAnswersByQuestionIdAndRound(String questionId);
 
-	int getAnswerCount(String questionId, int piRound);
+	int countAnswersByQuestionIdAndRound(String questionId, int piRound);
 
-	List<Answer> getFreetextAnswers(String questionId, int offset, int limit);
+	List<Answer> getFreetextAnswersByQuestionId(String questionId, int offset, int limit);
 
-	List<Answer> getMyAnswers(String sessionKey);
+	List<Answer> getMyAnswersBySessionKey(String sessionKey);
 
-	int getTotalAnswerCount(String sessionKey);
+	int countTotalAnswersBySessionKey(String sessionKey);
 
-	int getTotalAnswerCountByQuestion(String questionId);
+	int countTotalAnswersByQuestionId(String questionId);
 
 	Content update(Content content);
 
@@ -94,13 +94,13 @@ public interface ContentService {
 
 	List<Content> getPreparationQuestions(String sessionkey);
 
-	int getLectureQuestionCount(String sessionkey);
+	int countLectureQuestions(String sessionkey);
 
-	int getFlashcardCount(String sessionkey);
+	int countFlashcards(String sessionkey);
 
-	int getPreparationQuestionCount(String sessionkey);
+	int countPreparationQuestions(String sessionkey);
 
-	Map<String, Object> getAnswerAndAbstentionCountInternal(String questionid);
+	Map<String, Object> countAnswersAndAbstentionsInternal(String questionid);
 
 	int countLectureQuestionAnswers(String sessionkey);
 
@@ -136,7 +136,7 @@ public interface ContentService {
 
 	void deleteAllLectureAnswers(String sessionkey);
 
-	int getAbstentionAnswerCount(String questionId);
+	int countTotalAbstentionsByQuestionId(String questionId);
 
 	String getImage(String questionId, String answerId);
 

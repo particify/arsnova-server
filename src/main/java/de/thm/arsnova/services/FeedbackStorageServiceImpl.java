@@ -63,7 +63,7 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 			new ConcurrentHashMap<>();
 
 	@Override
-	public Feedback getFeedback(final Session session) {
+	public Feedback getBySession(final Session session) {
 		int a = 0;
 		int b = 0;
 		int c = 0;
@@ -95,7 +95,7 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 	}
 
 	@Override
-	public Integer getMyFeedback(final Session session, final User u) {
+	public Integer getBySessionAndUser(final Session session, final User u) {
 		if (data.get(session) == null) {
 			return null;
 		}
@@ -111,7 +111,7 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public void saveFeedback(final Session session, final int value, final User user) {
+	public void save(final Session session, final int value, final User user) {
 		if (data.get(session) == null) {
 			data.put(session, new ConcurrentHashMap<User, FeedbackStorageObject>());
 		}
@@ -121,11 +121,11 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public Map<Session, List<User>> cleanFeedbackVotes(final int cleanupFeedbackDelay) {
+	public Map<Session, List<User>> cleanVotes(final int cleanupFeedbackDelay) {
 		final Map<Session, List<User>> removedFeedbackOfUsersInSession = new HashMap<>();
 		for (final Session session : data.keySet()) {
 			if (!session.getFeatures().isLiveClicker()) {
-				List<User> affectedUsers = cleanFeedbackVotesInSession(session, cleanupFeedbackDelay);
+				List<User> affectedUsers = cleanVotesBySession(session, cleanupFeedbackDelay);
 				if (!affectedUsers.isEmpty()) {
 					removedFeedbackOfUsersInSession.put(session, affectedUsers);
 				}
@@ -136,7 +136,7 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public List<User> cleanFeedbackVotesInSession(final Session session, final int cleanupFeedbackDelayInMins) {
+	public List<User> cleanVotesBySession(final Session session, final int cleanupFeedbackDelayInMins) {
 		final long timelimitInMillis = TimeUnit.MILLISECONDS.convert(cleanupFeedbackDelayInMins, TimeUnit.MINUTES);
 		final Date maxAllowedTime = new Date(System.currentTimeMillis() - timelimitInMillis);
 		final boolean forceClean = cleanupFeedbackDelayInMins == 0;
@@ -149,7 +149,7 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 				final User user = entry.getKey();
 				final FeedbackStorageObject feedback = entry.getValue();
 				final boolean timeIsUp = feedback.getTimestamp().before(maxAllowedTime);
-				final boolean isAwayFeedback = getMyFeedback(session, user).equals(Feedback.FEEDBACK_AWAY);
+				final boolean isAwayFeedback = getBySessionAndUser(session, user).equals(Feedback.FEEDBACK_AWAY);
 				if (forceClean || timeIsUp && !isAwayFeedback) {
 					sessionFeedbacks.remove(user);
 					affectedUsers.add(user);

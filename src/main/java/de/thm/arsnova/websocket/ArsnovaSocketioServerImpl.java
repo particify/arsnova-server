@@ -142,15 +142,15 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 
 					return;
 				}
-				final String sessionKey = userService.getSessionForUser(u.getUsername());
-				final de.thm.arsnova.entities.Session session = sessionService.getSessionInternal(sessionKey, u);
+				final String sessionKey = userService.getSessionByUsername(u.getUsername());
+				final de.thm.arsnova.entities.Session session = sessionService.getInternal(sessionKey, u);
 
 				if (session.getFeedbackLock()) {
 					logger.debug("Feedback save blocked: {}", u, sessionKey, data.getValue());
 				} else {
 					logger.debug("Feedback recieved: {}", u, sessionKey, data.getValue());
 					if (null != sessionKey) {
-						feedbackService.saveFeedback(sessionKey, data.getValue(), u);
+						feedbackService.save(sessionKey, data.getValue(), u);
 					}
 				}
 			}
@@ -166,12 +166,12 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 
 					return;
 				}
-				final String oldSessionKey = userService.getSessionForUser(u.getUsername());
+				final String oldSessionKey = userService.getSessionByUsername(u.getUsername());
 				if (null != session.getKeyword() && session.getKeyword().equals(oldSessionKey)) {
 					return;
 				}
 
-				if (null != sessionService.joinSession(session.getKeyword(), client.getSessionId())) {
+				if (null != sessionService.join(session.getKeyword(), client.getSessionId())) {
 					/* active user count has to be sent to the client since the broadcast is
 					 * not always sent as long as the polling solution is active simultaneously */
 					reportActiveUserCountForSession(session.getKeyword());
@@ -195,7 +195,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 					AckRequest ackRequest) {
 				final User user = userService.getUser2SocketId(client.getSessionId());
 				try {
-					commentService.readInterposedQuestionInternal(comment.getId(), user);
+					commentService.getAndMarkReadInternal(comment.getId(), user);
 				} catch (NotFoundException | UnauthorizedException e) {
 					logger.error("Loading of comment {} failed for user {} with exception {}", comment.getId(), user, e.getMessage());
 				}
@@ -207,7 +207,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 			public void onData(SocketIOClient client, String answerId, AckRequest ackRequest) {
 				final User user = userService.getUser2SocketId(client.getSessionId());
 				try {
-					contentService.readFreetextAnswer(answerId, user);
+					contentService.getFreetextAnswerAndMarkRead(answerId, user);
 				} catch (NotFoundException | UnauthorizedException e) {
 					logger.error("Marking answer {} as read failed for user {} with exception {}", answerId, user, e.getMessage());
 				}
@@ -222,10 +222,10 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 			@Timed(name = "setLearningProgressOptionsEvent.onData")
 			public void onData(SocketIOClient client, ScoreOptions scoreOptions, AckRequest ack) {
 				final User user = userService.getUser2SocketId(client.getSessionId());
-				final de.thm.arsnova.entities.Session session = sessionService.getSessionInternal(scoreOptions.getSessionKeyword(), user);
+				final de.thm.arsnova.entities.Session session = sessionService.getInternal(scoreOptions.getSessionKeyword(), user);
 				if (session.isCreator(user)) {
 					session.setLearningProgressOptions(scoreOptions.toEntity());
-					sessionService.updateSessionInternal(session, user);
+					sessionService.updateInternal(session, user);
 					broadcastInSession(session.getKeyword(), "learningProgressOptions", scoreOptions.toEntity());
 				}
 			}
@@ -251,7 +251,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 					return;
 				}
 				final String username = userService.getUser2SocketId(client.getSessionId()).getUsername();
-				final String sessionKey = userService.getSessionForUser(username);
+				final String sessionKey = userService.getSessionByUsername(username);
 				userService.removeUserFromSessionBySocketId(client.getSessionId());
 				userService.removeUser2SocketId(client.getSessionId());
 				if (null != sessionKey) {
@@ -361,8 +361,8 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 	 * relevant Socket.IO data, the client needs to know after joining a session.
 	 */
 	public void reportSessionDataToClient(final String sessionKey, final User user, final SocketIOClient client) {
-		final de.thm.arsnova.entities.Session session = sessionService.getSessionInternal(sessionKey, user);
-		final de.thm.arsnova.entities.SessionFeature features = sessionService.getSessionFeatures(sessionKey);
+		final de.thm.arsnova.entities.Session session = sessionService.getInternal(sessionKey, user);
+		final de.thm.arsnova.entities.SessionFeature features = sessionService.getFeatures(sessionKey);
 
 		client.sendEvent("unansweredLecturerQuestions", contentService.getUnAnsweredLectureQuestionIds(sessionKey, user));
 		client.sendEvent("unansweredPreparationQuestions", contentService.getUnAnsweredPreparationQuestionIds(sessionKey, user));
@@ -370,7 +370,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		client.sendEvent("countPreparationQuestionAnswers", contentService.countPreparationQuestionAnswersInternal(sessionKey));
 		client.sendEvent("activeUserCountData", sessionService.activeUsers(sessionKey));
 		client.sendEvent("learningProgressOptions", session.getLearningProgressOptions());
-		final de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(sessionKey);
+		final de.thm.arsnova.entities.Feedback fb = feedbackService.getBySessionKey(sessionKey);
 		client.sendEvent("feedbackData", fb.getValues());
 
 		if (features.isFlashcard() || features.isFlashcardFeature()) {
@@ -379,7 +379,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		}
 
 		try {
-			final long averageFeedback = feedbackService.getAverageFeedbackRounded(sessionKey);
+			final long averageFeedback = feedbackService.calculateRoundedAverageFeedback(sessionKey);
 			client.sendEvent("feedbackDataRoundedAverage", averageFeedback);
 		} catch (final NoContentException e) {
 			final Object object = null; // can't directly use "null".
@@ -388,10 +388,10 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 	}
 
 	public void reportUpdatedFeedbackForSession(final de.thm.arsnova.entities.Session session) {
-		final de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(session.getKeyword());
+		final de.thm.arsnova.entities.Feedback fb = feedbackService.getBySessionKey(session.getKeyword());
 		broadcastInSession(session.getKeyword(), "feedbackData", fb.getValues());
 		try {
-			final long averageFeedback = feedbackService.getAverageFeedbackRounded(session.getKeyword());
+			final long averageFeedback = feedbackService.calculateRoundedAverageFeedback(session.getKeyword());
 			broadcastInSession(session.getKeyword(), "feedbackDataRoundedAverage", averageFeedback);
 		} catch (final NoContentException e) {
 			broadcastInSession(session.getKeyword(), "feedbackDataRoundedAverage", null);
@@ -399,10 +399,10 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 	}
 
 	public void reportFeedbackForUserInSession(final de.thm.arsnova.entities.Session session, final User user) {
-		final de.thm.arsnova.entities.Feedback fb = feedbackService.getFeedback(session.getKeyword());
+		final de.thm.arsnova.entities.Feedback fb = feedbackService.getBySessionKey(session.getKeyword());
 		Long averageFeedback;
 		try {
-			averageFeedback = feedbackService.getAverageFeedbackRounded(session.getKeyword());
+			averageFeedback = feedbackService.calculateRoundedAverageFeedback(session.getKeyword());
 		} catch (final NoContentException e) {
 			averageFeedback = null;
 		}
@@ -420,7 +420,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 	}
 
 	public void reportActiveUserCountForSession(final String sessionKey) {
-		final int count = userService.getUsersInSession(sessionKey).size();
+		final int count = userService.getUsersBySessionKey(sessionKey).size();
 
 		broadcastInSession(sessionKey, "activeUserCountData", count);
 	}
@@ -464,7 +464,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		 * all connected clients and if send feedback, if user is in current
 		 * session
 		 */
-		final Set<User> users = userService.getUsersInSession(sessionKey);
+		final Set<User> users = userService.getUsersBySessionKey(sessionKey);
 
 		for (final SocketIOClient c : server.getAllClients()) {
 			final User u = userService.getUser2SocketId(c.getSessionId());
@@ -510,7 +510,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 	public void visit(NewAnswerEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
 		this.reportAnswersToLecturerQuestionAvailable(event.getSession(), new Content(event.getContent()));
-		broadcastInSession(sessionKey, "countQuestionAnswersByQuestionId", contentService.getAnswerAndAbstentionCountInternal(event.getContent().getId()));
+		broadcastInSession(sessionKey, "countQuestionAnswersByQuestionId", contentService.countAnswersAndAbstentionsInternal(event.getContent().getId()));
 		broadcastInSession(sessionKey, "countLectureQuestionAnswers", contentService.countLectureQuestionAnswersInternal(sessionKey));
 		broadcastInSession(sessionKey, "countPreparationQuestionAnswers", contentService.countPreparationQuestionAnswersInternal(sessionKey));
 

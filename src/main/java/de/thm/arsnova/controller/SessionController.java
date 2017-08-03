@@ -76,9 +76,9 @@ public class SessionController extends PaginationController {
 			@ApiParam(value = "Adminflag", required = false) @RequestParam(value = "admin", defaultValue = "false")	final boolean admin
 			) {
 		if (admin) {
-			return sessionService.getSessionForAdmin(sessionkey);
+			return sessionService.getForAdmin(sessionkey);
 		} else {
-			return sessionService.getSession(sessionkey);
+			return sessionService.getByKey(sessionkey);
 		}
 	}
 
@@ -86,7 +86,7 @@ public class SessionController extends PaginationController {
 			nickname = "deleteSession")
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.DELETE)
 	public void deleteSession(@ApiParam(value = "Session-Key from current session", required = true) @PathVariable final String sessionkey) {
-		sessionService.deleteSession(sessionkey);
+		sessionService.delete(sessionkey);
 	}
 
 	@ApiOperation(value = "count active users",
@@ -112,7 +112,7 @@ public class SessionController extends PaginationController {
 			final Course course = new Course();
 			course.setId(session.getCourseId());
 			courses.add(course);
-			final int sessionCount = sessionService.countSessions(courses);
+			final int sessionCount = sessionService.countSessionsByCourses(courses);
 			if (sessionCount > 0) {
 				final String appendix = " (" + (sessionCount + 1) + ")";
 				session.setName(session.getName() + appendix);
@@ -120,7 +120,7 @@ public class SessionController extends PaginationController {
 			}
 		}
 
-		final Session newSession = sessionService.saveSession(session);
+		final Session newSession = sessionService.save(session);
 
 		if (newSession == null) {
 			response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
@@ -137,7 +137,7 @@ public class SessionController extends PaginationController {
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
 			@ApiParam(value = "current session", required = true) @RequestBody final Session session
 			) {
-		return sessionService.updateSession(sessionkey, session);
+		return sessionService.update(sessionkey, session);
 	}
 
 	@ApiOperation(value = "change the session creator (owner)", nickname = "changeSessionCreator")
@@ -146,7 +146,7 @@ public class SessionController extends PaginationController {
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
 			@ApiParam(value = "new session creator", required = true) @RequestBody final String newCreator
 			) {
-		return sessionService.changeSessionCreator(sessionkey, newCreator);
+		return sessionService.updateCreator(sessionkey, newCreator);
 	}
 
 	@ApiOperation(value = "Retrieves a list of Sessions",
@@ -376,7 +376,7 @@ public class SessionController extends PaginationController {
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
 			final HttpServletResponse response
 			) {
-		return sessionService.getSessionFeatures(sessionkey);
+		return sessionService.getFeatures(sessionkey);
 	}
 
 	@RequestMapping(value = "/{sessionkey}/features", method = RequestMethod.PUT)
@@ -387,7 +387,7 @@ public class SessionController extends PaginationController {
 			@ApiParam(value = "session feature", required = true) @RequestBody final SessionFeature features,
 			final HttpServletResponse response
 			) {
-		return sessionService.changeSessionFeatures(sessionkey, features);
+		return sessionService.updateFeatures(sessionkey, features);
 	}
 
 	@RequestMapping(value = "/{sessionkey}/lockfeedbackinput", method = RequestMethod.POST)

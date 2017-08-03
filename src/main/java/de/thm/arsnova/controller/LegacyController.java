@@ -99,7 +99,7 @@ public class LegacyController extends AbstractController {
 	@RequestMapping(value = "/session/{sessionKey}/interposed", method = RequestMethod.DELETE)
 	@ResponseBody
 	public void deleteAllInterposedQuestions(@PathVariable final String sessionKey) {
-		commentService.deleteAllInterposedQuestions(sessionKey);
+		commentService.deleteBySessionKey(sessionKey);
 	}
 
 	@DeprecatedApi

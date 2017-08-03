@@ -26,17 +26,17 @@ import de.thm.arsnova.entities.User;
 public interface FeedbackService {
 	void cleanFeedbackVotes();
 
-	void cleanFeedbackVotesInSession(String keyword, int cleanupFeedbackDelayInMins);
+	void cleanFeedbackVotesBySessionKey(String keyword, int cleanupFeedbackDelayInMins);
 
-	Feedback getFeedback(String keyword);
+	Feedback getBySessionKey(String keyword);
 
-	int getFeedbackCount(String keyword);
+	int countFeedbackBySessionKey(String keyword);
 
-	double getAverageFeedback(String sessionkey);
+	double calculateAverageFeedback(String sessionkey);
 
-	long getAverageFeedbackRounded(String sessionkey);
+	long calculateRoundedAverageFeedback(String sessionkey);
 
-	boolean saveFeedback(String keyword, int value, User user);
+	boolean save(String keyword, int value, User user);
 
-	Integer getMyFeedback(String keyword, User user);
+	Integer getBySessionKeyAndUser(String keyword, User user);
 }

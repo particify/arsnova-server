@@ -36,7 +36,7 @@ public class CommentServiceImpl implements CommentService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public boolean saveQuestion(final Comment comment) {
+	public boolean save(final Comment comment) {
 		final Session session = sessionRepository.findByKeyword(comment.getSessionId());
 		final Comment result = commentRepository.save(session.getId(), comment, userService.getCurrentUser());
 
@@ -50,7 +50,7 @@ public class CommentServiceImpl implements CommentService {
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#commentId, 'comment', 'owner')")
-	public void deleteInterposedQuestion(final String commentId) {
+	public void delete(final String commentId) {
 		final Comment comment = commentRepository.findOne(commentId);
 		if (comment == null) {
 			throw new NotFoundException();
@@ -64,7 +64,7 @@ public class CommentServiceImpl implements CommentService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public void deleteAllInterposedQuestions(final String sessionKeyword) {
+	public void deleteBySessionKey(final String sessionKeyword) {
 		final Session session = sessionRepository.findByKeyword(sessionKeyword);
 		if (session == null) {
 			throw new UnauthorizedException();
@@ -79,13 +79,13 @@ public class CommentServiceImpl implements CommentService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getInterposedCount(final String sessionKey) {
+	public int count(final String sessionKey) {
 		return commentRepository.countBySessionKey(sessionKey);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public CommentReadingCount getInterposedReadingCount(final String sessionKey, String username) {
+	public CommentReadingCount countRead(final String sessionKey, String username) {
 		final Session session = sessionRepository.findByKeyword(sessionKey);
 		if (session == null) {
 			throw new NotFoundException();
@@ -104,7 +104,7 @@ public class CommentServiceImpl implements CommentService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Comment> getInterposedQuestions(final String sessionKey, final int offset, final int limit) {
+	public List<Comment> getBySessionKey(final String sessionKey, final int offset, final int limit) {
 		final Session session = this.getSession(sessionKey);
 		final User user = getCurrentUser();
 		if (session.isCreator(user)) {
@@ -116,9 +116,9 @@ public class CommentServiceImpl implements CommentService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public Comment readInterposedQuestion(final String commentId) {
+	public Comment getAndMarkRead(final String commentId) {
 		final User user = userService.getCurrentUser();
-		return this.readInterposedQuestionInternal(commentId, user);
+		return this.getAndMarkReadInternal(commentId, user);
 	}
 
 	/*
@@ -126,7 +126,7 @@ public class CommentServiceImpl implements CommentService {
 	 * TODO: Find a better way of doing this...
 	 */
 	@Override
-	public Comment readInterposedQuestionInternal(final String commentId, User user) {
+	public Comment getAndMarkReadInternal(final String commentId, User user) {
 		final Comment comment = commentRepository.findOne(commentId);
 		if (comment == null) {
 			throw new NotFoundException();

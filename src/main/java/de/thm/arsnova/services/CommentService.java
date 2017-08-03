@@ -7,19 +7,19 @@ import de.thm.arsnova.entities.User;
 import java.util.List;
 
 public interface CommentService {
-	boolean saveQuestion(Comment comment);
+	boolean save(Comment comment);
 
-	int getInterposedCount(String sessionKey);
+	int count(String sessionKey);
 
-	CommentReadingCount getInterposedReadingCount(String sessionKey, String username);
+	CommentReadingCount countRead(String sessionKey, String username);
 
-	List<Comment> getInterposedQuestions(String sessionKey, int offset, int limit);
+	List<Comment> getBySessionKey(String sessionKey, int offset, int limit);
 
-	Comment readInterposedQuestion(String commentId);
+	Comment getAndMarkRead(String commentId);
 
-	Comment readInterposedQuestionInternal(String commentId, User user);
+	Comment getAndMarkReadInternal(String commentId, User user);
 
-	void deleteInterposedQuestion(String commentId);
+	void delete(String commentId);
 
-	void deleteAllInterposedQuestions(String sessionKeyword);
+	void deleteBySessionKey(String sessionKeyword);
 }

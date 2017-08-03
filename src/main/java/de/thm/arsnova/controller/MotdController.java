@@ -93,9 +93,9 @@ public class MotdController extends AbstractController {
 		if (motd != null) {
 			Motd newMotd;
 			if ("session".equals(motd.getAudience()) && motd.getSessionkey() != null) {
-				newMotd = motdService.saveSessionMotd(motd.getSessionkey(), motd);
+				newMotd = motdService.save(motd.getSessionkey(), motd);
 			} else {
-				newMotd = motdService.saveMotd(motd);
+				newMotd = motdService.save(motd);
 			}
 			if (newMotd == null) {
 				response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
@@ -115,20 +115,20 @@ public class MotdController extends AbstractController {
 			@ApiParam(value = "current motd", required = true) @RequestBody final Motd motd
 			) {
 		if ("session".equals(motd.getAudience()) && motd.getSessionkey() != null) {
-			return motdService.updateSessionMotd(motd.getSessionkey(), motd);
+			return motdService.update(motd.getSessionkey(), motd);
 		} else {
-			return motdService.updateMotd(motd);
+			return motdService.update(motd);
 		}
 	}
 
 	@ApiOperation(value = "deletes a message of the day", nickname = "deleteMotd")
 	@RequestMapping(value = "/{motdkey}", method = RequestMethod.DELETE)
 	public void deleteMotd(@ApiParam(value = "Motd-key from the message that shall be deleted", required = true) @PathVariable final String motdkey) {
-		Motd motd = motdService.getMotd(motdkey);
+		Motd motd = motdService.getByKey(motdkey);
 		if ("session".equals(motd.getAudience())) {
-			motdService.deleteSessionMotd(motd.getSessionkey(), motd);
+			motdService.deleteBySessionKey(motd.getSessionkey(), motd);
 		} else {
-			motdService.deleteMotd(motd);
+			motdService.delete(motd);
 		}
 	}
 
@@ -136,7 +136,7 @@ public class MotdController extends AbstractController {
 	@RequestMapping(value = "/userlist", method = RequestMethod.GET)
 	public MotdList getUserMotdList(
 			@ApiParam(value = "users name", required = true) @RequestParam(value = "username", defaultValue = "null", required = true) final String username) {
-		return motdService.getMotdListForUser(username);
+		return motdService.getMotdListByUsername(username);
 	}
 
 	@ApiOperation(value = "create a list of the motdkeys the current user has confirmed to be read")
@@ -144,7 +144,7 @@ public class MotdController extends AbstractController {
 	public MotdList postUserMotdList(
 			@ApiParam(value = "current motdlist", required = true) @RequestBody final MotdList userMotdList
 			) {
-		return motdService.saveUserMotdList(userMotdList);
+		return motdService.saveMotdList(userMotdList);
 	}
 
 	@ApiOperation(value = "update a list of the motdkeys the current user has confirmed to be read")
@@ -152,6 +152,6 @@ public class MotdController extends AbstractController {
 	public MotdList updateUserMotdList(
 			@ApiParam(value = "current motdlist", required = true) @RequestBody final MotdList userMotdList
 			) {
-		return motdService.updateUserMotdList(userMotdList);
+		return motdService.updateMotdList(userMotdList);
 	}
 }

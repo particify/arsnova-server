@@ -77,7 +77,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Content> getSkillQuestions(final String sessionkey) {
+	public List<Content> getBySessionKey(final String sessionkey) {
 		final Session session = getSession(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
@@ -89,7 +89,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getSkillQuestionCount(final String sessionkey) {
+	public int countBySessionKey(final String sessionkey) {
 		final Session session = sessionRepository.findByKeyword(sessionkey);
 		return contentRepository.countBySessionId(session.getId());
 	}
@@ -97,7 +97,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	/* FIXME: #content.getSessionKeyword() cannot be checked since keyword is no longer set for content. */
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#content.getSessionKeyword(), 'session', 'owner')")
-	public Content saveQuestion(final Content content) {
+	public Content save(final Content content) {
 		final Session session = sessionRepository.findByKeyword(content.getSessionKeyword());
 		content.setSessionId(session.getId());
 		content.setTimestamp(System.currentTimeMillis() / 1000L);
@@ -128,7 +128,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public Content getQuestion(final String id) {
+	public Content get(final String id) {
 		final Content result = contentRepository.findOne(id);
 		if (result == null) {
 			return null;
@@ -143,7 +143,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'content', 'owner')")
-	public void deleteQuestion(final String questionId) {
+	public void delete(final String questionId) {
 		final Content content = contentRepository.findOne(questionId);
 		if (content == null) {
 			throw new NotFoundException();
@@ -161,7 +161,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionKeyword, 'session', 'owner')")
-	public void deleteAllQuestions(final String sessionKeyword) {
+	public void deleteBySessionKey(final String sessionKeyword) {
 		final Session session = getSessionWithAuthCheck(sessionKeyword);
 		contentRepository.deleteAllQuestionsWithAnswers(session.getId());
 
@@ -359,7 +359,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public Answer getMyAnswer(final String questionId) {
-		final Content content = getQuestion(questionId);
+		final Content content = get(questionId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
@@ -367,7 +367,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	}
 
 	@Override
-	public void readFreetextAnswer(final String answerId, final User user) {
+	public void getFreetextAnswerAndMarkRead(final String answerId, final User user) {
 		final Answer answer = answerRepository.findOne(answerId);
 		if (answer == null) {
 			throw new NotFoundException();
@@ -390,19 +390,19 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 			throw new NotFoundException();
 		}
 		return "freetext".equals(content.getQuestionType())
-				? getFreetextAnswers(questionId, offset, limit)
+				? getFreetextAnswersByQuestionId(questionId, offset, limit)
 						: answerRepository.findByContentIdPiRound(content.getId(), piRound);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Answer> getAnswers(final String questionId, final int offset, final int limit) {
-		final Content content = getQuestion(questionId);
+		final Content content = get(questionId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
 		if ("freetext".equals(content.getQuestionType())) {
-			return getFreetextAnswers(questionId, offset, limit);
+			return getFreetextAnswersByQuestionId(questionId, offset, limit);
 		} else {
 			return answerRepository.findByContentIdPiRound(content.getId(), content.getPiRound());
 		}
@@ -411,12 +411,12 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Answer> getAllAnswers(final String questionId, final int offset, final int limit) {
-		final Content content = getQuestion(questionId);
+		final Content content = get(questionId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
 		if ("freetext".equals(content.getQuestionType())) {
-			return getFreetextAnswers(questionId, offset, limit);
+			return getFreetextAnswersByQuestionId(questionId, offset, limit);
 		} else {
 			return answerRepository.findByContentId(content.getId());
 		}
@@ -424,8 +424,8 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getAnswerCount(final String questionId) {
-		final Content content = getQuestion(questionId);
+	public int countAnswersByQuestionIdAndRound(final String questionId) {
+		final Content content = get(questionId);
 		if (content == null) {
 			return 0;
 		}
@@ -439,8 +439,8 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getAnswerCount(final String questionId, final int piRound) {
-		final Content content = getQuestion(questionId);
+	public int countAnswersByQuestionIdAndRound(final String questionId, final int piRound) {
+		final Content content = get(questionId);
 		if (content == null) {
 			return 0;
 		}
@@ -450,8 +450,8 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getAbstentionAnswerCount(final String questionId) {
-		final Content content = getQuestion(questionId);
+	public int countTotalAbstentionsByQuestionId(final String questionId) {
+		final Content content = get(questionId);
 		if (content == null) {
 			return 0;
 		}
@@ -461,8 +461,8 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getTotalAnswerCountByQuestion(final String questionId) {
-		final Content content = getQuestion(questionId);
+	public int countTotalAnswersByQuestionId(final String questionId) {
+		final Content content = get(questionId);
 		if (content == null) {
 			return 0;
 		}
@@ -472,7 +472,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getFreetextAnswers(final String questionId, final int offset, final int limit) {
+	public List<Answer> getFreetextAnswersByQuestionId(final String questionId, final int offset, final int limit) {
 		final List<Answer> answers = answerRepository.findByContentId(questionId, offset, limit);
 		if (answers == null) {
 			throw new NotFoundException();
@@ -487,7 +487,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getMyAnswers(final String sessionKey) {
+	public List<Answer> getMyAnswersBySessionKey(final String sessionKey) {
 		final Session session = getSession(sessionKey);
 		// Load contents first because we are only interested in answers of the latest piRound.
 		final List<Content> contents = contentRepository.findBySessionIdForUsers(session.getId());
@@ -521,7 +521,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getTotalAnswerCount(final String sessionKey) {
+	public int countTotalAnswersBySessionKey(final String sessionKey) {
 		return answerRepository.countBySessionKey(sessionKey);
 	}
 
@@ -567,7 +567,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	@PreAuthorize("isAuthenticated()")
 	public Answer saveAnswer(final String questionId, final de.thm.arsnova.entities.transport.Answer answer) {
 		final User user = getCurrentUser();
-		final Content content = getQuestion(questionId);
+		final Content content = get(questionId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
@@ -602,7 +602,7 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 			throw new UnauthorizedException();
 		}
 
-		final Content content = getQuestion(answer.getQuestionId());
+		final Content content = get(answer.getQuestionId());
 		if ("freetext".equals(content.getQuestionType())) {
 			imageUtils.generateThumbnailImage(realAnswer);
 			content.checkTextStrictOptions(realAnswer);
@@ -692,19 +692,19 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getLectureQuestionCount(final String sessionkey) {
+	public int countLectureQuestions(final String sessionkey) {
 		return contentRepository.countLectureVariantBySessionId(getSession(sessionkey).getId());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getFlashcardCount(final String sessionkey) {
+	public int countFlashcards(final String sessionkey) {
 		return contentRepository.countFlashcardVariantBySessionId(getSession(sessionkey).getId());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int getPreparationQuestionCount(final String sessionkey) {
+	public int countPreparationQuestions(final String sessionkey) {
 		return contentRepository.countPreparationVariantBySessionId(getSession(sessionkey).getId());
 	}
 
@@ -724,8 +724,8 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	}
 
 	@Override
-	public Map<String, Object> getAnswerAndAbstentionCountInternal(final String questionId) {
-		final Content content = getQuestion(questionId);
+	public Map<String, Object> countAnswersAndAbstentionsInternal(final String questionId) {
+		final Content content = get(questionId);
 		HashMap<String, Object> map = new HashMap<>();
 
 		if (content == null) {

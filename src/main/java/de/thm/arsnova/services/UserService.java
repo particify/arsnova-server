@@ -44,9 +44,9 @@ public interface UserService {
 
 	boolean isUserInSession(User user, String keyword);
 
-	Set<User> getUsersInSession(String keyword);
+	Set<User> getUsersBySessionKey(String keyword);
 
-	String getSessionForUser(String username);
+	String getSessionByUsername(String username);
 
 	void addUserToSessionBySocketId(UUID socketId, String keyword);
 
@@ -56,13 +56,13 @@ public interface UserService {
 
 	int loggedInUsers();
 
-	DbUser getDbUser(String username);
+	DbUser getByUsername(String username);
 
-	DbUser createDbUser(String username, String password);
+	DbUser create(String username, String password);
 
-	DbUser updateDbUser(DbUser dbUser);
+	DbUser update(DbUser dbUser);
 
-	DbUser deleteDbUser(String username);
+	DbUser deleteByUsername(String username);
 
 	void initiatePasswordReset(String username);
 

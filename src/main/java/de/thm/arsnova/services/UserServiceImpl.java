@@ -278,7 +278,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Set<User> getUsersInSession(final String keyword) {
+	public Set<User> getUsersBySessionKey(final String keyword) {
 		final Set<User> result = new HashSet<>();
 		for (final Entry<User, String> e : user2session.entrySet()) {
 			if (e.getValue().equals(keyword)) {
@@ -309,7 +309,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public String getSessionForUser(final String username) {
+	public String getSessionByUsername(final String username) {
 		for (final Entry<User, String> entry  : user2session.entrySet()) {
 			if (entry.getKey().getUsername().equals(username)) {
 				return entry.getValue();
@@ -338,12 +338,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public DbUser getDbUser(String username) {
+	public DbUser getByUsername(String username) {
 		return userRepository.findByUsername(username.toLowerCase());
 	}
 
 	@Override
-	public DbUser createDbUser(String username, String password) {
+	public DbUser create(String username, String password) {
 		String lcUsername = username.toLowerCase();
 
 		if (null == keygen) {
@@ -434,7 +434,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public DbUser updateDbUser(DbUser dbUser) {
+	public DbUser update(DbUser dbUser) {
 		if (null != dbUser.getId()) {
 			return userRepository.save(dbUser);
 		}
@@ -443,7 +443,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public DbUser deleteDbUser(String username) {
+	public DbUser deleteByUsername(String username) {
 		User user = getCurrentUser();
 		if (!user.getUsername().equals(username.toLowerCase())
 				&& !SecurityContextHolder.getContext().getAuthentication().getAuthorities()
@@ -451,7 +451,7 @@ public class UserServiceImpl implements UserService {
 			throw new UnauthorizedException();
 		}
 
-		DbUser dbUser = getDbUser(username);
+		DbUser dbUser = getByUsername(username);
 		if (null == dbUser) {
 			throw new NotFoundException();
 		}
@@ -463,7 +463,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void initiatePasswordReset(String username) {
-		DbUser dbUser = getDbUser(username);
+		DbUser dbUser = getByUsername(username);
 		if (null == dbUser) {
 			logger.info("Password reset failed. User {} does not exist.", username);
 
@@ -513,14 +513,14 @@ public class UserServiceImpl implements UserService {
 
 			dbUser.setPasswordResetKey(null);
 			dbUser.setPasswordResetTime(0);
-			updateDbUser(dbUser);
+			update(dbUser);
 
 			return false;
 		}
 
 		dbUser.setPassword(encodePassword(password));
 		dbUser.setPasswordResetKey(null);
-		if (null == updateDbUser(dbUser)) {
+		if (null == update(dbUser)) {
 			logger.error("Password reset failed. {} could not be updated.", dbUser.getUsername());
 		}
 

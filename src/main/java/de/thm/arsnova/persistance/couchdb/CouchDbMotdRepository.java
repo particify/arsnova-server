@@ -105,7 +105,7 @@ public class CouchDbMotdRepository extends CouchDbCrudRepository<Motd> implement
 			motd.setMotdkey(oldMotd.getMotdkey());
 			update(motd);
 		} else {
-			motd.setMotdkey(sessionService.generateKeyword());
+			motd.setMotdkey(sessionService.generateKey());
 			add(motd);
 		}
 

@@ -89,7 +89,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 	@Override
 	@Caching(evict = @CacheEvict(cacheNames = "sessions", key = "#result.keyword"))
 	public Session save(final User user, final Session session) {
-		session.setKeyword(sessionService.generateKeyword());
+		session.setKeyword(sessionService.generateKey());
 		session.setCreator(user.getUsername());
 		session.setActive(true);
 		session.setFeedbackLock(false);

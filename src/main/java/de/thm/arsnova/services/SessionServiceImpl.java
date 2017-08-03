@@ -153,7 +153,7 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 	}
 
 	@Override
-	public Session joinSession(final String keyword, final UUID socketId) {
+	public Session join(final String keyword, final UUID socketId) {
 		/* Socket.IO solution */
 
 		Session session = null != keyword ? sessionRepository.findByKeyword(keyword) : null;
@@ -183,13 +183,13 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public Session getSession(final String keyword) {
+	public Session getByKey(final String keyword) {
 		final User user = userService.getCurrentUser();
-		return Session.anonymizedCopy(this.getSessionInternal(keyword, user));
+		return Session.anonymizedCopy(this.getInternal(keyword, user));
 	}
 
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
-	public Session getSessionForAdmin(final String keyword) {
+	public Session getForAdmin(final String keyword) {
 		return sessionRepository.findByKeyword(keyword);
 	}
 
@@ -198,7 +198,7 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 	 * TODO: Find a better way of doing this...
 	 */
 	@Override
-	public Session getSessionInternal(final String keyword, final User user) {
+	public Session getInternal(final String keyword, final User user) {
 		final Session session = sessionRepository.findByKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();
@@ -270,7 +270,7 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public Session saveSession(final Session session) {
+	public Session save(final Session session) {
 		if (connectorClient != null && session.getCourseId() != null) {
 			if (!connectorClient.getMembership(
 					userService.getCurrentUser().getUsername(), session.getCourseId()).isMember()
@@ -300,25 +300,25 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 	}
 
 	@Override
-	public boolean sessionKeyAvailable(final String keyword) {
+	public boolean isKeyAvailable(final String keyword) {
 		return sessionRepository.sessionKeyAvailable(keyword);
 	}
 
 	@Override
-	public String generateKeyword() {
+	public String generateKey() {
 		final int low = 10000000;
 		final int high = 100000000;
 		final String keyword = String
 				.valueOf((int) (Math.random() * (high - low) + low));
 
-		if (sessionKeyAvailable(keyword)) {
+		if (isKeyAvailable(keyword)) {
 			return keyword;
 		}
-		return generateKeyword();
+		return generateKey();
 	}
 
 	@Override
-	public int countSessions(final List<Course> courses) {
+	public int countSessionsByCourses(final List<Course> courses) {
 		final List<Session> sessions = sessionRepository.findSessionsByCourses(courses);
 		if (sessions == null) {
 			return 0;
@@ -328,7 +328,7 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 
 	@Override
 	public int activeUsers(final String sessionkey) {
-		return userService.getUsersInSession(sessionkey).size();
+		return userService.getUsersBySessionKey(sessionkey).size();
 	}
 
 	@Override
@@ -347,7 +347,7 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#session, 'owner')")
-	public Session updateSession(final String sessionkey, final Session session) {
+	public Session update(final String sessionkey, final Session session) {
 		final Session existingSession = sessionRepository.findByKeyword(sessionkey);
 
 		existingSession.setActive(session.isActive());
@@ -375,7 +375,7 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
-	public Session changeSessionCreator(String sessionkey, String newCreator) {
+	public Session updateCreator(String sessionkey, String newCreator) {
 		final Session existingSession = sessionRepository.findByKeyword(sessionkey);
 		if (existingSession == null) {
 			throw new NullPointerException("Could not load session " + sessionkey + ".");
@@ -388,7 +388,7 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 	 * TODO: Find a better way of doing this...
 	 */
 	@Override
-	public Session updateSessionInternal(final Session session, final User user) {
+	public Session updateInternal(final Session session, final User user) {
 		if (session.isCreator(user)) {
 			sessionRepository.update(session);
 			return session;
@@ -398,7 +398,7 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
-	public void deleteSession(final String sessionkey) {
+	public void delete(final String sessionkey) {
 		final Session session = sessionRepository.findByKeyword(sessionkey);
 
 		sessionRepository.deleteSession(session);
@@ -456,12 +456,12 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 	}
 
 	@Override
-	public SessionFeature getSessionFeatures(String sessionkey) {
+	public SessionFeature getFeatures(String sessionkey) {
 		return sessionRepository.findByKeyword(sessionkey).getFeatures();
 	}
 
 	@Override
-	public SessionFeature changeSessionFeatures(String sessionkey, SessionFeature features) {
+	public SessionFeature updateFeatures(String sessionkey, SessionFeature features) {
 		final Session session = sessionRepository.findByKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
 		if (!session.isCreator(user)) {
@@ -482,7 +482,7 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 			throw new UnauthorizedException("User is not session creator.");
 		}
 		if (!lock) {
-			feedbackService.cleanFeedbackVotesInSession(sessionkey, 0);
+			feedbackService.cleanFeedbackVotesBySessionKey(sessionkey, 0);
 		}
 
 		session.setFeedbackLock(lock);

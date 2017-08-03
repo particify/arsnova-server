@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 public interface FeedbackStorageService {
-	Feedback getFeedback(Session session);
-	Integer getMyFeedback(Session session, User u);
-	void saveFeedback(Session session, int value, User user);
-	Map<Session, List<User>> cleanFeedbackVotes(int cleanupFeedbackDelay);
-	List<User> cleanFeedbackVotesInSession(Session session, int cleanupFeedbackDelayInMins);
+	Feedback getBySession(Session session);
+	Integer getBySessionAndUser(Session session, User u);
+	void save(Session session, int value, User user);
+	Map<Session, List<User>> cleanVotes(int cleanupFeedbackDelay);
+	List<User> cleanVotesBySession(Session session, int cleanupFeedbackDelayInMins);
 }

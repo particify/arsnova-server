@@ -66,7 +66,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	@Override
 	@Scheduled(fixedDelay = DEFAULT_SCHEDULER_DELAY)
 	public void cleanFeedbackVotes() {
-		Map<Session, List<User>> deletedFeedbackOfUsersInSession = feedbackStorage.cleanFeedbackVotes(cleanupFeedbackDelay);
+		Map<Session, List<User>> deletedFeedbackOfUsersInSession = feedbackStorage.cleanVotes(cleanupFeedbackDelay);
 		/*
 		 * mapping (Session -> Users) is not suitable for web sockets, because we want to sent all affected
 		 * sessions to a single user in one go instead of sending multiple messages for each session. Hence,
@@ -101,9 +101,9 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	}
 
 	@Override
-	public void cleanFeedbackVotesInSession(final String keyword, final int cleanupFeedbackDelayInMins) {
+	public void cleanFeedbackVotesBySessionKey(final String keyword, final int cleanupFeedbackDelayInMins) {
 		final Session session = sessionRepository.findByKeyword(keyword);
-		List<User> affectedUsers = feedbackStorage.cleanFeedbackVotesInSession(session, cleanupFeedbackDelayInMins);
+		List<User> affectedUsers = feedbackStorage.cleanVotesBySession(session, cleanupFeedbackDelayInMins);
 		Set<Session> sessionSet = new HashSet<>();
 		sessionSet.add(session);
 
@@ -116,29 +116,29 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	}
 
 	@Override
-	public Feedback getFeedback(final String keyword) {
+	public Feedback getBySessionKey(final String keyword) {
 		final Session session = sessionRepository.findByKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();
 		}
-		return feedbackStorage.getFeedback(session);
+		return feedbackStorage.getBySession(session);
 	}
 
 	@Override
-	public int getFeedbackCount(final String keyword) {
-		final Feedback feedback = this.getFeedback(keyword);
+	public int countFeedbackBySessionKey(final String keyword) {
+		final Feedback feedback = this.getBySessionKey(keyword);
 		final List<Integer> values = feedback.getValues();
 		return values.get(Feedback.FEEDBACK_FASTER) + values.get(Feedback.FEEDBACK_OK)
 				+ values.get(Feedback.FEEDBACK_SLOWER) + values.get(Feedback.FEEDBACK_AWAY);
 	}
 
 	@Override
-	public double getAverageFeedback(final String sessionkey) {
+	public double calculateAverageFeedback(final String sessionkey) {
 		final Session session = sessionRepository.findByKeyword(sessionkey);
 		if (session == null) {
 			throw new NotFoundException();
 		}
-		final Feedback feedback = feedbackStorage.getFeedback(session);
+		final Feedback feedback = feedbackStorage.getBySession(session);
 		final List<Integer> values = feedback.getValues();
 		final double count = values.get(Feedback.FEEDBACK_FASTER) + values.get(Feedback.FEEDBACK_OK)
 				+ values.get(Feedback.FEEDBACK_SLOWER) + values.get(Feedback.FEEDBACK_AWAY);
@@ -152,29 +152,29 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	}
 
 	@Override
-	public long getAverageFeedbackRounded(final String sessionkey) {
-		return Math.round(getAverageFeedback(sessionkey));
+	public long calculateRoundedAverageFeedback(final String sessionkey) {
+		return Math.round(calculateAverageFeedback(sessionkey));
 	}
 
 	@Override
-	public boolean saveFeedback(final String keyword, final int value, final User user) {
+	public boolean save(final String keyword, final int value, final User user) {
 		final Session session = sessionRepository.findByKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();
 		}
-		feedbackStorage.saveFeedback(session, value, user);
+		feedbackStorage.save(session, value, user);
 
 		this.publisher.publishEvent(new NewFeedbackEvent(this, session));
 		return true;
 	}
 
 	@Override
-	public Integer getMyFeedback(final String keyword, final User user) {
+	public Integer getBySessionKeyAndUser(final String keyword, final User user) {
 		final Session session = sessionRepository.findByKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();
 		}
-		return feedbackStorage.getMyFeedback(session, user);
+		return feedbackStorage.getBySessionAndUser(session, user);
 	}
 
 	@Override

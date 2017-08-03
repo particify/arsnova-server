@@ -57,7 +57,7 @@ public class CommentController extends PaginationController {
 	@DeprecatedApi
 	@Deprecated
 	public int getInterposedCount(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey) {
-		return commentService.getInterposedCount(sessionkey);
+		return commentService.count(sessionkey);
 	}
 
 	@ApiOperation(value = "count all unread comments",
@@ -66,7 +66,7 @@ public class CommentController extends PaginationController {
 	@DeprecatedApi
 	@Deprecated
 	public CommentReadingCount getUnreadInterposedCount(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam("sessionkey") final String sessionkey, String user) {
-		return commentService.getInterposedReadingCount(sessionkey, user);
+		return commentService.countRead(sessionkey, user);
 	}
 
 	@ApiOperation(value = "Retrieves all Comments for a Session",
@@ -74,14 +74,14 @@ public class CommentController extends PaginationController {
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
 	public List<Comment> getInterposedQuestions(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey) {
-		return Comment.fromList(commentService.getInterposedQuestions(sessionkey, offset, limit));
+		return Comment.fromList(commentService.getBySessionKey(sessionkey, offset, limit));
 	}
 
 	@ApiOperation(value = "Retrieves an Comment",
 			nickname = "getInterposedQuestion")
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
 	public Comment getInterposedQuestion(@ApiParam(value = "ID of the Comment that needs to be deleted", required = true) @PathVariable final String questionId) {
-		return new Comment(commentService.readInterposedQuestion(questionId));
+		return new Comment(commentService.getAndMarkRead(questionId));
 	}
 
 	@ApiOperation(value = "Creates a new Comment for a Session and returns the Comment's data",
@@ -95,7 +95,7 @@ public class CommentController extends PaginationController {
 			@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey,
 			@ApiParam(value = "the body from the new comment", required = true) @RequestBody final de.thm.arsnova.entities.Comment comment
 			) {
-		if (commentService.saveQuestion(comment)) {
+		if (commentService.save(comment)) {
 			return;
 		}
 
@@ -106,6 +106,6 @@ public class CommentController extends PaginationController {
 			nickname = "deleteInterposedQuestion")
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)
 	public void deleteInterposedQuestion(@ApiParam(value = "ID of the comment that needs to be deleted", required = true) @PathVariable final String questionId) {
-		commentService.deleteInterposedQuestion(questionId);
+		commentService.delete(questionId);
 	}
 }

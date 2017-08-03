@@ -52,7 +52,7 @@ public class MotdServiceImpl implements MotdService {
 
   @Override
   @PreAuthorize("isAuthenticated()")
-  public Motd getMotd(final String key) {
+  public Motd getByKey(final String key) {
     return motdRepository.findByKey(key);
   }
 
@@ -115,14 +115,14 @@ public class MotdServiceImpl implements MotdService {
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
-	public Motd saveMotd(final Motd motd) {
+	public Motd save(final Motd motd) {
 		return createOrUpdateMotd(motd);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
-	public Motd saveSessionMotd(final String sessionkey, final Motd motd) {
-		Session session = sessionService.getSession(sessionkey);
+	public Motd save(final String sessionkey, final Motd motd) {
+		Session session = sessionService.getByKey(sessionkey);
 		motd.setSessionId(session.getId());
 
 
@@ -131,13 +131,13 @@ public class MotdServiceImpl implements MotdService {
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
-	public Motd updateMotd(final Motd motd) {
+	public Motd update(final Motd motd) {
 		return createOrUpdateMotd(motd);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
-	public Motd updateSessionMotd(final String sessionkey, final Motd motd) {
+	public Motd update(final String sessionkey, final Motd motd) {
 		return createOrUpdateMotd(motd);
 	}
 
@@ -155,19 +155,19 @@ public class MotdServiceImpl implements MotdService {
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
-	public void deleteMotd(Motd motd) {
+	public void delete(Motd motd) {
 		motdRepository.delete(motd);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
-	public void deleteSessionMotd(final String sessionkey, Motd motd) {
+	public void deleteBySessionKey(final String sessionkey, Motd motd) {
 		motdRepository.delete(motd);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public MotdList getMotdListForUser(final String username) {
+	public MotdList getMotdListByUsername(final String username) {
 		final User user = userService.getCurrentUser();
 		if (username.equals(user.getUsername()) && !"guest".equals(user.getType())) {
 			return motdListRepository.findByUsername(username);
@@ -177,7 +177,7 @@ public class MotdServiceImpl implements MotdService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public MotdList saveUserMotdList(MotdList motdList) {
+	public MotdList saveMotdList(MotdList motdList) {
 		final User user = userService.getCurrentUser();
 		if (user.getUsername().equals(motdList.getUsername())) {
 			return motdListRepository.save(motdList);
@@ -187,7 +187,7 @@ public class MotdServiceImpl implements MotdService {
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public MotdList updateUserMotdList(MotdList motdList) {
+	public MotdList updateMotdList(MotdList motdList) {
 		final User user = userService.getCurrentUser();
 		if (user.getUsername().equals(motdList.getUsername())) {
 			return motdListRepository.save(motdList);

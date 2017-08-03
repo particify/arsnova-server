@@ -27,7 +27,7 @@ import java.util.List;
  * The functionality the motd service should provide.
  */
 public interface MotdService {
-	Motd getMotd(String keyword);
+	Motd getByKey(String keyword);
 
 	List<Motd> getAdminMotds();  //all w/o the sessionmotds
 
@@ -39,21 +39,21 @@ public interface MotdService {
 
 	List<Motd> filterMotdsByList(List<Motd> list, MotdList motdList);
 
-	void deleteMotd(Motd motd);
+	void delete(Motd motd);
 
-	void deleteSessionMotd(final String sessionkey, Motd motd);
+	void deleteBySessionKey(final String sessionkey, Motd motd);
 
-	Motd saveMotd(Motd motd);
+	Motd save(Motd motd);
 
-	Motd saveSessionMotd(final String sessionkey, final Motd motd);
+	Motd save(final String sessionkey, final Motd motd);
 
-	Motd updateMotd(Motd motd);
+	Motd update(Motd motd);
 
-	Motd updateSessionMotd(final String sessionkey, Motd motd);
+	Motd update(final String sessionkey, Motd motd);
 
-	MotdList getMotdListForUser(final String username);
+	MotdList getMotdListByUsername(final String username);
 
-	MotdList saveUserMotdList(MotdList motdList);
+	MotdList saveMotdList(MotdList motdList);
 
-	MotdList updateUserMotdList(MotdList userMotdList);
+	MotdList updateMotdList(MotdList motdList);
 }

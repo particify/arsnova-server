@@ -32,17 +32,17 @@ import java.util.UUID;
  * The functionality the session service should provide.
  */
 public interface SessionService {
-	Session getSession(String keyword);
+	Session getByKey(String keyword);
 
-	Session getSessionForAdmin(final String keyword);
+	Session getForAdmin(final String keyword);
 
-	Session getSessionInternal(String keyword, User user);
+	Session getInternal(String keyword, User user);
 
-	Session saveSession(Session session);
+	Session save(Session session);
 
-	boolean sessionKeyAvailable(String keyword);
+	boolean isKeyAvailable(String keyword);
 
-	String generateKeyword();
+	String generateKey();
 
 	List<Session> getUserSessions(String username);
 
@@ -52,21 +52,21 @@ public interface SessionService {
 
 	List<Session> getMyVisitedSessions(int offset, int limit);
 
-	int countSessions(List<Course> courses);
+	int countSessionsByCourses(List<Course> courses);
 
 	int activeUsers(String sessionkey);
 
 	Session setActive(String sessionkey, Boolean lock);
 
-	Session joinSession(String keyword, UUID socketId);
+	Session join(String keyword, UUID socketId);
 
-	Session updateSession(String sessionkey, Session session);
+	Session update(String sessionkey, Session session);
 
-	Session changeSessionCreator(String sessionkey, String newCreator);
+	Session updateCreator(String sessionkey, String newCreator);
 
-	Session updateSessionInternal(Session session, User user);
+	Session updateInternal(Session session, User user);
 
-	void deleteSession(String sessionkey);
+	void delete(String sessionkey);
 
 	ScoreStatistics getLearningProgress(String sessionkey, String type, String questionVariant);
 
@@ -86,9 +86,9 @@ public interface SessionService {
 
 	SessionInfo copySessionToPublicPool(String sessionkey, de.thm.arsnova.entities.transport.ImportExportSession.PublicPool pp);
 
-	SessionFeature getSessionFeatures(String sessionkey);
+	SessionFeature getFeatures(String sessionkey);
 
-	SessionFeature changeSessionFeatures(String sessionkey, SessionFeature features);
+	SessionFeature updateFeatures(String sessionkey, SessionFeature features);
 
 	boolean lockFeedbackInput(String sessionkey, Boolean lock);
 

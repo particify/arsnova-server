@@ -23,7 +23,7 @@ public class EntityService<T extends Entity> {
 	}
 
 	@PreAuthorize("hasPermission(type, #id, 'read')")
-	public T findOne(final String id) {
+	public T get(final String id) {
 		return repository.findOne(id);
 	}
 
