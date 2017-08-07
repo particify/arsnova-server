@@ -13,6 +13,7 @@ import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.SessionRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ import java.util.List;
  * Performs all comment related operations.
  */
 @Service
-public class CommentServiceImpl extends EntityService<Comment> implements CommentService {
+public class CommentServiceImpl extends EntityService<Comment> implements CommentService, ApplicationEventPublisherAware {
 	private UserService userService;
 
 	private CommentRepository commentRepository;
@@ -41,6 +42,11 @@ public class CommentServiceImpl extends EntityService<Comment> implements Commen
 		this.commentRepository = repository;
 		this.sessionRepository = sessionRepository;
 		this.userService = userService;
+	}
+
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+		this.publisher = applicationEventPublisher;
 	}
 
 	@Override
