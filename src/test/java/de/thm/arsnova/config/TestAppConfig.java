@@ -1,5 +1,6 @@
 package de.thm.arsnova.config;
 
+import de.thm.arsnova.persistance.UserRepository;
 import de.thm.arsnova.services.StubUserService;
 import de.thm.arsnova.websocket.ArsnovaSocketioServer;
 import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.aspectj.EnableSpringConfigured;
 import org.springframework.context.support.SimpleThreadScope;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
@@ -70,7 +72,7 @@ public class TestAppConfig {
 
 	@Bean
 	@Primary
-	public StubUserService stubUserService() {
-		return new StubUserService();
+	public StubUserService stubUserService(UserRepository repository, JavaMailSender mailSender) {
+		return new StubUserService(repository, mailSender);
 	}
 }

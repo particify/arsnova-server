@@ -32,7 +32,6 @@ import org.pac4j.oauth.profile.twitter.TwitterProfile;
 import org.pac4j.springframework.security.authentication.Pac4jAuthenticationToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -95,10 +94,8 @@ public class UserServiceImpl implements UserService {
 	/* used for Socket.IO online check solution (new) */
 	private static final ConcurrentHashMap<User, String> user2session = new ConcurrentHashMap<>();
 
-	@Autowired
 	private UserRepository userRepository;
 
-	@Autowired
 	private JavaMailSender mailSender;
 
 	@Value("${root-url}")
@@ -149,6 +146,11 @@ public class UserServiceImpl implements UserService {
 	{
 		loginTries = new ConcurrentHashMap<>();
 		loginBans = Collections.synchronizedSet(new HashSet<String>());
+	}
+
+	public UserServiceImpl(UserRepository repository, JavaMailSender mailSender) {
+		this.userRepository = repository;
+		this.mailSender = mailSender;
 	}
 
 	@Scheduled(fixedDelay = LOGIN_TRY_RESET_DELAY_MS)

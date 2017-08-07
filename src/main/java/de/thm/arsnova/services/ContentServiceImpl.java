@@ -31,10 +31,11 @@ import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.SessionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -50,20 +51,15 @@ import java.util.TimerTask;
  * Performs all content and answer related operations.
  */
 @Service
-public class ContentServiceImpl implements ContentService, ApplicationEventPublisherAware {
-	@Autowired
+public class ContentServiceImpl extends EntityService<Content> implements ContentService, ApplicationEventPublisherAware {
 	private UserService userService;
 
-	@Autowired
 	private SessionRepository sessionRepository;
 
-	@Autowired
 	private ContentRepository contentRepository;
 
-	@Autowired
 	private AnswerRepository answerRepository;
 
-	@Autowired
 	private ImageUtils imageUtils;
 
 	@Value("${upload.filesize_b}")
@@ -74,6 +70,21 @@ public class ContentServiceImpl implements ContentService, ApplicationEventPubli
 	private static final Logger logger = LoggerFactory.getLogger(ContentServiceImpl.class);
 
 	private HashMap<String, Timer> timerList = new HashMap<>();
+
+	public ContentServiceImpl(
+			ContentRepository repository,
+			AnswerRepository answerRepository,
+			SessionRepository sessionRepository,
+			UserService userService,
+			ImageUtils imageUtils,
+			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+		super(Content.class, repository, jackson2HttpMessageConverter.getObjectMapper());
+		this.contentRepository = repository;
+		this.answerRepository = answerRepository;
+		this.sessionRepository = sessionRepository;
+		this.userService = userService;
+		this.imageUtils = imageUtils;
+	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")

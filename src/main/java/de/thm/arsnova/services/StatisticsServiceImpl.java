@@ -19,7 +19,6 @@ package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.persistance.StatisticsRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -29,11 +28,16 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class StatisticsServiceImpl implements StatisticsService {
-	@Autowired
 	private StatisticsRepository statisticsRepository;
 
-	@Autowired
 	private UserService userService;
+
+	public StatisticsServiceImpl(
+			StatisticsRepository repository,
+			UserService userService) {
+		this.statisticsRepository = repository;
+		this.userService = userService;
+	}
 
 	private Statistics statistics = new Statistics();
 

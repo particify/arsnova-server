@@ -11,8 +11,9 @@ import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.SessionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -22,17 +23,25 @@ import java.util.List;
  * Performs all comment related operations.
  */
 @Service
-public class CommentServiceImpl implements CommentService {
-	@Autowired
+public class CommentServiceImpl extends EntityService<Comment> implements CommentService {
 	private UserService userService;
 
-	@Autowired
 	private CommentRepository commentRepository;
 
-	@Autowired
 	private SessionRepository sessionRepository;
 
 	private ApplicationEventPublisher publisher;
+
+	public CommentServiceImpl(
+			CommentRepository repository,
+			SessionRepository sessionRepository,
+			UserService userService,
+			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+		super(Comment.class, repository, jackson2HttpMessageConverter.getObjectMapper());
+		this.commentRepository = repository;
+		this.sessionRepository = sessionRepository;
+		this.userService = userService;
+	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")

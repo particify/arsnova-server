@@ -45,9 +45,11 @@ import de.thm.arsnova.persistance.VisitedSessionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -61,10 +63,49 @@ import java.util.UUID;
  * Performs all session related operations.
  */
 @Service
-public class SessionServiceImpl implements SessionService, ApplicationEventPublisherAware {
+public class SessionServiceImpl extends EntityService<Session> implements SessionService, ApplicationEventPublisherAware {
+	private static final long SESSION_INACTIVITY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
 
-	@Autowired
+	private static final Logger logger = LoggerFactory.getLogger(SessionServiceImpl.class);
+
 	private SessionRepository sessionRepository;
+
+	private VisitedSessionRepository visitedSessionRepository;
+
+	private UserService userService;
+
+	private FeedbackService feedbackService;
+
+	private ScoreCalculatorFactory scoreCalculatorFactory;
+
+	private ConnectorClient connectorClient;
+
+	private ImageUtils imageUtils;
+
+	@Value("${session.guest-session.cleanup-days:0}")
+	private int guestSessionInactivityThresholdDays;
+
+	@Value("${pp.logofilesize_b}")
+	private int uploadFileSizeByte;
+
+	private ApplicationEventPublisher publisher;
+
+	public SessionServiceImpl(
+			SessionRepository repository,
+			VisitedSessionRepository visitedSessionRepository,
+			UserService userService,
+			FeedbackService feedbackService,
+			ScoreCalculatorFactory scoreCalculatorFactory,
+			ImageUtils imageUtils,
+			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+		super(Session.class, repository, jackson2HttpMessageConverter.getObjectMapper());
+		this.sessionRepository = repository;
+		this.visitedSessionRepository = visitedSessionRepository;
+		this.userService = userService;
+		this.feedbackService = feedbackService;
+		this.scoreCalculatorFactory = scoreCalculatorFactory;
+		this.imageUtils = imageUtils;
+	}
 
 	public static class SessionNameComparator implements Comparator<Session>, Serializable {
 		private static final long serialVersionUID = 1L;
@@ -102,35 +143,10 @@ public class SessionServiceImpl implements SessionService, ApplicationEventPubli
 		}
 	}
 
-	private static final long SESSION_INACTIVITY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
-
-	@Autowired
-	private VisitedSessionRepository visitedSessionRepository;
-
-	@Autowired
-	private UserService userService;
-
-	@Autowired
-	private FeedbackService feedbackService;
-
-	@Autowired
-	private ScoreCalculatorFactory scoreCalculatorFactory;
-
 	@Autowired(required = false)
-	private ConnectorClient connectorClient;
-
-	@Autowired
-	private ImageUtils imageUtils;
-
-	@Value("${session.guest-session.cleanup-days:0}")
-	private int guestSessionInactivityThresholdDays;
-
-	@Value("${pp.logofilesize_b}")
-	private int uploadFileSizeByte;
-
-	private ApplicationEventPublisher publisher;
-
-	private static final Logger logger = LoggerFactory.getLogger(SessionServiceImpl.class);
+	public void setConnectorClient(ConnectorClient connectorClient) {
+		this.connectorClient = connectorClient;
+	}
 
 	@Scheduled(fixedDelay = SESSION_INACTIVITY_CHECK_INTERVAL_MS)
 	public void deleteInactiveSessions() {

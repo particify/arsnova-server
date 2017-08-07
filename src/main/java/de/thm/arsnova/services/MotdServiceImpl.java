@@ -24,7 +24,8 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.persistance.MotdListRepository;
 import de.thm.arsnova.persistance.MotdRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -37,18 +38,27 @@ import java.util.StringTokenizer;
  * Performs all question, interposed question, and answer related operations.
  */
 @Service
-public class MotdServiceImpl implements MotdService {
-	@Autowired
+public class MotdServiceImpl extends EntityService<Motd> implements MotdService {
 	private UserService userService;
 
-	@Autowired
 	private SessionService sessionService;
 
-	@Autowired
 	private MotdRepository motdRepository;
 
-	@Autowired
 	private MotdListRepository motdListRepository;
+
+	public MotdServiceImpl(
+			MotdRepository repository,
+			MotdListRepository motdListRepository,
+			UserService userService,
+			SessionService sessionService,
+			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+		super(Motd.class, repository, jackson2HttpMessageConverter.getObjectMapper());
+		this.motdRepository = repository;
+		this.motdListRepository = motdListRepository;
+		this.userService = userService;
+		this.sessionService = sessionService;
+	}
 
   @Override
   @PreAuthorize("isAuthenticated()")

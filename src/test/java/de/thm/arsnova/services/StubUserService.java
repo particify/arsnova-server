@@ -18,11 +18,17 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.persistance.UserRepository;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 public class StubUserService extends UserServiceImpl {
 
 	private User stubUser = null;
+
+	public StubUserService(UserRepository repository, JavaMailSender mailSender) {
+		super(repository, mailSender);
+	}
 
 	public void setUserAuthenticated(boolean isAuthenticated) {
 		this.setUserAuthenticated(isAuthenticated, "ptsr00");
