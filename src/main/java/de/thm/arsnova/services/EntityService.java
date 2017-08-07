@@ -7,8 +7,10 @@ import de.thm.arsnova.entities.Entity;
 import de.thm.arsnova.entities.serialization.View;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.prepost.PreFilter;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Map;
 
 public class EntityService<T extends Entity> {
@@ -48,6 +50,17 @@ public class EntityService<T extends Entity> {
 		reader.readValue(tree);
 
 		return repository.save(entity);
+	}
+
+	@PreFilter(value = "hasPermission(filterObject, 'update')", filterTarget = "entities")
+	public Iterable<T> patch(final Collection<T> entities, final Map<String, Object> changes) throws IOException {
+		JsonNode tree = objectMapper.valueToTree(changes);
+		for (T entity : entities) {
+			ObjectReader reader = objectMapper.readerForUpdating(entity).withView(View.Public.class);
+			reader.readValue(tree);
+		}
+
+		return repository.save(entities);
 	}
 
 	@PreAuthorize("hasPermission(#entity, 'delete')")
