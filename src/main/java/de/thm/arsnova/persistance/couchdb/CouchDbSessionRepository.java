@@ -221,7 +221,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 	@CachePut(value = "sessions")
 	public void update(final Session session) {
 		try {
-			update(session);
+			super.update(session);
 		} catch (final UpdateConflictException e) {
 			logger.error("Could not update session {}.", session, e);
 		}

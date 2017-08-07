@@ -106,7 +106,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 			content.setId(oldContent.getId());
 			content.setRevision(oldContent.getRevision());
 			content.updateRoundManagementState();
-			update(content);
+			super.update(content);
 		} catch (final UpdateConflictException e) {
 			logger.error("Could not update content {}.", content, e);
 		}
