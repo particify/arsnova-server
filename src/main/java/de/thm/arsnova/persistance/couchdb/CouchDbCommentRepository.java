@@ -3,12 +3,9 @@ package de.thm.arsnova.persistance.couchdb;
 import com.fasterxml.jackson.databind.JsonNode;
 import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.CommentReadingCount;
-import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.LogEntryRepository;
-import de.thm.arsnova.persistance.SessionRepository;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.UpdateConflictException;
@@ -25,22 +22,14 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	@Autowired
 	private LogEntryRepository dbLogger;
 
-	@Autowired
-	private SessionRepository sessionRepository;
-
 	public CouchDbCommentRepository(final CouchDbConnector db, final boolean createIfNotExists) {
 		super(Comment.class, db, "by_sessionid", createIfNotExists);
 	}
 
 	@Override
-	public int countBySessionKey(final String sessionKey) {
-		final Session s = sessionRepository.findByKeyword(sessionKey);
-		if (s == null) {
-			throw new NotFoundException();
-		}
-
+	public int countBySessionId(final String sessionId) {
 		final ViewResult result = db.queryView(createQuery("by_sessionid")
-				.key(s.getId())
+				.key(sessionId)
 				.reduce(true)
 				.group(true));
 		if (result.isEmpty()) {

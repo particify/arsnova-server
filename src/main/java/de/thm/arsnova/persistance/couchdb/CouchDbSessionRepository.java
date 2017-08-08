@@ -249,7 +249,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 		throw new UnsupportedOperationException();
 //		final int[] count = new int[] {0, 0};
 //		try {
-//			count = deleteAllQuestionsWithAnswers(session);
+//			count = deleteBySessionId(session);
 //			remove(session);
 //			logger.debug("Deleted session document {} and related data.", session.getId());
 //			dbLogger.log("delete", "type", "session", "id", session.getId());

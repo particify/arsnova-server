@@ -14,8 +14,8 @@ public interface ContentRepository extends CrudRepository<Content, String> {
 	List<Content> findBySessionIdForSpeaker(String sessionId);
 	int countBySessionId(String sessionId);
 	List<String> findIdsBySessionId(String sessionId);
-	int deleteQuestionWithAnswers(String contentId);
-	int[] deleteAllQuestionsWithAnswers(String sessionId);
+	List<String> findIdsBySessionIdAndVariant(String sessionId, String variant);
+	int deleteBySessionId(String sessionId);
 	List<String> findUnansweredIdsBySessionIdAndUser(String sessionId, User user);
 	void update(Content content);
 	List<Content> findBySessionIdOnlyLectureVariantAndActive(String sessionId);
@@ -34,9 +34,6 @@ public interface ContentRepository extends CrudRepository<Content, String> {
 	void resetQuestionsRoundState(String sessionId, List<Content> contents);
 	void setVotingAdmissions(String sessionId, boolean disableVoting, List<Content> contents);
 	List<Content> setVotingAdmissionForAllQuestions(String sessionId, boolean disableVoting);
-	int[] deleteAllLectureQuestionsWithAnswers(String sessionId);
-	int[] deleteAllFlashcardsWithAnswers(String sessionId);
-	int[] deleteAllPreparationQuestionsWithAnswers(String sessionId);
 	List<String> findSubjectsBySessionIdAndVariant(String sessionId, String questionVariant);
 	List<String> findUnansweredIdsBySessionIdAndUserOnlyLectureVariant(String sessionId, User user);
 	List<String> findUnansweredIdsBySessionIdAndUserOnlyPreparationVariant(String sessionId, User user);

@@ -18,8 +18,6 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.Comment;
-import de.thm.arsnova.entities.CommentReadingCount;
 import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.User;
 
@@ -39,8 +37,6 @@ public interface ContentService {
 	int countBySessionKey(String sessionkey);
 
 	void delete(String questionId);
-
-	void deleteBySessionKey(String sessionKeyword);
 
 	void startNewPiRound(String questionId, User user);
 
@@ -112,11 +108,13 @@ public interface ContentService {
 
 	int countFlashcardsForUserInternal(String sessionkey);
 
+	void deleteAllContent(String sessionkey);
+
 	void deleteLectureQuestions(String sessionkey);
 
-	void deleteFlashcards(String sessionkey);
-
 	void deletePreparationQuestions(String sessionkey);
+
+	void deleteFlashcards(String sessionkey);
 
 	List<String> getUnAnsweredLectureQuestionIds(String sessionkey);
 

@@ -3,16 +3,9 @@ package de.thm.arsnova.persistance.couchdb;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.Content;
-import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.entities.transport.AnswerQueueElement;
-import de.thm.arsnova.events.NewAnswerEvent;
-import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.persistance.AnswerRepository;
-import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.LogEntryRepository;
-import de.thm.arsnova.persistance.SessionRepository;
 import org.ektorp.BulkDeleteDocument;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
@@ -26,60 +19,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
 
 public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> implements AnswerRepository, ApplicationEventPublisherAware {
 	private static final int BULK_PARTITION_SIZE = 500;
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbAnswerRepository.class);
 
-	private final Queue<AnswerQueueElement> answerQueue = new ConcurrentLinkedQueue<>();
-
 	@Autowired
 	private LogEntryRepository dbLogger;
-
-	@Autowired
-	private SessionRepository sessionRepository;
-
-	@Autowired
-	private ContentRepository contentRepository;
 
 	private ApplicationEventPublisher publisher;
 
 	public CouchDbAnswerRepository(final CouchDbConnector db, final boolean createIfNotExists) {
 		super(Answer.class, db, "by_sessionid", createIfNotExists);
-	}
-
-	@Scheduled(fixedDelay = 5000)
-	public void flushAnswerQueue() {
-		if (answerQueue.isEmpty()) {
-			// no need to send an empty bulk request.
-			return;
-		}
-
-		final List<Answer> answerList = new ArrayList<>();
-		final List<AnswerQueueElement> elements = new ArrayList<>();
-		AnswerQueueElement entry;
-		while ((entry = this.answerQueue.poll()) != null) {
-			final Answer answer = entry.getAnswer();
-			answerList.add(answer);
-			elements.add(entry);
-		}
-		try {
-			db.executeBulk(answerList);
-
-			// Send NewAnswerEvents ...
-			for (AnswerQueueElement e : elements) {
-				this.publisher.publishEvent(new NewAnswerEvent(this, e.getSession(), e.getAnswer(), e.getUser(), e.getQuestion()));
-			}
-		} catch (final DbAccessException e) {
-			logger.error("Could not bulk save answers from queue.", e);
-		}
 	}
 
 	@Override
@@ -219,22 +173,9 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 
 	@Override
 	public int countBySessionKey(final String sessionKey) {
-		final Session s = sessionRepository.findByKeyword(sessionKey);
-		if (s == null) {
-			throw new NotFoundException();
-		}
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant").key(s.getId()));
+		final ViewResult result = db.queryView(createQuery("by_sessionid_variant").key(sessionKey));
 
 		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
-	}
-
-	@CacheEvict(value = "answers", key = "#content")
-	@Override
-	public Answer create(final Answer answer, final User user, final Content content, final Session session) {
-		db.create(answer);
-		this.answerQueue.offer(new AnswerQueueElement(session, content, answer, user));
-
-		return answer;
 	}
 
 	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
@@ -279,39 +220,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
 	}
 
-	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
-	@CacheEvict(value = "answers", allEntries = true)
 	@Override
-	public int deleteAllQuestionsAnswers(final String sessionId) {
-		final List<Content> contents = contentRepository.findBySessionIdAndVariantAndActive(sessionId);
-		contentRepository.resetQuestionsRoundState(sessionId, contents);
-		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
-
-		return deleteAllAnswersForQuestions(contentIds);
-	}
-
-	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
-	@CacheEvict(value = "answers", allEntries = true)
-	@Override
-	public int deleteAllPreparationAnswers(final String sessionId) {
-		final List<Content> contents = contentRepository.findBySessionIdAndVariantAndActive(sessionId, "preparation");
-		contentRepository.resetQuestionsRoundState(sessionId, contents);
-		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
-
-		return deleteAllAnswersForQuestions(contentIds);
-	}
-
-	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
-	@CacheEvict(value = "answers", allEntries = true)
-	@Override
-	public int deleteAllLectureAnswers(final String sessionId) {
-		final List<Content> contents = contentRepository.findBySessionIdAndVariantAndActive(sessionId, "lecture");
-		contentRepository.resetQuestionsRoundState(sessionId, contents);
-		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
-
-		return deleteAllAnswersForQuestions(contentIds);
-	}
-
 	public int deleteAllAnswersForQuestions(final List<String> contentIds) {
 		final ViewResult result = db.queryView(createQuery("by_questionid")
 				.keys(contentIds));
@@ -331,35 +240,24 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 		return 0;
 	}
 
-	/* TODO: Split up - the combined action should be handled on the service level. */
-	public int[] deleteAllAnswersWithQuestions(final List<Content> contents) {
-		List<String> questionIds = new ArrayList<>();
-		final List<BulkDeleteDocument> allQuestions = new ArrayList<>();
-		for (final Content q : contents) {
-			final BulkDeleteDocument d = new BulkDeleteDocument(q.getId(), q.getRevision());
-			questionIds.add(q.getId());
-			allQuestions.add(d);
-		}
-
+	@Override
+	public int deleteByContentIds(final List<String> contentIds) {
 		final ViewResult result = db.queryView(createQuery("by_questionid")
-				.key(questionIds));
-		final List<BulkDeleteDocument> allAnswers = new ArrayList<>();
+				.keys(contentIds));
+		final List<BulkDeleteDocument> deleteDocs = new ArrayList<>();
 		for (final ViewResult.Row a : result.getRows()) {
 			final BulkDeleteDocument d = new BulkDeleteDocument(a.getId(), a.getValueAsNode().get("_rev").asText());
-			allAnswers.add(d);
+			deleteDocs.add(d);
 		}
 
 		try {
-			final List<BulkDeleteDocument> deleteList = new ArrayList<>(allAnswers);
-			deleteList.addAll(allQuestions);
-			final List<DocumentOperationResult> errors = db.executeBulk(deleteList);
+			final List<DocumentOperationResult> errors = db.executeBulk(deleteDocs);
 
-			/* TODO: subtract errors from count */
-			return new int[] {allQuestions.size(), allAnswers.size()};
+			return deleteDocs.size() - errors.size();
 		} catch (final DbAccessException e) {
-			logger.error("Could not bulk delete contents and answers.", e);
+			logger.error("Could not bulk delete answers.", e);
 		}
 
-		return new int[] {0, 0};
+		return 0;
 	}
 }

@@ -17,6 +17,8 @@
  */
 package de.thm.arsnova.services;
 
+import de.thm.arsnova.entities.transport.AnswerQueueElement;
+import de.thm.arsnova.persistance.LogEntryRepository;
 import de.thm.arsnova.util.ImageUtils;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Content;
@@ -29,13 +31,17 @@ import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.persistance.AnswerRepository;
 import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.SessionRepository;
+import org.ektorp.DbAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -44,8 +50,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 /**
  * Performs all content and answer related operations.
@@ -53,6 +62,8 @@ import java.util.TimerTask;
 @Service
 public class ContentServiceImpl extends EntityService<Content> implements ContentService, ApplicationEventPublisherAware {
 	private UserService userService;
+
+	private LogEntryRepository dbLogger;
 
 	private SessionRepository sessionRepository;
 
@@ -71,10 +82,13 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 
 	private HashMap<String, Timer> timerList = new HashMap<>();
 
+	private final Queue<AnswerQueueElement> answerQueue = new ConcurrentLinkedQueue<>();
+
 	public ContentServiceImpl(
 			ContentRepository repository,
 			AnswerRepository answerRepository,
 			SessionRepository sessionRepository,
+			LogEntryRepository dbLogger,
 			UserService userService,
 			ImageUtils imageUtils,
 			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
@@ -82,8 +96,36 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 		this.contentRepository = repository;
 		this.answerRepository = answerRepository;
 		this.sessionRepository = sessionRepository;
+		this.dbLogger = dbLogger;
 		this.userService = userService;
 		this.imageUtils = imageUtils;
+	}
+
+	@Scheduled(fixedDelay = 5000)
+	public void flushAnswerQueue() {
+		if (answerQueue.isEmpty()) {
+			// no need to send an empty bulk request.
+			return;
+		}
+
+		final List<Answer> answerList = new ArrayList<>();
+		final List<AnswerQueueElement> elements = new ArrayList<>();
+		AnswerQueueElement entry;
+		while ((entry = this.answerQueue.poll()) != null) {
+			final Answer answer = entry.getAnswer();
+			answerList.add(answer);
+			elements.add(entry);
+		}
+		try {
+			answerRepository.save(answerList);
+
+			// Send NewAnswerEvents ...
+			for (AnswerQueueElement e : elements) {
+				this.publisher.publishEvent(new NewAnswerEvent(this, e.getSession(), e.getAnswer(), e.getUser(), e.getQuestion()));
+			}
+		} catch (final DbAccessException e) {
+			logger.error("Could not bulk save answers from queue.", e);
+		}
 	}
 
 	@Override
@@ -152,10 +194,17 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 		return result;
 	}
 
+	/* TODO: Only evict cache entry for the content's session. This requires some refactoring. */
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'content', 'owner')")
-	public void delete(final String questionId) {
-		final Content content = contentRepository.findOne(questionId);
+	@PreAuthorize("isAuthenticated() and hasPermission(#contentId, 'content', 'owner')")
+	@Caching(evict = {
+			@CacheEvict(value = "questions", key = "#contentId"),
+			@CacheEvict(value = "skillquestions", allEntries = true),
+			@CacheEvict(value = "lecturequestions", allEntries = true /*, condition = "#content.getQuestionVariant().equals('lecture')"*/),
+			@CacheEvict(value = "preparationquestions", allEntries = true /*, condition = "#content.getQuestionVariant().equals('preparation')"*/),
+			@CacheEvict(value = "flashcardquestions", allEntries = true /*, condition = "#content.getQuestionVariant().equals('flashcard')"*/) })
+	public void delete(final String contentId) {
+		final Content content = contentRepository.findOne(contentId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
@@ -164,20 +213,69 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 		if (session == null) {
 			throw new UnauthorizedException();
 		}
-		contentRepository.deleteQuestionWithAnswers(content.getId());
+
+		try {
+			final int count = answerRepository.deleteByContentId(contentId);
+			contentRepository.delete(contentId);
+			dbLogger.log("delete", "type", "content", "answerCount", count);
+		} catch (final IllegalArgumentException e) {
+			logger.error("Could not delete content {}.", contentId, e);
+		}
 
 		final DeleteQuestionEvent event = new DeleteQuestionEvent(this, session, content);
 		this.publisher.publishEvent(event);
 	}
 
-	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#sessionKeyword, 'session', 'owner')")
-	public void deleteBySessionKey(final String sessionKeyword) {
-		final Session session = getSessionWithAuthCheck(sessionKeyword);
-		contentRepository.deleteAllQuestionsWithAnswers(session.getId());
+	@PreAuthorize("isAuthenticated() and hasPermission(#session, 'owner')")
+	@Caching(evict = {
+			@CacheEvict(value = "questions", allEntries = true),
+			@CacheEvict(value = "skillquestions", key = "#session.getId()"),
+			@CacheEvict(value = "lecturequestions", key = "#session.getId()", condition = "'lecture'.equals(#variant)"),
+			@CacheEvict(value = "preparationquestions", key = "#session.getId()", condition = "'preparation'.equals(#variant)"),
+			@CacheEvict(value = "flashcardquestions", key = "#session.getId()", condition = "'flashcard'.equals(#variant)") })
+	private void deleteBySessionAndVariant(final Session session, final String variant) {
+		final List<String> contentIds;
+		if ("all".equals(variant)) {
+			contentIds = contentRepository.findIdsBySessionId(session.getId());
+		} else {
+			contentIds = contentRepository.findIdsBySessionIdAndVariant(session.getId(), variant);
+		}
+
+		final int answerCount = answerRepository.deleteByContentIds(contentIds);
+		final int contentCount = contentRepository.deleteBySessionId(session.getId());
+		dbLogger.log("delete", "type", "question", "questionCount", contentCount);
+		dbLogger.log("delete", "type", "answer", "answerCount", answerCount);
 
 		final DeleteAllQuestionsEvent event = new DeleteAllQuestionsEvent(this, session);
 		this.publisher.publishEvent(event);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public void deleteAllContent(final String sessionkey) {
+		final Session session = getSessionWithAuthCheck(sessionkey);
+		deleteBySessionAndVariant(session, "all");
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public void deleteLectureQuestions(final String sessionkey) {
+		final Session session = getSessionWithAuthCheck(sessionkey);
+		deleteBySessionAndVariant(session, "lecture");
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public void deletePreparationQuestions(final String sessionkey) {
+		final Session session = getSessionWithAuthCheck(sessionkey);
+		deleteBySessionAndVariant(session, "preparation");
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public void deleteFlashcards(final String sessionkey) {
+		final Session session = getSessionWithAuthCheck(sessionkey);
+		deleteBySessionAndVariant(session, "flashcard");
 	}
 
 	@Override
@@ -576,6 +674,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	@CacheEvict(value = "answers", key = "#content")
 	public Answer saveAnswer(final String questionId, final de.thm.arsnova.entities.transport.Answer answer) {
 		final User user = getCurrentUser();
 		final Content content = get(questionId);
@@ -601,7 +700,9 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 			}
 		}
 
-		return answerRepository.create(theAnswer, user, content, session);
+		this.answerQueue.offer(new AnswerQueueElement(session, content, theAnswer, user));
+
+		return theAnswer;
 	}
 
 	@Override
@@ -776,27 +877,6 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public void deleteLectureQuestions(final String sessionkey) {
-		final Session session = getSessionWithAuthCheck(sessionkey);
-		contentRepository.deleteAllLectureQuestionsWithAnswers(session.getId());
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public void deleteFlashcards(final String sessionkey) {
-		final Session session = getSessionWithAuthCheck(sessionkey);
-		contentRepository.deleteAllFlashcardsWithAnswers(session.getId());
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public void deletePreparationQuestions(final String sessionkey) {
-		final Session session = getSessionWithAuthCheck(sessionkey);
-		contentRepository.deleteAllPreparationQuestionsWithAnswers(session.getId());
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
 	public List<String> getUnAnsweredLectureQuestionIds(final String sessionkey) {
 		final User user = getCurrentUser();
 		return this.getUnAnsweredLectureQuestionIds(sessionkey, user);
@@ -859,31 +939,48 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	@CacheEvict(value = "answers", allEntries = true)
 	public void deleteAllQuestionsAnswers(final String sessionkey) {
 		final User user = getCurrentUser();
 		final Session session = getSession(sessionkey);
 		if (!session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
-		answerRepository.deleteAllQuestionsAnswers(session.getId());
+
+		final List<Content> contents = contentRepository.findBySessionIdAndVariantAndActive(session.getId());
+		contentRepository.resetQuestionsRoundState(session.getId(), contents);
+		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
+		answerRepository.deleteAllAnswersForQuestions(contentIds);
 
 		this.publisher.publishEvent(new DeleteAllQuestionsAnswersEvent(this, session));
 	}
 
+	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	@CacheEvict(value = "answers", allEntries = true)
 	public void deleteAllPreparationAnswers(String sessionkey) {
 		final Session session = getSession(sessionkey);
-		answerRepository.deleteAllPreparationAnswers(session.getId());
+
+		final List<Content> contents = contentRepository.findBySessionIdAndVariantAndActive(session.getId(), "preparation");
+		contentRepository.resetQuestionsRoundState(session.getId(), contents);
+		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
+		answerRepository.deleteAllAnswersForQuestions(contentIds);
 
 		this.publisher.publishEvent(new DeleteAllPreparationAnswersEvent(this, session));
 	}
 
+	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	@CacheEvict(value = "answers", allEntries = true)
 	public void deleteAllLectureAnswers(String sessionkey) {
 		final Session session = getSession(sessionkey);
-		answerRepository.deleteAllLectureAnswers(session.getId());
+
+		final List<Content> contents = contentRepository.findBySessionIdAndVariantAndActive(session.getId(), "lecture");
+		contentRepository.resetQuestionsRoundState(session.getId(), contents);
+		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
+		answerRepository.deleteAllAnswersForQuestions(contentIds);
 
 		this.publisher.publishEvent(new DeleteAllLectureAnswersEvent(this, session));
 	}

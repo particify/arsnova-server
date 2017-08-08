@@ -8,7 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface CommentRepository extends CrudRepository<Comment, String> {
-	int countBySessionKey(String sessionKey);
+	int countBySessionId(String sessionKey);
 	CommentReadingCount countReadingBySessionId(String sessionId);
 	CommentReadingCount countReadingBySessionIdAndUser(String sessionId, User user);
 	List<Comment> findBySessionId(String sessionId, int start, int limit);

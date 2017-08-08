@@ -2,13 +2,14 @@ package de.thm.arsnova.persistance.couchdb;
 
 import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.persistance.AnswerRepository;
 import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.LogEntryRepository;
+import org.ektorp.BulkDeleteDocument;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DbAccessException;
 import org.ektorp.DocumentNotFoundException;
+import org.ektorp.DocumentOperationResult;
 import org.ektorp.UpdateConflictException;
 import org.ektorp.ViewResult;
 import org.slf4j.Logger;
@@ -32,9 +33,6 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	@Autowired
 	private LogEntryRepository dbLogger;
-
-	@Autowired
-	private AnswerRepository answerRepository;
 
 	public CouchDbContentRepository(final CouchDbConnector db, final boolean createIfNotExists) {
 		super(Content.class, db, "by_sessionid", createIfNotExists);
@@ -131,62 +129,33 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	@Override
 	public List<String> findIdsBySessionId(final String sessionId) {
-		return collectQuestionIds(db.queryView(createQuery("by_sessionid_variant_active").key(sessionId)));
+		return collectQuestionIds(db.queryView(createQuery("by_sessionid_variant_active")
+				.startKey(ComplexKey.of(sessionId))
+				.endKey(ComplexKey.of(sessionId, ComplexKey.emptyObject()))));
 	}
 
-	/* TODO: Move to service layer. */
-	/* TODO: Only evict cache entry for the content's session. This requires some refactoring. */
-	@Caching(evict = { @CacheEvict(value = "questions", key = "#content.id"),
-			@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true, condition = "#content.getQuestionVariant().equals('lecture')"),
-			@CacheEvict(value = "preparationquestions", allEntries = true, condition = "#content.getQuestionVariant().equals('preparation')"),
-			@CacheEvict(value = "flashcardquestions", allEntries = true, condition = "#content.getQuestionVariant().equals('flashcard')") })
 	@Override
-	public int deleteQuestionWithAnswers(final String contentId) {
-		try {
-			final int count = answerRepository.deleteByContentId(contentId);
-			db.delete(contentId);
-			dbLogger.log("delete", "type", "content", "answerCount", count);
-
-			return count;
-		} catch (final IllegalArgumentException e) {
-			logger.error("Could not delete content {}.", contentId, e);
-		}
-
-		return 0;
+	public List<String> findIdsBySessionIdAndVariant(final String sessionId, final String variant) {
+		return collectQuestionIds(db.queryView(createQuery("by_sessionid_variant_active")
+				.startKey(ComplexKey.of(sessionId, variant))
+				.endKey(ComplexKey.of(sessionId, variant, ComplexKey.emptyObject()))));
 	}
 
-	/* TODO: Move to service layer. */
-	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict(value = "skillquestions", key = "#sessionId"),
-			@CacheEvict(value = "lecturequestions", key = "#sessionId"),
-			@CacheEvict(value = "preparationquestions", key = "#sessionId"),
-			@CacheEvict(value = "flashcardquestions", key = "#sessionId") })
 	@Override
-	public int[] deleteAllQuestionsWithAnswers(final String sessionId) {
+	public int deleteBySessionId(final String sessionId) {
 		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
 				.startKey(ComplexKey.of(sessionId))
 				.endKey(ComplexKey.of(sessionId, ComplexKey.emptyObject()))
 				.reduce(false));
 
-		return deleteAllQuestionDocumentsWithAnswers(result);
-	}
-
-	/* TODO: Move to service layer. */
-	private int[] deleteAllQuestionDocumentsWithAnswers(final ViewResult viewResult) {
-		List<Content> contents = new ArrayList<>();
-		for (final ViewResult.Row row : viewResult.getRows()) {
-			final Content q = new Content();
-			q.setId(row.getId());
-			q.setRevision(row.getValueAsNode().get("_rev").asText());
-			contents.add(q);
+		final List<BulkDeleteDocument> deleteDocs = new ArrayList<>();
+		for (final ViewResult.Row a : result.getRows()) {
+			final BulkDeleteDocument d = new BulkDeleteDocument(a.getId(), a.getValueAsNode().get("_rev").asText());
+			deleteDocs.add(d);
 		}
+		List<DocumentOperationResult> errors = db.executeBulk(deleteDocs);
 
-		final int[] count = answerRepository.deleteAllAnswersWithQuestions(contents);
-		dbLogger.log("delete", "type", "question", "questionCount", count[0]);
-		dbLogger.log("delete", "type", "answer", "answerCount", count[1]);
-
-		return count;
+		return deleteDocs.size() - errors.size();
 	}
 
 	@Override
@@ -312,54 +281,6 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 				.endKey(ComplexKey.of(sessionId, "preparation", ComplexKey.emptyObject())));
 
 		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
-	}
-
-	/* TODO: Move to service layer. */
-	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
-	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict("skillquestions"),
-			@CacheEvict("lecturequestions"),
-			@CacheEvict(value = "answers", allEntries = true)})
-	@Override
-	public int[] deleteAllLectureQuestionsWithAnswers(final String sessionId) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(sessionId, "lecture"))
-				.endKey(ComplexKey.of(sessionId, "lecture", ComplexKey.emptyObject()))
-				.reduce(false));
-
-		return deleteAllQuestionDocumentsWithAnswers(result);
-	}
-
-	/* TODO: Move to service layer. */
-	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
-	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict("skillquestions"),
-			@CacheEvict("flashcardquestions"),
-			@CacheEvict(value = "answers", allEntries = true)})
-	@Override
-	public int[] deleteAllFlashcardsWithAnswers(final String sessionId) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(sessionId, "flashcard"))
-				.endKey(ComplexKey.of(sessionId, "flashcard", ComplexKey.emptyObject()))
-				.reduce(false));
-
-		return deleteAllQuestionDocumentsWithAnswers(result);
-	}
-
-	/* TODO: Move to service layer. */
-	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
-	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict("skillquestions"),
-			@CacheEvict("preparationquestions"),
-			@CacheEvict(value = "answers", allEntries = true)})
-	@Override
-	public int[] deleteAllPreparationQuestionsWithAnswers(final String sessionId) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(sessionId, "preparation"))
-				.endKey(ComplexKey.of(sessionId, "preparation", ComplexKey.emptyObject()))
-				.reduce(false));
-
-		return deleteAllQuestionDocumentsWithAnswers(result);
 	}
 
 	private List<String> collectUnansweredQuestionIds(

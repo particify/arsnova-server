@@ -315,12 +315,12 @@ public class ContentController extends PaginationController {
 			) {
 		if (lectureQuestionsOnly) {
 			contentService.deleteLectureQuestions(sessionkey);
-		} else if (flashcardsOnly) {
-			contentService.deleteFlashcards(sessionkey);
 		} else if (preparationQuestionsOnly) {
 			contentService.deletePreparationQuestions(sessionkey);
+		} else if (flashcardsOnly) {
+			contentService.deleteFlashcards(sessionkey);
 		} else {
-			contentService.deleteBySessionKey(sessionkey);
+			contentService.deleteAllContent(sessionkey);
 		}
 	}
 
@@ -337,10 +337,10 @@ public class ContentController extends PaginationController {
 			) {
 		if (lectureQuestionsOnly) {
 			return contentService.countLectureQuestions(sessionkey);
-		} else if (flashcardsOnly) {
-			return contentService.countFlashcards(sessionkey);
 		} else if (preparationQuestionsOnly) {
 			return contentService.countPreparationQuestions(sessionkey);
+		} else if (flashcardsOnly) {
+			return contentService.countFlashcards(sessionkey);
 		} else {
 			return contentService.countBySessionKey(sessionkey);
 		}

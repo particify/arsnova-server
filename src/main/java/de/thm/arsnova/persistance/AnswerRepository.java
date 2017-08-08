@@ -18,8 +18,6 @@
 package de.thm.arsnova.persistance;
 
 import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.Content;
-import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import org.springframework.data.repository.CrudRepository;
 
@@ -35,13 +33,10 @@ public interface AnswerRepository extends CrudRepository<Answer, String> {
 	List<Answer> findByUserSessionId(User user, String sessionId);
 	int countBySessionKey(String sessionKey);
 	int deleteByContentId(String contentId);
-	Answer create(Answer answer, User user, Content content, Session session);
 	void update(Answer answer);
 	void delete(String answerId);
 	int countBySessionIdLectureVariant(String sessionId);
 	int countBySessionIdPreparationVariant(String sessionId);
-	int deleteAllQuestionsAnswers(String sessionId);
-	int deleteAllPreparationAnswers(String sessionId);
-	int deleteAllLectureAnswers(String sessionId);
-	int[] deleteAllAnswersWithQuestions(List<Content> contents);
+	int deleteAllAnswersForQuestions(List<String> contentIds);
+	int deleteByContentIds(List<String> contentIds);
 }

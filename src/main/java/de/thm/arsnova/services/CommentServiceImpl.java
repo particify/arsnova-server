@@ -95,7 +95,7 @@ public class CommentServiceImpl extends EntityService<Comment> implements Commen
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int count(final String sessionKey) {
-		return commentRepository.countBySessionKey(sessionKey);
+		return commentRepository.countBySessionId(getSession(sessionKey).getId());
 	}
 
 	@Override
