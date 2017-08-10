@@ -72,9 +72,9 @@ public interface ContentService {
 
 	int countTotalAnswersByQuestionId(String questionId);
 
-	Content update(Content content);
+	Content save(final String sessionId, final Content content);
 
-	Content update(Content content, User user);
+	Content update(Content content);
 
 	void deleteAnswers(String questionId);
 

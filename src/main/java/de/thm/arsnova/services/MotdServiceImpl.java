@@ -25,6 +25,9 @@ import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.persistance.MotdListRepository;
 import de.thm.arsnova.persistance.MotdRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -79,16 +82,24 @@ public class MotdServiceImpl extends EntityService<Motd> implements MotdService 
 	}
 
 	@Override
-	public List<Motd> getCurrentMotds(final Date clientdate, final String audience, final String sessionkey) {
+	@Cacheable(cacheNames = "motds", key = "('session').concat(#sessionkey)")
+	public List<Motd> getCurrentSessionMotds(final Date clientdate, final String sessionkey) {
+		final List<Motd> motds = motdRepository.findBySessionKey(sessionkey);
+		return filterMotdsByDate(motds, clientdate);
+	}
+
+	@Override
+	@Cacheable(cacheNames = "motds", key = "#audience")
+	public List<Motd> getCurrentMotds(final Date clientdate, final String audience) {
 		final List<Motd> motds;
 		switch (audience) {
 			case "all": motds = motdRepository.findGlobalForAll(); break;
 			case "loggedIn": motds = motdRepository.findGlobalForLoggedIn(); break;
 			case "students": motds = motdRepository.findForStudents(); break;
 			case "tutors": motds = motdRepository.findGlobalForTutors(); break;
-			case "session": motds = motdRepository.findBySessionKey(sessionkey); break;
-			default: motds = motdRepository.findGlobalForAll(); break;
+			default: throw new IllegalArgumentException("Invalid audience.");
 		}
+
 		return filterMotdsByDate(motds, clientdate);
 	}
 
@@ -135,7 +146,6 @@ public class MotdServiceImpl extends EntityService<Motd> implements MotdService 
 		Session session = sessionService.getByKey(sessionkey);
 		motd.setSessionId(session.getId());
 
-
 		return createOrUpdateMotd(motd);
 	}
 
@@ -151,6 +161,7 @@ public class MotdServiceImpl extends EntityService<Motd> implements MotdService 
 		return createOrUpdateMotd(motd);
 	}
 
+	@CacheEvict(cacheNames = "motds", key = "#motd.audience.concat(#motd.sessionkey)")
 	private Motd createOrUpdateMotd(final Motd motd) {
 		if (motd.getMotdkey() != null) {
 			Motd oldMotd = motdRepository.findByKey(motd.getMotdkey());
@@ -160,11 +171,20 @@ public class MotdServiceImpl extends EntityService<Motd> implements MotdService 
 			}
 		}
 
+		if (null != motd.getId()) {
+			Motd oldMotd = get(motd.getId());
+			motd.setMotdkey(oldMotd.getMotdkey());
+		} else {
+			motd.setMotdkey(sessionService.generateKey());
+		}
+		save(motd);
+
 		return motdRepository.save(motd);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
+	@CacheEvict(cacheNames = "motds", key = "#motd.audience.concat(#motd.sessionkey)")
 	public void delete(Motd motd) {
 		motdRepository.delete(motd);
 	}
@@ -177,6 +197,7 @@ public class MotdServiceImpl extends EntityService<Motd> implements MotdService 
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	@Cacheable(cacheNames = "motdlist", key = "#username")
 	public MotdList getMotdListByUsername(final String username) {
 		final User user = userService.getCurrentUser();
 		if (username.equals(user.getUsername()) && !"guest".equals(user.getType())) {
@@ -187,6 +208,7 @@ public class MotdServiceImpl extends EntityService<Motd> implements MotdService 
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	@CachePut(cacheNames = "motdlist", key = "#motdList.username")
 	public MotdList saveMotdList(MotdList motdList) {
 		final User user = userService.getCurrentUser();
 		if (user.getUsername().equals(motdList.getUsername())) {

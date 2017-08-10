@@ -17,6 +17,10 @@
  */
 package de.thm.arsnova.services;
 
+import de.thm.arsnova.persistance.AnswerRepository;
+import de.thm.arsnova.persistance.CommentRepository;
+import de.thm.arsnova.persistance.ContentRepository;
+import de.thm.arsnova.persistance.LogEntryRepository;
 import de.thm.arsnova.util.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
@@ -42,11 +46,15 @@ import de.thm.arsnova.exceptions.PayloadTooLargeException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.persistance.SessionRepository;
 import de.thm.arsnova.persistance.VisitedSessionRepository;
+import org.ektorp.UpdateConflictException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -68,7 +76,15 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 
 	private static final Logger logger = LoggerFactory.getLogger(SessionServiceImpl.class);
 
+	private LogEntryRepository dbLogger;
+
 	private SessionRepository sessionRepository;
+
+	private ContentRepository contentRepository;
+
+	private AnswerRepository answerRepository;
+
+	private CommentRepository commentRepository;
 
 	private VisitedSessionRepository visitedSessionRepository;
 
@@ -92,7 +108,11 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 
 	public SessionServiceImpl(
 			SessionRepository repository,
+			ContentRepository contentRepository,
+			AnswerRepository answerRepository,
+			CommentRepository commentRepository,
 			VisitedSessionRepository visitedSessionRepository,
+			LogEntryRepository dbLogger,
 			UserService userService,
 			FeedbackService feedbackService,
 			ScoreCalculatorFactory scoreCalculatorFactory,
@@ -100,7 +120,11 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(Session.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.sessionRepository = repository;
+		this.contentRepository = contentRepository;
+		this.answerRepository = answerRepository;
+		this.commentRepository = commentRepository;
 		this.visitedSessionRepository = visitedSessionRepository;
+		this.dbLogger = dbLogger;
 		this.userService = userService;
 		this.feedbackService = feedbackService;
 		this.scoreCalculatorFactory = scoreCalculatorFactory;
@@ -154,7 +178,23 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 			logger.info("Delete inactive sessions.");
 			long unixTime = System.currentTimeMillis();
 			long lastActivityBefore = unixTime - guestSessionInactivityThresholdDays * 24 * 60 * 60 * 1000L;
-			sessionRepository.deleteInactiveGuestSessions(lastActivityBefore);
+			int totalCount[] = new int[] {0, 0, 0};
+			List<Session> inactiveSessions = sessionRepository.findInactiveGuestSessionsMetadata(lastActivityBefore);
+			for (Session session : inactiveSessions) {
+				int[] count = deleteCascading(session);
+				totalCount[0] += count[0];
+				totalCount[1] += count[1];
+				totalCount[2] += count[2];
+			}
+
+			if (!inactiveSessions.isEmpty()) {
+				logger.info("Deleted {} inactive guest sessions.", inactiveSessions.size());
+				dbLogger.log("cleanup", "type", "session",
+						"sessionCount", inactiveSessions.size(),
+						"questionCount", totalCount[1],
+						"answerCount", totalCount[2],
+						"commentCount", totalCount[3]);
+			}
 		}
 	}
 
@@ -183,7 +223,7 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 		userService.addUserToSessionBySocketId(socketId, keyword);
 
 		if (session.getCreator().equals(user.getUsername())) {
-			sessionRepository.updateSessionOwnerActivity(session);
+			updateSessionOwnerActivity(session);
 		}
 		sessionRepository.registerAsOnlineUser(user, session);
 
@@ -195,6 +235,24 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 		}
 
 		return session;
+	}
+
+	@CachePut(value = "sessions")
+	private Session updateSessionOwnerActivity(final Session session) {
+		try {
+			/* Do not clutter CouchDB. Only update once every 3 hours. */
+			if (session.getLastOwnerActivity() > System.currentTimeMillis() - 3 * 3600000) {
+				return session;
+			}
+
+			session.setLastOwnerActivity(System.currentTimeMillis());
+			save(session);
+
+			return session;
+		} catch (final UpdateConflictException e) {
+			logger.error("Failed to update lastOwnerActivity for session {}.", session, e);
+			return session;
+		}
 	}
 
 	@Override
@@ -286,6 +344,7 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	@Caching(evict = @CacheEvict(cacheNames = "sessions", key = "#result.keyword"))
 	public Session save(final Session session) {
 		if (connectorClient != null && session.getCourseId() != null) {
 			if (!connectorClient.getMembership(
@@ -310,14 +369,19 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 		sf.setPi(true);
 		session.setFeatures(sf);
 
-		final Session result = sessionRepository.save(userService.getCurrentUser(), session);
+		session.setKeyword(generateKey());
+		session.setCreator(userService.getCurrentUser().getUsername());
+		session.setActive(true);
+		session.setFeedbackLock(false);
+
+		final Session result = save(session);
 		this.publisher.publishEvent(new NewSessionEvent(this, result));
 		return result;
 	}
 
 	@Override
 	public boolean isKeyAvailable(final String keyword) {
-		return sessionRepository.sessionKeyAvailable(keyword);
+		return getByKey(keyword) == null;
 	}
 
 	@Override
@@ -356,13 +420,14 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 		}
 		session.setActive(lock);
 		this.publisher.publishEvent(new StatusSessionEvent(this, session));
-		sessionRepository.update(session);
+		sessionRepository.save(session);
 
 		return session;
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#session, 'owner')")
+	@CachePut(value = "sessions", key = "#session")
 	public Session update(final String sessionkey, final Session session) {
 		final Session existingSession = sessionRepository.findByKeyword(sessionkey);
 
@@ -384,19 +449,24 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 		handleLogo(session);
 		existingSession.setPpLogo(session.getPpLogo());
 
-		sessionRepository.update(existingSession);
+		sessionRepository.save(existingSession);
 
 		return session;
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
+	@PreAuthorize("isAuthenticated() and hasPermission(1, 'motd', 'admin')")
+	@Caching(evict = { @CacheEvict("sessions"), @CacheEvict(cacheNames = "sessions", key = "#sessionkey.keyword") })
 	public Session updateCreator(String sessionkey, String newCreator) {
-		final Session existingSession = sessionRepository.findByKeyword(sessionkey);
-		if (existingSession == null) {
+		final Session session = sessionRepository.findByKeyword(sessionkey);
+		if (session == null) {
 			throw new NullPointerException("Could not load session " + sessionkey + ".");
 		}
-		return sessionRepository.changeSessionCreator(existingSession, newCreator);
+
+		session.setCreator(newCreator);
+		save(session);
+
+		return save(session);
 	}
 
 	/*
@@ -406,20 +476,28 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 	@Override
 	public Session updateInternal(final Session session, final User user) {
 		if (session.isCreator(user)) {
-			sessionRepository.update(session);
+			sessionRepository.save(session);
 			return session;
 		}
 		return null;
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
-	public void delete(final String sessionkey) {
-		final Session session = sessionRepository.findByKeyword(sessionkey);
-
-		sessionRepository.deleteSession(session);
+	@PreAuthorize("isAuthenticated() and hasPermission(#session, 'owner')")
+	@CacheEvict("sessions")
+	public int[] deleteCascading(final Session session) {
+		int[] count = new int[] {0, 0, 0};
+		List<String> contentIds = contentRepository.findIdsBySessionId(session.getId());
+		count[2] = commentRepository.deleteBySessionId(session.getId());
+		count[1] = answerRepository.deleteByContentIds(contentIds);
+		count[0] = contentRepository.deleteBySessionId(session.getId());
+		sessionRepository.delete(session);
+		logger.debug("Deleted session document {} and related data.", session.getId());
+		dbLogger.log("delete", "type", "session", "id", session.getId());
 
 		this.publisher.publishEvent(new DeleteSessionEvent(this, session));
+
+		return count;
 	}
 
 	@Override
@@ -485,7 +563,7 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 		}
 		session.setFeatures(features);
 		this.publisher.publishEvent(new FeatureChangeEvent(this, session));
-		sessionRepository.update(session);
+		sessionRepository.save(session);
 
 		return session.getFeatures();
 	}
@@ -503,7 +581,7 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 
 		session.setFeedbackLock(lock);
 		this.publisher.publishEvent(new LockFeedbackEvent(this, session));
-		sessionRepository.update(session);
+		sessionRepository.save(session);
 
 		return session.getFeedbackLock();
 	}
@@ -517,7 +595,7 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 		}
 		session.setFlipFlashcards(flip);
 		this.publisher.publishEvent(new FlipFlashcardsEvent(this, session));
-		sessionRepository.update(session);
+		sessionRepository.save(session);
 
 		return session.getFlipFlashcards();
 	}

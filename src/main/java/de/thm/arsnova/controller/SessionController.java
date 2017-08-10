@@ -86,7 +86,8 @@ public class SessionController extends PaginationController {
 			nickname = "deleteSession")
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.DELETE)
 	public void deleteSession(@ApiParam(value = "Session-Key from current session", required = true) @PathVariable final String sessionkey) {
-		sessionService.delete(sessionkey);
+		Session session = sessionService.getByKey(sessionkey);
+		sessionService.deleteCascading(session);
 	}
 
 	@ApiOperation(value = "count active users",

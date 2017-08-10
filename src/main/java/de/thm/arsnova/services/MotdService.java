@@ -33,7 +33,9 @@ public interface MotdService {
 
 	List<Motd> getAllSessionMotds(final String sessionkey);
 
-	List<Motd> getCurrentMotds(final Date clientdate, final String audience, final String sessionkey);
+	List<Motd> getCurrentMotds(final Date clientdate, final String audience);
+
+	List<Motd> getCurrentSessionMotds(final Date clientdate, final String sessionkey);
 
 	List<Motd> filterMotdsByDate(List<Motd> list, Date clientdate);
 

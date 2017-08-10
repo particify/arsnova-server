@@ -8,14 +8,12 @@ import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.ViewResult;
 import org.ektorp.support.CouchDbRepositorySupport;
-import org.springframework.cache.annotation.Cacheable;
 
 public class CouchDbSessionStatisticsRepository extends CouchDbRepositorySupport implements SessionStatisticsRepository {
 	public CouchDbSessionStatisticsRepository(final CouchDbConnector db, final boolean createIfNotExists) {
 		super(Object.class, db, "learning_progress", createIfNotExists);
 	}
 
-	@Cacheable("learningprogress")
 	@Override
 	public Score getLearningProgress(final Session session) {
 		final ViewResult maximumValueResult = db.queryView(createQuery("maximum_value_of_question")

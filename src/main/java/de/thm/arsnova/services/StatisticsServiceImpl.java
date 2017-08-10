@@ -19,6 +19,7 @@ package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.persistance.StatisticsRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +44,12 @@ public class StatisticsServiceImpl implements StatisticsService {
 
 	@Scheduled(initialDelay = 0, fixedRate = 10000)
 	private void refreshStatistics() {
-		statistics = statisticsRepository.getStatistics();
+		statistics = loadStatistics();
+	}
+
+	@Cacheable("statistics")
+	private Statistics loadStatistics() {
+		return statisticsRepository.getStatistics();
 	}
 
 	@Override

@@ -53,7 +53,14 @@ public class CommentServiceImpl extends EntityService<Comment> implements Commen
 	@PreAuthorize("isAuthenticated()")
 	public boolean save(final Comment comment) {
 		final Session session = sessionRepository.findByKeyword(comment.getSessionId());
-		final Comment result = commentRepository.save(session.getId(), comment, userService.getCurrentUser());
+		final User user = userService.getCurrentUser();
+		comment.setSessionId(session.getId());
+		comment.setCreator(user.getUsername());
+		comment.setRead(false);
+		if (comment.getTimestamp() == 0) {
+			comment.setTimestamp(System.currentTimeMillis());
+		}
+		final Comment result = super.create(comment);
 
 		if (null != result) {
 			final NewCommentEvent event = new NewCommentEvent(this, session, result);
@@ -151,7 +158,8 @@ public class CommentServiceImpl extends EntityService<Comment> implements Commen
 			throw new UnauthorizedException();
 		}
 		if (session.isCreator(user)) {
-			commentRepository.markInterposedQuestionAsRead(comment);
+			comment.setRead(true);
+			save(comment);
 		}
 		return comment;
 	}

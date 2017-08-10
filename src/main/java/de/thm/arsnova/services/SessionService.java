@@ -66,7 +66,7 @@ public interface SessionService {
 
 	Session updateInternal(Session session, User user);
 
-	void delete(String sessionkey);
+	int[] deleteCascading(Session session);
 
 	ScoreStatistics getLearningProgress(String sessionkey, String type, String questionVariant);
 

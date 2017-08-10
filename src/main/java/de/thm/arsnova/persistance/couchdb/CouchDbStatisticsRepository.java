@@ -8,7 +8,6 @@ import org.ektorp.ViewResult;
 import org.ektorp.support.CouchDbRepositorySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.Cacheable;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -20,7 +19,6 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
 		super(Object.class, db, "statistics", createIfNotExists);
 	}
 
-	@Cacheable("statistics")
 	@Override
 	public Statistics getStatistics() {
 		final Statistics stats = new Statistics();

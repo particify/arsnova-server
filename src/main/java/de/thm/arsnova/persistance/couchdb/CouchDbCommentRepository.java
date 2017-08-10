@@ -142,48 +142,6 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 		return comments;
 	}
 
-	/* TODO: Move to service layer. */
-	@Override
-	public Comment save(final String sessionId, final Comment comment, final User user) {
-		/* TODO: This should be done on the service level. */
-		comment.setSessionId(sessionId);
-		comment.setCreator(user.getUsername());
-		comment.setRead(false);
-		if (comment.getTimestamp() == 0) {
-			comment.setTimestamp(System.currentTimeMillis());
-		}
-		try {
-			db.create(comment);
-
-			return comment;
-		} catch (final IllegalArgumentException e) {
-			logger.error("Could not save comment {}.", comment, e);
-		}
-
-		return null;
-	}
-
-	/* TODO: Move to service layer. */
-	@Override
-	public void markInterposedQuestionAsRead(final Comment comment) {
-		try {
-			comment.setRead(true);
-			db.update(comment);
-		} catch (final UpdateConflictException e) {
-			logger.error("Could not mark comment as read {}.", comment.getId(), e);
-		}
-	}
-
-	@Override
-	public void delete(final Comment comment) {
-		try {
-			db.delete(comment.getId(), comment.getRevision());
-			dbLogger.log("delete", "type", "comment");
-		} catch (final UpdateConflictException e) {
-			logger.error("Could not delete comment {}.", comment.getId(), e);
-		}
-	}
-
 	@Override
 	public int deleteBySessionId(final String sessionId) {
 		final ViewResult result = db.queryView(createQuery("by_sessionid").key(sessionId));

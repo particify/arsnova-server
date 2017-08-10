@@ -19,22 +19,15 @@ package de.thm.arsnova.persistance.couchdb;
 
 import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.persistance.MotdRepository;
-import de.thm.arsnova.services.SessionService;
 import org.ektorp.CouchDbConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CouchDbMotdRepository extends CouchDbCrudRepository<Motd> implements MotdRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbMotdRepository.class);
-
-	@Autowired
-	private SessionService sessionService;
 
 	public CouchDbMotdRepository(final CouchDbConnector db, final boolean createIfNotExists) {
 		super(Motd.class, db, "by_sessionkey", createIfNotExists);
@@ -46,19 +39,16 @@ public class CouchDbMotdRepository extends CouchDbCrudRepository<Motd> implement
 	}
 
 	@Override
-	@Cacheable(cacheNames = "motds", key = "'all'")
 	public List<Motd> findGlobalForAll() {
 		return find("by_audience_for_global", "all");
 	}
 
 	@Override
-	@Cacheable(cacheNames = "motds", key = "'loggedIn'")
 	public List<Motd> findGlobalForLoggedIn() {
 		return find("by_audience_for_global", "loggedIn");
 	}
 
 	@Override
-	@Cacheable(cacheNames = "motds", key = "'tutors'")
 	public List<Motd> findGlobalForTutors() {
 		final List<Motd> union = new ArrayList<>();
 		union.addAll(find("by_audience_for_global", "loggedIn"));
@@ -68,7 +58,6 @@ public class CouchDbMotdRepository extends CouchDbCrudRepository<Motd> implement
 	}
 
 	@Override
-	@Cacheable(cacheNames = "motds", key = "'students'")
 	public List<Motd> findForStudents() {
 		final List<Motd> union = new ArrayList<>();
 		union.addAll(find("by_audience_for_global", "loggedIn"));
@@ -78,7 +67,6 @@ public class CouchDbMotdRepository extends CouchDbCrudRepository<Motd> implement
 	}
 
 	@Override
-	@Cacheable(cacheNames = "motds", key = "('session').concat(#p0)")
 	public List<Motd> findBySessionKey(final String sessionkey) {
 		return find("by_sessionkey", sessionkey);
 	}
@@ -92,30 +80,5 @@ public class CouchDbMotdRepository extends CouchDbCrudRepository<Motd> implement
 		final List<Motd> motd = queryView("by_motdkey", key);
 
 		return motd.get(0);
-	}
-
-	@Override
-	@CacheEvict(cacheNames = "motds", key = "#p0.audience.concat(#p0.sessionkey)")
-	public Motd save(final Motd motd) {
-		final String id = motd.getId();
-		final String rev = motd.getRevision();
-
-		if (null != id) {
-			Motd oldMotd = get(id);
-			motd.setMotdkey(oldMotd.getMotdkey());
-			update(motd);
-		} else {
-			motd.setMotdkey(sessionService.generateKey());
-			add(motd);
-		}
-
-		return motd;
-	}
-
-	/* TODO: Redundant -> remove. Move cache handling to service layer. */
-	@Override
-	@CacheEvict(cacheNames = "motds", key = "#p0.audience.concat(#p0.sessionkey)")
-	public void delete(final Motd motd) {
-		db.delete(motd);
 	}
 }

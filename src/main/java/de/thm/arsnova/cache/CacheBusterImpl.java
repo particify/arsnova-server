@@ -51,7 +51,7 @@ public class CacheBusterImpl implements CacheBuster, ArsnovaEventVisitor {
 	@Override
 	public void visit(LockQuestionsEvent lockQuestionsEvent) { }
 
-	@CacheEvict(value = "answers", key = "#event.content")
+	@CacheEvict(value = "answers", key = "#event.content.id")
 	@Override
 	public void visit(NewAnswerEvent event) { }
 

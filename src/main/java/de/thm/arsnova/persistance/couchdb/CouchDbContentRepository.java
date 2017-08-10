@@ -7,18 +7,11 @@ import de.thm.arsnova.persistance.LogEntryRepository;
 import org.ektorp.BulkDeleteDocument;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
-import org.ektorp.DbAccessException;
-import org.ektorp.DocumentNotFoundException;
 import org.ektorp.DocumentOperationResult;
-import org.ektorp.UpdateConflictException;
 import org.ektorp.ViewResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,7 +31,6 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		super(Content.class, db, "by_sessionid", createIfNotExists);
 	}
 
-	@Cacheable("skillquestions")
 	@Override
 	public List<Content> findBySessionIdForUsers(final String sessionId) {
 		final List<Content> contents = new ArrayList<>();
@@ -52,7 +44,6 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		return contents;
 	}
 
-	@Cacheable("skillquestions")
 	@Override
 	public List<Content> findBySessionIdForSpeaker(final String sessionId) {
 		return findBySessionIdAndVariantAndActive(new Object[] {sessionId}, sessionId);
@@ -65,66 +56,6 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 				.endKey(ComplexKey.of(sessionId, ComplexKey.emptyObject())));
 
 		return result.getSize();
-	}
-
-	/* TODO: Move to service layer. */
-	@Caching(evict = {@CacheEvict(value = "skillquestions", key = "#sessionId"),
-			@CacheEvict(value = "lecturequestions", key = "#sessionId", condition = "#content.getQuestionVariant().equals('lecture')"),
-			@CacheEvict(value = "preparationquestions", key = "#sessionId", condition = "#content.getQuestionVariant().equals('preparation')"),
-			@CacheEvict(value = "flashcardquestions", key = "#sessionId", condition = "#content.getQuestionVariant().equals('flashcard')") },
-			put = {@CachePut(value = "questions", key = "#content.id")})
-	@Override
-	public Content save(final String sessionId, final Content content) {
-		/* TODO: This should be done on the service level. */
-		content.setSessionId(sessionId);
-		try {
-			db.create(content);
-
-			return content;
-		} catch (final IllegalArgumentException e) {
-			logger.error("Could not save content {}.", content, e);
-		}
-
-		return null;
-	}
-
-	/* TODO: Move to service layer. */
-	/* TODO: Only evict cache entry for the content's session. This requires some refactoring. */
-	@Caching(evict = {@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true, condition = "#content.getQuestionVariant().equals('lecture')"),
-			@CacheEvict(value = "preparationquestions", allEntries = true, condition = "#content.getQuestionVariant().equals('preparation')"),
-			@CacheEvict(value = "flashcardquestions", allEntries = true, condition = "#content.getQuestionVariant().equals('flashcard')") },
-			put = {@CachePut(value = "questions", key = "#content.id")})
-	@Override
-	public void update(final Content content) {
-		try {
-			/* TODO: This should be done on the service level. Make sure that
-			 * sessionId is valid before so the content does not need to be retrieved. */
-			final Content oldContent = get(content.getId());
-			content.setId(oldContent.getId());
-			content.setRevision(oldContent.getRevision());
-			content.updateRoundManagementState();
-			super.update(content);
-		} catch (final UpdateConflictException e) {
-			logger.error("Could not update content {}.", content, e);
-		}
-	}
-
-	/* TODO: Move to service layer. */
-	@Cacheable("questions")
-	@Override
-	public Content findOne(final String id) {
-		try {
-			final Content content = get(id);
-			content.updateRoundManagementState();
-			//content.setSessionKeyword(sessionRepository.getSessionFromId(content.getSessionId()).getKeyword());
-
-			return content;
-		} catch (final DocumentNotFoundException e) {
-			logger.error("Could not get question {}.", id, e);
-		}
-
-		return null;
 	}
 
 	@Override
@@ -197,7 +128,6 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		return collectUnansweredQuestionIdsByPiRound(findBySessionIdOnlyPreparationVariantAndActive(sessionId), answeredQuestions);
 	}
 
-	@Cacheable("lecturequestions")
 	@Override
 	public List<Content> findBySessionIdOnlyLectureVariantAndActive(final String sessionId) {
 		return findBySessionIdAndVariantAndActive(sessionId, "lecture", true);
@@ -208,7 +138,6 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		return findBySessionIdAndVariantAndActive(sessionId, "lecture");
 	}
 
-	@Cacheable("flashcardquestions")
 	@Override
 	public List<Content> findBySessionIdOnlyFlashcardVariantAndActive(final String sessionId) {
 		return findBySessionIdAndVariantAndActive(sessionId, "flashcard", true);
@@ -219,7 +148,6 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		return findBySessionIdAndVariantAndActive(sessionId, "flashcard");
 	}
 
-	@Cacheable("preparationquestions")
 	@Override
 	public List<Content> findBySessionIdOnlyPreparationVariantAndActive(final String sessionId) {
 		return findBySessionIdAndVariantAndActive(sessionId, "preparation", true);
@@ -320,71 +248,6 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		return ids;
 	}
 
-	/* TODO: Move to service layer. */
-	@Override
-	public List<Content> publishAllQuestions(final String sessionId, final boolean publish) {
-		final List<Content> contents = db.queryView(createQuery("by_sessionid_variant_active")
-						.startKey(ComplexKey.of(sessionId))
-						.endKey(ComplexKey.of(sessionId, ComplexKey.emptyObject())),
-				Content.class);
-		/* FIXME: caching */
-		publishQuestions(sessionId, publish, contents);
-
-		return contents;
-	}
-
-	/* TODO: Move to service layer. */
-	@Caching(evict = { @CacheEvict(value = "contents", allEntries = true),
-			@CacheEvict(value = "skillquestions", key = "#sessionId"),
-			@CacheEvict(value = "lecturequestions", key = "#sessionId"),
-			@CacheEvict(value = "preparationquestions", key = "#sessionId"),
-			@CacheEvict(value = "flashcardquestions", key = "#sessionId") })
-	@Override
-	public void publishQuestions(final String sessionId, final boolean publish, final List<Content> contents) {
-		for (final Content content : contents) {
-			content.setActive(publish);
-		}
-		try {
-			db.executeBulk(contents);
-		} catch (final DbAccessException e) {
-			logger.error("Could not bulk publish all contents.", e);
-		}
-	}
-
-	/* TODO: Move to service layer. */
-	@Override
-	public List<Content> setVotingAdmissionForAllQuestions(final String sessionId, final boolean disableVoting) {
-		final List<Content> contents = db.queryView(createQuery("by_sessionid_variant_active")
-						.startKey(ComplexKey.of(sessionId))
-						.endKey(ComplexKey.of(sessionId, ComplexKey.emptyObject()))
-						.includeDocs(true),
-				Content.class);
-		/* FIXME: caching */
-		setVotingAdmissions(sessionId, disableVoting, contents);
-
-		return contents;
-	}
-
-	@Caching(evict = { @CacheEvict(value = "contents", allEntries = true),
-			@CacheEvict(value = "skillquestions", key = "#sessionId"),
-			@CacheEvict(value = "lecturequestions", key = "#sessionId"),
-			@CacheEvict(value = "preparationquestions", key = "#sessionId"),
-			@CacheEvict(value = "flashcardquestions", key = "#sessionId") })
-	@Override
-	public void setVotingAdmissions(final String sessionId, final boolean disableVoting, final List<Content> contents) {
-		for (final Content q : contents) {
-			if (!"flashcard".equals(q.getQuestionType())) {
-				q.setVotingDisabled(disableVoting);
-			}
-		}
-
-		try {
-			db.executeBulk(contents);
-		} catch (final DbAccessException e) {
-			logger.error("Could not bulk set voting admission for all contents.", e);
-		}
-	}
-
 	/* TODO: remove if this method is no longer used */
 	@Override
 	public List<String> findIdsBySessionIdAndVariantAndSubject(final String sessionId, final String questionVariant, final String subject) {
@@ -415,24 +278,5 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		}
 
 		return new ArrayList<>(uniqueSubjects);
-	}
-
-	/* TODO: Move to service layer. */
-	@Caching(evict = { @CacheEvict(value = "contents", allEntries = true),
-			@CacheEvict(value = "skillquestions", key = "#sessionId"),
-			@CacheEvict(value = "lecturequestions", key = "#sessionId"),
-			@CacheEvict(value = "preparationquestions", key = "#sessionId"),
-			@CacheEvict(value = "flashcardquestions", key = "#sessionId") })
-	@Override
-	public void resetQuestionsRoundState(final String sessionId, final List<Content> contents) {
-		for (final Content q : contents) {
-			q.setSessionId(sessionId);
-			q.resetQuestionState();
-		}
-		try {
-			db.executeBulk(contents);
-		} catch (final DbAccessException e) {
-			logger.error("Could not bulk reset all contents round state.", e);
-		}
 	}
 }

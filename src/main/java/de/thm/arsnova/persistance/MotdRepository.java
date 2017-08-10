@@ -30,6 +30,4 @@ public interface MotdRepository extends CrudRepository<Motd, String> {
 	List<Motd> findForStudents();
 	List<Motd> findBySessionKey(String sessionkey);
 	Motd findByKey(String key);
-	Motd save(Motd motd);
-	void delete(Motd motd);
 }

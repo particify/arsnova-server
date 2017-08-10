@@ -16,7 +16,6 @@ import org.ektorp.ViewResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 
@@ -41,7 +40,6 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 		this.publisher = publisher;
 	}
 
-	@CacheEvict("answers")
 	@Override
 	public int deleteByContentId(final String contentId) {
 		try {
@@ -176,31 +174,6 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 		final ViewResult result = db.queryView(createQuery("by_sessionid_variant").key(sessionKey));
 
 		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
-	}
-
-	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
-	@CacheEvict(value = "answers", allEntries = true)
-	public void update(final Answer answer) {
-		try {
-			super.update(answer);
-		} catch (final UpdateConflictException e) {
-			logger.error("Could not update answer {}.", answer, e);
-			throw e;
-		}
-	}
-
-	/* TODO: Only evict cache entry for the answer's session. This requires some refactoring. */
-	@CacheEvict(value = "answers", allEntries = true)
-	@Override
-	public void delete(final String answerId) {
-		try {
-			/* TODO: use id and rev instead of loading the answer */
-			db.delete(get(answerId));
-			dbLogger.log("delete", "type", "answer");
-		} catch (final DbAccessException e) {
-			logger.error("Could not delete answer {}.", answerId, e);
-			throw e;
-		}
 	}
 
 	@Override

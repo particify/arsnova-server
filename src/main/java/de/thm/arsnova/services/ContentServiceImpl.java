@@ -32,11 +32,14 @@ import de.thm.arsnova.persistance.AnswerRepository;
 import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.SessionRepository;
 import org.ektorp.DbAccessException;
+import org.ektorp.DocumentNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -128,8 +131,90 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 		}
 	}
 
+	@Cacheable("questions")
+	@Override
+	public Content get(final String id) {
+		try {
+			final Content content = super.get(id);
+			if (!"freetext".equals(content.getQuestionType()) && 0 == content.getPiRound()) {
+			/* needed for legacy questions whose piRound property has not been set */
+				content.setPiRound(1);
+			}
+			content.updateRoundManagementState();
+			//content.setSessionKeyword(sessionRepository.getSessionFromId(content.getSessionId()).getKeyword());
+
+			return content;
+		} catch (final DocumentNotFoundException e) {
+			logger.error("Could not get question {}.", id, e);
+		}
+
+		return null;
+	}
+
+	@Override
+	@Caching(evict = {@CacheEvict(value = "skillquestions", key = "#sessionId"),
+			@CacheEvict(value = "lecturequestions", key = "#sessionId", condition = "#content.getQuestionVariant().equals('lecture')"),
+			@CacheEvict(value = "preparationquestions", key = "#sessionId", condition = "#content.getQuestionVariant().equals('preparation')"),
+			@CacheEvict(value = "flashcardquestions", key = "#sessionId", condition = "#content.getQuestionVariant().equals('flashcard')") },
+			put = {@CachePut(value = "questions", key = "#content.id")})
+	public Content save(final String sessionId, final Content content) {
+		content.setSessionId(sessionId);
+		try {
+			contentRepository.save(content);
+
+			return content;
+		} catch (final IllegalArgumentException e) {
+			logger.error("Could not save content {}.", content, e);
+		}
+
+		return null;
+	}
+
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	@Caching(evict = {
+			@CacheEvict(value = "skillquestions", allEntries = true),
+			@CacheEvict(value = "lecturequestions", allEntries = true, condition = "#content.getQuestionVariant().equals('lecture')"),
+			@CacheEvict(value = "preparationquestions", allEntries = true, condition = "#content.getQuestionVariant().equals('preparation')"),
+			@CacheEvict(value = "flashcardquestions", allEntries = true, condition = "#content.getQuestionVariant().equals('flashcard')") },
+			put = {@CachePut(value = "questions", key = "#content.id")})
+	public Content update(final Content content) {
+		final User user = userService.getCurrentUser();
+		final Content oldContent = contentRepository.findOne(content.getId());
+		if (null == oldContent) {
+			throw new NotFoundException();
+		}
+
+		final Session session = sessionRepository.findOne(content.getSessionId());
+		if (user == null || session == null || !session.isCreator(user)) {
+			throw new UnauthorizedException();
+		}
+
+		if ("freetext".equals(content.getQuestionType())) {
+			content.setPiRound(0);
+		} else if (content.getPiRound() < 1 || content.getPiRound() > 2) {
+			content.setPiRound(oldContent.getPiRound() > 0 ? oldContent.getPiRound() : 1);
+		}
+
+		content.setId(oldContent.getId());
+		content.setRevision(oldContent.getRevision());
+		content.updateRoundManagementState();
+		contentRepository.save(content);
+
+		if (!oldContent.isActive() && content.isActive()) {
+			final UnlockQuestionEvent event = new UnlockQuestionEvent(this, session, content);
+			this.publisher.publishEvent(event);
+		} else if (oldContent.isActive() && !content.isActive()) {
+			final LockQuestionEvent event = new LockQuestionEvent(this, session, content);
+			this.publisher.publishEvent(event);
+		}
+		return content;
+	}
+
+	/* FIXME: caching */
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	//@Cacheable("skillquestions")
 	public List<Content> getBySessionKey(final String sessionkey) {
 		final Session session = getSession(sessionkey);
 		final User user = userService.getCurrentUser();
@@ -171,25 +256,10 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 			}
 		}
 
-		final Content result = contentRepository.save(session.getId(), content);
+		final Content result = save(session.getId(), content);
 
 		final NewQuestionEvent event = new NewQuestionEvent(this, session, result);
 		this.publisher.publishEvent(event);
-
-		return result;
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public Content get(final String id) {
-		final Content result = contentRepository.findOne(id);
-		if (result == null) {
-			return null;
-		}
-		if (!"freetext".equals(result.getQuestionType()) && 0 == result.getPiRound()) {
-			/* needed for legacy questions whose piRound property has not been set */
-			result.setPiRound(1);
-		}
 
 		return result;
 	}
@@ -198,6 +268,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#contentId, 'content', 'owner')")
 	@Caching(evict = {
+			@CacheEvict("answers"),
 			@CacheEvict(value = "questions", key = "#contentId"),
 			@CacheEvict(value = "skillquestions", allEntries = true),
 			@CacheEvict(value = "lecturequestions", allEntries = true /*, condition = "#content.getQuestionVariant().equals('lecture')"*/),
@@ -293,7 +364,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 		content.setPiRoundEndTime(0);
 		content.setVotingDisabled(true);
 		content.updateRoundManagementState();
-		update(content, user);
+		update(content);
 
 		this.publisher.publishEvent(new PiRoundEndEvent(this, session, content));
 	}
@@ -356,6 +427,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'content', 'owner')")
+	@CacheEvict("answers")
 	public void resetPiRoundState(final String questionId) {
 		final Content content = contentRepository.findOne(questionId);
 		final Session session = sessionRepository.findOne(content.getSessionId());
@@ -384,7 +456,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 			content.setActive(true);
 			update(content);
 		} else {
-			contentRepository.update(content);
+			update(content);
 		}
 		ArsnovaEvent event;
 		if (disableVoting) {
@@ -397,13 +469,22 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	@Caching(evict = { @CacheEvict(value = "contents", allEntries = true),
+			@CacheEvict(value = "skillquestions", key = "#sessionId"),
+			@CacheEvict(value = "lecturequestions", key = "#sessionId"),
+			@CacheEvict(value = "preparationquestions", key = "#sessionId"),
+			@CacheEvict(value = "flashcardquestions", key = "#sessionId") })
 	public void setVotingAdmissions(final String sessionkey, final boolean disableVoting, List<Content> contents) {
 		final User user = getCurrentUser();
 		final Session session = getSession(sessionkey);
 		if (!session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
-		contentRepository.setVotingAdmissions(session.getId(), disableVoting, contents);
+		for (final Content q : contents) {
+			if (!"flashcard".equals(q.getQuestionType())) {
+				q.setVotingDisabled(disableVoting);
+			}
+		}
 		ArsnovaEvent event;
 		if (disableVoting) {
 			event = new LockVotesEvent(this, session, contents);
@@ -421,14 +502,8 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 		if (!session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
-		final List<Content> contents = contentRepository.setVotingAdmissionForAllQuestions(session.getId(), disableVoting);
-		ArsnovaEvent event;
-		if (disableVoting) {
-			event = new LockVotesEvent(this, session, contents);
-		} else {
-			event = new UnlockVotesEvent(this, session, contents);
-		}
-		this.publisher.publishEvent(event);
+		final List<Content> contents = contentRepository.findBySessionId(session.getId());
+		setVotingAdmissionForAllQuestions(session.getId(), disableVoting);
 	}
 
 	private Session getSessionWithAuthCheck(final String sessionKeyword) {
@@ -445,7 +520,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	public void deleteAnswers(final String questionId) {
 		final Content content = contentRepository.findOne(questionId);
 		content.resetQuestionState();
-		contentRepository.update(content);
+		update(content);
 		answerRepository.deleteByContentId(content.getId());
 	}
 
@@ -487,7 +562,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 		final Session session = sessionRepository.findOne(answer.getSessionId());
 		if (session.isCreator(user)) {
 			answer.setRead(true);
-			answerRepository.update(answer);
+			answerRepository.save(answer);
 		}
 	}
 
@@ -599,7 +674,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	public List<Answer> getMyAnswersBySessionKey(final String sessionKey) {
 		final Session session = getSession(sessionKey);
 		// Load contents first because we are only interested in answers of the latest piRound.
-		final List<Content> contents = contentRepository.findBySessionIdForUsers(session.getId());
+		final List<Content> contents = getBySessionKey(sessionKey);
 		final Map<String, Content> questionIdToQuestion = new HashMap<>();
 		for (final Content content : contents) {
 			questionIdToQuestion.put(content.getId(), content);
@@ -636,48 +711,10 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public Content update(final Content content) {
-		final User user = userService.getCurrentUser();
-		return update(content, user);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public Content update(final Content content, User user) {
-		final Content oldContent = contentRepository.findOne(content.getId());
-		if (null == oldContent) {
-			throw new NotFoundException();
-		}
-
-		final Session session = sessionRepository.findOne(content.getSessionId());
-		if (user == null || session == null || !session.isCreator(user)) {
-			throw new UnauthorizedException();
-		}
-
-		if ("freetext".equals(content.getQuestionType())) {
-			content.setPiRound(0);
-		} else if (content.getPiRound() < 1 || content.getPiRound() > 2) {
-			content.setPiRound(oldContent.getPiRound() > 0 ? oldContent.getPiRound() : 1);
-		}
-
-		contentRepository.update(content);
-
-		if (!oldContent.isActive() && content.isActive()) {
-			final UnlockQuestionEvent event = new UnlockQuestionEvent(this, session, content);
-			this.publisher.publishEvent(event);
-		} else if (oldContent.isActive() && !content.isActive()) {
-			final LockQuestionEvent event = new LockQuestionEvent(this, session, content);
-			this.publisher.publishEvent(event);
-		}
-		return content;
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	@CacheEvict(value = "answers", key = "#content")
-	public Answer saveAnswer(final String questionId, final de.thm.arsnova.entities.transport.Answer answer) {
+	@CacheEvict(value = "answers", key = "#contentId")
+	public Answer saveAnswer(final String contentId, final de.thm.arsnova.entities.transport.Answer answer) {
 		final User user = getCurrentUser();
-		final Content content = get(questionId);
+		final Content content = get(contentId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
@@ -707,6 +744,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	@CacheEvict(value = "answers", allEntries = true)
 	public Answer updateAnswer(final Answer answer) {
 		final User user = userService.getCurrentUser();
 		final Answer realAnswer = this.getMyAnswer(answer.getQuestionId());
@@ -723,7 +761,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 		answer.setUser(user.getUsername());
 		answer.setQuestionId(content.getId());
 		answer.setSessionId(session.getId());
-		answerRepository.update(realAnswer);
+		answerRepository.save(realAnswer);
 		this.publisher.publishEvent(new NewAnswerEvent(this, session, answer, user, content));
 
 		return answer;
@@ -731,6 +769,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	@CacheEvict(value = "answers", allEntries = true)
 	public void deleteAnswer(final String questionId, final String answerId) {
 		final Content content = contentRepository.findOne(questionId);
 		if (content == null) {
@@ -746,8 +785,10 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 		this.publisher.publishEvent(new DeleteAnswerEvent(this, session, content));
 	}
 
+	/* FIXME: caching */
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	//@Cacheable("lecturequestions")
 	public List<Content> getLectureQuestions(final String sessionkey) {
 		final Session session = getSession(sessionkey);
 		final User user = userService.getCurrentUser();
@@ -758,8 +799,10 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 		}
 	}
 
+	/* FIXME: caching */
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	//@Cacheable("flashcardquestions")
 	public List<Content> getFlashcards(final String sessionkey) {
 		final Session session = getSession(sessionkey);
 		final User user = userService.getCurrentUser();
@@ -770,8 +813,10 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 		}
 	}
 
+	/* FIXME: caching */
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	//@Cacheable("preparationquestions")
 	public List<Content> getPreparationQuestions(final String sessionkey) {
 		final Session session = getSession(sessionkey);
 		final User user = userService.getCurrentUser();
@@ -904,30 +949,33 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public void publishAll(final String sessionkey, final boolean publish) {
+		/* TODO: resolve redundancies */
 		final User user = getCurrentUser();
 		final Session session = getSession(sessionkey);
 		if (!session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
-		final List<Content> contents = contentRepository.publishAllQuestions(session.getId(), publish);
-		ArsnovaEvent event;
-		if (publish) {
-			event = new UnlockQuestionsEvent(this, session, contents);
-		} else {
-			event = new LockQuestionsEvent(this, session, contents);
-		}
-		this.publisher.publishEvent(event);
+		final List<Content> contents = contentRepository.findBySessionId(session.getId());
+		publishQuestions(sessionkey, publish, contents);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	@Caching(evict = { @CacheEvict(value = "contents", allEntries = true),
+			@CacheEvict(value = "skillquestions", key = "#sessionId"),
+			@CacheEvict(value = "lecturequestions", key = "#sessionId"),
+			@CacheEvict(value = "preparationquestions", key = "#sessionId"),
+			@CacheEvict(value = "flashcardquestions", key = "#sessionId") })
 	public void publishQuestions(final String sessionkey, final boolean publish, List<Content> contents) {
 		final User user = getCurrentUser();
 		final Session session = getSession(sessionkey);
 		if (!session.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
-		contentRepository.publishQuestions(session.getId(), publish, contents);
+		for (final Content content : contents) {
+			content.setActive(publish);
+		}
+		contentRepository.save(contents);
 		ArsnovaEvent event;
 		if (publish) {
 			event = new UnlockQuestionsEvent(this, session, contents);
@@ -948,7 +996,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 		}
 
 		final List<Content> contents = contentRepository.findBySessionIdAndVariantAndActive(session.getId());
-		contentRepository.resetQuestionsRoundState(session.getId(), contents);
+		resetContentsRoundState(session.getId(), contents);
 		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
 		answerRepository.deleteAllAnswersForQuestions(contentIds);
 
@@ -963,7 +1011,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 		final Session session = getSession(sessionkey);
 
 		final List<Content> contents = contentRepository.findBySessionIdAndVariantAndActive(session.getId(), "preparation");
-		contentRepository.resetQuestionsRoundState(session.getId(), contents);
+		resetContentsRoundState(session.getId(), contents);
 		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
 		answerRepository.deleteAllAnswersForQuestions(contentIds);
 
@@ -978,11 +1026,26 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 		final Session session = getSession(sessionkey);
 
 		final List<Content> contents = contentRepository.findBySessionIdAndVariantAndActive(session.getId(), "lecture");
-		contentRepository.resetQuestionsRoundState(session.getId(), contents);
+		resetContentsRoundState(session.getId(), contents);
 		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
 		answerRepository.deleteAllAnswersForQuestions(contentIds);
 
 		this.publisher.publishEvent(new DeleteAllLectureAnswersEvent(this, session));
+	}
+
+	@Caching(evict = {
+			@CacheEvict(value = "contents", allEntries = true),
+			@CacheEvict(value = "skillquestions", key = "#sessionId"),
+			@CacheEvict(value = "lecturequestions", key = "#sessionId"),
+			@CacheEvict(value = "preparationquestions", key = "#sessionId"),
+			@CacheEvict(value = "flashcardquestions", key = "#sessionId") })
+	private void resetContentsRoundState(final String sessionId, final List<Content> contents) {
+		for (final Content q : contents) {
+			/* TODO: Check if setting the sessionId is necessary. */
+			q.setSessionId(sessionId);
+			q.resetQuestionState();
+		}
+		contentRepository.save(contents);
 	}
 
 	@Override

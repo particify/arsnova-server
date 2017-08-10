@@ -52,7 +52,7 @@ Cache name | Key | Description
 `flashcardquestions` | database id of session | Contains all "flashcard" variant questions for the specified session.
 `questions` | `Question` entity | Contains single question objects.
 `questions` | database id of question | Although it shares the name of the previously mentioned cache, it is in essence a different cache because the keys are different. This means that the same `Question` object might be associated with two different keys.
-`answers`| `Question` entity | Contains single answer objects.
+`answers`| database id of question | Contains single answer objects.
 `learningprogress` | `Session` entity | Contains `CourseScore` objects to calculate the learning progress values for the specified session.
 `sessions` | keyword of session | Contains sessions identified by their keywords.
 `sessions` | database id of session | Although it shares the name of the previously mentioned cache, it is in essence a different cache because the keys are different. This means that the same `Session` object might be associated with two different keys.

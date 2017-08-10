@@ -63,18 +63,18 @@ public class MotdController extends AbstractController {
 		@ApiParam(value = "sessionkey", required = false) @RequestParam(value = "sessionkey", defaultValue = "null") final String sessionkey
 	) {
 		List<Motd> motds;
-		Date client = new Date(System.currentTimeMillis());
+		Date date = new Date(System.currentTimeMillis());
 		if (!clientdate.isEmpty()) {
-			client.setTime(Long.parseLong(clientdate));
+			date.setTime(Long.parseLong(clientdate));
 		}
 		if (adminview) {
-			if ("null".equals(sessionkey)) {
-				motds = motdService.getAdminMotds();
-			} else {
-				motds = motdService.getAllSessionMotds(sessionkey);
-			}
+			motds = "session".equals(audience) ?
+					motdService.getAllSessionMotds(sessionkey) :
+					motdService.getAdminMotds();
 		} else {
-			motds = motdService.getCurrentMotds(client, audience, sessionkey);
+			motds = "session".equals(audience) ?
+					motdService.getCurrentSessionMotds(date, sessionkey) :
+					motdService.getCurrentMotds(date, audience);
 		}
 		return motds;
 	}

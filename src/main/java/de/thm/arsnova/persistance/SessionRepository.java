@@ -28,26 +28,12 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface SessionRepository extends CrudRepository<Session, String> {
-	Session findOne(String sessionId);
 	Session findByKeyword(String keyword);
-	Session save(User user, Session session);
-	void update(Session session);
-
-	/**
-	 * Deletes a session and related data.
-	 *
-	 * @param session the session for deletion
-	 */
-	int[] deleteSession(Session session);
-
-	Session changeSessionCreator(Session session, String newCreator);
-	int[] deleteInactiveGuestSessions(long lastActivityBefore);
+	List<Session> findInactiveGuestSessionsMetadata(long lastActivityBefore);
 	List<Session> findByUser(User user, int start, int limit);
 	List<Session> findByUsername(String username, int start, int limit);
 	List<Session> findAllForPublicPool();
 	List<Session> findForPublicPoolByUser(User user);
-	boolean sessionKeyAvailable(String keyword);
-	Session updateSessionOwnerActivity(Session session);
 	List<Session> findVisitedByUsername(String username, int start, int limit);
 	List<SessionInfo> getMySessionsInfo(User user, int start, int limit);
 	List<SessionInfo> findInfosForPublicPool();

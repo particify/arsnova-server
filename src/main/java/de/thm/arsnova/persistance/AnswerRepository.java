@@ -33,8 +33,6 @@ public interface AnswerRepository extends CrudRepository<Answer, String> {
 	List<Answer> findByUserSessionId(User user, String sessionId);
 	int countBySessionKey(String sessionKey);
 	int deleteByContentId(String contentId);
-	void update(Answer answer);
-	void delete(String answerId);
 	int countBySessionIdLectureVariant(String sessionId);
 	int countBySessionIdPreparationVariant(String sessionId);
 	int deleteAllAnswersForQuestions(List<String> contentIds);

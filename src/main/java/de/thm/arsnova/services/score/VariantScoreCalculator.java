@@ -21,6 +21,7 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ScoreStatistics;
 import de.thm.arsnova.persistance.SessionStatisticsRepository;
+import org.springframework.cache.annotation.Cacheable;
 
 /**
  * Base class for the score feature that allows filtering on the question variant.
@@ -37,7 +38,12 @@ abstract class VariantScoreCalculator implements ScoreCalculator {
 		this.sessionStatisticsRepository = sessionStatisticsRepository;
 	}
 
-	private void loadProgress(final Session session) {
+	@Cacheable("learningprogress")
+	private Score loadProgress(final Session session) {
+		return sessionStatisticsRepository.getLearningProgress(session);
+	}
+
+	private void refreshProgress(final Session session) {
 		this.courseScore = sessionStatisticsRepository.getLearningProgress(session);
 	}
 
@@ -47,7 +53,7 @@ abstract class VariantScoreCalculator implements ScoreCalculator {
 
 	@Override
 	public ScoreStatistics getCourseProgress(Session session) {
-		this.loadProgress(session);
+		this.refreshProgress(session);
 		this.filterVariant();
 		return this.createCourseProgress();
 	}
@@ -56,7 +62,7 @@ abstract class VariantScoreCalculator implements ScoreCalculator {
 
 	@Override
 	public ScoreStatistics getMyProgress(Session session, User user) {
-		this.loadProgress(session);
+		this.refreshProgress(session);
 		this.filterVariant();
 		return this.createMyProgress(user);
 	}

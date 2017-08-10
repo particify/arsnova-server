@@ -14,9 +14,6 @@ public interface CommentRepository extends CrudRepository<Comment, String> {
 	List<Comment> findBySessionId(String sessionId, int start, int limit);
 	List<Comment> findBySessionIdAndUser(String sessionId, User user, int start, int limit);
 	Comment findOne(String commentId);
-	Comment save(String sessionId, Comment comment, User user);
-	void markInterposedQuestionAsRead(Comment comment);
-	void delete(Comment comment);
 	int deleteBySessionId(String sessionId);
 	int deleteBySessionIdAndUser(String sessionId, User user);
 }

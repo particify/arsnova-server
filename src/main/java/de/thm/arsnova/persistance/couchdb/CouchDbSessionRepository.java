@@ -29,7 +29,6 @@ import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import de.thm.arsnova.persistance.MotdRepository;
 import de.thm.arsnova.persistance.SessionRepository;
-import de.thm.arsnova.services.SessionService;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentNotFoundException;
@@ -39,10 +38,7 @@ import org.ektorp.ViewResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -56,9 +52,6 @@ import java.util.stream.Collectors;
 
 public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> implements SessionRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbSessionRepository.class);
-
-	@Autowired
-	private SessionService sessionService;
 
 	@Autowired
 	private LogEntryRepository dbLogger;
@@ -78,37 +71,6 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 		return !session.isEmpty() ? session.get(0) : null;
 	}
 
-	/* TODO: Redundant -> remove. Move cache handling to service layer. */
-	@Override
-	@Cacheable("sessions")
-	public Session findOne(final String sessionId) {
-		return get(sessionId);
-	}
-
-	/* TODO: Move to service layer. */
-	@Override
-	@Caching(evict = @CacheEvict(cacheNames = "sessions", key = "#result.keyword"))
-	public Session save(final User user, final Session session) {
-		session.setKeyword(sessionService.generateKey());
-		session.setCreator(user.getUsername());
-		session.setActive(true);
-		session.setFeedbackLock(false);
-
-		try {
-			db.create(session);
-		} catch (final IllegalArgumentException e) {
-			logger.error("Could not save session to database.", e);
-		}
-
-		return session.getId() != null ? session : null;
-	}
-
-	/* TODO: Move to service layer. */
-	@Override
-	public boolean sessionKeyAvailable(final String keyword) {
-		return findByKeyword(keyword) == null;
-	}
-
 	/* TODO: Move to service layer. */
 	private String getSessionKeyword(final String internalSessionId) throws IOException {
 		final Session session = get(internalSessionId);
@@ -119,26 +81,6 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 		}
 
 		return session.getKeyword();
-	}
-
-	/* TODO: Move to service layer. */
-	@Override
-	@CachePut(value = "sessions")
-	public Session updateSessionOwnerActivity(final Session session) {
-		try {
-			/* Do not clutter CouchDB. Only update once every 3 hours. */
-			if (session.getLastOwnerActivity() > System.currentTimeMillis() - 3 * 3600000) {
-				return session;
-			}
-
-			session.setLastOwnerActivity(System.currentTimeMillis());
-			update(session);
-
-			return session;
-		} catch (final UpdateConflictException e) {
-			logger.error("Failed to update lastOwnerActivity for session {}.", session, e);
-			return session;
-		}
 	}
 
 	@Override
@@ -216,73 +158,21 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 				ComplexKey.of(courses.stream().map(Course::getId).collect(Collectors.toList())));
 	}
 
-	/* TODO: Redundant -> remove. Move cache handling to service layer. */
 	@Override
-	@CachePut(value = "sessions")
-	public void update(final Session session) {
-		try {
-			super.update(session);
-		} catch (final UpdateConflictException e) {
-			logger.error("Could not update session {}.", session, e);
-		}
-	}
-
-	/* TODO: Move to service layer. */
-	@Override
-	@Caching(evict = { @CacheEvict("sessions"), @CacheEvict(cacheNames = "sessions", key = "#p0.keyword") })
-	public Session changeSessionCreator(final Session session, final String newCreator) {
-		final Session s = get(session.getId());
-		s.setCreator(newCreator);
-		try {
-			update(s);
-		} catch (final UpdateConflictException e) {
-			logger.error("Could not update creator for session {}.", session, e);
-		}
-
-		return s;
-	}
-
-	@Override
-	@Caching(evict = { @CacheEvict("sessions"), @CacheEvict(cacheNames = "sessions", key = "#p0.keyword") })
-	public int[] deleteSession(final Session session) {
-		/* FIXME: not yet migrated - move to service layer */
-		throw new UnsupportedOperationException();
-//		final int[] count = new int[] {0, 0};
-//		try {
-//			count = deleteBySessionId(session);
-//			remove(session);
-//			logger.debug("Deleted session document {} and related data.", session.getId());
-//			dbLogger.log("delete", "type", "session", "id", session.getId());
-//		} catch (final Exception e) {
-//			/* TODO: improve error handling */
-//			logger.error("Could not delete session {}.", session, e);
-//		}
-//
-//		return count;
-	}
-
-	@Override
-	public int[] deleteInactiveGuestSessions(final long lastActivityBefore) {
+	public List<Session> findInactiveGuestSessionsMetadata(final long lastActivityBefore) {
 		final ViewResult result = db.queryView(
 				createQuery("by_lastactivity_for_guests").endKey(lastActivityBefore));
 		final int[] count = new int[3];
 
+		List<Session> sessions = new ArrayList<>();
 		for (final ViewResult.Row row : result.getRows()) {
 			final Session s = new Session();
 			s.setId(row.getId());
 			s.setRevision(row.getValueAsNode().get("_rev").asText());
-			final int[] qaCount = deleteSession(s);
-			count[1] += qaCount[0];
-			count[2] += qaCount[1];
+			sessions.add(s);
 		}
 
-		if (!result.isEmpty()) {
-			logger.info("Deleted {} inactive guest sessions.", result.getSize());
-			dbLogger.log("cleanup", "type", "session", "sessionCount", result.getSize(), "questionCount", count[1], "answerCount", count[2]);
-		}
-		count[0] = result.getSize();
-
-		return count;
+		return sessions;
 	}
 
 	/* TODO: Move to service layer. */
