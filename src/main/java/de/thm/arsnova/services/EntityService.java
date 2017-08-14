@@ -24,7 +24,7 @@ public class EntityService<T extends Entity> {
 		this.objectMapper = objectMapper;
 	}
 
-	@PreAuthorize("hasPermission(type, #id, 'read')")
+	@PreAuthorize("hasPermission(#id, #this.this.getTypeName(), 'read')")
 	public T get(final String id) {
 		return repository.findOne(id);
 	}
@@ -66,5 +66,9 @@ public class EntityService<T extends Entity> {
 	@PreAuthorize("hasPermission(#entity, 'delete')")
 	public void delete(final T entity) {
 		repository.delete(entity);
+	}
+
+	public String getTypeName() {
+		return type.getSimpleName().toLowerCase();
 	}
 }
