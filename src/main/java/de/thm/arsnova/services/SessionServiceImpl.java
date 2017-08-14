@@ -259,7 +259,7 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 	@PreAuthorize("isAuthenticated()")
 	public Session getByKey(final String keyword) {
 		final User user = userService.getCurrentUser();
-		return Session.anonymizedCopy(this.getInternal(keyword, user));
+		return this.getInternal(keyword, user);
 	}
 
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")

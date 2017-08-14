@@ -55,43 +55,6 @@ public class Session implements Entity {
 	private boolean feedbackLock;
 	private boolean flipFlashcards;
 
-	/**
-	 * Returns a copy of the given session without any information that identifies a person.
-	 * @param original The session to create a anonymized copy of
-	 * @return The anonymized copy of the session
-	 */
-	public static Session anonymizedCopy(final Session original) {
-		final Session copy = new Session();
-		copy.name = original.name;
-		copy.shortName = original.shortName;
-		copy.keyword = original.keyword;
-		copy.creator = ""; // anonymous
-		copy.active = original.active;
-		copy.lastOwnerActivity = original.lastOwnerActivity;
-		copy.courseType = original.courseType;
-		copy.courseId = original.courseId;
-		copy.creationTime = original.creationTime;
-		copy.learningProgressOptions = new ScoreOptions(original.learningProgressOptions);
-		copy.features = new SessionFeature(original.features);
-		// public pool
-		copy.ppAuthorName = original.ppAuthorName;
-		copy.ppAuthorMail = original.ppAuthorMail;
-		copy.ppUniversity = original.ppUniversity;
-		copy.ppLogo = original.ppLogo;
-		copy.ppSubject = original.ppSubject;
-		copy.ppLicense = original.ppLicense;
-		copy.ppDescription = original.ppDescription;
-		copy.ppFaculty = original.ppFaculty;
-		copy.ppLevel = original.ppLevel;
-		copy.sessionType = original.sessionType;
-		copy.feedbackLock = original.feedbackLock;
-		copy.flipFlashcards = original.flipFlashcards;
-
-		copy.id = original.id;
-		copy.rev = original.rev;
-		return copy;
-	}
-
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getId() {
 		return id;
