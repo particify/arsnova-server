@@ -24,6 +24,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 public class NovaViewTest {
@@ -32,80 +33,80 @@ public class NovaViewTest {
 	public void setKeyShouldAcceptSingleArgument() {
 		final NovaView v = new NovaView(null);
 		v.setKey("foo");
-		assertEncodedEquals("key", "\"foo\"", v.getQueryString());
+		assertEncodedContains("key", "\"foo\"", v.getQueryString());
 	}
 
 	@Test
 	public void setKeyShouldAcceptMultipleArgument() {
 		final NovaView v = new NovaView(null);
 		v.setKey("foo", "bar", "baz");
-		assertEncodedEquals("key", "[\"foo\",\"bar\",\"baz\"]", v.getQueryString());
+		assertEncodedContains("key", "[\"foo\",\"bar\",\"baz\"]", v.getQueryString());
 	}
 
 	@Test
 	public void setStartKeyShouldAcceptSingleArgument() {
 		final NovaView v = new NovaView(null);
 		v.setStartKey("foo");
-		assertEncodedEquals("startkey", "\"foo\"", v.getQueryString());
+		assertEncodedContains("startkey", "\"foo\"", v.getQueryString());
 	}
 
 	@Test
 	public void setStartKeyShouldAcceptSingleArgumentArray() {
 		final NovaView v = new NovaView(null);
 		v.setStartKeyArray("foo");
-		assertEncodedEquals("startkey", "[\"foo\"]", v.getQueryString());
+		assertEncodedContains("startkey", "[\"foo\"]", v.getQueryString());
 	}
 
 	@Test
 	public void setEndKeyShouldAcceptSingleArgumentArray() {
 		final NovaView v = new NovaView(null);
 		v.setEndKeyArray("foo");
-		assertEncodedEquals("endkey", "[\"foo\"]", v.getQueryString());
+		assertEncodedContains("endkey", "[\"foo\"]", v.getQueryString());
 	}
 
 	@Test
 	public void setEndKeyShouldAcceptSingleArgument() {
 		final NovaView v = new NovaView(null);
 		v.setEndKey("foo");
-		assertEncodedEquals("endkey", "\"foo\"", v.getQueryString());
+		assertEncodedContains("endkey", "\"foo\"", v.getQueryString());
 	}
 
 	@Test
 	public void setStartKeyShouldAcceptMultipleArgument() {
 		final NovaView v = new NovaView(null);
 		v.setStartKey("foo", "bar", "baz");
-		assertEncodedEquals("startkey", "[\"foo\",\"bar\",\"baz\"]", v.getQueryString());
+		assertEncodedContains("startkey", "[\"foo\",\"bar\",\"baz\"]", v.getQueryString());
 	}
 
 	@Test
 	public void setEndKeyShouldAcceptMultipleArgument() {
 		final NovaView v = new NovaView(null);
 		v.setEndKey("foo", "bar", "baz");
-		assertEncodedEquals("endkey", "[\"foo\",\"bar\",\"baz\"]", v.getQueryString());
+		assertEncodedContains("endkey", "[\"foo\",\"bar\",\"baz\"]", v.getQueryString());
 	}
 
 	@Test
 	public void keysShouldSupportEmptyObject() {
 		final NovaView v = new NovaView(null);
 		v.setKey("foo", "bar", "{}");
-		assertEncodedEquals("key", "[\"foo\",\"bar\",{}]", v.getQueryString());
+		assertEncodedContains("key", "[\"foo\",\"bar\",{}]", v.getQueryString());
 	}
 
 	@Test
-	public void arrayKeysShouldNotEnquoteNumbers() {
+	public void arrayKeysShouldEnquoteNumbers() {
 		final NovaView v = new NovaView(null);
 		v.setKey("foo", "bar", "2");
-		assertEncodedEquals("key", "[\"foo\",\"bar\",2]", v.getQueryString());
+		assertEncodedContains("key", "[\"foo\",\"bar\",\"2\"]", v.getQueryString());
 	}
 
 	@Test
-	public void singleArrayKeysShouldNotEnquoteNumbers() {
+	public void singleArrayKeysShouldEnquoteNumbers() {
 		final NovaView v1 = new NovaView(null);
 		final NovaView v2 = new NovaView(null);
 		v1.setStartKeyArray("2");
 		v2.setEndKeyArray("2");
-		assertEncodedEquals("startkey", "[2]", v1.getQueryString());
-		assertEncodedEquals("endkey", "[2]", v2.getQueryString());
+		assertEncodedContains("startkey", "[\"2\"]", v1.getQueryString());
+		assertEncodedContains("endkey", "[\"2\"]", v2.getQueryString());
 	}
 
 	@Test
@@ -125,11 +126,11 @@ public class NovaViewTest {
 		v3.setKeys(Arrays.asList(mixedKeys));
 		v4.setKeys(Arrays.asList(arrayKeys));
 		v5.setKeys(Arrays.asList(emptyKeys));
-		assertEncodedEquals("keys", "[\"foo\",\"bar\"]", v1.getQueryString());
-		assertEncodedEquals("keys", "[123,456]", v2.getQueryString());
-		assertEncodedEquals("keys", "[\"foo\",123]", v3.getQueryString());
-		assertEncodedEquals("keys", "[[\"foo\",123],[456,\"bar\"]]", v4.getQueryString());
-		assertEncodedEquals("keys", "[]", v5.getQueryString());
+		assertEncodedContains("keys", "[\"foo\",\"bar\"]", v1.getQueryString());
+		assertEncodedContains("keys", "[\"123\",\"456\"]", v2.getQueryString());
+		assertEncodedContains("keys", "[\"foo\",\"123\"]", v3.getQueryString());
+		assertEncodedContains("keys", "[\"[\\\"foo\\\",123]\",\"[456,\\\"bar\\\"]\"]", v4.getQueryString());
+		assertEncodedContains("keys", "[]", v5.getQueryString());
 	}
 
 	@Test
@@ -141,10 +142,10 @@ public class NovaViewTest {
 		v1.setStale(StaleMode.NONE);
 		v2.setStale(StaleMode.OK);
 		v3.setStale(StaleMode.UPDATE_AFTER);
-		assertNull(v1.getQueryString());
-		assertEncodedEquals("stale", "ok", v2.getQueryString());
-		assertEncodedEquals("stale", "update_after", v3.getQueryString());
-		assertNull(v4.getQueryString());
+		assertThat(v1.getQueryString(), not(containsString("stale")));
+		assertEncodedContains("stale", "ok", v2.getQueryString());
+		assertEncodedContains("stale", "update_after", v3.getQueryString());
+		assertThat(v4.getQueryString(), not(containsString("stale")));
 	}
 
 	@Test
@@ -154,14 +155,22 @@ public class NovaViewTest {
 		final NovaView v3 = new NovaView(null);
 		v1.setIncludeDocs(true);
 		v2.setIncludeDocs(false);
-		assertEncodedEquals("include_docs", "true", v1.getQueryString());
-		assertNull(v2.getQueryString());
-		assertNull(v3.getQueryString());
+		assertEncodedContains("include_docs", "true", v1.getQueryString());
+		assertEncodedContainsNot("include_docs", "true", v2.getQueryString());
+		assertEncodedContainsNot("include_docs", "true", v3.getQueryString());
 	}
 
-	private void assertEncodedEquals(final String key, final String expected, final String actual) {
+	private void assertEncodedContains(final String key, final String expected, final String actual) {
 		try {
-			assertEquals(key + "=" + URLEncoder.encode(expected, "UTF-8"), actual);
+			assertThat(actual, containsString(key + "=" + URLEncoder.encode(expected, "UTF-8")));
+		} catch (final UnsupportedEncodingException e) {
+			fail(e.getLocalizedMessage());
+		}
+	}
+
+	private void assertEncodedContainsNot(final String key, final String expected, final String actual) {
+		try {
+			assertThat(actual, not(containsString(key + "=" + URLEncoder.encode(expected, "UTF-8"))));
 		} catch (final UnsupportedEncodingException e) {
 			fail(e.getLocalizedMessage());
 		}
