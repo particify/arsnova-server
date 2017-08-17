@@ -26,9 +26,9 @@ import org.jasig.cas.client.authentication.AttributePrincipalImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pac4j.oauth.profile.JsonHelper;
-import org.pac4j.oauth.profile.google2.Google2AttributesDefinition;
 import org.pac4j.oauth.profile.google2.Google2Email;
 import org.pac4j.oauth.profile.google2.Google2Profile;
+import org.pac4j.oauth.profile.google2.Google2ProfileDefinition;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -70,8 +70,8 @@ public class UserServiceTest {
 		ArrayList<Google2Email> emails = new ArrayList<>();
 		emails.add(email);
 		Google2Profile profile = new Google2Profile();
-		profile.addAttribute(Google2AttributesDefinition.DISPLAY_NAME, "ptsr00");
-		profile.addAttribute(Google2AttributesDefinition.EMAILS, JsonHelper.toJSONString(emails));
+		profile.addAttribute(Google2ProfileDefinition.DISPLAY_NAME, "ptsr00");
+		profile.addAttribute(Google2ProfileDefinition.EMAILS, emails);
 
 		socketid2user.put(UUID.randomUUID(), new User(profile));
 		List<GrantedAuthority> authorities = new ArrayList<>();
