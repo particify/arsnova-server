@@ -57,7 +57,7 @@ public class User implements Serializable {
 	}
 
 	public User(FacebookProfile profile) {
-		setUsername(profile.getProfileUrl());
+		setUsername(profile.getProfileUrl().toString());
 		setType(User.FACEBOOK);
 	}
 
