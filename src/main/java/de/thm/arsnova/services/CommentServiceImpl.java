@@ -71,7 +71,7 @@ public class CommentServiceImpl extends EntityService<Comment> implements Commen
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#commentId, 'comment', 'owner')")
+	@PreAuthorize("hasPermission(#commentId, 'comment', 'owner')")
 	public void delete(final String commentId) {
 		final Comment comment = commentRepository.findOne(commentId);
 		if (comment == null) {

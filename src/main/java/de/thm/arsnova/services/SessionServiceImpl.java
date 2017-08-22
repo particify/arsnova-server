@@ -262,7 +262,7 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 		return this.getInternal(keyword, user);
 	}
 
-	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	public Session getForAdmin(final String keyword) {
 		return sessionRepository.findByKeyword(keyword);
 	}
@@ -331,7 +331,7 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(1, 'motd', 'admin')")
+	@PreAuthorize("hasPermission('', 'motd', 'admin')")
 	public List<Session> getUserVisitedSessions(String username) {
 		return sessionRepository.findVisitedByUsername(username, 0, 0);
 	}
@@ -343,7 +343,7 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
+	@PreAuthorize("hasPermission('', 'session', 'create')")
 	@Caching(evict = @CacheEvict(cacheNames = "sessions", key = "#result.keyword"))
 	public Session save(final Session session) {
 		if (connectorClient != null && session.getCourseId() != null) {
@@ -412,12 +412,9 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 	}
 
 	@Override
+	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	public Session setActive(final String sessionkey, final Boolean lock) {
 		final Session session = sessionRepository.findByKeyword(sessionkey);
-		final User user = userService.getCurrentUser();
-		if (!session.isCreator(user)) {
-			throw new ForbiddenException("User is not session creator.");
-		}
 		session.setActive(lock);
 		this.publisher.publishEvent(new StatusSessionEvent(this, session));
 		sessionRepository.save(session);
@@ -426,7 +423,7 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#session, 'owner')")
+	@PreAuthorize("hasPermission(#session, 'owner')")
 	@CachePut(value = "sessions", key = "#session")
 	public Session update(final String sessionkey, final Session session) {
 		final Session existingSession = sessionRepository.findByKeyword(sessionkey);
@@ -455,7 +452,7 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(1, 'motd', 'admin')")
+	@PreAuthorize("hasPermission('', 'motd', 'admin')")
 	@Caching(evict = { @CacheEvict("sessions"), @CacheEvict(cacheNames = "sessions", key = "#sessionkey.keyword") })
 	public Session updateCreator(String sessionkey, String newCreator) {
 		final Session session = sessionRepository.findByKeyword(sessionkey);
@@ -483,7 +480,7 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#session, 'owner')")
+	@PreAuthorize("hasPermission(#session, 'owner')")
 	@CacheEvict("sessions")
 	public int[] deleteCascading(final Session session) {
 		int[] count = new int[] {0, 0, 0};
@@ -501,7 +498,7 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
+	@PreAuthorize("hasPermission(#sessionkey, 'session', 'read')")
 	public ScoreStatistics getLearningProgress(final String sessionkey, final String type, final String questionVariant) {
 		final Session session = sessionRepository.findByKeyword(sessionkey);
 		ScoreCalculator scoreCalculator = scoreCalculatorFactory.create(type, questionVariant);
@@ -509,7 +506,7 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
+	@PreAuthorize("hasPermission(#sessionkey, 'session', 'read')")
 	public ScoreStatistics getMyLearningProgress(final String sessionkey, final String type, final String questionVariant) {
 		final Session session = sessionRepository.findByKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
@@ -518,7 +515,7 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
+	@PreAuthorize("hasPermission('', 'session', 'create')")
 	public SessionInfo importSession(ImportExportSession importSession) {
 		final User user = userService.getCurrentUser();
 		final SessionInfo info = sessionRepository.importSession(user, importSession);
@@ -529,13 +526,13 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	public ImportExportSession exportSession(String sessionkey, Boolean withAnswerStatistics, Boolean withFeedbackQuestions) {
 		return sessionRepository.exportSession(sessionkey, withAnswerStatistics, withFeedbackQuestions);
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	public SessionInfo copySessionToPublicPool(String sessionkey, de.thm.arsnova.entities.transport.ImportExportSession.PublicPool pp) {
 		ImportExportSession temp = sessionRepository.exportSession(sessionkey, false, false);
 		temp.getSession().setPublicPool(pp);
@@ -550,17 +547,16 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 	}
 
 	@Override
+	@PreAuthorize("hasPermission(#sessionkey, 'session', 'read')")
 	public SessionFeature getFeatures(String sessionkey) {
 		return sessionRepository.findByKeyword(sessionkey).getFeatures();
 	}
 
 	@Override
+	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	public SessionFeature updateFeatures(String sessionkey, SessionFeature features) {
 		final Session session = sessionRepository.findByKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
-		if (!session.isCreator(user)) {
-			throw new UnauthorizedException("User is not session creator.");
-		}
 		session.setFeatures(features);
 		this.publisher.publishEvent(new FeatureChangeEvent(this, session));
 		sessionRepository.save(session);
@@ -569,12 +565,10 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 	}
 
 	@Override
+	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	public boolean lockFeedbackInput(String sessionkey, Boolean lock) {
 		final Session session = sessionRepository.findByKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
-		if (!session.isCreator(user)) {
-			throw new UnauthorizedException("User is not session creator.");
-		}
 		if (!lock) {
 			feedbackService.cleanFeedbackVotesBySessionKey(sessionkey, 0);
 		}
@@ -587,12 +581,10 @@ public class SessionServiceImpl extends EntityService<Session> implements Sessio
 	}
 
 	@Override
+	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	public boolean flipFlashcards(String sessionkey, Boolean flip) {
 		final Session session = sessionRepository.findByKeyword(sessionkey);
 		final User user = userService.getCurrentUser();
-		if (!session.isCreator(user)) {
-			throw new UnauthorizedException("User is not session creator.");
-		}
 		session.setFlipFlashcards(flip);
 		this.publisher.publishEvent(new FlipFlashcardsEvent(this, session));
 		sessionRepository.save(session);

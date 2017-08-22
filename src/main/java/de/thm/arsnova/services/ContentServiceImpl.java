@@ -234,7 +234,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 
 	/* FIXME: #content.getSessionKeyword() cannot be checked since keyword is no longer set for content. */
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#content.getSessionKeyword(), 'session', 'owner')")
+	@PreAuthorize("hasPermission(#content.getSessionKeyword(), 'session', 'owner')")
 	public Content save(final Content content) {
 		final Session session = sessionRepository.findByKeyword(content.getSessionKeyword());
 		content.setSessionId(session.getId());
@@ -266,7 +266,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 
 	/* TODO: Only evict cache entry for the content's session. This requires some refactoring. */
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#contentId, 'content', 'owner')")
+	@PreAuthorize("hasPermission(#contentId, 'content', 'owner')")
 	@Caching(evict = {
 			@CacheEvict("answers"),
 			@CacheEvict(value = "questions", key = "#contentId"),
@@ -297,7 +297,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 		this.publisher.publishEvent(event);
 	}
 
-	@PreAuthorize("isAuthenticated() and hasPermission(#session, 'owner')")
+	@PreAuthorize("hasPermission(#session, 'owner')")
 	@Caching(evict = {
 			@CacheEvict(value = "questions", allEntries = true),
 			@CacheEvict(value = "skillquestions", key = "#session.getId()"),
@@ -370,7 +370,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'content', 'owner')")
+	@PreAuthorize("hasPermission(#questionId, 'content', 'owner')")
 	public void startNewPiRoundDelayed(final String questionId, final int time) {
 		final ContentService contentService = this;
 		final User user = userService.getCurrentUser();
@@ -395,7 +395,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'content', 'owner')")
+	@PreAuthorize("hasPermission(#questionId, 'content', 'owner')")
 	public void cancelPiRoundChange(final String questionId) {
 		final Content content = contentRepository.findOne(questionId);
 		final Session session = sessionRepository.findOne(content.getSessionId());
@@ -426,7 +426,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'content', 'owner')")
+	@PreAuthorize("hasPermission(#questionId, 'content', 'owner')")
 	@CacheEvict("answers")
 	public void resetPiRoundState(final String questionId) {
 		final Content content = contentRepository.findOne(questionId);
@@ -446,7 +446,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'content', 'owner')")
+	@PreAuthorize("hasPermission(#questionId, 'content', 'owner')")
 	public void setVotingAdmission(final String questionId, final boolean disableVoting) {
 		final Content content = contentRepository.findOne(questionId);
 		final Session session = sessionRepository.findOne(content.getSessionId());
@@ -516,7 +516,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'content', 'owner')")
+	@PreAuthorize("hasPermission(#questionId, 'content', 'owner')")
 	public void deleteAnswers(final String questionId) {
 		final Content content = contentRepository.findOne(questionId);
 		content.resetQuestionState();
@@ -1005,7 +1005,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 
 	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	@CacheEvict(value = "answers", allEntries = true)
 	public void deleteAllPreparationAnswers(String sessionkey) {
 		final Session session = getSession(sessionkey);
@@ -1020,7 +1020,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 
 	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	@CacheEvict(value = "answers", allEntries = true)
 	public void deleteAllLectureAnswers(String sessionkey) {
 		final Session session = getSession(sessionkey);

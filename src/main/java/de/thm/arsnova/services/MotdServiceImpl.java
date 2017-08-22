@@ -70,13 +70,13 @@ public class MotdServiceImpl extends EntityService<Motd> implements MotdService 
   }
 
   @Override
-  @PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
+  @PreAuthorize("hasPermission('', 'motd', 'admin')")
   public List<Motd> getAdminMotds() {
     return motdRepository.findGlobalForAdmin();
   }
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	public List<Motd> getAllSessionMotds(final String sessionkey) {
 		return motdRepository.findBySessionKey(sessionkey);
 	}
@@ -135,13 +135,13 @@ public class MotdServiceImpl extends EntityService<Motd> implements MotdService 
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
+	@PreAuthorize("hasPermission('', 'motd', 'admin')")
 	public Motd save(final Motd motd) {
 		return createOrUpdateMotd(motd);
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	public Motd save(final String sessionkey, final Motd motd) {
 		Session session = sessionService.getByKey(sessionkey);
 		motd.setSessionId(session.getId());
@@ -150,13 +150,13 @@ public class MotdServiceImpl extends EntityService<Motd> implements MotdService 
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
+	@PreAuthorize("hasPermission(1,'motd','admin')")
 	public Motd update(final Motd motd) {
 		return createOrUpdateMotd(motd);
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	public Motd update(final String sessionkey, final Motd motd) {
 		return createOrUpdateMotd(motd);
 	}
@@ -183,14 +183,14 @@ public class MotdServiceImpl extends EntityService<Motd> implements MotdService 
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(1,'motd','admin')")
+	@PreAuthorize("hasPermission('', 'motd', 'admin')")
 	@CacheEvict(cacheNames = "motds", key = "#motd.audience.concat(#motd.sessionkey)")
 	public void delete(Motd motd) {
 		motdRepository.delete(motd);
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
+	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	public void deleteBySessionKey(final String sessionkey, Motd motd) {
 		motdRepository.delete(motd);
 	}
