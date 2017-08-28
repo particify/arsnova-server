@@ -38,31 +38,31 @@ public class ScheduledCacheBuster {
 	@Scheduled(initialDelay = 1000 * 25, fixedRate = 1000 * 60 * 60 * 6)
 	private void clearSessionCache() { }
 
-	@CacheEvict(value = "questions", allEntries = true)
+	@CacheEvict(value = "contents", allEntries = true)
 	@Scheduled(initialDelay = 1000 * 50, fixedRate = 1000 * 60 * 30)
 	private void clearQuestionCache() { }
 
-	@CacheEvict(value = "skillquestions", allEntries = true)
+	@CacheEvict(value = "contentlists", allEntries = true)
 	@Scheduled(initialDelay = 1000 * 75, fixedRate = 1000 * 60 * 30)
 	private void clearSkillQuestionCache() { }
 
-	@CacheEvict(value = "lecturequestions", allEntries = true)
+	@CacheEvict(value = "lecturecontentlists", allEntries = true)
 	@Scheduled(initialDelay = 1000 * 100, fixedRate = 1000 * 60 * 30)
 	private void clearLectureQuestionCache() { }
 
-	@CacheEvict(value = "preparationquestions", allEntries = true)
+	@CacheEvict(value = "preparationcontentlists", allEntries = true)
 	@Scheduled(initialDelay = 1000 * 125, fixedRate = 1000 * 60 * 30)
 	private void clearPreparationQuestionCache() { }
 
-	@CacheEvict(value = "flashcardquestions", allEntries = true)
+	@CacheEvict(value = "flashcardcontentlists", allEntries = true)
 	@Scheduled(initialDelay = 1000 * 150, fixedRate = 1000 * 60 * 30)
 	private void clearFlashcardQuestionCache() { }
 
-	@CacheEvict(value = "answers", allEntries = true)
+	@CacheEvict(value = "answerlists", allEntries = true)
 	@Scheduled(initialDelay = 1000 * 175, fixedRate = 1000 * 60 * 15)
 	private void clearAnswerCache() { }
 
-	@CacheEvict(value = "learningprogress", allEntries = true)
+	@CacheEvict(value = "score", allEntries = true)
 	@Scheduled(initialDelay = 1000 * 200, fixedRate = 1000 * 60 * 15)
 	private void clearLearningProgressCache() { }
 

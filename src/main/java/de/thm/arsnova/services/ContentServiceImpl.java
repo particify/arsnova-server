@@ -131,7 +131,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 		}
 	}
 
-	@Cacheable("questions")
+	@Cacheable("contents")
 	@Override
 	public Content get(final String id) {
 		try {
@@ -152,11 +152,11 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	}
 
 	@Override
-	@Caching(evict = {@CacheEvict(value = "skillquestions", key = "#sessionId"),
-			@CacheEvict(value = "lecturequestions", key = "#sessionId", condition = "#content.getQuestionVariant().equals('lecture')"),
-			@CacheEvict(value = "preparationquestions", key = "#sessionId", condition = "#content.getQuestionVariant().equals('preparation')"),
-			@CacheEvict(value = "flashcardquestions", key = "#sessionId", condition = "#content.getQuestionVariant().equals('flashcard')") },
-			put = {@CachePut(value = "questions", key = "#content.id")})
+	@Caching(evict = {@CacheEvict(value = "contentlists", key = "#sessionId"),
+			@CacheEvict(value = "lecturecontentlists", key = "#sessionId", condition = "#content.getQuestionVariant().equals('lecture')"),
+			@CacheEvict(value = "preparationcontentlists", key = "#sessionId", condition = "#content.getQuestionVariant().equals('preparation')"),
+			@CacheEvict(value = "flashcardcontentlists", key = "#sessionId", condition = "#content.getQuestionVariant().equals('flashcard')") },
+			put = {@CachePut(value = "contents", key = "#content.id")})
 	public Content save(final String sessionId, final Content content) {
 		content.setSessionId(sessionId);
 		try {
@@ -173,11 +173,11 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	@Caching(evict = {
-			@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true, condition = "#content.getQuestionVariant().equals('lecture')"),
-			@CacheEvict(value = "preparationquestions", allEntries = true, condition = "#content.getQuestionVariant().equals('preparation')"),
-			@CacheEvict(value = "flashcardquestions", allEntries = true, condition = "#content.getQuestionVariant().equals('flashcard')") },
-			put = {@CachePut(value = "questions", key = "#content.id")})
+			@CacheEvict(value = "contentlists", allEntries = true),
+			@CacheEvict(value = "lecturecontentlists", allEntries = true, condition = "#content.getQuestionVariant().equals('lecture')"),
+			@CacheEvict(value = "preparationcontentlists", allEntries = true, condition = "#content.getQuestionVariant().equals('preparation')"),
+			@CacheEvict(value = "flashcardcontentlists", allEntries = true, condition = "#content.getQuestionVariant().equals('flashcard')") },
+			put = {@CachePut(value = "contents", key = "#content.id")})
 	public Content update(final Content content) {
 		final User user = userService.getCurrentUser();
 		final Content oldContent = contentRepository.findOne(content.getId());
@@ -214,7 +214,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	/* FIXME: caching */
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	//@Cacheable("skillquestions")
+	//@Cacheable("contentlists")
 	public List<Content> getBySessionKey(final String sessionkey) {
 		final Session session = getSession(sessionkey);
 		final User user = userService.getCurrentUser();
@@ -268,12 +268,12 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	@Override
 	@PreAuthorize("hasPermission(#contentId, 'content', 'owner')")
 	@Caching(evict = {
-			@CacheEvict("answers"),
-			@CacheEvict(value = "questions", key = "#contentId"),
-			@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true /*, condition = "#content.getQuestionVariant().equals('lecture')"*/),
-			@CacheEvict(value = "preparationquestions", allEntries = true /*, condition = "#content.getQuestionVariant().equals('preparation')"*/),
-			@CacheEvict(value = "flashcardquestions", allEntries = true /*, condition = "#content.getQuestionVariant().equals('flashcard')"*/) })
+			@CacheEvict("answerlists"),
+			@CacheEvict(value = "contents", key = "#contentId"),
+			@CacheEvict(value = "contentlists", allEntries = true),
+			@CacheEvict(value = "lecturecontentlists", allEntries = true /*, condition = "#content.getQuestionVariant().equals('lecture')"*/),
+			@CacheEvict(value = "preparationcontentlists", allEntries = true /*, condition = "#content.getQuestionVariant().equals('preparation')"*/),
+			@CacheEvict(value = "flashcardcontentlists", allEntries = true /*, condition = "#content.getQuestionVariant().equals('flashcard')"*/) })
 	public void delete(final String contentId) {
 		final Content content = contentRepository.findOne(contentId);
 		if (content == null) {
@@ -299,11 +299,11 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 
 	@PreAuthorize("hasPermission(#session, 'owner')")
 	@Caching(evict = {
-			@CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict(value = "skillquestions", key = "#session.getId()"),
-			@CacheEvict(value = "lecturequestions", key = "#session.getId()", condition = "'lecture'.equals(#variant)"),
-			@CacheEvict(value = "preparationquestions", key = "#session.getId()", condition = "'preparation'.equals(#variant)"),
-			@CacheEvict(value = "flashcardquestions", key = "#session.getId()", condition = "'flashcard'.equals(#variant)") })
+			@CacheEvict(value = "contents", allEntries = true),
+			@CacheEvict(value = "contentlists", key = "#session.getId()"),
+			@CacheEvict(value = "lecturecontentlists", key = "#session.getId()", condition = "'lecture'.equals(#variant)"),
+			@CacheEvict(value = "preparationcontentlists", key = "#session.getId()", condition = "'preparation'.equals(#variant)"),
+			@CacheEvict(value = "flashcardcontentlists", key = "#session.getId()", condition = "'flashcard'.equals(#variant)") })
 	private void deleteBySessionAndVariant(final Session session, final String variant) {
 		final List<String> contentIds;
 		if ("all".equals(variant)) {
@@ -427,7 +427,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 
 	@Override
 	@PreAuthorize("hasPermission(#questionId, 'content', 'owner')")
-	@CacheEvict("answers")
+	@CacheEvict("answerlists")
 	public void resetPiRoundState(final String questionId) {
 		final Content content = contentRepository.findOne(questionId);
 		final Session session = sessionRepository.findOne(content.getSessionId());
@@ -470,10 +470,10 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	@Caching(evict = { @CacheEvict(value = "contents", allEntries = true),
-			@CacheEvict(value = "skillquestions", key = "#sessionId"),
-			@CacheEvict(value = "lecturequestions", key = "#sessionId"),
-			@CacheEvict(value = "preparationquestions", key = "#sessionId"),
-			@CacheEvict(value = "flashcardquestions", key = "#sessionId") })
+			@CacheEvict(value = "contentlists", key = "#sessionId"),
+			@CacheEvict(value = "lecturecontentlists", key = "#sessionId"),
+			@CacheEvict(value = "preparationcontentlists", key = "#sessionId"),
+			@CacheEvict(value = "flashcardcontentlists", key = "#sessionId") })
 	public void setVotingAdmissions(final String sessionkey, final boolean disableVoting, List<Content> contents) {
 		final User user = getCurrentUser();
 		final Session session = getSession(sessionkey);
@@ -711,7 +711,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	@CacheEvict(value = "answers", key = "#contentId")
+	@CacheEvict(value = "answerlists", key = "#contentId")
 	public Answer saveAnswer(final String contentId, final Answer answer) {
 		final User user = getCurrentUser();
 		final Content content = get(contentId);
@@ -750,7 +750,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	@CacheEvict(value = "answers", allEntries = true)
+	@CacheEvict(value = "answerlists", allEntries = true)
 	public Answer updateAnswer(final Answer answer) {
 		final User user = userService.getCurrentUser();
 		final Answer realAnswer = this.getMyAnswer(answer.getQuestionId());
@@ -775,7 +775,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	@CacheEvict(value = "answers", allEntries = true)
+	@CacheEvict(value = "answerlists", allEntries = true)
 	public void deleteAnswer(final String questionId, final String answerId) {
 		final Content content = contentRepository.findOne(questionId);
 		if (content == null) {
@@ -794,7 +794,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	/* FIXME: caching */
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	//@Cacheable("lecturequestions")
+	//@Cacheable("lecturecontentlists")
 	public List<Content> getLectureQuestions(final String sessionkey) {
 		final Session session = getSession(sessionkey);
 		final User user = userService.getCurrentUser();
@@ -808,7 +808,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	/* FIXME: caching */
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	//@Cacheable("flashcardquestions")
+	//@Cacheable("flashcardcontentlists")
 	public List<Content> getFlashcards(final String sessionkey) {
 		final Session session = getSession(sessionkey);
 		final User user = userService.getCurrentUser();
@@ -822,7 +822,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	/* FIXME: caching */
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	//@Cacheable("preparationquestions")
+	//@Cacheable("preparationcontentlists")
 	public List<Content> getPreparationQuestions(final String sessionkey) {
 		final Session session = getSession(sessionkey);
 		final User user = userService.getCurrentUser();
@@ -968,10 +968,10 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	@Caching(evict = { @CacheEvict(value = "contents", allEntries = true),
-			@CacheEvict(value = "skillquestions", key = "#sessionId"),
-			@CacheEvict(value = "lecturequestions", key = "#sessionId"),
-			@CacheEvict(value = "preparationquestions", key = "#sessionId"),
-			@CacheEvict(value = "flashcardquestions", key = "#sessionId") })
+			@CacheEvict(value = "contentlists", key = "#sessionId"),
+			@CacheEvict(value = "lecturecontentlists", key = "#sessionId"),
+			@CacheEvict(value = "preparationcontentlists", key = "#sessionId"),
+			@CacheEvict(value = "flashcardcontentlists", key = "#sessionId") })
 	public void publishQuestions(final String sessionkey, final boolean publish, List<Content> contents) {
 		final User user = getCurrentUser();
 		final Session session = getSession(sessionkey);
@@ -993,7 +993,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	@CacheEvict(value = "answers", allEntries = true)
+	@CacheEvict(value = "answerlists", allEntries = true)
 	public void deleteAllQuestionsAnswers(final String sessionkey) {
 		final User user = getCurrentUser();
 		final Session session = getSession(sessionkey);
@@ -1012,7 +1012,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@Override
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
-	@CacheEvict(value = "answers", allEntries = true)
+	@CacheEvict(value = "answerlists", allEntries = true)
 	public void deleteAllPreparationAnswers(String sessionkey) {
 		final Session session = getSession(sessionkey);
 
@@ -1027,7 +1027,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
 	@Override
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
-	@CacheEvict(value = "answers", allEntries = true)
+	@CacheEvict(value = "answerlists", allEntries = true)
 	public void deleteAllLectureAnswers(String sessionkey) {
 		final Session session = getSession(sessionkey);
 
@@ -1041,10 +1041,10 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 
 	@Caching(evict = {
 			@CacheEvict(value = "contents", allEntries = true),
-			@CacheEvict(value = "skillquestions", key = "#sessionId"),
-			@CacheEvict(value = "lecturequestions", key = "#sessionId"),
-			@CacheEvict(value = "preparationquestions", key = "#sessionId"),
-			@CacheEvict(value = "flashcardquestions", key = "#sessionId") })
+			@CacheEvict(value = "contentlists", key = "#sessionId"),
+			@CacheEvict(value = "lecturecontentlists", key = "#sessionId"),
+			@CacheEvict(value = "preparationcontentlists", key = "#sessionId"),
+			@CacheEvict(value = "flashcardcontentlists", key = "#sessionId") })
 	private void resetContentsRoundState(final String sessionId, final List<Content> contents) {
 		for (final Content q : contents) {
 			/* TODO: Check if setting the sessionId is necessary. */

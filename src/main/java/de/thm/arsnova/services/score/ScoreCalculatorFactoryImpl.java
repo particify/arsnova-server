@@ -56,79 +56,79 @@ public class ScoreCalculatorFactoryImpl implements ArsnovaEventVisitor, ScoreCal
 	@Override
 	public void visit(DeleteCommentEvent deleteCommentEvent) { }
 
-	@CacheEvict(value = "learningprogress", key = "#event.Session")
+	@CacheEvict(value = "score", key = "#event.Session")
 	@Override
 	public void visit(NewQuestionEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getSession()));
 	}
 
-	@CacheEvict(value = "learningprogress", key = "#event.Session")
+	@CacheEvict(value = "score", key = "#event.Session")
 	@Override
 	public void visit(UnlockQuestionEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getSession()));
 	}
 
-	@CacheEvict(value = "learningprogress", key = "#event.Session")
+	@CacheEvict(value = "score", key = "#event.Session")
 	@Override
 	public void visit(UnlockQuestionsEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getSession()));
 	}
 
-	@CacheEvict(value = "learningprogress", key = "#event.Session")
+	@CacheEvict(value = "score", key = "#event.Session")
 	@Override
 	public void visit(LockQuestionEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getSession()));
 	}
 
-	@CacheEvict(value = "learningprogress", key = "#event.Session")
+	@CacheEvict(value = "score", key = "#event.Session")
 	@Override
 	public void visit(LockQuestionsEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getSession()));
 	}
 
-	@CacheEvict(value = "learningprogress", key = "#event.Session")
+	@CacheEvict(value = "score", key = "#event.Session")
 	@Override
 	public void visit(NewAnswerEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getSession()));
 	}
 
-	@CacheEvict(value = "learningprogress", key = "#event.Session")
+	@CacheEvict(value = "score", key = "#event.Session")
 	@Override
 	public void visit(DeleteAnswerEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getSession()));
 	}
 
-	@CacheEvict(value = "learningprogress", key = "#event.Session")
+	@CacheEvict(value = "score", key = "#event.Session")
 	@Override
 	public void visit(DeleteQuestionEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getSession()));
 	}
 
-	@CacheEvict(value = "learningprogress", key = "#event.Session")
+	@CacheEvict(value = "score", key = "#event.Session")
 	@Override
 	public void visit(DeleteAllQuestionsEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getSession()));
 	}
 
-	@CacheEvict(value = "learningprogress", key = "#event.Session")
+	@CacheEvict(value = "score", key = "#event.Session")
 	@Override
 	public void visit(DeleteAllQuestionsAnswersEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getSession()));
 	}
 
-	@CacheEvict(value = "learningprogress", key = "#event.Session")
+	@CacheEvict(value = "score", key = "#event.Session")
 	@Override
 	public void visit(DeleteAllPreparationAnswersEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getSession()));
 	}
 
-	@CacheEvict(value = "learningprogress", key = "#event.Session")
+	@CacheEvict(value = "score", key = "#event.Session")
 	@Override
 	public void visit(DeleteAllLectureAnswersEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getSession()));
 	}
 
-	@CacheEvict(value = "learningprogress", key = "#event.Session")
+	@CacheEvict(value = "score", key = "#event.Session")
 	@Override
 	public void visit(PiRoundResetEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getSession()));

@@ -38,7 +38,7 @@ abstract class VariantScoreCalculator implements ScoreCalculator {
 		this.sessionStatisticsRepository = sessionStatisticsRepository;
 	}
 
-	@Cacheable("learningprogress")
+	@Cacheable("score")
 	private Score loadProgress(final Session session) {
 		return sessionStatisticsRepository.getLearningProgress(session);
 	}
