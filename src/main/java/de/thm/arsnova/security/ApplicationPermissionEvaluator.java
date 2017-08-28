@@ -21,7 +21,6 @@ import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.SessionRepository;
@@ -113,8 +112,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			case "read":
 				return targetSession.isActive();
 			case "create":
-				/* There are currently no limitations on session creation. */
-				return true;
+				return !username.isEmpty();
 			case "owner":
 			case "update":
 			case "delete":
@@ -148,7 +146,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final String permission) {
 		switch (permission) {
 			case "create":
-				return sessionRepository.findOne(targetComment.getSessionId()).isActive();
+				return !username.isEmpty() && sessionRepository.findOne(targetComment.getSessionId()).isActive();
 			case "owner":
 			case "update":
 				return targetComment.getCreator() != null && targetComment.getCreator().equals(username);
@@ -174,7 +172,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 	private String getUsername(final Authentication authentication) {
 		if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
-			throw new UnauthorizedException();
+			return "";
 		}
 
 		if (authentication instanceof Pac4jAuthenticationToken) {
@@ -198,5 +196,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		}
 
 		return authentication.getName();
+	}
+
+	private boolean isWebsocketAccess(Authentication auth) {
+		return auth instanceof AnonymousAuthenticationToken && auth.getAuthorities().contains("ROLE_WEBSOCKET_ACCESS");
 	}
 }
