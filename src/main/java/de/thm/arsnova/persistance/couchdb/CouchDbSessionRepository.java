@@ -18,12 +18,12 @@
 package de.thm.arsnova.persistance.couchdb;
 
 import de.thm.arsnova.connector.model.Course;
+import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.VisitedSession;
-import de.thm.arsnova.entities.transport.Comment;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.persistance.LogEntryRepository;

@@ -712,7 +712,7 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	@CacheEvict(value = "answers", key = "#contentId")
-	public Answer saveAnswer(final String contentId, final de.thm.arsnova.entities.transport.Answer answer) {
+	public Answer saveAnswer(final String contentId, final Answer answer) {
 		final User user = getCurrentUser();
 		final Content content = get(contentId);
 		if (content == null) {
@@ -720,26 +720,32 @@ public class ContentServiceImpl extends EntityService<Content> implements Conten
 		}
 		final Session session = sessionRepository.findOne(content.getSessionId());
 
-		Answer theAnswer = answer.generateAnswerEntity(user, content);
-		theAnswer.setUser(user.getUsername());
-		theAnswer.setQuestionId(content.getId());
-		theAnswer.setSessionId(session.getId());
+		answer.setUser(user.getUsername());
+		answer.setQuestionId(content.getId());
+		answer.setSessionId(session.getId());
+		answer.setQuestionVariant(content.getQuestionVariant());
+		answer.setQuestionValue(content.calculateValue(answer));
+		answer.setTimestamp(new Date().getTime());
+
 		if ("freetext".equals(content.getQuestionType())) {
-			imageUtils.generateThumbnailImage(theAnswer);
+			answer.setPiRound(0);
+			imageUtils.generateThumbnailImage(answer);
 			if (content.isFixedAnswer() && content.getText() != null) {
-				theAnswer.setAnswerTextRaw(theAnswer.getAnswerText());
+				answer.setAnswerTextRaw(answer.getAnswerText());
 
 				if (content.isStrictMode()) {
-					content.checkTextStrictOptions(theAnswer);
+					content.checkTextStrictOptions(answer);
 				}
-				theAnswer.setQuestionValue(content.evaluateCorrectAnswerFixedText(theAnswer.getAnswerTextRaw()));
-				theAnswer.setSuccessfulFreeTextAnswer(content.isSuccessfulFreeTextAnswer(theAnswer.getAnswerTextRaw()));
+				answer.setQuestionValue(content.evaluateCorrectAnswerFixedText(answer.getAnswerTextRaw()));
+				answer.setSuccessfulFreeTextAnswer(content.isSuccessfulFreeTextAnswer(answer.getAnswerTextRaw()));
 			}
+		} else {
+			answer.setPiRound(content.getPiRound());
 		}
 
-		this.answerQueue.offer(new AnswerQueueElement(session, content, theAnswer, user));
+		this.answerQueue.offer(new AnswerQueueElement(session, content, answer, user));
 
-		return theAnswer;
+		return answer;
 	}
 
 	@Override

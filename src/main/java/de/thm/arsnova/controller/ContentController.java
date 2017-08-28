@@ -458,7 +458,7 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/{questionId}/answer/", method = RequestMethod.POST)
 	public Answer saveAnswer(
 			@PathVariable final String questionId,
-			@RequestBody final de.thm.arsnova.entities.transport.Answer answer,
+			@RequestBody final Answer answer,
 			final HttpServletResponse response
 			) {
 		return contentService.saveAnswer(questionId, answer);

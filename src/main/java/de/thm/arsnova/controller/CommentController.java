@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.controller;
 
+import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.CommentReadingCount;
-import de.thm.arsnova.entities.transport.Comment;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.services.CommentService;
 import de.thm.arsnova.web.DeprecatedApi;
@@ -74,14 +74,14 @@ public class CommentController extends PaginationController {
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
 	public List<Comment> getInterposedQuestions(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey) {
-		return Comment.fromList(commentService.getBySessionKey(sessionkey, offset, limit));
+		return commentService.getBySessionKey(sessionkey, offset, limit);
 	}
 
 	@ApiOperation(value = "Retrieves an Comment",
 			nickname = "getInterposedQuestion")
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
 	public Comment getInterposedQuestion(@ApiParam(value = "ID of the Comment that needs to be deleted", required = true) @PathVariable final String questionId) {
-		return new Comment(commentService.getAndMarkRead(questionId));
+		return commentService.getAndMarkRead(questionId);
 	}
 
 	@ApiOperation(value = "Creates a new Comment for a Session and returns the Comment's data",

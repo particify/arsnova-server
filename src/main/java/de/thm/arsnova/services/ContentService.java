@@ -78,7 +78,7 @@ public interface ContentService {
 
 	void deleteAnswers(String questionId);
 
-	Answer saveAnswer(String questionId, de.thm.arsnova.entities.transport.Answer answer);
+	Answer saveAnswer(String questionId, Answer answer);
 
 	Answer updateAnswer(Answer answer);
 

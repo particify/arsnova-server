@@ -29,8 +29,8 @@ import com.corundumstudio.socketio.listener.DisconnectListener;
 import com.corundumstudio.socketio.protocol.Packet;
 import com.corundumstudio.socketio.protocol.PacketType;
 import de.thm.arsnova.entities.Comment;
+import de.thm.arsnova.entities.ScoreOptions;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.entities.transport.ScoreOptions;
 import de.thm.arsnova.events.*;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -189,15 +189,16 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 			}
 		});
 
+		/* TODO: This listener expects a Comment entity but only uses the ID. Reduce transmitted data. */
 		server.addEventListener(
 				"readInterposedQuestion",
-				de.thm.arsnova.entities.transport.Comment.class,
-				new DataListener<de.thm.arsnova.entities.transport.Comment>() {
+				Comment.class,
+				new DataListener<Comment>() {
 			@Override
 			@Timed(name = "readInterposedQuestionEvent.onData")
 			public void onData(
 					SocketIOClient client,
-					de.thm.arsnova.entities.transport.Comment comment,
+					Comment comment,
 					AckRequest ackRequest) {
 				final User user = userService.getUser2SocketId(client.getSessionId());
 				try {
@@ -228,11 +229,12 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 			@Timed(name = "setLearningProgressOptionsEvent.onData")
 			public void onData(SocketIOClient client, ScoreOptions scoreOptions, AckRequest ack) {
 				final User user = userService.getUser2SocketId(client.getSessionId());
-				final de.thm.arsnova.entities.Session session = sessionService.getInternal(scoreOptions.getSessionKeyword(), user);
+				final String sessionKey = userService.getSessionByUsername(user.getUsername());
+				final de.thm.arsnova.entities.Session session = sessionService.getInternal(sessionKey, user);
 				if (session.isCreator(user)) {
-					session.setLearningProgressOptions(scoreOptions.toEntity());
+					session.setLearningProgressOptions(scoreOptions);
 					sessionService.updateInternal(session, user);
-					broadcastInSession(session.getKeyword(), "learningProgressOptions", scoreOptions.toEntity());
+					broadcastInSession(session.getKeyword(), "learningProgressOptions", scoreOptions);
 				}
 			}
 		});
