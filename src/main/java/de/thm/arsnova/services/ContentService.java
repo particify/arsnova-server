@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.services;
 
-import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.Content;
+import de.thm.arsnova.entities.migration.v2.Answer;
+import de.thm.arsnova.entities.migration.v2.Content;
 import de.thm.arsnova.entities.User;
 
 import java.util.List;

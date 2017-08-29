@@ -18,8 +18,8 @@
 package de.thm.arsnova.controller;
 
 import de.thm.arsnova.util.PaginationListDecorator;
-import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.Content;
+import de.thm.arsnova.entities.migration.v2.Answer;
+import de.thm.arsnova.entities.migration.v2.Content;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;

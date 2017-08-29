@@ -1,6 +1,6 @@
 package de.thm.arsnova.persistance;
 
-import de.thm.arsnova.entities.Content;
+import de.thm.arsnova.entities.migration.v2.Content;
 import de.thm.arsnova.entities.User;
 import org.springframework.data.repository.CrudRepository;
 

@@ -1,6 +1,6 @@
 package de.thm.arsnova.persistance.couchdb;
 
-import de.thm.arsnova.entities.Content;
+import de.thm.arsnova.entities.migration.v2.Content;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.LogEntryRepository;

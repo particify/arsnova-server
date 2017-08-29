@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.entities;
 
+import de.thm.arsnova.entities.migration.v2.Answer;
+import de.thm.arsnova.entities.migration.v2.AnswerOption;
+import de.thm.arsnova.entities.migration.v2.Content;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -28,17 +31,17 @@ public class ContentTest {
 	@SuppressWarnings("serial")
 	@Test
 	public void shouldComputeBasedOnCorrectAnswerWithExactMatch() {
-		final PossibleAnswer p1 = new PossibleAnswer();
+		final AnswerOption p1 = new AnswerOption();
 		p1.setText("Yes");
 		p1.setCorrect(true);
 		p1.setValue(10);
-		final PossibleAnswer p2 = new PossibleAnswer();
+		final AnswerOption p2 = new AnswerOption();
 		p2.setText("No");
 		p2.setCorrect(false);
 		p2.setValue(-10);
 		Content q = new Content();
 		q.setQuestionType("yesno");
-		q.setPossibleAnswers(new ArrayList<PossibleAnswer>() {{
+		q.setPossibleAnswers(new ArrayList<AnswerOption>() {{
 			add(p1);
 			add(p2);
 		}});
@@ -54,17 +57,17 @@ public class ContentTest {
 	@SuppressWarnings("serial")
 	@Test
 	public void shouldEqualAbstentionToZeroValue() {
-		final PossibleAnswer p1 = new PossibleAnswer();
+		final AnswerOption p1 = new AnswerOption();
 		p1.setText("Yes");
 		p1.setCorrect(true);
 		p1.setValue(10);
-		final PossibleAnswer p2 = new PossibleAnswer();
+		final AnswerOption p2 = new AnswerOption();
 		p2.setText("No");
 		p2.setCorrect(false);
 		p2.setValue(-10);
 		Content q = new Content();
 		q.setAbstention(true);
-		q.setPossibleAnswers(new ArrayList<PossibleAnswer>() {{
+		q.setPossibleAnswers(new ArrayList<AnswerOption>() {{
 			add(p1);
 			add(p2);
 		}});
@@ -77,21 +80,21 @@ public class ContentTest {
 	@SuppressWarnings("serial")
 	@Test
 	public void shouldCalculateMultipleChoiceAnswers() {
-		final PossibleAnswer p1 = new PossibleAnswer();
+		final AnswerOption p1 = new AnswerOption();
 		p1.setText("Yes");
 		p1.setCorrect(true);
 		p1.setValue(10);
-		final PossibleAnswer p2 = new PossibleAnswer();
+		final AnswerOption p2 = new AnswerOption();
 		p2.setText("No");
 		p2.setCorrect(false);
 		p2.setValue(-10);
-		final PossibleAnswer p3 = new PossibleAnswer();
+		final AnswerOption p3 = new AnswerOption();
 		p3.setText("Maybe");
 		p3.setCorrect(true);
 		p3.setValue(10);
 		Content q = new Content();
 		q.setQuestionType("mc");
-		q.setPossibleAnswers(new ArrayList<PossibleAnswer>() {{
+		q.setPossibleAnswers(new ArrayList<AnswerOption>() {{
 			add(p1);
 			add(p2);
 			add(p3);
@@ -118,25 +121,25 @@ public class ContentTest {
 	@SuppressWarnings("serial")
 	@Test
 	public void shouldCalculatePictureQuestionAnswers() {
-		final PossibleAnswer p1 = new PossibleAnswer();
+		final AnswerOption p1 = new AnswerOption();
 		p1.setText("0;0");
 		p1.setCorrect(true);
 		p1.setValue(10);
-		final PossibleAnswer p2 = new PossibleAnswer();
+		final AnswerOption p2 = new AnswerOption();
 		p2.setText("0;1");
 		p2.setCorrect(false);
 		p2.setValue(-10);
-		final PossibleAnswer p3 = new PossibleAnswer();
+		final AnswerOption p3 = new AnswerOption();
 		p3.setText("1;0");
 		p3.setCorrect(true);
 		p3.setValue(10);
-		final PossibleAnswer p4 = new PossibleAnswer();
+		final AnswerOption p4 = new AnswerOption();
 		p4.setText("1;1");
 		p4.setCorrect(true);
 		p4.setValue(10);
 		Content q = new Content();
 		q.setQuestionType("grid");
-		q.setPossibleAnswers(new ArrayList<PossibleAnswer>() {{
+		q.setPossibleAnswers(new ArrayList<AnswerOption>() {{
 			add(p1);
 			add(p2);
 			add(p3);

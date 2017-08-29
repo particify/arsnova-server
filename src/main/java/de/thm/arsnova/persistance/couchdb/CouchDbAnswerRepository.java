@@ -2,7 +2,7 @@ package de.thm.arsnova.persistance.couchdb;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
-import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.migration.v2.Answer;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.persistance.AnswerRepository;
 import de.thm.arsnova.persistance.LogEntryRepository;
@@ -11,7 +11,6 @@ import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DbAccessException;
 import org.ektorp.DocumentOperationResult;
-import org.ektorp.UpdateConflictException;
 import org.ektorp.ViewResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

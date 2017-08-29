@@ -444,9 +444,9 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		broadcastInSession(session.getKeyword(), "audQuestionAvail", audienceQuestion.getId());
 	}
 
-	public void reportLecturerQuestionAvailable(final de.thm.arsnova.entities.Session session, final List<de.thm.arsnova.entities.Content> qs) {
+	public void reportLecturerQuestionAvailable(final de.thm.arsnova.entities.Session session, final List<de.thm.arsnova.entities.migration.v2.Content> qs) {
 		List<Content> contents = new ArrayList<>();
-		for (de.thm.arsnova.entities.Content q : qs) {
+		for (de.thm.arsnova.entities.migration.v2.Content q : qs) {
 			contents.add(new Content(q));
 		}
 
@@ -457,9 +457,9 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		broadcastInSession(session.getKeyword(), "lecturerQuestionAvailable", contents);
 	}
 
-	public void reportLecturerQuestionsLocked(final de.thm.arsnova.entities.Session session, final List<de.thm.arsnova.entities.Content> qs) {
+	public void reportLecturerQuestionsLocked(final de.thm.arsnova.entities.Session session, final List<de.thm.arsnova.entities.migration.v2.Content> qs) {
 		List<Content> contents = new ArrayList<>();
-		for (de.thm.arsnova.entities.Content q : qs) {
+		for (de.thm.arsnova.entities.migration.v2.Content q : qs) {
 			contents.add(new Content(q));
 		}
 		broadcastInSession(session.getKeyword(), "lecturerQuestionLocked", contents);
@@ -525,7 +525,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		broadcastInSession(sessionKey, "countPreparationQuestionAnswers", contentService.countPreparationQuestionAnswersInternal(sessionKey));
 
 		// Update the unanswered count for the content variant that was answered.
-		final de.thm.arsnova.entities.Content content = event.getContent();
+		final de.thm.arsnova.entities.migration.v2.Content content = event.getContent();
 		if ("lecture".equals(content.getQuestionVariant())) {
 			sendToUser(event.getUser(), "unansweredLecturerQuestions", contentService.getUnAnsweredLectureQuestionIds(sessionKey, event.getUser()));
 		} else if ("preparation".equals(content.getQuestionVariant())) {
@@ -589,7 +589,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 	@Override
 	public void visit(LockVotesEvent event) {
 		List<Content> contents = new ArrayList<>();
-		for (de.thm.arsnova.entities.Content q : event.getQuestions()) {
+		for (de.thm.arsnova.entities.migration.v2.Content q : event.getQuestions()) {
 			contents.add(new Content(q));
 		}
 		broadcastInSession(event.getSession().getKeyword(), "lockVotes", contents);
@@ -598,7 +598,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 	@Override
 	public void visit(UnlockVotesEvent event) {
 		List<Content> contents = new ArrayList<>();
-		for (de.thm.arsnova.entities.Content q : event.getQuestions()) {
+		for (de.thm.arsnova.entities.migration.v2.Content q : event.getQuestions()) {
 			contents.add(new Content(q));
 		}
 		broadcastInSession(event.getSession().getKeyword(), "unlockVotes", contents);

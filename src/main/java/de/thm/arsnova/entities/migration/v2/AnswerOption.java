@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.entities;
+package de.thm.arsnova.entities.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
@@ -28,7 +28,7 @@ import java.io.Serializable;
  * This class represents an answer option of a question.
  */
 @ApiModel(value = "session/answer", description = "the possible answer entity")
-public class PossibleAnswer implements Serializable {
+public class AnswerOption implements Serializable {
 
 	private String id;
 	private String text;
@@ -79,6 +79,6 @@ public class PossibleAnswer implements Serializable {
 
 	@Override
 	public String toString() {
-		return "PossibleAnswer [id=" + id + ", text=" + text + ", correct=" + correct + "]";
+		return "AnswerOption [id=" + id + ", text=" + text + ", correct=" + correct + "]";
 	}
 }

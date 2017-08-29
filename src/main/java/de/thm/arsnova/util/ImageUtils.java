@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.util;
 
-import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.migration.v2.Answer;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

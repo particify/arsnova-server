@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.Content;
+import de.thm.arsnova.entities.migration.v2.Content;
 import de.thm.arsnova.entities.Session;
 
 import java.util.List;

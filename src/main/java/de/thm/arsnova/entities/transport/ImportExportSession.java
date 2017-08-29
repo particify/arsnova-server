@@ -18,9 +18,9 @@
 package de.thm.arsnova.entities.transport;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.migration.v2.Answer;
 import de.thm.arsnova.entities.Comment;
-import de.thm.arsnova.entities.Content;
+import de.thm.arsnova.entities.migration.v2.Content;
 import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionFeature;
