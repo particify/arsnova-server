@@ -25,7 +25,7 @@ public interface Entity {
 	void setId(String id);
 
 	String getRevision();
-	void setRevision(String id);
+	void setRevision(String rev);
 
 	@JsonView(View.Persistence.class)
 	default Class<? extends Entity> getType() {
