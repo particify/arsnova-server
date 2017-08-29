@@ -18,33 +18,10 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Statistics;
-import de.thm.arsnova.persistance.StatisticsRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 
 /**
- * Performs all statistics related operations. To reduce pressure on the database, data is cached for a fixed amount of
- * time.
+ * The functionality the statistics service should provide.
  */
-@Service
-public class StatisticsService implements IStatisticsService {
-	@Autowired
-	private StatisticsRepository statisticsRepository;
-
-	@Autowired
-	private IUserService userService;
-
-	private Statistics statistics = new Statistics();
-
-	@Scheduled(initialDelay = 0, fixedRate = 10000)
-	private void refreshStatistics() {
-		statistics = statisticsRepository.getStatistics();
-	}
-
-	@Override
-	public Statistics getStatistics() {
-		statistics.setActiveUsers(userService.loggedInUsers());
-		return statistics;
-	}
+public interface StatisticsService {
+	Statistics getStatistics();
 }

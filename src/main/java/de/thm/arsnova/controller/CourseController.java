@@ -23,7 +23,7 @@ import de.thm.arsnova.connector.model.UserRole;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.NotImplementedException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
-import de.thm.arsnova.services.IUserService;
+import de.thm.arsnova.services.UserService;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,7 +46,7 @@ public class CourseController extends AbstractController {
 	private ConnectorClient connectorClient;
 
 	@Autowired
-	private IUserService userService;
+	private UserService userService;
 
 	@RequestMapping(value = "/mycourses", method = RequestMethod.GET)
 	public List<Course> myCourses(

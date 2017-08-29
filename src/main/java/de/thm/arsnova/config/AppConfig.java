@@ -20,26 +20,18 @@ package de.thm.arsnova.config;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import de.thm.arsnova.ImageUtils;
+import de.thm.arsnova.util.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.client.ConnectorClientImpl;
-import de.thm.arsnova.entities.*;
 import de.thm.arsnova.entities.serialization.CouchDbDocumentModule;
-import de.thm.arsnova.entities.serialization.CouchDbObjectMapperFactory;
 import de.thm.arsnova.entities.serialization.View;
-import de.thm.arsnova.persistance.*;
-import de.thm.arsnova.persistance.couchdb.*;
-import de.thm.arsnova.persistance.couchdb.InitializingCouchDbConnector;
-import de.thm.arsnova.socket.ARSnovaSocket;
-import de.thm.arsnova.socket.ARSnovaSocketIOServer;
-import de.thm.arsnova.socket.ARSnovaSocketListener;
+import de.thm.arsnova.websocket.ArsnovaSocketioServer;
+import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
+import de.thm.arsnova.websocket.ArsnovaSocketioServerListener;
 import de.thm.arsnova.web.CacheControlInterceptorHandler;
 import de.thm.arsnova.web.CorsFilter;
 import de.thm.arsnova.web.DeprecatedApiInterceptorHandler;
 import de.thm.arsnova.web.ResponseInterceptorHandler;
-import org.ektorp.CouchDbConnector;
-import org.ektorp.impl.StdCouchDbInstance;
-import org.ektorp.spring.HttpClientFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
@@ -88,7 +80,6 @@ import java.util.List;
 		"de.thm.arsnova.aop",
 		"de.thm.arsnova.cache",
 		"de.thm.arsnova.controller",
-		"de.thm.arsnova.domain",
 		"de.thm.arsnova.dao",
 		"de.thm.arsnova.events",
 		"de.thm.arsnova.security",
@@ -261,19 +252,19 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 
 	@Profile("!test")
 	@Bean(name = "socketServer", initMethod = "startServer", destroyMethod = "stopServer")
-	public ARSnovaSocket socketServer() {
-		final ARSnovaSocketIOServer socketServer = new ARSnovaSocketIOServer();
-		socketServer.setHostIp(socketAddress);
-		socketServer.setPortNumber(socketPort);
-		socketServer.setUseSSL(!socketKeystore.isEmpty());
-		socketServer.setKeystore(socketKeystore);
-		socketServer.setStorepass(socketKeystorePassword);
-		return socketServer;
+	public ArsnovaSocketioServer socketServer() {
+		final ArsnovaSocketioServerImpl socketioServer = new ArsnovaSocketioServerImpl();
+		socketioServer.setHostIp(socketAddress);
+		socketioServer.setPortNumber(socketPort);
+		socketioServer.setUseSSL(!socketKeystore.isEmpty());
+		socketioServer.setKeystore(socketKeystore);
+		socketioServer.setStorepass(socketKeystorePassword);
+		return socketioServer;
 	}
 
 	@Bean
-	public ARSnovaSocketListener arsnovaSocketListener() {
-		return new ARSnovaSocketListener();
+	public ArsnovaSocketioServerListener arsnovaSocketListener() {
+		return new ArsnovaSocketioServerListener();
 	}
 
 	@Bean

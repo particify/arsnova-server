@@ -17,172 +17,26 @@
  */
 package de.thm.arsnova.services;
 
-import de.thm.arsnova.FeedbackStorage;
 import de.thm.arsnova.entities.Feedback;
-import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.events.DeleteFeedbackForSessionsEvent;
-import de.thm.arsnova.events.NewFeedbackEvent;
-import de.thm.arsnova.exceptions.NoContentException;
-import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.persistance.SessionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
- * Performs all feedback related operations.
+ * The functionality the feedback service should provide.
  */
-@Service
-public class FeedbackService implements IFeedbackService, ApplicationEventPublisherAware {
+public interface FeedbackService {
+	void cleanFeedbackVotes();
 
-	private static final int DEFAULT_SCHEDULER_DELAY = 5000;
-	private static final double Z_THRESHOLD = 0.1;
+	void cleanFeedbackVotesBySessionKey(String keyword, int cleanupFeedbackDelayInMins);
 
-	/**
-	 * minutes, after which the feedback is deleted
-	 */
-	@Value("${feedback.cleanup}")
-	private int cleanupFeedbackDelay;
+	Feedback getBySessionKey(String keyword);
 
-	@Autowired
-	private SessionRepository sessionRepository;
+	int countFeedbackBySessionKey(String keyword);
 
-	private FeedbackStorage feedbackStorage;
+	double calculateAverageFeedback(String sessionkey);
 
-	private ApplicationEventPublisher publisher;
+	long calculateRoundedAverageFeedback(String sessionkey);
 
-	@PostConstruct
-	public void init() {
-		feedbackStorage = new FeedbackStorage();
-	}
+	boolean save(String keyword, int value, User user);
 
-	@Override
-	@Scheduled(fixedDelay = DEFAULT_SCHEDULER_DELAY)
-	public void cleanFeedbackVotes() {
-		Map<Session, List<User>> deletedFeedbackOfUsersInSession = feedbackStorage.cleanFeedbackVotes(cleanupFeedbackDelay);
-		/*
-		 * mapping (Session -> Users) is not suitable for web sockets, because we want to sent all affected
-		 * sessions to a single user in one go instead of sending multiple messages for each session. Hence,
-		 * we need the mapping (User -> Sessions)
-		 */
-		final Map<User, Set<Session>> affectedSessionsOfUsers = new HashMap<>();
-
-		for (Map.Entry<Session, List<User>> entry : deletedFeedbackOfUsersInSession.entrySet()) {
-			final Session session = entry.getKey();
-			final List<User> users = entry.getValue();
-			for (User user : users) {
-				Set<Session> affectedSessions;
-				if (affectedSessionsOfUsers.containsKey(user)) {
-					affectedSessions = affectedSessionsOfUsers.get(user);
-				} else {
-					affectedSessions = new HashSet<>();
-				}
-				affectedSessions.add(session);
-				affectedSessionsOfUsers.put(user, affectedSessions);
-			}
-		}
-		// Send feedback reset event to all affected users
-		for (Map.Entry<User, Set<Session>> entry : affectedSessionsOfUsers.entrySet()) {
-			final User user = entry.getKey();
-			final Set<Session> arsSessions = entry.getValue();
-			this.publisher.publishEvent(new DeleteFeedbackForSessionsEvent(this, arsSessions, user));
-		}
-		// For each session that has deleted feedback, send the new feedback to all clients
-		for (Session session : deletedFeedbackOfUsersInSession.keySet()) {
-			this.publisher.publishEvent(new NewFeedbackEvent(this, session));
-		}
-	}
-
-	@Override
-	public void cleanFeedbackVotesInSession(final String keyword, final int cleanupFeedbackDelayInMins) {
-		final Session session = sessionRepository.getSessionFromKeyword(keyword);
-		List<User> affectedUsers = feedbackStorage.cleanFeedbackVotesInSession(session, cleanupFeedbackDelayInMins);
-		Set<Session> sessionSet = new HashSet<>();
-		sessionSet.add(session);
-
-		// Send feedback reset event to all affected users
-		for (User user : affectedUsers) {
-			this.publisher.publishEvent(new DeleteFeedbackForSessionsEvent(this, sessionSet, user));
-		}
-		// send the new feedback to all clients in affected session
-		this.publisher.publishEvent(new NewFeedbackEvent(this, session));
-	}
-
-	@Override
-	public Feedback getFeedback(final String keyword) {
-		final Session session = sessionRepository.getSessionFromKeyword(keyword);
-		if (session == null) {
-			throw new NotFoundException();
-		}
-		return feedbackStorage.getFeedback(session);
-	}
-
-	@Override
-	public int getFeedbackCount(final String keyword) {
-		final Feedback feedback = this.getFeedback(keyword);
-		final List<Integer> values = feedback.getValues();
-		return values.get(Feedback.FEEDBACK_FASTER) + values.get(Feedback.FEEDBACK_OK)
-				+ values.get(Feedback.FEEDBACK_SLOWER) + values.get(Feedback.FEEDBACK_AWAY);
-	}
-
-	@Override
-	public double getAverageFeedback(final String sessionkey) {
-		final Session session = sessionRepository.getSessionFromKeyword(sessionkey);
-		if (session == null) {
-			throw new NotFoundException();
-		}
-		final Feedback feedback = feedbackStorage.getFeedback(session);
-		final List<Integer> values = feedback.getValues();
-		final double count = values.get(Feedback.FEEDBACK_FASTER) + values.get(Feedback.FEEDBACK_OK)
-				+ values.get(Feedback.FEEDBACK_SLOWER) + values.get(Feedback.FEEDBACK_AWAY);
-		final double sum = values.get(Feedback.FEEDBACK_OK) + values.get(Feedback.FEEDBACK_SLOWER) * 2
-				+ values.get(Feedback.FEEDBACK_AWAY) * 3;
-
-		if (Math.abs(count) < Z_THRESHOLD) {
-			throw new NoContentException();
-		}
-		return sum / count;
-	}
-
-	@Override
-	public long getAverageFeedbackRounded(final String sessionkey) {
-		return Math.round(getAverageFeedback(sessionkey));
-	}
-
-	@Override
-	public boolean saveFeedback(final String keyword, final int value, final User user) {
-		final Session session = sessionRepository.getSessionFromKeyword(keyword);
-		if (session == null) {
-			throw new NotFoundException();
-		}
-		feedbackStorage.saveFeedback(session, value, user);
-
-		this.publisher.publishEvent(new NewFeedbackEvent(this, session));
-		return true;
-	}
-
-	@Override
-	public Integer getMyFeedback(final String keyword, final User user) {
-		final Session session = sessionRepository.getSessionFromKeyword(keyword);
-		if (session == null) {
-			throw new NotFoundException();
-		}
-		return feedbackStorage.getMyFeedback(session, user);
-	}
-
-	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
-		this.publisher = publisher;
-	}
+	Integer getBySessionKeyAndUser(String keyword, User user);
 }

@@ -18,32 +18,23 @@
 package de.thm.arsnova.persistance;
 
 import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.Content;
-import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface AnswerRepository {
-	Answer get(String id);
-	Answer getMyAnswer(User me, String questionId, int piRound);
-	List<Answer> getAnswers(Content content, int piRound);
-	List<Answer> getAnswers(Content content);
-	List<Answer> getAllAnswers(Content content);
-	int getAnswerCount(Content content, int piRound);
-	int getTotalAnswerCountByQuestion(Content content);
-	int getAbstentionAnswerCount(String questionId);
-	List<Answer> getFreetextAnswers(String questionId, final int start, final int limit);
-	List<Answer> getMyAnswers(User me, Session session);
-	int getTotalAnswerCount(String sessionKey);
-	int deleteAnswers(Content content);
-	Answer saveAnswer(Answer answer, User user, Content content, Session session);
-	Answer updateAnswer(Answer answer);
-	void deleteAnswer(String answerId);
-	int countLectureQuestionAnswers(Session session);
-	int countPreparationQuestionAnswers(Session session);
-	int deleteAllQuestionsAnswers(Session session);
-	int deleteAllPreparationAnswers(Session session);
-	int deleteAllLectureAnswers(Session session);
-	int[] deleteAllAnswersWithQuestions(List<Content> contents);
+public interface AnswerRepository extends CrudRepository<Answer, String> {
+	Answer findByQuestionIdUserPiRound(String questionId, User user, int piRound);
+	List<Answer> findByContentIdPiRound(String contentId, int piRound);
+	List<Answer> findByContentId(String contentId);
+	int countByContentIdRound(String contentId, int round);
+	int countByContentId(String contentId);
+	List<Answer> findByContentId(String contentId, int start, int limit);
+	List<Answer> findByUserSessionId(User user, String sessionId);
+	int countBySessionKey(String sessionKey);
+	int deleteByContentId(String contentId);
+	int countBySessionIdLectureVariant(String sessionId);
+	int countBySessionIdPreparationVariant(String sessionId);
+	int deleteAllAnswersForQuestions(List<String> contentIds);
+	int deleteByContentIds(List<String> contentIds);
 }

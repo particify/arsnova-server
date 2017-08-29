@@ -20,8 +20,9 @@ package de.thm.arsnova.controller;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.services.IFeedbackService;
-import de.thm.arsnova.services.IUserService;
+import de.thm.arsnova.services.FeedbackService;
+import de.thm.arsnova.services.UserService;
+import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 import de.thm.arsnova.web.DeprecatedApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,28 +37,28 @@ import org.springframework.web.bind.annotation.RestController;
  * Handles requests concerning the user's feedback, i.e., "too fast" or "faster, please". This HTTP API is
  * deprecated in favor of the socket implementation.
  *
- * @see de.thm.arsnova.socket.ARSnovaSocketIOServer
+ * @see ArsnovaSocketioServerImpl
  */
 @RestController
 public class FeedbackController extends AbstractController {
 	@Autowired
-	private IFeedbackService feedbackService;
+	private FeedbackService feedbackService;
 
 	@Autowired
-	private IUserService userService;
+	private UserService userService;
 
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.GET)
 	public Feedback getFeedback(@PathVariable final String sessionkey) {
-		return feedbackService.getFeedback(sessionkey);
+		return feedbackService.getBySessionKey(sessionkey);
 	}
 
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/myfeedback", method = RequestMethod.GET)
 	public Integer getMyFeedback(@PathVariable final String sessionkey) {
-		Integer value = feedbackService.getMyFeedback(sessionkey, userService.getCurrentUser());
+		Integer value = feedbackService.getBySessionKeyAndUser(sessionkey, userService.getCurrentUser());
 		if (value != null && value >= Feedback.MIN_FEEDBACK_TYPE && value <= Feedback.MAX_FEEDBACK_TYPE) {
 			return value;
 		}
@@ -68,21 +69,21 @@ public class FeedbackController extends AbstractController {
 	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/feedbackcount", method = RequestMethod.GET)
 	public int getFeedbackCount(@PathVariable final String sessionkey) {
-		return feedbackService.getFeedbackCount(sessionkey);
+		return feedbackService.countFeedbackBySessionKey(sessionkey);
 	}
 
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/roundedaveragefeedback", method = RequestMethod.GET)
 	public long getAverageFeedbackRounded(@PathVariable final String sessionkey) {
-		return feedbackService.getAverageFeedbackRounded(sessionkey);
+		return feedbackService.calculateRoundedAverageFeedback(sessionkey);
 	}
 
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/session/{sessionkey}/averagefeedback", method = RequestMethod.GET)
 	public double getAverageFeedback(@PathVariable final String sessionkey) {
-		return feedbackService.getAverageFeedback(sessionkey);
+		return feedbackService.calculateAverageFeedback(sessionkey);
 	}
 
 	@DeprecatedApi
@@ -94,8 +95,8 @@ public class FeedbackController extends AbstractController {
 			@RequestBody final int value
 			) {
 		User user = userService.getCurrentUser();
-		feedbackService.saveFeedback(sessionkey, value, user);
-		Feedback feedback = feedbackService.getFeedback(sessionkey);
+		feedbackService.save(sessionkey, value, user);
+		Feedback feedback = feedbackService.getBySessionKey(sessionkey);
 
 		return feedback;
 	}

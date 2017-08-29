@@ -39,7 +39,7 @@ public class Session implements Entity {
 	private String courseType;
 	private String courseId;
 	private long creationTime;
-	private LearningProgressOptions learningProgressOptions = new LearningProgressOptions();
+	private ScoreOptions learningProgressOptions = new ScoreOptions();
 	private SessionFeature features = new SessionFeature();
 
 	private String ppAuthorName;
@@ -54,43 +54,6 @@ public class Session implements Entity {
 	private String sessionType;
 	private boolean feedbackLock;
 	private boolean flipFlashcards;
-
-	/**
-	 * Returns a copy of the given session without any information that identifies a person.
-	 * @param original The session to create a anonymized copy of
-	 * @return The anonymized copy of the session
-	 */
-	public static Session anonymizedCopy(final Session original) {
-		final Session copy = new Session();
-		copy.name = original.name;
-		copy.shortName = original.shortName;
-		copy.keyword = original.keyword;
-		copy.creator = ""; // anonymous
-		copy.active = original.active;
-		copy.lastOwnerActivity = original.lastOwnerActivity;
-		copy.courseType = original.courseType;
-		copy.courseId = original.courseId;
-		copy.creationTime = original.creationTime;
-		copy.learningProgressOptions = new LearningProgressOptions(original.learningProgressOptions);
-		copy.features = new SessionFeature(original.features);
-		// public pool
-		copy.ppAuthorName = original.ppAuthorName;
-		copy.ppAuthorMail = original.ppAuthorMail;
-		copy.ppUniversity = original.ppUniversity;
-		copy.ppLogo = original.ppLogo;
-		copy.ppSubject = original.ppSubject;
-		copy.ppLicense = original.ppLicense;
-		copy.ppDescription = original.ppDescription;
-		copy.ppFaculty = original.ppFaculty;
-		copy.ppLevel = original.ppLevel;
-		copy.sessionType = original.sessionType;
-		copy.feedbackLock = original.feedbackLock;
-		copy.flipFlashcards = original.flipFlashcards;
-
-		copy.id = original.id;
-		copy.rev = original.rev;
-		return copy;
-	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getId() {
@@ -220,14 +183,14 @@ public class Session implements Entity {
 		this.creationTime = creationTime;
 	}
 
-	@ApiModelProperty(required = true, value = "the learning progress options")
+	@ApiModelProperty(required = true, value = "the score options")
 	@JsonView({View.Persistence.class, View.Public.class})
-	public LearningProgressOptions getLearningProgressOptions() {
+	public ScoreOptions getLearningProgressOptions() {
 		return learningProgressOptions;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setLearningProgressOptions(LearningProgressOptions learningProgressOptions) {
+	public void setLearningProgressOptions(ScoreOptions learningProgressOptions) {
 		this.learningProgressOptions = learningProgressOptions;
 	}
 

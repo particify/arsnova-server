@@ -128,7 +128,7 @@ public class SessionFeature implements Serializable {
 		this.pi = pi;
 	}
 
-	@ApiModelProperty(required = true, value = "learning progress")
+	@ApiModelProperty(required = true, value = "score")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isLearningProgress() {
 		return learningProgress;

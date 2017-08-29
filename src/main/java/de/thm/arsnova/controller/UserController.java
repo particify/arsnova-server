@@ -18,7 +18,7 @@
 package de.thm.arsnova.controller;
 
 import de.thm.arsnova.entities.DbUser;
-import de.thm.arsnova.services.IUserService;
+import de.thm.arsnova.services.UserService;
 import de.thm.arsnova.services.UserSessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -41,7 +41,7 @@ public class UserController extends AbstractController {
 	private DaoAuthenticationProvider daoProvider;
 
 	@Autowired
-	private IUserService userService;
+	private UserService userService;
 
 	@Autowired
 	private UserSessionService userSessionService;
@@ -50,7 +50,7 @@ public class UserController extends AbstractController {
 	public void register(@RequestParam final String username,
 			@RequestParam final String password,
 			final HttpServletRequest request, final HttpServletResponse response) {
-		if (null != userService.createDbUser(username, password)) {
+		if (null != userService.create(username, password)) {
 			return;
 		}
 
@@ -64,10 +64,10 @@ public class UserController extends AbstractController {
 			@PathVariable final String username,
 			@RequestParam final String key, final HttpServletRequest request,
 			final HttpServletResponse response) {
-		DbUser dbUser = userService.getDbUser(username);
+		DbUser dbUser = userService.getByUsername(username);
 		if (null != dbUser && key.equals(dbUser.getActivationKey())) {
 			dbUser.setActivationKey(null);
-			userService.updateDbUser(dbUser);
+			userService.update(dbUser);
 
 			return;
 		}
@@ -80,7 +80,7 @@ public class UserController extends AbstractController {
 			@PathVariable final String username,
 			final HttpServletRequest request,
 			final HttpServletResponse response) {
-		if (null == userService.deleteDbUser(username)) {
+		if (null == userService.deleteByUsername(username)) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 		}
 	}
@@ -92,7 +92,7 @@ public class UserController extends AbstractController {
 			@RequestParam(required = false) final String password,
 			final HttpServletRequest request,
 			final HttpServletResponse response) {
-		DbUser dbUser = userService.getDbUser(username);
+		DbUser dbUser = userService.getByUsername(username);
 		if (null == dbUser) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 

@@ -3,45 +3,35 @@ package de.thm.arsnova.persistance.couchdb;
 import com.fasterxml.jackson.databind.JsonNode;
 import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.CommentReadingCount;
-import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.LogEntryRepository;
-import de.thm.arsnova.persistance.SessionRepository;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
-import org.ektorp.DocumentNotFoundException;
 import org.ektorp.UpdateConflictException;
 import org.ektorp.ViewResult;
-import org.ektorp.support.CouchDbRepositorySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-public class CouchDbCommentRepository extends CouchDbRepositorySupport<Comment> implements CommentRepository {
+public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> implements CommentRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbCommentRepository.class);
 
 	@Autowired
 	private LogEntryRepository dbLogger;
 
-	@Autowired
-	private SessionRepository sessionRepository;
-
-	public CouchDbCommentRepository(CouchDbConnector db, boolean createIfNotExists) {
-		super(Comment.class, db, createIfNotExists);
+	public CouchDbCommentRepository(final CouchDbConnector db, final boolean createIfNotExists) {
+		super(Comment.class, db, "by_sessionid", createIfNotExists);
 	}
 
 	@Override
-	public int getInterposedCount(final String sessionKey) {
-		final Session s = sessionRepository.getSessionFromKeyword(sessionKey);
-		if (s == null) {
-			throw new NotFoundException();
-		}
-
-		final ViewResult result = db.queryView(createQuery("by_sessionid").key(s.getId()).group(true));
+	public int countBySessionId(final String sessionId) {
+		final ViewResult result = db.queryView(createQuery("by_sessionid")
+				.key(sessionId)
+				.reduce(true)
+				.group(true));
 		if (result.isEmpty()) {
 			return 0;
 		}
@@ -50,24 +40,26 @@ public class CouchDbCommentRepository extends CouchDbRepositorySupport<Comment> 
 	}
 
 	@Override
-	public CommentReadingCount getInterposedReadingCount(final Session session) {
+	public CommentReadingCount countReadingBySessionId(final String sessionId) {
 		final ViewResult result = db.queryView(createQuery("by_sessionid_read")
-				.startKey(ComplexKey.of(session.getId()))
-				.endKey(ComplexKey.of(session.getId(), ComplexKey.emptyObject()))
+				.startKey(ComplexKey.of(sessionId))
+				.endKey(ComplexKey.of(sessionId, ComplexKey.emptyObject()))
+				.reduce(true)
 				.group(true));
-		return getInterposedReadingCount(result);
+		return calculateReadingCount(result);
 	}
 
 	@Override
-	public CommentReadingCount getInterposedReadingCount(final Session session, final User user) {
+	public CommentReadingCount countReadingBySessionIdAndUser(final String sessionId, final User user) {
 		final ViewResult result = db.queryView(createQuery("by_sessionid_creator_read")
-				.startKey(ComplexKey.of(session.getId(), user.getUsername()))
-				.endKey(ComplexKey.of(session.getId(), user.getUsername(), ComplexKey.emptyObject()))
+				.startKey(ComplexKey.of(sessionId, user.getUsername()))
+				.endKey(ComplexKey.of(sessionId, user.getUsername(), ComplexKey.emptyObject()))
+				.reduce(true)
 				.group(true));
-		return getInterposedReadingCount(result);
+		return calculateReadingCount(result);
 	}
 
-	private CommentReadingCount getInterposedReadingCount(final ViewResult viewResult) {
+	private CommentReadingCount calculateReadingCount(final ViewResult viewResult) {
 		if (viewResult.isEmpty()) {
 			return new CommentReadingCount();
 		}
@@ -111,7 +103,7 @@ public class CouchDbCommentRepository extends CouchDbRepositorySupport<Comment> 
 	}
 
 	@Override
-	public List<Comment> getInterposedQuestions(final Session session, final int start, final int limit) {
+	public List<Comment> findBySessionId(final String sessionId, final int start, final int limit) {
 		final int qSkip = start > 0 ? start : -1;
 		final int qLimit = limit > 0 ? limit : -1;
 
@@ -119,8 +111,8 @@ public class CouchDbCommentRepository extends CouchDbRepositorySupport<Comment> 
 						.skip(qSkip)
 						.limit(qLimit)
 						.descending(true)
-						.startKey(ComplexKey.of(session.getId(), ComplexKey.emptyObject()))
-						.endKey(ComplexKey.of(session.getId()))
+						.startKey(ComplexKey.of(sessionId, ComplexKey.emptyObject()))
+						.endKey(ComplexKey.of(sessionId))
 						.includeDocs(true),
 				Comment.class);
 //		for (Comment comment : comments) {
@@ -131,7 +123,7 @@ public class CouchDbCommentRepository extends CouchDbRepositorySupport<Comment> 
 	}
 
 	@Override
-	public List<Comment> getInterposedQuestions(final Session session, final User user, final int start, final int limit) {
+	public List<Comment> findBySessionIdAndUser(final String sessionId, final User user, final int start, final int limit) {
 		final int qSkip = start > 0 ? start : -1;
 		final int qLimit = limit > 0 ? limit : -1;
 
@@ -139,8 +131,8 @@ public class CouchDbCommentRepository extends CouchDbRepositorySupport<Comment> 
 						.skip(qSkip)
 						.limit(qLimit)
 						.descending(true)
-						.startKey(ComplexKey.of(session.getId(), user.getUsername(), ComplexKey.emptyObject()))
-						.endKey(ComplexKey.of(session.getId(), user.getUsername()))
+						.startKey(ComplexKey.of(sessionId, user.getUsername(), ComplexKey.emptyObject()))
+						.endKey(ComplexKey.of(sessionId, user.getUsername()))
 						.includeDocs(true),
 				Comment.class);
 //		for (Comment comment : comments) {
@@ -151,74 +143,22 @@ public class CouchDbCommentRepository extends CouchDbRepositorySupport<Comment> 
 	}
 
 	@Override
-	public Comment getInterposedQuestion(final String commentId) {
-		try {
-			final Comment comment = get(commentId);
-			/* TODO: Refactor code so the next line can be removed */
-			//comment.setSessionId(sessionRepository.getSessionFromKeyword(comment.getSessionId()).getId());
-			return comment;
-		} catch (final DocumentNotFoundException e) {
-			logger.error("Could not load comment {}.", commentId, e);
-		}
-		return null;
+	public int deleteBySessionId(final String sessionId) {
+		final ViewResult result = db.queryView(createQuery("by_sessionid").key(sessionId));
+
+		return delete(result);
 	}
 
 	@Override
-	public Comment saveQuestion(final Session session, final Comment comment, User user) {
-		comment.setSessionId(session.getId());
-		comment.setCreator(user.getUsername());
-		comment.setRead(false);
-		if (comment.getTimestamp() == 0) {
-			comment.setTimestamp(System.currentTimeMillis());
-		}
-		try {
-			db.create(comment);
-
-			return comment;
-		} catch (final IllegalArgumentException e) {
-			logger.error("Could not save comment {}.", comment, e);
-		}
-
-		return null;
-	}
-
-	@Override
-	public void markInterposedQuestionAsRead(final Comment comment) {
-		try {
-			comment.setRead(true);
-			db.update(comment);
-		} catch (final UpdateConflictException e) {
-			logger.error("Could not mark comment as read {}.", comment.getId(), e);
-		}
-	}
-
-	@Override
-	public void deleteInterposedQuestion(final Comment comment) {
-		try {
-			db.delete(comment.getId(), comment.getRevision());
-			dbLogger.log("delete", "type", "comment");
-		} catch (final UpdateConflictException e) {
-			logger.error("Could not delete comment {}.", comment.getId(), e);
-		}
-	}
-
-	@Override
-	public int deleteAllInterposedQuestions(final Session session) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid").key(session.getId()));
-
-		return deleteAllInterposedQuestions(session, result);
-	}
-
-	@Override
-	public int deleteAllInterposedQuestions(final Session session, final User user) {
+	public int deleteBySessionIdAndUser(final String sessionId, final User user) {
 		final ViewResult result = db.queryView(createQuery("by_sessionid_creator_read")
-				.startKey(ComplexKey.of(session.getId(), user.getUsername()))
-				.endKey(ComplexKey.of(session.getId(), user.getUsername(), ComplexKey.emptyObject())));
+				.startKey(ComplexKey.of(sessionId, user.getUsername()))
+				.endKey(ComplexKey.of(sessionId, user.getUsername(), ComplexKey.emptyObject())));
 
-		return deleteAllInterposedQuestions(session, result);
+		return delete(result);
 	}
 
-	private int deleteAllInterposedQuestions(final Session session, final ViewResult comments) {
+	private int delete(final ViewResult comments) {
 		if (comments.isEmpty()) {
 			return 0;
 		}
@@ -227,7 +167,7 @@ public class CouchDbCommentRepository extends CouchDbRepositorySupport<Comment> 
 			try {
 				db.delete(row.getId(), row.getValueAsNode().get("rev").asText());
 			} catch (final UpdateConflictException e) {
-				logger.error("Could not delete all comments {}.", session, e);
+				logger.error("Could not delete comments.", e);
 			}
 		}
 

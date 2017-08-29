@@ -30,11 +30,11 @@ public class InitializingCouchDbConnector extends StdCouchDbConnector implements
 
 	private ResourceLoader resourceLoader;
 
-	public InitializingCouchDbConnector(String databaseName, CouchDbInstance dbInstance) {
+	public InitializingCouchDbConnector(final String databaseName, final CouchDbInstance dbInstance) {
 		super(databaseName, dbInstance);
 	}
 
-	public InitializingCouchDbConnector(String databaseName, CouchDbInstance dbi, ObjectMapperFactory om) {
+	public InitializingCouchDbConnector(final String databaseName, final CouchDbInstance dbi, final ObjectMapperFactory om) {
 		super(databaseName, dbi, om);
 	}
 
@@ -42,14 +42,14 @@ public class InitializingCouchDbConnector extends StdCouchDbConnector implements
 		final ScriptEngine engine = new ScriptEngineManager().getEngineByMimeType("application/javascript");
 		engine.eval(new InputStreamReader(new ClassPathResource("couchdb/jsToJson.js").getInputStream()));
 
-		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-		Resource[] resources = resolver.getResources("classpath:couchdb/*.design.js");
+		final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+		final Resource[] resources = resolver.getResources("classpath:couchdb/*.design.js");
 		for (Resource resource : resources) {
 			logger.debug("Loading CouchDB design doc: {}", resource.getFilename());
-			String js = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
+			final String js = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
 			/* Reset designDoc before parsing a new one. */
 			engine.eval("var designDoc = null;" + js);
-			Bindings jsonObject = (Bindings) engine.eval("jsToJson(designDoc)");
+			final Bindings jsonObject = (Bindings) engine.eval("jsToJson(designDoc)");
 			docs.add(jsonObject);
 		}
 	}
@@ -64,10 +64,10 @@ public class InitializingCouchDbConnector extends StdCouchDbConnector implements
 				}
 			}
 			try {
-				String rev = getCurrentRevision((String) doc.get("_id"));
+				final String rev = getCurrentRevision((String) doc.get("_id"));
 				doc.put("_rev", rev);
 				update(doc);
-			} catch (DocumentNotFoundException e) {
+			} catch (final DocumentNotFoundException e) {
 				create(doc);
 			}
 		});
@@ -80,7 +80,7 @@ public class InitializingCouchDbConnector extends StdCouchDbConnector implements
 	}
 
 	@Override
-	public void setResourceLoader(ResourceLoader resourceLoader) {
+	public void setResourceLoader(final ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}
 }

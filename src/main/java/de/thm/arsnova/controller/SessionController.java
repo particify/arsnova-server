@@ -22,14 +22,14 @@ import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionFeature;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.transport.ImportExportSession;
-import de.thm.arsnova.entities.transport.LearningProgressValues;
+import de.thm.arsnova.entities.transport.ScoreStatistics;
 import de.thm.arsnova.exceptions.UnauthorizedException;
-import de.thm.arsnova.services.ISessionService;
-import de.thm.arsnova.services.IUserService;
-import de.thm.arsnova.services.SessionService.SessionInfoNameComparator;
-import de.thm.arsnova.services.SessionService.SessionInfoShortNameComparator;
-import de.thm.arsnova.services.SessionService.SessionNameComparator;
-import de.thm.arsnova.services.SessionService.SessionShortNameComparator;
+import de.thm.arsnova.services.SessionService;
+import de.thm.arsnova.services.UserService;
+import de.thm.arsnova.services.SessionServiceImpl.SessionInfoNameComparator;
+import de.thm.arsnova.services.SessionServiceImpl.SessionInfoShortNameComparator;
+import de.thm.arsnova.services.SessionServiceImpl.SessionNameComparator;
+import de.thm.arsnova.services.SessionServiceImpl.SessionShortNameComparator;
 import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.web.Pagination;
 import io.swagger.annotations.Api;
@@ -61,10 +61,10 @@ import java.util.List;
 @Api(value = "/session", description = "the Session Controller API")
 public class SessionController extends PaginationController {
 	@Autowired
-	private ISessionService sessionService;
+	private SessionService sessionService;
 
 	@Autowired
-	private IUserService userService;
+	private UserService userService;
 
 	@ApiOperation(value = "join a session",
 			nickname = "joinSession")
@@ -76,9 +76,9 @@ public class SessionController extends PaginationController {
 			@ApiParam(value = "Adminflag", required = false) @RequestParam(value = "admin", defaultValue = "false")	final boolean admin
 			) {
 		if (admin) {
-			return sessionService.getSessionForAdmin(sessionkey);
+			return sessionService.getForAdmin(sessionkey);
 		} else {
-			return sessionService.getSession(sessionkey);
+			return sessionService.getByKey(sessionkey);
 		}
 	}
 
@@ -86,7 +86,8 @@ public class SessionController extends PaginationController {
 			nickname = "deleteSession")
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.DELETE)
 	public void deleteSession(@ApiParam(value = "Session-Key from current session", required = true) @PathVariable final String sessionkey) {
-		sessionService.deleteSession(sessionkey);
+		Session session = sessionService.getByKey(sessionkey);
+		sessionService.deleteCascading(session);
 	}
 
 	@ApiOperation(value = "count active users",
@@ -112,7 +113,7 @@ public class SessionController extends PaginationController {
 			final Course course = new Course();
 			course.setId(session.getCourseId());
 			courses.add(course);
-			final int sessionCount = sessionService.countSessions(courses);
+			final int sessionCount = sessionService.countSessionsByCourses(courses);
 			if (sessionCount > 0) {
 				final String appendix = " (" + (sessionCount + 1) + ")";
 				session.setName(session.getName() + appendix);
@@ -120,7 +121,7 @@ public class SessionController extends PaginationController {
 			}
 		}
 
-		final Session newSession = sessionService.saveSession(session);
+		final Session newSession = sessionService.save(session);
 
 		if (newSession == null) {
 			response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
@@ -137,7 +138,7 @@ public class SessionController extends PaginationController {
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
 			@ApiParam(value = "current session", required = true) @RequestBody final Session session
 			) {
-		return sessionService.updateSession(sessionkey, session);
+		return sessionService.update(sessionkey, session);
 	}
 
 	@ApiOperation(value = "change the session creator (owner)", nickname = "changeSessionCreator")
@@ -146,7 +147,7 @@ public class SessionController extends PaginationController {
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
 			@ApiParam(value = "new session creator", required = true) @RequestBody final String newCreator
 			) {
-		return sessionService.changeSessionCreator(sessionkey, newCreator);
+		return sessionService.updateCreator(sessionkey, newCreator);
 	}
 
 	@ApiOperation(value = "Retrieves a list of Sessions",
@@ -345,28 +346,28 @@ public class SessionController extends PaginationController {
 		return null;
 	}
 
-	@ApiOperation(value = "retrieves a value for the learning progress",
+	@ApiOperation(value = "retrieves a value for the score",
 			nickname = "getLearningProgress")
 	@RequestMapping(value = "/{sessionkey}/learningprogress", method = RequestMethod.GET)
-	public LearningProgressValues getLearningProgress(
+	public ScoreStatistics getLearningProgress(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
-			@ApiParam(value = "progress type", required = false) @RequestParam(value = "type", defaultValue = "questions") final String progressType,
+			@ApiParam(value = "type", required = false) @RequestParam(value = "type", defaultValue = "questions") final String type,
 			@ApiParam(value = "question variant", required = false) @RequestParam(value = "questionVariant", required = false) final String questionVariant,
 			final HttpServletResponse response
 			) {
-		return sessionService.getLearningProgress(sessionkey, progressType, questionVariant);
+		return sessionService.getLearningProgress(sessionkey, type, questionVariant);
 	}
 
 	@ApiOperation(value = "retrieves a value for the learning progress for the current user",
 			nickname = "getMyLearningProgress")
 	@RequestMapping(value = "/{sessionkey}/mylearningprogress", method = RequestMethod.GET)
-	public LearningProgressValues getMyLearningProgress(
+	public ScoreStatistics getMyLearningProgress(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
-			@RequestParam(value = "type", defaultValue = "questions") final String progressType,
+			@RequestParam(value = "type", defaultValue = "questions") final String type,
 			@RequestParam(value = "questionVariant", required = false) final String questionVariant,
 			final HttpServletResponse response
 			) {
-		return sessionService.getMyLearningProgress(sessionkey, progressType, questionVariant);
+		return sessionService.getMyLearningProgress(sessionkey, type, questionVariant);
 	}
 
 	@ApiOperation(value = "retrieves all session features",
@@ -376,7 +377,7 @@ public class SessionController extends PaginationController {
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
 			final HttpServletResponse response
 			) {
-		return sessionService.getSessionFeatures(sessionkey);
+		return sessionService.getFeatures(sessionkey);
 	}
 
 	@RequestMapping(value = "/{sessionkey}/features", method = RequestMethod.PUT)
@@ -387,7 +388,7 @@ public class SessionController extends PaginationController {
 			@ApiParam(value = "session feature", required = true) @RequestBody final SessionFeature features,
 			final HttpServletResponse response
 			) {
-		return sessionService.changeSessionFeatures(sessionkey, features);
+		return sessionService.updateFeatures(sessionkey, features);
 	}
 
 	@RequestMapping(value = "/{sessionkey}/lockfeedbackinput", method = RequestMethod.POST)

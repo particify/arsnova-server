@@ -18,17 +18,16 @@
 package de.thm.arsnova.persistance;
 
 import de.thm.arsnova.entities.Motd;
+import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface MotdRepository {
-	List<Motd> getAdminMotds();
-	List<Motd> getMotdsForAll();
-	List<Motd> getMotdsForLoggedIn();
-	List<Motd> getMotdsForTutors();
-	List<Motd> getMotdsForStudents();
-	List<Motd> getMotdsForSession(final String sessionkey);
-	Motd getMotdByKey(String key);
-	Motd createOrUpdateMotd(Motd motd);
-	boolean deleteMotd(Motd motd);
+public interface MotdRepository extends CrudRepository<Motd, String> {
+	List<Motd> findGlobalForAdmin();
+	List<Motd> findGlobalForAll();
+	List<Motd> findGlobalForLoggedIn();
+	List<Motd> findGlobalForTutors();
+	List<Motd> findForStudents();
+	List<Motd> findBySessionKey(String sessionkey);
+	Motd findByKey(String key);
 }

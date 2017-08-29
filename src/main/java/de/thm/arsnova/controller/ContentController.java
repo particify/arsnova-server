@@ -17,14 +17,14 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.PaginationListDecorator;
+import de.thm.arsnova.util.PaginationListDecorator;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.services.IContentService;
+import de.thm.arsnova.services.ContentService;
 import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.web.Pagination;
 import io.swagger.annotations.Api;
@@ -54,7 +54,7 @@ import java.util.List;
 @Api(value = "/lecturerquestion", description = "Operations for Lecture Questions")
 public class ContentController extends PaginationController {
 	@Autowired
-	private IContentService contentService;
+	private ContentService contentService;
 
 	@ApiOperation(value = "Get question with provided question Id",
 			nickname = "getQuestion")
@@ -63,7 +63,7 @@ public class ContentController extends PaginationController {
 	})
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
 	public Content getQuestion(@PathVariable final String questionId) {
-		final Content content = contentService.getQuestion(questionId);
+		final Content content = contentService.get(questionId);
 		if (content != null) {
 			return content;
 		}
@@ -79,7 +79,7 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Content postQuestion(@RequestBody final Content content) {
-		if (contentService.saveQuestion(content) != null) {
+		if (contentService.save(content) != null) {
 			return content;
 		}
 		throw new BadRequestException();
@@ -93,7 +93,7 @@ public class ContentController extends PaginationController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public List<Content> bulkPostQuestions(@RequestBody final List<Content> contents) {
 		for (final Content content : contents) {
-			if (contentService.saveQuestion(content) == null) {
+			if (contentService.save(content) == null) {
 				throw new BadRequestException();
 			}
 		}
@@ -291,7 +291,7 @@ public class ContentController extends PaginationController {
 		} else if (preparationQuestionsOnly) {
 			contents = contentService.getPreparationQuestions(sessionkey);
 		} else {
-			contents = contentService.getSkillQuestions(sessionkey);
+			contents = contentService.getBySessionKey(sessionkey);
 		}
 		if (contents == null || contents.isEmpty()) {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
@@ -315,12 +315,12 @@ public class ContentController extends PaginationController {
 			) {
 		if (lectureQuestionsOnly) {
 			contentService.deleteLectureQuestions(sessionkey);
-		} else if (flashcardsOnly) {
-			contentService.deleteFlashcards(sessionkey);
 		} else if (preparationQuestionsOnly) {
 			contentService.deletePreparationQuestions(sessionkey);
+		} else if (flashcardsOnly) {
+			contentService.deleteFlashcards(sessionkey);
 		} else {
-			contentService.deleteAllQuestions(sessionkey);
+			contentService.deleteAllContent(sessionkey);
 		}
 	}
 
@@ -336,13 +336,13 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationQuestionsOnly
 			) {
 		if (lectureQuestionsOnly) {
-			return contentService.getLectureQuestionCount(sessionkey);
-		} else if (flashcardsOnly) {
-			return contentService.getFlashcardCount(sessionkey);
+			return contentService.countLectureQuestions(sessionkey);
 		} else if (preparationQuestionsOnly) {
-			return contentService.getPreparationQuestionCount(sessionkey);
+			return contentService.countPreparationQuestions(sessionkey);
+		} else if (flashcardsOnly) {
+			return contentService.countFlashcards(sessionkey);
 		} else {
-			return contentService.getSkillQuestionCount(sessionkey);
+			return contentService.countBySessionKey(sessionkey);
 		}
 	}
 
@@ -352,7 +352,7 @@ public class ContentController extends PaginationController {
 	public void deleteAnswersAndQuestion(
 			@PathVariable final String questionId
 			) {
-		contentService.deleteQuestion(questionId);
+		contentService.delete(questionId);
 	}
 
 	@ApiOperation(value = "Get unanswered skill question ID by provided session ID",
@@ -458,7 +458,7 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/{questionId}/answer/", method = RequestMethod.POST)
 	public Answer saveAnswer(
 			@PathVariable final String questionId,
-			@RequestBody final de.thm.arsnova.entities.transport.Answer answer,
+			@RequestBody final Answer answer,
 			final HttpServletResponse response
 			) {
 		return contentService.saveAnswer(questionId, answer);
@@ -544,7 +544,7 @@ public class ContentController extends PaginationController {
 	@Deprecated
 	@RequestMapping(value = "/{questionId}/answercount", method = RequestMethod.GET)
 	public int getAnswerCount(@PathVariable final String questionId) {
-		return contentService.getAnswerCount(questionId);
+		return contentService.countAnswersByQuestionIdAndRound(questionId);
 	}
 
 	@ApiOperation(value = "Get the amount of answers for a question, identified by the question ID",
@@ -552,8 +552,8 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/{questionId}/allroundanswercount", method = RequestMethod.GET)
 	public List<Integer> getAllAnswerCount(@PathVariable final String questionId) {
 		return Arrays.asList(
-			contentService.getAnswerCount(questionId, 1),
-			contentService.getAnswerCount(questionId, 2)
+			contentService.countAnswersByQuestionIdAndRound(questionId, 1),
+			contentService.countAnswersByQuestionIdAndRound(questionId, 2)
 		);
 	}
 
@@ -561,7 +561,7 @@ public class ContentController extends PaginationController {
 			nickname = "getTotalAnswerCountByQuestion")
 	@RequestMapping(value = "/{questionId}/totalanswercount", method = RequestMethod.GET)
 	public int getTotalAnswerCountByQuestion(@PathVariable final String questionId) {
-		return contentService.getTotalAnswerCountByQuestion(questionId);
+		return contentService.countTotalAnswersByQuestionId(questionId);
 	}
 
 	@ApiOperation(value = "Get the amount of answers and abstention answers by a question, identified by the question ID",
@@ -569,8 +569,8 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/{questionId}/answerandabstentioncount", method = RequestMethod.GET)
 	public List<Integer> getAnswerAndAbstentionCount(@PathVariable final String questionId) {
 		return Arrays.asList(
-			contentService.getAnswerCount(questionId),
-			contentService.getAbstentionAnswerCount(questionId)
+			contentService.countAnswersByQuestionIdAndRound(questionId),
+			contentService.countTotalAbstentionsByQuestionId(questionId)
 		);
 	}
 
@@ -579,7 +579,7 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/{questionId}/freetextanswer/", method = RequestMethod.GET)
 	@Pagination
 	public List<Answer> getFreetextAnswers(@PathVariable final String questionId) {
-		return contentService.getFreetextAnswers(questionId, offset, limit);
+		return contentService.getFreetextAnswersByQuestionId(questionId, offset, limit);
 	}
 
 	@ApiOperation(value = "Get my answers of an session, identified by the sessionkey",
@@ -588,7 +588,7 @@ public class ContentController extends PaginationController {
 	@Deprecated
 	@RequestMapping(value = "/myanswers", method = RequestMethod.GET)
 	public List<Answer> getMyAnswers(@RequestParam final String sessionkey) {
-		return contentService.getMyAnswers(sessionkey);
+		return contentService.getMyAnswersBySessionKey(sessionkey);
 	}
 
 	@ApiOperation(value = "Get the total amount of answers of an session, identified by the sessionkey",
@@ -606,7 +606,7 @@ public class ContentController extends PaginationController {
 		} else if (preparationQuestionsOnly) {
 			return contentService.countPreparationQuestionAnswers(sessionkey);
 		} else {
-			return contentService.getTotalAnswerCount(sessionkey);
+			return contentService.countTotalAnswersBySessionKey(sessionkey);
 		}
 	}
 }

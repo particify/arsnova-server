@@ -21,7 +21,7 @@ import de.thm.arsnova.entities.ServiceDescription;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.UnauthorizedException;
-import de.thm.arsnova.services.IUserService;
+import de.thm.arsnova.services.UserService;
 import de.thm.arsnova.services.UserSessionService;
 import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.exception.HttpAction;
@@ -142,7 +142,7 @@ public class LoginController extends AbstractController {
 	private CasAuthenticationEntryPoint casEntryPoint;
 
 	@Autowired
-	private IUserService userService;
+	private UserService userService;
 
 	@Autowired
 	private UserSessionService userSessionService;

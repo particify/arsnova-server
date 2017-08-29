@@ -39,7 +39,7 @@ public class UserSessionAspect {
 	/** Sets current user and ARSnova session in session scoped UserSessionService
 	 */
 	@AfterReturning(
-			pointcut = "execution(public * de.thm.arsnova.services.SessionService.joinSession(..)) && args(keyword)",
+			pointcut = "execution(public * de.thm.arsnova.services.SessionService.join(..)) && args(keyword)",
 			returning = "session"
 			)
 	public void joinSessionAdvice(final JoinPoint jp, final String keyword, final Session session) {

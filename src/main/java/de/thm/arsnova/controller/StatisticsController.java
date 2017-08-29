@@ -18,7 +18,7 @@
 package de.thm.arsnova.controller;
 
 import de.thm.arsnova.entities.Statistics;
-import de.thm.arsnova.services.IStatisticsService;
+import de.thm.arsnova.services.StatisticsService;
 import de.thm.arsnova.web.CacheControl;
 import de.thm.arsnova.web.DeprecatedApi;
 import io.swagger.annotations.Api;
@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class StatisticsController extends AbstractController {
 
 	@Autowired
-	private IStatisticsService statisticsService;
+	private StatisticsService statisticsService;
 
 	@ApiOperation(value = "Retrieves global statistics",
 			nickname = "getStatistics")

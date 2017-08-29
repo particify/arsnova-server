@@ -18,9 +18,9 @@
 package de.thm.arsnova.controller;
 
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.services.IUserService;
+import de.thm.arsnova.services.UserService;
 import de.thm.arsnova.services.UserSessionService;
-import de.thm.arsnova.socket.ARSnovaSocket;
+import de.thm.arsnova.websocket.ArsnovaSocketioServer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -49,13 +49,13 @@ import java.util.UUID;
 public class SocketController extends AbstractController {
 
 	@Autowired
-	private IUserService userService;
+	private UserService userService;
 
 	@Autowired
 	private UserSessionService userSessionService;
 
 	@Autowired
-	private ARSnovaSocket server;
+	private ArsnovaSocketioServer server;
 
 	private static final Logger logger = LoggerFactory.getLogger(SocketController.class);
 

@@ -1,26 +1,17 @@
 package de.thm.arsnova.persistance.couchdb;
 
 import de.thm.arsnova.entities.Content;
-import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.persistance.AnswerRepository;
 import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.LogEntryRepository;
+import org.ektorp.BulkDeleteDocument;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
-import org.ektorp.DbAccessException;
-import org.ektorp.DocumentNotFoundException;
-import org.ektorp.UpdateConflictException;
-import org.ektorp.ViewQuery;
+import org.ektorp.DocumentOperationResult;
 import org.ektorp.ViewResult;
-import org.ektorp.support.CouchDbRepositorySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,26 +21,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class CouchDbContentRepository extends CouchDbRepositorySupport<Content> implements ContentRepository {
+public class CouchDbContentRepository extends CouchDbCrudRepository<Content> implements ContentRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbContentRepository.class);
 
 	@Autowired
 	private LogEntryRepository dbLogger;
 
-	@Autowired
-	private AnswerRepository answerRepository;
-
-	public CouchDbContentRepository(CouchDbConnector db, boolean createIfNotExists) {
-		super(Content.class, db, createIfNotExists);
+	public CouchDbContentRepository(final CouchDbConnector db, final boolean createIfNotExists) {
+		super(Content.class, db, "by_sessionid", createIfNotExists);
 	}
 
-	@Cacheable("skillquestions")
 	@Override
-	public List<Content> getSkillQuestionsForUsers(final Session session) {
+	public List<Content> findBySessionIdForUsers(final String sessionId) {
 		final List<Content> contents = new ArrayList<>();
-		final List<Content> questions1 = getQuestions(session.getId(), "lecture", true);
-		final List<Content> questions2 = getQuestions(session.getId(), "preparation", true);
-		final List<Content> questions3 = getQuestions(session.getId(), "flashcard", true);
+		final List<Content> questions1 = findBySessionIdAndVariantAndActive(sessionId, "lecture", true);
+		final List<Content> questions2 = findBySessionIdAndVariantAndActive(sessionId, "preparation", true);
+		final List<Content> questions3 = findBySessionIdAndVariantAndActive(sessionId, "flashcard", true);
 		contents.addAll(questions1);
 		contents.addAll(questions2);
 		contents.addAll(questions3);
@@ -57,217 +44,128 @@ public class CouchDbContentRepository extends CouchDbRepositorySupport<Content> 
 		return contents;
 	}
 
-	@Cacheable("skillquestions")
 	@Override
-	public List<Content> getSkillQuestionsForTeachers(final Session session) {
-		return getQuestions(new Object[] {session.getId()}, session);
+	public List<Content> findBySessionIdForSpeaker(final String sessionId) {
+		return findBySessionIdAndVariantAndActive(new Object[] {sessionId}, sessionId);
 	}
 
 	@Override
-	public int getSkillQuestionCount(final Session session) {
+	public int countBySessionId(final String sessionId) {
 		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(session.getId()))
-				.endKey(ComplexKey.of(session.getId(), ComplexKey.emptyObject())));
+				.startKey(ComplexKey.of(sessionId))
+				.endKey(ComplexKey.of(sessionId, ComplexKey.emptyObject())));
 
 		return result.getSize();
 	}
 
-	@Caching(evict = {@CacheEvict(value = "skillquestions", key = "#session"),
-			@CacheEvict(value = "lecturequestions", key = "#session", condition = "#content.getQuestionVariant().equals('lecture')"),
-			@CacheEvict(value = "preparationquestions", key = "#session", condition = "#content.getQuestionVariant().equals('preparation')"),
-			@CacheEvict(value = "flashcardquestions", key = "#session", condition = "#content.getQuestionVariant().equals('flashcard')") },
-			put = {@CachePut(value = "questions", key = "#content.id")})
 	@Override
-	public Content saveQuestion(final Session session, final Content content) {
-		content.setSessionId(session.getId());
-		try {
-			db.create(content);
-
-			return content;
-		} catch (final IllegalArgumentException e) {
-			logger.error("Could not save content {}.", content, e);
-		}
-
-		return null;
-	}
-
-	/* TODO: Only evict cache entry for the content's session. This requires some refactoring. */
-	@Caching(evict = {@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true, condition = "#content.getQuestionVariant().equals('lecture')"),
-			@CacheEvict(value = "preparationquestions", allEntries = true, condition = "#content.getQuestionVariant().equals('preparation')"),
-			@CacheEvict(value = "flashcardquestions", allEntries = true, condition = "#content.getQuestionVariant().equals('flashcard')") },
-			put = {@CachePut(value = "questions", key = "#content.id")})
-	@Override
-	public Content updateQuestion(final Content content) {
-		try {
-			/* TODO: Make sure that sessionId is valid before so the content does not need to be retrieved. */
-			final Content oldContent = get(content.getId());
-			content.setId(oldContent.getId());
-			content.setRevision(oldContent.getRevision());
-			content.updateRoundManagementState();
-			update(content);
-
-			return content;
-		} catch (final UpdateConflictException e) {
-			logger.error("Could not update content {}.", content, e);
-		}
-
-		return null;
-	}
-
-	@Cacheable("questions")
-	@Override
-	public Content getQuestion(final String id) {
-		try {
-			final Content content = get(id);
-			content.updateRoundManagementState();
-			//content.setSessionKeyword(sessionRepository.getSessionFromId(content.getSessionId()).getKeyword());
-
-			return content;
-		} catch (final DocumentNotFoundException e) {
-			logger.error("Could not get question {}.", id, e);
-		}
-
-		return null;
+	public List<String> findIdsBySessionId(final String sessionId) {
+		return collectQuestionIds(db.queryView(createQuery("by_sessionid_variant_active")
+				.startKey(ComplexKey.of(sessionId))
+				.endKey(ComplexKey.of(sessionId, ComplexKey.emptyObject()))));
 	}
 
 	@Override
-	public List<String> getQuestionIds(final Session session, final User user) {
-		return collectQuestionIds(db.queryView(createQuery("by_sessionid_variant_active").key(session.getId())));
+	public List<String> findIdsBySessionIdAndVariant(final String sessionId, final String variant) {
+		return collectQuestionIds(db.queryView(createQuery("by_sessionid_variant_active")
+				.startKey(ComplexKey.of(sessionId, variant))
+				.endKey(ComplexKey.of(sessionId, variant, ComplexKey.emptyObject()))));
 	}
 
-	/* TODO: Only evict cache entry for the content's session. This requires some refactoring. */
-	@Caching(evict = { @CacheEvict(value = "questions", key = "#content.id"),
-			@CacheEvict(value = "skillquestions", allEntries = true),
-			@CacheEvict(value = "lecturequestions", allEntries = true, condition = "#content.getQuestionVariant().equals('lecture')"),
-			@CacheEvict(value = "preparationquestions", allEntries = true, condition = "#content.getQuestionVariant().equals('preparation')"),
-			@CacheEvict(value = "flashcardquestions", allEntries = true, condition = "#content.getQuestionVariant().equals('flashcard')") })
 	@Override
-	public int deleteQuestionWithAnswers(final Content content) {
-		try {
-			int count = answerRepository.deleteAnswers(content);
-			db.delete(content);
-			dbLogger.log("delete", "type", "content", "answerCount", count);
-
-			return count;
-		} catch (final IllegalArgumentException e) {
-			logger.error("Could not delete content {}.", content.getId(), e);
-		}
-
-		return 0;
-	}
-
-	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict(value = "skillquestions", key = "#session"),
-			@CacheEvict(value = "lecturequestions", key = "#session"),
-			@CacheEvict(value = "preparationquestions", key = "#session"),
-			@CacheEvict(value = "flashcardquestions", key = "#session") })
-	@Override
-	public int[] deleteAllQuestionsWithAnswers(final Session session) {
+	public int deleteBySessionId(final String sessionId) {
 		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(session.getId()))
-				.endKey(ComplexKey.of(session.getId(), ComplexKey.emptyObject()))
+				.startKey(ComplexKey.of(sessionId))
+				.endKey(ComplexKey.of(sessionId, ComplexKey.emptyObject()))
 				.reduce(false));
 
-		return deleteAllQuestionDocumentsWithAnswers(result);
-	}
-
-	private int[] deleteAllQuestionDocumentsWithAnswers(final ViewResult viewResult) {
-		List<Content> contents = new ArrayList<>();
-		for (final ViewResult.Row row : viewResult.getRows()) {
-			final Content q = new Content();
-			q.setId(row.getId());
-			q.setRevision(row.getValueAsNode().get("_rev").asText());
-			contents.add(q);
+		final List<BulkDeleteDocument> deleteDocs = new ArrayList<>();
+		for (final ViewResult.Row a : result.getRows()) {
+			final BulkDeleteDocument d = new BulkDeleteDocument(a.getId(), a.getValueAsNode().get("_rev").asText());
+			deleteDocs.add(d);
 		}
+		List<DocumentOperationResult> errors = db.executeBulk(deleteDocs);
 
-		int[] count = answerRepository.deleteAllAnswersWithQuestions(contents);
-		dbLogger.log("delete", "type", "question", "questionCount", count[0]);
-		dbLogger.log("delete", "type", "answer", "answerCount", count[1]);
-
-		return count;
+		return deleteDocs.size() - errors.size();
 	}
 
 	@Override
-	public List<String> getUnAnsweredQuestionIds(final Session session, final User user) {
+	public List<String> findUnansweredIdsBySessionIdAndUser(final String sessionId, final User user) {
 		final ViewResult result = db.queryView(createQuery("questionid_by_user_sessionid_variant")
 				.designDocId("_design/Answer")
-				.startKey(ComplexKey.of(user.getUsername(), session.getId()))
-				.endKey(ComplexKey.of(user.getUsername(), session.getId(), ComplexKey.emptyObject())));
-		List<String> answeredIds = new ArrayList<>();
-		for (ViewResult.Row row : result.getRows()) {
+				.startKey(ComplexKey.of(user.getUsername(), sessionId))
+				.endKey(ComplexKey.of(user.getUsername(), sessionId, ComplexKey.emptyObject())));
+		final List<String> answeredIds = new ArrayList<>();
+		for (final ViewResult.Row row : result.getRows()) {
 			answeredIds.add(row.getId());
 		}
-		return collectUnansweredQuestionIds(getQuestionIds(session, user), answeredIds);
+		return collectUnansweredQuestionIds(findIdsBySessionId(sessionId), answeredIds);
 	}
 
 	@Override
-	public List<String> getUnAnsweredLectureQuestionIds(final Session session, final User user) {
+	public List<String> findUnansweredIdsBySessionIdAndUserOnlyLectureVariant(final String sessionId, final User user) {
 		final ViewResult result = db.queryView(createQuery("questionid_piround_by_user_sessionid_variant")
 				.designDocId("_design/Answer")
-				.key(ComplexKey.of(user.getUsername(), session.getId(), "lecture")));
-		Map<String, Integer> answeredQuestions = new HashMap<>();
-		for (ViewResult.Row row : result.getRows()) {
+				.key(ComplexKey.of(user.getUsername(), sessionId, "lecture")));
+		final Map<String, Integer> answeredQuestions = new HashMap<>();
+		for (final ViewResult.Row row : result.getRows()) {
 			answeredQuestions.put(row.getId(), row.getKeyAsNode().get(2).asInt());
 		}
 
-		return collectUnansweredQuestionIdsByPiRound(getLectureQuestionsForUsers(session), answeredQuestions);
+		return collectUnansweredQuestionIdsByPiRound(findBySessionIdOnlyLectureVariantAndActive(sessionId), answeredQuestions);
 	}
 
 	@Override
-	public List<String> getUnAnsweredPreparationQuestionIds(final Session session, final User user) {
+	public List<String> findUnansweredIdsBySessionIdAndUserOnlyPreparationVariant(final String sessionId, final User user) {
 		final ViewResult result = db.queryView(createQuery("questionid_piround_by_user_sessionid_variant")
 				.designDocId("_design/Answer")
-				.key(ComplexKey.of(user.getUsername(), session.getId(), "preparation")));
-		Map<String, Integer> answeredQuestions = new HashMap<>();
-		for (ViewResult.Row row : result.getRows()) {
+				.key(ComplexKey.of(user.getUsername(), sessionId, "preparation")));
+		final Map<String, Integer> answeredQuestions = new HashMap<>();
+		for (final ViewResult.Row row : result.getRows()) {
 			answeredQuestions.put(row.getId(), row.getKeyAsNode().get(2).asInt());
 		}
 
-		return collectUnansweredQuestionIdsByPiRound(getPreparationQuestionsForUsers(session), answeredQuestions);
-	}
-
-	@Cacheable("lecturequestions")
-	@Override
-	public List<Content> getLectureQuestionsForUsers(final Session session) {
-		return getQuestions(session.getId(), "lecture", true);
+		return collectUnansweredQuestionIdsByPiRound(findBySessionIdOnlyPreparationVariantAndActive(sessionId), answeredQuestions);
 	}
 
 	@Override
-	public List<Content> getLectureQuestionsForTeachers(final Session session) {
-		return getQuestions(session.getId(), "lecture");
-	}
-
-	@Cacheable("flashcardquestions")
-	@Override
-	public List<Content> getFlashcardsForUsers(final Session session) {
-		return getQuestions(session.getId(), "flashcard", true);
+	public List<Content> findBySessionIdOnlyLectureVariantAndActive(final String sessionId) {
+		return findBySessionIdAndVariantAndActive(sessionId, "lecture", true);
 	}
 
 	@Override
-	public List<Content> getFlashcardsForTeachers(final Session session) {
-		return getQuestions(session.getId(), "flashcard");
-	}
-
-	@Cacheable("preparationquestions")
-	@Override
-	public List<Content> getPreparationQuestionsForUsers(final Session session) {
-		return getQuestions(session.getId(), "preparation", true);
+	public List<Content> findBySessionIdOnlyLectureVariant(final String sessionId) {
+		return findBySessionIdAndVariantAndActive(sessionId, "lecture");
 	}
 
 	@Override
-	public List<Content> getPreparationQuestionsForTeachers(final Session session) {
-		return getQuestions(session.getId(), "preparation");
+	public List<Content> findBySessionIdOnlyFlashcardVariantAndActive(final String sessionId) {
+		return findBySessionIdAndVariantAndActive(sessionId, "flashcard", true);
 	}
 
 	@Override
-	public List<Content> getAllSkillQuestions(final Session session) {
-		return getQuestions(session.getId());
+	public List<Content> findBySessionIdOnlyFlashcardVariant(final String sessionId) {
+		return findBySessionIdAndVariantAndActive(sessionId, "flashcard");
 	}
 
 	@Override
-	public List<Content> getQuestions(final Object... keys) {
-		Object[] endKeys = Arrays.copyOf(keys, keys.length + 1);
+	public List<Content> findBySessionIdOnlyPreparationVariantAndActive(final String sessionId) {
+		return findBySessionIdAndVariantAndActive(sessionId, "preparation", true);
+	}
+
+	@Override
+	public List<Content> findBySessionIdOnlyPreparationVariant(final String sessionId) {
+		return findBySessionIdAndVariantAndActive(sessionId, "preparation");
+	}
+
+	@Override
+	public List<Content> findBySessionId(final String sessionId) {
+		return findBySessionIdAndVariantAndActive(sessionId);
+	}
+
+	@Override
+	public List<Content> findBySessionIdAndVariantAndActive(final Object... keys) {
+		final Object[] endKeys = Arrays.copyOf(keys, keys.length + 1);
 		endKeys[keys.length] = ComplexKey.emptyObject();
 		final List<Content> contents = db.queryView(createQuery("by_sessionid_variant_active")
 						.includeDocs(true)
@@ -275,7 +173,7 @@ public class CouchDbContentRepository extends CouchDbRepositorySupport<Content> 
 						.startKey(ComplexKey.of(keys))
 						.endKey(ComplexKey.of(endKeys)),
 				Content.class);
-		for (Content content : contents) {
+		for (final Content content : contents) {
 			content.updateRoundManagementState();
 			//content.setSessionKeyword(session.getKeyword());
 		}
@@ -284,88 +182,43 @@ public class CouchDbContentRepository extends CouchDbRepositorySupport<Content> 
 	}
 
 	@Override
-	public int getLectureQuestionCount(final Session session) {
+	public int countLectureVariantBySessionId(final String sessionId) {
 		/* TODO: reduce code duplication */
 		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(session.getId(), "lecture"))
-				.endKey(ComplexKey.of(session.getId(), "lecture", ComplexKey.emptyObject())));
+				.startKey(ComplexKey.of(sessionId, "lecture"))
+				.endKey(ComplexKey.of(sessionId, "lecture", ComplexKey.emptyObject())));
 
 		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
 	}
 
 	@Override
-	public int getFlashcardCount(final Session session) {
+	public int countFlashcardVariantBySessionId(final String sessionId) {
 		/* TODO: reduce code duplication */
 		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(session.getId(), "flashcard"))
-				.endKey(ComplexKey.of(session.getId(), "flashcard", ComplexKey.emptyObject())));
+				.startKey(ComplexKey.of(sessionId, "flashcard"))
+				.endKey(ComplexKey.of(sessionId, "flashcard", ComplexKey.emptyObject())));
 
 		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
 	}
 
 	@Override
-	public int getPreparationQuestionCount(final Session session) {
+	public int countPreparationVariantBySessionId(final String sessionId) {
 		/* TODO: reduce code duplication */
 		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(session.getId(), "preparation"))
-				.endKey(ComplexKey.of(session.getId(), "preparation", ComplexKey.emptyObject())));
+				.startKey(ComplexKey.of(sessionId, "preparation"))
+				.endKey(ComplexKey.of(sessionId, "preparation", ComplexKey.emptyObject())));
 
 		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
-	}
-
-	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
-	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict("skillquestions"),
-			@CacheEvict("lecturequestions"),
-			@CacheEvict(value = "answers", allEntries = true)})
-	@Override
-	public int[] deleteAllLectureQuestionsWithAnswers(final Session session) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(session.getId(), "lecture"))
-				.endKey(ComplexKey.of(session.getId(), "lecture", ComplexKey.emptyObject()))
-				.reduce(false));
-
-		return deleteAllQuestionDocumentsWithAnswers(result);
-	}
-
-	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
-	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict("skillquestions"),
-			@CacheEvict("flashcardquestions"),
-			@CacheEvict(value = "answers", allEntries = true)})
-	@Override
-	public int[] deleteAllFlashcardsWithAnswers(final Session session) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(session.getId(), "flashcard"))
-				.endKey(ComplexKey.of(session.getId(), "flashcard", ComplexKey.emptyObject()))
-				.reduce(false));
-
-		return deleteAllQuestionDocumentsWithAnswers(result);
-	}
-
-	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
-	@Caching(evict = { @CacheEvict(value = "questions", allEntries = true),
-			@CacheEvict("skillquestions"),
-			@CacheEvict("preparationquestions"),
-			@CacheEvict(value = "answers", allEntries = true)})
-	@Override
-	public int[] deleteAllPreparationQuestionsWithAnswers(final Session session) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(session.getId(), "preparation"))
-				.endKey(ComplexKey.of(session.getId(), "preparation", ComplexKey.emptyObject()))
-				.reduce(false));
-
-		return deleteAllQuestionDocumentsWithAnswers(result);
 	}
 
 	private List<String> collectUnansweredQuestionIds(
-			final List<String> questions,
-			final List<String> answeredQuestions
+			final List<String> contentIds,
+			final List<String> answeredContentIds
 	) {
 		final List<String> unanswered = new ArrayList<>();
-		for (final String questionId : questions) {
-			if (!answeredQuestions.contains(questionId)) {
-				unanswered.add(questionId);
+		for (final String contentId : contentIds) {
+			if (!answeredContentIds.contains(contentId)) {
+				unanswered.add(contentId);
 			}
 		}
 		return unanswered;
@@ -395,76 +248,14 @@ public class CouchDbContentRepository extends CouchDbRepositorySupport<Content> 
 		return ids;
 	}
 
-	@Override
-	public List<Content> publishAllQuestions(final Session session, final boolean publish) {
-		final List<Content> contents = db.queryView(createQuery("by_sessionid_variant_active")
-						.startKey(ComplexKey.of(session.getId()))
-						.endKey(ComplexKey.of(session.getId(), ComplexKey.emptyObject())),
-				Content.class);
-		/* FIXME: caching */
-		publishQuestions(session, publish, contents);
-
-		return contents;
-	}
-
-	@Caching(evict = { @CacheEvict(value = "contents", allEntries = true),
-			@CacheEvict(value = "skillquestions", key = "#session"),
-			@CacheEvict(value = "lecturequestions", key = "#session"),
-			@CacheEvict(value = "preparationquestions", key = "#session"),
-			@CacheEvict(value = "flashcardquestions", key = "#session") })
-	@Override
-	public void publishQuestions(final Session session, final boolean publish, List<Content> contents) {
-		for (final Content content : contents) {
-			content.setActive(publish);
-		}
-		try {
-			db.executeBulk(contents);
-		} catch (final DbAccessException e) {
-			logger.error("Could not bulk publish all contents.", e);
-		}
-	}
-
-	@Override
-	public List<Content> setVotingAdmissionForAllQuestions(final Session session, final boolean disableVoting) {
-		final List<Content> contents = db.queryView(createQuery("by_sessionid_variant_active")
-						.startKey(ComplexKey.of(session.getId()))
-						.endKey(ComplexKey.of(session.getId(), ComplexKey.emptyObject()))
-						.includeDocs(true),
-				Content.class);
-		/* FIXME: caching */
-		setVotingAdmissions(session, disableVoting, contents);
-
-		return contents;
-	}
-
-	@Caching(evict = { @CacheEvict(value = "contents", allEntries = true),
-			@CacheEvict(value = "skillquestions", key = "#session"),
-			@CacheEvict(value = "lecturequestions", key = "#session"),
-			@CacheEvict(value = "preparationquestions", key = "#session"),
-			@CacheEvict(value = "flashcardquestions", key = "#session") })
-	@Override
-	public void setVotingAdmissions(final Session session, final boolean disableVoting, List<Content> contents) {
-		for (final Content q : contents) {
-			if (!"flashcard".equals(q.getQuestionType())) {
-				q.setVotingDisabled(disableVoting);
-			}
-		}
-
-		try {
-			db.executeBulk(contents);
-		} catch (final DbAccessException e) {
-			logger.error("Could not bulk set voting admission for all contents.", e);
-		}
-	}
-
 	/* TODO: remove if this method is no longer used */
 	@Override
-	public List<String> getQuestionIdsBySubject(Session session, String questionVariant, String subject) {
+	public List<String> findIdsBySessionIdAndVariantAndSubject(final String sessionId, final String questionVariant, final String subject) {
 		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(session.getId(), questionVariant, 1, subject))
-				.endKey(ComplexKey.of(session.getId(), questionVariant, 1, subject, ComplexKey.emptyObject())));
+				.startKey(ComplexKey.of(sessionId, questionVariant, 1, subject))
+				.endKey(ComplexKey.of(sessionId, questionVariant, 1, subject, ComplexKey.emptyObject())));
 
-		List<String> qids = new ArrayList<>();
+		final List<String> qids = new ArrayList<>();
 
 		for (final ViewResult.Row row : result.getRows()) {
 			final String s = row.getId();
@@ -475,40 +266,17 @@ public class CouchDbContentRepository extends CouchDbRepositorySupport<Content> 
 	}
 
 	@Override
-	public List<Content> getQuestionsByIds(List<String> ids, final Session session) {
-		return db.queryView(new ViewQuery().allDocs().keys(ids).includeDocs(true), Content.class);
-	}
-
-	@Override
-	public List<String> getSubjects(Session session, String questionVariant) {
+	public List<String> findSubjectsBySessionIdAndVariant(final String sessionId, final String questionVariant) {
 		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(session.getId(), questionVariant))
-				.endKey(ComplexKey.of(session.getId(), questionVariant, ComplexKey.emptyObject())));
+				.startKey(ComplexKey.of(sessionId, questionVariant))
+				.endKey(ComplexKey.of(sessionId, questionVariant, ComplexKey.emptyObject())));
 
-		Set<String> uniqueSubjects = new HashSet<>();
+		final Set<String> uniqueSubjects = new HashSet<>();
 
 		for (final ViewResult.Row row : result.getRows()) {
 			uniqueSubjects.add(row.getKeyAsNode().get(3).asText());
 		}
 
 		return new ArrayList<>(uniqueSubjects);
-	}
-
-	@Caching(evict = { @CacheEvict(value = "contents", allEntries = true),
-			@CacheEvict(value = "skillquestions", key = "#session"),
-			@CacheEvict(value = "lecturequestions", key = "#session"),
-			@CacheEvict(value = "preparationquestions", key = "#session"),
-			@CacheEvict(value = "flashcardquestions", key = "#session") })
-	@Override
-	public void resetQuestionsRoundState(final Session session, List<Content> contents) {
-		for (final Content q : contents) {
-			q.setSessionId(session.getId());
-			q.resetQuestionState();
-		}
-		try {
-			db.executeBulk(contents);
-		} catch (final DbAccessException e) {
-			logger.error("Could not bulk reset all contents round state.", e);
-		}
 	}
 }

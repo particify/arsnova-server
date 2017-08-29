@@ -19,103 +19,66 @@ package de.thm.arsnova.persistance.couchdb;
 
 import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.persistance.MotdRepository;
-import de.thm.arsnova.services.ISessionService;
 import org.ektorp.CouchDbConnector;
-import org.ektorp.support.CouchDbRepositorySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CouchDbMotdRepository extends CouchDbRepositorySupport<Motd> implements MotdRepository {
+public class CouchDbMotdRepository extends CouchDbCrudRepository<Motd> implements MotdRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbMotdRepository.class);
 
-	@Autowired
-	private ISessionService sessionService;
-
-	public CouchDbMotdRepository(CouchDbConnector db, boolean createIfNotExists) {
-		super(Motd.class, db, createIfNotExists);
+	public CouchDbMotdRepository(final CouchDbConnector db, final boolean createIfNotExists) {
+		super(Motd.class, db, "by_sessionkey", createIfNotExists);
 	}
 
 	@Override
-	public List<Motd> getAdminMotds() {
-		return getMotds("by_audience_for_global", null);
+	public List<Motd> findGlobalForAdmin() {
+		return find("by_audience_for_global", null);
 	}
 
 	@Override
-	@Cacheable(cacheNames = "motds", key = "'all'")
-	public List<Motd> getMotdsForAll() {
-		return getMotds("by_audience_for_global", "all");
+	public List<Motd> findGlobalForAll() {
+		return find("by_audience_for_global", "all");
 	}
 
 	@Override
-	@Cacheable(cacheNames = "motds", key = "'loggedIn'")
-	public List<Motd> getMotdsForLoggedIn() {
-		return getMotds("by_audience_for_global", "loggedIn");
+	public List<Motd> findGlobalForLoggedIn() {
+		return find("by_audience_for_global", "loggedIn");
 	}
 
 	@Override
-	@Cacheable(cacheNames = "motds", key = "'tutors'")
-	public List<Motd> getMotdsForTutors() {
+	public List<Motd> findGlobalForTutors() {
 		final List<Motd> union = new ArrayList<>();
-		union.addAll(getMotds("by_audience_for_global", "loggedIn"));
-		union.addAll(getMotds("by_audience_for_global", "tutors"));
+		union.addAll(find("by_audience_for_global", "loggedIn"));
+		union.addAll(find("by_audience_for_global", "tutors"));
 
 		return union;
 	}
 
 	@Override
-	@Cacheable(cacheNames = "motds", key = "'students'")
-	public List<Motd> getMotdsForStudents() {
+	public List<Motd> findForStudents() {
 		final List<Motd> union = new ArrayList<>();
-		union.addAll(getMotds("by_audience_for_global", "loggedIn"));
-		union.addAll(getMotds("by_audience_for_global", "students"));
+		union.addAll(find("by_audience_for_global", "loggedIn"));
+		union.addAll(find("by_audience_for_global", "students"));
 
 		return union;
 	}
 
 	@Override
-	@Cacheable(cacheNames = "motds", key = "('session').concat(#p0)")
-	public List<Motd> getMotdsForSession(final String sessionkey) {
-		return getMotds("by_sessionkey", sessionkey);
+	public List<Motd> findBySessionKey(final String sessionkey) {
+		return find("by_sessionkey", sessionkey);
 	}
 
-	private List<Motd> getMotds(String viewName, String key) {
+	private List<Motd> find(final String viewName, final String key) {
 		return queryView(viewName, key);
 	}
 
 	@Override
-	public Motd getMotdByKey(String key) {
-		List<Motd> motd = queryView("by_motdkey", key);
+	public Motd findByKey(final String key) {
+		final List<Motd> motd = queryView("by_motdkey", key);
 
 		return motd.get(0);
-	}
-
-	@Override
-	@CacheEvict(cacheNames = "motds", key = "#p0.audience.concat(#p0.sessionkey)")
-	public Motd createOrUpdateMotd(Motd motd) {
-		String id = motd.getId();
-		String rev = motd.getRevision();
-
-		if (null != id) {
-			Motd oldMotd = get(id);
-			motd.setMotdkey(oldMotd.getMotdkey());
-			update(motd);
-		} else {
-			motd.setMotdkey(sessionService.generateKeyword());
-			add(motd);
-		}
-
-		return motd;
-	}
-
-	@Override
-	@CacheEvict(cacheNames = "motds", key = "#p0.audience.concat(#p0.sessionkey)")
-	public boolean deleteMotd(Motd motd) {
-		return db.delete(motd) != null;
 	}
 }

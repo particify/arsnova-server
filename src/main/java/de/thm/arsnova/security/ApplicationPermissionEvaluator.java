@@ -21,7 +21,6 @@ import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.SessionRepository;
@@ -59,18 +58,20 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	public boolean hasPermission(
 			final Authentication authentication,
 			final Object targetDomainObject,
-			final Object permission
-			) {
-		final String username = getUsername(authentication);
-		if (checkAdminPermission(username)) {
-			return true;
-		} else if (
-				targetDomainObject instanceof Session
-				&& checkSessionPermission(username, ((Session) targetDomainObject).getKeyword(), permission)
-				) {
-			return true;
+			final Object permission) {
+		if (authentication == null || targetDomainObject == null || !(permission instanceof String)) {
+			return false;
 		}
-		return false;
+
+		final String username = getUsername(authentication);
+
+		return hasAdminRole(username)
+				|| (targetDomainObject instanceof Session
+						&& hasSessionPermission(username, ((Session) targetDomainObject), permission.toString()))
+				|| (targetDomainObject instanceof Content
+						&& hasContentPermission(username, ((Content) targetDomainObject), permission.toString()))
+				|| (targetDomainObject instanceof Comment
+						&& hasCommentPermission(username, ((Comment) targetDomainObject), permission.toString()));
 	}
 
 	@Override
@@ -78,87 +79,100 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Authentication authentication,
 			final Serializable targetId,
 			final String targetType,
-			final Object permission
-			) {
+			final Object permission) {
+		if (authentication == null || targetId == null || targetType == null || !(permission instanceof String)) {
+			return false;
+		}
+
 		final String username = getUsername(authentication);
-		if (checkAdminPermission(username)) {
-			return true;
-		} else if (
-				"session".equals(targetType)
-				&& checkSessionPermission(username, targetId, permission)) {
-			return true;
-		} else if (
-				"content".equals(targetType)
-				&& checkQuestionPermission(username, targetId, permission)
-				) {
-			return true;
-		} else if (
-				"comment".equals(targetType)
-				&& checkInterposedQuestionPermission(username, targetId, permission)
-				) {
+		if (hasAdminRole(username)) {
 			return true;
 		}
-		return false;
+
+		switch (targetType) {
+			case "session":
+				final Session targetSession = sessionRepository.findByKeyword(targetId.toString());
+				return targetSession != null && hasSessionPermission(username, targetSession, permission.toString());
+			case "content":
+				final Content targetContent = contentRepository.findOne(targetId.toString());
+				return targetContent != null && hasContentPermission(username, targetContent, permission.toString());
+			case "comment":
+				final Comment targetComment = commentRepository.findOne(targetId.toString());
+				return targetComment != null && hasCommentPermission(username, targetComment, permission.toString());
+			default:
+				return false;
+		}
 	}
 
-	private boolean checkAdminPermission(final String username) {
+	private boolean hasSessionPermission(
+			final String username,
+			final Session targetSession,
+			final String permission) {
+		switch (permission) {
+			case "read":
+				return targetSession.isActive();
+			case "create":
+				return !username.isEmpty();
+			case "owner":
+			case "update":
+			case "delete":
+				return targetSession.getCreator().equals(username);
+			default:
+				return false;
+		}
+	}
+
+	private boolean hasContentPermission(
+			final String username,
+			final Content targetContent,
+			final String permission) {
+		switch (permission) {
+			case "read":
+				return sessionRepository.findOne(targetContent.getSessionId()).isActive();
+			case "create":
+			case "owner":
+			case "update":
+			case "delete":
+				final Session session = sessionRepository.findOne(targetContent.getSessionId());
+				return session != null && session.getCreator().equals(username);
+			default:
+				return false;
+		}
+	}
+
+	private boolean hasCommentPermission(
+			final String username,
+			final Comment targetComment,
+			final String permission) {
+		switch (permission) {
+			case "create":
+				return !username.isEmpty() && sessionRepository.findOne(targetComment.getSessionId()).isActive();
+			case "owner":
+			case "update":
+				return targetComment.getCreator() != null && targetComment.getCreator().equals(username);
+			case "read":
+			case "delete":
+				if (targetComment.getCreator() != null && targetComment.getCreator().equals(username)) {
+					return true;
+				}
+
+				/* Allow reading & deletion by session owner */
+				final Session session = sessionRepository.findOne(targetComment.getSessionId());
+
+				return session != null && session.getCreator().equals(username);
+			default:
+				return false;
+		}
+	}
+
+	private boolean hasAdminRole(final String username) {
 		/* TODO: only allow accounts from arsnova db */
 		return Arrays.asList(adminAccounts).contains(username);
 	}
 
-	private boolean checkSessionPermission(
-			final String username,
-			final Serializable targetId,
-			final Object permission
-			) {
-		if (permission instanceof String && ("owner".equals(permission) || "write".equals(permission))) {
-			return sessionRepository.getSessionFromKeyword(targetId.toString()).getCreator().equals(username);
-		} else if (permission instanceof String && "read".equals(permission)) {
-			return sessionRepository.getSessionFromKeyword(targetId.toString()).isActive();
-		}
-		return false;
-	}
-
-	private boolean checkQuestionPermission(
-			final String username,
-			final Serializable targetId,
-			final Object permission
-			) {
-		if (permission instanceof String && "owner".equals(permission)) {
-			final Content content = contentRepository.getQuestion(targetId.toString());
-			if (content != null) {
-				final Session session = sessionRepository.getSessionFromId(content.getSessionId());
-
-				return session != null && session.getCreator().equals(username);
-			}
-		}
-		return false;
-	}
-
-	private boolean checkInterposedQuestionPermission(
-			final String username,
-			final Serializable targetId,
-			final Object permission
-			) {
-		if (permission instanceof String && "owner".equals(permission)) {
-			final Comment comment = commentRepository.getInterposedQuestion(targetId.toString());
-			if (comment != null) {
-				// Does the creator want to delete his own comment?
-				if (comment.getCreator() != null && comment.getCreator().equals(username)) {
-					return true;
-				}
-				// Allow deletion if requested by session owner
-				final Session session = sessionRepository.getSessionFromKeyword(comment.getSessionId());
-
-				return session != null && session.getCreator().equals(username);
-			}
-		}
-		return false;
-	}
-
 	private String getUsername(final Authentication authentication) {
 		if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
-			throw new UnauthorizedException();
+			return "";
 		}
 
 		if (authentication instanceof Pac4jAuthenticationToken) {
@@ -182,5 +196,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		}
 
 		return authentication.getName();
+	}
+
+	private boolean isWebsocketAccess(Authentication auth) {
+		return auth instanceof AnonymousAuthenticationToken && auth.getAuthorities().contains("ROLE_WEBSOCKET_ACCESS");
 	}
 }

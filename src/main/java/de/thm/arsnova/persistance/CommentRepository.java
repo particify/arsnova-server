@@ -2,21 +2,18 @@ package de.thm.arsnova.persistance;
 
 import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.CommentReadingCount;
-import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface CommentRepository {
-	int getInterposedCount(String sessionKey);
-	CommentReadingCount getInterposedReadingCount(Session session);
-	CommentReadingCount getInterposedReadingCount(Session session, User user);
-	List<Comment> getInterposedQuestions(Session session, final int start, final int limit);
-	List<Comment> getInterposedQuestions(Session session, User user, final int start, final int limit);
-	Comment getInterposedQuestion(String commentId);
-	Comment saveQuestion(Session session, Comment comment, User user);
-	void markInterposedQuestionAsRead(Comment comment);
-	void deleteInterposedQuestion(Comment comment);
-	int deleteAllInterposedQuestions(Session session);
-	int deleteAllInterposedQuestions(Session session, User user);
+public interface CommentRepository extends CrudRepository<Comment, String> {
+	int countBySessionId(String sessionKey);
+	CommentReadingCount countReadingBySessionId(String sessionId);
+	CommentReadingCount countReadingBySessionIdAndUser(String sessionId, User user);
+	List<Comment> findBySessionId(String sessionId, int start, int limit);
+	List<Comment> findBySessionIdAndUser(String sessionId, User user, int start, int limit);
+	Comment findOne(String commentId);
+	int deleteBySessionId(String sessionId);
+	int deleteBySessionIdAndUser(String sessionId, User user);
 }

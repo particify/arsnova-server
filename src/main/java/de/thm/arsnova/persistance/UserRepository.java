@@ -18,10 +18,9 @@
 package de.thm.arsnova.persistance;
 
 import de.thm.arsnova.entities.DbUser;
+import org.springframework.data.repository.CrudRepository;
 
-public interface UserRepository {
-	DbUser findUserByUsername(String username);
-	DbUser createOrUpdateUser(DbUser user);
-	boolean deleteUser(DbUser user);
+public interface UserRepository extends CrudRepository<DbUser, String> {
+	DbUser findByUsername(String username);
 	int deleteInactiveUsers(long lastActivityBefore);
 }
