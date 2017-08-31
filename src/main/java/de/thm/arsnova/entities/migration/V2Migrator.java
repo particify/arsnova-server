@@ -2,11 +2,13 @@ package de.thm.arsnova.entities.migration;
 
 import de.thm.arsnova.entities.ChoiceAnswer;
 import de.thm.arsnova.entities.ChoiceQuestionContent;
+import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.Entity;
 import de.thm.arsnova.entities.TextAnswer;
 import de.thm.arsnova.entities.migration.v2.Answer;
 import de.thm.arsnova.entities.migration.v2.AnswerOption;
 import de.thm.arsnova.entities.migration.v2.Content;
+import de.thm.arsnova.entities.migration.v2.Session;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +17,21 @@ public class V2Migrator {
 	private void copyCommonProperties(final Entity from, final Entity to) {
 		to.setId(from.getId());
 		to.setRevision(from.getRevision());
+	}
+
+	public de.thm.arsnova.entities.Session migrate(final Session from, final DbUser owner) {
+		if (!owner.getUsername().equals(from.getCreator())) {
+			throw new IllegalArgumentException("Username of owner object does not match session creator.");
+		}
+		final de.thm.arsnova.entities.Session to = new de.thm.arsnova.entities.Session();
+		copyCommonProperties(from, to);
+		to.setShortId(from.getKeyword());
+		to.setOwnerId(owner.getId());
+		to.setName(from.getName());
+		to.setAbbreviation(from.getShortName());
+		to.setClosed(!from.isActive());
+
+		return to;
 	}
 
 	public de.thm.arsnova.entities.Content migrate(final Content from) {

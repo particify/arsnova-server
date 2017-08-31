@@ -31,6 +31,7 @@ import com.corundumstudio.socketio.protocol.PacketType;
 import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.ScoreOptions;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.migration.v2.SessionFeature;
 import de.thm.arsnova.events.*;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -149,7 +150,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 					return;
 				}
 				final String sessionKey = userService.getSessionByUsername(u.getUsername());
-				final de.thm.arsnova.entities.Session session = sessionService.getInternal(sessionKey, u);
+				final de.thm.arsnova.entities.migration.v2.Session session = sessionService.getInternal(sessionKey, u);
 
 				if (session.getFeedbackLock()) {
 					logger.debug("Feedback save blocked: {}", u, sessionKey, data.getValue());
@@ -230,7 +231,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 			public void onData(SocketIOClient client, ScoreOptions scoreOptions, AckRequest ack) {
 				final User user = userService.getUser2SocketId(client.getSessionId());
 				final String sessionKey = userService.getSessionByUsername(user.getUsername());
-				final de.thm.arsnova.entities.Session session = sessionService.getInternal(sessionKey, user);
+				final de.thm.arsnova.entities.migration.v2.Session session = sessionService.getInternal(sessionKey, user);
 				if (session.isCreator(user)) {
 					session.setLearningProgressOptions(scoreOptions);
 					sessionService.updateInternal(session, user);
@@ -334,9 +335,9 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		this.useSSL = useSSL;
 	}
 
-	public void reportDeletedFeedback(final User user, final Set<de.thm.arsnova.entities.Session> arsSessions) {
+	public void reportDeletedFeedback(final User user, final Set<de.thm.arsnova.entities.migration.v2.Session> arsSessions) {
 		final List<String> keywords = new ArrayList<>();
-		for (final de.thm.arsnova.entities.Session session : arsSessions) {
+		for (final de.thm.arsnova.entities.migration.v2.Session session : arsSessions) {
 			keywords.add(session.getKeyword());
 		}
 		this.sendToUser(user, "feedbackReset", keywords);
@@ -371,8 +372,8 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 	 * relevant Socket.IO data, the client needs to know after joining a session.
 	 */
 	public void reportSessionDataToClient(final String sessionKey, final User user, final SocketIOClient client) {
-		final de.thm.arsnova.entities.Session session = sessionService.getInternal(sessionKey, user);
-		final de.thm.arsnova.entities.SessionFeature features = sessionService.getFeatures(sessionKey);
+		final de.thm.arsnova.entities.migration.v2.Session session = sessionService.getInternal(sessionKey, user);
+		final SessionFeature features = sessionService.getFeatures(sessionKey);
 
 		client.sendEvent("unansweredLecturerQuestions", contentService.getUnAnsweredLectureQuestionIds(sessionKey, user));
 		client.sendEvent("unansweredPreparationQuestions", contentService.getUnAnsweredPreparationQuestionIds(sessionKey, user));
@@ -397,7 +398,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		}
 	}
 
-	public void reportUpdatedFeedbackForSession(final de.thm.arsnova.entities.Session session) {
+	public void reportUpdatedFeedbackForSession(final de.thm.arsnova.entities.migration.v2.Session session) {
 		final de.thm.arsnova.entities.Feedback fb = feedbackService.getBySessionKey(session.getKeyword());
 		broadcastInSession(session.getKeyword(), "feedbackData", fb.getValues());
 		try {
@@ -408,7 +409,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		}
 	}
 
-	public void reportFeedbackForUserInSession(final de.thm.arsnova.entities.Session session, final User user) {
+	public void reportFeedbackForUserInSession(final de.thm.arsnova.entities.migration.v2.Session session, final User user) {
 		final de.thm.arsnova.entities.Feedback fb = feedbackService.getBySessionKey(session.getKeyword());
 		Long averageFeedback;
 		try {
@@ -435,16 +436,16 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		broadcastInSession(sessionKey, "activeUserCountData", count);
 	}
 
-	public void reportAnswersToLecturerQuestionAvailable(final de.thm.arsnova.entities.Session session, final Content content) {
+	public void reportAnswersToLecturerQuestionAvailable(final de.thm.arsnova.entities.migration.v2.Session session, final Content content) {
 		broadcastInSession(session.getKeyword(), "answersToLecQuestionAvail", content.get_id());
 	}
 
-	public void reportAudienceQuestionAvailable(final de.thm.arsnova.entities.Session session, final Comment audienceQuestion) {
+	public void reportAudienceQuestionAvailable(final de.thm.arsnova.entities.migration.v2.Session session, final Comment audienceQuestion) {
 		/* TODO role handling implementation, send this only to users with role lecturer */
 		broadcastInSession(session.getKeyword(), "audQuestionAvail", audienceQuestion.getId());
 	}
 
-	public void reportLecturerQuestionAvailable(final de.thm.arsnova.entities.Session session, final List<de.thm.arsnova.entities.migration.v2.Content> qs) {
+	public void reportLecturerQuestionAvailable(final de.thm.arsnova.entities.migration.v2.Session session, final List<de.thm.arsnova.entities.migration.v2.Content> qs) {
 		List<Content> contents = new ArrayList<>();
 		for (de.thm.arsnova.entities.migration.v2.Content q : qs) {
 			contents.add(new Content(q));
@@ -457,7 +458,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		broadcastInSession(session.getKeyword(), "lecturerQuestionAvailable", contents);
 	}
 
-	public void reportLecturerQuestionsLocked(final de.thm.arsnova.entities.Session session, final List<de.thm.arsnova.entities.migration.v2.Content> qs) {
+	public void reportLecturerQuestionsLocked(final de.thm.arsnova.entities.migration.v2.Session session, final List<de.thm.arsnova.entities.migration.v2.Content> qs) {
 		List<Content> contents = new ArrayList<>();
 		for (de.thm.arsnova.entities.migration.v2.Content q : qs) {
 			contents.add(new Content(q));
@@ -607,7 +608,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 	@Override
 	public void visit(FeatureChangeEvent event) {
 		final String sessionKey = event.getSession().getKeyword();
-		final de.thm.arsnova.entities.SessionFeature features = event.getSession().getFeatures();
+		final SessionFeature features = event.getSession().getFeatures();
 		broadcastInSession(sessionKey, "featureChange", features);
 
 		if (features.isFlashcard() || features.isFlashcardFeature()) {

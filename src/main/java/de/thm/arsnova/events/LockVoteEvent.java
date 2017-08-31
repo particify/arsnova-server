@@ -18,7 +18,7 @@
 package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.migration.v2.Session;
 
 import java.util.HashMap;
 import java.util.Map;

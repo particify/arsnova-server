@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.aop;
 
-import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.migration.v2.Session;
 import de.thm.arsnova.services.UserSessionService;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;

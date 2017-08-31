@@ -19,7 +19,7 @@ package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.entities.MotdList;
-import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.migration.v2.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.persistance.MotdListRepository;

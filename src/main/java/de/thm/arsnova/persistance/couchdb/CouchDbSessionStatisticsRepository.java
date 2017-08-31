@@ -2,7 +2,7 @@ package de.thm.arsnova.persistance.couchdb;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import de.thm.arsnova.services.score.Score;
-import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.migration.v2.Session;
 import de.thm.arsnova.persistance.SessionStatisticsRepository;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;

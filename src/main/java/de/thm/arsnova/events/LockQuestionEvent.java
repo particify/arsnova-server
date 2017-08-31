@@ -18,7 +18,7 @@
 package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.migration.v2.Session;
 
 /**
  * Fires whenever a content is disabled, i.e., it is hidden from students.

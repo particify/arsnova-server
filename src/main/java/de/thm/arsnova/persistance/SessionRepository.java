@@ -19,8 +19,8 @@ package de.thm.arsnova.persistance;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.LoggedIn;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.SessionInfo;
+import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import org.springframework.data.repository.CrudRepository;

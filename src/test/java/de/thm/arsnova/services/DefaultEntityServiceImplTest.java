@@ -5,7 +5,7 @@ import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.config.TestAppConfig;
 import de.thm.arsnova.config.TestPersistanceConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
-import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.migration.v2.Session;
 import de.thm.arsnova.persistance.SessionRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;

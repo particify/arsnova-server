@@ -19,7 +19,7 @@ package de.thm.arsnova.security;
 
 import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.migration.v2.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.ContentRepository;

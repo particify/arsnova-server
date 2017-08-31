@@ -2,7 +2,7 @@ package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.CommentReadingCount;
-import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.migration.v2.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.events.DeleteCommentEvent;
 import de.thm.arsnova.events.NewCommentEvent;

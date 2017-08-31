@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.services.score;
 
-import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.migration.v2.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ScoreStatistics;
 

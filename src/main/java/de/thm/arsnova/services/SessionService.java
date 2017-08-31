@@ -18,9 +18,9 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.SessionFeature;
-import de.thm.arsnova.entities.SessionInfo;
+import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.SessionFeature;
+import de.thm.arsnova.entities.migration.v2.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.ScoreStatistics;
