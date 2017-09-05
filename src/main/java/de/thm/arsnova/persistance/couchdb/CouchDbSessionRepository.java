@@ -18,7 +18,7 @@
 package de.thm.arsnova.persistance.couchdb;
 
 import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.entities.Comment;
+import de.thm.arsnova.entities.migration.v2.Comment;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.migration.v2.Session;
 import de.thm.arsnova.entities.migration.v2.SessionInfo;

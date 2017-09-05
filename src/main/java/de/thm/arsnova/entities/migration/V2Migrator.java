@@ -7,6 +7,7 @@ import de.thm.arsnova.entities.Entity;
 import de.thm.arsnova.entities.TextAnswer;
 import de.thm.arsnova.entities.migration.v2.Answer;
 import de.thm.arsnova.entities.migration.v2.AnswerOption;
+import de.thm.arsnova.entities.migration.v2.Comment;
 import de.thm.arsnova.entities.migration.v2.Content;
 import de.thm.arsnova.entities.migration.v2.Session;
 
@@ -100,6 +101,22 @@ public class V2Migrator {
 		to.setContentId(from.getQuestionId());
 		to.setSubject(from.getAnswerSubject());
 		to.setBody(from.getAnswerText());
+
+		return to;
+	}
+
+	public de.thm.arsnova.entities.Comment migrate(final Comment from, final DbUser creator) {
+		if (!creator.getUsername().equals(from.getCreator())) {
+			throw new IllegalArgumentException("Username of creator object does not match comment creator.");
+		}
+		final de.thm.arsnova.entities.Comment to = new de.thm.arsnova.entities.Comment();
+		copyCommonProperties(from, to);
+		to.setSessionId(from.getSessionId());
+		to.setCreatorId(creator.getId());
+		to.setSubject(from.getSubject());
+		to.setBody(from.getText());
+		to.setTimestamp(from.getTimestamp());
+		to.setRead(from.isRead());
 
 		return to;
 	}

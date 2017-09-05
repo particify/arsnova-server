@@ -1,8 +1,8 @@
 package de.thm.arsnova.persistance.couchdb;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import de.thm.arsnova.entities.Comment;
-import de.thm.arsnova.entities.CommentReadingCount;
+import de.thm.arsnova.entities.migration.v2.Comment;
+import de.thm.arsnova.entities.migration.v2.CommentReadingCount;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.LogEntryRepository;

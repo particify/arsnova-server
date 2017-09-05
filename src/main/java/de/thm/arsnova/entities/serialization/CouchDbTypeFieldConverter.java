@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.Converter;
 import de.thm.arsnova.entities.migration.v2.Answer;
-import de.thm.arsnova.entities.Comment;
+import de.thm.arsnova.entities.migration.v2.Comment;
 import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.Entity;
 import de.thm.arsnova.entities.LogEntry;

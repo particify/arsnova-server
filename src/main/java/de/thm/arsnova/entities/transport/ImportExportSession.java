@@ -19,7 +19,7 @@ package de.thm.arsnova.entities.transport;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.migration.v2.Answer;
-import de.thm.arsnova.entities.Comment;
+import de.thm.arsnova.entities.migration.v2.Comment;
 import de.thm.arsnova.entities.migration.v2.Content;
 import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.entities.migration.v2.Session;

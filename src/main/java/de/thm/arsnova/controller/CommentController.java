@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.entities.Comment;
-import de.thm.arsnova.entities.CommentReadingCount;
+import de.thm.arsnova.entities.migration.v2.Comment;
+import de.thm.arsnova.entities.migration.v2.CommentReadingCount;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.services.CommentService;
 import de.thm.arsnova.web.DeprecatedApi;
@@ -93,7 +93,7 @@ public class CommentController extends PaginationController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public void postInterposedQuestion(
 			@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey,
-			@ApiParam(value = "the body from the new comment", required = true) @RequestBody final de.thm.arsnova.entities.Comment comment
+			@ApiParam(value = "the body from the new comment", required = true) @RequestBody final Comment comment
 			) {
 		if (commentService.save(comment)) {
 			return;
