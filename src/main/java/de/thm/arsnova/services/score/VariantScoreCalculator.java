@@ -18,7 +18,7 @@
 package de.thm.arsnova.services.score;
 
 import de.thm.arsnova.entities.migration.v2.Session;
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.transport.ScoreStatistics;
 import de.thm.arsnova.persistance.SessionStatisticsRepository;
 import org.springframework.cache.annotation.Cacheable;
@@ -61,7 +61,7 @@ abstract class VariantScoreCalculator implements ScoreCalculator {
 	protected abstract ScoreStatistics createCourseProgress();
 
 	@Override
-	public ScoreStatistics getMyProgress(Session session, User user) {
+	public ScoreStatistics getMyProgress(Session session, UserAuthentication user) {
 		this.refreshProgress(session);
 		this.filterVariant();
 		return this.createMyProgress(user);
@@ -73,6 +73,6 @@ abstract class VariantScoreCalculator implements ScoreCalculator {
 		}
 	}
 
-	protected abstract ScoreStatistics createMyProgress(User user);
+	protected abstract ScoreStatistics createMyProgress(UserAuthentication user);
 
 }

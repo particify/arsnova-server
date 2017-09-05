@@ -17,6 +17,7 @@
  */
 package de.thm.arsnova.services;
 
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.persistance.AnswerRepository;
 import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.ContentRepository;
@@ -30,7 +31,6 @@ import de.thm.arsnova.entities.ScoreOptions;
 import de.thm.arsnova.entities.migration.v2.Session;
 import de.thm.arsnova.entities.migration.v2.SessionFeature;
 import de.thm.arsnova.entities.migration.v2.SessionInfo;
-import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.ScoreStatistics;
 import de.thm.arsnova.events.DeleteSessionEvent;
@@ -217,7 +217,7 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 			userService.removeUserFromSessionBySocketId(socketId);
 			return null;
 		}
-		final User user = userService.getUser2SocketId(socketId);
+		final UserAuthentication user = userService.getUser2SocketId(socketId);
 
 		userService.addUserToSessionBySocketId(socketId, keyword);
 
@@ -257,7 +257,7 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public Session getByKey(final String keyword) {
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		return this.getInternal(keyword, user);
 	}
 
@@ -271,7 +271,7 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 	 * TODO: Find a better way of doing this...
 	 */
 	@Override
-	public Session getInternal(final String keyword, final User user) {
+	public Session getInternal(final String keyword, final UserAuthentication user) {
 		final Session session = sessionRepository.findByKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();
@@ -319,7 +319,7 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<SessionInfo> getMySessionsInfo(final int offset, final int limit) {
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		return sessionRepository.getMySessionsInfo(user, offset, limit);
 	}
 
@@ -471,7 +471,7 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 	 * TODO: Find a better way of doing this...
 	 */
 	@Override
-	public Session updateInternal(final Session session, final User user) {
+	public Session updateInternal(final Session session, final UserAuthentication user) {
 		if (session.isCreator(user)) {
 			sessionRepository.save(session);
 			return session;
@@ -509,7 +509,7 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'read')")
 	public ScoreStatistics getMyLearningProgress(final String sessionkey, final String type, final String questionVariant) {
 		final Session session = sessionRepository.findByKeyword(sessionkey);
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		ScoreCalculator scoreCalculator = scoreCalculatorFactory.create(type, questionVariant);
 		return scoreCalculator.getMyProgress(session, user);
 	}
@@ -517,7 +517,7 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 	@Override
 	@PreAuthorize("hasPermission('', 'session', 'create')")
 	public SessionInfo importSession(ImportExportSession importSession) {
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		final SessionInfo info = sessionRepository.importSession(user, importSession);
 		if (info == null) {
 			throw new NullPointerException("Could not import session.");
@@ -537,7 +537,7 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 		ImportExportSession temp = sessionRepository.exportSession(sessionkey, false, false);
 		temp.getSession().setPublicPool(pp);
 		temp.getSession().setSessionType("public_pool");
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		return sessionRepository.importSession(user, temp);
 	}
 
@@ -556,7 +556,7 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	public SessionFeature updateFeatures(String sessionkey, SessionFeature features) {
 		final Session session = sessionRepository.findByKeyword(sessionkey);
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		session.setFeatures(features);
 		this.publisher.publishEvent(new FeatureChangeEvent(this, session));
 		sessionRepository.save(session);
@@ -568,7 +568,7 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	public boolean lockFeedbackInput(String sessionkey, Boolean lock) {
 		final Session session = sessionRepository.findByKeyword(sessionkey);
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		if (!lock) {
 			feedbackService.cleanFeedbackVotesBySessionKey(sessionkey, 0);
 		}
@@ -584,7 +584,7 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	public boolean flipFlashcards(String sessionkey, Boolean flip) {
 		final Session session = sessionRepository.findByKeyword(sessionkey);
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		session.setFlipFlashcards(flip);
 		this.publisher.publishEvent(new FlipFlashcardsEvent(this, session));
 		sessionRepository.save(session);

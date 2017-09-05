@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.services;
 
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Session;
-import de.thm.arsnova.entities.User;
 
 import java.util.UUID;
 
@@ -32,8 +32,8 @@ public interface UserSessionService {
 		SPEAKER
 	}
 
-	void setUser(User user);
-	User getUser();
+	void setUser(UserAuthentication user);
+	UserAuthentication getUser();
 
 	void setSession(Session session);
 	Session getSession();

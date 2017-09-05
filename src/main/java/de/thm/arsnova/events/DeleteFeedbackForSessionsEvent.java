@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.events;
 
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Session;
-import de.thm.arsnova.entities.User;
 
 import java.util.Set;
 
@@ -31,9 +31,9 @@ public class DeleteFeedbackForSessionsEvent extends ArsnovaEvent {
 
 	private final Set<Session> sessions;
 
-	private final User user;
+	private final UserAuthentication user;
 
-	public DeleteFeedbackForSessionsEvent(Object source, Set<Session> sessions, User user) {
+	public DeleteFeedbackForSessionsEvent(Object source, Set<Session> sessions, UserAuthentication user) {
 		super(source);
 		this.sessions = sessions;
 		this.user = user;
@@ -43,7 +43,7 @@ public class DeleteFeedbackForSessionsEvent extends ArsnovaEvent {
 		return sessions;
 	}
 
-	public User getUser() {
+	public UserAuthentication getUser() {
 		return user;
 	}
 

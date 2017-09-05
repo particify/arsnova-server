@@ -17,20 +17,20 @@
  */
 package de.thm.arsnova.persistance;
 
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Answer;
-import de.thm.arsnova.entities.User;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
 public interface AnswerRepository extends CrudRepository<Answer, String> {
-	Answer findByQuestionIdUserPiRound(String questionId, User user, int piRound);
+	Answer findByQuestionIdUserPiRound(String questionId, UserAuthentication user, int piRound);
 	List<Answer> findByContentIdPiRound(String contentId, int piRound);
 	List<Answer> findByContentId(String contentId);
 	int countByContentIdRound(String contentId, int round);
 	int countByContentId(String contentId);
 	List<Answer> findByContentId(String contentId, int start, int limit);
-	List<Answer> findByUserSessionId(User user, String sessionId);
+	List<Answer> findByUserSessionId(UserAuthentication user, String sessionId);
 	int countBySessionKey(String sessionKey);
 	int deleteByContentId(String contentId);
 	int countBySessionIdLectureVariant(String sessionId);

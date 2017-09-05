@@ -2,22 +2,62 @@ package de.thm.arsnova.entities.migration;
 
 import de.thm.arsnova.entities.ChoiceAnswer;
 import de.thm.arsnova.entities.ChoiceQuestionContent;
-import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.Entity;
 import de.thm.arsnova.entities.TextAnswer;
+import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.entities.migration.v2.Answer;
 import de.thm.arsnova.entities.migration.v2.AnswerOption;
 import de.thm.arsnova.entities.migration.v2.Comment;
 import de.thm.arsnova.entities.migration.v2.Content;
+import de.thm.arsnova.entities.migration.v2.DbUser;
+import de.thm.arsnova.entities.migration.v2.LoggedIn;
+import de.thm.arsnova.entities.migration.v2.MotdList;
 import de.thm.arsnova.entities.migration.v2.Session;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class V2Migrator {
 	private void copyCommonProperties(final Entity from, final Entity to) {
 		to.setId(from.getId());
 		to.setRevision(from.getRevision());
+	}
+
+	public UserProfile migrate(final DbUser dbUser, final LoggedIn loggedIn, final MotdList motdList) {
+		if (dbUser != null && loggedIn != null && !loggedIn.getUser().equals(dbUser.getUsername())) {
+			throw new IllegalArgumentException("Username of loggedIn object does not match.");
+		}
+		if (dbUser != null && motdList != null && !motdList.getUsername().equals(dbUser.getUsername())) {
+			throw new IllegalArgumentException("Username of motdList object does not match.");
+		}
+		if (loggedIn != null && motdList != null && !loggedIn.getUser().equals(motdList.getUsername())) {
+			throw new IllegalArgumentException("Usernames of loggedIn and motdList objects do not match.");
+		}
+		final UserProfile profile = new UserProfile();
+		if (dbUser != null) {
+			profile.setLoginId(dbUser.getUsername());
+			UserProfile.Account account = profile.new Account();
+			profile.setAccount(account);
+			account.setPassword(dbUser.getPassword());
+			account.setActivationKey(dbUser.getActivationKey());
+			account.setPasswordResetKey(dbUser.getPasswordResetKey());
+			account.setPasswordResetTime(dbUser.getPasswordResetTime());
+		}
+		if (loggedIn != null) {
+			profile.setLoginId(loggedIn.getUser());
+			profile.setLastLogin(loggedIn.getTimestamp());
+			List<UserProfile.SessionHistoryEntry> sessionHistory = loggedIn.getVisitedSessions().stream()
+					.map(entry -> profile.new SessionHistoryEntry(entry.getId(), 0))
+					.collect(Collectors.toList());
+			profile.setSessionHistory(sessionHistory);
+		}
+		if (motdList != null && motdList.getMotdkeys() != null) {
+			profile.setAcknowledgedMotds(Arrays.stream(motdList.getMotdkeys().split(",")).collect(Collectors.toSet()));
+		}
+
+		return profile;
 	}
 
 	public de.thm.arsnova.entities.Session migrate(final Session from, final DbUser owner) {

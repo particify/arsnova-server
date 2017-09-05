@@ -18,8 +18,8 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Feedback;
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Session;
-import de.thm.arsnova.entities.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,9 +40,9 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 	private static class FeedbackStorageObject {
 		private final int value;
 		private final Date timestamp;
-		private final User user;
+		private final UserAuthentication user;
 
-		public FeedbackStorageObject(final int initValue, final User u) {
+		public FeedbackStorageObject(final int initValue, final UserAuthentication u) {
 			value = initValue;
 			timestamp = new Date();
 			user = u;
@@ -54,12 +54,12 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 		public Date getTimestamp() {
 			return timestamp;
 		}
-		public boolean fromUser(final User u) {
+		public boolean fromUser(final UserAuthentication u) {
 			return user.equals(u);
 		}
 	}
 
-	private final Map<Session, Map<User, FeedbackStorageObject>> data =
+	private final Map<Session, Map<UserAuthentication, FeedbackStorageObject>> data =
 			new ConcurrentHashMap<>();
 
 	@Override
@@ -95,7 +95,7 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 	}
 
 	@Override
-	public Integer getBySessionAndUser(final Session session, final User u) {
+	public Integer getBySessionAndUser(final Session session, final UserAuthentication u) {
 		if (data.get(session) == null) {
 			return null;
 		}
@@ -111,9 +111,9 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public void save(final Session session, final int value, final User user) {
+	public void save(final Session session, final int value, final UserAuthentication user) {
 		if (data.get(session) == null) {
-			data.put(session, new ConcurrentHashMap<User, FeedbackStorageObject>());
+			data.put(session, new ConcurrentHashMap<UserAuthentication, FeedbackStorageObject>());
 		}
 
 		data.get(session).put(user, new FeedbackStorageObject(value, user));
@@ -121,11 +121,11 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public Map<Session, List<User>> cleanVotes(final int cleanupFeedbackDelay) {
-		final Map<Session, List<User>> removedFeedbackOfUsersInSession = new HashMap<>();
+	public Map<Session, List<UserAuthentication>> cleanVotes(final int cleanupFeedbackDelay) {
+		final Map<Session, List<UserAuthentication>> removedFeedbackOfUsersInSession = new HashMap<>();
 		for (final Session session : data.keySet()) {
 			if (session.getFeatures() == null || !session.getFeatures().isLiveClicker()) {
-				List<User> affectedUsers = cleanVotesBySession(session, cleanupFeedbackDelay);
+				List<UserAuthentication> affectedUsers = cleanVotesBySession(session, cleanupFeedbackDelay);
 				if (!affectedUsers.isEmpty()) {
 					removedFeedbackOfUsersInSession.put(session, affectedUsers);
 				}
@@ -136,17 +136,17 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public List<User> cleanVotesBySession(final Session session, final int cleanupFeedbackDelayInMins) {
+	public List<UserAuthentication> cleanVotesBySession(final Session session, final int cleanupFeedbackDelayInMins) {
 		final long timelimitInMillis = TimeUnit.MILLISECONDS.convert(cleanupFeedbackDelayInMins, TimeUnit.MINUTES);
 		final Date maxAllowedTime = new Date(System.currentTimeMillis() - timelimitInMillis);
 		final boolean forceClean = cleanupFeedbackDelayInMins == 0;
 
-		final Map<User, FeedbackStorageObject> sessionFeedbacks = data.get(session);
-		final List<User> affectedUsers = new ArrayList<>();
+		final Map<UserAuthentication, FeedbackStorageObject> sessionFeedbacks = data.get(session);
+		final List<UserAuthentication> affectedUsers = new ArrayList<>();
 
 		if (sessionFeedbacks != null) {
-			for (final Map.Entry<User, FeedbackStorageObject> entry : sessionFeedbacks.entrySet()) {
-				final User user = entry.getKey();
+			for (final Map.Entry<UserAuthentication, FeedbackStorageObject> entry : sessionFeedbacks.entrySet()) {
+				final UserAuthentication user = entry.getKey();
 				final FeedbackStorageObject feedback = entry.getValue();
 				final boolean timeIsUp = feedback.getTimestamp().before(maxAllowedTime);
 				final boolean isAwayFeedback = getBySessionAndUser(session, user).equals(Feedback.FEEDBACK_AWAY);

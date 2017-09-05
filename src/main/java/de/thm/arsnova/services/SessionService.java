@@ -18,10 +18,10 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.connector.model.Course;
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Session;
 import de.thm.arsnova.entities.migration.v2.SessionFeature;
 import de.thm.arsnova.entities.migration.v2.SessionInfo;
-import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.ScoreStatistics;
 
@@ -36,7 +36,7 @@ public interface SessionService extends EntityService<Session> {
 
 	Session getForAdmin(final String keyword);
 
-	Session getInternal(String keyword, User user);
+	Session getInternal(String keyword, UserAuthentication user);
 
 	Session save(Session session);
 
@@ -64,7 +64,7 @@ public interface SessionService extends EntityService<Session> {
 
 	Session updateCreator(String sessionkey, String newCreator);
 
-	Session updateInternal(Session session, User user);
+	Session updateInternal(Session session, UserAuthentication user);
 
 	int[] deleteCascading(Session session);
 

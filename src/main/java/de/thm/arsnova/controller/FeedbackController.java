@@ -18,7 +18,7 @@
 package de.thm.arsnova.controller;
 
 import de.thm.arsnova.entities.Feedback;
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.FeedbackService;
 import de.thm.arsnova.services.UserService;
@@ -94,7 +94,7 @@ public class FeedbackController extends AbstractController {
 			@PathVariable final String sessionkey,
 			@RequestBody final int value
 			) {
-		User user = userService.getCurrentUser();
+		UserAuthentication user = userService.getCurrentUser();
 		feedbackService.save(sessionkey, value, user);
 		Feedback feedback = feedbackService.getBySessionKey(sessionkey);
 

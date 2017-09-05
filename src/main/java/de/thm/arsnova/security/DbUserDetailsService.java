@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.security;
 
-import de.thm.arsnova.entities.DbUser;
+import de.thm.arsnova.entities.migration.v2.DbUser;
 import de.thm.arsnova.persistance.UserRepository;
 import de.thm.arsnova.services.UserService;
 import org.slf4j.Logger;

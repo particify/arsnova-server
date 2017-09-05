@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.services.score;
 
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.UserAuthentication;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -90,7 +90,7 @@ public class Score implements Iterable<QuestionScore> {
 		return score;
 	}
 
-	public double getTotalUserScore(User user) {
+	public double getTotalUserScore(UserAuthentication user) {
 		int score = 0;
 		for (QuestionScore questionScore : this) {
 			score += questionScore.getTotalUserScore(user);

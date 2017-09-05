@@ -18,7 +18,7 @@
 package de.thm.arsnova.persistance.couchdb;
 
 import com.google.common.collect.Lists;
-import de.thm.arsnova.entities.DbUser;
+import de.thm.arsnova.entities.migration.v2.DbUser;
 import de.thm.arsnova.persistance.UserRepository;
 import org.ektorp.BulkDeleteDocument;
 import org.ektorp.CouchDbConnector;

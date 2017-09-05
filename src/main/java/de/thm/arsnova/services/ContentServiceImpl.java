@@ -17,13 +17,13 @@
  */
 package de.thm.arsnova.services;
 
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.transport.AnswerQueueElement;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import de.thm.arsnova.util.ImageUtils;
 import de.thm.arsnova.entities.migration.v2.Answer;
 import de.thm.arsnova.entities.migration.v2.Content;
 import de.thm.arsnova.entities.migration.v2.Session;
-import de.thm.arsnova.entities.User;
 import de.thm.arsnova.events.*;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -179,7 +179,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			@CacheEvict(value = "flashcardcontentlists", allEntries = true, condition = "#content.getQuestionVariant().equals('flashcard')") },
 			put = {@CachePut(value = "contents", key = "#content.id")})
 	public Content update(final Content content) {
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		final Content oldContent = contentRepository.findOne(content.getId());
 		if (null == oldContent) {
 			throw new NotFoundException();
@@ -217,7 +217,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	//@Cacheable("contentlists")
 	public List<Content> getBySessionKey(final String sessionkey) {
 		final Session session = getSession(sessionkey);
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
 			return contentRepository.findBySessionIdForSpeaker(session.getId());
 		} else {
@@ -351,7 +351,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'content', 'owner')")
-	public void startNewPiRound(final String questionId, User user) {
+	public void startNewPiRound(final String questionId, UserAuthentication user) {
 		final Content content = contentRepository.findOne(questionId);
 		final Session session = sessionRepository.findOne(content.getSessionId());
 
@@ -373,7 +373,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@PreAuthorize("hasPermission(#questionId, 'content', 'owner')")
 	public void startNewPiRoundDelayed(final String questionId, final int time) {
 		final ContentService contentService = this;
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		final Content content = contentRepository.findOne(questionId);
 		final Session session = sessionRepository.findOne(content.getSessionId());
 
@@ -475,7 +475,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			@CacheEvict(value = "preparationcontentlists", key = "#sessionId"),
 			@CacheEvict(value = "flashcardcontentlists", key = "#sessionId") })
 	public void setVotingAdmissions(final String sessionkey, final boolean disableVoting, List<Content> contents) {
-		final User user = getCurrentUser();
+		final UserAuthentication user = getCurrentUser();
 		final Session session = getSession(sessionkey);
 		if (!session.isCreator(user)) {
 			throw new UnauthorizedException();
@@ -497,7 +497,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public void setVotingAdmissionForAllQuestions(final String sessionkey, final boolean disableVoting) {
-		final User user = getCurrentUser();
+		final UserAuthentication user = getCurrentUser();
 		final Session session = getSession(sessionkey);
 		if (!session.isCreator(user)) {
 			throw new UnauthorizedException();
@@ -507,7 +507,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	}
 
 	private Session getSessionWithAuthCheck(final String sessionKeyword) {
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		final Session session = sessionRepository.findByKeyword(sessionKeyword);
 		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
@@ -527,13 +527,13 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<String> getUnAnsweredQuestionIds(final String sessionKey) {
-		final User user = getCurrentUser();
+		final UserAuthentication user = getCurrentUser();
 		final Session session = getSession(sessionKey);
 		return contentRepository.findUnansweredIdsBySessionIdAndUser(session.getId(), user);
 	}
 
-	private User getCurrentUser() {
-		final User user = userService.getCurrentUser();
+	private UserAuthentication getCurrentUser() {
+		final UserAuthentication user = userService.getCurrentUser();
 		if (user == null) {
 			throw new UnauthorizedException();
 		}
@@ -551,7 +551,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	}
 
 	@Override
-	public void getFreetextAnswerAndMarkRead(final String answerId, final User user) {
+	public void getFreetextAnswerAndMarkRead(final String answerId, final UserAuthentication user) {
 		final Answer answer = answerRepository.findOne(answerId);
 		if (answer == null) {
 			throw new NotFoundException();
@@ -713,7 +713,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@PreAuthorize("isAuthenticated()")
 	@CacheEvict(value = "answerlists", key = "#contentId")
 	public Answer saveAnswer(final String contentId, final Answer answer) {
-		final User user = getCurrentUser();
+		final UserAuthentication user = getCurrentUser();
 		final Content content = get(contentId);
 		if (content == null) {
 			throw new NotFoundException();
@@ -752,7 +752,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@PreAuthorize("isAuthenticated()")
 	@CacheEvict(value = "answerlists", allEntries = true)
 	public Answer updateAnswer(final Answer answer) {
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		final Answer realAnswer = this.getMyAnswer(answer.getQuestionId());
 		if (user == null || realAnswer == null || !user.getUsername().equals(realAnswer.getUser())) {
 			throw new UnauthorizedException();
@@ -781,7 +781,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		final Session session = sessionRepository.findOne(content.getSessionId());
 		if (user == null || session == null || !session.isCreator(user)) {
 			throw new UnauthorizedException();
@@ -797,7 +797,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	//@Cacheable("lecturecontentlists")
 	public List<Content> getLectureQuestions(final String sessionkey) {
 		final Session session = getSession(sessionkey);
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
 			return contentRepository.findBySessionIdOnlyLectureVariant(session.getId());
 		} else {
@@ -811,7 +811,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	//@Cacheable("flashcardcontentlists")
 	public List<Content> getFlashcards(final String sessionkey) {
 		final Session session = getSession(sessionkey);
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
 			return contentRepository.findBySessionIdOnlyFlashcardVariant(session.getId());
 		} else {
@@ -825,7 +825,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	//@Cacheable("preparationcontentlists")
 	public List<Content> getPreparationQuestions(final String sessionkey) {
 		final Session session = getSession(sessionkey);
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		if (session.isCreator(user)) {
 			return contentRepository.findBySessionIdOnlyPreparationVariant(session.getId());
 		} else {
@@ -929,12 +929,12 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<String> getUnAnsweredLectureQuestionIds(final String sessionkey) {
-		final User user = getCurrentUser();
+		final UserAuthentication user = getCurrentUser();
 		return this.getUnAnsweredLectureQuestionIds(sessionkey, user);
 	}
 
 	@Override
-	public List<String> getUnAnsweredLectureQuestionIds(final String sessionkey, final User user) {
+	public List<String> getUnAnsweredLectureQuestionIds(final String sessionkey, final UserAuthentication user) {
 		final Session session = getSession(sessionkey);
 		return contentRepository.findUnansweredIdsBySessionIdAndUserOnlyLectureVariant(session.getId(), user);
 	}
@@ -942,12 +942,12 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<String> getUnAnsweredPreparationQuestionIds(final String sessionkey) {
-		final User user = getCurrentUser();
+		final UserAuthentication user = getCurrentUser();
 		return this.getUnAnsweredPreparationQuestionIds(sessionkey, user);
 	}
 
 	@Override
-	public List<String> getUnAnsweredPreparationQuestionIds(final String sessionkey, final User user) {
+	public List<String> getUnAnsweredPreparationQuestionIds(final String sessionkey, final UserAuthentication user) {
 		final Session session = getSession(sessionkey);
 		return contentRepository.findUnansweredIdsBySessionIdAndUserOnlyPreparationVariant(session.getId(), user);
 	}
@@ -956,7 +956,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@PreAuthorize("isAuthenticated()")
 	public void publishAll(final String sessionkey, final boolean publish) {
 		/* TODO: resolve redundancies */
-		final User user = getCurrentUser();
+		final UserAuthentication user = getCurrentUser();
 		final Session session = getSession(sessionkey);
 		if (!session.isCreator(user)) {
 			throw new UnauthorizedException();
@@ -973,7 +973,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			@CacheEvict(value = "preparationcontentlists", key = "#sessionId"),
 			@CacheEvict(value = "flashcardcontentlists", key = "#sessionId") })
 	public void publishQuestions(final String sessionkey, final boolean publish, List<Content> contents) {
-		final User user = getCurrentUser();
+		final UserAuthentication user = getCurrentUser();
 		final Session session = getSession(sessionkey);
 		if (!session.isCreator(user)) {
 			throw new UnauthorizedException();
@@ -995,7 +995,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@PreAuthorize("isAuthenticated()")
 	@CacheEvict(value = "answerlists", allEntries = true)
 	public void deleteAllQuestionsAnswers(final String sessionkey) {
-		final User user = getCurrentUser();
+		final UserAuthentication user = getCurrentUser();
 		final Session session = getSession(sessionkey);
 		if (!session.isCreator(user)) {
 			throw new UnauthorizedException();

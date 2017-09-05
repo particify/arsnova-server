@@ -17,14 +17,14 @@
  */
 package de.thm.arsnova.services;
 
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.persistance.UserRepository;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 public class StubUserService extends UserServiceImpl {
 
-	private User stubUser = null;
+	private UserAuthentication stubUser = null;
 
 	public StubUserService(UserRepository repository, JavaMailSender mailSender) {
 		super(repository, mailSender);
@@ -36,18 +36,18 @@ public class StubUserService extends UserServiceImpl {
 
 	public void setUserAuthenticated(boolean isAuthenticated, String username) {
 		if (isAuthenticated) {
-			stubUser = new User(new UsernamePasswordAuthenticationToken(username, "testpassword"));
+			stubUser = new UserAuthentication(new UsernamePasswordAuthenticationToken(username, "testpassword"));
 			return;
 		}
 		stubUser = null;
 	}
 
 	public void useAnonymousUser() {
-		stubUser = new User(new UsernamePasswordAuthenticationToken("anonymous", ""));
+		stubUser = new UserAuthentication(new UsernamePasswordAuthenticationToken("anonymous", ""));
 	}
 
 	@Override
-	public User getCurrentUser() {
+	public UserAuthentication getCurrentUser() {
 		return stubUser;
 	}
 

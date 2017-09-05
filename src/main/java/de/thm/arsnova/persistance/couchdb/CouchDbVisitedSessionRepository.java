@@ -1,7 +1,7 @@
 package de.thm.arsnova.persistance.couchdb;
 
 import com.google.common.collect.Lists;
-import de.thm.arsnova.entities.VisitedSession;
+import de.thm.arsnova.entities.migration.v2.VisitedSession;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import de.thm.arsnova.persistance.VisitedSessionRepository;
 import org.ektorp.BulkDeleteDocument;

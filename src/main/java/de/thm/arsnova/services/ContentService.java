@@ -17,9 +17,9 @@
  */
 package de.thm.arsnova.services;
 
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Answer;
 import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.User;
 
 import java.util.List;
 import java.util.Map;
@@ -38,7 +38,7 @@ public interface ContentService extends EntityService<Content> {
 
 	void delete(String questionId);
 
-	void startNewPiRound(String questionId, User user);
+	void startNewPiRound(String questionId, UserAuthentication user);
 
 	void startNewPiRoundDelayed(String questionId, int time);
 
@@ -52,7 +52,7 @@ public interface ContentService extends EntityService<Content> {
 
 	Answer getMyAnswer(String questionId);
 
-	void getFreetextAnswerAndMarkRead(String answerId, User user);
+	void getFreetextAnswerAndMarkRead(String answerId, UserAuthentication user);
 
 	List<Answer> getAnswers(String questionId, int piRound, int offset, int limit);
 
@@ -118,11 +118,11 @@ public interface ContentService extends EntityService<Content> {
 
 	List<String> getUnAnsweredLectureQuestionIds(String sessionkey);
 
-	List<String> getUnAnsweredLectureQuestionIds(String sessionKey, User user);
+	List<String> getUnAnsweredLectureQuestionIds(String sessionKey, UserAuthentication user);
 
 	List<String> getUnAnsweredPreparationQuestionIds(String sessionkey);
 
-	List<String> getUnAnsweredPreparationQuestionIds(String sessionKey, User user);
+	List<String> getUnAnsweredPreparationQuestionIds(String sessionKey, UserAuthentication user);
 
 	void publishAll(String sessionkey, boolean publish);
 

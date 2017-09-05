@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.services.score;
 
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.transport.ScoreStatistics;
 import de.thm.arsnova.persistance.SessionStatisticsRepository;
 
@@ -71,7 +71,7 @@ public class QuestionBasedScoreCalculator extends VariantScoreCalculator {
 	}
 
 	@Override
-	protected ScoreStatistics createMyProgress(User user) {
+	protected ScoreStatistics createMyProgress(UserAuthentication user) {
 		final int numerator = numQuestionsCorrectForUser(user);
 		final int denominator = courseScore.getQuestionCount();
 		ScoreStatistics lpv = new ScoreStatistics();
@@ -84,7 +84,7 @@ public class QuestionBasedScoreCalculator extends VariantScoreCalculator {
 		return lpv;
 	}
 
-	private int numQuestionsCorrectForUser(User user) {
+	private int numQuestionsCorrectForUser(UserAuthentication user) {
 		int numQuestionsCorrect = 0;
 		for (QuestionScore questionScore : courseScore) {
 			numQuestionsCorrect += countCorrectAnswersForUser(user, questionScore);
@@ -92,7 +92,7 @@ public class QuestionBasedScoreCalculator extends VariantScoreCalculator {
 		return numQuestionsCorrect;
 	}
 
-	private int countCorrectAnswersForUser(User user, QuestionScore questionScore) {
+	private int countCorrectAnswersForUser(UserAuthentication user, QuestionScore questionScore) {
 		int numQuestionsCorrect = 0;
 		int requiredScore = questionScore.getMaximum();
 		for (UserScore userScore : questionScore) {

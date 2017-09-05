@@ -25,7 +25,7 @@ import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.entities.migration.v2.Session;
 import de.thm.arsnova.entities.migration.v2.SessionFeature;
 import de.thm.arsnova.entities.migration.v2.SessionInfo;
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -134,7 +134,7 @@ public class ImportExportSession {
 		questions.add(ieq);
 	}
 
-	public Session generateSessionEntity(User user) {
+	public Session generateSessionEntity(UserAuthentication user) {
 		final Session s = new Session();
 		// import fields
 		s.setActive(session.isActive());

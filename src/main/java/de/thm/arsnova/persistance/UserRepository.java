@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.persistance;
 
-import de.thm.arsnova.entities.DbUser;
+import de.thm.arsnova.entities.migration.v2.DbUser;
 import org.springframework.data.repository.CrudRepository;
 
 public interface UserRepository extends CrudRepository<DbUser, String> {

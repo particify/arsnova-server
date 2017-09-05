@@ -1,9 +1,9 @@
 package de.thm.arsnova.persistance.couchdb;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Comment;
 import de.thm.arsnova.entities.migration.v2.CommentReadingCount;
-import de.thm.arsnova.entities.User;
 import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import org.ektorp.ComplexKey;
@@ -50,7 +50,7 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	}
 
 	@Override
-	public CommentReadingCount countReadingBySessionIdAndUser(final String sessionId, final User user) {
+	public CommentReadingCount countReadingBySessionIdAndUser(final String sessionId, final UserAuthentication user) {
 		final ViewResult result = db.queryView(createQuery("by_sessionid_creator_read")
 				.startKey(ComplexKey.of(sessionId, user.getUsername()))
 				.endKey(ComplexKey.of(sessionId, user.getUsername(), ComplexKey.emptyObject()))
@@ -123,7 +123,7 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	}
 
 	@Override
-	public List<Comment> findBySessionIdAndUser(final String sessionId, final User user, final int start, final int limit) {
+	public List<Comment> findBySessionIdAndUser(final String sessionId, final UserAuthentication user, final int start, final int limit) {
 		final int qSkip = start > 0 ? start : -1;
 		final int qLimit = limit > 0 ? limit : -1;
 
@@ -150,7 +150,7 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	}
 
 	@Override
-	public int deleteBySessionIdAndUser(final String sessionId, final User user) {
+	public int deleteBySessionIdAndUser(final String sessionId, final UserAuthentication user) {
 		final ViewResult result = db.queryView(createQuery("by_sessionid_creator_read")
 				.startKey(ComplexKey.of(sessionId, user.getUsername()))
 				.endKey(ComplexKey.of(sessionId, user.getUsername(), ComplexKey.emptyObject())));

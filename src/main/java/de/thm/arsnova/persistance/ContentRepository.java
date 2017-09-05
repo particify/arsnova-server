@@ -1,7 +1,7 @@
 package de.thm.arsnova.persistance;
 
 import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.UserAuthentication;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
@@ -14,7 +14,7 @@ public interface ContentRepository extends CrudRepository<Content, String> {
 	List<String> findIdsBySessionId(String sessionId);
 	List<String> findIdsBySessionIdAndVariant(String sessionId, String variant);
 	int deleteBySessionId(String sessionId);
-	List<String> findUnansweredIdsBySessionIdAndUser(String sessionId, User user);
+	List<String> findUnansweredIdsBySessionIdAndUser(String sessionId, UserAuthentication user);
 	List<Content> findBySessionIdOnlyLectureVariantAndActive(String sessionId);
 	List<Content> findBySessionIdOnlyLectureVariant(String sessionId);
 	List<Content> findBySessionIdOnlyFlashcardVariantAndActive(String sessionId);
@@ -27,6 +27,6 @@ public interface ContentRepository extends CrudRepository<Content, String> {
 	int countPreparationVariantBySessionId(String sessionId);
 	List<String> findIdsBySessionIdAndVariantAndSubject(String sessionId, String questionVariant, String subject);
 	List<String> findSubjectsBySessionIdAndVariant(String sessionId, String questionVariant);
-	List<String> findUnansweredIdsBySessionIdAndUserOnlyLectureVariant(String sessionId, User user);
-	List<String> findUnansweredIdsBySessionIdAndUserOnlyPreparationVariant(String sessionId, User user);
+	List<String> findUnansweredIdsBySessionIdAndUserOnlyLectureVariant(String sessionId, UserAuthentication user);
+	List<String> findUnansweredIdsBySessionIdAndUserOnlyPreparationVariant(String sessionId, UserAuthentication user);
 }

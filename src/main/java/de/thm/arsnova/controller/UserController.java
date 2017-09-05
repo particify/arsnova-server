@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.entities.DbUser;
+import de.thm.arsnova.entities.migration.v2.DbUser;
 import de.thm.arsnova.services.UserService;
 import de.thm.arsnova.services.UserSessionService;
 import org.springframework.beans.factory.annotation.Autowired;

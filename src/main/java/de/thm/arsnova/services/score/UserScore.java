@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.services.score;
 
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.UserAuthentication;
 
 /**
  * The learning progress answer score of a particular user.
@@ -41,7 +41,7 @@ public class UserScore {
 		return score;
 	}
 
-	public boolean isUser(User user) {
+	public boolean isUser(UserAuthentication user) {
 		return user.getUsername().equals(username);
 	}
 

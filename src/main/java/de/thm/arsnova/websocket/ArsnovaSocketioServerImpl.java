@@ -28,9 +28,9 @@ import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
 import com.corundumstudio.socketio.protocol.Packet;
 import com.corundumstudio.socketio.protocol.PacketType;
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Comment;
 import de.thm.arsnova.entities.ScoreOptions;
-import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.migration.v2.SessionFeature;
 import de.thm.arsnova.events.*;
 import de.thm.arsnova.exceptions.NoContentException;
@@ -143,7 +143,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 			@Override
 			@Timed(name = "setFeedbackEvent.onData")
 			public void onData(final SocketIOClient client, final Feedback data, final AckRequest ackSender) {
-				final User u = userService.getUser2SocketId(client.getSessionId());
+				final UserAuthentication u = userService.getUser2SocketId(client.getSessionId());
 				if (u == null) {
 					logger.info("Client {} tried to send feedback but is not mapped to a user", client.getSessionId());
 
@@ -167,7 +167,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 			@Override
 			@Timed(name = "setSessionEvent.onData")
 			public void onData(final SocketIOClient client, final Session session, final AckRequest ackSender) {
-				final User u = userService.getUser2SocketId(client.getSessionId());
+				final UserAuthentication u = userService.getUser2SocketId(client.getSessionId());
 				if (null == u) {
 					logger.info("Client {} requested to join session but is not mapped to a user", client.getSessionId());
 
@@ -201,7 +201,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 					SocketIOClient client,
 					Comment comment,
 					AckRequest ackRequest) {
-				final User user = userService.getUser2SocketId(client.getSessionId());
+				final UserAuthentication user = userService.getUser2SocketId(client.getSessionId());
 				try {
 					commentService.getAndMarkReadInternal(comment.getId(), user);
 				} catch (NotFoundException | UnauthorizedException e) {
@@ -213,7 +213,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		server.addEventListener("readFreetextAnswer", String.class, new DataListener<String>() {
 			@Override
 			public void onData(SocketIOClient client, String answerId, AckRequest ackRequest) {
-				final User user = userService.getUser2SocketId(client.getSessionId());
+				final UserAuthentication user = userService.getUser2SocketId(client.getSessionId());
 				try {
 					contentService.getFreetextAnswerAndMarkRead(answerId, user);
 				} catch (NotFoundException | UnauthorizedException e) {
@@ -229,7 +229,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 			@Override
 			@Timed(name = "setLearningProgressOptionsEvent.onData")
 			public void onData(SocketIOClient client, ScoreOptions scoreOptions, AckRequest ack) {
-				final User user = userService.getUser2SocketId(client.getSessionId());
+				final UserAuthentication user = userService.getUser2SocketId(client.getSessionId());
 				final String sessionKey = userService.getSessionByUsername(user.getUsername());
 				final de.thm.arsnova.entities.migration.v2.Session session = sessionService.getInternal(sessionKey, user);
 				if (session.isCreator(user)) {
@@ -335,7 +335,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		this.useSSL = useSSL;
 	}
 
-	public void reportDeletedFeedback(final User user, final Set<de.thm.arsnova.entities.migration.v2.Session> arsSessions) {
+	public void reportDeletedFeedback(final UserAuthentication user, final Set<de.thm.arsnova.entities.migration.v2.Session> arsSessions) {
 		final List<String> keywords = new ArrayList<>();
 		for (final de.thm.arsnova.entities.migration.v2.Session session : arsSessions) {
 			keywords.add(session.getKeyword());
@@ -343,11 +343,11 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		this.sendToUser(user, "feedbackReset", keywords);
 	}
 
-	private List<UUID> findConnectionIdForUser(final User user) {
+	private List<UUID> findConnectionIdForUser(final UserAuthentication user) {
 		final List<UUID> result = new ArrayList<>();
-		for (final Entry<UUID, User> e : userService.socketId2User()) {
+		for (final Entry<UUID, UserAuthentication> e : userService.socketId2User()) {
 			final UUID someUsersConnectionId = e.getKey();
-			final User someUser = e.getValue();
+			final UserAuthentication someUser = e.getValue();
 			if (someUser.equals(user)) {
 				result.add(someUsersConnectionId);
 			}
@@ -355,7 +355,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		return result;
 	}
 
-	private void sendToUser(final User user, final String event, Object data) {
+	private void sendToUser(final UserAuthentication user, final String event, Object data) {
 		final List<UUID> connectionIds = findConnectionIdForUser(user);
 		if (connectionIds.isEmpty()) {
 			return;
@@ -371,7 +371,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 	 * Currently only sends the feedback data to the client. Should be used for all
 	 * relevant Socket.IO data, the client needs to know after joining a session.
 	 */
-	public void reportSessionDataToClient(final String sessionKey, final User user, final SocketIOClient client) {
+	public void reportSessionDataToClient(final String sessionKey, final UserAuthentication user, final SocketIOClient client) {
 		final de.thm.arsnova.entities.migration.v2.Session session = sessionService.getInternal(sessionKey, user);
 		final SessionFeature features = sessionService.getFeatures(sessionKey);
 
@@ -409,7 +409,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		}
 	}
 
-	public void reportFeedbackForUserInSession(final de.thm.arsnova.entities.migration.v2.Session session, final User user) {
+	public void reportFeedbackForUserInSession(final de.thm.arsnova.entities.migration.v2.Session session, final UserAuthentication user) {
 		final de.thm.arsnova.entities.Feedback fb = feedbackService.getBySessionKey(session.getKeyword());
 		Long averageFeedback;
 		try {
@@ -475,10 +475,10 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		 * all connected clients and if send feedback, if user is in current
 		 * session
 		 */
-		final Set<User> users = userService.getUsersBySessionKey(sessionKey);
+		final Set<UserAuthentication> users = userService.getUsersBySessionKey(sessionKey);
 
 		for (final SocketIOClient c : server.getAllClients()) {
-			final User u = userService.getUser2SocketId(c.getSessionId());
+			final UserAuthentication u = userService.getUser2SocketId(c.getSessionId());
 			if (u != null && users.contains(u)) {
 				c.sendEvent(eventName, data);
 			}

@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.Entity;
 import de.thm.arsnova.entities.ScoreOptions;
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -144,7 +144,7 @@ public class Session implements Entity {
 		this.lastOwnerActivity = lastOwnerActivity;
 	}
 
-	public boolean isCreator(final User user) {
+	public boolean isCreator(final UserAuthentication user) {
 		return user.getUsername().equals(creator);
 	}
 

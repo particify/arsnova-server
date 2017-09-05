@@ -17,10 +17,10 @@
  */
 package de.thm.arsnova.events;
 
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Answer;
 import de.thm.arsnova.entities.migration.v2.Content;
 import de.thm.arsnova.entities.migration.v2.Session;
-import de.thm.arsnova.entities.User;
 
 /**
  * Fires whenever a new answer is added.
@@ -31,11 +31,11 @@ public class NewAnswerEvent extends SessionEvent {
 
 	private final Answer answer;
 
-	private final User user;
+	private final UserAuthentication user;
 
 	private final Content content;
 
-	public NewAnswerEvent(Object source, Session session, Answer answer, User user, Content content) {
+	public NewAnswerEvent(Object source, Session session, Answer answer, UserAuthentication user, Content content) {
 		super(source, session);
 		this.answer = answer;
 		this.user = user;
@@ -51,7 +51,7 @@ public class NewAnswerEvent extends SessionEvent {
 		return answer;
 	}
 
-	public User getUser() {
+	public UserAuthentication getUser() {
 		return user;
 	}
 

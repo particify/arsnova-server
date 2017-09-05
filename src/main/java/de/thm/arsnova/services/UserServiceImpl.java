@@ -18,8 +18,8 @@
 package de.thm.arsnova.services;
 
 import com.codahale.metrics.annotation.Gauge;
-import de.thm.arsnova.entities.DbUser;
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.DbUser;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
@@ -89,10 +89,10 @@ public class UserServiceImpl implements UserService {
 
 	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-	private static final ConcurrentHashMap<UUID, User> socketid2user = new ConcurrentHashMap<>();
+	private static final ConcurrentHashMap<UUID, UserAuthentication> socketid2user = new ConcurrentHashMap<>();
 
 	/* used for Socket.IO online check solution (new) */
-	private static final ConcurrentHashMap<User, String> user2session = new ConcurrentHashMap<>();
+	private static final ConcurrentHashMap<UserAuthentication, String> user2session = new ConcurrentHashMap<>();
 
 	private UserRepository userRepository;
 
@@ -178,29 +178,29 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User getCurrentUser() {
+	public UserAuthentication getCurrentUser() {
 		final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication == null || authentication.getPrincipal() == null) {
 			return null;
 		}
 
-		User user = null;
+		UserAuthentication user = null;
 
 		if (authentication instanceof Pac4jAuthenticationToken) {
 			user = getOAuthUser(authentication);
 		} else if (authentication instanceof CasAuthenticationToken) {
 			final CasAuthenticationToken token = (CasAuthenticationToken) authentication;
-			user = new User(token.getAssertion().getPrincipal());
+			user = new UserAuthentication(token.getAssertion().getPrincipal());
 		} else if (authentication instanceof AnonymousAuthenticationToken) {
 			final AnonymousAuthenticationToken token = (AnonymousAuthenticationToken) authentication;
-			user = new User(token);
+			user = new UserAuthentication(token);
 		} else if (authentication instanceof UsernamePasswordAuthenticationToken) {
 			final UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) authentication;
-			user = new User(token);
+			user = new UserAuthentication(token);
 			if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_GUEST"))) {
-				user.setType(User.GUEST);
+				user.setType(UserAuthentication.GUEST);
 			} else if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_DB_USER"))) {
-				user.setType(User.ARSNOVA);
+				user.setType(UserAuthentication.ARSNOVA);
 			}
 		}
 
@@ -213,18 +213,18 @@ public class UserServiceImpl implements UserService {
 		return user;
 	}
 
-	private User getOAuthUser(final Authentication authentication) {
-		User user = null;
+	private UserAuthentication getOAuthUser(final Authentication authentication) {
+		UserAuthentication user = null;
 		final Pac4jAuthenticationToken token = (Pac4jAuthenticationToken) authentication;
 		if (token.getProfile() instanceof Google2Profile) {
 			final Google2Profile profile = (Google2Profile) token.getProfile();
-			user = new User(profile);
+			user = new UserAuthentication(profile);
 		} else if (token.getProfile() instanceof TwitterProfile) {
 			final TwitterProfile profile = (TwitterProfile) token.getProfile();
-			user = new User(profile);
+			user = new UserAuthentication(profile);
 		} else if (token.getProfile() instanceof FacebookProfile) {
 			final FacebookProfile profile = (FacebookProfile) token.getProfile();
-			user = new User(profile);
+			user = new UserAuthentication(profile);
 		}
 		return user;
 	}
@@ -255,17 +255,17 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User getUser2SocketId(final UUID socketId) {
+	public UserAuthentication getUser2SocketId(final UUID socketId) {
 		return socketid2user.get(socketId);
 	}
 
 	@Override
-	public void putUser2SocketId(final UUID socketId, final User user) {
+	public void putUser2SocketId(final UUID socketId, final UserAuthentication user) {
 		socketid2user.put(socketId, user);
 	}
 
 	@Override
-	public Set<Map.Entry<UUID, User>> socketId2User() {
+	public Set<Map.Entry<UUID, UserAuthentication>> socketId2User() {
 		return socketid2user.entrySet();
 	}
 
@@ -275,7 +275,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean isUserInSession(final User user, final String keyword) {
+	public boolean isUserInSession(final UserAuthentication user, final String keyword) {
 		if (keyword == null) {
 			return false;
 		}
@@ -285,9 +285,9 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Set<User> getUsersBySessionKey(final String keyword) {
-		final Set<User> result = new HashSet<>();
-		for (final Entry<User, String> e : user2session.entrySet()) {
+	public Set<UserAuthentication> getUsersBySessionKey(final String keyword) {
+		final Set<UserAuthentication> result = new HashSet<>();
+		for (final Entry<UserAuthentication, String> e : user2session.entrySet()) {
 			if (e.getValue().equals(keyword)) {
 				result.add(e.getKey());
 			}
@@ -299,14 +299,14 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public void addUserToSessionBySocketId(final UUID socketId, final String keyword) {
-		final User user = socketid2user.get(socketId);
+		final UserAuthentication user = socketid2user.get(socketId);
 		user2session.put(user, keyword);
 	}
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public void removeUserFromSessionBySocketId(final UUID socketId) {
-		final User user = socketid2user.get(socketId);
+		final UserAuthentication user = socketid2user.get(socketId);
 		if (null == user) {
 			logger.warn("No user exists for socket {}.", socketId);
 
@@ -317,7 +317,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public String getSessionByUsername(final String username) {
-		for (final Entry<User, String> entry  : user2session.entrySet()) {
+		for (final Entry<UserAuthentication, String> entry  : user2session.entrySet()) {
 			if (entry.getKey().getUsername().equals(username)) {
 				return entry.getValue();
 			}
@@ -332,7 +332,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void removeUserFromMaps(final User user) {
+	public void removeUserFromMaps(final UserAuthentication user) {
 		if (user != null) {
 			user2session.remove(user);
 		}
@@ -451,7 +451,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public DbUser deleteByUsername(String username) {
-		User user = getCurrentUser();
+		UserAuthentication user = getCurrentUser();
 		if (!user.getUsername().equals(username.toLowerCase())
 				&& !SecurityContextHolder.getContext().getAuthentication().getAuthorities()
 						.contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {

@@ -21,11 +21,10 @@ import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.config.TestAppConfig;
 import de.thm.arsnova.config.TestPersistanceConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.UserAuthentication;
 import org.jasig.cas.client.authentication.AttributePrincipalImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pac4j.oauth.profile.JsonHelper;
 import org.pac4j.oauth.profile.google2.Google2Email;
 import org.pac4j.oauth.profile.google2.Google2Profile;
 import org.pac4j.oauth.profile.google2.Google2ProfileDefinition;
@@ -57,13 +56,13 @@ import static org.junit.Assert.assertEquals;
 @ActiveProfiles("test")
 public class UserServiceTest {
 
-	private static final ConcurrentHashMap<UUID, User> socketid2user = new ConcurrentHashMap<>();
+	private static final ConcurrentHashMap<UUID, UserAuthentication> socketid2user = new ConcurrentHashMap<>();
 	private static final ConcurrentHashMap<String, String> user2session = new ConcurrentHashMap<>();
 
 	@Test
 	public void testSocket2UserPersistence() throws IOException, ClassNotFoundException {
-		socketid2user.put(UUID.randomUUID(), new User(new UsernamePasswordAuthenticationToken("ptsr00", UUID.randomUUID())));
-		socketid2user.put(UUID.randomUUID(), new User(new AttributePrincipalImpl("ptstr0")));
+		socketid2user.put(UUID.randomUUID(), new UserAuthentication(new UsernamePasswordAuthenticationToken("ptsr00", UUID.randomUUID())));
+		socketid2user.put(UUID.randomUUID(), new UserAuthentication(new AttributePrincipalImpl("ptstr0")));
 
 		Google2Email email = new Google2Email();
 		email.setEmail("mail@host.com");
@@ -73,17 +72,17 @@ public class UserServiceTest {
 		profile.addAttribute(Google2ProfileDefinition.DISPLAY_NAME, "ptsr00");
 		profile.addAttribute(Google2ProfileDefinition.EMAILS, emails);
 
-		socketid2user.put(UUID.randomUUID(), new User(profile));
+		socketid2user.put(UUID.randomUUID(), new UserAuthentication(profile));
 		List<GrantedAuthority> authorities = new ArrayList<>();
 		authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
-		socketid2user.put(UUID.randomUUID(), new User(new AnonymousAuthenticationToken("ptsr00", UUID.randomUUID(), authorities)));
+		socketid2user.put(UUID.randomUUID(), new UserAuthentication(new AnonymousAuthenticationToken("ptsr00", UUID.randomUUID(), authorities)));
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		ObjectOutputStream objOut = new ObjectOutputStream(out);
 		objOut.writeObject(socketid2user);
 		objOut.close();
 		ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(out.toByteArray()));
-		Map<UUID, User> actual = (Map<UUID, User>) objIn.readObject();
+		Map<UUID, UserAuthentication> actual = (Map<UUID, UserAuthentication>) objIn.readObject();
 		assertEquals(actual, socketid2user);
 	}
 

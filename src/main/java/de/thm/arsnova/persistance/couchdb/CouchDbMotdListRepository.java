@@ -1,6 +1,6 @@
 package de.thm.arsnova.persistance.couchdb;
 
-import de.thm.arsnova.entities.MotdList;
+import de.thm.arsnova.entities.migration.v2.MotdList;
 import de.thm.arsnova.persistance.MotdListRepository;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DbAccessException;

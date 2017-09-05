@@ -18,10 +18,10 @@
 package de.thm.arsnova.persistance;
 
 import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.entities.LoggedIn;
+import de.thm.arsnova.entities.migration.v2.LoggedIn;
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Session;
 import de.thm.arsnova.entities.migration.v2.SessionInfo;
-import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import org.springframework.data.repository.CrudRepository;
 
@@ -30,17 +30,17 @@ import java.util.List;
 public interface SessionRepository extends CrudRepository<Session, String> {
 	Session findByKeyword(String keyword);
 	List<Session> findInactiveGuestSessionsMetadata(long lastActivityBefore);
-	List<Session> findByUser(User user, int start, int limit);
+	List<Session> findByUser(UserAuthentication user, int start, int limit);
 	List<Session> findByUsername(String username, int start, int limit);
 	List<Session> findAllForPublicPool();
-	List<Session> findForPublicPoolByUser(User user);
+	List<Session> findForPublicPoolByUser(UserAuthentication user);
 	List<Session> findVisitedByUsername(String username, int start, int limit);
-	List<SessionInfo> getMySessionsInfo(User user, int start, int limit);
+	List<SessionInfo> getMySessionsInfo(UserAuthentication user, int start, int limit);
 	List<SessionInfo> findInfosForPublicPool();
-	List<SessionInfo> findInfosForPublicPoolByUser(User user);
-	List<SessionInfo> findInfoForVisitedByUser(User currentUser, int start, int limit);
+	List<SessionInfo> findInfosForPublicPoolByUser(UserAuthentication user);
+	List<SessionInfo> findInfoForVisitedByUser(UserAuthentication currentUser, int start, int limit);
 	List<Session> findSessionsByCourses(List<Course> courses);
-	SessionInfo importSession(User user, ImportExportSession importSession);
+	SessionInfo importSession(UserAuthentication user, ImportExportSession importSession);
 	ImportExportSession exportSession(String sessionkey, Boolean withAnswer, Boolean withFeedbackQuestions);
-	LoggedIn registerAsOnlineUser(User user, Session session);
+	LoggedIn registerAsOnlineUser(UserAuthentication user, Session session);
 }

@@ -18,7 +18,7 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Motd;
-import de.thm.arsnova.entities.MotdList;
+import de.thm.arsnova.entities.migration.v2.MotdList;
 
 import java.util.Date;
 import java.util.List;

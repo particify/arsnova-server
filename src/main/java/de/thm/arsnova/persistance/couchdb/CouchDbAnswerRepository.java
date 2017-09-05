@@ -2,8 +2,8 @@ package de.thm.arsnova.persistance.couchdb;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Answer;
-import de.thm.arsnova.entities.User;
 import de.thm.arsnova.persistance.AnswerRepository;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import org.ektorp.BulkDeleteDocument;
@@ -70,7 +70,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	}
 
 	@Override
-	public Answer findByQuestionIdUserPiRound(final String contentId, final User user, final int piRound) {
+	public Answer findByQuestionIdUserPiRound(final String contentId, final UserAuthentication user, final int piRound) {
 		final List<Answer> answerList = queryView("by_questionid_user_piround",
 				ComplexKey.of(contentId, user.getUsername(), piRound));
 		return answerList.isEmpty() ? null : answerList.get(0);
@@ -164,7 +164,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	}
 
 	@Override
-	public List<Answer> findByUserSessionId(final User user, final String sessionId) {
+	public List<Answer> findByUserSessionId(final UserAuthentication user, final String sessionId) {
 		return queryView("by_user_sessionid", ComplexKey.of(user.getUsername(), sessionId));
 	}
 

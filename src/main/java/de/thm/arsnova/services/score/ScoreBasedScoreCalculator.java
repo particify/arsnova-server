@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.services.score;
 
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.transport.ScoreStatistics;
 import de.thm.arsnova.persistance.SessionStatisticsRepository;
 
@@ -54,7 +54,7 @@ public class ScoreBasedScoreCalculator extends VariantScoreCalculator {
 	}
 
 	@Override
-	protected ScoreStatistics createMyProgress(User user) {
+	protected ScoreStatistics createMyProgress(UserAuthentication user) {
 		ScoreStatistics lpv = new ScoreStatistics();
 		lpv.setCourseProgress(coursePercentage());
 		lpv.setNumQuestions(courseScore.getQuestionCount());
@@ -65,7 +65,7 @@ public class ScoreBasedScoreCalculator extends VariantScoreCalculator {
 		return lpv;
 	}
 
-	private int myPercentage(User user) {
+	private int myPercentage(UserAuthentication user) {
 		final int courseMaximumValue = courseScore.getMaximumScore();
 		final double userTotalValue = courseScore.getTotalUserScore(user);
 		if (courseMaximumValue == 0) {

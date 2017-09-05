@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.services;
 
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Session;
-import de.thm.arsnova.entities.User;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
@@ -34,19 +34,19 @@ import java.util.UUID;
 public class UserSessionServiceImpl implements UserSessionService, Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private User user;
+	private UserAuthentication user;
 	private Session session;
 	private UUID socketId;
 	private Role role;
 
 	@Override
-	public void setUser(final User u) {
+	public void setUser(final UserAuthentication u) {
 		user = u;
 		user.setRole(role);
 	}
 
 	@Override
-	public User getUser() {
+	public UserAuthentication getUser() {
 		return user;
 	}
 

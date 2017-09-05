@@ -1,9 +1,9 @@
 package de.thm.arsnova.services;
 
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Comment;
 import de.thm.arsnova.entities.migration.v2.CommentReadingCount;
 import de.thm.arsnova.entities.migration.v2.Session;
-import de.thm.arsnova.entities.User;
 import de.thm.arsnova.events.DeleteCommentEvent;
 import de.thm.arsnova.events.NewCommentEvent;
 import de.thm.arsnova.exceptions.ForbiddenException;
@@ -53,7 +53,7 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 	@PreAuthorize("isAuthenticated()")
 	public boolean save(final Comment comment) {
 		final Session session = sessionRepository.findByKeyword(comment.getSessionId());
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		comment.setSessionId(session.getId());
 		comment.setCreator(user.getUsername());
 		comment.setRead(false);
@@ -91,7 +91,7 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		if (session == null) {
 			throw new UnauthorizedException();
 		}
-		final User user = getCurrentUser();
+		final UserAuthentication user = getCurrentUser();
 		if (session.isCreator(user)) {
 			commentRepository.deleteBySessionId(session.getId());
 		} else {
@@ -115,7 +115,7 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		if (username == null) {
 			return commentRepository.countReadingBySessionId(session.getId());
 		} else {
-			User currentUser = userService.getCurrentUser();
+			UserAuthentication currentUser = userService.getCurrentUser();
 			if (!currentUser.getUsername().equals(username)) {
 				throw new ForbiddenException();
 			}
@@ -128,7 +128,7 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 	@PreAuthorize("isAuthenticated()")
 	public List<Comment> getBySessionKey(final String sessionKey, final int offset, final int limit) {
 		final Session session = this.getSession(sessionKey);
-		final User user = getCurrentUser();
+		final UserAuthentication user = getCurrentUser();
 		if (session.isCreator(user)) {
 			return commentRepository.findBySessionId(session.getId(), offset, limit);
 		} else {
@@ -139,7 +139,7 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public Comment getAndMarkRead(final String commentId) {
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		return this.getAndMarkReadInternal(commentId, user);
 	}
 
@@ -148,7 +148,7 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 	 * TODO: Find a better way of doing this...
 	 */
 	@Override
-	public Comment getAndMarkReadInternal(final String commentId, User user) {
+	public Comment getAndMarkReadInternal(final String commentId, UserAuthentication user) {
 		final Comment comment = commentRepository.findOne(commentId);
 		if (comment == null) {
 			throw new NotFoundException();
@@ -164,8 +164,8 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		return comment;
 	}
 
-	private User getCurrentUser() {
-		final User user = userService.getCurrentUser();
+	private UserAuthentication getCurrentUser() {
+		final UserAuthentication user = userService.getCurrentUser();
 		if (user == null) {
 			throw new UnauthorizedException();
 		}

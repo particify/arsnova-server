@@ -18,12 +18,12 @@
 package de.thm.arsnova.persistance.couchdb;
 
 import de.thm.arsnova.connector.model.Course;
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Comment;
-import de.thm.arsnova.entities.LoggedIn;
+import de.thm.arsnova.entities.migration.v2.LoggedIn;
 import de.thm.arsnova.entities.migration.v2.Session;
 import de.thm.arsnova.entities.migration.v2.SessionInfo;
-import de.thm.arsnova.entities.User;
-import de.thm.arsnova.entities.VisitedSession;
+import de.thm.arsnova.entities.migration.v2.VisitedSession;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.persistance.LogEntryRepository;
@@ -144,7 +144,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 	}
 
 	@Override
-	public List<SessionInfo> findInfoForVisitedByUser(final User user, final int start, final int limit) {
+	public List<SessionInfo> findInfoForVisitedByUser(final UserAuthentication user, final int start, final int limit) {
 		final List<Session> sessions = findVisitedByUsername(user.getUsername(), start, limit);
 		if (sessions.isEmpty()) {
 			return new ArrayList<>();
@@ -177,7 +177,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 
 	/* TODO: Move to service layer. */
 	@Override
-	public SessionInfo importSession(final User user, final ImportExportSession importSession) {
+	public SessionInfo importSession(final UserAuthentication user, final ImportExportSession importSession) {
 		/* FIXME: not yet migrated - move to service layer */
 		throw new UnsupportedOperationException();
 //		final Session session = this.saveSession(user, importSession.generateSessionEntity(user));
@@ -338,7 +338,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 	}
 
 	@Override
-	public List<Session> findByUser(final User user, final int start, final int limit) {
+	public List<Session> findByUser(final UserAuthentication user, final int start, final int limit) {
 		return findByUsername(user.getUsername(), start, limit);
 	}
 
@@ -371,7 +371,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 	}
 
 	@Override
-	public List<Session> findForPublicPoolByUser(final User user) {
+	public List<Session> findForPublicPoolByUser(final UserAuthentication user) {
 		/* TODO: Only load IDs and check against cache for data. */
 		return db.queryView(
 				createQuery("partial_by_sessiontype_creator_name")
@@ -383,7 +383,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 
 	/* TODO: Move to service layer. */
 	@Override
-	public List<SessionInfo> findInfosForPublicPoolByUser(final User user) {
+	public List<SessionInfo> findInfosForPublicPoolByUser(final UserAuthentication user) {
 		final List<Session> sessions = this.findForPublicPoolByUser(user);
 		if (sessions.isEmpty()) {
 			return new ArrayList<>();
@@ -393,7 +393,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 
 	/* TODO: Move to service layer. */
 	@Override
-	public List<SessionInfo> getMySessionsInfo(final User user, final int start, final int limit) {
+	public List<SessionInfo> getMySessionsInfo(final UserAuthentication user, final int start, final int limit) {
 		final List<Session> sessions = this.findByUser(user, start, limit);
 		if (sessions.isEmpty()) {
 			return new ArrayList<>();
@@ -417,7 +417,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 	}
 
 	/* TODO: Move to service layer. */
-	private List<SessionInfo> getInfosForVisitedSessions(final List<Session> sessions, final User user) {
+	private List<SessionInfo> getInfosForVisitedSessions(final List<Session> sessions, final UserAuthentication user) {
 		final ViewQuery answeredQuestionsView = createQuery("by_user_sessionid").designDocId("_design/Answer")
 				.keys(sessions.stream().map(session -> ComplexKey.of(user.getUsername(), session.getId())).collect(Collectors.toList()));
 		final ViewQuery contentIdsView = createQuery("by_sessionid").designDocId("_design/Content")
@@ -539,7 +539,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 
 	/* TODO: Move to service layer. */
 	@Override
-	public LoggedIn registerAsOnlineUser(final User user, final Session session) {
+	public LoggedIn registerAsOnlineUser(final UserAuthentication user, final Session session) {
 		LoggedIn loggedIn = new LoggedIn();
 		try {
 			final List<LoggedIn> loggedInList = db.queryView(createQuery("all").designDocId("_design/LoggedIn").key(user.getUsername()), LoggedIn.class);

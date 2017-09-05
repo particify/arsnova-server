@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.services;
 
-import de.thm.arsnova.entities.DbUser;
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.DbUser;
 
 import java.util.Map;
 import java.util.Set;
@@ -28,7 +28,7 @@ import java.util.UUID;
  * The functionality the user service should provide.
  */
 public interface UserService {
-	User getCurrentUser();
+	UserAuthentication getCurrentUser();
 
 	boolean isAdmin(String username);
 
@@ -36,17 +36,17 @@ public interface UserService {
 
 	void increaseFailedLoginCount(String addr);
 
-	User getUser2SocketId(UUID socketId);
+	UserAuthentication getUser2SocketId(UUID socketId);
 
-	void putUser2SocketId(UUID socketId, User user);
+	void putUser2SocketId(UUID socketId, UserAuthentication user);
 
 	void removeUser2SocketId(UUID socketId);
 
-	Set<Map.Entry<UUID, User>> socketId2User();
+	Set<Map.Entry<UUID, UserAuthentication>> socketId2User();
 
-	boolean isUserInSession(User user, String keyword);
+	boolean isUserInSession(UserAuthentication user, String keyword);
 
-	Set<User> getUsersBySessionKey(String keyword);
+	Set<UserAuthentication> getUsersBySessionKey(String keyword);
 
 	String getSessionByUsername(String username);
 
@@ -54,7 +54,7 @@ public interface UserService {
 
 	void removeUserFromSessionBySocketId(UUID socketId);
 
-	void removeUserFromMaps(User user);
+	void removeUserFromMaps(UserAuthentication user);
 
 	int loggedInUsers();
 

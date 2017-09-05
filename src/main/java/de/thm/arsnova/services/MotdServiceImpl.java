@@ -18,9 +18,9 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Motd;
-import de.thm.arsnova.entities.MotdList;
+import de.thm.arsnova.entities.migration.v2.MotdList;
 import de.thm.arsnova.entities.migration.v2.Session;
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.persistance.MotdListRepository;
 import de.thm.arsnova.persistance.MotdRepository;
@@ -199,7 +199,7 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	@PreAuthorize("isAuthenticated()")
 	@Cacheable(cacheNames = "motdlist", key = "#username")
 	public MotdList getMotdListByUsername(final String username) {
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		if (username.equals(user.getUsername()) && !"guest".equals(user.getType())) {
 			return motdListRepository.findByUsername(username);
 		}
@@ -210,7 +210,7 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	@PreAuthorize("isAuthenticated()")
 	@CachePut(cacheNames = "motdlist", key = "#motdList.username")
 	public MotdList saveMotdList(MotdList motdList) {
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		if (user.getUsername().equals(motdList.getUsername())) {
 			return motdListRepository.save(motdList);
 		}
@@ -220,7 +220,7 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public MotdList updateMotdList(MotdList motdList) {
-		final User user = userService.getCurrentUser();
+		final UserAuthentication user = userService.getCurrentUser();
 		if (user.getUsername().equals(motdList.getUsername())) {
 			return motdListRepository.save(motdList);
 		}

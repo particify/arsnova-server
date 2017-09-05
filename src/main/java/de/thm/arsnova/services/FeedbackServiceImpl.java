@@ -18,8 +18,8 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Feedback;
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Session;
-import de.thm.arsnova.entities.User;
 import de.thm.arsnova.events.DeleteFeedbackForSessionsEvent;
 import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.exceptions.NoContentException;
@@ -66,18 +66,18 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	@Override
 	@Scheduled(fixedDelay = DEFAULT_SCHEDULER_DELAY)
 	public void cleanFeedbackVotes() {
-		Map<Session, List<User>> deletedFeedbackOfUsersInSession = feedbackStorage.cleanVotes(cleanupFeedbackDelay);
+		Map<Session, List<UserAuthentication>> deletedFeedbackOfUsersInSession = feedbackStorage.cleanVotes(cleanupFeedbackDelay);
 		/*
 		 * mapping (Session -> Users) is not suitable for web sockets, because we want to sent all affected
 		 * sessions to a single user in one go instead of sending multiple messages for each session. Hence,
 		 * we need the mapping (User -> Sessions)
 		 */
-		final Map<User, Set<Session>> affectedSessionsOfUsers = new HashMap<>();
+		final Map<UserAuthentication, Set<Session>> affectedSessionsOfUsers = new HashMap<>();
 
-		for (Map.Entry<Session, List<User>> entry : deletedFeedbackOfUsersInSession.entrySet()) {
+		for (Map.Entry<Session, List<UserAuthentication>> entry : deletedFeedbackOfUsersInSession.entrySet()) {
 			final Session session = entry.getKey();
-			final List<User> users = entry.getValue();
-			for (User user : users) {
+			final List<UserAuthentication> users = entry.getValue();
+			for (UserAuthentication user : users) {
 				Set<Session> affectedSessions;
 				if (affectedSessionsOfUsers.containsKey(user)) {
 					affectedSessions = affectedSessionsOfUsers.get(user);
@@ -89,8 +89,8 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 			}
 		}
 		// Send feedback reset event to all affected users
-		for (Map.Entry<User, Set<Session>> entry : affectedSessionsOfUsers.entrySet()) {
-			final User user = entry.getKey();
+		for (Map.Entry<UserAuthentication, Set<Session>> entry : affectedSessionsOfUsers.entrySet()) {
+			final UserAuthentication user = entry.getKey();
 			final Set<Session> arsSessions = entry.getValue();
 			this.publisher.publishEvent(new DeleteFeedbackForSessionsEvent(this, arsSessions, user));
 		}
@@ -103,12 +103,12 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	@Override
 	public void cleanFeedbackVotesBySessionKey(final String keyword, final int cleanupFeedbackDelayInMins) {
 		final Session session = sessionRepository.findByKeyword(keyword);
-		List<User> affectedUsers = feedbackStorage.cleanVotesBySession(session, cleanupFeedbackDelayInMins);
+		List<UserAuthentication> affectedUsers = feedbackStorage.cleanVotesBySession(session, cleanupFeedbackDelayInMins);
 		Set<Session> sessionSet = new HashSet<>();
 		sessionSet.add(session);
 
 		// Send feedback reset event to all affected users
-		for (User user : affectedUsers) {
+		for (UserAuthentication user : affectedUsers) {
 			this.publisher.publishEvent(new DeleteFeedbackForSessionsEvent(this, sessionSet, user));
 		}
 		// send the new feedback to all clients in affected session
@@ -157,7 +157,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	}
 
 	@Override
-	public boolean save(final String keyword, final int value, final User user) {
+	public boolean save(final String keyword, final int value, final UserAuthentication user) {
 		final Session session = sessionRepository.findByKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();
@@ -169,7 +169,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	}
 
 	@Override
-	public Integer getBySessionKeyAndUser(final String keyword, final User user) {
+	public Integer getBySessionKeyAndUser(final String keyword, final UserAuthentication user) {
 		final Session session = sessionRepository.findByKeyword(keyword);
 		if (session == null) {
 			throw new NotFoundException();

@@ -19,7 +19,7 @@ package de.thm.arsnova.entities;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
-public class TestUser extends User {
+public class TestUser extends UserAuthentication {
 	private static final long serialVersionUID = 1L;
 
 	public TestUser(String username) {

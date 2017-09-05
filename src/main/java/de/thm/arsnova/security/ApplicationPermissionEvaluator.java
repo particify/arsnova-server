@@ -17,10 +17,10 @@
  */
 package de.thm.arsnova.security;
 
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Comment;
 import de.thm.arsnova.entities.migration.v2.Content;
 import de.thm.arsnova.entities.migration.v2.Session;
-import de.thm.arsnova.entities.User;
 import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.SessionRepository;
@@ -176,18 +176,18 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		}
 
 		if (authentication instanceof Pac4jAuthenticationToken) {
-			User user = null;
+			UserAuthentication user = null;
 
 			final Pac4jAuthenticationToken token = (Pac4jAuthenticationToken) authentication;
 			if (token.getProfile() instanceof Google2Profile) {
 				final Google2Profile profile = (Google2Profile) token.getProfile();
-				user = new User(profile);
+				user = new UserAuthentication(profile);
 			} else if (token.getProfile() instanceof TwitterProfile) {
 				final TwitterProfile profile = (TwitterProfile) token.getProfile();
-				user = new User(profile);
+				user = new UserAuthentication(profile);
 			} else if (token.getProfile() instanceof FacebookProfile) {
 				final FacebookProfile profile = (FacebookProfile) token.getProfile();
-				user = new User(profile);
+				user = new UserAuthentication(profile);
 			}
 
 			if (user != null) {
