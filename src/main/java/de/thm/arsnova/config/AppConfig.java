@@ -20,7 +20,8 @@ package de.thm.arsnova.config;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import de.thm.arsnova.entities.migration.V2Migrator;
+import de.thm.arsnova.entities.migration.FromV2Migrator;
+import de.thm.arsnova.entities.migration.ToV2Migrator;
 import de.thm.arsnova.util.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.client.ConnectorClientImpl;
@@ -287,7 +288,12 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 	}
 
 	@Bean
-	public V2Migrator v2Migrator() {
-		return new V2Migrator();
+	public FromV2Migrator fromV2Migrator() {
+		return new FromV2Migrator();
+	}
+
+	@Bean
+	public ToV2Migrator toV2Migrator() {
+		return new ToV2Migrator();
 	}
 }
