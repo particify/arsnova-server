@@ -74,7 +74,7 @@ In this case follow the CouchDB's
 
 Before you proceed, make sure that CouchDB is up and running:
 
-	$ curl locahost:5984
+	$ curl localhost:5984
 
 CouchDB should respond with version information.
 
