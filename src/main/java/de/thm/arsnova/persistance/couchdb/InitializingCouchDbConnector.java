@@ -1,7 +1,6 @@
 package de.thm.arsnova.persistance.couchdb;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.persistance.couchdb.support.MangoCouchDbConnector;
 import org.ektorp.CouchDbInstance;
 import org.ektorp.DocumentNotFoundException;
