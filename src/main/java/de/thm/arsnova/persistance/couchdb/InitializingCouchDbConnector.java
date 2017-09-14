@@ -1,10 +1,11 @@
 package de.thm.arsnova.persistance.couchdb;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import de.thm.arsnova.entities.Content;
+import de.thm.arsnova.persistance.couchdb.support.MangoCouchDbConnector;
 import org.ektorp.CouchDbInstance;
 import org.ektorp.DocumentNotFoundException;
 import org.ektorp.impl.ObjectMapperFactory;
-import org.ektorp.impl.StdCouchDbConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -24,7 +25,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InitializingCouchDbConnector extends StdCouchDbConnector implements InitializingBean, ResourceLoaderAware {
+public class InitializingCouchDbConnector extends MangoCouchDbConnector implements InitializingBean, ResourceLoaderAware {
 	private static final Logger logger = LoggerFactory.getLogger(InitializingCouchDbConnector.class);
 	private final List<Bindings> docs = new ArrayList<>();
 
