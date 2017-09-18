@@ -56,25 +56,25 @@ public class UserProfile implements Entity {
 		}
 	}
 
-	public class SessionHistoryEntry {
-		private String sessionId;
+	public class RoomHistoryEntry {
+		private String roomId;
 		private long lastVisit;
 
-		public SessionHistoryEntry() {
+		public RoomHistoryEntry() {
 
 		}
 
-		public SessionHistoryEntry(String sessionId, long lastVisit) {
-			this.sessionId = sessionId;
+		public RoomHistoryEntry(String roomId, long lastVisit) {
+			this.roomId = roomId;
 			this.lastVisit = lastVisit;
 		}
 
-		public String getSessionId() {
-			return sessionId;
+		public String getRoomId() {
+			return roomId;
 		}
 
-		public void setSessionId(String sessionId) {
-			this.sessionId = sessionId;
+		public void setRoomId(String roomId) {
+			this.roomId = roomId;
 		}
 
 		public long getLastVisit() {
@@ -93,7 +93,7 @@ public class UserProfile implements Entity {
 	private long creation;
 	private long lastLogin;
 	private Account account;
-	private List<SessionHistoryEntry> sessionHistory = new ArrayList<>();
+	private List<RoomHistoryEntry> roomHistory = new ArrayList<>();
 	private Set<String> acknowledgedMotds = new HashSet<>();
 
 	@Override
@@ -171,13 +171,13 @@ public class UserProfile implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public List<SessionHistoryEntry> getSessionHistory() {
-		return sessionHistory;
+	public List<RoomHistoryEntry> getRoomHistory() {
+		return roomHistory;
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setSessionHistory(List<SessionHistoryEntry> sessionHistory) {
-		this.sessionHistory = sessionHistory;
+	public void setRoomHistory(List<RoomHistoryEntry> roomHistory) {
+		this.roomHistory = roomHistory;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})

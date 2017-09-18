@@ -17,17 +17,17 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 /**
- * Fires whenever a new session is created.
+ * Fires whenever the status of a session changes, i.e., it is enabled or disabled.
  */
-public class NewSessionEvent extends SessionEvent {
+public class StatusRoomEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public NewSessionEvent(Object source, Session session) {
-		super(source, session);
+	public StatusRoomEvent(Object source, Room room) {
+		super(source, room);
 	}
 
 	@Override

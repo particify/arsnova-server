@@ -18,7 +18,7 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
@@ -31,11 +31,11 @@ import java.util.UUID;
  */
 @Component
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class UserSessionServiceImpl implements UserSessionService, Serializable {
+public class UserRoomServiceImpl implements UserRoomService, Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private UserAuthentication user;
-	private Session session;
+	private Room room;
 	private UUID socketId;
 	private Role role;
 
@@ -51,13 +51,13 @@ public class UserSessionServiceImpl implements UserSessionService, Serializable 
 	}
 
 	@Override
-	public void setSession(final Session s) {
-		session = s;
+	public void setRoom(final Room room) {
+		this.room = room;
 	}
 
 	@Override
-	public Session getSession() {
-		return session;
+	public Room getRoom() {
+		return room;
 	}
 
 	@Override
@@ -71,9 +71,9 @@ public class UserSessionServiceImpl implements UserSessionService, Serializable 
 	}
 
 	@Override
-	public boolean inSession() {
+	public boolean inRoom() {
 		return isAuthenticated()
-				&& getSession() != null;
+				&& getRoom() != null;
 	}
 
 	@Override

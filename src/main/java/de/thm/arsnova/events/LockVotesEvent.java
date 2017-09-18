@@ -18,21 +18,21 @@
 package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 import java.util.List;
 
 /**
  * Fires whenever voting of multiple contents is disabled.
  */
-public class LockVotesEvent extends SessionEvent {
+public class LockVotesEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
 	private List<Content> contents;
 
-	public LockVotesEvent(Object source, Session session, List<Content> contents) {
-		super(source, session);
+	public LockVotesEvent(Object source, Room room, List<Content> contents) {
+		super(source, room);
 		this.contents = contents;
 	}
 

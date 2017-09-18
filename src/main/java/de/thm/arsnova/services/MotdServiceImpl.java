@@ -19,7 +19,7 @@ package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.entities.migration.v2.MotdList;
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.persistance.MotdListRepository;
@@ -44,7 +44,7 @@ import java.util.StringTokenizer;
 public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements MotdService {
 	private UserService userService;
 
-	private SessionService sessionService;
+	private RoomService roomService;
 
 	private MotdRepository motdRepository;
 
@@ -54,13 +54,13 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 			MotdRepository repository,
 			MotdListRepository motdListRepository,
 			UserService userService,
-			SessionService sessionService,
+			RoomService roomService,
 			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(Motd.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.motdRepository = repository;
 		this.motdListRepository = motdListRepository;
 		this.userService = userService;
-		this.sessionService = sessionService;
+		this.roomService = roomService;
 	}
 
   @Override
@@ -143,8 +143,8 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	@Override
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	public Motd save(final String sessionkey, final Motd motd) {
-		Session session = sessionService.getByKey(sessionkey);
-		motd.setSessionId(session.getId());
+		Room room = roomService.getByKey(sessionkey);
+		motd.setSessionId(room.getId());
 
 		return createOrUpdateMotd(motd);
 	}
@@ -175,7 +175,7 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 			Motd oldMotd = get(motd.getId());
 			motd.setMotdkey(oldMotd.getMotdkey());
 		} else {
-			motd.setMotdkey(sessionService.generateKey());
+			motd.setMotdkey(roomService.generateKey());
 		}
 		save(motd);
 

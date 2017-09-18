@@ -18,7 +18,7 @@
 package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 /**
  * Fires whenever a peer instruction round is canceled.
@@ -27,8 +27,8 @@ public class PiRoundCancelEvent extends PiRoundEndEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public PiRoundCancelEvent(Object source, Session session, Content content) {
-		super(source, session, content);
+	public PiRoundCancelEvent(Object source, Room room, Content content) {
+		super(source, room, content);
 	}
 
 	@Override

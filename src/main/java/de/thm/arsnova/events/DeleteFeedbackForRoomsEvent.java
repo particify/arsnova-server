@@ -15,35 +15,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.services;
+package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
-import java.util.UUID;
+import java.util.Set;
 
 /**
- * The functionality the user-session service should provide.
+ * Fires whenever the feedback of a specific user has been reset.
  */
-public interface UserSessionService {
+public class DeleteFeedbackForRoomsEvent extends ArsnovaEvent {
 
-	enum Role {
-		STUDENT,
-		SPEAKER
+	private static final long serialVersionUID = 1L;
+
+	private final Set<Room> sessions;
+
+	private final UserAuthentication user;
+
+	public DeleteFeedbackForRoomsEvent(Object source, Set<Room> rooms, UserAuthentication user) {
+		super(source);
+		this.sessions = rooms;
+		this.user = user;
 	}
 
-	void setUser(UserAuthentication user);
-	UserAuthentication getUser();
+	public Set<Room> getSessions() {
+		return sessions;
+	}
 
-	void setSession(Session session);
-	Session getSession();
+	public UserAuthentication getUser() {
+		return user;
+	}
 
-	void setSocketId(UUID socketId);
-	UUID getSocketId();
+	@Override
+	public void accept(ArsnovaEventVisitor visitor) {
+		visitor.visit(this);
+	}
 
-	void setRole(Role role);
-	Role getRole();
-
-	boolean inSession();
-	boolean isAuthenticated();
 }

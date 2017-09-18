@@ -30,7 +30,7 @@ import java.util.List;
  * as 'my visited sessions'.
  */
 @ApiModel(value = "session/import", description = "the session info entity")
-public class SessionInfo {
+public class RoomInfo {
 
 	private String name;
 	private String shortName;
@@ -48,24 +48,24 @@ public class SessionInfo {
 	private int numUnreadComments;
 	private int numUnanswered;
 
-	public SessionInfo(Session session) {
-		this.name = session.getName();
-		this.shortName = session.getShortName();
-		this.keyword = session.getKeyword();
-		this.active = session.isActive();
-		this.courseType = session.getCourseType();
-		this.creationTime = session.getCreationTime();
-		this.sessionType = session.getSessionType();
-		this.ppLevel = session.getPpLevel();
-		this.ppSubject = session.getPpSubject();
+	public RoomInfo(Room room) {
+		this.name = room.getName();
+		this.shortName = room.getShortName();
+		this.keyword = room.getKeyword();
+		this.active = room.isActive();
+		this.courseType = room.getCourseType();
+		this.creationTime = room.getCreationTime();
+		this.sessionType = room.getSessionType();
+		this.ppLevel = room.getPpLevel();
+		this.ppSubject = room.getPpSubject();
 	}
 
-	public SessionInfo() { }
+	public RoomInfo() { }
 
-	public static List<SessionInfo> fromSessionList(List<Session> sessions) {
-		List<SessionInfo> infos = new ArrayList<>();
-		for (Session s : sessions) {
-			infos.add(new SessionInfo(s));
+	public static List<RoomInfo> fromSessionList(List<Room> sessions) {
+		List<RoomInfo> infos = new ArrayList<>();
+		for (Room s : sessions) {
+			infos.add(new RoomInfo(s));
 		}
 		return infos;
 	}
@@ -235,7 +235,7 @@ public class SessionInfo {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		SessionInfo other = (SessionInfo) obj;
+		RoomInfo other = (RoomInfo) obj;
 		if (keyword == null) {
 			if (other.keyword != null) {
 				return false;

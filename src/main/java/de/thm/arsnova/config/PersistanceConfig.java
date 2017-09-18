@@ -54,8 +54,8 @@ public class PersistanceConfig {
 	}
 
 	@Bean
-	public SessionRepository sessionRepository() throws Exception {
-		return new CouchDbSessionRepository(couchDbConnector(), false);
+	public RoomRepository sessionRepository() throws Exception {
+		return new CouchDbRoomRepository(couchDbConnector(), false);
 	}
 
 	@Bean

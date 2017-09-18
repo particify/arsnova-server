@@ -18,19 +18,19 @@
 package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 /**
  * Fires whenever a new content is added.
  */
-public class NewQuestionEvent extends SessionEvent {
+public class NewQuestionEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
 	private final Content content;
 
-	public NewQuestionEvent(Object source, Session session, Content content) {
-		super(source, session);
+	public NewQuestionEvent(Object source, Room room, Content content) {
+		super(source, room);
 		this.content = content;
 	}
 

@@ -18,21 +18,21 @@
 package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 import java.util.List;
 
 /**
  * Fires whenever a set of contents are enabled, i.e., they become visible to students.
  */
-public class UnlockQuestionsEvent extends SessionEvent {
+public class UnlockQuestionsEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
 	private List<Content> contents;
 
-	public UnlockQuestionsEvent(Object source, Session session, List<Content> contents) {
-		super(source, session);
+	public UnlockQuestionsEvent(Object source, Room room, List<Content> contents) {
+		super(source, room);
 		this.contents = contents;
 	}
 

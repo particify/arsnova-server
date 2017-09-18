@@ -17,17 +17,17 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 /**
  * Fires whenever voting on a question is disabled.
  */
-public class LockFeedbackEvent extends SessionEvent {
+public class LockFeedbackEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public LockFeedbackEvent(Object source, Session session) {
-		super(source, session);
+	public LockFeedbackEvent(Object source, Room room) {
+		super(source, room);
 	}
 
 	@Override

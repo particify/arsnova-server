@@ -18,19 +18,19 @@
 package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.migration.v2.Comment;
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 /**
  * Fires whenever a new comment is added.
  */
-public class NewCommentEvent extends SessionEvent {
+public class NewCommentEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
 	private final Comment comment;
 
-	public NewCommentEvent(Object source, Session session, Comment comment) {
-		super(source, session);
+	public NewCommentEvent(Object source, Room room, Comment comment) {
+		super(source, room);
 		this.comment = comment;
 	}
 

@@ -29,7 +29,7 @@ import de.thm.arsnova.entities.migration.v2.Content;
 import de.thm.arsnova.entities.migration.v2.DbUser;
 import de.thm.arsnova.entities.migration.v2.LoggedIn;
 import de.thm.arsnova.entities.migration.v2.MotdList;
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,10 +70,10 @@ public class FromV2Migrator {
 		if (loggedIn != null) {
 			profile.setLoginId(loggedIn.getUser());
 			profile.setLastLogin(loggedIn.getTimestamp());
-			List<UserProfile.SessionHistoryEntry> sessionHistory = loggedIn.getVisitedSessions().stream()
-					.map(entry -> profile.new SessionHistoryEntry(entry.getId(), 0))
+			List<UserProfile.RoomHistoryEntry> sessionHistory = loggedIn.getVisitedSessions().stream()
+					.map(entry -> profile.new RoomHistoryEntry(entry.getId(), 0))
 					.collect(Collectors.toList());
-			profile.setSessionHistory(sessionHistory);
+			profile.setRoomHistory(sessionHistory);
 		}
 		if (motdList != null && motdList.getMotdkeys() != null) {
 			profile.setAcknowledgedMotds(Arrays.stream(motdList.getMotdkeys().split(",")).collect(Collectors.toSet()));
@@ -82,11 +82,11 @@ public class FromV2Migrator {
 		return profile;
 	}
 
-	public de.thm.arsnova.entities.Session migrate(final Session from, final DbUser owner) {
+	public de.thm.arsnova.entities.Room migrate(final Room from, final DbUser owner) {
 		if (!owner.getUsername().equals(from.getCreator())) {
 			throw new IllegalArgumentException("Username of owner object does not match session creator.");
 		}
-		final de.thm.arsnova.entities.Session to = new de.thm.arsnova.entities.Session();
+		final de.thm.arsnova.entities.Room to = new de.thm.arsnova.entities.Room();
 		copyCommonProperties(from, to);
 		to.setShortId(from.getKeyword());
 		to.setOwnerId(owner.getId());
@@ -119,7 +119,7 @@ public class FromV2Migrator {
 				throw new IllegalArgumentException("Unsupported content format.");
 		}
 		copyCommonProperties(from, to);
-		to.setSessionId(from.getSessionId());
+		to.setRoomId(from.getSessionId());
 		to.setSubject(from.getSubject());
 		to.setBody(from.getText());
 		to.setFormat(from.getQuestionType());

@@ -19,7 +19,7 @@ package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,21 +59,21 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 		}
 	}
 
-	private final Map<Session, Map<UserAuthentication, FeedbackStorageObject>> data =
+	private final Map<Room, Map<UserAuthentication, FeedbackStorageObject>> data =
 			new ConcurrentHashMap<>();
 
 	@Override
-	public Feedback getBySession(final Session session) {
+	public Feedback getByRoom(final Room room) {
 		int a = 0;
 		int b = 0;
 		int c = 0;
 		int d = 0;
 
-		if (data.get(session) == null) {
+		if (data.get(room) == null) {
 			return new Feedback(0, 0, 0, 0);
 		}
 
-		for (final FeedbackStorageObject fso : data.get(session).values()) {
+		for (final FeedbackStorageObject fso : data.get(room).values()) {
 			switch (fso.getValue()) {
 			case Feedback.FEEDBACK_FASTER:
 				a++;
@@ -95,12 +95,12 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 	}
 
 	@Override
-	public Integer getBySessionAndUser(final Session session, final UserAuthentication u) {
-		if (data.get(session) == null) {
+	public Integer getByRoomAndUser(final Room room, final UserAuthentication u) {
+		if (data.get(room) == null) {
 			return null;
 		}
 
-		for (final FeedbackStorageObject fso : data.get(session).values()) {
+		for (final FeedbackStorageObject fso : data.get(room).values()) {
 			if (fso.fromUser(u)) {
 				return fso.getValue();
 			}
@@ -111,23 +111,23 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public void save(final Session session, final int value, final UserAuthentication user) {
-		if (data.get(session) == null) {
-			data.put(session, new ConcurrentHashMap<UserAuthentication, FeedbackStorageObject>());
+	public void save(final Room room, final int value, final UserAuthentication user) {
+		if (data.get(room) == null) {
+			data.put(room, new ConcurrentHashMap<UserAuthentication, FeedbackStorageObject>());
 		}
 
-		data.get(session).put(user, new FeedbackStorageObject(value, user));
+		data.get(room).put(user, new FeedbackStorageObject(value, user));
 	}
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public Map<Session, List<UserAuthentication>> cleanVotes(final int cleanupFeedbackDelay) {
-		final Map<Session, List<UserAuthentication>> removedFeedbackOfUsersInSession = new HashMap<>();
-		for (final Session session : data.keySet()) {
-			if (session.getFeatures() == null || !session.getFeatures().isLiveClicker()) {
-				List<UserAuthentication> affectedUsers = cleanVotesBySession(session, cleanupFeedbackDelay);
+	public Map<Room, List<UserAuthentication>> cleanVotes(final int cleanupFeedbackDelay) {
+		final Map<Room, List<UserAuthentication>> removedFeedbackOfUsersInSession = new HashMap<>();
+		for (final Room room : data.keySet()) {
+			if (room.getFeatures() == null || !room.getFeatures().isLiveClicker()) {
+				List<UserAuthentication> affectedUsers = cleanVotesByRoom(room, cleanupFeedbackDelay);
 				if (!affectedUsers.isEmpty()) {
-					removedFeedbackOfUsersInSession.put(session, affectedUsers);
+					removedFeedbackOfUsersInSession.put(room, affectedUsers);
 				}
 			}
 		}
@@ -136,22 +136,22 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public List<UserAuthentication> cleanVotesBySession(final Session session, final int cleanupFeedbackDelayInMins) {
+	public List<UserAuthentication> cleanVotesByRoom(final Room room, final int cleanupFeedbackDelayInMins) {
 		final long timelimitInMillis = TimeUnit.MILLISECONDS.convert(cleanupFeedbackDelayInMins, TimeUnit.MINUTES);
 		final Date maxAllowedTime = new Date(System.currentTimeMillis() - timelimitInMillis);
 		final boolean forceClean = cleanupFeedbackDelayInMins == 0;
 
-		final Map<UserAuthentication, FeedbackStorageObject> sessionFeedbacks = data.get(session);
+		final Map<UserAuthentication, FeedbackStorageObject> roomFeedbacks = data.get(room);
 		final List<UserAuthentication> affectedUsers = new ArrayList<>();
 
-		if (sessionFeedbacks != null) {
-			for (final Map.Entry<UserAuthentication, FeedbackStorageObject> entry : sessionFeedbacks.entrySet()) {
+		if (roomFeedbacks != null) {
+			for (final Map.Entry<UserAuthentication, FeedbackStorageObject> entry : roomFeedbacks.entrySet()) {
 				final UserAuthentication user = entry.getKey();
 				final FeedbackStorageObject feedback = entry.getValue();
 				final boolean timeIsUp = feedback.getTimestamp().before(maxAllowedTime);
-				final boolean isAwayFeedback = getBySessionAndUser(session, user).equals(Feedback.FEEDBACK_AWAY);
+				final boolean isAwayFeedback = getByRoomAndUser(room, user).equals(Feedback.FEEDBACK_AWAY);
 				if (forceClean || timeIsUp && !isAwayFeedback) {
-					sessionFeedbacks.remove(user);
+					roomFeedbacks.remove(user);
 					affectedUsers.add(user);
 				}
 			}

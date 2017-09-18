@@ -17,17 +17,17 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 /**
  * Fires whenever a new session is created.
  */
-public class FeatureChangeEvent extends SessionEvent {
+public class FeatureChangeEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public FeatureChangeEvent(Object source, Session session) {
-		super(source, session);
+	public FeatureChangeEvent(Object source, Room room) {
+		super(source, room);
 	}
 
 	@Override

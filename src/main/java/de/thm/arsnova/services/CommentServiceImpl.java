@@ -3,14 +3,14 @@ package de.thm.arsnova.services;
 import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Comment;
 import de.thm.arsnova.entities.migration.v2.CommentReadingCount;
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 import de.thm.arsnova.events.DeleteCommentEvent;
 import de.thm.arsnova.events.NewCommentEvent;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.persistance.CommentRepository;
-import de.thm.arsnova.persistance.SessionRepository;
+import de.thm.arsnova.persistance.RoomRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -29,18 +29,18 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 
 	private CommentRepository commentRepository;
 
-	private SessionRepository sessionRepository;
+	private RoomRepository roomRepository;
 
 	private ApplicationEventPublisher publisher;
 
 	public CommentServiceImpl(
 			CommentRepository repository,
-			SessionRepository sessionRepository,
+			RoomRepository roomRepository,
 			UserService userService,
 			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(Comment.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.commentRepository = repository;
-		this.sessionRepository = sessionRepository;
+		this.roomRepository = roomRepository;
 		this.userService = userService;
 	}
 
@@ -52,9 +52,9 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public boolean save(final Comment comment) {
-		final Session session = sessionRepository.findByKeyword(comment.getSessionId());
+		final Room room = roomRepository.findByKeyword(comment.getSessionId());
 		final UserAuthentication user = userService.getCurrentUser();
-		comment.setSessionId(session.getId());
+		comment.setSessionId(room.getId());
 		comment.setCreator(user.getUsername());
 		comment.setRead(false);
 		if (comment.getTimestamp() == 0) {
@@ -63,7 +63,7 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		final Comment result = super.create(comment);
 
 		if (null != result) {
-			final NewCommentEvent event = new NewCommentEvent(this, session, result);
+			final NewCommentEvent event = new NewCommentEvent(this, room, result);
 			this.publisher.publishEvent(event);
 			return true;
 		}
@@ -79,23 +79,23 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		}
 		commentRepository.delete(comment);
 
-		final Session session = sessionRepository.findByKeyword(comment.getSessionId());
-		final DeleteCommentEvent event = new DeleteCommentEvent(this, session, comment);
+		final Room room = roomRepository.findByKeyword(comment.getSessionId());
+		final DeleteCommentEvent event = new DeleteCommentEvent(this, room, comment);
 		this.publisher.publishEvent(event);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public void deleteBySessionKey(final String sessionKeyword) {
-		final Session session = sessionRepository.findByKeyword(sessionKeyword);
-		if (session == null) {
+		final Room room = roomRepository.findByKeyword(sessionKeyword);
+		if (room == null) {
 			throw new UnauthorizedException();
 		}
 		final UserAuthentication user = getCurrentUser();
-		if (session.isCreator(user)) {
-			commentRepository.deleteBySessionId(session.getId());
+		if (room.isCreator(user)) {
+			commentRepository.deleteBySessionId(room.getId());
 		} else {
-			commentRepository.deleteBySessionIdAndUser(session.getId(), user);
+			commentRepository.deleteBySessionIdAndUser(room.getId(), user);
 		}
 	}
 
@@ -108,31 +108,31 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public CommentReadingCount countRead(final String sessionKey, String username) {
-		final Session session = sessionRepository.findByKeyword(sessionKey);
-		if (session == null) {
+		final Room room = roomRepository.findByKeyword(sessionKey);
+		if (room == null) {
 			throw new NotFoundException();
 		}
 		if (username == null) {
-			return commentRepository.countReadingBySessionId(session.getId());
+			return commentRepository.countReadingBySessionId(room.getId());
 		} else {
 			UserAuthentication currentUser = userService.getCurrentUser();
 			if (!currentUser.getUsername().equals(username)) {
 				throw new ForbiddenException();
 			}
 
-			return commentRepository.countReadingBySessionIdAndUser(session.getId(), currentUser);
+			return commentRepository.countReadingBySessionIdAndUser(room.getId(), currentUser);
 		}
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Comment> getBySessionKey(final String sessionKey, final int offset, final int limit) {
-		final Session session = this.getSession(sessionKey);
+		final Room room = this.getSession(sessionKey);
 		final UserAuthentication user = getCurrentUser();
-		if (session.isCreator(user)) {
-			return commentRepository.findBySessionId(session.getId(), offset, limit);
+		if (room.isCreator(user)) {
+			return commentRepository.findBySessionId(room.getId(), offset, limit);
 		} else {
-			return commentRepository.findBySessionIdAndUser(session.getId(), user, offset, limit);
+			return commentRepository.findBySessionIdAndUser(room.getId(), user, offset, limit);
 		}
 	}
 
@@ -153,11 +153,11 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		if (comment == null) {
 			throw new NotFoundException();
 		}
-		final Session session = sessionRepository.findOne(comment.getSessionId());
-		if (!comment.isCreator(user) && !session.isCreator(user)) {
+		final Room room = roomRepository.findOne(comment.getSessionId());
+		if (!comment.isCreator(user) && !room.isCreator(user)) {
 			throw new UnauthorizedException();
 		}
-		if (session.isCreator(user)) {
+		if (room.isCreator(user)) {
 			comment.setRead(true);
 			save(comment);
 		}
@@ -172,11 +172,11 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		return user;
 	}
 
-	private Session getSession(final String sessionkey) {
-		final Session session = sessionRepository.findByKeyword(sessionkey);
-		if (session == null) {
+	private Room getSession(final String sessionkey) {
+		final Room room = roomRepository.findByKeyword(sessionkey);
+		if (room == null) {
 			throw new NotFoundException();
 		}
-		return session;
+		return room;
 	}
 }

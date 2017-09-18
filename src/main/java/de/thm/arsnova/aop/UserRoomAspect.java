@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.aop;
 
-import de.thm.arsnova.entities.migration.v2.Session;
-import de.thm.arsnova.services.UserSessionService;
+import de.thm.arsnova.entities.migration.v2.Room;
+import de.thm.arsnova.services.UserRoomService;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -26,23 +26,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
 /**
- * Assigns a session to the {@link de.thm.arsnova.services.UserSessionService} whenever a user joins a
- * session.
+ * Assigns a room to the {@link UserRoomService} whenever a user joins a
+ * room.
  */
 @Aspect
 @Configurable
-public class UserSessionAspect {
+public class UserRoomAspect {
 
 	@Autowired
-	private UserSessionService userSessionService;
+	private UserRoomService userRoomService;
 
-	/** Sets current user and ARSnova session in session scoped UserSessionService
+	/** Sets current user and ARSnova room in session scoped UserRoomService
 	 */
 	@AfterReturning(
-			pointcut = "execution(public * de.thm.arsnova.services.SessionService.join(..)) && args(keyword)",
-			returning = "session"
+			pointcut = "execution(public * de.thm.arsnova.services.RoomService.join(..)) && args(keyword)",
+			returning = "room"
 			)
-	public void joinSessionAdvice(final JoinPoint jp, final String keyword, final Session session) {
-		userSessionService.setSession(session);
+	public void joinSessionAdvice(final JoinPoint jp, final String keyword, final Room room) {
+		userRoomService.setRoom(room);
 	}
 }

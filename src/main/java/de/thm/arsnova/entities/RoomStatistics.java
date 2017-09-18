@@ -3,14 +3,14 @@ package de.thm.arsnova.entities;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
 
-public class SessionStatistics {
+public class RoomStatistics {
 	private int contentCount = 0;
 	private int answerCount = 0;
 	private int unreadAnswerCount = 0;
 	private int commentCount = 0;
 	private int unreadCommentCount = 0;
 
-	public SessionStatistics() {
+	public RoomStatistics() {
 
 	}
 

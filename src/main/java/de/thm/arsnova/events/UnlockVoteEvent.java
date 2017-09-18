@@ -18,7 +18,7 @@
 package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,14 +26,14 @@ import java.util.Map;
 /**
  * Fires whenever voting on a content is enabled.
  */
-public class UnlockVoteEvent extends SessionEvent {
+public class UnlockVoteEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
 	private final Content content;
 
-	public UnlockVoteEvent(Object source, Session session, Content content) {
-		super(source, session);
+	public UnlockVoteEvent(Object source, Room room, Content content) {
+		super(source, room);
 		this.content = content;
 	}
 

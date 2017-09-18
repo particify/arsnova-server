@@ -1,7 +1,7 @@
 package de.thm.arsnova.persistance.couchdb;
 
 import com.google.common.collect.Lists;
-import de.thm.arsnova.entities.migration.v2.VisitedSession;
+import de.thm.arsnova.entities.migration.v2.VisitedRoom;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import de.thm.arsnova.persistance.VisitedSessionRepository;
 import org.ektorp.BulkDeleteDocument;
@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CouchDbVisitedSessionRepository extends CouchDbRepositorySupport<VisitedSession> implements VisitedSessionRepository {
+public class CouchDbVisitedSessionRepository extends CouchDbRepositorySupport<VisitedRoom> implements VisitedSessionRepository {
 	private static final int BULK_PARTITION_SIZE = 500;
 
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbVisitedSessionRepository.class);
@@ -26,7 +26,7 @@ public class CouchDbVisitedSessionRepository extends CouchDbRepositorySupport<Vi
 	private LogEntryRepository dbLogger;
 
 	public CouchDbVisitedSessionRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(VisitedSession.class, db, createIfNotExists);
+		super(VisitedRoom.class, db, createIfNotExists);
 	}
 
 	@Override

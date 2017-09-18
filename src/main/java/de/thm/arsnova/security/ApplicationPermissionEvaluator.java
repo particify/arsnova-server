@@ -20,10 +20,10 @@ package de.thm.arsnova.security;
 import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Comment;
 import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.ContentRepository;
-import de.thm.arsnova.persistance.SessionRepository;
+import de.thm.arsnova.persistance.RoomRepository;
 import org.pac4j.oauth.profile.facebook.FacebookProfile;
 import org.pac4j.oauth.profile.google2.Google2Profile;
 import org.pac4j.oauth.profile.twitter.TwitterProfile;
@@ -46,7 +46,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	private String[] adminAccounts;
 
 	@Autowired
-	private SessionRepository sessionRepository;
+	private RoomRepository roomRepository;
 
 	@Autowired
 	private CommentRepository commentRepository;
@@ -66,8 +66,8 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		final String username = getUsername(authentication);
 
 		return hasAdminRole(username)
-				|| (targetDomainObject instanceof Session
-						&& hasSessionPermission(username, ((Session) targetDomainObject), permission.toString()))
+				|| (targetDomainObject instanceof Room
+						&& hasSessionPermission(username, ((Room) targetDomainObject), permission.toString()))
 				|| (targetDomainObject instanceof Content
 						&& hasContentPermission(username, ((Content) targetDomainObject), permission.toString()))
 				|| (targetDomainObject instanceof Comment
@@ -91,7 +91,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 		switch (targetType) {
 			case "session":
-				final Session targetSession = sessionRepository.findByKeyword(targetId.toString());
+				final Room targetSession = roomRepository.findByKeyword(targetId.toString());
 				return targetSession != null && hasSessionPermission(username, targetSession, permission.toString());
 			case "content":
 				final Content targetContent = contentRepository.findOne(targetId.toString());
@@ -106,7 +106,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 	private boolean hasSessionPermission(
 			final String username,
-			final Session targetSession,
+			final Room targetSession,
 			final String permission) {
 		switch (permission) {
 			case "read":
@@ -128,13 +128,13 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final String permission) {
 		switch (permission) {
 			case "read":
-				return sessionRepository.findOne(targetContent.getSessionId()).isActive();
+				return roomRepository.findOne(targetContent.getSessionId()).isActive();
 			case "create":
 			case "owner":
 			case "update":
 			case "delete":
-				final Session session = sessionRepository.findOne(targetContent.getSessionId());
-				return session != null && session.getCreator().equals(username);
+				final Room room = roomRepository.findOne(targetContent.getSessionId());
+				return room != null && room.getCreator().equals(username);
 			default:
 				return false;
 		}
@@ -146,7 +146,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final String permission) {
 		switch (permission) {
 			case "create":
-				return !username.isEmpty() && sessionRepository.findOne(targetComment.getSessionId()).isActive();
+				return !username.isEmpty() && roomRepository.findOne(targetComment.getSessionId()).isActive();
 			case "owner":
 			case "update":
 				return targetComment.getCreator() != null && targetComment.getCreator().equals(username);
@@ -157,9 +157,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				}
 
 				/* Allow reading & deletion by session owner */
-				final Session session = sessionRepository.findOne(targetComment.getSessionId());
+				final Room room = roomRepository.findOne(targetComment.getSessionId());
 
-				return session != null && session.getCreator().equals(username);
+				return room != null && room.getCreator().equals(username);
 			default:
 				return false;
 		}

@@ -18,19 +18,19 @@
 package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 /**
  * Fires whenever a single answer is deleted.
  */
-public class DeleteAnswerEvent extends SessionEvent {
+public class DeleteAnswerEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
 	private final Content content;
 
-	public DeleteAnswerEvent(Object source, Session session, Content content) {
-		super(source, session);
+	public DeleteAnswerEvent(Object source, Room room, Content content) {
+		super(source, room);
 		this.content = content;
 	}
 

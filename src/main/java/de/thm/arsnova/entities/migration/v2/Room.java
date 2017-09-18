@@ -30,7 +30,7 @@ import io.swagger.annotations.ApiModelProperty;
  * Represents an ARSnova session.
  */
 @ApiModel(value = "session", description = "the session entity")
-public class Session implements Entity {
+public class Room implements Entity {
 	private String id;
 	private String rev;
 	private String name;
@@ -43,7 +43,7 @@ public class Session implements Entity {
 	private String courseId;
 	private long creationTime;
 	private ScoreOptions learningProgressOptions = new ScoreOptions();
-	private SessionFeature features = new SessionFeature();
+	private RoomFeature features = new RoomFeature();
 
 	private String ppAuthorName;
 	private String ppAuthorMail;
@@ -199,12 +199,12 @@ public class Session implements Entity {
 
 	@ApiModelProperty(required = true, value = "the enabled features (e.g. feedback, interposed, learning Progress, lecture)")
 	@JsonView({View.Persistence.class, View.Public.class})
-	public SessionFeature getFeatures() {
+	public RoomFeature getFeatures() {
 		return features;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setFeatures(SessionFeature features) {
+	public void setFeatures(RoomFeature features) {
 		this.features = features;
 	}
 
@@ -342,7 +342,7 @@ public class Session implements Entity {
 
 	@Override
 	public String toString() {
-		return "Session [keyword=" + keyword + ", type=" + getType() + ", creator=" + creator + "]";
+		return "Room [keyword=" + keyword + ", type=" + getType() + ", creator=" + creator + "]";
 	}
 
 	@Override
@@ -359,7 +359,7 @@ public class Session implements Entity {
 		if (obj == null || !obj.getClass().equals(this.getClass())) {
 			return false;
 		}
-		Session other = (Session) obj;
+		Room other = (Room) obj;
 		return this.keyword.equals(other.keyword);
 	}
 

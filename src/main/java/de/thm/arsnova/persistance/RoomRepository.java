@@ -20,27 +20,27 @@ package de.thm.arsnova.persistance;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.migration.v2.LoggedIn;
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.Session;
-import de.thm.arsnova.entities.migration.v2.SessionInfo;
+import de.thm.arsnova.entities.migration.v2.Room;
+import de.thm.arsnova.entities.migration.v2.RoomInfo;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface SessionRepository extends CrudRepository<Session, String> {
-	Session findByKeyword(String keyword);
-	List<Session> findInactiveGuestSessionsMetadata(long lastActivityBefore);
-	List<Session> findByUser(UserAuthentication user, int start, int limit);
-	List<Session> findByUsername(String username, int start, int limit);
-	List<Session> findAllForPublicPool();
-	List<Session> findForPublicPoolByUser(UserAuthentication user);
-	List<Session> findVisitedByUsername(String username, int start, int limit);
-	List<SessionInfo> getMySessionsInfo(UserAuthentication user, int start, int limit);
-	List<SessionInfo> findInfosForPublicPool();
-	List<SessionInfo> findInfosForPublicPoolByUser(UserAuthentication user);
-	List<SessionInfo> findInfoForVisitedByUser(UserAuthentication currentUser, int start, int limit);
-	List<Session> findSessionsByCourses(List<Course> courses);
-	SessionInfo importSession(UserAuthentication user, ImportExportSession importSession);
+public interface RoomRepository extends CrudRepository<Room, String> {
+	Room findByKeyword(String keyword);
+	List<Room> findInactiveGuestSessionsMetadata(long lastActivityBefore);
+	List<Room> findByUser(UserAuthentication user, int start, int limit);
+	List<Room> findByUsername(String username, int start, int limit);
+	List<Room> findAllForPublicPool();
+	List<Room> findForPublicPoolByUser(UserAuthentication user);
+	List<Room> findVisitedByUsername(String username, int start, int limit);
+	List<RoomInfo> getMySessionsInfo(UserAuthentication user, int start, int limit);
+	List<RoomInfo> findInfosForPublicPool();
+	List<RoomInfo> findInfosForPublicPoolByUser(UserAuthentication user);
+	List<RoomInfo> findInfoForVisitedByUser(UserAuthentication currentUser, int start, int limit);
+	List<Room> findSessionsByCourses(List<Course> courses);
+	RoomInfo importSession(UserAuthentication user, ImportExportSession importSession);
 	ImportExportSession exportSession(String sessionkey, Boolean withAnswer, Boolean withFeedbackQuestions);
-	LoggedIn registerAsOnlineUser(UserAuthentication user, Session session);
+	LoggedIn registerAsOnlineUser(UserAuthentication user, Room room);
 }

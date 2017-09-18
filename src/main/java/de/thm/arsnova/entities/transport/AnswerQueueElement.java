@@ -20,7 +20,7 @@ package de.thm.arsnova.entities.transport;
 import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Answer;
 import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 /**
  * An answer that is about to get saved in the database. Answers are not saved immediately, they are instead stored
@@ -28,7 +28,7 @@ import de.thm.arsnova.entities.migration.v2.Session;
  */
 public class AnswerQueueElement {
 
-	private final Session session;
+	private final Room room;
 
 	private final Content content;
 
@@ -36,15 +36,15 @@ public class AnswerQueueElement {
 
 	private final UserAuthentication user;
 
-	public AnswerQueueElement(Session session, Content content, Answer answer, UserAuthentication user) {
-		this.session = session;
+	public AnswerQueueElement(Room room, Content content, Answer answer, UserAuthentication user) {
+		this.room = room;
 		this.content = content;
 		this.answer = answer;
 		this.user = user;
 	}
 
-	public Session getSession() {
-		return session;
+	public Room getRoom() {
+		return room;
 	}
 
 	public Content getQuestion() {

@@ -56,7 +56,7 @@ public class CommentController extends PaginationController {
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	@DeprecatedApi
 	@Deprecated
-	public int getInterposedCount(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey) {
+	public int getInterposedCount(@ApiParam(value = "Room-Key from current session", required = true) @RequestParam final String sessionkey) {
 		return commentService.count(sessionkey);
 	}
 
@@ -65,15 +65,15 @@ public class CommentController extends PaginationController {
 	@RequestMapping(value = "/readcount", method = RequestMethod.GET)
 	@DeprecatedApi
 	@Deprecated
-	public CommentReadingCount getUnreadInterposedCount(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam("sessionkey") final String sessionkey, String user) {
+	public CommentReadingCount getUnreadInterposedCount(@ApiParam(value = "Room-Key from current session", required = true) @RequestParam("sessionkey") final String sessionkey, String user) {
 		return commentService.countRead(sessionkey, user);
 	}
 
-	@ApiOperation(value = "Retrieves all Comments for a Session",
+	@ApiOperation(value = "Retrieves all Comments for a Room",
 			nickname = "getInterposedQuestions")
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
-	public List<Comment> getInterposedQuestions(@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey) {
+	public List<Comment> getInterposedQuestions(@ApiParam(value = "Room-Key from current session", required = true) @RequestParam final String sessionkey) {
 		return commentService.getBySessionKey(sessionkey, offset, limit);
 	}
 
@@ -84,7 +84,7 @@ public class CommentController extends PaginationController {
 		return commentService.getAndMarkRead(questionId);
 	}
 
-	@ApiOperation(value = "Creates a new Comment for a Session and returns the Comment's data",
+	@ApiOperation(value = "Creates a new Comment for a Room and returns the Comment's data",
 			nickname = "postInterposedQuestion")
 	@ApiResponses(value = {
 		@ApiResponse(code = 400, message = HTML_STATUS_400)
@@ -92,7 +92,7 @@ public class CommentController extends PaginationController {
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void postInterposedQuestion(
-			@ApiParam(value = "Session-Key from current session", required = true) @RequestParam final String sessionkey,
+			@ApiParam(value = "Room-Key from current session", required = true) @RequestParam final String sessionkey,
 			@ApiParam(value = "the body from the new comment", required = true) @RequestBody final Comment comment
 			) {
 		if (commentService.save(comment)) {

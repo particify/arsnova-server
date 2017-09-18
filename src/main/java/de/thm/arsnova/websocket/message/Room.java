@@ -15,25 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.events;
-
-import de.thm.arsnova.entities.migration.v2.Session;
+package de.thm.arsnova.websocket.message;
 
 /**
- * Fires whenever a session is deleted. Note that this implies that all related data such as comments,
- * lecturer questions, and answers are deleted as well, even though those events are not fired.
+ * Represents a session.
  */
-public class DeleteSessionEvent extends SessionEvent {
+public class Room {
+	private String keyword;
 
-	private static final long serialVersionUID = 1L;
-
-	public DeleteSessionEvent(Object source, Session session) {
-		super(source, session);
+	public String getKeyword() {
+		return keyword;
 	}
 
-	@Override
-	public void accept(ArsnovaEventVisitor visitor) {
-		visitor.visit(this);
+	public void setKeyword(String keyword) {
+		this.keyword = keyword;
 	}
-
 }

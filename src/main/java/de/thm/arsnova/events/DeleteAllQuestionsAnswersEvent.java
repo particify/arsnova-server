@@ -17,17 +17,17 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 /**
  * Fires whenever all answers of all questions of a session are deleted.
  */
-public class DeleteAllQuestionsAnswersEvent extends SessionEvent {
+public class DeleteAllQuestionsAnswersEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public DeleteAllQuestionsAnswersEvent(Object source, Session session) {
-		super(source, session);
+	public DeleteAllQuestionsAnswersEvent(Object source, Room room) {
+		super(source, room);
 	}
 
 	@Override

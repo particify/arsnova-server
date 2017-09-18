@@ -19,9 +19,9 @@ package de.thm.arsnova.services;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.Session;
-import de.thm.arsnova.entities.migration.v2.SessionFeature;
-import de.thm.arsnova.entities.migration.v2.SessionInfo;
+import de.thm.arsnova.entities.migration.v2.Room;
+import de.thm.arsnova.entities.migration.v2.RoomFeature;
+import de.thm.arsnova.entities.migration.v2.RoomInfo;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.ScoreStatistics;
 
@@ -31,64 +31,64 @@ import java.util.UUID;
 /**
  * The functionality the session service should provide.
  */
-public interface SessionService extends EntityService<Session> {
-	Session getByKey(String keyword);
+public interface RoomService extends EntityService<Room> {
+	Room getByKey(String keyword);
 
-	Session getForAdmin(final String keyword);
+	Room getForAdmin(final String keyword);
 
-	Session getInternal(String keyword, UserAuthentication user);
+	Room getInternal(String keyword, UserAuthentication user);
 
-	Session save(Session session);
+	Room save(Room session);
 
 	boolean isKeyAvailable(String keyword);
 
 	String generateKey();
 
-	List<Session> getUserSessions(String username);
+	List<Room> getUserSessions(String username);
 
-	List<Session> getUserVisitedSessions(String username);
+	List<Room> getUserVisitedSessions(String username);
 
-	List<Session> getMySessions(int offset, int limit);
+	List<Room> getMySessions(int offset, int limit);
 
-	List<Session> getMyVisitedSessions(int offset, int limit);
+	List<Room> getMyVisitedSessions(int offset, int limit);
 
 	int countSessionsByCourses(List<Course> courses);
 
 	int activeUsers(String sessionkey);
 
-	Session setActive(String sessionkey, Boolean lock);
+	Room setActive(String sessionkey, Boolean lock);
 
-	Session join(String keyword, UUID socketId);
+	Room join(String keyword, UUID socketId);
 
-	Session update(String sessionkey, Session session);
+	Room update(String sessionkey, Room session);
 
-	Session updateCreator(String sessionkey, String newCreator);
+	Room updateCreator(String sessionkey, String newCreator);
 
-	Session updateInternal(Session session, UserAuthentication user);
+	Room updateInternal(Room session, UserAuthentication user);
 
-	int[] deleteCascading(Session session);
+	int[] deleteCascading(Room session);
 
 	ScoreStatistics getLearningProgress(String sessionkey, String type, String questionVariant);
 
 	ScoreStatistics getMyLearningProgress(String sessionkey, String type, String questionVariant);
 
-	List<SessionInfo> getMySessionsInfo(int offset, int limit);
+	List<RoomInfo> getMySessionsInfo(int offset, int limit);
 
-	List<SessionInfo> getPublicPoolSessionsInfo();
+	List<RoomInfo> getPublicPoolSessionsInfo();
 
-	List<SessionInfo> getMyPublicPoolSessionsInfo();
+	List<RoomInfo> getMyPublicPoolSessionsInfo();
 
-	List<SessionInfo> getMyVisitedSessionsInfo(int offset, int limit);
+	List<RoomInfo> getMyVisitedSessionsInfo(int offset, int limit);
 
-	SessionInfo importSession(ImportExportSession session);
+	RoomInfo importSession(ImportExportSession session);
 
 	ImportExportSession exportSession(String sessionkey, Boolean withAnswerStatistics, Boolean withFeedbackQuestions);
 
-	SessionInfo copySessionToPublicPool(String sessionkey, de.thm.arsnova.entities.transport.ImportExportSession.PublicPool pp);
+	RoomInfo copySessionToPublicPool(String sessionkey, de.thm.arsnova.entities.transport.ImportExportSession.PublicPool pp);
 
-	SessionFeature getFeatures(String sessionkey);
+	RoomFeature getFeatures(String sessionkey);
 
-	SessionFeature updateFeatures(String sessionkey, SessionFeature features);
+	RoomFeature updateFeatures(String sessionkey, RoomFeature features);
 
 	boolean lockFeedbackInput(String sessionkey, Boolean lock);
 

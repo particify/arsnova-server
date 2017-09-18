@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.services.score;
 
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.transport.ScoreStatistics;
 
@@ -26,7 +26,7 @@ import de.thm.arsnova.entities.transport.ScoreStatistics;
  */
 public interface ScoreCalculator {
 
-	ScoreStatistics getCourseProgress(Session session);
+	ScoreStatistics getCourseProgress(Room room);
 
-	ScoreStatistics getMyProgress(Session session, UserAuthentication user);
+	ScoreStatistics getMyProgress(Room room, UserAuthentication user);
 }

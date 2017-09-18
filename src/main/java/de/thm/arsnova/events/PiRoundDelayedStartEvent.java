@@ -18,7 +18,7 @@
 package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +27,7 @@ import java.util.Map;
  * Fires whenever a delayed peer instruction round is initiated. The delayed part denotes that this round might not
  * have been started yet.
  */
-public class PiRoundDelayedStartEvent extends SessionEvent {
+public class PiRoundDelayedStartEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 	private final String questionId;
@@ -36,8 +36,8 @@ public class PiRoundDelayedStartEvent extends SessionEvent {
 	private final String questionVariant;
 	private int piRound;
 
-	public PiRoundDelayedStartEvent(Object source, Session session, Content content) {
-		super(source, session);
+	public PiRoundDelayedStartEvent(Object source, Room room, Content content) {
+		super(source, room);
 		this.questionId = content.getId();
 		this.startTime = content.getPiRoundStartTime();
 		this.endTime = content.getPiRoundEndTime();

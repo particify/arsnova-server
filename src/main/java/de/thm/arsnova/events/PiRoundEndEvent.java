@@ -18,7 +18,7 @@
 package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,15 +26,15 @@ import java.util.Map;
 /**
  * Fires whenever a peer instruction round has ended.
  */
-public class PiRoundEndEvent extends SessionEvent {
+public class PiRoundEndEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
 	private final String questionId;
 	private final String questionVariant;
 
-	public PiRoundEndEvent(Object source, Session session, Content content) {
-		super(source, session);
+	public PiRoundEndEvent(Object source, Room room, Content content) {
+		super(source, room);
 		questionId = content.getId();
 		questionVariant = content.getQuestionVariant();
 	}

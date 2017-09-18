@@ -116,7 +116,7 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 						.includeDocs(true),
 				Comment.class);
 //		for (Comment comment : comments) {
-//			comment.setSessionId(session.getKeyword());
+//			comment.setRoomId(session.getKeyword());
 //		}
 
 		return comments;
@@ -136,7 +136,7 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 						.includeDocs(true),
 				Comment.class);
 //		for (Comment comment : comments) {
-//			comment.setSessionId(session.getKeyword());
+//			comment.setRoomId(session.getKeyword());
 //		}
 
 		return comments;

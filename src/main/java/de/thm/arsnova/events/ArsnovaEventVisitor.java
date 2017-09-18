@@ -52,9 +52,9 @@ public interface ArsnovaEventVisitor {
 
 	void visit(NewFeedbackEvent newFeedbackEvent);
 
-	void visit(DeleteFeedbackForSessionsEvent deleteFeedbackEvent);
+	void visit(DeleteFeedbackForRoomsEvent deleteFeedbackEvent);
 
-	void visit(StatusSessionEvent statusSessionEvent);
+	void visit(StatusRoomEvent statusSessionEvent);
 
 	void visit(ChangeScoreEvent changeLearningProgress);
 
@@ -66,9 +66,9 @@ public interface ArsnovaEventVisitor {
 
 	void visit(PiRoundResetEvent piRoundResetEvent);
 
-	void visit(NewSessionEvent newSessionEvent);
+	void visit(NewRoomEvent newSessionEvent);
 
-	void visit(DeleteSessionEvent deleteSessionEvent);
+	void visit(DeleteRoomEvent deleteSessionEvent);
 
 	void visit(LockVoteEvent lockVoteEvent);
 

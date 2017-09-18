@@ -51,7 +51,7 @@ public class StubUserService extends UserServiceImpl {
 		return stubUser;
 	}
 
-	public void setRole(UserSessionService.Role role) {
+	public void setRole(UserRoomService.Role role) {
 		stubUser.setRole(role);
 	}
 }

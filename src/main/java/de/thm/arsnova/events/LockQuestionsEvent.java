@@ -18,21 +18,21 @@
 package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 import java.util.List;
 
 /**
  * Fires whenever a set of contents are disabled, i.e., they are hidden from students.
  */
-public class LockQuestionsEvent extends SessionEvent {
+public class LockQuestionsEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
 	private List<Content> contents;
 
-	public LockQuestionsEvent(Object source, Session session, List<Content> contents) {
-		super(source, session);
+	public LockQuestionsEvent(Object source, Room room, List<Content> contents) {
+		super(source, room);
 		this.contents = contents;
 	}
 

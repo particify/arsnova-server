@@ -17,39 +17,23 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.Session;
-
-import java.util.Set;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 /**
- * Fires whenever the feedback of a specific user has been reset.
+ * Base class for all {@link ArsnovaEvent}s that are related to a room.
  */
-public class DeleteFeedbackForSessionsEvent extends ArsnovaEvent {
+public abstract class RoomEvent extends ArsnovaEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Set<Session> sessions;
+	private final Room room;
 
-	private final UserAuthentication user;
-
-	public DeleteFeedbackForSessionsEvent(Object source, Set<Session> sessions, UserAuthentication user) {
+	public RoomEvent(Object source, Room room) {
 		super(source);
-		this.sessions = sessions;
-		this.user = user;
+		this.room = room;
 	}
 
-	public Set<Session> getSessions() {
-		return sessions;
+	public Room getRoom() {
+		return room;
 	}
-
-	public UserAuthentication getUser() {
-		return user;
-	}
-
-	@Override
-	public void accept(ArsnovaEventVisitor visitor) {
-		visitor.visit(this);
-	}
-
 }

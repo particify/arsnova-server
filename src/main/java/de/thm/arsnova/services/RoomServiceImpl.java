@@ -18,32 +18,32 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.Room;
 import de.thm.arsnova.persistance.AnswerRepository;
 import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.LogEntryRepository;
+import de.thm.arsnova.persistance.RoomRepository;
 import de.thm.arsnova.util.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.services.score.ScoreCalculatorFactory;
 import de.thm.arsnova.services.score.ScoreCalculator;
 import de.thm.arsnova.entities.ScoreOptions;
-import de.thm.arsnova.entities.migration.v2.Session;
-import de.thm.arsnova.entities.migration.v2.SessionFeature;
-import de.thm.arsnova.entities.migration.v2.SessionInfo;
+import de.thm.arsnova.entities.migration.v2.RoomFeature;
+import de.thm.arsnova.entities.migration.v2.RoomInfo;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.ScoreStatistics;
-import de.thm.arsnova.events.DeleteSessionEvent;
+import de.thm.arsnova.events.DeleteRoomEvent;
 import de.thm.arsnova.events.FeatureChangeEvent;
 import de.thm.arsnova.events.FlipFlashcardsEvent;
 import de.thm.arsnova.events.LockFeedbackEvent;
-import de.thm.arsnova.events.NewSessionEvent;
-import de.thm.arsnova.events.StatusSessionEvent;
+import de.thm.arsnova.events.NewRoomEvent;
+import de.thm.arsnova.events.StatusRoomEvent;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.PayloadTooLargeException;
-import de.thm.arsnova.persistance.SessionRepository;
 import de.thm.arsnova.persistance.VisitedSessionRepository;
 import org.ektorp.UpdateConflictException;
 import org.slf4j.Logger;
@@ -70,14 +70,14 @@ import java.util.UUID;
  * Performs all session related operations.
  */
 @Service
-public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implements SessionService, ApplicationEventPublisherAware {
+public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements RoomService, ApplicationEventPublisherAware {
 	private static final long SESSION_INACTIVITY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
 
-	private static final Logger logger = LoggerFactory.getLogger(SessionServiceImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(RoomServiceImpl.class);
 
 	private LogEntryRepository dbLogger;
 
-	private SessionRepository sessionRepository;
+	private RoomRepository roomRepository;
 
 	private ContentRepository contentRepository;
 
@@ -105,8 +105,8 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 
 	private ApplicationEventPublisher publisher;
 
-	public SessionServiceImpl(
-			SessionRepository repository,
+	public RoomServiceImpl(
+			RoomRepository repository,
 			ContentRepository contentRepository,
 			AnswerRepository answerRepository,
 			CommentRepository commentRepository,
@@ -117,8 +117,8 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 			ScoreCalculatorFactory scoreCalculatorFactory,
 			ImageUtils imageUtils,
 			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
-		super(Session.class, repository, jackson2HttpMessageConverter.getObjectMapper());
-		this.sessionRepository = repository;
+		super(Room.class, repository, jackson2HttpMessageConverter.getObjectMapper());
+		this.roomRepository = repository;
 		this.contentRepository = contentRepository;
 		this.answerRepository = answerRepository;
 		this.commentRepository = commentRepository;
@@ -130,39 +130,39 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 		this.imageUtils = imageUtils;
 	}
 
-	public static class SessionNameComparator implements Comparator<Session>, Serializable {
+	public static class SessionNameComparator implements Comparator<Room>, Serializable {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		public int compare(final Session session1, final Session session2) {
-			return session1.getName().compareToIgnoreCase(session2.getName());
+		public int compare(final Room room1, final Room room2) {
+			return room1.getName().compareToIgnoreCase(room2.getName());
 		}
 	}
 
-	public static class SessionInfoNameComparator implements Comparator<SessionInfo>, Serializable {
+	public static class SessionInfoNameComparator implements Comparator<RoomInfo>, Serializable {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		public int compare(final SessionInfo session1, final SessionInfo session2) {
-			return session1.getName().compareToIgnoreCase(session2.getName());
+		public int compare(final RoomInfo roomInfo1, final RoomInfo roomInfo2) {
+			return roomInfo1.getName().compareToIgnoreCase(roomInfo2.getName());
 		}
 	}
 
-	public static class SessionShortNameComparator implements Comparator<Session>, Serializable {
+	public static class SessionShortNameComparator implements Comparator<Room>, Serializable {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		public int compare(final Session session1, final Session session2) {
-			return session1.getShortName().compareToIgnoreCase(session2.getShortName());
+		public int compare(final Room room1, final Room room2) {
+			return room1.getShortName().compareToIgnoreCase(room2.getShortName());
 		}
 	}
 
-	public static class SessionInfoShortNameComparator implements Comparator<SessionInfo>, Serializable {
+	public static class SessionInfoShortNameComparator implements Comparator<RoomInfo>, Serializable {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		public int compare(final SessionInfo session1, final SessionInfo session2) {
-			return session1.getShortName().compareToIgnoreCase(session2.getShortName());
+		public int compare(final RoomInfo roomInfo1, final RoomInfo roomInfo2) {
+			return roomInfo1.getShortName().compareToIgnoreCase(roomInfo2.getShortName());
 		}
 	}
 
@@ -178,18 +178,18 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 			long unixTime = System.currentTimeMillis();
 			long lastActivityBefore = unixTime - guestSessionInactivityThresholdDays * 24 * 60 * 60 * 1000L;
 			int totalCount[] = new int[] {0, 0, 0};
-			List<Session> inactiveSessions = sessionRepository.findInactiveGuestSessionsMetadata(lastActivityBefore);
-			for (Session session : inactiveSessions) {
-				int[] count = deleteCascading(session);
+			List<Room> inactiveRooms = roomRepository.findInactiveGuestSessionsMetadata(lastActivityBefore);
+			for (Room room : inactiveRooms) {
+				int[] count = deleteCascading(room);
 				totalCount[0] += count[0];
 				totalCount[1] += count[1];
 				totalCount[2] += count[2];
 			}
 
-			if (!inactiveSessions.isEmpty()) {
-				logger.info("Deleted {} inactive guest sessions.", inactiveSessions.size());
+			if (!inactiveRooms.isEmpty()) {
+				logger.info("Deleted {} inactive guest sessions.", inactiveRooms.size());
 				dbLogger.log("cleanup", "type", "session",
-						"sessionCount", inactiveSessions.size(),
+						"sessionCount", inactiveRooms.size(),
 						"questionCount", totalCount[0],
 						"answerCount", totalCount[1],
 						"commentCount", totalCount[2]);
@@ -208,12 +208,12 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 	}
 
 	@Override
-	public Session join(final String keyword, final UUID socketId) {
+	public Room join(final String keyword, final UUID socketId) {
 		/* Socket.IO solution */
 
-		Session session = null != keyword ? sessionRepository.findByKeyword(keyword) : null;
+		Room room = null != keyword ? roomRepository.findByKeyword(keyword) : null;
 
-		if (null == session) {
+		if (null == room) {
 			userService.removeUserFromSessionBySocketId(socketId);
 			return null;
 		}
@@ -221,23 +221,23 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 
 		userService.addUserToSessionBySocketId(socketId, keyword);
 
-		if (session.getCreator().equals(user.getUsername())) {
-			updateSessionOwnerActivity(session);
+		if (room.getCreator().equals(user.getUsername())) {
+			updateSessionOwnerActivity(room);
 		}
-		sessionRepository.registerAsOnlineUser(user, session);
+		roomRepository.registerAsOnlineUser(user, room);
 
-		if (connectorClient != null && session.isCourseSession()) {
-			final String courseid = session.getCourseId();
+		if (connectorClient != null && room.isCourseSession()) {
+			final String courseid = room.getCourseId();
 			if (!connectorClient.getMembership(user.getUsername(), courseid).isMember()) {
 				throw new ForbiddenException("User is no course member.");
 			}
 		}
 
-		return session;
+		return room;
 	}
 
-	@CachePut(value = "sessions")
-	private Session updateSessionOwnerActivity(final Session session) {
+	@CachePut(value = "rooms")
+	private Room updateSessionOwnerActivity(final Room session) {
 		try {
 			/* Do not clutter CouchDB. Only update once every 3 hours. */
 			if (session.getLastOwnerActivity() > System.currentTimeMillis() - 3 * 3600000) {
@@ -256,14 +256,14 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public Session getByKey(final String keyword) {
+	public Room getByKey(final String keyword) {
 		final UserAuthentication user = userService.getCurrentUser();
 		return this.getInternal(keyword, user);
 	}
 
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
-	public Session getForAdmin(final String keyword) {
-		return sessionRepository.findByKeyword(keyword);
+	public Room getForAdmin(final String keyword) {
+		return roomRepository.findByKeyword(keyword);
 	}
 
 	/*
@@ -271,111 +271,111 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 	 * TODO: Find a better way of doing this...
 	 */
 	@Override
-	public Session getInternal(final String keyword, final UserAuthentication user) {
-		final Session session = sessionRepository.findByKeyword(keyword);
-		if (session == null) {
+	public Room getInternal(final String keyword, final UserAuthentication user) {
+		final Room room = roomRepository.findByKeyword(keyword);
+		if (room == null) {
 			throw new NotFoundException();
 		}
-		if (!session.isActive()) {
-			if (user.hasRole(UserSessionService.Role.STUDENT)) {
+		if (!room.isActive()) {
+			if (user.hasRole(UserRoomService.Role.STUDENT)) {
 				throw new ForbiddenException("User is not session creator.");
-			} else if (user.hasRole(UserSessionService.Role.SPEAKER) && !session.isCreator(user)) {
+			} else if (user.hasRole(UserRoomService.Role.SPEAKER) && !room.isCreator(user)) {
 				throw new ForbiddenException("User is not session creator.");
 			}
 		}
-		if (connectorClient != null && session.isCourseSession()) {
-			final String courseid = session.getCourseId();
+		if (connectorClient != null && room.isCourseSession()) {
+			final String courseid = room.getCourseId();
 			if (!connectorClient.getMembership(user.getUsername(), courseid).isMember()) {
 				throw new ForbiddenException("User is no course member.");
 			}
 		}
-		return session;
+		return room;
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
-	public List<Session> getUserSessions(String username) {
-		return sessionRepository.findByUsername(username, 0, 0);
+	public List<Room> getUserSessions(String username) {
+		return roomRepository.findByUsername(username, 0, 0);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Session> getMySessions(final int offset, final int limit) {
-		return sessionRepository.findByUser(userService.getCurrentUser(), offset, limit);
+	public List<Room> getMySessions(final int offset, final int limit) {
+		return roomRepository.findByUser(userService.getCurrentUser(), offset, limit);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<SessionInfo> getPublicPoolSessionsInfo() {
-		return sessionRepository.findInfosForPublicPool();
+	public List<RoomInfo> getPublicPoolSessionsInfo() {
+		return roomRepository.findInfosForPublicPool();
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<SessionInfo> getMyPublicPoolSessionsInfo() {
-		return sessionRepository.findInfosForPublicPoolByUser(userService.getCurrentUser());
+	public List<RoomInfo> getMyPublicPoolSessionsInfo() {
+		return roomRepository.findInfosForPublicPoolByUser(userService.getCurrentUser());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<SessionInfo> getMySessionsInfo(final int offset, final int limit) {
+	public List<RoomInfo> getMySessionsInfo(final int offset, final int limit) {
 		final UserAuthentication user = userService.getCurrentUser();
-		return sessionRepository.getMySessionsInfo(user, offset, limit);
+		return roomRepository.getMySessionsInfo(user, offset, limit);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Session> getMyVisitedSessions(final int offset, final int limit) {
-		return sessionRepository.findVisitedByUsername(userService.getCurrentUser().getUsername(), offset, limit);
+	public List<Room> getMyVisitedSessions(final int offset, final int limit) {
+		return roomRepository.findVisitedByUsername(userService.getCurrentUser().getUsername(), offset, limit);
 	}
 
 	@Override
 	@PreAuthorize("hasPermission('', 'motd', 'admin')")
-	public List<Session> getUserVisitedSessions(String username) {
-		return sessionRepository.findVisitedByUsername(username, 0, 0);
+	public List<Room> getUserVisitedSessions(String username) {
+		return roomRepository.findVisitedByUsername(username, 0, 0);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<SessionInfo> getMyVisitedSessionsInfo(final int offset, final int limit) {
-		return sessionRepository.findInfoForVisitedByUser(userService.getCurrentUser(), offset, limit);
+	public List<RoomInfo> getMyVisitedSessionsInfo(final int offset, final int limit) {
+		return roomRepository.findInfoForVisitedByUser(userService.getCurrentUser(), offset, limit);
 	}
 
 	@Override
 	@PreAuthorize("hasPermission('', 'session', 'create')")
-	@Caching(evict = @CacheEvict(cacheNames = "sessions", key = "#result.keyword"))
-	public Session save(final Session session) {
-		if (connectorClient != null && session.getCourseId() != null) {
+	@Caching(evict = @CacheEvict(cacheNames = "rooms", key = "#result.keyword"))
+	public Room save(final Room room) {
+		if (connectorClient != null && room.getCourseId() != null) {
 			if (!connectorClient.getMembership(
-					userService.getCurrentUser().getUsername(), session.getCourseId()).isMember()
+					userService.getCurrentUser().getUsername(), room.getCourseId()).isMember()
 					) {
 				throw new ForbiddenException();
 			}
 		}
-		handleLogo(session);
+		handleLogo(room);
 
 		// set some default values
 		ScoreOptions lpo = new ScoreOptions();
 		lpo.setType("questions");
-		session.setLearningProgressOptions(lpo);
+		room.setLearningProgressOptions(lpo);
 
-		SessionFeature sf = new SessionFeature();
+		RoomFeature sf = new RoomFeature();
 		sf.setLecture(true);
 		sf.setFeedback(true);
 		sf.setInterposed(true);
 		sf.setJitt(true);
 		sf.setLearningProgress(true);
 		sf.setPi(true);
-		session.setFeatures(sf);
+		room.setFeatures(sf);
 
-		session.setKeyword(generateKey());
-		session.setCreationTime(System.currentTimeMillis());
-		session.setCreator(userService.getCurrentUser().getUsername());
-		session.setActive(true);
-		session.setFeedbackLock(false);
+		room.setKeyword(generateKey());
+		room.setCreationTime(System.currentTimeMillis());
+		room.setCreator(userService.getCurrentUser().getUsername());
+		room.setActive(true);
+		room.setFeedbackLock(false);
 
-		final Session result = save(session);
-		this.publisher.publishEvent(new NewSessionEvent(this, result));
+		final Room result = save(room);
+		this.publisher.publishEvent(new NewRoomEvent(this, result));
 		return result;
 	}
 
@@ -399,7 +399,7 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 
 	@Override
 	public int countSessionsByCourses(final List<Course> courses) {
-		final List<Session> sessions = sessionRepository.findSessionsByCourses(courses);
+		final List<Room> sessions = roomRepository.findSessionsByCourses(courses);
 		if (sessions == null) {
 			return 0;
 		}
@@ -413,57 +413,57 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 
 	@Override
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
-	public Session setActive(final String sessionkey, final Boolean lock) {
-		final Session session = sessionRepository.findByKeyword(sessionkey);
-		session.setActive(lock);
-		this.publisher.publishEvent(new StatusSessionEvent(this, session));
-		sessionRepository.save(session);
+	public Room setActive(final String sessionkey, final Boolean lock) {
+		final Room room = roomRepository.findByKeyword(sessionkey);
+		room.setActive(lock);
+		this.publisher.publishEvent(new StatusRoomEvent(this, room));
+		roomRepository.save(room);
 
-		return session;
+		return room;
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#session, 'owner')")
-	@CachePut(value = "sessions", key = "#session")
-	public Session update(final String sessionkey, final Session session) {
-		final Session existingSession = sessionRepository.findByKeyword(sessionkey);
+	@PreAuthorize("hasPermission(#room, 'owner')")
+	@CachePut(value = "rooms", key = "#room")
+	public Room update(final String sessionkey, final Room room) {
+		final Room existingSession = roomRepository.findByKeyword(sessionkey);
 
-		existingSession.setActive(session.isActive());
-		existingSession.setShortName(session.getShortName());
-		existingSession.setPpAuthorName(session.getPpAuthorName());
-		existingSession.setPpAuthorMail(session.getPpAuthorMail());
-		existingSession.setShortName(session.getShortName());
-		existingSession.setPpAuthorName(session.getPpAuthorName());
-		existingSession.setPpFaculty(session.getPpFaculty());
-		existingSession.setName(session.getName());
-		existingSession.setPpUniversity(session.getPpUniversity());
-		existingSession.setPpDescription(session.getPpDescription());
-		existingSession.setPpLevel(session.getPpLevel());
-		existingSession.setPpLicense(session.getPpLicense());
-		existingSession.setPpSubject(session.getPpSubject());
-		existingSession.setFeedbackLock(session.getFeedbackLock());
+		existingSession.setActive(room.isActive());
+		existingSession.setShortName(room.getShortName());
+		existingSession.setPpAuthorName(room.getPpAuthorName());
+		existingSession.setPpAuthorMail(room.getPpAuthorMail());
+		existingSession.setShortName(room.getShortName());
+		existingSession.setPpAuthorName(room.getPpAuthorName());
+		existingSession.setPpFaculty(room.getPpFaculty());
+		existingSession.setName(room.getName());
+		existingSession.setPpUniversity(room.getPpUniversity());
+		existingSession.setPpDescription(room.getPpDescription());
+		existingSession.setPpLevel(room.getPpLevel());
+		existingSession.setPpLicense(room.getPpLicense());
+		existingSession.setPpSubject(room.getPpSubject());
+		existingSession.setFeedbackLock(room.getFeedbackLock());
 
-		handleLogo(session);
-		existingSession.setPpLogo(session.getPpLogo());
+		handleLogo(room);
+		existingSession.setPpLogo(room.getPpLogo());
 
-		sessionRepository.save(existingSession);
+		roomRepository.save(existingSession);
 
-		return session;
+		return room;
 	}
 
 	@Override
 	@PreAuthorize("hasPermission('', 'motd', 'admin')")
-	@Caching(evict = { @CacheEvict("sessions"), @CacheEvict(cacheNames = "sessions", key = "#sessionkey.keyword") })
-	public Session updateCreator(String sessionkey, String newCreator) {
-		final Session session = sessionRepository.findByKeyword(sessionkey);
-		if (session == null) {
+	@Caching(evict = { @CacheEvict("rooms"), @CacheEvict(cacheNames = "rooms", key = "#sessionkey.keyword") })
+	public Room updateCreator(String sessionkey, String newCreator) {
+		final Room room = roomRepository.findByKeyword(sessionkey);
+		if (room == null) {
 			throw new NullPointerException("Could not load session " + sessionkey + ".");
 		}
 
-		session.setCreator(newCreator);
-		save(session);
+		room.setCreator(newCreator);
+		save(room);
 
-		return save(session);
+		return save(room);
 	}
 
 	/*
@@ -471,28 +471,28 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 	 * TODO: Find a better way of doing this...
 	 */
 	@Override
-	public Session updateInternal(final Session session, final UserAuthentication user) {
-		if (session.isCreator(user)) {
-			sessionRepository.save(session);
-			return session;
+	public Room updateInternal(final Room room, final UserAuthentication user) {
+		if (room.isCreator(user)) {
+			roomRepository.save(room);
+			return room;
 		}
 		return null;
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#session, 'owner')")
-	@CacheEvict("sessions")
-	public int[] deleteCascading(final Session session) {
+	@PreAuthorize("hasPermission(#room, 'owner')")
+	@CacheEvict("rooms")
+	public int[] deleteCascading(final Room room) {
 		int[] count = new int[] {0, 0, 0};
-		List<String> contentIds = contentRepository.findIdsBySessionId(session.getId());
-		count[2] = commentRepository.deleteBySessionId(session.getId());
+		List<String> contentIds = contentRepository.findIdsBySessionId(room.getId());
+		count[2] = commentRepository.deleteBySessionId(room.getId());
 		count[1] = answerRepository.deleteByContentIds(contentIds);
-		count[0] = contentRepository.deleteBySessionId(session.getId());
-		sessionRepository.delete(session);
-		logger.debug("Deleted session document {} and related data.", session.getId());
-		dbLogger.log("delete", "type", "session", "id", session.getId());
+		count[0] = contentRepository.deleteBySessionId(room.getId());
+		roomRepository.delete(room);
+		logger.debug("Deleted session document {} and related data.", room.getId());
+		dbLogger.log("delete", "type", "session", "id", room.getId());
 
-		this.publisher.publishEvent(new DeleteSessionEvent(this, session));
+		this.publisher.publishEvent(new DeleteRoomEvent(this, room));
 
 		return count;
 	}
@@ -500,25 +500,25 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 	@Override
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'read')")
 	public ScoreStatistics getLearningProgress(final String sessionkey, final String type, final String questionVariant) {
-		final Session session = sessionRepository.findByKeyword(sessionkey);
+		final Room room = roomRepository.findByKeyword(sessionkey);
 		ScoreCalculator scoreCalculator = scoreCalculatorFactory.create(type, questionVariant);
-		return scoreCalculator.getCourseProgress(session);
+		return scoreCalculator.getCourseProgress(room);
 	}
 
 	@Override
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'read')")
 	public ScoreStatistics getMyLearningProgress(final String sessionkey, final String type, final String questionVariant) {
-		final Session session = sessionRepository.findByKeyword(sessionkey);
+		final Room room = roomRepository.findByKeyword(sessionkey);
 		final UserAuthentication user = userService.getCurrentUser();
 		ScoreCalculator scoreCalculator = scoreCalculatorFactory.create(type, questionVariant);
-		return scoreCalculator.getMyProgress(session, user);
+		return scoreCalculator.getMyProgress(room, user);
 	}
 
 	@Override
 	@PreAuthorize("hasPermission('', 'session', 'create')")
-	public SessionInfo importSession(ImportExportSession importSession) {
+	public RoomInfo importSession(ImportExportSession importSession) {
 		final UserAuthentication user = userService.getCurrentUser();
-		final SessionInfo info = sessionRepository.importSession(user, importSession);
+		final RoomInfo info = roomRepository.importSession(user, importSession);
 		if (info == null) {
 			throw new NullPointerException("Could not import session.");
 		}
@@ -528,17 +528,17 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 	@Override
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	public ImportExportSession exportSession(String sessionkey, Boolean withAnswerStatistics, Boolean withFeedbackQuestions) {
-		return sessionRepository.exportSession(sessionkey, withAnswerStatistics, withFeedbackQuestions);
+		return roomRepository.exportSession(sessionkey, withAnswerStatistics, withFeedbackQuestions);
 	}
 
 	@Override
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
-	public SessionInfo copySessionToPublicPool(String sessionkey, de.thm.arsnova.entities.transport.ImportExportSession.PublicPool pp) {
-		ImportExportSession temp = sessionRepository.exportSession(sessionkey, false, false);
+	public RoomInfo copySessionToPublicPool(String sessionkey, de.thm.arsnova.entities.transport.ImportExportSession.PublicPool pp) {
+		ImportExportSession temp = roomRepository.exportSession(sessionkey, false, false);
 		temp.getSession().setPublicPool(pp);
 		temp.getSession().setSessionType("public_pool");
 		final UserAuthentication user = userService.getCurrentUser();
-		return sessionRepository.importSession(user, temp);
+		return roomRepository.importSession(user, temp);
 	}
 
 	@Override
@@ -548,62 +548,62 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 
 	@Override
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'read')")
-	public SessionFeature getFeatures(String sessionkey) {
-		return sessionRepository.findByKeyword(sessionkey).getFeatures();
+	public RoomFeature getFeatures(String sessionkey) {
+		return roomRepository.findByKeyword(sessionkey).getFeatures();
 	}
 
 	@Override
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
-	public SessionFeature updateFeatures(String sessionkey, SessionFeature features) {
-		final Session session = sessionRepository.findByKeyword(sessionkey);
+	public RoomFeature updateFeatures(String sessionkey, RoomFeature features) {
+		final Room room = roomRepository.findByKeyword(sessionkey);
 		final UserAuthentication user = userService.getCurrentUser();
-		session.setFeatures(features);
-		this.publisher.publishEvent(new FeatureChangeEvent(this, session));
-		sessionRepository.save(session);
+		room.setFeatures(features);
+		this.publisher.publishEvent(new FeatureChangeEvent(this, room));
+		roomRepository.save(room);
 
-		return session.getFeatures();
+		return room.getFeatures();
 	}
 
 	@Override
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	public boolean lockFeedbackInput(String sessionkey, Boolean lock) {
-		final Session session = sessionRepository.findByKeyword(sessionkey);
+		final Room room = roomRepository.findByKeyword(sessionkey);
 		final UserAuthentication user = userService.getCurrentUser();
 		if (!lock) {
 			feedbackService.cleanFeedbackVotesBySessionKey(sessionkey, 0);
 		}
 
-		session.setFeedbackLock(lock);
-		this.publisher.publishEvent(new LockFeedbackEvent(this, session));
-		sessionRepository.save(session);
+		room.setFeedbackLock(lock);
+		this.publisher.publishEvent(new LockFeedbackEvent(this, room));
+		roomRepository.save(room);
 
-		return session.getFeedbackLock();
+		return room.getFeedbackLock();
 	}
 
 	@Override
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	public boolean flipFlashcards(String sessionkey, Boolean flip) {
-		final Session session = sessionRepository.findByKeyword(sessionkey);
+		final Room room = roomRepository.findByKeyword(sessionkey);
 		final UserAuthentication user = userService.getCurrentUser();
-		session.setFlipFlashcards(flip);
-		this.publisher.publishEvent(new FlipFlashcardsEvent(this, session));
-		sessionRepository.save(session);
+		room.setFlipFlashcards(flip);
+		this.publisher.publishEvent(new FlipFlashcardsEvent(this, room));
+		roomRepository.save(room);
 
-		return session.getFlipFlashcards();
+		return room.getFlipFlashcards();
 	}
 
-	private void handleLogo(Session session) {
-		if (session.getPpLogo() != null) {
-			if (session.getPpLogo().startsWith("http")) {
-				final String base64ImageString = imageUtils.encodeImageToString(session.getPpLogo());
+	private void handleLogo(Room room) {
+		if (room.getPpLogo() != null) {
+			if (room.getPpLogo().startsWith("http")) {
+				final String base64ImageString = imageUtils.encodeImageToString(room.getPpLogo());
 				if (base64ImageString == null) {
 					throw new BadRequestException("Could not encode image.");
 				}
-				session.setPpLogo(base64ImageString);
+				room.setPpLogo(base64ImageString);
 			}
 
 			// base64 adds offset to filesize, formula taken from: http://en.wikipedia.org/wiki/Base64#MIME
-			final int fileSize = (int) ((session.getPpLogo().length() - 814) / 1.37);
+			final int fileSize = (int) ((room.getPpLogo().length() - 814) / 1.37);
 			if (fileSize > uploadFileSizeByte) {
 				throw new PayloadTooLargeException("Could not save file. File is too large with " + fileSize + " Byte.");
 			}

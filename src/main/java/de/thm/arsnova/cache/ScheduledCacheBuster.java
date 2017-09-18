@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ScheduledCacheBuster {
 
-	@CacheEvict(value = "sessions", allEntries = true)
+	@CacheEvict(value = "rooms", allEntries = true)
 	@Scheduled(initialDelay = 1000 * 25, fixedRate = 1000 * 60 * 60 * 6)
 	private void clearSessionCache() { }
 

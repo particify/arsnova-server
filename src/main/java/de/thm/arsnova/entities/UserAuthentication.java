@@ -19,7 +19,7 @@ package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
-import de.thm.arsnova.services.UserSessionService;
+import de.thm.arsnova.services.UserRoomService;
 import org.jasig.cas.client.authentication.AttributePrincipal;
 import org.pac4j.oauth.profile.facebook.FacebookProfile;
 import org.pac4j.oauth.profile.google2.Google2Profile;
@@ -45,7 +45,7 @@ public class UserAuthentication implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String username;
 	private String type;
-	private UserSessionService.Role role;
+	private UserRoomService.Role role;
 	private boolean isAdmin;
 
 	public UserAuthentication(Google2Profile profile) {
@@ -96,15 +96,15 @@ public class UserAuthentication implements Serializable {
 		this.type = type;
 	}
 
-	public UserSessionService.Role getRole() {
+	public UserRoomService.Role getRole() {
 		return role;
 	}
 
-	public void setRole(UserSessionService.Role role) {
+	public void setRole(UserRoomService.Role role) {
 		this.role = role;
 	}
 
-	public boolean hasRole(UserSessionService.Role role) {
+	public boolean hasRole(UserRoomService.Role role) {
 		return this.role == role;
 	}
 

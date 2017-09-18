@@ -19,8 +19,6 @@ package de.thm.arsnova.entities.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.Entity;
-import de.thm.arsnova.entities.migration.v2.Session;
-import de.thm.arsnova.entities.migration.v2.VisitedSession;
 import de.thm.arsnova.entities.serialization.View;
 
 import java.util.ArrayList;
@@ -35,20 +33,20 @@ public class LoggedIn implements Entity {
 	private String user;
 	private String sessionId;
 	private long timestamp;
-	private List<VisitedSession> visitedSessions = new ArrayList<>();
+	private List<VisitedRoom> visitedSessions = new ArrayList<>();
 
 	public LoggedIn() {
 		this.updateTimestamp();
 	}
 
-	public void addVisitedSession(Session s) {
+	public void addVisitedSession(Room s) {
 		if (!isAlreadyVisited(s)) {
-			this.visitedSessions.add(new VisitedSession(s));
+			this.visitedSessions.add(new VisitedRoom(s));
 		}
 	}
 
-	private boolean isAlreadyVisited(Session s) {
-		for (VisitedSession vs : this.visitedSessions) {
+	private boolean isAlreadyVisited(Room s) {
+		for (VisitedRoom vs : this.visitedSessions) {
 			if (vs.getId().equals(s.getId())) {
 				return true;
 			}
@@ -111,12 +109,12 @@ public class LoggedIn implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public List<VisitedSession> getVisitedSessions() {
+	public List<VisitedRoom> getVisitedSessions() {
 		return visitedSessions;
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setVisitedSessions(List<VisitedSession> visitedSessions) {
+	public void setVisitedSessions(List<VisitedRoom> visitedSessions) {
 		this.visitedSessions = visitedSessions;
 	}
 

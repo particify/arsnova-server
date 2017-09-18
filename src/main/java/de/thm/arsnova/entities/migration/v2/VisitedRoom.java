@@ -18,21 +18,20 @@
 package de.thm.arsnova.entities.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.entities.migration.v2.Session;
 import de.thm.arsnova.entities.serialization.View;
 
 /**
  * A session a user has visited previously.
  */
-public class VisitedSession {
+public class VisitedRoom {
 	private String id;
 	private String name;
 	private String keyword;
 
-	public VisitedSession() {
+	public VisitedRoom() {
 	}
 
-	public VisitedSession(Session s) {
+	public VisitedRoom(Room s) {
 		this.id = s.getId();
 		this.name = s.getName();
 		this.keyword = s.getKeyword();
@@ -70,7 +69,7 @@ public class VisitedSession {
 
 	@Override
 	public String toString() {
-		return "VisitedSession [id=" + id + ", name=" + name + ", keyword="
+		return "VisitedRoom [id=" + id + ", name=" + name + ", keyword="
 				+ keyword + "]";
 	}
 }

@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.services.score;
 
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.transport.ScoreStatistics;
 import de.thm.arsnova.persistance.SessionStatisticsRepository;
@@ -39,12 +39,12 @@ abstract class VariantScoreCalculator implements ScoreCalculator {
 	}
 
 	@Cacheable("score")
-	private Score loadProgress(final Session session) {
-		return sessionStatisticsRepository.getLearningProgress(session);
+	private Score loadProgress(final Room room) {
+		return sessionStatisticsRepository.getLearningProgress(room);
 	}
 
-	private void refreshProgress(final Session session) {
-		this.courseScore = sessionStatisticsRepository.getLearningProgress(session);
+	private void refreshProgress(final Room room) {
+		this.courseScore = sessionStatisticsRepository.getLearningProgress(room);
 	}
 
 	public void setQuestionVariant(final String variant) {
@@ -52,8 +52,8 @@ abstract class VariantScoreCalculator implements ScoreCalculator {
 	}
 
 	@Override
-	public ScoreStatistics getCourseProgress(Session session) {
-		this.refreshProgress(session);
+	public ScoreStatistics getCourseProgress(Room room) {
+		this.refreshProgress(room);
 		this.filterVariant();
 		return this.createCourseProgress();
 	}
@@ -61,8 +61,8 @@ abstract class VariantScoreCalculator implements ScoreCalculator {
 	protected abstract ScoreStatistics createCourseProgress();
 
 	@Override
-	public ScoreStatistics getMyProgress(Session session, UserAuthentication user) {
-		this.refreshProgress(session);
+	public ScoreStatistics getMyProgress(Room room, UserAuthentication user) {
+		this.refreshProgress(room);
 		this.filterVariant();
 		return this.createMyProgress(user);
 	}

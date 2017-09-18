@@ -18,19 +18,19 @@
 package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.migration.v2.Comment;
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 /**
  * Fires whenever an comment is deleted.
  */
-public class DeleteCommentEvent extends SessionEvent {
+public class DeleteCommentEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
 	private final Comment comment;
 
-	public DeleteCommentEvent(Object source, Session session, Comment comment) {
-		super(source, session);
+	public DeleteCommentEvent(Object source, Room room, Comment comment) {
+		super(source, room);
 		this.comment = comment;
 	}
 

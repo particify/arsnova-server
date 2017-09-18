@@ -19,7 +19,7 @@ package de.thm.arsnova.controller;
 
 import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.services.UserService;
-import de.thm.arsnova.services.UserSessionService;
+import de.thm.arsnova.services.UserRoomService;
 import de.thm.arsnova.websocket.ArsnovaSocketioServer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -52,7 +52,7 @@ public class SocketController extends AbstractController {
 	private UserService userService;
 
 	@Autowired
-	private UserSessionService userSessionService;
+	private UserRoomService userRoomService;
 
 	@Autowired
 	private ArsnovaSocketioServer server;
@@ -81,7 +81,7 @@ public class SocketController extends AbstractController {
 			return;
 		}
 		userService.putUser2SocketId(UUID.fromString(socketid), u);
-		userSessionService.setSocketId(UUID.fromString(socketid));
+		userRoomService.setSocketId(UUID.fromString(socketid));
 		response.setStatus(HttpStatus.NO_CONTENT.value());
 	}
 

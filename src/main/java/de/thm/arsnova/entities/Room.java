@@ -3,7 +3,7 @@ package de.thm.arsnova.entities;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
 
-public class Session implements Entity {
+public class Room implements Entity {
 	private String id;
 	private String rev;
 	private String shortId;
@@ -11,7 +11,7 @@ public class Session implements Entity {
 	private String name;
 	private String abbreviation;
 	private boolean closed;
-	private SessionStatistics statistics;
+	private RoomStatistics statistics;
 
 	@Override
 	@JsonView({View.Persistence.class, View.Public.class})
@@ -88,11 +88,11 @@ public class Session implements Entity {
 	}
 
 	@JsonView(View.Public.class)
-	public SessionStatistics getStatistics() {
+	public RoomStatistics getStatistics() {
 		return statistics;
 	}
 
-	public void setStatistics(final SessionStatistics statistics) {
+	public void setStatistics(final RoomStatistics statistics) {
 		this.statistics = statistics;
 	}
 }

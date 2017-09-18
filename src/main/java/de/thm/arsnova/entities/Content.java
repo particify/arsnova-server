@@ -6,7 +6,7 @@ import de.thm.arsnova.entities.serialization.View;
 public class Content implements Entity {
 	private String id;
 	private String rev;
-	private String sessionId;
+	private String roomId;
 	private String subject;
 	private String body;
 	private String format;
@@ -37,13 +37,13 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public String getSessionId() {
-		return sessionId;
+	public String getRoomId() {
+		return roomId;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setSessionId(final String sessionId) {
-		this.sessionId = sessionId;
+	public void setRoomId(final String roomId) {
+		this.roomId = roomId;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})

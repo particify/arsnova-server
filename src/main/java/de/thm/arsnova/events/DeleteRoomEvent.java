@@ -17,17 +17,18 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 /**
- * Fires whenever the status of a session changes, i.e., it is enabled or disabled.
+ * Fires whenever a session is deleted. Note that this implies that all related data such as comments,
+ * lecturer questions, and answers are deleted as well, even though those events are not fired.
  */
-public class StatusSessionEvent extends SessionEvent {
+public class DeleteRoomEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public StatusSessionEvent(Object source, Session session) {
-		super(source, session);
+	public DeleteRoomEvent(Object source, Room room) {
+		super(source, room);
 	}
 
 	@Override

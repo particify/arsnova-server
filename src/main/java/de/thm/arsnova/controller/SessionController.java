@@ -18,18 +18,18 @@
 package de.thm.arsnova.controller;
 
 import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.entities.migration.v2.Session;
-import de.thm.arsnova.entities.migration.v2.SessionFeature;
-import de.thm.arsnova.entities.migration.v2.SessionInfo;
+import de.thm.arsnova.entities.migration.v2.Room;
+import de.thm.arsnova.entities.migration.v2.RoomFeature;
+import de.thm.arsnova.entities.migration.v2.RoomInfo;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.ScoreStatistics;
 import de.thm.arsnova.exceptions.UnauthorizedException;
-import de.thm.arsnova.services.SessionService;
+import de.thm.arsnova.services.RoomService;
 import de.thm.arsnova.services.UserService;
-import de.thm.arsnova.services.SessionServiceImpl.SessionInfoNameComparator;
-import de.thm.arsnova.services.SessionServiceImpl.SessionInfoShortNameComparator;
-import de.thm.arsnova.services.SessionServiceImpl.SessionNameComparator;
-import de.thm.arsnova.services.SessionServiceImpl.SessionShortNameComparator;
+import de.thm.arsnova.services.RoomServiceImpl.SessionInfoNameComparator;
+import de.thm.arsnova.services.RoomServiceImpl.SessionInfoShortNameComparator;
+import de.thm.arsnova.services.RoomServiceImpl.SessionNameComparator;
+import de.thm.arsnova.services.RoomServiceImpl.SessionShortNameComparator;
 import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.web.Pagination;
 import io.swagger.annotations.Api;
@@ -58,10 +58,10 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/session")
-@Api(value = "/session", description = "the Session Controller API")
+@Api(value = "/session", description = "the Room Controller API")
 public class SessionController extends PaginationController {
 	@Autowired
-	private SessionService sessionService;
+	private RoomService roomService;
 
 	@Autowired
 	private UserService userService;
@@ -71,23 +71,23 @@ public class SessionController extends PaginationController {
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.GET)
-	public Session joinSession(
-			@ApiParam(value = "Session-Key from current session", required = true) @PathVariable final String sessionkey,
+	public Room joinSession(
+			@ApiParam(value = "Room-Key from current session", required = true) @PathVariable final String sessionkey,
 			@ApiParam(value = "Adminflag", required = false) @RequestParam(value = "admin", defaultValue = "false")	final boolean admin
 			) {
 		if (admin) {
-			return sessionService.getForAdmin(sessionkey);
+			return roomService.getForAdmin(sessionkey);
 		} else {
-			return sessionService.getByKey(sessionkey);
+			return roomService.getByKey(sessionkey);
 		}
 	}
 
 	@ApiOperation(value = "deletes a session",
 			nickname = "deleteSession")
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.DELETE)
-	public void deleteSession(@ApiParam(value = "Session-Key from current session", required = true) @PathVariable final String sessionkey) {
-		Session session = sessionService.getByKey(sessionkey);
-		sessionService.deleteCascading(session);
+	public void deleteSession(@ApiParam(value = "Room-Key from current session", required = true) @PathVariable final String sessionkey) {
+		Room room = roomService.getByKey(sessionkey);
+		roomService.deleteCascading(room);
 	}
 
 	@ApiOperation(value = "count active users",
@@ -95,11 +95,11 @@ public class SessionController extends PaginationController {
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/{sessionkey}/activeusercount", method = RequestMethod.GET)
-	public int countActiveUsers(@ApiParam(value = "Session-Key from current session", required = true) @PathVariable final String sessionkey) {
-		return sessionService.activeUsers(sessionkey);
+	public int countActiveUsers(@ApiParam(value = "Room-Key from current session", required = true) @PathVariable final String sessionkey) {
+		return roomService.activeUsers(sessionkey);
 	}
 
-	@ApiOperation(value = "Creates a new Session and returns the Session's data",
+	@ApiOperation(value = "Creates a new Room and returns the Room's data",
 			nickname = "postNewSession")
 	@ApiResponses(value = {
 		@ApiResponse(code = 201, message = HTML_STATUS_201),
@@ -107,21 +107,21 @@ public class SessionController extends PaginationController {
 	})
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Session postNewSession(@ApiParam(value = "current session", required = true) @RequestBody final Session session, final HttpServletResponse response) {
-		if (session != null && session.isCourseSession()) {
+	public Room postNewSession(@ApiParam(value = "current session", required = true) @RequestBody final Room room, final HttpServletResponse response) {
+		if (room != null && room.isCourseSession()) {
 			final List<Course> courses = new ArrayList<>();
 			final Course course = new Course();
-			course.setId(session.getCourseId());
+			course.setId(room.getCourseId());
 			courses.add(course);
-			final int sessionCount = sessionService.countSessionsByCourses(courses);
+			final int sessionCount = roomService.countSessionsByCourses(courses);
 			if (sessionCount > 0) {
 				final String appendix = " (" + (sessionCount + 1) + ")";
-				session.setName(session.getName() + appendix);
-				session.setShortName(session.getShortName() + appendix);
+				room.setName(room.getName() + appendix);
+				room.setShortName(room.getShortName() + appendix);
 			}
 		}
 
-		final Session newSession = sessionService.save(session);
+		final Room newSession = roomService.save(room);
 
 		if (newSession == null) {
 			response.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
@@ -134,20 +134,20 @@ public class SessionController extends PaginationController {
 	@ApiOperation(value = "updates a session",
 			nickname = "postNewSession")
 	@RequestMapping(value = "/{sessionkey}", method = RequestMethod.PUT)
-	public Session updateSession(
+	public Room updateSession(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
-			@ApiParam(value = "current session", required = true) @RequestBody final Session session
+			@ApiParam(value = "current session", required = true) @RequestBody final Room room
 			) {
-		return sessionService.update(sessionkey, session);
+		return roomService.update(sessionkey, room);
 	}
 
 	@ApiOperation(value = "change the session creator (owner)", nickname = "changeSessionCreator")
 	@RequestMapping(value = "/{sessionkey}/changecreator", method = RequestMethod.PUT)
-	public Session changeSessionCreator(
+	public Room changeSessionCreator(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
 			@ApiParam(value = "new session creator", required = true) @RequestBody final String newCreator
 			) {
-		return sessionService.updateCreator(sessionkey, newCreator);
+		return roomService.updateCreator(sessionkey, newCreator);
 	}
 
 	@ApiOperation(value = "Retrieves a list of Sessions",
@@ -158,7 +158,7 @@ public class SessionController extends PaginationController {
 	})
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
-	public List<Session> getSessions(
+	public List<Room> getSessions(
 			@ApiParam(value = "ownedOnly", required = true) @RequestParam(value = "ownedonly", defaultValue = "false") final boolean ownedOnly,
 			@ApiParam(value = "visitedOnly", required = true) @RequestParam(value = "visitedonly", defaultValue = "false") final boolean visitedOnly,
 			@ApiParam(value = "sortby", required = true) @RequestParam(value = "sortby", defaultValue = "name") final String sortby,
@@ -166,14 +166,14 @@ public class SessionController extends PaginationController {
 					"username", defaultValue = "") final String username,
 			final HttpServletResponse response
 			) {
-		List<Session> sessions;
+		List<Room> sessions;
 
 		if (!"".equals(username)) {
 			try {
 				if (ownedOnly && !visitedOnly) {
-					sessions = sessionService.getUserSessions(username);
+					sessions = roomService.getUserSessions(username);
 				} else if (visitedOnly && !ownedOnly) {
-					sessions = sessionService.getUserVisitedSessions(username);
+					sessions = roomService.getUserVisitedSessions(username);
 				} else {
 					response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
 					return null;
@@ -185,9 +185,9 @@ public class SessionController extends PaginationController {
 			/* TODO implement all parameter combinations, implement use of user parameter */
 			try {
 				if (ownedOnly && !visitedOnly) {
-					sessions = sessionService.getMySessions(offset, limit);
+					sessions = roomService.getMySessions(offset, limit);
 				} else if (visitedOnly && !ownedOnly) {
-					sessions = sessionService.getMyVisitedSessions(offset, limit);
+					sessions = roomService.getMyVisitedSessions(offset, limit);
 				} else {
 					response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
 					return null;
@@ -214,23 +214,23 @@ public class SessionController extends PaginationController {
 	/**
 	 * Returns a list of my own sessions with only the necessary information like name, keyword, or counters.
 	 */
-	@ApiOperation(value = "Retrieves a Session",
+	@ApiOperation(value = "Retrieves a Room",
 			nickname = "getMySessions")
 	@ApiResponses(value = {
 		@ApiResponse(code = 204, message = HTML_STATUS_204)
 	})
 	@RequestMapping(value = "/", method = RequestMethod.GET, params = "statusonly=true")
 	@Pagination
-	public List<SessionInfo> getMySessions(
+	public List<RoomInfo> getMySessions(
 			@ApiParam(value = "visitedOnly", required = true) @RequestParam(value = "visitedonly", defaultValue = "false") final boolean visitedOnly,
 			@ApiParam(value = "sort by", required = false) @RequestParam(value = "sortby", defaultValue = "name") final String sortby,
 			final HttpServletResponse response
 			) {
-		List<SessionInfo> sessions;
+		List<RoomInfo> sessions;
 		if (!visitedOnly) {
-			sessions = sessionService.getMySessionsInfo(offset, limit);
+			sessions = roomService.getMySessionsInfo(offset, limit);
 		} else {
-			sessions = sessionService.getMyVisitedSessionsInfo(offset, limit);
+			sessions = roomService.getMyVisitedSessionsInfo(offset, limit);
 		}
 
 		if (sessions == null || sessions.isEmpty()) {
@@ -252,10 +252,10 @@ public class SessionController extends PaginationController {
 		@ApiResponse(code = 204, message = HTML_STATUS_204)
 	})
 	@RequestMapping(value = "/publicpool", method = RequestMethod.GET, params = "statusonly=true")
-	public List<SessionInfo> getMyPublicPoolSessions(
+	public List<RoomInfo> getMyPublicPoolSessions(
 			final HttpServletResponse response
 			) {
-		List<SessionInfo> sessions = sessionService.getMyPublicPoolSessionsInfo();
+		List<RoomInfo> sessions = roomService.getMyPublicPoolSessionsInfo();
 
 		if (sessions == null || sessions.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
@@ -271,10 +271,10 @@ public class SessionController extends PaginationController {
 		@ApiResponse(code = 204, message = HTML_STATUS_204)
 	})
 	@RequestMapping(value = "/publicpool", method = RequestMethod.GET)
-	public List<SessionInfo> getPublicPoolSessions(
+	public List<RoomInfo> getPublicPoolSessions(
 			final HttpServletResponse response
 			) {
-		List<SessionInfo> sessions = sessionService.getPublicPoolSessionsInfo();
+		List<RoomInfo> sessions = roomService.getPublicPoolSessionsInfo();
 
 		if (sessions == null || sessions.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
@@ -287,11 +287,11 @@ public class SessionController extends PaginationController {
 	@ApiOperation(value = "imports a session",
 			nickname = "importSession")
 	@RequestMapping(value = "/import", method = RequestMethod.POST)
-	public SessionInfo importSession(
+	public RoomInfo importSession(
 			@ApiParam(value = "current session", required = true) @RequestBody final ImportExportSession session,
 			final HttpServletResponse response
 			) {
-		return sessionService.importSession(session);
+		return roomService.importSession(session);
 	}
 
 	@ApiOperation(value = "export sessions", nickname = "exportSession")
@@ -305,42 +305,42 @@ public class SessionController extends PaginationController {
 		List<ImportExportSession> sessions = new ArrayList<>();
 		ImportExportSession temp;
 		for (String key : sessionkey) {
-			sessionService.setActive(key, false);
-			temp = sessionService.exportSession(key, withAnswerStatistics, withFeedbackQuestions);
+			roomService.setActive(key, false);
+			temp = roomService.exportSession(key, withAnswerStatistics, withFeedbackQuestions);
 			if (temp != null) {
 				sessions.add(temp);
 			}
-			sessionService.setActive(key, true);
+			roomService.setActive(key, true);
 		}
 		return sessions;
 	}
 
 	@ApiOperation(value = "copy a session to the public pool if enabled")
 	@RequestMapping(value = "/{sessionkey}/copytopublicpool", method = RequestMethod.POST)
-	public SessionInfo copyToPublicPool(
+	public RoomInfo copyToPublicPool(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
 			@ApiParam(value = "public pool attributes for session", required = true) @RequestBody final de.thm.arsnova.entities.transport.ImportExportSession.PublicPool publicPool
 			) {
-		sessionService.setActive(sessionkey, false);
-		SessionInfo sessionInfo = sessionService.copySessionToPublicPool(sessionkey, publicPool);
-		sessionService.setActive(sessionkey, true);
+		roomService.setActive(sessionkey, false);
+		RoomInfo sessionInfo = roomService.copySessionToPublicPool(sessionkey, publicPool);
+		roomService.setActive(sessionkey, true);
 		return sessionInfo;
 	}
 
 
-	@ApiOperation(value = "Locks or unlocks a Session",
+	@ApiOperation(value = "Locks or unlocks a Room",
 			nickname = "lockSession")
 	@ApiResponses(value = {
 		@ApiResponse(code = 404, message = HTML_STATUS_404)
 	})
 	@RequestMapping(value = "/{sessionkey}/lock", method = RequestMethod.POST)
-	public Session lockSession(
+	public Room lockSession(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
 			@ApiParam(value = "lock", required = true) @RequestParam(required = false) final Boolean lock,
 			final HttpServletResponse response
 			) {
 		if (lock != null) {
-			return sessionService.setActive(sessionkey, lock);
+			return roomService.setActive(sessionkey, lock);
 		}
 		response.setStatus(HttpStatus.NOT_FOUND.value());
 		return null;
@@ -355,7 +355,7 @@ public class SessionController extends PaginationController {
 			@ApiParam(value = "question variant", required = false) @RequestParam(value = "questionVariant", required = false) final String questionVariant,
 			final HttpServletResponse response
 			) {
-		return sessionService.getLearningProgress(sessionkey, type, questionVariant);
+		return roomService.getLearningProgress(sessionkey, type, questionVariant);
 	}
 
 	@ApiOperation(value = "retrieves a value for the learning progress for the current user",
@@ -367,28 +367,28 @@ public class SessionController extends PaginationController {
 			@RequestParam(value = "questionVariant", required = false) final String questionVariant,
 			final HttpServletResponse response
 			) {
-		return sessionService.getMyLearningProgress(sessionkey, type, questionVariant);
+		return roomService.getMyLearningProgress(sessionkey, type, questionVariant);
 	}
 
 	@ApiOperation(value = "retrieves all session features",
 			nickname = "getSessionFeatures")
 	@RequestMapping(value = "/{sessionkey}/features", method = RequestMethod.GET)
-	public SessionFeature getSessionFeatures(
+	public RoomFeature getSessionFeatures(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
 			final HttpServletResponse response
 			) {
-		return sessionService.getFeatures(sessionkey);
+		return roomService.getFeatures(sessionkey);
 	}
 
 	@RequestMapping(value = "/{sessionkey}/features", method = RequestMethod.PUT)
 	@ApiOperation(value = "change all session features",
 			nickname = "changeSessionFeatures")
-	public SessionFeature changeSessionFeatures(
+	public RoomFeature changeSessionFeatures(
 			@ApiParam(value = "session-key from current session", required = true) @PathVariable final String sessionkey,
-			@ApiParam(value = "session feature", required = true) @RequestBody final SessionFeature features,
+			@ApiParam(value = "session feature", required = true) @RequestBody final RoomFeature features,
 			final HttpServletResponse response
 			) {
-		return sessionService.updateFeatures(sessionkey, features);
+		return roomService.updateFeatures(sessionkey, features);
 	}
 
 	@RequestMapping(value = "/{sessionkey}/lockfeedbackinput", method = RequestMethod.POST)
@@ -399,7 +399,7 @@ public class SessionController extends PaginationController {
 			@ApiParam(value = "lock", required = true) @RequestParam(required = true) final Boolean lock,
 			final HttpServletResponse response
 			) {
-		return sessionService.lockFeedbackInput(sessionkey, lock);
+		return roomService.lockFeedbackInput(sessionkey, lock);
 	}
 
 	@RequestMapping(value = "/{sessionkey}/flipflashcards", method = RequestMethod.POST)
@@ -410,7 +410,7 @@ public class SessionController extends PaginationController {
 			@ApiParam(value = "flip", required = true) @RequestParam(required = true) final Boolean flip,
 			final HttpServletResponse response
 			) {
-		return sessionService.flipFlashcards(sessionkey, flip);
+		return roomService.flipFlashcards(sessionkey, flip);
 	}
 
 	/* internal redirections */

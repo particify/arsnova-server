@@ -16,7 +16,7 @@ Caching should only be used with domain objects where the `hashCode` and `equals
 
 ```java
 @Cacheable(value = "notverycacheable", key = "#p0.concat('-').concat(#p1).concat('-').concat(#p2)")
-public ResultObject notVeryCacheable(String sessionId, String questionVariant, String subject) { ... }
+public ResultObject notVeryCacheable(String roomId, String questionVariant, String subject) { ... }
 ```
 
 Therefore, you should always work with domain objects like `Session`, `Content`, or even your own, newly defined objects:

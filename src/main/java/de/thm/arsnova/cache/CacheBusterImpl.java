@@ -77,10 +77,10 @@ public class CacheBusterImpl implements CacheBuster, ArsnovaEventVisitor {
 	public void visit(NewFeedbackEvent event) { }
 
 	@Override
-	public void visit(DeleteFeedbackForSessionsEvent event) { }
+	public void visit(DeleteFeedbackForRoomsEvent event) { }
 
 	@Override
-	public void visit(StatusSessionEvent event) { }
+	public void visit(StatusRoomEvent event) { }
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@Override
@@ -100,11 +100,11 @@ public class CacheBusterImpl implements CacheBuster, ArsnovaEventVisitor {
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@Override
-	public void visit(NewSessionEvent newSessionEvent) { }
+	public void visit(NewRoomEvent newSessionEvent) { }
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@Override
-	public void visit(DeleteSessionEvent deleteSessionEvent) { }
+	public void visit(DeleteRoomEvent deleteSessionEvent) { }
 
 	@Override
 	public void visit(LockVoteEvent lockVoteEvent) { }

@@ -15,25 +15,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.events;
+package de.thm.arsnova.services;
 
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.Room;
+
+import java.util.UUID;
 
 /**
- * Base class for all {@link ArsnovaEvent}s that are related to a session.
+ * The functionality the user-session service should provide.
  */
-public abstract class SessionEvent extends ArsnovaEvent {
+public interface UserRoomService {
 
-	private static final long serialVersionUID = 1L;
-
-	private final Session session;
-
-	public SessionEvent(Object source, Session session) {
-		super(source);
-		this.session = session;
+	enum Role {
+		STUDENT,
+		SPEAKER
 	}
 
-	public Session getSession() {
-		return session;
-	}
+	void setUser(UserAuthentication user);
+	UserAuthentication getUser();
+
+	void setRoom(Room room);
+	Room getRoom();
+
+	void setSocketId(UUID socketId);
+	UUID getSocketId();
+
+	void setRole(Role role);
+	Role getRole();
+
+	boolean inRoom();
+	boolean isAuthenticated();
 }

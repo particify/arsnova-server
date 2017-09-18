@@ -22,9 +22,9 @@ import de.thm.arsnova.entities.migration.v2.Answer;
 import de.thm.arsnova.entities.migration.v2.Comment;
 import de.thm.arsnova.entities.migration.v2.Content;
 import de.thm.arsnova.entities.Motd;
-import de.thm.arsnova.entities.migration.v2.Session;
-import de.thm.arsnova.entities.migration.v2.SessionFeature;
-import de.thm.arsnova.entities.migration.v2.SessionInfo;
+import de.thm.arsnova.entities.migration.v2.Room;
+import de.thm.arsnova.entities.migration.v2.RoomFeature;
+import de.thm.arsnova.entities.migration.v2.RoomInfo;
 import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.serialization.View;
 import io.swagger.annotations.ApiModel;
@@ -48,9 +48,9 @@ public class ImportExportSession {
 
 	private List<Motd> motds;
 
-	private SessionFeature sessionFeature = new SessionFeature();
+	private RoomFeature sessionFeature = new RoomFeature();
 
-	private SessionInfo sessionInfo;
+	private RoomInfo sessionInfo;
 
 	public ImportExportSession() {
 		questions = new ArrayList<>();
@@ -99,24 +99,24 @@ public class ImportExportSession {
 	}
 
 	@JsonView(View.Public.class)
-	public SessionFeature getSessionFeature() {
+	public RoomFeature getSessionFeature() {
 		return sessionFeature;
 	}
 
-	public void setSessionFeature(SessionFeature sF) {
+	public void setSessionFeature(RoomFeature sF) {
 		sessionFeature = sF;
 	}
 
 	@JsonView(View.Public.class)
-	public SessionInfo getSessionInfo() {
+	public RoomInfo getSessionInfo() {
 		return sessionInfo;
 	}
 
-	public void setSessionInfo(SessionInfo si) {
+	public void setSessionInfo(RoomInfo si) {
 		sessionInfo = si;
 	}
 
-	public void setSessionFromSessionObject(Session s) {
+	public void setSessionFromSessionObject(Room s) {
 		ImportExportSesssion iesession = new ImportExportSesssion();
 		iesession.setName(s.getName());
 		iesession.setShortName(s.getShortName());
@@ -134,8 +134,8 @@ public class ImportExportSession {
 		questions.add(ieq);
 	}
 
-	public Session generateSessionEntity(UserAuthentication user) {
-		final Session s = new Session();
+	public Room generateSessionEntity(UserAuthentication user) {
+		final Room s = new Room();
 		// import fields
 		s.setActive(session.isActive());
 		// overwrite name and shortname
@@ -249,7 +249,7 @@ public class ImportExportSession {
 
 		private PublicPool publicPool;
 
-		private SessionFeature sessionFeature;
+		private RoomFeature sessionFeature;
 
 		@ApiModelProperty(required = true, value = "used to display short name")
 		@JsonView(View.Public.class)
@@ -302,11 +302,11 @@ public class ImportExportSession {
 		}
 
 		@JsonView(View.Public.class)
-		public SessionFeature getSessionFeature() {
+		public RoomFeature getSessionFeature() {
 			return this.sessionFeature;
 		}
 
-		public void setSessionFeature(SessionFeature sF) {
+		public void setSessionFeature(RoomFeature sF) {
 			this.sessionFeature = sF;
 		}
 	}
@@ -335,7 +335,7 @@ public class ImportExportSession {
 
 		private String shortName;
 
-		public void setPpFromSession(Session s) {
+		public void setPpFromSession(Room s) {
 			ppAuthorName = s.getPpAuthorName();
 			ppAuthorMail = s.getPpAuthorMail();
 			ppUniversity = s.getPpUniversity();

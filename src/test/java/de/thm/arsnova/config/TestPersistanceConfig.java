@@ -20,8 +20,8 @@ public class TestPersistanceConfig {
 	}
 
 	@Bean
-	public SessionRepository sessionRepository() {
-		return Mockito.mock(SessionRepository.class);
+	public RoomRepository sessionRepository() {
+		return Mockito.mock(RoomRepository.class);
 	}
 
 	@Bean

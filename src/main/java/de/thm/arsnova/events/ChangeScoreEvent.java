@@ -17,17 +17,17 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 /**
  * Fires whenever a score related value changes.
  */
-public class ChangeScoreEvent extends SessionEvent {
+public class ChangeScoreEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public ChangeScoreEvent(Object source, Session session) {
-		super(source, session);
+	public ChangeScoreEvent(Object source, Room room) {
+		super(source, room);
 	}
 
 	@Override

@@ -28,7 +28,7 @@ import java.io.Serializable;
  * Contains fields that describe which specific feature is activated for a session.
  */
 @ApiModel(value = "session feature", description = "the session feature entity")
-public class SessionFeature implements Serializable {
+public class RoomFeature implements Serializable {
 
 	private boolean custom = true;
 	private boolean clicker = false;
@@ -49,7 +49,7 @@ public class SessionFeature implements Serializable {
 	private boolean flashcardFeature = true;
 	private boolean slides = false;
 
-	public SessionFeature(SessionFeature features) {
+	public RoomFeature(RoomFeature features) {
 		this();
 		if (features != null) {
 			this.custom = features.custom;
@@ -72,7 +72,7 @@ public class SessionFeature implements Serializable {
 		}
 	}
 
-	public SessionFeature() { }
+	public RoomFeature() { }
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isLecture() {

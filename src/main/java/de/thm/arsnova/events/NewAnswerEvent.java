@@ -20,12 +20,12 @@ package de.thm.arsnova.events;
 import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Answer;
 import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.Session;
+import de.thm.arsnova.entities.migration.v2.Room;
 
 /**
  * Fires whenever a new answer is added.
  */
-public class NewAnswerEvent extends SessionEvent {
+public class NewAnswerEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
@@ -35,8 +35,8 @@ public class NewAnswerEvent extends SessionEvent {
 
 	private final Content content;
 
-	public NewAnswerEvent(Object source, Session session, Answer answer, UserAuthentication user, Content content) {
-		super(source, session);
+	public NewAnswerEvent(Object source, Room room, Answer answer, UserAuthentication user, Content content) {
+		super(source, room);
 		this.answer = answer;
 		this.user = user;
 		this.content = content;
