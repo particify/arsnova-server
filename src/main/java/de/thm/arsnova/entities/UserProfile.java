@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class UserProfile implements Entity {
@@ -13,7 +15,7 @@ public class UserProfile implements Entity {
 		private String password;
 		private String activationKey;
 		private String passwordResetKey;
-		private long passwordResetTime;
+		private Date passwordResetTime;
 
 		@JsonView(View.Persistence.class)
 		public String getPassword() {
@@ -21,7 +23,7 @@ public class UserProfile implements Entity {
 		}
 
 		@JsonView(View.Persistence.class)
-		public void setPassword(String password) {
+		public void setPassword(final String password) {
 			this.password = password;
 		}
 
@@ -31,7 +33,7 @@ public class UserProfile implements Entity {
 		}
 
 		@JsonView(View.Persistence.class)
-		public void setActivationKey(String activationKey) {
+		public void setActivationKey(final String activationKey) {
 			this.activationKey = activationKey;
 		}
 
@@ -41,30 +43,30 @@ public class UserProfile implements Entity {
 		}
 
 		@JsonView(View.Persistence.class)
-		public void setPasswordResetKey(String passwordResetKey) {
+		public void setPasswordResetKey(final String passwordResetKey) {
 			this.passwordResetKey = passwordResetKey;
 		}
 
 		@JsonView(View.Persistence.class)
-		public long getPasswordResetTime() {
+		public Date getPasswordResetTime() {
 			return passwordResetTime;
 		}
 
 		@JsonView(View.Persistence.class)
-		public void setPasswordResetTime(long passwordResetTime) {
+		public void setPasswordResetTime(final Date passwordResetTime) {
 			this.passwordResetTime = passwordResetTime;
 		}
 	}
 
 	public class RoomHistoryEntry {
 		private String roomId;
-		private long lastVisit;
+		private Date lastVisit;
 
 		public RoomHistoryEntry() {
 
 		}
 
-		public RoomHistoryEntry(String roomId, long lastVisit) {
+		public RoomHistoryEntry(String roomId, Date lastVisit) {
 			this.roomId = roomId;
 			this.lastVisit = lastVisit;
 		}
@@ -77,11 +79,11 @@ public class UserProfile implements Entity {
 			this.roomId = roomId;
 		}
 
-		public long getLastVisit() {
+		public Date getLastVisit() {
 			return lastVisit;
 		}
 
-		public void setLastVisit(long lastVisit) {
+		public void setLastVisit(Date lastVisit) {
 			this.lastVisit = lastVisit;
 		}
 	}
@@ -90,11 +92,12 @@ public class UserProfile implements Entity {
 	private String rev;
 	private String authProvider;
 	private String loginId;
-	private long creation;
-	private long lastLogin;
+	private Date creationTimestamp;
+	private Date lastLoginTimestamp;
 	private Account account;
 	private List<RoomHistoryEntry> roomHistory = new ArrayList<>();
 	private Set<String> acknowledgedMotds = new HashSet<>();
+	private Map<String, Map<String, ?>> extensions;
 
 	@Override
 	@JsonView({View.Persistence.class, View.Public.class})
@@ -104,7 +107,7 @@ public class UserProfile implements Entity {
 
 	@Override
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setId(String id) {
+	public void setId(final String id) {
 		this.id = id;
 	}
 
@@ -116,7 +119,7 @@ public class UserProfile implements Entity {
 
 	@Override
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setRevision(String rev) {
+	public void setRevision(final String rev) {
 		this.rev = rev;
 	}
 
@@ -126,7 +129,7 @@ public class UserProfile implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setAuthProvider(String authProvider) {
+	public void setAuthProvider(final String authProvider) {
 		this.authProvider = authProvider;
 	}
 
@@ -136,28 +139,28 @@ public class UserProfile implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setLoginId(String loginId) {
+	public void setLoginId(final String loginId) {
 		this.loginId = loginId;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public long getCreation() {
-		return creation;
+	public Date getCreationTimestamp() {
+		return creationTimestamp;
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setCreation(long creation) {
-		this.creation = creation;
+	public void setCreationTimestamp(final Date creationTimestamp) {
+		this.creationTimestamp = creationTimestamp;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public long getLastLogin() {
-		return lastLogin;
+	public Date getLastLoginTimestamp() {
+		return lastLoginTimestamp;
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setLastLogin(long lastLogin) {
-		this.lastLogin = lastLogin;
+	public void setLastLoginTimestamp(final Date lastLoginTimestamp) {
+		this.lastLoginTimestamp = lastLoginTimestamp;
 	}
 
 	@JsonView(View.Persistence.class)
@@ -166,7 +169,7 @@ public class UserProfile implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setAccount(Account account) {
+	public void setAccount(final Account account) {
 		this.account = account;
 	}
 
@@ -176,7 +179,7 @@ public class UserProfile implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setRoomHistory(List<RoomHistoryEntry> roomHistory) {
+	public void setRoomHistory(final List<RoomHistoryEntry> roomHistory) {
 		this.roomHistory = roomHistory;
 	}
 
@@ -186,7 +189,17 @@ public class UserProfile implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setAcknowledgedMotds(Set<String> acknowledgedMotds) {
+	public void setAcknowledgedMotds(final Set<String> acknowledgedMotds) {
 		this.acknowledgedMotds = acknowledgedMotds;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public Map<String, Map<String, ?>> getExtensions() {
+		return extensions;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setExtensions(Map<String, Map<String, ?>> extensions) {
+		this.extensions = extensions;
 	}
 }

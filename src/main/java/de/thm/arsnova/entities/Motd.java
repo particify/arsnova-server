@@ -103,7 +103,7 @@ public class Motd implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setAudience(String a) {
+	public void setAudience(final String a) {
 		audience = a;
 	}
 
@@ -113,7 +113,7 @@ public class Motd implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setSessionId(String sessionId) {
+	public void setSessionId(final String sessionId) {
 		this.sessionId = sessionId;
 	}
 
@@ -124,7 +124,7 @@ public class Motd implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setSessionkey(String a) {
+	public void setSessionkey(final String a) {
 		sessionkey = a;
 	}
 
@@ -159,7 +159,7 @@ public class Motd implements Entity {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (obj == null || !obj.getClass().equals(this.getClass())) {
 			return false;
 		}

@@ -34,7 +34,7 @@ public class ScoreOptions implements Serializable {
 
 	private String questionVariant = "";
 
-	public ScoreOptions(ScoreOptions scoreOptions) {
+	public ScoreOptions(final ScoreOptions scoreOptions) {
 		this();
 		this.type = scoreOptions.getType();
 		this.questionVariant = scoreOptions.getQuestionVariant();
@@ -49,7 +49,7 @@ public class ScoreOptions implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setType(String type) {
+	public void setType(final String type) {
 		this.type = type;
 	}
 
@@ -60,7 +60,7 @@ public class ScoreOptions implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setQuestionVariant(String questionVariant) {
+	public void setQuestionVariant(final String questionVariant) {
 		this.questionVariant = questionVariant;
 	}
 }

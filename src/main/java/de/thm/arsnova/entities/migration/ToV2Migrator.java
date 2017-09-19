@@ -48,7 +48,7 @@ public class ToV2Migrator {
 		final LoggedIn to = new LoggedIn();
 		copyCommonProperties(from, to);
 		to.setUser(from.getLoginId());
-		to.setTimestamp(from.getLastLogin());
+		to.setTimestamp(from.getLastLoginTimestamp().getTime());
 		to.setVisitedSessions(from.getRoomHistory().stream()
 				.map(entry -> new VisitedRoom())
 				.collect(Collectors.toList()));
@@ -136,7 +136,7 @@ public class ToV2Migrator {
 		to.setCreator(creator.getLoginId());
 		to.setSubject(from.getSubject());
 		to.setText(from.getBody());
-		to.setTimestamp(from.getTimestamp());
+		to.setTimestamp(from.getTimestamp().getTime());
 		to.setRead(from.isRead());
 
 		return to;

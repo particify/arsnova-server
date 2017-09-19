@@ -3,9 +3,13 @@ package de.thm.arsnova.entities;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
 
+import java.util.Date;
+
 public class TextAnswer extends Answer {
 	private String subject;
 	private String body;
+	private boolean read;
+	private Date timestamp;
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getSubject() {
@@ -13,7 +17,7 @@ public class TextAnswer extends Answer {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setSubject(String subject) {
+	public void setSubject(final String subject) {
 		this.subject = subject;
 	}
 
@@ -23,7 +27,27 @@ public class TextAnswer extends Answer {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setBody(String body) {
+	public void setBody(final String body) {
 		this.body = body;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public boolean isRead() {
+		return read;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setRead(boolean read) {
+		this.read = read;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public Date getTimestamp() {
+		return timestamp;
+	}
+
+	@JsonView(View.Persistence.class)
+	public void setTimestamp(final Date timestamp) {
+		this.timestamp = timestamp;
 	}
 }

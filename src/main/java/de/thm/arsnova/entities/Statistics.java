@@ -129,7 +129,7 @@ public class Statistics {
 		return interposedQuestions;
 	}
 
-	public void setInterposedQuestions(int interposedQuestions) {
+	public void setInterposedQuestions(final int interposedQuestions) {
 		this.interposedQuestions = interposedQuestions;
 	}
 
@@ -139,7 +139,7 @@ public class Statistics {
 		return flashcards;
 	}
 
-	public void setFlashcards(int flashcards) {
+	public void setFlashcards(final int flashcards) {
 		this.flashcards = flashcards;
 	}
 
@@ -149,7 +149,7 @@ public class Statistics {
 		return creators;
 	}
 
-	public void setCreators(int creators) {
+	public void setCreators(final int creators) {
 		this.creators = creators;
 	}
 
@@ -159,7 +159,7 @@ public class Statistics {
 		return conceptQuestions;
 	}
 
-	public void setConceptQuestions(int conceptQuestions) {
+	public void setConceptQuestions(final int conceptQuestions) {
 		this.conceptQuestions = conceptQuestions;
 	}
 
@@ -169,7 +169,7 @@ public class Statistics {
 		return activeStudents;
 	}
 
-	public void setActiveStudents(int activeStudents) {
+	public void setActiveStudents(final int activeStudents) {
 		this.activeStudents = activeStudents;
 	}
 

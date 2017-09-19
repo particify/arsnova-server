@@ -57,13 +57,13 @@ public class LogEntry implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setRevision(final String rev) {
-		this.rev = rev;
+	public String getRevision() {
+		return rev;
 	}
 
 	@JsonView(View.Persistence.class)
-	public String getRevision() {
-		return rev;
+	public void setRevision(final String rev) {
+		this.rev = rev;
 	}
 
 	@JsonView(View.Persistence.class)
@@ -72,7 +72,7 @@ public class LogEntry implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setTimestamp(long timestamp) {
+	public void setTimestamp(final long timestamp) {
 		this.timestamp = timestamp;
 	}
 
@@ -82,7 +82,7 @@ public class LogEntry implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setEvent(String event) {
+	public void setEvent(final String event) {
 		this.event = event;
 	}
 
@@ -92,12 +92,12 @@ public class LogEntry implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setLevel(int level) {
+	public void setLevel(final int level) {
 		this.level = level;
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setLevel(LogLevel level) {
+	public void setLevel(final LogLevel level) {
 		this.level = level.ordinal();
 	}
 
@@ -107,7 +107,7 @@ public class LogEntry implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setPayload(Map<String, Object> payload) {
+	public void setPayload(final Map<String, Object> payload) {
 		this.payload = payload;
 	}
 }

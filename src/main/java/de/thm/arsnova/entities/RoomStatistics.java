@@ -5,13 +5,20 @@ import de.thm.arsnova.entities.serialization.View;
 
 public class RoomStatistics {
 	private int contentCount = 0;
+	private int unansweredContentCount = 0;
 	private int answerCount = 0;
 	private int unreadAnswerCount = 0;
 	private int commentCount = 0;
 	private int unreadCommentCount = 0;
 
-	public RoomStatistics() {
+	@JsonView(View.Public.class)
+	public int getUnansweredContentCount() {
+		return unansweredContentCount;
+	}
 
+	@JsonView(View.Public.class)
+	public void setUnansweredContentCount(final int unansweredContentCount) {
+		this.unansweredContentCount = unansweredContentCount;
 	}
 
 	@JsonView(View.Public.class)
@@ -19,7 +26,7 @@ public class RoomStatistics {
 		return contentCount;
 	}
 
-	public void setContentCount(int contentCount) {
+	public void setContentCount(final int contentCount) {
 		this.contentCount = contentCount;
 	}
 
@@ -28,7 +35,7 @@ public class RoomStatistics {
 		return answerCount;
 	}
 
-	public void setAnswerCount(int answerCount) {
+	public void setAnswerCount(final int answerCount) {
 		this.answerCount = answerCount;
 	}
 
@@ -37,7 +44,7 @@ public class RoomStatistics {
 		return unreadAnswerCount;
 	}
 
-	public void setUnreadAnswerCount(int unreadAnswerCount) {
+	public void setUnreadAnswerCount(final int unreadAnswerCount) {
 		this.unreadAnswerCount = unreadAnswerCount;
 	}
 
@@ -46,7 +53,7 @@ public class RoomStatistics {
 		return commentCount;
 	}
 
-	public void setCommentCount(int commentCount) {
+	public void setCommentCount(final int commentCount) {
 		this.commentCount = commentCount;
 	}
 
@@ -55,7 +62,7 @@ public class RoomStatistics {
 		return unreadCommentCount;
 	}
 
-	public void setUnreadCommentCount(int unreadCommentCount) {
+	public void setUnreadCommentCount(final int unreadCommentCount) {
 		this.unreadCommentCount = unreadCommentCount;
 	}
 }

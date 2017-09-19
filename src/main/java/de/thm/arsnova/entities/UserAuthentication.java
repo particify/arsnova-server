@@ -43,39 +43,48 @@ public class UserAuthentication implements Serializable {
 	public static final String GUEST = "guest";
 
 	private static final long serialVersionUID = 1L;
+	private String id;
 	private String username;
 	private String type;
 	private UserRoomService.Role role;
 	private boolean isAdmin;
 
-	public UserAuthentication(Google2Profile profile) {
+	public UserAuthentication(final Google2Profile profile) {
 		setUsername(profile.getEmail());
 		setType(UserAuthentication.GOOGLE);
 	}
 
-	public UserAuthentication(TwitterProfile profile) {
+	public UserAuthentication(final TwitterProfile profile) {
 		setUsername(profile.getUsername());
 		setType(UserAuthentication.TWITTER);
 	}
 
-	public UserAuthentication(FacebookProfile profile) {
+	public UserAuthentication(final FacebookProfile profile) {
 		setUsername(profile.getProfileUrl().toString());
 		setType(UserAuthentication.FACEBOOK);
 	}
 
-	public UserAuthentication(AttributePrincipal principal) {
+	public UserAuthentication(final AttributePrincipal principal) {
 		setUsername(principal.getName());
 		setType(UserAuthentication.THM);
 	}
 
-	public UserAuthentication(AnonymousAuthenticationToken token) {
+	public UserAuthentication(final AnonymousAuthenticationToken token) {
 		setUsername(UserAuthentication.ANONYMOUS);
 		setType(UserAuthentication.ANONYMOUS);
 	}
 
-	public UserAuthentication(UsernamePasswordAuthenticationToken token) {
+	public UserAuthentication(final UsernamePasswordAuthenticationToken token) {
 		setUsername(token.getName());
 		setType(LDAP);
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(final String id) {
+		this.id = id;
 	}
 
 	@JsonView(View.Public.class)
@@ -83,7 +92,7 @@ public class UserAuthentication implements Serializable {
 		return username;
 	}
 
-	public void setUsername(String username) {
+	public void setUsername(final String username) {
 		this.username = username;
 	}
 
@@ -92,7 +101,7 @@ public class UserAuthentication implements Serializable {
 		return type;
 	}
 
-	public void setType(String type) {
+	public void setType(final String type) {
 		this.type = type;
 	}
 
@@ -100,7 +109,7 @@ public class UserAuthentication implements Serializable {
 		return role;
 	}
 
-	public void setRole(UserRoomService.Role role) {
+	public void setRole(final UserRoomService.Role role) {
 		this.role = role;
 	}
 
@@ -108,7 +117,7 @@ public class UserAuthentication implements Serializable {
 		return this.role == role;
 	}
 
-	public void setAdmin(boolean a) {
+	public void setAdmin(final boolean a) {
 		this.isAdmin = a;
 	}
 
@@ -134,7 +143,7 @@ public class UserAuthentication implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (obj == null || !obj.getClass().equals(this.getClass())) {
 			return false;
 		}

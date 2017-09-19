@@ -31,20 +31,20 @@ public class ServiceDescription {
 	private int order = 0;
 	private String[] allowedRoles;
 
-	public ServiceDescription(String id, String name, String dialogUrl) {
+	public ServiceDescription(final String id, final String name, final String dialogUrl) {
 		this.id = id;
 		this.name = name;
 		this.dialogUrl = dialogUrl;
 	}
 
-	public ServiceDescription(String id, String name, String dialogUrl, String[] allowedRoles) {
+	public ServiceDescription(final String id, final String name, final String dialogUrl, final String[] allowedRoles) {
 		this.id = id;
 		this.name = name;
 		this.dialogUrl = dialogUrl;
 		this.allowedRoles = allowedRoles;
 	}
 
-	public ServiceDescription(String id, String name, String dialogUrl, String[] allowedRoles, String image) {
+	public ServiceDescription(final String id, final String name, final String dialogUrl, final String[] allowedRoles, final String image) {
 		this.id = id;
 		this.name = name;
 		this.dialogUrl = dialogUrl;
@@ -59,7 +59,7 @@ public class ServiceDescription {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(final String id) {
 		this.id = id;
 	}
 
@@ -68,7 +68,7 @@ public class ServiceDescription {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
@@ -77,7 +77,7 @@ public class ServiceDescription {
 		return dialogUrl;
 	}
 
-	public void setDialogUrl(String dialogUrl) {
+	public void setDialogUrl(final String dialogUrl) {
 		this.dialogUrl = dialogUrl;
 	}
 
@@ -86,7 +86,7 @@ public class ServiceDescription {
 		return image;
 	}
 
-	public void setImage(String image) {
+	public void setImage(final String image) {
 		this.image = image;
 	}
 
@@ -95,7 +95,7 @@ public class ServiceDescription {
 		return order;
 	}
 
-	public void setOrder(int order) {
+	public void setOrder(final int order) {
 		this.order = order;
 	}
 
@@ -104,7 +104,7 @@ public class ServiceDescription {
 		return allowedRoles;
 	}
 
-	public void setAllowedRoles(String[] roles) {
+	public void setAllowedRoles(final String[] roles) {
 		this.allowedRoles = roles;
 	}
 }

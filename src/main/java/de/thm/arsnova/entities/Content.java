@@ -3,7 +3,79 @@ package de.thm.arsnova.entities;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
 
+import java.util.Date;
+import java.util.Map;
+
 public class Content implements Entity {
+	public class State {
+		private int round = 1;
+		private Date roundEndTimestamp;
+		private boolean visible = true;
+		private boolean solutionVisible = false;
+		private boolean responsesEnabled = true;
+		private boolean responsesVisible = false;
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public int getRound() {
+			return round;
+		}
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public void setRound(final int round) {
+			this.round = round;
+		}
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public Date getRoundEndTimestamp() {
+			return roundEndTimestamp;
+		}
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public void setRoundEndTimestamp(Date roundEndTimestamp) {
+			this.roundEndTimestamp = roundEndTimestamp;
+		}
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public boolean isVisible() {
+			return visible;
+		}
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public boolean isSolutionVisible() {
+			return solutionVisible;
+		}
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public void setSolutionVisible(final boolean solutionVisible) {
+			this.solutionVisible = solutionVisible;
+		}
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public void setVisible(final boolean visible) {
+			this.visible = visible;
+		}
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public boolean areResponsesEnabled() {
+			return responsesEnabled;
+		}
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public void setResponsesEnabled(final boolean responsesEnabled) {
+			this.responsesEnabled = responsesEnabled;
+		}
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public boolean areResponsesVisible() {
+			return responsesVisible;
+		}
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public void setResponsesVisible(final boolean responsesVisible) {
+			this.responsesVisible = responsesVisible;
+		}
+	}
+
 	private String id;
 	private String rev;
 	private String roomId;
@@ -11,6 +83,9 @@ public class Content implements Entity {
 	private String body;
 	private String format;
 	private String group;
+	private State state;
+	private Date timestamp;
+	private Map<String, Map<String, ?>> extensions;
 
 	@Override
 	@JsonView({View.Persistence.class, View.Public.class})
@@ -76,13 +151,47 @@ public class Content implements Entity {
 		this.format = format;
 	}
 
-	@JsonView({View.Persistence.class, View.Public.class})
+	@JsonView(View.Public.class)
 	public String getGroup() {
 		return group;
 	}
 
-	@JsonView({View.Persistence.class, View.Public.class})
+	@JsonView(View.Public.class)
 	public void setGroup(final String group) {
 		this.group = group;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public State getState() {
+		return state;
+	}
+
+	public void resetState() {
+		this.state = new State();
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setState(final State state) {
+		this.state = state;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public Date getTimestamp() {
+		return timestamp;
+	}
+
+	@JsonView(View.Persistence.class)
+	public void setTimestamp(Date timestamp) {
+		this.timestamp = timestamp;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public Map<String, Map<String, ?>> getExtensions() {
+		return extensions;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setExtensions(Map<String, Map<String, ?>> extensions) {
+		this.extensions = extensions;
 	}
 }

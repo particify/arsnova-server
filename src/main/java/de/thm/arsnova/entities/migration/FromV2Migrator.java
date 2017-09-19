@@ -33,6 +33,7 @@ import de.thm.arsnova.entities.migration.v2.Room;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -65,13 +66,13 @@ public class FromV2Migrator {
 			account.setPassword(dbUser.getPassword());
 			account.setActivationKey(dbUser.getActivationKey());
 			account.setPasswordResetKey(dbUser.getPasswordResetKey());
-			account.setPasswordResetTime(dbUser.getPasswordResetTime());
+			account.setPasswordResetTime(new Date(dbUser.getPasswordResetTime()));
 		}
 		if (loggedIn != null) {
 			profile.setLoginId(loggedIn.getUser());
-			profile.setLastLogin(loggedIn.getTimestamp());
+			profile.setLastLoginTimestamp(new Date(loggedIn.getTimestamp()));
 			List<UserProfile.RoomHistoryEntry> sessionHistory = loggedIn.getVisitedSessions().stream()
-					.map(entry -> profile.new RoomHistoryEntry(entry.getId(), 0))
+					.map(entry -> profile.new RoomHistoryEntry(entry.getId(), new Date(0)))
 					.collect(Collectors.toList());
 			profile.setRoomHistory(sessionHistory);
 		}
@@ -82,8 +83,8 @@ public class FromV2Migrator {
 		return profile;
 	}
 
-	public de.thm.arsnova.entities.Room migrate(final Room from, final DbUser owner) {
-		if (!owner.getUsername().equals(from.getCreator())) {
+	public de.thm.arsnova.entities.Room migrate(final Room from, final UserProfile owner) {
+		if (!owner.getLoginId().equals(from.getCreator())) {
 			throw new IllegalArgumentException("Username of owner object does not match session creator.");
 		}
 		final de.thm.arsnova.entities.Room to = new de.thm.arsnova.entities.Room();
@@ -167,8 +168,8 @@ public class FromV2Migrator {
 		return to;
 	}
 
-	public de.thm.arsnova.entities.Comment migrate(final Comment from, final DbUser creator) {
-		if (!creator.getUsername().equals(from.getCreator())) {
+	public de.thm.arsnova.entities.Comment migrate(final Comment from, final UserProfile creator) {
+		if (!creator.getLoginId().equals(from.getCreator())) {
 			throw new IllegalArgumentException("Username of creator object does not match comment creator.");
 		}
 		final de.thm.arsnova.entities.Comment to = new de.thm.arsnova.entities.Comment();
@@ -177,7 +178,7 @@ public class FromV2Migrator {
 		to.setCreatorId(creator.getId());
 		to.setSubject(from.getSubject());
 		to.setBody(from.getText());
-		to.setTimestamp(from.getTimestamp());
+		to.setTimestamp(new Date(from.getTimestamp()));
 		to.setRead(from.isRead());
 
 		return to;

@@ -3,6 +3,9 @@ package de.thm.arsnova.entities;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
 
+import java.util.Date;
+import java.util.Map;
+
 public class Comment implements Entity {
 	private String id;
 	private String rev;
@@ -10,8 +13,9 @@ public class Comment implements Entity {
 	private String creatorId;
 	private String subject;
 	private String body;
-	private long timestamp;
+	private Date timestamp;
 	private boolean read;
+	private Map<String, Map<String, ?>> extensions;
 
 	@Override
 	@JsonView({View.Persistence.class, View.Public.class})
@@ -78,12 +82,12 @@ public class Comment implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public long getTimestamp() {
+	public Date getTimestamp() {
 		return timestamp;
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setTimestamp(final long timestamp) {
+	public void setTimestamp(final Date timestamp) {
 		this.timestamp = timestamp;
 	}
 
@@ -95,5 +99,15 @@ public class Comment implements Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setRead(final boolean read) {
 		this.read = read;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public Map<String, Map<String, ?>> getExtensions() {
+		return extensions;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setExtensions(Map<String, Map<String, ?>> extensions) {
+		this.extensions = extensions;
 	}
 }
