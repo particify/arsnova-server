@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.2
+This is a maintenance release which only brings libraries up to date to fix
+potential bugs.
+
 ## 2.5.1
 This release fixes a performance issue on session creation affecting large
 installations.
