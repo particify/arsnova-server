@@ -8,6 +8,7 @@
 
 	<properties>
 		<io.spring.platform-version>Brussels-SR5</io.spring.platform-version>
+		<io.netty-version>4.1.16.Final</io.netty-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
@@ -109,6 +110,13 @@
 				<groupId>io.spring.platform</groupId>
 				<artifactId>platform-bom</artifactId>
 				<version>${io.spring.platform-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-bom</artifactId>
+				<version>${io.netty-version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
