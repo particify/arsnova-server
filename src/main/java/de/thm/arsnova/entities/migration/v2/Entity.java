@@ -1,6 +1,6 @@
 /*
  * This file is part of ARSnova Backend.
- * Copyright (C) 2012-2018 The ARSnova Team and Contributors
+ * Copyright (C) 2012-2017 The ARSnova Team
  *
  * ARSnova Backend is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,19 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.persistance;
+package de.thm.arsnova.entities.migration.v2;
 
-import de.thm.arsnova.entities.migration.v2.Motd;
-import org.springframework.data.repository.CrudRepository;
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.serialization.View;
 
-import java.util.List;
+import java.util.Date;
 
-public interface MotdRepository extends CrudRepository<Motd, String> {
-	List<Motd> findGlobalForAdmin();
-	List<Motd> findGlobalForAll();
-	List<Motd> findGlobalForLoggedIn();
-	List<Motd> findGlobalForTutors();
-	List<Motd> findForStudents();
-	List<Motd> findBySessionKey(String sessionkey);
-	Motd findByKey(String key);
+public interface Entity {
+	String getId();
+	void setId(String id);
+
+	String getRevision();
+	void setRevision(String rev);
+
+	@JsonView(View.Persistence.class)
+	default Class<? extends Entity> getType() {
+		return getClass();
+	}
 }

@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.entities.Motd;
+import de.thm.arsnova.entities.migration.v2.Motd;
 import de.thm.arsnova.entities.migration.v2.MotdList;
 import de.thm.arsnova.services.MotdService;
 import io.swagger.annotations.Api;

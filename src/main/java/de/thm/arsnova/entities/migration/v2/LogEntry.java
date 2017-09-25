@@ -1,10 +1,26 @@
-package de.thm.arsnova.entities;
+/*
+ * This file is part of ARSnova Backend.
+ * Copyright (C) 2012-2017 The ARSnova Team
+ *
+ * ARSnova Backend is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * ARSnova Backend is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package de.thm.arsnova.entities.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
 
-import java.util.Date;
 import java.util.Map;
 
 public class LogEntry implements Entity {
@@ -19,8 +35,7 @@ public class LogEntry implements Entity {
 
 	private String id;
 	private String rev;
-	private Date creationTimestamp;
-	private Date updateTimestamp;
+	private long timestamp = System.currentTimeMillis();
 	private String event;
 	private int level;
 	private Map<String, Object> payload;
@@ -51,28 +66,14 @@ public class LogEntry implements Entity {
 		this.rev = rev;
 	}
 
-	@Override
 	@JsonView(View.Persistence.class)
-	public Date getCreationTimestamp() {
-		return creationTimestamp;
+	public long getTimestamp() {
+		return timestamp;
 	}
 
-	@Override
 	@JsonView(View.Persistence.class)
-	public void setCreationTimestamp(final Date creationTimestamp) {
-		this.creationTimestamp = creationTimestamp;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public Date getUpdateTimestamp() {
-		return updateTimestamp;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public void setUpdateTimestamp(final Date updateTimestamp) {
-		this.updateTimestamp = updateTimestamp;
+	public void setTimestamp(final long timestamp) {
+		this.timestamp = timestamp;
 	}
 
 	@JsonView(View.Persistence.class)
@@ -96,7 +97,7 @@ public class LogEntry implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setLevel(final de.thm.arsnova.entities.migration.v2.LogEntry.LogLevel level) {
+	public void setLevel(final LogLevel level) {
 		this.level = level.ordinal();
 	}
 

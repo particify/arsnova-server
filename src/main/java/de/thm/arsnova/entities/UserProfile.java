@@ -90,9 +90,10 @@ public class UserProfile implements Entity {
 
 	private String id;
 	private String rev;
+	private Date creationTimestamp;
+	private Date updateTimestamp;
 	private String authProvider;
 	private String loginId;
-	private Date creationTimestamp;
 	private Date lastLoginTimestamp;
 	private Account account;
 	private List<RoomHistoryEntry> roomHistory = new ArrayList<>();
@@ -123,6 +124,30 @@ public class UserProfile implements Entity {
 		this.rev = rev;
 	}
 
+	@Override
+	@JsonView(View.Persistence.class)
+	public Date getCreationTimestamp() {
+		return creationTimestamp;
+	}
+
+	@Override
+	@JsonView(View.Persistence.class)
+	public void setCreationTimestamp(final Date creationTimestamp) {
+		this.creationTimestamp = creationTimestamp;
+	}
+
+	@Override
+	@JsonView(View.Persistence.class)
+	public Date getUpdateTimestamp() {
+		return updateTimestamp;
+	}
+
+	@Override
+	@JsonView(View.Persistence.class)
+	public void setUpdateTimestamp(final Date updateTimestamp) {
+		this.updateTimestamp = updateTimestamp;
+	}
+
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getAuthProvider() {
 		return authProvider;
@@ -141,16 +166,6 @@ public class UserProfile implements Entity {
 	@JsonView(View.Persistence.class)
 	public void setLoginId(final String loginId) {
 		this.loginId = loginId;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public Date getCreationTimestamp() {
-		return creationTimestamp;
-	}
-
-	@JsonView(View.Persistence.class)
-	public void setCreationTimestamp(final Date creationTimestamp) {
-		this.creationTimestamp = creationTimestamp;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})

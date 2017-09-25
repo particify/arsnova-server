@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.persistance.couchdb;
 
-import de.thm.arsnova.entities.LogEntry;
+import de.thm.arsnova.entities.migration.v2.LogEntry;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.CouchDbRepositorySupport;

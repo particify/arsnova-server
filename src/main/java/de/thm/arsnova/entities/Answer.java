@@ -3,11 +3,14 @@ package de.thm.arsnova.entities;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
 
+import java.util.Date;
 import java.util.Map;
 
 public abstract class Answer implements Entity {
 	private String id;
 	private String rev;
+	private Date creationTimestamp;
+	private Date updateTimestamp;
 	private String contentId;
 	private String roomId;
 	private String creatorId;
@@ -36,6 +39,30 @@ public abstract class Answer implements Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setRevision(final String rev) {
 		this.rev = rev;
+	}
+
+	@Override
+	@JsonView(View.Persistence.class)
+	public Date getCreationTimestamp() {
+		return creationTimestamp;
+	}
+
+	@Override
+	@JsonView(View.Persistence.class)
+	public void setCreationTimestamp(final Date creationTimestamp) {
+		this.creationTimestamp = creationTimestamp;
+	}
+
+	@Override
+	@JsonView(View.Persistence.class)
+	public Date getUpdateTimestamp() {
+		return updateTimestamp;
+	}
+
+	@Override
+	@JsonView(View.Persistence.class)
+	public void setUpdateTimestamp(final Date updateTimestamp) {
+		this.updateTimestamp = updateTimestamp;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})

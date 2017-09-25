@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.persistance;
 
-import de.thm.arsnova.entities.LogEntry;
+import de.thm.arsnova.entities.migration.v2.LogEntry;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -19,7 +19,6 @@ package de.thm.arsnova.entities.migration;
 
 import de.thm.arsnova.entities.ChoiceAnswer;
 import de.thm.arsnova.entities.ChoiceQuestionContent;
-import de.thm.arsnova.entities.Entity;
 import de.thm.arsnova.entities.TextAnswer;
 import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.entities.migration.v2.Answer;
@@ -27,6 +26,7 @@ import de.thm.arsnova.entities.migration.v2.AnswerOption;
 import de.thm.arsnova.entities.migration.v2.Comment;
 import de.thm.arsnova.entities.migration.v2.Content;
 import de.thm.arsnova.entities.migration.v2.DbUser;
+import de.thm.arsnova.entities.migration.v2.Entity;
 import de.thm.arsnova.entities.migration.v2.LoggedIn;
 import de.thm.arsnova.entities.migration.v2.MotdList;
 import de.thm.arsnova.entities.migration.v2.Room;
@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  * @author Daniel Gerhardt
  */
 public class FromV2Migrator {
-	private void copyCommonProperties(final Entity from, final Entity to) {
+	private void copyCommonProperties(final Entity from, final de.thm.arsnova.entities.Entity to) {
 		to.setId(from.getId());
 		to.setRevision(from.getRevision());
 	}

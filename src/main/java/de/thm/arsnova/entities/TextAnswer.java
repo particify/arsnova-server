@@ -9,7 +9,6 @@ public class TextAnswer extends Answer {
 	private String subject;
 	private String body;
 	private boolean read;
-	private Date timestamp;
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getSubject() {
@@ -41,13 +40,9 @@ public class TextAnswer extends Answer {
 		this.read = read;
 	}
 
+	@Override
 	@JsonView({View.Persistence.class, View.Public.class})
-	public Date getTimestamp() {
-		return timestamp;
-	}
-
-	@JsonView(View.Persistence.class)
-	public void setTimestamp(final Date timestamp) {
-		this.timestamp = timestamp;
+	public Date getCreationTimestamp() {
+		return getCreationTimestamp();
 	}
 }

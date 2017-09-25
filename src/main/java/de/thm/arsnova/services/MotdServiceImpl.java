@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.services;
 
-import de.thm.arsnova.entities.Motd;
+import de.thm.arsnova.entities.migration.v2.Motd;
 import de.thm.arsnova.entities.migration.v2.MotdList;
 import de.thm.arsnova.entities.migration.v2.Room;
 import de.thm.arsnova.entities.UserAuthentication;

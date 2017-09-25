@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.persistance.couchdb;
 
-import de.thm.arsnova.entities.Motd;
+import de.thm.arsnova.entities.migration.v2.Motd;
 import de.thm.arsnova.persistance.MotdRepository;
 import org.ektorp.CouchDbConnector;
 import org.slf4j.Logger;

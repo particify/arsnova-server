@@ -9,6 +9,8 @@ import java.util.Map;
 public class Comment implements Entity {
 	private String id;
 	private String rev;
+	private Date creationTimestamp;
+	private Date updateTimestamp;
 	private String sessionId;
 	private String creatorId;
 	private String subject;
@@ -39,6 +41,30 @@ public class Comment implements Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setRevision(final String rev) {
 		this.rev = rev;
+	}
+
+	@Override
+	@JsonView(View.Persistence.class)
+	public Date getCreationTimestamp() {
+		return creationTimestamp;
+	}
+
+	@Override
+	@JsonView(View.Persistence.class)
+	public void setCreationTimestamp(final Date creationTimestamp) {
+		this.creationTimestamp = creationTimestamp;
+	}
+
+	@Override
+	@JsonView(View.Persistence.class)
+	public Date getUpdateTimestamp() {
+		return updateTimestamp;
+	}
+
+	@Override
+	@JsonView(View.Persistence.class)
+	public void setUpdateTimestamp(final Date updateTimestamp) {
+		this.updateTimestamp = updateTimestamp;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
