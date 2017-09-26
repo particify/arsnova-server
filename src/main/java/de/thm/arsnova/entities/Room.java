@@ -244,6 +244,7 @@ public class Room implements Entity {
 	private Author author;
 	private PoolProperties poolProperties;
 	private Map<String, Map<String, ?>> extensions;
+	private Map<String, String> attachments;
 	private RoomStatistics statistics;
 
 	@Override
@@ -402,6 +403,16 @@ public class Room implements Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setExtensions(final Map<String, Map<String, ?>> extensions) {
 		this.extensions = extensions;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public Map<String, String> getAttachments() {
+		return attachments;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setAttachments(final Map<String, String> attachments) {
+		this.attachments = attachments;
 	}
 
 	@JsonView(View.Public.class)

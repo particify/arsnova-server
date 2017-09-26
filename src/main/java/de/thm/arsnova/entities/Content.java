@@ -88,6 +88,7 @@ public class Content implements Entity {
 	private State state;
 	private Date timestamp;
 	private Map<String, Map<String, ?>> extensions;
+	private Map<String, String> attachments;
 
 	@Override
 	@JsonView({View.Persistence.class, View.Public.class})
@@ -219,5 +220,15 @@ public class Content implements Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setExtensions(Map<String, Map<String, ?>> extensions) {
 		this.extensions = extensions;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public Map<String, String> getAttachments() {
+		return attachments;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setAttachments(final Map<String, String> attachments) {
+		this.attachments = attachments;
 	}
 }

@@ -40,6 +40,11 @@ public class TestPersistanceConfig {
 	}
 
 	@Bean
+	public AttachmentRepository attachmentRepository() {
+		return Mockito.mock(AttachmentRepository.class);
+	}
+
+	@Bean
 	public MotdRepository motdRepository() {
 		return Mockito.mock(MotdRepository.class);
 	}
