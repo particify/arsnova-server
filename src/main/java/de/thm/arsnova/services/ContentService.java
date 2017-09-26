@@ -27,7 +27,7 @@ import java.util.Map;
 /**
  * The functionality the question service should provide.
  */
-public interface ContentService {
+public interface ContentService extends EntityService<Content> {
 	Content save(Content content);
 
 	Content get(String id);

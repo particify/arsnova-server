@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * The functionality the motd service should provide.
  */
-public interface MotdService {
+public interface MotdService extends EntityService<Motd> {
 	Motd getByKey(String keyword);
 
 	List<Motd> getAdminMotds();  //all w/o the sessionmotds

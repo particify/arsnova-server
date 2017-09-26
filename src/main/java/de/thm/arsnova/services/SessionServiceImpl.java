@@ -43,7 +43,6 @@ import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.PayloadTooLargeException;
-import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.persistance.SessionRepository;
 import de.thm.arsnova.persistance.VisitedSessionRepository;
 import org.ektorp.UpdateConflictException;
@@ -71,7 +70,7 @@ import java.util.UUID;
  * Performs all session related operations.
  */
 @Service
-public class SessionServiceImpl extends EntityService<Session> implements SessionService, ApplicationEventPublisherAware {
+public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implements SessionService, ApplicationEventPublisherAware {
 	private static final long SESSION_INACTIVITY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
 
 	private static final Logger logger = LoggerFactory.getLogger(SessionServiceImpl.class);

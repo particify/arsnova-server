@@ -31,7 +31,7 @@ import java.util.UUID;
 /**
  * The functionality the session service should provide.
  */
-public interface SessionService {
+public interface SessionService extends EntityService<Session> {
 	Session getByKey(String keyword);
 
 	Session getForAdmin(final String keyword);

@@ -33,7 +33,7 @@ import static org.junit.Assert.*;
 @WebAppConfiguration
 @ContextConfiguration(classes = {AppConfig.class, TestAppConfig.class, TestPersistanceConfig.class, TestSecurityConfig.class})
 @ActiveProfiles("test")
-public class EntityServiceTest {
+public class DefaultEntityServiceImplTest {
 	@Autowired
 	@Qualifier("defaultJsonMessageConverter")
 	private MappingJackson2HttpMessageConverter jackson2HttpMessageConverter;
@@ -45,7 +45,7 @@ public class EntityServiceTest {
 	@WithMockUser(username="TestUser")
 	public void testPatch() throws IOException {
 		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
-		final EntityService<Session> entityService = new EntityService<>(Session.class, sessionRepository, objectMapper);
+		final DefaultEntityServiceImpl<Session> entityService = new DefaultEntityServiceImpl<>(Session.class, sessionRepository, objectMapper);
 
 		when(sessionRepository.save(any(Session.class))).then(returnsFirstArg());
 
@@ -78,7 +78,7 @@ public class EntityServiceTest {
 	@WithMockUser(username="TestUser")
 	public void testPatchWithList() throws IOException {
 		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
-		final EntityService<Session> entityService = new EntityService<>(Session.class, sessionRepository, objectMapper);
+		final DefaultEntityServiceImpl<Session> entityService = new DefaultEntityServiceImpl<>(Session.class, sessionRepository, objectMapper);
 
 		when(sessionRepository.save(any(Session.class))).then(returnsFirstArg());
 

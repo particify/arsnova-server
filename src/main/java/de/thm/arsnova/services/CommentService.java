@@ -6,7 +6,7 @@ import de.thm.arsnova.entities.User;
 
 import java.util.List;
 
-public interface CommentService {
+public interface CommentService extends EntityService<Comment> {
 	boolean save(Comment comment);
 
 	int count(String sessionKey);

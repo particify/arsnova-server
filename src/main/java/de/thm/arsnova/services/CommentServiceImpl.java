@@ -24,7 +24,7 @@ import java.util.List;
  * Performs all comment related operations.
  */
 @Service
-public class CommentServiceImpl extends EntityService<Comment> implements CommentService, ApplicationEventPublisherAware {
+public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implements CommentService, ApplicationEventPublisherAware {
 	private UserService userService;
 
 	private CommentRepository commentRepository;
