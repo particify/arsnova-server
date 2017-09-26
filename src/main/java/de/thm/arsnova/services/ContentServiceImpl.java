@@ -63,7 +63,7 @@ import java.util.stream.Collectors;
  * Performs all content and answer related operations.
  */
 @Service
-public class ContentServiceImpl extends EntityService<Content> implements ContentService, ApplicationEventPublisherAware {
+public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implements ContentService, ApplicationEventPublisherAware {
 	private UserService userService;
 
 	private LogEntryRepository dbLogger;

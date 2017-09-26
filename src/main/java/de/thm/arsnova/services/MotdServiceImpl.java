@@ -41,7 +41,7 @@ import java.util.StringTokenizer;
  * Performs all question, interposed question, and answer related operations.
  */
 @Service
-public class MotdServiceImpl extends EntityService<Motd> implements MotdService {
+public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements MotdService {
 	private UserService userService;
 
 	private SessionService sessionService;
