@@ -4,7 +4,7 @@ var designDoc = {
 	"views": {
 		"by_sessionid": {
 			"map": function (doc) {
-				if (doc.type === "skill_question") {
+				if (doc.type === "Content") {
 					emit(doc.sessionId, {_rev: doc._rev});
 				}
 			},
@@ -12,7 +12,7 @@ var designDoc = {
 		},
 		"by_sessionid_variant_active": {
 			"map": function (doc) {
-				if (doc.type === "skill_question") {
+				if (doc.type === "Content") {
 					emit([doc.sessionId, doc.questionVariant, doc.active, doc.subject, doc.text.substr(0, 16)], {_rev: doc._rev});
 				}
 			},

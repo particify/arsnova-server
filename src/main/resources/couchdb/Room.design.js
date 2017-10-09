@@ -1,31 +1,31 @@
 var designDoc = {
-	"_id": "_design/Session",
+	"_id": "_design/Room",
 	"language": "javascript",
 	"views": {
 		"by_courseid": {
 			"map": function (doc) {
-				if (doc.type === "session" && doc.courseId  && doc.sessionType !== "public_pool") {
+				if (doc.type === "Room" && doc.courseId  && doc.sessionType !== "public_pool") {
 					emit(doc.courseId, {_rev: doc._rev});
 				}
 			}
 		},
 		"by_keyword": {
 			"map": function (doc) {
-				if (doc.type === "session") {
+				if (doc.type === "Room") {
 					emit(doc.keyword, {_rev: doc._rev});
 				}
 			}
 		},
 		"by_lastactivity_for_guests": {
 			"map": function (doc) {
-				if (doc.type === "session" && doc.sessionType !== "public_pool" && doc.creator.indexOf("Guest") === 0) {
+				if (doc.type === "Room" && doc.sessionType !== "public_pool" && doc.creator.indexOf("Guest") === 0) {
 					emit(doc.lastOwnerActivity || doc.creationTime, {_rev: doc._rev});
 				}
 			}
 		},
 		"partial_by_sessiontype_creator_name": {
 			"map": function (doc) {
-				if (doc.type === "session") {
+				if (doc.type === "Room") {
 					emit([doc.sessionType, doc.creator, doc.name], {
 						shortName: doc.shortName,
 						keyword: doc.keyword,
@@ -38,7 +38,7 @@ var designDoc = {
 		},
 		"partial_by_subject_name_for_publicpool": {
 			"map": function (doc) {
-				if (doc.type === "session" && doc.sessiontype === "public_pool") {
+				if (doc.type === "Room" && doc.sessiontype === "public_pool") {
 					emit([doc.ppSubject, doc.name], {
 						ppSubject: doc.ppSubject,
 						name: doc.name,

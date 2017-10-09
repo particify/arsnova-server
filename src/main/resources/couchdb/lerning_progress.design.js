@@ -5,7 +5,7 @@ var designDoc = {
 		"question_value_achieved_for_user": {
 			"comment": "This view returns the points users scored for answered questions.",
 			"map": function (doc) {
-				if (doc.type === "skill_question_answer" && !doc.abstention) {
+				if (doc.type === "Answer" && !doc.abstention) {
 					/* The 'questionValue' contains the points scored with this answer,
 					 * and this could be negative if a wrong answer was given.
 					 * However, we do not want negative values, so we set the lower bound to 0.*/
@@ -28,7 +28,7 @@ var designDoc = {
 				 * 1) On any single choice question, the value is the maximum of all possibleAnswer values.
 				 * 2) On a multiple choice question, we add up all positive values. */
 				 var value = 0, answers = [], positiveAnswers = [], score = 0;
-				 if (doc.type === "skill_question" && ["school", "flashcard"].indexOf(doc.questionType) === -1) {
+				 if (doc.type === "Content" && ["school", "flashcard"].indexOf(doc.questionType) === -1) {
 				 	if ("freetext" === doc.questionType && !doc.fixedAnswer) { return; }
 					answers = doc.possibleAnswers.map(function (answer) { return answer.value || 0; });
 					/* find the maximum value */
