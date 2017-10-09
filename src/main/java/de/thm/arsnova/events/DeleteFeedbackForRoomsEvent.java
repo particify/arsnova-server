@@ -18,7 +18,7 @@
 package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.Room;
+import de.thm.arsnova.entities.Room;
 
 import java.util.Set;
 

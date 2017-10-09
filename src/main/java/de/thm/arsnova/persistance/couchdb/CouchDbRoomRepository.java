@@ -18,20 +18,16 @@
 package de.thm.arsnova.persistance.couchdb;
 
 import de.thm.arsnova.connector.model.Course;
+import de.thm.arsnova.entities.Room;
+import de.thm.arsnova.entities.RoomStatistics;
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.Comment;
 import de.thm.arsnova.entities.migration.v2.LoggedIn;
-import de.thm.arsnova.entities.migration.v2.Room;
-import de.thm.arsnova.entities.migration.v2.RoomInfo;
-import de.thm.arsnova.entities.migration.v2.VisitedRoom;
 import de.thm.arsnova.entities.transport.ImportExportSession;
-import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import de.thm.arsnova.persistance.MotdRepository;
 import de.thm.arsnova.persistance.RoomRepository;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
-import org.ektorp.DocumentNotFoundException;
 import org.ektorp.UpdateConflictException;
 import org.ektorp.ViewQuery;
 import org.ektorp.ViewResult;
@@ -80,76 +76,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 			return null;
 		}
 
-		return room.getKeyword();
-	}
-
-	@Override
-	public List<Room> findVisitedByUsername(final String username, final int start, final int limit) {
-		final int qSkip = start > 0 ? start : -1;
-		final int qLimit = limit > 0 ? limit : -1;
-
-		try {
-			final ViewResult visitedSessionResult = db.queryView(createQuery("visited_sessions_by_user")
-					.designDocId("_design/LoggedIn").key(username));
-			final List<Room> visitedSessions = visitedSessionResult.getRows().stream().map(vs -> {
-				final Room s = new Room();
-				s.setId(vs.getValueAsNode().get("_id").asText());
-				s.setKeyword(vs.getValueAsNode().get("keyword").asText());
-				s.setName(vs.getValueAsNode().get("name").asText());
-
-				return s;
-			}).collect(Collectors.toList());
-
-			if (visitedSessions.isEmpty()) {
-				return new ArrayList<>();
-			}
-
-			// Filter sessions that don't exist anymore, also filter my own sessions
-			final List<Room> result = new ArrayList<>();
-			final List<Room> filteredSessions = new ArrayList<>();
-			for (final Room s : visitedSessions) {
-				try {
-					/* FIXME: caching (getSessionFromKeyword) */
-					final Room room = findByKeyword(s.getKeyword());
-					if (room != null && !(room.getCreator().equals(username))) {
-						result.add(room);
-					} else {
-						filteredSessions.add(s);
-					}
-				} catch (final NotFoundException e) {
-					filteredSessions.add(s);
-				}
-			}
-			if (filteredSessions.isEmpty()) {
-				return result;
-			}
-			// Update document to remove sessions that don't exist anymore
-			final List<VisitedRoom> newVisitedSessions = new ArrayList<>();
-			for (final Room s : result) {
-				newVisitedSessions.add(new VisitedRoom(s));
-			}
-
-			try {
-				final LoggedIn loggedIn = db.get(LoggedIn.class, visitedSessionResult.getRows().get(0).getId());
-				loggedIn.setVisitedSessions(newVisitedSessions);
-				db.update(loggedIn);
-			} catch (UpdateConflictException e) {
-				logger.error("Could not clean up LoggedIn document of {}.", username, e);
-			}
-
-			return result;
-		} catch (final DocumentNotFoundException e) {
-			return new ArrayList<>();
-		}
-	}
-
-	@Override
-	public List<RoomInfo> findInfoForVisitedByUser(final UserAuthentication user, final int start, final int limit) {
-		final List<Room> sessions = findVisitedByUsername(user.getUsername(), start, limit);
-		if (sessions.isEmpty()) {
-			return new ArrayList<>();
-		}
-		return this.getInfosForVisitedSessions(sessions, user);
+		return room.getShortId();
 	}
 
 	@Override
@@ -177,7 +104,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 
 	/* TODO: Move to service layer. */
 	@Override
-	public RoomInfo importSession(final UserAuthentication user, final ImportExportSession importSession) {
+	public Room importSession(final UserAuthentication user, final ImportExportSession importSession) {
 		/* FIXME: not yet migrated - move to service layer */
 		throw new UnsupportedOperationException();
 //		final Room session = this.saveSession(user, importSession.generateSessionEntity(user));
@@ -213,9 +140,9 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 //					final Document answerDoc = new Document();
 //					answerDoc.put("type", "skill_question_answer");
 //					answerDoc.put("sessionId", a.getRoomId());
-//					answerDoc.put("questionId", a.getQuestionId());
+//					answerDoc.put("questionId", a.getContentId());
 //					answerDoc.put("answerSubject", a.getAnswerSubject());
-//					answerDoc.put("questionVariant", a.getQuestionVariant());
+//					answerDoc.put("questionVariant", a.getGroup());
 //					answerDoc.put("questionValue", a.getQuestionValue());
 //					answerDoc.put("answerText", a.getAnswerText());
 //					answerDoc.put("answerTextRaw", a.getAnswerTextRaw());
@@ -313,28 +240,31 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 	}
 
 	/* TODO: Move to service layer. */
-	private RoomInfo calculateSessionInfo(final ImportExportSession importExportSession, final Room room) {
-		int unreadComments = 0;
-		int numUnanswered = 0;
-		int numAnswers = 0;
-		for (Comment i : importExportSession.getFeedbackQuestions()) {
-			if (!i.isRead()) {
-				unreadComments++;
-			}
-		}
-		for (ImportExportSession.ImportExportContent question : importExportSession.getQuestions()) {
-			numAnswers += question.getAnswers().size();
-			if (question.getAnswers().isEmpty()) {
-				numUnanswered++;
-			}
-		}
-		final RoomInfo info = new RoomInfo(room);
-		info.setNumQuestions(importExportSession.getQuestions().size());
-		info.setNumUnanswered(numUnanswered);
-		info.setNumAnswers(numAnswers);
-		info.setNumInterposed(importExportSession.getFeedbackQuestions().size());
-		info.setNumUnredInterposed(unreadComments);
-		return info;
+	private Room calculateSessionInfo(final ImportExportSession importExportSession, final Room room) {
+		/* FIXME: not yet migrated - move to service layer */
+		throw new UnsupportedOperationException();
+//		int unreadComments = 0;
+//		int numUnanswered = 0;
+//		int numAnswers = 0;
+//		for (Comment i : importExportSession.getFeedbackQuestions()) {
+//			if (!i.isRead()) {
+//				unreadComments++;
+//			}
+//		}
+//		for (ImportExportSession.ImportExportContent question : importExportSession.getQuestions()) {
+//			numAnswers += question.getAnswers().size();
+//			if (question.getAnswers().isEmpty()) {
+//				numUnanswered++;
+//			}
+//		}
+//		RoomStatistics stats = new RoomStatistics();
+//		stats.setContentCount(importExportSession.getQuestions().size());
+//		stats.setAnswerCount(numAnswers);
+//		stats.setUnreadAnswerCount(numUnanswered);
+//		stats.setCommentCount(importExportSession.getFeedbackQuestions().size());
+//		stats.setUnreadCommentCount(unreadComments);
+//
+//		return room;
 	}
 
 	@Override
@@ -365,9 +295,9 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 	}
 
 	@Override
-	public List<RoomInfo> findInfosForPublicPool() {
-		final List<Room> sessions = this.findAllForPublicPool();
-		return getInfosForSessions(sessions);
+	public List<Room> findInfosForPublicPool() {
+		final List<Room> rooms = this.findAllForPublicPool();
+		return attachStatsForRooms(rooms);
 	}
 
 	@Override
@@ -383,27 +313,27 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 
 	/* TODO: Move to service layer. */
 	@Override
-	public List<RoomInfo> findInfosForPublicPoolByUser(final UserAuthentication user) {
-		final List<Room> sessions = this.findForPublicPoolByUser(user);
-		if (sessions.isEmpty()) {
+	public List<Room> findInfosForPublicPoolByUser(final UserAuthentication user) {
+		final List<Room> rooms = this.findForPublicPoolByUser(user);
+		if (rooms.isEmpty()) {
 			return new ArrayList<>();
 		}
-		return getInfosForSessions(sessions);
+		return attachStatsForRooms(rooms);
 	}
 
 	/* TODO: Move to service layer. */
 	@Override
-	public List<RoomInfo> getMySessionsInfo(final UserAuthentication user, final int start, final int limit) {
+	public List<Room> getRoomsWithStatsForUser(final UserAuthentication user, final int start, final int limit) {
 		final List<Room> sessions = this.findByUser(user, start, limit);
 		if (sessions.isEmpty()) {
 			return new ArrayList<>();
 		}
-		return getInfosForSessions(sessions);
+		return attachStatsForRooms(sessions);
 	}
 
 	/* TODO: Move to service layer. */
-	private List<RoomInfo> getInfosForSessions(final List<Room> sessions) {
-		final List<String> sessionIds = sessions.stream().map(Room::getId).collect(Collectors.toList());
+	private List<Room> attachStatsForRooms(final List<Room> rooms) {
+		final List<String> sessionIds = rooms.stream().map(Room::getId).collect(Collectors.toList());
 		final ViewQuery questionCountView = createQuery("by_sessionid").designDocId("_design/Content")
 				.group(true).keys(sessionIds);
 		final ViewQuery answerCountView = createQuery("by_sessionid").designDocId("_design/Answer")
@@ -411,23 +341,23 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 		final ViewQuery commentCountView = createQuery("by_sessionid").designDocId("_design/Comment")
 				.group(true).keys(sessionIds);
 		final ViewQuery unreadCommentCountView = createQuery("by_sessionid_read").designDocId("_design/Comment")
-				.group(true).keys(sessions.stream().map(session -> ComplexKey.of(session.getId(), false)).collect(Collectors.toList()));
+				.group(true).keys(rooms.stream().map(session -> ComplexKey.of(session.getId(), false)).collect(Collectors.toList()));
 
-		return getSessionInfoData(sessions, questionCountView, answerCountView, commentCountView, unreadCommentCountView);
+		return attachStats(rooms, questionCountView, answerCountView, commentCountView, unreadCommentCountView);
 	}
 
 	/* TODO: Move to service layer. */
-	private List<RoomInfo> getInfosForVisitedSessions(final List<Room> sessions, final UserAuthentication user) {
+	public List<Room> getVisitedRoomsWithStatsForUser(final List<Room> rooms, final UserAuthentication user) {
 		final ViewQuery answeredQuestionsView = createQuery("by_user_sessionid").designDocId("_design/Answer")
-				.keys(sessions.stream().map(session -> ComplexKey.of(user.getUsername(), session.getId())).collect(Collectors.toList()));
+				.keys(rooms.stream().map(session -> ComplexKey.of(user.getUsername(), session.getId())).collect(Collectors.toList()));
 		final ViewQuery contentIdsView = createQuery("by_sessionid").designDocId("_design/Content")
-				.keys(sessions.stream().map(Room::getId).collect(Collectors.toList()));
+				.keys(rooms.stream().map(Room::getId).collect(Collectors.toList()));
 
-		return getVisitedSessionInfoData(sessions, answeredQuestionsView, contentIdsView);
+		return attachVisitedRoomStats(rooms, answeredQuestionsView, contentIdsView);
 	}
 
 	/* TODO: Move to service layer. */
-	private List<RoomInfo> getVisitedSessionInfoData(
+	private List<Room> attachVisitedRoomStats(
 			final List<Room> rooms,
 			final ViewQuery answeredQuestionsView,
 			final ViewQuery contentIdsView) {
@@ -474,22 +404,21 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 			unansweredQuestionsCountMap.put(s.getId(), contentIdsInSession.size());
 		}
 
-		final List<RoomInfo> roomInfos = new ArrayList<>();
 		for (final Room room : rooms) {
 			int numUnanswered = 0;
 
 			if (unansweredQuestionsCountMap.containsKey(room.getId())) {
 				numUnanswered = unansweredQuestionsCountMap.get(room.getId());
 			}
-			final RoomInfo info = new RoomInfo(room);
-			info.setNumUnanswered(numUnanswered);
-			roomInfos.add(info);
+			RoomStatistics stats = new RoomStatistics();
+			room.setStatistics(stats);
+			stats.setUnansweredContentCount(numUnanswered);
 		}
-		return roomInfos;
+		return rooms;
 	}
 
 	/* TODO: Move to service layer. */
-	private List<RoomInfo> getSessionInfoData(
+	private List<Room> attachStats(
 			final List<Room> rooms,
 			final ViewQuery questionCountView,
 			final ViewQuery answerCountView,
@@ -508,7 +437,6 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 				.stream().map(row -> new AbstractMap.SimpleImmutableEntry<>(row.getKey(), row.getValueAsInt()))
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-		final List<RoomInfo> roomInfos = new ArrayList<>();
 		for (final Room room : rooms) {
 			int numQuestions = 0;
 			int numAnswers = 0;
@@ -527,14 +455,14 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 				numUnreadComments = unreadCommentCountMap.get(room.getId());
 			}
 
-			final RoomInfo info = new RoomInfo(room);
-			info.setNumQuestions(numQuestions);
-			info.setNumAnswers(numAnswers);
-			info.setNumInterposed(numComments);
-			info.setNumUnredInterposed(numUnreadComments);
-			roomInfos.add(info);
+			final RoomStatistics stats = new RoomStatistics();
+			room.setStatistics(stats);
+			stats.setContentCount(numQuestions);
+			stats.setAnswerCount(numAnswers);
+			stats.setCommentCount(numComments);
+			stats.setUnreadCommentCount(numUnreadComments);
 		}
-		return roomInfos;
+		return rooms;
 	}
 
 	/* TODO: Move to service layer. */
@@ -555,7 +483,8 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 
 			loggedIn.setUser(user.getUsername());
 			loggedIn.setSessionId(room.getId());
-			loggedIn.addVisitedSession(room);
+			/* FIXME: migrate */
+			//loggedIn.addVisitedSession(room);
 			loggedIn.updateTimestamp();
 
 			if (loggedIn.getId() == null) {

@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.Room;
+import de.thm.arsnova.entities.Content;
+import de.thm.arsnova.entities.Room;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,19 +41,19 @@ public class UnlockVoteEvent extends RoomEvent {
 		return this.content.getId();
 	}
 
-	public String getQuestionVariant() {
-		return this.content.getQuestionVariant();
+	public String getGroup() {
+		return this.content.getGroup();
 	}
 
 	public Boolean getVotingDisabled() {
-		return this.content.isVotingDisabled();
+		return !this.content.getState().areResponsesEnabled();
 	}
 
 	public Map<String, Object> getVotingAdmission() {
 		Map<String, Object> map = new HashMap<>();
 
 		map.put("_id", getQuestionId());
-		map.put("variant", getQuestionVariant());
+		map.put("variant", getGroup());
 		return map;
 	}
 

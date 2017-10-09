@@ -1,7 +1,6 @@
 package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.entities.migration.v2.AnswerOption;
 import de.thm.arsnova.entities.serialization.View;
 
 import java.util.List;

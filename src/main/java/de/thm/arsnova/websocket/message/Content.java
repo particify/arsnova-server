@@ -25,9 +25,9 @@ public class Content {
 	private final String _id;
 	private final String variant;
 
-	public Content(de.thm.arsnova.entities.migration.v2.Content content) {
+	public Content(de.thm.arsnova.entities.Content content) {
 		this._id = content.getId();
-		this.variant = content.getQuestionVariant();
+		this.variant = content.getGroup();
 	}
 
 	public String get_id() {

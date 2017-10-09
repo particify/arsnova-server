@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.security;
 
-import de.thm.arsnova.entities.migration.v2.DbUser;
+import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.persistance.UserRepository;
 import de.thm.arsnova.services.UserService;
 import org.slf4j.Logger;
@@ -52,8 +52,8 @@ public class DbUserDetailsService implements UserDetailsService {
 	public UserDetails loadUserByUsername(String username) {
 		String uid = username.toLowerCase();
 		logger.debug("Load user: " + uid);
-		DbUser dbUser = userRepository.findByUsername(uid);
-		if (null == dbUser) {
+		UserProfile userProfile = userRepository.findByUsername(uid);
+		if (null == userProfile) {
 			throw new UsernameNotFoundException("User does not exist.");
 		}
 
@@ -64,8 +64,8 @@ public class DbUserDetailsService implements UserDetailsService {
 			grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
 		}
 
-		return new User(uid, dbUser.getPassword(),
-				null == dbUser.getActivationKey(), true, true, true,
-				grantedAuthorities);
+		return new User(uid, userProfile.getAccount().getPassword(),
+				null == userProfile.getAccount().getActivationKey(),
+				true, true, true, grantedAuthorities);
 	}
 }

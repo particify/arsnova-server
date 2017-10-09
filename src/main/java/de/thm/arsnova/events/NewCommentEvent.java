@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.migration.v2.Comment;
-import de.thm.arsnova.entities.migration.v2.Room;
+import de.thm.arsnova.entities.Comment;
+import de.thm.arsnova.entities.Room;
 
 /**
  * Fires whenever a new comment is added.

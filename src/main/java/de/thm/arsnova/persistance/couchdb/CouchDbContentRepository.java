@@ -1,7 +1,7 @@
 package de.thm.arsnova.persistance.couchdb;
 
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.Content;
 import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import org.ektorp.BulkDeleteDocument;
@@ -167,18 +167,13 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	public List<Content> findBySessionIdAndVariantAndActive(final Object... keys) {
 		final Object[] endKeys = Arrays.copyOf(keys, keys.length + 1);
 		endKeys[keys.length] = ComplexKey.emptyObject();
-		final List<Content> contents = db.queryView(createQuery("by_sessionid_variant_active")
+
+		return db.queryView(createQuery("by_sessionid_variant_active")
 						.includeDocs(true)
 						.reduce(false)
 						.startKey(ComplexKey.of(keys))
 						.endKey(ComplexKey.of(endKeys)),
 				Content.class);
-		for (final Content content : contents) {
-			content.updateRoundManagementState();
-			//content.setSessionKeyword(session.getKeyword());
-		}
-
-		return contents;
 	}
 
 	@Override
@@ -231,8 +226,8 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		final List<String> unanswered = new ArrayList<>();
 
 		for (final Content content : contents) {
-			if (!"slide".equals(content.getQuestionType()) && (!answeredQuestions.containsKey(content.getId())
-					|| (answeredQuestions.containsKey(content.getId()) && answeredQuestions.get(content.getId()) != content.getPiRound()))) {
+			if (!"slide".equals(content.getFormat()) && (!answeredQuestions.containsKey(content.getId())
+					|| (answeredQuestions.containsKey(content.getId()) && answeredQuestions.get(content.getId()) != content.getState().getRound()))) {
 				unanswered.add(content.getId());
 			}
 		}

@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.entities.migration.v2.Comment;
+import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.migration.v2.CommentReadingCount;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.services.CommentService;

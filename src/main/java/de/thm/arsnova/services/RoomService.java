@@ -18,10 +18,8 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.connector.model.Course;
+import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.Room;
-import de.thm.arsnova.entities.migration.v2.RoomFeature;
-import de.thm.arsnova.entities.migration.v2.RoomInfo;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.ScoreStatistics;
 
@@ -72,23 +70,23 @@ public interface RoomService extends EntityService<Room> {
 
 	ScoreStatistics getMyLearningProgress(String sessionkey, String type, String questionVariant);
 
-	List<RoomInfo> getMySessionsInfo(int offset, int limit);
+	List<Room> getMySessionsInfo(int offset, int limit);
 
-	List<RoomInfo> getPublicPoolSessionsInfo();
+	List<Room> getPublicPoolSessionsInfo();
 
-	List<RoomInfo> getMyPublicPoolSessionsInfo();
+	List<Room> getMyPublicPoolSessionsInfo();
 
-	List<RoomInfo> getMyVisitedSessionsInfo(int offset, int limit);
+	List<Room> getMyVisitedSessionsInfo(int offset, int limit);
 
-	RoomInfo importSession(ImportExportSession session);
+	Room importSession(ImportExportSession session);
 
 	ImportExportSession exportSession(String sessionkey, Boolean withAnswerStatistics, Boolean withFeedbackQuestions);
 
-	RoomInfo copySessionToPublicPool(String sessionkey, de.thm.arsnova.entities.transport.ImportExportSession.PublicPool pp);
+	Room copySessionToPublicPool(String sessionkey, de.thm.arsnova.entities.transport.ImportExportSession.PublicPool pp);
 
-	RoomFeature getFeatures(String sessionkey);
+	Room.Settings getFeatures(String sessionkey);
 
-	RoomFeature updateFeatures(String sessionkey, RoomFeature features);
+	Room.Settings updateFeatures(String sessionkey, Room.Settings settings);
 
 	boolean lockFeedbackInput(String sessionkey, Boolean lock);
 

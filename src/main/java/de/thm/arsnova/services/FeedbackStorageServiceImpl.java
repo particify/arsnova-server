@@ -18,8 +18,8 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Feedback;
+import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.Room;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -124,7 +124,7 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 	public Map<Room, List<UserAuthentication>> cleanVotes(final int cleanupFeedbackDelay) {
 		final Map<Room, List<UserAuthentication>> removedFeedbackOfUsersInSession = new HashMap<>();
 		for (final Room room : data.keySet()) {
-			if (room.getFeatures() == null || !room.getFeatures().isLiveClicker()) {
+			if (!room.getSettings().isLivevoteEnabled()) {
 				List<UserAuthentication> affectedUsers = cleanVotesByRoom(room, cleanupFeedbackDelay);
 				if (!affectedUsers.isEmpty()) {
 					removedFeedbackOfUsersInSession.put(room, affectedUsers);

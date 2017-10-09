@@ -17,9 +17,10 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.Room;
+import de.thm.arsnova.entities.Content;
+import de.thm.arsnova.entities.Room;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,18 +32,18 @@ public class PiRoundDelayedStartEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 	private final String questionId;
-	private final Long startTime;
-	private final Long endTime;
-	private final String questionVariant;
+	private final Date startTime;
+	private final Date endTime;
+	private final String group;
 	private int piRound;
 
 	public PiRoundDelayedStartEvent(Object source, Room room, Content content) {
 		super(source, room);
 		this.questionId = content.getId();
-		this.startTime = content.getPiRoundStartTime();
-		this.endTime = content.getPiRoundEndTime();
-		this.questionVariant = content.getQuestionVariant();
-		this.piRound = content.getPiRound();
+		this.group = content.getGroup();
+		this.piRound = content.getState().getRound();
+		this.endTime = content.getState().getRoundEndTimestamp();
+		this.startTime = new Date();
 	}
 
 	@Override
@@ -54,16 +55,16 @@ public class PiRoundDelayedStartEvent extends RoomEvent {
 		return questionId;
 	}
 
-	public Long getStartTime() {
+	public Date getStartTime() {
 		return startTime;
 	}
 
-	public Long getEndTime() {
+	public Date getEndTime() {
 		return endTime;
 	}
 
-	public String getQuestionVariant() {
-		return questionVariant;
+	public String getGroup() {
+		return group;
 	}
 
 	public Integer getPiRound() {
@@ -74,9 +75,9 @@ public class PiRoundDelayedStartEvent extends RoomEvent {
 		Map<String, Object> map = new HashMap<>();
 
 		map.put("_id", getQuestionId());
-		map.put("endTime", getEndTime());
-		map.put("startTime", getStartTime());
-		map.put("variant", getQuestionVariant());
+		map.put("endTime", getEndTime().getTime());
+		map.put("startTime", getStartTime().getTime());
+		map.put("variant", getGroup());
 		map.put("round", getPiRound());
 
 		return map;

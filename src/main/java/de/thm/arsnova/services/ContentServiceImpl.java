@@ -17,26 +17,25 @@
  */
 package de.thm.arsnova.services;
 
+import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.AnswerStatistics;
+import de.thm.arsnova.entities.Content;
+import de.thm.arsnova.entities.Room;
+import de.thm.arsnova.entities.TextAnswer;
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.Room;
 import de.thm.arsnova.entities.transport.AnswerQueueElement;
-import de.thm.arsnova.persistance.LogEntryRepository;
-import de.thm.arsnova.persistance.RoomRepository;
-import de.thm.arsnova.util.ImageUtils;
-import de.thm.arsnova.entities.migration.v2.Answer;
-import de.thm.arsnova.entities.migration.v2.Content;
 import de.thm.arsnova.events.*;
-import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.persistance.AnswerRepository;
 import de.thm.arsnova.persistance.ContentRepository;
+import de.thm.arsnova.persistance.LogEntryRepository;
+import de.thm.arsnova.persistance.RoomRepository;
 import org.ektorp.DbAccessException;
 import org.ektorp.DocumentNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -54,8 +53,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
@@ -74,16 +71,9 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	private AnswerRepository answerRepository;
 
-	private ImageUtils imageUtils;
-
-	@Value("${upload.filesize_b}")
-	private int uploadFileSizeByte;
-
 	private ApplicationEventPublisher publisher;
 
 	private static final Logger logger = LoggerFactory.getLogger(ContentServiceImpl.class);
-
-	private HashMap<String, Timer> timerList = new HashMap<>();
 
 	private final Queue<AnswerQueueElement> answerQueue = new ConcurrentLinkedQueue<>();
 
@@ -93,7 +83,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			RoomRepository roomRepository,
 			LogEntryRepository dbLogger,
 			UserService userService,
-			ImageUtils imageUtils,
 			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(Content.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.contentRepository = repository;
@@ -101,7 +90,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		this.roomRepository = roomRepository;
 		this.dbLogger = dbLogger;
 		this.userService = userService;
-		this.imageUtils = imageUtils;
 	}
 
 	@Scheduled(fixedDelay = 5000)
@@ -136,16 +124,15 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	public Content get(final String id) {
 		try {
 			final Content content = super.get(id);
-			if (!"freetext".equals(content.getQuestionType()) && 0 == content.getPiRound()) {
+			if (!"freetext".equals(content.getFormat()) && 0 == content.getState().getRound()) {
 			/* needed for legacy questions whose piRound property has not been set */
-				content.setPiRound(1);
+				content.getState().setRound(1);
 			}
-			content.updateRoundManagementState();
 			//content.setSessionKeyword(roomRepository.getSessionFromId(content.getRoomId()).getKeyword());
 
 			return content;
 		} catch (final DocumentNotFoundException e) {
-			logger.error("Could not get question {}.", id, e);
+			logger.error("Could not get content {}.", id, e);
 		}
 
 		return null;
@@ -153,12 +140,12 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@Caching(evict = {@CacheEvict(value = "contentlists", key = "#sessionId"),
-			@CacheEvict(value = "lecturecontentlists", key = "#sessionId", condition = "#content.getQuestionVariant().equals('lecture')"),
-			@CacheEvict(value = "preparationcontentlists", key = "#sessionId", condition = "#content.getQuestionVariant().equals('preparation')"),
-			@CacheEvict(value = "flashcardcontentlists", key = "#sessionId", condition = "#content.getQuestionVariant().equals('flashcard')") },
+			@CacheEvict(value = "lecturecontentlists", key = "#sessionId", condition = "#content.getGroup().equals('lecture')"),
+			@CacheEvict(value = "preparationcontentlists", key = "#sessionId", condition = "#content.getGroup().equals('preparation')"),
+			@CacheEvict(value = "flashcardcontentlists", key = "#sessionId", condition = "#content.getGroup().equals('flashcard')") },
 			put = {@CachePut(value = "contents", key = "#content.id")})
 	public Content save(final String sessionId, final Content content) {
-		content.setSessionId(sessionId);
+		content.setRoomId(sessionId);
 		try {
 			contentRepository.save(content);
 
@@ -174,9 +161,9 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@PreAuthorize("isAuthenticated()")
 	@Caching(evict = {
 			@CacheEvict(value = "contentlists", allEntries = true),
-			@CacheEvict(value = "lecturecontentlists", allEntries = true, condition = "#content.getQuestionVariant().equals('lecture')"),
-			@CacheEvict(value = "preparationcontentlists", allEntries = true, condition = "#content.getQuestionVariant().equals('preparation')"),
-			@CacheEvict(value = "flashcardcontentlists", allEntries = true, condition = "#content.getQuestionVariant().equals('flashcard')") },
+			@CacheEvict(value = "lecturecontentlists", allEntries = true, condition = "#content.getGroup().equals('lecture')"),
+			@CacheEvict(value = "preparationcontentlists", allEntries = true, condition = "#content.getGroup().equals('preparation')"),
+			@CacheEvict(value = "flashcardcontentlists", allEntries = true, condition = "#content.getGroup().equals('flashcard')") },
 			put = {@CachePut(value = "contents", key = "#content.id")})
 	public Content update(final Content content) {
 		final UserAuthentication user = userService.getCurrentUser();
@@ -185,26 +172,25 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			throw new NotFoundException();
 		}
 
-		final Room room = roomRepository.findOne(content.getSessionId());
-		if (user == null || room == null || !room.isCreator(user)) {
+		final Room room = roomRepository.findOne(content.getRoomId());
+		if (user == null || room == null || !room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
 		}
 
-		if ("freetext".equals(content.getQuestionType())) {
-			content.setPiRound(0);
-		} else if (content.getPiRound() < 1 || content.getPiRound() > 2) {
-			content.setPiRound(oldContent.getPiRound() > 0 ? oldContent.getPiRound() : 1);
+		if ("freetext".equals(content.getFormat())) {
+			content.getState().setRound(0);
+		} else if (content.getState().getRound() < 1 || content.getState().getRound() > 2) {
+			content.getState().setRound(oldContent.getState().getRound() > 0 ? oldContent.getState().getRound() : 1);
 		}
 
 		content.setId(oldContent.getId());
 		content.setRevision(oldContent.getRevision());
-		content.updateRoundManagementState();
 		contentRepository.save(content);
 
-		if (!oldContent.isActive() && content.isActive()) {
+		if (!oldContent.getState().isVisible() && content.getState().isVisible()) {
 			final UnlockQuestionEvent event = new UnlockQuestionEvent(this, room, content);
 			this.publisher.publishEvent(event);
-		} else if (oldContent.isActive() && !content.isActive()) {
+		} else if (oldContent.getState().isVisible() && !content.getState().isVisible()) {
 			final LockQuestionEvent event = new LockQuestionEvent(this, room, content);
 			this.publisher.publishEvent(event);
 		}
@@ -218,7 +204,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	public List<Content> getBySessionKey(final String sessionkey) {
 		final Room room = getSession(sessionkey);
 		final UserAuthentication user = userService.getCurrentUser();
-		if (room.isCreator(user)) {
+		if (room.getOwnerId().equals(user.getId())) {
 			return contentRepository.findBySessionIdForSpeaker(room.getId());
 		} else {
 			return contentRepository.findBySessionIdForUsers(room.getId());
@@ -236,18 +222,18 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@Override
 	@PreAuthorize("hasPermission(#content.getSessionKeyword(), 'session', 'owner')")
 	public Content save(final Content content) {
-		final Room room = roomRepository.findByKeyword(content.getSessionKeyword());
-		content.setSessionId(room.getId());
-		content.setTimestamp(System.currentTimeMillis() / 1000L);
+		final Room room = roomRepository.findOne(content.getRoomId());
+		content.setTimestamp(new Date());
 
-		if ("freetext".equals(content.getQuestionType())) {
-			content.setPiRound(0);
-		} else if (content.getPiRound() < 1 || content.getPiRound() > 2) {
-			content.setPiRound(1);
+		if ("freetext".equals(content.getFormat())) {
+			content.getState().setRound(0);
+		} else if (content.getState().getRound() < 1 || content.getState().getRound() > 2) {
+			content.getState().setRound(1);
 		}
 
+		/* FIXME: migrate
 		// convert imageurl to base64 if neccessary
-		if ("grid".equals(content.getQuestionType()) && !content.getImage().startsWith("http")) {
+		if ("grid".equals(content.getFormat()) && !content.getImage().startsWith("http")) {
 			// base64 adds offset to filesize, formula taken from: http://en.wikipedia.org/wiki/Base64#MIME
 			final int fileSize = (int) ((content.getImage().length() - 814) / 1.37);
 			if (fileSize > uploadFileSizeByte) {
@@ -255,6 +241,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 				throw new BadRequestException();
 			}
 		}
+		*/
 
 		final Content result = save(room.getId(), content);
 
@@ -271,16 +258,16 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			@CacheEvict("answerlists"),
 			@CacheEvict(value = "contents", key = "#contentId"),
 			@CacheEvict(value = "contentlists", allEntries = true),
-			@CacheEvict(value = "lecturecontentlists", allEntries = true /*, condition = "#content.getQuestionVariant().equals('lecture')"*/),
-			@CacheEvict(value = "preparationcontentlists", allEntries = true /*, condition = "#content.getQuestionVariant().equals('preparation')"*/),
-			@CacheEvict(value = "flashcardcontentlists", allEntries = true /*, condition = "#content.getQuestionVariant().equals('flashcard')"*/) })
+			@CacheEvict(value = "lecturecontentlists", allEntries = true /*, condition = "#content.getGroup().equals('lecture')"*/),
+			@CacheEvict(value = "preparationcontentlists", allEntries = true /*, condition = "#content.getGroup().equals('preparation')"*/),
+			@CacheEvict(value = "flashcardcontentlists", allEntries = true /*, condition = "#content.getGroup().equals('flashcard')"*/) })
 	public void delete(final String contentId) {
 		final Content content = contentRepository.findOne(contentId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
 
-		final Room room = roomRepository.findOne(content.getSessionId());
+		final Room room = roomRepository.findOne(content.getRoomId());
 		if (room == null) {
 			throw new UnauthorizedException();
 		}
@@ -350,110 +337,14 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated() and hasPermission(#questionId, 'content', 'owner')")
-	public void startNewPiRound(final String questionId, UserAuthentication user) {
-		final Content content = contentRepository.findOne(questionId);
-		final Room room = roomRepository.findOne(content.getSessionId());
+	@PreAuthorize("hasPermission(#contentId, 'content', 'owner')")
+	public void setVotingAdmission(final String contentId, final boolean disableVoting) {
+		final Content content = contentRepository.findOne(contentId);
+		final Room room = roomRepository.findOne(content.getRoomId());
+		content.getState().setResponsesEnabled(!disableVoting);
 
-		if (null == user) {
-			user = userService.getCurrentUser();
-		}
-
-		cancelDelayedPiRoundChange(questionId);
-
-		content.setPiRoundEndTime(0);
-		content.setVotingDisabled(true);
-		content.updateRoundManagementState();
-		update(content);
-
-		this.publisher.publishEvent(new PiRoundEndEvent(this, room, content));
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#questionId, 'content', 'owner')")
-	public void startNewPiRoundDelayed(final String questionId, final int time) {
-		final ContentService contentService = this;
-		final UserAuthentication user = userService.getCurrentUser();
-		final Content content = contentRepository.findOne(questionId);
-		final Room room = roomRepository.findOne(content.getSessionId());
-
-		final Date date = new Date();
-		final Timer timer = new Timer();
-		final Date endDate = new Date(date.getTime() + (time * 1000));
-		content.updateRoundStartVariables(date, endDate);
-		update(content);
-
-		this.publisher.publishEvent(new PiRoundDelayedStartEvent(this, room, content));
-		timerList.put(questionId, timer);
-
-		timer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				contentService.startNewPiRound(questionId, user);
-			}
-		}, endDate);
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#questionId, 'content', 'owner')")
-	public void cancelPiRoundChange(final String questionId) {
-		final Content content = contentRepository.findOne(questionId);
-		final Room room = roomRepository.findOne(content.getSessionId());
-
-		cancelDelayedPiRoundChange(questionId);
-		content.resetRoundManagementState();
-
-		if (0 == content.getPiRound() || 1 == content.getPiRound()) {
-			content.setPiRoundFinished(false);
-		} else {
-			content.setPiRound(1);
-			content.setPiRoundFinished(true);
-		}
-
-		update(content);
-		this.publisher.publishEvent(new PiRoundCancelEvent(this, room, content));
-	}
-
-	@Override
-	public void cancelDelayedPiRoundChange(final String questionId) {
-		Timer timer = timerList.get(questionId);
-
-		if (null != timer) {
-			timer.cancel();
-			timerList.remove(questionId);
-			timer.purge();
-		}
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#questionId, 'content', 'owner')")
-	@CacheEvict("answerlists")
-	public void resetPiRoundState(final String questionId) {
-		final Content content = contentRepository.findOne(questionId);
-		final Room room = roomRepository.findOne(content.getSessionId());
-		cancelDelayedPiRoundChange(questionId);
-
-		if ("freetext".equals(content.getQuestionType())) {
-			content.setPiRound(0);
-		} else {
-			content.setPiRound(1);
-		}
-
-		content.resetRoundManagementState();
-		answerRepository.deleteByContentId(content.getId());
-		update(content);
-		this.publisher.publishEvent(new PiRoundResetEvent(this, room, content));
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#questionId, 'content', 'owner')")
-	public void setVotingAdmission(final String questionId, final boolean disableVoting) {
-		final Content content = contentRepository.findOne(questionId);
-		final Room room = roomRepository.findOne(content.getSessionId());
-		content.setVotingDisabled(disableVoting);
-
-		if (!disableVoting && !content.isActive()) {
-			content.setActive(true);
+		if (!disableVoting && !content.getState().isVisible()) {
+			content.getState().setVisible(true);
 			update(content);
 		} else {
 			update(content);
@@ -477,12 +368,12 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	public void setVotingAdmissions(final String sessionkey, final boolean disableVoting, List<Content> contents) {
 		final UserAuthentication user = getCurrentUser();
 		final Room room = getSession(sessionkey);
-		if (!room.isCreator(user)) {
+		if (!room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
 		}
 		for (final Content q : contents) {
-			if (!"flashcard".equals(q.getQuestionType())) {
-				q.setVotingDisabled(disableVoting);
+			if (!"flashcard".equals(q.getRoomId())) {
+				q.getState().setResponsesEnabled(!disableVoting);
 			}
 		}
 		ArsnovaEvent event;
@@ -499,7 +390,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	public void setVotingAdmissionForAllQuestions(final String sessionkey, final boolean disableVoting) {
 		final UserAuthentication user = getCurrentUser();
 		final Room room = getSession(sessionkey);
-		if (!room.isCreator(user)) {
+		if (!room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
 		}
 		final List<Content> contents = contentRepository.findBySessionId(room.getId());
@@ -509,17 +400,18 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	private Room getSessionWithAuthCheck(final String sessionKeyword) {
 		final UserAuthentication user = userService.getCurrentUser();
 		final Room room = roomRepository.findByKeyword(sessionKeyword);
-		if (user == null || room == null || !room.isCreator(user)) {
+		if (user == null || room == null || !room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
 		}
 		return room;
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#questionId, 'content', 'owner')")
-	public void deleteAnswers(final String questionId) {
-		final Content content = contentRepository.findOne(questionId);
-		content.resetQuestionState();
+	@PreAuthorize("hasPermission(#contentId, 'content', 'owner')")
+	public void deleteAnswers(final String contentId) {
+		final Content content = contentRepository.findOne(contentId);
+		content.resetState();
+		/* FIXME: cancel timer */
 		update(content);
 		answerRepository.deleteByContentId(content.getId());
 	}
@@ -542,89 +434,115 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public Answer getMyAnswer(final String questionId) {
-		final Content content = get(questionId);
+	public Answer getMyAnswer(final String contentId) {
+		final Content content = get(contentId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		return answerRepository.findByQuestionIdUserPiRound(questionId, userService.getCurrentUser(), content.getPiRound());
+		return answerRepository.findByQuestionIdUserPiRound(contentId, userService.getCurrentUser(), content.getState().getRound());
 	}
 
 	@Override
 	public void getFreetextAnswerAndMarkRead(final String answerId, final UserAuthentication user) {
 		final Answer answer = answerRepository.findOne(answerId);
-		if (answer == null) {
+		if (!(answer instanceof TextAnswer)) {
 			throw new NotFoundException();
 		}
-		if (answer.isRead()) {
+		final TextAnswer textAnswer = (TextAnswer) answer;
+		if (textAnswer.isRead()) {
 			return;
 		}
-		final Room room = roomRepository.findOne(answer.getSessionId());
-		if (room.isCreator(user)) {
-			answer.setRead(true);
-			answerRepository.save(answer);
+		final Room room = roomRepository.findOne(textAnswer.getRoomId());
+		if (room.getOwnerId().equals(user.getId())) {
+			textAnswer.setRead(true);
+			answerRepository.save(textAnswer);
 		}
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getAnswers(final String questionId, final int piRound, final int offset, final int limit) {
-		final Content content = contentRepository.findOne(questionId);
+	public AnswerStatistics getStatistics(final String contentId, final int piRound) {
+		final Content content = contentRepository.findOne(contentId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		return "freetext".equals(content.getQuestionType())
-				? getFreetextAnswersByQuestionId(questionId, offset, limit)
-						: answerRepository.findByContentIdPiRound(content.getId(), piRound);
+
+		return answerRepository.findByContentIdPiRound(content.getId(), piRound);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getAnswers(final String questionId, final int offset, final int limit) {
-		final Content content = get(questionId);
+	public AnswerStatistics getStatistics(final String contentId) {
+		final Content content = get(contentId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		if ("freetext".equals(content.getQuestionType())) {
-			return getFreetextAnswersByQuestionId(questionId, offset, limit);
-		} else {
-			return answerRepository.findByContentIdPiRound(content.getId(), content.getPiRound());
-		}
+
+		return getStatistics(content.getId(), content.getState().getRound());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getAllAnswers(final String questionId, final int offset, final int limit) {
-		final Content content = get(questionId);
+	public AnswerStatistics getAllStatistics(final String contentId) {
+		final Content content = get(contentId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		if ("freetext".equals(content.getQuestionType())) {
-			return getFreetextAnswersByQuestionId(questionId, offset, limit);
-		} else {
-			return answerRepository.findByContentId(content.getId());
-		}
+		AnswerStatistics stats = answerRepository.findByContentIdPiRound(content.getId(), 1);
+		AnswerStatistics stats2 = answerRepository.findByContentIdPiRound(content.getId(), 2);
+		stats.getRoundStatistics().add(stats2.getRoundStatistics().get(0));
+
+		return stats;
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int countAnswersByQuestionIdAndRound(final String questionId) {
-		final Content content = get(questionId);
+	public List<Answer> getAnswers(final String contentId, final int piRound, final int offset, final int limit) {
+		/* FIXME: round support not implemented */
+		final Content content = contentRepository.findOne(contentId);
+		if (content == null) {
+			throw new NotFoundException();
+		}
+
+		return getFreetextAnswersByQuestionId(contentId, offset, limit);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public List<Answer> getAnswers(final String contentId, final int offset, final int limit) {
+		return getAnswers(contentId, 0, offset, limit);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public List<Answer> getAllAnswers(final String contentId, final int offset, final int limit) {
+		final Content content = get(contentId);
+		if (content == null) {
+			throw new NotFoundException();
+		}
+
+		return getFreetextAnswersByQuestionId(contentId, offset, limit);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public int countAnswersByQuestionIdAndRound(final String contentId) {
+		final Content content = get(contentId);
 		if (content == null) {
 			return 0;
 		}
 
-		if ("freetext".equals(content.getQuestionType())) {
+		if ("freetext".equals(content.getFormat())) {
 			return answerRepository.countByContentId(content.getId());
 		} else {
-			return answerRepository.countByContentIdRound(content.getId(), content.getPiRound());
+			return answerRepository.countByContentIdRound(content.getId(), content.getState().getRound());
 		}
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int countAnswersByQuestionIdAndRound(final String questionId, final int piRound) {
-		final Content content = get(questionId);
+	public int countAnswersByQuestionIdAndRound(final String contentId, final int piRound) {
+		final Content content = get(contentId);
 		if (content == null) {
 			return 0;
 		}
@@ -634,19 +552,19 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int countTotalAbstentionsByQuestionId(final String questionId) {
-		final Content content = get(questionId);
+	public int countTotalAbstentionsByQuestionId(final String contentId) {
+		final Content content = get(contentId);
 		if (content == null) {
 			return 0;
 		}
 
-		return answerRepository.countByContentId(questionId);
+		return answerRepository.countByContentId(contentId);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int countTotalAnswersByQuestionId(final String questionId) {
-		final Content content = get(questionId);
+	public int countTotalAnswersByQuestionId(final String contentId) {
+		final Content content = get(contentId);
 		if (content == null) {
 			return 0;
 		}
@@ -656,14 +574,10 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getFreetextAnswersByQuestionId(final String questionId, final int offset, final int limit) {
-		final List<Answer> answers = answerRepository.findByContentId(questionId, offset, limit);
+	public List<Answer> getFreetextAnswersByQuestionId(final String contentId, final int offset, final int limit) {
+		final List<Answer> answers = answerRepository.findByContentId(contentId, offset, limit);
 		if (answers == null) {
 			throw new NotFoundException();
-		}
-		/* Remove user for privacy concerns */
-		for (Answer answer : answers) {
-			answer.setUser(null);
 		}
 
 		return answers;
@@ -675,27 +589,27 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		final Room room = getSession(sessionKey);
 		// Load contents first because we are only interested in answers of the latest piRound.
 		final List<Content> contents = getBySessionKey(sessionKey);
-		final Map<String, Content> questionIdToQuestion = new HashMap<>();
+		final Map<String, Content> contentIdToContent = new HashMap<>();
 		for (final Content content : contents) {
-			questionIdToQuestion.put(content.getId(), content);
+			contentIdToContent.put(content.getId(), content);
 		}
 
-		/* filter answers by active piRound per question */
+		/* filter answers by active piRound per content */
 		final List<Answer> answers = answerRepository.findByUserSessionId(userService.getCurrentUser(), room.getId());
 		final List<Answer> filteredAnswers = new ArrayList<>();
 		for (final Answer answer : answers) {
-			final Content content = questionIdToQuestion.get(answer.getQuestionId());
+			final Content content = contentIdToContent.get(answer.getContentId());
 			if (content == null) {
 				// Content is not present. Most likely it has been locked by the
 				// Room's creator. Locked Questions do not appear in this list.
 				continue;
 			}
-			if (0 == answer.getPiRound() && !"freetext".equals(content.getQuestionType())) {
-				answer.setPiRound(1);
+			if (0 == answer.getRound() && !"freetext".equals(content.getFormat())) {
+				answer.setRound(1);
 			}
 
 			// discard all answers that aren't in the same piRound as the content
-			if (answer.getPiRound() == content.getPiRound()) {
+			if (answer.getRound() == content.getState().getRound()) {
 				filteredAnswers.add(answer);
 			}
 		}
@@ -718,19 +632,21 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		final Room room = roomRepository.findOne(content.getSessionId());
+		final Room room = roomRepository.findOne(content.getRoomId());
 
-		answer.setUser(user.getUsername());
-		answer.setQuestionId(content.getId());
-		answer.setSessionId(room.getId());
-		answer.setQuestionVariant(content.getQuestionVariant());
+		answer.setCreatorId(user.getId());
+		answer.setContentId(content.getId());
+		answer.setRoomId(room.getId());
+
+		/* FIXME: migrate
 		answer.setQuestionValue(content.calculateValue(answer));
-		answer.setTimestamp(new Date().getTime());
+		*/
 
-		if ("freetext".equals(content.getQuestionType())) {
-			answer.setPiRound(0);
+		if ("freetext".equals(content.getFormat())) {
+			answer.setRound(0);
+			/* FIXME: migrate
 			imageUtils.generateThumbnailImage(answer);
-			if (content.isFixedAnswer() && content.getText() != null) {
+			if (content.isFixedAnswer() && content.getBody() != null) {
 				answer.setAnswerTextRaw(answer.getAnswerText());
 
 				if (content.isStrictMode()) {
@@ -739,8 +655,9 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 				answer.setQuestionValue(content.evaluateCorrectAnswerFixedText(answer.getAnswerTextRaw()));
 				answer.setSuccessfulFreeTextAnswer(content.isSuccessfulFreeTextAnswer(answer.getAnswerTextRaw()));
 			}
+			*/
 		} else {
-			answer.setPiRound(content.getPiRound());
+			answer.setRound(content.getState().getRound());
 		}
 
 		this.answerQueue.offer(new AnswerQueueElement(room, content, answer, user));
@@ -753,20 +670,22 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@CacheEvict(value = "answerlists", allEntries = true)
 	public Answer updateAnswer(final Answer answer) {
 		final UserAuthentication user = userService.getCurrentUser();
-		final Answer realAnswer = this.getMyAnswer(answer.getQuestionId());
-		if (user == null || realAnswer == null || !user.getUsername().equals(realAnswer.getUser())) {
+		final Answer realAnswer = this.getMyAnswer(answer.getContentId());
+		if (user == null || realAnswer == null || !user.getId().equals(realAnswer.getCreatorId())) {
 			throw new UnauthorizedException();
 		}
 
-		final Content content = get(answer.getQuestionId());
-		if ("freetext".equals(content.getQuestionType())) {
+		final Content content = get(answer.getContentId());
+		/* FIXME: migrate
+		if ("freetext".equals(content.getFormat())) {
 			imageUtils.generateThumbnailImage(realAnswer);
 			content.checkTextStrictOptions(realAnswer);
 		}
-		final Room room = roomRepository.findOne(content.getSessionId());
-		answer.setUser(user.getUsername());
-		answer.setQuestionId(content.getId());
-		answer.setSessionId(room.getId());
+		*/
+		final Room room = roomRepository.findOne(content.getRoomId());
+		answer.setCreatorId(user.getId());
+		answer.setContentId(content.getId());
+		answer.setRoomId(room.getId());
 		answerRepository.save(realAnswer);
 		this.publisher.publishEvent(new NewAnswerEvent(this, room, answer, user, content));
 
@@ -776,14 +695,14 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	@CacheEvict(value = "answerlists", allEntries = true)
-	public void deleteAnswer(final String questionId, final String answerId) {
-		final Content content = contentRepository.findOne(questionId);
+	public void deleteAnswer(final String contentId, final String answerId) {
+		final Content content = contentRepository.findOne(contentId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
 		final UserAuthentication user = userService.getCurrentUser();
-		final Room room = roomRepository.findOne(content.getSessionId());
-		if (user == null || room == null || !room.isCreator(user)) {
+		final Room room = roomRepository.findOne(content.getRoomId());
+		if (user == null || room == null || !room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
 		}
 		answerRepository.delete(answerId);
@@ -798,7 +717,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	public List<Content> getLectureQuestions(final String sessionkey) {
 		final Room room = getSession(sessionkey);
 		final UserAuthentication user = userService.getCurrentUser();
-		if (room.isCreator(user)) {
+		if (room.getOwnerId().equals(user.getId())) {
 			return contentRepository.findBySessionIdOnlyLectureVariant(room.getId());
 		} else {
 			return contentRepository.findBySessionIdOnlyLectureVariantAndActive(room.getId());
@@ -812,7 +731,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	public List<Content> getFlashcards(final String sessionkey) {
 		final Room room = getSession(sessionkey);
 		final UserAuthentication user = userService.getCurrentUser();
-		if (room.isCreator(user)) {
+		if (room.getOwnerId().equals(user.getId())) {
 			return contentRepository.findBySessionIdOnlyFlashcardVariant(room.getId());
 		} else {
 			return contentRepository.findBySessionIdOnlyFlashcardVariantAndActive(room.getId());
@@ -826,23 +745,11 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	public List<Content> getPreparationQuestions(final String sessionkey) {
 		final Room room = getSession(sessionkey);
 		final UserAuthentication user = userService.getCurrentUser();
-		if (room.isCreator(user)) {
+		if (room.getOwnerId().equals(user.getId())) {
 			return contentRepository.findBySessionIdOnlyPreparationVariant(room.getId());
 		} else {
 			return contentRepository.findBySessionIdOnlyPreparationVariantAndActive(room.getId());
 		}
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public List<Content> replaceImageData(final List<Content> contents) {
-		for (Content q : contents) {
-			if (q.getImage() != null && q.getImage().startsWith("data:image/")) {
-				q.setImage("true");
-			}
-		}
-
-		return contents;
 	}
 
 	private Room getSession(final String sessionkey) {
@@ -887,17 +794,17 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	}
 
 	@Override
-	public Map<String, Object> countAnswersAndAbstentionsInternal(final String questionId) {
-		final Content content = get(questionId);
+	public Map<String, Object> countAnswersAndAbstentionsInternal(final String contentId) {
+		final Content content = get(contentId);
 		HashMap<String, Object> map = new HashMap<>();
 
 		if (content == null) {
 			return null;
 		}
 
-		map.put("_id", questionId);
-		map.put("answers", answerRepository.countByContentIdRound(content.getId(), content.getPiRound()));
-		map.put("abstentions", answerRepository.countByContentId(questionId));
+		map.put("_id", contentId);
+		map.put("answers", answerRepository.countByContentIdRound(content.getId(), content.getState().getRound()));
+		map.put("abstentions", answerRepository.countByContentId(contentId));
 
 		return map;
 	}
@@ -958,7 +865,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		/* TODO: resolve redundancies */
 		final UserAuthentication user = getCurrentUser();
 		final Room room = getSession(sessionkey);
-		if (!room.isCreator(user)) {
+		if (!room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
 		}
 		final List<Content> contents = contentRepository.findBySessionId(room.getId());
@@ -975,11 +882,11 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	public void publishQuestions(final String sessionkey, final boolean publish, List<Content> contents) {
 		final UserAuthentication user = getCurrentUser();
 		final Room room = getSession(sessionkey);
-		if (!room.isCreator(user)) {
+		if (!room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
 		}
 		for (final Content content : contents) {
-			content.setActive(publish);
+			content.getState().setVisible(publish);
 		}
 		contentRepository.save(contents);
 		ArsnovaEvent event;
@@ -997,7 +904,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	public void deleteAllQuestionsAnswers(final String sessionkey) {
 		final UserAuthentication user = getCurrentUser();
 		final Room room = getSession(sessionkey);
-		if (!room.isCreator(user)) {
+		if (!room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
 		}
 
@@ -1009,7 +916,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		this.publisher.publishEvent(new DeleteAllQuestionsAnswersEvent(this, room));
 	}
 
-	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
+	/* TODO: Only evict cache entry for the answer's content. This requires some refactoring. */
 	@Override
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	@CacheEvict(value = "answerlists", allEntries = true)
@@ -1024,7 +931,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		this.publisher.publishEvent(new DeleteAllPreparationAnswersEvent(this, room));
 	}
 
-	/* TODO: Only evict cache entry for the answer's question. This requires some refactoring. */
+	/* TODO: Only evict cache entry for the answer's content. This requires some refactoring. */
 	@Override
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
 	@CacheEvict(value = "answerlists", allEntries = true)
@@ -1048,8 +955,8 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	private void resetContentsRoundState(final String sessionId, final List<Content> contents) {
 		for (final Content q : contents) {
 			/* TODO: Check if setting the sessionId is necessary. */
-			q.setSessionId(sessionId);
-			q.resetQuestionState();
+			q.setRoomId(sessionId);
+			q.resetState();
 		}
 		contentRepository.save(contents);
 	}
@@ -1057,48 +964,5 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@Override
 	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
 		this.publisher = publisher;
-	}
-
-	@Override
-	public String getImage(String questionId, String answerId) {
-		final List<Answer> answers = getAnswers(questionId, -1, -1);
-		Answer answer = null;
-
-		for (Answer a : answers) {
-			if (answerId.equals(a.getId())) {
-				answer = a;
-				break;
-			}
-		}
-
-		if (answer == null) {
-			throw new NotFoundException();
-		}
-
-		return answer.getAnswerImage();
-	}
-
-	@Override
-	public String getQuestionImage(String questionId) {
-		Content content = contentRepository.findOne(questionId);
-		String imageData = content.getImage();
-
-		if (imageData == null) {
-			imageData = "";
-		}
-
-		return imageData;
-	}
-
-	@Override
-	public String getQuestionFcImage(String questionId) {
-		Content content = contentRepository.findOne(questionId);
-		String imageData = content.getFcImage();
-
-		if (imageData == null) {
-			imageData = "";
-		}
-
-		return imageData;
 	}
 }

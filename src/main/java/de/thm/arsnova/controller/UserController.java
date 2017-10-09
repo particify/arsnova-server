@@ -17,9 +17,9 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.entities.migration.v2.DbUser;
-import de.thm.arsnova.services.UserService;
+import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.services.UserRoomService;
+import de.thm.arsnova.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.stereotype.Controller;
@@ -64,10 +64,10 @@ public class UserController extends AbstractController {
 			@PathVariable final String username,
 			@RequestParam final String key, final HttpServletRequest request,
 			final HttpServletResponse response) {
-		DbUser dbUser = userService.getByUsername(username);
-		if (null != dbUser && key.equals(dbUser.getActivationKey())) {
-			dbUser.setActivationKey(null);
-			userService.update(dbUser);
+		UserProfile userProfile = userService.getByUsername(username);
+		if (null != userProfile && key.equals(userProfile.getAccount().getActivationKey())) {
+			userProfile.getAccount().setActivationKey(null);
+			userService.update(userProfile);
 
 			return;
 		}
@@ -92,15 +92,15 @@ public class UserController extends AbstractController {
 			@RequestParam(required = false) final String password,
 			final HttpServletRequest request,
 			final HttpServletResponse response) {
-		DbUser dbUser = userService.getByUsername(username);
-		if (null == dbUser) {
+		UserProfile userProfile = userService.getByUsername(username);
+		if (null == userProfile) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 
 			return;
 		}
 
 		if (null != key) {
-			if (!userService.resetPassword(dbUser, key, password)) {
+			if (!userService.resetPassword(userProfile, key, password)) {
 				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 			}
 		} else {

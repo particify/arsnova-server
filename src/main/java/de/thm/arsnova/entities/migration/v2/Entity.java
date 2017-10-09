@@ -20,8 +20,6 @@ package de.thm.arsnova.entities.migration.v2;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
 
-import java.util.Date;
-
 public interface Entity {
 	String getId();
 	void setId(String id);

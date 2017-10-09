@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.Room;
+import de.thm.arsnova.entities.Content;
+import de.thm.arsnova.entities.Room;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,13 +30,13 @@ public class PiRoundEndEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String questionId;
-	private final String questionVariant;
+	private final String contentId;
+	private final String group;
 
 	public PiRoundEndEvent(Object source, Room room, Content content) {
 		super(source, room);
-		questionId = content.getId();
-		questionVariant = content.getQuestionVariant();
+		contentId = content.getId();
+		group = content.getGroup();
 	}
 
 	@Override
@@ -44,19 +44,19 @@ public class PiRoundEndEvent extends RoomEvent {
 		visitor.visit(this);
 	}
 
-	public String getQuestionId() {
-		return questionId;
+	public String getContentId() {
+		return contentId;
 	}
 
-	public String getQuestionVariant() {
-		return questionVariant;
+	public String getGroup() {
+		return group;
 	}
 
 	public Map<String, String> getPiRoundEndInformations() {
 		Map<String, String> map = new HashMap<>();
 
-		map.put("_id", getQuestionId());
-		map.put("variant", getQuestionVariant());
+		map.put("_id", getContentId());
+		map.put("variant", getGroup());
 
 		return map;
 	}

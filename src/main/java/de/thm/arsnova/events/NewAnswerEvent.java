@@ -18,9 +18,9 @@
 package de.thm.arsnova.events;
 
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.Answer;
-import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.Room;
+import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.Content;
+import de.thm.arsnova.entities.Room;
 
 /**
  * Fires whenever a new answer is added.

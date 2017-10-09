@@ -17,14 +17,16 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.util.PaginationListDecorator;
-import de.thm.arsnova.entities.migration.v2.Answer;
-import de.thm.arsnova.entities.migration.v2.Content;
+import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
+import de.thm.arsnova.exceptions.NotImplementedException;
 import de.thm.arsnova.services.ContentService;
+import de.thm.arsnova.services.TimerService;
+import de.thm.arsnova.util.PaginationListDecorator;
 import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.web.Pagination;
 import io.swagger.annotations.Api;
@@ -55,6 +57,9 @@ import java.util.List;
 public class ContentController extends PaginationController {
 	@Autowired
 	private ContentService contentService;
+
+	@Autowired
+	private TimerService timerService;
 
 	@ApiOperation(value = "Get question with provided question Id",
 			nickname = "getQuestion")
@@ -125,11 +130,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "fcImage", defaultValue = "false", required = false) final boolean fcImage
 			) {
 
-		if (fcImage) {
-			return contentService.getQuestionFcImage(questionId);
-		} else {
-			return contentService.getQuestionImage(questionId);
-		}
+		throw new NotImplementedException();
 	}
 
 	@RequestMapping(value = "/{questionId}/startnewpiround", method = RequestMethod.POST)
@@ -139,9 +140,9 @@ public class ContentController extends PaginationController {
 			) {
 
 		if (time == 0) {
-			contentService.startNewPiRound(questionId, null);
+			timerService.startNewPiRound(questionId, null);
 		} else {
-			contentService.startNewPiRoundDelayed(questionId, time);
+			timerService.startNewPiRoundDelayed(questionId, time);
 		}
 	}
 
@@ -151,7 +152,7 @@ public class ContentController extends PaginationController {
 	public void cancelPiRound(
 			@PathVariable final String questionId
 			) {
-		contentService.cancelPiRoundChange(questionId);
+		timerService.cancelPiRoundChange(questionId);
 	}
 
 	@RequestMapping(value = "/{questionId}/resetpiroundstate", method = RequestMethod.POST)
@@ -160,7 +161,7 @@ public class ContentController extends PaginationController {
 	public void resetPiQuestion(
 			@PathVariable final String questionId
 			) {
-		contentService.resetPiRoundState(questionId);
+		timerService.resetPiRoundState(questionId);
 	}
 
 	@ApiOperation(value = "Set voting admission on question, identified by provided id",
@@ -215,7 +216,7 @@ public class ContentController extends PaginationController {
 			@RequestBody final Content content
 			) {
 		if (publish != null) {
-			content.setActive(publish);
+			content.getState().setVisible(!publish);
 		}
 		contentService.update(content);
 	}
@@ -252,7 +253,7 @@ public class ContentController extends PaginationController {
 			@RequestBody final Content content
 			) {
 		if (showStatistics != null) {
-			content.setShowStatistic(showStatistics);
+			content.getState().setResponsesVisible(showStatistics);
 		}
 		contentService.update(content);
 	}
@@ -266,7 +267,7 @@ public class ContentController extends PaginationController {
 			@RequestBody final Content content
 			) {
 		if (showCorrectAnswer != null) {
-			content.setShowAnswer(showCorrectAnswer);
+			content.getState().setSolutionVisible(showCorrectAnswer);
 		}
 		contentService.update(content);
 	}
@@ -296,8 +297,6 @@ public class ContentController extends PaginationController {
 		if (contents == null || contents.isEmpty()) {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
 			return null;
-		} else if (!requestImageData) {
-			contents = contentService.replaceImageData(contents);
 		}
 
 		return new PaginationListDecorator<>(contents, offset, limit);
@@ -485,7 +484,7 @@ public class ContentController extends PaginationController {
 			final HttpServletResponse response
 			) {
 
-		return contentService.getImage(questionId, answerId);
+		throw new NotImplementedException();
 	}
 
 	@ApiOperation(value = "Delete answer, identified by question ID and answer ID",

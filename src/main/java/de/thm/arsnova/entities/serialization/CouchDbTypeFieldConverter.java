@@ -22,11 +22,11 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.Converter;
 import de.thm.arsnova.entities.migration.v2.Answer;
 import de.thm.arsnova.entities.migration.v2.Comment;
+import de.thm.arsnova.entities.migration.v2.Content;
 import de.thm.arsnova.entities.migration.v2.DbUser;
 import de.thm.arsnova.entities.migration.v2.Entity;
 import de.thm.arsnova.entities.migration.v2.LogEntry;
 import de.thm.arsnova.entities.migration.v2.Motd;
-import de.thm.arsnova.entities.migration.v2.Content;
 import de.thm.arsnova.entities.migration.v2.MotdList;
 import de.thm.arsnova.entities.migration.v2.Room;
 

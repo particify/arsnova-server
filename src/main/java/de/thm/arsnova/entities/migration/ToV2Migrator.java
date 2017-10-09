@@ -18,12 +18,12 @@
 package de.thm.arsnova.entities.migration;
 
 import de.thm.arsnova.entities.ChoiceQuestionContent;
-import de.thm.arsnova.entities.migration.v2.Entity;
 import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.entities.migration.v2.Answer;
 import de.thm.arsnova.entities.migration.v2.AnswerOption;
 import de.thm.arsnova.entities.migration.v2.Comment;
 import de.thm.arsnova.entities.migration.v2.Content;
+import de.thm.arsnova.entities.migration.v2.Entity;
 import de.thm.arsnova.entities.migration.v2.LoggedIn;
 import de.thm.arsnova.entities.migration.v2.MotdList;
 import de.thm.arsnova.entities.migration.v2.Room;

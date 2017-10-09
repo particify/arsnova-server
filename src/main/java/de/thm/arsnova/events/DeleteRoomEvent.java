@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.migration.v2.Room;
+import de.thm.arsnova.entities.Room;
 
 /**
  * Fires whenever a session is deleted. Note that this implies that all related data such as comments,

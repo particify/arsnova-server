@@ -17,9 +17,10 @@
  */
 package de.thm.arsnova.services;
 
+import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.AnswerStatistics;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.Answer;
-import de.thm.arsnova.entities.migration.v2.Content;
 
 import java.util.List;
 import java.util.Map;
@@ -38,27 +39,23 @@ public interface ContentService extends EntityService<Content> {
 
 	void delete(String questionId);
 
-	void startNewPiRound(String questionId, UserAuthentication user);
-
-	void startNewPiRoundDelayed(String questionId, int time);
-
-	void cancelPiRoundChange(String questionId);
-
-	void cancelDelayedPiRoundChange(String questionId);
-
-	void resetPiRoundState(String questionId);
-
 	List<String> getUnAnsweredQuestionIds(String sessionKey);
 
 	Answer getMyAnswer(String questionId);
 
 	void getFreetextAnswerAndMarkRead(String answerId, UserAuthentication user);
 
-	List<Answer> getAnswers(String questionId, int piRound, int offset, int limit);
+	AnswerStatistics getStatistics(String contentId, int piRound);
 
-	List<Answer> getAnswers(String questionId, int offset, int limit);
+	AnswerStatistics getStatistics(String contentId);
 
-	List<Answer> getAllAnswers(String questionId, int offset, int limit);
+	AnswerStatistics getAllStatistics(String contentId);
+
+	List<Answer> getAnswers(String contentId, int piRound, int offset, int limit);
+
+	List<Answer> getAnswers(String contentId, int offset, int limit);
+
+	List<Answer> getAllAnswers(String contentId, int offset, int limit);
 
 	int countAnswersByQuestionIdAndRound(String questionId);
 
@@ -136,17 +133,9 @@ public interface ContentService extends EntityService<Content> {
 
 	int countTotalAbstentionsByQuestionId(String questionId);
 
-	String getImage(String questionId, String answerId);
-
 	void setVotingAdmission(String questionId, boolean disableVoting);
 
 	void setVotingAdmissions(String sessionkey, boolean disableVoting, List<Content> contents);
 
 	void setVotingAdmissionForAllQuestions(String sessionkey, boolean disableVoting);
-
-	String getQuestionImage(String questionId);
-
-	String getQuestionFcImage(String questionId);
-
-	List<Content> replaceImageData(List<Content> contents);
 }

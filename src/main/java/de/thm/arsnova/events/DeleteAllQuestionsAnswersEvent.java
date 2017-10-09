@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.migration.v2.Room;
+import de.thm.arsnova.entities.Room;
 
 /**
  * Fires whenever all answers of all questions of a session are deleted.

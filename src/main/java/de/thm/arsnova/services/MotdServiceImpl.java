@@ -17,16 +17,12 @@
  */
 package de.thm.arsnova.services;
 
-import de.thm.arsnova.entities.migration.v2.Motd;
-import de.thm.arsnova.entities.migration.v2.MotdList;
-import de.thm.arsnova.entities.migration.v2.Room;
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.Motd;
+import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.persistance.MotdListRepository;
 import de.thm.arsnova.persistance.MotdRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,9 +30,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.StringTokenizer;
+import java.util.stream.Collectors;
+
 /**
  * Performs all question, interposed question, and answer related operations.
  */
@@ -48,17 +44,13 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 
 	private MotdRepository motdRepository;
 
-	private MotdListRepository motdListRepository;
-
 	public MotdServiceImpl(
 			MotdRepository repository,
-			MotdListRepository motdListRepository,
 			UserService userService,
 			RoomService roomService,
 			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(Motd.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.motdRepository = repository;
-		this.motdListRepository = motdListRepository;
 		this.userService = userService;
 		this.roomService = roomService;
 	}
@@ -77,14 +69,14 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 
 	@Override
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
-	public List<Motd> getAllSessionMotds(final String sessionkey) {
-		return motdRepository.findBySessionKey(sessionkey);
+	public List<Motd> getAllSessionMotds(final String sessionId) {
+		return motdRepository.findBySessionKey(sessionId);
 	}
 
 	@Override
-	@Cacheable(cacheNames = "motds", key = "('session').concat(#sessionkey)")
-	public List<Motd> getCurrentSessionMotds(final Date clientdate, final String sessionkey) {
-		final List<Motd> motds = motdRepository.findBySessionKey(sessionkey);
+	@Cacheable(cacheNames = "motds", key = "('session').concat(#sessionId)")
+	public List<Motd> getCurrentSessionMotds(final Date clientdate, final String sessionId) {
+		final List<Motd> motds = motdRepository.findBySessionKey(sessionId);
 		return filterMotdsByDate(motds, clientdate);
 	}
 
@@ -115,23 +107,8 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
   }
 
 	@Override
-	public List<Motd> filterMotdsByList(List<Motd> list, MotdList motdlist) {
-		if (motdlist != null && motdlist.getMotdkeys() != null && !motdlist.getMotdkeys().isEmpty()) {
-			List<Motd> returns = new ArrayList<>();
-			HashSet<String> keys = new HashSet<>(500);  // Or a more realistic size
-			StringTokenizer st = new StringTokenizer(motdlist.getMotdkeys(), ",");
-			while (st.hasMoreTokens()) {
-				keys.add(st.nextToken());
-			}
-			for (Motd motd : list) {
-				if (!keys.contains(motd.getMotdkey())) {
-					returns.add(motd);
-				}
-			}
-			return returns;
-		} else {
-			return list;
-		}
+	public List<Motd> filterMotdsByList(List<Motd> list, List<String> ids) {
+		return list.stream().filter(id -> ids.contains(id)).collect(Collectors.toList());
 	}
 
 	@Override
@@ -142,8 +119,8 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 
 	@Override
 	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
-	public Motd save(final String sessionkey, final Motd motd) {
-		Room room = roomService.getByKey(sessionkey);
+	public Motd save(final String sessionId, final Motd motd) {
+		Room room = roomService.getByKey(sessionId);
 		motd.setSessionId(room.getId());
 
 		return createOrUpdateMotd(motd);
@@ -161,11 +138,11 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 		return createOrUpdateMotd(motd);
 	}
 
-	@CacheEvict(cacheNames = "motds", key = "#motd.audience.concat(#motd.sessionkey)")
+	@CacheEvict(cacheNames = "motds", key = "#motd.audience.concat(#motd.sessionId)")
 	private Motd createOrUpdateMotd(final Motd motd) {
-		if (motd.getMotdkey() != null) {
-			Motd oldMotd = motdRepository.findByKey(motd.getMotdkey());
-			if (!(motd.getId().equals(oldMotd.getId()) && motd.getSessionkey().equals(oldMotd.getSessionkey())
+		if (motd.getId() != null) {
+			Motd oldMotd = motdRepository.findOne(motd.getId());
+			if (!(motd.getId().equals(oldMotd.getId()) && motd.getSessionId().equals(oldMotd.getSessionId())
 					&& motd.getAudience().equals(oldMotd.getAudience()))) {
 				throw new BadRequestException();
 			}
@@ -173,9 +150,7 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 
 		if (null != motd.getId()) {
 			Motd oldMotd = get(motd.getId());
-			motd.setMotdkey(oldMotd.getMotdkey());
-		} else {
-			motd.setMotdkey(roomService.generateKey());
+			motd.setId(oldMotd.getId());
 		}
 		save(motd);
 
@@ -184,46 +159,14 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 
 	@Override
 	@PreAuthorize("hasPermission('', 'motd', 'admin')")
-	@CacheEvict(cacheNames = "motds", key = "#motd.audience.concat(#motd.sessionkey)")
+	@CacheEvict(cacheNames = "motds", key = "#motd.audience.concat(#motd.sessionId)")
 	public void delete(Motd motd) {
 		motdRepository.delete(motd);
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
-	public void deleteBySessionKey(final String sessionkey, Motd motd) {
+	@PreAuthorize("hasPermission(#sessionId, 'session', 'owner')")
+	public void deleteBySessionKey(final String sessionId, Motd motd) {
 		motdRepository.delete(motd);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	@Cacheable(cacheNames = "motdlist", key = "#username")
-	public MotdList getMotdListByUsername(final String username) {
-		final UserAuthentication user = userService.getCurrentUser();
-		if (username.equals(user.getUsername()) && !"guest".equals(user.getType())) {
-			return motdListRepository.findByUsername(username);
-		}
-		return null;
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	@CachePut(cacheNames = "motdlist", key = "#motdList.username")
-	public MotdList saveMotdList(MotdList motdList) {
-		final UserAuthentication user = userService.getCurrentUser();
-		if (user.getUsername().equals(motdList.getUsername())) {
-			return motdListRepository.save(motdList);
-		}
-		return null;
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public MotdList updateMotdList(MotdList motdList) {
-		final UserAuthentication user = userService.getCurrentUser();
-		if (user.getUsername().equals(motdList.getUsername())) {
-			return motdListRepository.save(motdList);
-		}
-		return null;
 	}
 }

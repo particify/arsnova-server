@@ -17,8 +17,7 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.entities.migration.v2.Motd;
-import de.thm.arsnova.entities.migration.v2.MotdList;
+import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.services.MotdService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -46,7 +45,6 @@ import java.util.List;
 @RequestMapping("/motd")
 @Api(value = "/motd", description = "the Motd Controller API")
 public class MotdController extends AbstractController {
-
 	@Autowired
 	private MotdService motdService;
 
@@ -92,8 +90,8 @@ public class MotdController extends AbstractController {
 			) {
 		if (motd != null) {
 			Motd newMotd;
-			if ("session".equals(motd.getAudience()) && motd.getSessionkey() != null) {
-				newMotd = motdService.save(motd.getSessionkey(), motd);
+			if ("session".equals(motd.getAudience()) && motd.getSessionId() != null) {
+				newMotd = motdService.save(motd.getSessionId(), motd);
 			} else {
 				newMotd = motdService.save(motd);
 			}
@@ -109,49 +107,26 @@ public class MotdController extends AbstractController {
 	}
 
 	@ApiOperation(value = "update a message of the day", nickname = "updateMotd")
-	@RequestMapping(value = "/{motdkey}", method = RequestMethod.PUT)
+	@RequestMapping(value = "/{motdId}", method = RequestMethod.PUT)
 	public Motd updateMotd(
-			@ApiParam(value = "motdkey from current motd", required = true) @PathVariable final String motdkey,
+			@ApiParam(value = "motdkey from current motd", required = true) @PathVariable final String motdId,
 			@ApiParam(value = "current motd", required = true) @RequestBody final Motd motd
 			) {
-		if ("session".equals(motd.getAudience()) && motd.getSessionkey() != null) {
-			return motdService.update(motd.getSessionkey(), motd);
+		if ("session".equals(motd.getAudience()) && motd.getSessionId() != null) {
+			return motdService.update(motd.getSessionId(), motd);
 		} else {
 			return motdService.update(motd);
 		}
 	}
 
 	@ApiOperation(value = "deletes a message of the day", nickname = "deleteMotd")
-	@RequestMapping(value = "/{motdkey}", method = RequestMethod.DELETE)
-	public void deleteMotd(@ApiParam(value = "Motd-key from the message that shall be deleted", required = true) @PathVariable final String motdkey) {
-		Motd motd = motdService.getByKey(motdkey);
+	@RequestMapping(value = "/{motdId}", method = RequestMethod.DELETE)
+	public void deleteMotd(@ApiParam(value = "Motd-key from the message that shall be deleted", required = true) @PathVariable final String motdId) {
+		Motd motd = motdService.get(motdId);
 		if ("session".equals(motd.getAudience())) {
-			motdService.deleteBySessionKey(motd.getSessionkey(), motd);
+			motdService.deleteBySessionKey(motd.getSessionId(), motd);
 		} else {
 			motdService.delete(motd);
 		}
-	}
-
-	@ApiOperation(value = "get a list of the motdkeys the current user has confirmed to be read")
-	@RequestMapping(value = "/userlist", method = RequestMethod.GET)
-	public MotdList getUserMotdList(
-			@ApiParam(value = "users name", required = true) @RequestParam(value = "username", defaultValue = "null", required = true) final String username) {
-		return motdService.getMotdListByUsername(username);
-	}
-
-	@ApiOperation(value = "create a list of the motdkeys the current user has confirmed to be read")
-	@RequestMapping(value = "/userlist", method = RequestMethod.POST)
-	public MotdList postUserMotdList(
-			@ApiParam(value = "current motdlist", required = true) @RequestBody final MotdList userMotdList
-			) {
-		return motdService.saveMotdList(userMotdList);
-	}
-
-	@ApiOperation(value = "update a list of the motdkeys the current user has confirmed to be read")
-	@RequestMapping(value = "/userlist", method = RequestMethod.PUT)
-	public MotdList updateUserMotdList(
-			@ApiParam(value = "current motdlist", required = true) @RequestBody final MotdList userMotdList
-			) {
-		return motdService.updateMotdList(userMotdList);
 	}
 }

@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.persistance;
 
-import de.thm.arsnova.entities.migration.v2.Motd;
+import de.thm.arsnova.entities.Motd;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;

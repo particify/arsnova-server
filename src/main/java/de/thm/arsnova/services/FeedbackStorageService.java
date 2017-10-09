@@ -1,8 +1,8 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Feedback;
+import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.Room;
 
 import java.util.List;
 import java.util.Map;

@@ -18,7 +18,7 @@
 package de.thm.arsnova.persistance.couchdb;
 
 import com.google.common.collect.Lists;
-import de.thm.arsnova.entities.migration.v2.DbUser;
+import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.persistance.UserRepository;
 import org.ektorp.BulkDeleteDocument;
 import org.ektorp.CouchDbConnector;
@@ -32,13 +32,13 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CouchDbUserRepository extends CouchDbCrudRepository<DbUser> implements UserRepository {
+public class CouchDbUserRepository extends CouchDbCrudRepository<UserProfile> implements UserRepository {
 	private static final int BULK_PARTITION_SIZE = 500;
 
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbUserRepository.class);
 
 	public CouchDbUserRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(DbUser.class, db, "by_username", createIfNotExists);
+		super(UserProfile.class, db, "by_username", createIfNotExists);
 	}
 
 	private void log(Object... strings) {
@@ -46,14 +46,14 @@ public class CouchDbUserRepository extends CouchDbCrudRepository<DbUser> impleme
 	}
 
 	@Override
-	public DbUser findByUsername(final String username) {
-		final List<DbUser> users = queryView("by_username", username);
+	public UserProfile findByUsername(final String username) {
+		final List<UserProfile> users = queryView("by_username", username);
 
 		return !users.isEmpty() ? users.get(0) : null;
 	}
 
 	@Override
-	public void delete(final DbUser user) {
+	public void delete(final UserProfile user) {
 		if (db.delete(user) != null) {
 			log("delete", "type", "user", "id", user.getId());
 		} else {

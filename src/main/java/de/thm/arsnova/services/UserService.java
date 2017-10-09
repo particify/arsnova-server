@@ -18,7 +18,7 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.DbUser;
+import de.thm.arsnova.entities.UserProfile;
 
 import java.util.Map;
 import java.util.Set;
@@ -58,15 +58,15 @@ public interface UserService {
 
 	int loggedInUsers();
 
-	DbUser getByUsername(String username);
+	UserProfile getByUsername(String username);
 
-	DbUser create(String username, String password);
+	UserProfile create(String username, String password);
 
-	DbUser update(DbUser dbUser);
+	UserProfile update(UserProfile userProfile);
 
-	DbUser deleteByUsername(String username);
+	UserProfile deleteByUsername(String username);
 
 	void initiatePasswordReset(String username);
 
-	boolean resetPassword(DbUser dbUser, String key, String password);
+	boolean resetPassword(UserProfile userProfile, String key, String password);
 }

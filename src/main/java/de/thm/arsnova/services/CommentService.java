@@ -1,8 +1,8 @@
 package de.thm.arsnova.services;
 
-import de.thm.arsnova.entities.migration.v2.Comment;
-import de.thm.arsnova.entities.migration.v2.CommentReadingCount;
+import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.CommentReadingCount;
 
 import java.util.List;
 

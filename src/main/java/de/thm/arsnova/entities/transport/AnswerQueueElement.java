@@ -17,10 +17,10 @@
  */
 package de.thm.arsnova.entities.transport;
 
+import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.Content;
+import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.Answer;
-import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.Room;
 
 /**
  * An answer that is about to get saved in the database. Answers are not saved immediately, they are instead stored

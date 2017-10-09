@@ -17,8 +17,7 @@
  */
 package de.thm.arsnova.services;
 
-import de.thm.arsnova.entities.migration.v2.Motd;
-import de.thm.arsnova.entities.migration.v2.MotdList;
+import de.thm.arsnova.entities.Motd;
 
 import java.util.Date;
 import java.util.List;
@@ -39,23 +38,17 @@ public interface MotdService extends EntityService<Motd> {
 
 	List<Motd> filterMotdsByDate(List<Motd> list, Date clientdate);
 
-	List<Motd> filterMotdsByList(List<Motd> list, MotdList motdList);
+	List<Motd> filterMotdsByList(List<Motd> list, List<String> ids);
 
 	void delete(Motd motd);
 
-	void deleteBySessionKey(final String sessionkey, Motd motd);
+	void deleteBySessionKey(final String sessionId, Motd motd);
 
 	Motd save(Motd motd);
 
-	Motd save(final String sessionkey, final Motd motd);
+	Motd save(final String sessionId, final Motd motd);
 
 	Motd update(Motd motd);
 
 	Motd update(final String sessionkey, Motd motd);
-
-	MotdList getMotdListByUsername(final String username);
-
-	MotdList saveMotdList(MotdList motdList);
-
-	MotdList updateMotdList(MotdList motdList);
 }

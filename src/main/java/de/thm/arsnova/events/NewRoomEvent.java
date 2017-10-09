@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.migration.v2.Room;
+import de.thm.arsnova.entities.Room;
 
 /**
  * Fires whenever a new session is created.

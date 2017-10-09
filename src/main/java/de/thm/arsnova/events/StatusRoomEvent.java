@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.migration.v2.Room;
+import de.thm.arsnova.entities.Room;
 
 /**
  * Fires whenever the status of a session changes, i.e., it is enabled or disabled.

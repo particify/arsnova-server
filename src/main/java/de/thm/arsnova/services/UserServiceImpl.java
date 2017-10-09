@@ -19,7 +19,7 @@ package de.thm.arsnova.services;
 
 import com.codahale.metrics.annotation.Gauge;
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.DbUser;
+import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
@@ -60,6 +60,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -345,12 +346,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public DbUser getByUsername(String username) {
+	public UserProfile getByUsername(String username) {
 		return userRepository.findByUsername(username.toLowerCase());
 	}
 
 	@Override
-	public DbUser create(String username, String password) {
+	public UserProfile create(String username, String password) {
 		String lcUsername = username.toLowerCase();
 
 		if (null == keygen) {
@@ -373,13 +374,15 @@ public class UserServiceImpl implements UserService {
 			return null;
 		}
 
-		DbUser dbUser = new DbUser();
-		dbUser.setUsername(lcUsername);
-		dbUser.setPassword(encodePassword(password));
-		dbUser.setActivationKey(RandomStringUtils.randomAlphanumeric(32));
-		dbUser.setCreation(System.currentTimeMillis());
+		UserProfile userProfile = new UserProfile();
+		UserProfile.Account account = userProfile.new Account();
+		userProfile.setAccount(account);
+		userProfile.setLoginId(lcUsername);
+		account.setPassword(encodePassword(password));
+		account.setActivationKey(RandomStringUtils.randomAlphanumeric(32));
+		userProfile.setCreationTimestamp(new Date());
 
-		DbUser result = userRepository.save(dbUser);
+		UserProfile result = userRepository.save(userProfile);
 		if (null != result) {
 			sendActivationEmail(result);
 		} else {
@@ -397,7 +400,7 @@ public class UserServiceImpl implements UserService {
 		return encoder.encode(password);
 	}
 
-	private void sendActivationEmail(DbUser dbUser) {
+	private void sendActivationEmail(UserProfile userProfile) {
 		String activationUrl;
 		try {
 			activationUrl = MessageFormat.format(
@@ -405,8 +408,8 @@ public class UserServiceImpl implements UserService {
 				rootUrl,
 				customizationPath,
 				activationPath,
-				UriUtils.encodeQueryParam(dbUser.getUsername(), "UTF-8"),
-				dbUser.getActivationKey()
+				UriUtils.encodeQueryParam(userProfile.getLoginId(), "UTF-8"),
+				userProfile.getAccount().getActivationKey()
 			);
 		} catch (UnsupportedEncodingException e) {
 			logger.error("Sending of activation mail failed.", e);
@@ -414,7 +417,7 @@ public class UserServiceImpl implements UserService {
 			return;
 		}
 
-		sendEmail(dbUser, regMailSubject, MessageFormat.format(regMailBody, activationUrl));
+		sendEmail(userProfile, regMailSubject, MessageFormat.format(regMailBody, activationUrl));
 	}
 
 	private void parseMailAddressPattern() {
@@ -441,16 +444,16 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public DbUser update(DbUser dbUser) {
-		if (null != dbUser.getId()) {
-			return userRepository.save(dbUser);
+	public UserProfile update(UserProfile userProfile) {
+		if (null != userProfile.getId()) {
+			return userRepository.save(userProfile);
 		}
 
 		return null;
 	}
 
 	@Override
-	public DbUser deleteByUsername(String username) {
+	public UserProfile deleteByUsername(String username) {
 		UserAuthentication user = getCurrentUser();
 		if (!user.getUsername().equals(username.toLowerCase())
 				&& !SecurityContextHolder.getContext().getAuthentication().getAuthorities()
@@ -458,34 +461,35 @@ public class UserServiceImpl implements UserService {
 			throw new UnauthorizedException();
 		}
 
-		DbUser dbUser = getByUsername(username);
-		if (null == dbUser) {
+		UserProfile userProfile = getByUsername(username);
+		if (null == userProfile) {
 			throw new NotFoundException();
 		}
 
-		userRepository.delete(dbUser);
+		userRepository.delete(userProfile);
 
-		return dbUser;
+		return userProfile;
 	}
 
 	@Override
 	public void initiatePasswordReset(String username) {
-		DbUser dbUser = getByUsername(username);
-		if (null == dbUser) {
+		UserProfile userProfile = getByUsername(username);
+		if (null == userProfile) {
 			logger.info("Password reset failed. User {} does not exist.", username);
 
 			throw new NotFoundException();
 		}
-		if (System.currentTimeMillis() < dbUser.getPasswordResetTime() + REPEATED_PASSWORD_RESET_DELAY_MS) {
+		UserProfile.Account account = userProfile.getAccount();
+		if (System.currentTimeMillis() < account.getPasswordResetTime().getTime() + REPEATED_PASSWORD_RESET_DELAY_MS) {
 			logger.info("Password reset failed. The reset delay for User {} is still active.", username);
 
 			throw new BadRequestException();
 		}
 
-		dbUser.setPasswordResetKey(RandomStringUtils.randomAlphanumeric(32));
-		dbUser.setPasswordResetTime(System.currentTimeMillis());
+		account.setPasswordResetKey(RandomStringUtils.randomAlphanumeric(32));
+		account.setPasswordResetTime(new Date());
 
-		if (null == userRepository.save(dbUser)) {
+		if (null == userRepository.save(userProfile)) {
 			logger.error("Password reset failed. {} could not be updated.", username);
 		}
 
@@ -496,8 +500,8 @@ public class UserServiceImpl implements UserService {
 				rootUrl,
 				customizationPath,
 				resetPasswordPath,
-				UriUtils.encodeQueryParam(dbUser.getUsername(), "UTF-8"),
-				dbUser.getPasswordResetKey()
+				UriUtils.encodeQueryParam(userProfile.getLoginId(), "UTF-8"),
+					account.getPasswordResetKey()
 			);
 		} catch (UnsupportedEncodingException e) {
 			logger.error("Sending of password reset mail failed.", e);
@@ -505,45 +509,46 @@ public class UserServiceImpl implements UserService {
 			return;
 		}
 
-		sendEmail(dbUser, resetPasswordMailSubject, MessageFormat.format(resetPasswordMailBody, resetPasswordUrl));
+		sendEmail(userProfile, resetPasswordMailSubject, MessageFormat.format(resetPasswordMailBody, resetPasswordUrl));
 	}
 
 	@Override
-	public boolean resetPassword(DbUser dbUser, String key, String password) {
-		if (null == key || "".equals(key) || !key.equals(dbUser.getPasswordResetKey())) {
-			logger.info("Password reset failed. Invalid key provided for User {}.", dbUser.getUsername());
+	public boolean resetPassword(UserProfile userProfile, String key, String password) {
+		UserProfile.Account account = userProfile.getAccount();
+		if (null == key || "".equals(key) || !key.equals(account.getPasswordResetKey())) {
+			logger.info("Password reset failed. Invalid key provided for User {}.", userProfile.getLoginId());
 
 			return false;
 		}
-		if (System.currentTimeMillis() > dbUser.getPasswordResetTime() + PASSWORD_RESET_KEY_DURABILITY_MS) {
-			logger.info("Password reset failed. Key provided for User {} is no longer valid.", dbUser.getUsername());
+		if (System.currentTimeMillis() > account.getPasswordResetTime().getTime() + PASSWORD_RESET_KEY_DURABILITY_MS) {
+			logger.info("Password reset failed. Key provided for User {} is no longer valid.", userProfile.getLoginId());
 
-			dbUser.setPasswordResetKey(null);
-			dbUser.setPasswordResetTime(0);
-			update(dbUser);
+			account.setPasswordResetKey(null);
+			account.setPasswordResetTime(new Date(0));
+			update(userProfile);
 
 			return false;
 		}
 
-		dbUser.setPassword(encodePassword(password));
-		dbUser.setPasswordResetKey(null);
-		if (null == update(dbUser)) {
-			logger.error("Password reset failed. {} could not be updated.", dbUser.getUsername());
+		account.setPassword(encodePassword(password));
+		account.setPasswordResetKey(null);
+		if (null == update(userProfile)) {
+			logger.error("Password reset failed. {} could not be updated.", userProfile.getLoginId());
 		}
 
 		return true;
 	}
 
-	private void sendEmail(DbUser dbUser, String subject, String body) {
+	private void sendEmail(UserProfile userProfile, String subject, String body) {
 		MimeMessage msg = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(msg, "UTF-8");
 		try {
 			helper.setFrom(mailSenderName + "<" + mailSenderAddress + ">");
-			helper.setTo(dbUser.getUsername());
+			helper.setTo(userProfile.getLoginId());
 			helper.setSubject(subject);
 			helper.setText(body);
 
-			logger.info("Sending mail \"{}\" from \"{}\" to \"{}\"", subject, msg.getFrom(), dbUser.getUsername());
+			logger.info("Sending mail \"{}\" from \"{}\" to \"{}\"", subject, msg.getFrom(), userProfile.getLoginId());
 			mailSender.send(msg);
 		} catch (MailException | MessagingException e) {
 			logger.warn("Mail \"{}\" could not be sent.", subject, e);

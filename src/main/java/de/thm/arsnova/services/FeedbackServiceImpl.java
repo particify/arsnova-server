@@ -18,8 +18,8 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Feedback;
+import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.Room;
 import de.thm.arsnova.events.DeleteFeedbackForRoomsEvent;
 import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.exceptions.NoContentException;

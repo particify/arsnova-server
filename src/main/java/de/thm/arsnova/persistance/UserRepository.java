@@ -17,10 +17,10 @@
  */
 package de.thm.arsnova.persistance;
 
-import de.thm.arsnova.entities.migration.v2.DbUser;
+import de.thm.arsnova.entities.UserProfile;
 import org.springframework.data.repository.CrudRepository;
 
-public interface UserRepository extends CrudRepository<DbUser, String> {
-	DbUser findByUsername(String username);
+public interface UserRepository extends CrudRepository<UserProfile, String> {
+	UserProfile findByUsername(String username);
 	int deleteInactiveUsers(long lastActivityBefore);
 }

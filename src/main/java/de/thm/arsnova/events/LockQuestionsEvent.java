@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.Room;
+import de.thm.arsnova.entities.Content;
+import de.thm.arsnova.entities.Room;
 
 import java.util.List;
 

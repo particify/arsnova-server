@@ -18,6 +18,7 @@
 package de.thm.arsnova.entities.transport;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Answer;
 import de.thm.arsnova.entities.migration.v2.Comment;
 import de.thm.arsnova.entities.migration.v2.Content;
@@ -25,7 +26,6 @@ import de.thm.arsnova.entities.migration.v2.Motd;
 import de.thm.arsnova.entities.migration.v2.Room;
 import de.thm.arsnova.entities.migration.v2.RoomFeature;
 import de.thm.arsnova.entities.migration.v2.RoomInfo;
-import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

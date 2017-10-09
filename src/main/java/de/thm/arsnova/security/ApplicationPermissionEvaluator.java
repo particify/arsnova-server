@@ -17,10 +17,10 @@
  */
 package de.thm.arsnova.security;
 
+import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.Comment;
-import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.Room;
+import de.thm.arsnova.entities.Comment;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.RoomRepository;
@@ -105,18 +105,18 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	}
 
 	private boolean hasSessionPermission(
-			final String username,
+			final String userId,
 			final Room targetSession,
 			final String permission) {
 		switch (permission) {
 			case "read":
-				return targetSession.isActive();
+				return !targetSession.isClosed();
 			case "create":
-				return !username.isEmpty();
+				return !userId.isEmpty();
 			case "owner":
 			case "update":
 			case "delete":
-				return targetSession.getCreator().equals(username);
+				return targetSession.getOwnerId().equals(userId);
 			default:
 				return false;
 		}
@@ -128,38 +128,38 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final String permission) {
 		switch (permission) {
 			case "read":
-				return roomRepository.findOne(targetContent.getSessionId()).isActive();
+				return !roomRepository.findOne(targetContent.getRoomId()).isClosed();
 			case "create":
 			case "owner":
 			case "update":
 			case "delete":
-				final Room room = roomRepository.findOne(targetContent.getSessionId());
-				return room != null && room.getCreator().equals(username);
+				final Room room = roomRepository.findOne(targetContent.getRoomId());
+				return room != null && room.getOwnerId().equals(username);
 			default:
 				return false;
 		}
 	}
 
 	private boolean hasCommentPermission(
-			final String username,
+			final String userId,
 			final Comment targetComment,
 			final String permission) {
 		switch (permission) {
 			case "create":
-				return !username.isEmpty() && roomRepository.findOne(targetComment.getSessionId()).isActive();
+				return !userId.isEmpty() && !roomRepository.findOne(targetComment.getSessionId()).isClosed();
 			case "owner":
 			case "update":
-				return targetComment.getCreator() != null && targetComment.getCreator().equals(username);
+				return targetComment.getCreatorId() != null && targetComment.getCreatorId().equals(userId);
 			case "read":
 			case "delete":
-				if (targetComment.getCreator() != null && targetComment.getCreator().equals(username)) {
+				if (targetComment.getCreatorId() != null && targetComment.getCreatorId().equals(userId)) {
 					return true;
 				}
 
 				/* Allow reading & deletion by session owner */
 				final Room room = roomRepository.findOne(targetComment.getSessionId());
 
-				return room != null && room.getCreator().equals(username);
+				return room != null && room.getOwnerId().equals(userId);
 			default:
 				return false;
 		}

@@ -1,9 +1,9 @@
 package de.thm.arsnova.services;
 
+import de.thm.arsnova.entities.Comment;
+import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.Comment;
 import de.thm.arsnova.entities.migration.v2.CommentReadingCount;
-import de.thm.arsnova.entities.migration.v2.Room;
 import de.thm.arsnova.events.DeleteCommentEvent;
 import de.thm.arsnova.events.NewCommentEvent;
 import de.thm.arsnova.exceptions.ForbiddenException;
@@ -18,6 +18,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -55,10 +56,10 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		final Room room = roomRepository.findByKeyword(comment.getSessionId());
 		final UserAuthentication user = userService.getCurrentUser();
 		comment.setSessionId(room.getId());
-		comment.setCreator(user.getUsername());
+		comment.setCreatorId(user.getId());
 		comment.setRead(false);
-		if (comment.getTimestamp() == 0) {
-			comment.setTimestamp(System.currentTimeMillis());
+		if (comment.getTimestamp() == null) {
+			comment.setTimestamp(new Date());
 		}
 		final Comment result = super.create(comment);
 
@@ -92,7 +93,7 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 			throw new UnauthorizedException();
 		}
 		final UserAuthentication user = getCurrentUser();
-		if (room.isCreator(user)) {
+		if (room.getOwnerId().equals(user.getId())) {
 			commentRepository.deleteBySessionId(room.getId());
 		} else {
 			commentRepository.deleteBySessionIdAndUser(room.getId(), user);
@@ -129,7 +130,7 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 	public List<Comment> getBySessionKey(final String sessionKey, final int offset, final int limit) {
 		final Room room = this.getSession(sessionKey);
 		final UserAuthentication user = getCurrentUser();
-		if (room.isCreator(user)) {
+		if (room.getOwnerId().equals(user.getId())) {
 			return commentRepository.findBySessionId(room.getId(), offset, limit);
 		} else {
 			return commentRepository.findBySessionIdAndUser(room.getId(), user, offset, limit);
@@ -154,10 +155,10 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 			throw new NotFoundException();
 		}
 		final Room room = roomRepository.findOne(comment.getSessionId());
-		if (!comment.isCreator(user) && !room.isCreator(user)) {
+		if (!comment.getCreatorId().equals(user.getId()) && !room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
 		}
-		if (room.isCreator(user)) {
+		if (room.getOwnerId().equals(user.getId())) {
 			comment.setRead(true);
 			save(comment);
 		}
