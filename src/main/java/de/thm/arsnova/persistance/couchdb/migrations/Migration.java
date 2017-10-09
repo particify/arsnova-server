@@ -1,6 +1,6 @@
 /*
  * This file is part of ARSnova Backend.
- * Copyright (C) 2012-2018 The ARSnova Team and Contributors
+ * Copyright (C) 2012-2018 The ARSnova Team
  *
  * ARSnova Backend is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,19 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.entities.serialization;
+package de.thm.arsnova.persistance.couchdb.migrations;
 
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import de.thm.arsnova.entities.Entity;
-
-public class CouchDbDocumentModule extends SimpleModule {
-	public CouchDbDocumentModule() {
-		super("CouchDbDocumentModule");
-	}
-
-	@Override
-	public void setupModule(SetupContext context) {
-		context.setMixInAnnotations(Entity.class, CouchDbDocumentMixIn.class);
-		context.setMixInAnnotations(de.thm.arsnova.entities.migration.v2.Entity.class, CouchDbDocumentMixIn.class);
-	}
+public interface Migration {
+	String getId();
+	void migrate();
 }

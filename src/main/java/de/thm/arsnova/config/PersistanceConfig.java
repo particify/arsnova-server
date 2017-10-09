@@ -3,14 +3,19 @@ package de.thm.arsnova.config;
 import de.thm.arsnova.entities.serialization.CouchDbObjectMapperFactory;
 import de.thm.arsnova.persistance.*;
 import de.thm.arsnova.persistance.couchdb.*;
-import org.ektorp.CouchDbConnector;
+import de.thm.arsnova.persistance.couchdb.support.MangoCouchDbConnector;
 import org.ektorp.impl.StdCouchDbInstance;
 import org.ektorp.spring.HttpClientFactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 
+@ComponentScan({
+		"de.thm.arsnova.persistance.couchdb.migrations"
+})
 @Configuration
 @Profile("!test")
 public class PersistanceConfig {
@@ -19,10 +24,17 @@ public class PersistanceConfig {
 	@Value("${couchdb.port}") private int couchDbPort;
 	@Value("${couchdb.username:}") private String couchDbUsername;
 	@Value("${couchdb.password:}") private String couchDbPassword;
+	@Value("${couchdb.migrate-from:}") private String couchDbMigrateFrom;
 
 	@Bean
-	public CouchDbConnector couchDbConnector() throws Exception {
+	@Primary
+	public MangoCouchDbConnector couchDbConnector() throws Exception {
 		return new InitializingCouchDbConnector(couchDbName, couchDbInstance(), new CouchDbObjectMapperFactory());
+	}
+
+	@Bean
+	public MangoCouchDbConnector couchDbMigrationConnector() throws Exception {
+		return new MangoCouchDbConnector(couchDbMigrateFrom, couchDbInstance(), new CouchDbObjectMapperFactory());
 	}
 
 	@Bean

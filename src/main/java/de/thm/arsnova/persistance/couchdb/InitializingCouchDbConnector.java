@@ -1,6 +1,8 @@
 package de.thm.arsnova.persistance.couchdb;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import de.thm.arsnova.entities.MigrationState;
+import de.thm.arsnova.persistance.couchdb.migrations.MigrationExecutor;
 import de.thm.arsnova.persistance.couchdb.support.MangoCouchDbConnector;
 import org.ektorp.CouchDbInstance;
 import org.ektorp.DocumentNotFoundException;
@@ -8,6 +10,7 @@ import org.ektorp.impl.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -29,6 +32,7 @@ public class InitializingCouchDbConnector extends MangoCouchDbConnector implemen
 	private final List<Bindings> docs = new ArrayList<>();
 
 	private ResourceLoader resourceLoader;
+	private MigrationExecutor migrationExecutor;
 
 	public InitializingCouchDbConnector(final String databaseName, final CouchDbInstance dbInstance) {
 		super(databaseName, dbInstance);
@@ -73,14 +77,33 @@ public class InitializingCouchDbConnector extends MangoCouchDbConnector implemen
 		});
 	}
 
+	protected void migrate() {
+		MigrationState state;
+		try {
+			state = get(MigrationState.class, MigrationState.ID);
+		} catch (DocumentNotFoundException e) {
+			logger.debug("No migration state found in database.");
+			state = new MigrationState();
+		}
+		if (migrationExecutor != null && migrationExecutor.runMigrations(state)) {
+			update(state);
+		}
+	}
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		loadDesignDocFiles();
 		createDesignDocs();
+		migrate();
 	}
 
 	@Override
 	public void setResourceLoader(final ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
+	}
+
+	@Autowired
+	public void setMigrationExecutor(final MigrationExecutor migrationExecutor) {
+		this.migrationExecutor = migrationExecutor;
 	}
 }

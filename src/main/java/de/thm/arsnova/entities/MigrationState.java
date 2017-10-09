@@ -3,6 +3,7 @@ package de.thm.arsnova.entities;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -10,6 +11,10 @@ public class MigrationState implements Entity {
 	public class Migration {
 		private String id;
 		private Date start;
+
+		public Migration() {
+
+		}
 
 		public Migration(String id, Date start) {
 			this.id = id;
@@ -25,25 +30,30 @@ public class MigrationState implements Entity {
 		public Date getStart() {
 			return start;
 		}
+
+		@Override
+		public String toString() {
+			return "Migration " + id + " started at " + start;
+		}
 	}
 
-	private String id = "MigrationState";
+	public static final String ID = "MigrationState";
 	private String rev;
 	private Date creationTimestamp;
 	private Date updateTimestamp;
 	private Migration active;
-	private List<String> completed;
+	private List<String> completed = new ArrayList<>();
 
 	@Override
 	@JsonView(View.Persistence.class)
 	public String getId() {
-		return id;
+		return ID;
 	}
 
 	@Override
 	@JsonView(View.Persistence.class)
 	public void setId(final String id) {
-		if (!id.equals(this.id)) {
+		if (!id.equals(this.ID)) {
 			throw new IllegalArgumentException("ID of this entity must not be changed.");
 		};
 	}

@@ -38,9 +38,10 @@ security.admin-accounts=
 ################################################################################
 couchdb.host=localhost
 couchdb.port=5984
-couchdb.name=arsnova
+couchdb.name=arsnova3
 couchdb.username=admin
 couchdb.password=
+#couchdb.migrate-from=arsnova
 
 
 ################################################################################
