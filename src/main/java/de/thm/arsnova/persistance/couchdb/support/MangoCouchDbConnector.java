@@ -16,11 +16,12 @@ import org.ektorp.impl.StdCouchDbConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * This Connector adds a query method which uses CouchDB's Mango API to retrieve data.
@@ -31,13 +32,16 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 	 * Represents a <code>_find</code> query for CouchDB's Mango API.
 	 * See http://docs.couchdb.org/en/stable/api/database/find.html#db-find.
 	 */
-	public class MangoQuery {
-		@JsonSerialize(converter = Sort.ToListConverter.class)
-		public class Sort {
-			public class ToListConverter implements Converter<Sort, List<String>> {
+	public static class MangoQuery {
+		@JsonSerialize(converter = Sort.ToMapConverter.class)
+		public static class Sort {
+			public static class ToMapConverter implements Converter<Sort, Map<String, String>> {
 				@Override
-				public List<String> convert(Sort value) {
-					return Arrays.asList(value.field, value.descending ? "desc" : "asc");
+				public Map<String, String> convert(Sort value) {
+					Map<String, String> map = new HashMap<>();
+					map.put(value.field, value.descending ? "desc" : "asc");
+
+					return map;
 				}
 
 				@Override
@@ -47,7 +51,7 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 
 				@Override
 				public JavaType getOutputType(TypeFactory typeFactory) {
-					return typeFactory.constructGeneralizedType(typeFactory.constructType(List.class), String.class);
+					return typeFactory.constructMapType(Map.class, String.class, String.class);
 				}
 			}
 
@@ -217,5 +221,22 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 		logger.debug("Answer from CouchDB Mango query: {}", result);
 
 		return result;
+	}
+
+	public void createJsonIndex(final String name, final List<MangoQuery.Sort> fields) {
+		Map<String, Object> query = new HashMap<>();
+		Map<String, Object> index = new HashMap<>();
+		query.put("ddoc", name);
+		query.put("type", "json");
+		query.put("index", index);
+		index.put("fields", fields);
+		String queryString;
+		try {
+			queryString = objectMapper.writeValueAsString(query);
+			logger.debug("Creating CouchDB index using Mango API: {}", queryString);
+		} catch (JsonProcessingException e) {
+			throw new DbAccessException(e);
+		}
+		restTemplate.postUncached(dbURI.append("_index").toString(), queryString);
 	}
 }

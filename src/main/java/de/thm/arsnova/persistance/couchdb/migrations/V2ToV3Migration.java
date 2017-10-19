@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Performs the data migration from version 2 to version 3.
@@ -63,14 +64,21 @@ public class V2ToV3Migration implements Migration {
 	}
 
 	public void migrate() {
+		createV2Index();
 		migrateUsers();
 		migrateRooms();
 	}
 
+	private void createV2Index() {
+		List<MangoCouchDbConnector.MangoQuery.Sort> fields = new ArrayList<>();
+		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("type", false));
+		fromConnector.createJsonIndex("type-index", fields);
+	}
+
 	private void migrateUsers() {
-		HashMap<String, Object> queryOptions = new HashMap<>();
+		Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "userdetails");
-		MangoCouchDbConnector.MangoQuery query = fromConnector.new MangoQuery(queryOptions);
+		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setLimit(LIMIT);
 
 		for (int skip = 0;; skip += LIMIT) {
@@ -85,14 +93,14 @@ public class V2ToV3Migration implements Migration {
 				HashMap<String, Object> loggedInQueryOptions = new HashMap<>();
 				loggedInQueryOptions.put("type", "logged_in");
 				loggedInQueryOptions.put("user", userV2.getUsername());
-				MangoCouchDbConnector.MangoQuery loggedInQuery = fromConnector.new MangoQuery(loggedInQueryOptions);
+				MangoCouchDbConnector.MangoQuery loggedInQuery = new MangoCouchDbConnector.MangoQuery(loggedInQueryOptions);
 				List<LoggedIn> loggedInList = fromConnector.query(loggedInQuery, LoggedIn.class);
 				LoggedIn loggedIn = loggedInList.size() > 0 ? loggedInList.get(0) : null;
 
 				HashMap<String, Object> motdListQueryOptions = new HashMap<>();
 				motdListQueryOptions.put("type", "motdlist");
 				motdListQueryOptions.put("username", userV2.getUsername());
-				MangoCouchDbConnector.MangoQuery motdlistQuery = fromConnector.new MangoQuery(motdListQueryOptions);
+				MangoCouchDbConnector.MangoQuery motdlistQuery = new MangoCouchDbConnector.MangoQuery(motdListQueryOptions);
 				List<MotdList> motdListList = fromConnector.query(motdlistQuery, MotdList.class);
 				MotdList motdList = motdListList.size() > 0 ? motdListList.get(0) : null;
 
@@ -104,9 +112,9 @@ public class V2ToV3Migration implements Migration {
 	}
 
 	private void migrateRooms() {
-		HashMap<String, Object> queryOptions = new HashMap<>();
+		Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "session");
-		MangoCouchDbConnector.MangoQuery query = fromConnector.new MangoQuery(queryOptions);
+		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setLimit(LIMIT);
 
 		for (int skip = 0;; skip += LIMIT) {
