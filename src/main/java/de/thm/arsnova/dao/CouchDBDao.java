@@ -2447,17 +2447,19 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 				q.put("creator", "");
 				interposedQuestions.add(q);
 			}
-			for (Motd m : importSession.getMotds()) {
-				final Document d = new Document();
-				d.put("type", "motd");
-				d.put("motdkey", m.getMotdkey());
-				d.put("title", m.getTitle());
-				d.put("text", m.getText());
-				d.put("audience", m.getAudience());
-				d.put("sessionkey", session.getKeyword());
-				d.put("startdate", String.valueOf(m.getStartdate().getTime()));
-				d.put("enddate", String.valueOf(m.getEnddate().getTime()));
-				motds.add(d);
+			if (importSession.getMotds() != null) {
+				for (Motd m : importSession.getMotds()) {
+					final Document d = new Document();
+					d.put("type", "motd");
+					d.put("motdkey", m.getMotdkey());
+					d.put("title", m.getTitle());
+					d.put("text", m.getText());
+					d.put("audience", m.getAudience());
+					d.put("sessionkey", session.getKeyword());
+					d.put("startdate", String.valueOf(m.getStartdate().getTime()));
+					d.put("enddate", String.valueOf(m.getEnddate().getTime()));
+					motds.add(d);
+				}
 			}
 			List<Document> documents = new ArrayList<>(answers);
 			database.bulkSaveDocuments(interposedQuestions.toArray(new Document[interposedQuestions.size()]));
