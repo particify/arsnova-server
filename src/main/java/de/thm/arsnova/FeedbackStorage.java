@@ -118,7 +118,7 @@ public class FeedbackStorage {
 	public Map<Session, List<User>> cleanFeedbackVotes(final int cleanupFeedbackDelay) {
 		final Map<Session, List<User>> removedFeedbackOfUsersInSession = new HashMap<>();
 		for (final Session session : data.keySet()) {
-			if (!session.getFeatures().isLiveClicker()) {
+			if (session.getFeatures() == null || !session.getFeatures().isLiveClicker()) {
 				List<User> affectedUsers = cleanFeedbackVotesInSession(session, cleanupFeedbackDelay);
 				if (!affectedUsers.isEmpty()) {
 					removedFeedbackOfUsersInSession.put(session, affectedUsers);
