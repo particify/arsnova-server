@@ -278,6 +278,7 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 				throw new ForbiddenException();
 			}
 		}
+		session.setCreationTime(System.currentTimeMillis());
 		handleLogo(session);
 
 		// set some default values
