@@ -199,6 +199,11 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	}
 
 	private boolean isWebsocketAccess(Authentication auth) {
-		return auth instanceof AnonymousAuthenticationToken && auth.getAuthorities().contains("ROLE_WEBSOCKET_ACCESS");
+		return auth instanceof AnonymousAuthenticationToken
+				&& auth.getAuthorities().stream()
+				.anyMatch(
+						grantedAuthority ->
+						grantedAuthority.getAuthority().equals("ROLE_WEBSOCKET_ACCESS")
+						);
 	}
 }
