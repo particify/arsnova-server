@@ -190,9 +190,9 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 				logger.info("Deleted {} inactive guest sessions.", inactiveSessions.size());
 				dbLogger.log("cleanup", "type", "session",
 						"sessionCount", inactiveSessions.size(),
-						"questionCount", totalCount[1],
-						"answerCount", totalCount[2],
-						"commentCount", totalCount[3]);
+						"questionCount", totalCount[0],
+						"answerCount", totalCount[1],
+						"commentCount", totalCount[2]);
 			}
 		}
 	}
