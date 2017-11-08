@@ -1133,6 +1133,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 		final NovaView view = new NovaView("skill_question/count_answers_by_session");
 		view.setKey(s.get_id());
+		view.setReduce(true);
 		final ViewResults results = getDatabase().view(view);
 		if (results.getResults().isEmpty()) {
 			return 0;
@@ -1894,6 +1895,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	private int getQuestionCount(final NovaView view, final Session session) {
 		view.setKey(session.get_id());
+		view.setReduce(true);
 		final ViewResults results = getDatabase().view(view);
 		if (results.getJSONArray("rows").optJSONObject(0) == null) {
 			return 0;
@@ -1914,6 +1916,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	private int countQuestionVariantAnswers(final Session session, final String variant) {
 		final NovaView view = new NovaView("skill_question/count_answers_by_session_and_question_variant");
 		view.setKey(session.get_id(), variant);
+		view.setReduce(true);
 		final ViewResults results = getDatabase().view(view);
 		if (results.getResults().isEmpty()) {
 			return 0;
