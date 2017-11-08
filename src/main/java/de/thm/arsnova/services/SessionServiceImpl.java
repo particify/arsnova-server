@@ -369,6 +369,7 @@ public class SessionServiceImpl extends DefaultEntityServiceImpl<Session> implem
 		session.setFeatures(sf);
 
 		session.setKeyword(generateKey());
+		session.setCreationTime(System.currentTimeMillis());
 		session.setCreator(userService.getCurrentUser().getUsername());
 		session.setActive(true);
 		session.setFeedbackLock(false);

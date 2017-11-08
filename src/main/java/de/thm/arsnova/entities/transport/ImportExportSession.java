@@ -139,21 +139,23 @@ public class ImportExportSession {
 		// import fields
 		s.setActive(session.isActive());
 		// overwrite name and shortname
-		s.setName(session.getPublicPool().getName());
-		s.setShortName(session.getPublicPool().getShortName());
+		s.setName(session.getName());
+		s.setShortName(session.getShortName());
 		// mark as public pool session
 		s.setSessionType(session.getSessionType());
 		s.setFeatures(session.getSessionFeature());
-		// set pool fields (which are also used as a session info)
-		s.setPpAuthorMail(session.getPublicPool().getPpAuthorMail());
-		s.setPpAuthorName(session.getPublicPool().getPpAuthorName());
-		s.setPpDescription(session.getPublicPool().getPpDescription());
-		s.setPpFaculty(session.getPublicPool().getPpFaculty());
-		s.setPpLevel(session.getPublicPool().getPpLevel());
-		s.setPpLicense(session.getPublicPool().getPpLicense());
-		s.setPpLogo(session.getPublicPool().getPpLogo());
-		s.setPpSubject(session.getPublicPool().getPpSubject());
-		s.setPpUniversity(session.getPublicPool().getPpUniversity());
+		if (session.getPublicPool() != null) {
+			// set pool fields (which are also used as a session info)
+			s.setPpAuthorMail(session.getPublicPool().getPpAuthorMail());
+			s.setPpAuthorName(session.getPublicPool().getPpAuthorName());
+			s.setPpDescription(session.getPublicPool().getPpDescription());
+			s.setPpFaculty(session.getPublicPool().getPpFaculty());
+			s.setPpLevel(session.getPublicPool().getPpLevel());
+			s.setPpLicense(session.getPublicPool().getPpLicense());
+			s.setPpLogo(session.getPublicPool().getPpLogo());
+			s.setPpSubject(session.getPublicPool().getPpSubject());
+			s.setPpUniversity(session.getPublicPool().getPpUniversity());
+		}
 		// other fields
 		s.setCreator(user.getUsername());
 		s.setCreationTime(new Date().getTime());

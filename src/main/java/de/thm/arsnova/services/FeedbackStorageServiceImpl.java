@@ -124,7 +124,7 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 	public Map<Session, List<User>> cleanVotes(final int cleanupFeedbackDelay) {
 		final Map<Session, List<User>> removedFeedbackOfUsersInSession = new HashMap<>();
 		for (final Session session : data.keySet()) {
-			if (!session.getFeatures().isLiveClicker()) {
+			if (session.getFeatures() == null || !session.getFeatures().isLiveClicker()) {
 				List<User> affectedUsers = cleanVotesBySession(session, cleanupFeedbackDelay);
 				if (!affectedUsers.isEmpty()) {
 					removedFeedbackOfUsersInSession.put(session, affectedUsers);
