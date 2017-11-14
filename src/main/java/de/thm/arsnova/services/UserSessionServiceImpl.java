@@ -35,7 +35,7 @@ public class UserSessionServiceImpl implements UserSessionService, Serializable 
 	private static final long serialVersionUID = 1L;
 
 	private User user;
-	private Session session;
+	private transient Session session;
 	private UUID socketId;
 	private Role role;
 
