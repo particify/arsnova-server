@@ -230,11 +230,9 @@ public class ImageUtils {
 	 * @return The <code>byte[]</code> of the image on success, otherwise <code>null</code>.
 	 */
 	byte[] convertFileToByteArray(final String imageUrl) {
-		try {
-			final URL url = new URL(imageUrl);
+		try (InputStream is = new URL(imageUrl).openStream()) {
 			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-			final InputStream is = url.openStream();
 			final byte[] byteChunk = new byte[CHUNK_SIZE];
 			int n;
 
