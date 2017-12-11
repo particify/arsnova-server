@@ -21,15 +21,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
 
-public class CorsFilter extends org.springframework.web.filter.CorsFilter {
-	private final Logger logger = LoggerFactory.getLogger(CorsFilter.class);
+public class CustomCorsFilter extends CorsFilter {
+	private final Logger log = LoggerFactory.getLogger(CustomCorsFilter.class);
 
-	public CorsFilter(List<String> origins) {
+	public CustomCorsFilter(List<String> origins) {
 		super(configurationSource(origins));
-		logger.info("CorsFilter initialized. Allowed origins: {}", origins);
+		log.info("CorsFilter initialized. Allowed origins: {}", origins);
 	}
 
 	private static UrlBasedCorsConfigurationSource configurationSource(List<String> origins) {

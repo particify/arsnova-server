@@ -29,7 +29,7 @@ import de.thm.arsnova.websocket.ArsnovaSocketioServer;
 import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 import de.thm.arsnova.websocket.ArsnovaSocketioServerListener;
 import de.thm.arsnova.web.CacheControlInterceptorHandler;
-import de.thm.arsnova.web.CorsFilter;
+import de.thm.arsnova.web.CustomCorsFilter;
 import de.thm.arsnova.web.DeprecatedApiInterceptorHandler;
 import de.thm.arsnova.web.ResponseInterceptorHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -233,8 +233,8 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 	}
 
 	@Bean
-	public CorsFilter corsFilter() {
-		return new CorsFilter(Arrays.asList(corsOrigins));
+	public CustomCorsFilter corsFilter() {
+		return new CustomCorsFilter(Arrays.asList(corsOrigins));
 	}
 
 	@Bean(name = "connectorClient")
