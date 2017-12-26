@@ -9,7 +9,7 @@ var designDoc = {
 					/* The 'questionValue' contains the points scored with this answer,
 					 * and this could be negative if a wrong answer was given.
 					 * However, we do not want negative values, so we set the lower bound to 0.*/
-					score = Math.max(doc.questionValue || 0, 0);
+					var score = Math.max(doc.questionValue || 0, 0);
 					emit([doc.sessionId, doc.user], {
 						questionId: doc.questionId,
 						score: score, piRound: doc.piRound
