@@ -12,6 +12,7 @@ import org.ektorp.CouchDbConnector;
 import org.ektorp.DbAccessException;
 import org.ektorp.DocumentOperationResult;
 import org.ektorp.UpdateConflictException;
+import org.ektorp.ViewQuery;
 import org.ektorp.ViewResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	@Override
 	public int deleteByContentId(final String contentId) {
 		try {
-			final ViewResult result = db.queryView(createQuery("by_questionid")
+			final ViewResult result = db.queryView(createByQuestionIdQuery()
 					.key(contentId));
 			final List<List<ViewResult.Row>> partitions = Lists.partition(result.getRows(), BULK_PARTITION_SIZE);
 
@@ -80,7 +81,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	@Override
 	public List<Answer> findByContentIdPiRound(final String contentId, final int piRound) {
 		final String questionId = contentId;
-		final ViewResult result = db.queryView(createQuery("by_questionid_piround_text_subject")
+		final ViewResult result = db.queryView(createByQuestionIdPiRoundTextSubjectQuery()
 						.group(true)
 						.startKey(ComplexKey.of(questionId, piRound))
 						.endKey(ComplexKey.of(questionId, piRound, ComplexKey.emptyObject())));
@@ -103,7 +104,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 
 	@Override
 	public List<Answer> findByContentId(final String contentId) {
-		final ViewResult result = db.queryView(createQuery("by_questionid_piround_text_subject")
+		final ViewResult result = db.queryView(createByQuestionIdPiRoundTextSubjectQuery()
 				.group(true)
 				.startKey(ComplexKey.of(contentId))
 				.endKey(ComplexKey.of(contentId, ComplexKey.emptyObject())));
@@ -129,7 +130,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 
 	@Override
 	public int countByContentId(final String contentId) {
-		final ViewResult result = db.queryView(createQuery("by_questionid_piround_text_subject")
+		final ViewResult result = db.queryView(createByQuestionIdPiRoundTextSubjectQuery()
 				.reduce(true)
 				.startKey(ComplexKey.of(contentId))
 				.endKey(ComplexKey.of(contentId, ComplexKey.emptyObject())));
@@ -139,7 +140,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 
 	@Override
 	public int countByContentIdRound(final String contentId, final int round) {
-		final ViewResult result = db.queryView(createQuery("by_questionid_piround_text_subject")
+		final ViewResult result = db.queryView(createByQuestionIdPiRoundTextSubjectQuery()
 				.reduce(true)
 				.startKey(ComplexKey.of(contentId, round))
 				.endKey(ComplexKey.of(contentId, round, ComplexKey.emptyObject())));
@@ -152,7 +153,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 		final int qSkip = start > 0 ? start : -1;
 		final int qLimit = limit > 0 ? limit : -1;
 
-		final List<Answer> answers = db.queryView(createQuery("by_questionid_timestamp")
+		return db.queryView(createByQuestionIdTimestampQuery()
 						.skip(qSkip)
 						.limit(qLimit)
 						//.includeDocs(true)
@@ -160,8 +161,6 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 						.endKey(ComplexKey.of(contentId, ComplexKey.emptyObject()))
 						.descending(true),
 				Answer.class);
-
-		return answers;
 	}
 
 	@Override
@@ -171,7 +170,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 
 	@Override
 	public int countBySessionKey(final String sessionKey) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant").key(sessionKey));
+		final ViewResult result = db.queryView(createBySessionIdVariantQuery().key(sessionKey));
 
 		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
 	}
@@ -187,7 +186,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	}
 
 	private int countBySessionIdVariant(final String sessionId, final String variant) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant")
+		final ViewResult result = db.queryView(createBySessionIdVariantQuery()
 				.key(ComplexKey.of(sessionId, variant)));
 
 		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
@@ -195,7 +194,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 
 	@Override
 	public int deleteAllAnswersForQuestions(final List<String> contentIds) {
-		final ViewResult result = db.queryView(createQuery("by_questionid")
+		final ViewResult result = db.queryView(createByQuestionIdQuery()
 				.keys(contentIds));
 		final List<BulkDeleteDocument> allAnswers = new ArrayList<>();
 		for (final ViewResult.Row a : result.getRows()) {
@@ -215,7 +214,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 
 	@Override
 	public int deleteByContentIds(final List<String> contentIds) {
-		final ViewResult result = db.queryView(createQuery("by_questionid")
+		final ViewResult result = db.queryView(createByQuestionIdQuery()
 				.keys(contentIds));
 		final List<BulkDeleteDocument> deleteDocs = new ArrayList<>();
 		for (final ViewResult.Row a : result.getRows()) {
@@ -233,4 +232,21 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 
 		return 0;
 	}
+
+	private ViewQuery createByQuestionIdTimestampQuery() {
+		return createQuery("by_questionid_timestamp");
+	}
+
+	private ViewQuery createBySessionIdVariantQuery() {
+		return createQuery("by_sessionid_variant");
+	}
+
+	private ViewQuery createByQuestionIdQuery() {
+		return createQuery("by_questionid");
+	}
+
+	private ViewQuery createByQuestionIdPiRoundTextSubjectQuery() {
+		return createQuery("by_questionid_piround_text_subject");
+	}
+
 }

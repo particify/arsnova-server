@@ -8,6 +8,7 @@ import org.ektorp.BulkDeleteDocument;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentOperationResult;
+import org.ektorp.ViewQuery;
 import org.ektorp.ViewResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	@Override
 	public int countBySessionId(final String sessionId) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
+		final ViewResult result = db.queryView(createBySessionIdVariantActiveQuery()
 				.startKey(ComplexKey.of(sessionId))
 				.endKey(ComplexKey.of(sessionId, ComplexKey.emptyObject())));
 
@@ -60,21 +61,21 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	@Override
 	public List<String> findIdsBySessionId(final String sessionId) {
-		return collectQuestionIds(db.queryView(createQuery("by_sessionid_variant_active")
+		return collectQuestionIds(db.queryView(createBySessionIdVariantActiveQuery()
 				.startKey(ComplexKey.of(sessionId))
 				.endKey(ComplexKey.of(sessionId, ComplexKey.emptyObject()))));
 	}
 
 	@Override
 	public List<String> findIdsBySessionIdAndVariant(final String sessionId, final String variant) {
-		return collectQuestionIds(db.queryView(createQuery("by_sessionid_variant_active")
+		return collectQuestionIds(db.queryView(createBySessionIdVariantActiveQuery()
 				.startKey(ComplexKey.of(sessionId, variant))
 				.endKey(ComplexKey.of(sessionId, variant, ComplexKey.emptyObject()))));
 	}
 
 	@Override
 	public int deleteBySessionId(final String sessionId) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
+		final ViewResult result = db.queryView(createBySessionIdVariantActiveQuery()
 				.startKey(ComplexKey.of(sessionId))
 				.endKey(ComplexKey.of(sessionId, ComplexKey.emptyObject()))
 				.reduce(false));
@@ -91,7 +92,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	@Override
 	public List<String> findUnansweredIdsBySessionIdAndUser(final String sessionId, final User user) {
-		final ViewResult result = db.queryView(createQuery("questionid_by_user_sessionid_variant")
+		final ViewResult result = db.queryView(createQuestionIdByUserSessionIdVariantQuery()
 				.designDocId("_design/Answer")
 				.startKey(ComplexKey.of(user.getUsername(), sessionId))
 				.endKey(ComplexKey.of(user.getUsername(), sessionId, ComplexKey.emptyObject())));
@@ -104,7 +105,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	@Override
 	public List<String> findUnansweredIdsBySessionIdAndUserOnlyLectureVariant(final String sessionId, final User user) {
-		final ViewResult result = db.queryView(createQuery("questionid_piround_by_user_sessionid_variant")
+		final ViewResult result = db.queryView(createQuestionIdPiRoundByUserSessionVariantQuery()
 				.designDocId("_design/Answer")
 				.key(ComplexKey.of(user.getUsername(), sessionId, "lecture")));
 		final Map<String, Integer> answeredQuestions = new HashMap<>();
@@ -117,7 +118,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	@Override
 	public List<String> findUnansweredIdsBySessionIdAndUserOnlyPreparationVariant(final String sessionId, final User user) {
-		final ViewResult result = db.queryView(createQuery("questionid_piround_by_user_sessionid_variant")
+		final ViewResult result = db.queryView(createQuestionIdPiRoundByUserSessionVariantQuery()
 				.designDocId("_design/Answer")
 				.key(ComplexKey.of(user.getUsername(), sessionId, "preparation")));
 		final Map<String, Integer> answeredQuestions = new HashMap<>();
@@ -167,7 +168,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	public List<Content> findBySessionIdAndVariantAndActive(final Object... keys) {
 		final Object[] endKeys = Arrays.copyOf(keys, keys.length + 1);
 		endKeys[keys.length] = ComplexKey.emptyObject();
-		final List<Content> contents = db.queryView(createQuery("by_sessionid_variant_active")
+		final List<Content> contents = db.queryView(createBySessionIdVariantActiveQuery()
 						.includeDocs(true)
 						.reduce(false)
 						.startKey(ComplexKey.of(keys))
@@ -184,7 +185,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	@Override
 	public int countLectureVariantBySessionId(final String sessionId) {
 		/* TODO: reduce code duplication */
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
+		final ViewResult result = db.queryView(createBySessionIdVariantActiveQuery()
 				.startKey(ComplexKey.of(sessionId, "lecture"))
 				.endKey(ComplexKey.of(sessionId, "lecture", ComplexKey.emptyObject())));
 
@@ -194,7 +195,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	@Override
 	public int countFlashcardVariantBySessionId(final String sessionId) {
 		/* TODO: reduce code duplication */
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
+		final ViewResult result = db.queryView(createBySessionIdVariantActiveQuery()
 				.startKey(ComplexKey.of(sessionId, "flashcard"))
 				.endKey(ComplexKey.of(sessionId, "flashcard", ComplexKey.emptyObject())));
 
@@ -204,7 +205,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	@Override
 	public int countPreparationVariantBySessionId(final String sessionId) {
 		/* TODO: reduce code duplication */
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
+		final ViewResult result = db.queryView(createBySessionIdVariantActiveQuery()
 				.startKey(ComplexKey.of(sessionId, "preparation"))
 				.endKey(ComplexKey.of(sessionId, "preparation", ComplexKey.emptyObject())));
 
@@ -251,7 +252,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	/* TODO: remove if this method is no longer used */
 	@Override
 	public List<String> findIdsBySessionIdAndVariantAndSubject(final String sessionId, final String questionVariant, final String subject) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
+		final ViewResult result = db.queryView(createBySessionIdVariantActiveQuery()
 				.startKey(ComplexKey.of(sessionId, questionVariant, 1, subject))
 				.endKey(ComplexKey.of(sessionId, questionVariant, 1, subject, ComplexKey.emptyObject())));
 
@@ -267,7 +268,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	@Override
 	public List<String> findSubjectsBySessionIdAndVariant(final String sessionId, final String questionVariant) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
+		final ViewResult result = db.queryView(createBySessionIdVariantActiveQuery()
 				.startKey(ComplexKey.of(sessionId, questionVariant))
 				.endKey(ComplexKey.of(sessionId, questionVariant, ComplexKey.emptyObject())));
 
@@ -279,4 +280,17 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 		return new ArrayList<>(uniqueSubjects);
 	}
+
+	private ViewQuery createBySessionIdVariantActiveQuery() {
+		return createQuery("by_sessionid_variant_active");
+	}
+
+	private ViewQuery createQuestionIdByUserSessionIdVariantQuery() {
+		return createQuery("questionid_by_user_sessionid_variant");
+	}
+
+	private ViewQuery createQuestionIdPiRoundByUserSessionVariantQuery() {
+		return createQuery("questionid_piround_by_user_sessionid_variant");
+	}
+
 }
