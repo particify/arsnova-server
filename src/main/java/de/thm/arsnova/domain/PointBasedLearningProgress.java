@@ -48,7 +48,7 @@ public class PointBasedLearningProgress extends VariantLearningProgress {
 		if (courseMaximumValue == 0 || numUsers == 0) {
 			return 0;
 		}
-		final double courseAverageValue = userTotalValue / numUsers;
+		final double courseAverageValue = (double) userTotalValue / numUsers;
 		final double courseProgress = courseAverageValue / courseMaximumValue;
 		return (int) Math.min(100, Math.round(courseProgress * 100));
 	}

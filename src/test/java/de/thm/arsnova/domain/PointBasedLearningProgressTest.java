@@ -57,27 +57,30 @@ public class PointBasedLearningProgressTest {
 
 	@Test
 	public void shouldFilterBasedOnQuestionVariant() {
+		// Total of 300 Points
 		String q1 = this.addQuestion("lecture", 100);
-		String q2 = this.addQuestion("preparation", 100);
+		String q2 = this.addQuestion("lecture", 100);
+		String q3 = this.addQuestion("lecture", 100);
 		User u1 = new TestUser("user1");
 		User u2 = new TestUser("user2");
-		// first question is answered correctly, second one is not
+		User u3 = new TestUser("user3");
+		// Both users achieve 200 points
 		this.addAnswer(q1, u1, 100);
 		this.addAnswer(q1, u2, 100);
+		this.addAnswer(q1, u3, 0);
 		this.addAnswer(q2, u1, 0);
-		this.addAnswer(q2, u2, 0);
+		this.addAnswer(q2, u2, 100);
+		this.addAnswer(q2, u3, 0);
+		this.addAnswer(q3, u1, 100);
+		this.addAnswer(q3, u2, 100);
+		this.addAnswer(q3, u3, 0);
 
 		lp.setQuestionVariant("lecture");
-		LearningProgressValues lectureProgress = lp.getCourseProgress(null);
-		LearningProgressValues myLectureProgress = lp.getMyProgress(null, u1);
-		lp.setQuestionVariant("preparation");
-		LearningProgressValues prepProgress = lp.getCourseProgress(null);
-		LearningProgressValues myPrepProgress = lp.getMyProgress(null, u1);
-
-		assertEquals(100, lectureProgress.getCourseProgress());
-		assertEquals(100, myLectureProgress.getMyProgress());
-		assertEquals(0, prepProgress.getCourseProgress());
-		assertEquals(0, myPrepProgress.getMyProgress());
+		LearningProgressValues u1LectureProgress = lp.getMyProgress(null, u1);
+		// (500/3) / 300 ~= 0,56.
+		assertEquals(56, u1LectureProgress.getCourseProgress());
+		// 200 / 300 ~= 0,67.
+		assertEquals(67, u1LectureProgress.getMyProgress());
 	}
 
 	@Test
