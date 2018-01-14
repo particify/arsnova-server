@@ -14,7 +14,7 @@ And additionally if you want to run ARSnova locally:
 * [ARSnova Setup Tool](https://github.com/thm-projects/arsnova-setuptool)
 
 Next, you need to setup an ARSnova configuration file.
-Create a copy of [arsnova.properties.example](src/main/resources/arsnova.properties.example) at `/etc/arsnova/arsnova.properties`.
+Create a copy of [arsnova.properties.example](../../main/resources/arsnova.properties.example) at `/etc/arsnova/arsnova.properties`.
 Afterwards, initialize the database by running the `tool.py` python script from the Setup Tool.
 
 
