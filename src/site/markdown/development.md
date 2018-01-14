@@ -37,7 +37,7 @@ Run the following command to download the dependencies and startup the backend w
 
 After a few seconds the ARSnova API will be accessible at <http://localhost:8080/>.
 
-You can adjust the amount of debug logging by changing the log levels in [log4j-dev.properties](src/main/resources/log4j-dev.properties).
+You can adjust the amount of debug logging by changing the log levels in [log4j-dev.properties](../../main/resources/log4j-dev.properties).
 Additionally, you can enable exception messages in API responses by setting the boolean property `api.expose-error-messages` in `arsnova.properties`.
 
 
