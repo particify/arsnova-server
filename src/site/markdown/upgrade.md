@@ -28,7 +28,7 @@ Unpack the downloaded archive and run the following commands in the extracted di
 ## Configuration Changes
 
 New ARSnova releases might introduce new configuration options or modify existing ones.
-We suggest you review the corresponding [arsnova.properties.example](src/main/resources/arsnova.properties.example) for your target version and adjust `/etc/arsnova.properties` accordingly.
+We suggest you review the corresponding [arsnova.properties.example](../../main/resources/arsnova.properties.example) for your target version and adjust `/etc/arsnova.properties` accordingly.
 
 
 ## Backend Upgrade
