@@ -17,6 +17,7 @@
  */
 package de.thm.arsnova.entities.migration.v2;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
 
@@ -24,6 +25,7 @@ import de.thm.arsnova.entities.serialization.View;
  * A session a user has visited previously.
  */
 public class VisitedRoom {
+	@JsonProperty("_id")
 	private String id;
 	private String name;
 	private String keyword;
