@@ -11,6 +11,15 @@ import java.util.Map;
 import java.util.Set;
 
 public class UserProfile implements Entity {
+	public enum AuthProvider {
+		INVALID,
+		ARSNOVA,
+		ARSNOVA_GUEST,
+		GOOGLE,
+		FACEBOOK,
+		TWITTER
+	}
+
 	public class Account {
 		private String password;
 		private String activationKey;
@@ -92,7 +101,7 @@ public class UserProfile implements Entity {
 	private String rev;
 	private Date creationTimestamp;
 	private Date updateTimestamp;
-	private String authProvider;
+	private AuthProvider authProvider;
 	private String loginId;
 	private Date lastLoginTimestamp;
 	private Account account;
@@ -149,12 +158,12 @@ public class UserProfile implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public String getAuthProvider() {
+	public AuthProvider getAuthProvider() {
 		return authProvider;
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setAuthProvider(final String authProvider) {
+	public void setAuthProvider(final AuthProvider authProvider) {
 		this.authProvider = authProvider;
 	}
 

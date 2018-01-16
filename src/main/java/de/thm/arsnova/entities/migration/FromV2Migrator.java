@@ -61,6 +61,7 @@ public class FromV2Migrator {
 		final UserProfile profile = new UserProfile();
 		if (dbUser != null) {
 			profile.setLoginId(dbUser.getUsername());
+			profile.setAuthProvider(UserProfile.AuthProvider.ARSNOVA);
 			UserProfile.Account account = profile.new Account();
 			profile.setAccount(account);
 			account.setPassword(dbUser.getPassword());
@@ -69,7 +70,10 @@ public class FromV2Migrator {
 			account.setPasswordResetTime(new Date(dbUser.getPasswordResetTime()));
 		}
 		if (loggedIn != null) {
-			profile.setLoginId(loggedIn.getUser());
+			if (dbUser == null) {
+				profile.setLoginId(loggedIn.getUser());
+				profile.setAuthProvider(detectAuthProvider(profile.getLoginId()));
+			}
 			profile.setLastLoginTimestamp(new Date(loggedIn.getTimestamp()));
 			List<UserProfile.RoomHistoryEntry> sessionHistory = loggedIn.getVisitedSessions().stream()
 					.map(entry -> profile.new RoomHistoryEntry(entry.getId(), new Date(0)))
@@ -182,5 +186,19 @@ public class FromV2Migrator {
 		to.setRead(from.isRead());
 
 		return to;
+	}
+
+	private UserProfile.AuthProvider detectAuthProvider(final String loginId) {
+		if (loginId.length() == 15 && loginId.startsWith("Guest")) {
+			return UserProfile.AuthProvider.ARSNOVA_GUEST;
+		}
+		if (loginId.startsWith("https://www.facebook.com/") || loginId.startsWith("http://www.facebook.com/")) {
+			return UserProfile.AuthProvider.FACEBOOK;
+		}
+		if (loginId.contains("@")) {
+			return UserProfile.AuthProvider.GOOGLE;
+		}
+
+		return UserProfile.AuthProvider.INVALID;
 	}
 }
