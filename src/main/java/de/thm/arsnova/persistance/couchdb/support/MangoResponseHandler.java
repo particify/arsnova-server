@@ -24,6 +24,13 @@ public class MangoResponseHandler<T> extends StdResponseHandler<List<T>> {
 		parser = new MangoQueryResultParser<T>(docType, om);
 	}
 
+	public MangoResponseHandler(String propertyName, Class<T> propertyType, ObjectMapper om) {
+		Assert.notNull(om, "ObjectMapper may not be null");
+		Assert.notNull(propertyType, "propertyType may not be null");
+		Assert.notNull(propertyName, "propertyName may not be null");
+		parser = new MangoQueryResultParser<T>(propertyName, propertyType, om);
+	}
+
 	@Override
 	public List<T> success(HttpResponse hr) throws Exception {
 		parser.parseResult(hr.getContent());

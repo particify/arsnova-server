@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 public class FromV2Migrator {
 	private void copyCommonProperties(final Entity from, final de.thm.arsnova.entities.Entity to) {
 		to.setId(from.getId());
-		to.setRevision(from.getRevision());
+		//to.setRevision(from.getRevision());
 	}
 
 	public UserProfile migrate(final DbUser dbUser, final LoggedIn loggedIn, final MotdList motdList) {
@@ -60,8 +60,11 @@ public class FromV2Migrator {
 		}
 		final UserProfile profile = new UserProfile();
 		if (dbUser != null) {
+			copyCommonProperties(dbUser, profile);
 			profile.setLoginId(dbUser.getUsername());
 			profile.setAuthProvider(UserProfile.AuthProvider.ARSNOVA);
+			profile.setCreationTimestamp(new Date(dbUser.getCreation()));
+			profile.setUpdateTimestamp(new Date());
 			UserProfile.Account account = profile.new Account();
 			profile.setAccount(account);
 			account.setPassword(dbUser.getPassword());
@@ -71,8 +74,10 @@ public class FromV2Migrator {
 		}
 		if (loggedIn != null) {
 			if (dbUser == null) {
+				copyCommonProperties(loggedIn, profile);
 				profile.setLoginId(loggedIn.getUser());
 				profile.setAuthProvider(detectAuthProvider(profile.getLoginId()));
+				profile.setCreationTimestamp(new Date());
 			}
 			profile.setLastLoginTimestamp(new Date(loggedIn.getTimestamp()));
 			List<UserProfile.RoomHistoryEntry> sessionHistory = loggedIn.getVisitedSessions().stream()

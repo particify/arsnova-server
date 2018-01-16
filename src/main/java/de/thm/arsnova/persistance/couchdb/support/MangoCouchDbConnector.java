@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -203,11 +204,10 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 	/**
 	 *
 	 * @param query The query sent to CouchDB's Mango API
-	 * @param type Type for deserialization of retrieved entities
+	 * @param rh Handler for the response to the query
 	 * @return List of retrieved entities
 	 */
-	public <T> List<T> query(final MangoQuery query, final Class<T> type) {
-		MangoResponseHandler<T> rh = new MangoResponseHandler<T>(type, objectMapper, true);
+	public <T> List<T> query(final MangoQuery query, final MangoResponseHandler<T> rh) {
 		String queryString;
 		try {
 			queryString = objectMapper.writeValueAsString(query);
@@ -221,6 +221,31 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 		logger.debug("Answer from CouchDB Mango query: {}", result);
 
 		return result;
+	}
+
+	/**
+	 *
+	 * @param query The query sent to CouchDB's Mango API
+	 * @param type Type for deserialization of retrieved entities
+	 * @return List of retrieved entities
+	 */
+	public <T> List<T> query(final MangoQuery query, final Class<T> type) {
+		MangoResponseHandler<T> rh = new MangoResponseHandler<>(type, objectMapper, true);
+		return query(query, rh);
+	}
+
+	/**
+	 *
+	 * @param query The query sent to CouchDB's Mango API
+	 * @param propertyName Name of the entity's property to be parsed
+	 * @param type Type for deserialization of retrieved entities
+	 * @return List of retrieved entities
+	 */
+	public <T> List<T> query(final MangoQuery query, final String propertyName, final Class<T> type) {
+		query.setFields(Arrays.asList(new String[] {propertyName}));
+		MangoResponseHandler<T> rh = new MangoResponseHandler<>(propertyName, type, objectMapper);
+
+		return query(query, rh);
 	}
 
 	public void createPartialJsonIndex(final String name, final List<MangoQuery.Sort> fields, final Map<String, Object> filterSelector) {

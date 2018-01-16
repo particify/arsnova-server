@@ -23,8 +23,15 @@ public class MangoQueryResultParser<T> {
 	private Class<T> type;
 	private ObjectMapper objectMapper;
 	private List<T> docs;
+	private String propertyName = null;
 
 	public MangoQueryResultParser(Class<T> type, ObjectMapper objectMapper) {
+		this.type = type;
+		this.objectMapper = objectMapper;
+	}
+
+	public MangoQueryResultParser(String propertyName, Class<T> type, ObjectMapper objectMapper) {
+		this.propertyName = propertyName;
 		this.type = type;
 		this.objectMapper = objectMapper;
 	}
@@ -74,8 +81,26 @@ public class MangoQueryResultParser<T> {
 		}
 
 		while (jp.nextToken() == JsonToken.START_OBJECT) {
-			T doc = jp.readValueAs(type);
-			docs.add(doc);
+			T doc = null;
+			if (propertyName == null) {
+				doc = jp.readValueAs(type);
+				docs.add(doc);
+			} else {
+				while (jp.nextToken() == JsonToken.FIELD_NAME) {
+					String fieldName = jp.getText();
+					jp.nextToken();
+					if (fieldName.equals(propertyName)) {
+						doc = jp.readValueAs(type);
+						docs.add(doc);
+					}
+				}
+				if (doc == null) {
+					throw new DbAccessException("Cannot parse response from CouchDB. Property is missing.");
+				}
+				if (jp.currentToken() != JsonToken.END_OBJECT) {
+					throw new DbAccessException("Cannot parse response from CouchDB. Unexpected data.");
+				}
+			}
 		}
 
 		if (jp.currentToken() != JsonToken.END_ARRAY) {

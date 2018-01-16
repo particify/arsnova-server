@@ -29,9 +29,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Performs the data migration from version 2 to version 3.
@@ -42,6 +45,7 @@ import java.util.Map;
 public class V2ToV3Migration implements Migration {
 	private static final String ID = "20170914131300";
 	private static final int LIMIT = 200;
+	private static final long OUTDATED_AFTER = 1000L * 3600 * 24 * 30 * 6;
 	private static final String FULL_INDEX_BY_TYPE = "full-index-by-type";
 	private static final String USER_INDEX = "user-index";
 	private static final String LOGGEDIN_INDEX = "loggedin-index";
@@ -53,6 +57,7 @@ public class V2ToV3Migration implements Migration {
 	private MangoCouchDbConnector toConnector;
 	private MangoCouchDbConnector fromConnector;
 	private UserRepository userRepository;
+	private long referenceTimestamp = System.currentTimeMillis();
 
 	public V2ToV3Migration(
 			final FromV2Migrator migrator,
@@ -72,6 +77,7 @@ public class V2ToV3Migration implements Migration {
 	public void migrate() {
 		createV2Index();
 		migrateUsers();
+		migrateUnregisteredUsers();
 		migrateRooms();
 	}
 
@@ -148,17 +154,52 @@ public class V2ToV3Migration implements Migration {
 				List<LoggedIn> loggedInList = fromConnector.query(loggedInQuery, LoggedIn.class);
 				LoggedIn loggedIn = loggedInList.size() > 0 ? loggedInList.get(0) : null;
 
-				HashMap<String, Object> motdListQueryOptions = new HashMap<>();
-				motdListQueryOptions.put("type", "motdlist");
-				motdListQueryOptions.put("username", userV2.getUsername());
-				MangoCouchDbConnector.MangoQuery motdlistQuery = new MangoCouchDbConnector.MangoQuery(motdListQueryOptions);
-				motdlistQuery.setIndexDocument(MOTDLIST_INDEX);
-				List<MotdList> motdListList = fromConnector.query(motdlistQuery, MotdList.class);
-				MotdList motdList = motdListList.size() > 0 ? motdListList.get(0) : null;
-
-				profilesV3.add(migrator.migrate(userV2, loggedIn, motdList));
+				UserProfile profileV3 = migrator.migrate(userV2, loggedIn, loadMotdList(userV2.getUsername()));
+				profileV3.setAcknowledgedMotds(migrateMotdIds(profileV3.getAcknowledgedMotds()));
+				profilesV3.add(profileV3);
 			}
 
+			toConnector.executeBulk(profilesV3);
+		}
+	}
+
+	private void migrateUnregisteredUsers() {
+		/* Load registered usernames to exclude them later */
+		Map<String, Object> queryOptions = new HashMap<>();
+		queryOptions.put("type", "userdetails");
+		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
+		query.setIndexDocument(USER_INDEX);
+		query.setLimit(LIMIT);
+		Set<String> usernames = new HashSet<>();
+		for (int skip = 0;; skip += LIMIT) {
+			query.setSkip(skip);
+			List<String> result = fromConnector.query(query, "username", String.class);
+			if (result.isEmpty()) {
+				break;
+			}
+			usernames.addAll(result);
+		}
+
+		queryOptions = new HashMap<>();
+		queryOptions.put("type", "logged_in");
+		query = new MangoCouchDbConnector.MangoQuery(queryOptions);
+		query.setIndexDocument(LOGGEDIN_INDEX);
+		query.setLimit(LIMIT);
+		for (int skip = 0;; skip += LIMIT) {
+			query.setSkip(skip);
+			List<UserProfile> profilesV3 = new ArrayList<>();
+			List<LoggedIn> loggedInsV2 = fromConnector.query(query, LoggedIn.class);
+			if (loggedInsV2.isEmpty()) {
+				break;
+			}
+			for (LoggedIn loggedInV2 : loggedInsV2) {
+				if (usernames.contains(loggedInV2.getUser())) {
+					continue;
+				}
+				UserProfile profileV3 = migrator.migrate(null, loggedInV2, loadMotdList(loggedInV2.getUser()));
+				profileV3.setAcknowledgedMotds(migrateMotdIds(profileV3.getAcknowledgedMotds()));
+				profilesV3.add(profileV3);
+			}
 			toConnector.executeBulk(profilesV3);
 		}
 	}
@@ -186,5 +227,36 @@ public class V2ToV3Migration implements Migration {
 
 			toConnector.executeBulk(roomsV3);
 		}
+	}
+
+	private HashSet<String> migrateMotdIds(final Set<String> oldIds) {
+		if (oldIds.isEmpty()) {
+			return new HashSet<>();
+		}
+		Map<String, Object> queryOptions = new HashMap<>();
+		Map<String, Set<String>> subQuery1 = new HashMap<>();
+		subQuery1.put("$in", oldIds);
+		queryOptions.put("type", "motd");
+		queryOptions.put("motdkey", subQuery1);
+		/* Exclude outdated MotDs */
+		HashMap<String, String> subQuery2 = new HashMap<>();
+		subQuery2.put("$gt", String.valueOf(referenceTimestamp - OUTDATED_AFTER));
+		queryOptions.put("enddate", subQuery2);
+		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
+		query.setIndexDocument(MOTD_INDEX);
+		query.setLimit(LIMIT);
+
+		return new HashSet<>(fromConnector.query(query, "_id", String.class));
+	}
+
+	private MotdList loadMotdList(final String username) {
+		HashMap<String, Object> motdListQueryOptions = new HashMap<>();
+		motdListQueryOptions.put("type", "motdlist");
+		motdListQueryOptions.put("username", username);
+		MangoCouchDbConnector.MangoQuery motdListQuery = new MangoCouchDbConnector.MangoQuery(motdListQueryOptions);
+		motdListQuery.setIndexDocument(MOTDLIST_INDEX);
+		List<MotdList> motdListList = fromConnector.query(motdListQuery, MotdList.class);
+
+		return motdListList.size() > 0 ? motdListList.get(0) : null;
 	}
 }
