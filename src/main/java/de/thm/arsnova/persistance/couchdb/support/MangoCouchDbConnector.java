@@ -223,13 +223,16 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 		return result;
 	}
 
-	public void createJsonIndex(final String name, final List<MangoQuery.Sort> fields) {
+	public void createPartialJsonIndex(final String name, final List<MangoQuery.Sort> fields, final Map<String, Object> filterSelector) {
 		Map<String, Object> query = new HashMap<>();
 		Map<String, Object> index = new HashMap<>();
 		query.put("ddoc", name);
 		query.put("type", "json");
 		query.put("index", index);
 		index.put("fields", fields);
+		if (filterSelector != null) {
+			index.put("partial_filter_selector", filterSelector);
+		}
 		String queryString;
 		try {
 			queryString = objectMapper.writeValueAsString(query);
@@ -238,5 +241,9 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 			throw new DbAccessException(e);
 		}
 		restTemplate.postUncached(dbURI.append("_index").toString(), queryString);
+	}
+
+	public void createJsonIndex(final String name, final List<MangoQuery.Sort> fields) {
+		createPartialJsonIndex(name, fields, null);
 	}
 }

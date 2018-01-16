@@ -42,6 +42,12 @@ import java.util.Map;
 public class V2ToV3Migration implements Migration {
 	private static final String ID = "20170914131300";
 	private static final int LIMIT = 200;
+	private static final String FULL_INDEX_BY_TYPE = "full-index-by-type";
+	private static final String USER_INDEX = "user-index";
+	private static final String LOGGEDIN_INDEX = "loggedin-index";
+	private static final String SESSION_INDEX = "session-index";
+	private static final String MOTD_INDEX = "motd-index";
+	private static final String MOTDLIST_INDEX = "motdlist-index";
 
 	private FromV2Migrator migrator;
 	private MangoCouchDbConnector toConnector;
@@ -70,15 +76,59 @@ public class V2ToV3Migration implements Migration {
 	}
 
 	private void createV2Index() {
-		List<MangoCouchDbConnector.MangoQuery.Sort> fields = new ArrayList<>();
+		List<MangoCouchDbConnector.MangoQuery.Sort> fields;
+		Map<String, Object> filterSelector;
+		Map<String, Object> subFilterSelector;
+
+		fields = new ArrayList<>();
 		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("type", false));
-		fromConnector.createJsonIndex("type-index", fields);
+		fromConnector.createJsonIndex(FULL_INDEX_BY_TYPE, fields);
+
+		filterSelector = new HashMap<>();
+		filterSelector.put("type", "userdetails");
+		Map<String, String> lockedFilter = new HashMap<>();
+		subFilterSelector = new HashMap<>();
+		subFilterSelector.put("$exists", false);
+		filterSelector.put("locked", subFilterSelector);
+		fromConnector.createPartialJsonIndex(USER_INDEX, new ArrayList<>(), filterSelector);
+		fields = new ArrayList<>();
+		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("username", false));
+		fromConnector.createPartialJsonIndex(USER_INDEX, fields, filterSelector);
+
+		filterSelector = new HashMap<>();
+		filterSelector.put("type", "logged_in");
+		fromConnector.createPartialJsonIndex(LOGGEDIN_INDEX, new ArrayList<>(), filterSelector);
+		fields = new ArrayList<>();
+		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("user", false));
+		fromConnector.createPartialJsonIndex(LOGGEDIN_INDEX, fields, filterSelector);
+
+		filterSelector = new HashMap<>();
+		filterSelector.put("type", "session");
+		fromConnector.createPartialJsonIndex(SESSION_INDEX, new ArrayList<>(), filterSelector);
+		fields = new ArrayList<>();
+		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("keyword", false));
+		fromConnector.createPartialJsonIndex(SESSION_INDEX, fields, filterSelector);
+
+		filterSelector = new HashMap<>();
+		filterSelector.put("type", "motd");
+		fromConnector.createPartialJsonIndex(MOTD_INDEX, new ArrayList<>(), filterSelector);
+		fields = new ArrayList<>();
+		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("motdkey", false));
+		fromConnector.createPartialJsonIndex(MOTD_INDEX, fields, filterSelector);
+
+		filterSelector = new HashMap<>();
+		filterSelector.put("type", "motdlist");
+		fromConnector.createPartialJsonIndex(MOTDLIST_INDEX, new ArrayList<>(), filterSelector);
+		fields = new ArrayList<>();
+		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("username", false));
+		fromConnector.createPartialJsonIndex(MOTDLIST_INDEX, fields, filterSelector);
 	}
 
 	private void migrateUsers() {
 		Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "userdetails");
 		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
+		query.setIndexDocument(USER_INDEX);
 		query.setLimit(LIMIT);
 
 		for (int skip = 0;; skip += LIMIT) {
@@ -94,6 +144,7 @@ public class V2ToV3Migration implements Migration {
 				loggedInQueryOptions.put("type", "logged_in");
 				loggedInQueryOptions.put("user", userV2.getUsername());
 				MangoCouchDbConnector.MangoQuery loggedInQuery = new MangoCouchDbConnector.MangoQuery(loggedInQueryOptions);
+				loggedInQuery.setIndexDocument(LOGGEDIN_INDEX);
 				List<LoggedIn> loggedInList = fromConnector.query(loggedInQuery, LoggedIn.class);
 				LoggedIn loggedIn = loggedInList.size() > 0 ? loggedInList.get(0) : null;
 
@@ -101,6 +152,7 @@ public class V2ToV3Migration implements Migration {
 				motdListQueryOptions.put("type", "motdlist");
 				motdListQueryOptions.put("username", userV2.getUsername());
 				MangoCouchDbConnector.MangoQuery motdlistQuery = new MangoCouchDbConnector.MangoQuery(motdListQueryOptions);
+				motdlistQuery.setIndexDocument(MOTDLIST_INDEX);
 				List<MotdList> motdListList = fromConnector.query(motdlistQuery, MotdList.class);
 				MotdList motdList = motdListList.size() > 0 ? motdListList.get(0) : null;
 
@@ -115,6 +167,7 @@ public class V2ToV3Migration implements Migration {
 		Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "session");
 		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
+		query.setIndexDocument(SESSION_INDEX);
 		query.setLimit(LIMIT);
 
 		for (int skip = 0;; skip += LIMIT) {
