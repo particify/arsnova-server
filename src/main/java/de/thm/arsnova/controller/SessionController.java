@@ -162,9 +162,10 @@ public class SessionController extends PaginationController {
 		List<Room> rooms;
 
 		if (!"".equals(username)) {
+			final String userId = userService.getByUsername(username).getId();
 			try {
 				if (ownedOnly && !visitedOnly) {
-					rooms = roomService.getUserSessions(username);
+					rooms = roomService.getUserSessions(userId);
 				} else if (visitedOnly && !ownedOnly) {
 					rooms = roomService.getUserVisitedSessions(username);
 				} else {

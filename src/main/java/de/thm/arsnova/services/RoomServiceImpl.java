@@ -254,14 +254,14 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'owner')")
-	public List<Room> getUserSessions(String username) {
-		return roomRepository.findByUsername(username, 0, 0);
+	public List<Room> getUserSessions(String userId) {
+		return roomRepository.findByOwnerId(userId, 0, 0);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Room> getMySessions(final int offset, final int limit) {
-		return roomRepository.findByUser(userService.getCurrentUser(), offset, limit);
+		return roomRepository.findByOwner(userService.getCurrentUser(), offset, limit);
 	}
 
 	@Override
@@ -273,14 +273,14 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Room> getMyPublicPoolSessionsInfo() {
-		return roomRepository.findInfosForPublicPoolByUser(userService.getCurrentUser());
+		return roomRepository.findInfosForPublicPoolByOwner(userService.getCurrentUser());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Room> getMySessionsInfo(final int offset, final int limit) {
 		final UserAuthentication user = userService.getCurrentUser();
-		return roomRepository.getRoomsWithStatsForUser(user, offset, limit);
+		return roomRepository.getRoomsWithStatsForOwner(user, offset, limit);
 	}
 
 	@Override
@@ -306,7 +306,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@PreAuthorize("isAuthenticated()")
 	public List<Room> getMyVisitedSessionsInfo(final int offset, final int limit) {
 		List<Room> rooms = getMyVisitedSessions(0, 0);
-		roomRepository.getVisitedRoomsWithStatsForUser(rooms, userService.getCurrentUser());
+		roomRepository.getVisitedRoomsWithStatsForOwner(rooms, userService.getCurrentUser());
 
 		return rooms;
 	}

@@ -4,46 +4,45 @@ var designDoc = {
 	"views": {
 		"by_courseid": {
 			"map": function (doc) {
-				if (doc.type === "Room" && doc.courseId  && doc.sessionType !== "public_pool") {
+				if (doc.type === "Room" && doc.courseId  && !doc.poolProperties) {
 					emit(doc.courseId, {_rev: doc._rev});
 				}
 			}
 		},
-		"by_keyword": {
+		"by_shortid": {
 			"map": function (doc) {
 				if (doc.type === "Room") {
-					emit(doc.keyword, {_rev: doc._rev});
+					emit(doc.shortId, {_rev: doc._rev});
 				}
 			}
 		},
-		"by_lastactivity_for_guests": {
+		"by_lastactivity_for_guests": { /* needs rewrite */
 			"map": function (doc) {
-				if (doc.type === "Room" && doc.sessionType !== "public_pool" && doc.creator.indexOf("Guest") === 0) {
-					emit(doc.lastOwnerActivity || doc.creationTime, {_rev: doc._rev});
+				if (doc.type === "Room" && !doc.poolProperties && doc.creator.indexOf("Guest") === 0) {
+					emit(doc.lastOwnerActivity || doc.creationTimestamp, {_rev: doc._rev});
 				}
 			}
 		},
-		"partial_by_sessiontype_creator_name": {
+		"partial_by_pool_ownerid_name": {
 			"map": function (doc) {
 				if (doc.type === "Room") {
-					emit([doc.sessionType, doc.creator, doc.name], {
-						shortName: doc.shortName,
-						keyword: doc.keyword,
-						active: doc.active,
+					emit([!!doc.poolProperties, doc.ownerId, doc.name], {
+						abbreviation: doc.abbreviation,
+						shortId: doc.shortId,
+						locked: doc.locked,
 						courseType: doc.courseType,
-						creationTime: doc.creationTime
+						creationTimestamp: doc.creationTimestamp
 					});
 				}
 			}
 		},
 		"partial_by_subject_name_for_publicpool": {
 			"map": function (doc) {
-				if (doc.type === "Room" && doc.sessiontype === "public_pool") {
-					emit([doc.ppSubject, doc.name], {
-						ppSubject: doc.ppSubject,
+				if (doc.type === "Room" && doc.poolProperties) {
+					emit([doc.poolProperties.category, doc.name], {
 						name: doc.name,
-						keyword: doc.keyword,
-						ppLevel: doc.ppLevel
+						shortId: doc.shortId,
+						poolProperties: doc.poolProperties
 					});
 				}
 			}

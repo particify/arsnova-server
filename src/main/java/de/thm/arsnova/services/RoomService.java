@@ -42,7 +42,7 @@ public interface RoomService extends EntityService<Room> {
 
 	String generateKey();
 
-	List<Room> getUserSessions(String username);
+	List<Room> getUserSessions(String userId);
 
 	List<Room> getUserVisitedSessions(String username);
 

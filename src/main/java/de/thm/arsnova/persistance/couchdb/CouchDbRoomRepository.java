@@ -268,22 +268,22 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 	}
 
 	@Override
-	public List<Room> findByUser(final UserAuthentication user, final int start, final int limit) {
-		return findByUsername(user.getUsername(), start, limit);
+	public List<Room> findByOwner(final UserAuthentication owner, final int start, final int limit) {
+		return findByOwnerId(owner.getId(), start, limit);
 	}
 
 	@Override
-	public List<Room> findByUsername(final String username, final int start, final int limit) {
+	public List<Room> findByOwnerId(final String ownerId, final int start, final int limit) {
 		final int qSkip = start > 0 ? start : -1;
 		final int qLimit = limit > 0 ? limit : -1;
 
 		/* TODO: Only load IDs and check against cache for data. */
 		return db.queryView(
-				createQuery("partial_by_sessiontype_creator_name")
+				createQuery("partial_by_pool_ownerid_name")
 						.skip(qSkip)
 						.limit(qLimit)
-						.startKey(ComplexKey.of(null, username))
-						.endKey(ComplexKey.of(null, username, ComplexKey.emptyObject()))
+						.startKey(ComplexKey.of(false, ownerId))
+						.endKey(ComplexKey.of(false, ownerId, ComplexKey.emptyObject()))
 						.includeDocs(true),
 				Room.class);
 	}
@@ -301,20 +301,20 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 	}
 
 	@Override
-	public List<Room> findForPublicPoolByUser(final UserAuthentication user) {
+	public List<Room> findForPublicPoolByOwner(final UserAuthentication owner) {
 		/* TODO: Only load IDs and check against cache for data. */
 		return db.queryView(
-				createQuery("partial_by_sessiontype_creator_name")
-						.startKey(ComplexKey.of("public_pool", user.getUsername()))
-						.endKey(ComplexKey.of("public_pool", user.getUsername(), ComplexKey.emptyObject()))
+				createQuery("partial_by_pool_ownerid_name")
+						.startKey(ComplexKey.of(true, owner.getId()))
+						.endKey(ComplexKey.of(true, owner.getId(), ComplexKey.emptyObject()))
 						.includeDocs(true),
 				Room.class);
 	}
 
 	/* TODO: Move to service layer. */
 	@Override
-	public List<Room> findInfosForPublicPoolByUser(final UserAuthentication user) {
-		final List<Room> rooms = this.findForPublicPoolByUser(user);
+	public List<Room> findInfosForPublicPoolByOwner(final UserAuthentication owner) {
+		final List<Room> rooms = this.findForPublicPoolByOwner(owner);
 		if (rooms.isEmpty()) {
 			return new ArrayList<>();
 		}
@@ -323,8 +323,8 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 
 	/* TODO: Move to service layer. */
 	@Override
-	public List<Room> getRoomsWithStatsForUser(final UserAuthentication user, final int start, final int limit) {
-		final List<Room> sessions = this.findByUser(user, start, limit);
+	public List<Room> getRoomsWithStatsForOwner(final UserAuthentication owner, final int start, final int limit) {
+		final List<Room> sessions = this.findByOwner(owner, start, limit);
 		if (sessions.isEmpty()) {
 			return new ArrayList<>();
 		}
@@ -347,9 +347,9 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 	}
 
 	/* TODO: Move to service layer. */
-	public List<Room> getVisitedRoomsWithStatsForUser(final List<Room> rooms, final UserAuthentication user) {
+	public List<Room> getVisitedRoomsWithStatsForOwner(final List<Room> rooms, final UserAuthentication owner) {
 		final ViewQuery answeredQuestionsView = createQuery("by_user_sessionid").designDocId("_design/Answer")
-				.keys(rooms.stream().map(session -> ComplexKey.of(user.getUsername(), session.getId())).collect(Collectors.toList()));
+				.keys(rooms.stream().map(session -> ComplexKey.of(owner.getUsername(), session.getId())).collect(Collectors.toList()));
 		final ViewQuery contentIdsView = createQuery("by_sessionid").designDocId("_design/Content")
 				.keys(rooms.stream().map(Room::getId).collect(Collectors.toList()));
 
