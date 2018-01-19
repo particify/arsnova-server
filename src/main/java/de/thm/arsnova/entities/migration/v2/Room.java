@@ -339,6 +339,14 @@ public class Room implements Entity {
 		this.flipFlashcards = flip;
 	}
 
+	public boolean hasAuthorDetails() {
+		return ppAuthorName != null && !ppAuthorName.isEmpty()
+				|| ppAuthorMail != null && !ppAuthorMail.isEmpty()
+				|| ppUniversity != null && !ppUniversity.isEmpty()
+				|| ppFaculty != null && !ppFaculty.isEmpty()
+				|| ppLogo != null && !ppLogo.isEmpty();
+	}
+
 	@Override
 	public String toString() {
 		return "Room [keyword=" + keyword + ", type=" + getType() + ", creator=" + creator + "]";

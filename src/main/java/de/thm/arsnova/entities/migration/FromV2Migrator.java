@@ -98,11 +98,30 @@ public class FromV2Migrator {
 		}
 		final de.thm.arsnova.entities.Room to = new de.thm.arsnova.entities.Room();
 		copyCommonProperties(from, to);
+		to.setCreationTimestamp(new Date(from.getCreationTime()));
+		to.setUpdateTimestamp(new Date());
 		to.setShortId(from.getKeyword());
 		to.setOwnerId(owner.getId());
 		to.setName(from.getName());
 		to.setAbbreviation(from.getShortName());
+		to.setDescription(from.getPpDescription());
 		to.setClosed(!from.isActive());
+		if (from.hasAuthorDetails()) {
+			final de.thm.arsnova.entities.Room.Author author = new de.thm.arsnova.entities.Room.Author();
+			to.setAuthor(author);
+			author.setName(from.getPpAuthorName());
+			author.setMail(from.getPpAuthorMail());
+			author.setOrganizationName(from.getPpUniversity());
+			author.setOrganizationUnit(from.getPpFaculty());
+			author.setOrganizationLogo(from.getPpLogo());
+		}
+		if ("public_pool".equals(from.getSessionType())) {
+			final de.thm.arsnova.entities.Room.PoolProperties poolProperties = new de.thm.arsnova.entities.Room.PoolProperties();
+			to.setPoolProperties(poolProperties);
+			poolProperties.setLevel(from.getPpLevel());
+			poolProperties.setCategory(from.getPpSubject());
+			poolProperties.setLicense(from.getPpLicense());
+		}
 
 		return to;
 	}
