@@ -347,7 +347,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserProfile getByUsername(String username) {
-		return userRepository.findByUsername(username.toLowerCase());
+		return userRepository.findByAuthProviderAndLoginId(UserProfile.AuthProvider.ARSNOVA, username.toLowerCase());
 	}
 
 	@Override
@@ -368,7 +368,7 @@ public class UserServiceImpl implements UserService {
 			return null;
 		}
 
-		if (null != userRepository.findByUsername(lcUsername)) {
+		if (null != userRepository.findByAuthProviderAndLoginId(UserProfile.AuthProvider.ARSNOVA, lcUsername)) {
 			logger.info("User registration failed. {} already exists.", lcUsername);
 
 			return null;

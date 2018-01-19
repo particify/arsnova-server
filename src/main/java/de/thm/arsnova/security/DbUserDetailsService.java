@@ -52,7 +52,7 @@ public class DbUserDetailsService implements UserDetailsService {
 	public UserDetails loadUserByUsername(String username) {
 		String uid = username.toLowerCase();
 		logger.debug("Load user: " + uid);
-		UserProfile userProfile = userRepository.findByUsername(uid);
+		UserProfile userProfile = userRepository.findByAuthProviderAndLoginId(UserProfile.AuthProvider.ARSNOVA, uid);
 		if (null == userProfile) {
 			throw new UsernameNotFoundException("User does not exist.");
 		}

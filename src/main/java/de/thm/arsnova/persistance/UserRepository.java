@@ -20,7 +20,10 @@ package de.thm.arsnova.persistance;
 import de.thm.arsnova.entities.UserProfile;
 import org.springframework.data.repository.CrudRepository;
 
+import java.util.List;
+
 public interface UserRepository extends CrudRepository<UserProfile, String> {
-	UserProfile findByUsername(String username);
+	UserProfile findByAuthProviderAndLoginId(UserProfile.AuthProvider authProvider, String loginId);
+	List<UserProfile> findByLoginId(String loginId);
 	int deleteInactiveUsers(long lastActivityBefore);
 }

@@ -221,8 +221,11 @@ public class V2ToV3Migration implements Migration {
 			}
 
 			for (de.thm.arsnova.entities.migration.v2.Room roomV2 : roomsV2) {
-				UserProfile profile = userRepository.findByUsername(roomV2.getCreator());
-				roomsV3.add(migrator.migrate(roomV2, profile));
+				List<UserProfile> profiles = userRepository.findByLoginId(roomV2.getCreator());
+				if (profiles.size() != 1) {
+					throw new Error("Session creator cannot be determined ambiguously.");
+				}
+				roomsV3.add(migrator.migrate(roomV2, profiles.get(0)));
 			}
 
 			toConnector.executeBulk(roomsV3);

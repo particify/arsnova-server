@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.persistance.UserRepository;
 import org.ektorp.BulkDeleteDocument;
+import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DbAccessException;
 import org.ektorp.DocumentOperationResult;
@@ -38,7 +39,7 @@ public class CouchDbUserRepository extends CouchDbCrudRepository<UserProfile> im
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbUserRepository.class);
 
 	public CouchDbUserRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(UserProfile.class, db, "by_username", createIfNotExists);
+		super(UserProfile.class, db, "by_authprovider_loginid", createIfNotExists);
 	}
 
 	private void log(Object... strings) {
@@ -46,10 +47,18 @@ public class CouchDbUserRepository extends CouchDbCrudRepository<UserProfile> im
 	}
 
 	@Override
-	public UserProfile findByUsername(final String username) {
-		final List<UserProfile> users = queryView("by_username", username);
+	public UserProfile findByAuthProviderAndLoginId(final UserProfile.AuthProvider authProvider, final String loginId) {
+		final List<UserProfile> users = queryView("by_authprovider_loginid",
+				ComplexKey.of(authProvider.toString(), loginId));
 
 		return !users.isEmpty() ? users.get(0) : null;
+	}
+
+	@Override
+	public List<UserProfile> findByLoginId(final String loginId) {
+		final List<UserProfile> users = queryView("by_loginid", loginId);
+
+		return users;
 	}
 
 	@Override
@@ -64,7 +73,7 @@ public class CouchDbUserRepository extends CouchDbCrudRepository<UserProfile> im
 
 	@Override
 	public int deleteInactiveUsers(final long lastActivityBefore) {
-		final ViewQuery q = createQuery("by_creation_for_inactive").endKey(lastActivityBefore);
+		final ViewQuery q = createQuery("by_creationtimestamp_for_inactive").endKey(lastActivityBefore);
 		final List<ViewResult.Row> rows = db.queryView(q).getRows();
 
 		int count = 0;
