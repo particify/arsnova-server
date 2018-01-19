@@ -199,15 +199,18 @@ public class UserServiceImpl implements UserService {
 			final UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) authentication;
 			user = new UserAuthentication(token);
 			if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_GUEST"))) {
-				user.setType(UserAuthentication.GUEST);
+				user.setAuthProvider(UserProfile.AuthProvider.ARSNOVA_GUEST);
 			} else if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_DB_USER"))) {
-				user.setType(UserAuthentication.ARSNOVA);
+				user.setAuthProvider(UserProfile.AuthProvider.ARSNOVA);
 			}
 		}
 
 		if (user == null || "anonymous".equals(user.getUsername())) {
 			throw new UnauthorizedException();
 		}
+
+		UserProfile userProfile = userRepository.findByAuthProviderAndLoginId(user.getAuthProvider(), user.getUsername());
+		user.setId(userProfile.getId());
 
 		user.setAdmin(Arrays.asList(adminAccounts).contains(user.getUsername()));
 

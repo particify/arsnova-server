@@ -28,55 +28,48 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Represents a user.
  */
 public class UserAuthentication implements Serializable {
-	public static final String GOOGLE = "google";
-	public static final String TWITTER = "twitter";
-	public static final String FACEBOOK = "facebook";
-	public static final String THM = "thm";
-	public static final String LDAP = "ldap";
-	public static final String ARSNOVA = "arsnova";
 	public static final String ANONYMOUS = "anonymous";
-	public static final String GUEST = "guest";
 
 	private static final long serialVersionUID = 1L;
 	private String id;
 	private String username;
-	private String type;
+	private UserProfile.AuthProvider authProvider;
 	private UserRoomService.Role role;
 	private boolean isAdmin;
 
 	public UserAuthentication(final Google2Profile profile) {
 		setUsername(profile.getEmail());
-		setType(UserAuthentication.GOOGLE);
+		setAuthProvider(UserProfile.AuthProvider.GOOGLE);
 	}
 
 	public UserAuthentication(final TwitterProfile profile) {
 		setUsername(profile.getUsername());
-		setType(UserAuthentication.TWITTER);
+		setAuthProvider(UserProfile.AuthProvider.TWITTER);
 	}
 
 	public UserAuthentication(final FacebookProfile profile) {
 		setUsername(profile.getProfileUrl().toString());
-		setType(UserAuthentication.FACEBOOK);
+		setAuthProvider(UserProfile.AuthProvider.FACEBOOK);
 	}
 
 	public UserAuthentication(final AttributePrincipal principal) {
 		setUsername(principal.getName());
-		setType(UserAuthentication.THM);
-	}
-
-	public UserAuthentication(final AnonymousAuthenticationToken token) {
-		setUsername(UserAuthentication.ANONYMOUS);
-		setType(UserAuthentication.ANONYMOUS);
+		setAuthProvider(UserProfile.AuthProvider.CAS);
 	}
 
 	public UserAuthentication(final UsernamePasswordAuthenticationToken token) {
 		setUsername(token.getName());
-		setType(LDAP);
+		setAuthProvider(UserProfile.AuthProvider.LDAP);
+	}
+
+	public UserAuthentication(final AnonymousAuthenticationToken token) {
+		setUsername(UserAuthentication.ANONYMOUS);
 	}
 
 	public String getId() {
@@ -97,12 +90,12 @@ public class UserAuthentication implements Serializable {
 	}
 
 	@JsonView(View.Public.class)
-	public String getType() {
-		return type;
+	public UserProfile.AuthProvider getAuthProvider() {
+		return authProvider;
 	}
 
-	public void setType(final String type) {
-		this.type = type;
+	public void setAuthProvider(final UserProfile.AuthProvider authProvider) {
+		this.authProvider = authProvider;
 	}
 
 	public UserRoomService.Role getRole() {
@@ -128,7 +121,7 @@ public class UserAuthentication implements Serializable {
 
 	@Override
 	public String toString() {
-		return "User [username=" + username + ", type=" + type + "]";
+		return "User [username=" + username + ", authProvider=" + authProvider + "]";
 	}
 
 	@Override
@@ -139,7 +132,7 @@ public class UserAuthentication implements Serializable {
 
 		int result = theAnswer;
 		result = theOthers * result + this.username.hashCode();
-		return theOthers * result + this.type.hashCode();
+		return theOthers * result + this.authProvider.hashCode();
 	}
 
 	@Override
@@ -148,7 +141,8 @@ public class UserAuthentication implements Serializable {
 			return false;
 		}
 		UserAuthentication other = (UserAuthentication) obj;
-		return this.username.equals(other.username) && this.type.equals(other.type);
+
+		return this.authProvider == other.authProvider && Objects.equals(this.id, other.id) && this.username.equals(other.username);
 	}
 
 }

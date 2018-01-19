@@ -12,9 +12,11 @@ import java.util.Set;
 
 public class UserProfile implements Entity {
 	public enum AuthProvider {
-		INVALID,
+		UNKNOWN,
 		ARSNOVA,
 		ARSNOVA_GUEST,
+		LDAP,
+		CAS,
 		GOOGLE,
 		FACEBOOK,
 		TWITTER

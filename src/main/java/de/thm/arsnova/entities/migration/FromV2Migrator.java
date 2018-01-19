@@ -223,6 +223,6 @@ public class FromV2Migrator {
 			return UserProfile.AuthProvider.GOOGLE;
 		}
 
-		return UserProfile.AuthProvider.INVALID;
+		return UserProfile.AuthProvider.UNKNOWN;
 	}
 }
