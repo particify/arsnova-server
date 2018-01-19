@@ -210,6 +210,12 @@ public class UserServiceImpl implements UserService {
 		}
 
 		UserProfile userProfile = userRepository.findByAuthProviderAndLoginId(user.getAuthProvider(), user.getUsername());
+		if (userProfile == null && user.getAuthProvider() != UserProfile.AuthProvider.ARSNOVA) {
+			userProfile = new UserProfile();
+			userProfile.setAuthProvider(user.getAuthProvider());
+			userProfile.setLoginId(user.getUsername());
+			userRepository.save(userProfile);
+		}
 		user.setId(userProfile.getId());
 
 		user.setAdmin(Arrays.asList(adminAccounts).contains(user.getUsername()));
