@@ -6,8 +6,8 @@ import de.thm.arsnova.entities.serialization.View;
 import java.util.List;
 
 public class AnswerStatistics {
-	public class RoundStatistics {
-		public class Combination {
+	public static class RoundStatistics {
+		public static class Combination {
 			private int[] selectedChoiceIndexes;
 			private int count;
 		}
@@ -54,7 +54,7 @@ public class AnswerStatistics {
 		}
 	}
 
-	public class RoundTransition {
+	public static class RoundTransition {
 		private int roundA;
 		private int roundB;
 		private int[] selectedChoiceIndexesA;

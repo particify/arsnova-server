@@ -65,7 +65,7 @@ public class FromV2Migrator {
 			profile.setAuthProvider(UserProfile.AuthProvider.ARSNOVA);
 			profile.setCreationTimestamp(new Date(dbUser.getCreation()));
 			profile.setUpdateTimestamp(new Date());
-			UserProfile.Account account = profile.new Account();
+			UserProfile.Account account = new UserProfile.Account();
 			profile.setAccount(account);
 			account.setPassword(dbUser.getPassword());
 			account.setActivationKey(dbUser.getActivationKey());
@@ -81,7 +81,7 @@ public class FromV2Migrator {
 			}
 			profile.setLastLoginTimestamp(new Date(loggedIn.getTimestamp()));
 			List<UserProfile.RoomHistoryEntry> sessionHistory = loggedIn.getVisitedSessions().stream()
-					.map(entry -> profile.new RoomHistoryEntry(entry.getId(), new Date(0)))
+					.map(entry -> new UserProfile.RoomHistoryEntry(entry.getId(), new Date(0)))
 					.collect(Collectors.toList());
 			profile.setRoomHistory(sessionHistory);
 		}

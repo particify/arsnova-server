@@ -86,7 +86,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 
 		final AnswerStatistics stats = new AnswerStatistics();
 		stats.setContentId(contentId);
-		final AnswerStatistics.RoundStatistics roundStats = stats.new RoundStatistics();
+		final AnswerStatistics.RoundStatistics roundStats = new AnswerStatistics.RoundStatistics();
 		roundStats.setRound(piRound);
 		roundStats.setAbstentionCount(abstentionCount);
 		/* FIXME: determine correct array size dynamically */

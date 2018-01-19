@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Room implements Entity {
-	public class ContentGroup {
+	public static class ContentGroup {
 		private List<String> contentIds;
 		private boolean autoSort;
 
@@ -33,7 +33,7 @@ public class Room implements Entity {
 		}
 	}
 
-	public class Settings {
+	public static class Settings {
 		private boolean questionsEnabled = true;
 		private boolean slidesEnabled = true;
 		private boolean commentsEnabled = true;
@@ -135,7 +135,7 @@ public class Room implements Entity {
 		}
 	}
 
-	public class Author {
+	public static class Author {
 		private String name;
 		private String mail;
 		private String organizationName;
@@ -193,7 +193,7 @@ public class Room implements Entity {
 		}
 	}
 
-	public class PoolProperties {
+	public static class PoolProperties {
 		private String category;
 		private String level;
 		private String license;

@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 public class MigrationState implements Entity {
-	public class Migration {
+	public static class Migration {
 		private String id;
 		private Date start;
 

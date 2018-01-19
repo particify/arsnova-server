@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChoiceQuestionContent extends Content {
-	public class AnswerOption {
+	public static class AnswerOption {
 		private String label;
 		private int points;
 

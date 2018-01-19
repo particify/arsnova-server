@@ -327,7 +327,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 		handleLogo(room);
 
-		Room.Settings sf = room.new Settings();
+		Room.Settings sf = new Room.Settings();
 		room.setSettings(sf);
 
 		room.setShortId(generateKey());

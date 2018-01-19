@@ -20,7 +20,7 @@ public class UserProfile implements Entity {
 		TWITTER
 	}
 
-	public class Account {
+	public static class Account {
 		private String password;
 		private String activationKey;
 		private String passwordResetKey;
@@ -67,7 +67,7 @@ public class UserProfile implements Entity {
 		}
 	}
 
-	public class RoomHistoryEntry {
+	public static class RoomHistoryEntry {
 		private String roomId;
 		private Date lastVisit;
 

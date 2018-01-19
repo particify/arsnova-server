@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.Map;
 
 public class Content implements Entity {
-	public class State {
+	public static class State {
 		private int round = 1;
 		private Date roundEndTimestamp;
 		private boolean visible = true;
