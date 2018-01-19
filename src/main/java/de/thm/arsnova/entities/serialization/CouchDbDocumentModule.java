@@ -28,6 +28,6 @@ public class CouchDbDocumentModule extends SimpleModule {
 	@Override
 	public void setupModule(SetupContext context) {
 		context.setMixInAnnotations(Entity.class, CouchDbDocumentMixIn.class);
-		context.setMixInAnnotations(de.thm.arsnova.entities.migration.v2.Entity.class, CouchDbDocumentMixIn.class);
+		context.setMixInAnnotations(de.thm.arsnova.entities.migration.v2.Entity.class, CouchDbDocumentV2MixIn.class);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * This file is part of ARSnova Backend.
- * Copyright (C) 2012-2018 The ARSnova Team and Contributors
+ * Copyright (C) 2012-2017 The ARSnova Team
  *
  * ARSnova Backend is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,13 +20,36 @@ package de.thm.arsnova.entities.serialization;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.Converter;
-import de.thm.arsnova.entities.Entity;
+import de.thm.arsnova.entities.migration.v2.Answer;
+import de.thm.arsnova.entities.migration.v2.Comment;
+import de.thm.arsnova.entities.migration.v2.Content;
+import de.thm.arsnova.entities.migration.v2.DbUser;
+import de.thm.arsnova.entities.migration.v2.Entity;
+import de.thm.arsnova.entities.migration.v2.LogEntry;
+import de.thm.arsnova.entities.migration.v2.Motd;
+import de.thm.arsnova.entities.migration.v2.MotdList;
+import de.thm.arsnova.entities.migration.v2.Room;
 
-public class CouchDbTypeFieldConverter implements Converter<Class<? extends Entity>, String> {
+import java.util.HashMap;
+import java.util.Map;
+
+public class CouchDbTypeFieldV2Converter implements Converter<Class<? extends Entity>, String> {
+	private static final Map<Class<? extends Entity>, String> typeMapping = new HashMap<>();
+
+	{
+		typeMapping.put(LogEntry.class, "log");
+		typeMapping.put(DbUser.class, "userdetails");
+		typeMapping.put(Motd.class, "motd");
+		typeMapping.put(MotdList.class, "motdlist");
+		typeMapping.put(Room.class, "session");
+		typeMapping.put(Comment.class, "interposed_question");
+		typeMapping.put(Content.class, "skill_question");
+		typeMapping.put(Answer.class, "skill_question_answer");
+	}
 
 	@Override
 	public String convert(Class<? extends Entity> aClass) {
-		return aClass.getSimpleName();
+		return typeMapping.get(aClass);
 	}
 
 	@Override
