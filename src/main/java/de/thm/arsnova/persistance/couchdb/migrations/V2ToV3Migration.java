@@ -196,6 +196,8 @@ public class V2ToV3Migration implements Migration {
 				if (usernames.contains(loggedInV2.getUser())) {
 					continue;
 				}
+				/* There might be rare cases of duplicate LoggedIn records for a user so add them to the filter list */
+				usernames.add(loggedInV2.getUser());
 				UserProfile profileV3 = migrator.migrate(null, loggedInV2, loadMotdList(loggedInV2.getUser()));
 				profileV3.setAcknowledgedMotds(migrateMotdIds(profileV3.getAcknowledgedMotds()));
 				profilesV3.add(profileV3);
@@ -222,8 +224,9 @@ public class V2ToV3Migration implements Migration {
 
 			for (de.thm.arsnova.entities.migration.v2.Room roomV2 : roomsV2) {
 				List<UserProfile> profiles = userRepository.findByLoginId(roomV2.getCreator());
-				if (profiles.size() != 1) {
-					throw new Error("Session creator cannot be determined ambiguously.");
+				if (profiles.size() == 0) {
+					// Session creator does not exist, skipping: roomV2.getCreator(), roomV2.getId()
+					continue;
 				}
 				roomsV3.add(migrator.migrate(roomV2, profiles.get(0)));
 			}
