@@ -1,7 +1,7 @@
 # Installation
 
 This document describes the necessary steps to install ARSnova Backend.
-In case you are viewing this file from the repository please make sure you are on the corresponding `x.y-stable` branch for the target version.
+If you are viewing this file from the repository, please make sure you are on the corresponding `x.y-stable` branch for the target version.
 
 
 ## Requirements
@@ -18,7 +18,7 @@ For Debian 8 you need to enable the backports repository to install Java 8:
 
 ### Hardware
 
-While the hardware requirements highly depend on the number of simultaneous users we suggest to provide at least 2 CPU cores and 4 GiB memory to the system ARSnova will be running.
+While the hardware requirements highly depend on the number of simultaneous users, we suggest to provide at least 2 CPU cores and 4 GiB memory to the system running ARSnova.
 This configuration would support up to 500 users.
 
 
@@ -61,7 +61,7 @@ Most of this software can easily be installed on Linux systems using the distrib
 * Debian: `# apt-get install -t jessie-backports nginx openjdk-8-jre && apt-get install libapr1 tomcat8`
 * Ubuntu: `# sudo apt-get install couchdb libapr1 nginx openjdk-8-jre tomcat8`
 
-While running ARSnova without a reverse proxy is possible we do not recommend to do so.
+While running ARSnova without a reverse proxy is possible, we do not recommend to do so.
 A reverse proxy significantly simplifies the setup of HTTPS and allows running Websocket connections over the default HTTP(S) port.
 
 
@@ -69,7 +69,7 @@ A reverse proxy significantly simplifies the setup of HTTPS and allows running W
 
 Install CouchDB:
 Depending on your operation system or distribution you might need to compile CouchDB from source code.
-In this case follow the CouchDB's
+In this case follow CouchDB's
 [installation guide](http://docs.couchdb.org/en/1.6.1/install/index.html).
 
 Before you proceed, make sure that CouchDB is up and running:
@@ -91,23 +91,23 @@ To set up the database, run:
 
 This will create the database along with all required view documents.
 
-CouchDB is now usable for ARSnova but there a still a few things that should be setup for security and performance reasons.
+CouchDB is now usable for ARSnova, but there are still a few things that should be setup for security and performance reasons.
 We recommend that you make the following adjustments to the CouchDB configuration `local.ini` which is usually located in either `/etc/couchdb` or `/usr/local/etc/couchdb` depending on the installation method.
-First make sure the CouchDB daemon only listens to local connections by setting `bind_address` in the `httpd` section to `127.0.0.1`.
+First, make sure the CouchDB daemon only listens to local connections by setting `bind_address` in the `httpd` section to `127.0.0.1`.
 Next, append the following section which instructs CouchDB to cleanup at night.
 
 	[compactions]
 	_default = [{db_fragmentation, "70%"}, {view_fragmentation, "60%"}, {from, "01:00"}, {to, "05:00"}]
 
-To make compaction effective you need to reduce the number of revisions saved per document.
-As long as CouchDB is not clustered you can significantly reduce storage usage by setting a limit of 5.
+To make compaction effective, you need to reduce the number of revisions saved per document.
+As long as CouchDB is not clustered, you can significantly reduce storage usage by setting a limit of 5.
 
 	$ curl -X PUT -d "5" http://localhost:5984/arsnova/_revs_limit
 
 
 ### Java & Tomcat
 
-To make sure ARSnova has access to the memory provided by the system you need adjust the Java settings for Tomcat.
+To make sure ARSnova has access to the memory provided by the system, you need adjust the Java settings for Tomcat.
 Increase the initial and maximum heap sizes by adding `-Xms3072m -Xmx3072m` to the Java start up parameters used by Tomcat.
 On Debian-based systems this is done by appending
 
@@ -115,11 +115,11 @@ On Debian-based systems this is done by appending
 
 to `/etc/default/tomcat8`.
 For most other distributions append this to `setenv.sh` in Tomcat's `bin` directory.
-Adjust the values based on the memory available to the system but make sure reserve 1 GiB for the operating system, web server and database system.
+Adjust the values based on the memory available to the system, but make sure to reserve 1 GiB for the operating system, web server, and database system.
 
 By default, Tomcat listens on a public interface.
-If you follow our recommendation and use a reverse proxy you should change the configuration so Tomcat only accepts requests from localhost.
-Open `/etc/tomcat8/server.xml` and look for `<Connector port="8080" ...>` and change it to:
+If you follow our recommendation to use a reverse proxy, you should change the configuration so Tomcat only accepts requests from localhost.
+Open `/etc/tomcat8/server.xml`, look for `<Connector port="8080" ...>`, and change it to:
 
 	<Connector port="8080" address="127.0.0.1" ...>
 
@@ -130,7 +130,7 @@ The ARSnova Backend application is contained in a single file: the web archive (
 You can download the latest version from our
 [GitHub releases page](https://github.com/thm-projects/arsnova-backend/releases).
 
-To deploy the backend on the Tomcat Servlet container, copy the file to Tomcat's webapp directory and name it `api.war`.
+To deploy the backend on the Tomcat Servlet container, copy the file to Tomcat's webapp directory, and name it `api.war`.
 
 Check that the application is deployed correctly by sending a HTTP request:
 
@@ -184,14 +184,14 @@ Add the following lines to the `VirtualHost` section of the file:
 		ProxyPassReverse ws://localhost:8090/socket.io/
 	</Location>
 
-To enable the required Apache HTTP Server modules simply type:
+To enable the required Apache HTTP Server modules, simply type:
 
 	# a2enmod proxy
 	# a2enmod proxy_http
 	# a2enmod proxy_wstunnel
 	# a2enmod rewrite
 
-At last, disable the default site configuration and enable the newly created one:
+At last, disable the default site configuration, and enable the newly created one:
 
 	# a2dissite default
 	# a2ensite arsnova
