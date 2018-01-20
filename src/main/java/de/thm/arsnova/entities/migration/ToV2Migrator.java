@@ -19,15 +19,7 @@ package de.thm.arsnova.entities.migration;
 
 import de.thm.arsnova.entities.ChoiceQuestionContent;
 import de.thm.arsnova.entities.UserProfile;
-import de.thm.arsnova.entities.migration.v2.Answer;
-import de.thm.arsnova.entities.migration.v2.AnswerOption;
-import de.thm.arsnova.entities.migration.v2.Comment;
-import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.Entity;
-import de.thm.arsnova.entities.migration.v2.LoggedIn;
-import de.thm.arsnova.entities.migration.v2.MotdList;
-import de.thm.arsnova.entities.migration.v2.Room;
-import de.thm.arsnova.entities.migration.v2.VisitedRoom;
+import de.thm.arsnova.entities.migration.v2.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -138,6 +130,34 @@ public class ToV2Migrator {
 		to.setText(from.getBody());
 		to.setTimestamp(from.getTimestamp().getTime());
 		to.setRead(from.isRead());
+
+		return to;
+	}
+
+	public Motd migrate(final de.thm.arsnova.entities.Motd from) {
+		final Motd to = new Motd();
+		copyCommonProperties(from, to);
+		to.setMotdkey(from.getId());
+		to.setStartdate(from.getCreationTimestamp());
+		to.setStartdate(from.getStartDate());
+		to.setEnddate(from.getEndDate());
+		switch (from.getAudience()) {
+			case ALL:
+				to.setAudience("all");
+				break;
+			case AUTHORS:
+				to.setAudience("tutors");
+				break;
+			case PARTICIPANTS:
+				to.setAudience("students");
+				break;
+			case ROOM:
+				to.setAudience("session");
+				break;
+		}
+		to.setTitle(from.getTitle());
+		to.setText(from.getBody());
+		to.setSessionId(from.getRoomId());
 
 		return to;
 	}

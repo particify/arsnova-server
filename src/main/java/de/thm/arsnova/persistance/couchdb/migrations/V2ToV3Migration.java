@@ -17,6 +17,7 @@
  */
 package de.thm.arsnova.persistance.couchdb.migrations;
 
+import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.entities.migration.FromV2Migrator;
@@ -25,6 +26,7 @@ import de.thm.arsnova.entities.migration.v2.LoggedIn;
 import de.thm.arsnova.entities.migration.v2.MotdList;
 import de.thm.arsnova.persistance.UserRepository;
 import de.thm.arsnova.persistance.couchdb.support.MangoCouchDbConnector;
+import org.ektorp.DocumentNotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -57,17 +59,20 @@ public class V2ToV3Migration implements Migration {
 	private MangoCouchDbConnector toConnector;
 	private MangoCouchDbConnector fromConnector;
 	private UserRepository userRepository;
+	private RoomRepository roomRepository;
 	private long referenceTimestamp = System.currentTimeMillis();
 
 	public V2ToV3Migration(
 			final FromV2Migrator migrator,
 			final MangoCouchDbConnector toConnector,
 			@Qualifier("couchDbMigrationConnector") final MangoCouchDbConnector fromConnector,
-			final UserRepository userRepository) {
+			final UserRepository userRepository,
+			final RoomRepository roomRepository) {
 		this.migrator = migrator;
 		this.toConnector = toConnector;
 		this.fromConnector = fromConnector;
 		this.userRepository = userRepository;
+		this.roomRepository = roomRepository;
 	}
 
 	public String getId() {
@@ -79,6 +84,7 @@ public class V2ToV3Migration implements Migration {
 		migrateUsers();
 		migrateUnregisteredUsers();
 		migrateRooms();
+		migrateMotds();
 	}
 
 	private void createV2Index() {
@@ -232,6 +238,43 @@ public class V2ToV3Migration implements Migration {
 			}
 
 			toConnector.executeBulk(roomsV3);
+		}
+	}
+
+	private void migrateMotds() {
+		Map<String, Object> queryOptions = new HashMap<>();
+		queryOptions.put("type", "motd");
+		/* Exclude outdated MotDs */
+		HashMap<String, String> subQuery = new HashMap<>();
+		subQuery.put("$gt", String.valueOf(referenceTimestamp - OUTDATED_AFTER));
+		queryOptions.put("enddate", subQuery);
+		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
+		query.setIndexDocument(MOTD_INDEX);
+		query.setLimit(LIMIT);
+
+		for (int skip = 0;; skip += LIMIT) {
+			query.setSkip(skip);
+			List<Motd> motdsV3 = new ArrayList<>();
+			List<de.thm.arsnova.entities.migration.v2.Motd> motdsV2 = fromConnector.query(query,
+					de.thm.arsnova.entities.migration.v2.Motd.class);
+			if (motdsV2.size() == 0) {
+				break;
+			}
+
+			for (de.thm.arsnova.entities.migration.v2.Motd motdV2 : motdsV2) {
+				if (motdV2.getAudience().equals("session")) {
+					Room room = roomRepository.findByShortId(motdV2.getSessionkey());
+					/* sessionId has not been set for some old MotDs */
+					if (room == null) {
+						// Room does not exist, skipping: motdV2.getSessionId(), motdV2.getId()
+						continue;
+					}
+					motdV2.setSessionId(room.getId());
+				}
+				motdsV3.add(migrator.migrate(motdV2));
+			}
+
+			toConnector.executeBulk(motdsV3);
 		}
 	}
 
