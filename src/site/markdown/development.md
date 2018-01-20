@@ -31,7 +31,7 @@ You can create a web archive (`.war` file) by running a single command:
 ## Running
 
 ARSnova builds are setup up to automatically download the Java Servlet container Jetty for development.
-Run the following command to download the dependencies and startup the backend with Jetty:
+Run the following command to download the dependencies, and startup the backend with Jetty:
 
 	$ mvn jetty:run
 
@@ -53,7 +53,7 @@ Apart from mirroring GitLab CI triggers various jobs to:
 * execute unit tests
 * deploy to our staging/production servers
 
-In addition to GitLab CI for our internal repositories we use Travis CI which is able to run against merge requests on GitHub.
+In addition to GitLab CI for our internal repositories, we use Travis CI which is able to run against merge requests on GitHub.
 Travis CI only runs unit tests for the backend.
 
 The current build status for the master branch:

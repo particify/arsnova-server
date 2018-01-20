@@ -5,14 +5,14 @@ Please read about Spring Framework's [Cache Abstraction](http://docs.spring.io/s
 
 ## What should get cached?
 
-The short answer: All data that is written once and read multiple times. In ARSnova, there is an inherent `1:n` relationship between teachers and students. This makes everything the teacher creates a candidate for caching. But there are more opportunities, like students' answers which are mostly written once and cannot be changed afterwards. Be aware though that in this case, once a new answer comes in, the cache has to be invalidated. With many students answering questions at the same time the effects of caching go away since the cache is invalidated all the time.
+The short answer: All data that is written once and read multiple times. In ARSnova, there is an inherent `1:n` relationship between teachers and students. This makes everything the teacher creates a candidate for caching. But there are more opportunities like students' answers which are mostly written once and cannot be changed afterwards. Be aware though that in this case, once a new answer comes in, the cache has to be invalidated. With many students answering questions at the same time, the effects of caching go away since the cache is invalidated all the time.
 
 While caching provides an opportunity to greatly speed up the execution of various requests, it does come with a price: You have to think of all cases were the cached data might become stale.
 
 
 ## How to design your objects
 
-Caching should only be used with domain objects, where the `hashCode` and `equals` methods are provided. This makes it easy to update or delete cache entries. As you recall from the documentation, cache keys are based on a method's parameters. If you use base objects like `String` or `Integer`, you will have to manually provide a key through the Spring Expression Language (SpEL). As you can see from the following example, such keys can become quite complicated:
+Caching should only be used with domain objects where the `hashCode` and `equals` methods are provided. This makes it easy to update or delete cache entries. As you recall from the documentation, cache keys are based on a method's parameters. If you use base objects like `String` or `Integer`, you will have to manually provide a key through the Spring Expression Language (SpEL). As you can see from the following example, such keys can become quite complicated:
 
 ```java
 @Cacheable(value = "notverycacheable", key = "#p0.concat('-').concat(#p1).concat('-').concat(#p2)")
