@@ -26,10 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Summary information of a specific session. For example, this is used to display list entries of 'my sessions' as well
- * as 'my visited sessions'.
+ * Summary information of a specific Room. For example, this is used to display list entries of a user's Rooms as well
+ * as a user's Room History (Visited Rooms).
  */
-@ApiModel(value = "session/import", description = "the session info entity")
+@ApiModel(value = "RoomInfo", description = "Room (Session) Info entity")
 public class RoomInfo {
 
 	private String name;

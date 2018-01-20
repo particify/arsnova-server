@@ -9,11 +9,11 @@ import java.util.List;
 public interface CommentService extends EntityService<Comment> {
 	boolean save(Comment comment);
 
-	int count(String sessionKey);
+	int count(String roomShortId);
 
-	CommentReadingCount countRead(String sessionKey, String username);
+	CommentReadingCount countRead(String roomShortId, String username);
 
-	List<Comment> getBySessionKey(String sessionKey, int offset, int limit);
+	List<Comment> getByRoomShortId(String roomShortId, int offset, int limit);
 
 	Comment getAndMarkRead(String commentId);
 
@@ -21,5 +21,5 @@ public interface CommentService extends EntityService<Comment> {
 
 	void delete(String commentId);
 
-	void deleteBySessionKey(String sessionKeyword);
+	void deleteByRoomShortId(String roomShortId);
 }

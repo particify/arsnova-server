@@ -8,12 +8,12 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface CommentRepository extends CrudRepository<Comment, String> {
-	int countBySessionId(String sessionKey);
-	CommentReadingCount countReadingBySessionId(String sessionId);
-	CommentReadingCount countReadingBySessionIdAndUser(String sessionId, UserAuthentication user);
-	List<Comment> findBySessionId(String sessionId, int start, int limit);
-	List<Comment> findBySessionIdAndUser(String sessionId, UserAuthentication user, int start, int limit);
+	int countByRoomId(String roomId);
+	CommentReadingCount countReadingByRoomId(String roomId);
+	CommentReadingCount countReadingByRoomIdAndUser(String roomId, UserAuthentication user);
+	List<Comment> findByRoomId(String roomId, int start, int limit);
+	List<Comment> findByRoomIdAndUser(String roomId, UserAuthentication user, int start, int limit);
 	Comment findOne(String commentId);
-	int deleteBySessionId(String sessionId);
-	int deleteBySessionIdAndUser(String sessionId, UserAuthentication user);
+	int deleteByRoomId(String roomId);
+	int deleteByRoomIdAndUser(String roomId, UserAuthentication user);
 }

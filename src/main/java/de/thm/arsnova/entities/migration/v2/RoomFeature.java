@@ -25,9 +25,9 @@ import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
 
 /**
- * Contains fields that describe which specific feature is activated for a session.
+ * Contains fields that describe which specific Feature is activated for a Room.
  */
-@ApiModel(value = "session feature", description = "the session feature entity")
+@ApiModel(value = "RoomFeature", description = "Room (Session) Feature entity - Represents feature/use case settings of a Room")
 public class RoomFeature implements Serializable {
 
 	private boolean custom = true;

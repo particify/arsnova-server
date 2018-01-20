@@ -24,9 +24,9 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * A question the user is asking the teacher. Also known as comment, feedback or audience question.
+ * A Comment (Interposed/Feedback/Audience question) from a attendee in a Room.
  */
-@ApiModel(value = "comment", description = "the comment entity")
+@ApiModel(value = "Comment", description = "Comment (Interposed/Feedback/Audience Question) entity")
 public class Comment implements Entity {
 	private String id;
 	private String rev;

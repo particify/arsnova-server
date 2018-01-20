@@ -55,28 +55,22 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 		this.roomService = roomService;
 	}
 
-  @Override
-  @PreAuthorize("isAuthenticated()")
-  public Motd getByKey(final String key) {
-    return motdRepository.findByKey(key);
-  }
-
-  @Override
-  @PreAuthorize("hasPermission('', 'motd', 'admin')")
-  public List<Motd> getAdminMotds() {
+	@Override
+	@PreAuthorize("hasPermission('', 'motd', 'admin')")
+	public List<Motd> getAdminMotds() {
     return motdRepository.findGlobalForAdmin();
   }
 
 	@Override
-	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
-	public List<Motd> getAllSessionMotds(final String sessionId) {
-		return motdRepository.findBySessionKey(sessionId);
+	@PreAuthorize("hasPermission(#roomId, 'session', 'owner')")
+	public List<Motd> getAllRoomMotds(final String roomId) {
+		return motdRepository.findByRoomId(roomId);
 	}
 
 	@Override
-	@Cacheable(cacheNames = "motds", key = "('session').concat(#sessionId)")
-	public List<Motd> getCurrentSessionMotds(final Date clientdate, final String sessionId) {
-		final List<Motd> motds = motdRepository.findBySessionKey(sessionId);
+	@Cacheable(cacheNames = "motds", key = "('session').concat(#roomId)")
+	public List<Motd> getCurrentRoomMotds(final Date clientdate, final String roomId) {
+		final List<Motd> motds = motdRepository.findByRoomId(roomId);
 		return filterMotdsByDate(motds, clientdate);
 	}
 
@@ -95,16 +89,16 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 		return filterMotdsByDate(motds, clientdate);
 	}
 
-  @Override
-  public List<Motd> filterMotdsByDate(List<Motd> list, Date clientdate) {
+	@Override
+	public List<Motd> filterMotdsByDate(List<Motd> list, Date clientdate) {
 		List<Motd> returns = new ArrayList<>();
 		for (Motd motd : list) {
-			if (motd.getStartdate().before(clientdate) && motd.getEnddate().after(clientdate)) {
+			if (motd.getStartDate().before(clientdate) && motd.getEndDate().after(clientdate)) {
 				returns.add(motd);
 			}
 		}
 		return returns;
-  }
+	}
 
 	@Override
 	public List<Motd> filterMotdsByList(List<Motd> list, List<String> ids) {
@@ -118,10 +112,10 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
-	public Motd save(final String sessionId, final Motd motd) {
-		Room room = roomService.getByKey(sessionId);
-		motd.setSessionId(room.getId());
+	@PreAuthorize("hasPermission(#roomId, 'session', 'owner')")
+	public Motd save(final String roomId, final Motd motd) {
+		Room room = roomService.getByShortId(roomId);
+		motd.setRoomId(room.getId());
 
 		return createOrUpdateMotd(motd);
 	}
@@ -133,16 +127,16 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
-	public Motd update(final String sessionkey, final Motd motd) {
+	@PreAuthorize("hasPermission(#roomShortId, 'session', 'owner')")
+	public Motd update(final String roomShortId, final Motd motd) {
 		return createOrUpdateMotd(motd);
 	}
 
-	@CacheEvict(cacheNames = "motds", key = "#motd.audience.concat(#motd.sessionId)")
+	@CacheEvict(cacheNames = "motds", key = "#motd.audience.concat(#motd.roomId)")
 	private Motd createOrUpdateMotd(final Motd motd) {
 		if (motd.getId() != null) {
 			Motd oldMotd = motdRepository.findOne(motd.getId());
-			if (!(motd.getId().equals(oldMotd.getId()) && motd.getSessionId().equals(oldMotd.getSessionId())
+			if (!(motd.getId().equals(oldMotd.getId()) && motd.getRoomId().equals(oldMotd.getRoomId())
 					&& motd.getAudience().equals(oldMotd.getAudience()))) {
 				throw new BadRequestException();
 			}
@@ -159,14 +153,14 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 
 	@Override
 	@PreAuthorize("hasPermission('', 'motd', 'admin')")
-	@CacheEvict(cacheNames = "motds", key = "#motd.audience.concat(#motd.sessionId)")
+	@CacheEvict(cacheNames = "motds", key = "#motd.audience.concat(#motd.roomId)")
 	public void delete(Motd motd) {
 		motdRepository.delete(motd);
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#sessionId, 'session', 'owner')")
-	public void deleteBySessionKey(final String sessionId, Motd motd) {
+	@PreAuthorize("hasPermission(#roomId, 'session', 'owner')")
+	public void deleteByRoomId(final String roomId, Motd motd) {
 		motdRepository.delete(motd);
 	}
 }

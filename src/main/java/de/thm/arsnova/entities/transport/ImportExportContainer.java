@@ -38,9 +38,9 @@ import java.util.List;
  * This class is used to allow the import and export of a session.
  */
 @ApiModel(value = "session/import and export", description = "the import export session API")
-public class ImportExportSession {
+public class ImportExportContainer {
 
-	private ImportExportSesssion session;
+	private ImportExportRoom session;
 
 	private List<ImportExportContent> questions;
 
@@ -52,7 +52,7 @@ public class ImportExportSession {
 
 	private RoomInfo sessionInfo;
 
-	public ImportExportSession() {
+	public ImportExportContainer() {
 		questions = new ArrayList<>();
 		feedbackQuestions = new ArrayList<>();
 		motds = new ArrayList<>();
@@ -61,11 +61,11 @@ public class ImportExportSession {
 
 	@ApiModelProperty(required = true, value = "used to display session")
 	@JsonView(View.Public.class)
-	public ImportExportSesssion getSession() {
+	public ImportExportRoom getSession() {
 		return session;
 	}
 
-	public void setSession(ImportExportSesssion session) {
+	public void setSession(ImportExportRoom session) {
 		this.session = session;
 	}
 
@@ -117,7 +117,7 @@ public class ImportExportSession {
 	}
 
 	public void setSessionFromSessionObject(Room s) {
-		ImportExportSesssion iesession = new ImportExportSesssion();
+		ImportExportRoom iesession = new ImportExportRoom();
 		iesession.setName(s.getName());
 		iesession.setShortName(s.getShortName());
 		iesession.setActive(s.isActive());
@@ -237,7 +237,7 @@ public class ImportExportSession {
 		}
 	}
 
-	public static class ImportExportSesssion {
+	public static class ImportExportRoom {
 
 		private String name;
 

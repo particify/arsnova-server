@@ -6,16 +6,24 @@ import de.thm.arsnova.entities.serialization.View;
 import java.util.Date;
 
 public class Motd implements Entity {
+	public enum Audience {
+		ALL,
+		AUTHENTICATED,
+		AUTHORS,
+		PARTICIPANTS,
+		ROOM
+	}
+
 	private String id;
 	private String rev;
 	private Date creationTimestamp;
 	private Date updateTimestamp;
-	private String sessionId;
-	private Date startdate;
-	private Date enddate;
+	private String roomId;
+	private Date startDate;
+	private Date endDate;
 	private String title;
 	private String body;
-	private String audience;
+	private Audience audience;
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getId() {
@@ -62,33 +70,33 @@ public class Motd implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public String getSessionId() {
-		return sessionId;
+	public String getRoomId() {
+		return roomId;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setSessionId(final String sessionId) {
-		this.sessionId = sessionId;
+	public void setRoomId(final String roomId) {
+		this.roomId = roomId;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public Date getStartdate() {
-		return startdate;
+	public Date getStartDate() {
+		return startDate;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setStartdate(final Date timestamp) {
-		startdate = timestamp;
+	public void setStartDate(final Date startDate) {
+		this.startDate = startDate;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public Date getEnddate() {
-		return enddate;
+	public Date getEndDate() {
+		return endDate;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setEnddate(final Date timestamp) {
-		enddate = timestamp;
+	public void setEndDate(final Date endDate) {
+		this.endDate = endDate;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
@@ -97,8 +105,8 @@ public class Motd implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setTitle(final String ttitle) {
-		title = ttitle;
+	public void setTitle(final String title) {
+		this.title = title;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
@@ -107,17 +115,17 @@ public class Motd implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setBody(final String ttext) {
-		body = ttext;
+	public void setBody(final String body) {
+		this.body = body;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public String getAudience() {
+	public Audience getAudience() {
 		return audience;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setAudience(final String a) {
-		audience = a;
+	public void setAudience(final Audience audience) {
+		this.audience = audience;
 	}
 }

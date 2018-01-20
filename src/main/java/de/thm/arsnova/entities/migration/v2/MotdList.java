@@ -23,9 +23,9 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * This class represents a list of motdkeys for a user.
+ * Contains a list of MotD IDs a user has acknowledged.
  */
-@ApiModel(value = "motdlist", description = "the motdlist to save the messages a user has confirmed to be read")
+@ApiModel(value = "MotdList", description = "Motd List entity - Contains IDs of MotDs a user has acknowledged")
 public class MotdList implements Entity {
 	private String id;
 	private String rev;

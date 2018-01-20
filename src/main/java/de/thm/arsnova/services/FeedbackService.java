@@ -26,17 +26,17 @@ import de.thm.arsnova.entities.UserAuthentication;
 public interface FeedbackService {
 	void cleanFeedbackVotes();
 
-	void cleanFeedbackVotesBySessionKey(String keyword, int cleanupFeedbackDelayInMins);
+	void cleanFeedbackVotesByRoomShortId(String roomShortId, int cleanupFeedbackDelayInMins);
 
-	Feedback getBySessionKey(String keyword);
+	Feedback getByRoomShortId(String roomShortId);
 
-	int countFeedbackBySessionKey(String keyword);
+	int countFeedbackByRoomShortId(String roomShortId);
 
-	double calculateAverageFeedback(String sessionkey);
+	double calculateAverageFeedback(String roomShortId);
 
-	long calculateRoundedAverageFeedback(String sessionkey);
+	long calculateRoundedAverageFeedback(String roomShortId);
 
-	boolean save(String keyword, int value, UserAuthentication user);
+	boolean save(String roomShortId, int value, UserAuthentication user);
 
-	Integer getBySessionKeyAndUser(String keyword, UserAuthentication user);
+	Integer getByRoomShortIdAndUser(String roomShortId, UserAuthentication user);
 }

@@ -28,6 +28,5 @@ public interface MotdRepository extends CrudRepository<Motd, String> {
 	List<Motd> findGlobalForLoggedIn();
 	List<Motd> findGlobalForTutors();
 	List<Motd> findForStudents();
-	List<Motd> findBySessionKey(String sessionkey);
-	Motd findByKey(String key);
+	List<Motd> findByRoomId(String roomId);
 }

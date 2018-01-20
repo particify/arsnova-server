@@ -26,9 +26,9 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * Represents an ARSnova session.
+ * Represents a Room (Session).
  */
-@ApiModel(value = "session", description = "the session entity")
+@ApiModel(value = "Room", description = "Room (Session) entity")
 public class Room implements Entity {
 	private String id;
 	private String rev;

@@ -19,11 +19,11 @@ Caching should only be used with domain objects where the `hashCode` and `equals
 public ResultObject notVeryCacheable(String roomId, String questionVariant, String subject) { ... }
 ```
 
-Therefore, you should always work with domain objects like `Session`, `Content`, or even your own, newly defined objects:
+Therefore, you should always work with domain objects like `Room`, `Content`, or even your own, newly defined objects:
 
 ```java
 @Cacheable("verycacheable")
-public ResultObject veryCacheable(Session session) { ... }
+public ResultObject veryCacheable(Room room) { ... }
 ```
 
 Be aware though that you need to carefully choose the fields which should be part of the `equals`/`hashCode`: In case of CouchDB, for example, it is not a good idea to use a document's `rev` field. Every time a document is updated, it gets a new `rev` which will make it _unequal_ to all its previous versions, making cache updates using `@CachePut` impossible.
@@ -46,14 +46,14 @@ Here is a list of all caches, their keys, and a short description.
 
 Cache name | Key | Description
 -----------|-----|------------
-`contentlists`| database id of session | Contains all contents for the specified session irrespective of their variant.
-`lecturecontentlists` | database id of session | Contains all "lecture" variant contents for the specified session.
-`preparationcontentlists` | database id of session | Contains all "preparation" variant contents for the specified session.
-`flashcardcontentlists` | database id of session | Contains all "flashcard" variant contents for the specified session.
+`contentlists`| database id of room | Contains all contents for the specified room irrespective of their variant.
+`lecturecontentlists` | database id of room | Contains all "lecture" variant contents for the specified room.
+`preparationcontentlists` | database id of room | Contains all "preparation" variant contents for the specified room.
+`flashcardcontentlists` | database id of room | Contains all "flashcard" variant contents for the specified room.
 `contents` | `Content` entity | Contains single content objects.
 `contents` | database id of content | Although it shares the name of the previously mentioned cache, it is in essence a different cache because the keys are different. This means that the same `Content` object might be associated with two different keys.
 `answerlists`| database id of content | Contains single answer objects.
-`score` | `Session` entity | Contains `CourseScore` objects to calculate the score values for the specified session.
-`sessions` | keyword of session | Contains sessions identified by their keywords.
-`sessions` | database id of session | Although it shares the name of the previously mentioned cache, it is in essence a different cache because the keys are different. This means that the same `Session` object might be associated with two different keys.
+`score` | `Room` entity | Contains `CourseScore` objects to calculate the score values for the specified room.
+`rooms` | keyword of room | Contains rooms identified by their keywords.
+`rooms` | database id of room | Although it shares the name of the previously mentioned cache, it is in essence a different cache because the keys are different. This means that the same `Room` object might be associated with two different keys.
 `statistics` | -- | Contains a single, global statistics object.

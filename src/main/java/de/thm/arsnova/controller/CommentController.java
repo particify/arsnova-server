@@ -45,53 +45,53 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/audiencequestion")
-@Api(value = "/audiencequestion", description = "the Audience Content API")
+@Api(value = "/audiencequestion", description = "Comment (Interposed/Audience Question) API")
 public class CommentController extends PaginationController {
 
 	@Autowired
 	private CommentService commentService;
 
 	@ApiOperation(value = "Count all the comments in current session",
-			nickname = "getAudienceQuestionCount")
+			nickname = "getCommentCount")
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	@DeprecatedApi
 	@Deprecated
-	public int getInterposedCount(@ApiParam(value = "Room-Key from current session", required = true) @RequestParam final String sessionkey) {
+	public int getCommentCount(@ApiParam(value = "Room-Key from current session", required = true) @RequestParam final String sessionkey) {
 		return commentService.count(sessionkey);
 	}
 
 	@ApiOperation(value = "count all unread comments",
-			nickname = "getUnreadInterposedCount")
+			nickname = "getUnreadCommentCount")
 	@RequestMapping(value = "/readcount", method = RequestMethod.GET)
 	@DeprecatedApi
 	@Deprecated
-	public CommentReadingCount getUnreadInterposedCount(@ApiParam(value = "Room-Key from current session", required = true) @RequestParam("sessionkey") final String sessionkey, String user) {
+	public CommentReadingCount getUnreadCommentCount(@ApiParam(value = "Room-Key from current session", required = true) @RequestParam("sessionkey") final String sessionkey, String user) {
 		return commentService.countRead(sessionkey, user);
 	}
 
 	@ApiOperation(value = "Retrieves all Comments for a Room",
-			nickname = "getInterposedQuestions")
+			nickname = "getComments")
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
-	public List<Comment> getInterposedQuestions(@ApiParam(value = "Room-Key from current session", required = true) @RequestParam final String sessionkey) {
-		return commentService.getBySessionKey(sessionkey, offset, limit);
+	public List<Comment> getComments(@ApiParam(value = "Room-Key from current session", required = true) @RequestParam final String sessionkey) {
+		return commentService.getByRoomShortId(sessionkey, offset, limit);
 	}
 
 	@ApiOperation(value = "Retrieves an Comment",
-			nickname = "getInterposedQuestion")
+			nickname = "getComment")
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
-	public Comment getInterposedQuestion(@ApiParam(value = "ID of the Comment that needs to be deleted", required = true) @PathVariable final String questionId) {
+	public Comment getComment(@ApiParam(value = "ID of the Comment that needs to be deleted", required = true) @PathVariable final String questionId) {
 		return commentService.getAndMarkRead(questionId);
 	}
 
 	@ApiOperation(value = "Creates a new Comment for a Room and returns the Comment's data",
-			nickname = "postInterposedQuestion")
+			nickname = "postComment")
 	@ApiResponses(value = {
 		@ApiResponse(code = 400, message = HTML_STATUS_400)
 	})
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public void postInterposedQuestion(
+	public void postComment(
 			@ApiParam(value = "Room-Key from current session", required = true) @RequestParam final String sessionkey,
 			@ApiParam(value = "the body from the new comment", required = true) @RequestBody final Comment comment
 			) {
@@ -103,9 +103,9 @@ public class CommentController extends PaginationController {
 	}
 
 	@ApiOperation(value = "Deletes a Comment",
-			nickname = "deleteInterposedQuestion")
+			nickname = "deleteComment")
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)
-	public void deleteInterposedQuestion(@ApiParam(value = "ID of the comment that needs to be deleted", required = true) @PathVariable final String questionId) {
+	public void deleteComment(@ApiParam(value = "ID of the comment that needs to be deleted", required = true) @PathVariable final String questionId) {
 		commentService.delete(questionId);
 	}
 }

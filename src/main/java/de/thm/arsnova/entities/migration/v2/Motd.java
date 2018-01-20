@@ -25,9 +25,9 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.Date;
 
 /**
- * This class represents a message of the day.
+ * Represents a Message of the Day.
  */
-@ApiModel(value = "motd", description = "the message of the day entity")
+@ApiModel(value = "Motd", description = "Message of the Day entity")
 public class Motd implements Entity {
 
 	private String motdkey; //ID
@@ -81,8 +81,8 @@ public class Motd implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setTitle(final String ttitle) {
-		title = ttitle;
+	public void setTitle(final String title) {
+		this.title = title;
 	}
 
 	@ApiModelProperty(required = true, value = "text of the message")

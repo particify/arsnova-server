@@ -21,15 +21,7 @@ import de.thm.arsnova.entities.ChoiceAnswer;
 import de.thm.arsnova.entities.ChoiceQuestionContent;
 import de.thm.arsnova.entities.TextAnswer;
 import de.thm.arsnova.entities.UserProfile;
-import de.thm.arsnova.entities.migration.v2.Answer;
-import de.thm.arsnova.entities.migration.v2.AnswerOption;
-import de.thm.arsnova.entities.migration.v2.Comment;
-import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.entities.migration.v2.DbUser;
-import de.thm.arsnova.entities.migration.v2.Entity;
-import de.thm.arsnova.entities.migration.v2.LoggedIn;
-import de.thm.arsnova.entities.migration.v2.MotdList;
-import de.thm.arsnova.entities.migration.v2.Room;
+import de.thm.arsnova.entities.migration.v2.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -202,12 +194,40 @@ public class FromV2Migrator {
 		}
 		final de.thm.arsnova.entities.Comment to = new de.thm.arsnova.entities.Comment();
 		copyCommonProperties(from, to);
-		to.setSessionId(from.getSessionId());
+		to.setRoomId(from.getSessionId());
 		to.setCreatorId(creator.getId());
 		to.setSubject(from.getSubject());
 		to.setBody(from.getText());
 		to.setTimestamp(new Date(from.getTimestamp()));
 		to.setRead(from.isRead());
+
+		return to;
+	}
+
+	public de.thm.arsnova.entities.Motd migrate(final Motd from) {
+		final de.thm.arsnova.entities.Motd to = new de.thm.arsnova.entities.Motd();
+		copyCommonProperties(from, to);
+		to.setCreationTimestamp(from.getStartdate());
+		to.setUpdateTimestamp(new Date());
+		to.setStartDate(from.getStartdate());
+		to.setEndDate(from.getEnddate());
+		switch (from.getAudience()) {
+			case "all":
+				to.setAudience(de.thm.arsnova.entities.Motd.Audience.ALL);
+				break;
+			case "tutors":
+				to.setAudience(de.thm.arsnova.entities.Motd.Audience.AUTHORS);
+				break;
+			case "students":
+				to.setAudience(de.thm.arsnova.entities.Motd.Audience.PARTICIPANTS);
+				break;
+			case "session":
+				to.setAudience(de.thm.arsnova.entities.Motd.Audience.ROOM);
+				break;
+		}
+		to.setTitle(from.getTitle());
+		to.setBody(from.getText());
+		to.setRoomId(from.getSessionId());
 
 		return to;
 	}

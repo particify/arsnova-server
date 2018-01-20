@@ -33,15 +33,15 @@ public interface ContentService extends EntityService<Content> {
 
 	Content get(String id);
 
-	List<Content> getBySessionKey(String sessionkey);
+	List<Content> getByRoomShortId(String roomShortId);
 
-	int countBySessionKey(String sessionkey);
+	int countByRoomShortId(String roomShortId);
 
 	void delete(String questionId);
 
-	List<String> getUnAnsweredQuestionIds(String sessionKey);
+	List<String> getUnAnsweredQuestionIds(String roomShortId);
 
-	Answer getMyAnswer(String questionId);
+	Answer getMyAnswer(String contentId);
 
 	void getFreetextAnswerAndMarkRead(String answerId, UserAuthentication user);
 
@@ -57,85 +57,85 @@ public interface ContentService extends EntityService<Content> {
 
 	List<Answer> getAllAnswers(String contentId, int offset, int limit);
 
-	int countAnswersByQuestionIdAndRound(String questionId);
+	int countAnswersByContentIdAndRound(String contentId);
 
-	int countAnswersByQuestionIdAndRound(String questionId, int piRound);
+	int countAnswersByContentIdAndRound(String contentId, int piRound);
 
-	List<Answer> getFreetextAnswersByQuestionId(String questionId, int offset, int limit);
+	List<Answer> getFreetextAnswersByContentId(String contentId, int offset, int limit);
 
-	List<Answer> getMyAnswersBySessionKey(String sessionKey);
+	List<Answer> getMyAnswersByRoomShortId(String roomShortId);
 
-	int countTotalAnswersBySessionKey(String sessionKey);
+	int countTotalAnswersByRoomShortId(String roomShortId);
 
-	int countTotalAnswersByQuestionId(String questionId);
+	int countTotalAnswersByContentId(String contentId);
 
-	Content save(final String sessionId, final Content content);
+	Content save(final String roomId, final Content content);
 
 	Content update(Content content);
 
-	void deleteAnswers(String questionId);
+	void deleteAnswers(String contentId);
 
-	Answer saveAnswer(String questionId, Answer answer);
+	Answer saveAnswer(String contentId, Answer answer);
 
 	Answer updateAnswer(Answer answer);
 
-	void deleteAnswer(String questionId, String answerId);
+	void deleteAnswer(String contentId, String answerId);
 
-	List<Content> getLectureQuestions(String sessionkey);
+	List<Content> getLectureQuestions(String roomShortId);
 
-	List<Content> getFlashcards(String sessionkey);
+	List<Content> getFlashcards(String roomShortId);
 
-	List<Content> getPreparationQuestions(String sessionkey);
+	List<Content> getPreparationQuestions(String roomShortId);
 
-	int countLectureQuestions(String sessionkey);
+	int countLectureQuestions(String roomShortId);
 
-	int countFlashcards(String sessionkey);
+	int countFlashcards(String roomShortId);
 
-	int countPreparationQuestions(String sessionkey);
+	int countPreparationQuestions(String roomShortId);
 
-	Map<String, Object> countAnswersAndAbstentionsInternal(String questionid);
+	Map<String, Object> countAnswersAndAbstentionsInternal(String contentId);
 
-	int countLectureQuestionAnswers(String sessionkey);
+	int countLectureQuestionAnswers(String roomShortId);
 
-	int countLectureQuestionAnswersInternal(String sessionkey);
+	int countLectureQuestionAnswersInternal(String roomShortId);
 
-	int countPreparationQuestionAnswers(String sessionkey);
+	int countPreparationQuestionAnswers(String roomShortId);
 
-	int countPreparationQuestionAnswersInternal(String sessionkey);
+	int countPreparationQuestionAnswersInternal(String roomShortId);
 
-	int countFlashcardsForUserInternal(String sessionkey);
+	int countFlashcardsForUserInternal(String roomShortId);
 
-	void deleteAllContent(String sessionkey);
+	void deleteAllContent(String roomShortId);
 
-	void deleteLectureQuestions(String sessionkey);
+	void deleteLectureQuestions(String roomShortId);
 
-	void deletePreparationQuestions(String sessionkey);
+	void deletePreparationQuestions(String roomShortId);
 
-	void deleteFlashcards(String sessionkey);
+	void deleteFlashcards(String roomShortId);
 
-	List<String> getUnAnsweredLectureQuestionIds(String sessionkey);
+	List<String> getUnAnsweredLectureQuestionIds(String roomShortId);
 
-	List<String> getUnAnsweredLectureQuestionIds(String sessionKey, UserAuthentication user);
+	List<String> getUnAnsweredLectureQuestionIds(String roomShortId, UserAuthentication user);
 
-	List<String> getUnAnsweredPreparationQuestionIds(String sessionkey);
+	List<String> getUnAnsweredPreparationQuestionIds(String roomShortId);
 
-	List<String> getUnAnsweredPreparationQuestionIds(String sessionKey, UserAuthentication user);
+	List<String> getUnAnsweredPreparationQuestionIds(String roomShortId, UserAuthentication user);
 
-	void publishAll(String sessionkey, boolean publish);
+	void publishAll(String roomShortId, boolean publish);
 
-	void publishQuestions(String sessionkey, boolean publish, List<Content> contents);
+	void publishQuestions(String roomShortId, boolean publish, List<Content> contents);
 
-	void deleteAllQuestionsAnswers(String sessionkey);
+	void deleteAllQuestionsAnswers(String roomShortId);
 
-	void deleteAllPreparationAnswers(String sessionkey);
+	void deleteAllPreparationAnswers(String roomShortId);
 
-	void deleteAllLectureAnswers(String sessionkey);
+	void deleteAllLectureAnswers(String roomShortId);
 
-	int countTotalAbstentionsByQuestionId(String questionId);
+	int countTotalAbstentionsByContentId(String contentId);
 
-	void setVotingAdmission(String questionId, boolean disableVoting);
+	void setVotingAdmission(String contentId, boolean disableVoting);
 
-	void setVotingAdmissions(String sessionkey, boolean disableVoting, List<Content> contents);
+	void setVotingAdmissions(String roomShortId, boolean disableVoting, List<Content> contents);
 
-	void setVotingAdmissionForAllQuestions(String sessionkey, boolean disableVoting);
+	void setVotingAdmissionForAllContents(String roomShortId, boolean disableVoting);
 }

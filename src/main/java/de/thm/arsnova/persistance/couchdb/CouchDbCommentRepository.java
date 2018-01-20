@@ -23,12 +23,12 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	private LogEntryRepository dbLogger;
 
 	public CouchDbCommentRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(Comment.class, db, "by_sessionid", createIfNotExists);
+		super(Comment.class, db, "by_roomid", createIfNotExists);
 	}
 
 	@Override
-	public int countBySessionId(final String sessionId) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid")
+	public int countByRoomId(final String sessionId) {
+		final ViewResult result = db.queryView(createQuery("by_roomid")
 				.key(sessionId)
 				.reduce(true)
 				.group(true));
@@ -40,20 +40,20 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	}
 
 	@Override
-	public CommentReadingCount countReadingBySessionId(final String sessionId) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid_read")
-				.startKey(ComplexKey.of(sessionId))
-				.endKey(ComplexKey.of(sessionId, ComplexKey.emptyObject()))
+	public CommentReadingCount countReadingByRoomId(final String roomId) {
+		final ViewResult result = db.queryView(createQuery("by_roomid_read")
+				.startKey(ComplexKey.of(roomId))
+				.endKey(ComplexKey.of(roomId, ComplexKey.emptyObject()))
 				.reduce(true)
 				.group(true));
 		return calculateReadingCount(result);
 	}
 
 	@Override
-	public CommentReadingCount countReadingBySessionIdAndUser(final String sessionId, final UserAuthentication user) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid_creator_read")
-				.startKey(ComplexKey.of(sessionId, user.getUsername()))
-				.endKey(ComplexKey.of(sessionId, user.getUsername(), ComplexKey.emptyObject()))
+	public CommentReadingCount countReadingByRoomIdAndUser(final String roomId, final UserAuthentication user) {
+		final ViewResult result = db.queryView(createQuery("by_roomid_creatorid_read")
+				.startKey(ComplexKey.of(roomId, user.getUsername()))
+				.endKey(ComplexKey.of(roomId, user.getUsername(), ComplexKey.emptyObject()))
 				.reduce(true)
 				.group(true));
 		return calculateReadingCount(result);
@@ -103,16 +103,16 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	}
 
 	@Override
-	public List<Comment> findBySessionId(final String sessionId, final int start, final int limit) {
+	public List<Comment> findByRoomId(final String roomId, final int start, final int limit) {
 		final int qSkip = start > 0 ? start : -1;
 		final int qLimit = limit > 0 ? limit : -1;
 
-		final List<Comment> comments = db.queryView(createQuery("by_sessionid_timestamp")
+		final List<Comment> comments = db.queryView(createQuery("by_roomid_creationtimestamp")
 						.skip(qSkip)
 						.limit(qLimit)
 						.descending(true)
-						.startKey(ComplexKey.of(sessionId, ComplexKey.emptyObject()))
-						.endKey(ComplexKey.of(sessionId))
+						.startKey(ComplexKey.of(roomId, ComplexKey.emptyObject()))
+						.endKey(ComplexKey.of(roomId))
 						.includeDocs(true),
 				Comment.class);
 //		for (Comment comment : comments) {
@@ -123,16 +123,16 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	}
 
 	@Override
-	public List<Comment> findBySessionIdAndUser(final String sessionId, final UserAuthentication user, final int start, final int limit) {
+	public List<Comment> findByRoomIdAndUser(final String roomId, final UserAuthentication user, final int start, final int limit) {
 		final int qSkip = start > 0 ? start : -1;
 		final int qLimit = limit > 0 ? limit : -1;
 
-		final List<Comment> comments = db.queryView(createQuery("by_sessionid_creator_timestamp")
+		final List<Comment> comments = db.queryView(createQuery("by_roomid_creatorid_creationtimestamp")
 						.skip(qSkip)
 						.limit(qLimit)
 						.descending(true)
-						.startKey(ComplexKey.of(sessionId, user.getUsername(), ComplexKey.emptyObject()))
-						.endKey(ComplexKey.of(sessionId, user.getUsername()))
+						.startKey(ComplexKey.of(roomId, user.getUsername(), ComplexKey.emptyObject()))
+						.endKey(ComplexKey.of(roomId, user.getUsername()))
 						.includeDocs(true),
 				Comment.class);
 //		for (Comment comment : comments) {
@@ -143,17 +143,17 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	}
 
 	@Override
-	public int deleteBySessionId(final String sessionId) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid").key(sessionId));
+	public int deleteByRoomId(final String roomId) {
+		final ViewResult result = db.queryView(createQuery("by_roomid").key(roomId));
 
 		return delete(result);
 	}
 
 	@Override
-	public int deleteBySessionIdAndUser(final String sessionId, final UserAuthentication user) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid_creator_read")
-				.startKey(ComplexKey.of(sessionId, user.getUsername()))
-				.endKey(ComplexKey.of(sessionId, user.getUsername(), ComplexKey.emptyObject())));
+	public int deleteByRoomIdAndUser(final String roomId, final UserAuthentication user) {
+		final ViewResult result = db.queryView(createQuery("by_roomid_creatorid_read")
+				.startKey(ComplexKey.of(roomId, user.getUsername()))
+				.endKey(ComplexKey.of(roomId, user.getUsername(), ComplexKey.emptyObject())));
 
 		return delete(result);
 	}

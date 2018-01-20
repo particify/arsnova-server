@@ -124,7 +124,7 @@ public class ToV2Migrator {
 	public Comment migrate(final de.thm.arsnova.entities.Comment from, final UserProfile creator) {
 		final Comment to = new Comment();
 		copyCommonProperties(from, to);
-		to.setSessionId(from.getSessionId());
+		to.setSessionId(from.getRoomId());
 		to.setCreator(creator.getLoginId());
 		to.setSubject(from.getSubject());
 		to.setText(from.getBody());

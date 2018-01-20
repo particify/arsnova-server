@@ -25,9 +25,9 @@ import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
 
 /**
- * This class represents an answer option of a question.
+ * Represents an Answer (Possible Answer) of Content.
  */
-@ApiModel(value = "session/answer", description = "the possible answer entity")
+@ApiModel(value = "AnswerOption", description = "Answer Option (Possible Answer) entity")
 public class AnswerOption implements Serializable {
 
 	private String id;

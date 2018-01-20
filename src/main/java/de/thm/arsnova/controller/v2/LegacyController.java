@@ -56,105 +56,105 @@ public class LegacyController extends AbstractController {
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/{sessionKey}/question")
-	public String redirectQuestionByLecturer(@PathVariable final String sessionKey) {
-		return String.format("forward:/v2/lecturerquestion/?sessionkey=%s", sessionKey);
+	@RequestMapping(value = "/session/{shortId}/question")
+	public String redirectQuestionByLecturer(@PathVariable final String shortId) {
+		return String.format("forward:/v2/lecturerquestion/?sessionkey=%s", shortId);
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/{sessionKey}/skillquestions", method = RequestMethod.GET)
-	public String redirectQuestionByLecturerList(@PathVariable final String sessionKey) {
-		return String.format("forward:/v2/lecturerquestion/?sessionkey=%s", sessionKey);
+	@RequestMapping(value = "/session/{shortId}/skillquestions", method = RequestMethod.GET)
+	public String redirectQuestionByLecturerList(@PathVariable final String shortId) {
+		return String.format("forward:/v2/lecturerquestion/?sessionkey=%s", shortId);
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/{sessionKey}/skillquestioncount", method = RequestMethod.GET)
-	public String redirectQuestionByLecturerCount(@PathVariable final String sessionKey) {
-		return String.format("forward:/v2/lecturerquestion/count?sessionkey=%s", sessionKey);
+	@RequestMapping(value = "/session/{shortId}/skillquestioncount", method = RequestMethod.GET)
+	public String redirectQuestionByLecturerCount(@PathVariable final String shortId) {
+		return String.format("forward:/v2/lecturerquestion/count?sessionkey=%s", shortId);
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/{sessionKey}/answercount", method = RequestMethod.GET)
-	public String redirectQuestionByLecturerAnswerCount(@PathVariable final String sessionKey) {
-		return String.format("forward:/v2/lecturerquestion/answercount?sessionkey=%s", sessionKey);
+	@RequestMapping(value = "/session/{shortId}/answercount", method = RequestMethod.GET)
+	public String redirectQuestionByLecturerAnswerCount(@PathVariable final String shortId) {
+		return String.format("forward:/v2/lecturerquestion/answercount?sessionkey=%s", shortId);
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/{sessionKey}/unanswered", method = RequestMethod.GET)
-	public String redirectQuestionByLecturerUnnsweredCount(@PathVariable final String sessionKey) {
-		return String.format("forward:/v2/lecturerquestion/answercount?sessionkey=%s", sessionKey);
+	@RequestMapping(value = "/session/{shortId}/unanswered", method = RequestMethod.GET)
+	public String redirectQuestionByLecturerUnnsweredCount(@PathVariable final String shortId) {
+		return String.format("forward:/v2/lecturerquestion/answercount?sessionkey=%s", shortId);
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/{sessionKey}/myanswers", method = RequestMethod.GET)
-	public String redirectQuestionByLecturerMyAnswers(@PathVariable final String sessionKey) {
-		return String.format("forward:/v2/lecturerquestion/myanswers?sessionkey=%s", sessionKey);
+	@RequestMapping(value = "/session/{shortId}/myanswers", method = RequestMethod.GET)
+	public String redirectQuestionByLecturerMyAnswers(@PathVariable final String shortId) {
+		return String.format("forward:/v2/lecturerquestion/myanswers?sessionkey=%s", shortId);
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/{sessionKey}/interposed")
-	public String redirectQuestionByAudience(@PathVariable final String sessionKey) {
-		return String.format("forward:/v2/audiencequestion/?sessionkey=%s", sessionKey);
+	@RequestMapping(value = "/session/{shortId}/interposed")
+	public String redirectQuestionByAudience(@PathVariable final String shortId) {
+		return String.format("forward:/v2/audiencequestion/?sessionkey=%s", shortId);
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/{sessionKey}/interposed", method = RequestMethod.DELETE)
+	@RequestMapping(value = "/session/{shortId}/interposed", method = RequestMethod.DELETE)
 	@ResponseBody
-	public void deleteAllInterposedQuestions(@PathVariable final String sessionKey) {
-		commentService.deleteBySessionKey(sessionKey);
+	public void deleteAllInterposedQuestions(@PathVariable final String shortId) {
+		commentService.deleteByRoomShortId(shortId);
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/{sessionKey}/interposedcount", method = RequestMethod.GET)
-	public String redirectQuestionByAudienceCount(@PathVariable final String sessionKey) {
-		return String.format("forward:/v2/audiencequestion/count?sessionkey=%s", sessionKey);
+	@RequestMapping(value = "/session/{shortId}/interposedcount", method = RequestMethod.GET)
+	public String redirectQuestionByAudienceCount(@PathVariable final String shortId) {
+		return String.format("forward:/v2/audiencequestion/count?sessionkey=%s", shortId);
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/{sessionKey}/interposedreadingcount", method = RequestMethod.GET)
-	public String redirectQuestionByAudienceReadCount(@PathVariable final String sessionKey) {
-		return String.format("forward:/v2/audiencequestion/readcount?sessionkey=%s", sessionKey);
+	@RequestMapping(value = "/session/{shortId}/interposedreadingcount", method = RequestMethod.GET)
+	public String redirectQuestionByAudienceReadCount(@PathVariable final String shortId) {
+		return String.format("forward:/v2/audiencequestion/readcount?sessionkey=%s", shortId);
 	}
 
 	/* generalized routes */
 
 	@DeprecatedApi
-	@RequestMapping(value = { "/session/{sessionKey}/question/{arg1}", "/session/{sessionKey}/questions/{arg1}" })
+	@RequestMapping(value = { "/session/{shortId}/question/{arg1}", "/session/{shortId}/questions/{arg1}" })
 	public String redirectQuestionByLecturerWithOneArgument(
-			@PathVariable final String sessionKey,
+			@PathVariable final String shortId,
 			@PathVariable final String arg1
 			) {
-		return String.format("forward:/v2/lecturerquestion/%s/?sessionkey=%s", arg1, sessionKey);
+		return String.format("forward:/v2/lecturerquestion/%s/?sessionkey=%s", arg1, shortId);
 	}
 
 	@DeprecatedApi
 	@RequestMapping(
-			value = { "/session/{sessionKey}/question/{arg1}/{arg2}", "/session/{sessionKey}/questions/{arg1}/{arg2}" }
+			value = { "/session/{shortId}/question/{arg1}/{arg2}", "/session/{shortId}/questions/{arg1}/{arg2}" }
 			)
 	public String redirectQuestionByLecturerWithTwoArguments(
-			@PathVariable final String sessionKey,
+			@PathVariable final String shortId,
 			@PathVariable final String arg1,
 			@PathVariable final String arg2
 			) {
-		return String.format("forward:/v2/lecturerquestion/%s/%s/?sessionkey=%s", arg1, arg2, sessionKey);
+		return String.format("forward:/v2/lecturerquestion/%s/%s/?sessionkey=%s", arg1, arg2, shortId);
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/{sessionKey}/interposed/{arg1}")
+	@RequestMapping(value = "/session/{shortId}/interposed/{arg1}")
 	public String redirectQuestionByAudienceWithOneArgument(
-			@PathVariable final String sessionKey,
+			@PathVariable final String shortId,
 			@PathVariable final String arg1
 			) {
-		return String.format("forward:/v2/audiencequestion/%s/?sessionkey=%s", arg1, sessionKey);
+		return String.format("forward:/v2/audiencequestion/%s/?sessionkey=%s", arg1, shortId);
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/{sessionKey}/interposed/{arg1}/{arg2}")
+	@RequestMapping(value = "/session/{shortId}/interposed/{arg1}/{arg2}")
 	public String redirectQuestionByAudienceWithTwoArguments(
-			@PathVariable final String sessionKey,
+			@PathVariable final String shortId,
 			@PathVariable final String arg1,
 			@PathVariable final String arg2
 			) {
-		return String.format("forward:/v2/audiencequestion/%s/%s/?sessionkey=%s", arg1, arg2, sessionKey);
+		return String.format("forward:/v2/audiencequestion/%s/%s/?sessionkey=%s", arg1, arg2, shortId);
 	}
 }

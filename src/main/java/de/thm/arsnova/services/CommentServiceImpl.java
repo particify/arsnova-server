@@ -53,9 +53,9 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public boolean save(final Comment comment) {
-		final Room room = roomRepository.findByKeyword(comment.getSessionId());
+		final Room room = roomRepository.findByShortId(comment.getRoomId());
 		final UserAuthentication user = userService.getCurrentUser();
-		comment.setSessionId(room.getId());
+		comment.setRoomId(room.getId());
 		comment.setCreatorId(user.getId());
 		comment.setRead(false);
 		if (comment.getTimestamp() == null) {
@@ -80,60 +80,60 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		}
 		commentRepository.delete(comment);
 
-		final Room room = roomRepository.findByKeyword(comment.getSessionId());
+		final Room room = roomRepository.findByShortId(comment.getRoomId());
 		final DeleteCommentEvent event = new DeleteCommentEvent(this, room, comment);
 		this.publisher.publishEvent(event);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public void deleteBySessionKey(final String sessionKeyword) {
-		final Room room = roomRepository.findByKeyword(sessionKeyword);
+	public void deleteByRoomShortId(final String roomShortId) {
+		final Room room = roomRepository.findByShortId(roomShortId);
 		if (room == null) {
 			throw new UnauthorizedException();
 		}
 		final UserAuthentication user = getCurrentUser();
 		if (room.getOwnerId().equals(user.getId())) {
-			commentRepository.deleteBySessionId(room.getId());
+			commentRepository.deleteByRoomId(room.getId());
 		} else {
-			commentRepository.deleteBySessionIdAndUser(room.getId(), user);
+			commentRepository.deleteByRoomIdAndUser(room.getId(), user);
 		}
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int count(final String sessionKey) {
-		return commentRepository.countBySessionId(getSession(sessionKey).getId());
+	public int count(final String roomShortId) {
+		return commentRepository.countByRoomId(getRoom(roomShortId).getId());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public CommentReadingCount countRead(final String sessionKey, String username) {
-		final Room room = roomRepository.findByKeyword(sessionKey);
+	public CommentReadingCount countRead(final String roomShortId, String username) {
+		final Room room = roomRepository.findByShortId(roomShortId);
 		if (room == null) {
 			throw new NotFoundException();
 		}
 		if (username == null) {
-			return commentRepository.countReadingBySessionId(room.getId());
+			return commentRepository.countReadingByRoomId(room.getId());
 		} else {
 			UserAuthentication currentUser = userService.getCurrentUser();
 			if (!currentUser.getUsername().equals(username)) {
 				throw new ForbiddenException();
 			}
 
-			return commentRepository.countReadingBySessionIdAndUser(room.getId(), currentUser);
+			return commentRepository.countReadingByRoomIdAndUser(room.getId(), currentUser);
 		}
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Comment> getBySessionKey(final String sessionKey, final int offset, final int limit) {
-		final Room room = this.getSession(sessionKey);
+	public List<Comment> getByRoomShortId(final String roomShortId, final int offset, final int limit) {
+		final Room room = this.getRoom(roomShortId);
 		final UserAuthentication user = getCurrentUser();
 		if (room.getOwnerId().equals(user.getId())) {
-			return commentRepository.findBySessionId(room.getId(), offset, limit);
+			return commentRepository.findByRoomId(room.getId(), offset, limit);
 		} else {
-			return commentRepository.findBySessionIdAndUser(room.getId(), user, offset, limit);
+			return commentRepository.findByRoomIdAndUser(room.getId(), user, offset, limit);
 		}
 	}
 
@@ -154,7 +154,7 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		if (comment == null) {
 			throw new NotFoundException();
 		}
-		final Room room = roomRepository.findOne(comment.getSessionId());
+		final Room room = roomRepository.findOne(comment.getRoomId());
 		if (!comment.getCreatorId().equals(user.getId()) && !room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
 		}
@@ -173,8 +173,8 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		return user;
 	}
 
-	private Room getSession(final String sessionkey) {
-		final Room room = roomRepository.findByKeyword(sessionkey);
+	private Room getRoom(final String shortId) {
+		final Room room = roomRepository.findByShortId(shortId);
 		if (room == null) {
 			throw new NotFoundException();
 		}

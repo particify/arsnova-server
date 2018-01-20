@@ -36,23 +36,23 @@ public interface UserService {
 
 	void increaseFailedLoginCount(String addr);
 
-	UserAuthentication getUser2SocketId(UUID socketId);
+	UserAuthentication getUserToSocketId(UUID socketId);
 
-	void putUser2SocketId(UUID socketId, UserAuthentication user);
+	void putUserToSocketId(UUID socketId, UserAuthentication user);
 
-	void removeUser2SocketId(UUID socketId);
+	void removeUserToSocketId(UUID socketId);
 
-	Set<Map.Entry<UUID, UserAuthentication>> socketId2User();
+	Set<Map.Entry<UUID, UserAuthentication>> getSocketIdToUser();
 
-	boolean isUserInSession(UserAuthentication user, String keyword);
+	boolean isUserInRoom(UserAuthentication user, String roomShortId);
 
-	Set<UserAuthentication> getUsersBySessionKey(String keyword);
+	Set<UserAuthentication> getUsersByRoomShortId(String roomShortId);
 
-	String getSessionByUsername(String username);
+	String getRoomByUsername(String username);
 
-	void addUserToSessionBySocketId(UUID socketId, String keyword);
+	void addUserToRoomBySocketId(UUID socketId, String roomShortId);
 
-	void removeUserFromSessionBySocketId(UUID socketId);
+	void removeUserFromRoomBySocketId(UUID socketId);
 
 	void removeUserFromMaps(UserAuthentication user);
 

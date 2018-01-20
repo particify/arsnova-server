@@ -26,15 +26,13 @@ import java.util.List;
  * The functionality the motd service should provide.
  */
 public interface MotdService extends EntityService<Motd> {
-	Motd getByKey(String keyword);
-
 	List<Motd> getAdminMotds();  //all w/o the sessionmotds
 
-	List<Motd> getAllSessionMotds(final String sessionkey);
+	List<Motd> getAllRoomMotds(final String roomId);
 
 	List<Motd> getCurrentMotds(final Date clientdate, final String audience);
 
-	List<Motd> getCurrentSessionMotds(final Date clientdate, final String sessionkey);
+	List<Motd> getCurrentRoomMotds(final Date clientdate, final String roomId);
 
 	List<Motd> filterMotdsByDate(List<Motd> list, Date clientdate);
 
@@ -42,13 +40,13 @@ public interface MotdService extends EntityService<Motd> {
 
 	void delete(Motd motd);
 
-	void deleteBySessionKey(final String sessionId, Motd motd);
+	void deleteByRoomId(final String roomId, Motd motd);
 
 	Motd save(Motd motd);
 
-	Motd save(final String sessionId, final Motd motd);
+	Motd save(final String roomId, final Motd motd);
 
 	Motd update(Motd motd);
 
-	Motd update(final String sessionkey, Motd motd);
+	Motd update(final String roomShortId, Motd motd);
 }

@@ -92,7 +92,7 @@ public class ConfigurationController extends AbstractController {
 	private String gridSquareEnabled;
 
 	@Value("${features.session-import-export.enabled:false}")
-	private String sessionImportExportEnabled;
+	private String roomImportExportEnabled;
 
 	@Value("${features.public-pool.enabled:false}")
 	private String publicPoolEnabled;
@@ -131,7 +131,7 @@ public class ConfigurationController extends AbstractController {
 	private String trackingSiteId;
 
 	@Value("${session.demo-id:}")
-	private String demoSessionKey;
+	private String demoRoomShortId;
 
 	@Value("${ui.slogan:}")
 	private String arsnovaSlogan;
@@ -209,8 +209,8 @@ public class ConfigurationController extends AbstractController {
 		if (!"".equals(privacyPolicyUrl)) {
 			config.put("privacyPolicyUrl", privacyPolicyUrl);
 		}
-		if (!"".equals(demoSessionKey)) {
-			config.put("demoSessionKey", demoSessionKey);
+		if (!"".equals(demoRoomShortId)) {
+			config.put("demoRoomShortId", demoRoomShortId);
 		}
 		if (!"".equals(arsnovaSlogan)) {
 			config.put("arsnovaSlogan", arsnovaSlogan);
@@ -233,7 +233,7 @@ public class ConfigurationController extends AbstractController {
 		features.put("markdown", true);
 		features.put("imageAnswer", "true".equals(imageAnswerEnabled));
 		features.put("gridSquare", "true".equals(gridSquareEnabled));
-		features.put("sessionImportExport", "true".equals(sessionImportExportEnabled));
+		features.put("sessionImportExport", "true".equals(roomImportExportEnabled));
 		features.put("publicPool", "true".equals(publicPoolEnabled));
 		features.put("exportToClick", "true".equals(exportToClickEnabled));
 

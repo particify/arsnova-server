@@ -53,7 +53,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/lecturerquestion")
-@Api(value = "/lecturerquestion", description = "Operations for Lecture Questions")
+@Api(value = "/lecturerquestion", description = "Content (Skill/Lecturer Question) API")
 public class ContentController extends PaginationController {
 	@Autowired
 	private ContentService contentService;
@@ -140,9 +140,9 @@ public class ContentController extends PaginationController {
 			) {
 
 		if (time == 0) {
-			timerService.startNewPiRound(questionId, null);
+			timerService.startNewRound(questionId, null);
 		} else {
-			timerService.startNewPiRoundDelayed(questionId, time);
+			timerService.startNewRoundDelayed(questionId, time);
 		}
 	}
 
@@ -152,7 +152,7 @@ public class ContentController extends PaginationController {
 	public void cancelPiRound(
 			@PathVariable final String questionId
 			) {
-		timerService.cancelPiRoundChange(questionId);
+		timerService.cancelRoundChange(questionId);
 	}
 
 	@RequestMapping(value = "/{questionId}/resetpiroundstate", method = RequestMethod.POST)
@@ -161,7 +161,7 @@ public class ContentController extends PaginationController {
 	public void resetPiQuestion(
 			@PathVariable final String questionId
 			) {
-		timerService.resetPiRoundState(questionId);
+		timerService.resetRoundState(questionId);
 	}
 
 	@ApiOperation(value = "Set voting admission on question, identified by provided id",
@@ -203,7 +203,7 @@ public class ContentController extends PaginationController {
 			contents = contentService.getPreparationQuestions(sessionkey);
 			contentService.setVotingAdmissions(sessionkey, disable, contents);
 		} else {
-			contentService.setVotingAdmissionForAllQuestions(sessionkey, disable);
+			contentService.setVotingAdmissionForAllContents(sessionkey, disable);
 		}
 	}
 
@@ -292,7 +292,7 @@ public class ContentController extends PaginationController {
 		} else if (preparationQuestionsOnly) {
 			contents = contentService.getPreparationQuestions(sessionkey);
 		} else {
-			contents = contentService.getBySessionKey(sessionkey);
+			contents = contentService.getByRoomShortId(sessionkey);
 		}
 		if (contents == null || contents.isEmpty()) {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
@@ -341,7 +341,7 @@ public class ContentController extends PaginationController {
 		} else if (flashcardsOnly) {
 			return contentService.countFlashcards(sessionkey);
 		} else {
-			return contentService.countBySessionKey(sessionkey);
+			return contentService.countByRoomShortId(sessionkey);
 		}
 	}
 
@@ -543,7 +543,7 @@ public class ContentController extends PaginationController {
 	@Deprecated
 	@RequestMapping(value = "/{questionId}/answercount", method = RequestMethod.GET)
 	public int getAnswerCount(@PathVariable final String questionId) {
-		return contentService.countAnswersByQuestionIdAndRound(questionId);
+		return contentService.countAnswersByContentIdAndRound(questionId);
 	}
 
 	@ApiOperation(value = "Get the amount of answers for a question, identified by the question ID",
@@ -551,8 +551,8 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/{questionId}/allroundanswercount", method = RequestMethod.GET)
 	public List<Integer> getAllAnswerCount(@PathVariable final String questionId) {
 		return Arrays.asList(
-			contentService.countAnswersByQuestionIdAndRound(questionId, 1),
-			contentService.countAnswersByQuestionIdAndRound(questionId, 2)
+			contentService.countAnswersByContentIdAndRound(questionId, 1),
+			contentService.countAnswersByContentIdAndRound(questionId, 2)
 		);
 	}
 
@@ -560,7 +560,7 @@ public class ContentController extends PaginationController {
 			nickname = "getTotalAnswerCountByQuestion")
 	@RequestMapping(value = "/{questionId}/totalanswercount", method = RequestMethod.GET)
 	public int getTotalAnswerCountByQuestion(@PathVariable final String questionId) {
-		return contentService.countTotalAnswersByQuestionId(questionId);
+		return contentService.countTotalAnswersByContentId(questionId);
 	}
 
 	@ApiOperation(value = "Get the amount of answers and abstention answers by a question, identified by the question ID",
@@ -568,8 +568,8 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/{questionId}/answerandabstentioncount", method = RequestMethod.GET)
 	public List<Integer> getAnswerAndAbstentionCount(@PathVariable final String questionId) {
 		return Arrays.asList(
-			contentService.countAnswersByQuestionIdAndRound(questionId),
-			contentService.countTotalAbstentionsByQuestionId(questionId)
+			contentService.countAnswersByContentIdAndRound(questionId),
+			contentService.countTotalAbstentionsByContentId(questionId)
 		);
 	}
 
@@ -578,7 +578,7 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/{questionId}/freetextanswer/", method = RequestMethod.GET)
 	@Pagination
 	public List<Answer> getFreetextAnswers(@PathVariable final String questionId) {
-		return contentService.getFreetextAnswersByQuestionId(questionId, offset, limit);
+		return contentService.getFreetextAnswersByContentId(questionId, offset, limit);
 	}
 
 	@ApiOperation(value = "Get my answers of an session, identified by the sessionkey",
@@ -587,7 +587,7 @@ public class ContentController extends PaginationController {
 	@Deprecated
 	@RequestMapping(value = "/myanswers", method = RequestMethod.GET)
 	public List<Answer> getMyAnswers(@RequestParam final String sessionkey) {
-		return contentService.getMyAnswersBySessionKey(sessionkey);
+		return contentService.getMyAnswersByRoomShortId(sessionkey);
 	}
 
 	@ApiOperation(value = "Get the total amount of answers of an session, identified by the sessionkey",
@@ -605,7 +605,7 @@ public class ContentController extends PaginationController {
 		} else if (preparationQuestionsOnly) {
 			return contentService.countPreparationQuestionAnswers(sessionkey);
 		} else {
-			return contentService.countTotalAnswersBySessionKey(sessionkey);
+			return contentService.countTotalAnswersByRoomShortId(sessionkey);
 		}
 	}
 }

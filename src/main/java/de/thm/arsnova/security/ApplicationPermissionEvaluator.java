@@ -67,7 +67,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 		return hasAdminRole(username)
 				|| (targetDomainObject instanceof Room
-						&& hasSessionPermission(username, ((Room) targetDomainObject), permission.toString()))
+						&& hasRoomPermission(username, ((Room) targetDomainObject), permission.toString()))
 				|| (targetDomainObject instanceof Content
 						&& hasContentPermission(username, ((Content) targetDomainObject), permission.toString()))
 				|| (targetDomainObject instanceof Comment
@@ -91,8 +91,8 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 		switch (targetType) {
 			case "session":
-				final Room targetSession = roomRepository.findByKeyword(targetId.toString());
-				return targetSession != null && hasSessionPermission(username, targetSession, permission.toString());
+				final Room targetRoom = roomRepository.findByShortId(targetId.toString());
+				return targetRoom != null && hasRoomPermission(username, targetRoom, permission.toString());
 			case "content":
 				final Content targetContent = contentRepository.findOne(targetId.toString());
 				return targetContent != null && hasContentPermission(username, targetContent, permission.toString());
@@ -104,19 +104,19 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		}
 	}
 
-	private boolean hasSessionPermission(
+	private boolean hasRoomPermission(
 			final String userId,
-			final Room targetSession,
+			final Room targetRoom,
 			final String permission) {
 		switch (permission) {
 			case "read":
-				return !targetSession.isClosed();
+				return !targetRoom.isClosed();
 			case "create":
 				return !userId.isEmpty();
 			case "owner":
 			case "update":
 			case "delete":
-				return targetSession.getOwnerId().equals(userId);
+				return targetRoom.getOwnerId().equals(userId);
 			default:
 				return false;
 		}
@@ -146,7 +146,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final String permission) {
 		switch (permission) {
 			case "create":
-				return !userId.isEmpty() && !roomRepository.findOne(targetComment.getSessionId()).isClosed();
+				return !userId.isEmpty() && !roomRepository.findOne(targetComment.getRoomId()).isClosed();
 			case "owner":
 			case "update":
 				return targetComment.getCreatorId() != null && targetComment.getCreatorId().equals(userId);
@@ -157,7 +157,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				}
 
 				/* Allow reading & deletion by session owner */
-				final Room room = roomRepository.findOne(targetComment.getSessionId());
+				final Room room = roomRepository.findOne(targetComment.getRoomId());
 
 				return room != null && room.getOwnerId().equals(userId);
 			default:

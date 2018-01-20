@@ -139,13 +139,13 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	}
 
 	@Override
-	@Caching(evict = {@CacheEvict(value = "contentlists", key = "#sessionId"),
-			@CacheEvict(value = "lecturecontentlists", key = "#sessionId", condition = "#content.getGroup().equals('lecture')"),
-			@CacheEvict(value = "preparationcontentlists", key = "#sessionId", condition = "#content.getGroup().equals('preparation')"),
-			@CacheEvict(value = "flashcardcontentlists", key = "#sessionId", condition = "#content.getGroup().equals('flashcard')") },
+	@Caching(evict = {@CacheEvict(value = "contentlists", key = "#roomId"),
+			@CacheEvict(value = "lecturecontentlists", key = "#roomId", condition = "#content.getGroup().equals('lecture')"),
+			@CacheEvict(value = "preparationcontentlists", key = "#roomId", condition = "#content.getGroup().equals('preparation')"),
+			@CacheEvict(value = "flashcardcontentlists", key = "#roomId", condition = "#content.getGroup().equals('flashcard')") },
 			put = {@CachePut(value = "contents", key = "#content.id")})
-	public Content save(final String sessionId, final Content content) {
-		content.setRoomId(sessionId);
+	public Content save(final String roomId, final Content content) {
+		content.setRoomId(roomId);
 		try {
 			contentRepository.save(content);
 
@@ -201,26 +201,26 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	//@Cacheable("contentlists")
-	public List<Content> getBySessionKey(final String sessionkey) {
-		final Room room = getSession(sessionkey);
+	public List<Content> getByRoomShortId(final String roomShortId) {
+		final Room room = getRoom(roomShortId);
 		final UserAuthentication user = userService.getCurrentUser();
 		if (room.getOwnerId().equals(user.getId())) {
-			return contentRepository.findBySessionIdForSpeaker(room.getId());
+			return contentRepository.findByRoomIdForSpeaker(room.getId());
 		} else {
-			return contentRepository.findBySessionIdForUsers(room.getId());
+			return contentRepository.findByRoomIdForUsers(room.getId());
 		}
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int countBySessionKey(final String sessionkey) {
-		final Room room = roomRepository.findByKeyword(sessionkey);
-		return contentRepository.countBySessionId(room.getId());
+	public int countByRoomShortId(final String roomShortId) {
+		final Room room = roomRepository.findByShortId(roomShortId);
+		return contentRepository.countByRoomId(room.getId());
 	}
 
-	/* FIXME: #content.getSessionKeyword() cannot be checked since keyword is no longer set for content. */
+	/* FIXME: #content.getShortId() cannot be checked since keyword is no longer set for content. */
 	@Override
-	@PreAuthorize("hasPermission(#content.getSessionKeyword(), 'session', 'owner')")
+	@PreAuthorize("hasPermission(#content.getShortId(), 'session', 'owner')")
 	public Content save(final Content content) {
 		final Room room = roomRepository.findOne(content.getRoomId());
 		content.setTimestamp(new Date());
@@ -294,13 +294,13 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	private void deleteBySessionAndVariant(final Room room, final String variant) {
 		final List<String> contentIds;
 		if ("all".equals(variant)) {
-			contentIds = contentRepository.findIdsBySessionId(room.getId());
+			contentIds = contentRepository.findIdsByRoomId(room.getId());
 		} else {
-			contentIds = contentRepository.findIdsBySessionIdAndVariant(room.getId(), variant);
+			contentIds = contentRepository.findIdsByRoomIdAndVariant(room.getId(), variant);
 		}
 
 		final int answerCount = answerRepository.deleteByContentIds(contentIds);
-		final int contentCount = contentRepository.deleteBySessionId(room.getId());
+		final int contentCount = contentRepository.deleteByRoomId(room.getId());
 		dbLogger.log("delete", "type", "question", "questionCount", contentCount);
 		dbLogger.log("delete", "type", "answer", "answerCount", answerCount);
 
@@ -310,29 +310,29 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public void deleteAllContent(final String sessionkey) {
-		final Room room = getSessionWithAuthCheck(sessionkey);
+	public void deleteAllContent(final String roomShortId) {
+		final Room room = getRoomWithAuthCheck(roomShortId);
 		deleteBySessionAndVariant(room, "all");
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public void deleteLectureQuestions(final String sessionkey) {
-		final Room room = getSessionWithAuthCheck(sessionkey);
+	public void deleteLectureQuestions(final String roomShortId) {
+		final Room room = getRoomWithAuthCheck(roomShortId);
 		deleteBySessionAndVariant(room, "lecture");
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public void deletePreparationQuestions(final String sessionkey) {
-		final Room room = getSessionWithAuthCheck(sessionkey);
+	public void deletePreparationQuestions(final String roomShortId) {
+		final Room room = getRoomWithAuthCheck(roomShortId);
 		deleteBySessionAndVariant(room, "preparation");
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public void deleteFlashcards(final String sessionkey) {
-		final Room room = getSessionWithAuthCheck(sessionkey);
+	public void deleteFlashcards(final String roomShortId) {
+		final Room room = getRoomWithAuthCheck(roomShortId);
 		deleteBySessionAndVariant(room, "flashcard");
 	}
 
@@ -361,13 +361,13 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	@Caching(evict = { @CacheEvict(value = "contents", allEntries = true),
-			@CacheEvict(value = "contentlists", key = "#sessionId"),
-			@CacheEvict(value = "lecturecontentlists", key = "#sessionId"),
-			@CacheEvict(value = "preparationcontentlists", key = "#sessionId"),
-			@CacheEvict(value = "flashcardcontentlists", key = "#sessionId") })
-	public void setVotingAdmissions(final String sessionkey, final boolean disableVoting, List<Content> contents) {
+			@CacheEvict(value = "contentlists", key = "#roomShortId"),
+			@CacheEvict(value = "lecturecontentlists", key = "#roomShortId"),
+			@CacheEvict(value = "preparationcontentlists", key = "#roomShortId"),
+			@CacheEvict(value = "flashcardcontentlists", key = "#roomShortId") })
+	public void setVotingAdmissions(final String roomShortId, final boolean disableVoting, List<Content> contents) {
 		final UserAuthentication user = getCurrentUser();
-		final Room room = getSession(sessionkey);
+		final Room room = getRoom(roomShortId);
 		if (!room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
 		}
@@ -387,19 +387,19 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public void setVotingAdmissionForAllQuestions(final String sessionkey, final boolean disableVoting) {
+	public void setVotingAdmissionForAllContents(final String roomShortId, final boolean disableVoting) {
 		final UserAuthentication user = getCurrentUser();
-		final Room room = getSession(sessionkey);
+		final Room room = getRoom(roomShortId);
 		if (!room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
 		}
-		final List<Content> contents = contentRepository.findBySessionId(room.getId());
-		setVotingAdmissionForAllQuestions(room.getId(), disableVoting);
+		final List<Content> contents = contentRepository.findByRoomId(room.getId());
+		setVotingAdmissionForAllContents(room.getId(), disableVoting);
 	}
 
-	private Room getSessionWithAuthCheck(final String sessionKeyword) {
+	private Room getRoomWithAuthCheck(final String shortId) {
 		final UserAuthentication user = userService.getCurrentUser();
-		final Room room = roomRepository.findByKeyword(sessionKeyword);
+		final Room room = roomRepository.findByShortId(shortId);
 		if (user == null || room == null || !room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
 		}
@@ -418,10 +418,10 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<String> getUnAnsweredQuestionIds(final String sessionKey) {
+	public List<String> getUnAnsweredQuestionIds(final String roomShortId) {
 		final UserAuthentication user = getCurrentUser();
-		final Room room = getSession(sessionKey);
-		return contentRepository.findUnansweredIdsBySessionIdAndUser(room.getId(), user);
+		final Room room = getRoom(roomShortId);
+		return contentRepository.findUnansweredIdsByRoomIdAndUser(room.getId(), user);
 	}
 
 	private UserAuthentication getCurrentUser() {
@@ -439,7 +439,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		return answerRepository.findByQuestionIdUserPiRound(contentId, userService.getCurrentUser(), content.getState().getRound());
+		return answerRepository.findByContentIdUserPiRound(contentId, userService.getCurrentUser(), content.getState().getRound());
 	}
 
 	@Override
@@ -504,7 +504,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			throw new NotFoundException();
 		}
 
-		return getFreetextAnswersByQuestionId(contentId, offset, limit);
+		return getFreetextAnswersByContentId(contentId, offset, limit);
 	}
 
 	@Override
@@ -521,12 +521,12 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			throw new NotFoundException();
 		}
 
-		return getFreetextAnswersByQuestionId(contentId, offset, limit);
+		return getFreetextAnswersByContentId(contentId, offset, limit);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int countAnswersByQuestionIdAndRound(final String contentId) {
+	public int countAnswersByContentIdAndRound(final String contentId) {
 		final Content content = get(contentId);
 		if (content == null) {
 			return 0;
@@ -541,7 +541,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int countAnswersByQuestionIdAndRound(final String contentId, final int piRound) {
+	public int countAnswersByContentIdAndRound(final String contentId, final int piRound) {
 		final Content content = get(contentId);
 		if (content == null) {
 			return 0;
@@ -552,7 +552,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int countTotalAbstentionsByQuestionId(final String contentId) {
+	public int countTotalAbstentionsByContentId(final String contentId) {
 		final Content content = get(contentId);
 		if (content == null) {
 			return 0;
@@ -563,7 +563,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int countTotalAnswersByQuestionId(final String contentId) {
+	public int countTotalAnswersByContentId(final String contentId) {
 		final Content content = get(contentId);
 		if (content == null) {
 			return 0;
@@ -574,7 +574,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getFreetextAnswersByQuestionId(final String contentId, final int offset, final int limit) {
+	public List<Answer> getFreetextAnswersByContentId(final String contentId, final int offset, final int limit) {
 		final List<Answer> answers = answerRepository.findByContentId(contentId, offset, limit);
 		if (answers == null) {
 			throw new NotFoundException();
@@ -585,17 +585,17 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getMyAnswersBySessionKey(final String sessionKey) {
-		final Room room = getSession(sessionKey);
+	public List<Answer> getMyAnswersByRoomShortId(final String roomShortId) {
+		final Room room = getRoom(roomShortId);
 		// Load contents first because we are only interested in answers of the latest piRound.
-		final List<Content> contents = getBySessionKey(sessionKey);
+		final List<Content> contents = getByRoomShortId(roomShortId);
 		final Map<String, Content> contentIdToContent = new HashMap<>();
 		for (final Content content : contents) {
 			contentIdToContent.put(content.getId(), content);
 		}
 
 		/* filter answers by active piRound per content */
-		final List<Answer> answers = answerRepository.findByUserSessionId(userService.getCurrentUser(), room.getId());
+		final List<Answer> answers = answerRepository.findByUserRoomId(userService.getCurrentUser(), room.getId());
 		final List<Answer> filteredAnswers = new ArrayList<>();
 		for (final Answer answer : answers) {
 			final Content content = contentIdToContent.get(answer.getContentId());
@@ -619,8 +619,8 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int countTotalAnswersBySessionKey(final String sessionKey) {
-		return answerRepository.countBySessionKey(sessionKey);
+	public int countTotalAnswersByRoomShortId(final String roomShortId) {
+		return answerRepository.countByRoomShortId(roomShortId);
 	}
 
 	@Override
@@ -714,13 +714,13 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	//@Cacheable("lecturecontentlists")
-	public List<Content> getLectureQuestions(final String sessionkey) {
-		final Room room = getSession(sessionkey);
+	public List<Content> getLectureQuestions(final String roomShortId) {
+		final Room room = getRoom(roomShortId);
 		final UserAuthentication user = userService.getCurrentUser();
 		if (room.getOwnerId().equals(user.getId())) {
-			return contentRepository.findBySessionIdOnlyLectureVariant(room.getId());
+			return contentRepository.findByRoomIdOnlyLectureVariant(room.getId());
 		} else {
-			return contentRepository.findBySessionIdOnlyLectureVariantAndActive(room.getId());
+			return contentRepository.findByRoomIdOnlyLectureVariantAndActive(room.getId());
 		}
 	}
 
@@ -728,13 +728,13 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	//@Cacheable("flashcardcontentlists")
-	public List<Content> getFlashcards(final String sessionkey) {
-		final Room room = getSession(sessionkey);
+	public List<Content> getFlashcards(final String roomShortId) {
+		final Room room = getRoom(roomShortId);
 		final UserAuthentication user = userService.getCurrentUser();
 		if (room.getOwnerId().equals(user.getId())) {
-			return contentRepository.findBySessionIdOnlyFlashcardVariant(room.getId());
+			return contentRepository.findByRoomIdOnlyFlashcardVariant(room.getId());
 		} else {
-			return contentRepository.findBySessionIdOnlyFlashcardVariantAndActive(room.getId());
+			return contentRepository.findByRoomIdOnlyFlashcardVariantAndActive(room.getId());
 		}
 	}
 
@@ -742,18 +742,18 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	//@Cacheable("preparationcontentlists")
-	public List<Content> getPreparationQuestions(final String sessionkey) {
-		final Room room = getSession(sessionkey);
+	public List<Content> getPreparationQuestions(final String roomShortId) {
+		final Room room = getRoom(roomShortId);
 		final UserAuthentication user = userService.getCurrentUser();
 		if (room.getOwnerId().equals(user.getId())) {
-			return contentRepository.findBySessionIdOnlyPreparationVariant(room.getId());
+			return contentRepository.findByRoomIdOnlyPreparationVariant(room.getId());
 		} else {
-			return contentRepository.findBySessionIdOnlyPreparationVariantAndActive(room.getId());
+			return contentRepository.findByRoomIdOnlyPreparationVariantAndActive(room.getId());
 		}
 	}
 
-	private Room getSession(final String sessionkey) {
-		final Room room = roomRepository.findByKeyword(sessionkey);
+	private Room getRoom(final String roomShortId) {
+		final Room room = roomRepository.findByShortId(roomShortId);
 		if (room == null) {
 			throw new NotFoundException();
 		}
@@ -762,26 +762,26 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int countLectureQuestions(final String sessionkey) {
-		return contentRepository.countLectureVariantBySessionId(getSession(sessionkey).getId());
+	public int countLectureQuestions(final String roomShortId) {
+		return contentRepository.countLectureVariantByRoomId(getRoom(roomShortId).getId());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int countFlashcards(final String sessionkey) {
-		return contentRepository.countFlashcardVariantBySessionId(getSession(sessionkey).getId());
+	public int countFlashcards(final String roomShortId) {
+		return contentRepository.countFlashcardVariantRoomId(getRoom(roomShortId).getId());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int countPreparationQuestions(final String sessionkey) {
-		return contentRepository.countPreparationVariantBySessionId(getSession(sessionkey).getId());
+	public int countPreparationQuestions(final String roomShortId) {
+		return contentRepository.countPreparationVariantByRoomId(getRoom(roomShortId).getId());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int countLectureQuestionAnswers(final String sessionkey) {
-		return this.countLectureQuestionAnswersInternal(sessionkey);
+	public int countLectureQuestionAnswers(final String roomShortId) {
+		return this.countLectureQuestionAnswersInternal(roomShortId);
 	}
 
 	/*
@@ -789,8 +789,8 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	 * TODO: Find a better way of doing this...
 	 */
 	@Override
-	public int countLectureQuestionAnswersInternal(final String sessionkey) {
-		return answerRepository.countBySessionIdLectureVariant(getSession(sessionkey).getId());
+	public int countLectureQuestionAnswersInternal(final String roomShortId) {
+		return answerRepository.countByRoomIdOnlyLectureVariant(getRoom(roomShortId).getId());
 	}
 
 	@Override
@@ -811,8 +811,8 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public int countPreparationQuestionAnswers(final String sessionkey) {
-		return this.countPreparationQuestionAnswersInternal(sessionkey);
+	public int countPreparationQuestionAnswers(final String roomShortId) {
+		return this.countPreparationQuestionAnswersInternal(roomShortId);
 	}
 
 	/*
@@ -820,8 +820,8 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	 * TODO: Find a better way of doing this...
 	 */
 	@Override
-	public int countPreparationQuestionAnswersInternal(final String sessionkey) {
-		return answerRepository.countBySessionIdPreparationVariant(getSession(sessionkey).getId());
+	public int countPreparationQuestionAnswersInternal(final String roomShortId) {
+		return answerRepository.countByRoomIdOnlyPreparationVariant(getRoom(roomShortId).getId());
 	}
 
 	/*
@@ -829,59 +829,59 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	 * TODO: Find a better way of doing this...
 	 */
 	@Override
-	public int countFlashcardsForUserInternal(final String sessionkey) {
-		return contentRepository.findBySessionIdOnlyFlashcardVariantAndActive(getSession(sessionkey).getId()).size();
+	public int countFlashcardsForUserInternal(final String roomShortId) {
+		return contentRepository.findByRoomIdOnlyFlashcardVariantAndActive(getRoom(roomShortId).getId()).size();
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<String> getUnAnsweredLectureQuestionIds(final String sessionkey) {
+	public List<String> getUnAnsweredLectureQuestionIds(final String roomShortId) {
 		final UserAuthentication user = getCurrentUser();
-		return this.getUnAnsweredLectureQuestionIds(sessionkey, user);
+		return this.getUnAnsweredLectureQuestionIds(roomShortId, user);
 	}
 
 	@Override
-	public List<String> getUnAnsweredLectureQuestionIds(final String sessionkey, final UserAuthentication user) {
-		final Room room = getSession(sessionkey);
-		return contentRepository.findUnansweredIdsBySessionIdAndUserOnlyLectureVariant(room.getId(), user);
+	public List<String> getUnAnsweredLectureQuestionIds(final String roomShortId, final UserAuthentication user) {
+		final Room room = getRoom(roomShortId);
+		return contentRepository.findUnansweredIdsByRoomIdAndUserOnlyLectureVariant(room.getId(), user);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<String> getUnAnsweredPreparationQuestionIds(final String sessionkey) {
+	public List<String> getUnAnsweredPreparationQuestionIds(final String roomShortId) {
 		final UserAuthentication user = getCurrentUser();
-		return this.getUnAnsweredPreparationQuestionIds(sessionkey, user);
+		return this.getUnAnsweredPreparationQuestionIds(roomShortId, user);
 	}
 
 	@Override
-	public List<String> getUnAnsweredPreparationQuestionIds(final String sessionkey, final UserAuthentication user) {
-		final Room room = getSession(sessionkey);
-		return contentRepository.findUnansweredIdsBySessionIdAndUserOnlyPreparationVariant(room.getId(), user);
+	public List<String> getUnAnsweredPreparationQuestionIds(final String roomShortId, final UserAuthentication user) {
+		final Room room = getRoom(roomShortId);
+		return contentRepository.findUnansweredIdsByRoomIdAndUserOnlyPreparationVariant(room.getId(), user);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public void publishAll(final String sessionkey, final boolean publish) {
+	public void publishAll(final String roomShortId, final boolean publish) {
 		/* TODO: resolve redundancies */
 		final UserAuthentication user = getCurrentUser();
-		final Room room = getSession(sessionkey);
+		final Room room = getRoom(roomShortId);
 		if (!room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
 		}
-		final List<Content> contents = contentRepository.findBySessionId(room.getId());
-		publishQuestions(sessionkey, publish, contents);
+		final List<Content> contents = contentRepository.findByRoomId(room.getId());
+		publishQuestions(roomShortId, publish, contents);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	@Caching(evict = { @CacheEvict(value = "contents", allEntries = true),
-			@CacheEvict(value = "contentlists", key = "#sessionId"),
-			@CacheEvict(value = "lecturecontentlists", key = "#sessionId"),
-			@CacheEvict(value = "preparationcontentlists", key = "#sessionId"),
-			@CacheEvict(value = "flashcardcontentlists", key = "#sessionId") })
-	public void publishQuestions(final String sessionkey, final boolean publish, List<Content> contents) {
+			@CacheEvict(value = "contentlists", key = "#roomShortId"),
+			@CacheEvict(value = "lecturecontentlists", key = "#roomShortId"),
+			@CacheEvict(value = "preparationcontentlists", key = "#roomShortId"),
+			@CacheEvict(value = "flashcardcontentlists", key = "#roomShortId") })
+	public void publishQuestions(final String roomShortId, final boolean publish, List<Content> contents) {
 		final UserAuthentication user = getCurrentUser();
-		final Room room = getSession(sessionkey);
+		final Room room = getRoom(roomShortId);
 		if (!room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
 		}
@@ -901,14 +901,14 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	@CacheEvict(value = "answerlists", allEntries = true)
-	public void deleteAllQuestionsAnswers(final String sessionkey) {
+	public void deleteAllQuestionsAnswers(final String roomShortId) {
 		final UserAuthentication user = getCurrentUser();
-		final Room room = getSession(sessionkey);
+		final Room room = getRoom(roomShortId);
 		if (!room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
 		}
 
-		final List<Content> contents = contentRepository.findBySessionIdAndVariantAndActive(room.getId());
+		final List<Content> contents = contentRepository.findByRoomIdAndVariantAndActive(room.getId());
 		resetContentsRoundState(room.getId(), contents);
 		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
 		answerRepository.deleteAllAnswersForQuestions(contentIds);
@@ -918,12 +918,12 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	/* TODO: Only evict cache entry for the answer's content. This requires some refactoring. */
 	@Override
-	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
+	@PreAuthorize("hasPermission(#roomShortId, 'session', 'owner')")
 	@CacheEvict(value = "answerlists", allEntries = true)
-	public void deleteAllPreparationAnswers(String sessionkey) {
-		final Room room = getSession(sessionkey);
+	public void deleteAllPreparationAnswers(String roomShortId) {
+		final Room room = getRoom(roomShortId);
 
-		final List<Content> contents = contentRepository.findBySessionIdAndVariantAndActive(room.getId(), "preparation");
+		final List<Content> contents = contentRepository.findByRoomIdAndVariantAndActive(room.getId(), "preparation");
 		resetContentsRoundState(room.getId(), contents);
 		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
 		answerRepository.deleteAllAnswersForQuestions(contentIds);
@@ -933,12 +933,12 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	/* TODO: Only evict cache entry for the answer's content. This requires some refactoring. */
 	@Override
-	@PreAuthorize("hasPermission(#sessionkey, 'session', 'owner')")
+	@PreAuthorize("hasPermission(#roomShortId, 'session', 'owner')")
 	@CacheEvict(value = "answerlists", allEntries = true)
-	public void deleteAllLectureAnswers(String sessionkey) {
-		final Room room = getSession(sessionkey);
+	public void deleteAllLectureAnswers(String roomShortId) {
+		final Room room = getRoom(roomShortId);
 
-		final List<Content> contents = contentRepository.findBySessionIdAndVariantAndActive(room.getId(), "lecture");
+		final List<Content> contents = contentRepository.findByRoomIdAndVariantAndActive(room.getId(), "lecture");
 		resetContentsRoundState(room.getId(), contents);
 		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
 		answerRepository.deleteAllAnswersForQuestions(contentIds);
@@ -948,14 +948,14 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Caching(evict = {
 			@CacheEvict(value = "contents", allEntries = true),
-			@CacheEvict(value = "contentlists", key = "#sessionId"),
-			@CacheEvict(value = "lecturecontentlists", key = "#sessionId"),
-			@CacheEvict(value = "preparationcontentlists", key = "#sessionId"),
-			@CacheEvict(value = "flashcardcontentlists", key = "#sessionId") })
-	private void resetContentsRoundState(final String sessionId, final List<Content> contents) {
+			@CacheEvict(value = "contentlists", key = "#roomId"),
+			@CacheEvict(value = "lecturecontentlists", key = "#roomId"),
+			@CacheEvict(value = "preparationcontentlists", key = "#roomId"),
+			@CacheEvict(value = "flashcardcontentlists", key = "#roomId") })
+	private void resetContentsRoundState(final String roomId, final List<Content> contents) {
 		for (final Content q : contents) {
 			/* TODO: Check if setting the sessionId is necessary. */
-			q.setRoomId(sessionId);
+			q.setRoomId(roomId);
 			q.resetState();
 		}
 		contentRepository.save(contents);

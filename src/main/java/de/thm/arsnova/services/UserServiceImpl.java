@@ -90,10 +90,10 @@ public class UserServiceImpl implements UserService {
 
 	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-	private static final ConcurrentHashMap<UUID, UserAuthentication> socketid2user = new ConcurrentHashMap<>();
+	private static final ConcurrentHashMap<UUID, UserAuthentication> socketIdToUser = new ConcurrentHashMap<>();
 
 	/* used for Socket.IO online check solution (new) */
-	private static final ConcurrentHashMap<UserAuthentication, String> user2session = new ConcurrentHashMap<>();
+	private static final ConcurrentHashMap<UserAuthentication, String> userToRoomId = new ConcurrentHashMap<>();
 
 	private UserRepository userRepository;
 
@@ -265,40 +265,40 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserAuthentication getUser2SocketId(final UUID socketId) {
-		return socketid2user.get(socketId);
+	public UserAuthentication getUserToSocketId(final UUID socketId) {
+		return socketIdToUser.get(socketId);
 	}
 
 	@Override
-	public void putUser2SocketId(final UUID socketId, final UserAuthentication user) {
-		socketid2user.put(socketId, user);
+	public void putUserToSocketId(final UUID socketId, final UserAuthentication user) {
+		socketIdToUser.put(socketId, user);
 	}
 
 	@Override
-	public Set<Map.Entry<UUID, UserAuthentication>> socketId2User() {
-		return socketid2user.entrySet();
+	public Set<Map.Entry<UUID, UserAuthentication>> getSocketIdToUser() {
+		return socketIdToUser.entrySet();
 	}
 
 	@Override
-	public void removeUser2SocketId(final UUID socketId) {
-		socketid2user.remove(socketId);
+	public void removeUserToSocketId(final UUID socketId) {
+		socketIdToUser.remove(socketId);
 	}
 
 	@Override
-	public boolean isUserInSession(final UserAuthentication user, final String keyword) {
-		if (keyword == null) {
+	public boolean isUserInRoom(final UserAuthentication user, final String roomShortId) {
+		if (roomShortId == null) {
 			return false;
 		}
-		String session = user2session.get(user);
+		String session = userToRoomId.get(user);
 
-		return session != null && keyword.equals(session);
+		return session != null && roomShortId.equals(session);
 	}
 
 	@Override
-	public Set<UserAuthentication> getUsersBySessionKey(final String keyword) {
+	public Set<UserAuthentication> getUsersByRoomShortId(final String roomShortId) {
 		final Set<UserAuthentication> result = new HashSet<>();
-		for (final Entry<UserAuthentication, String> e : user2session.entrySet()) {
-			if (e.getValue().equals(keyword)) {
+		for (final Entry<UserAuthentication, String> e : userToRoomId.entrySet()) {
+			if (e.getValue().equals(roomShortId)) {
 				result.add(e.getKey());
 			}
 		}
@@ -308,26 +308,26 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public void addUserToSessionBySocketId(final UUID socketId, final String keyword) {
-		final UserAuthentication user = socketid2user.get(socketId);
-		user2session.put(user, keyword);
+	public void addUserToRoomBySocketId(final UUID socketId, final String roomShortId) {
+		final UserAuthentication user = socketIdToUser.get(socketId);
+		userToRoomId.put(user, roomShortId);
 	}
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public void removeUserFromSessionBySocketId(final UUID socketId) {
-		final UserAuthentication user = socketid2user.get(socketId);
+	public void removeUserFromRoomBySocketId(final UUID socketId) {
+		final UserAuthentication user = socketIdToUser.get(socketId);
 		if (null == user) {
 			logger.warn("No user exists for socket {}.", socketId);
 
 			return;
 		}
-		user2session.remove(user);
+		userToRoomId.remove(user);
 	}
 
 	@Override
-	public String getSessionByUsername(final String username) {
-		for (final Entry<UserAuthentication, String> entry  : user2session.entrySet()) {
+	public String getRoomByUsername(final String username) {
+		for (final Entry<UserAuthentication, String> entry  : userToRoomId.entrySet()) {
 			if (entry.getKey().getUsername().equals(username)) {
 				return entry.getValue();
 			}
@@ -344,14 +344,14 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void removeUserFromMaps(final UserAuthentication user) {
 		if (user != null) {
-			user2session.remove(user);
+			userToRoomId.remove(user);
 		}
 	}
 
 	@Override
 	@Gauge
 	public int loggedInUsers() {
-		return user2session.size();
+		return userToRoomId.size();
 	}
 
 	@Override

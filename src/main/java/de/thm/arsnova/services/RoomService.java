@@ -20,7 +20,7 @@ package de.thm.arsnova.services;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.transport.ImportExportSession;
+import de.thm.arsnova.entities.transport.ImportExportContainer;
 import de.thm.arsnova.entities.transport.ScoreStatistics;
 
 import java.util.List;
@@ -30,69 +30,69 @@ import java.util.UUID;
  * The functionality the session service should provide.
  */
 public interface RoomService extends EntityService<Room> {
-	Room getByKey(String keyword);
+	Room getByShortId(String shortId);
 
-	Room getForAdmin(final String keyword);
+	Room getForAdmin(final String shortId);
 
-	Room getInternal(String keyword, UserAuthentication user);
+	Room getInternal(String shortId, UserAuthentication user);
 
 	Room save(Room session);
 
-	boolean isKeyAvailable(String keyword);
+	boolean isShortIdAvailable(String shortId);
 
-	String generateKey();
+	String generateShortId();
 
-	List<Room> getUserSessions(String userId);
+	List<Room> getUserRooms(String userId);
 
-	List<Room> getUserVisitedSessions(String username);
+	List<Room> getUserVisitedRooms(String username);
 
-	List<Room> getMySessions(int offset, int limit);
+	List<Room> getMyRooms(int offset, int limit);
 
-	List<Room> getMyVisitedSessions(int offset, int limit);
+	List<Room> getMyVisitedRooms(int offset, int limit);
 
-	int countSessionsByCourses(List<Course> courses);
+	int countRoomsByCourses(List<Course> courses);
 
-	int activeUsers(String sessionkey);
+	int activeUsers(String shortId);
 
-	Room setActive(String sessionkey, Boolean lock);
+	Room setActive(String shortId, Boolean lock);
 
-	Room join(String keyword, UUID socketId);
+	Room join(String shortId, UUID socketId);
 
-	Room update(String sessionkey, Room session);
+	Room update(String shortId, Room room);
 
-	Room updateCreator(String sessionkey, String newCreator);
+	Room updateCreator(String shortId, String newCreator);
 
-	Room updateInternal(Room session, UserAuthentication user);
+	Room updateInternal(Room room, UserAuthentication user);
 
-	int[] deleteCascading(Room session);
+	int[] deleteCascading(Room room);
 
-	ScoreStatistics getLearningProgress(String sessionkey, String type, String questionVariant);
+	ScoreStatistics getLearningProgress(String shortId, String type, String questionVariant);
 
-	ScoreStatistics getMyLearningProgress(String sessionkey, String type, String questionVariant);
+	ScoreStatistics getMyLearningProgress(String shortId, String type, String questionVariant);
 
-	List<Room> getMySessionsInfo(int offset, int limit);
+	List<Room> getMyRoomsInfo(int offset, int limit);
 
-	List<Room> getPublicPoolSessionsInfo();
+	List<Room> getPublicPoolRoomsInfo();
 
-	List<Room> getMyPublicPoolSessionsInfo();
+	List<Room> getMyPublicPoolRoomsInfo();
 
-	List<Room> getMyVisitedSessionsInfo(int offset, int limit);
+	List<Room> getMyVisitedRoomsInfo(int offset, int limit);
 
-	Room importSession(ImportExportSession session);
+	Room importRooms(ImportExportContainer importExportRoom);
 
-	ImportExportSession exportSession(String sessionkey, Boolean withAnswerStatistics, Boolean withFeedbackQuestions);
+	ImportExportContainer exportRoom(String shortId, Boolean withAnswerStatistics, Boolean withFeedbackQuestions);
 
-	Room copySessionToPublicPool(String sessionkey, de.thm.arsnova.entities.transport.ImportExportSession.PublicPool pp);
+	Room copyRoomToPublicPool(String shortId, ImportExportContainer.PublicPool pp);
 
-	Room.Settings getFeatures(String sessionkey);
+	Room.Settings getFeatures(String shortId);
 
-	Room.Settings updateFeatures(String sessionkey, Room.Settings settings);
+	Room.Settings updateFeatures(String shortId, Room.Settings settings);
 
-	boolean lockFeedbackInput(String sessionkey, Boolean lock);
+	boolean lockFeedbackInput(String shortId, Boolean lock);
 
-	boolean flipFlashcards(String sessionkey, Boolean flip);
+	boolean flipFlashcards(String shortId, Boolean flip);
 
-	void deleteInactiveSessions();
+	void deleteInactiveRooms();
 
-	void deleteInactiveVisitedSessionLists();
+	void deleteInactiveVisitedRoomLists();
 }

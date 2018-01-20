@@ -4,22 +4,22 @@ var designDoc = {
 	"views": {
 		"by_audience_for_global": {
 			"map": function (doc) {
-				if (doc.type === "Motd" && doc.audience !== "session") {
+				if (doc.type === "Motd" && doc.audience !== "ROOM") {
 					emit(doc.audience, {_rev: doc._rev});
 				}
 			}
 		},
-		"by_motdkey": {
+		"by_id": {
 			"map": function (doc) {
 				if (doc.type === "Motd") {
-					emit(doc.motdkey, {_rev: doc._rev});
+					emit(doc.id, {_rev: doc._rev});
 				}
 			}
 		},
-		"by_sessionkey": {
+		"by_roomid": {
 			"map": function (doc) {
-				if (doc.type === "Motd" && doc.audience === "session") {
-					emit(doc.sessionkey, {_rev: doc._rev});
+				if (doc.type === "Motd" && doc.audience === "ROOM") {
+					emit(doc.roomId, {_rev: doc._rev});
 				}
 			}
 		}

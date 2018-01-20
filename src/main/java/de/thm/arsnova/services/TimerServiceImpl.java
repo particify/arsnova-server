@@ -40,7 +40,7 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#contentId, 'content', 'owner')")
-	public void startNewPiRound(final String contentId, UserAuthentication user) {
+	public void startNewRound(final String contentId, UserAuthentication user) {
 		final Content content = contentRepository.findOne(contentId);
 		final Room room = roomRepository.findOne(content.getRoomId());
 
@@ -48,7 +48,7 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 			user = userService.getCurrentUser();
 		}
 
-		cancelDelayedPiRoundChange(contentId);
+		cancelDelayedRoundChange(contentId);
 
 		content.getState().setRoundEndTimestamp(null);
 		content.getState().setResponsesEnabled(false);
@@ -60,7 +60,7 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 
 	@Override
 	@PreAuthorize("hasPermission(#contentId, 'content', 'owner')")
-	public void startNewPiRoundDelayed(final String contentId, final int time) {
+	public void startNewRoundDelayed(final String contentId, final int time) {
 		final UserAuthentication user = userService.getCurrentUser();
 		final Content content = contentRepository.findOne(contentId);
 		final Room room = roomRepository.findOne(content.getRoomId());
@@ -77,18 +77,18 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				startNewPiRound(contentId, user);
+				startNewRound(contentId, user);
 			}
 		}, endDate);
 	}
 
 	@Override
 	@PreAuthorize("hasPermission(#contentId, 'content', 'owner')")
-	public void cancelPiRoundChange(final String contentId) {
+	public void cancelRoundChange(final String contentId) {
 		final Content content = contentRepository.findOne(contentId);
 		final Room room = roomRepository.findOne(content.getRoomId());
 
-		cancelDelayedPiRoundChange(contentId);
+		cancelDelayedRoundChange(contentId);
 		resetRoundManagementState(content);
 
 		if (content.getState().getRound() > 1) {
@@ -101,7 +101,7 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 	}
 
 	@Override
-	public void cancelDelayedPiRoundChange(final String contentId) {
+	public void cancelDelayedRoundChange(final String contentId) {
 		Timer timer = timerList.get(contentId);
 
 		if (null != timer) {
@@ -114,10 +114,10 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 	@Override
 	@PreAuthorize("hasPermission(#contentId, 'content', 'owner')")
 	@CacheEvict("answerlists")
-	public void resetPiRoundState(final String contentId) {
+	public void resetRoundState(final String contentId) {
 		final Content content = contentRepository.findOne(contentId);
 		final Room room = roomRepository.findOne(content.getRoomId());
-		cancelDelayedPiRoundChange(contentId);
+		cancelDelayedRoundChange(contentId);
 
 		if ("freetext".equals(content.getFormat())) {
 			content.getState().setRound(0);
@@ -156,7 +156,7 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 		content.getState().setRoundEndTimestamp(null);
 	}
 
-	private void resetQuestionState(final Content content) {
+	private void resetContentState(final Content content) {
 		content.getState().setResponsesEnabled(true);
 		content.getState().setRound(1);
 		content.getState().setRoundEndTimestamp(null);

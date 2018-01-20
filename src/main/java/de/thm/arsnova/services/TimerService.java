@@ -3,9 +3,9 @@ package de.thm.arsnova.services;
 import de.thm.arsnova.entities.UserAuthentication;
 
 public interface TimerService {
-	void startNewPiRound(final String contentId, UserAuthentication user);
-	void startNewPiRoundDelayed(final String contentId, final int time);
-	void cancelPiRoundChange(final String contentId);
-	void cancelDelayedPiRoundChange(final String contentId);
-	void resetPiRoundState(final String contentId);
+	void startNewRound(final String contentId, UserAuthentication user);
+	void startNewRoundDelayed(final String contentId, final int time);
+	void cancelRoundChange(final String contentId);
+	void cancelDelayedRoundChange(final String contentId);
+	void resetRoundState(final String contentId);
 }

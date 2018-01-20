@@ -26,9 +26,9 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * A question the teacher is asking.
+ * Represents Content (Skill/Lecturer Question) in a Room.
  */
-@ApiModel(value = "content", description = "the content entity")
+@ApiModel(value = "Content", description = "Content (Skill/Lecturer Question) entity")
 public class Content implements Entity {
 	private String id;
 	private String rev;
@@ -216,7 +216,7 @@ public class Content implements Entity {
 		sessionId = session;
 	}
 
-	@ApiModelProperty(required = true, value = "the session keyword, the question is assigned to")
+	@ApiModelProperty(required = true, value = "the room keyword, the question is assigned to")
 	public final String getSessionKeyword() {
 		return sessionKeyword;
 	}

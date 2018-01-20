@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Allows retrieval of several statistics such as the number of active users.
  */
 @RestController
-@Api(value = "/statistics", description = "the Statistic API")
+@Api(value = "/statistics", description = "Statistics API")
 public class StatisticsController extends AbstractController {
 
 	@Autowired

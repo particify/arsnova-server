@@ -101,8 +101,8 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	}
 
 	@Override
-	public void cleanFeedbackVotesBySessionKey(final String keyword, final int cleanupFeedbackDelayInMins) {
-		final Room room = roomRepository.findByKeyword(keyword);
+	public void cleanFeedbackVotesByRoomShortId(final String roomShortId, final int cleanupFeedbackDelayInMins) {
+		final Room room = roomRepository.findByShortId(roomShortId);
 		List<UserAuthentication> affectedUsers = feedbackStorage.cleanVotesByRoom(room, cleanupFeedbackDelayInMins);
 		Set<Room> sessionSet = new HashSet<>();
 		sessionSet.add(room);
@@ -116,8 +116,8 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	}
 
 	@Override
-	public Feedback getBySessionKey(final String keyword) {
-		final Room room = roomRepository.findByKeyword(keyword);
+	public Feedback getByRoomShortId(final String roomShortId) {
+		final Room room = roomRepository.findByShortId(roomShortId);
 		if (room == null) {
 			throw new NotFoundException();
 		}
@@ -125,16 +125,16 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	}
 
 	@Override
-	public int countFeedbackBySessionKey(final String keyword) {
-		final Feedback feedback = this.getBySessionKey(keyword);
+	public int countFeedbackByRoomShortId(final String roomShortId) {
+		final Feedback feedback = this.getByRoomShortId(roomShortId);
 		final List<Integer> values = feedback.getValues();
 		return values.get(Feedback.FEEDBACK_FASTER) + values.get(Feedback.FEEDBACK_OK)
 				+ values.get(Feedback.FEEDBACK_SLOWER) + values.get(Feedback.FEEDBACK_AWAY);
 	}
 
 	@Override
-	public double calculateAverageFeedback(final String sessionkey) {
-		final Room room = roomRepository.findByKeyword(sessionkey);
+	public double calculateAverageFeedback(final String roomShortId) {
+		final Room room = roomRepository.findByShortId(roomShortId);
 		if (room == null) {
 			throw new NotFoundException();
 		}
@@ -152,13 +152,13 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	}
 
 	@Override
-	public long calculateRoundedAverageFeedback(final String sessionkey) {
-		return Math.round(calculateAverageFeedback(sessionkey));
+	public long calculateRoundedAverageFeedback(final String roomShortId) {
+		return Math.round(calculateAverageFeedback(roomShortId));
 	}
 
 	@Override
-	public boolean save(final String keyword, final int value, final UserAuthentication user) {
-		final Room room = roomRepository.findByKeyword(keyword);
+	public boolean save(final String roomShortId, final int value, final UserAuthentication user) {
+		final Room room = roomRepository.findByShortId(roomShortId);
 		if (room == null) {
 			throw new NotFoundException();
 		}
@@ -169,8 +169,8 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	}
 
 	@Override
-	public Integer getBySessionKeyAndUser(final String keyword, final UserAuthentication user) {
-		final Room room = roomRepository.findByKeyword(keyword);
+	public Integer getByRoomShortIdAndUser(final String roomShortId, final UserAuthentication user) {
+		final Room room = roomRepository.findByShortId(roomShortId);
 		if (room == null) {
 			throw new NotFoundException();
 		}

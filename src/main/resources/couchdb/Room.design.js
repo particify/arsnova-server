@@ -36,7 +36,7 @@ var designDoc = {
 				}
 			}
 		},
-		"partial_by_subject_name_for_publicpool": {
+		"partial_by_category_name_for_pool": {
 			"map": function (doc) {
 				if (doc.type === "Room" && doc.poolProperties) {
 					emit([doc.poolProperties.category, doc.name], {

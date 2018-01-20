@@ -49,16 +49,16 @@ public class FeedbackController extends AbstractController {
 
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.GET)
-	public Feedback getFeedback(@PathVariable final String sessionkey) {
-		return feedbackService.getBySessionKey(sessionkey);
+	@RequestMapping(value = "/session/{shortId}/feedback", method = RequestMethod.GET)
+	public Feedback getFeedback(@PathVariable final String shortId) {
+		return feedbackService.getByRoomShortId(shortId);
 	}
 
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/session/{sessionkey}/myfeedback", method = RequestMethod.GET)
-	public Integer getMyFeedback(@PathVariable final String sessionkey) {
-		Integer value = feedbackService.getBySessionKeyAndUser(sessionkey, userService.getCurrentUser());
+	@RequestMapping(value = "/session/{shortId}/myfeedback", method = RequestMethod.GET)
+	public Integer getMyFeedback(@PathVariable final String shortId) {
+		Integer value = feedbackService.getByRoomShortIdAndUser(shortId, userService.getCurrentUser());
 		if (value != null && value >= Feedback.MIN_FEEDBACK_TYPE && value <= Feedback.MAX_FEEDBACK_TYPE) {
 			return value;
 		}
@@ -67,36 +67,36 @@ public class FeedbackController extends AbstractController {
 
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/session/{sessionkey}/feedbackcount", method = RequestMethod.GET)
-	public int getFeedbackCount(@PathVariable final String sessionkey) {
-		return feedbackService.countFeedbackBySessionKey(sessionkey);
+	@RequestMapping(value = "/session/{shortId}/feedbackcount", method = RequestMethod.GET)
+	public int getFeedbackCount(@PathVariable final String shortId) {
+		return feedbackService.countFeedbackByRoomShortId(shortId);
 	}
 
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/session/{sessionkey}/roundedaveragefeedback", method = RequestMethod.GET)
-	public long getAverageFeedbackRounded(@PathVariable final String sessionkey) {
-		return feedbackService.calculateRoundedAverageFeedback(sessionkey);
+	@RequestMapping(value = "/session/{shortId}/roundedaveragefeedback", method = RequestMethod.GET)
+	public long getAverageFeedbackRounded(@PathVariable final String shortId) {
+		return feedbackService.calculateRoundedAverageFeedback(shortId);
 	}
 
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/session/{sessionkey}/averagefeedback", method = RequestMethod.GET)
-	public double getAverageFeedback(@PathVariable final String sessionkey) {
-		return feedbackService.calculateAverageFeedback(sessionkey);
+	@RequestMapping(value = "/session/{shortId}/averagefeedback", method = RequestMethod.GET)
+	public double getAverageFeedback(@PathVariable final String shortId) {
+		return feedbackService.calculateAverageFeedback(shortId);
 	}
 
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/session/{sessionkey}/feedback", method = RequestMethod.POST)
+	@RequestMapping(value = "/session/{shortId}/feedback", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Feedback postFeedback(
-			@PathVariable final String sessionkey,
+			@PathVariable final String shortId,
 			@RequestBody final int value
 			) {
 		UserAuthentication user = userService.getCurrentUser();
-		feedbackService.save(sessionkey, value, user);
-		Feedback feedback = feedbackService.getBySessionKey(sessionkey);
+		feedbackService.save(shortId, value, user);
+		Feedback feedback = feedbackService.getByRoomShortId(shortId);
 
 		return feedback;
 	}

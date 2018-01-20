@@ -25,7 +25,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * The calculated score along with meta-data.
  */
-@ApiModel(value = "session/{sessionkey}/learningprogress", description = "the score API")
+@ApiModel(value = "session/{shortId}/learningprogress", description = "the score API")
 public class ScoreStatistics {
 
 	private int courseProgress;

@@ -45,7 +45,7 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/socket")
-@Api(value = "/socket", description = "the Socket API")
+@Api(value = "/socket", description = "WebSocket Initialization API")
 public class SocketController extends AbstractController {
 
 	@Autowired
@@ -80,7 +80,7 @@ public class SocketController extends AbstractController {
 			response.setStatus(HttpStatus.FORBIDDEN.value());
 			return;
 		}
-		userService.putUser2SocketId(UUID.fromString(socketid), u);
+		userService.putUserToSocketId(UUID.fromString(socketid), u);
 		userRoomService.setSocketId(UUID.fromString(socketid));
 		response.setStatus(HttpStatus.NO_CONTENT.value());
 	}

@@ -28,7 +28,7 @@ import io.swagger.annotations.ApiModelProperty;
  *
  * This class has additional fields to transport generated answer statistics.
  */
-@ApiModel(value = "Answer", description = "the answer entity")
+@ApiModel(value = "Answer", description = "Answer entity - Can represent a single answer or summarized statistics")
 public class Answer implements Entity {
 	private String id;
 	private String rev;

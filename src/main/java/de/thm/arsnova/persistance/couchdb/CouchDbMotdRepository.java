@@ -30,29 +30,29 @@ public class CouchDbMotdRepository extends CouchDbCrudRepository<Motd> implement
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbMotdRepository.class);
 
 	public CouchDbMotdRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(Motd.class, db, "by_sessionkey", createIfNotExists);
+		super(Motd.class, db, "by_id", createIfNotExists);
 	}
 
 	@Override
 	public List<Motd> findGlobalForAdmin() {
-		return find("by_audience_for_global", null);
+		return find(null);
 	}
 
 	@Override
 	public List<Motd> findGlobalForAll() {
-		return find("by_audience_for_global", "all");
+		return find(Motd.Audience.ALL);
 	}
 
 	@Override
 	public List<Motd> findGlobalForLoggedIn() {
-		return find("by_audience_for_global", "loggedIn");
+		return find(Motd.Audience.AUTHENTICATED);
 	}
 
 	@Override
 	public List<Motd> findGlobalForTutors() {
 		final List<Motd> union = new ArrayList<>();
-		union.addAll(find("by_audience_for_global", "loggedIn"));
-		union.addAll(find("by_audience_for_global", "tutors"));
+		union.addAll(find(Motd.Audience.AUTHENTICATED));
+		union.addAll(find(Motd.Audience.AUTHORS));
 
 		return union;
 	}
@@ -60,25 +60,22 @@ public class CouchDbMotdRepository extends CouchDbCrudRepository<Motd> implement
 	@Override
 	public List<Motd> findForStudents() {
 		final List<Motd> union = new ArrayList<>();
-		union.addAll(find("by_audience_for_global", "loggedIn"));
-		union.addAll(find("by_audience_for_global", "students"));
+		union.addAll(find(Motd.Audience.AUTHENTICATED));
+		union.addAll(find(Motd.Audience.PARTICIPANTS));
 
 		return union;
 	}
 
 	@Override
-	public List<Motd> findBySessionKey(final String sessionkey) {
-		return find("by_sessionkey", sessionkey);
+	public List<Motd> findByRoomId(final String roomId) {
+		return find("by_roomid", roomId);
+	}
+
+	private List<Motd> find(final Motd.Audience audience) {
+		return queryView("by_audience_for_global", audience.toString());
 	}
 
 	private List<Motd> find(final String viewName, final String key) {
 		return queryView(viewName, key);
-	}
-
-	@Override
-	public Motd findByKey(final String key) {
-		final List<Motd> motd = queryView("by_motdkey", key);
-
-		return motd.get(0);
 	}
 }

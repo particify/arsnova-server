@@ -19,6 +19,7 @@ package de.thm.arsnova.entities.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
+import io.swagger.annotations.ApiModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.List;
 /**
  * Once a user joins a session, this class is used to identify a returning user.
  */
+@ApiModel(value = "LoggedIn", description = "Logged In entity - Contains the Room History (Visited Sessions)")
 public class LoggedIn implements Entity {
 	private String id;
 	private String rev;

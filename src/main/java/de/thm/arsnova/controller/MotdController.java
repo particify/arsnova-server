@@ -43,7 +43,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/motd")
-@Api(value = "/motd", description = "the Motd Controller API")
+@Api(value = "/motd", description = "Message of the Day API")
 public class MotdController extends AbstractController {
 	@Autowired
 	private MotdService motdService;
@@ -58,20 +58,24 @@ public class MotdController extends AbstractController {
 		@ApiParam(value = "clientdate", required = false) @RequestParam(value = "clientdate", defaultValue = "") final String clientdate,
 		@ApiParam(value = "adminview", required = false) @RequestParam(value = "adminview", defaultValue = "false") final Boolean adminview,
 		@ApiParam(value = "audience", required = false) @RequestParam(value = "audience", defaultValue = "all") final String audience,
-		@ApiParam(value = "sessionkey", required = false) @RequestParam(value = "sessionkey", defaultValue = "null") final String sessionkey
+		@ApiParam(value = "sessionkey", required = false) @RequestParam(value = "sessionkey", defaultValue = "null") final String roomShortId
 	) {
 		List<Motd> motds;
 		Date date = new Date(System.currentTimeMillis());
 		if (!clientdate.isEmpty()) {
 			date.setTime(Long.parseLong(clientdate));
 		}
+		String roomId = "";
+		if (roomShortId != null) {
+			// roomId = ; // FIXME
+		}
 		if (adminview) {
 			motds = "session".equals(audience) ?
-					motdService.getAllSessionMotds(sessionkey) :
+					motdService.getAllRoomMotds(roomId) :
 					motdService.getAdminMotds();
 		} else {
 			motds = "session".equals(audience) ?
-					motdService.getCurrentSessionMotds(date, sessionkey) :
+					motdService.getCurrentRoomMotds(date, roomId) :
 					motdService.getCurrentMotds(date, audience);
 		}
 		return motds;
@@ -90,8 +94,8 @@ public class MotdController extends AbstractController {
 			) {
 		if (motd != null) {
 			Motd newMotd;
-			if ("session".equals(motd.getAudience()) && motd.getSessionId() != null) {
-				newMotd = motdService.save(motd.getSessionId(), motd);
+			if ("session".equals(motd.getAudience()) && motd.getRoomId() != null) {
+				newMotd = motdService.save(motd.getRoomId(), motd);
 			} else {
 				newMotd = motdService.save(motd);
 			}
@@ -112,8 +116,8 @@ public class MotdController extends AbstractController {
 			@ApiParam(value = "motdkey from current motd", required = true) @PathVariable final String motdId,
 			@ApiParam(value = "current motd", required = true) @RequestBody final Motd motd
 			) {
-		if ("session".equals(motd.getAudience()) && motd.getSessionId() != null) {
-			return motdService.update(motd.getSessionId(), motd);
+		if ("session".equals(motd.getAudience()) && motd.getRoomId() != null) {
+			return motdService.update(motd.getRoomId(), motd);
 		} else {
 			return motdService.update(motd);
 		}
@@ -124,7 +128,7 @@ public class MotdController extends AbstractController {
 	public void deleteMotd(@ApiParam(value = "Motd-key from the message that shall be deleted", required = true) @PathVariable final String motdId) {
 		Motd motd = motdService.get(motdId);
 		if ("session".equals(motd.getAudience())) {
-			motdService.deleteBySessionKey(motd.getSessionId(), motd);
+			motdService.deleteByRoomId(motd.getRoomId(), motd);
 		} else {
 			motdService.delete(motd);
 		}

@@ -28,15 +28,15 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	private LogEntryRepository dbLogger;
 
 	public CouchDbContentRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(Content.class, db, "by_sessionid", createIfNotExists);
+		super(Content.class, db, "by_roomid", createIfNotExists);
 	}
 
 	@Override
-	public List<Content> findBySessionIdForUsers(final String sessionId) {
+	public List<Content> findByRoomIdForUsers(final String roomId) {
 		final List<Content> contents = new ArrayList<>();
-		final List<Content> questions1 = findBySessionIdAndVariantAndActive(sessionId, "lecture", true);
-		final List<Content> questions2 = findBySessionIdAndVariantAndActive(sessionId, "preparation", true);
-		final List<Content> questions3 = findBySessionIdAndVariantAndActive(sessionId, "flashcard", true);
+		final List<Content> questions1 = findByRoomIdAndVariantAndActive(roomId, "lecture", true);
+		final List<Content> questions2 = findByRoomIdAndVariantAndActive(roomId, "preparation", true);
+		final List<Content> questions3 = findByRoomIdAndVariantAndActive(roomId, "flashcard", true);
 		contents.addAll(questions1);
 		contents.addAll(questions2);
 		contents.addAll(questions3);
@@ -45,38 +45,38 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public List<Content> findBySessionIdForSpeaker(final String sessionId) {
-		return findBySessionIdAndVariantAndActive(new Object[] {sessionId}, sessionId);
+	public List<Content> findByRoomIdForSpeaker(final String roomId) {
+		return findByRoomIdAndVariantAndActive(new Object[] {roomId}, roomId);
 	}
 
 	@Override
-	public int countBySessionId(final String sessionId) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(sessionId))
-				.endKey(ComplexKey.of(sessionId, ComplexKey.emptyObject())));
+	public int countByRoomId(final String roomId) {
+		final ViewResult result = db.queryView(createQuery("by_roomid_group_locked")
+				.startKey(ComplexKey.of(roomId))
+				.endKey(ComplexKey.of(roomId, ComplexKey.emptyObject())));
 
 		return result.getSize();
 	}
 
 	@Override
-	public List<String> findIdsBySessionId(final String sessionId) {
-		return collectQuestionIds(db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(sessionId))
-				.endKey(ComplexKey.of(sessionId, ComplexKey.emptyObject()))));
+	public List<String> findIdsByRoomId(final String roomId) {
+		return collectQuestionIds(db.queryView(createQuery("by_roomid_group_locked")
+				.startKey(ComplexKey.of(roomId))
+				.endKey(ComplexKey.of(roomId, ComplexKey.emptyObject()))));
 	}
 
 	@Override
-	public List<String> findIdsBySessionIdAndVariant(final String sessionId, final String variant) {
-		return collectQuestionIds(db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(sessionId, variant))
-				.endKey(ComplexKey.of(sessionId, variant, ComplexKey.emptyObject()))));
+	public List<String> findIdsByRoomIdAndVariant(final String roomId, final String variant) {
+		return collectQuestionIds(db.queryView(createQuery("by_roomid_group_locked")
+				.startKey(ComplexKey.of(roomId, variant))
+				.endKey(ComplexKey.of(roomId, variant, ComplexKey.emptyObject()))));
 	}
 
 	@Override
-	public int deleteBySessionId(final String sessionId) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(sessionId))
-				.endKey(ComplexKey.of(sessionId, ComplexKey.emptyObject()))
+	public int deleteByRoomId(final String roomId) {
+		final ViewResult result = db.queryView(createQuery("by_roomid_group_locked")
+				.startKey(ComplexKey.of(roomId))
+				.endKey(ComplexKey.of(roomId, ComplexKey.emptyObject()))
 				.reduce(false));
 
 		final List<BulkDeleteDocument> deleteDocs = new ArrayList<>();
@@ -90,85 +90,85 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public List<String> findUnansweredIdsBySessionIdAndUser(final String sessionId, final UserAuthentication user) {
-		final ViewResult result = db.queryView(createQuery("questionid_by_user_sessionid_variant")
+	public List<String> findUnansweredIdsByRoomIdAndUser(final String roomId, final UserAuthentication user) {
+		final ViewResult result = db.queryView(createQuery("contentid_by_creatorid_roomid_variant")
 				.designDocId("_design/Answer")
-				.startKey(ComplexKey.of(user.getUsername(), sessionId))
-				.endKey(ComplexKey.of(user.getUsername(), sessionId, ComplexKey.emptyObject())));
+				.startKey(ComplexKey.of(user.getId(), roomId))
+				.endKey(ComplexKey.of(user.getUsername(), roomId, ComplexKey.emptyObject())));
 		final List<String> answeredIds = new ArrayList<>();
 		for (final ViewResult.Row row : result.getRows()) {
 			answeredIds.add(row.getId());
 		}
-		return collectUnansweredQuestionIds(findIdsBySessionId(sessionId), answeredIds);
+		return collectUnansweredQuestionIds(findIdsByRoomId(roomId), answeredIds);
 	}
 
 	@Override
-	public List<String> findUnansweredIdsBySessionIdAndUserOnlyLectureVariant(final String sessionId, final UserAuthentication user) {
-		final ViewResult result = db.queryView(createQuery("questionid_piround_by_user_sessionid_variant")
+	public List<String> findUnansweredIdsByRoomIdAndUserOnlyLectureVariant(final String roomId, final UserAuthentication user) {
+		final ViewResult result = db.queryView(createQuery("contentid_round_by_creatorid_roomid_variant")
 				.designDocId("_design/Answer")
-				.key(ComplexKey.of(user.getUsername(), sessionId, "lecture")));
+				.key(ComplexKey.of(user.getId(), roomId, "lecture")));
 		final Map<String, Integer> answeredQuestions = new HashMap<>();
 		for (final ViewResult.Row row : result.getRows()) {
 			answeredQuestions.put(row.getId(), row.getKeyAsNode().get(2).asInt());
 		}
 
-		return collectUnansweredQuestionIdsByPiRound(findBySessionIdOnlyLectureVariantAndActive(sessionId), answeredQuestions);
+		return collectUnansweredQuestionIdsByPiRound(findByRoomIdOnlyLectureVariantAndActive(roomId), answeredQuestions);
 	}
 
 	@Override
-	public List<String> findUnansweredIdsBySessionIdAndUserOnlyPreparationVariant(final String sessionId, final UserAuthentication user) {
-		final ViewResult result = db.queryView(createQuery("questionid_piround_by_user_sessionid_variant")
+	public List<String> findUnansweredIdsByRoomIdAndUserOnlyPreparationVariant(final String roomId, final UserAuthentication user) {
+		final ViewResult result = db.queryView(createQuery("contentid_round_by_creatorid_roomid_variant")
 				.designDocId("_design/Answer")
-				.key(ComplexKey.of(user.getUsername(), sessionId, "preparation")));
+				.key(ComplexKey.of(user.getId(), roomId, "preparation")));
 		final Map<String, Integer> answeredQuestions = new HashMap<>();
 		for (final ViewResult.Row row : result.getRows()) {
 			answeredQuestions.put(row.getId(), row.getKeyAsNode().get(2).asInt());
 		}
 
-		return collectUnansweredQuestionIdsByPiRound(findBySessionIdOnlyPreparationVariantAndActive(sessionId), answeredQuestions);
+		return collectUnansweredQuestionIdsByPiRound(findByRoomIdOnlyPreparationVariantAndActive(roomId), answeredQuestions);
 	}
 
 	@Override
-	public List<Content> findBySessionIdOnlyLectureVariantAndActive(final String sessionId) {
-		return findBySessionIdAndVariantAndActive(sessionId, "lecture", true);
+	public List<Content> findByRoomIdOnlyLectureVariantAndActive(final String roomId) {
+		return findByRoomIdAndVariantAndActive(roomId, "lecture", true);
 	}
 
 	@Override
-	public List<Content> findBySessionIdOnlyLectureVariant(final String sessionId) {
-		return findBySessionIdAndVariantAndActive(sessionId, "lecture");
+	public List<Content> findByRoomIdOnlyLectureVariant(final String roomId) {
+		return findByRoomIdAndVariantAndActive(roomId, "lecture");
 	}
 
 	@Override
-	public List<Content> findBySessionIdOnlyFlashcardVariantAndActive(final String sessionId) {
-		return findBySessionIdAndVariantAndActive(sessionId, "flashcard", true);
+	public List<Content> findByRoomIdOnlyFlashcardVariantAndActive(final String roomId) {
+		return findByRoomIdAndVariantAndActive(roomId, "flashcard", true);
 	}
 
 	@Override
-	public List<Content> findBySessionIdOnlyFlashcardVariant(final String sessionId) {
-		return findBySessionIdAndVariantAndActive(sessionId, "flashcard");
+	public List<Content> findByRoomIdOnlyFlashcardVariant(final String roomId) {
+		return findByRoomIdAndVariantAndActive(roomId, "flashcard");
 	}
 
 	@Override
-	public List<Content> findBySessionIdOnlyPreparationVariantAndActive(final String sessionId) {
-		return findBySessionIdAndVariantAndActive(sessionId, "preparation", true);
+	public List<Content> findByRoomIdOnlyPreparationVariantAndActive(final String roomId) {
+		return findByRoomIdAndVariantAndActive(roomId, "preparation", true);
 	}
 
 	@Override
-	public List<Content> findBySessionIdOnlyPreparationVariant(final String sessionId) {
-		return findBySessionIdAndVariantAndActive(sessionId, "preparation");
+	public List<Content> findByRoomIdOnlyPreparationVariant(final String roomId) {
+		return findByRoomIdAndVariantAndActive(roomId, "preparation");
 	}
 
 	@Override
-	public List<Content> findBySessionId(final String sessionId) {
-		return findBySessionIdAndVariantAndActive(sessionId);
+	public List<Content> findByRoomId(final String roomId) {
+		return findByRoomIdAndVariantAndActive(roomId);
 	}
 
 	@Override
-	public List<Content> findBySessionIdAndVariantAndActive(final Object... keys) {
+	public List<Content> findByRoomIdAndVariantAndActive(final Object... keys) {
 		final Object[] endKeys = Arrays.copyOf(keys, keys.length + 1);
 		endKeys[keys.length] = ComplexKey.emptyObject();
 
-		return db.queryView(createQuery("by_sessionid_variant_active")
+		return db.queryView(createQuery("by_roomid_group_locked")
 						.includeDocs(true)
 						.reduce(false)
 						.startKey(ComplexKey.of(keys))
@@ -177,31 +177,31 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public int countLectureVariantBySessionId(final String sessionId) {
+	public int countLectureVariantByRoomId(final String roomId) {
 		/* TODO: reduce code duplication */
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(sessionId, "lecture"))
-				.endKey(ComplexKey.of(sessionId, "lecture", ComplexKey.emptyObject())));
+		final ViewResult result = db.queryView(createQuery("by_roomid_group_locked")
+				.startKey(ComplexKey.of(roomId, "lecture"))
+				.endKey(ComplexKey.of(roomId, "lecture", ComplexKey.emptyObject())));
 
 		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
 	}
 
 	@Override
-	public int countFlashcardVariantBySessionId(final String sessionId) {
+	public int countFlashcardVariantRoomId(final String roomId) {
 		/* TODO: reduce code duplication */
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(sessionId, "flashcard"))
-				.endKey(ComplexKey.of(sessionId, "flashcard", ComplexKey.emptyObject())));
+		final ViewResult result = db.queryView(createQuery("by_roomid_group_locked")
+				.startKey(ComplexKey.of(roomId, "flashcard"))
+				.endKey(ComplexKey.of(roomId, "flashcard", ComplexKey.emptyObject())));
 
 		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
 	}
 
 	@Override
-	public int countPreparationVariantBySessionId(final String sessionId) {
+	public int countPreparationVariantByRoomId(final String roomId) {
 		/* TODO: reduce code duplication */
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(sessionId, "preparation"))
-				.endKey(ComplexKey.of(sessionId, "preparation", ComplexKey.emptyObject())));
+		final ViewResult result = db.queryView(createQuery("by_roomid_group_locked")
+				.startKey(ComplexKey.of(roomId, "preparation"))
+				.endKey(ComplexKey.of(roomId, "preparation", ComplexKey.emptyObject())));
 
 		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
 	}
@@ -245,10 +245,10 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	/* TODO: remove if this method is no longer used */
 	@Override
-	public List<String> findIdsBySessionIdAndVariantAndSubject(final String sessionId, final String questionVariant, final String subject) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(sessionId, questionVariant, 1, subject))
-				.endKey(ComplexKey.of(sessionId, questionVariant, 1, subject, ComplexKey.emptyObject())));
+	public List<String> findIdsByRoomIdAndVariantAndSubject(final String roomId, final String questionVariant, final String subject) {
+		final ViewResult result = db.queryView(createQuery("by_roomid_group_locked")
+				.startKey(ComplexKey.of(roomId, questionVariant, false, subject))
+				.endKey(ComplexKey.of(roomId, questionVariant, false, subject, ComplexKey.emptyObject())));
 
 		final List<String> qids = new ArrayList<>();
 
@@ -261,10 +261,10 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public List<String> findSubjectsBySessionIdAndVariant(final String sessionId, final String questionVariant) {
-		final ViewResult result = db.queryView(createQuery("by_sessionid_variant_active")
-				.startKey(ComplexKey.of(sessionId, questionVariant))
-				.endKey(ComplexKey.of(sessionId, questionVariant, ComplexKey.emptyObject())));
+	public List<String> findSubjectsByRoomIdAndVariant(final String roomId, final String questionVariant) {
+		final ViewResult result = db.queryView(createQuery("by_roomid_group_locked")
+				.startKey(ComplexKey.of(roomId, questionVariant))
+				.endKey(ComplexKey.of(roomId, questionVariant, ComplexKey.emptyObject())));
 
 		final Set<String> uniqueSubjects = new HashSet<>();
 

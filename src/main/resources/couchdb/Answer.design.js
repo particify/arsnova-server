@@ -2,69 +2,69 @@ var designDoc = {
 	"_id": "_design/Answer",
 	"language": "javascript",
 	"views": {
-		"by_questionid": {
+		"by_contentid": {
 			"map": function (doc) {
 				if (doc.type === "Answer") {
-					emit(doc.questionId, {_rev: doc._rev});
+					emit(doc.contentId, {_rev: doc._rev});
 				}
 			}
 		},
-		"by_questionid_piround_text_subject": {
+		"by_contentid_round_body_subject": {
 			"map": function (doc) {
 				if (doc.type === "Answer") {
-					emit([doc.questionId, doc.piRound, doc.abstention, doc.answerText, doc.answerSubject, doc.successfulFreeTextAnswer], {_rev: doc._rev});
+					emit([doc.contentId, doc.round, doc.abstention, doc.body, doc.subject, doc.successfulFreeTextAnswer], {_rev: doc._rev});
 				}
 			},
 			"reduce": "_count"
 		},
-		"by_questionid_timestamp": {
+		"by_contentid_creationtimestamp": {
 			"map": function (doc) {
 				if (doc.type === "Answer") {
-					emit([doc.questionId, doc.timestamp], {_rev: doc._rev});
+					emit([doc.contentId, doc.creationTimestamp], {_rev: doc._rev});
 				}
 			}
 		},
-		"by_questionid_user_piround": {
+		"by_contentid_user_round": {
 			"map": function (doc) {
 				if (doc.type === "Answer") {
-					emit([doc.questionId, doc.user, doc.piRound], {_rev: doc._rev});
+					emit([doc.contentId, doc.user, doc.round], {_rev: doc._rev});
 				}
 			}
 		},
-		"by_sessionid": {
+		"by_roomid": {
 			"map": function (doc) {
 				if (doc.type === "Answer") {
-					emit(doc.sessionId, {_rev: doc._rev});
+					emit(doc.roomId, {_rev: doc._rev});
 				}
 			},
 			"reduce": "_count"
 		},
-		"by_sessionid_variant": {
+		"by_roomid_variant": {
 			"map": function (doc) {
 				if (doc.type === "Answer") {
-					emit([doc.sessionId, doc.questionVariant], {_rev: doc._rev});
+					emit([doc.roomId, doc.questionVariant], {_rev: doc._rev});
 				}
 			},
 			"reduce": "_count"
 		},
-		"by_user_sessionid": {
+		"by_creatorid_roomid": {
 			"map": function (doc) {
 				if (doc.type === "Answer") {
-					emit([doc.user, doc.sessionId], {_rev: doc._rev});
+					emit([doc.creatorId, doc.roomId], {_rev: doc._rev});
 				}
 			}
 		},
-		"questionid_by_user_sessionid_variant": {
+		"contentid_by_creatorid_roomid_variant": {
 			"map": function (doc) {
 				if (doc.type === "Answer") {
-					emit([doc.user, doc.sessionId, doc.questionVariant], doc.questionId);
+					emit([doc.user, doc.roomId, doc.questionVariant], doc.contentId);
 				}
 			}
 		},
-		"questionid_piround_by_user_sessionid_variant": {
+		"contentid_round_by_creatorid_roomid_variant": {
 			"map": function (doc) {
 				if (doc.type === "Answer") {
-					emit([doc.user, doc.sessionId, doc.questionVariant], [doc.questionId, doc.piRound]);
+					emit([doc.creatorId, doc.roomId, doc.questionVariant], [doc.contentId, doc.round]);
 				}
 			}
 		}

@@ -23,9 +23,9 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * Wrapper class for counting read and unread comments for a session or a single user.
+ * Wrapper class for counting read and unread Comments for a Room or a single user.
  */
-@ApiModel(value = "audiencequestion/readcount", description = "the comment reading count entity")
+@ApiModel(value = "Comment Reading Count", description = "Comment Reading Count statistics entity")
 public class CommentReadingCount {
 
 	private int read;

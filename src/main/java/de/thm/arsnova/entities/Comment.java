@@ -11,7 +11,7 @@ public class Comment implements Entity {
 	private String rev;
 	private Date creationTimestamp;
 	private Date updateTimestamp;
-	private String sessionId;
+	private String roomId;
 	private String creatorId;
 	private String subject;
 	private String body;
@@ -68,13 +68,13 @@ public class Comment implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public String getSessionId() {
-		return sessionId;
+	public String getRoomId() {
+		return roomId;
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setSessionId(final String sessionId) {
-		this.sessionId = sessionId;
+	public void setRoomId(final String roomId) {
+		this.roomId = roomId;
 	}
 
 	@JsonView(View.Persistence.class)

@@ -25,16 +25,16 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface AnswerRepository extends CrudRepository<Answer, String> {
-	Answer findByQuestionIdUserPiRound(String questionId, UserAuthentication user, int piRound);
+	Answer findByContentIdUserPiRound(String contentId, UserAuthentication user, int piRound);
 	AnswerStatistics findByContentIdPiRound(String contentId, int piRound);
 	int countByContentIdRound(String contentId, int round);
 	int countByContentId(String contentId);
 	List<Answer> findByContentId(String contentId, int start, int limit);
-	List<Answer> findByUserSessionId(UserAuthentication user, String sessionId);
-	int countBySessionKey(String sessionKey);
+	List<Answer> findByUserRoomId(UserAuthentication user, String roomId);
+	int countByRoomShortId(String roomShortId);
 	int deleteByContentId(String contentId);
-	int countBySessionIdLectureVariant(String sessionId);
-	int countBySessionIdPreparationVariant(String sessionId);
+	int countByRoomIdOnlyLectureVariant(String roomId);
+	int countByRoomIdOnlyPreparationVariant(String roomId);
 	int deleteAllAnswersForQuestions(List<String> contentIds);
 	int deleteByContentIds(List<String> contentIds);
 }
