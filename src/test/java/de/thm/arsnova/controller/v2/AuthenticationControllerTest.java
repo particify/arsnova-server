@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.controller;
+package de.thm.arsnova.controller.v2;
 
+import de.thm.arsnova.controller.AbstractControllerTest;
 import de.thm.arsnova.services.StubUserService;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -34,7 +35,7 @@ import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-public class LoginControllerTest extends AbstractControllerTest {
+public class AuthenticationControllerTest extends AbstractControllerTest {
 
 	@Autowired
 	private StubUserService userService;
@@ -52,7 +53,7 @@ public class LoginControllerTest extends AbstractControllerTest {
 	@Test
 	public void testGuestLogin() throws Exception {
 		mockMvc.perform(
-				get("/doLogin")
+				get("/v2/auth/doLogin")
 				.param("type", "guest")
 				).andExpect(status().isOk());
 	}
@@ -60,7 +61,7 @@ public class LoginControllerTest extends AbstractControllerTest {
 	@Test
 	public void testReuseGuestLogin() throws Exception {
 		mockMvc.perform(
-				get("/doLogin")
+				get("/v2/auth/doLogin")
 				.param("type", "guest").param("user","Guest1234567890")
 				).andExpect(status().isOk());
 
@@ -76,7 +77,7 @@ public class LoginControllerTest extends AbstractControllerTest {
 	public void testUser() throws Exception {
 		userService.setUserAuthenticated(true);
 
-		mockMvc.perform(get("/whoami").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/v2/auth/whoami").accept(MediaType.APPLICATION_JSON))
 		.andExpect(status().isOk())
 		.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 		.andExpect(jsonPath("$.username").value("ptsr00"))
@@ -85,7 +86,7 @@ public class LoginControllerTest extends AbstractControllerTest {
 
 	@Test
 	public void testLogoutWithoutRedirect() throws Exception {
-		mockMvc.perform(get("/logout"))
+		mockMvc.perform(get("/v2/auth/logout"))
 		.andExpect(status().is3xxRedirection())
 		.andExpect(redirectedUrl("/"));
 	}

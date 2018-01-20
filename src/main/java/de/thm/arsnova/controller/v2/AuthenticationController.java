@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.controller;
+package de.thm.arsnova.controller.v2;
 
+import de.thm.arsnova.controller.AbstractController;
 import de.thm.arsnova.entities.ServiceDescription;
 import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.Room;
@@ -69,7 +70,8 @@ import java.util.List;
  * Handles authentication specific requests.
  */
 @Controller
-public class LoginController extends AbstractController {
+@RequestMapping("/v2/auth")
+public class AuthenticationController extends AbstractController {
 
 	private static final int MAX_USERNAME_LENGTH = 15;
 	private static final int MAX_GUESTHASH_LENGTH = 10;
@@ -147,7 +149,7 @@ public class LoginController extends AbstractController {
 	@Autowired
 	private UserRoomService userRoomService;
 
-	private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
+	private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
 
 	@PostConstruct
 	private void init() {
@@ -156,7 +158,7 @@ public class LoginController extends AbstractController {
 		}
 	}
 
-	@RequestMapping(value = { "/auth/login", "/doLogin" }, method = { RequestMethod.POST, RequestMethod.GET })
+	@RequestMapping(value = { "/login", "/doLogin" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public void doLogin(
 			@RequestParam("type") final String type,
 			@RequestParam(value = "user", required = false) String username,
@@ -238,7 +240,7 @@ public class LoginController extends AbstractController {
 		}
 	}
 
-	@RequestMapping(value = { "/auth/dialog" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/dialog" }, method = RequestMethod.GET)
 	@ResponseBody
 	public View dialog(
 			@RequestParam("type") final String type,
@@ -297,14 +299,14 @@ public class LoginController extends AbstractController {
 		return result;
 	}
 
-	@RequestMapping(value = { "/auth/", "/whoami" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/", "/whoami" }, method = RequestMethod.GET)
 	@ResponseBody
 	public UserAuthentication whoami() {
 		userRoomService.setUser(userService.getCurrentUser());
 		return userService.getCurrentUser();
 	}
 
-	@RequestMapping(value = { "/auth/logout", "/logout" }, method = { RequestMethod.POST, RequestMethod.GET })
+	@RequestMapping(value = { "/logout" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public View doLogout(final HttpServletRequest request) {
 		final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		userService.removeUserFromMaps(userService.getCurrentUser());
@@ -316,13 +318,13 @@ public class LoginController extends AbstractController {
 		return new RedirectView(request.getHeader("referer") != null ? request.getHeader("referer") : "/");
 	}
 
-	@RequestMapping(value = { "/auth/services" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/services" }, method = RequestMethod.GET)
 	@ResponseBody
 	public List<ServiceDescription> getServices(final HttpServletRequest request) {
 		List<ServiceDescription> services = new ArrayList<>();
 
 		/* The first parameter is replaced by the backend, the second one by the frondend */
-		String dialogUrl = apiPath + "/auth/dialog?type={0}&successurl='{0}'";
+		String dialogUrl = apiPath + "/v2/auth/dialog?type={0}&successurl='{0}'";
 
 		if (guestEnabled) {
 			ServiceDescription sdesc = new ServiceDescription(
