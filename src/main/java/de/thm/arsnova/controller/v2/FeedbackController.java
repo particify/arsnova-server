@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.controller;
+package de.thm.arsnova.controller.v2;
 
+import de.thm.arsnova.controller.AbstractController;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -39,7 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @see ArsnovaSocketioServerImpl
  */
-@RestController
+@RestController("v2FeedbackController")
 public class FeedbackController extends AbstractController {
 	@Autowired
 	private FeedbackService feedbackService;

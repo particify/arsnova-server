@@ -15,9 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.controller;
+package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.connector.client.ConnectorClient;
+import de.thm.arsnova.controller.AbstractControllerTest;
+import de.thm.arsnova.controller.v2.CourseController;
 import de.thm.arsnova.services.StubUserService;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,7 +59,7 @@ public class CourseControllerTest extends AbstractControllerTest {
 	public void testShouldIndicateNotImplementedIfInactiveClient() throws Exception {
 		setAuthenticated(true, "ptsr00");
 
-		mockMvc.perform(get("/mycourses").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/v2/mycourses").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNotImplemented());
 	}
 
@@ -65,7 +67,7 @@ public class CourseControllerTest extends AbstractControllerTest {
 	public void testShouldNotReturnCurrentUsersCoursesIfUnauthorized() throws Exception {
 		setAuthenticated(false, "nobody");
 
-		mockMvc.perform(get("/mycourses").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/v2/mycourses").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isUnauthorized());
 	}
 }

@@ -15,12 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.controller;
+package de.thm.arsnova.controller.v2;
 
-import de.thm.arsnova.entities.Comment;
+import de.thm.arsnova.controller.PaginationController;
+import de.thm.arsnova.entities.UserProfile;
+import de.thm.arsnova.entities.migration.FromV2Migrator;
+import de.thm.arsnova.entities.migration.ToV2Migrator;
+import de.thm.arsnova.entities.migration.v2.Comment;
 import de.thm.arsnova.entities.migration.v2.CommentReadingCount;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.services.CommentService;
+import de.thm.arsnova.services.UserService;
 import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.web.Pagination;
 import io.swagger.annotations.Api;
@@ -39,17 +44,27 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Handles requests related to comments.
  */
-@RestController
-@RequestMapping("/audiencequestion")
+@RestController("v2CommentController")
+@RequestMapping("/v2/audiencequestion")
 @Api(value = "/audiencequestion", description = "Comment (Interposed/Audience Question) API")
 public class CommentController extends PaginationController {
 
 	@Autowired
 	private CommentService commentService;
+
+	@Autowired
+	private UserService userService;
+
+	@Autowired
+	private ToV2Migrator toV2Migrator;
+
+	@Autowired
+	private FromV2Migrator fromV2Migrator;
 
 	@ApiOperation(value = "Count all the comments in current session",
 			nickname = "getCommentCount")
@@ -74,14 +89,15 @@ public class CommentController extends PaginationController {
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
 	public List<Comment> getComments(@ApiParam(value = "Room-Key from current session", required = true) @RequestParam final String sessionkey) {
-		return commentService.getByRoomShortId(sessionkey, offset, limit);
+		return commentService.getByRoomShortId(sessionkey, offset, limit).stream()
+				.map(toV2Migrator::migrate).collect(Collectors.toList());
 	}
 
 	@ApiOperation(value = "Retrieves an Comment",
 			nickname = "getComment")
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
 	public Comment getComment(@ApiParam(value = "ID of the Comment that needs to be deleted", required = true) @PathVariable final String questionId) {
-		return commentService.getAndMarkRead(questionId);
+		return toV2Migrator.migrate(commentService.getAndMarkRead(questionId));
 	}
 
 	@ApiOperation(value = "Creates a new Comment for a Room and returns the Comment's data",
@@ -95,7 +111,8 @@ public class CommentController extends PaginationController {
 			@ApiParam(value = "Room-Key from current session", required = true) @RequestParam final String sessionkey,
 			@ApiParam(value = "the body from the new comment", required = true) @RequestBody final Comment comment
 			) {
-		if (commentService.save(comment)) {
+		UserProfile profile = userService.getByUsername(comment.getCreator());
+		if (commentService.save(fromV2Migrator.migrate(comment, profile))) {
 			return;
 		}
 

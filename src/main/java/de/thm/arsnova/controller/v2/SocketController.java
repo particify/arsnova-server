@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.controller;
+package de.thm.arsnova.controller.v2;
 
+import de.thm.arsnova.controller.AbstractController;
 import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.services.UserRoomService;
 import de.thm.arsnova.services.UserService;
@@ -43,8 +44,8 @@ import java.util.UUID;
 /**
  * Initiates the socket communication.
  */
-@RestController
-@RequestMapping("/socket")
+@RestController("v2SocketController")
+@RequestMapping("/v2/socket")
 @Api(value = "/socket", description = "WebSocket Initialization API")
 public class SocketController extends AbstractController {
 

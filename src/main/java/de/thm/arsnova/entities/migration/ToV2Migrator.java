@@ -23,6 +23,7 @@ import de.thm.arsnova.entities.migration.v2.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -57,16 +58,22 @@ public class ToV2Migrator {
 		return to;
 	}
 
-	public Room migrate(final de.thm.arsnova.entities.Room from, final UserProfile owner) {
+	public Room migrate(final de.thm.arsnova.entities.Room from, final Optional<UserProfile> owner) {
 		final Room to = new Room();
 		copyCommonProperties(from, to);
 		to.setKeyword(from.getShortId());
-		to.setCreator(owner == null ? null : owner.getLoginId());
+		if (owner.isPresent()) {
+			to.setCreator(owner.get().getLoginId());
+		}
 		to.setName(from.getName());
 		to.setShortName(from.getAbbreviation());
 		to.setActive(!from.isClosed());
 
 		return to;
+	}
+
+	public Room migrate(final de.thm.arsnova.entities.Room from) {
+		return migrate(from, Optional.empty());
 	}
 
 	public Content migrate(final de.thm.arsnova.entities.Content from) {
@@ -116,11 +123,14 @@ public class ToV2Migrator {
 		return to;
 	}
 
-	public Answer migrate(final de.thm.arsnova.entities.ChoiceAnswer from, final de.thm.arsnova.entities.ChoiceQuestionContent content, final UserProfile creator) {
+	public Answer migrate(final de.thm.arsnova.entities.ChoiceAnswer from,
+			final de.thm.arsnova.entities.ChoiceQuestionContent content, final Optional<UserProfile> creator) {
 		final Answer to = new Answer();
 		copyCommonProperties(from, to);
 		to.setQuestionId(from.getContentId());
-		to.setUser(creator.getLoginId());
+		if (creator.isPresent()) {
+			to.setUser(creator.get().getLoginId());
+		}
 
 		List<String> answers = new ArrayList<>();
 		for (int i = 0; i < content.getOptions().size(); i++) {
@@ -131,11 +141,19 @@ public class ToV2Migrator {
 		return to;
 	}
 
-	public Answer migrate(final de.thm.arsnova.entities.TextAnswer from, final de.thm.arsnova.entities.Content content, final UserProfile creator) {
+	public Answer migrate(final de.thm.arsnova.entities.ChoiceAnswer from,
+			final de.thm.arsnova.entities.ChoiceQuestionContent content) {
+		return migrate(from, content, Optional.empty());
+	}
+
+	public Answer migrate(final de.thm.arsnova.entities.TextAnswer from,
+			final Optional<de.thm.arsnova.entities.Content> content, final Optional<UserProfile> creator) {
 		final Answer to = new Answer();
 		copyCommonProperties(from, to);
 		to.setQuestionId(from.getContentId());
-		to.setUser(creator.getLoginId());
+		if (creator.isPresent()) {
+			to.setUser(creator.get().getLoginId());
+		}
 
 		to.setAnswerSubject(from.getSubject());
 		to.setAnswerText(from.getBody());
@@ -143,17 +161,27 @@ public class ToV2Migrator {
 		return to;
 	}
 
-	public Comment migrate(final de.thm.arsnova.entities.Comment from, final UserProfile creator) {
+	public Answer migrate(final de.thm.arsnova.entities.TextAnswer from) {
+		return migrate(from, Optional.empty(), Optional.empty());
+	}
+
+	public Comment migrate(final de.thm.arsnova.entities.Comment from, final Optional<UserProfile> creator) {
 		final Comment to = new Comment();
 		copyCommonProperties(from, to);
 		to.setSessionId(from.getRoomId());
-		to.setCreator(creator.getLoginId());
+		if (creator.isPresent()) {
+			to.setCreator(creator.get().getLoginId());
+		}
 		to.setSubject(from.getSubject());
 		to.setText(from.getBody());
 		to.setTimestamp(from.getTimestamp().getTime());
 		to.setRead(from.isRead());
 
 		return to;
+	}
+
+	public Comment migrate(final de.thm.arsnova.entities.Comment from) {
+		return migrate(from, Optional.empty());
 	}
 
 	public Motd migrate(final de.thm.arsnova.entities.Motd from) {

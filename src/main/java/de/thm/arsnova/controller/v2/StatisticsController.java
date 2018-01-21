@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.controller;
+package de.thm.arsnova.controller.v2;
 
+import de.thm.arsnova.controller.AbstractController;
 import de.thm.arsnova.entities.Statistics;
 import de.thm.arsnova.services.StatisticsService;
 import de.thm.arsnova.web.CacheControl;
@@ -31,8 +32,9 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Allows retrieval of several statistics such as the number of active users.
  */
-@RestController
+@RestController("v2StatisticsController")
 @Api(value = "/statistics", description = "Statistics API")
+@RequestMapping("/v2/statistics")
 public class StatisticsController extends AbstractController {
 
 	@Autowired
@@ -40,7 +42,7 @@ public class StatisticsController extends AbstractController {
 
 	@ApiOperation(value = "Retrieves global statistics",
 			nickname = "getStatistics")
-	@RequestMapping(method = RequestMethod.GET, value = "/statistics")
+	@RequestMapping(method = RequestMethod.GET, value = "/")
 	@CacheControl(maxAge = 60, policy = CacheControl.Policy.PUBLIC)
 	public Statistics getStatistics() {
 		return statisticsService.getStatistics();
@@ -50,7 +52,7 @@ public class StatisticsController extends AbstractController {
 			nickname = "countActiveUsers")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(method = RequestMethod.GET, value = "/statistics/activeusercount", produces = "text/plain")
+	@RequestMapping(method = RequestMethod.GET, value = "/activeusercount", produces = "text/plain")
 	public String countActiveUsers() {
 		return Integer.toString(statisticsService.getStatistics().getActiveUsers());
 	}
@@ -59,7 +61,7 @@ public class StatisticsController extends AbstractController {
 			nickname = "countLoggedInUsers")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(method = RequestMethod.GET, value = "/statistics/loggedinusercount", produces = "text/plain")
+	@RequestMapping(method = RequestMethod.GET, value = "/loggedinusercount", produces = "text/plain")
 	public String countLoggedInUsers() {
 		return Integer.toString(statisticsService.getStatistics().getLoggedinUsers());
 	}
@@ -68,7 +70,7 @@ public class StatisticsController extends AbstractController {
 			nickname = "countSessions")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(method = RequestMethod.GET, value = "/statistics/sessioncount", produces = "text/plain")
+	@RequestMapping(method = RequestMethod.GET, value = "/sessioncount", produces = "text/plain")
 	public String countSessions() {
 		return Integer.toString(statisticsService.getStatistics().getOpenSessions()
 				+ statisticsService.getStatistics().getClosedSessions());

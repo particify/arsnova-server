@@ -15,10 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.controller;
+package de.thm.arsnova.controller.v2;
 
-import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.entities.Content;
+import de.thm.arsnova.controller.PaginationController;
+import de.thm.arsnova.entities.migration.FromV2Migrator;
+import de.thm.arsnova.entities.migration.ToV2Migrator;
+import de.thm.arsnova.entities.migration.v2.Answer;
+import de.thm.arsnova.entities.migration.v2.Content;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
@@ -47,12 +50,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Handles requests related to questions teachers are asking their students.
  */
-@RestController
-@RequestMapping("/lecturerquestion")
+@RestController("v2ContentController")
+@RequestMapping("/v2/lecturerquestion")
 @Api(value = "/lecturerquestion", description = "Content (Skill/Lecturer Question) API")
 public class ContentController extends PaginationController {
 	@Autowired
@@ -61,6 +65,12 @@ public class ContentController extends PaginationController {
 	@Autowired
 	private TimerService timerService;
 
+	@Autowired
+	private ToV2Migrator toV2Migrator;
+
+	@Autowired
+	private FromV2Migrator fromV2Migrator;
+
 	@ApiOperation(value = "Get question with provided question Id",
 			nickname = "getQuestion")
 	@ApiResponses(value = {
@@ -68,9 +78,9 @@ public class ContentController extends PaginationController {
 	})
 	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
 	public Content getQuestion(@PathVariable final String questionId) {
-		final Content content = contentService.get(questionId);
+		final de.thm.arsnova.entities.Content content = contentService.get(questionId);
 		if (content != null) {
-			return content;
+			return toV2Migrator.migrate(content);
 		}
 
 		throw new NotFoundException();
@@ -84,8 +94,9 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Content postQuestion(@RequestBody final Content content) {
-		if (contentService.save(content) != null) {
-			return content;
+		de.thm.arsnova.entities.Content contentV3 = fromV2Migrator.migrate(content);
+		if (contentService.save(contentV3) != null) {
+			return toV2Migrator.migrate(contentV3);
 		}
 		throw new BadRequestException();
 	}
@@ -97,12 +108,9 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/bulk", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public List<Content> bulkPostQuestions(@RequestBody final List<Content> contents) {
-		for (final Content content : contents) {
-			if (contentService.save(content) == null) {
-				throw new BadRequestException();
-			}
-		}
-		return contents;
+		List<de.thm.arsnova.entities.Content> contentsV3 =
+				contents.stream().map(c -> contentService.save(fromV2Migrator.migrate(c))).collect(Collectors.toList());
+		return contentsV3.stream().map(toV2Migrator::migrate).collect(Collectors.toList());
 	}
 
 	@ApiOperation(value = "Update the content, identified by provided id, with the provided content in the Request Body",
@@ -116,7 +124,7 @@ public class ContentController extends PaginationController {
 			@RequestBody final Content content
 			) {
 		try {
-			return contentService.update(content);
+			return toV2Migrator.migrate(contentService.update(fromV2Migrator.migrate(content)));
 		} catch (final Exception e) {
 			throw new BadRequestException();
 		}
@@ -190,7 +198,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) final boolean preparationQuestionsOnly
 			) {
 		boolean disable = false;
-		List<Content> contents;
+		List<de.thm.arsnova.entities.Content> contents;
 
 		if (disableVote != null) {
 			disable = disableVote;
@@ -215,10 +223,11 @@ public class ContentController extends PaginationController {
 			@RequestParam(required = false) final Boolean publish,
 			@RequestBody final Content content
 			) {
+		de.thm.arsnova.entities.Content contentV3 = fromV2Migrator.migrate(content);
 		if (publish != null) {
-			content.getState().setVisible(!publish);
+			contentV3.getState().setVisible(!publish);
 		}
-		contentService.update(content);
+		contentService.update(contentV3);
 	}
 
 	@ApiOperation(value = "Publish all questions",
@@ -231,7 +240,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) final boolean preparationQuestionsOnly
 			) {
 		boolean p = publish == null || publish;
-		List<Content> contents;
+		List<de.thm.arsnova.entities.Content> contents;
 
 		if (lectureQuestionsOnly) {
 			contents = contentService.getLectureQuestions(sessionkey);
@@ -252,10 +261,11 @@ public class ContentController extends PaginationController {
 			@RequestParam(required = false) final Boolean showStatistics,
 			@RequestBody final Content content
 			) {
+		de.thm.arsnova.entities.Content contentV3 = fromV2Migrator.migrate(content);
 		if (showStatistics != null) {
-			content.getState().setResponsesVisible(showStatistics);
+			contentV3.getState().setResponsesVisible(showStatistics);
 		}
-		contentService.update(content);
+		contentService.update(contentV3);
 	}
 
 	@ApiOperation(value = "Publish correct answer from content with provided id",
@@ -266,10 +276,11 @@ public class ContentController extends PaginationController {
 			@RequestParam(required = false) final Boolean showCorrectAnswer,
 			@RequestBody final Content content
 			) {
+		de.thm.arsnova.entities.Content contentV3 = fromV2Migrator.migrate(content);
 		if (showCorrectAnswer != null) {
-			content.getState().setSolutionVisible(showCorrectAnswer);
+			contentV3.getState().setSolutionVisible(showCorrectAnswer);
 		}
-		contentService.update(content);
+		contentService.update(contentV3);
 	}
 
 	@ApiOperation(value = "Get skill questions",
@@ -284,7 +295,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "requestImageData", defaultValue = "false") final boolean requestImageData,
 			final HttpServletResponse response
 			) {
-		List<Content> contents;
+		List<de.thm.arsnova.entities.Content> contents;
 		if (lectureQuestionsOnly) {
 			contents = contentService.getLectureQuestions(sessionkey);
 		} else if (flashcardsOnly) {
@@ -299,7 +310,8 @@ public class ContentController extends PaginationController {
 			return null;
 		}
 
-		return new PaginationListDecorator<>(contents, offset, limit);
+		return new PaginationListDecorator<>(
+				contents.stream().map(toV2Migrator::migrate).collect(Collectors.toList()), offset, limit);
 	}
 
 	@ApiOperation(value = "Delete skill questions",
@@ -401,13 +413,13 @@ public class ContentController extends PaginationController {
 			@PathVariable final String questionId,
 			final HttpServletResponse response
 			) {
-		final Answer answer = contentService.getMyAnswer(questionId);
+		final de.thm.arsnova.entities.Answer answer = contentService.getMyAnswer(questionId);
 		if (answer == null) {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
 			return null;
 		}
 
-		return answer;
+		return toV2Migrator.migrate(answer);
 	}
 
 	/**
@@ -433,7 +445,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "all", required = false, defaultValue = "false") final Boolean allAnswers,
 			final HttpServletResponse response
 			) {
-		List<Answer> answers;
+		List<de.thm.arsnova.entities.Answer> answers;
 		if (allAnswers) {
 			answers = contentService.getAllAnswers(questionId, -1, -1);
 		} else if (null == piRound) {
@@ -449,7 +461,7 @@ public class ContentController extends PaginationController {
 		if (answers == null) {
 			return new ArrayList<>();
 		}
-		return answers;
+		return answers.stream().map(toV2Migrator::migrate).collect(Collectors.toList());
 	}
 
 	@ApiOperation(value = "Save answer, provided in the Request Body, for a question, identified by provided question ID",
@@ -460,7 +472,7 @@ public class ContentController extends PaginationController {
 			@RequestBody final Answer answer,
 			final HttpServletResponse response
 			) {
-		return contentService.saveAnswer(questionId, answer);
+		return toV2Migrator.migrate(contentService.saveAnswer(questionId, fromV2Migrator.migrate(answer)));
 	}
 
 	@ApiOperation(value = "Update answer, provided in Request Body, identified by question ID and answer ID",
@@ -472,7 +484,7 @@ public class ContentController extends PaginationController {
 			@RequestBody final Answer answer,
 			final HttpServletResponse response
 			) {
-		return contentService.updateAnswer(answer);
+		return toV2Migrator.migrate(contentService.updateAnswer(fromV2Migrator.migrate(answer)));
 	}
 
 	@ApiOperation(value = "Get Image, identified by question ID and answer ID",
@@ -578,7 +590,8 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/{questionId}/freetextanswer/", method = RequestMethod.GET)
 	@Pagination
 	public List<Answer> getFreetextAnswers(@PathVariable final String questionId) {
-		return contentService.getFreetextAnswersByContentId(questionId, offset, limit);
+		return contentService.getFreetextAnswersByContentId(questionId, offset, limit).stream()
+				.map(toV2Migrator::migrate).collect(Collectors.toList());
 	}
 
 	@ApiOperation(value = "Get my answers of an session, identified by the sessionkey",
@@ -587,7 +600,8 @@ public class ContentController extends PaginationController {
 	@Deprecated
 	@RequestMapping(value = "/myanswers", method = RequestMethod.GET)
 	public List<Answer> getMyAnswers(@RequestParam final String sessionkey) {
-		return contentService.getMyAnswersByRoomShortId(sessionkey);
+		return contentService.getMyAnswersByRoomShortId(sessionkey).stream()
+				.map(toV2Migrator::migrate).collect(Collectors.toList());
 	}
 
 	@ApiOperation(value = "Get the total amount of answers of an session, identified by the sessionkey",

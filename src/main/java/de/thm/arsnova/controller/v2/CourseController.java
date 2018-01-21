@@ -15,11 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.controller;
+package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.connector.model.UserRole;
+import de.thm.arsnova.controller.AbstractController;
 import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.exceptions.NotImplementedException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
@@ -40,7 +41,7 @@ import java.util.List;
 /**
  * Provides access to a user's courses in an LMS such as Moodle.
  */
-@RestController
+@RestController("v2CourseController")
 public class CourseController extends AbstractController {
 	@Autowired(required = false)
 	private ConnectorClient connectorClient;
@@ -48,7 +49,7 @@ public class CourseController extends AbstractController {
 	@Autowired
 	private UserService userService;
 
-	@RequestMapping(value = "/mycourses", method = RequestMethod.GET)
+	@RequestMapping(value = "/v2/mycourses", method = RequestMethod.GET)
 	public List<Course> myCourses(
 			@ApiParam(value = "sort my courses by name", required = true)
 			@RequestParam(value = "sortby", defaultValue = "name") final String sortby

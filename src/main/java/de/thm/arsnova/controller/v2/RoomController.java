@@ -15,9 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.controller;
+package de.thm.arsnova.controller.v2;
 
-import de.thm.arsnova.entities.Room;
+import de.thm.arsnova.controller.PaginationController;
+import de.thm.arsnova.entities.UserProfile;
+import de.thm.arsnova.entities.migration.FromV2Migrator;
+import de.thm.arsnova.entities.migration.ToV2Migrator;
+import de.thm.arsnova.entities.migration.v2.Room;
+import de.thm.arsnova.entities.migration.v2.RoomFeature;
 import de.thm.arsnova.entities.transport.ImportExportContainer;
 import de.thm.arsnova.entities.transport.ScoreStatistics;
 import de.thm.arsnova.exceptions.UnauthorizedException;
@@ -48,12 +53,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Handles requests related to ARSnova Rooms.
  */
-@RestController
-@RequestMapping("/session")
+@RestController("v2RoomController")
+@RequestMapping("/v2/session")
 @Api(value = "/session", description = "Room (Session) API")
 public class RoomController extends PaginationController {
 	@Autowired
@@ -61,6 +68,12 @@ public class RoomController extends PaginationController {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private ToV2Migrator toV2Migrator;
+
+	@Autowired
+	private FromV2Migrator fromV2Migrator;
 
 	@ApiOperation(value = "join a Room",
 			nickname = "joinRoom")
@@ -72,9 +85,9 @@ public class RoomController extends PaginationController {
 			@ApiParam(value = "Adminflag", required = false) @RequestParam(value = "admin", defaultValue = "false")	final boolean admin
 			) {
 		if (admin) {
-			return roomService.getForAdmin(shortId);
+			return toV2Migrator.migrate(roomService.getForAdmin(shortId));
 		} else {
-			return roomService.getByShortId(shortId);
+			return toV2Migrator.migrate(roomService.getByShortId(shortId));
 		}
 	}
 
@@ -82,7 +95,7 @@ public class RoomController extends PaginationController {
 			nickname = "deleteRoom")
 	@RequestMapping(value = "/{shortId}", method = RequestMethod.DELETE)
 	public void deleteRoom(@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId) {
-		Room room = roomService.getByShortId(shortId);
+		de.thm.arsnova.entities.Room room = roomService.getByShortId(shortId);
 		roomService.deleteCascading(room);
 	}
 
@@ -119,9 +132,9 @@ public class RoomController extends PaginationController {
 		}
 		*/
 
-		roomService.save(room);
+		final UserProfile profile = userService.getByUsername(userService.getCurrentUser().getUsername());
 
-		return room;
+		return toV2Migrator.migrate(roomService.save(fromV2Migrator.migrate(room, profile)), Optional.of(profile));
 	}
 
 	@ApiOperation(value = "updates a Room",
@@ -131,7 +144,8 @@ public class RoomController extends PaginationController {
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
 			@ApiParam(value = "current session", required = true) @RequestBody final Room room
 			) {
-		return roomService.update(shortId, room);
+		final UserProfile profile = userService.getByUsername(room.getCreator());
+		return toV2Migrator.migrate(roomService.update(shortId, fromV2Migrator.migrate(room, profile)), Optional.of(profile));
 	}
 
 	@ApiOperation(value = "change the Room creator (owner)", nickname = "changeRoomCreator")
@@ -140,7 +154,7 @@ public class RoomController extends PaginationController {
 			@ApiParam(value = "Room-key from current Room", required = true) @PathVariable final String shortId,
 			@ApiParam(value = "new Room creator", required = true) @RequestBody final String newCreator
 			) {
-		return roomService.updateCreator(shortId, newCreator);
+		return toV2Migrator.migrate(roomService.updateCreator(shortId, newCreator));
 	}
 
 	@ApiOperation(value = "Retrieves a list of Rooms",
@@ -159,7 +173,7 @@ public class RoomController extends PaginationController {
 					"username", defaultValue = "") final String username,
 			final HttpServletResponse response
 			) {
-		List<Room> rooms;
+		List<de.thm.arsnova.entities.Room> rooms;
 
 		if (!"".equals(username)) {
 			final String userId = userService.getByUsername(username).getId();
@@ -202,7 +216,7 @@ public class RoomController extends PaginationController {
 			Collections.sort(rooms, new RoomServiceImpl.RoomNameComparator());
 		}
 
-		return rooms;
+		return rooms.stream().map(toV2Migrator::migrate).collect(Collectors.toList());
 	}
 
 	/**
@@ -220,7 +234,7 @@ public class RoomController extends PaginationController {
 			@ApiParam(value = "sort by", required = false) @RequestParam(value = "sortby", defaultValue = "name") final String sortby,
 			final HttpServletResponse response
 			) {
-		List<Room> rooms;
+		List<de.thm.arsnova.entities.Room> rooms;
 		if (!visitedOnly) {
 			rooms = roomService.getMyRoomsInfo(offset, limit);
 		} else {
@@ -237,7 +251,7 @@ public class RoomController extends PaginationController {
 		} else {
 			Collections.sort(rooms, new RoomNameComparator());
 		}
-		return rooms;
+		return rooms.stream().map(toV2Migrator::migrate).collect(Collectors.toList());
 	}
 
 	@ApiOperation(value = "Retrieves all public pool Rooms for the current user",
@@ -249,14 +263,14 @@ public class RoomController extends PaginationController {
 	public List<Room> getMyPublicPoolRooms(
 			final HttpServletResponse response
 			) {
-		List<Room> rooms = roomService.getMyPublicPoolRoomsInfo();
+		List<de.thm.arsnova.entities.Room> rooms = roomService.getMyPublicPoolRoomsInfo();
 
 		if (rooms == null || rooms.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
 			return null;
 		}
 
-		return rooms;
+		return rooms.stream().map(toV2Migrator::migrate).collect(Collectors.toList());
 	}
 
 	@ApiOperation(value = "Retrieves all public pool Rooms",
@@ -268,14 +282,14 @@ public class RoomController extends PaginationController {
 	public List<Room> getPublicPoolRooms(
 			final HttpServletResponse response
 			) {
-		List<Room> rooms = roomService.getPublicPoolRoomsInfo();
+		List<de.thm.arsnova.entities.Room> rooms = roomService.getPublicPoolRoomsInfo();
 
 		if (rooms == null || rooms.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
 			return null;
 		}
 
-		return rooms;
+		return rooms.stream().map(toV2Migrator::migrate).collect(Collectors.toList());
 	}
 
 	@ApiOperation(value = "imports a Room",
@@ -285,7 +299,7 @@ public class RoomController extends PaginationController {
 			@ApiParam(value = "current Room", required = true) @RequestBody final ImportExportContainer room,
 			final HttpServletResponse response
 			) {
-		return roomService.importRooms(room);
+		return toV2Migrator.migrate(roomService.importRooms(room));
 	}
 
 	@ApiOperation(value = "export Rooms", nickname = "exportRoom")
@@ -316,9 +330,10 @@ public class RoomController extends PaginationController {
 			@ApiParam(value = "public pool attributes for Room", required = true) @RequestBody final ImportExportContainer.PublicPool publicPool
 			) {
 		roomService.setActive(shortId, false);
-		Room roomInfo = roomService.copyRoomToPublicPool(shortId, publicPool);
+		de.thm.arsnova.entities.Room roomInfo = roomService.copyRoomToPublicPool(shortId, publicPool);
 		roomService.setActive(shortId, true);
-		return roomInfo;
+
+		return toV2Migrator.migrate(roomInfo);
 	}
 
 
@@ -334,7 +349,7 @@ public class RoomController extends PaginationController {
 			final HttpServletResponse response
 			) {
 		if (lock != null) {
-			return roomService.setActive(shortId, lock);
+			return toV2Migrator.migrate(roomService.setActive(shortId, lock));
 		}
 		response.setStatus(HttpStatus.NOT_FOUND.value());
 		return null;
@@ -367,22 +382,26 @@ public class RoomController extends PaginationController {
 	@ApiOperation(value = "retrieves all Room features",
 			nickname = "getRoomFeatures")
 	@RequestMapping(value = "/{shortId}/features", method = RequestMethod.GET)
-	public Room.Settings getRoomFeatures(
+	public RoomFeature getRoomFeatures(
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
 			final HttpServletResponse response
 			) {
-		return roomService.getFeatures(shortId);
+		// FIXME: migrate Settings
+		throw new UnsupportedOperationException();
+		//return roomService.getFeatures(shortId);
 	}
 
 	@RequestMapping(value = "/{shortId}/features", method = RequestMethod.PUT)
 	@ApiOperation(value = "change all Room features",
 			nickname = "changeRoomFeatures")
-	public Room.Settings changeRoomFeatures(
+	public RoomFeature changeRoomFeatures(
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
-			@ApiParam(value = "Room feature", required = true) @RequestBody final Room.Settings features,
+			@ApiParam(value = "Room feature", required = true) @RequestBody final RoomFeature features,
 			final HttpServletResponse response
 			) {
-		return roomService.updateFeatures(shortId, features);
+		// FIXME: migrate Settings
+		throw new UnsupportedOperationException();
+		//return roomService.updateFeatures(shortId, features);
 	}
 
 	@RequestMapping(value = "/{shortId}/lockfeedbackinput", method = RequestMethod.POST)

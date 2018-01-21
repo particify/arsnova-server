@@ -69,7 +69,7 @@ import java.util.List;
 /**
  * Handles authentication specific requests.
  */
-@Controller
+@Controller("v2AuthenticationController")
 @RequestMapping("/v2/auth")
 public class AuthenticationController extends AbstractController {
 

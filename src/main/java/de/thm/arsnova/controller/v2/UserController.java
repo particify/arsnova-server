@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.controller;
+package de.thm.arsnova.controller.v2;
 
+import de.thm.arsnova.controller.AbstractController;
 import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.services.UserRoomService;
 import de.thm.arsnova.services.UserService;
@@ -34,8 +35,8 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Handles requests related to ARSnova's own user registration and login process.
  */
-@Controller
-@RequestMapping("/user")
+@Controller("v2UserController")
+@RequestMapping("/v2/user")
 public class UserController extends AbstractController {
 	@Autowired
 	private DaoAuthenticationProvider daoProvider;
