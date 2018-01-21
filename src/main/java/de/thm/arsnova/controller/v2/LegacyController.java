@@ -22,16 +22,16 @@ import de.thm.arsnova.services.CommentService;
 import de.thm.arsnova.services.ContentService;
 import de.thm.arsnova.web.DeprecatedApi;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * This controller forwards requests from deprecated URLs to their new controller, where the requests are handled.
  */
-@RestController("v2LegacyController")
+@Controller("v2LegacyController")
 @RequestMapping("/v2")
 public class LegacyController extends AbstractController {
 
@@ -156,5 +156,17 @@ public class LegacyController extends AbstractController {
 			@PathVariable final String arg2
 			) {
 		return String.format("forward:/v2/audiencequestion/%s/%s/?sessionkey=%s", arg1, arg2, shortId);
+	}
+
+	@DeprecatedApi
+	@RequestMapping(value = "/whoami")
+	public String redirectWhoami() {
+		return "forward:/v2/auth/whoami";
+	}
+
+	@DeprecatedApi
+	@RequestMapping(value = "/doLogin")
+	public String redirectLogin() {
+		return "forward:/v2/auth/login";
 	}
 }
