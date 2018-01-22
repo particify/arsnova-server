@@ -1,11 +1,17 @@
 package de.thm.arsnova.entities;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
 
 import java.util.Date;
 import java.util.Map;
 
+@JsonTypeInfo(
+		use = JsonTypeInfo.Id.MINIMAL_CLASS,
+		include = JsonTypeInfo.As.PROPERTY,
+		property = "type"
+)
 public class Content implements Entity {
 	public enum Format {
 		CHOICE,

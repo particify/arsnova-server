@@ -20,6 +20,7 @@ package de.thm.arsnova.services;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.AnswerStatistics;
 import de.thm.arsnova.entities.Content;
+import de.thm.arsnova.entities.TextAnswer;
 import de.thm.arsnova.entities.UserAuthentication;
 
 import java.util.List;
@@ -51,17 +52,17 @@ public interface ContentService extends EntityService<Content> {
 
 	AnswerStatistics getAllStatistics(String contentId);
 
-	List<Answer> getAnswers(String contentId, int piRound, int offset, int limit);
+	List<TextAnswer> getTextAnswers(String contentId, int piRound, int offset, int limit);
 
-	List<Answer> getAnswers(String contentId, int offset, int limit);
+	List<TextAnswer> getTextAnswers(String contentId, int offset, int limit);
 
-	List<Answer> getAllAnswers(String contentId, int offset, int limit);
+	List<TextAnswer> getAllTextAnswers(String contentId, int offset, int limit);
 
 	int countAnswersByContentIdAndRound(String contentId);
 
 	int countAnswersByContentIdAndRound(String contentId, int piRound);
 
-	List<Answer> getFreetextAnswersByContentId(String contentId, int offset, int limit);
+	List<TextAnswer> getTextAnswersByContentId(String contentId, int offset, int limit);
 
 	List<Answer> getMyAnswersByRoomShortId(String roomShortId);
 

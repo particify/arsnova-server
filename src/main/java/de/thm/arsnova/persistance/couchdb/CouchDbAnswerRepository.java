@@ -70,9 +70,9 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	}
 
 	@Override
-	public Answer findByContentIdUserPiRound(final String contentId, final UserAuthentication user, final int piRound) {
-		final List<Answer> answerList = queryView("by_contentid_creatorid_round",
-				ComplexKey.of(contentId, user.getUsername(), piRound));
+	public <T extends Answer> T findByContentIdUserPiRound(final String contentId, final Class<T> type, final UserAuthentication user, final int piRound) {
+		final List<T> answerList = db.queryView(createQuery("by_contentid_creatorid_round")
+				.key(ComplexKey.of(contentId, user.getUsername(), piRound)), type);
 		return answerList.isEmpty() ? null : answerList.get(0);
 	}
 
@@ -128,18 +128,18 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	}
 
 	@Override
-	public List<Answer> findByContentId(final String contentId, final int start, final int limit) {
+	public <T extends Answer> List<T> findByContentId(final String contentId, final Class<T> type, final int start, final int limit) {
 		final int qSkip = start > 0 ? start : -1;
 		final int qLimit = limit > 0 ? limit : -1;
 
-		final List<Answer> answers = db.queryView(createQuery("by_contentid_creationtimestamp")
+		final List<T> answers = db.queryView(createQuery("by_contentid_creationtimestamp")
 						.skip(qSkip)
 						.limit(qLimit)
 						//.includeDocs(true)
 						.startKey(ComplexKey.of(contentId))
 						.endKey(ComplexKey.of(contentId, ComplexKey.emptyObject()))
 						.descending(true),
-				Answer.class);
+				type);
 
 		return answers;
 	}

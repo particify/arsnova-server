@@ -439,7 +439,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		return answerRepository.findByContentIdUserPiRound(contentId, userService.getCurrentUser(), content.getState().getRound());
+		return answerRepository.findByContentIdUserPiRound(contentId, Answer.class, userService.getCurrentUser(), content.getState().getRound());
 	}
 
 	@Override
@@ -497,31 +497,31 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getAnswers(final String contentId, final int piRound, final int offset, final int limit) {
+	public List<TextAnswer> getTextAnswers(final String contentId, final int piRound, final int offset, final int limit) {
 		/* FIXME: round support not implemented */
 		final Content content = contentRepository.findOne(contentId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
 
-		return getFreetextAnswersByContentId(contentId, offset, limit);
+		return getTextAnswersByContentId(contentId, offset, limit);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getAnswers(final String contentId, final int offset, final int limit) {
-		return getAnswers(contentId, 0, offset, limit);
+	public List<TextAnswer> getTextAnswers(final String contentId, final int offset, final int limit) {
+		return getTextAnswers(contentId, 0, offset, limit);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getAllAnswers(final String contentId, final int offset, final int limit) {
+	public List<TextAnswer> getAllTextAnswers(final String contentId, final int offset, final int limit) {
 		final Content content = get(contentId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
 
-		return getFreetextAnswersByContentId(contentId, offset, limit);
+		return getTextAnswersByContentId(contentId, offset, limit);
 	}
 
 	@Override
@@ -574,8 +574,8 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Answer> getFreetextAnswersByContentId(final String contentId, final int offset, final int limit) {
-		final List<Answer> answers = answerRepository.findByContentId(contentId, offset, limit);
+	public List<TextAnswer> getTextAnswersByContentId(final String contentId, final int offset, final int limit) {
+		final List<TextAnswer> answers = answerRepository.findByContentId(contentId, TextAnswer.class, offset, limit);
 		if (answers == null) {
 			throw new NotFoundException();
 		}
