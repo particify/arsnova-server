@@ -7,6 +7,15 @@ import java.util.Date;
 import java.util.Map;
 
 public class Content implements Entity {
+	public enum Format {
+		CHOICE,
+		BINARY,
+		SCALE,
+		NUMBER,
+		TEXT,
+		GRID
+	}
+
 	public static class State {
 		private int round = 1;
 		private Date roundEndTimestamp;
@@ -83,7 +92,7 @@ public class Content implements Entity {
 	private String roomId;
 	private String subject;
 	private String body;
-	private String format;
+	private Format format;
 	private String group;
 	private State state;
 	private Date timestamp;
@@ -169,12 +178,12 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public String getFormat() {
+	public Format getFormat() {
 		return format;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setFormat(final String format) {
+	public void setFormat(final Format format) {
 		this.format = format;
 	}
 

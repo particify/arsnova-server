@@ -75,11 +75,24 @@ public class ToV2Migrator {
 		to.setSessionId(from.getRoomId());
 		to.setSubject(from.getSubject());
 		to.setText(from.getBody());
-		to.setQuestionType(from.getFormat());
 		to.setQuestionVariant(from.getGroup());
 
 		if (from instanceof ChoiceQuestionContent) {
 			final ChoiceQuestionContent fromChoiceQuestionContent = (ChoiceQuestionContent) from;
+			switch (from.getFormat()) {
+				case CHOICE:
+					to.setQuestionType(fromChoiceQuestionContent.isMultiple() ? "mc" : "abcd");
+					break;
+				case BINARY:
+					to.setQuestionType("yesno");
+					break;
+				case SCALE:
+					to.setQuestionType("vote");
+					break;
+				case GRID:
+					to.setQuestionType("grid");
+					break;
+			}
 			final List<AnswerOption> toOptions = new ArrayList<>();
 			to.setPossibleAnswers(toOptions);
 			for (int i = 0; i < fromChoiceQuestionContent.getOptions().size(); i++) {
@@ -88,6 +101,15 @@ public class ToV2Migrator {
 				option.setValue(fromChoiceQuestionContent.getOptions().get(1).getPoints());
 				option.setCorrect(fromChoiceQuestionContent.getCorrectOptionIndexes().contains(i));
 				toOptions.add(option);
+			}
+		} else {
+			switch (from.getFormat()) {
+				case NUMBER:
+					to.setQuestionType("freetext");
+					break;
+				case TEXT:
+					to.setQuestionType("freetext");
+					break;
 			}
 		}
 

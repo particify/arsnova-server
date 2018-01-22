@@ -125,6 +125,8 @@ public class FromV2Migrator {
 			case "mc":
 				ChoiceQuestionContent choiceQuestionContent = new ChoiceQuestionContent();
 				to = choiceQuestionContent;
+				to.setFormat(de.thm.arsnova.entities.Content.Format.CHOICE);
+				choiceQuestionContent.setMultiple("mc".equals(from.getQuestionType()));
 				for (int i = 0; i < from.getPossibleAnswers().size(); i++) {
 					de.thm.arsnova.entities.migration.v2.AnswerOption choice = from.getPossibleAnswers().get(i);
 					if (choice.isCorrect()) {
@@ -135,6 +137,7 @@ public class FromV2Migrator {
 				break;
 			case "text":
 				to = new de.thm.arsnova.entities.Content();
+				to.setFormat(de.thm.arsnova.entities.Content.Format.TEXT);
 				break;
 			default:
 				throw new IllegalArgumentException("Unsupported content format.");
@@ -143,7 +146,6 @@ public class FromV2Migrator {
 		to.setRoomId(from.getSessionId());
 		to.setSubject(from.getSubject());
 		to.setBody(from.getText());
-		to.setFormat(from.getQuestionType());
 		to.setGroup(from.getQuestionVariant());
 
 		return to;
