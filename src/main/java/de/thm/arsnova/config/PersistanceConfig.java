@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 
 @ComponentScan({
-		"de.thm.arsnova.persistance.couchdb.migrations"
+		"de.thm.arsnova.persistance.couchdb"
 })
 @Configuration
 @Profile("!test")
@@ -29,12 +29,12 @@ public class PersistanceConfig {
 	@Bean
 	@Primary
 	public MangoCouchDbConnector couchDbConnector() throws Exception {
-		return new InitializingCouchDbConnector(couchDbName, couchDbInstance(), new CouchDbObjectMapperFactory());
+		return new MangoCouchDbConnector(couchDbName, couchDbInstance(), couchDbObjectMapperFactory());
 	}
 
 	@Bean
 	public MangoCouchDbConnector couchDbMigrationConnector() throws Exception {
-		return new MangoCouchDbConnector(couchDbMigrateFrom, couchDbInstance(), new CouchDbObjectMapperFactory());
+		return new MangoCouchDbConnector(couchDbMigrateFrom, couchDbInstance(), couchDbObjectMapperFactory());
 	}
 
 	@Bean
@@ -53,6 +53,11 @@ public class PersistanceConfig {
 		}
 
 		return factory;
+	}
+
+	@Bean
+	public CouchDbObjectMapperFactory couchDbObjectMapperFactory() {
+		return new CouchDbObjectMapperFactory();
 	}
 
 	@Bean

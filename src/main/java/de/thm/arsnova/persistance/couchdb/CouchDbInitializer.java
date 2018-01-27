@@ -1,23 +1,27 @@
 package de.thm.arsnova.persistance.couchdb;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.thm.arsnova.entities.MigrationState;
 import de.thm.arsnova.persistance.couchdb.migrations.MigrationExecutor;
-import de.thm.arsnova.persistance.couchdb.support.MangoCouchDbConnector;
-import org.ektorp.CouchDbInstance;
+import de.thm.arsnova.services.StatusService;
+import org.ektorp.CouchDbConnector;
 import org.ektorp.DocumentNotFoundException;
 import org.ektorp.impl.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
 
+import javax.annotation.PostConstruct;
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -27,19 +31,22 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InitializingCouchDbConnector extends MangoCouchDbConnector implements InitializingBean, ResourceLoaderAware {
-	private static final Logger logger = LoggerFactory.getLogger(InitializingCouchDbConnector.class);
+@Component
+public class CouchDbInitializer implements ResourceLoaderAware {
+	private static final Logger logger = LoggerFactory.getLogger(CouchDbInitializer.class);
 	private final List<Bindings> docs = new ArrayList<>();
 
 	private ResourceLoader resourceLoader;
 	private MigrationExecutor migrationExecutor;
+	private CouchDbConnector connector;
+	private ObjectMapper objectMapper;
+	private StatusService statusService;
 
-	public InitializingCouchDbConnector(final String databaseName, final CouchDbInstance dbInstance) {
-		super(databaseName, dbInstance);
-	}
-
-	public InitializingCouchDbConnector(final String databaseName, final CouchDbInstance dbi, final ObjectMapperFactory om) {
-		super(databaseName, dbi, om);
+	public CouchDbInitializer(final CouchDbConnector couchDbConnector, final ObjectMapperFactory objectMapperFactory,
+			final StatusService statusService) {
+		connector = couchDbConnector;
+		objectMapper = objectMapperFactory.createObjectMapper(couchDbConnector);
+		this.statusService = statusService;
 	}
 
 	protected void loadDesignDocFiles() throws IOException, ScriptException {
@@ -68,11 +75,11 @@ public class InitializingCouchDbConnector extends MangoCouchDbConnector implemen
 				}
 			}
 			try {
-				final String rev = getCurrentRevision((String) doc.get("_id"));
+				final String rev = connector.getCurrentRevision((String) doc.get("_id"));
 				doc.put("_rev", rev);
-				update(doc);
+				connector.update(doc);
 			} catch (final DocumentNotFoundException e) {
-				create(doc);
+				connector.create(doc);
 			}
 		});
 	}
@@ -80,21 +87,28 @@ public class InitializingCouchDbConnector extends MangoCouchDbConnector implemen
 	protected void migrate() {
 		MigrationState state;
 		try {
-			state = get(MigrationState.class, MigrationState.ID);
+			state = connector.get(MigrationState.class, MigrationState.ID);
 		} catch (DocumentNotFoundException e) {
 			logger.debug("No migration state found in database.");
 			state = new MigrationState();
 		}
 		if (migrationExecutor != null && migrationExecutor.runMigrations(state)) {
-			update(state);
+			connector.update(state);
 		}
 	}
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
+	@PostConstruct
+	private void init() {
+		statusService.putMaintenanceReason(this.getClass(), "Database not initialized");
+	}
+
+	@EventListener
+	private void onApplicationEvent(ContextRefreshedEvent event) throws IOException, ScriptException {
+		statusService.putMaintenanceReason(this.getClass(), "Data migration active");
 		loadDesignDocFiles();
 		createDesignDocs();
 		migrate();
+		statusService.removeMaintenanceReason(this.getClass());
 	}
 
 	@Override
