@@ -27,6 +27,7 @@ import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.client.ConnectorClientImpl;
 import de.thm.arsnova.entities.serialization.CouchDbDocumentModule;
 import de.thm.arsnova.entities.serialization.View;
+import de.thm.arsnova.web.PathApiVersionContentNegotiationStrategy;
 import de.thm.arsnova.websocket.ArsnovaSocketioServer;
 import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 import de.thm.arsnova.websocket.ArsnovaSocketioServerListener;
@@ -127,11 +128,14 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 
 	@Override
 	public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+		PathApiVersionContentNegotiationStrategy strategy =
+				new PathApiVersionContentNegotiationStrategy(API_V3_MEDIA_TYPE);
 		configurer.mediaType("json", MediaType.APPLICATION_JSON_UTF8);
 		configurer.mediaType("xml", MediaType.APPLICATION_XML);
-		configurer.defaultContentType(API_V3_MEDIA_TYPE);
-		configurer.favorParameter(true);
+		configurer.favorParameter(false);
 		configurer.favorPathExtension(false);
+		//configurer.defaultContentType(API_V3_MEDIA_TYPE);
+		configurer.defaultContentTypeStrategy(strategy);
 	}
 
 	@Override
