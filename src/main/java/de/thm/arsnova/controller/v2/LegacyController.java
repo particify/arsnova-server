@@ -15,22 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.controller;
+package de.thm.arsnova.controller.v2;
 
+import de.thm.arsnova.controller.AbstractController;
 import de.thm.arsnova.services.CommentService;
 import de.thm.arsnova.services.ContentService;
 import de.thm.arsnova.web.DeprecatedApi;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * This controller forwards requests from deprecated URLs to their new controller, where the requests are handled.
  */
-@Controller
+@RestController("v2LegacyController")
+@RequestMapping("/v2")
 public class LegacyController extends AbstractController {
 
 	@Autowired
@@ -44,55 +46,55 @@ public class LegacyController extends AbstractController {
 	@DeprecatedApi
 	@RequestMapping(value = "/session/mysessions", method = RequestMethod.GET)
 	public String redirectSessionMy() {
-		return "forward:/session/?ownedonly=true";
+		return "forward:/v2/session/?ownedonly=true";
 	}
 
 	@DeprecatedApi
 	@RequestMapping(value = "/session/visitedsessions", method = RequestMethod.GET)
 	public String redirectSessionVisited() {
-		return "forward:/session/?visitedonly=true";
+		return "forward:/v2/session/?visitedonly=true";
 	}
 
 	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/question")
 	public String redirectQuestionByLecturer(@PathVariable final String sessionKey) {
-		return String.format("forward:/lecturerquestion/?sessionkey=%s", sessionKey);
+		return String.format("forward:/v2/lecturerquestion/?sessionkey=%s", sessionKey);
 	}
 
 	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/skillquestions", method = RequestMethod.GET)
 	public String redirectQuestionByLecturerList(@PathVariable final String sessionKey) {
-		return String.format("forward:/lecturerquestion/?sessionkey=%s", sessionKey);
+		return String.format("forward:/v2/lecturerquestion/?sessionkey=%s", sessionKey);
 	}
 
 	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/skillquestioncount", method = RequestMethod.GET)
 	public String redirectQuestionByLecturerCount(@PathVariable final String sessionKey) {
-		return String.format("forward:/lecturerquestion/count?sessionkey=%s", sessionKey);
+		return String.format("forward:/v2/lecturerquestion/count?sessionkey=%s", sessionKey);
 	}
 
 	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/answercount", method = RequestMethod.GET)
 	public String redirectQuestionByLecturerAnswerCount(@PathVariable final String sessionKey) {
-		return String.format("forward:/lecturerquestion/answercount?sessionkey=%s", sessionKey);
+		return String.format("forward:/v2/lecturerquestion/answercount?sessionkey=%s", sessionKey);
 	}
 
 	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/unanswered", method = RequestMethod.GET)
 	public String redirectQuestionByLecturerUnnsweredCount(@PathVariable final String sessionKey) {
-		return String.format("forward:/lecturerquestion/answercount?sessionkey=%s", sessionKey);
+		return String.format("forward:/v2/lecturerquestion/answercount?sessionkey=%s", sessionKey);
 	}
 
 	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/myanswers", method = RequestMethod.GET)
 	public String redirectQuestionByLecturerMyAnswers(@PathVariable final String sessionKey) {
-		return String.format("forward:/lecturerquestion/myanswers?sessionkey=%s", sessionKey);
+		return String.format("forward:/v2/lecturerquestion/myanswers?sessionkey=%s", sessionKey);
 	}
 
 	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/interposed")
 	public String redirectQuestionByAudience(@PathVariable final String sessionKey) {
-		return String.format("forward:/audiencequestion/?sessionkey=%s", sessionKey);
+		return String.format("forward:/v2/audiencequestion/?sessionkey=%s", sessionKey);
 	}
 
 	@DeprecatedApi
@@ -105,13 +107,13 @@ public class LegacyController extends AbstractController {
 	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/interposedcount", method = RequestMethod.GET)
 	public String redirectQuestionByAudienceCount(@PathVariable final String sessionKey) {
-		return String.format("forward:/audiencequestion/count?sessionkey=%s", sessionKey);
+		return String.format("forward:/v2/audiencequestion/count?sessionkey=%s", sessionKey);
 	}
 
 	@DeprecatedApi
 	@RequestMapping(value = "/session/{sessionKey}/interposedreadingcount", method = RequestMethod.GET)
 	public String redirectQuestionByAudienceReadCount(@PathVariable final String sessionKey) {
-		return String.format("forward:/audiencequestion/readcount?sessionkey=%s", sessionKey);
+		return String.format("forward:/v2/audiencequestion/readcount?sessionkey=%s", sessionKey);
 	}
 
 	/* generalized routes */
@@ -122,7 +124,7 @@ public class LegacyController extends AbstractController {
 			@PathVariable final String sessionKey,
 			@PathVariable final String arg1
 			) {
-		return String.format("forward:/lecturerquestion/%s/?sessionkey=%s", arg1, sessionKey);
+		return String.format("forward:/v2/lecturerquestion/%s/?sessionkey=%s", arg1, sessionKey);
 	}
 
 	@DeprecatedApi
@@ -134,7 +136,7 @@ public class LegacyController extends AbstractController {
 			@PathVariable final String arg1,
 			@PathVariable final String arg2
 			) {
-		return String.format("forward:/lecturerquestion/%s/%s/?sessionkey=%s", arg1, arg2, sessionKey);
+		return String.format("forward:/v2/lecturerquestion/%s/%s/?sessionkey=%s", arg1, arg2, sessionKey);
 	}
 
 	@DeprecatedApi
@@ -143,7 +145,7 @@ public class LegacyController extends AbstractController {
 			@PathVariable final String sessionKey,
 			@PathVariable final String arg1
 			) {
-		return String.format("forward:/audiencequestion/%s/?sessionkey=%s", arg1, sessionKey);
+		return String.format("forward:/v2/audiencequestion/%s/?sessionkey=%s", arg1, sessionKey);
 	}
 
 	@DeprecatedApi
@@ -153,6 +155,6 @@ public class LegacyController extends AbstractController {
 			@PathVariable final String arg1,
 			@PathVariable final String arg2
 			) {
-		return String.format("forward:/audiencequestion/%s/%s/?sessionkey=%s", arg1, arg2, sessionKey);
+		return String.format("forward:/v2/audiencequestion/%s/%s/?sessionkey=%s", arg1, arg2, sessionKey);
 	}
 }
