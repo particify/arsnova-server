@@ -61,7 +61,7 @@ public class ToV2Migrator {
 		final Room to = new Room();
 		copyCommonProperties(from, to);
 		to.setKeyword(from.getShortId());
-		to.setCreator(owner.getLoginId());
+		to.setCreator(owner == null ? null : owner.getLoginId());
 		to.setName(from.getName());
 		to.setShortName(from.getAbbreviation());
 		to.setActive(!from.isClosed());
