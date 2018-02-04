@@ -44,6 +44,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.codec.Hex;
 import org.springframework.security.crypto.keygen.BytesKeyGenerator;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Service;
@@ -364,7 +365,7 @@ public class UserServiceImpl implements UserService {
 		String lcUsername = username.toLowerCase();
 
 		if (null == keygen) {
-			keygen = KeyGenerators.secureRandom(32);
+			keygen = KeyGenerators.secureRandom(16);
 		}
 
 		if (null == mailPattern) {
@@ -562,5 +563,22 @@ public class UserServiceImpl implements UserService {
 		} catch (MailException | MessagingException e) {
 			logger.warn("Mail \"{}\" could not be sent.", subject, e);
 		}
+	}
+
+	public String createGuest() {
+		if (null == keygen) {
+			keygen = KeyGenerators.secureRandom(16);
+		}
+
+		UserProfile userProfile = new UserProfile();
+		userProfile.setLoginId(new String(Hex.encode(keygen.generateKey())));
+		userProfile.setAuthProvider(UserProfile.AuthProvider.ARSNOVA_GUEST);
+		userRepository.save(userProfile);
+
+		return userProfile.getLoginId();
+	}
+
+	public boolean guestExists(final String loginId) {
+		return userRepository.findByAuthProviderAndLoginId(UserProfile.AuthProvider.ARSNOVA_GUEST, loginId) != null;
 	}
 }

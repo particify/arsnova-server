@@ -69,4 +69,8 @@ public interface UserService {
 	void initiatePasswordReset(String username);
 
 	boolean resetPassword(UserProfile userProfile, String key, String password);
+
+	String createGuest();
+
+	boolean guestExists(String loginId);
 }

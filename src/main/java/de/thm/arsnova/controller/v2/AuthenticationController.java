@@ -221,11 +221,19 @@ public class AuthenticationController extends AbstractController {
 				response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			}
 		} else if (guestEnabled && "guest".equals(type)) {
+			if (username == null || !username.startsWith("Guest")) {
+				username = "Guest" + userService.createGuest();
+			} else {
+				if (!userService.guestExists(username.substring(5))) {
+					userService.increaseFailedLoginCount(addr);
+					response.setStatus(HttpStatus.UNAUTHORIZED.value());
+					logger.debug("Guest authentication failed.");
+
+					return;
+				}
+			}
 			List<GrantedAuthority> authorities = new ArrayList<>();
 			authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
-			if (username == null || !username.startsWith("Guest") || username.length() != MAX_USERNAME_LENGTH) {
-				username = "Guest" + Sha512DigestUtils.shaHex(request.getSession().getId()).substring(0, MAX_GUESTHASH_LENGTH);
-			}
 			org.springframework.security.core.userdetails.User user =
 					new org.springframework.security.core.userdetails.User(
 							username, "", true, true, true, true, authorities
