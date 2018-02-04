@@ -38,7 +38,8 @@ public class Room implements Entity {
 		private boolean slidesEnabled = true;
 		private boolean commentsEnabled = true;
 		private boolean flashcardsEnabled = true;
-		private boolean livevoteEnabled = true;
+		private boolean quickSurveyEnabled = true;
+		private boolean quickFeedbackEnabled = true;
 		private boolean scoreEnabled = true;
 		private boolean multipleRoundsEnabled = true;
 		private boolean timerEnabled = true;
@@ -85,13 +86,23 @@ public class Room implements Entity {
 		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
-		public boolean isLivevoteEnabled() {
-			return livevoteEnabled;
+		public boolean isQuickSurveyEnabled() {
+			return quickSurveyEnabled;
 		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
-		public void setLivevoteEnabled(boolean livevoteEnabled) {
-			this.livevoteEnabled = livevoteEnabled;
+		public void setQuickSurveyEnabled(boolean quickSurveyEnabled) {
+			this.quickSurveyEnabled = quickSurveyEnabled;
+		}
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public boolean isQuickFeedbackEnabled() {
+			return quickFeedbackEnabled;
+		}
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public void setQuickFeedbackEnabled(boolean quickFeedbackEnabled) {
+			this.quickFeedbackEnabled = quickFeedbackEnabled;
 		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
@@ -367,6 +378,10 @@ public class Room implements Entity {
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public Settings getSettings() {
+		if (settings == null) {
+			settings = new Settings();
+		}
+
 		return settings;
 	}
 

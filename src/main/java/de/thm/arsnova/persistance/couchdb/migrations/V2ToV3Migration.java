@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -234,7 +235,7 @@ public class V2ToV3Migration implements Migration {
 					// Session creator does not exist, skipping: roomV2.getCreator(), roomV2.getId()
 					continue;
 				}
-				roomsV3.add(migrator.migrate(roomV2, profiles.get(0)));
+				roomsV3.add(migrator.migrate(roomV2, Optional.of(profiles.get(0))));
 			}
 
 			toConnector.executeBulk(roomsV3);

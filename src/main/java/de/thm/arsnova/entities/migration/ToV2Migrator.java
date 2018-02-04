@@ -68,12 +68,79 @@ public class ToV2Migrator {
 		to.setName(from.getName());
 		to.setShortName(from.getAbbreviation());
 		to.setActive(!from.isClosed());
+		if (from.getAuthor() != null) {
+			to.setPpAuthorName(from.getAuthor().getName());
+			to.setPpAuthorMail(from.getAuthor().getMail());
+			to.setPpUniversity(from.getAuthor().getOrganizationName());
+			to.setPpFaculty(from.getAuthor().getOrganizationUnit());
+			to.setPpLogo(from.getAuthor().getOrganizationLogo());
+		}
 
 		return to;
 	}
 
 	public Room migrate(final de.thm.arsnova.entities.Room from) {
 		return migrate(from, Optional.empty());
+	}
+
+	public RoomFeature migrate(final de.thm.arsnova.entities.Room.Settings settings) {
+		RoomFeature feature = new RoomFeature();
+		feature.setInterposed(settings.isCommentsEnabled());
+		feature.setLecture(settings.isQuestionsEnabled());
+		feature.setJitt(settings.isQuestionsEnabled());
+		feature.setSlides(settings.isSlidesEnabled());
+		feature.setFlashcard(settings.isFlashcardsEnabled());
+		feature.setFeedback(settings.isQuickSurveyEnabled());
+		feature.setPi(settings.isMultipleRoundsEnabled() || settings.isTimerEnabled());
+		feature.setLearningProgress(settings.isScoreEnabled());
+
+		int count = 0;
+		/* Single-feature use cases can be migrated */
+		if (settings.isCommentsEnabled()) {
+			feature.setTwitterWall(true);
+			count++;
+		}
+		if (settings.isFlashcardsEnabled()) {
+			feature.setFlashcardFeature(true);
+			count++;
+		}
+		if (settings.isQuickSurveyEnabled()) {
+			feature.setLiveClicker(true);
+			count++;
+		}
+		/* For the following features an exact migration is not possible, so custom is set */
+		if (settings.isQuestionsEnabled()) {
+			feature.setCustom(true);
+			count++;
+		}
+		if (settings.isSlidesEnabled()) {
+			feature.setCustom(true);
+			count++;
+		}
+		if (settings.isMultipleRoundsEnabled() || settings.isTimerEnabled()) {
+			feature.setCustom(true);
+			count++;
+		}
+		if (settings.isScoreEnabled()) {
+			feature.setCustom(true);
+			count++;
+		}
+
+		if (count != 1) {
+			/* Reset single-feature use-cases since multiple features were detected */
+			feature.setTwitterWall(false);
+			feature.setFlashcardFeature(false);
+			feature.setLiveClicker(false);
+
+			if (count == 7) {
+				feature.setCustom(false);
+				feature.setTotal(true);
+			} else {
+				feature.setCustom(true);
+			}
+		}
+
+		return feature;
 	}
 
 	public Content migrate(final de.thm.arsnova.entities.Content from) {

@@ -124,7 +124,7 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 	public Map<Room, List<UserAuthentication>> cleanVotes(final int cleanupFeedbackDelay) {
 		final Map<Room, List<UserAuthentication>> removedFeedbackOfUsersInSession = new HashMap<>();
 		for (final Room room : data.keySet()) {
-			if (!room.getSettings().isLivevoteEnabled()) {
+			if (!room.getSettings().isQuickSurveyEnabled()) {
 				List<UserAuthentication> affectedUsers = cleanVotesByRoom(room, cleanupFeedbackDelay);
 				if (!affectedUsers.isEmpty()) {
 					removedFeedbackOfUsersInSession.put(room, affectedUsers);

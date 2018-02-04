@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -84,8 +85,9 @@ public class FromV2Migrator {
 		return profile;
 	}
 
-	public de.thm.arsnova.entities.Room migrate(final Room from, final UserProfile owner) {
-		if (!owner.getLoginId().equals(from.getCreator())) {
+	public de.thm.arsnova.entities.Room migrate(final Room from, final Optional<UserProfile> owner) {
+		if (!owner.isPresent() && from.getCreator() != null ||
+				owner.isPresent() && !owner.get().getLoginId().equals(from.getCreator())) {
 			throw new IllegalArgumentException("Username of owner object does not match session creator.");
 		}
 		final de.thm.arsnova.entities.Room to = new de.thm.arsnova.entities.Room();
@@ -93,7 +95,9 @@ public class FromV2Migrator {
 		to.setCreationTimestamp(new Date(from.getCreationTime()));
 		to.setUpdateTimestamp(new Date());
 		to.setShortId(from.getKeyword());
-		to.setOwnerId(owner.getId());
+		if (owner.isPresent()) {
+			to.setOwnerId(owner.get().getId());
+		}
 		to.setName(from.getName());
 		to.setAbbreviation(from.getShortName());
 		to.setDescription(from.getPpDescription());
@@ -114,8 +118,30 @@ public class FromV2Migrator {
 			poolProperties.setCategory(from.getPpSubject());
 			poolProperties.setLicense(from.getPpLicense());
 		}
+		to.setSettings(migrate(from.getFeatures()));
 
 		return to;
+	}
+
+	public de.thm.arsnova.entities.Room migrate(final Room from) {
+		return migrate(from, Optional.empty());
+	}
+
+	public de.thm.arsnova.entities.Room.Settings migrate(final RoomFeature feature) {
+		de.thm.arsnova.entities.Room.Settings settings = new de.thm.arsnova.entities.Room.Settings();
+		if (feature != null) {
+			settings.setCommentsEnabled(feature.isInterposed() || feature.isInterposedFeedback() || feature.isTotal());
+			settings.setQuestionsEnabled(feature.isLecture() || feature.isJitt() || feature.isClicker() || feature.isTotal());
+			settings.setSlidesEnabled(feature.isSlides() || feature.isTotal());
+			settings.setFlashcardsEnabled(feature.isFlashcard() || feature.isFlashcardFeature() || feature.isTotal());
+			settings.setQuickSurveyEnabled(feature.isLiveClicker());
+			settings.setQuickFeedbackEnabled(feature.isFeedback() || feature.isLiveFeedback() || feature.isTotal());
+			settings.setMultipleRoundsEnabled(feature.isPi() || feature.isClicker() || feature.isTotal());
+			settings.setTimerEnabled(feature.isPi() || feature.isClicker() || feature.isTotal());
+			settings.setScoreEnabled(feature.isLearningProgress() || feature.isTotal());
+		}
+
+		return settings;
 	}
 
 	public de.thm.arsnova.entities.Content migrate(final Content from) {

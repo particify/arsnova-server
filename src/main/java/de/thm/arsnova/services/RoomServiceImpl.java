@@ -309,8 +309,8 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
-	@PreAuthorize("hasPermission('', 'session', 'create')")
-	@Caching(evict = @CacheEvict(cacheNames = "rooms", key = "#result.keyword"))
+	@PreAuthorize("hasPermission(#room, 'create')")
+	@Caching(evict = @CacheEvict(cacheNames = "rooms", key = "#result.shortId"))
 	public Room save(final Room room) {
 		/* FIXME: migrate LMS course support
 		if (connectorClient != null && room.getCourseId() != null) {
@@ -332,7 +332,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		room.setOwnerId(userService.getCurrentUser().getId());
 		room.setClosed(false);
 
-		final Room result = save(room);
+		final Room result = super.create(room);
 		this.publisher.publishEvent(new NewRoomEvent(this, result));
 		return result;
 	}
@@ -381,10 +381,11 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#room, 'owner')")
+	@PreAuthorize("hasPermission(#room.id, 'room', 'owner')")
 	@CachePut(value = "rooms", key = "#room")
 	public Room update(final String shortId, final Room room) {
 		final Room existingRoom = roomRepository.findByShortId(shortId);
+		room.setOwnerId(existingRoom.getOwnerId());
 		handleLogo(room);
 		update(existingRoom, room);
 
@@ -522,7 +523,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	private void handleLogo(Room room) {
-		if (room.getAuthor().getOrganizationLogo() != null) {
+		if (room.getAuthor() != null && room.getAuthor().getOrganizationLogo() != null) {
 			if (!room.getAuthor().getOrganizationLogo().startsWith("http")) {
 				throw new IllegalArgumentException("Invalid logo URL.");
 			}

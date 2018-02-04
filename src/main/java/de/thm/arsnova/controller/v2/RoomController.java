@@ -18,7 +18,6 @@
 package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.controller.PaginationController;
-import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.entities.migration.FromV2Migrator;
 import de.thm.arsnova.entities.migration.ToV2Migrator;
 import de.thm.arsnova.entities.migration.v2.Room;
@@ -53,7 +52,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -132,9 +130,7 @@ public class RoomController extends PaginationController {
 		}
 		*/
 
-		final UserProfile profile = userService.getByUsername(userService.getCurrentUser().getUsername());
-
-		return toV2Migrator.migrate(roomService.save(fromV2Migrator.migrate(room, profile)), Optional.of(profile));
+		return toV2Migrator.migrate(roomService.save(fromV2Migrator.migrate(room)));
 	}
 
 	@ApiOperation(value = "updates a Room",
@@ -144,8 +140,7 @@ public class RoomController extends PaginationController {
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
 			@ApiParam(value = "current session", required = true) @RequestBody final Room room
 			) {
-		final UserProfile profile = userService.getByUsername(room.getCreator());
-		return toV2Migrator.migrate(roomService.update(shortId, fromV2Migrator.migrate(room, profile)), Optional.of(profile));
+		return toV2Migrator.migrate(roomService.update(shortId, fromV2Migrator.migrate(room)));
 	}
 
 	@ApiOperation(value = "change the Room creator (owner)", nickname = "changeRoomCreator")
@@ -386,9 +381,8 @@ public class RoomController extends PaginationController {
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
 			final HttpServletResponse response
 			) {
-		// FIXME: migrate Settings
-		throw new UnsupportedOperationException();
-		//return roomService.getFeatures(shortId);
+		de.thm.arsnova.entities.Room room = roomService.getByShortId(shortId);
+		return toV2Migrator.migrate(room.getSettings());
 	}
 
 	@RequestMapping(value = "/{shortId}/features", method = RequestMethod.PUT)
@@ -399,9 +393,11 @@ public class RoomController extends PaginationController {
 			@ApiParam(value = "Room feature", required = true) @RequestBody final RoomFeature features,
 			final HttpServletResponse response
 			) {
-		// FIXME: migrate Settings
-		throw new UnsupportedOperationException();
-		//return roomService.updateFeatures(shortId, features);
+		de.thm.arsnova.entities.Room room = roomService.getByShortId(shortId);
+		room.setSettings(fromV2Migrator.migrate(features));
+		roomService.update(shortId, room);
+
+		return toV2Migrator.migrate(room.getSettings());
 	}
 
 	@RequestMapping(value = "/{shortId}/lockfeedbackinput", method = RequestMethod.POST)
