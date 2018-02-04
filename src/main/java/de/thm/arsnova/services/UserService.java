@@ -28,6 +28,8 @@ import java.util.UUID;
  * The functionality the user service should provide.
  */
 public interface UserService {
+	UserProfile getCurrentUserProfile();
+
 	UserAuthentication getCurrentUser();
 
 	boolean isAdmin(String username);
@@ -57,6 +59,8 @@ public interface UserService {
 	void removeUserFromMaps(UserAuthentication user);
 
 	int loggedInUsers();
+
+	UserProfile getByAuthProviderAndLoginId(UserProfile.AuthProvider authProvider, String loginId);
 
 	UserProfile getByUsername(String username);
 

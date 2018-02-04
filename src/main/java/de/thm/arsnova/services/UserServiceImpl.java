@@ -180,6 +180,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public UserProfile getCurrentUserProfile() {
+		final UserAuthentication authentication = getCurrentUser();
+		return getByAuthProviderAndLoginId(authentication.getAuthProvider(), authentication.getUsername());
+	}
+
+	@Override
 	public UserAuthentication getCurrentUser() {
 		final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication == null || authentication.getPrincipal() == null) {
@@ -353,6 +359,11 @@ public class UserServiceImpl implements UserService {
 	@Gauge
 	public int loggedInUsers() {
 		return userToRoomId.size();
+	}
+
+	@Override
+	public UserProfile getByAuthProviderAndLoginId(final UserProfile.AuthProvider authProvider, final String loginId) {
+		return userRepository.findByAuthProviderAndLoginId(authProvider, loginId);
 	}
 
 	@Override
