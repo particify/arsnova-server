@@ -387,6 +387,7 @@ public class UserServiceImpl implements UserService {
 		UserProfile userProfile = new UserProfile();
 		UserProfile.Account account = new UserProfile.Account();
 		userProfile.setAccount(account);
+		userProfile.setAuthProvider(UserProfile.AuthProvider.ARSNOVA);
 		userProfile.setLoginId(lcUsername);
 		account.setPassword(encodePassword(password));
 		account.setActivationKey(RandomStringUtils.randomAlphanumeric(32));
