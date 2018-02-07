@@ -19,7 +19,6 @@ package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.controller.AbstractController;
 import de.thm.arsnova.entities.UserProfile;
-import de.thm.arsnova.services.UserRoomService;
 import de.thm.arsnova.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -43,9 +42,6 @@ public class UserController extends AbstractController {
 
 	@Autowired
 	private UserService userService;
-
-	@Autowired
-	private UserRoomService userRoomService;
 
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
 	public void register(@RequestParam final String username,

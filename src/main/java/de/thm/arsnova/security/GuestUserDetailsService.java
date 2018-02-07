@@ -19,36 +19,42 @@ package de.thm.arsnova.security;
 
 import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.services.UserService;
-import org.jasig.cas.client.validation.Assertion;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.cas.userdetails.AbstractCasAssertionUserDetailsService;
+import de.thm.arsnova.services.UserService;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
 /**
- * Class to load a user based on the results from CAS.
+ * Loads UserDetails for a guest user ({@link UserProfile.AuthProvider#ARSNOVA_GUEST}) based on the username (guest
+ * token).
+ *
+ * @author Daniel Gerhardt
  */
 @Service
-public class CasUserDetailsService extends AbstractCasAssertionUserDetailsService {
-	@Autowired
-	private UserService userService;
+public class GuestUserDetailsService implements UserDetailsService {
+	private final UserService userService;
+	private final Collection<GrantedAuthority> grantedAuthorities;
+
+	public GuestUserDetailsService(UserService userService) {
+		this.userService = userService;
+		grantedAuthorities = new HashSet<>();
+		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_GUEST_USER"));
+	}
 
 	@Override
-	protected UserDetails loadUserDetails(final Assertion assertion) {
-		final Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
-		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_CAS_USER"));
-		final String uid = assertion.getPrincipal().getName();
-		if (userService.isAdmin(uid)) {
-			grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-		}
+	public UserDetails loadUserByUsername(final String loginId) throws UsernameNotFoundException {
+		return loadUserByUsername(loginId, false);
+	}
 
-		return userService.loadUser(UserProfile.AuthProvider.CAS, assertion.getPrincipal().getName(),
-				grantedAuthorities, true);
+	public UserDetails loadUserByUsername(final String loginId, final boolean autoCreate) {
+		return userService.loadUser(UserProfile.AuthProvider.ARSNOVA_GUEST, loginId,
+				grantedAuthorities, autoCreate);
 	}
 }

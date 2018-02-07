@@ -12,6 +12,7 @@ import java.util.Set;
 
 public class UserProfile implements Entity {
 	public enum AuthProvider {
+		NONE,
 		UNKNOWN,
 		ARSNOVA,
 		ARSNOVA_GUEST,
@@ -110,6 +111,15 @@ public class UserProfile implements Entity {
 	private List<RoomHistoryEntry> roomHistory = new ArrayList<>();
 	private Set<String> acknowledgedMotds = new HashSet<>();
 	private Map<String, Map<String, ?>> extensions;
+
+	public UserProfile() {
+
+	}
+
+	public UserProfile(final AuthProvider authProvider, final String loginId) {
+		this.authProvider = authProvider;
+		this.loginId = loginId;
+	}
 
 	@Override
 	@JsonView({View.Persistence.class, View.Public.class})

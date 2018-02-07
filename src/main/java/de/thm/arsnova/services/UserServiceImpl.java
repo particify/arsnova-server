@@ -24,29 +24,33 @@ import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.persistance.UserRepository;
+import de.thm.arsnova.security.GuestUserDetailsService;
+import de.thm.arsnova.security.User;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
-import org.pac4j.oauth.profile.facebook.FacebookProfile;
-import org.pac4j.oauth.profile.google2.Google2Profile;
-import org.pac4j.oauth.profile.twitter.TwitterProfile;
-import org.pac4j.springframework.security.authentication.Pac4jAuthenticationToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.cas.authentication.CasAuthenticationToken;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.codec.Hex;
 import org.springframework.security.crypto.keygen.BytesKeyGenerator;
 import org.springframework.security.crypto.keygen.KeyGenerators;
+import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,16 +62,8 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
@@ -76,7 +72,7 @@ import java.util.regex.Pattern;
  */
 @Service
 @MonitorGauges
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> implements UserService {
 
 	private static final int LOGIN_TRY_RESET_DELAY_MS = 30 * 1000;
 
@@ -99,6 +95,15 @@ public class UserServiceImpl implements UserService {
 	private UserRepository userRepository;
 
 	private JavaMailSender mailSender;
+
+	@Autowired(required = false)
+	private GuestUserDetailsService guestUserDetailsService;
+
+	@Autowired(required = false)
+	private DaoAuthenticationProvider daoProvider;
+
+	@Autowired(required = false)
+	private LdapAuthenticationProvider ldapAuthenticationProvider;
 
 	@Value("${root-url}")
 	private String rootUrl;
@@ -150,7 +155,11 @@ public class UserServiceImpl implements UserService {
 		loginBans = Collections.synchronizedSet(new HashSet<String>());
 	}
 
-	public UserServiceImpl(UserRepository repository, JavaMailSender mailSender) {
+	public UserServiceImpl(
+			UserRepository repository,
+			JavaMailSender mailSender,
+			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+		super(UserProfile.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.userRepository = repository;
 		this.mailSender = mailSender;
 	}
@@ -192,57 +201,12 @@ public class UserServiceImpl implements UserService {
 			return null;
 		}
 
-		UserAuthentication user = null;
-
-		if (authentication instanceof Pac4jAuthenticationToken) {
-			user = getOAuthUser(authentication);
-		} else if (authentication instanceof CasAuthenticationToken) {
-			final CasAuthenticationToken token = (CasAuthenticationToken) authentication;
-			user = new UserAuthentication(token.getAssertion().getPrincipal());
-		} else if (authentication instanceof AnonymousAuthenticationToken) {
-			final AnonymousAuthenticationToken token = (AnonymousAuthenticationToken) authentication;
-			user = new UserAuthentication(token);
-		} else if (authentication instanceof UsernamePasswordAuthenticationToken) {
-			final UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) authentication;
-			user = new UserAuthentication(token);
-			if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_GUEST"))) {
-				user.setAuthProvider(UserProfile.AuthProvider.ARSNOVA_GUEST);
-			} else if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_DB_USER"))) {
-				user.setAuthProvider(UserProfile.AuthProvider.ARSNOVA);
-			}
-		}
-
+		UserAuthentication user = new UserAuthentication(authentication);
 		if (user == null || "anonymous".equals(user.getUsername())) {
 			throw new UnauthorizedException();
 		}
-
-		UserProfile userProfile = userRepository.findByAuthProviderAndLoginId(user.getAuthProvider(), user.getUsername());
-		if (userProfile == null && user.getAuthProvider() != UserProfile.AuthProvider.ARSNOVA) {
-			userProfile = new UserProfile();
-			userProfile.setAuthProvider(user.getAuthProvider());
-			userProfile.setLoginId(user.getUsername());
-			userRepository.save(userProfile);
-		}
-		user.setId(userProfile.getId());
-
 		user.setAdmin(Arrays.asList(adminAccounts).contains(user.getUsername()));
 
-		return user;
-	}
-
-	private UserAuthentication getOAuthUser(final Authentication authentication) {
-		UserAuthentication user = null;
-		final Pac4jAuthenticationToken token = (Pac4jAuthenticationToken) authentication;
-		if (token.getProfile() instanceof Google2Profile) {
-			final Google2Profile profile = (Google2Profile) token.getProfile();
-			user = new UserAuthentication(profile);
-		} else if (token.getProfile() instanceof TwitterProfile) {
-			final TwitterProfile profile = (TwitterProfile) token.getProfile();
-			user = new UserAuthentication(profile);
-		} else if (token.getProfile() instanceof FacebookProfile) {
-			final FacebookProfile profile = (FacebookProfile) token.getProfile();
-			user = new UserAuthentication(profile);
-		}
 		return user;
 	}
 
@@ -362,6 +326,60 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public void authenticate(final UsernamePasswordAuthenticationToken token,
+			final UserProfile.AuthProvider authProvider) {
+		Authentication auth;
+		switch (authProvider) {
+			case LDAP:
+				auth = ldapAuthenticationProvider.authenticate(token);
+				break;
+			case ARSNOVA:
+				auth = daoProvider.authenticate(token);
+				break;
+			case ARSNOVA_GUEST:
+				String id = token.getName();
+				boolean autoCreate = false;
+				if (id == null || id.isEmpty()) {
+					id = generateGuestId();
+					autoCreate = true;
+				}
+				UserDetails userDetails = guestUserDetailsService.loadUserByUsername(id, autoCreate);
+				if (userDetails == null) {
+					throw new UsernameNotFoundException("Guest user does not exist");
+				}
+				auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+				break;
+			default:
+				throw new IllegalArgumentException("Unsupported authentication provider");
+		}
+
+		if (!auth.isAuthenticated()) {
+			throw new BadRequestException();
+		}
+		SecurityContextHolder.getContext().setAuthentication(auth);
+	}
+
+	@Override
+	public User loadUser(final UserProfile.AuthProvider authProvider, final String loginId,
+			final Collection<GrantedAuthority> grantedAuthorities, final boolean autoCreate)
+			throws UsernameNotFoundException {
+		logger.debug("Load user: LoginId: {}, AuthProvider: {}", loginId, authProvider);
+		UserProfile userProfile = userRepository.findByAuthProviderAndLoginId(authProvider, loginId);
+		if (userProfile == null) {
+			if (autoCreate) {
+				userProfile = new UserProfile(authProvider, loginId);
+				/* Repository is accessed directly without EntityService to skip permission check */
+				userRepository.save(userProfile);
+			} else {
+				throw new UsernameNotFoundException("User does not exist.");
+			}
+		}
+
+		return new User(userProfile, grantedAuthorities);
+	}
+
+	@Override
 	public UserProfile getByAuthProviderAndLoginId(final UserProfile.AuthProvider authProvider, final String loginId) {
 		return userRepository.findByAuthProviderAndLoginId(authProvider, loginId);
 	}
@@ -404,6 +422,7 @@ public class UserServiceImpl implements UserService {
 		account.setActivationKey(RandomStringUtils.randomAlphanumeric(32));
 		userProfile.setCreationTimestamp(new Date());
 
+		/* Repository is accessed directly without EntityService to skip permission check */
 		UserProfile result = userRepository.save(userProfile);
 		if (null != result) {
 			sendActivationEmail(result);
@@ -577,20 +596,11 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
-	public String createGuest() {
+	private String generateGuestId() {
 		if (null == keygen) {
 			keygen = KeyGenerators.secureRandom(16);
 		}
 
-		UserProfile userProfile = new UserProfile();
-		userProfile.setLoginId(new String(Hex.encode(keygen.generateKey())));
-		userProfile.setAuthProvider(UserProfile.AuthProvider.ARSNOVA_GUEST);
-		userRepository.save(userProfile);
-
-		return userProfile.getLoginId();
-	}
-
-	public boolean guestExists(final String loginId) {
-		return userRepository.findByAuthProviderAndLoginId(UserProfile.AuthProvider.ARSNOVA_GUEST, loginId) != null;
+		return new String(Hex.encode(keygen.generateKey()));
 	}
 }

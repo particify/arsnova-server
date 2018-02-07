@@ -17,12 +17,13 @@
  */
 package de.thm.arsnova.controller.v2;
 
+import de.thm.arsnova.config.SecurityConfig;
 import de.thm.arsnova.controller.AbstractController;
 import de.thm.arsnova.entities.ServiceDescription;
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.Room;
+import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.exceptions.UnauthorizedException;
-import de.thm.arsnova.services.UserRoomService;
+import de.thm.arsnova.security.User;
 import de.thm.arsnova.services.UserService;
 import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.exception.HttpAction;
@@ -35,17 +36,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.token.Sha512DigestUtils;
 import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -72,10 +71,6 @@ import java.util.List;
 @Controller("v2AuthenticationController")
 @RequestMapping("/v2/auth")
 public class AuthenticationController extends AbstractController {
-
-	private static final int MAX_USERNAME_LENGTH = 15;
-	private static final int MAX_GUESTHASH_LENGTH = 10;
-
 	@Value("${api.path:}") private String apiPath;
 	@Value("${customization.path}") private String customizationPath;
 
@@ -126,9 +121,6 @@ public class AuthenticationController extends AbstractController {
 	private ServletContext servletContext;
 
 	@Autowired(required = false)
-	private DaoAuthenticationProvider daoProvider;
-
-	@Autowired(required = false)
 	private TwitterClient twitterClient;
 
 	@Autowired(required = false)
@@ -138,16 +130,10 @@ public class AuthenticationController extends AbstractController {
 	private FacebookClient facebookClient;
 
 	@Autowired(required = false)
-	private LdapAuthenticationProvider ldapAuthenticationProvider;
-
-	@Autowired(required = false)
 	private CasAuthenticationEntryPoint casEntryPoint;
 
 	@Autowired
 	private UserService userService;
-
-	@Autowired
-	private UserRoomService userRoomService;
 
 	private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
 
@@ -163,7 +149,6 @@ public class AuthenticationController extends AbstractController {
 			@RequestParam("type") final String type,
 			@RequestParam(value = "user", required = false) String username,
 			@RequestParam(required = false) final String password,
-			@RequestParam(value = "role", required = false) final UserRoomService.Role role,
 			final HttpServletRequest request,
 			final HttpServletResponse response
 	) throws IOException {
@@ -173,76 +158,33 @@ public class AuthenticationController extends AbstractController {
 
 			return;
 		}
-
-		userRoomService.setRole(role);
+		final UsernamePasswordAuthenticationToken authRequest =
+				new UsernamePasswordAuthenticationToken(username, password);
 
 		if (dbAuthEnabled && "arsnova".equals(type)) {
-			Authentication authRequest = new UsernamePasswordAuthenticationToken(username, password);
 			try {
-				Authentication auth = daoProvider.authenticate(authRequest);
-				if (auth.isAuthenticated()) {
-					SecurityContextHolder.getContext().setAuthentication(auth);
-					request.getSession(true).setAttribute(
-							HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-							SecurityContextHolder.getContext());
-
-					return;
-				}
+				userService.authenticate(authRequest, UserProfile.AuthProvider.ARSNOVA);
 			} catch (AuthenticationException e) {
 				logger.info("Database authentication failed.", e);
+				userService.increaseFailedLoginCount(addr);
+				response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			}
-
-			userService.increaseFailedLoginCount(addr);
-			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 		} else if (ldapEnabled && "ldap".equals(type)) {
-			if (!"".equals(username) && !"".equals(password)) {
-				org.springframework.security.core.userdetails.User user =
-						new org.springframework.security.core.userdetails.User(
-							username, password, true, true, true, true, this.getAuthorities(userService.isAdmin(username))
-						);
-
-				Authentication token = new UsernamePasswordAuthenticationToken(user, password, getAuthorities(userService.isAdmin(username)));
-				try {
-					Authentication auth = ldapAuthenticationProvider.authenticate(token);
-					if (auth.isAuthenticated()) {
-						SecurityContextHolder.getContext().setAuthentication(auth);
-						request.getSession(true).setAttribute(
-								HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-								SecurityContextHolder.getContext());
-
-						return;
-					}
-					logger.info("LDAP authentication failed.");
-				} catch (AuthenticationException e) {
-					logger.info("LDAP authentication failed.", e);
-				}
-
+			try {
+				userService.authenticate(authRequest, UserProfile.AuthProvider.LDAP);
+			} catch (AuthenticationException e) {
+				logger.info("LDAP authentication failed.", e);
 				userService.increaseFailedLoginCount(addr);
 				response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			}
 		} else if (guestEnabled && "guest".equals(type)) {
-			if (username == null || !username.startsWith("Guest")) {
-				username = "Guest" + userService.createGuest();
-			} else {
-				if (!userService.guestExists(username.substring(5))) {
-					userService.increaseFailedLoginCount(addr);
-					response.setStatus(HttpStatus.UNAUTHORIZED.value());
-					logger.debug("Guest authentication failed.");
-
-					return;
-				}
+			try {
+				userService.authenticate(authRequest, UserProfile.AuthProvider.ARSNOVA_GUEST);
+			} catch (final AuthenticationException e) {
+				logger.debug("Guest authentication failed.", e);
+				userService.increaseFailedLoginCount(addr);
+				response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			}
-			List<GrantedAuthority> authorities = new ArrayList<>();
-			authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
-			org.springframework.security.core.userdetails.User user =
-					new org.springframework.security.core.userdetails.User(
-							username, "", true, true, true, true, authorities
-					);
-			Authentication token = new UsernamePasswordAuthenticationToken(user, null, authorities);
-
-			SecurityContextHolder.getContext().setAuthentication(token);
-			request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-					SecurityContextHolder.getContext());
 		} else {
 			response.setStatus(HttpStatus.BAD_REQUEST.value());
 		}
@@ -309,21 +251,23 @@ public class AuthenticationController extends AbstractController {
 
 	@RequestMapping(value = { "/", "/whoami" }, method = RequestMethod.GET)
 	@ResponseBody
-	public UserAuthentication whoami() {
-		userRoomService.setUser(userService.getCurrentUser());
-		return userService.getCurrentUser();
+	public UserAuthentication whoami(@AuthenticationPrincipal User user) {
+		if (user == null) {
+			throw new UnauthorizedException();
+		}
+		return new UserAuthentication(user);
 	}
 
 	@RequestMapping(value = { "/logout" }, method = { RequestMethod.POST, RequestMethod.GET })
-	public View doLogout(final HttpServletRequest request) {
+	public String doLogout(final HttpServletRequest request) {
 		final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		userService.removeUserFromMaps(userService.getCurrentUser());
 		request.getSession().invalidate();
 		SecurityContextHolder.clearContext();
 		if (auth instanceof CasAuthenticationToken) {
-			return new RedirectView(apiPath + "/j_spring_cas_security_logout");
+			return "redirect:" + apiPath + SecurityConfig.CAS_LOGOUT_PATH_SUFFIX;
 		}
-		return new RedirectView(request.getHeader("referer") != null ? request.getHeader("referer") : "/");
+		return "redirect:" + request.getHeader("referer") != null ? request.getHeader("referer") : "/";
 	}
 
 	@RequestMapping(value = { "/services" }, method = RequestMethod.GET)
@@ -332,7 +276,7 @@ public class AuthenticationController extends AbstractController {
 		List<ServiceDescription> services = new ArrayList<>();
 
 		/* The first parameter is replaced by the backend, the second one by the frondend */
-		String dialogUrl = apiPath + "/v2/auth/dialog?type={0}&successurl='{0}'";
+		String dialogUrl = apiPath + "/auth/dialog?type={0}&successurl='{0}'";
 
 		if (guestEnabled) {
 			ServiceDescription sdesc = new ServiceDescription(

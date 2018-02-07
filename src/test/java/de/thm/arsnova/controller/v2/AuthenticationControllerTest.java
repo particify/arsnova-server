@@ -32,6 +32,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -59,17 +60,23 @@ public class AuthenticationControllerTest extends AbstractControllerTest {
 	}
 
 	@Test
+	@Ignore("Mockup needed for UserService")
 	public void testReuseGuestLogin() throws Exception {
 		mockMvc.perform(
 				get("/v2/auth/doLogin")
-				.param("type", "guest").param("user","Guest1234567890")
+						.param("type", "guest")
+		).andExpect(status().isOk());
+		final Authentication auth1 = SecurityContextHolder.getContext().getAuthentication();
+		cleanup();
+		mockMvc.perform(
+				get("/v2/auth/doLogin")
+				.param("type", "guest").param("user", auth1.getName())
 				).andExpect(status().isOk());
 
-		final Authentication auth = SecurityContextHolder.getContext()
-				.getAuthentication();
-		assertEquals(auth.getClass(), UsernamePasswordAuthenticationToken.class);
-		assertEquals("Guest1234567890", auth.getName());
-
+		final Authentication auth2 = SecurityContextHolder.getContext().getAuthentication();
+		assertEquals(auth2.getClass(), UsernamePasswordAuthenticationToken.class);
+		assertNotSame(auth1, auth2);
+		assertEquals(auth1, auth2);
 	}
 
 	@Test

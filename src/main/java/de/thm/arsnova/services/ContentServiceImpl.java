@@ -220,7 +220,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	/* FIXME: #content.getShortId() cannot be checked since keyword is no longer set for content. */
 	@Override
-	@PreAuthorize("hasPermission(#content.getShortId(), 'session', 'owner')")
+	@PreAuthorize("hasPermission(#content.getShortId(), 'room', 'owner')")
 	public Content save(final Content content) {
 		final Room room = roomRepository.findOne(content.getRoomId());
 		content.setTimestamp(new Date());
@@ -918,7 +918,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	/* TODO: Only evict cache entry for the answer's content. This requires some refactoring. */
 	@Override
-	@PreAuthorize("hasPermission(#roomShortId, 'session', 'owner')")
+	@PreAuthorize("hasPermission(#roomShortId, 'room', 'owner')")
 	@CacheEvict(value = "answerlists", allEntries = true)
 	public void deleteAllPreparationAnswers(String roomShortId) {
 		final Room room = getRoom(roomShortId);
@@ -933,7 +933,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	/* TODO: Only evict cache entry for the answer's content. This requires some refactoring. */
 	@Override
-	@PreAuthorize("hasPermission(#roomShortId, 'session', 'owner')")
+	@PreAuthorize("hasPermission(#roomShortId, 'room', 'owner')")
 	@CacheEvict(value = "answerlists", allEntries = true)
 	public void deleteAllLectureAnswers(String roomShortId) {
 		final Room room = getRoom(roomShortId);

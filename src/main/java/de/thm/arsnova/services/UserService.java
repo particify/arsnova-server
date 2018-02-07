@@ -19,7 +19,12 @@ package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.UserProfile;
+import de.thm.arsnova.security.User;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -27,7 +32,7 @@ import java.util.UUID;
 /**
  * The functionality the user service should provide.
  */
-public interface UserService {
+public interface UserService extends EntityService<UserProfile> {
 	UserProfile getCurrentUserProfile();
 
 	UserAuthentication getCurrentUser();
@@ -60,6 +65,11 @@ public interface UserService {
 
 	int loggedInUsers();
 
+	void authenticate(UsernamePasswordAuthenticationToken token, UserProfile.AuthProvider authProvider);
+
+	User loadUser(UserProfile.AuthProvider authProvider, String loginId,
+			Collection<GrantedAuthority> grantedAuthorities, boolean autoCreate) throws UsernameNotFoundException;
+
 	UserProfile getByAuthProviderAndLoginId(UserProfile.AuthProvider authProvider, String loginId);
 
 	UserProfile getByUsername(String username);
@@ -73,8 +83,4 @@ public interface UserService {
 	void initiatePasswordReset(String username);
 
 	boolean resetPassword(UserProfile userProfile, String key, String password);
-
-	String createGuest();
-
-	boolean guestExists(String loginId);
 }

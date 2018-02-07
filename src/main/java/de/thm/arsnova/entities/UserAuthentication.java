@@ -19,13 +19,9 @@ package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
-import de.thm.arsnova.services.UserRoomService;
-import org.jasig.cas.client.authentication.AttributePrincipal;
-import org.pac4j.oauth.profile.facebook.FacebookProfile;
-import org.pac4j.oauth.profile.google2.Google2Profile;
-import org.pac4j.oauth.profile.twitter.TwitterProfile;
+import de.thm.arsnova.security.User;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -40,36 +36,33 @@ public class UserAuthentication implements Serializable {
 	private String id;
 	private String username;
 	private UserProfile.AuthProvider authProvider;
-	private UserRoomService.Role role;
 	private boolean isAdmin;
 
-	public UserAuthentication(final Google2Profile profile) {
-		setUsername(profile.getEmail());
-		setAuthProvider(UserProfile.AuthProvider.GOOGLE);
+	public UserAuthentication() {
+		username = ANONYMOUS;
+		authProvider = UserProfile.AuthProvider.NONE;
 	}
 
-	public UserAuthentication(final TwitterProfile profile) {
-		setUsername(profile.getUsername());
-		setAuthProvider(UserProfile.AuthProvider.TWITTER);
+	public UserAuthentication(User user) {
+		id = user.getId();
+		username = user.getUsername();
+		authProvider = user.getAuthProvider();
+		isAdmin = user.isAdmin();
 	}
 
-	public UserAuthentication(final FacebookProfile profile) {
-		setUsername(profile.getProfileUrl().toString());
-		setAuthProvider(UserProfile.AuthProvider.FACEBOOK);
-	}
-
-	public UserAuthentication(final AttributePrincipal principal) {
-		setUsername(principal.getName());
-		setAuthProvider(UserProfile.AuthProvider.CAS);
-	}
-
-	public UserAuthentication(final UsernamePasswordAuthenticationToken token) {
-		setUsername(token.getName());
-		setAuthProvider(UserProfile.AuthProvider.LDAP);
-	}
-
-	public UserAuthentication(final AnonymousAuthenticationToken token) {
-		setUsername(UserAuthentication.ANONYMOUS);
+	public UserAuthentication(Authentication authentication) {
+		if (authentication instanceof AnonymousAuthenticationToken) {
+			setUsername(UserAuthentication.ANONYMOUS);
+		} else {
+			if (!(authentication.getPrincipal() instanceof User)) {
+				throw new IllegalArgumentException("Unsupported authentication token");
+			}
+			User user = (User) authentication.getPrincipal();
+			id = user.getId();
+			username = user.getUsername();
+			authProvider = user.getAuthProvider();
+			isAdmin = user.isAdmin();
+		}
 	}
 
 	public String getId() {
@@ -96,18 +89,6 @@ public class UserAuthentication implements Serializable {
 
 	public void setAuthProvider(final UserProfile.AuthProvider authProvider) {
 		this.authProvider = authProvider;
-	}
-
-	public UserRoomService.Role getRole() {
-		return role;
-	}
-
-	public void setRole(final UserRoomService.Role role) {
-		this.role = role;
-	}
-
-	public boolean hasRole(UserRoomService.Role role) {
-		return this.role == role;
 	}
 
 	public void setAdmin(final boolean a) {

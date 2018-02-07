@@ -19,7 +19,6 @@ package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.controller.AbstractController;
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.services.UserRoomService;
 import de.thm.arsnova.services.UserService;
 import de.thm.arsnova.websocket.ArsnovaSocketioServer;
 import io.swagger.annotations.Api;
@@ -53,9 +52,6 @@ public class SocketController extends AbstractController {
 	private UserService userService;
 
 	@Autowired
-	private UserRoomService userRoomService;
-
-	@Autowired
 	private ArsnovaSocketioServer server;
 
 	private static final Logger logger = LoggerFactory.getLogger(SocketController.class);
@@ -82,7 +78,6 @@ public class SocketController extends AbstractController {
 			return;
 		}
 		userService.putUserToSocketId(UUID.fromString(socketid), u);
-		userRoomService.setSocketId(UUID.fromString(socketid));
 		response.setStatus(HttpStatus.NO_CONTENT.value());
 	}
 

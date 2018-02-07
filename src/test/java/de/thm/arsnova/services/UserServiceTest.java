@@ -22,6 +22,8 @@ import de.thm.arsnova.config.TestAppConfig;
 import de.thm.arsnova.config.TestPersistanceConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
 import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.security.User;
+import de.thm.arsnova.security.pac4j.OAuthToken;
 import org.jasig.cas.client.authentication.AttributePrincipalImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,6 +45,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -62,7 +65,7 @@ public class UserServiceTest {
 	@Test
 	public void testSocket2UserPersistence() throws IOException, ClassNotFoundException {
 		socketid2user.put(UUID.randomUUID(), new UserAuthentication(new UsernamePasswordAuthenticationToken("ptsr00", UUID.randomUUID())));
-		socketid2user.put(UUID.randomUUID(), new UserAuthentication(new AttributePrincipalImpl("ptstr0")));
+		//socketid2user.put(UUID.randomUUID(), new UserAuthentication(new AttributePrincipalImpl("ptstr0")));
 
 		Google2Email email = new Google2Email();
 		email.setEmail("mail@host.com");
@@ -71,8 +74,9 @@ public class UserServiceTest {
 		Google2Profile profile = new Google2Profile();
 		profile.addAttribute(Google2ProfileDefinition.DISPLAY_NAME, "ptsr00");
 		profile.addAttribute(Google2ProfileDefinition.EMAILS, emails);
+		OAuthToken token = new OAuthToken(null, profile, Collections.emptyList());
 
-		socketid2user.put(UUID.randomUUID(), new UserAuthentication(profile));
+		socketid2user.put(UUID.randomUUID(), new UserAuthentication(token));
 		List<GrantedAuthority> authorities = new ArrayList<>();
 		authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
 		socketid2user.put(UUID.randomUUID(), new UserAuthentication(new AnonymousAuthenticationToken("ptsr00", UUID.randomUUID(), authorities)));

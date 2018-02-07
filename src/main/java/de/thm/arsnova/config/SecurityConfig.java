@@ -21,16 +21,17 @@ import de.thm.arsnova.security.CasLogoutSuccessHandler;
 import de.thm.arsnova.security.CasUserDetailsService;
 import de.thm.arsnova.security.LoginAuthenticationFailureHandler;
 import de.thm.arsnova.security.LoginAuthenticationSucessHandler;
-import de.thm.arsnova.security.ApplicationPermissionEvaluator;
 import de.thm.arsnova.security.CustomLdapUserDetailsMapper;
-import de.thm.arsnova.security.DbUserDetailsService;
+import de.thm.arsnova.security.RegisteredUserDetailsService;
+import de.thm.arsnova.security.pac4j.OauthCallbackFilter;
+import de.thm.arsnova.security.pac4j.OauthCallbackHandler;
 import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.config.Config;
+import org.pac4j.core.context.J2EContext;
 import org.pac4j.oauth.client.FacebookClient;
 import org.pac4j.oauth.client.Google2Client;
 import org.pac4j.oauth.client.TwitterClient;
-import org.pac4j.springframework.security.web.CallbackFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,8 +44,6 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.ldap.core.support.LdapContextSource;
-import org.springframework.security.access.PermissionEvaluator;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.cas.ServiceProperties;
 import org.springframework.security.cas.authentication.CasAuthenticationProvider;
@@ -88,7 +87,9 @@ import java.util.List;
 @EnableWebSecurity
 @Profile("!test")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-	private static final String OAUTH_CALLBACK_PATH_SUFFIX = "/auth/oauth_callback";
+	public static final String OAUTH_CALLBACK_PATH_SUFFIX = "/auth/oauth_callback";
+	public static final String CAS_LOGIN_PATH_SUFFIX = "/auth/login/cas";
+	public static final String CAS_LOGOUT_PATH_SUFFIX = "/auth/logout/cas";
 	private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
 	@Autowired
@@ -143,7 +144,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		}
 
 		if (facebookEnabled || googleEnabled || twitterEnabled) {
-			CallbackFilter callbackFilter = new CallbackFilter(oauthConfig());
+			OauthCallbackFilter callbackFilter = new OauthCallbackFilter(oauthCallbackHandler(), oauthConfig());
 			callbackFilter.setSuffix(OAUTH_CALLBACK_PATH_SUFFIX);
 			callbackFilter.setDefaultUrl(rootUrl + apiPath + "/");
 			http.addFilterAfter(callbackFilter, CasAuthenticationFilter.class);
@@ -153,10 +154,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		List<String> providers = new ArrayList<>();
-		if (dbAuthEnabled) {
-			providers.add("user-db");
-			auth.authenticationProvider(daoAuthenticationProvider());
-		}
 		if (ldapEnabled) {
 			providers.add("ldap");
 			auth.authenticationProvider(ldapAuthenticationProvider());
@@ -164,6 +161,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		if (casEnabled) {
 			providers.add("cas");
 			auth.authenticationProvider(casAuthenticationProvider());
+		}
+		if (dbAuthEnabled) {
+			providers.add("user-db");
+			auth.authenticationProvider(daoAuthenticationProvider());
 		}
 		if (googleEnabled) {
 			providers.add("google");
@@ -175,12 +176,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			providers.add("twitter");
 		}
 		logger.info("Enabled authentication providers: {}", providers);
-	}
-
-	@Bean
-	@Override
-	public AuthenticationManager authenticationManagerBean() throws Exception {
-		return super.authenticationManager();
 	}
 
 	@Bean
@@ -199,11 +194,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public SessionRegistry sessionRegistry() {
 		return new SessionRegistryImpl();
-	}
-
-	@Bean
-	public PermissionEvaluator permissionEvaluator() {
-		return new ApplicationPermissionEvaluator();
 	}
 
 	@Bean
@@ -232,7 +222,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public DaoAuthenticationProvider daoAuthenticationProvider() {
 		final DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-		authProvider.setUserDetailsService(dbUserDetailsService());
+		authProvider.setUserDetailsService(registeredUserDetailsService());
 		authProvider.setPasswordEncoder(passwordEncoder());
 
 		return authProvider;
@@ -244,8 +234,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public DbUserDetailsService dbUserDetailsService() {
-		return new DbUserDetailsService();
+	public RegisteredUserDetailsService registeredUserDetailsService() {
+		return new RegisteredUserDetailsService();
 	}
 
 	@Bean
@@ -324,7 +314,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public ServiceProperties casServiceProperties() {
 		ServiceProperties properties = new ServiceProperties();
-		properties.setService(rootUrl + apiPath + "/login/cas");
+		properties.setService(rootUrl + apiPath + CAS_LOGIN_PATH_SUFFIX);
 		properties.setSendRenew(false);
 
 		return properties;
@@ -348,6 +338,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public CasAuthenticationFilter casAuthenticationFilter() throws Exception {
 		CasAuthenticationFilter filter = new CasAuthenticationFilter();
 		filter.setAuthenticationManager(authenticationManager());
+		filter.setServiceProperties(casServiceProperties());
+		filter.setFilterProcessesUrl("/**" + CAS_LOGIN_PATH_SUFFIX);
 		filter.setAuthenticationSuccessHandler(successHandler());
 		filter.setAuthenticationFailureHandler(failureHandler());
 
@@ -357,7 +349,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public LogoutFilter casLogoutFilter() {
 		LogoutFilter filter = new LogoutFilter(casLogoutSuccessHandler(), logoutHandler());
-		filter.setLogoutRequestMatcher(new AntPathRequestMatcher("/j_spring_cas_security_logout"));
+		filter.setLogoutRequestMatcher(new AntPathRequestMatcher("/**" + CAS_LOGOUT_PATH_SUFFIX));
 
 		return filter;
 	}
@@ -387,6 +379,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		}
 
 		return new Config(rootUrl + apiPath + OAUTH_CALLBACK_PATH_SUFFIX, clients);
+	}
+
+	@Bean
+	public OauthCallbackHandler<Object, J2EContext> oauthCallbackHandler() {
+		return new OauthCallbackHandler<>();
 	}
 
 	@Bean

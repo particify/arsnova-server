@@ -19,6 +19,8 @@ package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.persistance.UserRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
@@ -26,8 +28,11 @@ public class StubUserService extends UserServiceImpl {
 
 	private UserAuthentication stubUser = null;
 
-	public StubUserService(UserRepository repository, JavaMailSender mailSender) {
-		super(repository, mailSender);
+	public StubUserService(
+			UserRepository repository,
+			JavaMailSender mailSender,
+			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+		super(repository, mailSender, jackson2HttpMessageConverter);
 	}
 
 	public void setUserAuthenticated(boolean isAuthenticated) {
@@ -49,9 +54,5 @@ public class StubUserService extends UserServiceImpl {
 	@Override
 	public UserAuthentication getCurrentUser() {
 		return stubUser;
-	}
-
-	public void setRole(UserRoomService.Role role) {
-		stubUser.setRole(role);
 	}
 }
