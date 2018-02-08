@@ -18,15 +18,12 @@
 package de.thm.arsnova.security.pac4j;
 
 import de.thm.arsnova.security.User;
-import org.pac4j.core.config.Config;
-import org.pac4j.core.context.WebContext;
-import org.pac4j.core.engine.DefaultCallbackLogic;
 import org.pac4j.core.profile.CommonProfile;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
-
-import java.util.Collections;
 
 /**
  * Sets up the SecurityContext OAuth users.
@@ -34,21 +31,20 @@ import java.util.Collections;
  * @author Daniel Gerhardt
  */
 @Component
-public class OauthCallbackHandler<R, C extends WebContext> extends DefaultCallbackLogic<R, C> {
+public class OauthAuthenticationProvider implements AuthenticationProvider {
 	private OauthUserDetailsService oauthUserDetailsService;
 
 	@Override
-	protected void saveUserProfile(final C context, final Config config, final CommonProfile profile,
-			final boolean multiProfile, final boolean renewSession) {
-		User user = oauthUserDetailsService.loadUserDetails(
-				new OAuthToken(null, profile, Collections.emptyList()));
-		SecurityContextHolder.getContext().setAuthentication(
-				new OAuthToken(user, profile, user.getAuthorities()));
+	public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
+		OAuthToken oAuthToken = (OAuthToken) authentication;
+		User user = oauthUserDetailsService.loadUserDetails(oAuthToken);
+
+		return new OAuthToken(user, (CommonProfile) oAuthToken.getDetails(), user.getAuthorities());
 	}
 
 	@Override
-	protected void renewSession(final C context, final Config config) {
-		/* NOOP */
+	public boolean supports(final Class<?> aClass) {
+		return aClass.isAssignableFrom(OAuthToken.class);
 	}
 
 	@Autowired

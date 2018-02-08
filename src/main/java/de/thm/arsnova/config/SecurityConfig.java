@@ -24,11 +24,10 @@ import de.thm.arsnova.security.LoginAuthenticationSucessHandler;
 import de.thm.arsnova.security.CustomLdapUserDetailsMapper;
 import de.thm.arsnova.security.RegisteredUserDetailsService;
 import de.thm.arsnova.security.pac4j.OauthCallbackFilter;
-import de.thm.arsnova.security.pac4j.OauthCallbackHandler;
+import de.thm.arsnova.security.pac4j.OauthAuthenticationProvider;
 import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.config.Config;
-import org.pac4j.core.context.J2EContext;
 import org.pac4j.oauth.client.FacebookClient;
 import org.pac4j.oauth.client.Google2Client;
 import org.pac4j.oauth.client.TwitterClient;
@@ -144,10 +143,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		}
 
 		if (facebookEnabled || googleEnabled || twitterEnabled) {
-			OauthCallbackFilter callbackFilter = new OauthCallbackFilter(oauthCallbackHandler(), oauthConfig());
-			callbackFilter.setSuffix(OAUTH_CALLBACK_PATH_SUFFIX);
-			callbackFilter.setDefaultUrl(rootUrl + apiPath + "/");
-			http.addFilterAfter(callbackFilter, CasAuthenticationFilter.class);
+			http.addFilterAfter(oauthCallbackFilter(), CasAuthenticationFilter.class);
 		}
 	}
 
@@ -166,14 +162,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			providers.add("user-db");
 			auth.authenticationProvider(daoAuthenticationProvider());
 		}
-		if (googleEnabled) {
-			providers.add("google");
-		}
-		if (facebookEnabled) {
-			providers.add("facebook");
-		}
-		if (twitterEnabled) {
-			providers.add("twitter");
+		if (googleEnabled || facebookEnabled || twitterEnabled) {
+			if (googleEnabled) {
+				providers.add("google");
+			}
+			if (facebookEnabled) {
+				providers.add("facebook");
+			}
+			if (twitterEnabled) {
+				providers.add("twitter");
+			}
+			auth.authenticationProvider(oauthAuthenticationProvider());
 		}
 		logger.info("Enabled authentication providers: {}", providers);
 	}
@@ -382,8 +381,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public OauthCallbackHandler<Object, J2EContext> oauthCallbackHandler() {
-		return new OauthCallbackHandler<>();
+	public OauthCallbackFilter oauthCallbackFilter() throws Exception {
+		OauthCallbackFilter callbackFilter = new OauthCallbackFilter(oauthConfig());
+		callbackFilter.setAuthenticationManager(authenticationManager());
+		callbackFilter.setFilterProcessesUrl("/**" + OAUTH_CALLBACK_PATH_SUFFIX);
+
+		return callbackFilter;
+	}
+
+	@Bean
+	public OauthAuthenticationProvider oauthAuthenticationProvider() {
+		return new OauthAuthenticationProvider();
 	}
 
 	@Bean
