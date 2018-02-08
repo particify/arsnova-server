@@ -7,8 +7,8 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<io.spring.platform-version>Brussels-SR6</io.spring.platform-version>
-		<io.netty-version>4.1.19.Final</io.netty-version>
+		<io.spring.platform-version>Brussels-SR7</io.spring.platform-version>
+		<io.netty-version>4.1.21.Final</io.netty-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
@@ -183,7 +183,7 @@
 		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib</artifactId>
-			<version>3.2.5</version>
+			<version>3.2.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -296,7 +296,7 @@
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-annotations</artifactId>
-			<version>1.5.17</version>
+			<version>1.5.18</version>
 		</dependency>
 		<dependency>
 			<groupId>com.codahale.metrics</groupId>
