@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.4
+This is a maintenance release which only brings libraries up to date to fix
+potential bugs.
+
 ## 2.5.3
 This is a maintenance release which only brings libraries up to date to fix
 potential bugs.
