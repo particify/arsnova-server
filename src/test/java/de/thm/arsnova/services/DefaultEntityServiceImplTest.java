@@ -7,12 +7,12 @@ import de.thm.arsnova.config.TestPersistanceConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
 import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.persistance.RoomRepository;
+import de.thm.arsnova.test.context.support.WithMockUser;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -42,7 +42,7 @@ public class DefaultEntityServiceImplTest {
 	private RoomRepository roomRepository;
 
 	@Test
-	@WithMockUser(username="TestUser")
+	@WithMockUser("TestUser")
 	public void testPatch() throws IOException {
 		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
 		final DefaultEntityServiceImpl<Room> entityService = new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper);
@@ -75,7 +75,7 @@ public class DefaultEntityServiceImplTest {
 	}
 
 	@Test
-	@WithMockUser(username="TestUser")
+	@WithMockUser("TestUser")
 	public void testPatchWithList() throws IOException {
 		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
 		final DefaultEntityServiceImpl<Room> entityService = new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper);

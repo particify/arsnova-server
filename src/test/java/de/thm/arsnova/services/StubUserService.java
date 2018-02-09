@@ -18,14 +18,25 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.persistance.UserRepository;
+import de.thm.arsnova.security.User;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public class StubUserService extends UserServiceImpl {
-
+	private final Set<GrantedAuthority> grantedAuthorities;
 	private UserAuthentication stubUser = null;
 
 	public StubUserService(
@@ -33,6 +44,8 @@ public class StubUserService extends UserServiceImpl {
 			JavaMailSender mailSender,
 			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(repository, mailSender, jackson2HttpMessageConverter);
+		grantedAuthorities = new HashSet<>();
+		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 	}
 
 	public void setUserAuthenticated(boolean isAuthenticated) {
@@ -41,14 +54,17 @@ public class StubUserService extends UserServiceImpl {
 
 	public void setUserAuthenticated(boolean isAuthenticated, String username) {
 		if (isAuthenticated) {
-			stubUser = new UserAuthentication(new UsernamePasswordAuthenticationToken(username, "testpassword"));
-			return;
+			UserProfile userProfile = new UserProfile(UserProfile.AuthProvider.ARSNOVA, username);
+			userProfile.setId(UUID.randomUUID().toString());
+			User user = new User(userProfile, grantedAuthorities);
+			stubUser = new UserAuthentication(user);
+		} else {
+			stubUser = null;
 		}
-		stubUser = null;
 	}
 
 	public void useAnonymousUser() {
-		stubUser = new UserAuthentication(new UsernamePasswordAuthenticationToken("anonymous", ""));
+		stubUser = new UserAuthentication(new AnonymousAuthenticationToken(UUID.randomUUID().toString(), "anonymous", Collections.emptyList()));
 	}
 
 	@Override

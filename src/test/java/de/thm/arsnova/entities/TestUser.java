@@ -17,12 +17,21 @@
  */
 package de.thm.arsnova.entities;
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public class TestUser extends UserAuthentication {
 	private static final long serialVersionUID = 1L;
+	private final Set<GrantedAuthority> grantedAuthorities;
 
 	public TestUser(String username) {
-		super( new UsernamePasswordAuthenticationToken(username, "secret") );
+		super();
+		grantedAuthorities = new HashSet<>();
+		setId(UUID.randomUUID().toString());
+		setUsername(username);
+		setAuthProvider(UserProfile.AuthProvider.ARSNOVA);
 	}
 }
