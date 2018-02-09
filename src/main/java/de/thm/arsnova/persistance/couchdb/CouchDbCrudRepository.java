@@ -72,7 +72,7 @@ abstract class CouchDbCrudRepository<T extends Entity> extends CouchDbRepository
 
 	@Override
 	public Iterable<T> findAll() {
-		return db.queryView(createQuery(countableAllViewName).includeDocs(true), type);
+		return db.queryView(createQuery(countableAllViewName).includeDocs(true).reduce(false), type);
 	}
 
 	@Override
@@ -83,7 +83,7 @@ abstract class CouchDbCrudRepository<T extends Entity> extends CouchDbRepository
 
 		return db.queryView(createQuery(countableAllViewName)
 						.keys((Collection<String>) strings)
-						.includeDocs(true),
+						.includeDocs(true).reduce(false),
 				type);
 	}
 
