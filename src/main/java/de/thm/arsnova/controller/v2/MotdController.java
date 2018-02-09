@@ -18,10 +18,15 @@
 package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.controller.AbstractController;
+import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.entities.migration.FromV2Migrator;
 import de.thm.arsnova.entities.migration.ToV2Migrator;
 import de.thm.arsnova.entities.migration.v2.Motd;
+import de.thm.arsnova.entities.migration.v2.MotdList;
+import de.thm.arsnova.exceptions.ForbiddenException;
+import de.thm.arsnova.security.User;
 import de.thm.arsnova.services.MotdService;
+import de.thm.arsnova.services.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -29,6 +34,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,6 +57,9 @@ import java.util.stream.Collectors;
 public class MotdController extends AbstractController {
 	@Autowired
 	private MotdService motdService;
+
+	@Autowired
+	private UserService userService;
 
 	@Autowired
 	private ToV2Migrator toV2Migrator;
@@ -138,5 +147,25 @@ public class MotdController extends AbstractController {
 		} else {
 			motdService.delete(motd);
 		}
+	}
+
+	@RequestMapping(value = "/userlist", method =  RequestMethod.GET)
+	public MotdList getAcknowledgedIds(@AuthenticationPrincipal User user, @RequestParam final String username) {
+		if (user == null || !user.getUsername().equals(username)) {
+			throw new ForbiddenException();
+		}
+		UserProfile profile = userService.get(user.getId());
+
+		return toV2Migrator.migrateMotdList(profile);
+	}
+
+	@RequestMapping(value = "/userlist", method =  RequestMethod.PUT)
+	public void putAcknowledgedIds(@AuthenticationPrincipal User user, @RequestBody final MotdList motdList) {
+		if (user == null || !user.getUsername().equals(motdList.getUsername())) {
+			throw new ForbiddenException();
+		}
+		UserProfile profile = userService.get(user.getId());
+		profile.setAcknowledgedMotds(fromV2Migrator.migrate(motdList));
+		userService.update(profile);
 	}
 }

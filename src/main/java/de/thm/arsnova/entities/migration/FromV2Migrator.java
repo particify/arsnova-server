@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -79,10 +80,14 @@ public class FromV2Migrator {
 			profile.setRoomHistory(sessionHistory);
 		}
 		if (motdList != null && motdList.getMotdkeys() != null) {
-			profile.setAcknowledgedMotds(Arrays.stream(motdList.getMotdkeys().split(",")).collect(Collectors.toSet()));
+			profile.setAcknowledgedMotds(migrate(motdList));
 		}
 
 		return profile;
+	}
+
+	public Set<String> migrate(final MotdList motdList) {
+		return Arrays.stream(motdList.getMotdkeys().split(",")).collect(Collectors.toSet());
 	}
 
 	public de.thm.arsnova.entities.Room migrate(final Room from, final Optional<UserProfile> owner) {

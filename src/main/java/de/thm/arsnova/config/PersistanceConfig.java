@@ -96,11 +96,6 @@ public class PersistanceConfig {
 	}
 
 	@Bean
-	public MotdListRepository motdListRepository() throws Exception {
-		return new CouchDbMotdListRepository(couchDbConnector(), false);
-	}
-
-	@Bean
 	public VisitedSessionRepository visitedSessionRepository() throws Exception {
 		return new CouchDbVisitedSessionRepository(couchDbConnector(), false);
 	}

@@ -50,11 +50,6 @@ public class TestPersistanceConfig {
 	}
 
 	@Bean
-	public MotdListRepository motdListRepository() {
-		return Mockito.mock(MotdListRepository.class);
-	}
-
-	@Bean
 	public VisitedSessionRepository visitedSessionRepository() {
 		return Mockito.mock(VisitedSessionRepository.class);
 	}
