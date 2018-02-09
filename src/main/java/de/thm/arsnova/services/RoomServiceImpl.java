@@ -324,7 +324,11 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	@Override
 	public boolean isShortIdAvailable(final String shortId) {
-		return getByShortId(shortId) == null;
+		try {
+			return getByShortId(shortId) == null;
+		} catch (final NotFoundException e) {
+			return true;
+		}
 	}
 
 	@Override
