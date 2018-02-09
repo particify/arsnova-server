@@ -46,19 +46,6 @@ public class CouchDbUserRepository extends CouchDbCrudRepository<DbUser> impleme
 	}
 
 	@Override
-	public DbUser save(final DbUser user) {
-		final String id = user.getId();
-
-		if (null != id) {
-			db.update(user);
-		}
-
-		db.create(user);
-
-		return user;
-	}
-
-	@Override
 	public DbUser findByUsername(final String username) {
 		final List<DbUser> users = queryView("by_username", username);
 
