@@ -347,17 +347,17 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 	}
 
 	/* TODO: Move to service layer. */
-	public List<Room> getVisitedRoomsWithStatsForOwner(final List<Room> rooms, final UserAuthentication owner) {
+	public List<Room> getRoomHistoryWithStatsForUser(final List<Room> rooms, final UserAuthentication user) {
 		final ViewQuery answeredQuestionsView = createQuery("by_creatorid_roomid").designDocId("_design/Answer")
-				.keys(rooms.stream().map(room -> ComplexKey.of(owner.getUsername(), room.getId())).collect(Collectors.toList()));
+				.reduce(false).keys(rooms.stream().map(room -> ComplexKey.of(user.getId(), room.getId())).collect(Collectors.toList()));
 		final ViewQuery contentIdsView = createQuery("by_roomid").designDocId("_design/Content")
-				.keys(rooms.stream().map(Room::getId).collect(Collectors.toList()));
+				.reduce(false).keys(rooms.stream().map(Room::getId).collect(Collectors.toList()));
 
-		return attachVisitedRoomStats(rooms, answeredQuestionsView, contentIdsView);
+		return attachRoomHistoryStats(rooms, answeredQuestionsView, contentIdsView);
 	}
 
 	/* TODO: Move to service layer. */
-	private List<Room> attachVisitedRoomStats(
+	private List<Room> attachRoomHistoryStats(
 			final List<Room> rooms,
 			final ViewQuery answeredQuestionsView,
 			final ViewQuery contentIdsView) {

@@ -37,7 +37,6 @@ import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import de.thm.arsnova.persistance.RoomRepository;
-import de.thm.arsnova.persistance.VisitedSessionRepository;
 import de.thm.arsnova.services.score.ScoreCalculator;
 import de.thm.arsnova.services.score.ScoreCalculatorFactory;
 import org.slf4j.Logger;
@@ -82,8 +81,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	private CommentRepository commentRepository;
 
-	private VisitedSessionRepository visitedSessionRepository;
-
 	private UserService userService;
 
 	private FeedbackService feedbackService;
@@ -105,7 +102,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 			ContentRepository contentRepository,
 			AnswerRepository answerRepository,
 			CommentRepository commentRepository,
-			VisitedSessionRepository visitedSessionRepository,
 			LogEntryRepository dbLogger,
 			UserService userService,
 			FeedbackService feedbackService,
@@ -116,7 +112,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		this.contentRepository = contentRepository;
 		this.answerRepository = answerRepository;
 		this.commentRepository = commentRepository;
-		this.visitedSessionRepository = visitedSessionRepository;
 		this.dbLogger = dbLogger;
 		this.userService = userService;
 		this.feedbackService = feedbackService;
@@ -169,16 +164,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 						"answerCount", totalCount[1],
 						"commentCount", totalCount[2]);
 			}
-		}
-	}
-
-	@Scheduled(fixedDelay = ROOM_INACTIVITY_CHECK_INTERVAL_MS)
-	public void deleteInactiveVisitedRoomLists() {
-		if (guestRoomInactivityThresholdDays > 0) {
-			logger.info("Delete lists of visited session for inactive users.");
-			long unixTime = System.currentTimeMillis();
-			long lastActivityBefore = unixTime - guestRoomInactivityThresholdDays * 24 * 60 * 60 * 1000L;
-			visitedSessionRepository.deleteInactiveGuestVisitedSessionLists(lastActivityBefore);
 		}
 	}
 
@@ -282,15 +267,15 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Room> getMyVisitedRooms(final int offset, final int limit) {
+	public List<Room> getMyRoomHistory(final int offset, final int limit) {
 		/* TODO: implement pagination */
-		return getUserVisitedRooms(userService.getCurrentUser().getUsername());
+		return getUserRoomHistory(userService.getCurrentUser().getId());
 	}
 
 	@Override
-	@PreAuthorize("hasPermission('', 'motd', 'admin')")
-	public List<Room> getUserVisitedRooms(String username) {
-		UserProfile profile = userService.getByUsername(username);
+	@PreAuthorize("hasPermission(#userId, 'userprofile', 'read')")
+	public List<Room> getUserRoomHistory(final String userId) {
+		UserProfile profile = userService.get(userId);
 		List<String> roomIds = profile.getRoomHistory().stream().map(entry -> entry.getRoomId()).collect(Collectors.toList());
 		roomRepository.findAll(roomIds);
 		List<Room> rooms = new ArrayList<>();
@@ -301,9 +286,9 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public List<Room> getMyVisitedRoomsInfo(final int offset, final int limit) {
-		List<Room> rooms = getMyVisitedRooms(0, 0);
-		roomRepository.getVisitedRoomsWithStatsForOwner(rooms, userService.getCurrentUser());
+	public List<Room> getMyRoomHistoryInfo(final int offset, final int limit) {
+		List<Room> rooms = getMyRoomHistory(0, 0);
+		roomRepository.getRoomHistoryWithStatsForUser(rooms, userService.getCurrentUser());
 
 		return rooms;
 	}

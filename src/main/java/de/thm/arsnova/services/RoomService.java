@@ -44,11 +44,11 @@ public interface RoomService extends EntityService<Room> {
 
 	List<Room> getUserRooms(String userId);
 
-	List<Room> getUserVisitedRooms(String username);
+	List<Room> getUserRoomHistory(String userId);
 
 	List<Room> getMyRooms(int offset, int limit);
 
-	List<Room> getMyVisitedRooms(int offset, int limit);
+	List<Room> getMyRoomHistory(int offset, int limit);
 
 	int countRoomsByCourses(List<Course> courses);
 
@@ -76,7 +76,7 @@ public interface RoomService extends EntityService<Room> {
 
 	List<Room> getMyPublicPoolRoomsInfo();
 
-	List<Room> getMyVisitedRoomsInfo(int offset, int limit);
+	List<Room> getMyRoomHistoryInfo(int offset, int limit);
 
 	Room importRooms(ImportExportContainer importExportRoom);
 
@@ -93,6 +93,4 @@ public interface RoomService extends EntityService<Room> {
 	boolean flipFlashcards(String shortId, Boolean flip);
 
 	void deleteInactiveRooms();
-
-	void deleteInactiveVisitedRoomLists();
 }

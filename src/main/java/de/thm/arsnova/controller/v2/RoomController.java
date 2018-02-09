@@ -176,7 +176,7 @@ public class RoomController extends PaginationController {
 				if (ownedOnly && !visitedOnly) {
 					rooms = roomService.getUserRooms(userId);
 				} else if (visitedOnly && !ownedOnly) {
-					rooms = roomService.getUserVisitedRooms(username);
+					rooms = roomService.getUserRoomHistory(username);
 				} else {
 					response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
 					return null;
@@ -190,7 +190,7 @@ public class RoomController extends PaginationController {
 				if (ownedOnly && !visitedOnly) {
 					rooms = roomService.getMyRooms(offset, limit);
 				} else if (visitedOnly && !ownedOnly) {
-					rooms = roomService.getMyVisitedRooms(offset, limit);
+					rooms = roomService.getMyRoomHistory(offset, limit);
 				} else {
 					response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
 					return null;
@@ -233,7 +233,7 @@ public class RoomController extends PaginationController {
 		if (!visitedOnly) {
 			rooms = roomService.getMyRoomsInfo(offset, limit);
 		} else {
-			rooms = roomService.getMyVisitedRoomsInfo(offset, limit);
+			rooms = roomService.getMyRoomHistoryInfo(offset, limit);
 		}
 
 		if (rooms == null || rooms.isEmpty()) {

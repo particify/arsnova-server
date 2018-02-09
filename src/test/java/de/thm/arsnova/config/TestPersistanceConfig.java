@@ -50,11 +50,6 @@ public class TestPersistanceConfig {
 	}
 
 	@Bean
-	public VisitedSessionRepository visitedSessionRepository() {
-		return Mockito.mock(VisitedSessionRepository.class);
-	}
-
-	@Bean
 	public StatisticsRepository statisticsRepository() {
 		return Mockito.mock(StatisticsRepository.class);
 	}

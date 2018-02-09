@@ -34,7 +34,7 @@ public interface RoomRepository extends CrudRepository<Room, String> {
 	List<Room> findAllForPublicPool();
 	List<Room> findForPublicPoolByOwner(UserAuthentication owner);
 	List<Room> getRoomsWithStatsForOwner(UserAuthentication owner, int start, int limit);
-	List<Room> getVisitedRoomsWithStatsForOwner(List<Room> rooms, UserAuthentication owner);
+	List<Room> getRoomHistoryWithStatsForUser(List<Room> rooms, UserAuthentication owner);
 	List<Room> findInfosForPublicPool();
 	List<Room> findInfosForPublicPoolByOwner(UserAuthentication owner);
 	List<Room> findRoomsByCourses(List<Course> courses);

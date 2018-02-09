@@ -96,11 +96,6 @@ public class PersistanceConfig {
 	}
 
 	@Bean
-	public VisitedSessionRepository visitedSessionRepository() throws Exception {
-		return new CouchDbVisitedSessionRepository(couchDbConnector(), false);
-	}
-
-	@Bean
 	public StatisticsRepository statisticsRepository() throws Exception {
 		return new CouchDbStatisticsRepository(couchDbConnector(), false);
 	}
