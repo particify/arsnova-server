@@ -9,7 +9,7 @@
 	<properties>
 		<io.spring.platform-version>Brussels-SR7</io.spring.platform-version>
 		<io.netty-version>4.1.21.Final</io.netty-version>
-		<org.aspectj-version>1.8.10</org.aspectj-version>
+		<org.aspectj-version>1.8.13</org.aspectj-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
@@ -281,6 +281,7 @@
 		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjrt</artifactId>
+			<version>${org.aspectj-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
