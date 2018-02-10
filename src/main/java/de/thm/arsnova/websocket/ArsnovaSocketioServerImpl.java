@@ -143,7 +143,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 
 					return;
 				}
-				final String roomShortId = userService.getRoomByUsername(u.getUsername());
+				final String roomShortId = userService.getRoomByUserId(u.getId());
 				final de.thm.arsnova.entities.Room room = roomService.getInternal(roomShortId, u);
 
 				if (room.getSettings().isFeedbackLocked()) {
@@ -167,7 +167,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 
 					return;
 				}
-				final String oldShortRoomId = userService.getRoomByUsername(u.getUsername());
+				final String oldShortRoomId = userService.getRoomByUserId(u.getId());
 				if (null != room.getKeyword() && room.getKeyword().equals(oldShortRoomId)) {
 					return;
 				}
@@ -254,8 +254,8 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 						) {
 					return;
 				}
-				final String username = userService.getUserToSocketId(client.getSessionId()).getUsername();
-				final String shortRoomId = userService.getRoomByUsername(username);
+				final String userId = userService.getUserToSocketId(client.getSessionId()).getId();
+				final String shortRoomId = userService.getRoomByUserId(userId);
 				userService.removeUserFromRoomBySocketId(client.getSessionId());
 				userService.removeUserToSocketId(client.getSessionId());
 				if (null != shortRoomId) {

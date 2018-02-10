@@ -297,9 +297,9 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	public String getRoomByUsername(final String username) {
+	public String getRoomByUserId(final String userId) {
 		for (final Entry<UserAuthentication, String> entry  : userToRoomId.entrySet()) {
-			if (entry.getKey().getUsername().equals(username)) {
+			if (entry.getKey().getId().equals(userId)) {
 				return entry.getValue();
 			}
 		}

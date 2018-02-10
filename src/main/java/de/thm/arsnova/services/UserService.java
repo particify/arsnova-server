@@ -55,7 +55,7 @@ public interface UserService extends EntityService<UserProfile> {
 
 	Set<UserAuthentication> getUsersByRoomShortId(String roomShortId);
 
-	String getRoomByUsername(String username);
+	String getRoomByUserId(String userId);
 
 	void addUserToRoomBySocketId(UUID socketId, String roomShortId);
 
