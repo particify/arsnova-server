@@ -35,6 +35,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -68,11 +69,11 @@ public class CommentController extends PaginationController {
 
 	@ApiOperation(value = "Count all the comments in current room",
 			nickname = "getCommentCount")
-	@RequestMapping(value = "/count", method = RequestMethod.GET)
+	@RequestMapping(value = "/count", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
 	@DeprecatedApi
 	@Deprecated
-	public int getCommentCount(@ApiParam(value = "Room-Key from current room", required = true) @RequestParam("sessionkey") final String roomShortId) {
-		return commentService.count(roomShortId);
+	public String getCommentCount(@ApiParam(value = "Room-Key from current room", required = true) @RequestParam("sessionkey") final String roomShortId) {
+		return String.valueOf(commentService.count(roomShortId));
 	}
 
 	@ApiOperation(value = "count all unread comments",

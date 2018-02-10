@@ -39,6 +39,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -101,9 +102,9 @@ public class RoomController extends PaginationController {
 			nickname = "countActiveUsers")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/{shortId}/activeusercount", method = RequestMethod.GET)
-	public int countActiveUsers(@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId) {
-		return roomService.activeUsers(shortId);
+	@RequestMapping(value = "/{shortId}/activeusercount", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
+	public String countActiveUsers(@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId) {
+		return String.valueOf(roomService.activeUsers(shortId));
 	}
 
 	@ApiOperation(value = "Creates a new Room and returns the Room's data",
@@ -400,26 +401,26 @@ public class RoomController extends PaginationController {
 		return toV2Migrator.migrate(room.getSettings());
 	}
 
-	@RequestMapping(value = "/{shortId}/lockfeedbackinput", method = RequestMethod.POST)
+	@RequestMapping(value = "/{shortId}/lockfeedbackinput", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
 	@ApiOperation(value = "locks input of user live feedback",
 			nickname = "lockFeedbackInput")
-	public boolean lockFeedbackInput(
+	public String lockFeedbackInput(
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
 			@ApiParam(value = "lock", required = true) @RequestParam(required = true) final Boolean lock,
 			final HttpServletResponse response
 			) {
-		return roomService.lockFeedbackInput(shortId, lock);
+		return String.valueOf(roomService.lockFeedbackInput(shortId, lock));
 	}
 
-	@RequestMapping(value = "/{shortId}/flipflashcards", method = RequestMethod.POST)
+	@RequestMapping(value = "/{shortId}/flipflashcards", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
 	@ApiOperation(value = "flip all flashcards in Room",
 			nickname = "lockFeedbackInput")
-	public boolean flipFlashcards(
+	public String flipFlashcards(
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
 			@ApiParam(value = "flip", required = true) @RequestParam(required = true) final Boolean flip,
 			final HttpServletResponse response
 			) {
-		return roomService.flipFlashcards(shortId, flip);
+		return String.valueOf(roomService.flipFlashcards(shortId, flip));
 	}
 
 	/* internal redirections */

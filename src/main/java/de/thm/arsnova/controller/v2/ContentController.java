@@ -41,6 +41,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -343,22 +344,25 @@ public class ContentController extends PaginationController {
 			nickname = "getContentCount")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/count", method = RequestMethod.GET)
-	public int getContentCount(
+	@RequestMapping(value = "/count", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
+	public String getContentCount(
 			@RequestParam(value = "sessionkey") final String roomShortId,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureContentsOnly,
 			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationContentsOnly
 			) {
+		int count = 0;
 		if (lectureContentsOnly) {
-			return contentService.countLectureContents(roomShortId);
+			count = contentService.countLectureContents(roomShortId);
 		} else if (preparationContentsOnly) {
-			return contentService.countPreparationContents(roomShortId);
+			count = contentService.countPreparationContents(roomShortId);
 		} else if (flashcardsOnly) {
-			return contentService.countFlashcards(roomShortId);
+			count = contentService.countFlashcards(roomShortId);
 		} else {
-			return contentService.countByRoomShortId(roomShortId);
+			count = contentService.countByRoomShortId(roomShortId);
 		}
+
+		return String.valueOf(count);
 	}
 
 	@ApiOperation(value = "Delete answers and content",
@@ -584,9 +588,9 @@ public class ContentController extends PaginationController {
 			nickname = "getAnswerCount")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/{contentId}/answercount", method = RequestMethod.GET)
-	public int getAnswerCount(@PathVariable final String contentId) {
-		return contentService.countAnswersByContentIdAndRound(contentId);
+	@RequestMapping(value = "/{contentId}/answercount", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
+	public String getAnswerCount(@PathVariable final String contentId) {
+		return String.valueOf(contentService.countAnswersByContentIdAndRound(contentId));
 	}
 
 	@ApiOperation(value = "Get the amount of answers for a content, identified by the content ID",
@@ -601,9 +605,9 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Get the total amount of answers by a content, identified by the content ID",
 			nickname = "getTotalAnswerCountByContent")
-	@RequestMapping(value = "/{contentId}/totalanswercount", method = RequestMethod.GET)
-	public int getTotalAnswerCountByContent(@PathVariable final String contentId) {
-		return contentService.countTotalAnswersByContentId(contentId);
+	@RequestMapping(value = "/{contentId}/totalanswercount", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
+	public String getTotalAnswerCountByContent(@PathVariable final String contentId) {
+		return String.valueOf(contentService.countTotalAnswersByContentId(contentId));
 	}
 
 	@ApiOperation(value = "Get the amount of answers and abstention answers by a content, identified by the content ID",
@@ -640,18 +644,21 @@ public class ContentController extends PaginationController {
 			nickname = "getTotalAnswerCount")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/answercount", method = RequestMethod.GET)
-	public int getTotalAnswerCount(
+	@RequestMapping(value = "/answercount", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
+	public String getTotalAnswerCount(
 			@RequestParam(value = "sessionkey") final String roomShortId,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureContentsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationContentsOnly
 			) {
+		int count = 0;
 		if (lectureContentsOnly) {
-			return contentService.countLectureContentAnswers(roomShortId);
+			count = contentService.countLectureContentAnswers(roomShortId);
 		} else if (preparationContentsOnly) {
-			return contentService.countPreparationContentAnswers(roomShortId);
+			count = contentService.countPreparationContentAnswers(roomShortId);
 		} else {
-			return contentService.countTotalAnswersByRoomShortId(roomShortId);
+			count = contentService.countTotalAnswersByRoomShortId(roomShortId);
 		}
+
+		return String.valueOf(count);
 	}
 }

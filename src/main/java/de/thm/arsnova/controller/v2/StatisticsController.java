@@ -25,6 +25,7 @@ import de.thm.arsnova.web.DeprecatedApi;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,27 +53,27 @@ public class StatisticsController extends AbstractController {
 			nickname = "countActiveUsers")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(method = RequestMethod.GET, value = "/activeusercount", produces = "text/plain")
+	@RequestMapping(method = RequestMethod.GET, value = "/activeusercount", produces = MediaType.TEXT_PLAIN_VALUE)
 	public String countActiveUsers() {
-		return Integer.toString(statisticsService.getStatistics().getActiveUsers());
+		return String.valueOf(statisticsService.getStatistics().getActiveUsers());
 	}
 
 	@ApiOperation(value = "Retrieves the amount of all currently logged in users",
 			nickname = "countLoggedInUsers")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(method = RequestMethod.GET, value = "/loggedinusercount", produces = "text/plain")
+	@RequestMapping(method = RequestMethod.GET, value = "/loggedinusercount", produces = MediaType.TEXT_PLAIN_VALUE)
 	public String countLoggedInUsers() {
-		return Integer.toString(statisticsService.getStatistics().getLoggedinUsers());
+		return String.valueOf(statisticsService.getStatistics().getLoggedinUsers());
 	}
 
 	@ApiOperation(value = "Retrieves the total amount of all sessions",
 			nickname = "countSessions")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(method = RequestMethod.GET, value = "/sessioncount", produces = "text/plain")
+	@RequestMapping(method = RequestMethod.GET, value = "/sessioncount", produces = MediaType.TEXT_PLAIN_VALUE)
 	public String countSessions() {
-		return Integer.toString(statisticsService.getStatistics().getOpenSessions()
+		return String.valueOf(statisticsService.getStatistics().getOpenSessions()
 				+ statisticsService.getStatistics().getClosedSessions());
 	}
 }

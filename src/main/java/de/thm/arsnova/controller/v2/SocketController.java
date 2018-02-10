@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -83,7 +84,7 @@ public class SocketController extends AbstractController {
 
 	@ApiOperation(value = "retrieves a socket url",
 			nickname = "getSocketUrl")
-	@RequestMapping(value = "/url", method = RequestMethod.GET)
+	@RequestMapping(value = "/url", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getSocketUrl(final HttpServletRequest request) {
 		return (server.isUseSSL() ? "https://" : "http://") + request.getServerName() + ":" + server.getPortNumber();
 	}
