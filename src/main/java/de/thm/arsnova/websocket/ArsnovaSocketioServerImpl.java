@@ -367,8 +367,8 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		final de.thm.arsnova.entities.Room room = roomService.getInternal(shortRoomId, user);
 		final de.thm.arsnova.entities.Room.Settings settings = roomService.getFeatures(shortRoomId);
 
-		client.sendEvent("unansweredLecturerQuestions", contentService.getUnAnsweredLectureQuestionIds(shortRoomId, user));
-		client.sendEvent("unansweredPreparationQuestions", contentService.getUnAnsweredPreparationQuestionIds(shortRoomId, user));
+		client.sendEvent("unansweredLecturerQuestions", contentService.getUnAnsweredLectureContentIds(shortRoomId, user));
+		client.sendEvent("unansweredPreparationQuestions", contentService.getUnAnsweredPreparationContentIds(shortRoomId, user));
 		client.sendEvent("countLectureQuestionAnswers", contentService.countLectureQuestionAnswersInternal(shortRoomId));
 		client.sendEvent("countPreparationQuestionAnswers", contentService.countPreparationQuestionAnswersInternal(shortRoomId));
 		client.sendEvent("activeUserCountData", roomService.activeUsers(shortRoomId));
@@ -520,9 +520,9 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		// Update the unanswered count for the content variant that was answered.
 		final de.thm.arsnova.entities.Content content = event.getContent();
 		if ("lecture".equals(content.getGroup())) {
-			sendToUser(event.getUser(), "unansweredLecturerQuestions", contentService.getUnAnsweredLectureQuestionIds(shortRoomId, event.getUser()));
+			sendToUser(event.getUser(), "unansweredLecturerQuestions", contentService.getUnAnsweredLectureContentIds(shortRoomId, event.getUser()));
 		} else if ("preparation".equals(content.getGroup())) {
-			sendToUser(event.getUser(), "unansweredPreparationQuestions", contentService.getUnAnsweredPreparationQuestionIds(shortRoomId, event.getUser()));
+			sendToUser(event.getUser(), "unansweredPreparationQuestions", contentService.getUnAnsweredPreparationContentIds(shortRoomId, event.getUser()));
 		}
 	}
 

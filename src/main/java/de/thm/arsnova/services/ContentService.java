@@ -40,7 +40,7 @@ public interface ContentService extends EntityService<Content> {
 
 	void delete(String questionId);
 
-	List<String> getUnAnsweredQuestionIds(String roomShortId);
+	List<String> getUnAnsweredContentIds(String roomShortId);
 
 	Answer getMyAnswer(String contentId);
 
@@ -82,51 +82,51 @@ public interface ContentService extends EntityService<Content> {
 
 	void deleteAnswer(String contentId, String answerId);
 
-	List<Content> getLectureQuestions(String roomShortId);
+	List<Content> getLectureContents(String roomShortId);
 
 	List<Content> getFlashcards(String roomShortId);
 
-	List<Content> getPreparationQuestions(String roomShortId);
+	List<Content> getPreparationContents(String roomShortId);
 
-	int countLectureQuestions(String roomShortId);
+	int countLectureContents(String roomShortId);
 
 	int countFlashcards(String roomShortId);
 
-	int countPreparationQuestions(String roomShortId);
+	int countPreparationContents(String roomShortId);
 
 	Map<String, Object> countAnswersAndAbstentionsInternal(String contentId);
 
-	int countLectureQuestionAnswers(String roomShortId);
+	int countLectureContentAnswers(String roomShortId);
 
 	int countLectureQuestionAnswersInternal(String roomShortId);
 
-	int countPreparationQuestionAnswers(String roomShortId);
+	int countPreparationContentAnswers(String roomShortId);
 
 	int countPreparationQuestionAnswersInternal(String roomShortId);
 
 	int countFlashcardsForUserInternal(String roomShortId);
 
-	void deleteAllContent(String roomShortId);
+	void deleteAllContents(String roomShortId);
 
-	void deleteLectureQuestions(String roomShortId);
+	void deleteLectureContents(String roomShortId);
 
-	void deletePreparationQuestions(String roomShortId);
+	void deletePreparationContents(String roomShortId);
 
 	void deleteFlashcards(String roomShortId);
 
-	List<String> getUnAnsweredLectureQuestionIds(String roomShortId);
+	List<String> getUnAnsweredLectureContentIds(String roomShortId);
 
-	List<String> getUnAnsweredLectureQuestionIds(String roomShortId, UserAuthentication user);
+	List<String> getUnAnsweredLectureContentIds(String roomShortId, UserAuthentication user);
 
-	List<String> getUnAnsweredPreparationQuestionIds(String roomShortId);
+	List<String> getUnAnsweredPreparationContentIds(String roomShortId);
 
-	List<String> getUnAnsweredPreparationQuestionIds(String roomShortId, UserAuthentication user);
+	List<String> getUnAnsweredPreparationContentIds(String roomShortId, UserAuthentication user);
 
 	void publishAll(String roomShortId, boolean publish);
 
-	void publishQuestions(String roomShortId, boolean publish, List<Content> contents);
+	void publishContents(String roomShortId, boolean publish, List<Content> contents);
 
-	void deleteAllQuestionsAnswers(String roomShortId);
+	void deleteAllContentsAnswers(String roomShortId);
 
 	void deleteAllPreparationAnswers(String roomShortId);
 

@@ -138,7 +138,7 @@ public class RoomController extends PaginationController {
 	@RequestMapping(value = "/{shortId}", method = RequestMethod.PUT)
 	public Room updateRoom(
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
-			@ApiParam(value = "current session", required = true) @RequestBody final Room room
+			@ApiParam(value = "current room", required = true) @RequestBody final Room room
 			) {
 		return toV2Migrator.migrate(roomService.update(shortId, fromV2Migrator.migrate(room)));
 	}
@@ -305,17 +305,17 @@ public class RoomController extends PaginationController {
 			@ApiParam(value = "wether comments shall be exported", required = true) @RequestParam(value = "withFeedbackQuestions", defaultValue = "false") final Boolean withFeedbackQuestions,
 			final HttpServletResponse response
 		) {
-		List<ImportExportContainer> sessions = new ArrayList<>();
+		List<ImportExportContainer> rooms = new ArrayList<>();
 		ImportExportContainer temp;
 		for (String shortId : shortIds) {
 			roomService.setActive(shortId, false);
 			temp = roomService.exportRoom(shortId, withAnswerStatistics, withFeedbackQuestions);
 			if (temp != null) {
-				sessions.add(temp);
+				rooms.add(temp);
 			}
 			roomService.setActive(shortId, true);
 		}
-		return sessions;
+		return rooms;
 	}
 
 	@ApiOperation(value = "copy a Rooms to the public pool if enabled")

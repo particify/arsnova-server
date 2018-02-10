@@ -66,13 +66,13 @@ public class CommentController extends PaginationController {
 	@Autowired
 	private FromV2Migrator fromV2Migrator;
 
-	@ApiOperation(value = "Count all the comments in current session",
+	@ApiOperation(value = "Count all the comments in current room",
 			nickname = "getCommentCount")
 	@RequestMapping(value = "/count", method = RequestMethod.GET)
 	@DeprecatedApi
 	@Deprecated
-	public int getCommentCount(@ApiParam(value = "Room-Key from current session", required = true) @RequestParam final String sessionkey) {
-		return commentService.count(sessionkey);
+	public int getCommentCount(@ApiParam(value = "Room-Key from current room", required = true) @RequestParam("sessionkey") final String roomShortId) {
+		return commentService.count(roomShortId);
 	}
 
 	@ApiOperation(value = "count all unread comments",
@@ -80,24 +80,24 @@ public class CommentController extends PaginationController {
 	@RequestMapping(value = "/readcount", method = RequestMethod.GET)
 	@DeprecatedApi
 	@Deprecated
-	public CommentReadingCount getUnreadCommentCount(@ApiParam(value = "Room-Key from current session", required = true) @RequestParam("sessionkey") final String sessionkey, String user) {
-		return commentService.countRead(sessionkey, user);
+	public CommentReadingCount getUnreadCommentCount(@ApiParam(value = "Room-Key from current room", required = true) @RequestParam("sessionkey") final String roomShortId, String user) {
+		return commentService.countRead(roomShortId, user);
 	}
 
 	@ApiOperation(value = "Retrieves all Comments for a Room",
 			nickname = "getComments")
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
-	public List<Comment> getComments(@ApiParam(value = "Room-Key from current session", required = true) @RequestParam final String sessionkey) {
-		return commentService.getByRoomShortId(sessionkey, offset, limit).stream()
+	public List<Comment> getComments(@ApiParam(value = "Room-Key from current room", required = true) @RequestParam("sessionkey") final String roomShortId) {
+		return commentService.getByRoomShortId(roomShortId, offset, limit).stream()
 				.map(toV2Migrator::migrate).collect(Collectors.toList());
 	}
 
 	@ApiOperation(value = "Retrieves an Comment",
 			nickname = "getComment")
-	@RequestMapping(value = "/{questionId}", method = RequestMethod.GET)
-	public Comment getComment(@ApiParam(value = "ID of the Comment that needs to be deleted", required = true) @PathVariable final String questionId) {
-		return toV2Migrator.migrate(commentService.getAndMarkRead(questionId));
+	@RequestMapping(value = "/{commentId}", method = RequestMethod.GET)
+	public Comment getComment(@ApiParam(value = "ID of the Comment that needs to be deleted", required = true) @PathVariable final String commentId) {
+		return toV2Migrator.migrate(commentService.getAndMarkRead(commentId));
 	}
 
 	@ApiOperation(value = "Creates a new Comment for a Room and returns the Comment's data",
@@ -108,7 +108,7 @@ public class CommentController extends PaginationController {
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void postComment(
-			@ApiParam(value = "Room-Key from current session", required = true) @RequestParam final String sessionkey,
+			@ApiParam(value = "Room-Key from current room", required = true) @RequestParam("sessionkey") final String roomShortId,
 			@ApiParam(value = "the body from the new comment", required = true) @RequestBody final Comment comment
 			) {
 		UserProfile profile = userService.getByUsername(comment.getCreator());
@@ -121,8 +121,8 @@ public class CommentController extends PaginationController {
 
 	@ApiOperation(value = "Deletes a Comment",
 			nickname = "deleteComment")
-	@RequestMapping(value = "/{questionId}", method = RequestMethod.DELETE)
-	public void deleteComment(@ApiParam(value = "ID of the comment that needs to be deleted", required = true) @PathVariable final String questionId) {
-		commentService.delete(questionId);
+	@RequestMapping(value = "/{commentId}", method = RequestMethod.DELETE)
+	public void deleteComment(@ApiParam(value = "ID of the comment that needs to be deleted", required = true) @PathVariable final String commentId) {
+		commentService.delete(commentId);
 	}
 }
