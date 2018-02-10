@@ -48,5 +48,5 @@ public interface MotdService extends EntityService<Motd> {
 
 	Motd update(Motd motd);
 
-	Motd update(final String roomShortId, Motd motd);
+	Motd update(final String roomId, Motd motd);
 }

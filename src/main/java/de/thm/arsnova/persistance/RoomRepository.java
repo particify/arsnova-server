@@ -39,6 +39,6 @@ public interface RoomRepository extends CrudRepository<Room, String> {
 	List<Room> findInfosForPublicPoolByOwner(UserAuthentication owner);
 	List<Room> findRoomsByCourses(List<Course> courses);
 	Room importRoom(UserAuthentication user, ImportExportContainer importRoom);
-	ImportExportContainer exportRoom(String shortId, Boolean withAnswer, Boolean withFeedbackQuestions);
+	ImportExportContainer exportRoom(String id, Boolean withAnswer, Boolean withFeedbackQuestions);
 	LoggedIn registerAsOnlineUser(UserAuthentication user, Room room);
 }

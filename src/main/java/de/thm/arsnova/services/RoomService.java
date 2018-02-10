@@ -30,11 +30,13 @@ import java.util.UUID;
  * The functionality the session service should provide.
  */
 public interface RoomService extends EntityService<Room> {
+	String getIdByShortId(String shortId);
+
 	Room getByShortId(String shortId);
 
-	Room getForAdmin(final String shortId);
+	Room getForAdmin(final String id);
 
-	Room getInternal(String shortId, UserAuthentication user);
+	Room getInternal(String id, UserAuthentication user);
 
 	Room save(Room session);
 
@@ -52,23 +54,23 @@ public interface RoomService extends EntityService<Room> {
 
 	int countRoomsByCourses(List<Course> courses);
 
-	int activeUsers(String shortId);
+	int activeUsers(String id);
 
-	Room setActive(String shortId, Boolean lock);
+	Room setActive(String id, Boolean lock);
 
-	Room join(String shortId, UUID socketId);
+	Room join(String id, UUID socketId);
 
-	Room update(String shortId, Room room);
+	Room update(String id, Room room);
 
-	Room updateCreator(String shortId, String newCreator);
+	Room updateCreator(String id, String newCreator);
 
 	Room updateInternal(Room room, UserAuthentication user);
 
 	int[] deleteCascading(Room room);
 
-	ScoreStatistics getLearningProgress(String shortId, String type, String questionVariant);
+	ScoreStatistics getLearningProgress(String id, String type, String questionVariant);
 
-	ScoreStatistics getMyLearningProgress(String shortId, String type, String questionVariant);
+	ScoreStatistics getMyLearningProgress(String id, String type, String questionVariant);
 
 	List<Room> getMyRoomsInfo(int offset, int limit);
 
@@ -80,17 +82,17 @@ public interface RoomService extends EntityService<Room> {
 
 	Room importRooms(ImportExportContainer importExportRoom);
 
-	ImportExportContainer exportRoom(String shortId, Boolean withAnswerStatistics, Boolean withFeedbackQuestions);
+	ImportExportContainer exportRoom(String id, Boolean withAnswerStatistics, Boolean withFeedbackQuestions);
 
-	Room copyRoomToPublicPool(String shortId, ImportExportContainer.PublicPool pp);
+	Room copyRoomToPublicPool(String id, ImportExportContainer.PublicPool pp);
 
-	Room.Settings getFeatures(String shortId);
+	Room.Settings getFeatures(String id);
 
-	Room.Settings updateFeatures(String shortId, Room.Settings settings);
+	Room.Settings updateFeatures(String id, Room.Settings settings);
 
-	boolean lockFeedbackInput(String shortId, Boolean lock);
+	boolean lockFeedbackInput(String id, Boolean lock);
 
-	boolean flipFlashcards(String shortId, Boolean flip);
+	boolean flipFlashcards(String id, Boolean flip);
 
 	void deleteInactiveRooms();
 }

@@ -31,7 +31,7 @@ public interface AnswerRepository extends CrudRepository<Answer, String> {
 	int countByContentId(String contentId);
 	<T extends Answer> List<T> findByContentId(String contentId, Class<T> type, int start, int limit);
 	List<Answer> findByUserRoomId(UserAuthentication user, String roomId);
-	int countByRoomShortId(String roomShortId);
+	int countByRoomId(String roomId);
 	int deleteByContentId(String contentId);
 	int countByRoomIdOnlyLectureVariant(String roomId);
 	int countByRoomIdOnlyPreparationVariant(String roomId);

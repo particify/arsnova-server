@@ -9,15 +9,15 @@ import java.util.List;
 public interface CommentService extends EntityService<Comment> {
 	boolean save(Comment comment);
 
-	int count(String roomShortId);
+	int count(String roomId);
 
-	CommentReadingCount countRead(String roomShortId, String username);
+	CommentReadingCount countRead(String roomId, String username);
 
-	List<Comment> getByRoomShortId(String roomShortId, int offset, int limit);
+	List<Comment> getByRoomId(String roomId, int offset, int limit);
 
 	Comment getAndMarkRead(String commentId) throws IOException;
 
 	void delete(String commentId);
 
-	void deleteByRoomShortId(String roomShortId);
+	void deleteByRoomId(String roomId);
 }

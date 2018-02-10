@@ -114,7 +114,7 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	@Override
 	@PreAuthorize("hasPermission(#roomId, 'room', 'owner')")
 	public Motd save(final String roomId, final Motd motd) {
-		Room room = roomService.getByShortId(roomId);
+		Room room = roomService.get(roomId);
 		motd.setRoomId(room.getId());
 
 		return createOrUpdateMotd(motd);
@@ -127,8 +127,8 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#roomShortId, 'room', 'owner')")
-	public Motd update(final String roomShortId, final Motd motd) {
+	@PreAuthorize("hasPermission(#roomId, 'room', 'owner')")
+	public Motd update(final String roomId, final Motd motd) {
 		return createOrUpdateMotd(motd);
 	}
 

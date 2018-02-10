@@ -22,6 +22,7 @@ import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.FeedbackService;
+import de.thm.arsnova.services.RoomService;
 import de.thm.arsnova.services.UserService;
 import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
@@ -47,20 +48,24 @@ public class FeedbackController extends AbstractController {
 	private FeedbackService feedbackService;
 
 	@Autowired
+	private RoomService roomService;
+
+	@Autowired
 	private UserService userService;
 
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/session/{shortId}/feedback", method = RequestMethod.GET)
 	public Feedback getFeedback(@PathVariable final String shortId) {
-		return feedbackService.getByRoomShortId(shortId);
+		return feedbackService.getByRoomId(roomService.getIdByShortId(shortId));
 	}
 
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/session/{shortId}/myfeedback", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getMyFeedback(@PathVariable final String shortId) {
-		Integer value = feedbackService.getByRoomShortIdAndUser(shortId, userService.getCurrentUser());
+		String roomId = roomService.getIdByShortId(shortId);
+		Integer value = feedbackService.getByRoomIdAndUser(roomId, userService.getCurrentUser());
 		if (value != null && value >= Feedback.MIN_FEEDBACK_TYPE && value <= Feedback.MAX_FEEDBACK_TYPE) {
 			return value.toString();
 		}
@@ -71,21 +76,21 @@ public class FeedbackController extends AbstractController {
 	@Deprecated
 	@RequestMapping(value = "/session/{shortId}/feedbackcount", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getFeedbackCount(@PathVariable final String shortId) {
-		return String.valueOf(feedbackService.countFeedbackByRoomShortId(shortId));
+		return String.valueOf(feedbackService.countFeedbackByRoomId(roomService.getIdByShortId(shortId)));
 	}
 
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/session/{shortId}/roundedaveragefeedback", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getAverageFeedbackRounded(@PathVariable final String shortId) {
-		return String.valueOf(feedbackService.calculateRoundedAverageFeedback(shortId));
+		return String.valueOf(feedbackService.calculateRoundedAverageFeedback(roomService.getIdByShortId(shortId)));
 	}
 
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/session/{shortId}/averagefeedback", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getAverageFeedback(@PathVariable final String shortId) {
-		return String.valueOf(feedbackService.calculateAverageFeedback(shortId));
+		return String.valueOf(feedbackService.calculateAverageFeedback(roomService.getIdByShortId(shortId)));
 	}
 
 	@DeprecatedApi
@@ -96,9 +101,10 @@ public class FeedbackController extends AbstractController {
 			@PathVariable final String shortId,
 			@RequestBody final int value
 			) {
+		String roomId = roomService.getIdByShortId(shortId);
 		UserAuthentication user = userService.getCurrentUser();
-		feedbackService.save(shortId, value, user);
-		Feedback feedback = feedbackService.getByRoomShortId(shortId);
+		feedbackService.save(roomId, value, user);
+		Feedback feedback = feedbackService.getByRoomId(roomId);
 
 		return feedback;
 	}

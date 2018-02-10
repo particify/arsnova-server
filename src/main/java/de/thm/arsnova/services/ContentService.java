@@ -34,13 +34,13 @@ public interface ContentService extends EntityService<Content> {
 
 	Content get(String id);
 
-	List<Content> getByRoomShortId(String roomShortId);
+	List<Content> getByRoomId(String roomId);
 
-	int countByRoomShortId(String roomShortId);
+	int countByRoomId(String roomId);
 
 	void delete(String questionId);
 
-	List<String> getUnAnsweredContentIds(String roomShortId);
+	List<String> getUnAnsweredContentIds(String roomId);
 
 	Answer getMyAnswer(String contentId);
 
@@ -64,9 +64,9 @@ public interface ContentService extends EntityService<Content> {
 
 	List<TextAnswer> getTextAnswersByContentId(String contentId, int offset, int limit);
 
-	List<Answer> getMyAnswersByRoomShortId(String roomShortId);
+	List<Answer> getMyAnswersByRoomId(String roomId);
 
-	int countTotalAnswersByRoomShortId(String roomShortId);
+	int countTotalAnswersByRoomId(String roomId);
 
 	int countTotalAnswersByContentId(String contentId);
 
@@ -82,61 +82,61 @@ public interface ContentService extends EntityService<Content> {
 
 	void deleteAnswer(String contentId, String answerId);
 
-	List<Content> getLectureContents(String roomShortId);
+	List<Content> getLectureContents(String roomId);
 
-	List<Content> getFlashcards(String roomShortId);
+	List<Content> getFlashcards(String roomId);
 
-	List<Content> getPreparationContents(String roomShortId);
+	List<Content> getPreparationContents(String roomId);
 
-	int countLectureContents(String roomShortId);
+	int countLectureContents(String roomId);
 
-	int countFlashcards(String roomShortId);
+	int countFlashcards(String roomId);
 
-	int countPreparationContents(String roomShortId);
+	int countPreparationContents(String roomId);
 
 	Map<String, Object> countAnswersAndAbstentionsInternal(String contentId);
 
-	int countLectureContentAnswers(String roomShortId);
+	int countLectureContentAnswers(String roomId);
 
-	int countLectureQuestionAnswersInternal(String roomShortId);
+	int countLectureQuestionAnswersInternal(String roomId);
 
-	int countPreparationContentAnswers(String roomShortId);
+	int countPreparationContentAnswers(String roomId);
 
-	int countPreparationQuestionAnswersInternal(String roomShortId);
+	int countPreparationQuestionAnswersInternal(String roomId);
 
-	int countFlashcardsForUserInternal(String roomShortId);
+	int countFlashcardsForUserInternal(String roomId);
 
-	void deleteAllContents(String roomShortId);
+	void deleteAllContents(String roomId);
 
-	void deleteLectureContents(String roomShortId);
+	void deleteLectureContents(String roomId);
 
-	void deletePreparationContents(String roomShortId);
+	void deletePreparationContents(String roomId);
 
-	void deleteFlashcards(String roomShortId);
+	void deleteFlashcards(String roomId);
 
-	List<String> getUnAnsweredLectureContentIds(String roomShortId);
+	List<String> getUnAnsweredLectureContentIds(String roomId);
 
-	List<String> getUnAnsweredLectureContentIds(String roomShortId, UserAuthentication user);
+	List<String> getUnAnsweredLectureContentIds(String roomId, UserAuthentication user);
 
-	List<String> getUnAnsweredPreparationContentIds(String roomShortId);
+	List<String> getUnAnsweredPreparationContentIds(String roomId);
 
-	List<String> getUnAnsweredPreparationContentIds(String roomShortId, UserAuthentication user);
+	List<String> getUnAnsweredPreparationContentIds(String roomId, UserAuthentication user);
 
-	void publishAll(String roomShortId, boolean publish);
+	void publishAll(String roomId, boolean publish);
 
-	void publishContents(String roomShortId, boolean publish, List<Content> contents);
+	void publishContents(String roomId, boolean publish, List<Content> contents);
 
-	void deleteAllContentsAnswers(String roomShortId);
+	void deleteAllContentsAnswers(String roomId);
 
-	void deleteAllPreparationAnswers(String roomShortId);
+	void deleteAllPreparationAnswers(String roomId);
 
-	void deleteAllLectureAnswers(String roomShortId);
+	void deleteAllLectureAnswers(String roomId);
 
 	int countTotalAbstentionsByContentId(String contentId);
 
 	void setVotingAdmission(String contentId, boolean disableVoting);
 
-	void setVotingAdmissions(String roomShortId, boolean disableVoting, List<Content> contents);
+	void setVotingAdmissions(String roomId, boolean disableVoting, List<Content> contents);
 
-	void setVotingAdmissionForAllContents(String roomShortId, boolean disableVoting);
+	void setVotingAdmissionForAllContents(String roomId, boolean disableVoting);
 }

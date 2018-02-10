@@ -60,7 +60,6 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 	}
 
 	@Override
-	@Cacheable("rooms")
 	public Room findByShortId(final String shortId) {
 		final List<Room> roomList = queryView("by_shortid", shortId);
 
@@ -195,7 +194,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 	/* TODO: Move to service layer. */
 	@Override
 	public ImportExportContainer exportRoom(
-			final String shortId,
+			final String id,
 			final Boolean withAnswers,
 			final Boolean withFeedbackQuestions) {
 		/* FIXME: not yet migrated - move to service layer */

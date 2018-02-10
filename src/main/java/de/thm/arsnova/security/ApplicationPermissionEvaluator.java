@@ -100,7 +100,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				targetUserProfile.setId(targetId.toString());
 				return hasUserProfilePermission(userId, targetUserProfile, permission.toString());
 			case "room":
-				final Room targetRoom = roomRepository.findByShortId(targetId.toString());
+				final Room targetRoom = roomRepository.findOne(targetId.toString());
 				return targetRoom != null && hasRoomPermission(userId, targetRoom, permission.toString());
 			case "content":
 				final Content targetContent = contentRepository.findOne(targetId.toString());

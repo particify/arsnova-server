@@ -256,20 +256,17 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	public boolean isUserInRoom(final UserAuthentication user, final String roomShortId) {
-		if (roomShortId == null) {
-			return false;
-		}
-		String session = userToRoomId.get(user);
+	public boolean isUserInRoom(final UserAuthentication user, final String expectedRoomId) {
+		String actualRoomId = userToRoomId.get(user);
 
-		return session != null && roomShortId.equals(session);
+		return actualRoomId != null && actualRoomId.equals(expectedRoomId);
 	}
 
 	@Override
-	public Set<UserAuthentication> getUsersByRoomShortId(final String roomShortId) {
+	public Set<UserAuthentication> getUsersByRoomId(final String roomId) {
 		final Set<UserAuthentication> result = new HashSet<>();
 		for (final Entry<UserAuthentication, String> e : userToRoomId.entrySet()) {
-			if (e.getValue().equals(roomShortId)) {
+			if (e.getValue().equals(roomId)) {
 				result.add(e.getKey());
 			}
 		}
@@ -279,9 +276,9 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public void addUserToRoomBySocketId(final UUID socketId, final String roomShortId) {
+	public void addUserToRoomBySocketId(final UUID socketId, final String roomId) {
 		final UserAuthentication user = socketIdToUser.get(socketId);
-		userToRoomId.put(user, roomShortId);
+		userToRoomId.put(user, roomId);
 	}
 
 	@Override
@@ -297,7 +294,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	public String getRoomByUserId(final String userId) {
+	public String getRoomIdByUserId(final String userId) {
 		for (final Entry<UserAuthentication, String> entry  : userToRoomId.entrySet()) {
 			if (entry.getKey().getId().equals(userId)) {
 				return entry.getValue();

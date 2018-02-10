@@ -31,6 +31,7 @@ import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.NotImplementedException;
 import de.thm.arsnova.services.ContentService;
+import de.thm.arsnova.services.RoomService;
 import de.thm.arsnova.services.TimerService;
 import de.thm.arsnova.util.PaginationListDecorator;
 import de.thm.arsnova.web.DeprecatedApi;
@@ -66,6 +67,9 @@ import java.util.stream.Collectors;
 public class ContentController extends PaginationController {
 	@Autowired
 	private ContentService contentService;
+
+	@Autowired
+	private RoomService roomService;
 
 	@Autowired
 	private TimerService timerService;
@@ -202,6 +206,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false) final boolean lectureContentsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) final boolean preparationContentsOnly
 			) {
+		String roomId = roomService.getIdByShortId(roomShortId);
 		boolean disable = false;
 		List<de.thm.arsnova.entities.Content> contents;
 
@@ -210,13 +215,13 @@ public class ContentController extends PaginationController {
 		}
 
 		if (lectureContentsOnly) {
-			contents = contentService.getLectureContents(roomShortId);
-			contentService.setVotingAdmissions(roomShortId, disable, contents);
+			contents = contentService.getLectureContents(roomId);
+			contentService.setVotingAdmissions(roomId, disable, contents);
 		} else if (preparationContentsOnly) {
-			contents = contentService.getPreparationContents(roomShortId);
-			contentService.setVotingAdmissions(roomShortId, disable, contents);
+			contents = contentService.getPreparationContents(roomId);
+			contentService.setVotingAdmissions(roomId, disable, contents);
 		} else {
-			contentService.setVotingAdmissionForAllContents(roomShortId, disable);
+			contentService.setVotingAdmissionForAllContents(roomId, disable);
 		}
 	}
 
@@ -244,17 +249,18 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false) final boolean lectureContentsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) final boolean preparationContentsOnly
 			) {
+		String roomId = roomService.getIdByShortId(roomShortId);
 		boolean p = publish == null || publish;
 		List<de.thm.arsnova.entities.Content> contents;
 
 		if (lectureContentsOnly) {
-			contents = contentService.getLectureContents(roomShortId);
-			contentService.publishContents(roomShortId, p, contents);
+			contents = contentService.getLectureContents(roomId);
+			contentService.publishContents(roomId, p, contents);
 		} else if (preparationContentsOnly) {
-			contents = contentService.getPreparationContents(roomShortId);
-			contentService.publishContents(roomShortId, p, contents);
+			contents = contentService.getPreparationContents(roomId);
+			contentService.publishContents(roomId, p, contents);
 		} else {
-			contentService.publishAll(roomShortId, p);
+			contentService.publishAll(roomId, p);
 		}
 	}
 
@@ -300,15 +306,16 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "requestImageData", defaultValue = "false") final boolean requestImageData,
 			final HttpServletResponse response
 			) {
+		String roomId = roomService.getIdByShortId(roomShortId);
 		List<de.thm.arsnova.entities.Content> contents;
 		if (lectureContentsOnly) {
-			contents = contentService.getLectureContents(roomShortId);
+			contents = contentService.getLectureContents(roomId);
 		} else if (flashcardsOnly) {
-			contents = contentService.getFlashcards(roomShortId);
+			contents = contentService.getFlashcards(roomId);
 		} else if (preparationContentsOnly) {
-			contents = contentService.getPreparationContents(roomShortId);
+			contents = contentService.getPreparationContents(roomId);
 		} else {
-			contents = contentService.getByRoomShortId(roomShortId);
+			contents = contentService.getByRoomId(roomId);
 		}
 		if (contents == null || contents.isEmpty()) {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
@@ -329,14 +336,15 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationContentsOnly,
 			final HttpServletResponse response
 			) {
+		String roomId = roomService.getIdByShortId(roomShortId);
 		if (lectureContentsOnly) {
-			contentService.deleteLectureContents(roomShortId);
+			contentService.deleteLectureContents(roomId);
 		} else if (preparationContentsOnly) {
-			contentService.deletePreparationContents(roomShortId);
+			contentService.deletePreparationContents(roomId);
 		} else if (flashcardsOnly) {
-			contentService.deleteFlashcards(roomShortId);
+			contentService.deleteFlashcards(roomId);
 		} else {
-			contentService.deleteAllContents(roomShortId);
+			contentService.deleteAllContents(roomId);
 		}
 	}
 
@@ -351,15 +359,16 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationContentsOnly
 			) {
+		String roomId = roomService.getIdByShortId(roomShortId);
 		int count = 0;
 		if (lectureContentsOnly) {
-			count = contentService.countLectureContents(roomShortId);
+			count = contentService.countLectureContents(roomId);
 		} else if (preparationContentsOnly) {
-			count = contentService.countPreparationContents(roomShortId);
+			count = contentService.countPreparationContents(roomId);
 		} else if (flashcardsOnly) {
-			count = contentService.countFlashcards(roomShortId);
+			count = contentService.countFlashcards(roomId);
 		} else {
-			count = contentService.countByRoomShortId(roomShortId);
+			count = contentService.countByRoomId(roomId);
 		}
 
 		return String.valueOf(count);
@@ -384,13 +393,14 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureContentsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationContentsOnly
 			) {
+		String roomId = roomService.getIdByShortId(roomShortId);
 		List<String> answers;
 		if (lectureContentsOnly) {
-			answers = contentService.getUnAnsweredLectureContentIds(roomShortId);
+			answers = contentService.getUnAnsweredLectureContentIds(roomId);
 		} else if (preparationContentsOnly) {
-			answers = contentService.getUnAnsweredPreparationContentIds(roomShortId);
+			answers = contentService.getUnAnsweredPreparationContentIds(roomId);
 		} else {
-			answers = contentService.getUnAnsweredContentIds(roomShortId);
+			answers = contentService.getUnAnsweredContentIds(roomId);
 		}
 		if (answers == null || answers.isEmpty()) {
 			throw new NoContentException();
@@ -564,12 +574,13 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationContentsOnly,
 			final HttpServletResponse response
 			) {
+		String roomId = roomService.getIdByShortId(roomShortId);
 		if (lectureContentsOnly) {
-			contentService.deleteAllLectureAnswers(roomShortId);
+			contentService.deleteAllLectureAnswers(roomId);
 		} else if (preparationContentsOnly) {
-			contentService.deleteAllPreparationAnswers(roomShortId);
+			contentService.deleteAllPreparationAnswers(roomId);
 		} else {
-			contentService.deleteAllContentsAnswers(roomShortId);
+			contentService.deleteAllContentsAnswers(roomId);
 		}
 	}
 
@@ -650,13 +661,14 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureContentsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationContentsOnly
 			) {
+		String roomId = roomService.getIdByShortId(roomShortId);
 		int count = 0;
 		if (lectureContentsOnly) {
-			count = contentService.countLectureContentAnswers(roomShortId);
+			count = contentService.countLectureContentAnswers(roomId);
 		} else if (preparationContentsOnly) {
-			count = contentService.countPreparationContentAnswers(roomShortId);
+			count = contentService.countPreparationContentAnswers(roomId);
 		} else {
-			count = contentService.countTotalAnswersByRoomShortId(roomShortId);
+			count = contentService.countTotalAnswersByRoomId(roomId);
 		}
 
 		return String.valueOf(count);

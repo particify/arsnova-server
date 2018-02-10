@@ -51,13 +51,13 @@ public interface UserService extends EntityService<UserProfile> {
 
 	Set<Map.Entry<UUID, UserAuthentication>> getSocketIdToUser();
 
-	boolean isUserInRoom(UserAuthentication user, String roomShortId);
+	boolean isUserInRoom(UserAuthentication user, String roomId);
 
-	Set<UserAuthentication> getUsersByRoomShortId(String roomShortId);
+	Set<UserAuthentication> getUsersByRoomId(String roomId);
 
-	String getRoomByUserId(String userId);
+	String getRoomIdByUserId(String userId);
 
-	void addUserToRoomBySocketId(UUID socketId, String roomShortId);
+	void addUserToRoomBySocketId(UUID socketId, String roomId);
 
 	void removeUserFromRoomBySocketId(UUID socketId);
 

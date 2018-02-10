@@ -78,7 +78,7 @@ public class CommentController extends PaginationController {
 	@DeprecatedApi
 	@Deprecated
 	public String getCommentCount(@ApiParam(value = "Room-Key from current room", required = true) @RequestParam("sessionkey") final String roomShortId) {
-		return String.valueOf(commentService.count(roomShortId));
+		return String.valueOf(commentService.count(roomService.getIdByShortId(roomShortId)));
 	}
 
 	@ApiOperation(value = "count all unread comments",
@@ -87,7 +87,7 @@ public class CommentController extends PaginationController {
 	@DeprecatedApi
 	@Deprecated
 	public CommentReadingCount getUnreadCommentCount(@ApiParam(value = "Room-Key from current room", required = true) @RequestParam("sessionkey") final String roomShortId, String user) {
-		return commentService.countRead(roomShortId, user);
+		return commentService.countRead(roomService.getIdByShortId(roomShortId), user);
 	}
 
 	@ApiOperation(value = "Retrieves all Comments for a Room",
@@ -95,7 +95,7 @@ public class CommentController extends PaginationController {
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
 	public List<Comment> getComments(@ApiParam(value = "Room-Key from current room", required = true) @RequestParam("sessionkey") final String roomShortId) {
-		return commentService.getByRoomShortId(roomShortId, offset, limit).stream()
+		return commentService.getByRoomId(roomService.getIdByShortId(roomShortId), offset, limit).stream()
 				.map(toV2Migrator::migrate).collect(Collectors.toList());
 	}
 

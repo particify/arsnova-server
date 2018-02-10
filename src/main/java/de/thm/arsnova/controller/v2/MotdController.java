@@ -26,6 +26,7 @@ import de.thm.arsnova.entities.migration.v2.MotdList;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.services.MotdService;
+import de.thm.arsnova.services.RoomService;
 import de.thm.arsnova.services.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -59,6 +60,9 @@ public class MotdController extends AbstractController {
 	private MotdService motdService;
 
 	@Autowired
+	private RoomService roomService;
+
+	@Autowired
 	private UserService userService;
 
 	@Autowired
@@ -77,7 +81,7 @@ public class MotdController extends AbstractController {
 		@ApiParam(value = "clientdate", required = false) @RequestParam(value = "clientdate", defaultValue = "") final String clientdate,
 		@ApiParam(value = "adminview", required = false) @RequestParam(value = "adminview", defaultValue = "false") final Boolean adminview,
 		@ApiParam(value = "audience", required = false) @RequestParam(value = "audience", defaultValue = "all") final String audience,
-		@ApiParam(value = "sessionkey", required = false) @RequestParam(value = "sessionkey", defaultValue = "null") final String roomShortId
+		@ApiParam(value = "sessionkey", required = false) @RequestParam(value = "sessionkey", required = false) final String roomShortId
 	) {
 		List<de.thm.arsnova.entities.Motd> motds;
 		Date date = new Date(System.currentTimeMillis());
@@ -86,7 +90,7 @@ public class MotdController extends AbstractController {
 		}
 		String roomId = "";
 		if (roomShortId != null) {
-			// roomId = ; // FIXME
+			roomId = roomService.getIdByShortId(roomShortId);
 		}
 		if (adminview) {
 			motds = "session".equals(audience) ?

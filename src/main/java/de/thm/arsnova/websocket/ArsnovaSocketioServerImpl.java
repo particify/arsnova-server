@@ -143,15 +143,15 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 
 					return;
 				}
-				final String roomShortId = userService.getRoomByUserId(u.getId());
-				final de.thm.arsnova.entities.Room room = roomService.getInternal(roomShortId, u);
+				final String roomId = userService.getRoomIdByUserId(u.getId());
+				final de.thm.arsnova.entities.Room room = roomService.getInternal(roomId, u);
 
 				if (room.getSettings().isFeedbackLocked()) {
-					logger.debug("Feedback save blocked: {}", u, roomShortId, data.getValue());
+					logger.debug("Feedback save blocked: {}", u, roomId, data.getValue());
 				} else {
-					logger.debug("Feedback recieved: {}", u, roomShortId, data.getValue());
-					if (null != roomShortId) {
-						feedbackService.save(roomShortId, data.getValue(), u);
+					logger.debug("Feedback recieved: {}", u, roomId, data.getValue());
+					if (null != roomId) {
+						feedbackService.save(roomId, data.getValue(), u);
 					}
 				}
 			}
@@ -167,19 +167,20 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 
 					return;
 				}
-				final String oldShortRoomId = userService.getRoomByUserId(u.getId());
-				if (null != room.getKeyword() && room.getKeyword().equals(oldShortRoomId)) {
+				final String oldRoomId = userService.getRoomIdByUserId(u.getId());
+				if (null != room.getKeyword() && room.getKeyword().equals(oldRoomId)) {
 					return;
 				}
+				final String roomId = roomService.getIdByShortId(room.getKeyword());
 
-				if (null != roomService.join(room.getKeyword(), client.getSessionId())) {
+				if (null != roomId && null != roomService.join(roomId, client.getSessionId())) {
 					/* active user count has to be sent to the client since the broadcast is
 					 * not always sent as long as the polling solution is active simultaneously */
-					reportActiveUserCountForRoom(room.getKeyword());
-					reportRoomDataToClient(room.getKeyword(), u, client);
+					reportActiveUserCountForRoom(roomId);
+					reportRoomDataToClient(roomId, u, client);
 				}
-				if (null != oldShortRoomId) {
-					reportActiveUserCountForRoom(oldShortRoomId);
+				if (null != oldRoomId) {
+					reportActiveUserCountForRoom(oldRoomId);
 				}
 			}
 		});
@@ -255,12 +256,12 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 					return;
 				}
 				final String userId = userService.getUserToSocketId(client.getSessionId()).getId();
-				final String shortRoomId = userService.getRoomByUserId(userId);
+				final String roomId = userService.getRoomIdByUserId(userId);
 				userService.removeUserFromRoomBySocketId(client.getSessionId());
 				userService.removeUserToSocketId(client.getSessionId());
-				if (null != shortRoomId) {
+				if (null != roomId) {
 					/* user disconnected before joining a session */
-					reportActiveUserCountForRoom(shortRoomId);
+					reportActiveUserCountForRoom(roomId);
 				}
 			}
 		});
@@ -328,12 +329,12 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		this.useSSL = useSSL;
 	}
 
-	public void reportDeletedFeedback(final UserAuthentication user, final Set<de.thm.arsnova.entities.Room> arsRooms) {
-		final List<String> keywords = new ArrayList<>();
-		for (final de.thm.arsnova.entities.Room room : arsRooms) {
-			keywords.add(room.getShortId());
+	public void reportDeletedFeedback(final UserAuthentication user, final Set<de.thm.arsnova.entities.Room> rooms) {
+		final List<String> roomShortIds = new ArrayList<>();
+		for (final de.thm.arsnova.entities.Room room : rooms) {
+			roomShortIds.add(room.getShortId());
 		}
-		this.sendToUser(user, "feedbackReset", keywords);
+		this.sendToUser(user, "feedbackReset", roomShortIds);
 	}
 
 	private List<UUID> findConnectionIdForUser(final UserAuthentication user) {
@@ -364,26 +365,26 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 	 * Currently only sends the feedback data to the client. Should be used for all
 	 * relevant Socket.IO data, the client needs to know after joining a session.
 	 */
-	public void reportRoomDataToClient(final String shortRoomId, final UserAuthentication user, final SocketIOClient client) {
-		final de.thm.arsnova.entities.Room room = roomService.getInternal(shortRoomId, user);
-		final de.thm.arsnova.entities.Room.Settings settings = roomService.getFeatures(shortRoomId);
+	public void reportRoomDataToClient(final String roomId, final UserAuthentication user, final SocketIOClient client) {
+		final de.thm.arsnova.entities.Room room = roomService.getInternal(roomId, user);
+		final de.thm.arsnova.entities.Room.Settings settings = room.getSettings();
 
-		client.sendEvent("unansweredLecturerQuestions", contentService.getUnAnsweredLectureContentIds(shortRoomId, user));
-		client.sendEvent("unansweredPreparationQuestions", contentService.getUnAnsweredPreparationContentIds(shortRoomId, user));
-		client.sendEvent("countLectureQuestionAnswers", contentService.countLectureQuestionAnswersInternal(shortRoomId));
-		client.sendEvent("countPreparationQuestionAnswers", contentService.countPreparationQuestionAnswersInternal(shortRoomId));
-		client.sendEvent("activeUserCountData", roomService.activeUsers(shortRoomId));
+		client.sendEvent("unansweredLecturerQuestions", contentService.getUnAnsweredLectureContentIds(roomId, user));
+		client.sendEvent("unansweredPreparationQuestions", contentService.getUnAnsweredPreparationContentIds(roomId, user));
+		client.sendEvent("countLectureQuestionAnswers", contentService.countLectureQuestionAnswersInternal(roomId));
+		client.sendEvent("countPreparationQuestionAnswers", contentService.countPreparationQuestionAnswersInternal(roomId));
+		client.sendEvent("activeUserCountData", roomService.activeUsers(roomId));
 //		client.sendEvent("learningProgressOptions", room.getLearningProgressOptions());
-		final de.thm.arsnova.entities.Feedback fb = feedbackService.getByRoomShortId(shortRoomId);
+		final de.thm.arsnova.entities.Feedback fb = feedbackService.getByRoomId(roomId);
 		client.sendEvent("feedbackData", fb.getValues());
 
 		if (settings.isFlashcardsEnabled()) {
-			client.sendEvent("countFlashcards", contentService.countFlashcardsForUserInternal(shortRoomId));
+			client.sendEvent("countFlashcards", contentService.countFlashcardsForUserInternal(roomId));
 //			client.sendEvent("flipFlashcards", room.getFlipFlashcards());
 		}
 
 		try {
-			final long averageFeedback = feedbackService.calculateRoundedAverageFeedback(shortRoomId);
+			final long averageFeedback = feedbackService.calculateRoundedAverageFeedback(roomId);
 			client.sendEvent("feedbackDataRoundedAverage", averageFeedback);
 		} catch (final NoContentException e) {
 			final Object object = null; // can't directly use "null".
@@ -392,18 +393,18 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 	}
 
 	public void reportUpdatedFeedbackForRoom(final de.thm.arsnova.entities.Room room) {
-		final de.thm.arsnova.entities.Feedback fb = feedbackService.getByRoomShortId(room.getShortId());
-		broadcastInRoom(room.getShortId(), "feedbackData", fb.getValues());
+		final de.thm.arsnova.entities.Feedback fb = feedbackService.getByRoomId(room.getId());
+		broadcastInRoom(room.getId(), "feedbackData", fb.getValues());
 		try {
-			final long averageFeedback = feedbackService.calculateRoundedAverageFeedback(room.getShortId());
-			broadcastInRoom(room.getShortId(), "feedbackDataRoundedAverage", averageFeedback);
+			final long averageFeedback = feedbackService.calculateRoundedAverageFeedback(room.getId());
+			broadcastInRoom(room.getId(), "feedbackDataRoundedAverage", averageFeedback);
 		} catch (final NoContentException e) {
-			broadcastInRoom(room.getShortId(), "feedbackDataRoundedAverage", null);
+			broadcastInRoom(room.getId(), "feedbackDataRoundedAverage", null);
 		}
 	}
 
 	public void reportFeedbackForUserInRoom(final Room room, final UserAuthentication user) {
-		final de.thm.arsnova.entities.Feedback fb = feedbackService.getByRoomShortId(room.getKeyword());
+		final de.thm.arsnova.entities.Feedback fb = feedbackService.getByRoomId(room.getKeyword());
 		Long averageFeedback;
 		try {
 			averageFeedback = feedbackService.calculateRoundedAverageFeedback(room.getKeyword());
@@ -423,19 +424,19 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		}
 	}
 
-	public void reportActiveUserCountForRoom(final String shortRoomId) {
-		final int count = userService.getUsersByRoomShortId(shortRoomId).size();
+	public void reportActiveUserCountForRoom(final String roomId) {
+		final int count = userService.getUsersByRoomId(roomId).size();
 
-		broadcastInRoom(shortRoomId, "activeUserCountData", count);
+		broadcastInRoom(roomId, "activeUserCountData", count);
 	}
 
 	public void reportAnswersToContentAvailable(final de.thm.arsnova.entities.Room room, final Content content) {
-		broadcastInRoom(room.getShortId(), "answersToLecQuestionAvail", content.get_id());
+		broadcastInRoom(room.getId(), "answersToLecQuestionAvail", content.get_id());
 	}
 
 	public void reportCommentAvailable(final de.thm.arsnova.entities.Room room, final Comment comment) {
 		/* TODO role handling implementation, send this only to users with role lecturer */
-		broadcastInRoom(room.getShortId(), "audQuestionAvail", comment.getId());
+		broadcastInRoom(room.getId(), "audQuestionAvail", comment.getId());
 	}
 
 	public void reportContentAvailable(final de.thm.arsnova.entities.Room room, final List<de.thm.arsnova.entities.Content> qs) {
@@ -446,9 +447,9 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 
 		/* TODO role handling implementation, send this only to users with role audience */
 		if (!qs.isEmpty()) {
-			broadcastInRoom(room.getShortId(), "lecQuestionAvail", contents.get(0).get_id()); // deprecated!
+			broadcastInRoom(room.getId(), "lecQuestionAvail", contents.get(0).get_id()); // deprecated!
 		}
-		broadcastInRoom(room.getShortId(), "lecturerQuestionAvailable", contents);
+		broadcastInRoom(room.getId(), "lecturerQuestionAvailable", contents);
 	}
 
 	public void reportContentsLocked(final de.thm.arsnova.entities.Room room, final List<de.thm.arsnova.entities.Content> qs) {
@@ -456,19 +457,19 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		for (de.thm.arsnova.entities.Content q : qs) {
 			contents.add(new Content(q));
 		}
-		broadcastInRoom(room.getShortId(), "lecturerQuestionLocked", contents);
+		broadcastInRoom(room.getId(), "lecturerQuestionLocked", contents);
 	}
 
-	public void reportRoomStatus(final String shortRoomId, final boolean active) {
-		broadcastInRoom(shortRoomId, "setSessionActive", active);
+	public void reportRoomStatus(final String roomId, final boolean active) {
+		broadcastInRoom(roomId, "setSessionActive", active);
 	}
 
-	public void broadcastInRoom(final String shortRoomId, final String eventName, final Object data) {
+	public void broadcastInRoom(final String roomId, final String eventName, final Object data) {
 		/* collect a list of users which are in the current room iterate over
 		 * all connected clients and if send feedback, if user is in current
 		 * room
 		 */
-		final Set<UserAuthentication> users = userService.getUsersByRoomShortId(shortRoomId);
+		final Set<UserAuthentication> users = userService.getUsersByRoomId(roomId);
 
 		for (final SocketIOClient c : server.getAllClients()) {
 			final UserAuthentication u = userService.getUserToSocketId(c.getSessionId());
@@ -512,18 +513,18 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 	@Override
 	@Timed(name = "visit.NewAnswerEvent")
 	public void visit(NewAnswerEvent event) {
-		final String shortRoomId = event.getRoom().getShortId();
+		final String roomId = event.getRoom().getId();
 		this.reportAnswersToContentAvailable(event.getRoom(), new Content(event.getContent()));
-		broadcastInRoom(shortRoomId, "countQuestionAnswersByQuestionId", contentService.countAnswersAndAbstentionsInternal(event.getContent().getId()));
-		broadcastInRoom(shortRoomId, "countLectureQuestionAnswers", contentService.countLectureQuestionAnswersInternal(shortRoomId));
-		broadcastInRoom(shortRoomId, "countPreparationQuestionAnswers", contentService.countPreparationQuestionAnswersInternal(shortRoomId));
+		broadcastInRoom(roomId, "countQuestionAnswersByQuestionId", contentService.countAnswersAndAbstentionsInternal(event.getContent().getId()));
+		broadcastInRoom(roomId, "countLectureQuestionAnswers", contentService.countLectureQuestionAnswersInternal(roomId));
+		broadcastInRoom(roomId, "countPreparationQuestionAnswers", contentService.countPreparationQuestionAnswersInternal(roomId));
 
 		// Update the unanswered count for the content variant that was answered.
 		final de.thm.arsnova.entities.Content content = event.getContent();
 		if ("lecture".equals(content.getGroup())) {
-			sendToUser(event.getUser(), "unansweredLecturerQuestions", contentService.getUnAnsweredLectureContentIds(shortRoomId, event.getUser()));
+			sendToUser(event.getUser(), "unansweredLecturerQuestions", contentService.getUnAnsweredLectureContentIds(roomId, event.getUser()));
 		} else if ("preparation".equals(content.getGroup())) {
-			sendToUser(event.getUser(), "unansweredPreparationQuestions", contentService.getUnAnsweredPreparationContentIds(shortRoomId, event.getUser()));
+			sendToUser(event.getUser(), "unansweredPreparationQuestions", contentService.getUnAnsweredPreparationContentIds(roomId, event.getUser()));
 		}
 	}
 
@@ -531,53 +532,53 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 	@Override
 	@Timed(name = "visit.DeleteAnswerEvent")
 	public void visit(DeleteAnswerEvent event) {
-		final String shortRoomId = event.getRoom().getShortId();
+		final String roomId = event.getRoom().getId();
 		this.reportAnswersToContentAvailable(event.getRoom(), new Content(event.getQuestion()));
 		// We do not know which user's answer was deleted, so we can't update his 'unanswered' list of questions...
-		broadcastInRoom(shortRoomId, "countLectureQuestionAnswers", contentService.countLectureQuestionAnswersInternal(shortRoomId));
-		broadcastInRoom(shortRoomId, "countPreparationQuestionAnswers", contentService.countPreparationQuestionAnswersInternal(shortRoomId));
+		broadcastInRoom(roomId, "countLectureQuestionAnswers", contentService.countLectureQuestionAnswersInternal(roomId));
+		broadcastInRoom(roomId, "countPreparationQuestionAnswers", contentService.countPreparationQuestionAnswersInternal(roomId));
 	}
 
 	@Async
 	@Override
 	@Timed(name = "visit.PiRoundDelayedStartEvent")
 	public void visit(PiRoundDelayedStartEvent event) {
-		final String shortRoomId = event.getRoom().getShortId();
-		broadcastInRoom(shortRoomId, "startDelayedPiRound", event.getPiRoundInformations());
+		final String roomId = event.getRoom().getId();
+		broadcastInRoom(roomId, "startDelayedPiRound", event.getPiRoundInformations());
 	}
 
 	@Async
 	@Override
 	@Timed(name = "visit.PiRoundEndEvent")
 	public void visit(PiRoundEndEvent event) {
-		final String shortRoomId = event.getRoom().getShortId();
-		broadcastInRoom(shortRoomId, "endPiRound", event.getPiRoundEndInformations());
+		final String roomId = event.getRoom().getId();
+		broadcastInRoom(roomId, "endPiRound", event.getPiRoundEndInformations());
 	}
 
 	@Async
 	@Override
 	@Timed(name = "visit.PiRoundCancelEvent")
 	public void visit(PiRoundCancelEvent event) {
-		final String shortRoomId = event.getRoom().getShortId();
-		broadcastInRoom(shortRoomId, "cancelPiRound", event.getContentId());
+		final String roomId = event.getRoom().getId();
+		broadcastInRoom(roomId, "cancelPiRound", event.getContentId());
 	}
 
 	@Override
 	public void visit(PiRoundResetEvent event) {
-		final String shortRoomId = event.getRoom().getShortId();
-		broadcastInRoom(shortRoomId, "resetPiRound", event.getPiRoundResetInformations());
+		final String roomId = event.getRoom().getId();
+		broadcastInRoom(roomId, "resetPiRound", event.getPiRoundResetInformations());
 	}
 
 	@Override
 	public void visit(LockVoteEvent event) {
-		final String shortRoomId = event.getRoom().getShortId();
-		broadcastInRoom(shortRoomId, "lockVote", event.getVotingAdmission());
+		final String roomId = event.getRoom().getId();
+		broadcastInRoom(roomId, "lockVote", event.getVotingAdmission());
 	}
 
 	@Override
 	public void visit(UnlockVoteEvent event) {
-		final String shortRoomId = event.getRoom().getShortId();
-		broadcastInRoom(shortRoomId, "unlockVote", event.getVotingAdmission());
+		final String roomId = event.getRoom().getId();
+		broadcastInRoom(roomId, "unlockVote", event.getVotingAdmission());
 	}
 
 	@Override
@@ -586,7 +587,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		for (de.thm.arsnova.entities.Content q : event.getQuestions()) {
 			contents.add(new Content(q));
 		}
-		broadcastInRoom(event.getRoom().getShortId(), "lockVotes", contents);
+		broadcastInRoom(event.getRoom().getId(), "lockVotes", contents);
 	}
 
 	@Override
@@ -595,29 +596,29 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		for (de.thm.arsnova.entities.Content q : event.getQuestions()) {
 			contents.add(new Content(q));
 		}
-		broadcastInRoom(event.getRoom().getShortId(), "unlockVotes", contents);
+		broadcastInRoom(event.getRoom().getId(), "unlockVotes", contents);
 	}
 
 	@Override
 	public void visit(FeatureChangeEvent event) {
-		final String shortRoomId = event.getRoom().getShortId();
+		final String roomId = event.getRoom().getId();
 		final de.thm.arsnova.entities.Room.Settings settings = event.getRoom().getSettings();
-		broadcastInRoom(shortRoomId, "featureChange", settings);
+		broadcastInRoom(roomId, "featureChange", settings);
 
 		if (settings.isFlashcardsEnabled()) {
-			broadcastInRoom(shortRoomId, "countFlashcards", contentService.countFlashcardsForUserInternal(shortRoomId));
-//			broadcastInRoom(shortRoomId, "flipFlashcards", event.getRoom().getFlipFlashcards());
+			broadcastInRoom(roomId, "countFlashcards", contentService.countFlashcardsForUserInternal(roomId));
+//			broadcastInRoom(roomId, "flipFlashcards", event.getRoom().getFlipFlashcards());
 		}
 	}
 
 	@Override
 	public void visit(LockFeedbackEvent event) {
-		broadcastInRoom(event.getRoom().getShortId(), "lockFeedback", event.getRoom().getSettings().isFeedbackLocked());
+		broadcastInRoom(event.getRoom().getId(), "lockFeedback", event.getRoom().getSettings().isFeedbackLocked());
 	}
 
 	@Override
 	public void visit(FlipFlashcardsEvent event) {
-//		broadcastInRoom(event.getRoom().getShortId(), "flipFlashcards", event.getRoom().getFlipFlashcards());
+//		broadcastInRoom(event.getRoom().getId(), "flipFlashcards", event.getRoom().getFlipFlashcards());
 	}
 
 	@Override
@@ -669,12 +670,12 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 
 	@Override
 	public void visit(StatusRoomEvent event) {
-		this.reportRoomStatus(event.getRoom().getShortId(), !event.getRoom().isClosed());
+		this.reportRoomStatus(event.getRoom().getId(), !event.getRoom().isClosed());
 	}
 
 	@Override
 	public void visit(ChangeScoreEvent event) {
-		broadcastInRoom(event.getRoom().getShortId(), "learningProgressChange", null);
+		broadcastInRoom(event.getRoom().getId(), "learningProgressChange", null);
 	}
 
 	@Override

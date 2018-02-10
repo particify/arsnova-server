@@ -46,6 +46,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -168,10 +169,10 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
-	public Room join(final String shortId, final UUID socketId) {
+	public Room join(final String id, final UUID socketId) {
 		/* Socket.IO solution */
 
-		Room room = null != shortId ? roomRepository.findByShortId(shortId) : null;
+		Room room = null != id ? roomRepository.findOne(id) : null;
 
 		if (null == room) {
 			userService.removeUserFromRoomBySocketId(socketId);
@@ -179,7 +180,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		}
 		final UserAuthentication user = userService.getUserToSocketId(socketId);
 
-		userService.addUserToRoomBySocketId(socketId, shortId);
+		userService.addUserToRoomBySocketId(socketId, id);
 
 		roomRepository.registerAsOnlineUser(user, room);
 
@@ -199,12 +200,23 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@PreAuthorize("isAuthenticated()")
 	public Room getByShortId(final String shortId) {
 		final UserAuthentication user = userService.getCurrentUser();
-		return this.getInternal(shortId, user);
+		return this.getInternal(getIdByShortId(shortId), user);
 	}
 
-	@PreAuthorize("hasPermission(#shortId, 'room', 'owner')")
-	public Room getForAdmin(final String shortId) {
-		return roomRepository.findByShortId(shortId);
+	@Override
+	@Cacheable("room.id-by-shortid")
+	public String getIdByShortId(final String shortId) {
+		Room room = roomRepository.findByShortId(shortId);
+		if (room == null) {
+			throw new NotFoundException("No Room exists for short ID");
+		}
+
+		return room.getId();
+	}
+
+	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
+	public Room getForAdmin(final String id) {
+		return roomRepository.findOne(id);
 	}
 
 	/*
@@ -212,8 +224,8 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	 * TODO: Find a better way of doing this...
 	 */
 	@Override
-	public Room getInternal(final String shortId, final UserAuthentication user) {
-		final Room room = roomRepository.findByShortId(shortId);
+	public Room getInternal(final String id, final UserAuthentication user) {
+		final Room room = roomRepository.findOne(id);
 		if (room == null) {
 			throw new NotFoundException();
 		}
@@ -295,7 +307,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	@Override
 	@PreAuthorize("hasPermission(#room, 'create')")
-	@Caching(evict = @CacheEvict(cacheNames = "rooms", key = "#result.shortId"))
+	@Caching(evict = @CacheEvict(cacheNames = "rooms", key = "#result.id"))
 	public Room save(final Room room) {
 		/* FIXME: migrate LMS course support
 		if (connectorClient != null && room.getCourseId() != null) {
@@ -325,7 +337,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Override
 	public boolean isShortIdAvailable(final String shortId) {
 		try {
-			return getByShortId(shortId) == null;
+			return getIdByShortId(shortId) == null;
 		} catch (final NotFoundException e) {
 			return true;
 		}
@@ -354,14 +366,14 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
-	public int activeUsers(final String shortId) {
-		return userService.getUsersByRoomShortId(shortId).size();
+	public int activeUsers(final String id) {
+		return userService.getUsersByRoomId(id).size();
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#shortId, 'room', 'owner')")
-	public Room setActive(final String shortId, final Boolean lock) {
-		final Room room = roomRepository.findByShortId(shortId);
+	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
+	public Room setActive(final String id, final Boolean lock) {
+		final Room room = roomRepository.findOne(id);
 		room.setClosed(!lock);
 		this.publisher.publishEvent(new StatusRoomEvent(this, room));
 		roomRepository.save(room);
@@ -372,8 +384,8 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Override
 	@PreAuthorize("hasPermission(#room.id, 'room', 'owner')")
 	@CachePut(value = "rooms", key = "#room")
-	public Room update(final String shortId, final Room room) {
-		final Room existingRoom = roomRepository.findByShortId(shortId);
+	public Room update(final String id, final Room room) {
+		final Room existingRoom = roomRepository.findOne(id);
 		room.setOwnerId(existingRoom.getOwnerId());
 		handleLogo(room);
 		update(existingRoom, room);
@@ -383,8 +395,8 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	@Override
 	@PreAuthorize("hasPermission('', 'motd', 'admin')")
-	@Caching(evict = { @CacheEvict("rooms"), @CacheEvict(cacheNames = "rooms", key = "#shortId") })
-	public Room updateCreator(String shortId, String newCreator) {
+	@Caching(evict = { @CacheEvict("rooms"), @CacheEvict(cacheNames = "rooms", key = "#id") })
+	public Room updateCreator(String id, String newCreator) {
 		throw new UnsupportedOperationException("No longer implemented.");
 	}
 
@@ -403,7 +415,10 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	@Override
 	@PreAuthorize("hasPermission(#room, 'owner')")
-	@CacheEvict("rooms")
+	@Caching(evict = {
+			@CacheEvict("rooms"),
+			@CacheEvict(value = "room.id-by-shortid", key = "#room.shortId")
+	})
 	public int[] deleteCascading(final Room room) {
 		int[] count = new int[] {0, 0, 0};
 		List<String> contentIds = contentRepository.findIdsByRoomId(room.getId());
@@ -420,17 +435,17 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#shortId, 'room', 'read')")
-	public ScoreStatistics getLearningProgress(final String shortId, final String type, final String questionVariant) {
-		final Room room = roomRepository.findByShortId(shortId);
+	@PreAuthorize("hasPermission(#id, 'room', 'read')")
+	public ScoreStatistics getLearningProgress(final String id, final String type, final String questionVariant) {
+		final Room room = roomRepository.findOne(id);
 		ScoreCalculator scoreCalculator = scoreCalculatorFactory.create(type, questionVariant);
 		return scoreCalculator.getCourseProgress(room);
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#shortId, 'room', 'read')")
-	public ScoreStatistics getMyLearningProgress(final String shortId, final String type, final String questionVariant) {
-		final Room room = roomRepository.findByShortId(shortId);
+	@PreAuthorize("hasPermission(#id, 'room', 'read')")
+	public ScoreStatistics getMyLearningProgress(final String id, final String type, final String questionVariant) {
+		final Room room = roomRepository.findOne(id);
 		final UserAuthentication user = userService.getCurrentUser();
 		ScoreCalculator scoreCalculator = scoreCalculatorFactory.create(type, questionVariant);
 		return scoreCalculator.getMyProgress(room, user);
@@ -448,15 +463,15 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#shortId, 'room', 'owner')")
-	public ImportExportContainer exportRoom(String shortId, Boolean withAnswerStatistics, Boolean withFeedbackQuestions) {
-		return roomRepository.exportRoom(shortId, withAnswerStatistics, withFeedbackQuestions);
+	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
+	public ImportExportContainer exportRoom(String id, Boolean withAnswerStatistics, Boolean withFeedbackQuestions) {
+		return roomRepository.exportRoom(id, withAnswerStatistics, withFeedbackQuestions);
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#shortId, 'room', 'owner')")
-	public Room copyRoomToPublicPool(String shortId, ImportExportContainer.PublicPool pp) {
-		ImportExportContainer temp = roomRepository.exportRoom(shortId, false, false);
+	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
+	public Room copyRoomToPublicPool(String id, ImportExportContainer.PublicPool pp) {
+		ImportExportContainer temp = roomRepository.exportRoom(id, false, false);
 		temp.getSession().setPublicPool(pp);
 		temp.getSession().setSessionType("public_pool");
 		final UserAuthentication user = userService.getCurrentUser();
@@ -469,15 +484,15 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#shortId, 'room', 'read')")
-	public Room.Settings getFeatures(String shortId) {
-		return roomRepository.findByShortId(shortId).getSettings();
+	@PreAuthorize("hasPermission(#id, 'room', 'read')")
+	public Room.Settings getFeatures(String id) {
+		return roomRepository.findOne(id).getSettings();
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#shortId, 'room', 'owner')")
-	public Room.Settings updateFeatures(String shortId, Room.Settings settings) {
-		final Room room = roomRepository.findByShortId(shortId);
+	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
+	public Room.Settings updateFeatures(String id, Room.Settings settings) {
+		final Room room = roomRepository.findOne(id);
 		final UserAuthentication user = userService.getCurrentUser();
 		room.setSettings(settings);
 		this.publisher.publishEvent(new FeatureChangeEvent(this, room));
@@ -487,12 +502,12 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#shortId, 'room', 'owner')")
-	public boolean lockFeedbackInput(String shortId, Boolean lock) {
-		final Room room = roomRepository.findByShortId(shortId);
+	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
+	public boolean lockFeedbackInput(String id, Boolean lock) {
+		final Room room = roomRepository.findOne(id);
 		final UserAuthentication user = userService.getCurrentUser();
 		if (!lock) {
-			feedbackService.cleanFeedbackVotesByRoomShortId(shortId, 0);
+			feedbackService.cleanFeedbackVotesByRoomId(id, 0);
 		}
 
 		room.getSettings().setFeedbackLocked(lock);
@@ -503,9 +518,9 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#shortId, 'room', 'owner')")
-	public boolean flipFlashcards(String shortId, Boolean flip) {
-		final Room room = roomRepository.findByShortId(shortId);
+	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
+	public boolean flipFlashcards(String id, Boolean flip) {
+		final Room room = roomRepository.findOne(id);
 		this.publisher.publishEvent(new FlipFlashcardsEvent(this, room));
 
 		return flip;
