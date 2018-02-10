@@ -18,8 +18,11 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Performs all comment related operations.
@@ -53,9 +56,8 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public boolean save(final Comment comment) {
-		final Room room = roomRepository.findByShortId(comment.getRoomId());
+		final Room room = roomRepository.findOne(comment.getRoomId());
 		final UserAuthentication user = userService.getCurrentUser();
-		comment.setRoomId(room.getId());
 		comment.setCreatorId(user.getId());
 		comment.setRead(false);
 		if (comment.getTimestamp() == null) {
@@ -138,30 +140,16 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
-	public Comment getAndMarkRead(final String commentId) {
-		final UserAuthentication user = userService.getCurrentUser();
-		return this.getAndMarkReadInternal(commentId, user);
-	}
-
-	/*
-	 * The "internal" suffix means it is called by internal services that have no authentication!
-	 * TODO: Find a better way of doing this...
-	 */
-	@Override
-	public Comment getAndMarkReadInternal(final String commentId, UserAuthentication user) {
+	@PreAuthorize("hasPermission(#commentId, 'comment', 'update')")
+	public Comment getAndMarkRead(final String commentId) throws IOException {
 		final Comment comment = commentRepository.findOne(commentId);
 		if (comment == null) {
 			throw new NotFoundException();
 		}
-		final Room room = roomRepository.findOne(comment.getRoomId());
-		if (!comment.getCreatorId().equals(user.getId()) && !room.getOwnerId().equals(user.getId())) {
-			throw new UnauthorizedException();
-		}
-		if (room.getOwnerId().equals(user.getId())) {
-			comment.setRead(true);
-			save(comment);
-		}
+		Map<String, Object> changes = new HashMap<>();
+		changes.put("read", true);
+		patch(comment, changes);
+
 		return comment;
 	}
 

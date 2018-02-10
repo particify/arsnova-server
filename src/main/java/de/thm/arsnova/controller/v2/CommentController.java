@@ -18,13 +18,14 @@
 package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.controller.PaginationController;
-import de.thm.arsnova.entities.UserProfile;
+import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.entities.migration.FromV2Migrator;
 import de.thm.arsnova.entities.migration.ToV2Migrator;
 import de.thm.arsnova.entities.migration.v2.Comment;
 import de.thm.arsnova.entities.migration.v2.CommentReadingCount;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.services.CommentService;
+import de.thm.arsnova.services.RoomService;
 import de.thm.arsnova.services.UserService;
 import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.web.Pagination;
@@ -44,6 +45,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,6 +59,9 @@ public class CommentController extends PaginationController {
 
 	@Autowired
 	private CommentService commentService;
+
+	@Autowired
+	private RoomService roomService;
 
 	@Autowired
 	private UserService userService;
@@ -97,7 +102,7 @@ public class CommentController extends PaginationController {
 	@ApiOperation(value = "Retrieves an Comment",
 			nickname = "getComment")
 	@RequestMapping(value = "/{commentId}", method = RequestMethod.GET)
-	public Comment getComment(@ApiParam(value = "ID of the Comment that needs to be deleted", required = true) @PathVariable final String commentId) {
+	public Comment getComment(@ApiParam(value = "ID of the Comment that needs to be deleted", required = true) @PathVariable final String commentId) throws IOException {
 		return toV2Migrator.migrate(commentService.getAndMarkRead(commentId));
 	}
 
@@ -112,8 +117,10 @@ public class CommentController extends PaginationController {
 			@ApiParam(value = "Room-Key from current room", required = true) @RequestParam("sessionkey") final String roomShortId,
 			@ApiParam(value = "the body from the new comment", required = true) @RequestBody final Comment comment
 			) {
-		UserProfile profile = userService.getByUsername(comment.getCreator());
-		if (commentService.save(fromV2Migrator.migrate(comment, profile))) {
+		de.thm.arsnova.entities.Comment commentV3 = fromV2Migrator.migrate(comment);
+		Room roomV3 = roomService.getByShortId(roomShortId);
+		commentV3.setRoomId(roomV3.getId());
+		if (commentService.save(commentV3)) {
 			return;
 		}
 

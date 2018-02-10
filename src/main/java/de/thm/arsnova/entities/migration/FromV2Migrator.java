@@ -22,6 +22,7 @@ import de.thm.arsnova.entities.ChoiceQuestionContent;
 import de.thm.arsnova.entities.TextAnswer;
 import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.entities.migration.v2.*;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -221,20 +222,28 @@ public class FromV2Migrator {
 		return to;
 	}
 
-	public de.thm.arsnova.entities.Comment migrate(final Comment from, final UserProfile creator) {
-		if (!creator.getLoginId().equals(from.getCreator())) {
+	public de.thm.arsnova.entities.Comment migrate(final Comment from, @Nullable final UserProfile creator) {
+		if (creator == null && from.getCreator() != null ||
+				creator != null && !creator.getLoginId().equals(from.getCreator())) {
 			throw new IllegalArgumentException("Username of creator object does not match comment creator.");
 		}
 		final de.thm.arsnova.entities.Comment to = new de.thm.arsnova.entities.Comment();
 		copyCommonProperties(from, to);
 		to.setRoomId(from.getSessionId());
-		to.setCreatorId(creator.getId());
+		if (creator != null) {
+			to.setCreatorId(creator.getId());
+		}
 		to.setSubject(from.getSubject());
 		to.setBody(from.getText());
 		to.setTimestamp(new Date(from.getTimestamp()));
 		to.setRead(from.isRead());
 
 		return to;
+	}
+
+
+	public de.thm.arsnova.entities.Comment migrate(final Comment from) {
+		return migrate(from, null);
 	}
 
 	public de.thm.arsnova.entities.Motd migrate(final Motd from) {

@@ -1,9 +1,9 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Comment;
-import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.migration.v2.CommentReadingCount;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface CommentService extends EntityService<Comment> {
@@ -15,9 +15,7 @@ public interface CommentService extends EntityService<Comment> {
 
 	List<Comment> getByRoomShortId(String roomShortId, int offset, int limit);
 
-	Comment getAndMarkRead(String commentId);
-
-	Comment getAndMarkReadInternal(String commentId, UserAuthentication user);
+	Comment getAndMarkRead(String commentId) throws IOException;
 
 	void delete(String commentId);
 

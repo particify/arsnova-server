@@ -17,6 +17,7 @@
  */
 package de.thm.arsnova.entities.migration.v2;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.serialization.View;
@@ -43,6 +44,7 @@ public class Comment implements Entity {
 	private String creator;
 
 	@JsonView({View.Persistence.class, View.Public.class})
+	@JsonProperty("_id")
 	public String getId() {
 		return id;
 	}
@@ -60,6 +62,13 @@ public class Comment implements Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getRevision() {
 		return rev;
+	}
+
+	/* Need because of an inconsistency in the v2 API */
+	@JsonView(View.Public.class)
+	@JsonProperty("id")
+	public String getApiId() {
+		return id;
 	}
 
 	@ApiModelProperty(required = true, value = "is read")

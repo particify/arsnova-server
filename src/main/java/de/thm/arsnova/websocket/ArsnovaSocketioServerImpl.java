@@ -53,6 +53,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PreDestroy;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -196,8 +197,8 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 					AckRequest ackRequest) {
 				final UserAuthentication user = userService.getUserToSocketId(client.getSessionId());
 				try {
-					commentService.getAndMarkReadInternal(comment.getId(), user);
-				} catch (NotFoundException | UnauthorizedException e) {
+					commentService.getAndMarkRead(comment.getId());
+				} catch (IOException | NotFoundException | UnauthorizedException e) {
 					logger.error("Loading of comment {} failed for user {} with exception {}", comment.getId(), user, e.getMessage());
 				}
 			}

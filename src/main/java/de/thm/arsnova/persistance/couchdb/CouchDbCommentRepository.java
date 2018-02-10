@@ -52,8 +52,8 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	@Override
 	public CommentReadingCount countReadingByRoomIdAndUser(final String roomId, final UserAuthentication user) {
 		final ViewResult result = db.queryView(createQuery("by_roomid_creatorid_read")
-				.startKey(ComplexKey.of(roomId, user.getUsername()))
-				.endKey(ComplexKey.of(roomId, user.getUsername(), ComplexKey.emptyObject()))
+				.startKey(ComplexKey.of(roomId, user.getId()))
+				.endKey(ComplexKey.of(roomId, user.getId(), ComplexKey.emptyObject()))
 				.reduce(true)
 				.group(true));
 		return calculateReadingCount(result);
