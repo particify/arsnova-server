@@ -17,6 +17,7 @@
  */
 package de.thm.arsnova.security;
 
+import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.UserProfile;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -54,6 +55,14 @@ public class User implements org.springframework.security.core.userdetails.UserD
 			final org.springframework.security.core.userdetails.UserDetails details) {
 		this(profile, authorities);
 		providerUserDetails = details;
+	}
+
+	public User(final UserAuthentication userAuthentication, final Collection<? extends GrantedAuthority> authorities) {
+		id = userAuthentication.getId();
+		loginId = userAuthentication.getUsername();
+		authProvider = userAuthentication.getAuthProvider();
+		this.authorities = authorities;
+		enabled = true;
 	}
 
 	@Override

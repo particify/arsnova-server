@@ -48,11 +48,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
@@ -96,7 +91,6 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 	private String storepass;
 	private final Configuration config;
 	private SocketIOServer server;
-	private boolean securityInitialized;
 
 	public ArsnovaSocketioServerImpl() {
 		config = new Configuration();
@@ -244,9 +238,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 			@Override
 			@Timed
 			public void onConnect(final SocketIOClient client) {
-				if (!securityInitialized) {
-					initializeSecurity();
-				}
+
 			}
 		});
 
@@ -689,13 +681,4 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 
 	@Override
 	public void visit(DeleteRoomEvent event) { }
-
-	private void initializeSecurity() {
-		Authentication auth = new AnonymousAuthenticationToken("websocket", "websocket",
-				AuthorityUtils.createAuthorityList("ROLE_WEBSOCKET_ACCESS"));
-		SecurityContext context = SecurityContextHolder.createEmptyContext();
-		context.setAuthentication(auth);
-		SecurityContextHolder.setContext(context);
-		securityInitialized = true;
-	}
 }
