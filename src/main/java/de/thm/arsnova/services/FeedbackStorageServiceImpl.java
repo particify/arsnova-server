@@ -20,6 +20,8 @@ package de.thm.arsnova.services;
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.entities.UserAuthentication;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,6 +60,8 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 			return user.equals(u);
 		}
 	}
+
+	private static final Logger logger = LoggerFactory.getLogger(FeedbackStorageServiceImpl.class);
 
 	private final Map<Room, Map<UserAuthentication, FeedbackStorageObject>> data =
 			new ConcurrentHashMap<>();
@@ -112,11 +116,16 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public void save(final Room room, final int value, final UserAuthentication user) {
-		if (data.get(room) == null) {
-			data.put(room, new ConcurrentHashMap<UserAuthentication, FeedbackStorageObject>());
+		logger.debug("Feedback data for {} Rooms is stored", data.size());
+		logger.debug("Saving feedback: Room: {}, Value: {}, User: {}", room, value, user);
+		Map<UserAuthentication, FeedbackStorageObject> roomData = data.get(room);
+		if (roomData == null) {
+			logger.debug("Creating new feedback container for Room: {}", room);
+			roomData = new ConcurrentHashMap<UserAuthentication, FeedbackStorageObject>();
+			data.put(room, roomData);
 		}
-
-		data.get(room).put(user, new FeedbackStorageObject(value, user));
+		logger.debug("Feedback values for Room {}: {}", room.getId(), roomData.size());
+		roomData.put(user, new FeedbackStorageObject(value, user));
 	}
 
 	@Override

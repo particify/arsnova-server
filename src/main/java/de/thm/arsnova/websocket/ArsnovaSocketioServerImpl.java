@@ -147,9 +147,9 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 				final de.thm.arsnova.entities.Room room = roomService.getInternal(roomId, u);
 
 				if (room.getSettings().isFeedbackLocked()) {
-					logger.debug("Feedback save blocked: {}", u, roomId, data.getValue());
+					logger.debug("Feedback ignored: User: {}, Room Id: {}, Feedback: {}", u, roomId, data.getValue());
 				} else {
-					logger.debug("Feedback recieved: {}", u, roomId, data.getValue());
+					logger.debug("Feedback received: User: {}, Room Id: {}, Feedback: {}", u, roomId, data.getValue());
 					if (null != roomId) {
 						feedbackService.save(roomId, data.getValue(), u);
 					}
