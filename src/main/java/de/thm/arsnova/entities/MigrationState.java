@@ -6,8 +6,9 @@ import de.thm.arsnova.entities.serialization.View;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
-public class MigrationState implements Entity {
+public class MigrationState extends Entity {
 	public static class Migration {
 		private String id;
 		private Date start;
@@ -38,11 +39,12 @@ public class MigrationState implements Entity {
 	}
 
 	public static final String ID = "MigrationState";
-	private String rev;
-	private Date creationTimestamp;
-	private Date updateTimestamp;
 	private Migration active;
 	private List<String> completed = new ArrayList<>();
+
+	{
+		id = ID;
+	}
 
 	@Override
 	@JsonView(View.Persistence.class)
@@ -70,30 +72,6 @@ public class MigrationState implements Entity {
 		this.rev = rev;
 	}
 
-	@Override
-	@JsonView(View.Persistence.class)
-	public Date getCreationTimestamp() {
-		return creationTimestamp;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public void setCreationTimestamp(final Date creationTimestamp) {
-		this.creationTimestamp = creationTimestamp;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public Date getUpdateTimestamp() {
-		return updateTimestamp;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public void setUpdateTimestamp(final Date updateTimestamp) {
-		this.updateTimestamp = updateTimestamp;
-	}
-
 	@JsonView({View.Persistence.class, View.Public.class})
 	public Migration getActive() {
 		return active;
@@ -116,5 +94,24 @@ public class MigrationState implements Entity {
 	@JsonView(View.Persistence.class)
 	public void setCompleted(final List<String> completed) {
 		this.completed = completed;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * All fields of <tt>MigrationState</tt> are included in equality checks.
+	 */
+	@Override
+	public boolean equals(final Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!super.equals(o)) {
+			return false;
+		}
+		final MigrationState that = (MigrationState) o;
+
+		return Objects.equals(active, that.active) &&
+				Objects.equals(completed, that.completed);
 	}
 }

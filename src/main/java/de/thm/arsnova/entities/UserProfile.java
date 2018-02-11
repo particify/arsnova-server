@@ -8,9 +8,10 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
-public class UserProfile implements Entity {
+public class UserProfile extends Entity {
 	public enum AuthProvider {
 		NONE,
 		UNKNOWN,
@@ -100,10 +101,6 @@ public class UserProfile implements Entity {
 		}
 	}
 
-	private String id;
-	private String rev;
-	private Date creationTimestamp;
-	private Date updateTimestamp;
 	private AuthProvider authProvider;
 	private String loginId;
 	private Date lastLoginTimestamp;
@@ -119,54 +116,6 @@ public class UserProfile implements Entity {
 	public UserProfile(final AuthProvider authProvider, final String loginId) {
 		this.authProvider = authProvider;
 		this.loginId = loginId;
-	}
-
-	@Override
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getId() {
-		return id;
-	}
-
-	@Override
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setId(final String id) {
-		this.id = id;
-	}
-
-	@Override
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getRevision() {
-		return rev;
-	}
-
-	@Override
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setRevision(final String rev) {
-		this.rev = rev;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public Date getCreationTimestamp() {
-		return creationTimestamp;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public void setCreationTimestamp(final Date creationTimestamp) {
-		this.creationTimestamp = creationTimestamp;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public Date getUpdateTimestamp() {
-		return updateTimestamp;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public void setUpdateTimestamp(final Date updateTimestamp) {
-		this.updateTimestamp = updateTimestamp;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
@@ -237,5 +186,26 @@ public class UserProfile implements Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setExtensions(Map<String, Map<String, ?>> extensions) {
 		this.extensions = extensions;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * The following fields of <tt>UserProfile</tt> are excluded from equality checks:
+	 * {@link #account}, {@link #roomHistory}, {@link #acknowledgedMotds}, {@link #extensions}.
+	 */
+	@Override
+	public boolean equals(final Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!super.equals(o)) {
+			return false;
+		}
+		final UserProfile that = (UserProfile) o;
+
+		return authProvider == that.authProvider &&
+				Objects.equals(loginId, that.loginId) &&
+				Objects.equals(lastLoginTimestamp, that.lastLoginTimestamp);
 	}
 }

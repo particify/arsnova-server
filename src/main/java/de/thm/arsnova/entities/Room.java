@@ -3,11 +3,11 @@ package de.thm.arsnova.entities;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-public class Room implements Entity {
+public class Room extends Entity {
 	public static class ContentGroup {
 		private List<String> contentIds;
 		private boolean autoSort;
@@ -240,10 +240,6 @@ public class Room implements Entity {
 		}
 	}
 
-	private String id;
-	private String rev;
-	private Date creationTimestamp;
-	private Date updateTimestamp;
 	private String shortId;
 	private String ownerId;
 	private String name;
@@ -257,54 +253,6 @@ public class Room implements Entity {
 	private Map<String, Map<String, ?>> extensions;
 	private Map<String, String> attachments;
 	private RoomStatistics statistics;
-
-	@Override
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getId() {
-		return id;
-	}
-
-	@Override
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setId(final String id) {
-		this.id = id;
-	}
-
-	@Override
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getRevision() {
-		return rev;
-	}
-
-	@Override
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setRevision(final String rev) {
-		this.rev = rev;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public Date getCreationTimestamp() {
-		return creationTimestamp;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public void setCreationTimestamp(final Date creationTimestamp) {
-		this.creationTimestamp = creationTimestamp;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public Date getUpdateTimestamp() {
-		return updateTimestamp;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public void setUpdateTimestamp(final Date updateTimestamp) {
-		this.updateTimestamp = updateTimestamp;
-	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getShortId() {
@@ -437,5 +385,30 @@ public class Room implements Entity {
 
 	public void setStatistics(final RoomStatistics statistics) {
 		this.statistics = statistics;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * The following fields of <tt>Room</tt> are excluded from equality checks:
+	 * {@link #contentGroups}, {@link #settings}, {@link #author}, {@link #poolProperties}, {@link #extensions},
+	 * {@link #attachments}, {@link #statistics}.
+	 */
+	@Override
+	public boolean equals(final Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!super.equals(o)) {
+			return false;
+		}
+		final Room room = (Room) o;
+
+		return closed == room.closed &&
+				Objects.equals(shortId, room.shortId) &&
+				Objects.equals(ownerId, room.ownerId) &&
+				Objects.equals(name, room.name) &&
+				Objects.equals(abbreviation, room.abbreviation) &&
+				Objects.equals(description, room.description);
 	}
 }

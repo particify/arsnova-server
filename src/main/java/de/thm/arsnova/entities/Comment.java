@@ -5,12 +5,9 @@ import de.thm.arsnova.entities.serialization.View;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 
-public class Comment implements Entity {
-	private String id;
-	private String rev;
-	private Date creationTimestamp;
-	private Date updateTimestamp;
+public class Comment extends Entity {
 	private String roomId;
 	private String creatorId;
 	private String subject;
@@ -18,54 +15,6 @@ public class Comment implements Entity {
 	private Date timestamp;
 	private boolean read;
 	private Map<String, Map<String, ?>> extensions;
-
-	@Override
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getId() {
-		return id;
-	}
-
-	@Override
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setId(final String id) {
-		this.id = id;
-	}
-
-	@Override
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getRevision() {
-		return rev;
-	}
-
-	@Override
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setRevision(final String rev) {
-		this.rev = rev;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public Date getCreationTimestamp() {
-		return creationTimestamp;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public void setCreationTimestamp(final Date creationTimestamp) {
-		this.creationTimestamp = creationTimestamp;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public Date getUpdateTimestamp() {
-		return updateTimestamp;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public void setUpdateTimestamp(final Date updateTimestamp) {
-		this.updateTimestamp = updateTimestamp;
-	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getRoomId() {
@@ -135,5 +84,30 @@ public class Comment implements Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setExtensions(Map<String, Map<String, ?>> extensions) {
 		this.extensions = extensions;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * The following fields of <tt>LogEntry</tt> are excluded from equality checks:
+	 * {@link #extensions}.
+	 */
+	@Override
+	public boolean equals(final Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!super.equals(o)) {
+			return false;
+		}
+		final Comment comment = (Comment) o;
+
+		return read == comment.read &&
+				Objects.equals(roomId, comment.roomId) &&
+				Objects.equals(creatorId, comment.creatorId) &&
+				Objects.equals(subject, comment.subject) &&
+				Objects.equals(body, comment.body) &&
+				Objects.equals(timestamp, comment.timestamp) &&
+				Objects.equals(extensions, comment.extensions);
 	}
 }

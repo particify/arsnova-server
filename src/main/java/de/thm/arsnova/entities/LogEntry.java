@@ -6,8 +6,9 @@ import de.thm.arsnova.entities.serialization.View;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 
-public class LogEntry implements Entity {
+public class LogEntry extends Entity {
 	public enum LogLevel {
 		TRACE,
 		DEBUG,
@@ -108,5 +109,29 @@ public class LogEntry implements Entity {
 	@JsonView(View.Persistence.class)
 	public void setPayload(final Map<String, Object> payload) {
 		this.payload = payload;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * The following fields of <tt>LogEntry</tt> are excluded from equality checks:
+	 * {@link #payload}.
+	 */
+	@Override
+	public boolean equals(final Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!super.equals(o)) {
+			return false;
+		}
+		final LogEntry logEntry = (LogEntry) o;
+
+		return level == logEntry.level &&
+				Objects.equals(id, logEntry.id) &&
+				Objects.equals(rev, logEntry.rev) &&
+				Objects.equals(creationTimestamp, logEntry.creationTimestamp) &&
+				Objects.equals(updateTimestamp, logEntry.updateTimestamp) &&
+				Objects.equals(event, logEntry.event);
 	}
 }

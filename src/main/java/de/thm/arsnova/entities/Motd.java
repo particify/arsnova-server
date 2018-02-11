@@ -4,8 +4,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
 
 import java.util.Date;
+import java.util.Objects;
 
-public class Motd implements Entity {
+public class Motd extends Entity {
 	public enum Audience {
 		ALL,
 		AUTHENTICATED,
@@ -14,48 +15,12 @@ public class Motd implements Entity {
 		ROOM
 	}
 
-	private String id;
-	private String rev;
-	private Date creationTimestamp;
-	private Date updateTimestamp;
 	private String roomId;
 	private Date startDate;
 	private Date endDate;
 	private String title;
 	private String body;
 	private Audience audience;
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getId() {
-		return id;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setId(final String id) {
-		this.id = id;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setRevision(final String rev) {
-		this.rev = rev;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getRevision() {
-		return rev;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public Date getCreationTimestamp() {
-		return creationTimestamp;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public void setCreationTimestamp(final Date creationTimestamp) {
-		this.creationTimestamp = creationTimestamp;
-	}
 
 	@Override
 	@JsonView(View.Persistence.class)
@@ -127,5 +92,28 @@ public class Motd implements Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setAudience(final Audience audience) {
 		this.audience = audience;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * All fields of <tt>Motd</tt> are included in equality checks.
+	 */
+	@Override
+	public boolean equals(final Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!super.equals(o)) {
+			return false;
+		}
+		final Motd motd = (Motd) o;
+
+		return Objects.equals(roomId, motd.roomId) &&
+				Objects.equals(startDate, motd.startDate) &&
+				Objects.equals(endDate, motd.endDate) &&
+				Objects.equals(title, motd.title) &&
+				Objects.equals(body, motd.body) &&
+				audience == motd.audience;
 	}
 }
