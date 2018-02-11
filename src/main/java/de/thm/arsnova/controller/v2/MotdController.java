@@ -93,11 +93,11 @@ public class MotdController extends AbstractController {
 			roomId = roomService.getIdByShortId(roomShortId);
 		}
 		if (adminview) {
-			motds = "session".equals(audience) ?
+			motds = roomShortId != null ?
 					motdService.getAllRoomMotds(roomId) :
 					motdService.getAdminMotds();
 		} else {
-			motds = "session".equals(audience) ?
+			motds = roomShortId != null ?
 					motdService.getCurrentRoomMotds(date, roomId) :
 					motdService.getCurrentMotds(date, audience);
 		}
@@ -117,8 +117,9 @@ public class MotdController extends AbstractController {
 			final HttpServletResponse response
 			) {
 		de.thm.arsnova.entities.Motd motdV3 = fromV2Migrator.migrate(motd);
-		if (de.thm.arsnova.entities.Motd.Audience.ROOM.equals(motd.getAudience()) && motdV3.getRoomId() != null) {
-			motdService.save(motdV3.getRoomId(), motdV3);
+		String roomId = roomService.getIdByShortId(motd.getSessionkey());
+		if (de.thm.arsnova.entities.Motd.Audience.ROOM == motdV3.getAudience() && roomId != null) {
+			motdService.save(roomId, motdV3);
 		} else {
 			motdService.save(motdV3);
 		}
@@ -133,8 +134,9 @@ public class MotdController extends AbstractController {
 			@ApiParam(value = "current motd", required = true) @RequestBody final Motd motd
 			) {
 		de.thm.arsnova.entities.Motd motdV3 = fromV2Migrator.migrate(motd);
-		if ("session".equals(motd.getAudience()) && motdV3.getRoomId() != null) {
-			motdService.update(motdV3.getRoomId(), motdV3);
+		String roomId = roomService.getIdByShortId(motd.getSessionkey());
+		if (motdV3.getAudience() == de.thm.arsnova.entities.Motd.Audience.ROOM && roomId != null) {
+			motdService.update(roomId, motdV3);
 		} else {
 			motdService.update(motdV3);
 		}
@@ -146,7 +148,7 @@ public class MotdController extends AbstractController {
 	@RequestMapping(value = "/{motdId}", method = RequestMethod.DELETE)
 	public void deleteMotd(@ApiParam(value = "Motd-key from the message that shall be deleted", required = true) @PathVariable final String motdId) {
 		de.thm.arsnova.entities.Motd motd = motdService.get(motdId);
-		if ("session".equals(motd.getAudience())) {
+		if (motd.getAudience() == de.thm.arsnova.entities.Motd.Audience.ROOM) {
 			motdService.deleteByRoomId(motd.getRoomId(), motd);
 		} else {
 			motdService.delete(motd);

@@ -17,12 +17,14 @@
  */
 package de.thm.arsnova.security;
 
+import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.persistance.CommentRepository;
 import de.thm.arsnova.persistance.ContentRepository;
+import de.thm.arsnova.persistance.MotdRepository;
 import de.thm.arsnova.persistance.RoomRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +57,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	@Autowired
 	private ContentRepository contentRepository;
 
+	@Autowired
+	private MotdRepository motdRepository;
+
 	@Override
 	public boolean hasPermission(
 			final Authentication authentication,
@@ -75,7 +80,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				|| (targetDomainObject instanceof Content
 						&& hasContentPermission(userId, ((Content) targetDomainObject), permission.toString()))
 				|| (targetDomainObject instanceof Comment
-						&& hasCommentPermission(userId, ((Comment) targetDomainObject), permission.toString()));
+						&& hasCommentPermission(userId, ((Comment) targetDomainObject), permission.toString()))
+				|| (targetDomainObject instanceof Motd
+					&& hasMotdPermission(userId, ((Motd) targetDomainObject), permission.toString()));
 	}
 
 	@Override
@@ -108,6 +115,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			case "comment":
 				final Comment targetComment = commentRepository.findOne(targetId.toString());
 				return targetComment != null && hasCommentPermission(userId, targetComment, permission.toString());
+			case "motd":
+				final Motd targetMotd = motdRepository.findOne(targetId.toString());
+				return targetMotd != null && hasMotdPermission(userId, targetMotd, permission.toString());
 			default:
 				return false;
 		}
@@ -187,6 +197,37 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				final Room room = roomRepository.findOne(targetComment.getRoomId());
 
 				return room != null && room.getOwnerId().equals(userId);
+			default:
+				return false;
+		}
+	}
+
+	private boolean hasMotdPermission(
+			final String userId,
+			final Motd targetMotd,
+			final String permission) {
+		Room room;
+		switch (permission) {
+			case "create":
+			case "owner":
+			case "update":
+			case "delete":
+				if (userId.isEmpty() || targetMotd.getRoomId() == null || targetMotd.getAudience() != Motd.Audience.ROOM) {
+					return false;
+				}
+				room = roomRepository.findOne(targetMotd.getRoomId());
+				if (room == null) {
+					return false;
+				}
+
+				return userId.equals(room.getOwnerId());
+			case "read":
+				if (targetMotd.getAudience() != Motd.Audience.ROOM) {
+					return true;
+				}
+				room = roomRepository.findOne(targetMotd.getRoomId());
+
+				return room != null && !room.isClosed() || room.getOwnerId().equals(userId);
 			default:
 				return false;
 		}

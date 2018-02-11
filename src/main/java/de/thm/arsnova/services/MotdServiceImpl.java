@@ -68,7 +68,7 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	}
 
 	@Override
-	@Cacheable(cacheNames = "motds", key = "('session').concat(#roomId)")
+	@Cacheable(cacheNames = "motds", key = "'ROOM' + #roomId")
 	public List<Motd> getCurrentRoomMotds(final Date clientdate, final String roomId) {
 		final List<Motd> motds = motdRepository.findByRoomId(roomId);
 		return filterMotdsByDate(motds, clientdate);
@@ -121,7 +121,7 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(1,'motd','admin')")
+	@PreAuthorize("hasPermission('', 'motd', 'admin')")
 	public Motd update(final Motd motd) {
 		return createOrUpdateMotd(motd);
 	}
@@ -132,7 +132,7 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 		return createOrUpdateMotd(motd);
 	}
 
-	@CacheEvict(cacheNames = "motds", key = "#motd.audience.concat(#motd.roomId)")
+	@CacheEvict(cacheNames = "motds", key = "#motd.audience + #motd.roomId")
 	private Motd createOrUpdateMotd(final Motd motd) {
 		if (motd.getId() != null) {
 			Motd oldMotd = motdRepository.findOne(motd.getId());
@@ -145,15 +145,16 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 		if (null != motd.getId()) {
 			Motd oldMotd = get(motd.getId());
 			motd.setId(oldMotd.getId());
-		}
-		save(motd);
 
-		return motdRepository.save(motd);
+			return super.update(oldMotd, motd);
+		}
+
+		return super.create(motd);
 	}
 
 	@Override
 	@PreAuthorize("hasPermission('', 'motd', 'admin')")
-	@CacheEvict(cacheNames = "motds", key = "#motd.audience.concat(#motd.roomId)")
+	@CacheEvict(cacheNames = "motds", key = "#motd.audience + #motd.roomId")
 	public void delete(Motd motd) {
 		motdRepository.delete(motd);
 	}
