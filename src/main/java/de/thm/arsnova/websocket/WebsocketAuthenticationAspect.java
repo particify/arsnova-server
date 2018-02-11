@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -58,14 +59,20 @@ public class WebsocketAuthenticationAspect {
 			final SocketIOClient client, final T message) throws Throwable {
 		logger.debug("Executing WebsocketAuthenticationAspect for onData event: Session Id: {}, Message Class: {}",
 				client.getSessionId(), message.getClass());
-		populateSecurityContext(client.getSessionId());
-		pjp.proceed();
-		clearSecurityContext();
+		try {
+			populateSecurityContext(client.getSessionId());
+			pjp.proceed();
+		} finally {
+			clearSecurityContext();
+		}
 	}
 
 	private void populateSecurityContext(final UUID socketId) {
-		SecurityContext context = SecurityContextHolder.getContext();
 		UserAuthentication userAuth = userService.getUserToSocketId(socketId);
+		if (userAuth == null) {
+			throw new AccessDeniedException("No user authenticated for WebSocket connection");
+		}
+		SecurityContext context = SecurityContextHolder.getContext();
 		Set<GrantedAuthority> authorities = new HashSet<>();
 		authorities.add(WEBSOCKET_AUTHORITY);
 		User user = new User(userAuth, authorities);
