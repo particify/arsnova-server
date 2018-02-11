@@ -104,6 +104,8 @@ public class ContentController extends PaginationController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public Content postContent(@RequestBody final Content content) {
 		de.thm.arsnova.entities.Content contentV3 = fromV2Migrator.migrate(content);
+		final String roomId = roomService.getIdByShortId(content.getSessionKeyword());
+		contentV3.setRoomId(roomId);
 		if (contentService.save(contentV3) != null) {
 			return toV2Migrator.migrate(contentV3);
 		}
@@ -132,11 +134,7 @@ public class ContentController extends PaginationController {
 			@PathVariable final String contentId,
 			@RequestBody final Content content
 			) {
-		try {
-			return toV2Migrator.migrate(contentService.update(fromV2Migrator.migrate(content)));
-		} catch (final Exception e) {
-			throw new BadRequestException();
-		}
+		return toV2Migrator.migrate(contentService.update(fromV2Migrator.migrate(content)));
 	}
 
 	@ApiOperation(value = "Start new Pi Round on content, identified by provided id, with an optional time",
@@ -203,8 +201,8 @@ public class ContentController extends PaginationController {
 	public void setVotingAdmissionForAllContents(
 			@RequestParam(value = "sessionkey") final String roomShortId,
 			@RequestParam(value = "disable", defaultValue = "false", required = false) final Boolean disableVote,
-			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false) final boolean lectureContentsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) final boolean preparationContentsOnly
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false) boolean lectureContentsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) boolean preparationContentsOnly
 			) {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		boolean disable = false;
@@ -214,6 +212,8 @@ public class ContentController extends PaginationController {
 			disable = disableVote;
 		}
 
+		/* FIXME: Content variant is ignored for now */
+		lectureContentsOnly = preparationContentsOnly = false;
 		if (lectureContentsOnly) {
 			contents = contentService.getLectureContents(roomId);
 			contentService.setVotingAdmissions(roomId, disable, contents);
@@ -221,7 +221,8 @@ public class ContentController extends PaginationController {
 			contents = contentService.getPreparationContents(roomId);
 			contentService.setVotingAdmissions(roomId, disable, contents);
 		} else {
-			contentService.setVotingAdmissionForAllContents(roomId, disable);
+			contents = contentService.getByRoomId(roomId);
+			contentService.setVotingAdmissions(roomId, disable, contents);
 		}
 	}
 
@@ -235,7 +236,7 @@ public class ContentController extends PaginationController {
 			) {
 		de.thm.arsnova.entities.Content contentV3 = fromV2Migrator.migrate(content);
 		if (publish != null) {
-			contentV3.getState().setVisible(!publish);
+			contentV3.getState().setVisible(publish);
 		}
 		contentService.update(contentV3);
 	}
@@ -246,13 +247,15 @@ public class ContentController extends PaginationController {
 	public void publishAllContents(
 			@RequestParam(value = "sessionkey") final String roomShortId,
 			@RequestParam(required = false) final Boolean publish,
-			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false) final boolean lectureContentsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) final boolean preparationContentsOnly
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false) boolean lectureContentsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) boolean preparationContentsOnly
 			) {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		boolean p = publish == null || publish;
 		List<de.thm.arsnova.entities.Content> contents;
 
+		/* FIXME: Content variant is ignored for now */
+		lectureContentsOnly = preparationContentsOnly = false;
 		if (lectureContentsOnly) {
 			contents = contentService.getLectureContents(roomId);
 			contentService.publishContents(roomId, p, contents);
@@ -300,14 +303,16 @@ public class ContentController extends PaginationController {
 	@Pagination
 	public List<Content> getContents(
 			@RequestParam(value = "sessionkey") final String roomShortId,
-			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureContentsOnly,
-			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationContentsOnly,
-			@RequestParam(value = "requestImageData", defaultValue = "false") final boolean requestImageData,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
+			@RequestParam(value = "flashcardsonly", defaultValue = "false") boolean flashcardsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly,
+			@RequestParam(value = "requestImageData", defaultValue = "false") boolean requestImageData,
 			final HttpServletResponse response
 			) {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		List<de.thm.arsnova.entities.Content> contents;
+		/* FIXME: Content variant is ignored for now */
+		lectureContentsOnly = preparationContentsOnly = flashcardsOnly = false;
 		if (lectureContentsOnly) {
 			contents = contentService.getLectureContents(roomId);
 		} else if (flashcardsOnly) {
@@ -331,12 +336,14 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = { "/" }, method = RequestMethod.DELETE)
 	public void deleteContents(
 			@RequestParam(value = "sessionkey") final String roomShortId,
-			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureContentsOnly,
-			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationContentsOnly,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
+			@RequestParam(value = "flashcardsonly", defaultValue = "false") boolean flashcardsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly,
 			final HttpServletResponse response
 			) {
 		String roomId = roomService.getIdByShortId(roomShortId);
+		/* FIXME: Content variant is ignored for now */
+		lectureContentsOnly = preparationContentsOnly = flashcardsOnly = false;
 		if (lectureContentsOnly) {
 			contentService.deleteLectureContents(roomId);
 		} else if (preparationContentsOnly) {
@@ -355,12 +362,14 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/count", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getContentCount(
 			@RequestParam(value = "sessionkey") final String roomShortId,
-			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureContentsOnly,
-			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationContentsOnly
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
+			@RequestParam(value = "flashcardsonly", defaultValue = "false") boolean flashcardsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly
 			) {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		int count = 0;
+		/* FIXME: Content variant is ignored for now */
+		lectureContentsOnly = preparationContentsOnly = flashcardsOnly = false;
 		if (lectureContentsOnly) {
 			count = contentService.countLectureContents(roomId);
 		} else if (preparationContentsOnly) {
@@ -390,11 +399,13 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/unanswered", method = RequestMethod.GET)
 	public List<String> getUnAnsweredContentIds(
 			@RequestParam(value = "sessionkey") final String roomShortId,
-			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureContentsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationContentsOnly
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly
 			) {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		List<String> answers;
+		/* FIXME: Content variant is ignored for now */
+		lectureContentsOnly = preparationContentsOnly = false;
 		if (lectureContentsOnly) {
 			answers = contentService.getUnAnsweredLectureContentIds(roomId);
 		} else if (preparationContentsOnly) {
@@ -570,11 +581,13 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/answers", method = RequestMethod.DELETE)
 	public void deleteAllContentsAnswers(
 			@RequestParam(value = "sessionkey") final String roomShortId,
-			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureContentsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationContentsOnly,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly,
 			final HttpServletResponse response
 			) {
 		String roomId = roomService.getIdByShortId(roomShortId);
+		/* FIXME: Content variant is ignored for now */
+		lectureContentsOnly = preparationContentsOnly = false;
 		if (lectureContentsOnly) {
 			contentService.deleteAllLectureAnswers(roomId);
 		} else if (preparationContentsOnly) {
@@ -658,11 +671,13 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/answercount", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getTotalAnswerCount(
 			@RequestParam(value = "sessionkey") final String roomShortId,
-			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureContentsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationContentsOnly
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly
 			) {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		int count = 0;
+		/* FIXME: Content variant is ignored for now */
+		lectureContentsOnly = preparationContentsOnly = false;
 		if (lectureContentsOnly) {
 			count = contentService.countLectureContentAnswers(roomId);
 		} else if (preparationContentsOnly) {

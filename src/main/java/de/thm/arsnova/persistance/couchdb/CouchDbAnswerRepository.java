@@ -136,8 +136,8 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 						.skip(qSkip)
 						.limit(qLimit)
 						//.includeDocs(true)
-						.startKey(ComplexKey.of(contentId))
-						.endKey(ComplexKey.of(contentId, ComplexKey.emptyObject()))
+						.startKey(ComplexKey.of(contentId, ComplexKey.emptyObject()))
+						.endKey(ComplexKey.of(contentId))
 						.descending(true),
 				type);
 

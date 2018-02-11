@@ -23,6 +23,7 @@ import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.TextAnswer;
 import de.thm.arsnova.entities.UserAuthentication;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -137,6 +138,4 @@ public interface ContentService extends EntityService<Content> {
 	void setVotingAdmission(String contentId, boolean disableVoting);
 
 	void setVotingAdmissions(String roomId, boolean disableVoting, List<Content> contents);
-
-	void setVotingAdmissionForAllContents(String roomId, boolean disableVoting);
 }

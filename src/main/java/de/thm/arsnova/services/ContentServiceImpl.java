@@ -47,6 +47,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -124,7 +125,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	public Content get(final String id) {
 		try {
 			final Content content = super.get(id);
-			if (!"freetext".equals(content.getFormat()) && 0 == content.getState().getRound()) {
+			if (content.getFormat() != Content.Format.TEXT && 0 == content.getState().getRound()) {
 			/* needed for legacy questions whose piRound property has not been set */
 				content.getState().setRound(1);
 			}
@@ -140,9 +141,9 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@Caching(evict = {@CacheEvict(value = "contentlists", key = "#roomId"),
-			@CacheEvict(value = "lecturecontentlists", key = "#roomId", condition = "#content.getGroup().equals('lecture')"),
-			@CacheEvict(value = "preparationcontentlists", key = "#roomId", condition = "#content.getGroup().equals('preparation')"),
-			@CacheEvict(value = "flashcardcontentlists", key = "#roomId", condition = "#content.getGroup().equals('flashcard')") },
+			@CacheEvict(value = "lecturecontentlists", key = "#roomId", condition = "'lecture'.equals(#content.getGroup())"),
+			@CacheEvict(value = "preparationcontentlists", key = "#roomId", condition = "'preparation'.equals(#content.getGroup())"),
+			@CacheEvict(value = "flashcardcontentlists", key = "#roomId", condition = "'flashcard'.equals(#content.getGroup())") },
 			put = {@CachePut(value = "contents", key = "#content.id")})
 	public Content save(final String roomId, final Content content) {
 		content.setRoomId(roomId);
@@ -161,9 +162,9 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@PreAuthorize("isAuthenticated()")
 	@Caching(evict = {
 			@CacheEvict(value = "contentlists", allEntries = true),
-			@CacheEvict(value = "lecturecontentlists", allEntries = true, condition = "#content.getGroup().equals('lecture')"),
-			@CacheEvict(value = "preparationcontentlists", allEntries = true, condition = "#content.getGroup().equals('preparation')"),
-			@CacheEvict(value = "flashcardcontentlists", allEntries = true, condition = "#content.getGroup().equals('flashcard')") },
+			@CacheEvict(value = "lecturecontentlists", allEntries = true, condition = "'lecture'.equals(#content.getGroup())"),
+			@CacheEvict(value = "preparationcontentlists", allEntries = true, condition = "'preparation'.equals(#content.getGroup())"),
+			@CacheEvict(value = "flashcardcontentlists", allEntries = true, condition = "'flashcard'.equals(#content.getGroup())") },
 			put = {@CachePut(value = "contents", key = "#content.id")})
 	public Content update(final Content content) {
 		final UserAuthentication user = userService.getCurrentUser();
@@ -177,7 +178,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			throw new UnauthorizedException();
 		}
 
-		if ("freetext".equals(content.getFormat())) {
+		if (content.getFormat() == Content.Format.TEXT) {
 			content.getState().setRound(0);
 		} else if (content.getState().getRound() < 1 || content.getState().getRound() > 2) {
 			content.getState().setRound(oldContent.getState().getRound() > 0 ? oldContent.getState().getRound() : 1);
@@ -223,7 +224,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		final Room room = roomRepository.findOne(content.getRoomId());
 		content.setTimestamp(new Date());
 
-		if ("freetext".equals(content.getFormat())) {
+		if (content.getFormat() == Content.Format.TEXT) {
 			content.getState().setRound(0);
 		} else if (content.getState().getRound() < 1 || content.getState().getRound() > 2) {
 			content.getState().setRound(1);
@@ -256,9 +257,9 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			@CacheEvict("answerlists"),
 			@CacheEvict(value = "contents", key = "#contentId"),
 			@CacheEvict(value = "contentlists", allEntries = true),
-			@CacheEvict(value = "lecturecontentlists", allEntries = true /*, condition = "#content.getGroup().equals('lecture')"*/),
-			@CacheEvict(value = "preparationcontentlists", allEntries = true /*, condition = "#content.getGroup().equals('preparation')"*/),
-			@CacheEvict(value = "flashcardcontentlists", allEntries = true /*, condition = "#content.getGroup().equals('flashcard')"*/) })
+			@CacheEvict(value = "lecturecontentlists", allEntries = true /*, condition = "'lecture'.equals(#content.getGroup())"*/),
+			@CacheEvict(value = "preparationcontentlists", allEntries = true /*, condition = "'preparation'.equals(#content.getGroup())"*/),
+			@CacheEvict(value = "flashcardcontentlists", allEntries = true /*, condition = "'flashcard'.equals(#content.getGroup())"*/) })
 	public void delete(final String contentId) {
 		final Content content = contentRepository.findOne(contentId);
 		if (content == null) {
@@ -369,30 +370,22 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		if (!room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
 		}
-		for (final Content q : contents) {
-			if (!"flashcard".equals(q.getRoomId())) {
-				q.getState().setResponsesEnabled(!disableVoting);
+		/* FIXME: Filter flashcards - flashcard format not yet implemented */
+		//contents.stream().filter(c -> c.getFormat() != Format.?).collect(Collectors.toList());
+		final Map<String, Object> patches = new HashMap<>();
+		patches.put("responsesEnabled", !disableVoting);
+		try {
+			patch(contents, patches, Content::getState);
+			ArsnovaEvent event;
+			if (disableVoting) {
+				event = new LockVotesEvent(this, room, contents);
+			} else {
+				event = new UnlockVotesEvent(this, room, contents);
 			}
+			this.publisher.publishEvent(event);
+		} catch (IOException e) {
+			logger.error("Patching of contents failed", e);
 		}
-		ArsnovaEvent event;
-		if (disableVoting) {
-			event = new LockVotesEvent(this, room, contents);
-		} else {
-			event = new UnlockVotesEvent(this, room, contents);
-		}
-		this.publisher.publishEvent(event);
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public void setVotingAdmissionForAllContents(final String roomId, final boolean disableVoting) {
-		final UserAuthentication user = getCurrentUser();
-		final Room room = roomRepository.findOne(roomId);
-		if (!room.getOwnerId().equals(user.getId())) {
-			throw new UnauthorizedException();
-		}
-		final List<Content> contents = contentRepository.findByRoomId(room.getId());
-		setVotingAdmissionForAllContents(room.getId(), disableVoting);
 	}
 
 	private Room getRoomWithAuthCheck(final String roomId) {
@@ -529,7 +522,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			return 0;
 		}
 
-		if ("freetext".equals(content.getFormat())) {
+		if (content.getFormat() == Content.Format.TEXT) {
 			return answerRepository.countByContentId(content.getId());
 		} else {
 			return answerRepository.countByContentIdRound(content.getId(), content.getState().getRound());
@@ -600,7 +593,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 				// Room's creator. Locked Questions do not appear in this list.
 				continue;
 			}
-			if (0 == answer.getRound() && !"freetext".equals(content.getFormat())) {
+			if (0 == answer.getRound() && content.getFormat() != Content.Format.TEXT) {
 				answer.setRound(1);
 			}
 
@@ -638,7 +631,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		answer.setQuestionValue(content.calculateValue(answer));
 		*/
 
-		if ("freetext".equals(content.getFormat())) {
+		if (content.getFormat() == Content.Format.TEXT) {
 			answer.setRound(0);
 			/* FIXME: migrate
 			imageUtils.generateThumbnailImage(answer);
@@ -673,7 +666,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 		final Content content = get(answer.getContentId());
 		/* FIXME: migrate
-		if ("freetext".equals(content.getFormat())) {
+		if (content.getFormat() == Content.Format.TEXT) {
 			imageUtils.generateThumbnailImage(realAnswer);
 			content.checkTextStrictOptions(realAnswer);
 		}

@@ -46,16 +46,17 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	@Override
 	public List<Content> findByRoomIdForSpeaker(final String roomId) {
-		return findByRoomIdAndVariantAndActive(new Object[] {roomId}, roomId);
+		return findByRoomIdAndVariantAndActive(roomId);
 	}
 
 	@Override
 	public int countByRoomId(final String roomId) {
 		final ViewResult result = db.queryView(createQuery("by_roomid_group_locked")
 				.startKey(ComplexKey.of(roomId))
-				.endKey(ComplexKey.of(roomId, ComplexKey.emptyObject())));
+				.endKey(ComplexKey.of(roomId, ComplexKey.emptyObject()))
+				.reduce(true));
 
-		return result.getSize();
+		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
 	}
 
 	@Override
