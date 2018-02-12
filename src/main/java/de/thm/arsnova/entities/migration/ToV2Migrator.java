@@ -26,12 +26,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static de.thm.arsnova.entities.migration.FromV2Migrator.*;
+
 /**
  * Converts entities from current model version to legacy version 2.
  *
  * @author Daniel Gerhardt
  */
 public class ToV2Migrator {
+
 	private void copyCommonProperties(final de.thm.arsnova.entities.Entity from, final Entity to) {
 		to.setId(from.getId());
 		to.setRevision(from.getRevision());
@@ -150,42 +153,53 @@ public class ToV2Migrator {
 		to.setSubject(from.getSubject());
 		to.setText(from.getBody());
 		to.setQuestionVariant(from.getGroup());
+		to.setAbstention(from.isAbstentionsAllowed());
 
 		if (from instanceof ChoiceQuestionContent) {
 			final ChoiceQuestionContent fromChoiceQuestionContent = (ChoiceQuestionContent) from;
 			switch (from.getFormat()) {
 				case CHOICE:
-					to.setQuestionType(fromChoiceQuestionContent.isMultiple() ? "mc" : "abcd");
+					to.setQuestionType(fromChoiceQuestionContent.isMultiple() ? V2_TYPE_MC : V2_TYPE_ABCD);
 					break;
 				case BINARY:
-					to.setQuestionType("yesno");
+					to.setQuestionType(V2_TYPE_YESNO);
 					break;
 				case SCALE:
-					to.setQuestionType("vote");
+					to.setQuestionType(V2_TYPE_VOTE);
 					break;
 				case GRID:
-					to.setQuestionType("grid");
+					to.setQuestionType(V2_TYPE_GRID);
 					break;
+				default:
+					throw new IllegalArgumentException("Unsupported content format.");
 			}
 			final List<AnswerOption> toOptions = new ArrayList<>();
 			to.setPossibleAnswers(toOptions);
 			for (int i = 0; i < fromChoiceQuestionContent.getOptions().size(); i++) {
 				AnswerOption option = new AnswerOption();
-				option.setText(fromChoiceQuestionContent.getOptions().get(1).getLabel());
-				option.setValue(fromChoiceQuestionContent.getOptions().get(1).getPoints());
+				option.setText(fromChoiceQuestionContent.getOptions().get(i).getLabel());
+				option.setValue(fromChoiceQuestionContent.getOptions().get(i).getPoints());
 				option.setCorrect(fromChoiceQuestionContent.getCorrectOptionIndexes().contains(i));
 				toOptions.add(option);
 			}
 		} else {
 			switch (from.getFormat()) {
 				case NUMBER:
-					to.setQuestionType("freetext");
+					to.setQuestionType(V2_TYPE_FREETEXT);
 					break;
 				case TEXT:
-					to.setQuestionType("freetext");
+					to.setQuestionType(V2_TYPE_FREETEXT);
 					break;
+				default:
+					throw new IllegalArgumentException("Unsupported content format.");
 			}
 		}
+		de.thm.arsnova.entities.Content.State state = from.getState();
+		to.setPiRound(state.getRound());
+		to.setActive(state.isVisible());
+		to.setShowStatistic(state.isResponsesVisible());
+		to.setShowAnswer(state.isSolutionVisible());
+		to.setVotingDisabled(!state.isResponsesEnabled());
 
 		return to;
 	}

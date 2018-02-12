@@ -22,6 +22,7 @@ import de.thm.arsnova.entities.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -179,7 +180,7 @@ public class Content implements Entity {
 	@ApiModelProperty(required = true, value = "list of possible answers")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public final List<AnswerOption> getPossibleAnswers() {
-		return possibleAnswers;
+		return possibleAnswers != null ? possibleAnswers : new ArrayList<>();
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
@@ -221,6 +222,7 @@ public class Content implements Entity {
 		return sessionKeyword;
 	}
 
+	//@JsonView(View.Public.class)
 	public final void setSessionKeyword(final String keyword) {
 		sessionKeyword = keyword;
 	}

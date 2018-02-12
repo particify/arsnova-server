@@ -46,7 +46,7 @@ public class UnlockVoteEvent extends RoomEvent {
 	}
 
 	public Boolean getVotingDisabled() {
-		return !this.content.getState().areResponsesEnabled();
+		return !this.content.getState().isResponsesEnabled();
 	}
 
 	public Map<String, Object> getVotingAdmission() {

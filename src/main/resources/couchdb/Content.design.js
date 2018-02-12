@@ -4,7 +4,7 @@ var designDoc = {
 	"views": {
 		"by_roomid": {
 			"map": function (doc) {
-				if (doc.type === "Content") {
+				if (["Content", "ChoiceQuestionContent"].indexOf(doc.type) !== -1) {
 					emit(doc.roomId, {_rev: doc._rev});
 				}
 			},
@@ -12,7 +12,7 @@ var designDoc = {
 		},
 		"by_roomid_group_locked": {
 			"map": function (doc) {
-				if (doc.type === "Content") {
+				if (["Content", "ChoiceQuestionContent"].indexOf(doc.type) !== -1) {
 					emit([doc.roomId, doc.group, doc.locked, doc.subject, doc.body.substr(0, 16)], {_rev: doc._rev});
 				}
 			},

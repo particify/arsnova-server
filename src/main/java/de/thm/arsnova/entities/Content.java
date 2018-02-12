@@ -1,7 +1,7 @@
 package de.thm.arsnova.entities;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
 
@@ -10,11 +10,14 @@ import java.util.Map;
 import java.util.Objects;
 
 @JsonTypeInfo(
-		use = JsonTypeInfo.Id.MINIMAL_CLASS,
-		include = JsonTypeInfo.As.PROPERTY,
+		use = JsonTypeInfo.Id.NAME,
+		include = JsonTypeInfo.As.EXISTING_PROPERTY,
 		property = "format",
 		visible = true
 )
+@JsonSubTypes({
+		@JsonSubTypes.Type(value = ChoiceQuestionContent.class, name = "ChoiceQuestionContent")
+})
 public class Content extends Entity {
 	public enum Format {
 		CHOICE,
@@ -74,7 +77,7 @@ public class Content extends Entity {
 		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
-		public boolean areResponsesEnabled() {
+		public boolean isResponsesEnabled() {
 			return responsesEnabled;
 		}
 
@@ -84,7 +87,7 @@ public class Content extends Entity {
 		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
-		public boolean areResponsesVisible() {
+		public boolean isResponsesVisible() {
 			return responsesVisible;
 		}
 
@@ -99,6 +102,7 @@ public class Content extends Entity {
 	private String body;
 	private Format format;
 	private String group;
+	private boolean abstentionsAllowed;
 	private State state;
 	private Date timestamp;
 	private Map<String, Map<String, ?>> extensions;
@@ -156,7 +160,7 @@ public class Content extends Entity {
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public State getState() {
-		return state;
+		return state != null ? state : (state = new State());
 	}
 
 	public void resetState() {
@@ -196,6 +200,16 @@ public class Content extends Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setAttachments(final Map<String, String> attachments) {
 		this.attachments = attachments;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public boolean isAbstentionsAllowed() {
+		return abstentionsAllowed;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setAbstentionsAllowed(final boolean abstentionsAllowed) {
+		this.abstentionsAllowed = abstentionsAllowed;
 	}
 
 	/**

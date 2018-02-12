@@ -27,7 +27,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -38,6 +40,28 @@ import java.util.stream.Collectors;
  * @author Daniel Gerhardt
  */
 public class FromV2Migrator {
+	static final String V2_TYPE_ABCD = "abcd";
+	static final String V2_TYPE_SC = "sc";
+	static final String V2_TYPE_MC = "mc";
+	static final String V2_TYPE_VOTE = "vote";
+	static final String V2_TYPE_SCHOOL = "school";
+	static final String V2_TYPE_YESNO = "yesno";
+	static final String V2_TYPE_FREETEXT = "freetext";
+	static final String V2_TYPE_GRID = "grid";
+	private static final Map<String, de.thm.arsnova.entities.Content.Format> formatMapping;
+
+	static {
+		formatMapping = new HashMap<>();
+		formatMapping.put(V2_TYPE_ABCD, de.thm.arsnova.entities.Content.Format.CHOICE);
+		formatMapping.put(V2_TYPE_SC, de.thm.arsnova.entities.Content.Format.CHOICE);
+		formatMapping.put(V2_TYPE_MC, de.thm.arsnova.entities.Content.Format.CHOICE);
+		formatMapping.put(V2_TYPE_VOTE, de.thm.arsnova.entities.Content.Format.SCALE);
+		formatMapping.put(V2_TYPE_SCHOOL, de.thm.arsnova.entities.Content.Format.SCALE);
+		formatMapping.put(V2_TYPE_YESNO, de.thm.arsnova.entities.Content.Format.BINARY);
+		formatMapping.put(V2_TYPE_FREETEXT, de.thm.arsnova.entities.Content.Format.TEXT);
+		formatMapping.put(V2_TYPE_GRID, de.thm.arsnova.entities.Content.Format.GRID);
+	}
+
 	private void copyCommonProperties(final Entity from, final de.thm.arsnova.entities.Entity to) {
 		to.setId(from.getId());
 		//to.setRevision(from.getRevision());
@@ -153,21 +177,29 @@ public class FromV2Migrator {
 	public de.thm.arsnova.entities.Content migrate(final Content from) {
 		de.thm.arsnova.entities.Content to;
 		switch (from.getQuestionType()) {
-			case "abcd":
-			case "mc":
+			case V2_TYPE_ABCD:
+			case V2_TYPE_SC:
+			case V2_TYPE_MC:
+			case V2_TYPE_VOTE:
+			case V2_TYPE_SCHOOL:
+			case V2_TYPE_YESNO:
 				ChoiceQuestionContent choiceQuestionContent = new ChoiceQuestionContent();
 				to = choiceQuestionContent;
-				to.setFormat(de.thm.arsnova.entities.Content.Format.CHOICE);
-				choiceQuestionContent.setMultiple("mc".equals(from.getQuestionType()));
+				to.setFormat(formatMapping.get(from.getQuestionType()));
+				choiceQuestionContent.setMultiple(V2_TYPE_MC.equals(from.getQuestionType()));
 				for (int i = 0; i < from.getPossibleAnswers().size(); i++) {
-					de.thm.arsnova.entities.migration.v2.AnswerOption choice = from.getPossibleAnswers().get(i);
-					if (choice.isCorrect()) {
+					de.thm.arsnova.entities.migration.v2.AnswerOption fromOption = from.getPossibleAnswers().get(i);
+					ChoiceQuestionContent.AnswerOption toOption = new ChoiceQuestionContent.AnswerOption();
+					toOption.setLabel(fromOption.getText());
+					toOption.setPoints(fromOption.getValue());
+					choiceQuestionContent.getOptions().add(toOption);
+					if (fromOption.isCorrect()) {
 						choiceQuestionContent.getCorrectOptionIndexes().add(i);
 					}
 				}
 
 				break;
-			case "text":
+			case V2_TYPE_FREETEXT:
 				to = new de.thm.arsnova.entities.Content();
 				to.setFormat(de.thm.arsnova.entities.Content.Format.TEXT);
 				break;
@@ -179,6 +211,14 @@ public class FromV2Migrator {
 		to.setSubject(from.getSubject());
 		to.setBody(from.getText());
 		to.setGroup(from.getQuestionVariant());
+		to.setAbstentionsAllowed(from.isAbstention());
+		to.setAbstentionsAllowed(from.isAbstention());
+		de.thm.arsnova.entities.Content.State state = to.getState();
+		state.setRound(from.getPiRound());
+		state.setVisible(from.isActive());
+		state.setResponsesVisible(from.isShowStatistic());
+		state.setSolutionVisible(from.isShowAnswer());
+		state.setResponsesEnabled(!from.isVotingDisabled());
 
 		return to;
 	}
@@ -188,7 +228,7 @@ public class FromV2Migrator {
 			case "abcd":
 			case "mc":
 				return migrate(from, content.getPossibleAnswers());
-			case "text":
+			case "freetext":
 				return migrate(from);
 			default:
 				throw new IllegalArgumentException("Unsupported content format.");
