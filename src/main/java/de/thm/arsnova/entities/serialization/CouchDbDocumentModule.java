@@ -36,8 +36,12 @@ public class CouchDbDocumentModule extends SimpleModule {
 		context.setMixInAnnotations(Entity.class, CouchDbDocumentMixIn.class);
 		context.setMixInAnnotations(de.thm.arsnova.entities.migration.v2.Entity.class, CouchDbDocumentV2MixIn.class);
 		context.registerSubtypes(
-				new NamedType(Content.class, Content.class.getSimpleName()),
-				new NamedType(ChoiceQuestionContent.class, ChoiceQuestionContent.class.getSimpleName()),
+				new NamedType(Content.class, Content.Format.TEXT.toString()),
+				new NamedType(Content.class, Content.Format.NUMBER.toString()),
+				new NamedType(ChoiceQuestionContent.class, Content.Format.CHOICE.toString()),
+				new NamedType(ChoiceQuestionContent.class, Content.Format.BINARY.toString()),
+				new NamedType(ChoiceQuestionContent.class, Content.Format.SCALE.toString()),
+				new NamedType(ChoiceQuestionContent.class, Content.Format.GRID.toString()),
 				new NamedType(Answer.class, Answer.class.getSimpleName()),
 				new NamedType(ChoiceAnswer.class, ChoiceAnswer.class.getSimpleName()),
 				new NamedType(TextAnswer.class, TextAnswer.class.getSimpleName()));

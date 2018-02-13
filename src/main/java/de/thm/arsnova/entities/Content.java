@@ -12,7 +12,8 @@ import java.util.Objects;
 @JsonTypeInfo(
 		use = JsonTypeInfo.Id.MINIMAL_CLASS,
 		include = JsonTypeInfo.As.PROPERTY,
-		property = "type"
+		property = "format",
+		visible = true
 )
 public class Content extends Entity {
 	public enum Format {
