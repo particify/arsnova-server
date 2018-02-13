@@ -205,7 +205,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 	public MappingJackson2HttpMessageConverter apiV2JsonMessageConverter() {
 		Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
 		builder
-				.serializationInclusion(JsonInclude.Include.NON_EMPTY)
+				.serializationInclusion(JsonInclude.Include.NON_NULL)
 				.defaultViewInclusion(false)
 				.indentOutput(apiIndent)
 				.featuresToEnable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
