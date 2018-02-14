@@ -371,8 +371,9 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 
 		client.sendEvent("unansweredLecturerQuestions", contentService.getUnAnsweredLectureContentIds(roomId, user));
 		client.sendEvent("unansweredPreparationQuestions", contentService.getUnAnsweredPreparationContentIds(roomId, user));
-		client.sendEvent("countLectureQuestionAnswers", contentService.countLectureQuestionAnswersInternal(roomId));
-		client.sendEvent("countPreparationQuestionAnswers", contentService.countPreparationQuestionAnswersInternal(roomId));
+		/* FIXME: Content variant is ignored for now */
+		client.sendEvent("countLectureQuestionAnswers", contentService.countTotalAnswersByRoomId(roomId));
+		client.sendEvent("countPreparationQuestionAnswers", contentService.countTotalAnswersByRoomId(roomId));
 		client.sendEvent("activeUserCountData", roomService.activeUsers(roomId));
 //		client.sendEvent("learningProgressOptions", room.getLearningProgressOptions());
 		final de.thm.arsnova.entities.Feedback fb = feedbackService.getByRoomId(roomId);
@@ -516,8 +517,9 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		final String roomId = event.getRoom().getId();
 		this.reportAnswersToContentAvailable(event.getRoom(), new Content(event.getContent()));
 		broadcastInRoom(roomId, "countQuestionAnswersByQuestionId", contentService.countAnswersAndAbstentionsInternal(event.getContent().getId()));
-		broadcastInRoom(roomId, "countLectureQuestionAnswers", contentService.countLectureQuestionAnswersInternal(roomId));
-		broadcastInRoom(roomId, "countPreparationQuestionAnswers", contentService.countPreparationQuestionAnswersInternal(roomId));
+		/* FIXME: Content variant is ignored for now */
+		broadcastInRoom(roomId, "countLectureQuestionAnswers", contentService.countTotalAnswersByRoomId(roomId));
+		broadcastInRoom(roomId, "countPreparationQuestionAnswers", contentService.countTotalAnswersByRoomId(roomId));
 
 		// Update the unanswered count for the content variant that was answered.
 		final de.thm.arsnova.entities.Content content = event.getContent();
@@ -535,8 +537,9 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		final String roomId = event.getRoom().getId();
 		this.reportAnswersToContentAvailable(event.getRoom(), new Content(event.getQuestion()));
 		// We do not know which user's answer was deleted, so we can't update his 'unanswered' list of questions...
-		broadcastInRoom(roomId, "countLectureQuestionAnswers", contentService.countLectureQuestionAnswersInternal(roomId));
-		broadcastInRoom(roomId, "countPreparationQuestionAnswers", contentService.countPreparationQuestionAnswersInternal(roomId));
+		/* FIXME: Content variant is ignored for now */
+		broadcastInRoom(roomId, "countLectureQuestionAnswers", contentService.countTotalAnswersByRoomId(roomId));
+		broadcastInRoom(roomId, "countPreparationQuestionAnswers", contentService.countTotalAnswersByRoomId(roomId));
 	}
 
 	@Async
