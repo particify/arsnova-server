@@ -593,9 +593,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 				// Room's creator. Locked Questions do not appear in this list.
 				continue;
 			}
-			if (0 == answer.getRound() && content.getFormat() != Content.Format.TEXT) {
-				answer.setRound(1);
-			}
 
 			// discard all answers that aren't in the same piRound as the content
 			if (answer.getRound() == content.getState().getRound()) {

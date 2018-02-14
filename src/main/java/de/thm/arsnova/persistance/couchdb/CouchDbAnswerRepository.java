@@ -135,7 +135,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 		final List<T> answers = db.queryView(createQuery("by_contentid_creationtimestamp")
 						.skip(qSkip)
 						.limit(qLimit)
-						//.includeDocs(true)
+						.includeDocs(true)
 						.startKey(ComplexKey.of(contentId, ComplexKey.emptyObject()))
 						.endKey(ComplexKey.of(contentId))
 						.descending(true),
@@ -146,7 +146,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 
 	@Override
 	public List<Answer> findByUserRoomId(final UserAuthentication user, final String roomId) {
-		return queryView("by_user_sessionid", ComplexKey.of(user.getUsername(), roomId));
+		return queryView("by_creatorid_roomid", ComplexKey.of(user.getId(), roomId));
 	}
 
 	@Override

@@ -55,6 +55,7 @@ import javax.naming.OperationNotSupportedException;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -477,12 +478,11 @@ public class ContentController extends PaginationController {
 			@PathVariable final String contentId,
 			@RequestParam(value = "piround", required = false) final Integer piRound,
 			@RequestParam(value = "all", required = false, defaultValue = "false") final Boolean allAnswers,
-			final HttpServletResponse response) throws OperationNotSupportedException {
+			final HttpServletResponse response) {
 		final de.thm.arsnova.entities.Content content = contentService.get(contentId);
 		if (content instanceof ChoiceQuestionContent) {
-			// FIXME migration needed!
-			// contentService.getAllStatistics()
-			throw new OperationNotSupportedException();
+			return toV2Migrator.migrate(contentService.getAllStatistics(contentId),
+					(ChoiceQuestionContent) content, content.getState().getRound());
 		} else {
 			List<de.thm.arsnova.entities.TextAnswer> answers;
 			if (allAnswers) {
@@ -659,9 +659,15 @@ public class ContentController extends PaginationController {
 	@Deprecated
 	@RequestMapping(value = "/myanswers", method = RequestMethod.GET)
 	public List<Answer> getMyAnswers(@RequestParam(value = "sessionkey") final String roomShortId) throws OperationNotSupportedException {
-		throw new OperationNotSupportedException();
-//		return contentService.getMyAnswersByRoomShortId(roomShortId).stream()
-//				.map(toV2Migrator::migrate).collect(Collectors.toList());
+		return contentService.getMyAnswersByRoomId(roomService.getIdByShortId(roomShortId)).stream()
+				.map(a -> {
+					if (a instanceof ChoiceAnswer) {
+						return toV2Migrator.migrate(
+								(ChoiceAnswer) a, (ChoiceQuestionContent) contentService.get(a.getContentId()));
+					} else {
+						return toV2Migrator.migrate((TextAnswer) a);
+					}
+				}).collect(Collectors.toList());
 	}
 
 	@ApiOperation(value = "Get the total amount of answers of a room, identified by the room short ID",

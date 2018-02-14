@@ -24,10 +24,10 @@ var designDoc = {
 				}
 			}
 		},
-		"by_contentid_user_round": {
+		"by_contentid_creatorid_round": {
 			"map": function (doc) {
 				if (["Answer", "ChoiceAnswer", "TextAnswer"].indexOf(doc.type) !== -1) {
-					emit([doc.contentId, doc.user, doc.round], {_rev: doc._rev});
+					emit([doc.contentId, doc.creatorId, doc.round], {_rev: doc._rev});
 				}
 			}
 		},
