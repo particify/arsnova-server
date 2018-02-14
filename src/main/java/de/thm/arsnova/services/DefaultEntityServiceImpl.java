@@ -1,3 +1,20 @@
+/*
+ * This file is part of ARSnova Backend.
+ * Copyright (C) 2012-2018 The ARSnova Team
+ *
+ * ARSnova Backend is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * ARSnova Backend is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.thm.arsnova.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -12,7 +29,15 @@ import org.springframework.security.access.prepost.PreFilter;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.Function;
 
+/**
+ * Default implementation of {@link EntityService} which provides CRUD operations for entities independently from the
+ * underlying persistence implementation. Authorization for entities is checked before any operation is performed.
+ *
+ * @param <T> Entity type
+ * @author Daniel Gerhardt
+ */
 public class DefaultEntityServiceImpl<T extends Entity> implements EntityService<T> {
 	protected Class<T> type;
 	protected CrudRepository<T, String> repository;
@@ -47,9 +72,16 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#entity, 'update')")
 	public T patch(final T entity, final Map<String, Object> changes) throws IOException {
-		ObjectReader reader = objectMapper.readerForUpdating(entity).withView(View.Public.class);
+		return patch(entity, changes, Function.identity());
+	}
+
+	@Override
+	@PreAuthorize("hasPermission(#entity, 'update')")
+	public T patch(final T entity, final Map<String, Object> changes,
+			final Function<T, ? extends Object> propertyGetter) throws IOException {
+		Object obj = propertyGetter.apply(entity);
+		ObjectReader reader = objectMapper.readerForUpdating(obj).withView(View.Public.class);
 		JsonNode tree = objectMapper.valueToTree(changes);
 		reader.readValue(tree);
 
@@ -57,11 +89,18 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	}
 
 	@Override
-	@PreFilter(value = "hasPermission(filterObject, 'update')", filterTarget = "entities")
 	public Iterable<T> patch(final Collection<T> entities, final Map<String, Object> changes) throws IOException {
-		JsonNode tree = objectMapper.valueToTree(changes);
+		return patch(entities, changes, Function.identity());
+	}
+
+	@Override
+	@PreFilter(value = "hasPermission(filterObject, 'update')", filterTarget = "entities")
+	public Iterable<T> patch(final Collection<T> entities, final Map<String, Object> changes,
+			final Function<T, ? extends Object> propertyGetter) throws IOException {
+		final JsonNode tree = objectMapper.valueToTree(changes);
 		for (T entity : entities) {
-			ObjectReader reader = objectMapper.readerForUpdating(entity).withView(View.Public.class);
+			Object obj = propertyGetter.apply(entity);
+			ObjectReader reader = objectMapper.readerForUpdating(obj).withView(View.Public.class);
 			reader.readValue(tree);
 		}
 
