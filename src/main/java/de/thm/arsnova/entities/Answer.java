@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Objects;
 
 @JsonTypeInfo(
-		use = JsonTypeInfo.Id.MINIMAL_CLASS,
-		include = JsonTypeInfo.As.PROPERTY,
+		use = JsonTypeInfo.Id.NAME,
+		include = JsonTypeInfo.As.EXISTING_PROPERTY,
 		property = "type"
 )
 public abstract class Answer extends Entity {

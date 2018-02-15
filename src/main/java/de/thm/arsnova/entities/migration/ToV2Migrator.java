@@ -209,17 +209,33 @@ public class ToV2Migrator {
 		final Answer to = new Answer();
 		copyCommonProperties(from, to);
 		to.setQuestionId(from.getContentId());
+		to.setSessionId(from.getRoomId());
+		to.setPiRound(from.getRound());
 		if (creator.isPresent()) {
 			to.setUser(creator.get().getLoginId());
 		}
-
-		List<String> answers = new ArrayList<>();
-		for (int i = 0; i < content.getOptions().size(); i++) {
-			answers.add(from.getSelectedChoiceIndexes().contains(i) ? "1" : "0");
+		if (from.getSelectedChoiceIndexes().isEmpty()) {
+			to.setAbstention(true);
+		} else {
+			if (content.isMultiple()) {
+				to.setAnswerText(migrateChoice(from.getSelectedChoiceIndexes(), content.getOptions()));
+			} else {
+				int index = from.getSelectedChoiceIndexes().get(0);
+				to.setAnswerText(content.getOptions().get(index).getLabel());
+			}
 		}
-		to.setAnswerText(answers.stream().collect(Collectors.joining()));
 
 		return to;
+	}
+
+	public String migrateChoice(final List<Integer> selectedChoiceIndexes,
+			final List<ChoiceQuestionContent.AnswerOption> options) {
+		List<String> answers = new ArrayList<>();
+		for (int i = 0; i < options.size(); i++) {
+			answers.add(selectedChoiceIndexes.contains(i) ? "1" : "0");
+		}
+
+		return answers.stream().collect(Collectors.joining(","));
 	}
 
 	public Answer migrate(final de.thm.arsnova.entities.ChoiceAnswer from,
@@ -232,6 +248,8 @@ public class ToV2Migrator {
 		final Answer to = new Answer();
 		copyCommonProperties(from, to);
 		to.setQuestionId(from.getContentId());
+		to.setSessionId(from.getRoomId());
+		to.setPiRound(from.getRound());
 		if (creator.isPresent()) {
 			to.setUser(creator.get().getLoginId());
 		}

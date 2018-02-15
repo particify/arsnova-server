@@ -43,6 +43,6 @@ public class TextAnswer extends Answer {
 	@Override
 	@JsonView({View.Persistence.class, View.Public.class})
 	public Date getCreationTimestamp() {
-		return getCreationTimestamp();
+		return creationTimestamp;
 	}
 }

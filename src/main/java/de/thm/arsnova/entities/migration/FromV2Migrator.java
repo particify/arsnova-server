@@ -225,27 +225,53 @@ public class FromV2Migrator {
 
 	public de.thm.arsnova.entities.Answer migrate(final Answer from, final Content content) {
 		switch (content.getQuestionType()) {
-			case "abcd":
-			case "mc":
-				return migrate(from, content.getPossibleAnswers());
-			case "freetext":
+			case V2_TYPE_ABCD:
+			case V2_TYPE_VOTE:
+			case V2_TYPE_SCHOOL:
+			case V2_TYPE_YESNO:
+				return migrate(from, content.getPossibleAnswers(), false);
+			case V2_TYPE_MC:
+				return migrate(from, content.getPossibleAnswers(), true);
+			case V2_TYPE_FREETEXT:
 				return migrate(from);
 			default:
 				throw new IllegalArgumentException("Unsupported content format.");
 		}
 	}
 
-	public ChoiceAnswer migrate(final Answer from, final List<AnswerOption> options) {
+	public ChoiceAnswer migrate(final Answer from, final List<AnswerOption> options, final boolean multiple) {
 		final ChoiceAnswer to = new ChoiceAnswer();
 		copyCommonProperties(from, to);
 		to.setContentId(from.getQuestionId());
+		to.setRoomId(from.getSessionId());
+		to.setRound(from.getPiRound());
 		List<Integer> selectedChoiceIndexes = new ArrayList<>();
 		to.setSelectedChoiceIndexes(selectedChoiceIndexes);
 
-		for (int i = 0; i < options.size(); i++) {
-			AnswerOption choice = options.get(i);
-			if (choice.getText().equals(from.getAnswerText())) {
-				selectedChoiceIndexes.add(i);
+		if (!from.isAbstention()) {
+			if (multiple) {
+				List<Boolean> flags = Arrays.stream(from.getAnswerText().split(","))
+						.map("1"::equals).collect(Collectors.toList());
+				if (flags.size() != options.size()) {
+					throw new IndexOutOfBoundsException(
+							"Number of answer's choice flags does not match number of content's answer options");
+				}
+				int i = 0;
+				for (boolean flag : flags) {
+					if (flag) {
+						selectedChoiceIndexes.add(i);
+					}
+					i++;
+				}
+			} else {
+				int i = 0;
+				for (AnswerOption option : options) {
+					if (option.getText().equals(from.getAnswerText())) {
+						selectedChoiceIndexes.add(i);
+						break;
+					}
+					i++;
+				}
 			}
 		}
 
@@ -256,6 +282,8 @@ public class FromV2Migrator {
 		final TextAnswer to = new TextAnswer();
 		copyCommonProperties(from, to);
 		to.setContentId(from.getQuestionId());
+		to.setRoomId(from.getSessionId());
+		to.setRound(from.getPiRound());
 		to.setSubject(from.getAnswerSubject());
 		to.setBody(from.getAnswerText());
 
