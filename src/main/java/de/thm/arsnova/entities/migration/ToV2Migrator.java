@@ -17,6 +17,7 @@
  */
 package de.thm.arsnova.entities.migration;
 
+import de.thm.arsnova.entities.AnswerStatistics;
 import de.thm.arsnova.entities.ChoiceQuestionContent;
 import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.entities.migration.v2.*;
@@ -307,6 +308,38 @@ public class ToV2Migrator {
 		to.setTitle(from.getTitle());
 		to.setText(from.getBody());
 		to.setSessionId(from.getRoomId());
+
+		return to;
+	}
+
+	public List<Answer> migrate(final AnswerStatistics from,
+			final de.thm.arsnova.entities.ChoiceQuestionContent content, int round) {
+		if (round < 1 || round > content.getState().getRound()) {
+			throw new IllegalArgumentException("Invalid value for round");
+		}
+		final List<Answer> to  = new ArrayList<>();
+		final AnswerStatistics.RoundStatistics stats = from.getRoundStatistics().get(round - 1);
+
+		if (content.isAbstentionsAllowed()) {
+			final Answer abstention = new Answer();
+			abstention.setQuestionId(content.getId());
+			abstention.setPiRound(round);
+			abstention.setAnswerCount(stats.getAbstentionCount());
+			abstention.setAbstentionCount(stats.getAbstentionCount());
+			to.add(abstention);
+		}
+
+		int i = 0;
+		for (ChoiceQuestionContent.AnswerOption option : content.getOptions()) {
+			Answer answer = new Answer();
+			answer.setQuestionId(content.getId());
+			answer.setPiRound(round);
+			answer.setAnswerCount(stats.getIndependentCounts()[i]);
+			answer.setAbstentionCount(stats.getAbstentionCount());
+			answer.setAnswerText(option.getLabel());
+			to.add(answer);
+			i++;
+		}
 
 		return to;
 	}
