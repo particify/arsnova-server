@@ -26,7 +26,7 @@ import java.util.List;
 
 public interface AnswerRepository extends CrudRepository<Answer, String> {
 	<T extends Answer> T findByContentIdUserPiRound(String contentId, Class<T> type, UserAuthentication user, int piRound);
-	AnswerStatistics findByContentIdPiRound(String contentId, int piRound);
+	AnswerStatistics findByContentIdRound(String contentId, int round, final int optionCount);
 	int countByContentIdRound(String contentId, int round);
 	int countByContentId(String contentId);
 	<T extends Answer> List<T> findByContentId(String contentId, Class<T> type, int start, int limit);

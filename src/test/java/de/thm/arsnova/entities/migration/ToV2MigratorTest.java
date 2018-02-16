@@ -106,11 +106,11 @@ public class ToV2MigratorTest {
 	}
 
 	@Test
-	public void testMigrateAnswerStatisticsSingleResponse() {
+	public void testMigrateAnswerStatisticsSingleChoice() {
 		final AnswerStatistics statsV3 = new AnswerStatistics();
 		final AnswerStatistics.RoundStatistics roundStatsV3 = new AnswerStatistics.RoundStatistics();
 		roundStatsV3.setRound(ROUND);
-		roundStatsV3.setIndependentCounts(ANSWER_COUNTS.stream().mapToInt(Integer::intValue).toArray());
+		roundStatsV3.setIndependentCounts(ANSWER_COUNTS);
 		roundStatsV3.setAbstentionCount(7);
 		statsV3.setRoundStatistics(Collections.singletonList(roundStatsV3));
 

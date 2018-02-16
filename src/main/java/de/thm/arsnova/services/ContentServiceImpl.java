@@ -19,6 +19,7 @@ package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.AnswerStatistics;
+import de.thm.arsnova.entities.ChoiceQuestionContent;
 import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.entities.TextAnswer;
@@ -451,13 +452,20 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public AnswerStatistics getStatistics(final String contentId, final int piRound) {
-		final Content content = contentRepository.findOne(contentId);
+	public AnswerStatistics getStatistics(final String contentId, final int round) {
+		final ChoiceQuestionContent content = (ChoiceQuestionContent) contentRepository.findOne(contentId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
+		AnswerStatistics stats = answerRepository.findByContentIdRound(
+				content.getId(), round, content.getOptions().size());
+		/* Fill list with zeros to prevent IndexOutOfBoundsExceptions */
+		List<Integer> independentCounts = stats.getRoundStatistics().get(round - 1).getIndependentCounts();
+		while (independentCounts.size() < content.getOptions().size()) {
+			independentCounts.add(0);
+		}
 
-		return answerRepository.findByContentIdPiRound(content.getId(), piRound);
+		return stats;
 	}
 
 	@Override
@@ -478,9 +486,9 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		AnswerStatistics stats = answerRepository.findByContentIdPiRound(content.getId(), 1);
-		AnswerStatistics stats2 = answerRepository.findByContentIdPiRound(content.getId(), 2);
-		stats.getRoundStatistics().add(stats2.getRoundStatistics().get(0));
+		AnswerStatistics stats = getStatistics(content.getId(), 1);
+		AnswerStatistics stats2 = getStatistics(content.getId(), 2);
+		stats.getRoundStatistics().add(stats2.getRoundStatistics().get(1));
 
 		return stats;
 	}

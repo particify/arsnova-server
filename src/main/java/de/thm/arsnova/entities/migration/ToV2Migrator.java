@@ -23,7 +23,9 @@ import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.entities.migration.v2.*;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -329,16 +331,31 @@ public class ToV2Migrator {
 			to.add(abstention);
 		}
 
-		int i = 0;
-		for (ChoiceQuestionContent.AnswerOption option : content.getOptions()) {
+		Map<String, Integer> choices;
+		if (content.isMultiple()) {
+			/* Map selected choice indexes -> answer count */
+			choices = stats.getCombinatedCounts().stream().collect(Collectors.toMap(
+					c -> migrateChoice(c.getSelectedChoiceIndexes(), content.getOptions()),
+					c -> c.getCount(),
+					(u, v) -> { throw new IllegalStateException(String.format("Duplicate key %s", u)); },
+					LinkedHashMap::new));
+		} else {
+			choices = new LinkedHashMap<>();
+			int i = 0;
+			for (ChoiceQuestionContent.AnswerOption option : content.getOptions()) {
+				choices.put(option.getLabel(), stats.getIndependentCounts().get(i));
+				i++;
+			}
+		}
+
+		for (Map.Entry<String, Integer> choice : choices.entrySet()) {
 			Answer answer = new Answer();
 			answer.setQuestionId(content.getId());
 			answer.setPiRound(round);
-			answer.setAnswerCount(stats.getIndependentCounts()[i]);
+			answer.setAnswerCount(choice.getValue());
 			answer.setAbstentionCount(stats.getAbstentionCount());
-			answer.setAnswerText(option.getLabel());
+			answer.setAnswerText(choice.getKey());
 			to.add(answer);
-			i++;
 		}
 
 		return to;

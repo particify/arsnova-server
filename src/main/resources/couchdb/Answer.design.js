@@ -17,6 +17,14 @@ var designDoc = {
 			},
 			"reduce": "_count"
 		},
+		"by_contentid_round_selectedchoiceindexes": {
+			"map": function (doc) {
+				if (["Answer", "ChoiceAnswer", "TextAnswer"].indexOf(doc.type) !== -1) {
+					emit([doc.contentId, doc.round, doc.selectedChoiceIndexes], {_rev: doc._rev});
+				}
+			},
+			"reduce": "_count"
+		},
 		"by_contentid_creationtimestamp": {
 			"map": function (doc) {
 				if (["Answer", "ChoiceAnswer", "TextAnswer"].indexOf(doc.type) !== -1) {

@@ -1,5 +1,6 @@
 package de.thm.arsnova.persistance.couchdb;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.AnswerStatistics;
@@ -19,7 +20,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> implements AnswerRepository, ApplicationEventPublisherAware {
 	private static final int BULK_PARTITION_SIZE = 500;
@@ -77,31 +82,45 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	}
 
 	@Override
-	public AnswerStatistics findByContentIdPiRound(final String contentId, final int piRound) {
-		final ViewResult result = db.queryView(createQuery("by_contentid_round_body_subject")
+	public AnswerStatistics findByContentIdRound(final String contentId, final int round, final int optionCount) {
+		final ViewResult result = db.queryView(createQuery("by_contentid_round_selectedchoiceindexes")
 						.group(true)
-						.startKey(ComplexKey.of(contentId, piRound))
-						.endKey(ComplexKey.of(contentId, piRound, ComplexKey.emptyObject())));
-		final int abstentionCount = countByContentId(contentId);
-
+						.startKey(ComplexKey.of(contentId, round))
+						.endKey(ComplexKey.of(contentId, round, ComplexKey.emptyObject())));
 		final AnswerStatistics stats = new AnswerStatistics();
 		stats.setContentId(contentId);
 		final AnswerStatistics.RoundStatistics roundStats = new AnswerStatistics.RoundStatistics();
-		roundStats.setRound(piRound);
-		roundStats.setAbstentionCount(abstentionCount);
-		/* FIXME: determine correct array size dynamically */
-		final int[] independentCounts = new int[16];
+		roundStats.setRound(round);
+		roundStats.setAbstentionCount(0);
+		final List<Integer> independentCounts = new ArrayList(Collections.nCopies(optionCount, 0));
+		final Map<List<Integer>, AnswerStatistics.RoundStatistics.Combination> combinations = new HashMap();
 		for (final ViewResult.Row d : result) {
-			if (d.getKeyAsNode().get(3).asBoolean()) {
+			if (d.getKeyAsNode().get(2).size() == 0) {
+				/* Abstentions */
 				roundStats.setAbstentionCount(d.getValueAsInt());
 			} else {
-				int optionIndex = d.getKeyAsNode().get(4).asInt();
-				independentCounts[optionIndex] = d.getValueAsInt();
+				/* Answers:
+				 * Extract selected indexes from key[2] and count from value */
+				final JsonNode jsonIndexes = d.getKeyAsNode().get(2);
+				Integer[] indexes = new Integer[jsonIndexes.size()];
+				/* Count independently */
+				for (int i = 0; i < jsonIndexes.size(); i++) {
+					indexes[i] = jsonIndexes.get(i).asInt();
+					independentCounts.set(indexes[i], independentCounts.get(indexes[i]) + d.getValueAsInt());
+				}
+				/* Count option combinations */
+				AnswerStatistics.RoundStatistics.Combination combination =
+						combinations.getOrDefault(Arrays.asList(indexes),
+								new AnswerStatistics.RoundStatistics.Combination(
+										Arrays.asList(indexes), d.getValueAsInt()));
+				combinations.put(Arrays.asList(indexes), combination);
+				roundStats.setCombinatedCounts(combinations.values());
 			}
 		}
 		roundStats.setIndependentCounts(independentCounts);
-		List<AnswerStatistics.RoundStatistics> roundStatisticsList = new ArrayList<>();
-		roundStatisticsList.add(roundStats);
+		/* TODO: Review - might lead easily to IndexOutOfBoundsExceptions - use a Map instead? */
+		List<AnswerStatistics.RoundStatistics> roundStatisticsList = new ArrayList(Collections.nCopies(round, null));
+		roundStatisticsList.set(round - 1, roundStats);
 		stats.setRoundStatistics(roundStatisticsList);
 
 		return stats;
