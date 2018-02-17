@@ -1,6 +1,5 @@
 package de.thm.arsnova.entities;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
@@ -12,12 +11,8 @@ import java.util.Objects;
 @JsonTypeInfo(
 		use = JsonTypeInfo.Id.NAME,
 		include = JsonTypeInfo.As.EXISTING_PROPERTY,
-		property = "format",
-		visible = true
+		property = "type"
 )
-@JsonSubTypes({
-		@JsonSubTypes.Type(value = ChoiceQuestionContent.class, name = "ChoiceQuestionContent")
-})
 public class Content extends Entity {
 	public enum Format {
 		CHOICE,
