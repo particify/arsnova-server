@@ -172,16 +172,18 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 					return;
 				}
 				final String oldRoomId = userService.getRoomIdByUserId(u.getId());
-				if (null != room.getKeyword() && room.getKeyword().equals(oldRoomId)) {
-					return;
-				}
-				final String roomId = roomService.getIdByShortId(room.getKeyword());
+				if (null != room.getKeyword()) {
+					if (room.getKeyword().equals(oldRoomId)) {
+						return;
+					}
+					final String roomId = roomService.getIdByShortId(room.getKeyword());
 
-				if (null != roomId && null != roomService.join(roomId, client.getSessionId())) {
-					/* active user count has to be sent to the client since the broadcast is
-					 * not always sent as long as the polling solution is active simultaneously */
-					reportActiveUserCountForRoom(roomId);
-					reportRoomDataToClient(roomId, u, client);
+					if (null != roomId && null != roomService.join(roomId, client.getSessionId())) {
+						/* active user count has to be sent to the client since the broadcast is
+						 * not always sent as long as the polling solution is active simultaneously */
+						reportActiveUserCountForRoom(roomId);
+						reportRoomDataToClient(roomId, u, client);
+					}
 				}
 				if (null != oldRoomId) {
 					reportActiveUserCountForRoom(oldRoomId);

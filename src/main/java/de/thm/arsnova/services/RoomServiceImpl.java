@@ -201,6 +201,9 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Override
 	@Cacheable("room.id-by-shortid")
 	public String getIdByShortId(final String shortId) {
+		if (shortId == null) {
+			throw new NullPointerException("shortId cannot be null");
+		}
 		Room room = roomRepository.findByShortId(shortId);
 		if (room == null) {
 			throw new NotFoundException("No Room exists for short ID");

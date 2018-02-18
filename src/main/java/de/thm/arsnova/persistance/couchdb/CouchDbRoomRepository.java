@@ -58,6 +58,9 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 
 	@Override
 	public Room findByShortId(final String shortId) {
+		if (shortId == null) {
+			return null;
+		}
 		final List<Room> roomList = queryView("by_shortid", shortId);
 
 		return !roomList.isEmpty() ? roomList.get(0) : null;
