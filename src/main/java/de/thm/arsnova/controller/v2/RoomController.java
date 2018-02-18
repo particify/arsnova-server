@@ -22,6 +22,7 @@ import de.thm.arsnova.entities.migration.FromV2Migrator;
 import de.thm.arsnova.entities.migration.ToV2Migrator;
 import de.thm.arsnova.entities.migration.v2.Room;
 import de.thm.arsnova.entities.migration.v2.RoomFeature;
+import de.thm.arsnova.entities.migration.v2.RoomInfo;
 import de.thm.arsnova.entities.transport.ImportExportContainer;
 import de.thm.arsnova.entities.transport.ScoreStatistics;
 import de.thm.arsnova.exceptions.UnauthorizedException;
@@ -226,7 +227,7 @@ public class RoomController extends PaginationController {
 	})
 	@RequestMapping(value = "/", method = RequestMethod.GET, params = "statusonly=true")
 	@Pagination
-	public List<Room> getMyRooms(
+	public List<RoomInfo> getMyRooms(
 			@ApiParam(value = "visitedOnly", required = true) @RequestParam(value = "visitedonly", defaultValue = "false") final boolean visitedOnly,
 			@ApiParam(value = "sort by", required = false) @RequestParam(value = "sortby", defaultValue = "name") final String sortby,
 			final HttpServletResponse response
@@ -248,7 +249,8 @@ public class RoomController extends PaginationController {
 		} else {
 			Collections.sort(rooms, new RoomNameComparator());
 		}
-		return rooms.stream().map(toV2Migrator::migrate).collect(Collectors.toList());
+
+		return rooms.stream().map(toV2Migrator::migrateStats).collect(Collectors.toList());
 	}
 
 	@ApiOperation(value = "Retrieves all public pool Rooms for the current user",
@@ -257,7 +259,7 @@ public class RoomController extends PaginationController {
 		@ApiResponse(code = 204, message = HTML_STATUS_204)
 	})
 	@RequestMapping(value = "/publicpool", method = RequestMethod.GET, params = "statusonly=true")
-	public List<Room> getMyPublicPoolRooms(
+	public List<RoomInfo> getMyPublicPoolRooms(
 			final HttpServletResponse response
 			) {
 		List<de.thm.arsnova.entities.Room> rooms = roomService.getMyPublicPoolRoomsInfo();
@@ -267,7 +269,7 @@ public class RoomController extends PaginationController {
 			return null;
 		}
 
-		return rooms.stream().map(toV2Migrator::migrate).collect(Collectors.toList());
+		return rooms.stream().map(toV2Migrator::migrateStats).collect(Collectors.toList());
 	}
 
 	@ApiOperation(value = "Retrieves all public pool Rooms",

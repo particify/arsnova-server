@@ -19,6 +19,7 @@ package de.thm.arsnova.entities.migration;
 
 import de.thm.arsnova.entities.AnswerStatistics;
 import de.thm.arsnova.entities.ChoiceQuestionContent;
+import de.thm.arsnova.entities.RoomStatistics;
 import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.entities.migration.v2.*;
 
@@ -156,6 +157,18 @@ public class ToV2Migrator {
 		}
 
 		return feature;
+	}
+
+	public RoomInfo migrateStats(final de.thm.arsnova.entities.Room from) {
+		RoomInfo to = new RoomInfo(migrate(from));
+		RoomStatistics stats = from.getStatistics();
+		to.setNumQuestions(stats.getContentCount());
+		to.setNumUnanswered(stats.getUnansweredContentCount());
+		to.setNumAnswers(stats.getAnswerCount());
+		to.setNumInterposed(stats.getCommentCount());
+		to.setNumUnredInterposed(stats.getUnreadCommentCount());
+
+		return to;
 	}
 
 	public Content migrate(final de.thm.arsnova.entities.Content from) {
