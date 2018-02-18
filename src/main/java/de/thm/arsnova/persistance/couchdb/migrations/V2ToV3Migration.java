@@ -82,10 +82,12 @@ public class V2ToV3Migration implements Migration {
 
 	public void migrate() {
 		createV2Index();
+		migrator.setIgnoreRevision(true);
 		migrateUsers();
 		migrateUnregisteredUsers();
 		migrateRooms();
 		migrateMotds();
+		migrator.setIgnoreRevision(false);
 	}
 
 	private void createV2Index() {

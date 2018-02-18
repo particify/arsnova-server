@@ -50,6 +50,8 @@ public class FromV2Migrator {
 	static final String V2_TYPE_GRID = "grid";
 	private static final Map<String, de.thm.arsnova.entities.Content.Format> formatMapping;
 
+	private boolean ignoreRevision = false;
+
 	static {
 		formatMapping = new HashMap<>();
 		formatMapping.put(V2_TYPE_ABCD, de.thm.arsnova.entities.Content.Format.CHOICE);
@@ -64,7 +66,9 @@ public class FromV2Migrator {
 
 	private void copyCommonProperties(final Entity from, final de.thm.arsnova.entities.Entity to) {
 		to.setId(from.getId());
-		//to.setRevision(from.getRevision());
+		if (!ignoreRevision) {
+			to.setRevision(from.getRevision());
+		}
 	}
 
 	public UserProfile migrate(final DbUser dbUser, final LoggedIn loggedIn, final MotdList motdList) {
@@ -354,5 +358,9 @@ public class FromV2Migrator {
 		}
 
 		return UserProfile.AuthProvider.UNKNOWN;
+	}
+
+	public void setIgnoreRevision(final boolean ignoreRevision) {
+		this.ignoreRevision = ignoreRevision;
 	}
 }
