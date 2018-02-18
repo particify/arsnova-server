@@ -170,7 +170,9 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 
 	@Override
 	public int countByRoomId(final String roomId) {
-		final ViewResult result = db.queryView(createQuery("by_roomid_variant").key(roomId));
+		final ViewResult result = db.queryView(createQuery("by_roomid")
+				.key(roomId)
+				.reduce(true));
 
 		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
 	}
