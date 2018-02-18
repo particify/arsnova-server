@@ -56,7 +56,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 	private MotdRepository motdRepository;
 
 	public CouchDbRoomRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(Room.class, db, "by_shortid", createIfNotExists);
+		super(Room.class, db, "by_id", createIfNotExists);
 	}
 
 	@Override

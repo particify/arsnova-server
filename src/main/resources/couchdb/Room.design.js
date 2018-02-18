@@ -2,6 +2,13 @@ var designDoc = {
 	"_id": "_design/Room",
 	"language": "javascript",
 	"views": {
+		"by_id": {
+			"map": function (doc) {
+				if (doc.type === "Room") {
+					emit(doc._id, {_rev: doc._rev});
+				}
+			}
+		},
 		"by_courseid": {
 			"map": function (doc) {
 				if (doc.type === "Room" && doc.courseId  && !doc.poolProperties) {
