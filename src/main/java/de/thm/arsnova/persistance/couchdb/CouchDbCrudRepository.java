@@ -8,6 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,6 +80,9 @@ abstract class CouchDbCrudRepository<T extends Entity> extends CouchDbRepository
 	public Iterable<T> findAll(final Iterable<String> strings) {
 		if (!(strings instanceof Collection)) {
 			throw new IllegalArgumentException("Implementation only supports Collections.");
+		}
+		if (((Collection) strings).isEmpty()) {
+			return Collections.emptyList();
 		}
 
 		return db.queryView(createQuery(countableAllViewName)
