@@ -3,10 +3,8 @@ package de.thm.arsnova.entities;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -84,20 +82,42 @@ public class UserProfile extends Entity {
 			this.lastVisit = lastVisit;
 		}
 
+		@JsonView(View.Persistence.class)
 		public String getRoomId() {
 			return roomId;
 		}
 
+		@JsonView(View.Persistence.class)
 		public void setRoomId(String roomId) {
 			this.roomId = roomId;
 		}
 
+		@JsonView(View.Persistence.class)
 		public Date getLastVisit() {
 			return lastVisit;
 		}
 
+		@JsonView(View.Persistence.class)
 		public void setLastVisit(Date lastVisit) {
 			this.lastVisit = lastVisit;
+		}
+
+		@Override
+		public boolean equals(final Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
+			final RoomHistoryEntry that = (RoomHistoryEntry) o;
+
+			return Objects.equals(roomId, that.roomId);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(roomId);
 		}
 	}
 
@@ -105,7 +125,11 @@ public class UserProfile extends Entity {
 	private String loginId;
 	private Date lastLoginTimestamp;
 	private Account account;
-	private List<RoomHistoryEntry> roomHistory = new ArrayList<>();
+	/* TODO: Review - is a Map more appropriate?
+	 * pro List: can be ordered by date
+	 * pro Map (roomId -> RoomHistoryEntry): easier to access for updating lastVisit
+	 * -> Map but custom serialization to array? */
+	private Set<RoomHistoryEntry> roomHistory = new HashSet<>();
 	private Set<String> acknowledgedMotds = new HashSet<>();
 	private Map<String, Map<String, ?>> extensions;
 
@@ -159,12 +183,12 @@ public class UserProfile extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public List<RoomHistoryEntry> getRoomHistory() {
+	public Set<RoomHistoryEntry> getRoomHistory() {
 		return roomHistory;
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setRoomHistory(final List<RoomHistoryEntry> roomHistory) {
+	public void setRoomHistory(final Set<RoomHistoryEntry> roomHistory) {
 		this.roomHistory = roomHistory;
 	}
 

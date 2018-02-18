@@ -20,7 +20,6 @@ package de.thm.arsnova.persistance;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.LoggedIn;
 import de.thm.arsnova.entities.transport.ImportExportContainer;
 import org.springframework.data.repository.CrudRepository;
 
@@ -40,5 +39,4 @@ public interface RoomRepository extends CrudRepository<Room, String> {
 	List<Room> findRoomsByCourses(List<Course> courses);
 	Room importRoom(UserAuthentication user, ImportExportContainer importRoom);
 	ImportExportContainer exportRoom(String id, Boolean withAnswer, Boolean withFeedbackQuestions);
-	LoggedIn registerAsOnlineUser(UserAuthentication user, Room room);
 }

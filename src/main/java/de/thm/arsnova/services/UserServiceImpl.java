@@ -18,6 +18,7 @@
 package de.thm.arsnova.services;
 
 import com.codahale.metrics.annotation.Gauge;
+import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.exceptions.BadRequestException;
@@ -38,6 +39,7 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -60,6 +62,7 @@ import org.stagemonitor.core.metrics.MonitorGauges;
 import javax.annotation.PreDestroy;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
 import java.util.*;
@@ -507,6 +510,26 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		userRepository.delete(userProfile);
 
 		return userProfile;
+	}
+
+	@Override
+	@PreAuthorize("hasPermission(#userProfile, 'update')")
+	public void addRoomToHistory(final UserProfile userProfile, final Room room) {
+		if (userProfile.getId().equals(room.getOwnerId())) {
+			return;
+		}
+		Set<UserProfile.RoomHistoryEntry> roomHistory = userProfile.getRoomHistory();
+		UserProfile.RoomHistoryEntry entry = new UserProfile.RoomHistoryEntry(room.getId(), new Date());
+		/* TODO: lastVisit in roomHistory is currently not updated by subsequent method invocations */
+		if (!roomHistory.contains(entry)) {
+			roomHistory.add(entry);
+			Map<String, Object> changes = Collections.singletonMap("roomHistory", roomHistory);
+			try {
+				super.patch(userProfile, changes);
+			} catch (IOException e) {
+				logger.error("Could not patch RoomHistory");
+			}
+		}
 	}
 
 	@Override

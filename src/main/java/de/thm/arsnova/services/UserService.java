@@ -17,6 +17,7 @@
  */
 package de.thm.arsnova.services;
 
+import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.security.User;
@@ -79,6 +80,8 @@ public interface UserService extends EntityService<UserProfile> {
 	UserProfile update(UserProfile userProfile);
 
 	UserProfile deleteByUsername(String username);
+
+	void addRoomToHistory(UserProfile userProfile, Room room);
 
 	void initiatePasswordReset(String username);
 

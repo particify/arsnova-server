@@ -21,20 +21,17 @@ import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.entities.RoomStatistics;
 import de.thm.arsnova.entities.UserAuthentication;
-import de.thm.arsnova.entities.migration.v2.LoggedIn;
 import de.thm.arsnova.entities.transport.ImportExportContainer;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import de.thm.arsnova.persistance.MotdRepository;
 import de.thm.arsnova.persistance.RoomRepository;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
-import org.ektorp.UpdateConflictException;
 import org.ektorp.ViewQuery;
 import org.ektorp.ViewResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -462,39 +459,5 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 			stats.setUnreadCommentCount(numUnreadComments);
 		}
 		return rooms;
-	}
-
-	/* TODO: Move to service layer. */
-	@Override
-	public LoggedIn registerAsOnlineUser(final UserAuthentication user, final Room room) {
-		LoggedIn loggedIn = new LoggedIn();
-		try {
-			final List<LoggedIn> loggedInList = db.queryView(createQuery("all").designDocId("_design/LoggedIn").key(user.getUsername()), LoggedIn.class);
-
-			if (!loggedInList.isEmpty()) {
-				loggedIn = loggedInList.get(0);
-
-				/* Do not clutter CouchDB. Only update once every 3 hours per room. */
-				if (loggedIn.getSessionId().equals(room.getId()) && loggedIn.getTimestamp() > System.currentTimeMillis() - 3 * 3600000) {
-					return loggedIn;
-				}
-			}
-
-			loggedIn.setUser(user.getUsername());
-			loggedIn.setSessionId(room.getId());
-			/* FIXME: migrate */
-			//loggedIn.addVisitedSession(room);
-			loggedIn.updateTimestamp();
-
-			if (loggedIn.getId() == null) {
-				db.create(loggedIn);
-			} else {
-				db.update(loggedIn);
-			}
-		} catch (final UpdateConflictException e) {
-			logger.error("Could not save LoggedIn document of {}.", user.getUsername(), e);
-		}
-
-		return loggedIn;
 	}
 }

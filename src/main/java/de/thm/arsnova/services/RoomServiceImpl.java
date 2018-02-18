@@ -170,19 +170,11 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	@Override
 	public Room join(final String id, final UUID socketId) {
-		/* Socket.IO solution */
-
 		Room room = null != id ? roomRepository.findOne(id) : null;
-
 		if (null == room) {
 			userService.removeUserFromRoomBySocketId(socketId);
 			return null;
 		}
-		final UserAuthentication user = userService.getUserToSocketId(socketId);
-
-		userService.addUserToRoomBySocketId(socketId, id);
-
-		roomRepository.registerAsOnlineUser(user, room);
 
 		/* FIXME: migrate LMS course support
 		if (connectorClient != null && room.isCourseSession()) {
@@ -192,6 +184,9 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 			}
 		}
 		*/
+
+		userService.addUserToRoomBySocketId(socketId, id);
+		userService.addRoomToHistory(userService.getCurrentUserProfile(), room);
 
 		return room;
 	}
@@ -287,9 +282,8 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Override
 	@PreAuthorize("hasPermission(#userId, 'userprofile', 'read')")
 	public List<Room> getUserRoomHistory(final String userId) {
-		UserProfile profile = userService.get(userId);
-		List<String> roomIds = profile.getRoomHistory().stream().map(entry -> entry.getRoomId()).collect(Collectors.toList());
-		roomRepository.findAll(roomIds);
+		final UserProfile profile = userService.get(userId);
+		final List<String> roomIds = profile.getRoomHistory().stream().map(entry -> entry.getRoomId()).collect(Collectors.toList());
 		List<Room> rooms = new ArrayList<>();
 		roomRepository.findAll(roomIds).forEach(rooms::add);
 
