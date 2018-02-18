@@ -164,10 +164,11 @@ public class FromV2Migrator {
 	public de.thm.arsnova.entities.Room.Settings migrate(final RoomFeature feature) {
 		de.thm.arsnova.entities.Room.Settings settings = new de.thm.arsnova.entities.Room.Settings();
 		if (feature != null) {
-			settings.setCommentsEnabled(feature.isInterposed() || feature.isInterposedFeedback() || feature.isTotal());
+			settings.setCommentsEnabled(feature.isInterposed() || feature.isInterposedFeedback()
+					|| feature.isTwitterWall() || feature.isTotal());
 			settings.setQuestionsEnabled(feature.isLecture() || feature.isJitt() || feature.isClicker() || feature.isTotal());
 			settings.setSlidesEnabled(feature.isSlides() || feature.isTotal());
-			settings.setFlashcardsEnabled(feature.isFlashcard() || feature.isFlashcardFeature() || feature.isTotal());
+			settings.setFlashcardsEnabled(feature.isFlashcardFeature() || feature.isFlashcard() || feature.isTotal());
 			settings.setQuickSurveyEnabled(feature.isLiveClicker());
 			settings.setQuickFeedbackEnabled(feature.isFeedback() || feature.isLiveFeedback() || feature.isTotal());
 			settings.setMultipleRoundsEnabled(feature.isPi() || feature.isClicker() || feature.isTotal());

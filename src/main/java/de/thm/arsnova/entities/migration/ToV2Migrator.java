@@ -81,6 +81,7 @@ public class ToV2Migrator {
 			to.setPpFaculty(from.getAuthor().getOrganizationUnit());
 			to.setPpLogo(from.getAuthor().getOrganizationLogo());
 		}
+		to.setFeatures(migrate(from.getSettings()));
 
 		return to;
 	}
@@ -91,23 +92,30 @@ public class ToV2Migrator {
 
 	public RoomFeature migrate(final de.thm.arsnova.entities.Room.Settings settings) {
 		RoomFeature feature = new RoomFeature();
+
+		/* Features */
 		feature.setInterposed(settings.isCommentsEnabled());
 		feature.setLecture(settings.isQuestionsEnabled());
 		feature.setJitt(settings.isQuestionsEnabled());
 		feature.setSlides(settings.isSlidesEnabled());
-		feature.setFlashcard(settings.isFlashcardsEnabled());
-		feature.setFeedback(settings.isQuickSurveyEnabled());
+		feature.setFlashcardFeature(settings.isFlashcardsEnabled());
+		feature.setFeedback(settings.isQuickFeedbackEnabled());
 		feature.setPi(settings.isMultipleRoundsEnabled() || settings.isTimerEnabled());
 		feature.setLearningProgress(settings.isScoreEnabled());
 
+		/* Use cases */
 		int count = 0;
 		/* Single-feature use cases can be migrated */
 		if (settings.isCommentsEnabled()) {
-			feature.setTwitterWall(true);
+			feature.setInterposedFeedback(true);
 			count++;
 		}
 		if (settings.isFlashcardsEnabled()) {
-			feature.setFlashcardFeature(true);
+			feature.setFlashcard(true);
+			count++;
+		}
+		if (settings.isQuickFeedbackEnabled()) {
+			feature.setLiveFeedback(true);
 			count++;
 		}
 		if (settings.isQuickSurveyEnabled()) {
@@ -134,8 +142,9 @@ public class ToV2Migrator {
 
 		if (count != 1) {
 			/* Reset single-feature use-cases since multiple features were detected */
-			feature.setTwitterWall(false);
-			feature.setFlashcardFeature(false);
+			feature.setInterposedFeedback(false);
+			feature.setFlashcard(false);
+			feature.setLiveFeedback(false);
 			feature.setLiveClicker(false);
 
 			if (count == 7) {

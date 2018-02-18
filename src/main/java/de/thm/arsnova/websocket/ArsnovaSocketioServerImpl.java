@@ -31,6 +31,7 @@ import com.corundumstudio.socketio.protocol.PacketType;
 import de.thm.arsnova.entities.UserAuthentication;
 import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.ScoreOptions;
+import de.thm.arsnova.entities.migration.ToV2Migrator;
 import de.thm.arsnova.events.*;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
@@ -82,6 +83,9 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 
 	@Autowired
 	private CommentService commentService;
+
+	@Autowired
+	private ToV2Migrator toV2Migrator;
 
 	private static final Logger logger = LoggerFactory.getLogger(ArsnovaSocketioServerImpl.class);
 
@@ -606,7 +610,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 	public void visit(FeatureChangeEvent event) {
 		final String roomId = event.getRoom().getId();
 		final de.thm.arsnova.entities.Room.Settings settings = event.getRoom().getSettings();
-		broadcastInRoom(roomId, "featureChange", settings);
+		broadcastInRoom(roomId, "featureChange", toV2Migrator.migrate(settings));
 
 		if (settings.isFlashcardsEnabled()) {
 			broadcastInRoom(roomId, "countFlashcards", contentService.countFlashcardsForUserInternal(roomId));

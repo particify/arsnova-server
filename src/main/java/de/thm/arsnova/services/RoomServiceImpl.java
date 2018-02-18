@@ -389,6 +389,8 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		room.setOwnerId(existingRoom.getOwnerId());
 		handleLogo(room);
 		update(existingRoom, room);
+		/* TODO: only publish event when feedback has changed */
+		this.publisher.publishEvent(new FeatureChangeEvent(this, room));
 
 		return room;
 	}

@@ -30,7 +30,7 @@ import java.io.Serializable;
 @ApiModel(value = "RoomFeature", description = "Room (Session) Feature entity - Represents feature/use case settings of a Room")
 public class RoomFeature implements Serializable {
 
-	private boolean custom = true;
+	private boolean custom = false;
 	private boolean clicker = false;
 	private boolean peerGrading = false;
 	private boolean twitterWall = false;
@@ -40,13 +40,13 @@ public class RoomFeature implements Serializable {
 	private boolean flashcard = false;
 	private boolean total = false;
 
-	private boolean jitt = true;
-	private boolean lecture = true;
-	private boolean feedback = true;
-	private boolean interposed = true;
-	private boolean pi = true;
-	private boolean learningProgress = true;
-	private boolean flashcardFeature = true;
+	private boolean jitt = false;
+	private boolean lecture = false;
+	private boolean feedback = false;
+	private boolean interposed = false;
+	private boolean pi = false;
+	private boolean learningProgress = false;
+	private boolean flashcardFeature = false;
 	private boolean slides = false;
 
 	public RoomFeature(RoomFeature features) {
