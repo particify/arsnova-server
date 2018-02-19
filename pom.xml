@@ -484,8 +484,8 @@
 						<apiSource>
 							<springmvc>true</springmvc>
 							<locations>
-								<location>de.thm.arsnova.controller</location>
-								<location>de.thm.arsnova.entities</location>
+								<location>de.thm.arsnova.controller.v2</location>
+								<location>de.thm.arsnova.entities.v2</location>
 							</locations>
 							<schemes>
 								<scheme>http</scheme>
