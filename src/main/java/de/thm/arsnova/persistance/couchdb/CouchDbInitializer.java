@@ -29,7 +29,10 @@ import javax.script.ScriptException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class CouchDbInitializer implements ResourceLoaderAware {
@@ -41,6 +44,7 @@ public class CouchDbInitializer implements ResourceLoaderAware {
 	private CouchDbConnector connector;
 	private ObjectMapper objectMapper;
 	private StatusService statusService;
+	private boolean migrationStarted = false;
 
 	public CouchDbInitializer(final CouchDbConnector couchDbConnector, final ObjectMapperFactory objectMapperFactory,
 			final StatusService statusService) {
@@ -66,22 +70,30 @@ public class CouchDbInitializer implements ResourceLoaderAware {
 	}
 
 	protected void createDesignDocs() {
-		docs.forEach(doc -> {
-			if (logger.isDebugEnabled()) {
-				try {
-					logger.debug("Creating design doc:\n{}", objectMapper.writeValueAsString(doc));
-				} catch (JsonProcessingException e) {
-					logger.warn("Failed to serialize design doc.", e);
-				}
-			}
+		connector.executeBulk(docs.stream().filter(doc -> {
 			try {
-				final String rev = connector.getCurrentRevision((String) doc.get("_id"));
-				doc.put("_rev", rev);
-				connector.update(doc);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Checking design doc {}:\n{}", doc.get("_id"), objectMapper.writeValueAsString(doc));
+				}
+				final Map<String, Object> existingDoc = connector.get(HashMap.class, doc.get("_id").toString());
+				final String existingViews = objectMapper.writeValueAsString(existingDoc.get("views"));
+				final String currentViews = objectMapper.writeValueAsString(doc.get("views"));
+				if (existingViews.equals(currentViews)) {
+					logger.debug("Design doc {} already exists.", doc.get("_id"));
+					return false;
+				} else {
+					logger.debug("Design doc {} will be updated.", doc.get("_id"));
+					doc.put("_rev", existingDoc.get("_rev"));
+					return true;
+				}
 			} catch (final DocumentNotFoundException e) {
-				connector.create(doc);
+				logger.debug("Design doc {} will be created.", doc.get("_id"));
+				return true;
+			} catch (JsonProcessingException e) {
+				logger.warn("Failed to serialize design doc {}.", doc.get("_id"), e);
+				return false;
 			}
-		});
+		}).collect(Collectors.toList()));
 	}
 
 	protected void migrate() {
@@ -104,6 +116,12 @@ public class CouchDbInitializer implements ResourceLoaderAware {
 
 	@EventListener
 	private void onApplicationEvent(ContextRefreshedEvent event) throws IOException, ScriptException {
+		/* Event is triggered more than once */
+		if (migrationStarted) {
+			return;
+		}
+		migrationStarted = true;
+
 		statusService.putMaintenanceReason(this.getClass(), "Data migration active");
 		loadDesignDocFiles();
 		createDesignDocs();
