@@ -190,7 +190,15 @@ public class ToV2Migrator {
 					to.setQuestionType(V2_TYPE_YESNO);
 					break;
 				case SCALE:
-					to.setQuestionType(V2_TYPE_VOTE);
+					final int optionCount = fromChoiceQuestionContent.getOptions().size();
+					/* The number of options for vote/school format is hard-coded by the legacy client */
+					if (optionCount == 5) {
+						to.setQuestionType(V2_TYPE_VOTE);
+					} else if (optionCount == 6) {
+						to.setQuestionType(V2_TYPE_SCHOOL);
+					} else {
+						to.setQuestionType(V2_TYPE_ABCD);
+					}
 					break;
 				case GRID:
 					to.setQuestionType(V2_TYPE_GRID);
