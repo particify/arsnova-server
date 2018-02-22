@@ -57,6 +57,12 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	}
 
 	@Override
+	@PreFilter(value = "hasPermission(filterObject, #this.this.getTypeName(), 'read')", filterTarget = "ids")
+	public Iterable<T> get(final Collection<String> ids) {
+		return repository.findAll(ids);
+	}
+
+	@Override
 	@PreAuthorize("hasPermission(#entity, 'create')")
 	public T create(final T entity) {
 		if (entity.getId() != null || entity.getRevision() != null) {

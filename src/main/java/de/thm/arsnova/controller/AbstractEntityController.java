@@ -18,7 +18,12 @@
 package de.thm.arsnova.controller;
 
 import de.thm.arsnova.entities.Entity;
+import de.thm.arsnova.entities.FindQuery;
 import de.thm.arsnova.services.EntityService;
+import de.thm.arsnova.services.FindQueryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -27,8 +32,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.naming.OperationNotSupportedException;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Base type for Entity controllers which provides basic CRUD operations and supports Entity patching.
@@ -37,14 +44,18 @@ import java.util.Map;
  * @author Daniel Gerhardt
  */
 public abstract class AbstractEntityController<E extends Entity> {
+	private static final Logger logger = LoggerFactory.getLogger(AbstractEntityController.class);
 	protected static final String DEFAULT_ROOT_MAPPING = "/";
 	protected static final String DEFAULT_ID_MAPPING = "/{id}";
+	protected static final String DEFAULT_FIND_MAPPING = "/find";
 	protected static final String GET_MAPPING = DEFAULT_ID_MAPPING;
 	protected static final String PUT_MAPPING = DEFAULT_ID_MAPPING;
 	protected static final String POST_MAPPING = DEFAULT_ROOT_MAPPING;
 	protected static final String PATCH_MAPPING = DEFAULT_ID_MAPPING;
 	protected static final String DELETE_MAPPING = DEFAULT_ID_MAPPING;
+	protected static final String FIND_MAPPING = DEFAULT_FIND_MAPPING;
 	protected final EntityService<E> entityService;
+	protected FindQueryService<E> findQueryService;
 
 	protected AbstractEntityController(final EntityService<E> entityService) {
 		this.entityService = entityService;
@@ -77,5 +88,23 @@ public abstract class AbstractEntityController<E extends Entity> {
 	public void delete(@PathVariable final String id) {
 		E entity = entityService.get(id);
 		entityService.delete(entity);
+	}
+
+	@PostMapping(FIND_MAPPING)
+	public Iterable<E> find(@RequestBody final FindQuery<E> findQuery) throws OperationNotSupportedException {
+		if (findQueryService != null) {
+			logger.debug("Resolving find query: {}", findQuery);
+			Set<String> ids = findQueryService.resolveQuery(findQuery);
+			logger.debug("Resolved find query to IDs: {}", ids);
+
+			return entityService.get(ids);
+		} else {
+			throw new OperationNotSupportedException("Find is not supported for this entity type.");
+		}
+	}
+
+	@Autowired(required = false)
+	public void setFindQueryService(final FindQueryService<E> findQueryService) {
+		this.findQueryService = findQueryService;
 	}
 }
