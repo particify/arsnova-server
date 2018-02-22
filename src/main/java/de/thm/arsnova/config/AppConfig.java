@@ -120,9 +120,9 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 
 	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-		converters.add(stringMessageConverter());
-		converters.add(apiV2JsonMessageConverter());
 		converters.add(defaultJsonMessageConverter());
+		converters.add(apiV2JsonMessageConverter());
+		converters.add(stringMessageConverter());
 		//converters.add(new MappingJackson2XmlHttpMessageConverter(builder.createXmlMapper(true).build()));
 	}
 
