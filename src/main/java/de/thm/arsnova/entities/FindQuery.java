@@ -24,8 +24,23 @@ import org.springframework.core.style.ToStringCreator;
 import java.util.Map;
 
 public class FindQuery<E extends Entity> {
+	enum LogicalOperator {
+		AND,
+		OR
+	}
+
+	private LogicalOperator operator = LogicalOperator.AND;
 	private E properties;
 	private Map<String, Object> externalFilters;
+
+	public LogicalOperator getOperator() {
+		return operator;
+	}
+
+	@JsonView(View.Public.class)
+	public void setOperator(final LogicalOperator operator) {
+		this.operator = operator;
+	}
 
 	public E getProperties() {
 		return properties;
@@ -48,6 +63,7 @@ public class FindQuery<E extends Entity> {
 	@Override
 	public String toString() {
 		return new ToStringCreator(getClass())
+				.append("operator", operator)
 				.append("properties", properties)
 				.append("externalFilters", externalFilters)
 				.toString();
