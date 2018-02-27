@@ -33,6 +33,7 @@ public class User implements org.springframework.security.core.userdetails.UserD
 	private String id;
 	private String loginId;
 	private UserProfile.AuthProvider authProvider;
+	private String password;
 	private org.springframework.security.core.userdetails.UserDetails providerUserDetails;
 	private Collection<? extends GrantedAuthority> authorities;
 	private boolean enabled;
@@ -44,6 +45,7 @@ public class User implements org.springframework.security.core.userdetails.UserD
 		id = profile.getId();
 		loginId = profile.getLoginId();
 		authProvider = profile.getAuthProvider();
+		password = profile.getAccount() == null ? null : profile.getAccount().getPassword();
 		this.authorities = authorities;
 		enabled = profile.getAccount() == null || profile.getAccount().getActivationKey() == null;
 	}
@@ -61,7 +63,7 @@ public class User implements org.springframework.security.core.userdetails.UserD
 
 	@Override
 	public String getPassword() {
-		return providerUserDetails != null ? providerUserDetails.getPassword() : null;
+		return providerUserDetails != null ? providerUserDetails.getPassword() : password;
 	}
 
 	@Override
