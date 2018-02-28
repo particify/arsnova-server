@@ -59,6 +59,12 @@ mail.host=
 # several minutes
 security.authentication.login-try-limit=50
 
+# JSON Web Tokens
+#
+security.jwt.serverId=arsnova.backend.v3:com.example
+security.jwt.secret=
+security.jwt.validity-period=T6H
+
 # Configuration parameters for authentication services:
 # enabled: enable or disable the service
 # allowed-roles: enable/disable service for a specific role (valid roles: speaker, student)
