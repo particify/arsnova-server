@@ -18,7 +18,7 @@
 package de.thm.arsnova.websocket;
 
 import com.corundumstudio.socketio.SocketIOClient;
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.services.UserService;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -68,7 +68,7 @@ public class WebsocketAuthenticationAspect {
 	}
 
 	private void populateSecurityContext(final UUID socketId) {
-		UserAuthentication userAuth = userService.getUserToSocketId(socketId);
+		ClientAuthentication userAuth = userService.getUserToSocketId(socketId);
 		if (userAuth == null) {
 			throw new AccessDeniedException("No user authenticated for WebSocket connection");
 		}

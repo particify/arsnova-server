@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.security;
 
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import de.thm.arsnova.entities.UserProfile;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -38,6 +38,7 @@ public class User implements org.springframework.security.core.userdetails.UserD
 	private org.springframework.security.core.userdetails.UserDetails providerUserDetails;
 	private Collection<? extends GrantedAuthority> authorities;
 	private boolean enabled;
+	private String token;
 
 	public User(final UserProfile profile, final Collection<? extends GrantedAuthority> authorities) {
 		if (profile == null || profile.getId() == null) {
@@ -57,10 +58,10 @@ public class User implements org.springframework.security.core.userdetails.UserD
 		providerUserDetails = details;
 	}
 
-	public User(final UserAuthentication userAuthentication, final Collection<? extends GrantedAuthority> authorities) {
-		id = userAuthentication.getId();
-		loginId = userAuthentication.getUsername();
-		authProvider = userAuthentication.getAuthProvider();
+	public User(final ClientAuthentication clientAuthentication, final Collection<? extends GrantedAuthority> authorities) {
+		id = clientAuthentication.getId();
+		loginId = clientAuthentication.getUsername();
+		authProvider = clientAuthentication.getAuthProvider();
 		this.authorities = authorities;
 		enabled = true;
 	}
@@ -114,6 +115,14 @@ public class User implements org.springframework.security.core.userdetails.UserD
 
 	public boolean isAdmin() {
 		return hasRole("ADMIN");
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(final String token) {
+		this.token = token;
 	}
 
 	@Override

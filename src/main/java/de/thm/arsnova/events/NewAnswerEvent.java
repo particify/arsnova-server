@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.events;
 
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Room;
@@ -31,11 +31,11 @@ public class NewAnswerEvent extends RoomEvent {
 
 	private final Answer answer;
 
-	private final UserAuthentication user;
+	private final ClientAuthentication user;
 
 	private final Content content;
 
-	public NewAnswerEvent(Object source, Room room, Answer answer, UserAuthentication user, Content content) {
+	public NewAnswerEvent(Object source, Room room, Answer answer, ClientAuthentication user, Content content) {
 		super(source, room);
 		this.answer = answer;
 		this.user = user;
@@ -51,7 +51,7 @@ public class NewAnswerEvent extends RoomEvent {
 		return answer;
 	}
 
-	public UserAuthentication getUser() {
+	public ClientAuthentication getUser() {
 		return user;
 	}
 

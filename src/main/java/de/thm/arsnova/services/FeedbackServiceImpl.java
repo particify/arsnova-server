@@ -19,7 +19,7 @@ package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Feedback;
 import de.thm.arsnova.entities.Room;
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import de.thm.arsnova.events.DeleteFeedbackForRoomsEvent;
 import de.thm.arsnova.events.NewFeedbackEvent;
 import de.thm.arsnova.exceptions.NoContentException;
@@ -66,18 +66,18 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	@Override
 	@Scheduled(fixedDelay = DEFAULT_SCHEDULER_DELAY)
 	public void cleanFeedbackVotes() {
-		Map<Room, List<UserAuthentication>> deletedFeedbackOfUsersInSession = feedbackStorage.cleanVotes(cleanupFeedbackDelay);
+		Map<Room, List<ClientAuthentication>> deletedFeedbackOfUsersInSession = feedbackStorage.cleanVotes(cleanupFeedbackDelay);
 		/*
 		 * mapping (Room -> Users) is not suitable for web sockets, because we want to sent all affected
 		 * sessions to a single user in one go instead of sending multiple messages for each session. Hence,
 		 * we need the mapping (User -> Sessions)
 		 */
-		final Map<UserAuthentication, Set<Room>> affectedSessionsOfUsers = new HashMap<>();
+		final Map<ClientAuthentication, Set<Room>> affectedSessionsOfUsers = new HashMap<>();
 
-		for (Map.Entry<Room, List<UserAuthentication>> entry : deletedFeedbackOfUsersInSession.entrySet()) {
+		for (Map.Entry<Room, List<ClientAuthentication>> entry : deletedFeedbackOfUsersInSession.entrySet()) {
 			final Room room = entry.getKey();
-			final List<UserAuthentication> users = entry.getValue();
-			for (UserAuthentication user : users) {
+			final List<ClientAuthentication> users = entry.getValue();
+			for (ClientAuthentication user : users) {
 				Set<Room> affectedSessions;
 				if (affectedSessionsOfUsers.containsKey(user)) {
 					affectedSessions = affectedSessionsOfUsers.get(user);
@@ -89,8 +89,8 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 			}
 		}
 		// Send feedback reset event to all affected users
-		for (Map.Entry<UserAuthentication, Set<Room>> entry : affectedSessionsOfUsers.entrySet()) {
-			final UserAuthentication user = entry.getKey();
+		for (Map.Entry<ClientAuthentication, Set<Room>> entry : affectedSessionsOfUsers.entrySet()) {
+			final ClientAuthentication user = entry.getKey();
 			final Set<Room> arsSessions = entry.getValue();
 			this.publisher.publishEvent(new DeleteFeedbackForRoomsEvent(this, arsSessions, user));
 		}
@@ -103,12 +103,12 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	@Override
 	public void cleanFeedbackVotesByRoomId(final String roomId, final int cleanupFeedbackDelayInMins) {
 		final Room room = roomRepository.findOne(roomId);
-		List<UserAuthentication> affectedUsers = feedbackStorage.cleanVotesByRoom(room, cleanupFeedbackDelayInMins);
+		List<ClientAuthentication> affectedUsers = feedbackStorage.cleanVotesByRoom(room, cleanupFeedbackDelayInMins);
 		Set<Room> sessionSet = new HashSet<>();
 		sessionSet.add(room);
 
 		// Send feedback reset event to all affected users
-		for (UserAuthentication user : affectedUsers) {
+		for (ClientAuthentication user : affectedUsers) {
 			this.publisher.publishEvent(new DeleteFeedbackForRoomsEvent(this, sessionSet, user));
 		}
 		// send the new feedback to all clients in affected session
@@ -157,7 +157,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	}
 
 	@Override
-	public boolean save(final String roomId, final int value, final UserAuthentication user) {
+	public boolean save(final String roomId, final int value, final ClientAuthentication user) {
 		final Room room = roomRepository.findOne(roomId);
 		if (room == null) {
 			throw new NotFoundException();
@@ -169,7 +169,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	}
 
 	@Override
-	public Integer getByRoomIdAndUser(final String roomId, final UserAuthentication user) {
+	public Integer getByRoomIdAndUser(final String roomId, final ClientAuthentication user) {
 		final Room room = roomRepository.findOne(roomId);
 		if (room == null) {
 			throw new NotFoundException();

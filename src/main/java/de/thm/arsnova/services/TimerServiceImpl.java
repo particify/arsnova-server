@@ -2,7 +2,7 @@ package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Room;
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import de.thm.arsnova.events.PiRoundCancelEvent;
 import de.thm.arsnova.events.PiRoundDelayedStartEvent;
 import de.thm.arsnova.events.PiRoundEndEvent;
@@ -40,7 +40,7 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#contentId, 'content', 'owner')")
-	public void startNewRound(final String contentId, UserAuthentication user) {
+	public void startNewRound(final String contentId, ClientAuthentication user) {
 		final Content content = contentRepository.findOne(contentId);
 		final Room room = roomRepository.findOne(content.getRoomId());
 
@@ -61,7 +61,7 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 	@Override
 	@PreAuthorize("hasPermission(#contentId, 'content', 'owner')")
 	public void startNewRoundDelayed(final String contentId, final int time) {
-		final UserAuthentication user = userService.getCurrentUser();
+		final ClientAuthentication user = userService.getCurrentUser();
 		final Content content = contentRepository.findOne(contentId);
 		final Room room = roomRepository.findOne(content.getRoomId());
 

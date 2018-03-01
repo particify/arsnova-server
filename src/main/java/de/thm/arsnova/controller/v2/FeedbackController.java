@@ -19,7 +19,7 @@ package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.controller.AbstractController;
 import de.thm.arsnova.entities.Feedback;
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.FeedbackService;
 import de.thm.arsnova.services.RoomService;
@@ -103,7 +103,7 @@ public class FeedbackController extends AbstractController {
 			@RequestBody final int value
 			) {
 		String roomId = roomService.getIdByShortId(shortId);
-		UserAuthentication user = userService.getCurrentUser();
+		ClientAuthentication user = userService.getCurrentUser();
 		feedbackService.save(roomId, value, user);
 		Feedback feedback = feedbackService.getByRoomId(roomId);
 

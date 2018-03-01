@@ -17,17 +17,18 @@
  */
 package de.thm.arsnova.entities;
 
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public class TestUser extends UserAuthentication {
+public class TestClient extends ClientAuthentication {
 	private static final long serialVersionUID = 1L;
 	private final Set<GrantedAuthority> grantedAuthorities;
 
-	public TestUser(String username) {
+	public TestClient(String username) {
 		super();
 		grantedAuthorities = new HashSet<>();
 		setId(UUID.randomUUID().toString());

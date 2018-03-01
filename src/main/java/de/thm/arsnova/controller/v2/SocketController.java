@@ -18,7 +18,7 @@
 package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.controller.AbstractController;
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import de.thm.arsnova.services.UserService;
 import de.thm.arsnova.websocket.ArsnovaSocketioServer;
 import io.swagger.annotations.Api;
@@ -72,7 +72,7 @@ public class SocketController extends AbstractController {
 			response.setStatus(HttpStatus.BAD_REQUEST.value());
 			return;
 		}
-		UserAuthentication u = userService.getCurrentUser();
+		ClientAuthentication u = userService.getCurrentUser();
 		if (null == u) {
 			logger.debug("Client {} requested to assign Websocket session but has not authenticated.", socketid);
 			response.setStatus(HttpStatus.FORBIDDEN.value());

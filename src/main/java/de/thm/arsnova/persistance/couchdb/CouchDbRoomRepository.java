@@ -20,7 +20,7 @@ package de.thm.arsnova.persistance.couchdb;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.entities.RoomStatistics;
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import de.thm.arsnova.entities.transport.ImportExportContainer;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import de.thm.arsnova.persistance.MotdRepository;
@@ -103,7 +103,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 
 	/* TODO: Move to service layer. */
 	@Override
-	public Room importRoom(final UserAuthentication user, final ImportExportContainer importRoom) {
+	public Room importRoom(final ClientAuthentication user, final ImportExportContainer importRoom) {
 		/* FIXME: not yet migrated - move to service layer */
 		throw new UnsupportedOperationException();
 //		final Room session = this.saveSession(user, importRoom.generateSessionEntity(user));
@@ -267,7 +267,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 	}
 
 	@Override
-	public List<Room> findByOwner(final UserAuthentication owner, final int start, final int limit) {
+	public List<Room> findByOwner(final ClientAuthentication owner, final int start, final int limit) {
 		return findByOwnerId(owner.getId(), start, limit);
 	}
 
@@ -300,7 +300,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 	}
 
 	@Override
-	public List<Room> findForPublicPoolByOwner(final UserAuthentication owner) {
+	public List<Room> findForPublicPoolByOwner(final ClientAuthentication owner) {
 		/* TODO: Only load IDs and check against cache for data. */
 		return db.queryView(
 				createQuery("partial_by_pool_ownerid_name")
@@ -312,7 +312,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 
 	/* TODO: Move to service layer. */
 	@Override
-	public List<Room> findInfosForPublicPoolByOwner(final UserAuthentication owner) {
+	public List<Room> findInfosForPublicPoolByOwner(final ClientAuthentication owner) {
 		final List<Room> rooms = this.findForPublicPoolByOwner(owner);
 		if (rooms.isEmpty()) {
 			return new ArrayList<>();
@@ -322,7 +322,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 
 	/* TODO: Move to service layer. */
 	@Override
-	public List<Room> getRoomsWithStatsForOwner(final UserAuthentication owner, final int start, final int limit) {
+	public List<Room> getRoomsWithStatsForOwner(final ClientAuthentication owner, final int start, final int limit) {
 		final List<Room> rooms = this.findByOwner(owner, start, limit);
 		if (rooms.isEmpty()) {
 			return new ArrayList<>();
@@ -346,7 +346,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 	}
 
 	/* TODO: Move to service layer. */
-	public List<Room> getRoomHistoryWithStatsForUser(final List<Room> rooms, final UserAuthentication user) {
+	public List<Room> getRoomHistoryWithStatsForUser(final List<Room> rooms, final ClientAuthentication user) {
 		final ViewQuery answeredQuestionsView = createQuery("by_creatorid_roomid").designDocId("_design/Answer")
 				.reduce(false).keys(rooms.stream().map(room -> ComplexKey.of(user.getId(), room.getId())).collect(Collectors.toList()));
 		final ViewQuery contentIdsView = createQuery("by_roomid").designDocId("_design/Content")

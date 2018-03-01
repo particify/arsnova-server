@@ -15,9 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.entities;
+package de.thm.arsnova.entities.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.entities.serialization.View;
 import de.thm.arsnova.security.User;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -29,7 +30,7 @@ import java.util.Objects;
 /**
  * Represents a user.
  */
-public class UserAuthentication implements Serializable {
+public class ClientAuthentication implements Serializable {
 	public static final String ANONYMOUS = "anonymous";
 
 	private static final long serialVersionUID = 1L;
@@ -38,21 +39,21 @@ public class UserAuthentication implements Serializable {
 	private UserProfile.AuthProvider authProvider;
 	private boolean isAdmin;
 
-	public UserAuthentication() {
+	public ClientAuthentication() {
 		username = ANONYMOUS;
 		authProvider = UserProfile.AuthProvider.NONE;
 	}
 
-	public UserAuthentication(User user) {
+	public ClientAuthentication(User user) {
 		id = user.getId();
 		username = user.getUsername();
 		authProvider = user.getAuthProvider();
 		isAdmin = user.isAdmin();
 	}
 
-	public UserAuthentication(Authentication authentication) {
+	public ClientAuthentication(Authentication authentication) {
 		if (authentication instanceof AnonymousAuthenticationToken) {
-			setUsername(UserAuthentication.ANONYMOUS);
+			setUsername(ClientAuthentication.ANONYMOUS);
 		} else {
 			if (!(authentication.getPrincipal() instanceof User)) {
 				throw new IllegalArgumentException("Unsupported authentication token");
@@ -121,7 +122,7 @@ public class UserAuthentication implements Serializable {
 		if (obj == null || !obj.getClass().equals(this.getClass())) {
 			return false;
 		}
-		UserAuthentication other = (UserAuthentication) obj;
+		ClientAuthentication other = (ClientAuthentication) obj;
 
 		return this.authProvider == other.authProvider && Objects.equals(this.id, other.id) && this.username.equals(other.username);
 	}

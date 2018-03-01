@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.services.score;
 
-import de.thm.arsnova.entities.TestUser;
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.TestClient;
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import de.thm.arsnova.entities.transport.ScoreStatistics;
 import de.thm.arsnova.persistance.SessionStatisticsRepository;
 import org.junit.Before;
@@ -42,7 +42,7 @@ public class QuestionBasedScoreCalculatorTest {
 		return questionId;
 	}
 
-	private void addAnswer(String questionId, UserAuthentication user, int points) {
+	private void addAnswer(String questionId, ClientAuthentication user, int points) {
 		final int piRound = 1;
 		courseScore.addAnswer(questionId, piRound, user.getUsername(), points);
 	}
@@ -62,7 +62,7 @@ public class QuestionBasedScoreCalculatorTest {
 	public void shouldIgnoreQuestionsWithoutCorrectAnswers() {
 		final int questionMaxValue = 0;
 		final int userScore = 0;
-		UserAuthentication user = new TestUser("username");
+		ClientAuthentication user = new TestClient("username");
 		String questionId = this.addQuestion("lecture", questionMaxValue);
 		this.addAnswer(questionId, user, userScore);
 
@@ -77,7 +77,7 @@ public class QuestionBasedScoreCalculatorTest {
 
 	@Test
 	public void shouldIgnoreQuestionsWithoutCorrectAnswersInQuestionCount() {
-		UserAuthentication user = new TestUser("username");
+		ClientAuthentication user = new TestClient("username");
 		courseScore.addQuestion("question-without-correct-answers", "lecture", 1, 0);
 		courseScore.addQuestion("question-with-correct-answers", "lecture", 1, 50);
 		courseScore.addAnswer("question-without-correct-answers", 1, user.getUsername(), 0);
@@ -99,9 +99,9 @@ public class QuestionBasedScoreCalculatorTest {
 	public void shouldCalculatePercentageOfOneQuestionWithSomeWrongAnswers() {
 		String questionId = this.addQuestion("lecture", 10);
 		for (int i = 0; i < 99; i++) {
-			this.addAnswer(questionId, new TestUser("user"+i), 10);
+			this.addAnswer(questionId, new TestClient("user"+i), 10);
 		}
-		this.addAnswer(questionId, new TestUser("user-with-a-wrong-answer"), 0);
+		this.addAnswer(questionId, new TestClient("user-with-a-wrong-answer"), 0);
 
 		int expected = 99;
 		int actual = lp.getCourseProgress(null).getCourseProgress();
@@ -120,8 +120,8 @@ public class QuestionBasedScoreCalculatorTest {
 		String q1 = this.addQuestion("lecture", 10);
 		String q2 = this.addQuestion("lecture", 10);
 		// two users
-		UserAuthentication u1 = new TestUser("user1");
-		UserAuthentication u2 = new TestUser("user2");
+		ClientAuthentication u1 = new TestClient("user1");
+		ClientAuthentication u2 = new TestClient("user2");
 		// four answers, last one is wrong
 		this.addAnswer(q1, u1, 10);
 		this.addAnswer(q1, u2, 10);
@@ -141,10 +141,10 @@ public class QuestionBasedScoreCalculatorTest {
 		String q2 = this.addQuestion("lecture", 1);
 		// first question has many answers, all of them correct
 		for (int i = 0; i < 100; i++) {
-			this.addAnswer(q1, new TestUser("user"+i), 1000);
+			this.addAnswer(q1, new TestClient("user"+i), 1000);
 		}
 		// second question has one wrong answer
-		this.addAnswer(q2,  new TestUser("another-user"), 0);
+		this.addAnswer(q2,  new TestClient("another-user"), 0);
 
 		int expected = 50;
 		int actual = lp.getCourseProgress(null).getCourseProgress();
@@ -156,8 +156,8 @@ public class QuestionBasedScoreCalculatorTest {
 	public void shouldFilterBasedOnQuestionVariant() {
 		String q1 = this.addQuestion("lecture", 100);
 		String q2 = this.addQuestion("preparation", 100);
-		UserAuthentication u1 = new TestUser("user1");
-		UserAuthentication u2 = new TestUser("user2");
+		ClientAuthentication u1 = new TestClient("user1");
+		ClientAuthentication u2 = new TestClient("user2");
 		// first question is answered correctly, second one is not
 		this.addAnswer(q1, u1, 100);
 		this.addAnswer(q1, u2, 100);
@@ -179,8 +179,8 @@ public class QuestionBasedScoreCalculatorTest {
 
 	@Test
 	public void shouldConsiderAnswersOfSamePiRound() {
-		UserAuthentication u1 = new TestUser("user1");
-		UserAuthentication u2 = new TestUser("user2");
+		ClientAuthentication u1 = new TestClient("user1");
+		ClientAuthentication u2 = new TestClient("user2");
 		// question is in round 2
 		courseScore.addQuestion("q1", "lecture", 2, 100);
 		// 25 points in round 1, 75 points in round two for the first user
@@ -206,9 +206,9 @@ public class QuestionBasedScoreCalculatorTest {
 		String q1 = this.addQuestion("lecture", 10);
 		String q2 = this.addQuestion("lecture", 10);
 		// three users
-		UserAuthentication u1 = new TestUser("user1");
-		UserAuthentication u2 = new TestUser("user2");
-		UserAuthentication u3 = new TestUser("user3");
+		ClientAuthentication u1 = new TestClient("user1");
+		ClientAuthentication u2 = new TestClient("user2");
+		ClientAuthentication u3 = new TestClient("user3");
 		// six answers
 		this.addAnswer(q1, u1, 10);
 		this.addAnswer(q2, u1, -100);

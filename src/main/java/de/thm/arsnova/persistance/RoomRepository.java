@@ -19,7 +19,7 @@ package de.thm.arsnova.persistance;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Room;
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import de.thm.arsnova.entities.transport.ImportExportContainer;
 import org.springframework.data.repository.CrudRepository;
 
@@ -28,15 +28,15 @@ import java.util.List;
 public interface RoomRepository extends CrudRepository<Room, String> {
 	Room findByShortId(String shortId);
 	List<Room> findInactiveGuestRoomsMetadata(long lastActivityBefore);
-	List<Room> findByOwner(UserAuthentication owner, int start, int limit);
+	List<Room> findByOwner(ClientAuthentication owner, int start, int limit);
 	List<Room> findByOwnerId(String ownerId, int start, int limit);
 	List<Room> findAllForPublicPool();
-	List<Room> findForPublicPoolByOwner(UserAuthentication owner);
-	List<Room> getRoomsWithStatsForOwner(UserAuthentication owner, int start, int limit);
-	List<Room> getRoomHistoryWithStatsForUser(List<Room> rooms, UserAuthentication owner);
+	List<Room> findForPublicPoolByOwner(ClientAuthentication owner);
+	List<Room> getRoomsWithStatsForOwner(ClientAuthentication owner, int start, int limit);
+	List<Room> getRoomHistoryWithStatsForUser(List<Room> rooms, ClientAuthentication owner);
 	List<Room> findInfosForPublicPool();
-	List<Room> findInfosForPublicPoolByOwner(UserAuthentication owner);
+	List<Room> findInfosForPublicPoolByOwner(ClientAuthentication owner);
 	List<Room> findRoomsByCourses(List<Course> courses);
-	Room importRoom(UserAuthentication user, ImportExportContainer importRoom);
+	Room importRoom(ClientAuthentication user, ImportExportContainer importRoom);
 	ImportExportContainer exportRoom(String id, Boolean withAnswer, Boolean withFeedbackQuestions);
 }

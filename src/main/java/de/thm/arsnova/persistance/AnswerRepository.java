@@ -19,18 +19,18 @@ package de.thm.arsnova.persistance;
 
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.AnswerStatistics;
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
 public interface AnswerRepository extends CrudRepository<Answer, String> {
-	<T extends Answer> T findByContentIdUserPiRound(String contentId, Class<T> type, UserAuthentication user, int piRound);
+	<T extends Answer> T findByContentIdUserPiRound(String contentId, Class<T> type, ClientAuthentication user, int piRound);
 	AnswerStatistics findByContentIdRound(String contentId, int round, final int optionCount);
 	int countByContentIdRound(String contentId, int round);
 	int countByContentId(String contentId);
 	<T extends Answer> List<T> findByContentId(String contentId, Class<T> type, int start, int limit);
-	List<Answer> findByUserRoomId(UserAuthentication user, String roomId);
+	List<Answer> findByUserRoomId(ClientAuthentication user, String roomId);
 	int countByRoomId(String roomId);
 	int deleteByContentId(String contentId);
 	int countByRoomIdOnlyLectureVariant(String roomId);

@@ -18,7 +18,7 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.Room;
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.security.User;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,7 +36,9 @@ import java.util.UUID;
 public interface UserService extends EntityService<UserProfile> {
 	UserProfile getCurrentUserProfile();
 
-	UserAuthentication getCurrentUser();
+	ClientAuthentication getCurrentUser();
+
+	de.thm.arsnova.entities.ClientAuthentication getCurrentClientAuthentication();
 
 	boolean isAdmin(String username);
 
@@ -44,17 +46,17 @@ public interface UserService extends EntityService<UserProfile> {
 
 	void increaseFailedLoginCount(String addr);
 
-	UserAuthentication getUserToSocketId(UUID socketId);
+	ClientAuthentication getUserToSocketId(UUID socketId);
 
-	void putUserToSocketId(UUID socketId, UserAuthentication user);
+	void putUserToSocketId(UUID socketId, ClientAuthentication user);
 
 	void removeUserToSocketId(UUID socketId);
 
-	Set<Map.Entry<UUID, UserAuthentication>> getSocketIdToUser();
+	Set<Map.Entry<UUID, ClientAuthentication>> getSocketIdToUser();
 
-	boolean isUserInRoom(UserAuthentication user, String roomId);
+	boolean isUserInRoom(ClientAuthentication user, String roomId);
 
-	Set<UserAuthentication> getUsersByRoomId(String roomId);
+	Set<ClientAuthentication> getUsersByRoomId(String roomId);
 
 	String getRoomIdByUserId(String userId);
 
@@ -62,7 +64,7 @@ public interface UserService extends EntityService<UserProfile> {
 
 	void removeUserFromRoomBySocketId(UUID socketId);
 
-	void removeUserFromMaps(UserAuthentication user);
+	void removeUserFromMaps(ClientAuthentication user);
 
 	int loggedInUsers();
 

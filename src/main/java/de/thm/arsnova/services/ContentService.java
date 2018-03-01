@@ -21,9 +21,8 @@ import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.AnswerStatistics;
 import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.TextAnswer;
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -45,7 +44,7 @@ public interface ContentService extends EntityService<Content> {
 
 	Answer getMyAnswer(String contentId);
 
-	void getFreetextAnswerAndMarkRead(String answerId, UserAuthentication user);
+	void getFreetextAnswerAndMarkRead(String answerId, ClientAuthentication user);
 
 	AnswerStatistics getStatistics(String contentId, int piRound);
 
@@ -117,11 +116,11 @@ public interface ContentService extends EntityService<Content> {
 
 	List<String> getUnAnsweredLectureContentIds(String roomId);
 
-	List<String> getUnAnsweredLectureContentIds(String roomId, UserAuthentication user);
+	List<String> getUnAnsweredLectureContentIds(String roomId, ClientAuthentication user);
 
 	List<String> getUnAnsweredPreparationContentIds(String roomId);
 
-	List<String> getUnAnsweredPreparationContentIds(String roomId, UserAuthentication user);
+	List<String> getUnAnsweredPreparationContentIds(String roomId, ClientAuthentication user);
 
 	void publishAll(String roomId, boolean publish);
 

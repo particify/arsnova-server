@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.AnswerStatistics;
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import de.thm.arsnova.persistance.AnswerRepository;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import org.ektorp.BulkDeleteDocument;
@@ -75,7 +75,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	}
 
 	@Override
-	public <T extends Answer> T findByContentIdUserPiRound(final String contentId, final Class<T> type, final UserAuthentication user, final int piRound) {
+	public <T extends Answer> T findByContentIdUserPiRound(final String contentId, final Class<T> type, final ClientAuthentication user, final int piRound) {
 		final List<T> answerList = db.queryView(createQuery("by_contentid_creatorid_round")
 				.key(ComplexKey.of(contentId, user.getUsername(), piRound)), type);
 		return answerList.isEmpty() ? null : answerList.get(0);
@@ -164,7 +164,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	}
 
 	@Override
-	public List<Answer> findByUserRoomId(final UserAuthentication user, final String roomId) {
+	public List<Answer> findByUserRoomId(final ClientAuthentication user, final String roomId) {
 		return queryView("by_creatorid_roomid", ComplexKey.of(user.getId(), roomId));
 	}
 

@@ -1,7 +1,7 @@
 package de.thm.arsnova.persistance.couchdb;
 
 import de.thm.arsnova.entities.Content;
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.LogEntryRepository;
 import org.ektorp.BulkDeleteDocument;
@@ -91,7 +91,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public List<String> findUnansweredIdsByRoomIdAndUser(final String roomId, final UserAuthentication user) {
+	public List<String> findUnansweredIdsByRoomIdAndUser(final String roomId, final ClientAuthentication user) {
 		final ViewResult result = db.queryView(createQuery("contentid_by_creatorid_roomid_variant")
 				.designDocId("_design/Answer")
 				.startKey(ComplexKey.of(user.getId(), roomId))
@@ -104,7 +104,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public List<String> findUnansweredIdsByRoomIdAndUserOnlyLectureVariant(final String roomId, final UserAuthentication user) {
+	public List<String> findUnansweredIdsByRoomIdAndUserOnlyLectureVariant(final String roomId, final ClientAuthentication user) {
 		final ViewResult result = db.queryView(createQuery("contentid_round_by_creatorid_roomid_variant")
 				.designDocId("_design/Answer")
 				.key(ComplexKey.of(user.getId(), roomId, "lecture")));
@@ -117,7 +117,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public List<String> findUnansweredIdsByRoomIdAndUserOnlyPreparationVariant(final String roomId, final UserAuthentication user) {
+	public List<String> findUnansweredIdsByRoomIdAndUserOnlyPreparationVariant(final String roomId, final ClientAuthentication user) {
 		final ViewResult result = db.queryView(createQuery("contentid_round_by_creatorid_roomid_variant")
 				.designDocId("_design/Answer")
 				.key(ComplexKey.of(user.getId(), roomId, "preparation")));

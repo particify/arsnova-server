@@ -20,7 +20,7 @@ package de.thm.arsnova.controller.v2;
 import de.thm.arsnova.config.SecurityConfig;
 import de.thm.arsnova.controller.AbstractController;
 import de.thm.arsnova.entities.ServiceDescription;
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.security.User;
@@ -44,7 +44,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -251,11 +250,11 @@ public class AuthenticationController extends AbstractController {
 
 	@RequestMapping(value = { "/", "/whoami" }, method = RequestMethod.GET)
 	@ResponseBody
-	public UserAuthentication whoami(@AuthenticationPrincipal User user) {
+	public ClientAuthentication whoami(@AuthenticationPrincipal User user) {
 		if (user == null) {
 			throw new UnauthorizedException();
 		}
-		return new UserAuthentication(user);
+		return new ClientAuthentication(user);
 	}
 
 	@RequestMapping(value = { "/logout" }, method = { RequestMethod.POST, RequestMethod.GET })

@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.services;
 
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.persistance.UserRepository;
 import de.thm.arsnova.security.User;
@@ -25,11 +25,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -37,7 +35,7 @@ import java.util.UUID;
 
 public class StubUserService extends UserServiceImpl {
 	private final Set<GrantedAuthority> grantedAuthorities;
-	private UserAuthentication stubUser = null;
+	private ClientAuthentication stubUser = null;
 
 	public StubUserService(
 			UserRepository repository,
@@ -57,18 +55,18 @@ public class StubUserService extends UserServiceImpl {
 			UserProfile userProfile = new UserProfile(UserProfile.AuthProvider.ARSNOVA, username);
 			userProfile.setId(UUID.randomUUID().toString());
 			User user = new User(userProfile, grantedAuthorities);
-			stubUser = new UserAuthentication(user);
+			stubUser = new ClientAuthentication(user);
 		} else {
 			stubUser = null;
 		}
 	}
 
 	public void useAnonymousUser() {
-		stubUser = new UserAuthentication(new AnonymousAuthenticationToken(UUID.randomUUID().toString(), "anonymous", Collections.emptyList()));
+		stubUser = new ClientAuthentication(new AnonymousAuthenticationToken(UUID.randomUUID().toString(), "anonymous", Collections.emptyList()));
 	}
 
 	@Override
-	public UserAuthentication getCurrentUser() {
+	public ClientAuthentication getCurrentUser() {
 		return stubUser;
 	}
 }

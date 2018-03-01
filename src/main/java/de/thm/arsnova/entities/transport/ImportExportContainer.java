@@ -18,7 +18,7 @@
 package de.thm.arsnova.entities.transport;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import de.thm.arsnova.entities.migration.v2.Answer;
 import de.thm.arsnova.entities.migration.v2.Comment;
 import de.thm.arsnova.entities.migration.v2.Content;
@@ -134,7 +134,7 @@ public class ImportExportContainer {
 		questions.add(ieq);
 	}
 
-	public Room generateSessionEntity(UserAuthentication user) {
+	public Room generateSessionEntity(ClientAuthentication user) {
 		final Room s = new Room();
 		// import fields
 		s.setActive(session.isActive());

@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.services.score;
 
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -74,7 +74,7 @@ public class QuestionScore implements Iterable<UserScore> {
 		return totalScore;
 	}
 
-	public int getTotalUserScore(UserAuthentication user) {
+	public int getTotalUserScore(ClientAuthentication user) {
 		int totalScore = 0;
 		for (UserScore score : userScores) {
 			if (score.isUser(user)) {

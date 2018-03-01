@@ -21,7 +21,7 @@ import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.connector.model.UserRole;
 import de.thm.arsnova.controller.AbstractController;
-import de.thm.arsnova.entities.UserAuthentication;
+import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import de.thm.arsnova.exceptions.NotImplementedException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.UserService;
@@ -55,7 +55,7 @@ public class CourseController extends AbstractController {
 			@RequestParam(value = "sortby", defaultValue = "name") final String sortby
 			) {
 
-		final UserAuthentication currentUser = userService.getCurrentUser();
+		final ClientAuthentication currentUser = userService.getCurrentUser();
 
 		if (currentUser == null || currentUser.getUsername() == null) {
 			throw new UnauthorizedException();
