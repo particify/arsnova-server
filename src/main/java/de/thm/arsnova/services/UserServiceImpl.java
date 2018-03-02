@@ -399,6 +399,18 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
+	public User loadUser(final String userId, final Collection<GrantedAuthority> grantedAuthorities)
+			throws UsernameNotFoundException {
+		logger.debug("Load user: UserId: {}", userId);
+		UserProfile userProfile = userRepository.findOne(userId);
+		if (userProfile == null) {
+			throw new UsernameNotFoundException("User does not exist.");
+		}
+
+		return new User(userProfile, grantedAuthorities);
+	}
+
+	@Override
 	public UserProfile getByAuthProviderAndLoginId(final UserProfile.AuthProvider authProvider, final String loginId) {
 		return userRepository.findByAuthProviderAndLoginId(authProvider, loginId);
 	}

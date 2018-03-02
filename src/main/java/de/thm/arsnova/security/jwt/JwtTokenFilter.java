@@ -1,29 +1,50 @@
 package de.thm.arsnova.security.jwt;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
-import org.springframework.security.web.authentication.preauth.PreAuthenticatedCredentialsNotFoundException;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.GenericFilterBean;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
-public class JwtTokenFilter extends AbstractAuthenticationProcessingFilter {
+@Component
+public class JwtTokenFilter extends GenericFilterBean {
 	private static final String JWT_HEADER_NAME = "Arsnova-Auth-Token";
-
-	protected JwtTokenFilter() {
-		super(new AntPathRequestMatcher("/**"));
-	}
+	private static final Logger logger = LoggerFactory.getLogger(JwtTokenFilter.class);
+	private JwtAuthenticationProvider jwtAuthenticationProvider;
 
 	@Override
-	public Authentication attemptAuthentication(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws AuthenticationException {
-		String jwtHeader = httpServletRequest.getHeader(JWT_HEADER_NAME);
-		if (jwtHeader == null) {
-			throw new PreAuthenticatedCredentialsNotFoundException("No authentication header present.");
+	public void doFilter(final ServletRequest servletRequest, final ServletResponse servletResponse, final FilterChain filterChain) throws IOException, ServletException {
+		String jwtHeader = ((HttpServletRequest) servletRequest).getHeader(JWT_HEADER_NAME);
+		if (jwtHeader != null) {
+			JwtToken token = new JwtToken(jwtHeader);
+			try {
+				Authentication authenticatedToken = jwtAuthenticationProvider.authenticate(token);
+				if (authenticatedToken != null) {
+					logger.debug("Storing JWT to SecurityContext: {}", authenticatedToken);
+					SecurityContextHolder.getContext().setAuthentication(authenticatedToken);
+				} else {
+					logger.debug("Could not authenticate JWT.");
+				}
+			} catch (final Exception e) {
+				logger.debug("JWT authentication failed", e);
+			}
+		} else {
+			logger.debug("No authentication header present.");
 		}
-		JwtToken token = new JwtToken(jwtHeader);
+		filterChain.doFilter(servletRequest, servletResponse);
+	}
 
-		return getAuthenticationManager().authenticate(token);
+	@Autowired
+	public void setJwtAuthenticationProvider(final JwtAuthenticationProvider jwtAuthenticationProvider) {
+		this.jwtAuthenticationProvider = jwtAuthenticationProvider;
 	}
 }

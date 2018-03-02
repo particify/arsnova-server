@@ -23,6 +23,8 @@ import de.thm.arsnova.security.LoginAuthenticationFailureHandler;
 import de.thm.arsnova.security.LoginAuthenticationSucessHandler;
 import de.thm.arsnova.security.CustomLdapUserDetailsMapper;
 import de.thm.arsnova.security.RegisteredUserDetailsService;
+import de.thm.arsnova.security.jwt.JwtAuthenticationProvider;
+import de.thm.arsnova.security.jwt.JwtTokenFilter;
 import de.thm.arsnova.security.pac4j.OauthCallbackFilter;
 import de.thm.arsnova.security.pac4j.OauthAuthenticationProvider;
 import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
@@ -53,6 +55,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -67,6 +70,7 @@ import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -132,11 +136,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		http.exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint());
 		http.csrf().disable();
 		http.headers()
 			.addHeaderWriter(new HstsHeaderWriter(false));
 
+		http.addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 		if (casEnabled) {
 			http.addFilter(casAuthenticationFilter());
 			http.addFilter(casLogoutFilter());
@@ -150,6 +156,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		List<String> providers = new ArrayList<>();
+		auth.authenticationProvider(jwtAuthenticationProvider());
 		if (ldapEnabled) {
 			providers.add("ldap");
 			auth.authenticationProvider(ldapAuthenticationProvider());
@@ -198,6 +205,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public static AuthenticationEntryPoint restAuthenticationEntryPoint() {
 		return new Http403ForbiddenEntryPoint();
+	}
+
+	@Bean
+	public JwtAuthenticationProvider jwtAuthenticationProvider() {
+		return new JwtAuthenticationProvider();
+	}
+
+	@Bean
+	public JwtTokenFilter jwtTokenFilter() throws Exception {
+		JwtTokenFilter jwtTokenFilter = new JwtTokenFilter();
+		return jwtTokenFilter;
 	}
 
 	@Bean

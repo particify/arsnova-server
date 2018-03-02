@@ -73,6 +73,8 @@ public interface UserService extends EntityService<UserProfile> {
 	User loadUser(UserProfile.AuthProvider authProvider, String loginId,
 			Collection<GrantedAuthority> grantedAuthorities, boolean autoCreate) throws UsernameNotFoundException;
 
+	User loadUser(String userId, Collection<GrantedAuthority> grantedAuthorities);
+
 	UserProfile getByAuthProviderAndLoginId(UserProfile.AuthProvider authProvider, String loginId);
 
 	UserProfile getByUsername(String username);

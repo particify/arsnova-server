@@ -71,6 +71,6 @@ public class JwtService {
 		final Collection<GrantedAuthority> authorities = decodedJwt.getClaim(ROLES_CLAIM_NAME).asList(String.class).stream()
 				.map(role -> new SimpleGrantedAuthority(ROLE_PREFIX + role)).collect(Collectors.toList());
 
-		return new User(userService.get(userId), authorities);
+		return userService.loadUser(userId, authorities);
 	}
 }
