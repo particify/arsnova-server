@@ -25,6 +25,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 public class CorsFilter extends org.springframework.web.filter.CorsFilter {
+	private static final String TOKEN_HEADER_NAME = "Arsnova-Auth-Token";
 	private final Logger logger = LoggerFactory.getLogger(CorsFilter.class);
 
 	public CorsFilter(List<String> origins) {
@@ -43,9 +44,11 @@ public class CorsFilter extends org.springframework.web.filter.CorsFilter {
 			config.addAllowedHeader("Accept");
 			config.addAllowedHeader("Content-Type");
 			config.addAllowedHeader("X-Requested-With");
+			config.addAllowedHeader(TOKEN_HEADER_NAME);
 			config.addAllowedMethod("GET");
 			config.addAllowedMethod("POST");
 			config.addAllowedMethod("PUT");
+			config.addAllowedMethod("PATCH");
 			config.addAllowedMethod("DELETE");
 			config.setAllowCredentials(true);
 			source.registerCorsConfiguration("/**", config);
