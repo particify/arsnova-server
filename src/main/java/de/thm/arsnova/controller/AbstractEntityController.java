@@ -68,13 +68,13 @@ public abstract class AbstractEntityController<E extends Entity> {
 
 	@PutMapping(PUT_MAPPING)
 	public void put(@RequestBody final E entity) {
-		entityService.create(entity);
+		E oldEntity = entityService.get(entity.getId());
+		entityService.update(oldEntity, entity);
 	}
 
 	@PostMapping(POST_MAPPING)
 	public void post(@RequestBody final E entity) {
-		E oldEntity = entityService.get(entity.getId());
-		entityService.update(oldEntity, entity);
+		entityService.create(entity);
 	}
 
 	@PatchMapping(PATCH_MAPPING)
