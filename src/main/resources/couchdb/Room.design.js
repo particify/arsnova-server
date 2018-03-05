@@ -23,6 +23,13 @@ var designDoc = {
 				}
 			}
 		},
+		"by_ownerid": {
+			"map": function (doc) {
+				if (doc.type === "Room") {
+					emit(doc.ownerId, {_rev: doc._rev});
+				}
+			}
+		},
 		"by_lastactivity_for_guests": { /* needs rewrite */
 			"map": function (doc) {
 				if (doc.type === "Room" && !doc.poolProperties && doc.creator.indexOf("Guest") === 0) {

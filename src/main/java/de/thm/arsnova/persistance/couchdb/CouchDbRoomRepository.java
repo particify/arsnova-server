@@ -288,6 +288,15 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 	}
 
 	@Override
+	public List<String> findIdsByOwnerId(final String ownerId) {
+		ViewResult result = db.queryView(createQuery("by_ownerid")
+				.key(ownerId)
+				.includeDocs(false));
+
+		return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
+	}
+
+	@Override
 	public List<Room> findAllForPublicPool() {
 		// TODO replace with new view
 		return queryView("partial_by_category_name_for_pool");

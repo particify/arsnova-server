@@ -47,8 +47,7 @@ public class RoomFindQueryService implements FindQueryService<Room> {
 					.map(UserProfile.RoomHistoryEntry::getRoomId).collect(Collectors.toList()));
 		}
 		if (findQuery.getProperties().getOwnerId() != null) {
-			/* TODO: nyi */
-			// ids.add(roomService.getUserRooms(findQuery.getProperties().getOwnerId()));
+			ids.add(roomService.getUserRoomIds(findQuery.getProperties().getOwnerId()));
 		}
 
 		return ids.stream().flatMap(list -> list.stream()).collect(Collectors.toSet());
