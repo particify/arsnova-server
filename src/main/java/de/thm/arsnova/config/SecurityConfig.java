@@ -42,6 +42,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.ldap.core.support.LdapContextSource;
@@ -127,29 +128,53 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Value("${security.google.key}") private String googleKey;
 	@Value("${security.google.secret}") private String googleSecret;
 
+	public class HttpSecurityConfig extends WebSecurityConfigurerAdapter {
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+			http.exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint());
+			http.csrf().disable();
+			http.headers().addHeaderWriter(new HstsHeaderWriter(false));
+
+			http.addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+			if (casEnabled) {
+				http.addFilter(casAuthenticationFilter());
+				http.addFilter(casLogoutFilter());
+			}
+
+			if (facebookEnabled || googleEnabled || twitterEnabled) {
+				http.addFilterAfter(oauthCallbackFilter(), CasAuthenticationFilter.class);
+			}
+		}
+	}
+
+	@Configuration
+	@Order(2)
+	@Profile("!test")
+	public class StatelessHttpSecurityConfig extends HttpSecurityConfig {
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+			super.configure(http);
+			http.antMatcher("/**");
+			http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+		}
+	}
+
+	@Configuration
+	@Order(1)
+	@Profile("!test")
+	public class StatefulHttpSecurityConfig extends HttpSecurityConfig {
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+			super.configure(http);
+			http.antMatcher("/v2/**");
+			http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
+		}
+	}
+
 	@PostConstruct
 	private void init() {
 		if ("".equals(apiPath)) {
 			apiPath = servletContext.getContextPath();
-		}
-	}
-
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-		http.exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint());
-		http.csrf().disable();
-		http.headers()
-			.addHeaderWriter(new HstsHeaderWriter(false));
-
-		http.addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-		if (casEnabled) {
-			http.addFilter(casAuthenticationFilter());
-			http.addFilter(casLogoutFilter());
-		}
-
-		if (facebookEnabled || googleEnabled || twitterEnabled) {
-			http.addFilterAfter(oauthCallbackFilter(), CasAuthenticationFilter.class);
 		}
 	}
 
