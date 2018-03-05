@@ -177,7 +177,6 @@ public class ToV2Migrator {
 		to.setSessionId(from.getRoomId());
 		to.setSubject(from.getSubject());
 		to.setText(from.getBody());
-		to.setQuestionVariant(from.getGroup());
 		to.setAbstention(from.isAbstentionsAllowed());
 
 		if (from instanceof ChoiceQuestionContent) {

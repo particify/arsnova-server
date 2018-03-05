@@ -3,22 +3,28 @@ package de.thm.arsnova.entities;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 public class Room extends Entity {
 	public static class ContentGroup {
-		private List<String> contentIds;
+		private Set<String> contentIds;
 		private boolean autoSort;
 
 		@JsonView({View.Persistence.class, View.Public.class})
-		public List<String> getContentIds() {
+		public Set<String> getContentIds() {
+			if (contentIds == null) {
+				contentIds = new HashSet<>();
+			}
+
 			return contentIds;
 		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
-		public void setContentIds(final List<String> contentIds) {
+		public void setContentIds(final Set<String> contentIds) {
 			this.contentIds = contentIds;
 		}
 

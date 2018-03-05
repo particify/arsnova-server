@@ -5,8 +5,10 @@ import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 @JsonTypeInfo(
 		use = JsonTypeInfo.Id.NAME,
@@ -96,7 +98,7 @@ public class Content extends Entity {
 	private String subject;
 	private String body;
 	private Format format;
-	private String group;
+	private Set<String> groups;
 	private boolean abstentionsAllowed;
 	private State state;
 	private Date timestamp;
@@ -144,13 +146,17 @@ public class Content extends Entity {
 	}
 
 	@JsonView(View.Public.class)
-	public String getGroup() {
-		return group;
+	public Set<String> getGroups() {
+		if (groups == null) {
+			groups = new HashSet<>();
+		}
+
+		return groups;
 	}
 
 	@JsonView(View.Public.class)
-	public void setGroup(final String group) {
-		this.group = group;
+	public void setGroups(final Set<String> groups) {
+		this.groups = groups;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
@@ -227,7 +233,7 @@ public class Content extends Entity {
 				Objects.equals(subject, content.subject) &&
 				Objects.equals(body, content.body) &&
 				format == content.format &&
-				Objects.equals(group, content.group) &&
+				Objects.equals(groups, content.groups) &&
 				Objects.equals(timestamp, content.timestamp);
 	}
 }

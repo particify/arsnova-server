@@ -142,9 +142,9 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@Caching(evict = {@CacheEvict(value = "contentlists", key = "#roomId"),
-			@CacheEvict(value = "lecturecontentlists", key = "#roomId", condition = "'lecture'.equals(#content.getGroup())"),
-			@CacheEvict(value = "preparationcontentlists", key = "#roomId", condition = "'preparation'.equals(#content.getGroup())"),
-			@CacheEvict(value = "flashcardcontentlists", key = "#roomId", condition = "'flashcard'.equals(#content.getGroup())") },
+			@CacheEvict(value = "lecturecontentlists", key = "#roomId", condition = "#content.getGroups().contains('lecture')"),
+			@CacheEvict(value = "preparationcontentlists", key = "#roomId", condition = "#content.getGroups().contains('preparation')"),
+			@CacheEvict(value = "flashcardcontentlists", key = "#roomId", condition = "#content.getGroups().contains('flashcard')") },
 			put = {@CachePut(value = "contents", key = "#content.id")})
 	public Content save(final String roomId, final Content content) {
 		content.setRoomId(roomId);
@@ -163,9 +163,9 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@PreAuthorize("isAuthenticated()")
 	@Caching(evict = {
 			@CacheEvict(value = "contentlists", allEntries = true),
-			@CacheEvict(value = "lecturecontentlists", allEntries = true, condition = "'lecture'.equals(#content.getGroup())"),
-			@CacheEvict(value = "preparationcontentlists", allEntries = true, condition = "'preparation'.equals(#content.getGroup())"),
-			@CacheEvict(value = "flashcardcontentlists", allEntries = true, condition = "'flashcard'.equals(#content.getGroup())") },
+			@CacheEvict(value = "lecturecontentlists", allEntries = true, condition = "#content.getGroups().contains('lecture')"),
+			@CacheEvict(value = "preparationcontentlists", allEntries = true, condition = "#content.getGroups().contains('preparation')"),
+			@CacheEvict(value = "flashcardcontentlists", allEntries = true, condition = "#content.getGroups().contains('flashcard')") },
 			put = {@CachePut(value = "contents", key = "#content.id")})
 	public Content update(final Content content) {
 		final ClientAuthentication user = userService.getCurrentUser();
@@ -188,6 +188,8 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		content.setId(oldContent.getId());
 		content.setRevision(oldContent.getRevision());
 		contentRepository.save(content);
+
+		/* TODO: nyi: updating content groups */
 
 		if (!oldContent.getState().isVisible() && content.getState().isVisible()) {
 			final UnlockQuestionEvent event = new UnlockQuestionEvent(this, room, content);
@@ -245,6 +247,12 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 		final Content result = save(room.getId(), content);
 
+		for (final String groupName : result.getGroups()) {
+			Room.ContentGroup group = room.getContentGroups().getOrDefault(groupName, new Room.ContentGroup());
+			group.getContentIds().add(result.getId());
+		}
+		roomRepository.save(room);
+
 		final NewQuestionEvent event = new NewQuestionEvent(this, room, result);
 		this.publisher.publishEvent(event);
 
@@ -258,9 +266,9 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			@CacheEvict("answerlists"),
 			@CacheEvict(value = "contents", key = "#contentId"),
 			@CacheEvict(value = "contentlists", allEntries = true),
-			@CacheEvict(value = "lecturecontentlists", allEntries = true /*, condition = "'lecture'.equals(#content.getGroup())"*/),
-			@CacheEvict(value = "preparationcontentlists", allEntries = true /*, condition = "'preparation'.equals(#content.getGroup())"*/),
-			@CacheEvict(value = "flashcardcontentlists", allEntries = true /*, condition = "'flashcard'.equals(#content.getGroup())"*/) })
+			@CacheEvict(value = "lecturecontentlists", allEntries = true /*, condition = "#content.getGroups().contains('lecture')"*/),
+			@CacheEvict(value = "preparationcontentlists", allEntries = true /*, condition = "#content.getGroups().contains('preparation')"*/),
+			@CacheEvict(value = "flashcardcontentlists", allEntries = true /*, condition = "#content.getGroups().contains('flashcard')"*/) })
 	public void delete(final String contentId) {
 		final Content content = contentRepository.findOne(contentId);
 		if (content == null) {
@@ -271,6 +279,12 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		if (room == null) {
 			throw new UnauthorizedException();
 		}
+
+		for (final String groupName : content.getGroups()) {
+			Room.ContentGroup group = room.getContentGroups().getOrDefault(groupName, new Room.ContentGroup());
+			group.getContentIds().remove(content.getId());
+		}
+		roomRepository.save(room);
 
 		try {
 			final int count = answerRepository.deleteByContentId(contentId);

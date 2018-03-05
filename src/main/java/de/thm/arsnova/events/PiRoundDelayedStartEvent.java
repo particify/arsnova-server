@@ -40,7 +40,8 @@ public class PiRoundDelayedStartEvent extends RoomEvent {
 	public PiRoundDelayedStartEvent(Object source, Room room, Content content) {
 		super(source, room);
 		this.questionId = content.getId();
-		this.group = content.getGroup();
+		/* FIXME: Event does not support content with multiple groups */
+		this.group = content.getGroups().toArray(new String[1])[0];
 		this.piRound = content.getState().getRound();
 		this.endTime = content.getState().getRoundEndTimestamp();
 		this.startTime = new Date();

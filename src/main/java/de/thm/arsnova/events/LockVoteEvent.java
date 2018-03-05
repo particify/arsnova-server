@@ -42,7 +42,8 @@ public class LockVoteEvent extends RoomEvent {
 	}
 
 	public String getGroup() {
-		return this.content.getGroup();
+		/* FIXME: Event does not support content with multiple groups */
+		return content.getGroups().toArray(new String[1])[0];
 	}
 
 	public Boolean getVotingDisabled() {

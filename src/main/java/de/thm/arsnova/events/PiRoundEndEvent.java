@@ -36,7 +36,8 @@ public class PiRoundEndEvent extends RoomEvent {
 	public PiRoundEndEvent(Object source, Room room, Content content) {
 		super(source, room);
 		contentId = content.getId();
-		group = content.getGroup();
+		/* FIXME: Event does not support content with multiple groups */
+		this.group = content.getGroups().toArray(new String[1])[0];
 	}
 
 	@Override

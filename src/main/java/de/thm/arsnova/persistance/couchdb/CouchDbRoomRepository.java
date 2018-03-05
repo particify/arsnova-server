@@ -141,7 +141,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 //					answerDoc.put("sessionId", a.getRoomId());
 //					answerDoc.put("questionId", a.getContentId());
 //					answerDoc.put("answerSubject", a.getAnswerSubject());
-//					answerDoc.put("questionVariant", a.getGroup());
+//					answerDoc.put("questionVariant", a.getGroups());
 //					answerDoc.put("questionValue", a.getQuestionValue());
 //					answerDoc.put("answerText", a.getAnswerText());
 //					answerDoc.put("answerTextRaw", a.getAnswerTextRaw());

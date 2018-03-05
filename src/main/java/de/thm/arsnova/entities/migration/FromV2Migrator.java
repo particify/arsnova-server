@@ -215,7 +215,6 @@ public class FromV2Migrator {
 		to.setRoomId(from.getSessionId());
 		to.setSubject(from.getSubject());
 		to.setBody(from.getText());
-		to.setGroup(from.getQuestionVariant());
 		to.setAbstentionsAllowed(from.isAbstention());
 		to.setAbstentionsAllowed(from.isAbstention());
 		de.thm.arsnova.entities.Content.State state = to.getState();
