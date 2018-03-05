@@ -31,9 +31,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.naming.OperationNotSupportedException;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -49,6 +51,7 @@ public abstract class AbstractEntityController<E extends Entity> {
 	protected static final String DEFAULT_ID_MAPPING = "/{id}";
 	protected static final String DEFAULT_FIND_MAPPING = "/find";
 	protected static final String GET_MAPPING = DEFAULT_ID_MAPPING;
+	protected static final String GET_MULTIPLE_MAPPING = DEFAULT_ROOT_MAPPING;
 	protected static final String PUT_MAPPING = DEFAULT_ID_MAPPING;
 	protected static final String POST_MAPPING = DEFAULT_ROOT_MAPPING;
 	protected static final String PATCH_MAPPING = DEFAULT_ID_MAPPING;
@@ -64,6 +67,11 @@ public abstract class AbstractEntityController<E extends Entity> {
 	@GetMapping(GET_MAPPING)
 	public E get(@PathVariable final String id) {
 		return entityService.get(id);
+	}
+
+	@GetMapping(GET_MULTIPLE_MAPPING)
+	public Iterable<E> getMultiple(@RequestParam final Collection<String> ids) {
+		return entityService.get(ids);
 	}
 
 	@PutMapping(PUT_MAPPING)
