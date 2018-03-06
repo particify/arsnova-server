@@ -4,6 +4,7 @@ import de.thm.arsnova.entities.ClientAuthentication;
 import de.thm.arsnova.entities.LoginCredentials;
 import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.services.UserService;
+import org.pac4j.core.client.Client;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +30,19 @@ public class AuthenticationController {
 		final String loginId = loginCredentials.getLoginId().toLowerCase();
 		userService.authenticate(new UsernamePasswordAuthenticationToken(loginId, loginCredentials.getPassword()),
 				UserProfile.AuthProvider.ARSNOVA);
+		return userService.getCurrentClientAuthentication();
+	}
+
+	@PostMapping("/login/guest")
+	public ClientAuthentication loginGuest() {
+		final ClientAuthentication currentAuthentication = userService.getCurrentClientAuthentication();
+		if (currentAuthentication != null
+				&& currentAuthentication.getAuthProvider() == UserProfile.AuthProvider.ARSNOVA_GUEST) {
+			return currentAuthentication;
+		}
+		userService.authenticate(new UsernamePasswordAuthenticationToken(null, null),
+				UserProfile.AuthProvider.ARSNOVA_GUEST);
+
 		return userService.getCurrentClientAuthentication();
 	}
 }

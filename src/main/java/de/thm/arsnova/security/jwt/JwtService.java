@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import de.thm.arsnova.entities.UserProfile;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.services.UserService;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +28,8 @@ public class JwtService {
 	private static final String ROLES_CLAIM_NAME = "roles";
 	private Algorithm algorithm;
 	private String serverId;
-	private TemporalAmount validityPeriod;
+	private TemporalAmount defaultValidityPeriod;
+	private TemporalAmount guestValidityPeriod;
 	private JWTVerifier verifier;
 	private UserService userService;
 
@@ -35,15 +37,16 @@ public class JwtService {
 			final UserService userService,
 			@Value("${" + CONFIG_PREFIX + "secret}") final String secret,
 			@Value("${" + CONFIG_PREFIX + "serverId}") final String serverId,
-			@Value("${" + CONFIG_PREFIX + "validity-period}") final String validityPeriod)
+			@Value("${" + CONFIG_PREFIX + "validity-period}") final String defaultValidityPeriod)
 			throws UnsupportedEncodingException {
 		this.userService = userService;
 		this.serverId = serverId;
 		try {
-			this.validityPeriod = Duration.parse("P" + validityPeriod);
+			this.defaultValidityPeriod = Duration.parse("P" + defaultValidityPeriod);
 		} catch (Exception e) {
-			throw new IllegalArgumentException(validityPeriod, e);
+			throw new IllegalArgumentException(defaultValidityPeriod, e);
 		}
+		guestValidityPeriod = Duration.parse("P180D");
 		algorithm = Algorithm.HMAC256(secret);
 		verifier = JWT.require(algorithm)
 				.withAudience(serverId)
@@ -55,11 +58,13 @@ public class JwtService {
 				.map(ga -> ga.getAuthority())
 				.filter(ga -> ga.startsWith(ROLE_PREFIX))
 				.map(ga -> ga.substring(ROLE_PREFIX.length())).toArray(String[]::new);
+		final TemporalAmount expiresAt = user.getAuthProvider() == UserProfile.AuthProvider.ARSNOVA_GUEST
+				? guestValidityPeriod : defaultValidityPeriod;
 		return JWT.create()
 				.withIssuer(serverId)
 				.withAudience(serverId)
 				.withIssuedAt(new Date())
-				.withExpiresAt(Date.from(LocalDateTime.now().plus(validityPeriod).toInstant(ZoneOffset.UTC)))
+				.withExpiresAt(Date.from(LocalDateTime.now().plus(expiresAt).toInstant(ZoneOffset.UTC)))
 				.withSubject(user.getId())
 				.withArrayClaim(ROLES_CLAIM_NAME, roles)
 				.sign(algorithm);
