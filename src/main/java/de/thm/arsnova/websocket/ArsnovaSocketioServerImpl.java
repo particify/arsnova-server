@@ -36,6 +36,7 @@ import de.thm.arsnova.events.*;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.services.AnswerService;
 import de.thm.arsnova.services.CommentService;
 import de.thm.arsnova.services.FeedbackService;
 import de.thm.arsnova.services.ContentService;
@@ -80,6 +81,9 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 
 	@Autowired
 	private ContentService contentService;
+
+	@Autowired
+	private AnswerService answerService;
 
 	@Autowired
 	private CommentService commentService;
@@ -216,7 +220,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 			public void onData(SocketIOClient client, String answerId, AckRequest ackRequest) {
 				final ClientAuthentication user = userService.getUserToSocketId(client.getSessionId());
 				try {
-					contentService.getFreetextAnswerAndMarkRead(answerId, user);
+					answerService.getFreetextAnswerAndMarkRead(answerId, user);
 				} catch (NotFoundException | UnauthorizedException e) {
 					logger.error("Marking answer {} as read failed for user {} with exception {}", answerId, user, e.getMessage());
 				}
@@ -378,8 +382,8 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		client.sendEvent("unansweredLecturerQuestions", contentService.getUnAnsweredLectureContentIds(roomId, user));
 		client.sendEvent("unansweredPreparationQuestions", contentService.getUnAnsweredPreparationContentIds(roomId, user));
 		/* FIXME: Content variant is ignored for now */
-		client.sendEvent("countLectureQuestionAnswers", contentService.countTotalAnswersByRoomId(roomId));
-		client.sendEvent("countPreparationQuestionAnswers", contentService.countTotalAnswersByRoomId(roomId));
+		client.sendEvent("countLectureQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
+		client.sendEvent("countPreparationQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
 		client.sendEvent("activeUserCountData", roomService.activeUsers(roomId));
 //		client.sendEvent("learningProgressOptions", room.getLearningProgressOptions());
 		final de.thm.arsnova.entities.Feedback fb = feedbackService.getByRoomId(roomId);
@@ -522,10 +526,10 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 	public void visit(NewAnswerEvent event) {
 		final String roomId = event.getRoom().getId();
 		this.reportAnswersToContentAvailable(event.getRoom(), new Content(event.getContent()));
-		broadcastInRoom(roomId, "countQuestionAnswersByQuestionId", contentService.countAnswersAndAbstentionsInternal(event.getContent().getId()));
+		broadcastInRoom(roomId, "countQuestionAnswersByQuestionId", answerService.countAnswersAndAbstentionsInternal(event.getContent().getId()));
 		/* FIXME: Content variant is ignored for now */
-		broadcastInRoom(roomId, "countLectureQuestionAnswers", contentService.countTotalAnswersByRoomId(roomId));
-		broadcastInRoom(roomId, "countPreparationQuestionAnswers", contentService.countTotalAnswersByRoomId(roomId));
+		broadcastInRoom(roomId, "countLectureQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
+		broadcastInRoom(roomId, "countPreparationQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
 
 		// Update the unanswered count for the content variant that was answered.
 		final de.thm.arsnova.entities.Content content = event.getContent();
@@ -544,8 +548,8 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		this.reportAnswersToContentAvailable(event.getRoom(), new Content(event.getQuestion()));
 		// We do not know which user's answer was deleted, so we can't update his 'unanswered' list of questions...
 		/* FIXME: Content variant is ignored for now */
-		broadcastInRoom(roomId, "countLectureQuestionAnswers", contentService.countTotalAnswersByRoomId(roomId));
-		broadcastInRoom(roomId, "countPreparationQuestionAnswers", contentService.countTotalAnswersByRoomId(roomId));
+		broadcastInRoom(roomId, "countLectureQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
+		broadcastInRoom(roomId, "countPreparationQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
 	}
 
 	@Async

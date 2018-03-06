@@ -30,6 +30,7 @@ import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.NotImplementedException;
+import de.thm.arsnova.services.AnswerService;
 import de.thm.arsnova.services.ContentService;
 import de.thm.arsnova.services.RoomService;
 import de.thm.arsnova.services.TimerService;
@@ -68,6 +69,9 @@ import java.util.stream.Collectors;
 public class ContentController extends PaginationController {
 	@Autowired
 	private ContentService contentService;
+
+	@Autowired
+	private AnswerService answerService;
 
 	@Autowired
 	private RoomService roomService;
@@ -444,7 +448,7 @@ public class ContentController extends PaginationController {
 			final HttpServletResponse response
 			) {
 		final de.thm.arsnova.entities.Content content = contentService.get(contentId);
-		final de.thm.arsnova.entities.Answer answer = contentService.getMyAnswer(contentId);
+		final de.thm.arsnova.entities.Answer answer = answerService.getMyAnswer(contentId);
 		if (answer == null) {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
 			return null;
@@ -481,21 +485,21 @@ public class ContentController extends PaginationController {
 			final HttpServletResponse response) {
 		final de.thm.arsnova.entities.Content content = contentService.get(contentId);
 		if (content instanceof ChoiceQuestionContent) {
-			return toV2Migrator.migrate(contentService.getAllStatistics(contentId),
+			return toV2Migrator.migrate(answerService.getAllStatistics(contentId),
 					(ChoiceQuestionContent) content, content.getState().getRound());
 		} else {
 			List<de.thm.arsnova.entities.TextAnswer> answers;
 			if (allAnswers) {
-				answers = contentService.getAllTextAnswers(contentId, -1, -1);
+				answers = answerService.getAllTextAnswers(contentId, -1, -1);
 			} else if (null == piRound) {
-				answers = contentService.getTextAnswers(contentId, offset, limit);
+				answers = answerService.getTextAnswers(contentId, offset, limit);
 			} else {
 				if (piRound < 1 || piRound > 2) {
 					response.setStatus(HttpStatus.BAD_REQUEST.value());
 
 					return null;
 				}
-				answers = contentService.getTextAnswers(contentId, piRound, offset, limit);
+				answers = answerService.getTextAnswers(contentId, piRound, offset, limit);
 			}
 			if (answers == null) {
 				return new ArrayList<>();
@@ -517,9 +521,9 @@ public class ContentController extends PaginationController {
 		final de.thm.arsnova.entities.Answer answerV3 = fromV2Migrator.migrate(answer, contentV2);
 
 		if (answerV3 instanceof TextAnswer) {
-			return toV2Migrator.migrate((TextAnswer) contentService.saveAnswer(contentId, answerV3));
+			return toV2Migrator.migrate((TextAnswer) answerService.saveAnswer(contentId, answerV3));
 		} else {
-			return  toV2Migrator.migrate((ChoiceAnswer) contentService.saveAnswer(contentId, answerV3), (ChoiceQuestionContent) content);
+			return  toV2Migrator.migrate((ChoiceAnswer) answerService.saveAnswer(contentId, answerV3), (ChoiceQuestionContent) content);
 		}
 	}
 
@@ -537,9 +541,9 @@ public class ContentController extends PaginationController {
 		final de.thm.arsnova.entities.Answer answerV3 = fromV2Migrator.migrate(answer, contentV2);
 
 		if (answerV3 instanceof TextAnswer) {
-			return toV2Migrator.migrate((TextAnswer) contentService.updateAnswer(answerV3));
+			return toV2Migrator.migrate((TextAnswer) answerService.updateAnswer(answerV3));
 		} else {
-			return  toV2Migrator.migrate((ChoiceAnswer) contentService.updateAnswer(answerV3), (ChoiceQuestionContent) content);
+			return  toV2Migrator.migrate((ChoiceAnswer) answerService.updateAnswer(answerV3), (ChoiceQuestionContent) content);
 		}
 	}
 
@@ -563,7 +567,7 @@ public class ContentController extends PaginationController {
 			@PathVariable final String answerId,
 			final HttpServletResponse response
 			) {
-		contentService.deleteAnswer(contentId, answerId);
+		answerService.deleteAnswer(contentId, answerId);
 	}
 
 	@ApiOperation(value = "Delete answers from a content, identified by content ID",
@@ -573,7 +577,7 @@ public class ContentController extends PaginationController {
 			@PathVariable final String contentId,
 			final HttpServletResponse response
 			) {
-		contentService.deleteAnswers(contentId);
+		answerService.deleteAnswers(contentId);
 	}
 
 	@ApiOperation(value = "Delete all answers and contents from a room, identified by room short ID",
@@ -614,7 +618,7 @@ public class ContentController extends PaginationController {
 	@Deprecated
 	@RequestMapping(value = "/{contentId}/answercount", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getAnswerCount(@PathVariable final String contentId) {
-		return String.valueOf(contentService.countAnswersByContentIdAndRound(contentId));
+		return String.valueOf(answerService.countAnswersByContentIdAndRound(contentId));
 	}
 
 	@ApiOperation(value = "Get the amount of answers for a content, identified by the content ID",
@@ -622,8 +626,8 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/{contentId}/allroundanswercount", method = RequestMethod.GET)
 	public List<Integer> getAllAnswerCount(@PathVariable final String contentId) {
 		return Arrays.asList(
-			contentService.countAnswersByContentIdAndRound(contentId, 1),
-			contentService.countAnswersByContentIdAndRound(contentId, 2)
+				answerService.countAnswersByContentIdAndRound(contentId, 1),
+				answerService.countAnswersByContentIdAndRound(contentId, 2)
 		);
 	}
 
@@ -631,7 +635,7 @@ public class ContentController extends PaginationController {
 			nickname = "getTotalAnswerCountByContent")
 	@RequestMapping(value = "/{contentId}/totalanswercount", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getTotalAnswerCountByContent(@PathVariable final String contentId) {
-		return String.valueOf(contentService.countTotalAnswersByContentId(contentId));
+		return String.valueOf(answerService.countTotalAnswersByContentId(contentId));
 	}
 
 	@ApiOperation(value = "Get the amount of answers and abstention answers by a content, identified by the content ID",
@@ -639,8 +643,8 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/{contentId}/answerandabstentioncount", method = RequestMethod.GET)
 	public List<Integer> getAnswerAndAbstentionCount(@PathVariable final String contentId) {
 		return Arrays.asList(
-			contentService.countAnswersByContentIdAndRound(contentId),
-			contentService.countTotalAbstentionsByContentId(contentId)
+				answerService.countAnswersByContentIdAndRound(contentId),
+				answerService.countTotalAbstentionsByContentId(contentId)
 		);
 	}
 
@@ -649,7 +653,7 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/{contentId}/freetextanswer/", method = RequestMethod.GET)
 	@Pagination
 	public List<Answer> getFreetextAnswers(@PathVariable final String contentId) {
-		return contentService.getTextAnswersByContentId(contentId, offset, limit).stream()
+		return answerService.getTextAnswersByContentId(contentId, offset, limit).stream()
 				.map(toV2Migrator::migrate).collect(Collectors.toList());
 	}
 
@@ -659,7 +663,7 @@ public class ContentController extends PaginationController {
 	@Deprecated
 	@RequestMapping(value = "/myanswers", method = RequestMethod.GET)
 	public List<Answer> getMyAnswers(@RequestParam(value = "sessionkey") final String roomShortId) throws OperationNotSupportedException {
-		return contentService.getMyAnswersByRoomId(roomService.getIdByShortId(roomShortId)).stream()
+		return answerService.getMyAnswersByRoomId(roomService.getIdByShortId(roomShortId)).stream()
 				.map(a -> {
 					if (a instanceof ChoiceAnswer) {
 						return toV2Migrator.migrate(
@@ -685,11 +689,11 @@ public class ContentController extends PaginationController {
 		/* FIXME: Content variant is ignored for now */
 		lectureContentsOnly = preparationContentsOnly = false;
 		if (lectureContentsOnly) {
-			count = contentService.countLectureContentAnswers(roomId);
+			count = answerService.countLectureContentAnswers(roomId);
 		} else if (preparationContentsOnly) {
-			count = contentService.countPreparationContentAnswers(roomId);
+			count = answerService.countPreparationContentAnswers(roomId);
 		} else {
-			count = contentService.countTotalAnswersByRoomId(roomId);
+			count = answerService.countTotalAnswersByRoomId(roomId);
 		}
 
 		return String.valueOf(count);
