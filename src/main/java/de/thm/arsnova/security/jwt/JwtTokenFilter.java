@@ -23,7 +23,12 @@ public class JwtTokenFilter extends GenericFilterBean {
 
 	@Override
 	public void doFilter(final ServletRequest servletRequest, final ServletResponse servletResponse, final FilterChain filterChain) throws IOException, ServletException {
-		String jwtHeader = ((HttpServletRequest) servletRequest).getHeader(JWT_HEADER_NAME);
+		final HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
+		if (httpServletRequest.getRequestURI().startsWith("/v2/")) {
+			filterChain.doFilter(servletRequest, servletResponse);
+			return;
+		}
+		String jwtHeader = httpServletRequest.getHeader(JWT_HEADER_NAME);
 		if (jwtHeader != null) {
 			JwtToken token = new JwtToken(jwtHeader);
 			try {
