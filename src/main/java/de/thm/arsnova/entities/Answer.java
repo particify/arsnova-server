@@ -3,6 +3,7 @@ package de.thm.arsnova.entities;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
+import org.springframework.core.style.ToStringCreator;
 
 import java.util.Map;
 import java.util.Objects;
@@ -88,5 +89,14 @@ public abstract class Answer extends Entity {
 				Objects.equals(contentId, answer.contentId) &&
 				Objects.equals(roomId, answer.roomId) &&
 				Objects.equals(creatorId, answer.creatorId);
+	}
+
+	@Override
+	protected ToStringCreator buildToString() {
+		return super.buildToString()
+				.append("contentId", contentId)
+				.append("roomId", roomId)
+				.append("creatorId", creatorId)
+				.append("round", round);
 	}
 }

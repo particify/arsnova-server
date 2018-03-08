@@ -2,6 +2,7 @@ package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
+import org.springframework.core.style.ToStringCreator;
 
 public class LoginCredentials {
 	private String loginId;
@@ -23,5 +24,13 @@ public class LoginCredentials {
 	@JsonView(View.Public.class)
 	public void setPassword(final String password) {
 		this.password = password;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringCreator(this)
+				.append("loginId", loginId)
+				.append("password", password)
+				.toString();
 	}
 }

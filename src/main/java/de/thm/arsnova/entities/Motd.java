@@ -2,6 +2,7 @@ package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
+import org.springframework.core.style.ToStringCreator;
 
 import java.util.Date;
 import java.util.Objects;
@@ -115,5 +116,16 @@ public class Motd extends Entity {
 				Objects.equals(title, motd.title) &&
 				Objects.equals(body, motd.body) &&
 				audience == motd.audience;
+	}
+
+	@Override
+	protected ToStringCreator buildToString() {
+		return super.buildToString()
+				.append("roomId", roomId)
+				.append("startDate", startDate)
+				.append("endDate", endDate)
+				.append("title", title)
+				.append("body", body)
+				.append("audience", audience);
 	}
 }

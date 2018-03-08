@@ -2,6 +2,7 @@ package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
+import org.springframework.core.style.ToStringCreator;
 
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +37,14 @@ public class Room extends Entity {
 		@JsonView({View.Persistence.class, View.Public.class})
 		public void setAutoSort(final boolean autoSort) {
 			this.autoSort = autoSort;
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringCreator(this)
+					.append("contentIds", contentIds)
+					.append("autoSort", autoSort)
+					.toString();
 		}
 	}
 
@@ -150,6 +159,22 @@ public class Room extends Entity {
 		public void setFeedbackLocked(final boolean feedbackLocked) {
 			this.feedbackLocked = feedbackLocked;
 		}
+
+		@Override
+		public String toString() {
+			return new ToStringCreator(this)
+					.append("questionsEnabled", questionsEnabled)
+					.append("slidesEnabled", slidesEnabled)
+					.append("commentsEnabled", commentsEnabled)
+					.append("flashcardsEnabled", flashcardsEnabled)
+					.append("quickSurveyEnabled", quickSurveyEnabled)
+					.append("quickFeedbackEnabled", quickFeedbackEnabled)
+					.append("scoreEnabled", scoreEnabled)
+					.append("multipleRoundsEnabled", multipleRoundsEnabled)
+					.append("timerEnabled", timerEnabled)
+					.append("feedbackLocked", feedbackLocked)
+					.toString();
+		}
 	}
 
 	public static class Author {
@@ -208,6 +233,17 @@ public class Room extends Entity {
 		public void setOrganizationUnit(final String organizationUnit) {
 			this.organizationUnit = organizationUnit;
 		}
+
+		@Override
+		public String toString() {
+			return new ToStringCreator(this)
+					.append("name", name)
+					.append("mail", mail)
+					.append("organizationName", organizationName)
+					.append("organizationLogo", organizationLogo)
+					.append("organizationUnit", organizationUnit)
+					.toString();
+		}
 	}
 
 	public static class PoolProperties {
@@ -243,6 +279,15 @@ public class Room extends Entity {
 		@JsonView({View.Persistence.class, View.Public.class})
 		public void setLicense(final String license) {
 			this.license = license;
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringCreator(this)
+					.append("category", category)
+					.append("level", level)
+					.append("license", license)
+					.toString();
 		}
 	}
 
@@ -416,5 +461,22 @@ public class Room extends Entity {
 				Objects.equals(name, room.name) &&
 				Objects.equals(abbreviation, room.abbreviation) &&
 				Objects.equals(description, room.description);
+	}
+
+	@Override
+	protected ToStringCreator buildToString() {
+		return super.buildToString()
+				.append("shortId", shortId)
+				.append("ownerId", ownerId)
+				.append("name", name)
+				.append("abbreviation", abbreviation)
+				.append("description", description)
+				.append("closed", closed)
+				.append("contentGroups", contentGroups)
+				.append("settings", settings)
+				.append("author", author)
+				.append("poolProperties", poolProperties)
+				.append("attachments", attachments)
+				.append("statistics", statistics);
 	}
 }

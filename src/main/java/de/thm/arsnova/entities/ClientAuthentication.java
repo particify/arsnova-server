@@ -2,6 +2,7 @@ package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
+import org.springframework.core.style.ToStringCreator;
 
 public class ClientAuthentication {
 	private String userId;
@@ -35,5 +36,15 @@ public class ClientAuthentication {
 	@JsonView(View.Public.class)
 	public String getToken() {
 		return token;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringCreator(this)
+				.append("userId", userId)
+				.append("loginId", loginId)
+				.append("authProvider", authProvider)
+				.append("token", token)
+				.toString();
 	}
 }

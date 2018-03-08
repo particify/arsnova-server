@@ -2,6 +2,7 @@ package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
+import org.springframework.core.style.ToStringCreator;
 
 public class RoomStatistics {
 	private int contentCount = 0;
@@ -64,5 +65,17 @@ public class RoomStatistics {
 
 	public void setUnreadCommentCount(final int unreadCommentCount) {
 		this.unreadCommentCount = unreadCommentCount;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringCreator(this)
+				.append("contentCount", contentCount)
+				.append("unansweredContentCount", unansweredContentCount)
+				.append("answerCount", answerCount)
+				.append("unreadAnswerCount", unreadAnswerCount)
+				.append("commentCount", commentCount)
+				.append("unreadCommentCount", unreadCommentCount)
+				.toString();
 	}
 }

@@ -2,6 +2,7 @@ package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
+import org.springframework.core.style.ToStringCreator;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -67,6 +68,16 @@ public class UserProfile extends Entity {
 		public void setPasswordResetTime(final Date passwordResetTime) {
 			this.passwordResetTime = passwordResetTime;
 		}
+
+		@Override
+		public String toString() {
+			return new ToStringCreator(this)
+					.append("password", password)
+					.append("activationKey", activationKey)
+					.append("passwordResetKey", passwordResetKey)
+					.append("passwordResetTime", passwordResetTime)
+					.toString();
+		}
 	}
 
 	public static class RoomHistoryEntry {
@@ -118,6 +129,14 @@ public class UserProfile extends Entity {
 		@Override
 		public int hashCode() {
 			return Objects.hash(roomId);
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringCreator(this)
+					.append("roomId", roomId)
+					.append("lastVisit", lastVisit)
+					.toString();
 		}
 	}
 
@@ -231,5 +250,16 @@ public class UserProfile extends Entity {
 		return authProvider == that.authProvider &&
 				Objects.equals(loginId, that.loginId) &&
 				Objects.equals(lastLoginTimestamp, that.lastLoginTimestamp);
+	}
+
+	@Override
+	protected ToStringCreator buildToString() {
+		return super.buildToString()
+				.append("authProvider", authProvider)
+				.append("loginId", loginId)
+				.append("lastLoginTimestamp", lastLoginTimestamp)
+				.append("account", account)
+				.append("roomHistory", roomHistory)
+				.append("acknowledgedMotds", acknowledgedMotds);
 	}
 }

@@ -3,6 +3,7 @@ package de.thm.arsnova.entities;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
+import org.springframework.core.style.ToStringCreator;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -91,6 +92,18 @@ public class Content extends Entity {
 		@JsonView({View.Persistence.class, View.Public.class})
 		public void setResponsesVisible(final boolean responsesVisible) {
 			this.responsesVisible = responsesVisible;
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringCreator(this)
+					.append("round", round)
+					.append("roundEndTimestamp", roundEndTimestamp)
+					.append("visible", visible)
+					.append("solutionVisible", solutionVisible)
+					.append("responsesEnabled", responsesEnabled)
+					.append("responsesVisible", responsesVisible)
+					.toString();
 		}
 	}
 
@@ -235,5 +248,19 @@ public class Content extends Entity {
 				format == content.format &&
 				Objects.equals(groups, content.groups) &&
 				Objects.equals(timestamp, content.timestamp);
+	}
+
+	@Override
+	protected ToStringCreator buildToString() {
+		return super.buildToString()
+				.append("roomId", roomId)
+				.append("subject", subject)
+				.append("body", body)
+				.append("format", format)
+				.append("groups", groups)
+				.append("abstentionsAllowed", abstentionsAllowed)
+				.append("state", state)
+				.append("timestamp", timestamp)
+				.append("attachments", attachments);
 	}
 }

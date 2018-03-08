@@ -2,6 +2,7 @@ package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
+import org.springframework.core.style.ToStringCreator;
 
 import java.util.Date;
 import java.util.Map;
@@ -109,5 +110,16 @@ public class Comment extends Entity {
 				Objects.equals(body, comment.body) &&
 				Objects.equals(timestamp, comment.timestamp) &&
 				Objects.equals(extensions, comment.extensions);
+	}
+
+	@Override
+	protected ToStringCreator buildToString() {
+		return super.buildToString()
+				.append("roomId", roomId)
+				.append("creatorId", creatorId)
+				.append("subject", subject)
+				.append("body", body)
+				.append("timestamp", timestamp)
+				.append("read", read);
 	}
 }

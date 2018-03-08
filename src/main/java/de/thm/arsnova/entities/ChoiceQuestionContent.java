@@ -2,6 +2,7 @@ package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
+import org.springframework.core.style.ToStringCreator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,15 @@ public class ChoiceQuestionContent extends Content {
 		public void setPoints(int points) {
 			this.points = points;
 		}
+
+		@Override
+		public String toString() {
+			return new ToStringCreator(this)
+					.append("label", label)
+					.append("points", points)
+					.toString();
+		}
+
 	}
 
 	private List<AnswerOption> options = new ArrayList<>();
@@ -65,5 +75,13 @@ public class ChoiceQuestionContent extends Content {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setMultiple(final boolean multiple) {
 		this.multiple = multiple;
+	}
+
+	@Override
+	protected ToStringCreator buildToString() {
+		return super.buildToString()
+				.append("options", options)
+				.append("correctOptionIndexes", correctOptionIndexes)
+				.append("multiple", multiple);
 	}
 }

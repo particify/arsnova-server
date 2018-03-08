@@ -2,6 +2,7 @@ package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
+import org.springframework.core.style.ToStringCreator;
 
 import java.util.Objects;
 
@@ -94,5 +95,14 @@ public class Attachment extends Entity {
 				Objects.equals(mediaType, that.mediaType) &&
 				Objects.equals(originalSourceUrl, that.originalSourceUrl) &&
 				Objects.equals(storageLocation, that.storageLocation);
+	}
+
+	@Override
+	protected ToStringCreator buildToString() {
+		return super.buildToString()
+				.append("mediaType", mediaType)
+				.append("size", size)
+				.append("originalSourceUrl", originalSourceUrl)
+				.append("storageLocation", storageLocation);
 	}
 }

@@ -2,6 +2,7 @@ package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
+import org.springframework.core.style.ToStringCreator;
 
 import java.util.Date;
 
@@ -44,5 +45,13 @@ public class TextAnswer extends Answer {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public Date getCreationTimestamp() {
 		return creationTimestamp;
+	}
+
+	@Override
+	protected ToStringCreator buildToString() {
+		return super.buildToString()
+				.append("subject", subject)
+				.append("body", body)
+				.append("read", read);
 	}
 }
