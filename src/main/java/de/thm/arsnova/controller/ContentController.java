@@ -17,18 +17,31 @@
  */
 package de.thm.arsnova.controller;
 
+import de.thm.arsnova.entities.AnswerStatistics;
 import de.thm.arsnova.entities.Content;
+import de.thm.arsnova.services.AnswerService;
 import de.thm.arsnova.services.ContentService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/content")
 public class ContentController extends AbstractEntityController<Content> {
-	private ContentService contentService;
+	private static final String GET_ANSWER_STATISTICS_MAPPING = DEFAULT_ID_MAPPING + "/stats";
 
-	public ContentController(final ContentService contentService) {
+	private ContentService contentService;
+	private AnswerService answerService;
+
+	public ContentController(final ContentService contentService, final AnswerService answerService) {
 		super(contentService);
 		this.contentService = contentService;
+		this.answerService = answerService;
+	}
+
+	@GetMapping(GET_ANSWER_STATISTICS_MAPPING)
+	public AnswerStatistics getAnswerStatistics(@PathVariable final String id) {
+		return answerService.getAllStatistics(id);
 	}
 }
