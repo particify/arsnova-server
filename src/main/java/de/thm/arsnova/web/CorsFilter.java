@@ -33,8 +33,8 @@ public class CorsFilter extends org.springframework.web.filter.CorsFilter {
 	}
 
 	private static UrlBasedCorsConfigurationSource configurationSource(List<String> origins) {
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		CorsConfiguration config;
-		UrlBasedCorsConfigurationSource source;
 
 		/* Grant full access from specified origins */
 		config = new CorsConfiguration();
@@ -47,7 +47,6 @@ public class CorsFilter extends org.springframework.web.filter.CorsFilter {
 		config.addAllowedMethod("PUT");
 		config.addAllowedMethod("DELETE");
 		config.setAllowCredentials(true);
-		source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", config);
 
 		/* Grant limited access from all origins */
@@ -57,7 +56,6 @@ public class CorsFilter extends org.springframework.web.filter.CorsFilter {
 		config.addAllowedHeader("X-Requested-With");
 		config.addAllowedMethod("GET");
 		config.setAllowCredentials(true);
-		source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/", config);
 		source.registerCorsConfiguration("/arsnova-config", config);
 		source.registerCorsConfiguration("/configuration/", config);
