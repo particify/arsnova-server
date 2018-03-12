@@ -23,12 +23,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/answer")
+@RequestMapping(AnswerController.REQUEST_MAPPING)
 public class AnswerController extends AbstractEntityController<Answer> {
+	protected static final String REQUEST_MAPPING = "/answer";
+
 	private AnswerService answerService;
 
 	public AnswerController(final AnswerService answerService) {
 		super(answerService);
 		this.answerService = answerService;
+	}
+
+	@Override
+	protected String getMapping() {
+		return REQUEST_MAPPING;
 	}
 }

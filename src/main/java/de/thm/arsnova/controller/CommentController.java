@@ -23,12 +23,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/comment")
+@RequestMapping(CommentController.REQUEST_MAPPING)
 public class CommentController extends AbstractEntityController<Comment> {
+	protected static final String REQUEST_MAPPING = "/comment";
+
 	private CommentService commentService;
 
 	public CommentController(final CommentService commentService) {
 		super(commentService);
 		this.commentService = commentService;
+	}
+
+	@Override
+	protected String getMapping() {
+		return REQUEST_MAPPING;
 	}
 }

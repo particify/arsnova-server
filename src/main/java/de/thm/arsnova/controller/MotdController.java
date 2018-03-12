@@ -23,12 +23,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/motd")
+@RequestMapping(MotdController.REQUEST_MAPPING)
 public class MotdController extends AbstractEntityController<Motd> {
+	protected static final String REQUEST_MAPPING = "/motd";
+
 	private MotdService motdService;
 
 	public MotdController(final MotdService motdService) {
 		super(motdService);
 		this.motdService = motdService;
+	}
+
+	@Override
+	protected String getMapping() {
+		return REQUEST_MAPPING;
 	}
 }

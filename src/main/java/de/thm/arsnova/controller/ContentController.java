@@ -27,8 +27,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/content")
+@RequestMapping(ContentController.REQUEST_MAPPING)
 public class ContentController extends AbstractEntityController<Content> {
+	protected static final String REQUEST_MAPPING = "/content";
 	private static final String GET_ANSWER_STATISTICS_MAPPING = DEFAULT_ID_MAPPING + "/stats";
 
 	private ContentService contentService;
@@ -38,6 +39,11 @@ public class ContentController extends AbstractEntityController<Content> {
 		super(contentService);
 		this.contentService = contentService;
 		this.answerService = answerService;
+	}
+
+	@Override
+	protected String getMapping() {
+		return REQUEST_MAPPING;
 	}
 
 	@GetMapping(GET_ANSWER_STATISTICS_MAPPING)

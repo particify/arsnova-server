@@ -24,6 +24,8 @@ import de.thm.arsnova.services.FindQueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -32,8 +34,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.naming.OperationNotSupportedException;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
@@ -47,6 +52,8 @@ import java.util.Set;
  */
 public abstract class AbstractEntityController<E extends Entity> {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractEntityController.class);
+	protected static final String ENTITY_ID_HEADER = "Arsnova-Entity-Id";
+	protected static final String ENTITY_REVISION_HEADER = "Arsnova-Entity-Revision";
 	protected static final String DEFAULT_ROOT_MAPPING = "/";
 	protected static final String DEFAULT_ID_MAPPING = "/{id}";
 	protected static final String DEFAULT_FIND_MAPPING = "/find";
@@ -64,6 +71,8 @@ public abstract class AbstractEntityController<E extends Entity> {
 		this.entityService = entityService;
 	}
 
+	protected abstract String getMapping();
+
 	@GetMapping(GET_MAPPING)
 	public E get(@PathVariable final String id) {
 		return entityService.get(id);
@@ -75,21 +84,31 @@ public abstract class AbstractEntityController<E extends Entity> {
 	}
 
 	@PutMapping(PUT_MAPPING)
-	public void put(@RequestBody final E entity) {
+	public void put(@RequestBody final E entity, final HttpServletResponse httpServletResponse) {
 		E oldEntity = entityService.get(entity.getId());
 		entityService.update(oldEntity, entity);
+		httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
+		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
 	}
 
 	@PostMapping(POST_MAPPING)
-	public void post(@RequestBody final E entity) {
+	@ResponseStatus(HttpStatus.CREATED)
+	public void post(@RequestBody final E entity, final HttpServletResponse httpServletResponse) {
 		entityService.create(entity);
+		final String uri = UriComponentsBuilder.fromPath(getMapping()).path(GET_MAPPING)
+				.buildAndExpand(entity.getId()).toUriString();
+		httpServletResponse.setHeader(HttpHeaders.LOCATION, uri);
+		httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
+		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
 	}
 
 	@PatchMapping(PATCH_MAPPING)
-	public void patch(@PathVariable final String id, @RequestBody final Map<String, Object> changes)
-			throws IOException {
+	public void patch(@PathVariable final String id, @RequestBody final Map<String, Object> changes,
+					  final HttpServletResponse httpServletResponse) throws IOException {
 		E entity = entityService.get(id);
 		entityService.patch(entity, changes);
+		httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
+		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
 	}
 
 	@DeleteMapping(DELETE_MAPPING)

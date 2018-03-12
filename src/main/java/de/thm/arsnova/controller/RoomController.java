@@ -23,12 +23,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/room")
+@RequestMapping(RoomController.REQUEST_MAPPING)
 public class RoomController extends AbstractEntityController<Room> {
+	protected static final String REQUEST_MAPPING = "/room";
+
 	private RoomService roomService;
 
 	public RoomController(final RoomService roomService) {
 		super(roomService);
 		this.roomService = roomService;
+	}
+
+	@Override
+	protected String getMapping() {
+		return REQUEST_MAPPING;
 	}
 }

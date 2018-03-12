@@ -9,13 +9,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping(UserController.REQUEST_MAPPING)
 public class UserController extends AbstractEntityController<UserProfile> {
+	protected static final String REQUEST_MAPPING = "/user";
+
 	private UserService userService;
 
 	public UserController(final UserService userService) {
 		super(userService);
 		this.userService = userService;
+	}
+
+	@Override
+	protected String getMapping() {
+		return REQUEST_MAPPING;
 	}
 
 	@PostMapping("/register")
