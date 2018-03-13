@@ -38,8 +38,6 @@ public interface RoomService extends EntityService<Room> {
 
 	Room getInternal(String id, ClientAuthentication user);
 
-	Room save(Room session);
-
 	boolean isShortIdAvailable(String shortId);
 
 	String generateShortId();
@@ -61,8 +59,6 @@ public interface RoomService extends EntityService<Room> {
 	Room setActive(String id, Boolean lock);
 
 	Room join(String id, UUID socketId);
-
-	Room update(String id, Room room);
 
 	Room updateCreator(String id, String newCreator);
 

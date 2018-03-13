@@ -310,9 +310,9 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#room, 'create')")
-	@Caching(evict = @CacheEvict(cacheNames = "rooms", key = "#result.id"))
-	public Room save(final Room room) {
+	/* TODO: move caching to DefaultEntityServiceImpl */
+	//@Caching(evict = @CacheEvict(cacheNames = "rooms", key = "#result.id"))
+	public void prepareCreate(final Room room) {
 		/* FIXME: migrate LMS course support
 		if (connectorClient != null && room.getCourseId() != null) {
 			if (!connectorClient.getMembership(
@@ -329,13 +329,11 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		room.setSettings(sf);
 
 		room.setShortId(generateShortId());
-		room.setCreationTimestamp(new Date());
 		room.setOwnerId(userService.getCurrentUser().getId());
 		room.setClosed(false);
 
-		final Room result = super.create(room);
-		this.publisher.publishEvent(new NewRoomEvent(this, result));
-		return result;
+		/* FIXME: event */
+		// this.publisher.publishEvent(new NewRoomEvent(this, result));
 	}
 
 	@Override
@@ -386,17 +384,16 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#room.id, 'room', 'owner')")
-	@CachePut(value = "rooms", key = "#room")
-	public Room update(final String id, final Room room) {
-		final Room existingRoom = roomRepository.findOne(id);
+	/* TODO: move caching to DefaultEntityServiceImpl */
+	//@CachePut(value = "rooms", key = "#room")
+	protected void prepareUpdate(final Room room) {
+		final Room existingRoom = roomRepository.findOne(room.getId());
 		room.setOwnerId(existingRoom.getOwnerId());
 		handleLogo(room);
-		update(existingRoom, room);
-		/* TODO: only publish event when feedback has changed */
-		this.publisher.publishEvent(new FeatureChangeEvent(this, room));
 
-		return room;
+		/* TODO: only publish event when feedback has changed */
+		/* FIXME: event */
+		// this.publisher.publishEvent(new FeatureChangeEvent(this, room));
 	}
 
 	@Override

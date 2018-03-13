@@ -132,7 +132,7 @@ public class RoomController extends PaginationController {
 		}
 		*/
 
-		return toV2Migrator.migrate(roomService.save(fromV2Migrator.migrate(room)));
+		return toV2Migrator.migrate(roomService.create(fromV2Migrator.migrate(room)));
 	}
 
 	@ApiOperation(value = "updates a Room",
@@ -142,8 +142,7 @@ public class RoomController extends PaginationController {
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
 			@ApiParam(value = "current room", required = true) @RequestBody final Room room
 			) {
-		return toV2Migrator.migrate(roomService.update(
-				roomService.getIdByShortId(shortId), fromV2Migrator.migrate(room)));
+		return toV2Migrator.migrate(roomService.update(fromV2Migrator.migrate(room)));
 	}
 
 	@ApiOperation(value = "change the Room creator (owner)", nickname = "changeRoomCreator")
@@ -401,7 +400,7 @@ public class RoomController extends PaginationController {
 			) {
 		de.thm.arsnova.entities.Room room = roomService.getByShortId(shortId);
 		room.setSettings(fromV2Migrator.migrate(features));
-		roomService.update(room.getId(), room);
+		roomService.update(room);
 
 		return toV2Migrator.migrate(room.getSettings());
 	}
