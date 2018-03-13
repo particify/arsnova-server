@@ -1,15 +1,16 @@
 package de.thm.arsnova.persistance.couchdb;
 
 import de.thm.arsnova.entities.Entity;
+import de.thm.arsnova.persistance.CrudRepository;
 import org.ektorp.BulkDeleteDocument;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.support.CouchDbRepositorySupport;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @NoRepositoryBean
@@ -52,7 +53,7 @@ abstract class CouchDbCrudRepository<T extends Entity> extends CouchDbRepository
 	}
 
 	@Override
-	public <S extends T> Iterable<S> save(final Iterable<S> entities) {
+	public <S extends T> Iterable<S> saveAll(final Iterable<S> entities) {
 		if (!(entities instanceof Collection)) {
 			throw new IllegalArgumentException("Implementation only supports Collections.");
 		}
@@ -62,12 +63,17 @@ abstract class CouchDbCrudRepository<T extends Entity> extends CouchDbRepository
 	}
 
 	@Override
+	public Optional<T> findById(final String id) {
+		return Optional.ofNullable(get(id));
+	}
+
+	@Override
 	public T findOne(final String id) {
 		return get(id);
 	}
 
 	@Override
-	public boolean exists(final String id) {
+	public boolean existsById(final String id) {
 		return contains(id);
 	}
 
@@ -77,7 +83,7 @@ abstract class CouchDbCrudRepository<T extends Entity> extends CouchDbRepository
 	}
 
 	@Override
-	public Iterable<T> findAll(final Iterable<String> strings) {
+	public Iterable<T> findAllById(final Iterable<String> strings) {
 		if (!(strings instanceof Collection)) {
 			throw new IllegalArgumentException("Implementation only supports Collections.");
 		}
@@ -97,7 +103,7 @@ abstract class CouchDbCrudRepository<T extends Entity> extends CouchDbRepository
 	}
 
 	@Override
-	public void delete(final String id) {
+	public void deleteById(final String id) {
 		T entity = get(id);
 		db.delete(id, entity.getRevision());
 	}
@@ -108,7 +114,7 @@ abstract class CouchDbCrudRepository<T extends Entity> extends CouchDbRepository
 	}
 
 	@Override
-	public void delete(final Iterable<? extends T> entities) {
+	public void deleteAll(final Iterable<? extends T> entities) {
 		if (!(entities instanceof Collection)) {
 			throw new IllegalArgumentException("Implementation only supports Collections.");
 		}

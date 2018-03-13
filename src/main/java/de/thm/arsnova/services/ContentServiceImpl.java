@@ -249,7 +249,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 		try {
 			final int count = answerRepository.deleteByContentId(contentId);
-			contentRepository.delete(contentId);
+			contentRepository.deleteById(contentId);
 			dbLogger.log("delete", "type", "content", "answerCount", count);
 		} catch (final IllegalArgumentException e) {
 			logger.error("Could not delete content {}.", contentId, e);
@@ -510,7 +510,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		for (final Content content : contents) {
 			content.getState().setVisible(publish);
 		}
-		contentRepository.save(contents);
+		contentRepository.saveAll(contents);
 		ArsnovaEvent event;
 		if (publish) {
 			event = new UnlockQuestionsEvent(this, room, contents);
@@ -583,7 +583,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			q.setRoomId(roomId);
 			q.resetState();
 		}
-		contentRepository.save(contents);
+		contentRepository.saveAll(contents);
 	}
 
 	@Override

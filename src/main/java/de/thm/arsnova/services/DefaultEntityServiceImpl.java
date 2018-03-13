@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import de.thm.arsnova.entities.Entity;
 import de.thm.arsnova.entities.serialization.View;
-import org.springframework.data.repository.CrudRepository;
+import de.thm.arsnova.persistance.CrudRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.access.prepost.PreFilter;
 
@@ -59,7 +59,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	@Override
 	@PreFilter(value = "hasPermission(filterObject, #this.this.getTypeName(), 'read')", filterTarget = "ids")
 	public Iterable<T> get(final Collection<String> ids) {
-		return repository.findAll(ids);
+		return repository.findAllById(ids);
 	}
 
 	@Override
@@ -143,7 +143,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 			preparePatch(entity);
 		}
 
-		return repository.save(entities);
+		return repository.saveAll(entities);
 	}
 
 	/**

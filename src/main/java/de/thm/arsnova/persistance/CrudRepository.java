@@ -17,15 +17,21 @@
  */
 package de.thm.arsnova.persistance;
 
-import de.thm.arsnova.entities.Motd;
-
-import java.util.List;
-
-public interface MotdRepository extends CrudRepository<Motd, String> {
-	List<Motd> findGlobalForAdmin();
-	List<Motd> findGlobalForAll();
-	List<Motd> findGlobalForLoggedIn();
-	List<Motd> findGlobalForTutors();
-	List<Motd> findForStudents();
-	List<Motd> findByRoomId(String roomId);
+/**
+ * This is a temporary extension to {@link org.springframework.data.repository.CrudRepository} which simplifies the
+ * migration to Spring Data 2.0.
+ *
+ * {@inheritDoc}
+ *
+ * @author Daniel Gerhardt
+ */
+public interface CrudRepository<T, ID> extends org.springframework.data.repository.CrudRepository<T, ID> {
+	/**
+	 *
+	 * @param id The entity's Id
+	 * @return The retrieved entity or null
+	 * @deprecated Use {@link #findById(Object)} instead.
+	 */
+	@Deprecated
+	T findOne(final ID id);
 }

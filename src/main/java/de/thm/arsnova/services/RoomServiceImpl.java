@@ -295,7 +295,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		final UserProfile profile = userService.get(userId);
 		final List<String> roomIds = profile.getRoomHistory().stream().map(entry -> entry.getRoomId()).collect(Collectors.toList());
 		List<Room> rooms = new ArrayList<>();
-		roomRepository.findAll(roomIds).forEach(rooms::add);
+		roomRepository.findAllById(roomIds).forEach(rooms::add);
 
 		return rooms;
 	}

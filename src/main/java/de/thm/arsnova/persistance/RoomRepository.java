@@ -21,7 +21,6 @@ import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import de.thm.arsnova.entities.transport.ImportExportContainer;
-import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 

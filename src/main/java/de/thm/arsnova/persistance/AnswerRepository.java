@@ -20,7 +20,6 @@ package de.thm.arsnova.persistance;
 import de.thm.arsnova.entities.Answer;
 import de.thm.arsnova.entities.AnswerStatistics;
 import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
-import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 

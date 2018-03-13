@@ -473,21 +473,13 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	private void sendActivationEmail(UserProfile userProfile) {
-		String activationUrl;
-		try {
-			activationUrl = MessageFormat.format(
+		String activationUrl = MessageFormat.format(
 				"{0}{1}/{2}?action=activate&username={3}&key={4}",
 				rootUrl,
 				customizationPath,
 				activationPath,
 				UriUtils.encodeQueryParam(userProfile.getLoginId(), "UTF-8"),
-				userProfile.getAccount().getActivationKey()
-			);
-		} catch (UnsupportedEncodingException e) {
-			logger.error("Sending of activation mail failed.", e);
-
-			return;
-		}
+				userProfile.getAccount().getActivationKey());
 
 		sendEmail(userProfile, regMailSubject, MessageFormat.format(regMailBody, activationUrl));
 	}
@@ -585,21 +577,12 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 			logger.error("Password reset failed. {} could not be updated.", username);
 		}
 
-		String resetPasswordUrl;
-		try {
-			resetPasswordUrl = MessageFormat.format(
-				"{0}{1}/{2}?action=resetpassword&username={3}&key={4}",
-				rootUrl,
-				customizationPath,
-				resetPasswordPath,
-				UriUtils.encodeQueryParam(userProfile.getLoginId(), "UTF-8"),
-					account.getPasswordResetKey()
-			);
-		} catch (UnsupportedEncodingException e) {
-			logger.error("Sending of password reset mail failed.", e);
-
-			return;
-		}
+		String resetPasswordUrl = MessageFormat.format(
+			"{0}{1}/{2}?action=resetpassword&username={3}&key={4}",
+			rootUrl,
+			customizationPath,
+			resetPasswordPath,
+			UriUtils.encodeQueryParam(userProfile.getLoginId(), "UTF-8"), account.getPasswordResetKey());
 
 		sendEmail(userProfile, resetPasswordMailSubject, MessageFormat.format(resetPasswordMailBody, resetPasswordUrl));
 	}

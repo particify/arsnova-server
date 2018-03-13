@@ -3,7 +3,6 @@ package de.thm.arsnova.persistance;
 import de.thm.arsnova.entities.Comment;
 import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
 import de.thm.arsnova.entities.migration.v2.CommentReadingCount;
-import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 

@@ -100,7 +100,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
 			elements.add(entry);
 		}
 		try {
-			answerRepository.save(answerList);
+			answerRepository.saveAll(answerList);
 
 			// Send NewAnswerEvents ...
 			for (AnswerQueueElement e : elements) {
@@ -397,7 +397,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
 		if (user == null || room == null || !room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
 		}
-		answerRepository.delete(answerId);
+		answerRepository.deleteById(answerId);
 
 		this.publisher.publishEvent(new DeleteAnswerEvent(this, room, content));
 	}

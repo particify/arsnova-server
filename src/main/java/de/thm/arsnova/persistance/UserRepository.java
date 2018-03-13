@@ -18,7 +18,6 @@
 package de.thm.arsnova.persistance;
 
 import de.thm.arsnova.entities.UserProfile;
-import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
