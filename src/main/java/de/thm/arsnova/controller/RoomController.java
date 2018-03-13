@@ -38,4 +38,9 @@ public class RoomController extends AbstractEntityController<Room> {
 	protected String getMapping() {
 		return REQUEST_MAPPING;
 	}
+
+	@Override
+	protected String resolveAlias(final String shortId) {
+		return roomService.getIdByShortId(shortId);
+	}
 }

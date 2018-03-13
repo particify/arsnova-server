@@ -19,6 +19,7 @@ package de.thm.arsnova.controller;
 
 import de.thm.arsnova.entities.Entity;
 import de.thm.arsnova.entities.FindQuery;
+import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.EntityService;
 import de.thm.arsnova.services.FindQueryService;
 import org.slf4j.Logger;
@@ -26,18 +27,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.naming.OperationNotSupportedException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collection;
@@ -55,7 +50,8 @@ public abstract class AbstractEntityController<E extends Entity> {
 	protected static final String ENTITY_ID_HEADER = "Arsnova-Entity-Id";
 	protected static final String ENTITY_REVISION_HEADER = "Arsnova-Entity-Revision";
 	protected static final String DEFAULT_ROOT_MAPPING = "/";
-	protected static final String DEFAULT_ID_MAPPING = "/{id}";
+	protected static final String DEFAULT_ID_MAPPING = "/{id:[^~].*}";
+	protected static final String DEFAULT_ALIAS_MAPPING = "/~{alias}";
 	protected static final String DEFAULT_FIND_MAPPING = "/find";
 	protected static final String GET_MAPPING = DEFAULT_ID_MAPPING;
 	protected static final String GET_MULTIPLE_MAPPING = DEFAULT_ROOT_MAPPING;
@@ -128,6 +124,17 @@ public abstract class AbstractEntityController<E extends Entity> {
 		} else {
 			throw new OperationNotSupportedException("Find is not supported for this entity type.");
 		}
+	}
+
+	@RequestMapping(value = DEFAULT_ALIAS_MAPPING, method = {RequestMethod.GET, RequestMethod.PUT, RequestMethod.POST})
+	public void forwardAlias(@PathVariable final String alias, HttpServletRequest httpServletRequest,
+			HttpServletResponse httpServletResponse) throws ServletException, IOException {
+		httpServletRequest.getRequestDispatcher(getMapping() + "/" + resolveAlias(alias))
+				.forward(httpServletRequest, httpServletResponse);
+	}
+
+	protected String resolveAlias(final String alias) {
+		throw new NotFoundException("Aliases not supported for " + getMapping() + ".");
 	}
 
 	@Autowired(required = false)
