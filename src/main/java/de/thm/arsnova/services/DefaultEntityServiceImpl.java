@@ -83,6 +83,10 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 
 	}
 
+	public T update(final T entity) {
+		return update(repository.findOne(entity.getId()), entity);
+	}
+
 	@Override
 	@PreAuthorize("hasPermission(#oldEntity, 'update')")
 	public T update(final T oldEntity, final T newEntity) {

@@ -42,6 +42,8 @@ public interface EntityService<T extends Entity> {
 	@PreAuthorize("hasPermission(#entity, 'create')")
 	T create(T entity);
 
+	T update(T entity);
+
 	@PreAuthorize("hasPermission(#oldEntity, 'update')")
 	T update(T oldEntity, T newEntity);
 
