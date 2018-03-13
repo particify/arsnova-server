@@ -69,8 +69,18 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 			throw new IllegalArgumentException("Entity is not new.");
 		}
 		entity.setCreationTimestamp(new Date());
+		prepareCreate(entity);
 
 		return repository.save(entity);
+	}
+
+	/**
+	 * This method can be overridden by subclasses to modify the entity before creation.
+	 *
+	 * @param entity The entity to be created
+	 */
+	protected void prepareCreate(final T entity) {
+
 	}
 
 	@Override
@@ -78,8 +88,18 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	public T update(final T oldEntity, final T newEntity) {
 		newEntity.setId(oldEntity.getId());
 		newEntity.setUpdateTimestamp(new Date());
+		prepareUpdate(newEntity);
 
 		return repository.save(newEntity);
+	}
+
+	/**
+	 * This method can be overridden by subclasses to modify the entity before updating.
+	 *
+	 * @param entity The entity to be updated
+	 */
+	protected void prepareUpdate(final T entity) {
+
 	}
 
 	@Override
@@ -96,6 +116,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		JsonNode tree = objectMapper.valueToTree(changes);
 		reader.readValue(tree);
 		entity.setUpdateTimestamp(new Date());
+		preparePatch(entity);
 
 		return repository.save(entity);
 	}
@@ -115,15 +136,35 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 			ObjectReader reader = objectMapper.readerForUpdating(obj).withView(View.Public.class);
 			reader.readValue(tree);
 			entity.setUpdateTimestamp(new Date());
+			preparePatch(entity);
 		}
 
 		return repository.save(entities);
+	}
+
+	/**
+	 * This method can be overridden by subclasses to modify the entity before patching. By default, the implementation
+	 * of {@link #prepareUpdate} is used.
+	 *
+	 * @param entity The entity to be patched
+	 */
+	protected void preparePatch(final T entity) {
+		prepareUpdate(entity);
 	}
 
 	@Override
 	@PreAuthorize("hasPermission(#entity, 'delete')")
 	public void delete(final T entity) {
 		repository.delete(entity);
+	}
+
+	/**
+	 * This method can be overridden by subclasses to do additional entity related actions before deletion.
+	 *
+	 * @param entity The entity to be deleted
+	 */
+	protected void prepareDelete(final T entity) {
+
 	}
 
 	public String getTypeName() {
