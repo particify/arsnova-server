@@ -96,7 +96,8 @@ import java.util.List;
 @EnableWebMvc
 @PropertySource(
 		value = {"classpath:arsnova.properties.example", "file:/etc/arsnova/arsnova.properties"},
-		ignoreResourceNotFound = true
+		ignoreResourceNotFound = true,
+		encoding = "UTF-8"
 )
 public class AppConfig extends WebMvcConfigurerAdapter {
 	public static final MediaType API_V2_MEDIA_TYPE = new MediaType("application", "vnd.de.thm.arsnova.v2+json");
