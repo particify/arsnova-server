@@ -1,8 +1,10 @@
 package de.thm.arsnova.web;
 
 import de.thm.arsnova.config.AppConfig;
+import de.thm.arsnova.controller.AbstractEntityController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationStrategy;
@@ -10,6 +12,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -22,6 +25,7 @@ public class PathApiVersionContentNegotiationStrategy implements ContentNegotiat
 	private static final Logger logger = LoggerFactory.getLogger(PathApiVersionContentNegotiationStrategy.class);
 
 	private MediaType fallback;
+	private MediaType empty = MediaType.valueOf(AbstractEntityController.MEDIATYPE_EMPTY);
 
 	public PathApiVersionContentNegotiationStrategy(MediaType fallback) {
 		this.fallback = fallback;
@@ -38,7 +42,15 @@ public class PathApiVersionContentNegotiationStrategy implements ContentNegotiat
 			mediaTypes.add(MediaType.TEXT_PLAIN);
 		} else {
 			logger.trace("Content negotiation falling back to {}", fallback);
-			mediaTypes.add(fallback);
+			if (servletRequest.getHeader(HttpHeaders.ACCEPT) == null
+					&& Arrays.asList("POST", "PUT", "PATCH").contains(servletRequest.getMethod())) {
+				/* This allows AbstractEntityController to send an empty response if no Accept header is set */
+				logger.debug("No Accept header present for {} request. Entity will not be sent in response",
+						servletRequest.getMethod());
+				mediaTypes.add(empty);
+			} else {
+				mediaTypes.add(fallback);
+			}
 		}
 
 		return mediaTypes;

@@ -46,6 +46,7 @@ import java.util.Set;
  * @author Daniel Gerhardt
  */
 public abstract class AbstractEntityController<E extends Entity> {
+	public static final String MEDIATYPE_EMPTY = "application/x-empty";
 	private static final Logger logger = LoggerFactory.getLogger(AbstractEntityController.class);
 	protected static final String ENTITY_ID_HEADER = "Arsnova-Entity-Id";
 	protected static final String ENTITY_REVISION_HEADER = "Arsnova-Entity-Revision";
@@ -79,32 +80,55 @@ public abstract class AbstractEntityController<E extends Entity> {
 		return entityService.get(ids);
 	}
 
+	@PutMapping(value = PUT_MAPPING, produces = MEDIATYPE_EMPTY)
+	public void putWithoutResponse(@RequestBody final E entity, final HttpServletResponse httpServletResponse) {
+		put(entity, httpServletResponse);
+	}
+
 	@PutMapping(PUT_MAPPING)
-	public void put(@RequestBody final E entity, final HttpServletResponse httpServletResponse) {
+	public E put(@RequestBody final E entity, final HttpServletResponse httpServletResponse) {
 		E oldEntity = entityService.get(entity.getId());
 		entityService.update(oldEntity, entity);
 		httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
 		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
+
+		return entity;
+	}
+
+	@PostMapping(value = POST_MAPPING, produces = MEDIATYPE_EMPTY)
+	@ResponseStatus(HttpStatus.CREATED)
+	public void postWithoutResponse(@RequestBody final E entity, final HttpServletResponse httpServletResponse) {
+		post(entity, httpServletResponse);
 	}
 
 	@PostMapping(POST_MAPPING)
 	@ResponseStatus(HttpStatus.CREATED)
-	public void post(@RequestBody final E entity, final HttpServletResponse httpServletResponse) {
+	public E post(@RequestBody final E entity, final HttpServletResponse httpServletResponse) {
 		entityService.create(entity);
 		final String uri = UriComponentsBuilder.fromPath(getMapping()).path(GET_MAPPING)
 				.buildAndExpand(entity.getId()).toUriString();
 		httpServletResponse.setHeader(HttpHeaders.LOCATION, uri);
 		httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
 		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
+
+		return entity;
+	}
+
+	@PatchMapping(value = PATCH_MAPPING, produces = MEDIATYPE_EMPTY)
+	public void patchWithoutResponse(@PathVariable final String id, @RequestBody final Map<String, Object> changes,
+			final HttpServletResponse httpServletResponse) throws IOException {
+		patch(id, changes, httpServletResponse);
 	}
 
 	@PatchMapping(PATCH_MAPPING)
-	public void patch(@PathVariable final String id, @RequestBody final Map<String, Object> changes,
+	public E patch(@PathVariable final String id, @RequestBody final Map<String, Object> changes,
 					  final HttpServletResponse httpServletResponse) throws IOException {
 		E entity = entityService.get(id);
 		entityService.patch(entity, changes);
 		httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
 		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
+
+		return entity;
 	}
 
 	@DeleteMapping(DELETE_MAPPING)
