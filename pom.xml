@@ -7,8 +7,8 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<io.spring.platform-version>Brussels-SR7</io.spring.platform-version>
-		<io.netty-version>4.1.22.Final</io.netty-version>
+		<io.spring.platform-version>Brussels-SR9</io.spring.platform-version>
+		<io.netty-version>4.1.23.Final</io.netty-version>
 		<org.aspectj-version>1.8.13</org.aspectj-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
@@ -402,7 +402,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.4.8.v20171121</version>
+				<version>9.4.9.v20180320</version>
 				<configuration>
 					<scanIntervalSeconds>1</scanIntervalSeconds>
 					<webApp>
@@ -442,7 +442,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.0</version>
+				<version>0.8.1</version>
 				<executions>
 					<execution>
 						<id>default-prepare-agent</id>
@@ -485,7 +485,7 @@
 			<plugin>
 				<groupId>com.github.kongchen</groupId>
 				<artifactId>swagger-maven-plugin</artifactId>
-				<version>3.1.6</version>
+				<version>3.1.7</version>
 				<configuration>
 					<apiSources>
 						<apiSource>
