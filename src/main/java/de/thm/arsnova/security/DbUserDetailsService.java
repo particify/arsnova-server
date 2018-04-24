@@ -19,6 +19,7 @@ package de.thm.arsnova.security;
 
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.DbUser;
+import de.thm.arsnova.services.IUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,9 @@ public class DbUserDetailsService implements UserDetailsService {
 	@Autowired
 	private IDatabaseDao dao;
 
+	@Autowired
+	private IUserService userService;
+
 	private static final Logger logger = LoggerFactory
 			.getLogger(DbUserDetailsService.class);
 
@@ -56,6 +60,9 @@ public class DbUserDetailsService implements UserDetailsService {
 		final List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_DB_USER"));
+		if (userService.isAdmin(uid)) {
+			grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+		}
 
 		return new User(uid, dbUser.getPassword(),
 				null == dbUser.getActivationKey(), true, true, true,

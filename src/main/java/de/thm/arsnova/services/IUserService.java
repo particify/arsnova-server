@@ -30,6 +30,8 @@ import java.util.UUID;
 public interface IUserService {
 	User getCurrentUser();
 
+	boolean isAdmin(String username);
+
 	boolean isBannedFromLogin(String addr);
 
 	void increaseFailedLoginCount(String addr);

@@ -206,9 +206,15 @@ public class UserService implements IUserService {
 			throw new UnauthorizedException();
 		}
 
-		user.setAdmin(Arrays.asList(adminAccounts).contains(user.getUsername()));
+		user.setAdmin(!authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_GUEST"))
+				&& isAdmin(user.getUsername()));
 
 		return user;
+	}
+
+	@Override
+	public boolean isAdmin(final String username) {
+		return Arrays.asList(adminAccounts).contains(username);
 	}
 
 	private User getOAuthUser(final Authentication authentication) {
