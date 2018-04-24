@@ -17,7 +17,9 @@
  */
 package de.thm.arsnova;
 
+import de.thm.arsnova.services.IUserService;
 import org.jasig.cas.client.validation.Assertion;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.cas.userdetails.AbstractCasAssertionUserDetailsService;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -33,14 +35,20 @@ import java.util.List;
  */
 @Service
 public class CasUserDetailsService extends AbstractCasAssertionUserDetailsService {
+	@Autowired
+	private IUserService userService;
 
 	@Override
 	protected UserDetails loadUserDetails(final Assertion assertion) {
 		final List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+		final String uid = assertion.getPrincipal().getName();
+		if (userService.isAdmin(uid)) {
+			grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+		}
 
 		return new User(
-				assertion.getPrincipal().getName(),
+				uid,
 				"",
 				true,
 				true,
