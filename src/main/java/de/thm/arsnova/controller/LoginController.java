@@ -196,10 +196,10 @@ public class LoginController extends AbstractController {
 			if (!"".equals(username) && !"".equals(password)) {
 				org.springframework.security.core.userdetails.User user =
 						new org.springframework.security.core.userdetails.User(
-							username, password, true, true, true, true, this.getAuthorities()
+							username, password, true, true, true, true, this.getAuthorities(userService.isAdmin(username))
 						);
 
-				Authentication token = new UsernamePasswordAuthenticationToken(user, password, getAuthorities());
+				Authentication token = new UsernamePasswordAuthenticationToken(user, password, getAuthorities(userService.isAdmin(username)));
 				try {
 					Authentication auth = ldapAuthenticationProvider.authenticate(token);
 					if (auth.isAuthenticated()) {
@@ -423,9 +423,13 @@ public class LoginController extends AbstractController {
 		return services;
 	}
 
-	private Collection<GrantedAuthority> getAuthorities() {
+	private Collection<GrantedAuthority> getAuthorities(final boolean admin) {
 		List<GrantedAuthority> authList = new ArrayList<>();
 		authList.add(new SimpleGrantedAuthority("ROLE_USER"));
+		if (admin) {
+			authList.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+		}
+
 		return authList;
 	}
 

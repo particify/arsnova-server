@@ -230,6 +230,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public boolean isAdmin(final String username) {
+		return Arrays.asList(adminAccounts).contains(username);
+	}
+
+	@Override
 	public boolean isBannedFromLogin(String addr) {
 		return loginBans.contains(addr);
 	}
