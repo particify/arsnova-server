@@ -36,30 +36,31 @@ public class CorsFilter extends org.springframework.web.filter.CorsFilter {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		CorsConfiguration config;
 
-		/* Grant full access from specified origins */
-		config = new CorsConfiguration();
-		config.setAllowedOrigins(origins);
-		config.addAllowedHeader("Accept");
-		config.addAllowedHeader("Content-Type");
-		config.addAllowedHeader("X-Requested-With");
-		config.addAllowedMethod("GET");
-		config.addAllowedMethod("POST");
-		config.addAllowedMethod("PUT");
-		config.addAllowedMethod("DELETE");
-		config.setAllowCredentials(true);
-		source.registerCorsConfiguration("/**", config);
-
-		/* Grant limited access from all origins */
-		config = new CorsConfiguration();
-		config.addAllowedOrigin("*");
-		config.addAllowedHeader("Accept");
-		config.addAllowedHeader("X-Requested-With");
-		config.addAllowedMethod("GET");
-		config.setAllowCredentials(true);
-		source.registerCorsConfiguration("/", config);
-		source.registerCorsConfiguration("/arsnova-config", config);
-		source.registerCorsConfiguration("/configuration/", config);
-		source.registerCorsConfiguration("/statistics", config);
+		if (!origins.isEmpty()) {
+			/* Grant full access from specified origins */
+			config = new CorsConfiguration();
+			config.setAllowedOrigins(origins);
+			config.addAllowedHeader("Accept");
+			config.addAllowedHeader("Content-Type");
+			config.addAllowedHeader("X-Requested-With");
+			config.addAllowedMethod("GET");
+			config.addAllowedMethod("POST");
+			config.addAllowedMethod("PUT");
+			config.addAllowedMethod("DELETE");
+			config.setAllowCredentials(true);
+			source.registerCorsConfiguration("/**", config);
+		} else {
+			/* Grant limited access from all origins */
+			config = new CorsConfiguration();
+			config.addAllowedOrigin("*");
+			config.addAllowedHeader("Accept");
+			config.addAllowedHeader("X-Requested-With");
+			config.addAllowedMethod("GET");
+			source.registerCorsConfiguration("/", config);
+			source.registerCorsConfiguration("/arsnova-config", config);
+			source.registerCorsConfiguration("/configuration/", config);
+			source.registerCorsConfiguration("/statistics", config);
+		}
 
 		return source;
 	}
