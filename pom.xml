@@ -7,8 +7,8 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<io.spring.platform-version>Brussels-SR9</io.spring.platform-version>
-		<io.netty-version>4.1.23.Final</io.netty-version>
+		<io.spring.platform-version>Brussels-SR10</io.spring.platform-version>
+		<io.netty-version>4.1.25.Final</io.netty-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
@@ -232,7 +232,7 @@
 		<dependency>
 			<groupId>com.corundumstudio.socketio</groupId>
 			<artifactId>netty-socketio</artifactId>
-			<version>1.7.14</version>
+			<version>1.7.15</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.inject</groupId>
@@ -296,7 +296,7 @@
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-annotations</artifactId>
-			<version>1.5.18</version>
+			<version>1.5.19</version>
 		</dependency>
 		<dependency>
 			<groupId>com.codahale.metrics</groupId>
@@ -341,7 +341,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.4.9.v20180320</version>
+				<version>9.4.10.v20180503</version>
 				<configuration>
 					<scanIntervalSeconds>1</scanIntervalSeconds>
 					<webApp>
@@ -363,7 +363,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
-				<version>3.7</version>
+				<version>3.7.1</version>
 				<configuration>
 					<locales>en</locales>
 				</configuration>
@@ -419,7 +419,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>3.2.0</version>
+				<version>3.2.1</version>
 			</plugin>
 			<plugin>
 				<groupId>com.github.kongchen</groupId>
