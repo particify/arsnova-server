@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.util.List;
 
 public interface CommentService extends EntityService<Comment> {
-	boolean save(Comment comment);
-
 	int count(String roomId);
 
 	CommentReadingCount countRead(String roomId, String username);

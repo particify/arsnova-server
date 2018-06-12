@@ -120,11 +120,7 @@ public class CommentController extends PaginationController {
 		de.thm.arsnova.entities.Comment commentV3 = fromV2Migrator.migrate(comment);
 		Room roomV3 = roomService.getByShortId(roomShortId);
 		commentV3.setRoomId(roomV3.getId());
-		if (commentService.save(commentV3)) {
-			return;
-		}
-
-		throw new BadRequestException();
+		commentService.create(commentV3);
 	}
 
 	@ApiOperation(value = "Deletes a Comment",

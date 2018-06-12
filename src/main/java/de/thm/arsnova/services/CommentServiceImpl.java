@@ -55,7 +55,7 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public boolean save(final Comment comment) {
+	public void prepareCreate(final Comment comment) {
 		final Room room = roomRepository.findOne(comment.getRoomId());
 		final ClientAuthentication user = userService.getCurrentUser();
 		comment.setCreatorId(user.getId());
@@ -63,14 +63,7 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		if (comment.getTimestamp() == null) {
 			comment.setTimestamp(new Date());
 		}
-		final Comment result = super.create(comment);
-
-		if (null != result) {
-			final NewCommentEvent event = new NewCommentEvent(this, room, result);
-			this.publisher.publishEvent(event);
-			return true;
-		}
-		return false;
+		/* TODO: fire event */
 	}
 
 	@Override
