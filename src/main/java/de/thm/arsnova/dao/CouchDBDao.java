@@ -977,12 +977,12 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		final String questionId = question.get_id();
 		final NovaView view = new NovaView("skill_question/count_answers_by_question_and_piround");
 		if (2 == piRound) {
-			view.setStartKey(questionId, "2");
-			view.setEndKey(questionId, "2", "{}");
+			view.setStartKey(questionId, 2);
+			view.setEndKey(questionId, 2, "{}");
 		} else {
 			/* needed for legacy questions whose piRound property has not been set */
 			view.setStartKeyArray(questionId);
-			view.setEndKeyArray(questionId, "1", "{}");
+			view.setEndKeyArray(questionId, 1, "{}");
 		}
 		view.setGroup(true);
 		final ViewResults results = getDatabase().view(view);
@@ -1051,8 +1051,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	public int getAnswerCount(final Question question, final int piRound) {
 		final NovaView view = new NovaView("skill_question/count_total_answers_by_question_and_piround");
 		view.setGroup(true);
-		view.setStartKey(question.get_id(), String.valueOf(piRound));
-		view.setEndKey(question.get_id(), String.valueOf(piRound), "{}");
+		view.setStartKey(question.get_id(), piRound);
+		view.setEndKey(question.get_id(), piRound, "{}");
 		final ViewResults results = getDatabase().view(view);
 		if (results.getResults().isEmpty()) {
 			return 0;
