@@ -44,8 +44,10 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -101,67 +103,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		return null;
 	}
 
-	@Override
-	@Caching(evict = {@CacheEvict(value = "contentlists", key = "#roomId"),
-			@CacheEvict(value = "lecturecontentlists", key = "#roomId", condition = "#content.getGroups().contains('lecture')"),
-			@CacheEvict(value = "preparationcontentlists", key = "#roomId", condition = "#content.getGroups().contains('preparation')"),
-			@CacheEvict(value = "flashcardcontentlists", key = "#roomId", condition = "#content.getGroups().contains('flashcard')") },
-			put = {@CachePut(value = "contents", key = "#content.id")})
-	public Content save(final String roomId, final Content content) {
-		content.setRoomId(roomId);
-		try {
-			contentRepository.save(content);
-
-			return content;
-		} catch (final IllegalArgumentException e) {
-			logger.error("Could not save content {}.", content, e);
-		}
-
-		return null;
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	@Caching(evict = {
-			@CacheEvict(value = "contentlists", allEntries = true),
-			@CacheEvict(value = "lecturecontentlists", allEntries = true, condition = "#content.getGroups().contains('lecture')"),
-			@CacheEvict(value = "preparationcontentlists", allEntries = true, condition = "#content.getGroups().contains('preparation')"),
-			@CacheEvict(value = "flashcardcontentlists", allEntries = true, condition = "#content.getGroups().contains('flashcard')") },
-			put = {@CachePut(value = "contents", key = "#content.id")})
-	public Content update(final Content content) {
-		final ClientAuthentication user = userService.getCurrentUser();
-		final Content oldContent = contentRepository.findOne(content.getId());
-		if (null == oldContent) {
-			throw new NotFoundException();
-		}
-
-		final Room room = roomRepository.findOne(content.getRoomId());
-		if (user == null || room == null || !room.getOwnerId().equals(user.getId())) {
-			throw new UnauthorizedException();
-		}
-
-		if (content.getFormat() == Content.Format.TEXT) {
-			content.getState().setRound(0);
-		} else if (content.getState().getRound() < 1 || content.getState().getRound() > 2) {
-			content.getState().setRound(oldContent.getState().getRound() > 0 ? oldContent.getState().getRound() : 1);
-		}
-
-		content.setId(oldContent.getId());
-		content.setRevision(oldContent.getRevision());
-		contentRepository.save(content);
-
-		/* TODO: nyi: updating content groups */
-
-		if (!oldContent.getState().isVisible() && content.getState().isVisible()) {
-			final UnlockQuestionEvent event = new UnlockQuestionEvent(this, room, content);
-			this.publisher.publishEvent(event);
-		} else if (oldContent.getState().isVisible() && !content.getState().isVisible()) {
-			final LockQuestionEvent event = new LockQuestionEvent(this, room, content);
-			this.publisher.publishEvent(event);
-		}
-		return content;
-	}
-
 	/* FIXME: caching */
 	@Override
 	@PreAuthorize("isAuthenticated()")
@@ -183,9 +124,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	}
 
 	@Override
-	@PreAuthorize("hasPermission(#content.roomId, 'room', 'owner')")
-	public Content save(final Content content) {
-		final Room room = roomRepository.findOne(content.getRoomId());
+	public void prepareCreate(final Content content) {
 		content.setTimestamp(new Date());
 
 		if (content.getFormat() == Content.Format.TEXT) {
@@ -205,19 +144,72 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			}
 		}
 		*/
+	}
 
-		final Content result = save(room.getId(), content);
-
-		for (final String groupName : result.getGroups()) {
+	@Override
+	public void finalizeCreate(final Content content) {
+		/* Update content groups of room */
+		final Room room = roomRepository.findOne(content.getRoomId());
+		for (final String groupName : content.getGroups()) {
 			Room.ContentGroup group = room.getContentGroups().getOrDefault(groupName, new Room.ContentGroup());
-			group.getContentIds().add(result.getId());
+			room.getContentGroups().put(groupName, group);
+			group.getContentIds().add(content.getId());
 		}
 		roomRepository.save(room);
 
-		final NewQuestionEvent event = new NewQuestionEvent(this, room, result);
+		final NewQuestionEvent event = new NewQuestionEvent(this, room, content);
 		this.publisher.publishEvent(event);
+	}
 
-		return result;
+	@Override
+	public void prepareUpdate(final Content content) {
+		final ClientAuthentication user = userService.getCurrentUser();
+		final Content oldContent = contentRepository.findOne(content.getId());
+		if (null == oldContent) {
+			throw new NotFoundException();
+		}
+
+		final Room room = roomRepository.findOne(content.getRoomId());
+		if (user == null || room == null || !room.getOwnerId().equals(user.getId())) {
+			throw new UnauthorizedException();
+		}
+
+		if (content.getFormat() == Content.Format.TEXT) {
+			content.getState().setRound(0);
+		} else if (content.getState().getRound() < 1 || content.getState().getRound() > 2) {
+			content.getState().setRound(oldContent.getState().getRound() > 0 ? oldContent.getState().getRound() : 1);
+		}
+
+		content.setId(oldContent.getId());
+		content.setRevision(oldContent.getRevision());
+	}
+
+	@Override
+	public void finalizeUpdate(final Content content) {
+		/* Update content groups of room */
+		final Room room = roomRepository.findOne(content.getRoomId());
+		final Set<String> contentsGroupNames = content.getGroups();
+		final Set<String> allGroupNames = new HashSet<>(contentsGroupNames);
+		allGroupNames.addAll(room.getContentGroups().keySet());
+		for (final String groupName : allGroupNames) {
+			Room.ContentGroup group = room.getContentGroups().getOrDefault(groupName, new Room.ContentGroup());
+			if (contentsGroupNames.contains(groupName)) {
+				group.getContentIds().add(content.getId());
+			} else {
+				group.getContentIds().remove(content.getId());
+			}
+		}
+		roomRepository.save(room);
+
+		/* TODO: not sure yet how to refactor this code - we need access to the old and new entity
+		if (!oldContent.getState().isVisible() && content.getState().isVisible()) {
+			final UnlockQuestionEvent event = new UnlockQuestionEvent(this, room, content);
+			this.publisher.publishEvent(event);
+		} else if (oldContent.getState().isVisible() && !content.getState().isVisible()) {
+			final LockQuestionEvent event = new LockQuestionEvent(this, room, content);
+			this.publisher.publishEvent(event);
+		}
+		*/
 	}
 
 	/* TODO: Only evict cache entry for the content's session. This requires some refactoring. */

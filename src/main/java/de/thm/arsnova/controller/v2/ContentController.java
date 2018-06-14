@@ -111,10 +111,9 @@ public class ContentController extends PaginationController {
 		de.thm.arsnova.entities.Content contentV3 = fromV2Migrator.migrate(content);
 		final String roomId = roomService.getIdByShortId(content.getSessionKeyword());
 		contentV3.setRoomId(roomId);
-		if (contentService.save(contentV3) != null) {
-			return toV2Migrator.migrate(contentV3);
-		}
-		throw new BadRequestException();
+		contentService.create(contentV3);
+
+		return toV2Migrator.migrate(contentV3);
 	}
 
 	@ApiOperation(value = "Post provided contents", nickname = "bulkPostContents")
@@ -125,7 +124,7 @@ public class ContentController extends PaginationController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public List<Content> bulkPostContents(@RequestBody final List<Content> contents) {
 		List<de.thm.arsnova.entities.Content> contentsV3 =
-				contents.stream().map(c -> contentService.save(fromV2Migrator.migrate(c))).collect(Collectors.toList());
+				contents.stream().map(c -> contentService.create(fromV2Migrator.migrate(c))).collect(Collectors.toList());
 		return contentsV3.stream().map(toV2Migrator::migrate).collect(Collectors.toList());
 	}
 

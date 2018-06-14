@@ -43,8 +43,6 @@ import java.util.List;
  * The functionality the question service should provide.
  */
 public interface ContentService extends EntityService<Content> {
-	Content save(Content content);
-
 	Content get(String id);
 
 	List<Content> getByRoomId(String roomId);
@@ -54,10 +52,6 @@ public interface ContentService extends EntityService<Content> {
 	void delete(String questionId);
 
 	List<String> getUnAnsweredContentIds(String roomId);
-
-	Content save(final String roomId, final Content content);
-
-	Content update(Content content);
 
 	List<Content> getLectureContents(String roomId);
 
