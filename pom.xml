@@ -7,7 +7,7 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<io.spring.platform-version>Brussels-SR10</io.spring.platform-version>
+		<io.spring.platform-version>Brussels-SR11</io.spring.platform-version>
 		<io.netty-version>4.1.25.Final</io.netty-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
@@ -183,7 +183,7 @@
 		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib</artifactId>
-			<version>3.2.6</version>
+			<version>3.2.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -299,7 +299,7 @@
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-annotations</artifactId>
-			<version>1.5.19</version>
+			<version>1.5.20</version>
 		</dependency>
 		<dependency>
 			<groupId>com.codahale.metrics</groupId>
@@ -344,7 +344,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.4.10.v20180503</version>
+				<version>9.4.11.v20180605</version>
 				<configuration>
 					<scanIntervalSeconds>1</scanIntervalSeconds>
 					<webApp>
@@ -374,7 +374,7 @@
 			<plugin>
 				<groupId>org.sonarsource.scanner.maven</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
-				<version>3.4.0.905</version>
+				<version>3.4.1.1168</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -422,7 +422,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>3.2.1</version>
+				<version>3.2.2</version>
 			</plugin>
 			<plugin>
 				<groupId>com.github.kongchen</groupId>
