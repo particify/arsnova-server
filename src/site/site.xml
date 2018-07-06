@@ -7,7 +7,7 @@
 	<skin>
 		<groupId>org.apache.maven.skins</groupId>
 		<artifactId>maven-fluido-skin</artifactId>
-		<version>1.6</version>
+		<version>1.7</version>
 	</skin>
 
 	<custom>
@@ -46,8 +46,8 @@
 		</links>
 		<menu name="Overview">
 			<item name="Introduction" href="index.html" />
-			<item name="License" href="license.html" />
-			<item name="The Team" href="team-list.html" />
+			<item name="License" href="licenses.html" />
+			<item name="The Team" href="team.html" />
 		</menu>
 		<menu name="Documentation">
 			<item name="Installation" href="installation.html" />
@@ -57,10 +57,10 @@
 			<item name="API Docs" href="apidocs/index.html" />
 		</menu>
 		<menu name="Further Information">
-			<item name="Source Repository" href="source-repository.html" />
-			<item name="Issue Tracking" href="issue-tracking.html" />
+			<item name="Source Repository" href="scm.html" />
+			<item name="Issue Tracking" href="issue-management.html" />
 			<item name="SonarQube Metrics" href="https://scm.thm.de/sonar/dashboard/index/de.thm.arsnova:arsnova-backend" />
-			<item name="Continuous Integration" href="integration.html" />
+			<item name="Continuous Integration" href="ci-management.html" />
 		</menu>
 	</body>
 </project>
