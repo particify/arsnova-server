@@ -287,7 +287,7 @@ public class LoginController extends AbstractController {
 			result = new RedirectView(
 					twitterClient.getRedirectAction(new J2EContext(request, response)).getLocation());
 		} else if (facebookEnabled && "facebook".equals(type)) {
-			facebookClient.setFields("id,link");
+			facebookClient.setFields("id");
 			facebookClient.setScope("");
 			result = new RedirectView(
 					facebookClient.getRedirectAction(new J2EContext(request, response)).getLocation());
