@@ -40,6 +40,8 @@ public class User implements Serializable {
 	public static final String ANONYMOUS = "anonymous";
 	public static final String GUEST = "guest";
 
+	public static final String FACEBOOK_LINK_PATTERN = "https://www.facebook.com/app_scoped_user_id/%s/";
+
 	private static final long serialVersionUID = 1L;
 	private String username;
 	private String type;
@@ -57,7 +59,8 @@ public class User implements Serializable {
 	}
 
 	public User(FacebookProfile profile) {
-		setUsername(profile.getProfileUrl().toString());
+		/* A URL is built for backwards compatibility. */
+		setUsername(String.format(FACEBOOK_LINK_PATTERN, profile.getId()));
 		setType(User.FACEBOOK);
 	}
 
