@@ -7,7 +7,7 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<io.spring.platform-version>Brussels-SR10</io.spring.platform-version>
+		<io.spring.platform-version>Brussels-SR11</io.spring.platform-version>
 		<io.netty-version>4.1.25.Final</io.netty-version>
 		<org.aspectj-version>1.8.13</org.aspectj-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -67,16 +67,15 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>2.9</version>
+				<version>3.0.0</version>
 				<configuration>
-					<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
 					<dependencyDetailsEnabled>false</dependencyDetailsEnabled>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.0.1</version>
 				<configuration></configuration>
 			</plugin>
 		</plugins>
@@ -245,12 +244,12 @@
 		<dependency>
 			<groupId>org.pac4j</groupId>
 			<artifactId>spring-security-pac4j</artifactId>
-			<version>3.0.0</version>
+			<version>3.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.pac4j</groupId>
 			<artifactId>pac4j-oauth</artifactId>
-			<version>2.2.1</version>
+			<version>2.3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.corundumstudio.socketio</groupId>
@@ -316,7 +315,7 @@
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-annotations</artifactId>
-			<version>1.5.19</version>
+			<version>1.5.20</version>
 		</dependency>
 		<dependency>
 			<groupId>com.codahale.metrics</groupId>
@@ -326,7 +325,7 @@
 		<dependency>
 			<groupId>org.checkerframework</groupId>
 			<artifactId>checker-qual</artifactId>
-			<version>2.4.0</version>
+			<version>2.5.3</version>
 		</dependency>
 	</dependencies>
 
@@ -402,7 +401,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.4.10.v20180503</version>
+				<version>9.4.11.v20180605</version>
 				<configuration>
 					<scanIntervalSeconds>1</scanIntervalSeconds>
 					<webApp>
@@ -432,12 +431,12 @@
 			<plugin>
 				<groupId>org.sonarsource.scanner.maven</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
-				<version>3.4.0.905</version>
+				<version>3.4.1.1168</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.21.0</version>
+				<version>2.22.0</version>
 			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>
@@ -480,7 +479,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>3.2.1</version>
+				<version>3.2.2</version>
 			</plugin>
 			<plugin>
 				<groupId>com.github.kongchen</groupId>
