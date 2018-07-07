@@ -82,6 +82,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @Component("databaseDao")
 public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware {
 
+	private static final int EXPECTED_MIGRATION_LEVEL = 11;
 	private static final int BULK_PARTITION_SIZE = 500;
 
 	@Autowired
@@ -542,18 +543,32 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	private Database getDatabase() {
 		if (database == null) {
 			try {
+				logger.info("Initializing database connection.");
 				final com.fourspaces.couchdb.Session session = new com.fourspaces.couchdb.Session(
 						databaseHost,
 						databasePort
 						);
 				database = session.getDatabase(databaseName);
-			} catch (final Exception e) {
+				final int migrationLevel = getExpectedMigrationLevel();
+				if (migrationLevel < EXPECTED_MIGRATION_LEVEL) {
+					logger.warn("Database migration level is lower than expected. Please run the migration scripts.");
+				} else if (migrationLevel > EXPECTED_MIGRATION_LEVEL) {
+					logger.warn("Database migration level is higher than expected.");
+				} else {
+					logger.info("Database migration status: OK");
+				}
+			} catch (final IOException e) {
 				logger.error("Cannot connect to CouchDB database '{}' on host '{}' using port {}.",
 						databaseName, databaseHost, databasePort, e);
 			}
 		}
 
 		return database;
+	}
+
+	private int getExpectedMigrationLevel() throws IOException {
+		Document d = database.getDocument("arsnova_migrations");
+		return d.getInt("version");
 	}
 
 	@Caching(evict = {@CacheEvict(value = "skillquestions", key = "#session"),
