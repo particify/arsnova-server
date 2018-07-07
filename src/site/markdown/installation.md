@@ -55,11 +55,11 @@ In order to build up a full featured server installation you have to install at 
 	* Apache HTTP Server 2.4.5 (or newer) with builtin modules `mod_proxy`, `mod_proxy_http`, `mod_proxy_wstunnel` and `mod_rewrite`
 
 Additionally, you need Python 2.7 (3.0 or newer will not work) to run the "Setup Tool".
-We further recommend installing the "Apache Portable Runtime Library" (libapr1) for improved performance.
+We further recommend installing the "Apache Portable Runtime (APR) based Native library for Tomcat" (libapr and libtcnative) for improved performance.
 
 Most of this software can easily be installed on Linux systems using the distribution's package manager:
-* Debian: `# apt-get install -t jessie-backports nginx openjdk-8-jre && apt-get install libapr1 tomcat8`
-* Ubuntu: `# sudo apt-get install couchdb libapr1 nginx openjdk-8-jre tomcat8`
+* Debian: `# apt-get install -t jessie-backports nginx openjdk-8-jre && apt-get install libtcnative-1 tomcat8`
+* Ubuntu: `# sudo apt-get install couchdb libtcnative-1 nginx openjdk-8-jre tomcat8`
 
 While running ARSnova without a reverse proxy is possible, we do not recommend to do so.
 A reverse proxy significantly simplifies the setup of HTTPS and allows running Websocket connections over the default HTTP(S) port.
