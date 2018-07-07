@@ -427,34 +427,4 @@ public class LoginController extends AbstractController {
 
 		return authList;
 	}
-
-	@RequestMapping(value = { "/test/me" }, method = RequestMethod.GET)
-	@ResponseBody
-	public User me() {
-		final User me = userSessionService.getUser();
-		if (me == null) {
-			throw new UnauthorizedException();
-		}
-		return me;
-	}
-
-	@RequestMapping(value = { "/test/mysession" }, method = RequestMethod.GET)
-	@ResponseBody
-	public Session mysession() {
-		final Session mysession = userSessionService.getSession();
-		if (mysession == null) {
-			throw new UnauthorizedException();
-		}
-		return mysession;
-	}
-
-	@RequestMapping(value = { "/test/myrole" }, method = RequestMethod.GET)
-	@ResponseBody
-	public UserSessionService.Role myrole() {
-		final UserSessionService.Role myrole = userSessionService.getRole();
-		if (myrole == null) {
-			throw new UnauthorizedException();
-		}
-		return myrole;
-	}
 }
