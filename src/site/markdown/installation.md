@@ -123,6 +123,18 @@ Open `/etc/tomcat8/server.xml`, look for `<Connector port="8080" ...>`, and chan
 
 	<Connector port="8080" address="127.0.0.1" ...>
 
+Additionally, you need to add a
+[Remote IP Valve](https://tomcat.apache.org/tomcat-9.0-doc/config/valve.html#Remote_IP_Valve)
+to make Tomcat aware of the `X-Forwarded` headers injected by the reverse proxy.
+Look for the `<Host name="localhost" ...>` section and add:
+
+    <Valve className="org.apache.catalina.valves.RemoteIpValve"
+        internalProxies="127\.0\.0\.1"
+        remoteIpHeader="x-forwarded-for"
+        protocolHeader="x-forwarded-proto" />
+
+If the reverse proxy is not running locally, you need to adjust the regular expression for `internalProxies` accordingly.
+
 
 ### Web Application
 
@@ -148,9 +160,8 @@ Add the following lines to the `server` section of the file:
 	location = /arsnova-config { proxy_pass http://localhost:8080/api/configuration/; }
 	location /api {
 		proxy_pass http://localhost:8080;
+		proxy_set_header Host $host;
 		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-		proxy_set_header X-Forwarded-Host $host;
-		proxy_set_header X-Forwarded-Port $server_port;
 		proxy_set_header X-Forwarded-Proto $scheme;
 	}
 	location /socket.io/ {
@@ -158,8 +169,6 @@ Add the following lines to the `server` section of the file:
 		proxy_http_version 1.1;
 		proxy_set_header Upgrade $http_upgrade;
 		proxy_set_header Connection "upgrade";
-		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-		proxy_set_header Host $host;
 	}
 
 Create a symbolic link in `/etc/nginx/sites-enabled` to the `arsnova` site configuration file.
@@ -178,6 +187,7 @@ Add the following lines to the `VirtualHost` section of the file:
 		ProxyPass http://localhost:8080/api/
 		ProxyPassReverse http://localhost:8080/api/
 		ProxyPreserveHost On
+		RequestHeader set X-Forwarded-Proto %{REQUEST_SCHEME}
 	</Location>
 	<Location /socket.io/>
 		ProxyPass ws://localhost:8090/socket.io/
