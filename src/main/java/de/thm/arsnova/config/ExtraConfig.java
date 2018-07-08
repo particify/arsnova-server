@@ -23,6 +23,8 @@ import de.thm.arsnova.connector.client.ConnectorClientImpl;
 import de.thm.arsnova.socket.ARSnovaSocket;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 import de.thm.arsnova.web.CorsFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
@@ -39,7 +41,10 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.util.Arrays;
+import java.util.Properties;
 
 /**
  * Loads property file and configures non-security related beans and components.
@@ -48,9 +53,13 @@ import java.util.Arrays;
 @Configuration
 @EnableCaching
 public class ExtraConfig extends WebMvcConfigurerAdapter {
+	private static final Logger logger = LoggerFactory.getLogger(ExtraConfig.class);
 
 	@Autowired
 	private Environment env;
+
+	@Resource(name = "versionInfoProperties")
+	private Properties versionInfoProperties;
 
 	@Value(value = "${connector.enable}") private boolean connectorEnable;
 	@Value(value = "${connector.uri}") private String connectorUri;
@@ -64,6 +73,15 @@ public class ExtraConfig extends WebMvcConfigurerAdapter {
 	@Value(value = "${security.cors.origins:}") private String[] corsOrigins;
 
 	private static int testPortOffset = 0;
+
+	@PostConstruct
+	public void init() {
+		logger.info("ARSnova Backend version: {} ({} {}{})",
+				versionInfoProperties.getProperty("version.string"),
+				versionInfoProperties.getProperty("version.build-time"),
+				versionInfoProperties.getProperty("version.git.commit-id"),
+				Boolean.parseBoolean(versionInfoProperties.getProperty("version.git.dirty")) ? " [dirty]" : "");
+	}
 
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
