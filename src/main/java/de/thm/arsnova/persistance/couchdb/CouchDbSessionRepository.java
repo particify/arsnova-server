@@ -404,13 +404,13 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 	/* TODO: Move to service layer. */
 	private List<SessionInfo> getInfosForSessions(final List<Session> sessions) {
 		final List<String> sessionIds = sessions.stream().map(Session::getId).collect(Collectors.toList());
-		final ViewQuery questionCountView = createQuery("by_sessionid").designDocId("_design/Content")
+		final ViewQuery questionCountView = createBySessionIdQuery().designDocId("_design/Content")
 				.group(true).keys(sessionIds);
-		final ViewQuery answerCountView = createQuery("by_sessionid").designDocId("_design/Answer")
+		final ViewQuery answerCountView = createBySessionIdQuery().designDocId("_design/Answer")
 				.group(true).keys(sessionIds);
-		final ViewQuery commentCountView = createQuery("by_sessionid").designDocId("_design/Comment")
+		final ViewQuery commentCountView = createBySessionIdQuery().designDocId("_design/Comment")
 				.group(true).keys(sessionIds);
-		final ViewQuery unreadCommentCountView = createQuery("by_sessionid_read").designDocId("_design/Comment")
+		final ViewQuery unreadCommentCountView = createBySessionIdReadQuery().designDocId("_design/Comment")
 				.group(true).keys(sessions.stream().map(session -> ComplexKey.of(session.getId(), false)).collect(Collectors.toList()));
 
 		return getSessionInfoData(sessions, questionCountView, answerCountView, commentCountView, unreadCommentCountView);
@@ -418,9 +418,9 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 
 	/* TODO: Move to service layer. */
 	private List<SessionInfo> getInfosForVisitedSessions(final List<Session> sessions, final User user) {
-		final ViewQuery answeredQuestionsView = createQuery("by_user_sessionid").designDocId("_design/Answer")
+		final ViewQuery answeredQuestionsView = createByUserSessionIdQuery().designDocId("_design/Answer")
 				.keys(sessions.stream().map(session -> ComplexKey.of(user.getUsername(), session.getId())).collect(Collectors.toList()));
-		final ViewQuery contentIdsView = createQuery("by_sessionid").designDocId("_design/Content")
+		final ViewQuery contentIdsView = createBySessionIdQuery().designDocId("_design/Content")
 				.keys(sessions.stream().map(Session::getId).collect(Collectors.toList()));
 
 		return getVisitedSessionInfoData(sessions, answeredQuestionsView, contentIdsView);
@@ -542,7 +542,7 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 	public LoggedIn registerAsOnlineUser(final User user, final Session session) {
 		LoggedIn loggedIn = new LoggedIn();
 		try {
-			final List<LoggedIn> loggedInList = db.queryView(createQuery("all").designDocId("_design/LoggedIn").key(user.getUsername()), LoggedIn.class);
+			final List<LoggedIn> loggedInList = db.queryView(createAllQuery().designDocId("_design/LoggedIn").key(user.getUsername()), LoggedIn.class);
 
 			if (!loggedInList.isEmpty()) {
 				loggedIn = loggedInList.get(0);
@@ -569,4 +569,21 @@ public class CouchDbSessionRepository extends CouchDbCrudRepository<Session> imp
 
 		return loggedIn;
 	}
+
+	private ViewQuery createBySessionIdReadQuery() {
+		return createQuery("by_sessionid_read");
+	}
+
+	private ViewQuery createBySessionIdQuery() {
+		return createQuery("by_sessionid");
+	}
+
+	private ViewQuery createByUserSessionIdQuery() {
+		return createQuery("by_user_sessionid");
+	}
+
+	private ViewQuery createAllQuery() {
+		return createQuery("all");
+	}
+
 }
