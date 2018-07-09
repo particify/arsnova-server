@@ -258,14 +258,9 @@ public class LoginController extends AbstractController {
 			failureUrl = "/";
 		}
 
-		/* Handle proxy
-		 * TODO: It might be better, to support the proposed standard: http://tools.ietf.org/html/rfc7239 */
-		String host = null != request.getHeader("X-Forwarded-Host")
-				? request.getHeader("X-Forwarded-Host") : request.getServerName();
-		int port = null != request.getHeader("X-Forwarded-Port")
-				? Integer.valueOf(request.getHeader("X-Forwarded-Port")) : request.getServerPort();
-		String scheme = null != request.getHeader("X-Forwarded-Proto")
-				? request.getHeader("X-Forwarded-Proto") : request.getScheme();
+		final String host = request.getServerName();
+		final int port = request.getServerPort();
+		final String scheme = request.getScheme();
 
 		String serverUrl = scheme + "://" + host;
 		if ("https".equals(scheme)) {
@@ -431,35 +426,5 @@ public class LoginController extends AbstractController {
 		}
 
 		return authList;
-	}
-
-	@RequestMapping(value = { "/test/me" }, method = RequestMethod.GET)
-	@ResponseBody
-	public User me() {
-		final User me = userSessionService.getUser();
-		if (me == null) {
-			throw new UnauthorizedException();
-		}
-		return me;
-	}
-
-	@RequestMapping(value = { "/test/mysession" }, method = RequestMethod.GET)
-	@ResponseBody
-	public Session mysession() {
-		final Session mysession = userSessionService.getSession();
-		if (mysession == null) {
-			throw new UnauthorizedException();
-		}
-		return mysession;
-	}
-
-	@RequestMapping(value = { "/test/myrole" }, method = RequestMethod.GET)
-	@ResponseBody
-	public UserSessionService.Role myrole() {
-		final UserSessionService.Role myrole = userSessionService.getRole();
-		if (myrole == null) {
-			throw new UnauthorizedException();
-		}
-		return myrole;
 	}
 }
