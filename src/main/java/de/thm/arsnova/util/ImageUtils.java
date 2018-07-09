@@ -81,7 +81,7 @@ public class ImageUtils {
 		if (urlParts.length > 0) {
 			final String extension = urlParts[urlParts.length - 1];
 
-			return "data:image/" + extension + ";base64," + Base64.encodeBase64String(convertFileToByteArray(imageUrl));
+			return IMAGE_PREFIX_START + extension + IMAGE_PREFIX_MIDDLE + Base64.encodeBase64String(convertFileToByteArray(imageUrl));
 		}
 
 		return null;
@@ -165,8 +165,9 @@ public class ImageUtils {
 			final String base64String = imgInfo[1];
 
 			byte[] imageData = Base64.decodeBase64(base64String);
-			try {
-				BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(imageData));
+			try (final ByteArrayInputStream bais = new ByteArrayInputStream(imageData);
+					final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+				BufferedImage originalImage = ImageIO.read(bais);
 				BufferedImage newImage = new BufferedImage(width, height, originalImage.getType());
 				Graphics2D g = newImage.createGraphics();
 
@@ -186,17 +187,15 @@ public class ImageUtils {
 				g.dispose();
 
 				StringBuilder result = new StringBuilder();
-				result.append("data:image/");
+				result.append(IMAGE_PREFIX_START);
 				result.append(extension);
-				result.append(";base64,");
+				result.append(IMAGE_PREFIX_MIDDLE);
 
-				ByteArrayOutputStream output = new ByteArrayOutputStream();
-				ImageIO.write(newImage, extension, output);
+				ImageIO.write(newImage, extension, baos);
 
-				output.flush();
-				output.close();
+				baos.flush();
 
-				result.append(Base64.encodeBase64String(output.toByteArray()));
+				result.append(Base64.encodeBase64String(baos.toByteArray()));
 
 				return result.toString();
 			} catch (IOException e) {
@@ -230,11 +229,8 @@ public class ImageUtils {
 	 * @return The <code>byte[]</code> of the image on success, otherwise <code>null</code>.
 	 */
 	byte[] convertFileToByteArray(final String imageUrl) {
-		try {
-			final URL url = new URL(imageUrl);
-			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-			final InputStream is = url.openStream();
+		try (final InputStream is = new URL(imageUrl).openStream();
+				final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 			final byte[] byteChunk = new byte[CHUNK_SIZE];
 			int n;
 
@@ -243,10 +239,8 @@ public class ImageUtils {
 			}
 
 			baos.flush();
-			baos.close();
 
 			return baos.toByteArray();
-
 		} catch (IOException e) {
 			logger.error(e.getLocalizedMessage());
 		}
