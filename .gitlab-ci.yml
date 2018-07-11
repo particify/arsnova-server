@@ -1,5 +1,4 @@
 variables:
-  MIRROR_REPO: git@github.com:thm-projects/arsnova-backend.git
   WAR_FILE: target/arsnova-backend-*.war
 
 stages:
@@ -7,29 +6,10 @@ stages:
   - test
   - build
   - deploy
-  - synchronization
 
 cache:
   paths:
     - .m2/
-
-sync_mirror:
-  stage: synchronization
-  when: always
-  except:
-    - production
-    - staging
-  tags:
-    - git
-  allow_failure: true
-  script:
-    - mkdir ~/.ssh && echo "$GITHUB_HOST_KEY" > ~/.ssh/known_hosts
-    - eval $(ssh-agent -s) && ssh-add <(echo "$GITHUB_DEPLOY_KEY")
-    - git clone --bare "$CI_REPOSITORY_URL" mirror.git
-    - cd mirror.git
-    - git update-ref -d refs/tags/production
-    - git update-ref -d refs/tags/staging
-    - git push --mirror "$MIRROR_REPO"
 
 sonar:
   stage: analysis
