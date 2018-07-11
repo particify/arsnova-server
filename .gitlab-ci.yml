@@ -17,7 +17,7 @@ checkstyle:
     - maven
   cache: *maven_cache
   script:
-    - mvn checkstyle:checkstyle
+    - mvn -B checkstyle:checkstyle
 
 compile:
   stage: build
@@ -28,7 +28,7 @@ compile:
       - $OUTPUT_DIR
   cache: *maven_cache
   script:
-    - mvn test-compile
+    - mvn -B test-compile
 
 unit_test:
   stage: post-build
@@ -41,7 +41,7 @@ unit_test:
       - $OUTPUT_DIR
   cache: *maven_cache
   script:
-    - mvn surefire:test
+    - mvn -B surefire:test
 
 package:
   stage: post-build
@@ -55,7 +55,7 @@ package:
       - $WAR_FILE
   cache: *maven_cache
   script:
-    - mvn war:war
+    - mvn -B war:war
 
 .deploy: &deploy
   stage: deploy
@@ -119,4 +119,4 @@ sonarqube:
   cache: *maven_cache
   allow_failure: true
   script:
-    - mvn sonar:sonar
+    - mvn -B sonar:sonar
