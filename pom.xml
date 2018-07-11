@@ -12,10 +12,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
-		<mobile.production.path>../arsnova-mobile/src/main/webapp/build/production/ARSnova</mobile.production.path>
-		<mobile.testing.path>../arsnova-mobile/src/main/webapp/build/testing/ARSnova</mobile.testing.path>
-		<mobile.path>${mobile.production.path}</mobile.path>
-		<customization.path>${basedir}/../arsnova-customization/src/main/webapp</customization.path>
 	</properties>
 
 	<developers>
@@ -350,16 +346,6 @@
 						<overrideDescriptor>src/main/webapp/WEB-INF/web-dev.xml</overrideDescriptor>
 						<webInfIncludeJarPattern>^$</webInfIncludeJarPattern>
 					</webApp>
-					<contextHandlers>
-						<contextHandler implementation="org.eclipse.jetty.maven.plugin.JettyWebAppContext">
-							<contextPath>/mobile</contextPath>
-							<resourceBase>${mobile.path}</resourceBase>
-						</contextHandler>
-						<contextHandler implementation="org.eclipse.jetty.maven.plugin.JettyWebAppContext">
-							<contextPath>/customization</contextPath>
-							<resourceBase>${customization.path}</resourceBase>
-						</contextHandler>
-					</contextHandlers>
 				</configuration>
 			</plugin>
 			<plugin>
