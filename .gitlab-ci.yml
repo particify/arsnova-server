@@ -1,49 +1,57 @@
 variables:
-  WAR_FILE: target/arsnova-backend-*.war
+  OUTPUT_DIR: target
+  WAR_FILE: $OUTPUT_DIR/arsnova-backend-*.war
 
 stages:
-  - analysis
-  - test
   - build
+  - post-build
   - deploy
 
 cache:
   paths:
     - .m2/
 
-sonar:
-  stage: analysis
-  only:
-    - master
-  tags:
-    - maven
-  allow_failure: true
-  script:
-    - mvn sonar:sonar
-
 checkstyle:
-  stage: analysis
+  stage: build
   tags:
     - maven
   script:
     - mvn checkstyle:checkstyle
 
-test:
-  stage: test
-  tags:
-    - maven
-  script:
-    - mvn test
-
-package:
+compile:
   stage: build
   tags:
     - maven
   artifacts:
     paths:
+      - $OUTPUT_DIR
+  script:
+    - mvn test-compile
+
+unit_test:
+  stage: post-build
+  tags:
+    - maven
+  dependencies:
+    - compile
+  artifacts:
+    paths:
+      - $OUTPUT_DIR
+  script:
+    - mvn surefire:test
+
+package:
+  stage: post-build
+  tags:
+    - maven
+  dependencies:
+    - compile
+  artifacts:
+    name: package
+    paths:
       - $WAR_FILE
   script:
-    - mvn package -DskipTests
+    - mvn war:war
 
 .deploy: &deploy
   stage: deploy
@@ -53,6 +61,8 @@ package:
   variables:
     DEPLOY_CONTEXT: api
     GIT_STRATEGY: none
+  dependencies:
+    - package
   script:
     # Do some variable magic to access host-specific variables
     - PREFIX=$(echo $CI_ENVIRONMENT_NAME | tr '.:/-' '_')
@@ -92,3 +102,16 @@ tomcat_development:
       #- $DEV_DEPLOY_HOST =~ /^([a-z0-9-]+\.)*[a-z0-9-]+(:[0-9]+)?$/
   before_script:
     - DEPLOY_HOST=$DEV_DEPLOY_HOST
+
+sonarqube:
+  stage: deploy
+  only:
+    - master
+  tags:
+    - maven
+  dependencies:
+    - compile
+    - unit_test
+  allow_failure: true
+  script:
+    - mvn sonar:sonar
