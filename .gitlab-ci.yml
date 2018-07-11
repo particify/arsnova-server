@@ -7,7 +7,7 @@ stages:
   - post-build
   - deploy
 
-cache:
+.maven_cache: &maven_cache
   paths:
     - .m2/
 
@@ -15,6 +15,7 @@ checkstyle:
   stage: build
   tags:
     - maven
+  cache: *maven_cache
   script:
     - mvn checkstyle:checkstyle
 
@@ -25,6 +26,7 @@ compile:
   artifacts:
     paths:
       - $OUTPUT_DIR
+  cache: *maven_cache
   script:
     - mvn test-compile
 
@@ -37,6 +39,7 @@ unit_test:
   artifacts:
     paths:
       - $OUTPUT_DIR
+  cache: *maven_cache
   script:
     - mvn surefire:test
 
@@ -50,6 +53,7 @@ package:
     name: package
     paths:
       - $WAR_FILE
+  cache: *maven_cache
   script:
     - mvn war:war
 
@@ -112,6 +116,7 @@ sonarqube:
   dependencies:
     - compile
     - unit_test
+  cache: *maven_cache
   allow_failure: true
   script:
     - mvn sonar:sonar
