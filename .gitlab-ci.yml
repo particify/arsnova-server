@@ -16,8 +16,9 @@ checkstyle:
   tags:
     - maven
   cache: *maven_cache
+  allow_failure: true
   script:
-    - mvn -B checkstyle:checkstyle
+    - mvn -B checkstyle:check
 
 compile:
   stage: build
