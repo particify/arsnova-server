@@ -1,84 +1,123 @@
 variables:
-  MIRROR_REPO: git@github.com:thm-projects/arsnova-backend.git
-  WAR_FILE: target/arsnova-backend-*.war
+  OUTPUT_DIR: target
+  WAR_FILE: $OUTPUT_DIR/arsnova-backend-*.war
 
 stages:
-  - analysis
-  - test
   - build
+  - post-build
   - deploy
-  - synchronization
 
-cache:
+.maven_cache: &maven_cache
   paths:
     - .m2/
 
-sync_mirror:
-  stage: synchronization
-  when: always
-  except:
-    - production
-    - staging
-  tags:
-    - git
-  allow_failure: true
-  script:
-    - mkdir ~/.ssh && echo "$GITHUB_HOST_KEY" > ~/.ssh/known_hosts
-    - eval $(ssh-agent -s) && ssh-add <(echo "$GITHUB_DEPLOY_KEY")
-    - git clone --bare "$CI_REPOSITORY_URL" mirror.git
-    - cd mirror.git
-    - git update-ref -d refs/tags/production
-    - git update-ref -d refs/tags/staging
-    - git push --mirror "$MIRROR_REPO"
-
-sonar:
-  stage: analysis
-  only:
-    - master
-  tags:
-    - maven
-  allow_failure: true
-  script:
-    - mvn sonar:sonar
-
 checkstyle:
-  stage: analysis
+  stage: build
   tags:
     - maven
+  cache: *maven_cache
+  allow_failure: true
   script:
-    - mvn checkstyle:checkstyle
+    - mvn -B checkstyle:check
 
-test:
-  stage: test
-  tags:
-    - maven
-  script:
-    - mvn test
-
-package:
+compile:
   stage: build
   tags:
     - maven
   artifacts:
     paths:
-      - $WAR_FILE
+      - $OUTPUT_DIR
+  cache: *maven_cache
   script:
-    - mvn package -DskipTests
+    - mvn -B test-compile
+
+unit_test:
+  stage: post-build
+  tags:
+    - maven
+  dependencies:
+    - compile
+  artifacts:
+    paths:
+      - $OUTPUT_DIR
+  cache: *maven_cache
+  script:
+    - mvn -B surefire:test
+
+package:
+  stage: post-build
+  tags:
+    - maven
+  dependencies:
+    - compile
+  artifacts:
+    name: package
+    paths:
+      - $WAR_FILE
+  cache: *maven_cache
+  script:
+    - mvn -B war:war
+
+.deploy: &deploy
+  stage: deploy
+  tags:
+    - python
+  when: manual
+  variables:
+    DEPLOY_CONTEXT: api
+    GIT_STRATEGY: none
+  dependencies:
+    - package
+  script:
+    # Do some variable magic to access host-specific variables
+    - PREFIX=$(echo $CI_ENVIRONMENT_NAME | tr '.:/-' '_')
+    - HOST_VAR=${PREFIX}__HOST TOMCAT_PASSWORD_VAR=${PREFIX}__TOMCAT_PASSWORD TOMCAT_USER_VAR=${PREFIX}__TOMCAT_USER
+    - "[ -z \"${!HOST_VAR}\" ] && echo \"No configuration for $DEPLOY_HOST found.\" && exit 1"
+    # Abort if there are too many users online
+    - USER_COUNT=$(curl -fsSL ${CI_ENVIRONMENT_URL}statistics | python -c "import sys, json; data=json.loads(sys.stdin.read()); print(data['activeUsers']);")
+    - "[ \"$USER_COUNT\" -ge 10 ] && [ -z \"$FORCE\" ] && echo \"Too many users ($USER_COUNT) online.\" && exit 1"
+    # Deploy .war file to Tomcat
+    - curl -fsS --upload-file $WAR_FILE "https://${!TOMCAT_USER_VAR}:${!TOMCAT_PASSWORD_VAR}@${!HOST_VAR}/manager/text/deploy?path=%2F${DEPLOY_CONTEXT}&update=true"
 
 tomcat_production:
-  stage: deploy
+  <<: *deploy
+  environment:
+    name: production/$PROD_DEPLOY_HOST
+    url: https://$PROD_DEPLOY_HOST/$DEPLOY_CONTEXT/
   only:
-    - production
-  tags:
-    - curl
-  script:
-    - curl --fail --upload-file $WAR_FILE "https://$PROD_TOMCAT_USER:$PROD_TOMCAT_PASSWORD@$PROD_TOMCAT_HOST/manager/text/deploy?path=%2Fapi&update=true"
+    variables:
+      - $PROD_DEPLOY_HOST
+      # GitLab 11.0+
+      #- $PROD_DEPLOY_HOST =~ /^([a-z0-9-]+\.)*[a-z0-9-]+(:[0-9]+)?$/
+    refs:
+      - /^v[0-9]+/
+      - /^[0-9]+\.[0-9]+$/
+  before_script:
+    - DEPLOY_HOST=$PROD_DEPLOY_HOST
 
 tomcat_development:
+  <<: *deploy
+  environment:
+    name: development/$DEV_DEPLOY_HOST
+    url: https://$DEV_DEPLOY_HOST/api/
+  only:
+    variables:
+      - $DEV_DEPLOY_HOST
+      # GitLab 11.0+
+      #- $DEV_DEPLOY_HOST =~ /^([a-z0-9-]+\.)*[a-z0-9-]+(:[0-9]+)?$/
+  before_script:
+    - DEPLOY_HOST=$DEV_DEPLOY_HOST
+
+sonarqube:
   stage: deploy
   only:
-    - staging
+    - master
   tags:
-    - curl
+    - maven
+  dependencies:
+    - compile
+    - unit_test
+  cache: *maven_cache
+  allow_failure: true
   script:
-    - curl --fail --upload-file $WAR_FILE "https://$DEV_TOMCAT_USER:$DEV_TOMCAT_PASSWORD@$DEV_TOMCAT_HOST/manager/text/deploy?path=%2Fapi&update=true"
+    - mvn -B sonar:sonar
