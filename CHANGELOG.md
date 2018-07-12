@@ -1,5 +1,41 @@
 # Changelog
 
+## 2.6
+Features:
+* Experimental support for CouchDB 2 has been added. Note: The data migration
+  script is not compatible with CouchDB 2 and has to be run before an upgrade.
+
+Improvements:
+* Error handling and logging has been improved. It should now be easier to find
+  the cause of problems. API error responses now contain the name of the
+  `Exception` which caused the error. Further details for debugging purposes can
+  be enabled with the new `api.expose-exception-messages` setting (Do NOT
+  enable in production environments!).
+* Updated OAuth handling to restore compatibility with 3rd-party login services.
+
+Bug fixes:
+* Fixed multiple bugs caused by incorrect type handling in the database layer.
+* Fixed XFO header check behind reverse proxy (used by clients when embedding
+  external websites).
+* Fixed rounding error in learning progress calculation.
+* Fixed `security.cors.origins` setting.
+* Fixed import of data from older versions.
+
+Security:
+* Fixed DoS vulnerability in authentication handling behind reverse proxy.
+
+Configuration changes:  
+Minor changes to the web server and Tomcat proxy configuration are required
+(see [installation guide](src/site/markdown/installation.md)).
+
+**This version is brought to you by:**  
+Project management: Klaus Quibeldey-Cirkel  
+Lead programming: Daniel Gerhardt, Tom "tekay" Käsler  
+Contributions: Marius Renner, Paul-Christian Volkmer  
+Sponsoring: [AG QLS](https://www.thm.de/site/en/hochschule/service/ag-qls.html),
+[HMWK](https://wissenschaft.hessen.de/wissenschaft/it-neue-medien/kompetenznetz-e-learning-hessen)
+
+
 ## 2.5.7
 This is a maintenance release which only brings libraries up to date to fix
 potential bugs.
