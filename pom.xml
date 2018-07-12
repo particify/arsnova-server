@@ -8,15 +8,11 @@
 
 	<properties>
 		<io.spring.platform-version>Brussels-SR11</io.spring.platform-version>
-		<io.netty-version>4.1.25.Final</io.netty-version>
+		<io.netty-version>4.1.26.Final</io.netty-version>
 		<org.aspectj-version>1.8.13</org.aspectj-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
-		<mobile.production.path>../arsnova-mobile/src/main/webapp/build/production/ARSnova</mobile.production.path>
-		<mobile.testing.path>../arsnova-mobile/src/main/webapp/build/testing/ARSnova</mobile.testing.path>
-		<mobile.path>${mobile.production.path}</mobile.path>
-		<customization.path>${basedir}/../arsnova-customization/src/main/webapp</customization.path>
 	</properties>
 
 	<developers>
@@ -83,24 +79,37 @@
 
 	<repositories>
 		<repository>
-			<id>thmrepo</id>
-			<name>THM Maven Repository</name>
-			<url>https://maven.mni.thm.de/content/repositories</url>
+			<id>thm-releases</id>
+			<name>THM Maven Release Repository</name>
+			<url>https://repo.mni.thm.de/repository/releases</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
 		</repository>
 		<repository>
-			<id>thmreposnapshots</id>
+			<id>thm-snapshots</id>
 			<name>THM Maven Snapshot Repository</name>
-			<url>https://maven.mni.thm.de/content/repositories/snapshots</url>
+			<url>https://repo.mni.thm.de/repository/snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 		<repository>
-			<id>thmmirror</id>
+			<id>thm-mirror</id>
 			<name>THM Maven Mirror</name>
-			<url>https://maven.mni.thm.de/content/groups/public</url>
-		</repository>
-		<repository>
-			<id>sonatypesnapshots</id>
-			<name>Sonatype Snapshot Repository</name>
-			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+			<url>https://repo.mni.thm.de/repository/maven-public</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 
@@ -408,16 +417,6 @@
 						<overrideDescriptor>src/main/webapp/WEB-INF/web-dev.xml</overrideDescriptor>
 						<webInfIncludeJarPattern>^$</webInfIncludeJarPattern>
 					</webApp>
-					<contextHandlers>
-						<contextHandler implementation="org.eclipse.jetty.maven.plugin.JettyWebAppContext">
-							<contextPath>/mobile</contextPath>
-							<resourceBase>${mobile.path}</resourceBase>
-						</contextHandler>
-						<contextHandler implementation="org.eclipse.jetty.maven.plugin.JettyWebAppContext">
-							<contextPath>/customization</contextPath>
-							<resourceBase>${customization.path}</resourceBase>
-						</contextHandler>
-					</contextHandlers>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -536,7 +535,7 @@
 
 	<name>ARSnova Backend</name>
 	<description>ARSnova is a great audience response system</description>
-	<url>https://arsnova.github.eu</url>
+	<url>https://arsnova.github.io</url>
 	<organization>
 		<name>Technische Hochschule Mittelhessen</name>
 		<url>https://www.thm.de</url>
