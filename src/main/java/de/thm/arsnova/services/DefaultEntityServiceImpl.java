@@ -69,9 +69,12 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 			throw new IllegalArgumentException("Entity is not new.");
 		}
 		entity.setCreationTimestamp(new Date());
-		prepareCreate(entity);
 
-		return repository.save(entity);
+		prepareCreate(entity);
+		final T createdEntity = repository.save(entity);
+		finalizeCreate(entity);
+
+		return createdEntity;
 	}
 
 	/**
@@ -80,6 +83,15 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	 * @param entity The entity to be created
 	 */
 	protected void prepareCreate(final T entity) {
+
+	}
+
+	/**
+	 * This method can be overridden by subclasses to modify the entity after creation.
+	 *
+	 * @param entity The entity which has been created
+	 */
+	protected void finalizeCreate(final T entity) {
 
 	}
 
@@ -92,9 +104,12 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	public T update(final T oldEntity, final T newEntity) {
 		newEntity.setId(oldEntity.getId());
 		newEntity.setUpdateTimestamp(new Date());
-		prepareUpdate(newEntity);
 
-		return repository.save(newEntity);
+		prepareUpdate(newEntity);
+		final T updatedEntity = repository.save(newEntity);
+		finalizeUpdate(updatedEntity);
+
+		return updatedEntity;
 	}
 
 	/**
@@ -103,6 +118,15 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	 * @param entity The entity to be updated
 	 */
 	protected void prepareUpdate(final T entity) {
+
+	}
+
+	/**
+	 * This method can be overridden by subclasses to modify the entity after updating.
+	 *
+	 * @param entity The entity which has been updated
+	 */
+	protected void finalizeUpdate(final T entity) {
 
 	}
 
