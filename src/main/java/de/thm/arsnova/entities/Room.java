@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.entities.serialization.View;
 import org.springframework.core.style.ToStringCreator;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -367,6 +368,10 @@ public class Room extends Entity {
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public Map<String, ContentGroup> getContentGroups() {
+		if (contentGroups == null) {
+			contentGroups = new HashMap<>();
+		}
+
 		return contentGroups;
 	}
 
