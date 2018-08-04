@@ -39,7 +39,7 @@ public class CouchDbUserRepository extends CouchDbCrudRepository<UserProfile> im
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbUserRepository.class);
 
 	public CouchDbUserRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(UserProfile.class, db, "by_authprovider_loginid", createIfNotExists);
+		super(UserProfile.class, db, "by_id", createIfNotExists);
 	}
 
 	private void log(Object... strings) {

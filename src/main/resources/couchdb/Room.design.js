@@ -7,7 +7,8 @@ var designDoc = {
 				if (doc.type === "Room") {
 					emit(doc._id, {_rev: doc._rev});
 				}
-			}
+			},
+			"reduce": "_count"
 		},
 		"by_courseid": {
 			"map": function (doc) {

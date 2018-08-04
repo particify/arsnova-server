@@ -2,6 +2,14 @@ var designDoc = {
 	"_id": "_design/Answer",
 	"language": "javascript",
 	"views": {
+		"by_id": {
+			"map": function (doc) {
+				if (["Answer", "ChoiceAnswer", "TextAnswer"].indexOf(doc.type) !== -1) {
+					emit(doc._id, {_rev: doc._rev});
+				}
+			},
+			"reduce": "_count"
+		},
 		"by_contentid": {
 			"map": function (doc) {
 				if (["Answer", "ChoiceAnswer", "TextAnswer"].indexOf(doc.type) !== -1) {

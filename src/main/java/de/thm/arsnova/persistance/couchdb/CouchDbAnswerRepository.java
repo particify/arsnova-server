@@ -36,7 +36,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	private ApplicationEventPublisher publisher;
 
 	public CouchDbAnswerRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(Answer.class, db, "by_roomid", createIfNotExists);
+		super(Answer.class, db, "by_id", createIfNotExists);
 	}
 
 	@Override

@@ -28,7 +28,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	private LogEntryRepository dbLogger;
 
 	public CouchDbContentRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(Content.class, db, "by_roomid", createIfNotExists);
+		super(Content.class, db, "by_id", createIfNotExists);
 	}
 
 	@Override

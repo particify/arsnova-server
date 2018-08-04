@@ -23,7 +23,7 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	private LogEntryRepository dbLogger;
 
 	public CouchDbCommentRepository(final CouchDbConnector db, final boolean createIfNotExists) {
-		super(Comment.class, db, "by_roomid", createIfNotExists);
+		super(Comment.class, db, "by_id", createIfNotExists);
 	}
 
 	@Override
