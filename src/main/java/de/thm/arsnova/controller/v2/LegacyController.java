@@ -159,7 +159,7 @@ public class LegacyController extends AbstractController {
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/whoami")
+	@RequestMapping(value = { "/whoami", "/whoami.json" })
 	public String redirectWhoami() {
 		return "forward:/v2/auth/whoami";
 	}

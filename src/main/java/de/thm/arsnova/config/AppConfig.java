@@ -100,8 +100,10 @@ import java.util.List;
 		encoding = "UTF-8"
 )
 public class AppConfig implements WebMvcConfigurer {
-	public static final MediaType API_V2_MEDIA_TYPE = new MediaType("application", "vnd.de.thm.arsnova.v2+json");
-	public static final MediaType API_V3_MEDIA_TYPE = new MediaType("application", "vnd.de.thm.arsnova.v3+json");
+	public static final String API_V2_MEDIA_TYPE_VALUE = "application/vnd.de.thm.arsnova.v2+json";
+	public static final String API_V3_MEDIA_TYPE_VALUE = "application/vnd.de.thm.arsnova.v3+json";
+	public static final MediaType API_V2_MEDIA_TYPE = MediaType.valueOf(API_V2_MEDIA_TYPE_VALUE);
+	public static final MediaType API_V3_MEDIA_TYPE = MediaType.valueOf(API_V3_MEDIA_TYPE_VALUE);
 
 	@Autowired
 	private Environment env;

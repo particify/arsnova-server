@@ -86,6 +86,16 @@
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
+	<filter>
+		<filter-name>v2ContentTypeOverrideFilter</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+		<async-supported>true</async-supported>
+	</filter>
+	<filter-mapping>
+		<filter-name>v2ContentTypeOverrideFilter</filter-name>
+		<url-pattern>/v2/*</url-pattern>
+	</filter-mapping>
+
 	<session-config>
 		<tracking-mode>COOKIE</tracking-mode>
 	</session-config>
