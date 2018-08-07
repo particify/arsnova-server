@@ -57,6 +57,18 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	}
 
 	@Override
+	public T get(final String id, final boolean internal) {
+		if (internal) {
+			T entity = repository.findOne(id);
+			entity.setInternal(true);
+
+			return entity;
+		}
+
+		return get(id);
+	}
+
+	@Override
 	@PreFilter(value = "hasPermission(filterObject, #this.this.getTypeName(), 'read')", filterTarget = "ids")
 	public Iterable<T> get(final Collection<String> ids) {
 		return repository.findAllById(ids);

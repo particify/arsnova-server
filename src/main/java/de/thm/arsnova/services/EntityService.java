@@ -36,6 +36,8 @@ public interface EntityService<T extends Entity> {
 	@PreAuthorize("hasPermission(#id, #this.this.getTypeName(), 'read')")
 	T get(String id);
 
+	T get(String id, boolean internal);
+
 	@PreFilter(value = "hasPermission(filterObject, #this.this.getTypeName(), 'read')", filterTarget = "ids")
 	Iterable<T> get(Collection<String> ids);
 

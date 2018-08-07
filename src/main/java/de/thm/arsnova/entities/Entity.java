@@ -34,6 +34,7 @@ public abstract class Entity {
 	protected String rev;
 	protected Date creationTimestamp;
 	protected Date updateTimestamp;
+	private boolean internal;
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getId() {
@@ -78,6 +79,14 @@ public abstract class Entity {
 	@JsonView(View.Persistence.class)
 	public Class<? extends Entity> getType() {
 		return getClass();
+	}
+
+	public boolean isInternal() {
+		return internal;
+	}
+
+	public void setInternal(final boolean internal) {
+		this.internal = internal;
 	}
 
 	@Override
