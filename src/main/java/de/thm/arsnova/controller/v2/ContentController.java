@@ -56,9 +56,9 @@ import javax.naming.OperationNotSupportedException;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Handles requests related to contents.
@@ -210,19 +210,17 @@ public class ContentController extends PaginationController {
 			) {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		boolean disable = false;
-		List<de.thm.arsnova.entities.Content> contents;
+		Iterable<de.thm.arsnova.entities.Content> contents;
 
 		if (disableVote != null) {
 			disable = disableVote;
 		}
 
-		/* FIXME: Content variant is ignored for now */
-		lectureContentsOnly = preparationContentsOnly = false;
 		if (lectureContentsOnly) {
-			contents = contentService.getLectureContents(roomId);
+			contents = contentService.getByRoomIdAndGroup(roomId, "lecture");
 			contentService.setVotingAdmissions(roomId, disable, contents);
 		} else if (preparationContentsOnly) {
-			contents = contentService.getPreparationContents(roomId);
+			contents = contentService.getByRoomIdAndGroup(roomId, "preparation");
 			contentService.setVotingAdmissions(roomId, disable, contents);
 		} else {
 			contents = contentService.getByRoomId(roomId);
@@ -256,15 +254,13 @@ public class ContentController extends PaginationController {
 			) {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		boolean p = publish == null || publish;
-		List<de.thm.arsnova.entities.Content> contents;
+		Iterable<de.thm.arsnova.entities.Content> contents;
 
-		/* FIXME: Content variant is ignored for now */
-		lectureContentsOnly = preparationContentsOnly = false;
 		if (lectureContentsOnly) {
-			contents = contentService.getLectureContents(roomId);
+			contents = contentService.getByRoomIdAndGroup(roomId, "lecture");
 			contentService.publishContents(roomId, p, contents);
 		} else if (preparationContentsOnly) {
-			contents = contentService.getPreparationContents(roomId);
+			contents = contentService.getByRoomIdAndGroup(roomId, "preparation");
 			contentService.publishContents(roomId, p, contents);
 		} else {
 			contentService.publishAll(roomId, p);
@@ -314,25 +310,23 @@ public class ContentController extends PaginationController {
 			final HttpServletResponse response
 			) {
 		String roomId = roomService.getIdByShortId(roomShortId);
-		List<de.thm.arsnova.entities.Content> contents;
-		/* FIXME: Content variant is ignored for now */
-		lectureContentsOnly = preparationContentsOnly = flashcardsOnly = false;
+		Iterable<de.thm.arsnova.entities.Content> contents;
 		if (lectureContentsOnly) {
-			contents = contentService.getLectureContents(roomId);
+			contents = contentService.getByRoomIdAndGroup(roomId, "lecture");
 		} else if (flashcardsOnly) {
-			contents = contentService.getFlashcards(roomId);
+			contents = contentService.getByRoomIdAndGroup(roomId, "flashcard");
 		} else if (preparationContentsOnly) {
-			contents = contentService.getPreparationContents(roomId);
+			contents = contentService.getByRoomIdAndGroup(roomId, "preparation");
 		} else {
 			contents = contentService.getByRoomId(roomId);
 		}
-		if (contents == null || contents.isEmpty()) {
+		if (contents == null || !contents.iterator().hasNext()) {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
 			return null;
 		}
 
-		return new PaginationListDecorator<>(
-				contents.stream().map(toV2Migrator::migrate).collect(Collectors.toList()), offset, limit);
+		return new PaginationListDecorator<>(StreamSupport.stream(contents.spliterator(), false)
+				.map(toV2Migrator::migrate).collect(Collectors.toList()), offset, limit);
 	}
 
 	@ApiOperation(value = "Delete contents",
@@ -371,15 +365,13 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly
 			) {
 		String roomId = roomService.getIdByShortId(roomShortId);
-		int count = 0;
-		/* FIXME: Content variant is ignored for now */
-		lectureContentsOnly = preparationContentsOnly = flashcardsOnly = false;
+		int count;
 		if (lectureContentsOnly) {
-			count = contentService.countLectureContents(roomId);
+			count = contentService.countByRoomIdAndGroup(roomId, "lecture");
 		} else if (preparationContentsOnly) {
-			count = contentService.countPreparationContents(roomId);
+			count = contentService.countByRoomIdAndGroup(roomId, "preparation");
 		} else if (flashcardsOnly) {
-			count = contentService.countFlashcards(roomId);
+			count = contentService.countByRoomIdAndGroup(roomId, "flashcard");
 		} else {
 			count = contentService.countByRoomId(roomId);
 		}

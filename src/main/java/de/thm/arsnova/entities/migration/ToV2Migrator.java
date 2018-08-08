@@ -232,6 +232,9 @@ public class ToV2Migrator {
 		to.setShowStatistic(state.isResponsesVisible());
 		to.setShowAnswer(state.isSolutionVisible());
 		to.setVotingDisabled(!state.isResponsesEnabled());
+		if (from.getGroups().size() == 1) {
+			to.setQuestionVariant(from.getGroups().iterator().next());
+		}
 
 		return to;
 	}

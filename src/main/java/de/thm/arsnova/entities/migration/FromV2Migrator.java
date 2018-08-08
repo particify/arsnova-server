@@ -213,6 +213,7 @@ public class FromV2Migrator {
 		}
 		copyCommonProperties(from, to);
 		to.setRoomId(from.getSessionId());
+		to.getGroups().add(from.getQuestionVariant());
 		to.setSubject(from.getSubject());
 		to.setBody(from.getText());
 		to.setAbstentionsAllowed(from.isAbstention());

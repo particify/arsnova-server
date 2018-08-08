@@ -32,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
@@ -42,6 +41,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -118,9 +118,32 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	}
 
 	@Override
+	public Iterable<Content> getByRoomIdAndGroup(final String roomId, final String group) {
+		final Room room = roomRepository.findOne(roomId);
+		final Room.ContentGroup contentGroup = room.getContentGroups().get(group);
+		if (contentGroup == null) {
+			throw new NotFoundException("Content group does not exist.");
+		}
+		Set<String> contentIds = contentGroup.getContentIds();
+
+		return get(contentIds);
+	}
+
+	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int countByRoomId(final String roomId) {
 		return contentRepository.countByRoomId(roomId);
+	}
+
+	@Override
+	public int countByRoomIdAndGroup(final String roomId, final String group) {
+		final Room room = roomRepository.findOne(roomId);
+		final Room.ContentGroup contentGroup = room.getContentGroups().get(group);
+		if (contentGroup == null) {
+			throw new NotFoundException("Content group does not exist.");
+		}
+
+		return contentGroup.getContentIds().size();
 	}
 
 	@Override
@@ -332,7 +355,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			@CacheEvict(value = "lecturecontentlists", key = "#roomId"),
 			@CacheEvict(value = "preparationcontentlists", key = "#roomId"),
 			@CacheEvict(value = "flashcardcontentlists", key = "#roomId") })
-	public void setVotingAdmissions(final String roomId, final boolean disableVoting, List<Content> contents) {
+	public void setVotingAdmissions(final String roomId, final boolean disableVoting, Iterable<Content> contents) {
 		final ClientAuthentication user = getCurrentUser();
 		final Room room = roomRepository.findOne(roomId);
 		if (!room.getOwnerId().equals(user.getId())) {
@@ -345,10 +368,12 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		try {
 			patch(contents, patches, Content::getState);
 			ArsnovaEvent event;
+			List<Content> list = new ArrayList<>();
+			contents.forEach(list::add);
 			if (disableVoting) {
-				event = new LockVotesEvent(this, room, contents);
+				event = new LockVotesEvent(this, room, list);
 			} else {
-				event = new UnlockVotesEvent(this, room, contents);
+				event = new UnlockVotesEvent(this, room, list);
 			}
 			this.publisher.publishEvent(event);
 		} catch (IOException e) {
@@ -378,66 +403,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			throw new UnauthorizedException();
 		}
 		return user;
-	}
-
-	/* FIXME: caching */
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	//@Cacheable("lecturecontentlists")
-	public List<Content> getLectureContents(final String roomId) {
-		final Room room = roomRepository.findOne(roomId);
-		final ClientAuthentication user = userService.getCurrentUser();
-		if (room.getOwnerId().equals(user.getId())) {
-			return contentRepository.findByRoomIdOnlyLectureVariant(room.getId());
-		} else {
-			return contentRepository.findByRoomIdOnlyLectureVariantAndActive(room.getId());
-		}
-	}
-
-	/* FIXME: caching */
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	//@Cacheable("flashcardcontentlists")
-	public List<Content> getFlashcards(final String roomId) {
-		final Room room = roomRepository.findOne(roomId);
-		final ClientAuthentication user = userService.getCurrentUser();
-		if (room.getOwnerId().equals(user.getId())) {
-			return contentRepository.findByRoomIdOnlyFlashcardVariant(room.getId());
-		} else {
-			return contentRepository.findByRoomIdOnlyFlashcardVariantAndActive(room.getId());
-		}
-	}
-
-	/* FIXME: caching */
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	//@Cacheable("preparationcontentlists")
-	public List<Content> getPreparationContents(final String roomId) {
-		final Room room = roomRepository.findOne(roomId);
-		final ClientAuthentication user = userService.getCurrentUser();
-		if (room.getOwnerId().equals(user.getId())) {
-			return contentRepository.findByRoomIdOnlyPreparationVariant(room.getId());
-		} else {
-			return contentRepository.findByRoomIdOnlyPreparationVariantAndActive(room.getId());
-		}
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public int countLectureContents(final String roomId) {
-		return contentRepository.countLectureVariantByRoomId(roomRepository.findOne(roomId).getId());
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public int countFlashcards(final String roomId) {
-		return contentRepository.countFlashcardVariantRoomId(roomRepository.findOne(roomId).getId());
-	}
-
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	public int countPreparationContents(final String roomId) {
-		return contentRepository.countPreparationVariantByRoomId(roomRepository.findOne(roomId).getId());
 	}
 
 	/*
@@ -493,7 +458,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			@CacheEvict(value = "lecturecontentlists", key = "#roomId"),
 			@CacheEvict(value = "preparationcontentlists", key = "#roomId"),
 			@CacheEvict(value = "flashcardcontentlists", key = "#roomId") })
-	public void publishContents(final String roomId, final boolean publish, List<Content> contents) {
+	public void publishContents(final String roomId, final boolean publish, Iterable<Content> contents) {
 		final ClientAuthentication user = getCurrentUser();
 		final Room room = roomRepository.findOne(roomId);
 		if (!room.getOwnerId().equals(user.getId())) {
@@ -504,10 +469,12 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		}
 		contentRepository.saveAll(contents);
 		ArsnovaEvent event;
+		List<Content> list = new ArrayList<>();
+		contents.forEach(list::add);
 		if (publish) {
-			event = new UnlockQuestionsEvent(this, room, contents);
+			event = new UnlockQuestionsEvent(this, room, list);
 		} else {
-			event = new LockQuestionsEvent(this, room, contents);
+			event = new LockQuestionsEvent(this, room, list);
 		}
 		this.publisher.publishEvent(event);
 	}

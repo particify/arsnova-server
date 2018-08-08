@@ -47,23 +47,15 @@ public interface ContentService extends EntityService<Content> {
 
 	List<Content> getByRoomId(String roomId);
 
+	Iterable<Content> getByRoomIdAndGroup(String roomId, String group);
+
 	int countByRoomId(String roomId);
+
+	int countByRoomIdAndGroup(String roomId, String group);
 
 	void delete(String questionId);
 
 	List<String> getUnAnsweredContentIds(String roomId);
-
-	List<Content> getLectureContents(String roomId);
-
-	List<Content> getFlashcards(String roomId);
-
-	List<Content> getPreparationContents(String roomId);
-
-	int countLectureContents(String roomId);
-
-	int countFlashcards(String roomId);
-
-	int countPreparationContents(String roomId);
 
 	int countFlashcardsForUserInternal(String roomId);
 
@@ -85,7 +77,7 @@ public interface ContentService extends EntityService<Content> {
 
 	void publishAll(String roomId, boolean publish);
 
-	void publishContents(String roomId, boolean publish, List<Content> contents);
+	void publishContents(String roomId, boolean publish, Iterable<Content> contents);
 
 	void deleteAllContentsAnswers(String roomId);
 
@@ -95,5 +87,5 @@ public interface ContentService extends EntityService<Content> {
 
 	void setVotingAdmission(String contentId, boolean disableVoting);
 
-	void setVotingAdmissions(String roomId, boolean disableVoting, List<Content> contents);
+	void setVotingAdmissions(String roomId, boolean disableVoting, Iterable<Content> contents);
 }

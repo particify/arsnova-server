@@ -167,6 +167,7 @@ public class Content extends Entity {
 		return groups;
 	}
 
+	/* Content groups are persisted in the Room */
 	@JsonView(View.Public.class)
 	public void setGroups(final Set<String> groups) {
 		this.groups = groups;
