@@ -22,7 +22,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.access.prepost.PreFilter;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -39,7 +38,7 @@ public interface EntityService<T extends Entity> {
 	T get(String id, boolean internal);
 
 	@PreFilter(value = "hasPermission(filterObject, #this.this.getTypeName(), 'read')", filterTarget = "ids")
-	Iterable<T> get(Collection<String> ids);
+	Iterable<T> get(Iterable<String> ids);
 
 	@PreAuthorize("hasPermission(#entity, 'create')")
 	T create(T entity);
@@ -55,10 +54,10 @@ public interface EntityService<T extends Entity> {
 	T patch(T entity, Map<String, Object> changes, Function<T, ? extends Object> propertyGetter)
 			throws IOException;
 
-	Iterable<T> patch(Collection<T> entities, Map<String, Object> changes) throws IOException;
+	Iterable<T> patch(Iterable<T> entities, Map<String, Object> changes) throws IOException;
 
 	@PreFilter(value = "hasPermission(filterObject, 'update')", filterTarget = "entities")
-	Iterable<T> patch(Collection<T> entities, Map<String, Object> changes, Function<T, ? extends Object> propertyGetter)
+	Iterable<T> patch(Iterable<T> entities, Map<String, Object> changes, Function<T, ? extends Object> propertyGetter)
 			throws IOException;
 
 	@PreAuthorize("hasPermission(#entity, 'delete')")

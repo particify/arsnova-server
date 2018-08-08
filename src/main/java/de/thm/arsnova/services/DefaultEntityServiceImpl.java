@@ -27,7 +27,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.access.prepost.PreFilter;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.function.Function;
@@ -70,7 +69,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 
 	@Override
 	@PreFilter(value = "hasPermission(filterObject, #this.this.getTypeName(), 'read')", filterTarget = "ids")
-	public Iterable<T> get(final Collection<String> ids) {
+	public Iterable<T> get(final Iterable<String> ids) {
 		return repository.findAllById(ids);
 	}
 
@@ -162,13 +161,13 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	}
 
 	@Override
-	public Iterable<T> patch(final Collection<T> entities, final Map<String, Object> changes) throws IOException {
+	public Iterable<T> patch(final Iterable<T> entities, final Map<String, Object> changes) throws IOException {
 		return patch(entities, changes, Function.identity());
 	}
 
 	@Override
 	@PreFilter(value = "hasPermission(filterObject, 'update')", filterTarget = "entities")
-	public Iterable<T> patch(final Collection<T> entities, final Map<String, Object> changes,
+	public Iterable<T> patch(final Iterable<T> entities, final Map<String, Object> changes,
 			final Function<T, ? extends Object> propertyGetter) throws IOException {
 		final JsonNode tree = objectMapper.valueToTree(changes);
 		for (T entity : entities) {
