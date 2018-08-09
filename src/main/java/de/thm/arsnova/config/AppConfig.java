@@ -62,6 +62,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -139,6 +140,11 @@ public class AppConfig implements WebMvcConfigurer {
 		configurer.favorPathExtension(false);
 		//configurer.defaultContentType(API_V3_MEDIA_TYPE);
 		configurer.defaultContentTypeStrategy(strategy);
+	}
+
+	@Override
+	public void configurePathMatch(final PathMatchConfigurer configurer) {
+		configurer.setUseSuffixPatternMatch(false);
 	}
 
 	@Override
