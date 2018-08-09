@@ -54,6 +54,7 @@ public abstract class AbstractEntityController<E extends Entity> {
 	protected static final String DEFAULT_ID_MAPPING = "/{id:[^~].*}";
 	protected static final String DEFAULT_ALIAS_MAPPING = "/~{alias}";
 	protected static final String DEFAULT_FIND_MAPPING = "/find";
+	protected static final String ALIAS_SUBPATH = "/{subPath:.+}";
 	protected static final String GET_MAPPING = DEFAULT_ID_MAPPING;
 	protected static final String GET_MULTIPLE_MAPPING = DEFAULT_ROOT_MAPPING;
 	protected static final String PUT_MAPPING = DEFAULT_ID_MAPPING;
@@ -150,10 +151,14 @@ public abstract class AbstractEntityController<E extends Entity> {
 		}
 	}
 
-	@RequestMapping(value = DEFAULT_ALIAS_MAPPING, method = {RequestMethod.GET, RequestMethod.PUT, RequestMethod.POST})
-	public void forwardAlias(@PathVariable final String alias, HttpServletRequest httpServletRequest,
-			HttpServletResponse httpServletResponse) throws ServletException, IOException {
-		httpServletRequest.getRequestDispatcher(getMapping() + "/" + resolveAlias(alias))
+	@RequestMapping(value = {DEFAULT_ALIAS_MAPPING, DEFAULT_ALIAS_MAPPING + ALIAS_SUBPATH})
+	public void forwardAlias(@PathVariable final String alias, @PathVariable(required = false) String subPath,
+			HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
+			throws ServletException, IOException {
+		final String targetPath = String.format(
+				"%s/%s%s", getMapping(), resolveAlias(alias), subPath != null ? "/" + subPath : "");
+		logger.debug("Forwarding alias request to {}", targetPath);
+		httpServletRequest.getRequestDispatcher( targetPath)
 				.forward(httpServletRequest, httpServletResponse);
 	}
 
