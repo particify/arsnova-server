@@ -34,6 +34,9 @@ public class PersistanceConfig {
 
 	@Bean
 	public MangoCouchDbConnector couchDbMigrationConnector() throws Exception {
+		if (couchDbMigrateFrom.isEmpty()) {
+			return null;
+		}
 		return new MangoCouchDbConnector(couchDbMigrateFrom, couchDbInstance(), couchDbObjectMapperFactory());
 	}
 

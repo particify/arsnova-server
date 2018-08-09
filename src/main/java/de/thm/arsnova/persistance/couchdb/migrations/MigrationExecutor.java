@@ -23,9 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -37,11 +39,12 @@ import java.util.stream.Collectors;
 public class MigrationExecutor {
 	private static final Logger logger = LoggerFactory.getLogger(MigrationExecutor.class);
 
-	private List<Migration> migrations;
+	private List<Migration> migrations = Collections.EMPTY_LIST;
 
-	public MigrationExecutor(List<Migration> migrations) {
-		this.migrations = migrations.stream()
-				.sorted(Comparator.comparing(Migration::getId)).collect(Collectors.toList());
+	public MigrationExecutor(final Optional<List<Migration>> migrations) {
+		migrations.map(m -> this.migrations = m.stream()
+				.sorted(Comparator.comparing(Migration::getId)).collect(Collectors.toList()));
+		logger.debug("Initialized {} migration(s).", this.migrations.size());
 	}
 
 	public boolean runMigrations(@NonNull final MigrationState migrationState) {

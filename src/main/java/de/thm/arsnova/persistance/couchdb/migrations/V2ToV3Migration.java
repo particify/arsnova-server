@@ -29,6 +29,7 @@ import de.thm.arsnova.persistance.UserRepository;
 import de.thm.arsnova.persistance.couchdb.support.MangoCouchDbConnector;
 import org.ektorp.DocumentNotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ import java.util.Set;
  *
  * @author Daniel Gerhardt
  */
+@Conditional(MigrateFromLegacyCondition.class)
 @Service
 public class V2ToV3Migration implements Migration {
 	private static final String ID = "20170914131300";
