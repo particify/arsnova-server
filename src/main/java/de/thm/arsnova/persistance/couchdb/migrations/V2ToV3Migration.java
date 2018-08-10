@@ -17,6 +17,9 @@
  */
 package de.thm.arsnova.persistance.couchdb.migrations;
 
+import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.Comment;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.Motd;
 import de.thm.arsnova.entities.Room;
 import de.thm.arsnova.entities.UserProfile;
@@ -24,15 +27,19 @@ import de.thm.arsnova.entities.migration.FromV2Migrator;
 import de.thm.arsnova.entities.migration.v2.DbUser;
 import de.thm.arsnova.entities.migration.v2.LoggedIn;
 import de.thm.arsnova.entities.migration.v2.MotdList;
+import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.RoomRepository;
 import de.thm.arsnova.persistance.UserRepository;
 import de.thm.arsnova.persistance.couchdb.support.MangoCouchDbConnector;
 import org.ektorp.DocumentNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -58,11 +65,14 @@ public class V2ToV3Migration implements Migration {
 	private static final String MOTD_INDEX = "motd-index";
 	private static final String MOTDLIST_INDEX = "motdlist-index";
 
+	private static final Logger logger = LoggerFactory.getLogger(V2ToV3Migration.class);
+
 	private FromV2Migrator migrator;
 	private MangoCouchDbConnector toConnector;
 	private MangoCouchDbConnector fromConnector;
 	private UserRepository userRepository;
 	private RoomRepository roomRepository;
+	private ContentRepository contentRepository;
 	private long referenceTimestamp = System.currentTimeMillis();
 
 	public V2ToV3Migration(
@@ -70,12 +80,14 @@ public class V2ToV3Migration implements Migration {
 			final MangoCouchDbConnector toConnector,
 			@Qualifier("couchDbMigrationConnector") final MangoCouchDbConnector fromConnector,
 			final UserRepository userRepository,
-			final RoomRepository roomRepository) {
+			final RoomRepository roomRepository,
+			final ContentRepository contentRepository) {
 		this.migrator = migrator;
 		this.toConnector = toConnector;
 		this.fromConnector = fromConnector;
 		this.userRepository = userRepository;
 		this.roomRepository = roomRepository;
+		this.contentRepository = contentRepository;
 	}
 
 	public String getId() {
@@ -89,6 +101,9 @@ public class V2ToV3Migration implements Migration {
 		migrateUnregisteredUsers();
 		migrateRooms();
 		migrateMotds();
+		migrateComments();
+		migrateContents();
+		migrateAnswers();
 		migrator.setIgnoreRevision(false);
 	}
 
@@ -236,7 +251,8 @@ public class V2ToV3Migration implements Migration {
 			for (de.thm.arsnova.entities.migration.v2.Room roomV2 : roomsV2) {
 				List<UserProfile> profiles = userRepository.findByLoginId(roomV2.getCreator());
 				if (profiles.size() == 0) {
-					// Session creator does not exist, skipping: roomV2.getCreator(), roomV2.getId()
+					logger.warn("Skipping migration of Room {}. Creator {} does not exist.",
+							roomV2.getId(), roomV2.getCreator());
 					continue;
 				}
 				roomsV3.add(migrator.migrate(roomV2, Optional.of(profiles.get(0))));
@@ -271,7 +287,8 @@ public class V2ToV3Migration implements Migration {
 					Room room = roomRepository.findByShortId(motdV2.getSessionkey());
 					/* sessionId has not been set for some old MotDs */
 					if (room == null) {
-						// Room does not exist, skipping: motdV2.getSessionId(), motdV2.getId()
+						logger.warn("Skipping migration of Motd {}. Room {} does not exist.",
+								motdV2.getId(), motdV2.getSessionId());
 						continue;
 					}
 					motdV2.setSessionId(room.getId());
@@ -280,6 +297,120 @@ public class V2ToV3Migration implements Migration {
 			}
 
 			toConnector.executeBulk(motdsV3);
+		}
+	}
+
+	private void migrateComments() {
+		Map<String, Object> queryOptions = new HashMap<>();
+		queryOptions.put("type", "interposed_question");
+		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
+		query.setIndexDocument(FULL_INDEX_BY_TYPE);
+		query.setLimit(LIMIT);
+
+		for (int skip = 0;; skip += LIMIT) {
+			query.setSkip(skip);
+			List<Comment> commentsV3 = new ArrayList<>();
+			List<de.thm.arsnova.entities.migration.v2.Comment> commentsV2 = fromConnector.query(query,
+					de.thm.arsnova.entities.migration.v2.Comment.class);
+			if (commentsV2.size() == 0) {
+				break;
+			}
+
+			for (de.thm.arsnova.entities.migration.v2.Comment commentV2 : commentsV2) {
+				try {
+					Room roomV3 = roomRepository.findOne(commentV2.getSessionId());
+					List<UserProfile> profiles = Collections.EMPTY_LIST;
+					if (commentV2.getCreator() != null && !commentV2.getCreator().equals("")) {
+						profiles = userRepository.findByLoginId(commentV2.getCreator());
+					}
+					if (profiles.size() == 0) {
+						/* No creator is set or creator does not exist -> fallback: creator = Room owner */
+						commentV2.setCreator(null);
+						Comment commentV3 = migrator.migrate(commentV2);
+						commentV3.setCreatorId(roomV3.getOwnerId());
+						commentsV3.add(commentV3);
+					} else {
+						commentsV3.add(migrator.migrate(commentV2, profiles.get(0)));
+					}
+				} catch (DocumentNotFoundException e) {
+					logger.warn("Skipping migration of Comment {}. Room {} does not exist.",
+							commentV2.getId(), commentV2.getSessionId());
+					continue;
+				}
+			}
+
+			toConnector.executeBulk(commentsV3);
+		}
+	}
+
+	private void migrateContents() {
+		Map<String, Object> queryOptions = new HashMap<>();
+		queryOptions.put("type", "skill_question");
+		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
+		query.setIndexDocument(FULL_INDEX_BY_TYPE);
+		query.setLimit(LIMIT);
+
+		for (int skip = 0;; skip += LIMIT) {
+			query.setSkip(skip);
+			List<Content> contentsV3 = new ArrayList<>();
+			List<de.thm.arsnova.entities.migration.v2.Content> contentsV2 = fromConnector.query(query,
+					de.thm.arsnova.entities.migration.v2.Content.class);
+			if (contentsV2.size() == 0) {
+				break;
+			}
+
+			for (de.thm.arsnova.entities.migration.v2.Content contentV2 : contentsV2) {
+				if (roomRepository.existsById(contentV2.getSessionId())) {
+					try {
+						contentsV3.add(migrator.migrate(contentV2));
+					} catch (IllegalArgumentException e) {
+						logger.warn("Skipping migration of Content {}.", contentV2.getId(), e);
+					}
+				} else {
+					logger.warn("Skipping migration of Content {}. Room {} does not exist.",
+							contentV2.getId(), contentV2.getSessionId());
+				}
+			}
+
+			toConnector.executeBulk(contentsV3);
+		}
+	}
+
+	private void migrateAnswers() {
+		Map<String, Object> queryOptions = new HashMap<>();
+		queryOptions.put("type", "skill_question_answer");
+		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
+		query.setIndexDocument(FULL_INDEX_BY_TYPE);
+		query.setLimit(LIMIT);
+
+		for (int skip = 0;; skip += LIMIT) {
+			query.setSkip(skip);
+			List<Answer> answersV3 = new ArrayList<>();
+			List<de.thm.arsnova.entities.migration.v2.Answer> answersV2 = fromConnector.query(query,
+					de.thm.arsnova.entities.migration.v2.Answer.class);
+			if (answersV2.size() == 0) {
+				break;
+			}
+
+			for (de.thm.arsnova.entities.migration.v2.Answer answerV2 : answersV2) {
+				if (!roomRepository.existsById(answerV2.getSessionId())) {
+					logger.warn("Skipping migration of Answer {}. Room {} does not exist.",
+							answerV2.getId(), answerV2.getQuestionId());
+					continue;
+				}
+				try {
+					Content contentV3 = contentRepository.findOne(answerV2.getQuestionId());
+					answersV3.add(migrator.migrate(answerV2, contentV3));
+				} catch (DocumentNotFoundException e) {
+					logger.warn("Skipping migration of Answer {}. Content {} does not exist.",
+							answerV2.getId(), answerV2.getQuestionId());
+					continue;
+				} catch (IndexOutOfBoundsException e) {
+					logger.warn("Skipping migration of Answer {}. Data inconsistency detected.", answerV2.getId());
+				}
+			}
+
+			toConnector.executeBulk(answersV3);
 		}
 	}
 
