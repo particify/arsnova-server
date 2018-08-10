@@ -6,6 +6,7 @@ import de.thm.arsnova.entities.MigrationState;
 import de.thm.arsnova.persistance.couchdb.migrations.MigrationExecutor;
 import de.thm.arsnova.services.StatusService;
 import org.ektorp.CouchDbConnector;
+import org.ektorp.DbAccessException;
 import org.ektorp.DocumentNotFoundException;
 import org.ektorp.impl.ObjectMapperFactory;
 import org.slf4j.Logger;
@@ -96,14 +97,24 @@ public class CouchDbInitializer implements ResourceLoaderAware {
 		}).collect(Collectors.toList()));
 	}
 
-	protected void migrate() {
+	private MigrationState checkMigrationState() {
 		MigrationState state;
 		try {
 			state = connector.get(MigrationState.class, MigrationState.ID);
 		} catch (DocumentNotFoundException e) {
-			logger.debug("No migration state found in database.");
+			logger.debug("No migration state found in database.", e);
+			if (connector.getDbInfo().getDocCount() > 0) {
+				/* TODO: use a custom exception */
+				throw new DbAccessException("Database is not empty.");
+			}
 			state = new MigrationState();
+			connector.create(state);
 		}
+
+		return state;
+	}
+
+	protected void migrate(final MigrationState state) {
 		if (migrationExecutor != null && migrationExecutor.runMigrations(state)) {
 			connector.update(state);
 		}
@@ -122,11 +133,17 @@ public class CouchDbInitializer implements ResourceLoaderAware {
 		}
 		migrationStarted = true;
 
-		statusService.putMaintenanceReason(this.getClass(), "Data migration active");
-		loadDesignDocFiles();
-		createDesignDocs();
-		migrate();
-		statusService.removeMaintenanceReason(this.getClass());
+		try {
+			final MigrationState state = checkMigrationState();
+			statusService.putMaintenanceReason(this.getClass(), "Data migration active");
+			loadDesignDocFiles();
+			createDesignDocs();
+			migrate(state);
+			statusService.removeMaintenanceReason(this.getClass());
+		} catch (DbAccessException e) {
+			logger.error("Database is invalid.", e);
+			statusService.putMaintenanceReason(this.getClass(), "Invalid database");
+		}
 	}
 
 	@Override
