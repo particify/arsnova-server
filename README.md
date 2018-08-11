@@ -1,5 +1,11 @@
 # ARSnova
 
+---
+The next major version of ARSnova Backend is being developed on the `master` branch which is not yet production ready.
+If you are looking for the current stable code base, switch to branch `2.x`.
+
+---
+
 ARSnova is a modern approach to Audience Response Systems (ARS).
 It is released under the GPLv3 license, and is offered as a Software as a Service free of charge.
 Head over to [arsnova.eu](https://arsnova.eu/) to see it in action.
