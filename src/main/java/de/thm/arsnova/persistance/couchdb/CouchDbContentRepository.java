@@ -63,14 +63,16 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	public List<String> findIdsByRoomId(final String roomId) {
 		return collectQuestionIds(db.queryView(createQuery("by_roomid_group_locked")
 				.startKey(ComplexKey.of(roomId))
-				.endKey(ComplexKey.of(roomId, ComplexKey.emptyObject()))));
+				.endKey(ComplexKey.of(roomId, ComplexKey.emptyObject()))
+				.reduce(false)));
 	}
 
 	@Override
 	public List<String> findIdsByRoomIdAndVariant(final String roomId, final String variant) {
 		return collectQuestionIds(db.queryView(createQuery("by_roomid_group_locked")
 				.startKey(ComplexKey.of(roomId, variant))
-				.endKey(ComplexKey.of(roomId, variant, ComplexKey.emptyObject()))));
+				.endKey(ComplexKey.of(roomId, variant, ComplexKey.emptyObject()))
+				.reduce(false)));
 	}
 
 	@Override
