@@ -22,9 +22,9 @@ import de.thm.arsnova.config.TestAppConfig;
 import de.thm.arsnova.config.TestPersistanceConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
 import de.thm.arsnova.entities.ChoiceAnswer;
+import de.thm.arsnova.entities.ChoiceQuestionContent;
+import de.thm.arsnova.entities.Content;
 import de.thm.arsnova.entities.migration.v2.Answer;
-import de.thm.arsnova.entities.migration.v2.AnswerOption;
-import de.thm.arsnova.entities.migration.v2.Content;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +49,7 @@ public class FromV2MigratorTest {
 	private static final String ANSWER_ID = "answerId";
 	private static final String CONTENT_ID = "contentId";
 	private static final String ROOM_ID = "roomId";
-	private static final String TYPE = "mc";
+	private static final Content.Format FORMAT = Content.Format.CHOICE;
 	private static final String OPTION1_LABEL = "option1";
 	private static final String OPTION2_LABEL = "option2";
 	private static final String OPTION3_LABEL = "option3";
@@ -67,27 +67,28 @@ public class FromV2MigratorTest {
 		answerV2.setPiRound(ROUND);
 		answerV2.setAnswerText("0,1,1");
 
-		List<AnswerOption> options = new ArrayList<>();
-		AnswerOption option1 = new AnswerOption();
-		option1.setText(OPTION1_LABEL);
+		List<ChoiceQuestionContent.AnswerOption> options = new ArrayList<>();
+		ChoiceQuestionContent.AnswerOption option1 = new ChoiceQuestionContent.AnswerOption();
+		option1.setLabel(OPTION1_LABEL);
 		options.add(option1);
-		AnswerOption option2 = new AnswerOption();
-		option2.setText(OPTION2_LABEL);
+		ChoiceQuestionContent.AnswerOption option2 = new ChoiceQuestionContent.AnswerOption();
+		option2.setLabel(OPTION2_LABEL);
 		options.add(option2);
-		AnswerOption option3 = new AnswerOption();
-		option3.setText(OPTION3_LABEL);
+		ChoiceQuestionContent.AnswerOption option3 = new ChoiceQuestionContent.AnswerOption();
+		option3.setLabel(OPTION3_LABEL);
 		options.add(option3);
 
-		Content contentV2 = new Content();
-		contentV2.setQuestionType(TYPE);
-		contentV2.setSessionId(ROOM_ID);
-		contentV2.setPossibleAnswers(options);
+		ChoiceQuestionContent content = new ChoiceQuestionContent();
+		content.setFormat(FORMAT);
+		content.setRoomId(ROOM_ID);
+		content.setMultiple(true);
+		content.setOptions(options);
 
 		List<Integer> selectedChoices = new ArrayList<>();
 		selectedChoices.add(1);
 		selectedChoices.add(2);
 
-		ChoiceAnswer answerV3 = (ChoiceAnswer) fromV2Migrator.migrate(answerV2, contentV2);
+		ChoiceAnswer answerV3 = (ChoiceAnswer) fromV2Migrator.migrate(answerV2, content);
 
 		assertEquals(ANSWER_ID, answerV3.getId());
 		assertEquals(CONTENT_ID, answerV3.getContentId());

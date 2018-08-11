@@ -228,23 +228,16 @@ public class FromV2Migrator {
 		return to;
 	}
 
-	public de.thm.arsnova.entities.Answer migrate(final Answer from, final Content content) {
-		switch (content.getQuestionType()) {
-			case V2_TYPE_ABCD:
-			case V2_TYPE_VOTE:
-			case V2_TYPE_SCHOOL:
-			case V2_TYPE_YESNO:
-				return migrate(from, content.getPossibleAnswers(), false);
-			case V2_TYPE_MC:
-				return migrate(from, content.getPossibleAnswers(), true);
-			case V2_TYPE_FREETEXT:
-				return migrate(from);
-			default:
-				throw new IllegalArgumentException("Unsupported content format.");
+	public de.thm.arsnova.entities.Answer migrate(final Answer from, final de.thm.arsnova.entities.Content content) {
+		if (content instanceof ChoiceQuestionContent) {
+			ChoiceQuestionContent choiceQuestionContent = (ChoiceQuestionContent) content;
+			return migrate(from, choiceQuestionContent.getOptions(), choiceQuestionContent.isMultiple());
+		} else {
+			return migrate(from);
 		}
 	}
 
-	public ChoiceAnswer migrate(final Answer from, final List<AnswerOption> options, final boolean multiple) {
+	public ChoiceAnswer migrate(final Answer from, final List<ChoiceQuestionContent.AnswerOption> options, final boolean multiple) {
 		final ChoiceAnswer to = new ChoiceAnswer();
 		copyCommonProperties(from, to);
 		to.setContentId(from.getQuestionId());
@@ -270,8 +263,8 @@ public class FromV2Migrator {
 				}
 			} else {
 				int i = 0;
-				for (AnswerOption option : options) {
-					if (option.getText().equals(from.getAnswerText())) {
+				for (ChoiceQuestionContent.AnswerOption option : options) {
+					if (option.getLabel().equals(from.getAnswerText())) {
 						selectedChoiceIndexes.add(i);
 						break;
 					}

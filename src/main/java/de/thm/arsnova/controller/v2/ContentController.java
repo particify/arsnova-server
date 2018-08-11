@@ -508,8 +508,7 @@ public class ContentController extends PaginationController {
 			final HttpServletResponse response
 			) {
 		final de.thm.arsnova.entities.Content content = contentService.get(contentId);
-		final Content contentV2 = toV2Migrator.migrate(content);
-		final de.thm.arsnova.entities.Answer answerV3 = fromV2Migrator.migrate(answer, contentV2);
+		final de.thm.arsnova.entities.Answer answerV3 = fromV2Migrator.migrate(answer, content);
 
 		if (answerV3 instanceof TextAnswer) {
 			return toV2Migrator.migrate((TextAnswer) answerService.saveAnswer(contentId, answerV3));
@@ -528,8 +527,7 @@ public class ContentController extends PaginationController {
 			final HttpServletResponse response
 			) {
 		final de.thm.arsnova.entities.Content content = contentService.get(contentId);
-		final Content contentV2 = toV2Migrator.migrate(content);
-		final de.thm.arsnova.entities.Answer answerV3 = fromV2Migrator.migrate(answer, contentV2);
+		final de.thm.arsnova.entities.Answer answerV3 = fromV2Migrator.migrate(answer, content);
 
 		if (answerV3 instanceof TextAnswer) {
 			return toV2Migrator.migrate((TextAnswer) answerService.updateAnswer(answerV3));
