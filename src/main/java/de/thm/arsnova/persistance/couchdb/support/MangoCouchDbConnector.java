@@ -92,6 +92,7 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 		private String indexName;
 		private boolean update = true;
 		private boolean stable = false;
+		private String bookmark;
 
 		public MangoQuery() {
 			this.selector = new HashMap<>();
@@ -192,6 +193,15 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 		public void setStable(boolean stable) {
 			this.stable = stable;
 		}
+
+		@JsonView(View.Persistence.class)
+		public String getBookmark() {
+			return bookmark;
+		}
+
+		public void setBookmark(final String bookmark) {
+			this.bookmark = bookmark;
+		}
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(MangoCouchDbConnector.class);
@@ -249,6 +259,17 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 		MangoResponseHandler<T> rh = new MangoResponseHandler<>(propertyName, type, objectMapper);
 
 		return query(query, rh);
+	}
+
+	/**
+	 *
+	 * @param query The query sent to CouchDB's Mango API
+	 * @param type Type for deserialization of retrieved entities
+	 * @return List of retrieved entities
+	 */
+	public <T> PagedMangoResponse<T> queryForPage(final MangoQuery query, final Class<T> type) {
+		MangoResponseHandler<T> rh = new MangoResponseHandler<>(type, objectMapper, true);
+		return new PagedMangoResponse<T>(query(query, rh), rh.getBookmark());
 	}
 
 	public void createPartialJsonIndex(final String name, final List<MangoQuery.Sort> fields, final Map<String, Object> filterSelector) {

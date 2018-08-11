@@ -14,6 +14,7 @@ import java.util.List;
 
 public class MangoQueryResultParser<T> {
 	private static final String DOCS_FIELD_NAME = "docs";
+	private static final String BOOKMARK_FIELD_NAME = "bookmark";
 	private static final String WARNING_FIELD_NAME = "warning";
 	private static final String ERROR_FIELD_NAME = "error";
 	private static final String REASON_FIELD_NAME = "reason";
@@ -23,6 +24,7 @@ public class MangoQueryResultParser<T> {
 	private Class<T> type;
 	private ObjectMapper objectMapper;
 	private List<T> docs;
+	private String bookmark;
 	private String propertyName = null;
 
 	public MangoQueryResultParser(Class<T> type, ObjectMapper objectMapper) {
@@ -60,6 +62,8 @@ public class MangoQueryResultParser<T> {
 			if (DOCS_FIELD_NAME.equals(currentName)) {
 				docs = new ArrayList<T>();
 				parseDocs(jp);
+			} else if (BOOKMARK_FIELD_NAME.equals(currentName)) {
+				bookmark = jp.getText();
 			} else if (WARNING_FIELD_NAME.equals(currentName)) {
 				logger.warn("Warning for CouchDB Mango query: {}", jp.getText());
 			} else if (ERROR_FIELD_NAME.equals(currentName)) {
@@ -110,5 +114,9 @@ public class MangoQueryResultParser<T> {
 
 	public List<T> getDocs() {
 		return docs;
+	}
+
+	public String getBookmark() {
+		return bookmark;
 	}
 }

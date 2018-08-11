@@ -31,6 +31,7 @@ import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.RoomRepository;
 import de.thm.arsnova.persistance.UserRepository;
 import de.thm.arsnova.persistance.couchdb.support.MangoCouchDbConnector;
+import de.thm.arsnova.persistance.couchdb.support.PagedMangoResponse;
 import org.ektorp.DbAccessException;
 import org.ektorp.DocumentNotFoundException;
 import org.slf4j.Logger;
@@ -178,11 +179,16 @@ public class V2ToV3Migration implements Migration {
 		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(USER_INDEX);
 		query.setLimit(LIMIT);
+		String bookmark = null;
 
 		for (int skip = 0;; skip += LIMIT) {
-			query.setSkip(skip);
+			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
+			query.setBookmark(bookmark);
 			List<UserProfile> profilesV3 = new ArrayList<>();
-			List<DbUser> dbUsersV2 = fromConnector.query(query, DbUser.class);
+			PagedMangoResponse<de.thm.arsnova.entities.migration.v2.DbUser> response =
+					fromConnector.queryForPage(query, de.thm.arsnova.entities.migration.v2.DbUser.class);
+			List<de.thm.arsnova.entities.migration.v2.DbUser> dbUsersV2 = response.getEntities();
+			bookmark = response.getBookmark();
 			if (dbUsersV2.size() == 0) {
 				break;
 			}
@@ -216,6 +222,7 @@ public class V2ToV3Migration implements Migration {
 		query.setLimit(LIMIT);
 		Set<String> usernames = new HashSet<>();
 		for (int skip = 0;; skip += LIMIT) {
+			logger.debug("Migration progress: {}", skip);
 			query.setSkip(skip);
 			List<String> result = fromConnector.query(query, "username", String.class);
 			if (result.isEmpty()) {
@@ -229,10 +236,15 @@ public class V2ToV3Migration implements Migration {
 		query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(LOGGEDIN_INDEX);
 		query.setLimit(LIMIT);
+		String bookmark = null;
 		for (int skip = 0;; skip += LIMIT) {
-			query.setSkip(skip);
+			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
+			query.setBookmark(bookmark);
 			List<UserProfile> profilesV3 = new ArrayList<>();
-			List<LoggedIn> loggedInsV2 = fromConnector.query(query, LoggedIn.class);
+			PagedMangoResponse<de.thm.arsnova.entities.migration.v2.LoggedIn> response =
+					fromConnector.queryForPage(query, de.thm.arsnova.entities.migration.v2.LoggedIn.class);
+			List<de.thm.arsnova.entities.migration.v2.LoggedIn> loggedInsV2 = response.getEntities();
+			bookmark = response.getBookmark();
 			if (loggedInsV2.isEmpty()) {
 				break;
 			}
@@ -257,12 +269,16 @@ public class V2ToV3Migration implements Migration {
 		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(SESSION_INDEX);
 		query.setLimit(LIMIT);
+		String bookmark = null;
 
 		for (int skip = 0;; skip += LIMIT) {
-			query.setSkip(skip);
+			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
+			query.setBookmark(bookmark);
 			List<Room> roomsV3 = new ArrayList<>();
-			List<de.thm.arsnova.entities.migration.v2.Room> roomsV2 = fromConnector.query(query,
-					de.thm.arsnova.entities.migration.v2.Room.class);
+			PagedMangoResponse<de.thm.arsnova.entities.migration.v2.Room> response =
+					fromConnector.queryForPage(query, de.thm.arsnova.entities.migration.v2.Room.class);
+			List<de.thm.arsnova.entities.migration.v2.Room> roomsV2 = response.getEntities();
+			bookmark = response.getBookmark();
 			if (roomsV2.size() == 0) {
 				break;
 			}
@@ -292,12 +308,16 @@ public class V2ToV3Migration implements Migration {
 		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(MOTD_INDEX);
 		query.setLimit(LIMIT);
+		String bookmark = null;
 
 		for (int skip = 0;; skip += LIMIT) {
-			query.setSkip(skip);
+			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
+			query.setBookmark(bookmark);
 			List<Motd> motdsV3 = new ArrayList<>();
-			List<de.thm.arsnova.entities.migration.v2.Motd> motdsV2 = fromConnector.query(query,
-					de.thm.arsnova.entities.migration.v2.Motd.class);
+			PagedMangoResponse<de.thm.arsnova.entities.migration.v2.Motd> response =
+					fromConnector.queryForPage(query, de.thm.arsnova.entities.migration.v2.Motd.class);
+			List<de.thm.arsnova.entities.migration.v2.Motd> motdsV2 = response.getEntities();
+			bookmark = response.getBookmark();
 			if (motdsV2.size() == 0) {
 				break;
 			}
@@ -327,12 +347,16 @@ public class V2ToV3Migration implements Migration {
 		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(FULL_INDEX_BY_TYPE);
 		query.setLimit(LIMIT);
+		String bookmark = null;
 
 		for (int skip = 0;; skip += LIMIT) {
-			query.setSkip(skip);
+			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
+			query.setBookmark(bookmark);
 			List<Comment> commentsV3 = new ArrayList<>();
-			List<de.thm.arsnova.entities.migration.v2.Comment> commentsV2 = fromConnector.query(query,
-					de.thm.arsnova.entities.migration.v2.Comment.class);
+			PagedMangoResponse<de.thm.arsnova.entities.migration.v2.Comment> response =
+					fromConnector.queryForPage(query, de.thm.arsnova.entities.migration.v2.Comment.class);
+			List<de.thm.arsnova.entities.migration.v2.Comment> commentsV2 = response.getEntities();
+			bookmark = response.getBookmark();
 			if (commentsV2.size() == 0) {
 				break;
 			}
@@ -371,12 +395,16 @@ public class V2ToV3Migration implements Migration {
 		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(FULL_INDEX_BY_TYPE);
 		query.setLimit(LIMIT);
+		String bookmark = null;
 
 		for (int skip = 0;; skip += LIMIT) {
-			query.setSkip(skip);
+			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
+			query.setBookmark(bookmark);
 			List<Content> contentsV3 = new ArrayList<>();
-			List<de.thm.arsnova.entities.migration.v2.Content> contentsV2 = fromConnector.query(query,
-					de.thm.arsnova.entities.migration.v2.Content.class);
+			PagedMangoResponse<de.thm.arsnova.entities.migration.v2.Content> response =
+					fromConnector.queryForPage(query, de.thm.arsnova.entities.migration.v2.Content.class);
+			List<de.thm.arsnova.entities.migration.v2.Content> contentsV2 = response.getEntities();
+			bookmark = response.getBookmark();
 			if (contentsV2.size() == 0) {
 				break;
 			}
@@ -405,12 +433,16 @@ public class V2ToV3Migration implements Migration {
 		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(FULL_INDEX_BY_TYPE);
 		query.setLimit(LIMIT);
+		String bookmark = null;
 
 		for (int skip = 0;; skip += LIMIT) {
-			query.setSkip(skip);
+			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
+			query.setBookmark(bookmark);
 			List<Answer> answersV3 = new ArrayList<>();
-			List<de.thm.arsnova.entities.migration.v2.Answer> answersV2 = fromConnector.query(query,
-					de.thm.arsnova.entities.migration.v2.Answer.class);
+			PagedMangoResponse<de.thm.arsnova.entities.migration.v2.Answer> response =
+					 fromConnector.queryForPage(query, de.thm.arsnova.entities.migration.v2.Answer.class);
+			List<de.thm.arsnova.entities.migration.v2.Answer> answersV2 = response.getEntities();
+			bookmark = response.getBookmark();
 			if (answersV2.size() == 0) {
 				break;
 			}

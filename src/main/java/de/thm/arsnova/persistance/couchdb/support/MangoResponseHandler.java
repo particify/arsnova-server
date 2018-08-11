@@ -10,6 +10,7 @@ import java.util.List;
 public class MangoResponseHandler<T> extends StdResponseHandler<List<T>> {
 
 	private MangoQueryResultParser<T> parser;
+	private String bookmark;
 
 	public MangoResponseHandler(Class<T> docType, ObjectMapper om) {
 		Assert.notNull(om, "ObjectMapper may not be null");
@@ -34,6 +35,12 @@ public class MangoResponseHandler<T> extends StdResponseHandler<List<T>> {
 	@Override
 	public List<T> success(HttpResponse hr) throws Exception {
 		parser.parseResult(hr.getContent());
+		bookmark = parser.getBookmark();
+
 		return parser.getDocs();
+	}
+
+	public String getBookmark() {
+		return bookmark;
 	}
 }
