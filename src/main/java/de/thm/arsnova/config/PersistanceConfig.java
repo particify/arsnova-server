@@ -19,6 +19,8 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 @Profile("!test")
 public class PersistanceConfig {
+	private static final int MIGRATION_SOCKET_TIMEOUT = 30000;
+
 	@Value("${couchdb.name}") private String couchDbName;
 	@Value("${couchdb.host}") private String couchDbHost;
 	@Value("${couchdb.port}") private int couchDbPort;
@@ -46,6 +48,11 @@ public class PersistanceConfig {
 	}
 
 	@Bean
+	public StdCouchDbInstance couchDbMigrationInstance() throws Exception {
+		return new StdCouchDbInstance(couchDbMigrationHttpClientFactory().getObject());
+	}
+
+	@Bean
 	public HttpClientFactoryBean couchDbHttpClientFactory() throws Exception {
 		final HttpClientFactoryBean factory = new HttpClientFactoryBean();
 		factory.setHost(couchDbHost);
@@ -54,6 +61,14 @@ public class PersistanceConfig {
 			factory.setUsername(couchDbUsername);
 			factory.setPassword(couchDbPassword);
 		}
+
+		return factory;
+	}
+
+	@Bean
+	public HttpClientFactoryBean couchDbMigrationHttpClientFactory() throws Exception {
+		final HttpClientFactoryBean factory = couchDbHttpClientFactory();
+		factory.setSocketTimeout(MIGRATION_SOCKET_TIMEOUT);
 
 		return factory;
 	}

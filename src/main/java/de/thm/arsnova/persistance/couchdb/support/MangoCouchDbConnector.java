@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.util.Converter;
 import de.thm.arsnova.entities.serialization.View;
 import org.ektorp.CouchDbInstance;
 import org.ektorp.DbAccessException;
+import org.ektorp.http.HttpResponse;
 import org.ektorp.impl.ObjectMapperFactory;
 import org.ektorp.impl.StdCouchDbConnector;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +104,7 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 			this.selector = selector;
 		}
 
+		@JsonInclude(JsonInclude.Include.ALWAYS)
 		@JsonView(View.Persistence.class)
 		public Map<String, ?> getSelector() {
 			return selector;
@@ -270,5 +273,24 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 
 	public void createJsonIndex(final String name, final List<MangoQuery.Sort> fields) {
 		createPartialJsonIndex(name, fields, null);
+	}
+
+	public boolean initializeIndex(final String name) {
+		MangoQuery query = new MangoQuery(Collections.EMPTY_MAP);
+		query.setIndexDocument(name);
+		query.setLimit(0);
+		try {
+			String queryString = objectMapper.writeValueAsString(query);
+			logger.debug("Using Mango API query to initialize CouchDB index: {}", queryString);
+			HttpResponse response = restTemplate.postUncached(dbURI.append("_find").toString(), queryString);
+			response.releaseConnection();
+		} catch (JsonProcessingException e) {
+			throw new DbAccessException("Could not serialize Mango query.");
+		} catch (DbAccessException e) {
+			logger.debug("CouchDB index is not ready yet: {}", name, e);
+			return false;
+		}
+
+		return true;
 	}
 }

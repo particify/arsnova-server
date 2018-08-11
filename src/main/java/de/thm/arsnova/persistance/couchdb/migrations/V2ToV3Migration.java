@@ -31,6 +31,7 @@ import de.thm.arsnova.persistance.ContentRepository;
 import de.thm.arsnova.persistance.RoomRepository;
 import de.thm.arsnova.persistance.UserRepository;
 import de.thm.arsnova.persistance.couchdb.support.MangoCouchDbConnector;
+import org.ektorp.DbAccessException;
 import org.ektorp.DocumentNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,13 +98,17 @@ public class V2ToV3Migration implements Migration {
 	public void migrate() {
 		createV2Index();
 		migrator.setIgnoreRevision(true);
-		migrateUsers();
-		migrateUnregisteredUsers();
-		migrateRooms();
-		migrateMotds();
-		migrateComments();
-		migrateContents();
-		migrateAnswers();
+		try {
+			migrateUsers();
+			migrateUnregisteredUsers();
+			migrateRooms();
+			migrateMotds();
+			migrateComments();
+			migrateContents();
+			migrateAnswers();
+		} catch (InterruptedException e) {
+			throw new DbAccessException(e);
+		}
 		migrator.setIgnoreRevision(false);
 	}
 
@@ -156,7 +161,18 @@ public class V2ToV3Migration implements Migration {
 		fromConnector.createPartialJsonIndex(MOTDLIST_INDEX, fields, filterSelector);
 	}
 
-	private void migrateUsers() {
+	private void waitForV2Index(final String name) throws InterruptedException {
+		for (int i = 0; i < 10; i++) {
+			if (fromConnector.initializeIndex(name)) {
+				return;
+			}
+			Thread.sleep(10000 * Math.round(1.0 + 0.5 * i));
+		}
+	}
+
+	private void migrateUsers() throws InterruptedException {
+		waitForV2Index(USER_INDEX);
+		waitForV2Index(LOGGEDIN_INDEX);
 		Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "userdetails");
 		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
@@ -189,7 +205,9 @@ public class V2ToV3Migration implements Migration {
 		}
 	}
 
-	private void migrateUnregisteredUsers() {
+	private void migrateUnregisteredUsers() throws InterruptedException {
+		waitForV2Index(USER_INDEX);
+		waitForV2Index(LOGGEDIN_INDEX);
 		/* Load registered usernames to exclude them later */
 		Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "userdetails");
@@ -232,7 +250,8 @@ public class V2ToV3Migration implements Migration {
 		}
 	}
 
-	private void migrateRooms() {
+	private void migrateRooms() throws InterruptedException {
+		waitForV2Index(SESSION_INDEX);
 		Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "session");
 		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
@@ -262,7 +281,8 @@ public class V2ToV3Migration implements Migration {
 		}
 	}
 
-	private void migrateMotds() {
+	private void migrateMotds() throws InterruptedException {
+		waitForV2Index(MOTD_INDEX);
 		Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "motd");
 		/* Exclude outdated MotDs */
@@ -300,7 +320,8 @@ public class V2ToV3Migration implements Migration {
 		}
 	}
 
-	private void migrateComments() {
+	private void migrateComments() throws InterruptedException {
+		waitForV2Index(FULL_INDEX_BY_TYPE);
 		Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "interposed_question");
 		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
@@ -343,7 +364,8 @@ public class V2ToV3Migration implements Migration {
 		}
 	}
 
-	private void migrateContents() {
+	private void migrateContents() throws InterruptedException {
+		waitForV2Index(FULL_INDEX_BY_TYPE);
 		Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "skill_question");
 		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
@@ -376,7 +398,8 @@ public class V2ToV3Migration implements Migration {
 		}
 	}
 
-	private void migrateAnswers() {
+	private void migrateAnswers() throws InterruptedException {
+		waitForV2Index(FULL_INDEX_BY_TYPE);
 		Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "skill_question_answer");
 		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
@@ -414,10 +437,11 @@ public class V2ToV3Migration implements Migration {
 		}
 	}
 
-	private HashSet<String> migrateMotdIds(final Set<String> oldIds) {
+	private HashSet<String> migrateMotdIds(final Set<String> oldIds) throws InterruptedException {
 		if (oldIds.isEmpty()) {
 			return new HashSet<>();
 		}
+		waitForV2Index(MOTD_INDEX);
 		Map<String, Object> queryOptions = new HashMap<>();
 		Map<String, Set<String>> subQuery1 = new HashMap<>();
 		subQuery1.put("$in", oldIds);
@@ -434,7 +458,8 @@ public class V2ToV3Migration implements Migration {
 		return new HashSet<>(fromConnector.query(query, "_id", String.class));
 	}
 
-	private MotdList loadMotdList(final String username) {
+	private MotdList loadMotdList(final String username) throws InterruptedException {
+		waitForV2Index(MOTDLIST_INDEX);
 		HashMap<String, Object> motdListQueryOptions = new HashMap<>();
 		motdListQueryOptions.put("type", "motdlist");
 		motdListQueryOptions.put("username", username);
