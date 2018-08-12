@@ -18,9 +18,9 @@
 package de.thm.arsnova.websocket;
 
 import com.corundumstudio.socketio.SocketIOClient;
-import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
+import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.security.User;
-import de.thm.arsnova.services.UserService;
+import de.thm.arsnova.service.UserService;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

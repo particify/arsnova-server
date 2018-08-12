@@ -17,14 +17,14 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.exceptions.ForbiddenException;
-import de.thm.arsnova.exceptions.NoContentException;
-import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.exceptions.NotImplementedException;
-import de.thm.arsnova.exceptions.PayloadTooLargeException;
-import de.thm.arsnova.exceptions.PreconditionFailedException;
-import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.web.exceptions.BadRequestException;
+import de.thm.arsnova.web.exceptions.ForbiddenException;
+import de.thm.arsnova.web.exceptions.NoContentException;
+import de.thm.arsnova.web.exceptions.NotFoundException;
+import de.thm.arsnova.web.exceptions.NotImplementedException;
+import de.thm.arsnova.web.exceptions.PayloadTooLargeException;
+import de.thm.arsnova.web.exceptions.PreconditionFailedException;
+import de.thm.arsnova.web.exceptions.UnauthorizedException;
 import org.ektorp.DocumentNotFoundException;
 import org.slf4j.event.Level;
 import org.springframework.http.HttpStatus;

@@ -18,8 +18,8 @@
 package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.controller.AbstractController;
-import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
-import de.thm.arsnova.services.UserService;
+import de.thm.arsnova.model.migration.v2.ClientAuthentication;
+import de.thm.arsnova.service.UserService;
 import de.thm.arsnova.websocket.ArsnovaSocketioServer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

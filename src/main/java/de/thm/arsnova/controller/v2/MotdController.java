@@ -18,16 +18,16 @@
 package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.controller.AbstractController;
-import de.thm.arsnova.entities.UserProfile;
-import de.thm.arsnova.entities.migration.FromV2Migrator;
-import de.thm.arsnova.entities.migration.ToV2Migrator;
-import de.thm.arsnova.entities.migration.v2.Motd;
-import de.thm.arsnova.entities.migration.v2.MotdList;
-import de.thm.arsnova.exceptions.ForbiddenException;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.model.migration.FromV2Migrator;
+import de.thm.arsnova.model.migration.ToV2Migrator;
+import de.thm.arsnova.model.migration.v2.Motd;
+import de.thm.arsnova.model.migration.v2.MotdList;
+import de.thm.arsnova.web.exceptions.ForbiddenException;
 import de.thm.arsnova.security.User;
-import de.thm.arsnova.services.MotdService;
-import de.thm.arsnova.services.RoomService;
-import de.thm.arsnova.services.UserService;
+import de.thm.arsnova.service.MotdService;
+import de.thm.arsnova.service.RoomService;
+import de.thm.arsnova.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -83,7 +83,7 @@ public class MotdController extends AbstractController {
 		@ApiParam(value = "audience", required = false) @RequestParam(value = "audience", defaultValue = "all") final String audience,
 		@ApiParam(value = "sessionkey", required = false) @RequestParam(value = "sessionkey", required = false) final String roomShortId
 	) {
-		List<de.thm.arsnova.entities.Motd> motds;
+		List<de.thm.arsnova.model.Motd> motds;
 		Date date = new Date(System.currentTimeMillis());
 		if (!clientdate.isEmpty()) {
 			date.setTime(Long.parseLong(clientdate));
@@ -116,9 +116,9 @@ public class MotdController extends AbstractController {
 			@ApiParam(value = "current motd", required = true) @RequestBody final Motd motd,
 			final HttpServletResponse response
 			) {
-		de.thm.arsnova.entities.Motd motdV3 = fromV2Migrator.migrate(motd);
+		de.thm.arsnova.model.Motd motdV3 = fromV2Migrator.migrate(motd);
 		String roomId = roomService.getIdByShortId(motd.getSessionkey());
-		if (de.thm.arsnova.entities.Motd.Audience.ROOM == motdV3.getAudience() && roomId != null) {
+		if (de.thm.arsnova.model.Motd.Audience.ROOM == motdV3.getAudience() && roomId != null) {
 			motdService.save(roomId, motdV3);
 		} else {
 			motdService.save(motdV3);
@@ -133,9 +133,9 @@ public class MotdController extends AbstractController {
 			@ApiParam(value = "motdkey from current motd", required = true) @PathVariable final String motdId,
 			@ApiParam(value = "current motd", required = true) @RequestBody final Motd motd
 			) {
-		de.thm.arsnova.entities.Motd motdV3 = fromV2Migrator.migrate(motd);
+		de.thm.arsnova.model.Motd motdV3 = fromV2Migrator.migrate(motd);
 		String roomId = roomService.getIdByShortId(motd.getSessionkey());
-		if (motdV3.getAudience() == de.thm.arsnova.entities.Motd.Audience.ROOM && roomId != null) {
+		if (motdV3.getAudience() == de.thm.arsnova.model.Motd.Audience.ROOM && roomId != null) {
 			motdService.update(roomId, motdV3);
 		} else {
 			motdService.update(motdV3);
@@ -147,8 +147,8 @@ public class MotdController extends AbstractController {
 	@ApiOperation(value = "deletes a message of the day", nickname = "deleteMotd")
 	@RequestMapping(value = "/{motdId}", method = RequestMethod.DELETE)
 	public void deleteMotd(@ApiParam(value = "Motd-key from the message that shall be deleted", required = true) @PathVariable final String motdId) {
-		de.thm.arsnova.entities.Motd motd = motdService.get(motdId);
-		if (motd.getAudience() == de.thm.arsnova.entities.Motd.Audience.ROOM) {
+		de.thm.arsnova.model.Motd motd = motdService.get(motdId);
+		if (motd.getAudience() == de.thm.arsnova.model.Motd.Audience.ROOM) {
 			motdService.deleteByRoomId(motd.getRoomId(), motd);
 		} else {
 			motdService.delete(motd);

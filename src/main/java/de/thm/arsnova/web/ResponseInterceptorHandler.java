@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.web;
 
-import de.thm.arsnova.services.ResponseProviderService;
+import de.thm.arsnova.service.ResponseProviderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;

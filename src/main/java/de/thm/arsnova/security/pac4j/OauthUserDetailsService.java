@@ -17,9 +17,9 @@
  */
 package de.thm.arsnova.security.pac4j;
 
-import de.thm.arsnova.entities.UserProfile;
+import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.security.User;
-import de.thm.arsnova.services.UserService;
+import de.thm.arsnova.service.UserService;
 import org.pac4j.oauth.profile.facebook.FacebookProfile;
 import org.pac4j.oauth.profile.google2.Google2Profile;
 import org.pac4j.oauth.profile.twitter.TwitterProfile;

@@ -1,7 +1,7 @@
 package de.thm.arsnova.config;
 
-import de.thm.arsnova.persistance.UserRepository;
-import de.thm.arsnova.services.StubUserService;
+import de.thm.arsnova.persistence.UserRepository;
+import de.thm.arsnova.service.StubUserService;
 import de.thm.arsnova.websocket.ArsnovaSocketioServer;
 import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 import org.springframework.beans.factory.annotation.Qualifier;

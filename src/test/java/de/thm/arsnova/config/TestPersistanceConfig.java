@@ -1,6 +1,6 @@
 package de.thm.arsnova.config;
 
-import de.thm.arsnova.persistance.*;
+import de.thm.arsnova.persistence.*;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

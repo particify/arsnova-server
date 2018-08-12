@@ -18,8 +18,8 @@
 package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.controller.AbstractController;
-import de.thm.arsnova.entities.Statistics;
-import de.thm.arsnova.services.StatisticsService;
+import de.thm.arsnova.model.Statistics;
+import de.thm.arsnova.service.StatisticsService;
 import de.thm.arsnova.web.CacheControl;
 import de.thm.arsnova.web.DeprecatedApi;
 import io.swagger.annotations.Api;

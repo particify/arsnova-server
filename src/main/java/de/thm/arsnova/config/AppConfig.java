@@ -20,13 +20,13 @@ package de.thm.arsnova.config;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import de.thm.arsnova.entities.migration.FromV2Migrator;
-import de.thm.arsnova.entities.migration.ToV2Migrator;
+import de.thm.arsnova.model.migration.FromV2Migrator;
+import de.thm.arsnova.model.migration.ToV2Migrator;
 import de.thm.arsnova.util.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.client.ConnectorClientImpl;
-import de.thm.arsnova.entities.serialization.CouchDbDocumentModule;
-import de.thm.arsnova.entities.serialization.View;
+import de.thm.arsnova.model.serialization.CouchDbDocumentModule;
+import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.web.PathApiVersionContentNegotiationStrategy;
 import de.thm.arsnova.websocket.ArsnovaSocketioServer;
 import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
@@ -81,13 +81,11 @@ import java.util.List;
  * AspectJ's weaving).
  */
 @ComponentScan({
-		"de.thm.arsnova.aop",
 		"de.thm.arsnova.cache",
 		"de.thm.arsnova.controller",
-		"de.thm.arsnova.dao",
-		"de.thm.arsnova.events",
+		"de.thm.arsnova.event",
 		"de.thm.arsnova.security",
-		"de.thm.arsnova.services",
+		"de.thm.arsnova.service",
 		"de.thm.arsnova.web"})
 @Configuration
 @EnableAsync

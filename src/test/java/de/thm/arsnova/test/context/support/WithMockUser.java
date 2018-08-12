@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.test.context.support;
 
-import de.thm.arsnova.entities.UserProfile;
+import de.thm.arsnova.model.UserProfile;
 import org.springframework.security.test.context.support.WithSecurityContext;
 
 import java.lang.annotation.Documented;

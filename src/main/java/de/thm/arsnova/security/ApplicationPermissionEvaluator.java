@@ -17,15 +17,15 @@
  */
 package de.thm.arsnova.security;
 
-import de.thm.arsnova.entities.Motd;
-import de.thm.arsnova.entities.Room;
-import de.thm.arsnova.entities.Comment;
-import de.thm.arsnova.entities.Content;
-import de.thm.arsnova.entities.UserProfile;
-import de.thm.arsnova.persistance.CommentRepository;
-import de.thm.arsnova.persistance.ContentRepository;
-import de.thm.arsnova.persistance.MotdRepository;
-import de.thm.arsnova.persistance.RoomRepository;
+import de.thm.arsnova.model.Motd;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.Comment;
+import de.thm.arsnova.model.Content;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.persistence.CommentRepository;
+import de.thm.arsnova.persistence.ContentRepository;
+import de.thm.arsnova.persistence.MotdRepository;
+import de.thm.arsnova.persistence.RoomRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -18,12 +18,12 @@
 package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.controller.AbstractController;
-import de.thm.arsnova.entities.Feedback;
-import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
-import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.services.FeedbackService;
-import de.thm.arsnova.services.RoomService;
-import de.thm.arsnova.services.UserService;
+import de.thm.arsnova.model.Feedback;
+import de.thm.arsnova.model.migration.v2.ClientAuthentication;
+import de.thm.arsnova.web.exceptions.NotFoundException;
+import de.thm.arsnova.service.FeedbackService;
+import de.thm.arsnova.service.RoomService;
+import de.thm.arsnova.service.UserService;
 import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 import org.springframework.beans.factory.annotation.Autowired;

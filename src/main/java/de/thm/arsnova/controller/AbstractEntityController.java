@@ -17,11 +17,11 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.entities.Entity;
-import de.thm.arsnova.entities.FindQuery;
-import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.services.EntityService;
-import de.thm.arsnova.services.FindQueryService;
+import de.thm.arsnova.model.Entity;
+import de.thm.arsnova.model.FindQuery;
+import de.thm.arsnova.web.exceptions.NotFoundException;
+import de.thm.arsnova.service.EntityService;
+import de.thm.arsnova.service.FindQueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

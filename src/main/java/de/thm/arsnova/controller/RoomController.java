@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.entities.Room;
-import de.thm.arsnova.services.RoomService;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.service.RoomService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

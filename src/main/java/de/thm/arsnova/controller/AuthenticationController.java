@@ -1,10 +1,9 @@
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.entities.ClientAuthentication;
-import de.thm.arsnova.entities.LoginCredentials;
-import de.thm.arsnova.entities.UserProfile;
-import de.thm.arsnova.services.UserService;
-import org.pac4j.core.client.Client;
+import de.thm.arsnova.model.ClientAuthentication;
+import de.thm.arsnova.model.LoginCredentials;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.service.UserService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

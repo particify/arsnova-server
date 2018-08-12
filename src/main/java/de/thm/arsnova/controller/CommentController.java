@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.entities.Comment;
-import de.thm.arsnova.services.CommentService;
+import de.thm.arsnova.model.Comment;
+import de.thm.arsnova.service.CommentService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

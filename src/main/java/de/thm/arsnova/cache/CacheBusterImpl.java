@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.cache;
 
-import de.thm.arsnova.events.*;
+import de.thm.arsnova.event.*;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 

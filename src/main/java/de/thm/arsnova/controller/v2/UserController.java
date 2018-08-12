@@ -18,8 +18,8 @@
 package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.controller.AbstractController;
-import de.thm.arsnova.entities.UserProfile;
-import de.thm.arsnova.services.UserService;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.stereotype.Controller;

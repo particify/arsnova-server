@@ -18,22 +18,21 @@
 package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.controller.PaginationController;
-import de.thm.arsnova.entities.ChoiceAnswer;
-import de.thm.arsnova.entities.ChoiceQuestionContent;
-import de.thm.arsnova.entities.TextAnswer;
-import de.thm.arsnova.entities.migration.FromV2Migrator;
-import de.thm.arsnova.entities.migration.ToV2Migrator;
-import de.thm.arsnova.entities.migration.v2.Answer;
-import de.thm.arsnova.entities.migration.v2.Content;
-import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.exceptions.ForbiddenException;
-import de.thm.arsnova.exceptions.NoContentException;
-import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.exceptions.NotImplementedException;
-import de.thm.arsnova.services.AnswerService;
-import de.thm.arsnova.services.ContentService;
-import de.thm.arsnova.services.RoomService;
-import de.thm.arsnova.services.TimerService;
+import de.thm.arsnova.model.ChoiceAnswer;
+import de.thm.arsnova.model.ChoiceQuestionContent;
+import de.thm.arsnova.model.TextAnswer;
+import de.thm.arsnova.model.migration.FromV2Migrator;
+import de.thm.arsnova.model.migration.ToV2Migrator;
+import de.thm.arsnova.model.migration.v2.Answer;
+import de.thm.arsnova.model.migration.v2.Content;
+import de.thm.arsnova.web.exceptions.ForbiddenException;
+import de.thm.arsnova.web.exceptions.NoContentException;
+import de.thm.arsnova.web.exceptions.NotFoundException;
+import de.thm.arsnova.web.exceptions.NotImplementedException;
+import de.thm.arsnova.service.AnswerService;
+import de.thm.arsnova.service.ContentService;
+import de.thm.arsnova.service.RoomService;
+import de.thm.arsnova.service.TimerService;
 import de.thm.arsnova.util.PaginationListDecorator;
 import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.web.Pagination;
@@ -92,7 +91,7 @@ public class ContentController extends PaginationController {
 	})
 	@RequestMapping(value = "/{contentId}", method = RequestMethod.GET)
 	public Content getContent(@PathVariable final String contentId) {
-		final de.thm.arsnova.entities.Content content = contentService.get(contentId);
+		final de.thm.arsnova.model.Content content = contentService.get(contentId);
 		if (content != null) {
 			return toV2Migrator.migrate(content);
 		}
@@ -108,7 +107,7 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Content postContent(@RequestBody final Content content) {
-		de.thm.arsnova.entities.Content contentV3 = fromV2Migrator.migrate(content);
+		de.thm.arsnova.model.Content contentV3 = fromV2Migrator.migrate(content);
 		final String roomId = roomService.getIdByShortId(content.getSessionKeyword());
 		contentV3.setRoomId(roomId);
 		contentService.create(contentV3);
@@ -123,7 +122,7 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/bulk", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public List<Content> bulkPostContents(@RequestBody final List<Content> contents) {
-		List<de.thm.arsnova.entities.Content> contentsV3 =
+		List<de.thm.arsnova.model.Content> contentsV3 =
 				contents.stream().map(c -> contentService.create(fromV2Migrator.migrate(c))).collect(Collectors.toList());
 		return contentsV3.stream().map(toV2Migrator::migrate).collect(Collectors.toList());
 	}
@@ -210,7 +209,7 @@ public class ContentController extends PaginationController {
 			) {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		boolean disable = false;
-		Iterable<de.thm.arsnova.entities.Content> contents;
+		Iterable<de.thm.arsnova.model.Content> contents;
 
 		if (disableVote != null) {
 			disable = disableVote;
@@ -236,7 +235,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(required = false) final Boolean publish,
 			@RequestBody final Content content
 			) {
-		de.thm.arsnova.entities.Content contentV3 = fromV2Migrator.migrate(content);
+		de.thm.arsnova.model.Content contentV3 = fromV2Migrator.migrate(content);
 		if (publish != null) {
 			contentV3.getState().setVisible(publish);
 		}
@@ -254,7 +253,7 @@ public class ContentController extends PaginationController {
 			) {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		boolean p = publish == null || publish;
-		Iterable<de.thm.arsnova.entities.Content> contents;
+		Iterable<de.thm.arsnova.model.Content> contents;
 
 		if (lectureContentsOnly) {
 			contents = contentService.getByRoomIdAndGroup(roomId, "lecture");
@@ -275,7 +274,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(required = false) final Boolean showStatistics,
 			@RequestBody final Content content
 			) {
-		de.thm.arsnova.entities.Content contentV3 = fromV2Migrator.migrate(content);
+		de.thm.arsnova.model.Content contentV3 = fromV2Migrator.migrate(content);
 		if (showStatistics != null) {
 			contentV3.getState().setResponsesVisible(showStatistics);
 		}
@@ -290,7 +289,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(required = false) final Boolean showCorrectAnswer,
 			@RequestBody final Content content
 			) {
-		de.thm.arsnova.entities.Content contentV3 = fromV2Migrator.migrate(content);
+		de.thm.arsnova.model.Content contentV3 = fromV2Migrator.migrate(content);
 		if (showCorrectAnswer != null) {
 			contentV3.getState().setSolutionVisible(showCorrectAnswer);
 		}
@@ -310,7 +309,7 @@ public class ContentController extends PaginationController {
 			final HttpServletResponse response
 			) {
 		String roomId = roomService.getIdByShortId(roomShortId);
-		Iterable<de.thm.arsnova.entities.Content> contents;
+		Iterable<de.thm.arsnova.model.Content> contents;
 		if (lectureContentsOnly) {
 			contents = contentService.getByRoomIdAndGroup(roomId, "lecture");
 		} else if (flashcardsOnly) {
@@ -438,14 +437,14 @@ public class ContentController extends PaginationController {
 			@PathVariable final String contentId,
 			final HttpServletResponse response
 			) {
-		final de.thm.arsnova.entities.Content content = contentService.get(contentId);
-		final de.thm.arsnova.entities.Answer answer = answerService.getMyAnswer(contentId);
+		final de.thm.arsnova.model.Content content = contentService.get(contentId);
+		final de.thm.arsnova.model.Answer answer = answerService.getMyAnswer(contentId);
 		if (answer == null) {
 			response.setStatus(HttpStatus.NO_CONTENT.value());
 			return null;
 		}
 
-		if (content.getFormat().equals(de.thm.arsnova.entities.Content.Format.TEXT)) {
+		if (content.getFormat().equals(de.thm.arsnova.model.Content.Format.TEXT)) {
 			return toV2Migrator.migrate((TextAnswer) answer);
 		} else {
 			return toV2Migrator.migrate((ChoiceAnswer) answer, (ChoiceQuestionContent) content);
@@ -474,12 +473,12 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "piround", required = false) final Integer piRound,
 			@RequestParam(value = "all", required = false, defaultValue = "false") final Boolean allAnswers,
 			final HttpServletResponse response) {
-		final de.thm.arsnova.entities.Content content = contentService.get(contentId);
+		final de.thm.arsnova.model.Content content = contentService.get(contentId);
 		if (content instanceof ChoiceQuestionContent) {
 			return toV2Migrator.migrate(answerService.getAllStatistics(contentId),
 					(ChoiceQuestionContent) content, content.getState().getRound());
 		} else {
-			List<de.thm.arsnova.entities.TextAnswer> answers;
+			List<de.thm.arsnova.model.TextAnswer> answers;
 			if (allAnswers) {
 				answers = answerService.getAllTextAnswers(contentId, -1, -1);
 			} else if (null == piRound) {
@@ -507,8 +506,8 @@ public class ContentController extends PaginationController {
 			@RequestBody final Answer answer,
 			final HttpServletResponse response
 			) {
-		final de.thm.arsnova.entities.Content content = contentService.get(contentId);
-		final de.thm.arsnova.entities.Answer answerV3 = fromV2Migrator.migrate(answer, content);
+		final de.thm.arsnova.model.Content content = contentService.get(contentId);
+		final de.thm.arsnova.model.Answer answerV3 = fromV2Migrator.migrate(answer, content);
 
 		if (answerV3 instanceof TextAnswer) {
 			return toV2Migrator.migrate((TextAnswer) answerService.saveAnswer(contentId, answerV3));
@@ -526,8 +525,8 @@ public class ContentController extends PaginationController {
 			@RequestBody final Answer answer,
 			final HttpServletResponse response
 			) {
-		final de.thm.arsnova.entities.Content content = contentService.get(contentId);
-		final de.thm.arsnova.entities.Answer answerV3 = fromV2Migrator.migrate(answer, content);
+		final de.thm.arsnova.model.Content content = contentService.get(contentId);
+		final de.thm.arsnova.model.Answer answerV3 = fromV2Migrator.migrate(answer, content);
 
 		if (answerV3 instanceof TextAnswer) {
 			return toV2Migrator.migrate((TextAnswer) answerService.updateAnswer(answerV3));

@@ -18,7 +18,7 @@
 package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.controller.AbstractControllerTest;
-import de.thm.arsnova.services.StubUserService;
+import de.thm.arsnova.service.StubUserService;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

@@ -19,8 +19,7 @@ package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.controller.AbstractControllerTest;
-import de.thm.arsnova.controller.v2.CourseController;
-import de.thm.arsnova.services.StubUserService;
+import de.thm.arsnova.service.StubUserService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;

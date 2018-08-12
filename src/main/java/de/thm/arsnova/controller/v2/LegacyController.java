@@ -18,8 +18,8 @@
 package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.controller.AbstractController;
-import de.thm.arsnova.services.CommentService;
-import de.thm.arsnova.services.ContentService;
+import de.thm.arsnova.service.CommentService;
+import de.thm.arsnova.service.ContentService;
 import de.thm.arsnova.web.DeprecatedApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

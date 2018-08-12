@@ -18,19 +18,19 @@
 package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.controller.PaginationController;
-import de.thm.arsnova.entities.migration.FromV2Migrator;
-import de.thm.arsnova.entities.migration.ToV2Migrator;
-import de.thm.arsnova.entities.migration.v2.Room;
-import de.thm.arsnova.entities.migration.v2.RoomFeature;
-import de.thm.arsnova.entities.migration.v2.RoomInfo;
-import de.thm.arsnova.entities.transport.ImportExportContainer;
-import de.thm.arsnova.entities.transport.ScoreStatistics;
-import de.thm.arsnova.exceptions.UnauthorizedException;
-import de.thm.arsnova.services.RoomService;
-import de.thm.arsnova.services.RoomServiceImpl;
-import de.thm.arsnova.services.RoomServiceImpl.RoomNameComparator;
-import de.thm.arsnova.services.RoomServiceImpl.RoomShortNameComparator;
-import de.thm.arsnova.services.UserService;
+import de.thm.arsnova.model.migration.FromV2Migrator;
+import de.thm.arsnova.model.migration.ToV2Migrator;
+import de.thm.arsnova.model.migration.v2.Room;
+import de.thm.arsnova.model.migration.v2.RoomFeature;
+import de.thm.arsnova.model.migration.v2.RoomInfo;
+import de.thm.arsnova.model.transport.ImportExportContainer;
+import de.thm.arsnova.model.transport.ScoreStatistics;
+import de.thm.arsnova.web.exceptions.UnauthorizedException;
+import de.thm.arsnova.service.RoomService;
+import de.thm.arsnova.service.RoomServiceImpl;
+import de.thm.arsnova.service.RoomServiceImpl.RoomNameComparator;
+import de.thm.arsnova.service.RoomServiceImpl.RoomShortNameComparator;
+import de.thm.arsnova.service.UserService;
 import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.web.Pagination;
 import io.swagger.annotations.Api;
@@ -95,7 +95,7 @@ public class RoomController extends PaginationController {
 			nickname = "deleteRoom")
 	@RequestMapping(value = "/{shortId}", method = RequestMethod.DELETE)
 	public void deleteRoom(@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId) {
-		de.thm.arsnova.entities.Room room = roomService.getByShortId(shortId);
+		de.thm.arsnova.model.Room room = roomService.getByShortId(shortId);
 		roomService.deleteCascading(room);
 	}
 
@@ -170,7 +170,7 @@ public class RoomController extends PaginationController {
 					"username", defaultValue = "") final String username,
 			final HttpServletResponse response
 			) {
-		List<de.thm.arsnova.entities.Room> rooms;
+		List<de.thm.arsnova.model.Room> rooms;
 
 		if (!"".equals(username)) {
 			final String userId = userService.getByUsername(username).getId();
@@ -231,7 +231,7 @@ public class RoomController extends PaginationController {
 			@ApiParam(value = "sort by", required = false) @RequestParam(value = "sortby", defaultValue = "name") final String sortby,
 			final HttpServletResponse response
 			) {
-		List<de.thm.arsnova.entities.Room> rooms;
+		List<de.thm.arsnova.model.Room> rooms;
 		if (!visitedOnly) {
 			rooms = roomService.getMyRoomsInfo(offset, limit);
 		} else {
@@ -261,7 +261,7 @@ public class RoomController extends PaginationController {
 	public List<RoomInfo> getMyPublicPoolRooms(
 			final HttpServletResponse response
 			) {
-		List<de.thm.arsnova.entities.Room> rooms = roomService.getMyPublicPoolRoomsInfo();
+		List<de.thm.arsnova.model.Room> rooms = roomService.getMyPublicPoolRoomsInfo();
 
 		if (rooms == null || rooms.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
@@ -280,7 +280,7 @@ public class RoomController extends PaginationController {
 	public List<Room> getPublicPoolRooms(
 			final HttpServletResponse response
 			) {
-		List<de.thm.arsnova.entities.Room> rooms = roomService.getPublicPoolRoomsInfo();
+		List<de.thm.arsnova.model.Room> rooms = roomService.getPublicPoolRoomsInfo();
 
 		if (rooms == null || rooms.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
@@ -330,7 +330,7 @@ public class RoomController extends PaginationController {
 			) {
 		String id = roomService.getIdByShortId(shortId);
 		roomService.setActive(id, false);
-		de.thm.arsnova.entities.Room roomInfo = roomService.copyRoomToPublicPool(shortId, publicPool);
+		de.thm.arsnova.model.Room roomInfo = roomService.copyRoomToPublicPool(shortId, publicPool);
 		roomService.setActive(id, true);
 
 		return toV2Migrator.migrate(roomInfo);
@@ -386,7 +386,7 @@ public class RoomController extends PaginationController {
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
 			final HttpServletResponse response
 			) {
-		de.thm.arsnova.entities.Room room = roomService.getByShortId(shortId);
+		de.thm.arsnova.model.Room room = roomService.getByShortId(shortId);
 		return toV2Migrator.migrate(room.getSettings());
 	}
 
@@ -398,7 +398,7 @@ public class RoomController extends PaginationController {
 			@ApiParam(value = "Room feature", required = true) @RequestBody final RoomFeature features,
 			final HttpServletResponse response
 			) {
-		de.thm.arsnova.entities.Room room = roomService.getByShortId(shortId);
+		de.thm.arsnova.model.Room room = roomService.getByShortId(shortId);
 		room.setSettings(fromV2Migrator.migrate(features));
 		roomService.update(room);
 

@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.entities.Motd;
-import de.thm.arsnova.services.MotdService;
+import de.thm.arsnova.model.Motd;
+import de.thm.arsnova.service.MotdService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

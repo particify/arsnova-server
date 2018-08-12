@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.security;
 
-import de.thm.arsnova.entities.UserProfile;
-import de.thm.arsnova.services.UserService;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.service.UserService;
 import org.jasig.cas.client.validation.Assertion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.cas.userdetails.AbstractCasAssertionUserDetailsService;

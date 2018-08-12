@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.web;
 
-import de.thm.arsnova.services.StatusService;
+import de.thm.arsnova.service.StatusService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 

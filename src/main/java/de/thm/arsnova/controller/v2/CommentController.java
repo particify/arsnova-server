@@ -18,15 +18,14 @@
 package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.controller.PaginationController;
-import de.thm.arsnova.entities.Room;
-import de.thm.arsnova.entities.migration.FromV2Migrator;
-import de.thm.arsnova.entities.migration.ToV2Migrator;
-import de.thm.arsnova.entities.migration.v2.Comment;
-import de.thm.arsnova.entities.migration.v2.CommentReadingCount;
-import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.services.CommentService;
-import de.thm.arsnova.services.RoomService;
-import de.thm.arsnova.services.UserService;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.migration.FromV2Migrator;
+import de.thm.arsnova.model.migration.ToV2Migrator;
+import de.thm.arsnova.model.migration.v2.Comment;
+import de.thm.arsnova.model.migration.v2.CommentReadingCount;
+import de.thm.arsnova.service.CommentService;
+import de.thm.arsnova.service.RoomService;
+import de.thm.arsnova.service.UserService;
 import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.web.Pagination;
 import io.swagger.annotations.Api;
@@ -117,7 +116,7 @@ public class CommentController extends PaginationController {
 			@ApiParam(value = "Room-Key from current room", required = true) @RequestParam("sessionkey") final String roomShortId,
 			@ApiParam(value = "the body from the new comment", required = true) @RequestBody final Comment comment
 			) {
-		de.thm.arsnova.entities.Comment commentV3 = fromV2Migrator.migrate(comment);
+		de.thm.arsnova.model.Comment commentV3 = fromV2Migrator.migrate(comment);
 		Room roomV3 = roomService.getByShortId(roomShortId);
 		commentV3.setRoomId(roomV3.getId());
 		commentService.create(commentV3);

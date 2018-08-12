@@ -19,12 +19,12 @@ package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.config.SecurityConfig;
 import de.thm.arsnova.controller.AbstractController;
-import de.thm.arsnova.entities.ServiceDescription;
-import de.thm.arsnova.entities.migration.v2.ClientAuthentication;
-import de.thm.arsnova.entities.UserProfile;
-import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.model.ServiceDescription;
+import de.thm.arsnova.model.migration.v2.ClientAuthentication;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.web.exceptions.UnauthorizedException;
 import de.thm.arsnova.security.User;
-import de.thm.arsnova.services.UserService;
+import de.thm.arsnova.service.UserService;
 import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.exception.HttpAction;
 import org.pac4j.oauth.client.FacebookClient;

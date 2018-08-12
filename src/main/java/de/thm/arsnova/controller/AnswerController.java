@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.entities.Answer;
-import de.thm.arsnova.services.AnswerService;
+import de.thm.arsnova.model.Answer;
+import de.thm.arsnova.service.AnswerService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

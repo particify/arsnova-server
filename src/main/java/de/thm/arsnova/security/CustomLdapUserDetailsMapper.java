@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.security;
 
-import de.thm.arsnova.entities.UserProfile;
-import de.thm.arsnova.services.UserService;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

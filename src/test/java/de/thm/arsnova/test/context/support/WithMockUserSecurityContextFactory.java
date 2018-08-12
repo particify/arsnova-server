@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.test.context.support;
 
-import de.thm.arsnova.entities.UserProfile;
+import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.security.User;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
