@@ -2,6 +2,8 @@ package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
+import de.thm.arsnova.entities.serialization.FormatContentTypeIdResolver;
 import de.thm.arsnova.entities.serialization.View;
 import org.springframework.core.style.ToStringCreator;
 
@@ -12,10 +14,12 @@ import java.util.Objects;
 import java.util.Set;
 
 @JsonTypeInfo(
-		use = JsonTypeInfo.Id.NAME,
-		include = JsonTypeInfo.As.EXISTING_PROPERTY,
-		property = "type"
+		use = JsonTypeInfo.Id.CUSTOM,
+		property = "format",
+		visible = true,
+		defaultImpl = Content.class
 )
+@JsonTypeIdResolver(FormatContentTypeIdResolver.class)
 public class Content extends Entity {
 	public enum Format {
 		CHOICE,
@@ -225,6 +229,12 @@ public class Content extends Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setAbstentionsAllowed(final boolean abstentionsAllowed) {
 		this.abstentionsAllowed = abstentionsAllowed;
+	}
+
+	@JsonView(View.Persistence.class)
+	@Override
+	public Class<? extends Entity> getType() {
+		return Content.class;
 	}
 
 	/**

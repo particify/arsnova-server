@@ -2,6 +2,8 @@ package de.thm.arsnova.entities;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
+import de.thm.arsnova.entities.serialization.FormatAnswerTypeIdResolver;
 import de.thm.arsnova.entities.serialization.View;
 import org.springframework.core.style.ToStringCreator;
 
@@ -9,14 +11,17 @@ import java.util.Map;
 import java.util.Objects;
 
 @JsonTypeInfo(
-		use = JsonTypeInfo.Id.NAME,
-		include = JsonTypeInfo.As.EXISTING_PROPERTY,
-		property = "type"
+		use = JsonTypeInfo.Id.CUSTOM,
+		property = "format",
+		visible = true,
+		defaultImpl = Answer.class
 )
-public abstract class Answer extends Entity {
+@JsonTypeIdResolver(FormatAnswerTypeIdResolver.class)
+public class Answer extends Entity {
 	private String contentId;
 	private String roomId;
 	private String creatorId;
+	private Content.Format format;
 	private int round;
 	private Map<String, Map<String, ?>> extensions;
 
@@ -50,6 +55,16 @@ public abstract class Answer extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
+	public Content.Format getFormat() {
+		return format;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setFormat(final Content.Format format) {
+		this.format = format;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
 	public int getRound() {
 		return round;
 	}
@@ -67,6 +82,12 @@ public abstract class Answer extends Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setExtensions(Map<String, Map<String, ?>> extensions) {
 		this.extensions = extensions;
+	}
+
+	@JsonView(View.Persistence.class)
+	@Override
+	public Class<? extends Entity> getType() {
+		return Answer.class;
 	}
 
 	/**
@@ -97,6 +118,7 @@ public abstract class Answer extends Entity {
 				.append("contentId", contentId)
 				.append("roomId", roomId)
 				.append("creatorId", creatorId)
+				.append("format", format)
 				.append("round", round);
 	}
 }

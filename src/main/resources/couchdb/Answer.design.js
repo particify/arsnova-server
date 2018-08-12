@@ -4,7 +4,7 @@ var designDoc = {
 	"views": {
 		"by_id": {
 			"map": function (doc) {
-				if (["Answer", "ChoiceAnswer", "TextAnswer"].indexOf(doc.type) !== -1) {
+				if (doc.type === "Answer") {
 					emit(doc._id, {_rev: doc._rev});
 				}
 			},
@@ -12,14 +12,14 @@ var designDoc = {
 		},
 		"by_contentid": {
 			"map": function (doc) {
-				if (["Answer", "ChoiceAnswer", "TextAnswer"].indexOf(doc.type) !== -1) {
+				if (doc.type === "Answer") {
 					emit(doc.contentId, {_rev: doc._rev});
 				}
 			}
 		},
 		"by_contentid_round_body_subject": {
 			"map": function (doc) {
-				if (["Answer", "ChoiceAnswer", "TextAnswer"].indexOf(doc.type) !== -1) {
+				if (doc.type === "Answer") {
 					emit([doc.contentId, doc.round, doc.abstention, doc.body, doc.subject, doc.successfulFreeTextAnswer], {_rev: doc._rev});
 				}
 			},
@@ -27,7 +27,7 @@ var designDoc = {
 		},
 		"by_contentid_round_selectedchoiceindexes": {
 			"map": function (doc) {
-				if (["Answer", "ChoiceAnswer", "TextAnswer"].indexOf(doc.type) !== -1) {
+				if (doc.type === "Answer") {
 					emit([doc.contentId, doc.round, doc.selectedChoiceIndexes], {_rev: doc._rev});
 				}
 			},
@@ -35,21 +35,21 @@ var designDoc = {
 		},
 		"by_contentid_creationtimestamp": {
 			"map": function (doc) {
-				if (["Answer", "ChoiceAnswer", "TextAnswer"].indexOf(doc.type) !== -1) {
+				if (doc.type === "Answer") {
 					emit([doc.contentId, doc.creationTimestamp], {_rev: doc._rev});
 				}
 			}
 		},
 		"by_contentid_creatorid_round": {
 			"map": function (doc) {
-				if (["Answer", "ChoiceAnswer", "TextAnswer"].indexOf(doc.type) !== -1) {
+				if (doc.type === "Answer") {
 					emit([doc.contentId, doc.creatorId, doc.round], {_rev: doc._rev});
 				}
 			}
 		},
 		"by_roomid": {
 			"map": function (doc) {
-				if (["Answer", "ChoiceAnswer", "TextAnswer"].indexOf(doc.type) !== -1) {
+				if (doc.type === "Answer") {
 					emit(doc.roomId, {_rev: doc._rev});
 				}
 			},
@@ -57,7 +57,7 @@ var designDoc = {
 		},
 		"by_roomid_variant": {
 			"map": function (doc) {
-				if (["Answer", "ChoiceAnswer", "TextAnswer"].indexOf(doc.type) !== -1) {
+				if (doc.type === "Answer") {
 					emit([doc.roomId, doc.questionVariant], {_rev: doc._rev});
 				}
 			},
@@ -65,21 +65,21 @@ var designDoc = {
 		},
 		"by_creatorid_roomid": {
 			"map": function (doc) {
-				if (["Answer", "ChoiceAnswer", "TextAnswer"].indexOf(doc.type) !== -1) {
+				if (doc.type === "Answer") {
 					emit([doc.creatorId, doc.roomId], {_rev: doc._rev});
 				}
 			}
 		},
 		"contentid_by_creatorid_roomid_variant": {
 			"map": function (doc) {
-				if (["Answer", "ChoiceAnswer", "TextAnswer"].indexOf(doc.type) !== -1) {
+				if (doc.type === "Answer") {
 					emit([doc.user, doc.roomId, doc.questionVariant], doc.contentId);
 				}
 			}
 		},
 		"contentid_round_by_creatorid_roomid_variant": {
 			"map": function (doc) {
-				if (["Answer", "ChoiceAnswer", "TextAnswer"].indexOf(doc.type) !== -1) {
+				if (doc.type === "Answer") {
 					emit([doc.creatorId, doc.roomId, doc.questionVariant], [doc.contentId, doc.round]);
 				}
 			}

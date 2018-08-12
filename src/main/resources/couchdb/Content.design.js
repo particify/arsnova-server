@@ -4,7 +4,7 @@ var designDoc = {
 	"views": {
 		"by_id": {
 			"map": function (doc) {
-				if (["Content", "ChoiceQuestionContent"].indexOf(doc.type) !== -1) {
+				if (doc.type === "Content") {
 					emit(doc._id, {_rev: doc._rev});
 				}
 			},
@@ -12,7 +12,7 @@ var designDoc = {
 		},
 		"by_roomid": {
 			"map": function (doc) {
-				if (["Content", "ChoiceQuestionContent"].indexOf(doc.type) !== -1) {
+				if (doc.type === "Content") {
 					emit(doc.roomId, {_rev: doc._rev});
 				}
 			},
@@ -20,7 +20,7 @@ var designDoc = {
 		},
 		"by_roomid_group_locked": {
 			"map": function (doc) {
-				if (["Content", "ChoiceQuestionContent"].indexOf(doc.type) !== -1) {
+				if (doc.type === "Content") {
 					emit([doc.roomId, doc.group, doc.locked, doc.subject, doc.body.substr(0, 16)], {_rev: doc._rev});
 				}
 			},
