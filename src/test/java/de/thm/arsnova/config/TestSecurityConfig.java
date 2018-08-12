@@ -47,21 +47,6 @@ public class TestSecurityConfig extends SecurityConfig {
 	protected void configure(HttpSecurity http) {}
 
 	@Override
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.inMemoryAuthentication()
-			.withUser("ptsr00")
-			.password("secret")
-			.authorities("ROLE_USER")
-		;
-	}
-
-	@Bean
-	@Override
-	public AuthenticationManager authenticationManagerBean() throws Exception {
-		return super.authenticationManager();
-	}
-
-	@Override
 	@Bean
 	public SessionRegistry sessionRegistry() {
 		return new SessionRegistryImpl();

@@ -17,18 +17,18 @@
  */
 package de.thm.arsnova.security;
 
-import de.thm.arsnova.services.UserService;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.service.UserService;
 import org.jasig.cas.client.validation.Assertion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.cas.userdetails.AbstractCasAssertionUserDetailsService;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Class to load a user based on the results from CAS.
@@ -40,21 +40,15 @@ public class CasUserDetailsService extends AbstractCasAssertionUserDetailsServic
 
 	@Override
 	protected UserDetails loadUserDetails(final Assertion assertion) {
-		final List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+		final Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_CAS_USER"));
 		final String uid = assertion.getPrincipal().getName();
 		if (userService.isAdmin(uid)) {
 			grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
 		}
 
-		return new User(
-				uid,
-				"",
-				true,
-				true,
-				true,
-				true,
-				grantedAuthorities
-				);
+		return userService.loadUser(UserProfile.AuthProvider.CAS, assertion.getPrincipal().getName(),
+				grantedAuthorities, true);
 	}
 }

@@ -38,9 +38,10 @@ security.admin-accounts=
 ################################################################################
 couchdb.host=localhost
 couchdb.port=5984
-couchdb.name=arsnova
+couchdb.name=arsnova3
 couchdb.username=admin
 couchdb.password=
+#couchdb.migrate-from=arsnova
 
 
 ################################################################################
@@ -57,6 +58,12 @@ mail.host=
 # After the specified number of login tries the client IP will be banned for
 # several minutes
 security.authentication.login-try-limit=50
+
+# JSON Web Tokens
+#
+security.jwt.serverId=arsnova.backend.v3:com.example
+security.jwt.secret=
+security.jwt.validity-period=T6H
 
 # Configuration parameters for authentication services:
 # enabled: enable or disable the service

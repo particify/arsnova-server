@@ -1,110 +1,123 @@
-/*
- * This file is part of ARSnova Backend.
- * Copyright (C) 2012-2018 The ARSnova Team and Contributors
- *
- * ARSnova Backend is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * ARSnova Backend is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.entities.DbUser;
-import de.thm.arsnova.services.UserService;
-import de.thm.arsnova.services.UserSessionService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.stereotype.Controller;
+import com.fasterxml.jackson.annotation.JsonView;
+import de.thm.arsnova.model.LoginCredentials;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.model.serialization.View;
+import de.thm.arsnova.web.exceptions.BadRequestException;
+import de.thm.arsnova.web.exceptions.ForbiddenException;
+import de.thm.arsnova.service.RoomService;
+import de.thm.arsnova.service.UserService;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+@RestController
+@RequestMapping(UserController.REQUEST_MAPPING)
+public class UserController extends AbstractEntityController<UserProfile> {
+	protected static final String REQUEST_MAPPING = "/user";
+	private static final String REGISTER_MAPPING = "/register";
+	private static final String ACTIVATE_MAPPING = DEFAULT_ID_MAPPING + "/activate";
+	private static final String RESET_PASSWORD_MAPPING = DEFAULT_ID_MAPPING + "/resetpassword";
+	private static final String ROOM_HISTORY_MAPPING = DEFAULT_ID_MAPPING + "/roomHistory";
 
-/**
- * Handles requests related to ARSnova's own user registration and login process.
- */
-@Controller
-@RequestMapping("/user")
-public class UserController extends AbstractController {
-	@Autowired
-	private DaoAuthenticationProvider daoProvider;
-
-	@Autowired
 	private UserService userService;
+	private RoomService roomService;
 
-	@Autowired
-	private UserSessionService userSessionService;
-
-	@RequestMapping(value = "/register", method = RequestMethod.POST)
-	public void register(@RequestParam final String username,
-			@RequestParam final String password,
-			final HttpServletRequest request, final HttpServletResponse response) {
-		if (null != userService.create(username, password)) {
-			return;
-		}
-
-		/* TODO: Improve error handling: send reason to client */
-		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+	public UserController(final UserService userService, final RoomService roomService) {
+		super(userService);
+		this.userService = userService;
+		this.roomService = roomService;
 	}
 
-	@RequestMapping(value = "/{username}/activate", method = { RequestMethod.POST,
-			RequestMethod.GET })
+	class Activation {
+		private String key;
+
+		public String getKey() {
+			return key;
+		}
+
+		@JsonView(View.Public.class)
+		public void setKey(final String key) {
+			this.key = key;
+		}
+	}
+
+	class PasswordReset {
+		private String key;
+		private String password;
+
+		public String getKey() {
+			return key;
+		}
+
+		@JsonView(View.Public.class)
+		public void setKey(final String key) {
+			this.key = key;
+		}
+
+		public String getPassword() {
+			return password;
+		}
+
+		@JsonView(View.Public.class)
+		public void setPassword(final String password) {
+			this.password = password;
+		}
+	}
+
+	@Override
+	protected String getMapping() {
+		return REQUEST_MAPPING;
+	}
+
+	@PostMapping(REGISTER_MAPPING)
+	public void register(@RequestBody LoginCredentials loginCredentials) {
+		userService.create(loginCredentials.getLoginId(), loginCredentials.getPassword());
+	}
+
+	@RequestMapping(value = ACTIVATE_MAPPING, method = RequestMethod.POST)
 	public void activate(
-			@PathVariable final String username,
-			@RequestParam final String key, final HttpServletRequest request,
-			final HttpServletResponse response) {
-		DbUser dbUser = userService.getByUsername(username);
-		if (null != dbUser && key.equals(dbUser.getActivationKey())) {
-			dbUser.setActivationKey(null);
-			userService.update(dbUser);
-
-			return;
+			@PathVariable final String id,
+			@RequestParam final String key) {
+		UserProfile userProfile = userService.get(id, true);
+		if (userProfile == null || !key.equals(userProfile.getAccount().getActivationKey())) {
+			throw new BadRequestException();
 		}
-
-		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+		userProfile.getAccount().setActivationKey(null);
+		userService.update(userProfile);
 	}
 
-	@RequestMapping(value = "/{username}/", method = RequestMethod.DELETE)
-	public void activate(
-			@PathVariable final String username,
-			final HttpServletRequest request,
-			final HttpServletResponse response) {
-		if (null == userService.deleteByUsername(username)) {
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-		}
-	}
-
-	@RequestMapping(value = "/{username}/resetpassword", method = RequestMethod.POST)
+	@RequestMapping(value = RESET_PASSWORD_MAPPING, method = RequestMethod.POST)
 	public void resetPassword(
-			@PathVariable final String username,
-			@RequestParam(required = false) final String key,
-			@RequestParam(required = false) final String password,
-			final HttpServletRequest request,
-			final HttpServletResponse response) {
-		DbUser dbUser = userService.getByUsername(username);
-		if (null == dbUser) {
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-
-			return;
+			@PathVariable final String id,
+			@RequestBody final PasswordReset passwordReset) {
+		UserProfile userProfile = userService.get(id, true);
+		if (userProfile == null) {
+			throw new BadRequestException();
 		}
 
-		if (null != key) {
-			if (!userService.resetPassword(dbUser, key, password)) {
-				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+		if (passwordReset.getKey() != null) {
+			if (!userService.resetPassword(userProfile, passwordReset.getKey(), passwordReset.getPassword())) {
+				throw new ForbiddenException();
 			}
 		} else {
-			userService.initiatePasswordReset(username);
+			userService.initiatePasswordReset(id);
 		}
+	}
+
+	@PostMapping(ROOM_HISTORY_MAPPING)
+	public void postRoomHistoryEntry(@PathVariable final String id,
+			@RequestBody final UserProfile.RoomHistoryEntry roomHistoryEntry) {
+		userService.addRoomToHistory(userService.get(id), roomService.get(roomHistoryEntry.getRoomId()));
+	}
+
+	@Override
+	protected String resolveAlias(final String alias) {
+		return userService.getByUsername(alias).getId();
 	}
 }

@@ -1,6 +1,6 @@
 package de.thm.arsnova.config;
 
-import de.thm.arsnova.persistance.*;
+import de.thm.arsnova.persistence.*;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,8 +20,8 @@ public class TestPersistanceConfig {
 	}
 
 	@Bean
-	public SessionRepository sessionRepository() {
-		return Mockito.mock(SessionRepository.class);
+	public RoomRepository sessionRepository() {
+		return Mockito.mock(RoomRepository.class);
 	}
 
 	@Bean
@@ -40,18 +40,13 @@ public class TestPersistanceConfig {
 	}
 
 	@Bean
+	public AttachmentRepository attachmentRepository() {
+		return Mockito.mock(AttachmentRepository.class);
+	}
+
+	@Bean
 	public MotdRepository motdRepository() {
 		return Mockito.mock(MotdRepository.class);
-	}
-
-	@Bean
-	public MotdListRepository motdListRepository() {
-		return Mockito.mock(MotdListRepository.class);
-	}
-
-	@Bean
-	public VisitedSessionRepository visitedSessionRepository() {
-		return Mockito.mock(VisitedSessionRepository.class);
 	}
 
 	@Bean

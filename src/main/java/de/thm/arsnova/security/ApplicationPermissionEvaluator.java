@@ -17,22 +17,23 @@
  */
 package de.thm.arsnova.security;
 
-import de.thm.arsnova.entities.Comment;
-import de.thm.arsnova.entities.Content;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.User;
-import de.thm.arsnova.persistance.CommentRepository;
-import de.thm.arsnova.persistance.ContentRepository;
-import de.thm.arsnova.persistance.SessionRepository;
-import org.pac4j.oauth.profile.facebook.FacebookProfile;
-import org.pac4j.oauth.profile.google2.Google2Profile;
-import org.pac4j.oauth.profile.twitter.TwitterProfile;
-import org.pac4j.springframework.security.authentication.Pac4jAuthenticationToken;
+import de.thm.arsnova.model.Motd;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.Comment;
+import de.thm.arsnova.model.Content;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.persistence.CommentRepository;
+import de.thm.arsnova.persistence.ContentRepository;
+import de.thm.arsnova.persistence.MotdRepository;
+import de.thm.arsnova.persistence.RoomRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -40,13 +41,15 @@ import java.util.Arrays;
 /**
  * Provides access control methods that can be used in annotations.
  */
+@Component
 public class ApplicationPermissionEvaluator implements PermissionEvaluator {
+	private static final Logger logger = LoggerFactory.getLogger(ApplicationPermissionEvaluator.class);
 
 	@Value("${security.admin-accounts}")
 	private String[] adminAccounts;
 
 	@Autowired
-	private SessionRepository sessionRepository;
+	private RoomRepository roomRepository;
 
 	@Autowired
 	private CommentRepository commentRepository;
@@ -54,24 +57,32 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	@Autowired
 	private ContentRepository contentRepository;
 
+	@Autowired
+	private MotdRepository motdRepository;
+
 	@Override
 	public boolean hasPermission(
 			final Authentication authentication,
 			final Object targetDomainObject,
 			final Object permission) {
+		logger.debug("Evaluating permission: hasPermission({}, {}. {})", authentication, targetDomainObject, permission);
 		if (authentication == null || targetDomainObject == null || !(permission instanceof String)) {
 			return false;
 		}
 
-		final String username = getUsername(authentication);
+		final String userId = getUserId(authentication);
 
-		return hasAdminRole(username)
-				|| (targetDomainObject instanceof Session
-						&& hasSessionPermission(username, ((Session) targetDomainObject), permission.toString()))
+		return hasAdminRole(userId)
+				|| (targetDomainObject instanceof UserProfile
+						&& hasUserProfilePermission(userId, ((UserProfile) targetDomainObject), permission.toString()))
+				|| (targetDomainObject instanceof Room
+						&& hasRoomPermission(userId, ((Room) targetDomainObject), permission.toString()))
 				|| (targetDomainObject instanceof Content
-						&& hasContentPermission(username, ((Content) targetDomainObject), permission.toString()))
+						&& hasContentPermission(userId, ((Content) targetDomainObject), permission.toString()))
 				|| (targetDomainObject instanceof Comment
-						&& hasCommentPermission(username, ((Comment) targetDomainObject), permission.toString()));
+						&& hasCommentPermission(userId, ((Comment) targetDomainObject), permission.toString()))
+				|| (targetDomainObject instanceof Motd
+					&& hasMotdPermission(userId, ((Motd) targetDomainObject), permission.toString()));
 	}
 
 	@Override
@@ -80,86 +91,143 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Serializable targetId,
 			final String targetType,
 			final Object permission) {
+		logger.debug("Evaluating permission: hasPermission({}, {}, {}, {})", authentication, targetId, targetType, permission);
 		if (authentication == null || targetId == null || targetType == null || !(permission instanceof String)) {
 			return false;
 		}
 
-		final String username = getUsername(authentication);
-		if (hasAdminRole(username)) {
+		final String userId = getUserId(authentication);
+		if (hasAdminRole(userId)) {
 			return true;
 		}
 
 		switch (targetType) {
-			case "session":
-				final Session targetSession = sessionRepository.findByKeyword(targetId.toString());
-				return targetSession != null && hasSessionPermission(username, targetSession, permission.toString());
+			case "userprofile":
+				final UserProfile targetUserProfile = new UserProfile();
+				targetUserProfile.setId(targetId.toString());
+				return hasUserProfilePermission(userId, targetUserProfile, permission.toString());
+			case "room":
+				final Room targetRoom = roomRepository.findOne(targetId.toString());
+				return targetRoom != null && hasRoomPermission(userId, targetRoom, permission.toString());
 			case "content":
 				final Content targetContent = contentRepository.findOne(targetId.toString());
-				return targetContent != null && hasContentPermission(username, targetContent, permission.toString());
+				return targetContent != null && hasContentPermission(userId, targetContent, permission.toString());
 			case "comment":
 				final Comment targetComment = commentRepository.findOne(targetId.toString());
-				return targetComment != null && hasCommentPermission(username, targetComment, permission.toString());
+				return targetComment != null && hasCommentPermission(userId, targetComment, permission.toString());
+			case "motd":
+				final Motd targetMotd = motdRepository.findOne(targetId.toString());
+				return targetMotd != null && hasMotdPermission(userId, targetMotd, permission.toString());
 			default:
 				return false;
 		}
 	}
 
-	private boolean hasSessionPermission(
-			final String username,
-			final Session targetSession,
+	private boolean hasUserProfilePermission(
+			final String userId,
+			final UserProfile targetUserProfile,
 			final String permission) {
 		switch (permission) {
 			case "read":
-				return targetSession.isActive();
+				return userId.equals(targetUserProfile.getId());
 			case "create":
-				return !username.isEmpty();
+				return true;
 			case "owner":
 			case "update":
 			case "delete":
-				return targetSession.getCreator().equals(username);
+				return userId.equals(targetUserProfile.getId());
+			default:
+				return false;
+		}
+	}
+
+	private boolean hasRoomPermission(
+			final String userId,
+			final Room targetRoom,
+			final String permission) {
+		switch (permission) {
+			case "read":
+				return !targetRoom.isClosed();
+			case "create":
+				return !userId.isEmpty();
+			case "owner":
+			case "update":
+			case "delete":
+				return targetRoom.getOwnerId().equals(userId);
 			default:
 				return false;
 		}
 	}
 
 	private boolean hasContentPermission(
-			final String username,
+			final String userId,
 			final Content targetContent,
 			final String permission) {
 		switch (permission) {
 			case "read":
-				return sessionRepository.findOne(targetContent.getSessionId()).isActive();
+				return !roomRepository.findOne(targetContent.getRoomId()).isClosed();
 			case "create":
 			case "owner":
 			case "update":
 			case "delete":
-				final Session session = sessionRepository.findOne(targetContent.getSessionId());
-				return session != null && session.getCreator().equals(username);
+				final Room room = roomRepository.findOne(targetContent.getRoomId());
+				return room != null && room.getOwnerId().equals(userId);
 			default:
 				return false;
 		}
 	}
 
 	private boolean hasCommentPermission(
-			final String username,
+			final String userId,
 			final Comment targetComment,
 			final String permission) {
 		switch (permission) {
 			case "create":
-				return !username.isEmpty() && sessionRepository.findOne(targetComment.getSessionId()).isActive();
+				return !userId.isEmpty() && !roomRepository.findOne(targetComment.getRoomId()).isClosed();
 			case "owner":
 			case "update":
-				return targetComment.getCreator() != null && targetComment.getCreator().equals(username);
+				return targetComment.getCreatorId() != null && targetComment.getCreatorId().equals(userId);
 			case "read":
 			case "delete":
-				if (targetComment.getCreator() != null && targetComment.getCreator().equals(username)) {
+				if (targetComment.getCreatorId() != null && targetComment.getCreatorId().equals(userId)) {
 					return true;
 				}
 
 				/* Allow reading & deletion by session owner */
-				final Session session = sessionRepository.findOne(targetComment.getSessionId());
+				final Room room = roomRepository.findOne(targetComment.getRoomId());
 
-				return session != null && session.getCreator().equals(username);
+				return room != null && room.getOwnerId().equals(userId);
+			default:
+				return false;
+		}
+	}
+
+	private boolean hasMotdPermission(
+			final String userId,
+			final Motd targetMotd,
+			final String permission) {
+		Room room;
+		switch (permission) {
+			case "create":
+			case "owner":
+			case "update":
+			case "delete":
+				if (userId.isEmpty() || targetMotd.getRoomId() == null || targetMotd.getAudience() != Motd.Audience.ROOM) {
+					return false;
+				}
+				room = roomRepository.findOne(targetMotd.getRoomId());
+				if (room == null) {
+					return false;
+				}
+
+				return userId.equals(room.getOwnerId());
+			case "read":
+				if (targetMotd.getAudience() != Motd.Audience.ROOM) {
+					return true;
+				}
+				room = roomRepository.findOne(targetMotd.getRoomId());
+
+				return room != null && !room.isClosed() || room.getOwnerId().equals(userId);
 			default:
 				return false;
 		}
@@ -170,32 +238,14 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		return Arrays.asList(adminAccounts).contains(username);
 	}
 
-	private String getUsername(final Authentication authentication) {
-		if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
+	private String getUserId(final Authentication authentication) {
+		if (authentication == null || authentication instanceof AnonymousAuthenticationToken ||
+				!(authentication.getPrincipal() instanceof User)) {
 			return "";
 		}
+		User user = (User) authentication.getPrincipal();
 
-		if (authentication instanceof Pac4jAuthenticationToken) {
-			User user = null;
-
-			final Pac4jAuthenticationToken token = (Pac4jAuthenticationToken) authentication;
-			if (token.getProfile() instanceof Google2Profile) {
-				final Google2Profile profile = (Google2Profile) token.getProfile();
-				user = new User(profile);
-			} else if (token.getProfile() instanceof TwitterProfile) {
-				final TwitterProfile profile = (TwitterProfile) token.getProfile();
-				user = new User(profile);
-			} else if (token.getProfile() instanceof FacebookProfile) {
-				final FacebookProfile profile = (FacebookProfile) token.getProfile();
-				user = new User(profile);
-			}
-
-			if (user != null) {
-				return user.getUsername();
-			}
-		}
-
-		return authentication.getName();
+		return user.getId();
 	}
 
 	private boolean isWebsocketAccess(Authentication auth) {

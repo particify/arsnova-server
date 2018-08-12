@@ -11,7 +11,7 @@
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
 			de.thm.arsnova.config.AppConfig
-			de.thm.arsnova.config.PersistanceConfig
+			de.thm.arsnova.config.PersistenceConfig
 			de.thm.arsnova.config.SecurityConfig
 		</param-value>
 	</context-param>
@@ -60,9 +60,6 @@
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 	<listener>
-		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
-	</listener>
-	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 	<listener>
@@ -77,6 +74,26 @@
 	<filter-mapping>
 		<filter-name>corsFilter</filter-name>
 		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<filter>
+		<filter-name>maintenanceModeFilter</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+		<async-supported>true</async-supported>
+	</filter>
+	<filter-mapping>
+		<filter-name>maintenanceModeFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<filter>
+		<filter-name>v2ContentTypeOverrideFilter</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+		<async-supported>true</async-supported>
+	</filter>
+	<filter-mapping>
+		<filter-name>v2ContentTypeOverrideFilter</filter-name>
+		<url-pattern>/v2/*</url-pattern>
 	</filter-mapping>
 
 	<session-config>

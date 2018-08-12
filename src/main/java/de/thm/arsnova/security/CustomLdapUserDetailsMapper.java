@@ -17,14 +17,19 @@
  */
 package de.thm.arsnova.security;
 
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * Replaces the user ID provided by the authenticating user with the one that is part of LDAP object. This is necessary
@@ -35,18 +40,30 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
 
 	private String userIdAttr;
 
+	@Autowired
+	private UserService userService;
+
 	public CustomLdapUserDetailsMapper(String ldapUserIdAttr) {
 		this.userIdAttr = ldapUserIdAttr;
 	}
 
-	public UserDetails mapUserFromContext(DirContextOperations ctx, String username,
-										  Collection<? extends GrantedAuthority> authorities) {
+	public UserDetails mapUserFromContext(
+			final DirContextOperations ctx,
+			final String username,
+			final Collection<? extends GrantedAuthority> authorities) {
 		String ldapUsername = ctx.getStringAttribute(userIdAttr);
 		if (ldapUsername == null) {
 			logger.warn("LDAP attribute {} not set. Falling back to lowercased user provided username.", userIdAttr);
 			ldapUsername = username.toLowerCase();
 		}
 
-		 return super.mapUserFromContext(ctx, ldapUsername, authorities);
+		final Collection<GrantedAuthority> grantedAuthorities = (Collection<GrantedAuthority>) authorities;
+		final Collection<GrantedAuthority> additionalAuthorities = new HashSet<>();
+		additionalAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+		additionalAuthorities.add(new SimpleGrantedAuthority("ROLE_LDAP_USER"));
+		grantedAuthorities.addAll(additionalAuthorities);
+
+		return userService.loadUser(UserProfile.AuthProvider.LDAP, ldapUsername,
+				grantedAuthorities, true);
 	}
 }

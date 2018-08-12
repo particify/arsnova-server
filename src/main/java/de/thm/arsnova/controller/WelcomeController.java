@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.exceptions.NoContentException;
+import de.thm.arsnova.web.exceptions.BadRequestException;
+import de.thm.arsnova.web.exceptions.NoContentException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

@@ -20,11 +20,14 @@ package de.thm.arsnova.config;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import de.thm.arsnova.model.migration.FromV2Migrator;
+import de.thm.arsnova.model.migration.ToV2Migrator;
 import de.thm.arsnova.util.ImageUtils;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.client.ConnectorClientImpl;
-import de.thm.arsnova.entities.serialization.CouchDbDocumentModule;
-import de.thm.arsnova.entities.serialization.View;
+import de.thm.arsnova.model.serialization.CouchDbDocumentModule;
+import de.thm.arsnova.model.serialization.View;
+import de.thm.arsnova.web.PathApiVersionContentNegotiationStrategy;
 import de.thm.arsnova.websocket.ArsnovaSocketioServer;
 import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 import de.thm.arsnova.websocket.ArsnovaSocketioServerListener;
@@ -59,9 +62,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import java.nio.charset.Charset;
@@ -77,13 +81,11 @@ import java.util.List;
  * AspectJ's weaving).
  */
 @ComponentScan({
-		"de.thm.arsnova.aop",
 		"de.thm.arsnova.cache",
 		"de.thm.arsnova.controller",
-		"de.thm.arsnova.dao",
-		"de.thm.arsnova.events",
+		"de.thm.arsnova.event",
 		"de.thm.arsnova.security",
-		"de.thm.arsnova.services",
+		"de.thm.arsnova.service",
 		"de.thm.arsnova.web"})
 @Configuration
 @EnableAsync
@@ -93,11 +95,14 @@ import java.util.List;
 @EnableWebMvc
 @PropertySource(
 		value = {"classpath:arsnova.properties.example", "file:/etc/arsnova/arsnova.properties"},
-		ignoreResourceNotFound = true
+		ignoreResourceNotFound = true,
+		encoding = "UTF-8"
 )
-public class AppConfig extends WebMvcConfigurerAdapter {
-	public static final MediaType API_V2_MEDIA_TYPE = new MediaType("application", "vnd.de.thm.arsnova.v2+json");
-	public static final MediaType API_V3_MEDIA_TYPE = new MediaType("application", "vnd.de.thm.arsnova.v3+json");
+public class AppConfig implements WebMvcConfigurer {
+	public static final String API_V2_MEDIA_TYPE_VALUE = "application/vnd.de.thm.arsnova.v2+json";
+	public static final String API_V3_MEDIA_TYPE_VALUE = "application/vnd.de.thm.arsnova.v3+json";
+	public static final MediaType API_V2_MEDIA_TYPE = MediaType.valueOf(API_V2_MEDIA_TYPE_VALUE);
+	public static final MediaType API_V3_MEDIA_TYPE = MediaType.valueOf(API_V3_MEDIA_TYPE_VALUE);
 
 	@Autowired
 	private Environment env;
@@ -117,19 +122,27 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 
 	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-		converters.add(stringMessageConverter());
-		converters.add(apiV2JsonMessageConverter());
 		converters.add(defaultJsonMessageConverter());
+		converters.add(apiV2JsonMessageConverter());
+		converters.add(stringMessageConverter());
 		//converters.add(new MappingJackson2XmlHttpMessageConverter(builder.createXmlMapper(true).build()));
 	}
 
 	@Override
 	public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+		PathApiVersionContentNegotiationStrategy strategy =
+				new PathApiVersionContentNegotiationStrategy(API_V3_MEDIA_TYPE);
 		configurer.mediaType("json", MediaType.APPLICATION_JSON_UTF8);
 		configurer.mediaType("xml", MediaType.APPLICATION_XML);
-		configurer.defaultContentType(API_V3_MEDIA_TYPE);
-		configurer.favorParameter(true);
+		configurer.favorParameter(false);
 		configurer.favorPathExtension(false);
+		//configurer.defaultContentType(API_V3_MEDIA_TYPE);
+		configurer.defaultContentTypeStrategy(strategy);
+	}
+
+	@Override
+	public void configurePathMatch(final PathMatchConfigurer configurer) {
+		configurer.setUseSuffixPatternMatch(false);
 	}
 
 	@Override
@@ -199,7 +212,7 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 	public MappingJackson2HttpMessageConverter apiV2JsonMessageConverter() {
 		Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
 		builder
-				.serializationInclusion(JsonInclude.Include.NON_EMPTY)
+				.serializationInclusion(JsonInclude.Include.NON_NULL)
 				.defaultViewInclusion(false)
 				.indentOutput(apiIndent)
 				.featuresToEnable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -283,5 +296,15 @@ public class AppConfig extends WebMvcConfigurerAdapter {
 	@Bean
 	public ImageUtils imageUtils() {
 		return new ImageUtils();
+	}
+
+	@Bean
+	public FromV2Migrator fromV2Migrator() {
+		return new FromV2Migrator();
+	}
+
+	@Bean
+	public ToV2Migrator toV2Migrator() {
+		return new ToV2Migrator();
 	}
 }

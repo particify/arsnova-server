@@ -2,41 +2,49 @@ var designDoc = {
 	"_id": "_design/Comment",
 	"language": "javascript",
 	"views": {
-		"by_sessionid": {
+		"by_id": {
 			"map": function (doc) {
-				if (doc.type === "interposed_question") {
-					emit(doc.sessionId, {_rev: doc._rev});
+				if (doc.type === "Comment") {
+					emit(doc._id, {_rev: doc._rev});
 				}
 			},
 			"reduce": "_count"
 		},
-		"by_sessionid_creator_read": {
+		"by_roomid": {
 			"map": function (doc) {
-				if (doc.type === "interposed_question") {
-					emit([doc.sessionId, doc.creator, doc.read], {_rev: doc._rev})
+				if (doc.type === "Comment") {
+					emit(doc.roomId, {_rev: doc._rev});
 				}
 			},
 			"reduce": "_count"
 		},
-		"by_sessionid_creator_timestamp": {
+		"by_roomid_creatorid_read": {
 			"map": function (doc) {
-				if (doc.type === "interposed_question") {
-					emit([doc.sessionId, doc.creator, doc.timestamp], {_rev: doc._rev});
+				if (doc.type === "Comment") {
+					emit([doc.roomId, doc.creatorId, doc.read], {_rev: doc._rev})
+				}
+			},
+			"reduce": "_count"
+		},
+		"by_roomid_creatorid_creationtimestamp": {
+			"map": function (doc) {
+				if (doc.type === "Comment") {
+					emit([doc.roomId, doc.creatorId, doc.creationTimestamp], {_rev: doc._rev});
 				}
 			}
 		},
-		"by_sessionid_read": {
+		"by_roomid_read": {
 			"map": function (doc) {
-				if (doc.type === "interposed_question") {
-					emit([doc.sessionId, doc.read], {_rev: doc._rev});
+				if (doc.type === "Comment") {
+					emit([doc.roomId, doc.read], {_rev: doc._rev});
 				}
 			},
 			"reduce": "_count"
 		},
-		"by_sessionid_timestamp": {
+		"by_roomid_creationtimestamp": {
 			"map": function (doc) {
-				if (doc.type === "interposed_question") {
-					emit([doc.sessionId, doc.timestamp], {_rev: doc._rev});
+				if (doc.type === "Comment") {
+					emit([doc.roomId, doc.creationTimestamp], {_rev: doc._rev});
 				}
 			}
 		}

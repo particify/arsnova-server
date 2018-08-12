@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.websocket;
 
-import de.thm.arsnova.events.ArsnovaEvent;
-import de.thm.arsnova.events.ArsnovaEventVisitor;
+import de.thm.arsnova.event.ArsnovaEvent;
+import de.thm.arsnova.event.ArsnovaEventVisitor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;

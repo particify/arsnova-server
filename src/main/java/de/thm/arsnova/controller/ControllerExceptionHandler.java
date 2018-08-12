@@ -17,14 +17,15 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.exceptions.BadRequestException;
-import de.thm.arsnova.exceptions.ForbiddenException;
-import de.thm.arsnova.exceptions.NoContentException;
-import de.thm.arsnova.exceptions.NotFoundException;
-import de.thm.arsnova.exceptions.NotImplementedException;
-import de.thm.arsnova.exceptions.PayloadTooLargeException;
-import de.thm.arsnova.exceptions.PreconditionFailedException;
-import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.web.exceptions.BadRequestException;
+import de.thm.arsnova.web.exceptions.ForbiddenException;
+import de.thm.arsnova.web.exceptions.NoContentException;
+import de.thm.arsnova.web.exceptions.NotFoundException;
+import de.thm.arsnova.web.exceptions.NotImplementedException;
+import de.thm.arsnova.web.exceptions.PayloadTooLargeException;
+import de.thm.arsnova.web.exceptions.PreconditionFailedException;
+import de.thm.arsnova.web.exceptions.UnauthorizedException;
+import org.ektorp.DocumentNotFoundException;
 import org.slf4j.event.Level;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -33,12 +34,14 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
+import javax.naming.OperationNotSupportedException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
@@ -109,7 +112,7 @@ public class ControllerExceptionHandler extends AbstractControllerExceptionHandl
 		return handleException(e, Level.DEBUG);
 	}
 
-	@ExceptionHandler(BadRequestException.class)
+	@ExceptionHandler({BadRequestException.class, HttpRequestMethodNotSupportedException.class})
 	@ResponseBody
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public Map<String, Object> handleBadRequestException(final Exception e, final HttpServletRequest request) {
@@ -123,7 +126,7 @@ public class ControllerExceptionHandler extends AbstractControllerExceptionHandl
 		return handleException(e, Level.DEBUG);
 	}
 
-	@ExceptionHandler(NotImplementedException.class)
+	@ExceptionHandler({NotImplementedException.class, OperationNotSupportedException.class})
 	@ResponseBody
 	@ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
 	public Map<String, Object> handleNotImplementedException(final Exception e, final HttpServletRequest request) {
@@ -142,5 +145,13 @@ public class ControllerExceptionHandler extends AbstractControllerExceptionHandl
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public Map<String, Object> handleHttpMessageNotReadableException(final Exception e, final HttpServletRequest request) {
 		return handleException(e, Level.DEBUG);
+	}
+
+	/* FIXME: Wrap persistance Exceptions - do not handle persistance Exceptions at the controller layer */
+	@ExceptionHandler(DocumentNotFoundException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public Map<String, Object> handleDocumentNotFoundException(final Exception e, final HttpServletRequest request) {
+		return handleException(e, Level.TRACE);
 	}
 }

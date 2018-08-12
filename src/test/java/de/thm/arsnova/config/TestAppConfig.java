@@ -1,9 +1,10 @@
 package de.thm.arsnova.config;
 
-import de.thm.arsnova.persistance.UserRepository;
-import de.thm.arsnova.services.StubUserService;
+import de.thm.arsnova.persistence.UserRepository;
+import de.thm.arsnova.service.StubUserService;
 import de.thm.arsnova.websocket.ArsnovaSocketioServer;
 import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
@@ -16,6 +17,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.aspectj.EnableSpringConfigured;
 import org.springframework.context.support.SimpleThreadScope;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -38,7 +40,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableWebMvc
 @PropertySource(
 		value = {"classpath:arsnova.properties.example", "file:/etc/arsnova/arsnova.properties"},
-		ignoreResourceNotFound = true
+		ignoreResourceNotFound = true,
+		encoding = "UTF-8"
 )
 @Profile("test")
 public class TestAppConfig {
@@ -72,7 +75,10 @@ public class TestAppConfig {
 
 	@Bean
 	@Primary
-	public StubUserService stubUserService(UserRepository repository, JavaMailSender mailSender) {
-		return new StubUserService(repository, mailSender);
+	public StubUserService stubUserService(
+			UserRepository repository,
+			JavaMailSender mailSender,
+			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+		return new StubUserService(repository, mailSender, jackson2HttpMessageConverter);
 	}
 }

@@ -11,18 +11,18 @@ A class is able to send events by implementing the `ApplicationEventPublisherAwa
 ```java
 publisher.publishEvent(theEvent);
 ```
-where `theEvent` is an object of type `ApplicationEvent`. For ARSnova, the base class `ArsovaEvent` should be used instead. All of ARSnova's internal events are subtypes of `ArsovaEvent`.
+where `theEvent` is an object of type `ApplicationEvent`. For ARSnova, the base class `ArsnovaEvent` should be used instead. All of ARSnova's internal events are subtypes of `ArsnovaEvent`.
 
 _Note_: Events are sent and received on the same thread, i.e., it is a synchronous operation.
 
 
 ## How to receive events?
 
-Events are received by implementing the `ApplicationListener<ArsovaEvent>` interface. The associated method gets passed in a `ArsovaEvent`, which is the base class of all of ARSnova's events. However, this type itself is not very useful. The real type can be revealed using double dispatch, which is the basis of the Visitor pattern. Therefore, the event should be forwarded to a class that implements the `ArsovaEvent` interface. This could be the same class that received the event.
+Events are received by implementing the `ApplicationListener<ArsnovaEvent>` interface. The associated method gets passed in a `ArsnovaEvent`, which is the base class of all of ARSnova's events. However, this type itself is not very useful. The real type can be revealed using double dispatch, which is the basis of the Visitor pattern. Therefore, the event should be forwarded to a class that implements the `ArsnovaEvent` interface. This could be the same class that received the event.
 
 _Note_: If the class implementing the Visitor needs to have some of Spring's annotations on the event methods, like, for example, to cache some values using `@Cacheable`, the Listener and the Visitor must be different objects.
 
 
 ## How to create custom events?
 
-Subclass either `ArsovaEvent` or `SessionEvent`. The former is for generic events that are not tied to a specific session, while the latter is for cases where the event only makes sense in the context of a session.
+Subclass either `ArsnovaEvent` or `RoomEvent`. The former is for generic events that are not tied to a specific room, while the latter is for cases where the event only makes sense in the context of a room.

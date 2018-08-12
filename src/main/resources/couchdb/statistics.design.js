@@ -4,7 +4,7 @@ var designDoc = {
 	"views": {
 		"active_student_users": {
 			"map": function (doc) {
-				if (doc.type === "skill_question_answer") {
+				if (doc.type === "Answer") {
 					emit(doc.user, 1);
 				}
 			},
@@ -13,14 +13,14 @@ var designDoc = {
 		"statistics": {
 			"map": function (doc) {
 				switch (doc.type) {
-				case "session":
+				case "Room":
 					if (doc.active) {
 						emit("openSessions", 1);
 					} else {
 						emit("closedSessions", 1);
 					}
 					break;
-				case "skill_question":
+				case "Content":
 					if (doc.questionType === "flashcard") {
 						emit("flashcards", 1);
 					} else {
@@ -34,13 +34,13 @@ var designDoc = {
 						}
 					}
 					break;
-				case "skill_question_answer":
+				case "Answer":
 					emit("answers", 1);
 					break;
-				case "interposed_question":
+				case "Comment":
 					emit ("interposedQuestions", 1);
 					break;
-				case "log":
+				case "LogEntry":
 					if (doc.event === "delete") {
 						switch (doc.payload.type) {
 						case "session":
@@ -67,7 +67,7 @@ var designDoc = {
 		},
 		"unique_session_creators": {
 			"map": function (doc) {
-				if (doc.type === "session") {
+				if (doc.type === "Room") {
 					emit(doc.creator, 1);
 				}
 			},
