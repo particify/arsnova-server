@@ -59,6 +59,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Performs all room related operations.
@@ -163,6 +166,35 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 						"commentCount", totalCount[2]);
 			}
 		}
+	}
+
+	/**
+	 * Fetches the room.
+	 * Adds content from this room that is in no content group to a no-name group.
+	 * @param id room id to fetch
+	 * @return Room with no-name content group
+	 */
+	@Override
+	public Room get(final String id) {
+		Room r = super.get(id);
+		// creates a set from all room content groups
+		Set<String> cIdsWithGroup = r.getContentGroups().values().stream()
+				.map(Room.ContentGroup::getContentIds)
+				.flatMap(ids -> ids.stream())
+				.collect(Collectors.toSet());
+
+		Set<String> cIds = new HashSet<String>(contentRepository.findIdsByRoomId(id));
+		cIds.removeAll(cIdsWithGroup);
+
+		if (!cIds.isEmpty()) {
+			Map<String, Room.ContentGroup> cgs = r.getContentGroups();
+			Room.ContentGroup defaultGroup = new Room.ContentGroup();
+			defaultGroup.setContentIds(cIds);
+			defaultGroup.setAutoSort(true);
+			cgs.put("", defaultGroup);
+		}
+
+		return r;
 	}
 
 	@Override
