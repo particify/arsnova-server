@@ -36,6 +36,11 @@ public class V2ContentTypeOverrideFilter extends OncePerRequestFilter {
 	}
 
 	@Override
+	protected boolean shouldNotFilter(final HttpServletRequest request) {
+		return !request.getServletPath().startsWith("/v2/");
+	}
+
+	@Override
 	protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response,
 			final FilterChain filterChain) throws IOException, ServletException {
 		HttpServletRequest requestWrapper = new HttpServletRequestWrapper(request) {
