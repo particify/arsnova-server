@@ -404,9 +404,14 @@
 				<configuration>
 					<scanIntervalSeconds>0</scanIntervalSeconds>
 					<webApp>
-						<overrideDescriptor>src/main/webapp/WEB-INF/web-dev.xml</overrideDescriptor>
 						<webInfIncludeJarPattern>^$</webInfIncludeJarPattern>
 					</webApp>
+					<systemProperties>
+						<systemProperty>
+							<name>arsnova.log.level</name>
+							<value>DEBUG</value>
+						</systemProperty>
+					</systemProperties>
 				</configuration>
 			</plugin>
 			<plugin>
