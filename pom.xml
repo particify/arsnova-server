@@ -411,6 +411,10 @@
 							<name>arsnova.log.level</name>
 							<value>DEBUG</value>
 						</systemProperty>
+						<systemProperty>
+							<name>org.eclipse.jetty.util.log.class</name>
+							<value>org.eclipse.jetty.util.log.Slf4JLog</value>
+						</systemProperty>
 					</systemProperties>
 				</configuration>
 			</plugin>
