@@ -404,7 +404,7 @@
 				<configuration>
 					<scanIntervalSeconds>0</scanIntervalSeconds>
 					<webApp>
-						<webInfIncludeJarPattern>^$</webInfIncludeJarPattern>
+						<webInfIncludeJarPattern>.*/spring-[^/]*\.jar$</webInfIncludeJarPattern>
 					</webApp>
 					<systemProperties>
 						<systemProperty>
