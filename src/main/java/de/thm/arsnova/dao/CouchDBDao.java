@@ -566,7 +566,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	private int getExpectedMigrationLevel() throws IOException {
 		Document d = database.getDocument("arsnova_migrations");
-		return d.getInt("version");
+
+		return d == null ? -1 : d.getInt("version");
 	}
 
 	@Caching(evict = {@CacheEvict(value = "skillquestions", key = "#session"),
