@@ -59,7 +59,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 
@@ -178,7 +177,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	public Room get(final String id) {
 		Room r = super.get(id);
 		// creates a set from all room content groups
-		Set<String> cIdsWithGroup = r.getContentGroups().values().stream()
+		Set<String> cIdsWithGroup = r.getContentGroups().stream()
 				.map(Room.ContentGroup::getContentIds)
 				.flatMap(ids -> ids.stream())
 				.collect(Collectors.toSet());
@@ -187,11 +186,12 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		cIds.removeAll(cIdsWithGroup);
 
 		if (!cIds.isEmpty()) {
-			Map<String, Room.ContentGroup> cgs = r.getContentGroups();
+			Set<Room.ContentGroup> cgs = r.getContentGroups();
 			Room.ContentGroup defaultGroup = new Room.ContentGroup();
 			defaultGroup.setContentIds(cIds);
 			defaultGroup.setAutoSort(true);
-			cgs.put("", defaultGroup);
+			defaultGroup.setName("");
+			cgs.add(defaultGroup);
 		}
 
 		return r;

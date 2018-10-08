@@ -12,8 +12,19 @@ import java.util.Set;
 
 public class Room extends Entity {
 	public static class ContentGroup {
+		private String name;
 		private Set<String> contentIds;
 		private boolean autoSort;
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public String getName() {
+			return this.name;
+		}
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public void setName(final String name) {
+			this.name = name;
+		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
 		public Set<String> getContentIds() {
@@ -42,6 +53,7 @@ public class Room extends Entity {
 		@Override
 		public String toString() {
 			return new ToStringCreator(this)
+					.append("name", name)
 					.append("contentIds", contentIds)
 					.append("autoSort", autoSort)
 					.toString();
@@ -297,7 +309,7 @@ public class Room extends Entity {
 	private String abbreviation;
 	private String description;
 	private boolean closed;
-	private Map<String, ContentGroup> contentGroups;
+	private Set<ContentGroup> contentGroups;
 	private Settings settings;
 	private Author author;
 	private PoolProperties poolProperties;
@@ -366,16 +378,16 @@ public class Room extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public Map<String, ContentGroup> getContentGroups() {
+	public Set<ContentGroup> getContentGroups() {
 		if (contentGroups == null) {
-			contentGroups = new HashMap<>();
+			contentGroups = new HashSet<ContentGroup>();
 		}
 
 		return contentGroups;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setContentGroups(final Map<String, ContentGroup> contentGroups) {
+	public void setContentGroups(final Set<ContentGroup> contentGroups) {
 		this.contentGroups = contentGroups;
 	}
 

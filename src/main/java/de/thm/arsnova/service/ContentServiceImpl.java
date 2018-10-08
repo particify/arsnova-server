@@ -120,13 +120,17 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@Override
 	public Iterable<Content> getByRoomIdAndGroup(final String roomId, final String group) {
 		final Room room = roomRepository.findOne(roomId);
-		final Room.ContentGroup contentGroup = room.getContentGroups().get(group);
+		Room.ContentGroup contentGroup = null;
+		for (Room.ContentGroup cg : room.getContentGroups()) {
+			if (cg.getName().equals(group)) {
+				contentGroup = cg;
+			}
+		}
 		if (contentGroup == null) {
 			throw new NotFoundException("Content group does not exist.");
 		}
-		Set<String> contentIds = contentGroup.getContentIds();
 
-		return get(contentIds);
+		return get(contentGroup.getContentIds());
 	}
 
 	@Override
@@ -138,7 +142,12 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@Override
 	public int countByRoomIdAndGroup(final String roomId, final String group) {
 		final Room room = roomRepository.findOne(roomId);
-		final Room.ContentGroup contentGroup = room.getContentGroups().get(group);
+		Room.ContentGroup contentGroup = null;
+		for (Room.ContentGroup cg : room.getContentGroups()) {
+			if (cg.getName().equals(group)) {
+				contentGroup = cg;
+			}
+		}
 		if (contentGroup == null) {
 			throw new NotFoundException("Content group does not exist.");
 		}
@@ -173,10 +182,21 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	public void finalizeCreate(final Content content) {
 		/* Update content groups of room */
 		final Room room = roomRepository.findOne(content.getRoomId());
-		for (final String groupName : content.getGroups()) {
-			Room.ContentGroup group = room.getContentGroups().getOrDefault(groupName, new Room.ContentGroup());
-			room.getContentGroups().put(groupName, group);
-			group.getContentIds().add(content.getId());
+		final Set<Room.ContentGroup> contentGroups = room.getContentGroups();
+		for (final Room.ContentGroup cg : contentGroups) {
+			if (content.getGroups().contains(cg.getName())) {
+				cg.getContentIds().add(content.getId());
+				content.getGroups().remove(cg.getName());
+			}
+		}
+		for (final String newContentGroups : content.getGroups()) {
+			Room.ContentGroup newGroup = new Room.ContentGroup();
+			Set<String> newContentIds = new HashSet<String>();
+			newContentIds.add(content.getId());
+			newGroup.setName(newContentGroups);
+			newGroup.setAutoSort(true);
+			newGroup.setContentIds(newContentIds);
+			room.getContentGroups().add(newGroup);
 		}
 		roomRepository.save(room);
 
@@ -211,16 +231,25 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	public void finalizeUpdate(final Content content) {
 		/* Update content groups of room */
 		final Room room = roomRepository.findOne(content.getRoomId());
-		final Set<String> contentsGroupNames = content.getGroups();
-		final Set<String> allGroupNames = new HashSet<>(contentsGroupNames);
-		allGroupNames.addAll(room.getContentGroups().keySet());
-		for (final String groupName : allGroupNames) {
-			Room.ContentGroup group = room.getContentGroups().getOrDefault(groupName, new Room.ContentGroup());
-			if (contentsGroupNames.contains(groupName)) {
-				group.getContentIds().add(content.getId());
+		for (final Room.ContentGroup cg : room.getContentGroups()) {
+			if (content.getGroups().contains(cg.getName())) {
+				cg.getContentIds().add(content.getId());
+				content.getGroups().remove(cg.getName());
 			} else {
-				group.getContentIds().remove(content.getId());
+				cg.getContentIds().remove(content.getId());
+				if (cg.getContentIds().isEmpty()) {
+					room.getContentGroups().remove(cg);
+				}
 			}
+		}
+		for (final String newContentGroups : content.getGroups()) {
+			Room.ContentGroup newGroup = new Room.ContentGroup();
+			Set<String> newContentIds = new HashSet<String>();
+			newContentIds.add(content.getId());
+			newGroup.setName(newContentGroups);
+			newGroup.setAutoSort(true);
+			newGroup.setContentIds(newContentIds);
+			room.getContentGroups().add(newGroup);
 		}
 		roomRepository.save(room);
 
@@ -256,9 +285,10 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			throw new UnauthorizedException();
 		}
 
-		for (final String groupName : content.getGroups()) {
-			Room.ContentGroup group = room.getContentGroups().getOrDefault(groupName, new Room.ContentGroup());
-			group.getContentIds().remove(content.getId());
+		for (final Room.ContentGroup contentGroup : room.getContentGroups()) {
+			if (content.getGroups().contains(contentGroup.getName())) {
+				contentGroup.getContentIds().remove(contentId);
+			}
 		}
 		roomRepository.save(room);
 
