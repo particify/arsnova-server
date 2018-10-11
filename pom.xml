@@ -8,7 +8,7 @@
 
 	<properties>
 		<io.spring.platform-version>Cairo-SR3</io.spring.platform-version>
-		<io.netty-version>4.1.28.Final</io.netty-version>
+		<io.netty-version>4.1.30.Final</io.netty-version>
 		<org.aspectj-version>1.8.13</org.aspectj-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
@@ -223,7 +223,7 @@
 		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>javax.mail</artifactId>
-			<version>1.6.1</version>
+			<version>1.6.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -314,7 +314,7 @@
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-annotations</artifactId>
-			<version>1.5.20</version>
+			<version>1.5.21</version>
 		</dependency>
 		<dependency>
 			<groupId>com.codahale.metrics</groupId>
@@ -324,7 +324,7 @@
 		<dependency>
 			<groupId>org.checkerframework</groupId>
 			<artifactId>checker-qual</artifactId>
-			<version>2.5.4</version>
+			<version>2.5.6</version>
 		</dependency>
 	</dependencies>
 
@@ -391,7 +391,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
+				<version>3.8.0</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
@@ -400,7 +400,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.4.11.v20180605</version>
+				<version>9.4.12.v2018083</version>
 				<configuration>
 					<scanIntervalSeconds>0</scanIntervalSeconds>
 					<webApp>
@@ -429,7 +429,7 @@
 			<plugin>
 				<groupId>org.sonarsource.scanner.maven</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
-				<version>3.4.1.1168</version>
+				<version>3.5.0.1254</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -439,7 +439,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.1</version>
+				<version>0.8.2</version>
 				<executions>
 					<execution>
 						<id>default-prepare-agent</id>
@@ -520,7 +520,7 @@
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
 				<artifactId>git-commit-id-plugin</artifactId>
-				<version>2.2.4</version>
+				<version>2.2.5</version>
 				<executions>
 					<execution>
 						<goals>
