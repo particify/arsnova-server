@@ -566,7 +566,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	private int getExpectedMigrationLevel() throws IOException {
 		Document d = database.getDocument("arsnova_migrations");
-		return d.getInt("version");
+
+		return d == null ? -1 : d.getInt("version");
 	}
 
 	@Caching(evict = {@CacheEvict(value = "skillquestions", key = "#session"),
@@ -2500,8 +2501,10 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			List<de.thm.arsnova.entities.transport.Answer> answerList = new ArrayList<>();
 			if (withAnswers) {
 				for (Answer a : this.getDatabaseDao().getAllAnswers(question)) {
-					de.thm.arsnova.entities.transport.Answer transportAnswer = new de.thm.arsnova.entities.transport.Answer(a);
-					answerList.add(transportAnswer);
+					for (int i = 0; i < a.getAnswerCount(); i++) {
+						de.thm.arsnova.entities.transport.Answer transportAnswer = new de.thm.arsnova.entities.transport.Answer(a);
+						answerList.add(transportAnswer);
+					}
 				}
 				// getAllAnswers does not grep for whole answer object so i need to add empty entries for abstentions
 				int i = this.getDatabaseDao().getAbstentionAnswerCount(question.get_id());

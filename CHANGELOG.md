@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.6.1
+
+Bug fixes:
+* Fixed exception at startup caused by missing migration document.
+* Fixed session export to correctly include all answers.
+
+Additional changes:
+* Libraries have been upgraded to fix potential bugs.
+
 ## 2.6
 Features:
 * Experimental support for CouchDB 2 has been added. Note: The data migration
