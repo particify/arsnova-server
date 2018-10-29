@@ -7,7 +7,7 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<io.spring.platform-version>Cairo-SR3</io.spring.platform-version>
+		<io.spring.platform-version>Cairo-SR5</io.spring.platform-version>
 		<io.netty-version>4.1.30.Final</io.netty-version>
 		<org.aspectj-version>1.8.13</org.aspectj-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -243,7 +243,7 @@
 		<dependency>
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
-			<version>3.4.0</version>
+			<version>3.4.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.pac4j</groupId>
