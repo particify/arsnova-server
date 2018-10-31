@@ -59,12 +59,12 @@ public class Comment extends Entity {
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public Date getTimestamp() {
-		return timestamp;
+		return (Date)timestamp.clone();
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setTimestamp(final Date timestamp) {
-		this.timestamp = timestamp;
+	public void setTimestamp(Date timestamp) {
+		this.timestamp = (Date)timestamp.clone();
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
