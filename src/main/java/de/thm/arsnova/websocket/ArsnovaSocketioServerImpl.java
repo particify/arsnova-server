@@ -533,9 +533,9 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 
 		// Update the unanswered count for the content variant that was answered.
 		final de.thm.arsnova.model.Content content = event.getContent();
-		if ("lecture".equals(content.getGroups())) {
+		if (content.getGroups().contains("lecture")) {
 			sendToUser(event.getUser(), "unansweredLecturerQuestions", contentService.getUnAnsweredLectureContentIds(roomId, event.getUser()));
-		} else if ("preparation".equals(content.getGroups())) {
+		} else if (content.getGroups().contains("preparation")) {
 			sendToUser(event.getUser(), "unansweredPreparationQuestions", contentService.getUnAnsweredPreparationContentIds(roomId, event.getUser()));
 		}
 	}
