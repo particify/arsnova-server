@@ -115,7 +115,7 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 		final Room room = roomRepository.findOne(content.getRoomId());
 		cancelDelayedRoundChange(contentId);
 
-		if ("freetext".equals(content.getFormat())) {
+		if (Content.Format.TEXT == content.getFormat()) {
 			content.getState().setRound(0);
 		} else {
 			content.getState().setRound(1);

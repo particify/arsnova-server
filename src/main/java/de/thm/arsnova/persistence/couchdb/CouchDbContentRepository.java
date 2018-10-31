@@ -228,7 +228,8 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		final List<String> unanswered = new ArrayList<>();
 
 		for (final Content content : contents) {
-			if (!"slide".equals(content.getFormat()) && (!answeredQuestions.containsKey(content.getId())
+			// TODO: Set correct format for slides, which currently aren't implemented
+			if (Content.Format.TEXT != content.getFormat() && (!answeredQuestions.containsKey(content.getId())
 					|| (answeredQuestions.containsKey(content.getId()) && answeredQuestions.get(content.getId()) != content.getState().getRound()))) {
 				unanswered.add(content.getId());
 			}
