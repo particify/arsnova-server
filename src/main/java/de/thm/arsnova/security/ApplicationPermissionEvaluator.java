@@ -227,7 +227,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				}
 				room = roomRepository.findOne(targetMotd.getRoomId());
 
-				return room != null && !room.isClosed() || room.getOwnerId().equals(userId);
+				return room != null && (!room.isClosed() || room.getOwnerId().equals(userId));
 			default:
 				return false;
 		}
