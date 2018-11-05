@@ -1,7 +1,14 @@
 # Changelog
 
-## 2.6.1
+## 2.6.2
+This is a maintenance release which only brings libraries up to date to fix
+potential bugs.
 
+## 2.5.8
+This is a maintenance release which only brings libraries up to date to fix
+potential bugs.
+
+## 2.6.1
 Bug fixes:
 * Fixed exception at startup caused by missing migration document.
 * Fixed session export to correctly include all answers.
