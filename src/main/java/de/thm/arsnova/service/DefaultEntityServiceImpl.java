@@ -20,9 +20,18 @@ package de.thm.arsnova.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import de.thm.arsnova.event.AfterCreationEvent;
+import de.thm.arsnova.event.AfterPatchEvent;
+import de.thm.arsnova.event.AfterUpdateEvent;
+import de.thm.arsnova.event.BeforeCreationEvent;
+import de.thm.arsnova.event.BeforeDeletionEvent;
+import de.thm.arsnova.event.BeforePatchEvent;
+import de.thm.arsnova.event.BeforeUpdateEvent;
 import de.thm.arsnova.model.Entity;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.persistence.CrudRepository;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.access.prepost.PreFilter;
 
@@ -38,9 +47,10 @@ import java.util.function.Function;
  * @param <T> Entity type
  * @author Daniel Gerhardt
  */
-public class DefaultEntityServiceImpl<T extends Entity> implements EntityService<T> {
+public class DefaultEntityServiceImpl<T extends Entity> implements EntityService<T>, ApplicationEventPublisherAware {
 	protected Class<T> type;
 	protected CrudRepository<T, String> repository;
+	protected ApplicationEventPublisher eventPublisher;
 	private ObjectMapper objectMapper;
 
 	public DefaultEntityServiceImpl(Class<T> type, CrudRepository<T, String> repository, ObjectMapper objectMapper) {
@@ -82,7 +92,9 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		entity.setCreationTimestamp(new Date());
 
 		prepareCreate(entity);
+		eventPublisher.publishEvent(new BeforeCreationEvent<>(entity));
 		final T createdEntity = repository.save(entity);
+		eventPublisher.publishEvent(new AfterCreationEvent<>(createdEntity));
 		finalizeCreate(entity);
 
 		return createdEntity;
@@ -117,7 +129,9 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		newEntity.setUpdateTimestamp(new Date());
 
 		prepareUpdate(newEntity);
+		eventPublisher.publishEvent(new BeforeUpdateEvent<>(newEntity));
 		final T updatedEntity = repository.save(newEntity);
+		eventPublisher.publishEvent(new AfterUpdateEvent<>(updatedEntity));
 		finalizeUpdate(updatedEntity);
 
 		return updatedEntity;
@@ -156,8 +170,11 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		reader.readValue(tree);
 		entity.setUpdateTimestamp(new Date());
 		preparePatch(entity);
+		eventPublisher.publishEvent(new BeforePatchEvent<>(entity));
+		final T patchedEntity = repository.save(entity);
+		eventPublisher.publishEvent(new AfterPatchEvent<>(entity));
 
-		return repository.save(entity);
+		return patchedEntity;
 	}
 
 	@Override
@@ -176,6 +193,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 			reader.readValue(tree);
 			entity.setUpdateTimestamp(new Date());
 			preparePatch(entity);
+			eventPublisher.publishEvent(new BeforePatchEvent<>(entity));
 		}
 
 		return repository.saveAll(entities);
@@ -194,7 +212,9 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	@Override
 	@PreAuthorize("hasPermission(#entity, 'delete')")
 	public void delete(final T entity) {
+		eventPublisher.publishEvent(new BeforeDeletionEvent<>(entity));
 		repository.delete(entity);
+		eventPublisher.publishEvent(new AfterUpdateEvent<>(entity));
 	}
 
 	/**
@@ -208,5 +228,10 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 
 	public String getTypeName() {
 		return type.getSimpleName().toLowerCase();
+	}
+
+	@Override
+	public void setApplicationEventPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+		this.eventPublisher = applicationEventPublisher;
 	}
 }

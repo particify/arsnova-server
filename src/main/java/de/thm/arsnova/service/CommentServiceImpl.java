@@ -11,8 +11,6 @@ import de.thm.arsnova.web.exceptions.ForbiddenException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 import de.thm.arsnova.web.exceptions.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -27,14 +25,12 @@ import java.util.Map;
  * Performs all comment related operations.
  */
 @Service
-public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implements CommentService, ApplicationEventPublisherAware {
+public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implements CommentService {
 	private UserService userService;
 
 	private CommentRepository commentRepository;
 
 	private RoomRepository roomRepository;
-
-	private ApplicationEventPublisher publisher;
 
 	public CommentServiceImpl(
 			CommentRepository repository,
@@ -45,11 +41,6 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		this.commentRepository = repository;
 		this.roomRepository = roomRepository;
 		this.userService = userService;
-	}
-
-	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-		this.publisher = applicationEventPublisher;
 	}
 
 	@Override
@@ -76,7 +67,7 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 
 		final Room room = roomRepository.findOne(comment.getRoomId());
 		final DeleteCommentEvent event = new DeleteCommentEvent(this, room, comment);
-		this.publisher.publishEvent(event);
+		this.eventPublisher.publishEvent(event);
 	}
 
 	@Override

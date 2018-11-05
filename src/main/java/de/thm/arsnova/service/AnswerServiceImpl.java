@@ -37,8 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -55,13 +53,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * Performs all answer related operations.
  */
 @Service
-public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
-		implements AnswerService, ApplicationEventPublisherAware {
+public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implements AnswerService {
 	private static final Logger logger = LoggerFactory.getLogger(ContentServiceImpl.class);
 
 	private final Queue<AnswerQueueElement> answerQueue = new ConcurrentLinkedQueue<>();
-
-	private ApplicationEventPublisher publisher;
 
 	private RoomRepository roomRepository;
 	private ContentRepository contentRepository;
@@ -104,7 +99,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
 
 			// Send NewAnswerEvents ...
 			for (AnswerQueueElement e : elements) {
-				this.publisher.publishEvent(new NewAnswerEvent(this, e.getRoom(), e.getAnswer(), e.getUserId(), e.getQuestion()));
+				this.eventPublisher.publishEvent(new NewAnswerEvent(this, e.getRoom(), e.getAnswer(), e.getUserId(), e.getQuestion()));
 			}
 		} catch (final DbAccessException e) {
 			logger.error("Could not bulk save answers from queue.", e);
@@ -379,7 +374,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
 		answer.setContentId(content.getId());
 		answer.setRoomId(room.getId());
 		answerRepository.save(realAnswer);
-		this.publisher.publishEvent(new NewAnswerEvent(this, room, answer, user.getId(), content));
+		this.eventPublisher.publishEvent(new NewAnswerEvent(this, room, answer, user.getId(), content));
 
 		return answer;
 	}
@@ -399,7 +394,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
 		}
 		answerRepository.deleteById(answerId);
 
-		this.publisher.publishEvent(new DeleteAnswerEvent(this, room, content));
+		this.eventPublisher.publishEvent(new DeleteAnswerEvent(this, room, content));
 	}
 
 	/*
@@ -446,10 +441,5 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
 	@Override
 	public int countPreparationQuestionAnswersInternal(final String roomId) {
 		return answerRepository.countByRoomIdOnlyPreparationVariant(roomRepository.findOne(roomId).getId());
-	}
-
-	@Override
-	public void setApplicationEventPublisher(final ApplicationEventPublisher applicationEventPublisher) {
-		this.publisher = applicationEventPublisher;
 	}
 }

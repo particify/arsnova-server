@@ -34,8 +34,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -54,7 +52,7 @@ import java.util.stream.Collectors;
  * Performs all content related operations.
  */
 @Service
-public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implements ContentService, ApplicationEventPublisherAware {
+public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implements ContentService {
 	private UserService userService;
 
 	private LogEntryRepository dbLogger;
@@ -64,8 +62,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	private ContentRepository contentRepository;
 
 	private AnswerRepository answerRepository;
-
-	private ApplicationEventPublisher publisher;
 
 	private static final Logger logger = LoggerFactory.getLogger(ContentServiceImpl.class);
 
@@ -201,7 +197,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		roomRepository.save(room);
 
 		final NewQuestionEvent event = new NewQuestionEvent(this, room, content);
-		this.publisher.publishEvent(event);
+		this.eventPublisher.publishEvent(event);
 	}
 
 	@Override
@@ -301,7 +297,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		}
 
 		final DeleteQuestionEvent event = new DeleteQuestionEvent(this, room, content);
-		this.publisher.publishEvent(event);
+		this.eventPublisher.publishEvent(event);
 	}
 
 	@PreAuthorize("hasPermission(#session, 'owner')")
@@ -325,7 +321,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		dbLogger.log("delete", "type", "answer", "answerCount", answerCount);
 
 		final DeleteAllQuestionsEvent event = new DeleteAllQuestionsEvent(this, room);
-		this.publisher.publishEvent(event);
+		this.eventPublisher.publishEvent(event);
 	}
 
 	@Override
@@ -375,7 +371,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		} else {
 			event = new UnlockVoteEvent(this, room, content);
 		}
-		this.publisher.publishEvent(event);
+		this.eventPublisher.publishEvent(event);
 	}
 
 	@Override
@@ -405,7 +401,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			} else {
 				event = new UnlockVotesEvent(this, room, list);
 			}
-			this.publisher.publishEvent(event);
+			this.eventPublisher.publishEvent(event);
 		} catch (IOException e) {
 			logger.error("Patching of contents failed", e);
 		}
@@ -506,7 +502,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		} else {
 			event = new LockQuestionsEvent(this, room, list);
 		}
-		this.publisher.publishEvent(event);
+		this.eventPublisher.publishEvent(event);
 	}
 
 	/* TODO: Split and move answer part to AnswerService */
@@ -525,7 +521,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
 		answerRepository.deleteAllAnswersForQuestions(contentIds);
 
-		this.publisher.publishEvent(new DeleteAllQuestionsAnswersEvent(this, room));
+		this.eventPublisher.publishEvent(new DeleteAllQuestionsAnswersEvent(this, room));
 	}
 
 	/* TODO: Split and move answer part to AnswerService */
@@ -541,7 +537,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
 		answerRepository.deleteAllAnswersForQuestions(contentIds);
 
-		this.publisher.publishEvent(new DeleteAllPreparationAnswersEvent(this, room));
+		this.eventPublisher.publishEvent(new DeleteAllPreparationAnswersEvent(this, room));
 	}
 
 	/* TODO: Split and move answer part to AnswerService */
@@ -557,7 +553,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
 		answerRepository.deleteAllAnswersForQuestions(contentIds);
 
-		this.publisher.publishEvent(new DeleteAllLectureAnswersEvent(this, room));
+		this.eventPublisher.publishEvent(new DeleteAllLectureAnswersEvent(this, room));
 	}
 
 	@Caching(evict = {
@@ -573,10 +569,5 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			q.resetState();
 		}
 		contentRepository.saveAll(contents);
-	}
-
-	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
-		this.publisher = publisher;
 	}
 }
