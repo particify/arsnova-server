@@ -25,10 +25,6 @@ import de.thm.arsnova.model.migration.FromV2Migrator;
 import de.thm.arsnova.model.migration.ToV2Migrator;
 import de.thm.arsnova.model.migration.v2.Answer;
 import de.thm.arsnova.model.migration.v2.Content;
-import de.thm.arsnova.web.exceptions.ForbiddenException;
-import de.thm.arsnova.web.exceptions.NoContentException;
-import de.thm.arsnova.web.exceptions.NotFoundException;
-import de.thm.arsnova.web.exceptions.NotImplementedException;
 import de.thm.arsnova.service.AnswerService;
 import de.thm.arsnova.service.ContentService;
 import de.thm.arsnova.service.RoomService;
@@ -36,6 +32,10 @@ import de.thm.arsnova.service.TimerService;
 import de.thm.arsnova.util.PaginationListDecorator;
 import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.web.Pagination;
+import de.thm.arsnova.web.exceptions.ForbiddenException;
+import de.thm.arsnova.web.exceptions.NoContentException;
+import de.thm.arsnova.web.exceptions.NotFoundException;
+import de.thm.arsnova.web.exceptions.NotImplementedException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -158,7 +158,7 @@ public class ContentController extends PaginationController {
 			) {
 
 		if (time == 0) {
-			timerService.startNewRound(contentId, null);
+			timerService.startNewRound(contentId);
 		} else {
 			timerService.startNewRoundDelayed(contentId, time);
 		}

@@ -17,8 +17,6 @@
  */
 package de.thm.arsnova.service.score;
 
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -48,18 +46,18 @@ public class Score implements Iterable<QuestionScore> {
 		scores.put(questionId, new QuestionScore(questionId, questionVariant, piRound, questionScore));
 	}
 
-	public void addAnswer(String questionId, int piRound, String username, int userscore) {
+	public void addAnswer(String questionId, int piRound, String userId, int userscore) {
 		if (!scores.containsKey(questionId)) {
 			// Precondition failed, ignore this element.
 			// Most likely this is a question that has no score value.
 			return;
 		}
-		if (username == null || username.isEmpty()) {
+		if (userId == null || userId.isEmpty()) {
 			// Precondition failed: ignore anonymous users
 			return;
 		}
 		QuestionScore questionScore = scores.get(questionId);
-		questionScore.add(piRound, username, userscore);
+		questionScore.add(piRound, userId, userscore);
 	}
 
 	public Score filterVariant(String questionVariant) {
@@ -90,10 +88,10 @@ public class Score implements Iterable<QuestionScore> {
 		return score;
 	}
 
-	public double getTotalUserScore(ClientAuthentication user) {
+	public double getTotalUserScore(String userId) {
 		int score = 0;
 		for (QuestionScore questionScore : this) {
-			score += questionScore.getTotalUserScore(user);
+			score += questionScore.getTotalUserScore(userId);
 		}
 		return score;
 	}

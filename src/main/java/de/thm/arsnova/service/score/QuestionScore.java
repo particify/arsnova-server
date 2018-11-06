@@ -17,8 +17,6 @@
  */
 package de.thm.arsnova.service.score;
 
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -60,9 +58,9 @@ public class QuestionScore implements Iterable<UserScore> {
 		return !this.userScores.isEmpty();
 	}
 
-	public void add(int piRound, String username, int userscore) {
+	public void add(int piRound, String userId, int userscore) {
 		if (this.piRound == piRound) {
-			userScores.add(new UserScore(username, userscore));
+			userScores.add(new UserScore(userId, userscore));
 		}
 	}
 
@@ -74,10 +72,10 @@ public class QuestionScore implements Iterable<UserScore> {
 		return totalScore;
 	}
 
-	public int getTotalUserScore(ClientAuthentication user) {
+	public int getTotalUserScore(String userId) {
 		int totalScore = 0;
 		for (UserScore score : userScores) {
-			if (score.isUser(user)) {
+			if (score.isUser(userId)) {
 				totalScore += score.getScore();
 			}
 		}
@@ -90,7 +88,7 @@ public class QuestionScore implements Iterable<UserScore> {
 
 	public void collectUsers(Set<String> users) {
 		for (UserScore score : userScores) {
-			users.add(score.getUsername());
+			users.add(score.getUserId());
 		}
 	}
 

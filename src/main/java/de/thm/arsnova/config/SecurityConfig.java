@@ -19,14 +19,14 @@ package de.thm.arsnova.config;
 
 import de.thm.arsnova.security.CasLogoutSuccessHandler;
 import de.thm.arsnova.security.CasUserDetailsService;
+import de.thm.arsnova.security.CustomLdapUserDetailsMapper;
 import de.thm.arsnova.security.LoginAuthenticationFailureHandler;
 import de.thm.arsnova.security.LoginAuthenticationSucessHandler;
-import de.thm.arsnova.security.CustomLdapUserDetailsMapper;
 import de.thm.arsnova.security.RegisteredUserDetailsService;
 import de.thm.arsnova.security.jwt.JwtAuthenticationProvider;
 import de.thm.arsnova.security.jwt.JwtTokenFilter;
-import de.thm.arsnova.security.pac4j.OauthCallbackFilter;
 import de.thm.arsnova.security.pac4j.OauthAuthenticationProvider;
+import de.thm.arsnova.security.pac4j.OauthCallbackFilter;
 import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.config.Config;

@@ -17,8 +17,6 @@
  */
 package de.thm.arsnova.service.score;
 
-import de.thm.arsnova.model.TestClient;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.transport.ScoreStatistics;
 import de.thm.arsnova.persistence.SessionStatisticsRepository;
 import org.junit.Before;
@@ -42,9 +40,9 @@ public class ScoreBasedScoreCalculatorTest {
 		return questionId;
 	}
 
-	private void addAnswer(String questionId, ClientAuthentication user, int points) {
+	private void addAnswer(String questionId, String userId, int points) {
 		final int piRound = 1;
-		courseScore.addAnswer(questionId, piRound, user.getUsername(), points);
+		courseScore.addAnswer(questionId, piRound, userId, points);
 	}
 
 	@Before
@@ -61,22 +59,22 @@ public class ScoreBasedScoreCalculatorTest {
 		String q1 = this.addQuestion("lecture", 100);
 		String q2 = this.addQuestion("lecture", 100);
 		String q3 = this.addQuestion("lecture", 100);
-		ClientAuthentication u1 = new TestClient("user1");
-		ClientAuthentication u2 = new TestClient("user2");
-		ClientAuthentication u3 = new TestClient("user3");
+		String userId1 = "user1";
+		String userId2 = "user2";
+		String userId3 = "user3";
 		// Both users achieve 200 points
-		this.addAnswer(q1, u1, 100);
-		this.addAnswer(q1, u2, 100);
-		this.addAnswer(q1, u3, 0);
-		this.addAnswer(q2, u1, 0);
-		this.addAnswer(q2, u2, 100);
-		this.addAnswer(q2, u3, 0);
-		this.addAnswer(q3, u1, 100);
-		this.addAnswer(q3, u2, 100);
-		this.addAnswer(q3, u3, 0);
+		this.addAnswer(q1, userId1, 100);
+		this.addAnswer(q1, userId2, 100);
+		this.addAnswer(q1, userId3, 0);
+		this.addAnswer(q2, userId1, 0);
+		this.addAnswer(q2, userId2, 100);
+		this.addAnswer(q2, userId3, 0);
+		this.addAnswer(q3, userId1, 100);
+		this.addAnswer(q3, userId2, 100);
+		this.addAnswer(q3, userId3, 0);
 
 		lp.setQuestionVariant("lecture");
-		ScoreStatistics u1LectureProgress = lp.getMyProgress(null, u1);
+		ScoreStatistics u1LectureProgress = lp.getMyProgress(null, userId1);
 		// (500/3) / 300 ~= 0,56.
 		assertEquals(56, u1LectureProgress.getCourseProgress());
 		// 200 / 300 ~= 0,67.
@@ -89,18 +87,18 @@ public class ScoreBasedScoreCalculatorTest {
 		String q1 = this.addQuestion("lecture", 100);
 		String q2 = this.addQuestion("lecture", 100);
 		String q3 = this.addQuestion("lecture", 100);
-		ClientAuthentication u1 = new TestClient("user1");
-		ClientAuthentication u2 = new TestClient("user2");
+		String userId1 = "user1";
+		String userId2 = "user2";
 		// Both users achieve 200 points
-		this.addAnswer(q1, u1, 100);
-		this.addAnswer(q1, u2, 100);
-		this.addAnswer(q2, u1, 0);
-		this.addAnswer(q2, u2, 0);
-		this.addAnswer(q3, u1, 100);
-		this.addAnswer(q3, u2, 100);
+		this.addAnswer(q1, userId1, 100);
+		this.addAnswer(q1, userId2, 100);
+		this.addAnswer(q2, userId1, 0);
+		this.addAnswer(q2, userId2, 0);
+		this.addAnswer(q3, userId1, 100);
+		this.addAnswer(q3, userId2, 100);
 
 		lp.setQuestionVariant("lecture");
-		ScoreStatistics u1LectureProgress = lp.getMyProgress(null, u1);
+		ScoreStatistics u1LectureProgress = lp.getMyProgress(null, userId1);
 		// 200 / 300 = 0,67
 		assertEquals(67, u1LectureProgress.getCourseProgress());
 		assertEquals(67, u1LectureProgress.getMyProgress());
@@ -108,19 +106,19 @@ public class ScoreBasedScoreCalculatorTest {
 
 	@Test
 	public void shouldConsiderAnswersOfSamePiRound() {
-		ClientAuthentication u1 = new TestClient("user1");
-		ClientAuthentication u2 = new TestClient("user2");
+		String userId1 = "user1";
+		String userId2 = "user2";
 		// question is in round 2
 		courseScore.addQuestion("q1", "lecture", 2, 100);
 		// 25 points in round 1, 75 points in round two for the first user
-		courseScore.addAnswer("q1", 1, u1.getUsername(), 25);
-		courseScore.addAnswer("q1", 2, u1.getUsername(), 75);
+		courseScore.addAnswer("q1", 1, userId1, 25);
+		courseScore.addAnswer("q1", 2, userId1, 75);
 		// 75 points in round 1, 25 points in round two for the second user
-		courseScore.addAnswer("q1", 1, u2.getUsername(), 75);
-		courseScore.addAnswer("q1", 2, u2.getUsername(), 25);
+		courseScore.addAnswer("q1", 1, userId2, 75);
+		courseScore.addAnswer("q1", 2, userId2, 25);
 
-		ScoreStatistics u1Progress = lp.getMyProgress(null, u1);
-		ScoreStatistics u2Progress = lp.getMyProgress(null, u2);
+		ScoreStatistics u1Progress = lp.getMyProgress(null, userId1);
+		ScoreStatistics u2Progress = lp.getMyProgress(null, userId2);
 
 		// only the answer for round 2 should be considered
 		assertEquals(50, u1Progress.getCourseProgress());
@@ -135,16 +133,16 @@ public class ScoreBasedScoreCalculatorTest {
 		String q1 = this.addQuestion("lecture", 10);
 		String q2 = this.addQuestion("lecture", 10);
 		// three users
-		ClientAuthentication u1 = new TestClient("user1");
-		ClientAuthentication u2 = new TestClient("user2");
-		ClientAuthentication u3 = new TestClient("user3");
+		String userId1 = "user1";
+		String userId2 = "user2";
+		String userId3 = "user3";
 		// six answers
-		this.addAnswer(q1, u1, 10);
-		this.addAnswer(q2, u1, 0);
-		this.addAnswer(q1, u2, 10);
-		this.addAnswer(q2, u2, 0);
-		this.addAnswer(q1, u3, 10);
-		this.addAnswer(q2, u3, 0);
+		this.addAnswer(q1, userId1, 10);
+		this.addAnswer(q2, userId1, 0);
+		this.addAnswer(q1, userId2, 10);
+		this.addAnswer(q2, userId2, 0);
+		this.addAnswer(q1, userId3, 10);
+		this.addAnswer(q2, userId3, 0);
 
 		int numerator = lp.getCourseProgress(null).getNumerator();
 		int denominator = lp.getCourseProgress(null).getDenominator();

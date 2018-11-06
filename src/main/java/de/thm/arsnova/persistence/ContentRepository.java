@@ -1,7 +1,6 @@
 package de.thm.arsnova.persistence;
 
 import de.thm.arsnova.model.Content;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 
 import java.util.List;
 
@@ -13,7 +12,7 @@ public interface ContentRepository extends CrudRepository<Content, String> {
 	List<String> findIdsByRoomId(String roomId);
 	List<String> findIdsByRoomIdAndVariant(String roomId, String variant);
 	int deleteByRoomId(String roomId);
-	List<String> findUnansweredIdsByRoomIdAndUser(String roomId, ClientAuthentication user);
+	List<String> findUnansweredIdsByRoomIdAndUser(String roomId, String userId);
 	List<Content> findByRoomIdOnlyLectureVariantAndActive(String roomId);
 	List<Content> findByRoomIdOnlyLectureVariant(String roomId);
 	List<Content> findByRoomIdOnlyFlashcardVariantAndActive(String roomId);
@@ -26,6 +25,6 @@ public interface ContentRepository extends CrudRepository<Content, String> {
 	int countPreparationVariantByRoomId(String roomId);
 	List<String> findIdsByRoomIdAndVariantAndSubject(String roomId, String questionVariant, String subject);
 	List<String> findSubjectsByRoomIdAndVariant(String roomId, String questionVariant);
-	List<String> findUnansweredIdsByRoomIdAndUserOnlyLectureVariant(String roomId, ClientAuthentication user);
-	List<String> findUnansweredIdsByRoomIdAndUserOnlyPreparationVariant(String roomId, ClientAuthentication user);
+	List<String> findUnansweredIdsByRoomIdAndUserOnlyLectureVariant(String roomId, String userId);
+	List<String> findUnansweredIdsByRoomIdAndUserOnlyPreparationVariant(String roomId, String userId);
 }

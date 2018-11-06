@@ -22,7 +22,8 @@ import org.springframework.core.style.ToStringCreator;
 
 import java.util.Date;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 
 /**

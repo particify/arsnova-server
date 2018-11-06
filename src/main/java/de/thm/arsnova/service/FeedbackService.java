@@ -18,7 +18,6 @@
 package de.thm.arsnova.service;
 
 import de.thm.arsnova.model.Feedback;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 
 /**
  * The functionality the feedback service should provide.
@@ -36,7 +35,7 @@ public interface FeedbackService {
 
 	long calculateRoundedAverageFeedback(String roomId);
 
-	boolean save(String roomId, int value, ClientAuthentication user);
+	boolean save(String roomId, int value, String userId);
 
-	Integer getByRoomIdAndUser(String roomId, ClientAuthentication user);
+	Integer getByRoomIdAndUserId(String roomId, String userId);
 }

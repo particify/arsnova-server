@@ -17,25 +17,22 @@
  */
 package de.thm.arsnova.service;
 
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.persistence.UserRepository;
 import de.thm.arsnova.security.User;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
 public class StubUserService extends UserServiceImpl {
 	private final Set<GrantedAuthority> grantedAuthorities;
-	private ClientAuthentication stubUser = null;
+	private User stubUser = null;
 
 	public StubUserService(
 			UserRepository repository,
@@ -54,19 +51,14 @@ public class StubUserService extends UserServiceImpl {
 		if (isAuthenticated) {
 			UserProfile userProfile = new UserProfile(UserProfile.AuthProvider.ARSNOVA, username);
 			userProfile.setId(UUID.randomUUID().toString());
-			User user = new User(userProfile, grantedAuthorities);
-			stubUser = new ClientAuthentication(user);
+			stubUser = new User(userProfile, grantedAuthorities);
 		} else {
 			stubUser = null;
 		}
 	}
 
-	public void useAnonymousUser() {
-		stubUser = new ClientAuthentication(new AnonymousAuthenticationToken(UUID.randomUUID().toString(), "anonymous", Collections.emptyList()));
-	}
-
 	@Override
-	public ClientAuthentication getCurrentUser() {
+	public User getCurrentUser() {
 		return stubUser;
 	}
 }

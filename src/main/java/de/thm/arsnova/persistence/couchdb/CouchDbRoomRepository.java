@@ -103,7 +103,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 
 	/* TODO: Move to service layer. */
 	@Override
-	public Room importRoom(final ClientAuthentication user, final ImportExportContainer importRoom) {
+	public Room importRoom(final String userId, final ImportExportContainer importRoom) {
 		/* FIXME: not yet migrated - move to service layer */
 		throw new UnsupportedOperationException();
 //		final Room session = this.saveSession(user, importRoom.generateSessionEntity(user));
@@ -309,20 +309,20 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 	}
 
 	@Override
-	public List<Room> findForPublicPoolByOwner(final ClientAuthentication owner) {
+	public List<Room> findForPublicPoolByOwnerId(final String ownerId) {
 		/* TODO: Only load IDs and check against cache for data. */
 		return db.queryView(
 				createQuery("partial_by_pool_ownerid_name")
-						.startKey(ComplexKey.of(true, owner.getId()))
-						.endKey(ComplexKey.of(true, owner.getId(), ComplexKey.emptyObject()))
+						.startKey(ComplexKey.of(true, ownerId))
+						.endKey(ComplexKey.of(true, ownerId, ComplexKey.emptyObject()))
 						.includeDocs(true),
 				Room.class);
 	}
 
 	/* TODO: Move to service layer. */
 	@Override
-	public List<Room> findInfosForPublicPoolByOwner(final ClientAuthentication owner) {
-		final List<Room> rooms = this.findForPublicPoolByOwner(owner);
+	public List<Room> findInfosForPublicPoolByOwnerId(final String ownerId) {
+		final List<Room> rooms = this.findForPublicPoolByOwnerId(ownerId);
 		if (rooms.isEmpty()) {
 			return new ArrayList<>();
 		}
@@ -331,8 +331,8 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 
 	/* TODO: Move to service layer. */
 	@Override
-	public List<Room> getRoomsWithStatsForOwner(final ClientAuthentication owner, final int start, final int limit) {
-		final List<Room> rooms = this.findByOwner(owner, start, limit);
+	public List<Room> getRoomsWithStatsForOwnerId(final String ownerId, final int start, final int limit) {
+		final List<Room> rooms = this.findByOwnerId(ownerId, start, limit);
 		if (rooms.isEmpty()) {
 			return new ArrayList<>();
 		}
@@ -355,9 +355,9 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 	}
 
 	/* TODO: Move to service layer. */
-	public List<Room> getRoomHistoryWithStatsForUser(final List<Room> rooms, final ClientAuthentication user) {
+	public List<Room> getRoomHistoryWithStatsForUser(final List<Room> rooms, final String ownerId) {
 		final ViewQuery answeredQuestionsView = createQuery("by_creatorid_roomid").designDocId("_design/Answer")
-				.reduce(false).keys(rooms.stream().map(room -> ComplexKey.of(user.getId(), room.getId())).collect(Collectors.toList()));
+				.reduce(false).keys(rooms.stream().map(room -> ComplexKey.of(ownerId, room.getId())).collect(Collectors.toList()));
 		final ViewQuery contentIdsView = createQuery("by_roomid").designDocId("_design/Content")
 				.reduce(false).keys(rooms.stream().map(Room::getId).collect(Collectors.toList()));
 

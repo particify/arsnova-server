@@ -17,14 +17,13 @@
  */
 package de.thm.arsnova.service;
 
-import de.thm.arsnova.model.Feedback;
-import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.event.DeleteFeedbackForRoomsEvent;
 import de.thm.arsnova.event.NewFeedbackEvent;
+import de.thm.arsnova.model.Feedback;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.web.exceptions.NoContentException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
-import de.thm.arsnova.persistence.RoomRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -66,33 +65,33 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	@Override
 	@Scheduled(fixedDelay = DEFAULT_SCHEDULER_DELAY)
 	public void cleanFeedbackVotes() {
-		Map<Room, List<ClientAuthentication>> deletedFeedbackOfUsersInSession = feedbackStorage.cleanVotes(cleanupFeedbackDelay);
+		Map<Room, List<String>> deletedFeedbackOfUsersInSession = feedbackStorage.cleanVotes(cleanupFeedbackDelay);
 		/*
 		 * mapping (Room -> Users) is not suitable for web sockets, because we want to sent all affected
 		 * sessions to a single user in one go instead of sending multiple messages for each session. Hence,
 		 * we need the mapping (User -> Sessions)
 		 */
-		final Map<ClientAuthentication, Set<Room>> affectedSessionsOfUsers = new HashMap<>();
+		final Map<String, Set<Room>> affectedSessionsOfUsers = new HashMap<>();
 
-		for (Map.Entry<Room, List<ClientAuthentication>> entry : deletedFeedbackOfUsersInSession.entrySet()) {
+		for (Map.Entry<Room, List<String>> entry : deletedFeedbackOfUsersInSession.entrySet()) {
 			final Room room = entry.getKey();
-			final List<ClientAuthentication> users = entry.getValue();
-			for (ClientAuthentication user : users) {
+			final List<String> userIds = entry.getValue();
+			for (String userId : userIds) {
 				Set<Room> affectedSessions;
-				if (affectedSessionsOfUsers.containsKey(user)) {
-					affectedSessions = affectedSessionsOfUsers.get(user);
+				if (affectedSessionsOfUsers.containsKey(userId)) {
+					affectedSessions = affectedSessionsOfUsers.get(userId);
 				} else {
 					affectedSessions = new HashSet<>();
 				}
 				affectedSessions.add(room);
-				affectedSessionsOfUsers.put(user, affectedSessions);
+				affectedSessionsOfUsers.put(userId, affectedSessions);
 			}
 		}
 		// Send feedback reset event to all affected users
-		for (Map.Entry<ClientAuthentication, Set<Room>> entry : affectedSessionsOfUsers.entrySet()) {
-			final ClientAuthentication user = entry.getKey();
+		for (Map.Entry<String, Set<Room>> entry : affectedSessionsOfUsers.entrySet()) {
+			final String userId = entry.getKey();
 			final Set<Room> arsSessions = entry.getValue();
-			this.publisher.publishEvent(new DeleteFeedbackForRoomsEvent(this, arsSessions, user));
+			this.publisher.publishEvent(new DeleteFeedbackForRoomsEvent(this, arsSessions, userId));
 		}
 		// For each session that has deleted feedback, send the new feedback to all clients
 		for (Room session : deletedFeedbackOfUsersInSession.keySet()) {
@@ -103,13 +102,13 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	@Override
 	public void cleanFeedbackVotesByRoomId(final String roomId, final int cleanupFeedbackDelayInMins) {
 		final Room room = roomRepository.findOne(roomId);
-		List<ClientAuthentication> affectedUsers = feedbackStorage.cleanVotesByRoom(room, cleanupFeedbackDelayInMins);
+		List<String> affectedUserIds = feedbackStorage.cleanVotesByRoom(room, cleanupFeedbackDelayInMins);
 		Set<Room> sessionSet = new HashSet<>();
 		sessionSet.add(room);
 
 		// Send feedback reset event to all affected users
-		for (ClientAuthentication user : affectedUsers) {
-			this.publisher.publishEvent(new DeleteFeedbackForRoomsEvent(this, sessionSet, user));
+		for (String userId : affectedUserIds) {
+			this.publisher.publishEvent(new DeleteFeedbackForRoomsEvent(this, sessionSet, userId));
 		}
 		// send the new feedback to all clients in affected session
 		this.publisher.publishEvent(new NewFeedbackEvent(this, room));
@@ -157,24 +156,24 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	}
 
 	@Override
-	public boolean save(final String roomId, final int value, final ClientAuthentication user) {
+	public boolean save(final String roomId, final int value, final String userId) {
 		final Room room = roomRepository.findOne(roomId);
 		if (room == null) {
 			throw new NotFoundException();
 		}
-		feedbackStorage.save(room, value, user);
+		feedbackStorage.save(room, value, userId);
 
 		this.publisher.publishEvent(new NewFeedbackEvent(this, room));
 		return true;
 	}
 
 	@Override
-	public Integer getByRoomIdAndUser(final String roomId, final ClientAuthentication user) {
+	public Integer getByRoomIdAndUserId(final String roomId, final String userId) {
 		final Room room = roomRepository.findOne(roomId);
 		if (room == null) {
 			throw new NotFoundException();
 		}
-		return feedbackStorage.getByRoomAndUser(room, user);
+		return feedbackStorage.getByRoomAndUserId(room, userId);
 	}
 
 	@Override

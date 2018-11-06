@@ -20,7 +20,6 @@ package de.thm.arsnova.model.transport;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 
 /**
  * An answer that is about to get saved in the database. Answers are not saved immediately, they are instead stored
@@ -34,13 +33,13 @@ public class AnswerQueueElement {
 
 	private final Answer answer;
 
-	private final ClientAuthentication user;
+	private final String userId;
 
-	public AnswerQueueElement(Room room, Content content, Answer answer, ClientAuthentication user) {
+	public AnswerQueueElement(Room room, Content content, Answer answer, String userId) {
 		this.room = room;
 		this.content = content;
 		this.answer = answer;
-		this.user = user;
+		this.userId = userId;
 	}
 
 	public Room getRoom() {
@@ -55,7 +54,7 @@ public class AnswerQueueElement {
 		return answer;
 	}
 
-	public ClientAuthentication getUser() {
-		return user;
+	public String getUserId() {
+		return userId;
 	}
 }

@@ -19,8 +19,8 @@ package de.thm.arsnova.service;
 
 import de.thm.arsnova.model.Motd;
 import de.thm.arsnova.model.Room;
-import de.thm.arsnova.web.exceptions.BadRequestException;
 import de.thm.arsnova.persistence.MotdRepository;
+import de.thm.arsnova.web.exceptions.BadRequestException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;

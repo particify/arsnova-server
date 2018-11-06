@@ -19,25 +19,26 @@ package de.thm.arsnova.service;
 
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.model.transport.ImportExportContainer;
-import de.thm.arsnova.model.transport.ScoreStatistics;
 import de.thm.arsnova.event.DeleteRoomEvent;
 import de.thm.arsnova.event.FeatureChangeEvent;
 import de.thm.arsnova.event.FlipFlashcardsEvent;
 import de.thm.arsnova.event.LockFeedbackEvent;
 import de.thm.arsnova.event.StatusRoomEvent;
-import de.thm.arsnova.web.exceptions.ForbiddenException;
-import de.thm.arsnova.web.exceptions.NotFoundException;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.model.migration.v2.ClientAuthentication;
+import de.thm.arsnova.model.transport.ImportExportContainer;
+import de.thm.arsnova.model.transport.ScoreStatistics;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.CommentRepository;
 import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.persistence.RoomRepository;
+import de.thm.arsnova.security.User;
 import de.thm.arsnova.service.score.ScoreCalculator;
 import de.thm.arsnova.service.score.ScoreCalculatorFactory;
+import de.thm.arsnova.web.exceptions.ForbiddenException;
+import de.thm.arsnova.web.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,11 +57,11 @@ import org.springframework.stereotype.Service;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.Set;
-import java.util.HashSet;
 
 /**
  * Performs all room related operations.
@@ -223,8 +224,8 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public Room getByShortId(final String shortId) {
-		final ClientAuthentication user = userService.getCurrentUser();
-		return this.getInternal(getIdByShortId(shortId), user);
+		final User user = userService.getCurrentUser();
+		return this.getInternal(getIdByShortId(shortId), user.getId());
 	}
 
 	@Override
@@ -251,12 +252,12 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	 * TODO: Find a better way of doing this...
 	 */
 	@Override
-	public Room getInternal(final String id, final ClientAuthentication user) {
+	public Room getInternal(final String id, final String userId) {
 		final Room room = roomRepository.findOne(id);
 		if (room == null) {
 			throw new NotFoundException();
 		}
-		if (room.isClosed() && !room.getOwnerId().equals(user.getId())) {
+		if (room.isClosed() && !room.getOwnerId().equals(userId)) {
 			throw new ForbiddenException("User is not room creator.");
 		}
 
@@ -289,7 +290,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Room> getMyRooms(final int offset, final int limit) {
-		return roomRepository.findByOwner(userService.getCurrentUser(), offset, limit);
+		return roomRepository.findByOwnerId(userService.getCurrentUser().getId(), offset, limit);
 	}
 
 	@Override
@@ -301,14 +302,14 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Room> getMyPublicPoolRoomsInfo() {
-		return roomRepository.findInfosForPublicPoolByOwner(userService.getCurrentUser());
+		return roomRepository.findInfosForPublicPoolByOwnerId(userService.getCurrentUser().getId());
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Room> getMyRoomsInfo(final int offset, final int limit) {
-		final ClientAuthentication user = userService.getCurrentUser();
-		return roomRepository.getRoomsWithStatsForOwner(user, offset, limit);
+		final User user = userService.getCurrentUser();
+		return roomRepository.getRoomsWithStatsForOwnerId(user.getId(), offset, limit);
 	}
 
 	@Override
@@ -333,7 +334,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@PreAuthorize("isAuthenticated()")
 	public List<Room> getMyRoomHistoryInfo(final int offset, final int limit) {
 		List<Room> rooms = getMyRoomHistory(0, 0);
-		roomRepository.getRoomHistoryWithStatsForUser(rooms, userService.getCurrentUser());
+		roomRepository.getRoomHistoryWithStatsForUser(rooms, userService.getCurrentUser().getId());
 
 		return rooms;
 	}
@@ -478,16 +479,16 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@PreAuthorize("hasPermission(#id, 'room', 'read')")
 	public ScoreStatistics getMyLearningProgress(final String id, final String type, final String questionVariant) {
 		final Room room = roomRepository.findOne(id);
-		final ClientAuthentication user = userService.getCurrentUser();
+		final User user = userService.getCurrentUser();
 		ScoreCalculator scoreCalculator = scoreCalculatorFactory.create(type, questionVariant);
-		return scoreCalculator.getMyProgress(room, user);
+		return scoreCalculator.getMyProgress(room, user.getId());
 	}
 
 	@Override
 	@PreAuthorize("hasPermission('', 'room', 'create')")
 	public Room importRooms(ImportExportContainer importRoom) {
-		final ClientAuthentication user = userService.getCurrentUser();
-		final Room info = roomRepository.importRoom(user, importRoom);
+		final User user = userService.getCurrentUser();
+		final Room info = roomRepository.importRoom(user.getId(), importRoom);
 		if (info == null) {
 			throw new NullPointerException("Could not import room.");
 		}
@@ -506,8 +507,8 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		ImportExportContainer temp = roomRepository.exportRoom(id, false, false);
 		temp.getSession().setPublicPool(pp);
 		temp.getSession().setSessionType("public_pool");
-		final ClientAuthentication user = userService.getCurrentUser();
-		return roomRepository.importRoom(user, temp);
+		final User user = userService.getCurrentUser();
+		return roomRepository.importRoom(user.getId(), temp);
 	}
 
 	@Override
@@ -525,7 +526,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
 	public Room.Settings updateFeatures(String id, Room.Settings settings) {
 		final Room room = roomRepository.findOne(id);
-		final ClientAuthentication user = userService.getCurrentUser();
 		room.setSettings(settings);
 		this.publisher.publishEvent(new FeatureChangeEvent(this, room));
 		roomRepository.save(room);
@@ -537,7 +537,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
 	public boolean lockFeedbackInput(String id, Boolean lock) {
 		final Room room = roomRepository.findOne(id);
-		final ClientAuthentication user = userService.getCurrentUser();
 		if (!lock) {
 			feedbackService.cleanFeedbackVotesByRoomId(id, 0);
 		}

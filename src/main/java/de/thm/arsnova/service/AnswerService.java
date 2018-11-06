@@ -3,7 +3,6 @@ package de.thm.arsnova.service;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.TextAnswer;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 
 import java.util.List;
 import java.util.Map;
@@ -11,7 +10,7 @@ import java.util.Map;
 public interface AnswerService extends EntityService<Answer> {
 	Answer getMyAnswer(String contentId);
 
-	void getFreetextAnswerAndMarkRead(String answerId, ClientAuthentication user);
+	void getFreetextAnswerAndMarkRead(String answerId, String userId);
 
 	AnswerStatistics getStatistics(String contentId, int piRound);
 

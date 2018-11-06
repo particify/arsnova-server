@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.service;
 
-import de.thm.arsnova.model.FindQuery;
 import de.thm.arsnova.model.Comment;
+import de.thm.arsnova.model.FindQuery;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;

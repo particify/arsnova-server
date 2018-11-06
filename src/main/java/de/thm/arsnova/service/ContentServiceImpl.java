@@ -17,16 +17,16 @@
  */
 package de.thm.arsnova.service;
 
+import de.thm.arsnova.event.*;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
-import de.thm.arsnova.event.*;
-import de.thm.arsnova.web.exceptions.NotFoundException;
-import de.thm.arsnova.web.exceptions.UnauthorizedException;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.persistence.RoomRepository;
+import de.thm.arsnova.security.User;
+import de.thm.arsnova.web.exceptions.NotFoundException;
+import de.thm.arsnova.web.exceptions.UnauthorizedException;
 import org.ektorp.DocumentNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,7 +109,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	//@Cacheable("contentlists")
 	public List<Content> getByRoomId(final String roomId) {
 		final Room room = roomRepository.findOne(roomId);
-		final ClientAuthentication user = userService.getCurrentUser();
+		final User user = userService.getCurrentUser();
 		if (room.getOwnerId().equals(user.getId())) {
 			return contentRepository.findByRoomIdForSpeaker(roomId);
 		} else {
@@ -206,7 +206,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	public void prepareUpdate(final Content content) {
-		final ClientAuthentication user = userService.getCurrentUser();
+		final User user = userService.getCurrentUser();
 		final Content oldContent = contentRepository.findOne(content.getId());
 		if (null == oldContent) {
 			throw new NotFoundException();
@@ -386,7 +386,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			@CacheEvict(value = "preparationcontentlists", key = "#roomId"),
 			@CacheEvict(value = "flashcardcontentlists", key = "#roomId") })
 	public void setVotingAdmissions(final String roomId, final boolean disableVoting, Iterable<Content> contents) {
-		final ClientAuthentication user = getCurrentUser();
+		final User user = getCurrentUser();
 		final Room room = roomRepository.findOne(roomId);
 		if (!room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
@@ -412,7 +412,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	}
 
 	private Room getRoomWithAuthCheck(final String roomId) {
-		final ClientAuthentication user = userService.getCurrentUser();
+		final User user = userService.getCurrentUser();
 		final Room room = roomRepository.findOne(roomId);
 		if (user == null || room == null || !room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
@@ -423,12 +423,12 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<String> getUnAnsweredContentIds(final String roomId) {
-		final ClientAuthentication user = getCurrentUser();
-		return contentRepository.findUnansweredIdsByRoomIdAndUser(roomId, user);
+		final User user = getCurrentUser();
+		return contentRepository.findUnansweredIdsByRoomIdAndUser(roomId, user.getId());
 	}
 
-	private ClientAuthentication getCurrentUser() {
-		final ClientAuthentication user = userService.getCurrentUser();
+	private User getCurrentUser() {
+		final User user = userService.getCurrentUser();
 		if (user == null) {
 			throw new UnauthorizedException();
 		}
@@ -447,32 +447,32 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<String> getUnAnsweredLectureContentIds(final String roomId) {
-		final ClientAuthentication user = getCurrentUser();
-		return this.getUnAnsweredLectureContentIds(roomId, user);
+		final User user = getCurrentUser();
+		return this.getUnAnsweredLectureContentIds(roomId, user.getId());
 	}
 
 	@Override
-	public List<String> getUnAnsweredLectureContentIds(final String roomId, final ClientAuthentication user) {
-		return contentRepository.findUnansweredIdsByRoomIdAndUserOnlyLectureVariant(roomId, user);
+	public List<String> getUnAnsweredLectureContentIds(final String roomId, final String userId) {
+		return contentRepository.findUnansweredIdsByRoomIdAndUserOnlyLectureVariant(roomId, userId);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<String> getUnAnsweredPreparationContentIds(final String roomId) {
-		final ClientAuthentication user = getCurrentUser();
-		return this.getUnAnsweredPreparationContentIds(roomId, user);
+		final User user = getCurrentUser();
+		return this.getUnAnsweredPreparationContentIds(roomId, user.getId());
 	}
 
 	@Override
-	public List<String> getUnAnsweredPreparationContentIds(final String roomId, final ClientAuthentication user) {
-		return contentRepository.findUnansweredIdsByRoomIdAndUserOnlyPreparationVariant(roomId, user);
+	public List<String> getUnAnsweredPreparationContentIds(final String roomId, final String userId) {
+		return contentRepository.findUnansweredIdsByRoomIdAndUserOnlyPreparationVariant(roomId, userId);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public void publishAll(final String roomId, final boolean publish) {
 		/* TODO: resolve redundancies */
-		final ClientAuthentication user = getCurrentUser();
+		final User user = getCurrentUser();
 		final Room room = roomRepository.findOne(roomId);
 		if (!room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
@@ -489,7 +489,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			@CacheEvict(value = "preparationcontentlists", key = "#roomId"),
 			@CacheEvict(value = "flashcardcontentlists", key = "#roomId") })
 	public void publishContents(final String roomId, final boolean publish, Iterable<Content> contents) {
-		final ClientAuthentication user = getCurrentUser();
+		final User user = getCurrentUser();
 		final Room room = roomRepository.findOne(roomId);
 		if (!room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
@@ -514,7 +514,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@PreAuthorize("isAuthenticated()")
 	@CacheEvict(value = "answerlists", allEntries = true)
 	public void deleteAllContentsAnswers(final String roomId) {
-		final ClientAuthentication user = getCurrentUser();
+		final User user = getCurrentUser();
 		final Room room = roomRepository.findOne(roomId);
 		if (!room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();

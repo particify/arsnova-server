@@ -31,12 +31,12 @@ public interface RoomRepository extends CrudRepository<Room, String> {
 	List<Room> findByOwnerId(String ownerId, int start, int limit);
 	List<String> findIdsByOwnerId(String ownerId);
 	List<Room> findAllForPublicPool();
-	List<Room> findForPublicPoolByOwner(ClientAuthentication owner);
-	List<Room> getRoomsWithStatsForOwner(ClientAuthentication owner, int start, int limit);
-	List<Room> getRoomHistoryWithStatsForUser(List<Room> rooms, ClientAuthentication owner);
+	List<Room> findForPublicPoolByOwnerId(String ownerId);
+	List<Room> getRoomsWithStatsForOwnerId(String ownerId, int start, int limit);
+	List<Room> getRoomHistoryWithStatsForUser(List<Room> rooms, String ownerId);
 	List<Room> findInfosForPublicPool();
-	List<Room> findInfosForPublicPoolByOwner(ClientAuthentication owner);
+	List<Room> findInfosForPublicPoolByOwnerId(String ownerId);
 	List<Room> findRoomsByCourses(List<Course> courses);
-	Room importRoom(ClientAuthentication user, ImportExportContainer importRoom);
+	Room importRoom(String userId, ImportExportContainer importRoom);
 	ImportExportContainer exportRoom(String id, Boolean withAnswer, Boolean withFeedbackQuestions);
 }

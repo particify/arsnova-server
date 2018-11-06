@@ -17,7 +17,6 @@
  */
 package de.thm.arsnova.event;
 
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.Room;
@@ -31,14 +30,14 @@ public class NewAnswerEvent extends RoomEvent {
 
 	private final Answer answer;
 
-	private final ClientAuthentication user;
+	private final String userId;
 
 	private final Content content;
 
-	public NewAnswerEvent(Object source, Room room, Answer answer, ClientAuthentication user, Content content) {
+	public NewAnswerEvent(Object source, Room room, Answer answer, String userId, Content content) {
 		super(source, room);
 		this.answer = answer;
-		this.user = user;
+		this.userId = userId;
 		this.content = content;
 	}
 
@@ -51,8 +50,8 @@ public class NewAnswerEvent extends RoomEvent {
 		return answer;
 	}
 
-	public ClientAuthentication getUser() {
-		return user;
+	public String getUserId() {
+		return userId;
 	}
 
 	public Content getContent() {

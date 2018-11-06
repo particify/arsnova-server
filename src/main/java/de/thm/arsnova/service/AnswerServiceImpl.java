@@ -17,21 +17,21 @@
  */
 package de.thm.arsnova.service;
 
+import de.thm.arsnova.event.DeleteAnswerEvent;
+import de.thm.arsnova.event.NewAnswerEvent;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.TextAnswer;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.transport.AnswerQueueElement;
-import de.thm.arsnova.event.DeleteAnswerEvent;
-import de.thm.arsnova.event.NewAnswerEvent;
-import de.thm.arsnova.web.exceptions.NotFoundException;
-import de.thm.arsnova.web.exceptions.UnauthorizedException;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.RoomRepository;
+import de.thm.arsnova.security.User;
+import de.thm.arsnova.web.exceptions.NotFoundException;
+import de.thm.arsnova.web.exceptions.UnauthorizedException;
 import org.ektorp.DbAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,7 +104,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
 
 			// Send NewAnswerEvents ...
 			for (AnswerQueueElement e : elements) {
-				this.publisher.publishEvent(new NewAnswerEvent(this, e.getRoom(), e.getAnswer(), e.getUser(), e.getQuestion()));
+				this.publisher.publishEvent(new NewAnswerEvent(this, e.getRoom(), e.getAnswer(), e.getUserId(), e.getQuestion()));
 			}
 		} catch (final DbAccessException e) {
 			logger.error("Could not bulk save answers from queue.", e);
@@ -128,11 +128,11 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		return answerRepository.findByContentIdUserPiRound(contentId, Answer.class, userService.getCurrentUser(), content.getState().getRound());
+		return answerRepository.findByContentIdUserIdPiRound(contentId, Answer.class, userService.getCurrentUser().getId(), content.getState().getRound());
 	}
 
 	@Override
-	public void getFreetextAnswerAndMarkRead(final String answerId, final ClientAuthentication user) {
+	public void getFreetextAnswerAndMarkRead(final String answerId, final String userId) {
 		final Answer answer = answerRepository.findOne(answerId);
 		if (!(answer instanceof TextAnswer)) {
 			throw new NotFoundException();
@@ -142,7 +142,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
 			return;
 		}
 		final Room room = roomRepository.findOne(textAnswer.getRoomId());
-		if (room.getOwnerId().equals(user.getId())) {
+		if (room.getOwnerId().equals(userId)) {
 			textAnswer.setRead(true);
 			answerRepository.save(textAnswer);
 		}
@@ -290,7 +290,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
 		}
 
 		/* filter answers by active piRound per content */
-		final List<Answer> answers = answerRepository.findByUserRoomId(userService.getCurrentUser(), roomId);
+		final List<Answer> answers = answerRepository.findByUserIdRoomId(userService.getCurrentUser().getId(), roomId);
 		final List<Answer> filteredAnswers = new ArrayList<>();
 		for (final Answer answer : answers) {
 			final Content content = contentIdToContent.get(answer.getContentId());
@@ -319,7 +319,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
 	@PreAuthorize("isAuthenticated()")
 	@CacheEvict(value = "answerlists", key = "#contentId")
 	public Answer saveAnswer(final String contentId, final Answer answer) {
-		final ClientAuthentication user = userService.getCurrentUser();
+		final User user = userService.getCurrentUser();
 		final Content content = contentService.get(contentId);
 		if (content == null) {
 			throw new NotFoundException();
@@ -352,7 +352,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
 			answer.setRound(content.getState().getRound());
 		}
 
-		this.answerQueue.offer(new AnswerQueueElement(room, content, answer, user));
+		this.answerQueue.offer(new AnswerQueueElement(room, content, answer, user.getId()));
 
 		return answer;
 	}
@@ -361,7 +361,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
 	@PreAuthorize("isAuthenticated()")
 	@CacheEvict(value = "answerlists", allEntries = true)
 	public Answer updateAnswer(final Answer answer) {
-		final ClientAuthentication user = userService.getCurrentUser();
+		final User user = userService.getCurrentUser();
 		final Answer realAnswer = this.getMyAnswer(answer.getContentId());
 		if (user == null || realAnswer == null || !user.getId().equals(realAnswer.getCreatorId())) {
 			throw new UnauthorizedException();
@@ -379,7 +379,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
 		answer.setContentId(content.getId());
 		answer.setRoomId(room.getId());
 		answerRepository.save(realAnswer);
-		this.publisher.publishEvent(new NewAnswerEvent(this, room, answer, user, content));
+		this.publisher.publishEvent(new NewAnswerEvent(this, room, answer, user.getId(), content));
 
 		return answer;
 	}
@@ -392,7 +392,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		final ClientAuthentication user = userService.getCurrentUser();
+		final User user = userService.getCurrentUser();
 		final Room room = roomRepository.findOne(content.getRoomId());
 		if (user == null || room == null || !room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();

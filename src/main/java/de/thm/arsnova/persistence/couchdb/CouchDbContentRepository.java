@@ -1,7 +1,6 @@
 package de.thm.arsnova.persistence.couchdb;
 
 import de.thm.arsnova.model.Content;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
 import org.ektorp.BulkDeleteDocument;
@@ -93,11 +92,11 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public List<String> findUnansweredIdsByRoomIdAndUser(final String roomId, final ClientAuthentication user) {
+	public List<String> findUnansweredIdsByRoomIdAndUser(final String roomId, final String userId) {
 		final ViewResult result = db.queryView(createQuery("contentid_by_creatorid_roomid_variant")
 				.designDocId("_design/Answer")
-				.startKey(ComplexKey.of(user.getId(), roomId))
-				.endKey(ComplexKey.of(user.getUsername(), roomId, ComplexKey.emptyObject())));
+				.startKey(ComplexKey.of(userId, roomId))
+				.endKey(ComplexKey.of(userId, roomId, ComplexKey.emptyObject())));
 		final List<String> answeredIds = new ArrayList<>();
 		for (final ViewResult.Row row : result.getRows()) {
 			answeredIds.add(row.getId());
@@ -106,10 +105,10 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public List<String> findUnansweredIdsByRoomIdAndUserOnlyLectureVariant(final String roomId, final ClientAuthentication user) {
+	public List<String> findUnansweredIdsByRoomIdAndUserOnlyLectureVariant(final String roomId, final String userId) {
 		final ViewResult result = db.queryView(createQuery("contentid_round_by_creatorid_roomid_variant")
 				.designDocId("_design/Answer")
-				.key(ComplexKey.of(user.getId(), roomId, "lecture")));
+				.key(ComplexKey.of(userId, roomId, "lecture")));
 		final Map<String, Integer> answeredQuestions = new HashMap<>();
 		for (final ViewResult.Row row : result.getRows()) {
 			answeredQuestions.put(row.getId(), row.getKeyAsNode().get(2).asInt());
@@ -119,10 +118,10 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public List<String> findUnansweredIdsByRoomIdAndUserOnlyPreparationVariant(final String roomId, final ClientAuthentication user) {
+	public List<String> findUnansweredIdsByRoomIdAndUserOnlyPreparationVariant(final String roomId, final String userId) {
 		final ViewResult result = db.queryView(createQuery("contentid_round_by_creatorid_roomid_variant")
 				.designDocId("_design/Answer")
-				.key(ComplexKey.of(user.getId(), roomId, "preparation")));
+				.key(ComplexKey.of(userId, roomId, "preparation")));
 		final Map<String, Integer> answeredQuestions = new HashMap<>();
 		for (final ViewResult.Row row : result.getRows()) {
 			answeredQuestions.put(row.getId(), row.getKeyAsNode().get(2).asInt());

@@ -2,7 +2,6 @@ package de.thm.arsnova.persistence.couchdb;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import de.thm.arsnova.model.Comment;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.migration.v2.CommentReadingCount;
 import de.thm.arsnova.persistence.CommentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
@@ -50,10 +49,10 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	}
 
 	@Override
-	public CommentReadingCount countReadingByRoomIdAndUser(final String roomId, final ClientAuthentication user) {
+	public CommentReadingCount countReadingByRoomIdAndUserId(final String roomId, final String userId) {
 		final ViewResult result = db.queryView(createQuery("by_roomid_creatorid_read")
-				.startKey(ComplexKey.of(roomId, user.getId()))
-				.endKey(ComplexKey.of(roomId, user.getId(), ComplexKey.emptyObject()))
+				.startKey(ComplexKey.of(roomId, userId))
+				.endKey(ComplexKey.of(roomId, userId, ComplexKey.emptyObject()))
 				.reduce(true)
 				.group(true));
 		return calculateReadingCount(result);
@@ -123,7 +122,7 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	}
 
 	@Override
-	public List<Comment> findByRoomIdAndUser(final String roomId, final ClientAuthentication user, final int start, final int limit) {
+	public List<Comment> findByRoomIdAndUserId(final String roomId, final String userId, final int start, final int limit) {
 		final int qSkip = start > 0 ? start : -1;
 		final int qLimit = limit > 0 ? limit : -1;
 
@@ -131,8 +130,8 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 						.skip(qSkip)
 						.limit(qLimit)
 						.descending(true)
-						.startKey(ComplexKey.of(roomId, user.getUsername(), ComplexKey.emptyObject()))
-						.endKey(ComplexKey.of(roomId, user.getUsername()))
+						.startKey(ComplexKey.of(roomId, userId, ComplexKey.emptyObject()))
+						.endKey(ComplexKey.of(roomId, userId))
 						.includeDocs(true),
 				Comment.class);
 //		for (Comment comment : comments) {
@@ -150,10 +149,10 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	}
 
 	@Override
-	public int deleteByRoomIdAndUser(final String roomId, final ClientAuthentication user) {
+	public int deleteByRoomIdAndUserId(final String roomId, final String userId) {
 		final ViewResult result = db.queryView(createQuery("by_roomid_creatorid_read")
-				.startKey(ComplexKey.of(roomId, user.getUsername()))
-				.endKey(ComplexKey.of(roomId, user.getUsername(), ComplexKey.emptyObject())));
+				.startKey(ComplexKey.of(roomId, userId))
+				.endKey(ComplexKey.of(roomId, userId, ComplexKey.emptyObject())));
 
 		return delete(result);
 	}

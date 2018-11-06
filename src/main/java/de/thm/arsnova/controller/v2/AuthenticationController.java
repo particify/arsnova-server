@@ -20,11 +20,11 @@ package de.thm.arsnova.controller.v2;
 import de.thm.arsnova.config.SecurityConfig;
 import de.thm.arsnova.controller.AbstractController;
 import de.thm.arsnova.model.ServiceDescription;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.web.exceptions.UnauthorizedException;
+import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.service.UserService;
+import de.thm.arsnova.web.exceptions.UnauthorizedException;
 import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.exception.HttpAction;
 import org.pac4j.oauth.client.FacebookClient;
@@ -260,7 +260,7 @@ public class AuthenticationController extends AbstractController {
 	@RequestMapping(value = { "/logout" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public String doLogout(final HttpServletRequest request) {
 		final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		userService.removeUserFromMaps(userService.getCurrentUser());
+		userService.removeUserIdFromMaps(userService.getCurrentUser().getId());
 		request.getSession().invalidate();
 		SecurityContextHolder.clearContext();
 		if (auth instanceof CasAuthenticationToken) {
