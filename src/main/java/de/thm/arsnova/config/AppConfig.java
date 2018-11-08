@@ -88,7 +88,7 @@ import java.util.List;
 		"de.thm.arsnova.service",
 		"de.thm.arsnova.web"})
 @Configuration
-@EnableAsync
+@EnableAsync(mode = AdviceMode.ASPECTJ)
 @EnableCaching(mode = AdviceMode.ASPECTJ)
 @EnableScheduling
 @EnableSpringConfigured
