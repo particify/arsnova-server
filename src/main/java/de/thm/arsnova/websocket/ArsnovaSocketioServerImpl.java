@@ -48,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -67,7 +68,7 @@ import java.util.UUID;
  * Web socket implementation based on Socket.io.
  */
 @Component
-public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, ArsnovaEventVisitor {
+public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 
 	@Autowired
 	private FeedbackService feedbackService;
@@ -489,40 +490,40 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		}
 	}
 
-	@Override
-	public void visit(NewQuestionEvent event) {
+	@EventListener
+	public void handleNewQuestion(NewQuestionEvent event) {
 		this.reportContentAvailable(event.getRoom(), Collections.singletonList(event.getQuestion()));
 	}
 
-	@Override
-	public void visit(UnlockQuestionEvent event) {
+	@EventListener
+	public void handleUnlockQuestion(UnlockQuestionEvent event) {
 		this.reportContentAvailable(event.getRoom(), Collections.singletonList(event.getQuestion()));
 	}
 
-	@Override
-	public void visit(LockQuestionEvent event) {
+	@EventListener
+	public void handleLockQuestion(LockQuestionEvent event) {
 		this.reportContentsLocked(event.getRoom(), Collections.singletonList(event.getQuestion()));
 	}
 
-	@Override
-	public void visit(UnlockQuestionsEvent event) {
+	@EventListener
+	public void handleUnlockQuestions(UnlockQuestionsEvent event) {
 		this.reportContentAvailable(event.getRoom(), event.getQuestions());
 	}
 
-	@Override
-	public void visit(LockQuestionsEvent event) {
+	@EventListener
+	public void handleLockQuestions(LockQuestionsEvent event) {
 		this.reportContentsLocked(event.getRoom(), event.getQuestions());
 	}
 
-	@Override
-	public void visit(NewCommentEvent event) {
+	@EventListener
+	public void handleNewComment(NewCommentEvent event) {
 		this.reportCommentAvailable(event.getRoom(), event.getQuestion());
 	}
 
 	@Async
-	@Override
-	@Timed(name = "visit.NewAnswerEvent")
-	public void visit(NewAnswerEvent event) {
+	@EventListener
+	@Timed
+	public void handleNewAnswer(NewAnswerEvent event) {
 		final String roomId = event.getRoom().getId();
 		this.reportAnswersToContentAvailable(event.getRoom(), new Content(event.getContent()));
 		broadcastInRoom(roomId, "countQuestionAnswersByQuestionId", answerService.countAnswersAndAbstentionsInternal(event.getContent().getId()));
@@ -540,9 +541,9 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 	}
 
 	@Async
-	@Override
-	@Timed(name = "visit.DeleteAnswerEvent")
-	public void visit(DeleteAnswerEvent event) {
+	@EventListener
+	@Timed
+	public void handleDeleteAnswer(DeleteAnswerEvent event) {
 		final String roomId = event.getRoom().getId();
 		this.reportAnswersToContentAvailable(event.getRoom(), new Content(event.getQuestion()));
 		// We do not know which user's answer was deleted, so we can't update his 'unanswered' list of questions...
@@ -552,49 +553,49 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 	}
 
 	@Async
-	@Override
-	@Timed(name = "visit.PiRoundDelayedStartEvent")
-	public void visit(PiRoundDelayedStartEvent event) {
+	@EventListener
+	@Timed
+	public void handlePiRoundDelayedStart(PiRoundDelayedStartEvent event) {
 		final String roomId = event.getRoom().getId();
 		broadcastInRoom(roomId, "startDelayedPiRound", event.getPiRoundInformations());
 	}
 
 	@Async
-	@Override
-	@Timed(name = "visit.PiRoundEndEvent")
-	public void visit(PiRoundEndEvent event) {
+	@EventListener
+	@Timed
+	public void handlePiRoundEnd(PiRoundEndEvent event) {
 		final String roomId = event.getRoom().getId();
 		broadcastInRoom(roomId, "endPiRound", event.getPiRoundEndInformations());
 	}
 
 	@Async
-	@Override
-	@Timed(name = "visit.PiRoundCancelEvent")
-	public void visit(PiRoundCancelEvent event) {
+	@EventListener
+	@Timed
+	public void handlePiRoundCancel(PiRoundCancelEvent event) {
 		final String roomId = event.getRoom().getId();
 		broadcastInRoom(roomId, "cancelPiRound", event.getContentId());
 	}
 
-	@Override
-	public void visit(PiRoundResetEvent event) {
+	@EventListener
+	public void handlePiRoundReset(PiRoundResetEvent event) {
 		final String roomId = event.getRoom().getId();
 		broadcastInRoom(roomId, "resetPiRound", event.getPiRoundResetInformations());
 	}
 
-	@Override
-	public void visit(LockVoteEvent event) {
+	@EventListener
+	public void handleLockVote(LockVoteEvent event) {
 		final String roomId = event.getRoom().getId();
 		broadcastInRoom(roomId, "lockVote", event.getVotingAdmission());
 	}
 
-	@Override
-	public void visit(UnlockVoteEvent event) {
+	@EventListener
+	public void handleUnlockVote(UnlockVoteEvent event) {
 		final String roomId = event.getRoom().getId();
 		broadcastInRoom(roomId, "unlockVote", event.getVotingAdmission());
 	}
 
-	@Override
-	public void visit(LockVotesEvent event) {
+	@EventListener
+	public void handleLockVotes(LockVotesEvent event) {
 		List<Content> contents = new ArrayList<>();
 		for (de.thm.arsnova.model.Content q : event.getQuestions()) {
 			contents.add(new Content(q));
@@ -602,8 +603,8 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		broadcastInRoom(event.getRoom().getId(), "lockVotes", contents);
 	}
 
-	@Override
-	public void visit(UnlockVotesEvent event) {
+	@EventListener
+	public void handleUnlockVotes(UnlockVotesEvent event) {
 		List<Content> contents = new ArrayList<>();
 		for (de.thm.arsnova.model.Content q : event.getQuestions()) {
 			contents.add(new Content(q));
@@ -611,8 +612,8 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		broadcastInRoom(event.getRoom().getId(), "unlockVotes", contents);
 	}
 
-	@Override
-	public void visit(FeatureChangeEvent event) {
+	@EventListener
+	public void handleFeatureChange(FeatureChangeEvent event) {
 		final String roomId = event.getRoom().getId();
 		final de.thm.arsnova.model.Room.Settings settings = event.getRoom().getSettings();
 		broadcastInRoom(roomId, "featureChange", toV2Migrator.migrate(settings));
@@ -623,76 +624,34 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		}
 	}
 
-	@Override
-	public void visit(LockFeedbackEvent event) {
+	@EventListener
+	public void handleLockFeedback(LockFeedbackEvent event) {
 		broadcastInRoom(event.getRoom().getId(), "lockFeedback", event.getRoom().getSettings().isFeedbackLocked());
 	}
 
-	@Override
-	public void visit(FlipFlashcardsEvent event) {
+	@EventListener
+	public void handleFlipFlashcards(FlipFlashcardsEvent event) {
 //		broadcastInRoom(event.getRoom().getId(), "flipFlashcards", event.getRoom().getFlipFlashcards());
 	}
 
-	@Override
-	public void visit(DeleteQuestionEvent deleteQuestionEvent) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(DeleteAllQuestionsEvent event) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(DeleteAllQuestionsAnswersEvent deleteAllAnswersEvent) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(DeleteAllPreparationAnswersEvent deleteAllPreparationAnswersEvent) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(DeleteAllLectureAnswersEvent deleteAllLectureAnswersEvent) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(DeleteCommentEvent deleteCommentEvent) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void visit(NewFeedbackEvent event) {
+	@EventListener
+	public void handleNewFeedback(NewFeedbackEvent event) {
 		this.reportUpdatedFeedbackForRoom(event.getRoom());
 	}
 
-	@Override
-	public void visit(DeleteFeedbackForRoomsEvent event) {
+	@EventListener
+	public void handleDeleteFeedbackForRooms(DeleteFeedbackForRoomsEvent event) {
 		this.reportDeletedFeedback(event.getUserId(), event.getSessions());
 
 	}
 
-	@Override
-	public void visit(StatusRoomEvent event) {
+	@EventListener
+	public void handleStatusRoom(StatusRoomEvent event) {
 		this.reportRoomStatus(event.getRoom().getId(), !event.getRoom().isClosed());
 	}
 
-	@Override
-	public void visit(ChangeScoreEvent event) {
+	@EventListener
+	public void handleChangeScore(ChangeScoreEvent event) {
 		broadcastInRoom(event.getRoom().getId(), "learningProgressChange", null);
 	}
-
-	@Override
-	public void visit(NewRoomEvent event) { }
-
-	@Override
-	public void visit(DeleteRoomEvent event) { }
 }

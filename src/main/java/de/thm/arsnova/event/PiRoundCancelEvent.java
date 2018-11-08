@@ -31,9 +31,4 @@ public class PiRoundCancelEvent extends PiRoundEndEvent {
 		super(source, room, content);
 	}
 
-	@Override
-	public void accept(ArsnovaEventVisitor visitor) {
-		visitor.visit(this);
-	}
-
 }

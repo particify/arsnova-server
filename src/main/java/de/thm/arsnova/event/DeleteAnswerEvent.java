@@ -34,11 +34,6 @@ public class DeleteAnswerEvent extends RoomEvent {
 		this.content = content;
 	}
 
-	@Override
-	public void accept(ArsnovaEventVisitor visitor) {
-		visitor.visit(this);
-	}
-
 	public Content getQuestion() {
 		return content;
 	}

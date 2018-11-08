@@ -40,11 +40,6 @@ public class PiRoundResetEvent extends RoomEvent {
 		this.group = content.getGroups().toArray(new String[1])[0];
 	}
 
-	@Override
-	public void accept(ArsnovaEventVisitor visitor) {
-		visitor.visit(this);
-	}
-
 	public String getContentId() {
 		return contentId;
 	}

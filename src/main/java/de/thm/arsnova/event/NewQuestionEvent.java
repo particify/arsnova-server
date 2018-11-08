@@ -37,9 +37,4 @@ public class NewQuestionEvent extends RoomEvent {
 	public Content getQuestion() {
 		return content;
 	}
-
-	@Override
-	public void accept(ArsnovaEventVisitor visitor) {
-		visitor.visit(this);
-	}
 }

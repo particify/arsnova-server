@@ -30,9 +30,4 @@ public class NewFeedbackEvent extends RoomEvent {
 		super(source, room);
 	}
 
-	@Override
-	public void accept(ArsnovaEventVisitor visitor) {
-		visitor.visit(this);
-	}
-
 }

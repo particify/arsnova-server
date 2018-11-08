@@ -34,11 +34,6 @@ public class DeleteCommentEvent extends RoomEvent {
 		this.comment = comment;
 	}
 
-	@Override
-	public void accept(ArsnovaEventVisitor visitor) {
-		visitor.visit(this);
-	}
-
 	public Comment getQuestion() {
 		return comment;
 	}

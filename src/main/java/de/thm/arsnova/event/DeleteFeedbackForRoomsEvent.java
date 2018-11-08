@@ -46,9 +46,4 @@ public class DeleteFeedbackForRoomsEvent extends ArsnovaEvent {
 		return userId;
 	}
 
-	@Override
-	public void accept(ArsnovaEventVisitor visitor) {
-		visitor.visit(this);
-	}
-
 }
