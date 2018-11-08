@@ -34,7 +34,6 @@ import de.thm.arsnova.web.PathApiVersionContentNegotiationStrategy;
 import de.thm.arsnova.web.ResponseInterceptorHandler;
 import de.thm.arsnova.websocket.ArsnovaSocketioServer;
 import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
-import de.thm.arsnova.websocket.ArsnovaSocketioServerListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
@@ -273,11 +272,6 @@ public class AppConfig implements WebMvcConfigurer {
 		socketioServer.setKeystore(socketKeystore);
 		socketioServer.setStorepass(socketKeystorePassword);
 		return socketioServer;
-	}
-
-	@Bean
-	public ArsnovaSocketioServerListener arsnovaSocketListener() {
-		return new ArsnovaSocketioServerListener();
 	}
 
 	@Bean

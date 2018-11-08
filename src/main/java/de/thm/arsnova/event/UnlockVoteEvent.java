@@ -57,9 +57,4 @@ public class UnlockVoteEvent extends RoomEvent {
 		map.put("variant", getGroup());
 		return map;
 	}
-
-	@Override
-	public void accept(ArsnovaEventVisitor visitor) {
-		visitor.visit(this);
-	}
 }

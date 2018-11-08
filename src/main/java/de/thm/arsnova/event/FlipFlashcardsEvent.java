@@ -29,9 +29,4 @@ public class FlipFlashcardsEvent extends RoomEvent {
 	public FlipFlashcardsEvent(Object source, Room room) {
 		super(source, room);
 	}
-
-	@Override
-	public void accept(ArsnovaEventVisitor visitor) {
-		visitor.visit(this);
-	}
 }

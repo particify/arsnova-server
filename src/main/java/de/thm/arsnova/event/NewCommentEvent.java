@@ -38,9 +38,4 @@ public class NewCommentEvent extends RoomEvent {
 		return comment;
 	}
 
-	@Override
-	public void accept(ArsnovaEventVisitor visitor) {
-		visitor.visit(this);
-	}
-
 }

@@ -29,9 +29,4 @@ public class LockFeedbackEvent extends RoomEvent {
 	public LockFeedbackEvent(Object source, Room room) {
 		super(source, room);
 	}
-
-	@Override
-	public void accept(ArsnovaEventVisitor visitor) {
-		visitor.visit(this);
-	}
 }

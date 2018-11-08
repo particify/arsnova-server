@@ -29,9 +29,4 @@ public class DeleteAllPreparationAnswersEvent extends RoomEvent {
 	public DeleteAllPreparationAnswersEvent(Object source, Room room) {
 		super(source, room);
 	}
-
-	@Override
-	public void accept(ArsnovaEventVisitor visitor) {
-		visitor.visit(this);
-	}
 }

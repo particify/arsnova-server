@@ -40,9 +40,4 @@ public class UnlockVotesEvent extends RoomEvent {
 		return this.contents;
 	}
 
-	@Override
-	public void accept(ArsnovaEventVisitor visitor) {
-		visitor.visit(this);
-	}
-
 }

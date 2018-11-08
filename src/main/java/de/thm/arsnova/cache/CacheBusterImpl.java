@@ -19,6 +19,7 @@ package de.thm.arsnova.cache;
 
 import de.thm.arsnova.event.*;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
@@ -26,105 +27,29 @@ import org.springframework.stereotype.Component;
  * caches, e.g, for a specific session.
  */
 @Component
-public class CacheBusterImpl implements CacheBuster, ArsnovaEventVisitor {
+public class CacheBusterImpl implements CacheBuster {
 
 	@CacheEvict(value = "statistics", allEntries = true)
-	@Override
-	public void visit(NewCommentEvent event) { }
+	@EventListener
+	public void handleNewComment(NewCommentEvent event) { }
 
 	@CacheEvict(value = "statistics", allEntries = true)
-	@Override
-	public void visit(DeleteCommentEvent event) { }
-
-	@Override
-	public void visit(NewQuestionEvent event) { }
-
-	@Override
-	public void visit(UnlockQuestionEvent event) { }
-
-	@Override
-	public void visit(UnlockQuestionsEvent newQuestionsEvent) { }
-
-	@Override
-	public void visit(LockQuestionEvent lockQuestionEvent) { }
-
-	@Override
-	public void visit(LockQuestionsEvent lockQuestionsEvent) { }
+	@EventListener
+	public void handleDeleteComment(DeleteCommentEvent event) { }
 
 	@CacheEvict(value = "answerlists", key = "#event.content.id")
-	@Override
-	public void visit(NewAnswerEvent event) { }
-
-	@Override
-	public void visit(DeleteAnswerEvent event) { }
-
-	@Override
-	public void visit(DeleteQuestionEvent event) { }
-
-	@Override
-	public void visit(DeleteAllQuestionsEvent event) { }
-
-	@Override
-	public void visit(DeleteAllQuestionsAnswersEvent event) { }
-
-	@Override
-	public void visit(DeleteAllPreparationAnswersEvent event) { }
-
-	@Override
-	public void visit(DeleteAllLectureAnswersEvent event) { }
-
-	@Override
-	public void visit(NewFeedbackEvent event) { }
-
-	@Override
-	public void visit(DeleteFeedbackForRoomsEvent event) { }
-
-	@Override
-	public void visit(StatusRoomEvent event) { }
+	@EventListener
+	public void handleNewAnswer(NewAnswerEvent event) { }
 
 	@CacheEvict(value = "statistics", allEntries = true)
-	@Override
-	public void visit(ChangeScoreEvent changeLearningProgress) { }
-
-	@Override
-	public void visit(PiRoundDelayedStartEvent piRoundDelayedStartEvent) { }
-
-	@Override
-	public void visit(PiRoundEndEvent piRoundEndEvent) { }
-
-	@Override
-	public void visit(PiRoundCancelEvent piRoundCancelEvent) { }
-
-	@Override
-	public void visit(PiRoundResetEvent piRoundResetEvent) { }
+	@EventListener
+	public void handleChangeScore(ChangeScoreEvent changeLearningProgress) { }
 
 	@CacheEvict(value = "statistics", allEntries = true)
-	@Override
-	public void visit(NewRoomEvent newSessionEvent) { }
+	@EventListener
+	public void handleewRoom(NewRoomEvent newSessionEvent) { }
 
 	@CacheEvict(value = "statistics", allEntries = true)
-	@Override
-	public void visit(DeleteRoomEvent deleteSessionEvent) { }
-
-	@Override
-	public void visit(LockVoteEvent lockVoteEvent) { }
-
-	@Override
-	public void visit(LockVotesEvent lockVotesEvent) { }
-
-	@Override
-	public void visit(UnlockVoteEvent unlockVoteEvent) { }
-
-	@Override
-	public void visit(UnlockVotesEvent unlockVotesEvent) { }
-
-	@Override
-	public void visit(FeatureChangeEvent featureChangeEvent) { }
-
-	@Override
-	public void visit(LockFeedbackEvent lockFeedbackEvent) { }
-
-	@Override
-	public void visit(FlipFlashcardsEvent flipFlashcardsEvent) { }
-
+	@EventListener
+	public void handleDeleteRoom(DeleteRoomEvent deleteSessionEvent) { }
 }

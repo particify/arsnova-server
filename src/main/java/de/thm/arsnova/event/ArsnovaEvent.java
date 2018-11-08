@@ -30,6 +30,4 @@ public abstract class ArsnovaEvent extends ApplicationEvent {
 		super(source);
 	}
 
-	public abstract void accept(ArsnovaEventVisitor visitor);
-
 }

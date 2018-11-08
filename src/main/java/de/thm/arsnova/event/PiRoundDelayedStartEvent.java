@@ -47,11 +47,6 @@ public class PiRoundDelayedStartEvent extends RoomEvent {
 		this.startTime = new Date();
 	}
 
-	@Override
-	public void accept(ArsnovaEventVisitor visitor) {
-		visitor.visit(this);
-	}
-
 	public String getQuestionId() {
 		return questionId;
 	}

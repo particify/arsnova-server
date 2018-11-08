@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
@@ -31,7 +32,7 @@ import org.springframework.stereotype.Component;
  * This class additionally clears all score caches and reports this via event system.
  */
 @Component
-public class ScoreCalculatorFactoryImpl implements ArsnovaEventVisitor, ScoreCalculatorFactory, ApplicationEventPublisherAware {
+public class ScoreCalculatorFactoryImpl implements ScoreCalculatorFactory, ApplicationEventPublisherAware {
 
 	@Autowired
 	private SessionStatisticsRepository sessionStatisticsRepository;
@@ -50,141 +51,87 @@ public class ScoreCalculatorFactoryImpl implements ArsnovaEventVisitor, ScoreCal
 		return scoreCalculator;
 	}
 
-	@Override
-	public void visit(NewCommentEvent event) { }
-
-	@Override
-	public void visit(DeleteCommentEvent deleteCommentEvent) { }
-
 	@CacheEvict(value = "score", key = "#event.Room")
-	@Override
-	public void visit(NewQuestionEvent event) {
+	@EventListener
+	public void handleNewQuestion(NewQuestionEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoom()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.Room")
-	@Override
-	public void visit(UnlockQuestionEvent event) {
+	@EventListener
+	public void handleUnlockQuestion(UnlockQuestionEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoom()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.Room")
-	@Override
-	public void visit(UnlockQuestionsEvent event) {
+	@EventListener
+	public void handleUnlockQuestions(UnlockQuestionsEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoom()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.Room")
-	@Override
-	public void visit(LockQuestionEvent event) {
+	@EventListener
+	public void handleLockQuestion(LockQuestionEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoom()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.Room")
-	@Override
-	public void visit(LockQuestionsEvent event) {
+	@EventListener
+	public void handleLockQuestions(LockQuestionsEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoom()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.Room")
-	@Override
-	public void visit(NewAnswerEvent event) {
+	@EventListener
+	public void handleNewAnswer(NewAnswerEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoom()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.Room")
-	@Override
-	public void visit(DeleteAnswerEvent event) {
+	@EventListener
+	public void handleDeleteAnswer(DeleteAnswerEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoom()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.Room")
-	@Override
-	public void visit(DeleteQuestionEvent event) {
+	@EventListener
+	public void handleDeleteQuestion(DeleteQuestionEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoom()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.Room")
-	@Override
-	public void visit(DeleteAllQuestionsEvent event) {
+	@EventListener
+	public void handleDeleteAllQuestions(DeleteAllQuestionsEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoom()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.Room")
-	@Override
-	public void visit(DeleteAllQuestionsAnswersEvent event) {
+	@EventListener
+	public void handleDeleteAllQuestionsAnswers(DeleteAllQuestionsAnswersEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoom()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.Room")
-	@Override
-	public void visit(DeleteAllPreparationAnswersEvent event) {
+	@EventListener
+	public void handleDeleteAllPreparationAnswers(DeleteAllPreparationAnswersEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoom()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.Room")
-	@Override
-	public void visit(DeleteAllLectureAnswersEvent event) {
+	@EventListener
+	public void handleDeleteAllLectureAnswers(DeleteAllLectureAnswersEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoom()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.Room")
-	@Override
-	public void visit(PiRoundResetEvent event) {
+	@EventListener
+	public void handlePiRoundReset(PiRoundResetEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoom()));
 	}
-
-	@Override
-	public void visit(NewFeedbackEvent newFeedbackEvent) { }
-
-	@Override
-	public void visit(DeleteFeedbackForRoomsEvent deleteFeedbackEvent) { }
-
-	@Override
-	public void visit(StatusRoomEvent statusSessionEvent) { }
-
-	@Override
-	public void visit(ChangeScoreEvent changeLearningProgress) { }
-
-	@Override
-	public void visit(PiRoundDelayedStartEvent piRoundDelayedStartEvent) { }
-
-	@Override
-	public void visit(PiRoundEndEvent piRoundEndEvent) { }
-
-	@Override
-	public void visit(PiRoundCancelEvent piRoundCancelEvent) { }
-
-	@Override
-	public void visit(NewRoomEvent event) { }
-
-	@Override
-	public void visit(DeleteRoomEvent event) { }
 
 	@Override
 	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
 		this.publisher = publisher;
 	}
-
-	@Override
-	public void visit(LockVoteEvent lockVoteEvent) { }
-
-	@Override
-	public void visit(LockVotesEvent lockVotesEvent) { }
-
-	@Override
-	public void visit(UnlockVoteEvent unlockVoteEvent) { }
-
-	@Override
-	public void visit(UnlockVotesEvent unlockVotesEvent) { }
-
-	@Override
-	public void visit(FeatureChangeEvent featureChangeEvent) { }
-
-	@Override
-	public void visit(LockFeedbackEvent lockFeedbackEvent) { }
-
-	@Override
-	public void visit(FlipFlashcardsEvent flipFlashcardsEvent) { }
 
 }
