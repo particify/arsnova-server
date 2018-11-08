@@ -229,12 +229,16 @@ public class FromV2Migrator {
 	}
 
 	public de.thm.arsnova.model.Answer migrate(final Answer from, final de.thm.arsnova.model.Content content) {
+		de.thm.arsnova.model.Answer answer;
 		if (content instanceof ChoiceQuestionContent) {
 			ChoiceQuestionContent choiceQuestionContent = (ChoiceQuestionContent) content;
-			return migrate(from, choiceQuestionContent.getOptions(), choiceQuestionContent.isMultiple());
+			answer = migrate(from, choiceQuestionContent.getOptions(), choiceQuestionContent.isMultiple());
 		} else {
-			return migrate(from);
+			answer = migrate(from);
 		}
+		answer.setFormat(content.getFormat());
+
+		return answer;
 	}
 
 	public ChoiceAnswer migrate(final Answer from, final List<ChoiceQuestionContent.AnswerOption> options, final boolean multiple) {
