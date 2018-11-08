@@ -18,17 +18,17 @@
 package de.thm.arsnova.service;
 
 import com.codahale.metrics.annotation.Gauge;
+import de.thm.arsnova.model.ClientAuthentication;
 import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.web.exceptions.BadRequestException;
-import de.thm.arsnova.web.exceptions.NotFoundException;
-import de.thm.arsnova.web.exceptions.UnauthorizedException;
 import de.thm.arsnova.persistence.UserRepository;
 import de.thm.arsnova.security.GuestUserDetailsService;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.security.jwt.JwtService;
 import de.thm.arsnova.security.jwt.JwtToken;
+import de.thm.arsnova.web.exceptions.BadRequestException;
+import de.thm.arsnova.web.exceptions.NotFoundException;
+import de.thm.arsnova.web.exceptions.UnauthorizedException;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -91,10 +91,10 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-	private static final ConcurrentHashMap<UUID, ClientAuthentication> socketIdToUser = new ConcurrentHashMap<>();
+	private static final ConcurrentHashMap<UUID, String> socketIdToUserId = new ConcurrentHashMap<>();
 
 	/* used for Socket.IO online check solution (new) */
-	private static final ConcurrentHashMap<ClientAuthentication, String> userToRoomId = new ConcurrentHashMap<>();
+	private static final ConcurrentHashMap<String, String> userIdToRoomId = new ConcurrentHashMap<>();
 
 	private UserRepository userRepository;
 	private JwtService jwtService;
@@ -194,24 +194,18 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 	@Override
 	public UserProfile getCurrentUserProfile() {
-		final ClientAuthentication authentication = getCurrentUser();
-		return getByAuthProviderAndLoginId(authentication.getAuthProvider(), authentication.getUsername());
+		final User user = getCurrentUser();
+		return getByAuthProviderAndLoginId(user.getAuthProvider(), user.getUsername());
 	}
 
 	@Override
-	public ClientAuthentication getCurrentUser() {
+	public User getCurrentUser() {
 		final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication == null || authentication.getPrincipal() == null) {
+		if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
 			return null;
 		}
 
-		ClientAuthentication user = new ClientAuthentication(authentication);
-		if (user == null || "anonymous".equals(user.getUsername())) {
-			throw new UnauthorizedException();
-		}
-		user.setAdmin(Arrays.asList(adminAccounts).contains(user.getUsername()));
-
-		return user;
+		return (User) authentication.getPrincipal();
 	}
 
 	@Override
@@ -224,8 +218,8 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		String jwt = authentication instanceof JwtToken ?
 				(String) authentication.getCredentials() : jwtService.createSignedToken(user);
 
-		de.thm.arsnova.model.ClientAuthentication clientAuthentication =
-				new de.thm.arsnova.model.ClientAuthentication(user.getId(), user.getUsername(),
+		ClientAuthentication clientAuthentication =
+				new ClientAuthentication(user.getId(), user.getUsername(),
 						user.getAuthProvider(), jwt);
 
 		return clientAuthentication;
@@ -257,36 +251,36 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	public ClientAuthentication getUserToSocketId(final UUID socketId) {
-		return socketIdToUser.get(socketId);
+	public String getUserIdToSocketId(final UUID socketId) {
+		return socketIdToUserId.get(socketId);
 	}
 
 	@Override
-	public void putUserToSocketId(final UUID socketId, final ClientAuthentication user) {
-		socketIdToUser.put(socketId, user);
+	public void putUserIdToSocketId(final UUID socketId, final String userId) {
+		socketIdToUserId.put(socketId, userId);
 	}
 
 	@Override
-	public Set<Map.Entry<UUID, ClientAuthentication>> getSocketIdToUser() {
-		return socketIdToUser.entrySet();
+	public Set<Entry<UUID, String>> getSocketIdToUserId() {
+		return socketIdToUserId.entrySet();
 	}
 
 	@Override
 	public void removeUserToSocketId(final UUID socketId) {
-		socketIdToUser.remove(socketId);
+		socketIdToUserId.remove(socketId);
 	}
 
 	@Override
-	public boolean isUserInRoom(final ClientAuthentication user, final String expectedRoomId) {
-		String actualRoomId = userToRoomId.get(user);
+	public boolean isUserInRoom(final String userId, final String expectedRoomId) {
+		String actualRoomId = userIdToRoomId.get(userId);
 
 		return actualRoomId != null && actualRoomId.equals(expectedRoomId);
 	}
 
 	@Override
-	public Set<ClientAuthentication> getUsersByRoomId(final String roomId) {
-		final Set<ClientAuthentication> result = new HashSet<>();
-		for (final Entry<ClientAuthentication, String> e : userToRoomId.entrySet()) {
+	public Set<String> getUsersByRoomId(final String roomId) {
+		final Set<String> result = new HashSet<>();
+		for (final Entry<String, String> e : userIdToRoomId.entrySet()) {
 			if (e.getValue().equals(roomId)) {
 				result.add(e.getKey());
 			}
@@ -298,26 +292,26 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public void addUserToRoomBySocketId(final UUID socketId, final String roomId) {
-		final ClientAuthentication user = socketIdToUser.get(socketId);
-		userToRoomId.put(user, roomId);
+		final String userId = socketIdToUserId.get(socketId);
+		userIdToRoomId.put(userId, roomId);
 	}
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public void removeUserFromRoomBySocketId(final UUID socketId) {
-		final ClientAuthentication user = socketIdToUser.get(socketId);
-		if (null == user) {
+		final String userId = socketIdToUserId.get(socketId);
+		if (null == userId) {
 			logger.warn("No user exists for socket {}.", socketId);
 
 			return;
 		}
-		userToRoomId.remove(user);
+		userIdToRoomId.remove(userId);
 	}
 
 	@Override
 	public String getRoomIdByUserId(final String userId) {
-		for (final Entry<ClientAuthentication, String> entry  : userToRoomId.entrySet()) {
-			if (entry.getKey().getId().equals(userId)) {
+		for (final Entry<String, String> entry  : userIdToRoomId.entrySet()) {
+			if (entry.getKey().equals(userId)) {
 				return entry.getValue();
 			}
 		}
@@ -331,16 +325,16 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	public void removeUserFromMaps(final ClientAuthentication user) {
-		if (user != null) {
-			userToRoomId.remove(user);
+	public void removeUserIdFromMaps(final String userId) {
+		if (userId != null) {
+			userIdToRoomId.remove(userId);
 		}
 	}
 
 	@Override
 	@Gauge
 	public int loggedInUsers() {
-		return userToRoomId.size();
+		return userIdToRoomId.size();
 	}
 
 	@Override
@@ -517,7 +511,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 	@Override
 	public UserProfile deleteByUsername(String username) {
-		ClientAuthentication user = getCurrentUser();
+		User user = getCurrentUser();
 		if (!user.getUsername().equals(username.toLowerCase())
 				&& !SecurityContextHolder.getContext().getAuthentication().getAuthorities()
 						.contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {

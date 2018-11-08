@@ -28,22 +28,21 @@ import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
 import com.corundumstudio.socketio.protocol.Packet;
 import com.corundumstudio.socketio.protocol.PacketType;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
+import de.thm.arsnova.event.*;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.ScoreOptions;
 import de.thm.arsnova.model.migration.ToV2Migrator;
-import de.thm.arsnova.event.*;
+import de.thm.arsnova.service.AnswerService;
+import de.thm.arsnova.service.CommentService;
+import de.thm.arsnova.service.ContentService;
+import de.thm.arsnova.service.FeedbackService;
+import de.thm.arsnova.service.RoomService;
+import de.thm.arsnova.service.UserService;
 import de.thm.arsnova.web.exceptions.NoContentException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 import de.thm.arsnova.web.exceptions.UnauthorizedException;
-import de.thm.arsnova.service.AnswerService;
-import de.thm.arsnova.service.CommentService;
-import de.thm.arsnova.service.FeedbackService;
-import de.thm.arsnova.service.ContentService;
-import de.thm.arsnova.service.RoomService;
-import de.thm.arsnova.service.UserService;
-import de.thm.arsnova.websocket.message.Feedback;
 import de.thm.arsnova.websocket.message.Content;
+import de.thm.arsnova.websocket.message.Feedback;
 import de.thm.arsnova.websocket.message.Room;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,21 +144,21 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 			@Override
 			@Timed(name = "setFeedbackEvent.onData")
 			public void onData(final SocketIOClient client, final Feedback data, final AckRequest ackSender) {
-				final ClientAuthentication u = userService.getUserToSocketId(client.getSessionId());
-				if (u == null) {
+				final String userId = userService.getUserIdToSocketId(client.getSessionId());
+				if (userId == null) {
 					logger.info("Client {} tried to send feedback but is not mapped to a user", client.getSessionId());
 
 					return;
 				}
-				final String roomId = userService.getRoomIdByUserId(u.getId());
-				final de.thm.arsnova.model.Room room = roomService.getInternal(roomId, u);
+				final String roomId = userService.getRoomIdByUserId(userId);
+				final de.thm.arsnova.model.Room room = roomService.getInternal(roomId, userId);
 
 				if (room.getSettings().isFeedbackLocked()) {
-					logger.debug("Feedback ignored: User: {}, Room Id: {}, Feedback: {}", u, roomId, data.getValue());
+					logger.debug("Feedback ignored: User: {}, Room Id: {}, Feedback: {}", userId, roomId, data.getValue());
 				} else {
-					logger.debug("Feedback received: User: {}, Room Id: {}, Feedback: {}", u, roomId, data.getValue());
+					logger.debug("Feedback received: User: {}, Room Id: {}, Feedback: {}", userId, roomId, data.getValue());
 					if (null != roomId) {
-						feedbackService.save(roomId, data.getValue(), u);
+						feedbackService.save(roomId, data.getValue(), userId);
 					}
 				}
 			}
@@ -169,13 +168,13 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 			@Override
 			@Timed(name = "setSessionEvent.onData")
 			public void onData(final SocketIOClient client, final Room room, final AckRequest ackSender) {
-				final ClientAuthentication u = userService.getUserToSocketId(client.getSessionId());
-				if (null == u) {
+				final String userId = userService.getUserIdToSocketId(client.getSessionId());
+				if (null == userId) {
 					logger.info("Client {} requested to join room but is not mapped to a user", client.getSessionId());
 
 					return;
 				}
-				final String oldRoomId = userService.getRoomIdByUserId(u.getId());
+				final String oldRoomId = userService.getRoomIdByUserId(userId);
 				if (null != room.getKeyword()) {
 					if (room.getKeyword().equals(oldRoomId)) {
 						return;
@@ -186,7 +185,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 						/* active user count has to be sent to the client since the broadcast is
 						 * not always sent as long as the polling solution is active simultaneously */
 						reportActiveUserCountForRoom(roomId);
-						reportRoomDataToClient(roomId, u, client);
+						reportRoomDataToClient(roomId, userId, client);
 					}
 				}
 				if (null != oldRoomId) {
@@ -206,7 +205,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 					SocketIOClient client,
 					Comment comment,
 					AckRequest ackRequest) {
-				final ClientAuthentication user = userService.getUserToSocketId(client.getSessionId());
+				final String user = userService.getUserIdToSocketId(client.getSessionId());
 				try {
 					commentService.getAndMarkRead(comment.getId());
 				} catch (IOException | NotFoundException | UnauthorizedException e) {
@@ -218,11 +217,11 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		server.addEventListener("readFreetextAnswer", String.class, new DataListener<String>() {
 			@Override
 			public void onData(SocketIOClient client, String answerId, AckRequest ackRequest) {
-				final ClientAuthentication user = userService.getUserToSocketId(client.getSessionId());
+				final String userId = userService.getUserIdToSocketId(client.getSessionId());
 				try {
-					answerService.getFreetextAnswerAndMarkRead(answerId, user);
+					answerService.getFreetextAnswerAndMarkRead(answerId, userId);
 				} catch (NotFoundException | UnauthorizedException e) {
-					logger.error("Marking answer {} as read failed for user {} with exception {}", answerId, user, e.getMessage());
+					logger.error("Marking answer {} as read failed for user {} with exception {}", answerId, userId, e.getMessage());
 				}
 			}
 		});
@@ -261,11 +260,11 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 				if (
 						userService == null
 						|| client.getSessionId() == null
-						|| userService.getUserToSocketId(client.getSessionId()) == null
+						|| userService.getUserIdToSocketId(client.getSessionId()) == null
 						) {
 					return;
 				}
-				final String userId = userService.getUserToSocketId(client.getSessionId()).getId();
+				final String userId = userService.getUserIdToSocketId(client.getSessionId());
 				final String roomId = userService.getRoomIdByUserId(userId);
 				userService.removeUserFromRoomBySocketId(client.getSessionId());
 				userService.removeUserToSocketId(client.getSessionId());
@@ -339,28 +338,28 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		this.useSSL = useSSL;
 	}
 
-	public void reportDeletedFeedback(final ClientAuthentication user, final Set<de.thm.arsnova.model.Room> rooms) {
+	public void reportDeletedFeedback(final String userId, final Set<de.thm.arsnova.model.Room> rooms) {
 		final List<String> roomShortIds = new ArrayList<>();
 		for (final de.thm.arsnova.model.Room room : rooms) {
 			roomShortIds.add(room.getShortId());
 		}
-		this.sendToUser(user, "feedbackReset", roomShortIds);
+		this.sendToUser(userId, "feedbackReset", roomShortIds);
 	}
 
-	private List<UUID> findConnectionIdForUser(final ClientAuthentication user) {
+	private List<UUID> findConnectionIdForUserId(final String userId) {
 		final List<UUID> result = new ArrayList<>();
-		for (final Entry<UUID, ClientAuthentication> e : userService.getSocketIdToUser()) {
+		for (final Entry<UUID, String> e : userService.getSocketIdToUserId()) {
 			final UUID someUsersConnectionId = e.getKey();
-			final ClientAuthentication someUser = e.getValue();
-			if (someUser.equals(user)) {
+			final String someUser = e.getValue();
+			if (someUser.equals(userId)) {
 				result.add(someUsersConnectionId);
 			}
 		}
 		return result;
 	}
 
-	private void sendToUser(final ClientAuthentication user, final String event, Object data) {
-		final List<UUID> connectionIds = findConnectionIdForUser(user);
+	private void sendToUser(final String userId, final String event, Object data) {
+		final List<UUID> connectionIds = findConnectionIdForUserId(userId);
 		if (connectionIds.isEmpty()) {
 			return;
 		}
@@ -375,12 +374,12 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 	 * Currently only sends the feedback data to the client. Should be used for all
 	 * relevant Socket.IO data, the client needs to know after joining a session.
 	 */
-	public void reportRoomDataToClient(final String roomId, final ClientAuthentication user, final SocketIOClient client) {
-		final de.thm.arsnova.model.Room room = roomService.getInternal(roomId, user);
+	public void reportRoomDataToClient(final String roomId, final String userId, final SocketIOClient client) {
+		final de.thm.arsnova.model.Room room = roomService.getInternal(roomId, userId);
 		final de.thm.arsnova.model.Room.Settings settings = room.getSettings();
 
-		client.sendEvent("unansweredLecturerQuestions", contentService.getUnAnsweredLectureContentIds(roomId, user));
-		client.sendEvent("unansweredPreparationQuestions", contentService.getUnAnsweredPreparationContentIds(roomId, user));
+		client.sendEvent("unansweredLecturerQuestions", contentService.getUnAnsweredLectureContentIds(roomId, userId));
+		client.sendEvent("unansweredPreparationQuestions", contentService.getUnAnsweredPreparationContentIds(roomId, userId));
 		/* FIXME: Content variant is ignored for now */
 		client.sendEvent("countLectureQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
 		client.sendEvent("countPreparationQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
@@ -414,15 +413,15 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		}
 	}
 
-	public void reportFeedbackForUserInRoom(final Room room, final ClientAuthentication user) {
-		final de.thm.arsnova.model.Feedback fb = feedbackService.getByRoomId(room.getKeyword());
+	public void reportFeedbackForUserInRoom(final String roomId, final String userId) {
+		final de.thm.arsnova.model.Feedback fb = feedbackService.getByRoomId(roomId);
 		Long averageFeedback;
 		try {
-			averageFeedback = feedbackService.calculateRoundedAverageFeedback(room.getKeyword());
+			averageFeedback = feedbackService.calculateRoundedAverageFeedback(roomId);
 		} catch (final NoContentException e) {
 			averageFeedback = null;
 		}
-		final List<UUID> connectionIds = findConnectionIdForUser(user);
+		final List<UUID> connectionIds = findConnectionIdForUserId(userId);
 		if (connectionIds.isEmpty()) {
 			return;
 		}
@@ -480,11 +479,11 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		 * all connected clients and if send feedback, if user is in current
 		 * room
 		 */
-		final Set<ClientAuthentication> users = userService.getUsersByRoomId(roomId);
+		final Set<String> userIds = userService.getUsersByRoomId(roomId);
 
 		for (final SocketIOClient c : server.getAllClients()) {
-			final ClientAuthentication u = userService.getUserToSocketId(c.getSessionId());
-			if (u != null && users.contains(u)) {
+			final String userId = userService.getUserIdToSocketId(c.getSessionId());
+			if (userId != null && userIds.contains(userId)) {
 				c.sendEvent(eventName, data);
 			}
 		}
@@ -534,9 +533,9 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 		// Update the unanswered count for the content variant that was answered.
 		final de.thm.arsnova.model.Content content = event.getContent();
 		if (content.getGroups().contains("lecture")) {
-			sendToUser(event.getUser(), "unansweredLecturerQuestions", contentService.getUnAnsweredLectureContentIds(roomId, event.getUser()));
+			sendToUser(event.getUserId(), "unansweredLecturerQuestions", contentService.getUnAnsweredLectureContentIds(roomId, event.getUserId()));
 		} else if (content.getGroups().contains("preparation")) {
-			sendToUser(event.getUser(), "unansweredPreparationQuestions", contentService.getUnAnsweredPreparationContentIds(roomId, event.getUser()));
+			sendToUser(event.getUserId(), "unansweredPreparationQuestions", contentService.getUnAnsweredPreparationContentIds(roomId, event.getUserId()));
 		}
 	}
 
@@ -677,7 +676,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer, Arsnova
 
 	@Override
 	public void visit(DeleteFeedbackForRoomsEvent event) {
-		this.reportDeletedFeedback(event.getUser(), event.getSessions());
+		this.reportDeletedFeedback(event.getUserId(), event.getSessions());
 
 	}
 

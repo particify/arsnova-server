@@ -1,15 +1,15 @@
 package de.thm.arsnova.service;
 
+import de.thm.arsnova.event.DeleteCommentEvent;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.migration.v2.CommentReadingCount;
-import de.thm.arsnova.event.DeleteCommentEvent;
+import de.thm.arsnova.persistence.CommentRepository;
+import de.thm.arsnova.persistence.RoomRepository;
+import de.thm.arsnova.security.User;
 import de.thm.arsnova.web.exceptions.ForbiddenException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 import de.thm.arsnova.web.exceptions.UnauthorizedException;
-import de.thm.arsnova.persistence.CommentRepository;
-import de.thm.arsnova.persistence.RoomRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -56,7 +56,7 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 	@PreAuthorize("isAuthenticated()")
 	public void prepareCreate(final Comment comment) {
 		final Room room = roomRepository.findOne(comment.getRoomId());
-		final ClientAuthentication user = userService.getCurrentUser();
+		final User user = userService.getCurrentUser();
 		comment.setCreatorId(user.getId());
 		comment.setRead(false);
 		if (comment.getTimestamp() == null) {
@@ -86,11 +86,11 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		if (room == null) {
 			throw new UnauthorizedException();
 		}
-		final ClientAuthentication user = getCurrentUser();
+		final User user = getCurrentUser();
 		if (room.getOwnerId().equals(user.getId())) {
 			commentRepository.deleteByRoomId(room.getId());
 		} else {
-			commentRepository.deleteByRoomIdAndUser(room.getId(), user);
+			commentRepository.deleteByRoomIdAndUserId(room.getId(), user.getId());
 		}
 	}
 
@@ -106,12 +106,12 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		if (username == null) {
 			return commentRepository.countReadingByRoomId(roomId);
 		} else {
-			ClientAuthentication currentUser = userService.getCurrentUser();
-			if (!currentUser.getUsername().equals(username)) {
+			User user = userService.getCurrentUser();
+			if (!user.getUsername().equals(username)) {
 				throw new ForbiddenException();
 			}
 
-			return commentRepository.countReadingByRoomIdAndUser(roomId, currentUser);
+			return commentRepository.countReadingByRoomIdAndUserId(roomId, user.getId());
 		}
 	}
 
@@ -119,11 +119,11 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 	@PreAuthorize("isAuthenticated()")
 	public List<Comment> getByRoomId(final String roomId, final int offset, final int limit) {
 		final Room room = roomRepository.findOne(roomId);
-		final ClientAuthentication user = getCurrentUser();
+		final User user = getCurrentUser();
 		if (room.getOwnerId().equals(user.getId())) {
 			return commentRepository.findByRoomId(room.getId(), offset, limit);
 		} else {
-			return commentRepository.findByRoomIdAndUser(room.getId(), user, offset, limit);
+			return commentRepository.findByRoomIdAndUserId(room.getId(), user.getId(), offset, limit);
 		}
 	}
 
@@ -141,8 +141,8 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		return comment;
 	}
 
-	private ClientAuthentication getCurrentUser() {
-		final ClientAuthentication user = userService.getCurrentUser();
+	private User getCurrentUser() {
+		final User user = userService.getCurrentUser();
 		if (user == null) {
 			throw new UnauthorizedException();
 		}

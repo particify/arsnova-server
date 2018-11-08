@@ -17,7 +17,6 @@
  */
 package de.thm.arsnova.event;
 
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.Room;
 
 import java.util.Set;
@@ -31,20 +30,20 @@ public class DeleteFeedbackForRoomsEvent extends ArsnovaEvent {
 
 	private final Set<Room> sessions;
 
-	private final ClientAuthentication user;
+	private final String userId;
 
-	public DeleteFeedbackForRoomsEvent(Object source, Set<Room> rooms, ClientAuthentication user) {
+	public DeleteFeedbackForRoomsEvent(Object source, Set<Room> rooms, String userId) {
 		super(source);
 		this.sessions = rooms;
-		this.user = user;
+		this.userId = userId;
 	}
 
 	public Set<Room> getSessions() {
 		return sessions;
 	}
 
-	public ClientAuthentication getUser() {
-		return user;
+	public String getUserId() {
+		return userId;
 	}
 
 	@Override

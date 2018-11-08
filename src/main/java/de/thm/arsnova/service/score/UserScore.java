@@ -17,19 +17,17 @@
  */
 package de.thm.arsnova.service.score;
 
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
-
 /**
  * The learning progress answer score of a particular user.
  */
 public class UserScore {
 
-	private String username;
+	private String userId;
 
 	private int score;
 
-	public UserScore(String username, int score) {
-		this.username = username;
+	public UserScore(String userId, int score) {
+		this.userId = userId;
 		this.score = score;
 	}
 
@@ -41,11 +39,11 @@ public class UserScore {
 		return score;
 	}
 
-	public boolean isUser(ClientAuthentication user) {
-		return user.getUsername().equals(username);
+	public boolean isUser(String userId) {
+		return this.userId.equals(userId);
 	}
 
-	public String getUsername() {
-		return username;
+	public String getUserId() {
+		return userId;
 	}
 }

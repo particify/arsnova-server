@@ -21,10 +21,10 @@ import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.connector.model.UserRole;
 import de.thm.arsnova.controller.AbstractController;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
+import de.thm.arsnova.security.User;
+import de.thm.arsnova.service.UserService;
 import de.thm.arsnova.web.exceptions.NotImplementedException;
 import de.thm.arsnova.web.exceptions.UnauthorizedException;
-import de.thm.arsnova.service.UserService;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,7 +55,7 @@ public class CourseController extends AbstractController {
 			@RequestParam(value = "sortby", defaultValue = "name") final String sortby
 			) {
 
-		final ClientAuthentication currentUser = userService.getCurrentUser();
+		final User currentUser = userService.getCurrentUser();
 
 		if (currentUser == null || currentUser.getUsername() == null) {
 			throw new UnauthorizedException();

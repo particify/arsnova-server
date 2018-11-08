@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.security;
 
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;

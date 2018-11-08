@@ -42,9 +42,9 @@ public class QuestionBasedScoreCalculatorTest {
 		return questionId;
 	}
 
-	private void addAnswer(String questionId, ClientAuthentication user, int points) {
+	private void addAnswer(String questionId, String userId, int points) {
 		final int piRound = 1;
-		courseScore.addAnswer(questionId, piRound, user.getUsername(), points);
+		courseScore.addAnswer(questionId, piRound, userId, points);
 	}
 
 	@Before
@@ -62,32 +62,32 @@ public class QuestionBasedScoreCalculatorTest {
 	public void shouldIgnoreQuestionsWithoutCorrectAnswers() {
 		final int questionMaxValue = 0;
 		final int userScore = 0;
-		ClientAuthentication user = new TestClient("username");
+		String userId = "user1";
 		String questionId = this.addQuestion("lecture", questionMaxValue);
-		this.addAnswer(questionId, user, userScore);
+		this.addAnswer(questionId, userId, userScore);
 
 		ScoreStatistics expected = new ScoreStatistics();
 		expected.setCourseProgress(0);
 		expected.setMyProgress(0);
 		expected.setNumQuestions(0);
-		ScoreStatistics actual = lp.getMyProgress(null, user);
+		ScoreStatistics actual = lp.getMyProgress(null, userId);
 
 		assertEquals(expected, actual);
 	}
 
 	@Test
 	public void shouldIgnoreQuestionsWithoutCorrectAnswersInQuestionCount() {
-		ClientAuthentication user = new TestClient("username");
+		String userId = "user";
 		courseScore.addQuestion("question-without-correct-answers", "lecture", 1, 0);
 		courseScore.addQuestion("question-with-correct-answers", "lecture", 1, 50);
-		courseScore.addAnswer("question-without-correct-answers", 1, user.getUsername(), 0);
-		courseScore.addAnswer("question-with-correct-answers", 1, user.getUsername(), 50);
+		courseScore.addAnswer("question-without-correct-answers", 1, userId, 0);
+		courseScore.addAnswer("question-with-correct-answers", 1, userId, 50);
 
 		ScoreStatistics expected = new ScoreStatistics();
 		expected.setCourseProgress(100);
 		expected.setMyProgress(100);
 		expected.setNumQuestions(1);
-		ScoreStatistics actual = lp.getMyProgress(null, user);
+		ScoreStatistics actual = lp.getMyProgress(null, userId);
 
 		assertEquals(expected, actual);
 	}
@@ -99,9 +99,9 @@ public class QuestionBasedScoreCalculatorTest {
 	public void shouldCalculatePercentageOfOneQuestionWithSomeWrongAnswers() {
 		String questionId = this.addQuestion("lecture", 10);
 		for (int i = 0; i < 99; i++) {
-			this.addAnswer(questionId, new TestClient("user"+i), 10);
+			this.addAnswer(questionId, "user" + i, 10);
 		}
-		this.addAnswer(questionId, new TestClient("user-with-a-wrong-answer"), 0);
+		this.addAnswer(questionId, "user-with-a-wrong-answer", 0);
 
 		int expected = 99;
 		int actual = lp.getCourseProgress(null).getCourseProgress();
@@ -120,13 +120,13 @@ public class QuestionBasedScoreCalculatorTest {
 		String q1 = this.addQuestion("lecture", 10);
 		String q2 = this.addQuestion("lecture", 10);
 		// two users
-		ClientAuthentication u1 = new TestClient("user1");
-		ClientAuthentication u2 = new TestClient("user2");
+		String userId1 = "user1";
+		String userId2 = "user2";
 		// four answers, last one is wrong
-		this.addAnswer(q1, u1, 10);
-		this.addAnswer(q1, u2, 10);
-		this.addAnswer(q2, u1, 10);
-		this.addAnswer(q2, u2, 0);
+		this.addAnswer(q1, userId1, 10);
+		this.addAnswer(q1, userId2, 10);
+		this.addAnswer(q2, userId1, 10);
+		this.addAnswer(q2, userId2, 0);
 
 		int expected = 75;
 		int actual = lp.getCourseProgress(null).getCourseProgress();
@@ -141,10 +141,10 @@ public class QuestionBasedScoreCalculatorTest {
 		String q2 = this.addQuestion("lecture", 1);
 		// first question has many answers, all of them correct
 		for (int i = 0; i < 100; i++) {
-			this.addAnswer(q1, new TestClient("user"+i), 1000);
+			this.addAnswer(q1, "user" + i, 1000);
 		}
 		// second question has one wrong answer
-		this.addAnswer(q2,  new TestClient("another-user"), 0);
+		this.addAnswer(q2,  "another-user", 0);
 
 		int expected = 50;
 		int actual = lp.getCourseProgress(null).getCourseProgress();
@@ -156,20 +156,20 @@ public class QuestionBasedScoreCalculatorTest {
 	public void shouldFilterBasedOnQuestionVariant() {
 		String q1 = this.addQuestion("lecture", 100);
 		String q2 = this.addQuestion("preparation", 100);
-		ClientAuthentication u1 = new TestClient("user1");
-		ClientAuthentication u2 = new TestClient("user2");
+		String userId1 = "user1";
+		String userId2 = "user2";
 		// first question is answered correctly, second one is not
-		this.addAnswer(q1, u1, 100);
-		this.addAnswer(q1, u2, 100);
-		this.addAnswer(q2, u1, 0);
-		this.addAnswer(q2, u2, 0);
+		this.addAnswer(q1, userId1, 100);
+		this.addAnswer(q1, userId2, 100);
+		this.addAnswer(q2, userId1, 0);
+		this.addAnswer(q2, userId2, 0);
 
 		lp.setQuestionVariant("lecture");
 		ScoreStatistics lectureProgress = lp.getCourseProgress(null);
-		ScoreStatistics myLectureProgress = lp.getMyProgress(null, u1);
+		ScoreStatistics myLectureProgress = lp.getMyProgress(null, userId1);
 		lp.setQuestionVariant("preparation");
 		ScoreStatistics prepProgress = lp.getCourseProgress(null);
-		ScoreStatistics myPrepProgress = lp.getMyProgress(null, u1);
+		ScoreStatistics myPrepProgress = lp.getMyProgress(null, userId1);
 
 		assertEquals(100, lectureProgress.getCourseProgress());
 		assertEquals(100, myLectureProgress.getMyProgress());
@@ -179,19 +179,19 @@ public class QuestionBasedScoreCalculatorTest {
 
 	@Test
 	public void shouldConsiderAnswersOfSamePiRound() {
-		ClientAuthentication u1 = new TestClient("user1");
-		ClientAuthentication u2 = new TestClient("user2");
+		String userId1 = "user1";
+		String userId2 = "user2";
 		// question is in round 2
 		courseScore.addQuestion("q1", "lecture", 2, 100);
 		// 25 points in round 1, 75 points in round two for the first user
-		courseScore.addAnswer("q1", 1, u1.getUsername(), 25);
-		courseScore.addAnswer("q1", 2, u1.getUsername(), 100);
+		courseScore.addAnswer("q1", 1, userId1, 25);
+		courseScore.addAnswer("q1", 2, userId1, 100);
 		// 75 points in round 1, 25 points in round two for the second user
-		courseScore.addAnswer("q1", 1, u2.getUsername(), 100);
-		courseScore.addAnswer("q1", 2, u2.getUsername(), 25);
+		courseScore.addAnswer("q1", 1, userId2, 100);
+		courseScore.addAnswer("q1", 2, userId2, 25);
 
-		ScoreStatistics u1Progress = lp.getMyProgress(null, u1);
-		ScoreStatistics u2Progress = lp.getMyProgress(null, u2);
+		ScoreStatistics u1Progress = lp.getMyProgress(null, userId1);
+		ScoreStatistics u2Progress = lp.getMyProgress(null, userId2);
 
 		// only the answer for round 2 should be considered
 		assertEquals(50, u1Progress.getCourseProgress());
@@ -206,16 +206,16 @@ public class QuestionBasedScoreCalculatorTest {
 		String q1 = this.addQuestion("lecture", 10);
 		String q2 = this.addQuestion("lecture", 10);
 		// three users
-		ClientAuthentication u1 = new TestClient("user1");
-		ClientAuthentication u2 = new TestClient("user2");
-		ClientAuthentication u3 = new TestClient("user3");
+		String userId1 = "user1";
+		String userId2 = "user2";
+		String userId3 = "user3";
 		// six answers
-		this.addAnswer(q1, u1, 10);
-		this.addAnswer(q2, u1, -100);
-		this.addAnswer(q1, u2, -100);
-		this.addAnswer(q2, u2, -100);
-		this.addAnswer(q1, u3, -100);
-		this.addAnswer(q2, u3, -100);
+		this.addAnswer(q1, userId1, 10);
+		this.addAnswer(q2, userId1, -100);
+		this.addAnswer(q1, userId2, -100);
+		this.addAnswer(q2, userId2, -100);
+		this.addAnswer(q1, userId3, -100);
+		this.addAnswer(q2, userId3, -100);
 
 		int numerator = lp.getCourseProgress(null).getNumerator();
 		int denominator = lp.getCourseProgress(null).getDenominator();

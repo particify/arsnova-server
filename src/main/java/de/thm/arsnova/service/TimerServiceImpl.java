@@ -1,15 +1,15 @@
 package de.thm.arsnova.service;
 
-import de.thm.arsnova.model.Content;
-import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.event.PiRoundCancelEvent;
 import de.thm.arsnova.event.PiRoundDelayedStartEvent;
 import de.thm.arsnova.event.PiRoundEndEvent;
 import de.thm.arsnova.event.PiRoundResetEvent;
+import de.thm.arsnova.model.Content;
+import de.thm.arsnova.model.Room;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.RoomRepository;
+import de.thm.arsnova.security.User;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -40,13 +40,9 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#contentId, 'content', 'owner')")
-	public void startNewRound(final String contentId, ClientAuthentication user) {
+	public void startNewRound(final String contentId) {
 		final Content content = contentRepository.findOne(contentId);
 		final Room room = roomRepository.findOne(content.getRoomId());
-
-		if (null == user) {
-			user = userService.getCurrentUser();
-		}
 
 		cancelDelayedRoundChange(contentId);
 
@@ -61,7 +57,7 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 	@Override
 	@PreAuthorize("hasPermission(#contentId, 'content', 'owner')")
 	public void startNewRoundDelayed(final String contentId, final int time) {
-		final ClientAuthentication user = userService.getCurrentUser();
+		final User user = userService.getCurrentUser();
 		final Content content = contentRepository.findOne(contentId);
 		final Room room = roomRepository.findOne(content.getRoomId());
 
@@ -77,7 +73,7 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				startNewRound(contentId, user);
+				startNewRound(contentId);
 			}
 		}, endDate);
 	}

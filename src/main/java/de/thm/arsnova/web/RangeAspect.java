@@ -17,9 +17,9 @@
  */
 package de.thm.arsnova.web;
 
-import de.thm.arsnova.util.PaginationListDecorator;
 import de.thm.arsnova.controller.PaginationController;
 import de.thm.arsnova.service.ResponseProviderService;
+import de.thm.arsnova.util.PaginationListDecorator;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

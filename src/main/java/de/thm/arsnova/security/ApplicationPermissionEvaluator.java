@@ -17,10 +17,10 @@
  */
 package de.thm.arsnova.security;
 
-import de.thm.arsnova.model.Motd;
-import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.Content;
+import de.thm.arsnova.model.Motd;
+import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.persistence.CommentRepository;
 import de.thm.arsnova.persistence.ContentRepository;

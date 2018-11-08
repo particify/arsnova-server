@@ -17,7 +17,6 @@
  */
 package de.thm.arsnova.service.score;
 
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.transport.ScoreStatistics;
 import de.thm.arsnova.persistence.SessionStatisticsRepository;
 
@@ -71,8 +70,8 @@ public class QuestionBasedScoreCalculator extends VariantScoreCalculator {
 	}
 
 	@Override
-	protected ScoreStatistics createMyProgress(ClientAuthentication user) {
-		final int numerator = numQuestionsCorrectForUser(user);
+	protected ScoreStatistics createMyProgress(String userId) {
+		final int numerator = numQuestionsCorrectForUser(userId);
 		final int denominator = courseScore.getQuestionCount();
 		ScoreStatistics lpv = new ScoreStatistics();
 		lpv.setCourseProgress(calculateCourseProgress());
@@ -84,19 +83,19 @@ public class QuestionBasedScoreCalculator extends VariantScoreCalculator {
 		return lpv;
 	}
 
-	private int numQuestionsCorrectForUser(ClientAuthentication user) {
+	private int numQuestionsCorrectForUser(String userId) {
 		int numQuestionsCorrect = 0;
 		for (QuestionScore questionScore : courseScore) {
-			numQuestionsCorrect += countCorrectAnswersForUser(user, questionScore);
+			numQuestionsCorrect += countCorrectAnswersForUser(userId, questionScore);
 		}
 		return numQuestionsCorrect;
 	}
 
-	private int countCorrectAnswersForUser(ClientAuthentication user, QuestionScore questionScore) {
+	private int countCorrectAnswersForUser(String userId, QuestionScore questionScore) {
 		int numQuestionsCorrect = 0;
 		int requiredScore = questionScore.getMaximum();
 		for (UserScore userScore : questionScore) {
-			if (!userScore.isUser(user)) {
+			if (!userScore.isUser(userId)) {
 				continue;
 			}
 			if (userScore.hasScore(requiredScore)) {

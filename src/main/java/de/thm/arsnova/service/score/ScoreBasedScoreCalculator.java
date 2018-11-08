@@ -17,7 +17,6 @@
  */
 package de.thm.arsnova.service.score;
 
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.transport.ScoreStatistics;
 import de.thm.arsnova.persistence.SessionStatisticsRepository;
 
@@ -54,20 +53,20 @@ public class ScoreBasedScoreCalculator extends VariantScoreCalculator {
 	}
 
 	@Override
-	protected ScoreStatistics createMyProgress(ClientAuthentication user) {
+	protected ScoreStatistics createMyProgress(String userId) {
 		ScoreStatistics lpv = new ScoreStatistics();
 		lpv.setCourseProgress(coursePercentage());
 		lpv.setNumQuestions(courseScore.getQuestionCount());
 		lpv.setNumUsers(courseScore.getTotalUserCount());
-		lpv.setMyProgress(myPercentage(user));
-		lpv.setNumerator((int) courseScore.getTotalUserScore(user));
+		lpv.setMyProgress(myPercentage(userId));
+		lpv.setNumerator((int) courseScore.getTotalUserScore(userId));
 		lpv.setDenominator(courseScore.getMaximumScore());
 		return lpv;
 	}
 
-	private int myPercentage(ClientAuthentication user) {
+	private int myPercentage(String userId) {
 		final int courseMaximumValue = courseScore.getMaximumScore();
-		final double userTotalValue = courseScore.getTotalUserScore(user);
+		final double userTotalValue = courseScore.getTotalUserScore(userId);
 		if (courseMaximumValue == 0) {
 			return 0;
 		}

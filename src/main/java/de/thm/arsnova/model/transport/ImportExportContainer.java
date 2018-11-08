@@ -18,8 +18,8 @@
 package de.thm.arsnova.model.transport;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.migration.v2.Answer;
+import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.migration.v2.Comment;
 import de.thm.arsnova.model.migration.v2.Content;
 import de.thm.arsnova.model.migration.v2.Motd;

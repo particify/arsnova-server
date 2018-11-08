@@ -35,7 +35,6 @@
 package de.thm.arsnova.service;
 
 import de.thm.arsnova.model.Content;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 
 import java.util.List;
 
@@ -69,11 +68,11 @@ public interface ContentService extends EntityService<Content> {
 
 	List<String> getUnAnsweredLectureContentIds(String roomId);
 
-	List<String> getUnAnsweredLectureContentIds(String roomId, ClientAuthentication user);
+	List<String> getUnAnsweredLectureContentIds(String roomId, String userId);
 
 	List<String> getUnAnsweredPreparationContentIds(String roomId);
 
-	List<String> getUnAnsweredPreparationContentIds(String roomId, ClientAuthentication user);
+	List<String> getUnAnsweredPreparationContentIds(String roomId, String userId);
 
 	void publishAll(String roomId, boolean publish);
 

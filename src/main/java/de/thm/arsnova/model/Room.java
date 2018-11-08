@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 import de.thm.arsnova.model.serialization.View;
 import org.springframework.core.style.ToStringCreator;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;

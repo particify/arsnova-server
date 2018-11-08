@@ -19,12 +19,12 @@ package de.thm.arsnova.controller.v2;
 
 import de.thm.arsnova.controller.AbstractController;
 import de.thm.arsnova.model.Feedback;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
-import de.thm.arsnova.web.exceptions.NotFoundException;
+import de.thm.arsnova.security.User;
 import de.thm.arsnova.service.FeedbackService;
 import de.thm.arsnova.service.RoomService;
 import de.thm.arsnova.service.UserService;
 import de.thm.arsnova.web.DeprecatedApi;
+import de.thm.arsnova.web.exceptions.NotFoundException;
 import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -66,7 +66,7 @@ public class FeedbackController extends AbstractController {
 	@RequestMapping(value = "/myfeedback", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getMyFeedback(@PathVariable final String shortId) {
 		String roomId = roomService.getIdByShortId(shortId);
-		Integer value = feedbackService.getByRoomIdAndUser(roomId, userService.getCurrentUser());
+		Integer value = feedbackService.getByRoomIdAndUserId(roomId, userService.getCurrentUser().getId());
 		if (value != null && value >= Feedback.MIN_FEEDBACK_TYPE && value <= Feedback.MAX_FEEDBACK_TYPE) {
 			return value.toString();
 		}
@@ -103,8 +103,8 @@ public class FeedbackController extends AbstractController {
 			@RequestBody final int value
 			) {
 		String roomId = roomService.getIdByShortId(shortId);
-		ClientAuthentication user = userService.getCurrentUser();
-		feedbackService.save(roomId, value, user);
+		User user = userService.getCurrentUser();
+		feedbackService.save(roomId, value, user.getId());
 		Feedback feedback = feedbackService.getByRoomId(roomId);
 
 		return feedback;
