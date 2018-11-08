@@ -403,14 +403,14 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 		}
 	}
 
-	public void reportUpdatedFeedbackForRoom(final de.thm.arsnova.model.Room room) {
-		final de.thm.arsnova.model.Feedback fb = feedbackService.getByRoomId(room.getId());
-		broadcastInRoom(room.getId(), "feedbackData", fb.getValues());
+	public void reportUpdatedFeedbackForRoom(final String roomId) {
+		final de.thm.arsnova.model.Feedback fb = feedbackService.getByRoomId(roomId);
+		broadcastInRoom(roomId, "feedbackData", fb.getValues());
 		try {
-			final long averageFeedback = feedbackService.calculateRoundedAverageFeedback(room.getId());
-			broadcastInRoom(room.getId(), "feedbackDataRoundedAverage", averageFeedback);
+			final long averageFeedback = feedbackService.calculateRoundedAverageFeedback(roomId);
+			broadcastInRoom(roomId, "feedbackDataRoundedAverage", averageFeedback);
 		} catch (final NoContentException e) {
-			broadcastInRoom(room.getId(), "feedbackDataRoundedAverage", null);
+			broadcastInRoom(roomId, "feedbackDataRoundedAverage", null);
 		}
 	}
 
@@ -441,16 +441,16 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 		broadcastInRoom(roomId, "activeUserCountData", count);
 	}
 
-	public void reportAnswersToContentAvailable(final de.thm.arsnova.model.Room room, final Content content) {
-		broadcastInRoom(room.getId(), "answersToLecQuestionAvail", content.get_id());
+	public void reportAnswersToContentAvailable(final String roomId, final String contentId) {
+		broadcastInRoom(roomId, "answersToLecQuestionAvail", contentId);
 	}
 
-	public void reportCommentAvailable(final de.thm.arsnova.model.Room room, final Comment comment) {
+	public void reportCommentAvailable(final String roomId, final String commentId) {
 		/* TODO role handling implementation, send this only to users with role lecturer */
-		broadcastInRoom(room.getId(), "audQuestionAvail", comment.getId());
+		broadcastInRoom(roomId, "audQuestionAvail", commentId);
 	}
 
-	public void reportContentAvailable(final de.thm.arsnova.model.Room room, final List<de.thm.arsnova.model.Content> qs) {
+	public void reportContentAvailable(final String roomId, final List<de.thm.arsnova.model.Content> qs) {
 		List<Content> contents = new ArrayList<>();
 		for (de.thm.arsnova.model.Content q : qs) {
 			contents.add(new Content(q));
@@ -458,17 +458,17 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 
 		/* TODO role handling implementation, send this only to users with role audience */
 		if (!qs.isEmpty()) {
-			broadcastInRoom(room.getId(), "lecQuestionAvail", contents.get(0).get_id()); // deprecated!
+			broadcastInRoom(roomId, "lecQuestionAvail", contents.get(0).get_id()); // deprecated!
 		}
-		broadcastInRoom(room.getId(), "lecturerQuestionAvailable", contents);
+		broadcastInRoom(roomId, "lecturerQuestionAvailable", contents);
 	}
 
-	public void reportContentsLocked(final de.thm.arsnova.model.Room room, final List<de.thm.arsnova.model.Content> qs) {
+	public void reportContentsLocked(final String roomId, final List<de.thm.arsnova.model.Content> qs) {
 		List<Content> contents = new ArrayList<>();
 		for (de.thm.arsnova.model.Content q : qs) {
 			contents.add(new Content(q));
 		}
-		broadcastInRoom(room.getId(), "lecturerQuestionLocked", contents);
+		broadcastInRoom(roomId, "lecturerQuestionLocked", contents);
 	}
 
 	public void reportRoomStatus(final String roomId, final boolean active) {
@@ -492,32 +492,32 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 
 	@EventListener
 	public void handleNewQuestion(NewQuestionEvent event) {
-		this.reportContentAvailable(event.getRoom(), Collections.singletonList(event.getQuestion()));
+		this.reportContentAvailable(event.getRoom().getId(), Collections.singletonList(event.getQuestion()));
 	}
 
 	@EventListener
 	public void handleUnlockQuestion(UnlockQuestionEvent event) {
-		this.reportContentAvailable(event.getRoom(), Collections.singletonList(event.getQuestion()));
+		this.reportContentAvailable(event.getRoom().getId(), Collections.singletonList(event.getQuestion()));
 	}
 
 	@EventListener
 	public void handleLockQuestion(LockQuestionEvent event) {
-		this.reportContentsLocked(event.getRoom(), Collections.singletonList(event.getQuestion()));
+		this.reportContentsLocked(event.getRoom().getId(), Collections.singletonList(event.getQuestion()));
 	}
 
 	@EventListener
 	public void handleUnlockQuestions(UnlockQuestionsEvent event) {
-		this.reportContentAvailable(event.getRoom(), event.getQuestions());
+		this.reportContentAvailable(event.getRoom().getId(), event.getQuestions());
 	}
 
 	@EventListener
 	public void handleLockQuestions(LockQuestionsEvent event) {
-		this.reportContentsLocked(event.getRoom(), event.getQuestions());
+		this.reportContentsLocked(event.getRoom().getId(), event.getQuestions());
 	}
 
 	@EventListener
 	public void handleNewComment(NewCommentEvent event) {
-		this.reportCommentAvailable(event.getRoom(), event.getQuestion());
+		this.reportCommentAvailable(event.getRoom().getId(), event.getQuestion().getId());
 	}
 
 	@Async
@@ -525,7 +525,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 	@Timed
 	public void handleNewAnswer(NewAnswerEvent event) {
 		final String roomId = event.getRoom().getId();
-		this.reportAnswersToContentAvailable(event.getRoom(), new Content(event.getContent()));
+		this.reportAnswersToContentAvailable(event.getRoom().getId(), event.getContent().getId());
 		broadcastInRoom(roomId, "countQuestionAnswersByQuestionId", answerService.countAnswersAndAbstentionsInternal(event.getContent().getId()));
 		/* FIXME: Content variant is ignored for now */
 		broadcastInRoom(roomId, "countLectureQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
@@ -545,7 +545,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 	@Timed
 	public void handleDeleteAnswer(DeleteAnswerEvent event) {
 		final String roomId = event.getRoom().getId();
-		this.reportAnswersToContentAvailable(event.getRoom(), new Content(event.getQuestion()));
+		this.reportAnswersToContentAvailable(event.getRoom().getId(), event.getQuestion().getId());
 		// We do not know which user's answer was deleted, so we can't update his 'unanswered' list of questions...
 		/* FIXME: Content variant is ignored for now */
 		broadcastInRoom(roomId, "countLectureQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
@@ -636,7 +636,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 
 	@EventListener
 	public void handleNewFeedback(NewFeedbackEvent event) {
-		this.reportUpdatedFeedbackForRoom(event.getRoom());
+		this.reportUpdatedFeedbackForRoom(event.getRoom().getId());
 	}
 
 	@EventListener
