@@ -19,6 +19,6 @@ public abstract class CrudEvent<E extends Entity> extends ApplicationEvent imple
 
 	@Override
 	public ResolvableType getResolvableType() {
-		return ResolvableType.forClassWithGenerics(getClass(), source.getClass());
+		return ResolvableType.forClassWithGenerics(getClass(), entity.getClass());
 	}
 }
