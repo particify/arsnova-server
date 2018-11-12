@@ -29,6 +29,7 @@ import com.corundumstudio.socketio.listener.DisconnectListener;
 import com.corundumstudio.socketio.protocol.Packet;
 import com.corundumstudio.socketio.protocol.PacketType;
 import de.thm.arsnova.event.*;
+import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.ScoreOptions;
 import de.thm.arsnova.model.migration.ToV2Migrator;
@@ -491,61 +492,62 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 	}
 
 	@EventListener
-	public void handleNewQuestion(NewQuestionEvent event) {
-		this.reportContentAvailable(event.getRoom().getId(), Collections.singletonList(event.getQuestion()));
+	public void handleAfterContentCreation(AfterCreationEvent<de.thm.arsnova.model.Content> event) {
+		this.reportContentAvailable(event.getEntity().getId(), Collections.singletonList(event.getEntity()));
 	}
 
 	@EventListener
 	public void handleUnlockQuestion(UnlockQuestionEvent event) {
-		this.reportContentAvailable(event.getRoom().getId(), Collections.singletonList(event.getQuestion()));
+		this.reportContentAvailable(event.getRoomId(), Collections.singletonList(event.getQuestion()));
 	}
 
 	@EventListener
 	public void handleLockQuestion(LockQuestionEvent event) {
-		this.reportContentsLocked(event.getRoom().getId(), Collections.singletonList(event.getQuestion()));
+		this.reportContentsLocked(event.getRoomId(), Collections.singletonList(event.getQuestion()));
 	}
 
 	@EventListener
 	public void handleUnlockQuestions(UnlockQuestionsEvent event) {
-		this.reportContentAvailable(event.getRoom().getId(), event.getQuestions());
+		this.reportContentAvailable(event.getRoomId(), event.getQuestions());
 	}
 
 	@EventListener
 	public void handleLockQuestions(LockQuestionsEvent event) {
-		this.reportContentsLocked(event.getRoom().getId(), event.getQuestions());
+		this.reportContentsLocked(event.getRoomId(), event.getQuestions());
 	}
 
 	@EventListener
-	public void handleNewComment(NewCommentEvent event) {
-		this.reportCommentAvailable(event.getRoom().getId(), event.getQuestion().getId());
+	public void handleAfterCommentCreation(AfterCreationEvent<Comment> event) {
+		this.reportCommentAvailable(event.getEntity().getId(), event.getEntity().getId());
 	}
 
 	@Async
 	@EventListener
 	@Timed
-	public void handleNewAnswer(NewAnswerEvent event) {
-		final String roomId = event.getRoom().getId();
-		this.reportAnswersToContentAvailable(event.getRoom().getId(), event.getContent().getId());
-		broadcastInRoom(roomId, "countQuestionAnswersByQuestionId", answerService.countAnswersAndAbstentionsInternal(event.getContent().getId()));
+	public void handleNewAnswer(AfterCreationEvent<Answer> event) {
+		final String roomId = event.getEntity().getRoomId();
+		this.reportAnswersToContentAvailable(event.getEntity().getRoomId(), event.getEntity().getContentId());
+		broadcastInRoom(roomId, "countQuestionAnswersByQuestionId", answerService.countAnswersAndAbstentionsInternal(event.getEntity().getContentId()));
 		/* FIXME: Content variant is ignored for now */
 		broadcastInRoom(roomId, "countLectureQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
 		broadcastInRoom(roomId, "countPreparationQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
 
 		// Update the unanswered count for the content variant that was answered.
-		final de.thm.arsnova.model.Content content = event.getContent();
-		if (content.getGroups().contains("lecture")) {
-			sendToUser(event.getUserId(), "unansweredLecturerQuestions", contentService.getUnAnsweredLectureContentIds(roomId, event.getUserId()));
-		} else if (content.getGroups().contains("preparation")) {
-			sendToUser(event.getUserId(), "unansweredPreparationQuestions", contentService.getUnAnsweredPreparationContentIds(roomId, event.getUserId()));
-		}
+		/* Is this still relevant? */
+//		final de.thm.arsnova.model.Content content = // event.getSource().getContentId();
+//		if (content.getGroups().contains("lecture")) {
+//			sendToUser(event.getSource().getCreatorId(), "unansweredLecturerQuestions", contentService.getUnAnsweredLectureContentIds(roomId, event.getSource().getCreatorId()));
+//		} else if (content.getGroups().contains("preparation")) {
+//			sendToUser(event.getSource().getCreatorId(), "unansweredPreparationQuestions", contentService.getUnAnsweredPreparationContentIds(roomId, event.getSource().getCreatorId()));
+//		}
 	}
 
 	@Async
 	@EventListener
 	@Timed
-	public void handleDeleteAnswer(DeleteAnswerEvent event) {
-		final String roomId = event.getRoom().getId();
-		this.reportAnswersToContentAvailable(event.getRoom().getId(), event.getQuestion().getId());
+	public void handleAfterAnswerDeletion(AfterDeletionEvent<Answer> event) {
+		final String roomId = event.getEntity().getRoomId();
+		this.reportAnswersToContentAvailable(event.getEntity().getRoomId(), event.getEntity().getContentId());
 		// We do not know which user's answer was deleted, so we can't update his 'unanswered' list of questions...
 		/* FIXME: Content variant is ignored for now */
 		broadcastInRoom(roomId, "countLectureQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
@@ -556,7 +558,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 	@EventListener
 	@Timed
 	public void handlePiRoundDelayedStart(PiRoundDelayedStartEvent event) {
-		final String roomId = event.getRoom().getId();
+		final String roomId = event.getRoomId();
 		broadcastInRoom(roomId, "startDelayedPiRound", event.getPiRoundInformations());
 	}
 
@@ -564,7 +566,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 	@EventListener
 	@Timed
 	public void handlePiRoundEnd(PiRoundEndEvent event) {
-		final String roomId = event.getRoom().getId();
+		final String roomId = event.getRoomId();
 		broadcastInRoom(roomId, "endPiRound", event.getPiRoundEndInformations());
 	}
 
@@ -572,25 +574,25 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 	@EventListener
 	@Timed
 	public void handlePiRoundCancel(PiRoundCancelEvent event) {
-		final String roomId = event.getRoom().getId();
+		final String roomId = event.getRoomId();
 		broadcastInRoom(roomId, "cancelPiRound", event.getContentId());
 	}
 
 	@EventListener
 	public void handlePiRoundReset(PiRoundResetEvent event) {
-		final String roomId = event.getRoom().getId();
+		final String roomId = event.getRoomId();
 		broadcastInRoom(roomId, "resetPiRound", event.getPiRoundResetInformations());
 	}
 
 	@EventListener
 	public void handleLockVote(LockVoteEvent event) {
-		final String roomId = event.getRoom().getId();
+		final String roomId = event.getRoomId();
 		broadcastInRoom(roomId, "lockVote", event.getVotingAdmission());
 	}
 
 	@EventListener
 	public void handleUnlockVote(UnlockVoteEvent event) {
-		final String roomId = event.getRoom().getId();
+		final String roomId = event.getRoomId();
 		broadcastInRoom(roomId, "unlockVote", event.getVotingAdmission());
 	}
 
@@ -600,7 +602,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 		for (de.thm.arsnova.model.Content q : event.getQuestions()) {
 			contents.add(new Content(q));
 		}
-		broadcastInRoom(event.getRoom().getId(), "lockVotes", contents);
+		broadcastInRoom(event.getRoomId(), "lockVotes", contents);
 	}
 
 	@EventListener
@@ -609,24 +611,24 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 		for (de.thm.arsnova.model.Content q : event.getQuestions()) {
 			contents.add(new Content(q));
 		}
-		broadcastInRoom(event.getRoom().getId(), "unlockVotes", contents);
+		broadcastInRoom(event.getRoomId(), "unlockVotes", contents);
 	}
 
 	@EventListener
 	public void handleFeatureChange(FeatureChangeEvent event) {
-		final String roomId = event.getRoom().getId();
-		final de.thm.arsnova.model.Room.Settings settings = event.getRoom().getSettings();
-		broadcastInRoom(roomId, "featureChange", toV2Migrator.migrate(settings));
-
-		if (settings.isFlashcardsEnabled()) {
-			broadcastInRoom(roomId, "countFlashcards", contentService.countFlashcardsForUserInternal(roomId));
+//		final String roomId = event.getRoomId();
+//		final de.thm.arsnova.model.Room.Settings settings = event.getRoom().getSettings();
+//		broadcastInRoom(roomId, "featureChange", toV2Migrator.migrate(settings));
+//
+//		if (settings.isFlashcardsEnabled()) {
+//			broadcastInRoom(roomId, "countFlashcards", contentService.countFlashcardsForUserInternal(roomId));
 //			broadcastInRoom(roomId, "flipFlashcards", event.getRoom().getFlipFlashcards());
-		}
+//		}
 	}
 
 	@EventListener
 	public void handleLockFeedback(LockFeedbackEvent event) {
-		broadcastInRoom(event.getRoom().getId(), "lockFeedback", event.getRoom().getSettings().isFeedbackLocked());
+//		broadcastInRoom(event.getRoomId(), "lockFeedback", event.getRoom().getSettings().isFeedbackLocked());
 	}
 
 	@EventListener
@@ -636,7 +638,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 
 	@EventListener
 	public void handleNewFeedback(NewFeedbackEvent event) {
-		this.reportUpdatedFeedbackForRoom(event.getRoom().getId());
+		this.reportUpdatedFeedbackForRoom(event.getRoomId());
 	}
 
 	@EventListener
@@ -647,11 +649,11 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 
 	@EventListener
 	public void handleStatusRoom(StatusRoomEvent event) {
-		this.reportRoomStatus(event.getRoom().getId(), !event.getRoom().isClosed());
+//		this.reportRoomStatus(event.getRoomId(), !event.getRoom().isClosed());
 	}
 
 	@EventListener
 	public void handleChangeScore(ChangeScoreEvent event) {
-		broadcastInRoom(event.getRoom().getId(), "learningProgressChange", null);
+		broadcastInRoom(event.getRoomId(), "learningProgressChange", null);
 	}
 }

@@ -18,7 +18,6 @@
 package de.thm.arsnova.event;
 
 import de.thm.arsnova.model.Content;
-import de.thm.arsnova.model.Room;
 
 import java.util.List;
 
@@ -31,8 +30,8 @@ public class UnlockQuestionsEvent extends RoomEvent {
 
 	private List<Content> contents;
 
-	public UnlockQuestionsEvent(Object source, Room room, List<Content> contents) {
-		super(source, room);
+	public UnlockQuestionsEvent(Object source, String roomId, List<Content> contents) {
+		super(source, roomId);
 		this.contents = contents;
 	}
 

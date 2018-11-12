@@ -17,8 +17,6 @@
  */
 package de.thm.arsnova.event;
 
-import de.thm.arsnova.model.Room;
-
 /**
  * Fires whenever a score related value changes.
  */
@@ -26,8 +24,8 @@ public class ChangeScoreEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public ChangeScoreEvent(Object source, Room room) {
-		super(source, room);
+	public ChangeScoreEvent(Object source, String roomId) {
+		super(source, roomId);
 	}
 
 }

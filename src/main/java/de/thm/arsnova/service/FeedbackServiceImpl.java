@@ -90,12 +90,12 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 		// Send feedback reset event to all affected users
 		for (Map.Entry<String, Set<Room>> entry : affectedSessionsOfUsers.entrySet()) {
 			final String userId = entry.getKey();
-			final Set<Room> arsSessions = entry.getValue();
-			this.publisher.publishEvent(new DeleteFeedbackForRoomsEvent(this, arsSessions, userId));
+			final Set<Room> rooms = entry.getValue();
+			this.publisher.publishEvent(new DeleteFeedbackForRoomsEvent(this, rooms, userId));
 		}
 		// For each session that has deleted feedback, send the new feedback to all clients
-		for (Room session : deletedFeedbackOfUsersInSession.keySet()) {
-			this.publisher.publishEvent(new NewFeedbackEvent(this, session));
+		for (Room room : deletedFeedbackOfUsersInSession.keySet()) {
+			this.publisher.publishEvent(new NewFeedbackEvent(this, room.getId()));
 		}
 	}
 
@@ -111,7 +111,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 			this.publisher.publishEvent(new DeleteFeedbackForRoomsEvent(this, sessionSet, userId));
 		}
 		// send the new feedback to all clients in affected session
-		this.publisher.publishEvent(new NewFeedbackEvent(this, room));
+		this.publisher.publishEvent(new NewFeedbackEvent(this, room.getId()));
 	}
 
 	@Override
@@ -163,7 +163,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 		}
 		feedbackStorage.save(room, value, userId);
 
-		this.publisher.publishEvent(new NewFeedbackEvent(this, room));
+		this.publisher.publishEvent(new NewFeedbackEvent(this, room.getId()));
 		return true;
 	}
 

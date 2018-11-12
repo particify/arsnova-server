@@ -18,7 +18,6 @@
 package de.thm.arsnova.event;
 
 import de.thm.arsnova.model.Content;
-import de.thm.arsnova.model.Room;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,8 +32,8 @@ public class PiRoundResetEvent extends RoomEvent {
 	private final String contentId;
 	private final String group;
 
-	public PiRoundResetEvent(Object source, Room room, Content content) {
-		super(source, room);
+	public PiRoundResetEvent(Object source, String roomId, Content content) {
+		super(source, roomId);
 		contentId = content.getId();
 		/* FIXME: Event does not support content with multiple groups */
 		this.group = content.getGroups().toArray(new String[1])[0];

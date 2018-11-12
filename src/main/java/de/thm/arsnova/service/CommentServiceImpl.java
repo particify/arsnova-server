@@ -1,6 +1,7 @@
 package de.thm.arsnova.service;
 
-import de.thm.arsnova.event.DeleteCommentEvent;
+import de.thm.arsnova.event.AfterDeletionEvent;
+import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.migration.v2.CommentReadingCount;
@@ -11,8 +12,6 @@ import de.thm.arsnova.web.exceptions.ForbiddenException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 import de.thm.arsnova.web.exceptions.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -27,14 +26,12 @@ import java.util.Map;
  * Performs all comment related operations.
  */
 @Service
-public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implements CommentService, ApplicationEventPublisherAware {
+public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implements CommentService {
 	private UserService userService;
 
 	private CommentRepository commentRepository;
 
 	private RoomRepository roomRepository;
-
-	private ApplicationEventPublisher publisher;
 
 	public CommentServiceImpl(
 			CommentRepository repository,
@@ -45,11 +42,6 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		this.commentRepository = repository;
 		this.roomRepository = roomRepository;
 		this.userService = userService;
-	}
-
-	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-		this.publisher = applicationEventPublisher;
 	}
 
 	@Override
@@ -65,6 +57,7 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		/* TODO: fire event */
 	}
 
+	/* FIXME: Remove, EntityService should handle this! */
 	@Override
 	@PreAuthorize("hasPermission(#commentId, 'comment', 'owner')")
 	public void delete(final String commentId) {
@@ -72,11 +65,9 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		if (comment == null) {
 			throw new NotFoundException();
 		}
+		eventPublisher.publishEvent(new BeforeDeletionEvent<>(this, comment));
 		commentRepository.delete(comment);
-
-		final Room room = roomRepository.findOne(comment.getRoomId());
-		final DeleteCommentEvent event = new DeleteCommentEvent(this, room, comment);
-		this.publisher.publishEvent(event);
+		eventPublisher.publishEvent(new AfterDeletionEvent<>(this, comment));
 	}
 
 	@Override

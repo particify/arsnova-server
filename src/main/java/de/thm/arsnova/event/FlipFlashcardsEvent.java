@@ -17,8 +17,6 @@
  */
 package de.thm.arsnova.event;
 
-import de.thm.arsnova.model.Room;
-
 /**
  * Fires whenever voting on a question is disabled.
  */
@@ -26,7 +24,7 @@ public class FlipFlashcardsEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public FlipFlashcardsEvent(Object source, Room room) {
-		super(source, room);
+	public FlipFlashcardsEvent(Object source, String roomId) {
+		super(source, roomId);
 	}
 }

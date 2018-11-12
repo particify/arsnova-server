@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.service;
 
-import de.thm.arsnova.event.DeleteAnswerEvent;
-import de.thm.arsnova.event.NewAnswerEvent;
+import de.thm.arsnova.event.AfterCreationEvent;
+import de.thm.arsnova.event.BeforeCreationEvent;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.ChoiceQuestionContent;
@@ -37,8 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -55,13 +53,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * Performs all answer related operations.
  */
 @Service
-public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
-		implements AnswerService, ApplicationEventPublisherAware {
+public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implements AnswerService {
 	private static final Logger logger = LoggerFactory.getLogger(ContentServiceImpl.class);
 
 	private final Queue<AnswerQueueElement> answerQueue = new ConcurrentLinkedQueue<>();
-
-	private ApplicationEventPublisher publisher;
 
 	private RoomRepository roomRepository;
 	private ContentRepository contentRepository;
@@ -100,11 +95,12 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
 			elements.add(entry);
 		}
 		try {
-			answerRepository.saveAll(answerList);
-
-			// Send NewAnswerEvents ...
 			for (AnswerQueueElement e : elements) {
-				this.publisher.publishEvent(new NewAnswerEvent(this, e.getRoom(), e.getAnswer(), e.getUserId(), e.getQuestion()));
+				this.eventPublisher.publishEvent(new BeforeCreationEvent<>(this, e.getAnswer()));
+			}
+			answerRepository.saveAll(answerList);
+			for (AnswerQueueElement e : elements) {
+				this.eventPublisher.publishEvent(new AfterCreationEvent<>(this, e.getAnswer()));
 			}
 		} catch (final DbAccessException e) {
 			logger.error("Could not bulk save answers from queue.", e);
@@ -357,6 +353,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
 		return answer;
 	}
 
+	/* FIXME: Remove, this should be handled by EntityService! */
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	@CacheEvict(value = "answerlists", allEntries = true)
@@ -378,12 +375,14 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
 		answer.setCreatorId(user.getId());
 		answer.setContentId(content.getId());
 		answer.setRoomId(room.getId());
+		this.eventPublisher.publishEvent(new BeforeCreationEvent<>(this, realAnswer));
 		answerRepository.save(realAnswer);
-		this.publisher.publishEvent(new NewAnswerEvent(this, room, answer, user.getId(), content));
+		this.eventPublisher.publishEvent(new AfterCreationEvent<>(this, realAnswer));
 
 		return answer;
 	}
 
+	/* FIXME: Remove, this should be handled by EntityService! */
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	@CacheEvict(value = "answerlists", allEntries = true)
@@ -397,9 +396,9 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
 		if (user == null || room == null || !room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
 		}
+		//this.eventPublisher.publishEvent(new BeforeDeletionEvent<>(answer));
 		answerRepository.deleteById(answerId);
-
-		this.publisher.publishEvent(new DeleteAnswerEvent(this, room, content));
+		//this.eventPublisher.publishEvent(new AfterDeletionEvent<>(answer));
 	}
 
 	/*
@@ -446,10 +445,5 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer>
 	@Override
 	public int countPreparationQuestionAnswersInternal(final String roomId) {
 		return answerRepository.countByRoomIdOnlyPreparationVariant(roomRepository.findOne(roomId).getId());
-	}
-
-	@Override
-	public void setApplicationEventPublisher(final ApplicationEventPublisher applicationEventPublisher) {
-		this.publisher = applicationEventPublisher;
 	}
 }

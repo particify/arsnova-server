@@ -17,8 +17,6 @@
  */
 package de.thm.arsnova.event;
 
-import de.thm.arsnova.model.Room;
-
 /**
  * Fires whenever the status of a session changes, i.e., it is enabled or disabled.
  */
@@ -26,8 +24,8 @@ public class StatusRoomEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public StatusRoomEvent(Object source, Room room) {
-		super(source, room);
+	public StatusRoomEvent(Object source, String roomId) {
+		super(source, roomId);
 	}
 
 }

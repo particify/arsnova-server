@@ -18,7 +18,6 @@
 package de.thm.arsnova.event;
 
 import de.thm.arsnova.model.Content;
-import de.thm.arsnova.model.Room;
 
 /**
  * Fires whenever a content is disabled, i.e., it is hidden from students.
@@ -29,8 +28,8 @@ public class LockQuestionEvent extends RoomEvent {
 
 	private final Content content;
 
-	public LockQuestionEvent(Object source, Room room, Content content) {
-		super(source, room);
+	public LockQuestionEvent(Object source, String roomId, Content content) {
+		super(source, roomId);
 		this.content = content;
 	}
 
