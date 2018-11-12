@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import de.thm.arsnova.event.AfterCreationEvent;
+import de.thm.arsnova.event.AfterDeletionEvent;
 import de.thm.arsnova.event.AfterPatchEvent;
 import de.thm.arsnova.event.AfterUpdateEvent;
 import de.thm.arsnova.event.BeforeCreationEvent;
@@ -214,7 +215,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	public void delete(final T entity) {
 		eventPublisher.publishEvent(new BeforeDeletionEvent<>(this, entity));
 		repository.delete(entity);
-		eventPublisher.publishEvent(new AfterUpdateEvent<>(this, entity));
+		eventPublisher.publishEvent(new AfterDeletionEvent<>(this, entity));
 	}
 
 	/**
