@@ -173,7 +173,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		preparePatch(entity);
 		eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity));
 		final T patchedEntity = repository.save(entity);
-		eventPublisher.publishEvent(new AfterPatchEvent<>(this, entity));
+		eventPublisher.publishEvent(new AfterPatchEvent<>(this, patchedEntity));
 
 		return patchedEntity;
 	}
