@@ -51,7 +51,7 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 		updateRoundManagementState(content);
 		contentRepository.save(content);
 
-		this.publisher.publishEvent(new PiRoundEndEvent(this, room, content));
+		this.publisher.publishEvent(new PiRoundEndEvent(this, room.getId(), content));
 	}
 
 	@Override
@@ -67,7 +67,7 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 		updateRoundStartVariables(content, date, endDate);
 		contentRepository.save(content);
 
-		this.publisher.publishEvent(new PiRoundDelayedStartEvent(this, room, content));
+		this.publisher.publishEvent(new PiRoundDelayedStartEvent(this, room.getId(), content));
 		timerList.put(contentId, timer);
 
 		timer.schedule(new TimerTask() {
@@ -93,7 +93,7 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 		content.getState().setRoundEndTimestamp(null);
 
 		contentRepository.save(content);
-		this.publisher.publishEvent(new PiRoundCancelEvent(this, room, content));
+		this.publisher.publishEvent(new PiRoundCancelEvent(this, room.getId(), content));
 	}
 
 	@Override
@@ -124,7 +124,7 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 		resetRoundManagementState(content);
 		answerRepository.deleteByContentId(content.getId());
 		contentRepository.save(content);
-		this.publisher.publishEvent(new PiRoundResetEvent(this, room, content));
+		this.publisher.publishEvent(new PiRoundResetEvent(this, room.getId(), content));
 	}
 
 	private void updateRoundStartVariables(final Content content, final Date start, final Date end) {

@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.service;
 
-import de.thm.arsnova.event.DeleteAnswerEvent;
-import de.thm.arsnova.event.NewAnswerEvent;
+import de.thm.arsnova.event.AfterCreationEvent;
+import de.thm.arsnova.event.BeforeCreationEvent;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.ChoiceQuestionContent;
@@ -95,11 +95,12 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 			elements.add(entry);
 		}
 		try {
-			answerRepository.saveAll(answerList);
-
-			// Send NewAnswerEvents ...
 			for (AnswerQueueElement e : elements) {
-				this.eventPublisher.publishEvent(new NewAnswerEvent(this, e.getRoom(), e.getAnswer(), e.getUserId(), e.getQuestion()));
+				this.eventPublisher.publishEvent(new BeforeCreationEvent<>(e.getAnswer()));
+			}
+			answerRepository.saveAll(answerList);
+			for (AnswerQueueElement e : elements) {
+				this.eventPublisher.publishEvent(new AfterCreationEvent<>(e.getAnswer()));
 			}
 		} catch (final DbAccessException e) {
 			logger.error("Could not bulk save answers from queue.", e);
@@ -352,6 +353,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		return answer;
 	}
 
+	/* FIXME: Remove, this should be handled by EntityService! */
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	@CacheEvict(value = "answerlists", allEntries = true)
@@ -373,12 +375,14 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		answer.setCreatorId(user.getId());
 		answer.setContentId(content.getId());
 		answer.setRoomId(room.getId());
+		this.eventPublisher.publishEvent(new BeforeCreationEvent<>(realAnswer));
 		answerRepository.save(realAnswer);
-		this.eventPublisher.publishEvent(new NewAnswerEvent(this, room, answer, user.getId(), content));
+		this.eventPublisher.publishEvent(new AfterCreationEvent<>(realAnswer));
 
 		return answer;
 	}
 
+	/* FIXME: Remove, this should be handled by EntityService! */
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	@CacheEvict(value = "answerlists", allEntries = true)
@@ -392,9 +396,9 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		if (user == null || room == null || !room.getOwnerId().equals(user.getId())) {
 			throw new UnauthorizedException();
 		}
+		//this.eventPublisher.publishEvent(new BeforeDeletionEvent<>(answer));
 		answerRepository.deleteById(answerId);
-
-		this.eventPublisher.publishEvent(new DeleteAnswerEvent(this, room, content));
+		//this.eventPublisher.publishEvent(new AfterDeletionEvent<>(answer));
 	}
 
 	/*

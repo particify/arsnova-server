@@ -17,7 +17,12 @@
  */
 package de.thm.arsnova.cache;
 
-import de.thm.arsnova.event.*;
+import de.thm.arsnova.event.AfterCreationEvent;
+import de.thm.arsnova.event.AfterDeletionEvent;
+import de.thm.arsnova.event.ChangeScoreEvent;
+import de.thm.arsnova.model.Answer;
+import de.thm.arsnova.model.Comment;
+import de.thm.arsnova.model.Room;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -31,25 +36,25 @@ public class CacheBusterImpl implements CacheBuster {
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@EventListener
-	public void handleNewComment(NewCommentEvent event) { }
+	public void handleAfterCommentCreation(AfterCreationEvent<Comment> event) { }
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@EventListener
-	public void handleDeleteComment(DeleteCommentEvent event) { }
+	public void handleAfterCommentDeletion(AfterDeletionEvent<Comment> event) { }
 
 	@CacheEvict(value = "answerlists", key = "#event.content.id")
 	@EventListener
-	public void handleNewAnswer(NewAnswerEvent event) { }
+	public void handleAfterAnswerCreation(AfterCreationEvent<Answer> event) { }
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@EventListener
-	public void handleChangeScore(ChangeScoreEvent changeLearningProgress) { }
+	public void handleChangeScore(ChangeScoreEvent event) { }
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@EventListener
-	public void handleewRoom(NewRoomEvent newSessionEvent) { }
+	public void handleAfterRoomCreation(AfterCreationEvent<Room> event) { }
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@EventListener
-	public void handleDeleteRoom(DeleteRoomEvent deleteSessionEvent) { }
+	public void handleAfterRoomDeletion(AfterDeletionEvent<Room> event) { }
 }

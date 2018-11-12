@@ -17,8 +17,6 @@
  */
 package de.thm.arsnova.event;
 
-import de.thm.arsnova.model.Room;
-
 /**
  * Fires whenever all questions of a session are deleted. Note that this implies that all answers are deleted as well,
  * even though the specific answer events are not fired.
@@ -27,8 +25,8 @@ public class DeleteAllQuestionsEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public DeleteAllQuestionsEvent(Object source, Room room) {
-		super(source, room);
+	public DeleteAllQuestionsEvent(Object source, String roomId) {
+		super(source, roomId);
 	}
 
 }

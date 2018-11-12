@@ -18,7 +18,6 @@
 package de.thm.arsnova.event;
 
 import de.thm.arsnova.model.Content;
-import de.thm.arsnova.model.Room;
 
 /**
  * Fires whenever a content is enabled, i.e., it becomes visible to students.
@@ -29,8 +28,8 @@ public class UnlockQuestionEvent extends RoomEvent {
 
 	private final Content content;
 
-	public UnlockQuestionEvent(Object source, Room room, Content content) {
-		super(source, room);
+	public UnlockQuestionEvent(Object source, String roomId, Content content) {
+		super(source, roomId);
 		this.content = content;
 	}
 

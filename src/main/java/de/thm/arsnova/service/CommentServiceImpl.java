@@ -1,6 +1,7 @@
 package de.thm.arsnova.service;
 
-import de.thm.arsnova.event.DeleteCommentEvent;
+import de.thm.arsnova.event.AfterDeletionEvent;
+import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.migration.v2.CommentReadingCount;
@@ -56,6 +57,7 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		/* TODO: fire event */
 	}
 
+	/* FIXME: Remove, EntityService should handle this! */
 	@Override
 	@PreAuthorize("hasPermission(#commentId, 'comment', 'owner')")
 	public void delete(final String commentId) {
@@ -63,11 +65,9 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		if (comment == null) {
 			throw new NotFoundException();
 		}
+		eventPublisher.publishEvent(new BeforeDeletionEvent<>(comment));
 		commentRepository.delete(comment);
-
-		final Room room = roomRepository.findOne(comment.getRoomId());
-		final DeleteCommentEvent event = new DeleteCommentEvent(this, room, comment);
-		this.eventPublisher.publishEvent(event);
+		eventPublisher.publishEvent(new AfterDeletionEvent<>(comment));
 	}
 
 	@Override

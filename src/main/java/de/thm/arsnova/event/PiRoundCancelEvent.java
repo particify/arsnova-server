@@ -18,7 +18,6 @@
 package de.thm.arsnova.event;
 
 import de.thm.arsnova.model.Content;
-import de.thm.arsnova.model.Room;
 
 /**
  * Fires whenever a peer instruction round is canceled.
@@ -27,8 +26,8 @@ public class PiRoundCancelEvent extends PiRoundEndEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public PiRoundCancelEvent(Object source, Room room, Content content) {
-		super(source, room, content);
+	public PiRoundCancelEvent(Object source, String roomId, Content content) {
+		super(source, roomId, content);
 	}
 
 }

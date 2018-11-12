@@ -17,8 +17,6 @@
  */
 package de.thm.arsnova.event;
 
-import de.thm.arsnova.model.Room;
-
 /**
  * Fires whenever the feedback changes.
  */
@@ -26,8 +24,8 @@ public class NewFeedbackEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public NewFeedbackEvent(Object source, Room room) {
-		super(source, room);
+	public NewFeedbackEvent(Object source, String roomId) {
+		super(source, roomId);
 	}
 
 }

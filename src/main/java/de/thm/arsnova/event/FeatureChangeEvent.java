@@ -17,8 +17,6 @@
  */
 package de.thm.arsnova.event;
 
-import de.thm.arsnova.model.Room;
-
 /**
  * Fires whenever a new session is created.
  */
@@ -26,8 +24,8 @@ public class FeatureChangeEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public FeatureChangeEvent(Object source, Room room) {
-		super(source, room);
+	public FeatureChangeEvent(Object source, String roomId) {
+		super(source, roomId);
 	}
 
 }

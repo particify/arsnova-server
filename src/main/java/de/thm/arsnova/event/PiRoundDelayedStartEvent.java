@@ -18,7 +18,6 @@
 package de.thm.arsnova.event;
 
 import de.thm.arsnova.model.Content;
-import de.thm.arsnova.model.Room;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -37,8 +36,8 @@ public class PiRoundDelayedStartEvent extends RoomEvent {
 	private final String group;
 	private int piRound;
 
-	public PiRoundDelayedStartEvent(Object source, Room room, Content content) {
-		super(source, room);
+	public PiRoundDelayedStartEvent(Object source, String roomId, Content content) {
+		super(source, roomId);
 		this.questionId = content.getId();
 		/* FIXME: Event does not support content with multiple groups */
 		this.group = content.getGroups().toArray(new String[1])[0];

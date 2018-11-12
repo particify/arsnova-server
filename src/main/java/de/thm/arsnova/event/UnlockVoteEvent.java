@@ -18,7 +18,6 @@
 package de.thm.arsnova.event;
 
 import de.thm.arsnova.model.Content;
-import de.thm.arsnova.model.Room;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,8 +31,8 @@ public class UnlockVoteEvent extends RoomEvent {
 
 	private final Content content;
 
-	public UnlockVoteEvent(Object source, Room room, Content content) {
-		super(source, room);
+	public UnlockVoteEvent(Object source, String roomId, Content content) {
+		super(source, roomId);
 		this.content = content;
 	}
 

@@ -17,8 +17,6 @@
  */
 package de.thm.arsnova.event;
 
-import de.thm.arsnova.model.Room;
-
 /**
  * Base class for all {@link ArsnovaEvent}s that are related to a room.
  */
@@ -26,14 +24,14 @@ public abstract class RoomEvent extends ArsnovaEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Room room;
+	private final String roomId;
 
-	public RoomEvent(Object source, Room room) {
+	public RoomEvent(Object source, String roomId) {
 		super(source);
-		this.room = room;
+		this.roomId = roomId;
 	}
 
-	public Room getRoom() {
-		return room;
+	public String getRoomId() {
+		return roomId;
 	}
 }

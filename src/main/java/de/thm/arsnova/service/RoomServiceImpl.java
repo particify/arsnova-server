@@ -19,7 +19,8 @@ package de.thm.arsnova.service;
 
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.event.DeleteRoomEvent;
+import de.thm.arsnova.event.AfterDeletionEvent;
+import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.event.FeatureChangeEvent;
 import de.thm.arsnova.event.FlipFlashcardsEvent;
 import de.thm.arsnova.event.LockFeedbackEvent;
@@ -403,7 +404,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	public Room setActive(final String id, final Boolean lock) {
 		final Room room = roomRepository.findOne(id);
 		room.setClosed(!lock);
-		this.eventPublisher.publishEvent(new StatusRoomEvent(this, room));
+		this.eventPublisher.publishEvent(new StatusRoomEvent(this, room.getId()));
 		roomRepository.save(room);
 
 		return room;
@@ -454,11 +455,11 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		count[2] = commentRepository.deleteByRoomId(room.getId());
 		count[1] = answerRepository.deleteByContentIds(contentIds);
 		count[0] = contentRepository.deleteByRoomId(room.getId());
+		this.eventPublisher.publishEvent(new BeforeDeletionEvent<>(room));
 		roomRepository.delete(room);
+		this.eventPublisher.publishEvent(new AfterDeletionEvent<>(room));
 		logger.debug("Deleted room document {} and related data.", room.getId());
 		dbLogger.log("delete", "type", "session", "id", room.getId());
-
-		this.eventPublisher.publishEvent(new DeleteRoomEvent(this, room));
 
 		return count;
 	}
@@ -518,7 +519,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	public Room.Settings updateFeatures(String id, Room.Settings settings) {
 		final Room room = roomRepository.findOne(id);
 		room.setSettings(settings);
-		this.eventPublisher.publishEvent(new FeatureChangeEvent(this, room));
+		this.eventPublisher.publishEvent(new FeatureChangeEvent(this, room.getId()));
 		roomRepository.save(room);
 
 		return room.getSettings();
@@ -533,7 +534,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		}
 
 		room.getSettings().setFeedbackLocked(lock);
-		this.eventPublisher.publishEvent(new LockFeedbackEvent(this, room));
+		this.eventPublisher.publishEvent(new LockFeedbackEvent(this, room.getId()));
 		roomRepository.save(room);
 
 		return room.getSettings().isFeedbackLocked();
@@ -543,7 +544,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
 	public boolean flipFlashcards(String id, Boolean flip) {
 		final Room room = roomRepository.findOne(id);
-		this.eventPublisher.publishEvent(new FlipFlashcardsEvent(this, room));
+		this.eventPublisher.publishEvent(new FlipFlashcardsEvent(this, room.getId()));
 
 		return flip;
 	}
