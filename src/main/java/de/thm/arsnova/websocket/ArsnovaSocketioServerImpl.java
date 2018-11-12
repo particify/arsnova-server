@@ -493,7 +493,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 
 	@EventListener
 	public void handleAfterContentCreation(AfterCreationEvent<de.thm.arsnova.model.Content> event) {
-		this.reportContentAvailable(event.getSource().getId(), Collections.singletonList(event.getSource()));
+		this.reportContentAvailable(event.getEntity().getId(), Collections.singletonList(event.getEntity()));
 	}
 
 	@EventListener
@@ -518,16 +518,16 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 
 	@EventListener
 	public void handleAfterCommentCreation(AfterCreationEvent<Comment> event) {
-		this.reportCommentAvailable(event.getSource().getId(), event.getSource().getId());
+		this.reportCommentAvailable(event.getEntity().getId(), event.getEntity().getId());
 	}
 
 	@Async
 	@EventListener
 	@Timed
 	public void handleNewAnswer(AfterCreationEvent<Answer> event) {
-		final String roomId = event.getSource().getRoomId();
-		this.reportAnswersToContentAvailable(event.getSource().getRoomId(), event.getSource().getContentId());
-		broadcastInRoom(roomId, "countQuestionAnswersByQuestionId", answerService.countAnswersAndAbstentionsInternal(event.getSource().getContentId()));
+		final String roomId = event.getEntity().getRoomId();
+		this.reportAnswersToContentAvailable(event.getEntity().getRoomId(), event.getEntity().getContentId());
+		broadcastInRoom(roomId, "countQuestionAnswersByQuestionId", answerService.countAnswersAndAbstentionsInternal(event.getEntity().getContentId()));
 		/* FIXME: Content variant is ignored for now */
 		broadcastInRoom(roomId, "countLectureQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
 		broadcastInRoom(roomId, "countPreparationQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
@@ -546,8 +546,8 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 	@EventListener
 	@Timed
 	public void handleAfterAnswerDeletion(AfterDeletionEvent<Answer> event) {
-		final String roomId = event.getSource().getRoomId();
-		this.reportAnswersToContentAvailable(event.getSource().getRoomId(), event.getSource().getContentId());
+		final String roomId = event.getEntity().getRoomId();
+		this.reportAnswersToContentAvailable(event.getEntity().getRoomId(), event.getEntity().getContentId());
 		// We do not know which user's answer was deleted, so we can't update his 'unanswered' list of questions...
 		/* FIXME: Content variant is ignored for now */
 		broadcastInRoom(roomId, "countLectureQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));

@@ -6,13 +6,15 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.ResolvableTypeProvider;
 
 public abstract class CrudEvent<E extends Entity> extends ApplicationEvent implements ResolvableTypeProvider {
-	public CrudEvent(final E source) {
+	private E entity;
+
+	public CrudEvent(final Object source, final E entity) {
 		super(source);
+		this.entity = entity;
 	}
 
-	@Override
-	public E getSource() {
-		return (E) super.getSource();
+	public E getEntity() {
+		return entity;
 	}
 
 	@Override

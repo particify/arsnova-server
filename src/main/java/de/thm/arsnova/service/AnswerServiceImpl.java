@@ -96,11 +96,11 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		}
 		try {
 			for (AnswerQueueElement e : elements) {
-				this.eventPublisher.publishEvent(new BeforeCreationEvent<>(e.getAnswer()));
+				this.eventPublisher.publishEvent(new BeforeCreationEvent<>(this, e.getAnswer()));
 			}
 			answerRepository.saveAll(answerList);
 			for (AnswerQueueElement e : elements) {
-				this.eventPublisher.publishEvent(new AfterCreationEvent<>(e.getAnswer()));
+				this.eventPublisher.publishEvent(new AfterCreationEvent<>(this, e.getAnswer()));
 			}
 		} catch (final DbAccessException e) {
 			logger.error("Could not bulk save answers from queue.", e);
@@ -375,9 +375,9 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		answer.setCreatorId(user.getId());
 		answer.setContentId(content.getId());
 		answer.setRoomId(room.getId());
-		this.eventPublisher.publishEvent(new BeforeCreationEvent<>(realAnswer));
+		this.eventPublisher.publishEvent(new BeforeCreationEvent<>(this, realAnswer));
 		answerRepository.save(realAnswer);
-		this.eventPublisher.publishEvent(new AfterCreationEvent<>(realAnswer));
+		this.eventPublisher.publishEvent(new AfterCreationEvent<>(this, realAnswer));
 
 		return answer;
 	}

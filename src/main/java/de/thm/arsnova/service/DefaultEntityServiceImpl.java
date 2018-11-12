@@ -92,9 +92,9 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		entity.setCreationTimestamp(new Date());
 
 		prepareCreate(entity);
-		eventPublisher.publishEvent(new BeforeCreationEvent<>(entity));
+		eventPublisher.publishEvent(new BeforeCreationEvent<>(this, entity));
 		final T createdEntity = repository.save(entity);
-		eventPublisher.publishEvent(new AfterCreationEvent<>(createdEntity));
+		eventPublisher.publishEvent(new AfterCreationEvent<>(this, createdEntity));
 		finalizeCreate(entity);
 
 		return createdEntity;
@@ -129,9 +129,9 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		newEntity.setUpdateTimestamp(new Date());
 
 		prepareUpdate(newEntity);
-		eventPublisher.publishEvent(new BeforeUpdateEvent<>(newEntity));
+		eventPublisher.publishEvent(new BeforeUpdateEvent<>(this, newEntity));
 		final T updatedEntity = repository.save(newEntity);
-		eventPublisher.publishEvent(new AfterUpdateEvent<>(updatedEntity));
+		eventPublisher.publishEvent(new AfterUpdateEvent<>(this, updatedEntity));
 		finalizeUpdate(updatedEntity);
 
 		return updatedEntity;
@@ -170,9 +170,9 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		reader.readValue(tree);
 		entity.setUpdateTimestamp(new Date());
 		preparePatch(entity);
-		eventPublisher.publishEvent(new BeforePatchEvent<>(entity));
+		eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity));
 		final T patchedEntity = repository.save(entity);
-		eventPublisher.publishEvent(new AfterPatchEvent<>(entity));
+		eventPublisher.publishEvent(new AfterPatchEvent<>(this, entity));
 
 		return patchedEntity;
 	}
@@ -193,7 +193,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 			reader.readValue(tree);
 			entity.setUpdateTimestamp(new Date());
 			preparePatch(entity);
-			eventPublisher.publishEvent(new BeforePatchEvent<>(entity));
+			eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity));
 		}
 
 		return repository.saveAll(entities);
@@ -212,9 +212,9 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	@Override
 	@PreAuthorize("hasPermission(#entity, 'delete')")
 	public void delete(final T entity) {
-		eventPublisher.publishEvent(new BeforeDeletionEvent<>(entity));
+		eventPublisher.publishEvent(new BeforeDeletionEvent<>(this, entity));
 		repository.delete(entity);
-		eventPublisher.publishEvent(new AfterUpdateEvent<>(entity));
+		eventPublisher.publishEvent(new AfterUpdateEvent<>(this, entity));
 	}
 
 	/**

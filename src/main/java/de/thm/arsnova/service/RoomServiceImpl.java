@@ -455,9 +455,9 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		count[2] = commentRepository.deleteByRoomId(room.getId());
 		count[1] = answerRepository.deleteByContentIds(contentIds);
 		count[0] = contentRepository.deleteByRoomId(room.getId());
-		this.eventPublisher.publishEvent(new BeforeDeletionEvent<>(room));
+		this.eventPublisher.publishEvent(new BeforeDeletionEvent<>(this, room));
 		roomRepository.delete(room);
-		this.eventPublisher.publishEvent(new AfterDeletionEvent<>(room));
+		this.eventPublisher.publishEvent(new AfterDeletionEvent<>(this, room));
 		logger.debug("Deleted room document {} and related data.", room.getId());
 		dbLogger.log("delete", "type", "session", "id", room.getId());
 

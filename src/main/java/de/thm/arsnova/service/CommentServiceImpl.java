@@ -65,9 +65,9 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		if (comment == null) {
 			throw new NotFoundException();
 		}
-		eventPublisher.publishEvent(new BeforeDeletionEvent<>(comment));
+		eventPublisher.publishEvent(new BeforeDeletionEvent<>(this, comment));
 		commentRepository.delete(comment);
-		eventPublisher.publishEvent(new AfterDeletionEvent<>(comment));
+		eventPublisher.publishEvent(new AfterDeletionEvent<>(this, comment));
 	}
 
 	@Override

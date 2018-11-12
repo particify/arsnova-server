@@ -194,9 +194,9 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			newGroup.setContentIds(newContentIds);
 			room.getContentGroups().add(newGroup);
 		}
-		eventPublisher.publishEvent(new BeforeCreationEvent<>(content));
+		eventPublisher.publishEvent(new BeforeCreationEvent<>(this, content));
 		roomRepository.save(room);
-		eventPublisher.publishEvent(new AfterCreationEvent<>(content));
+		eventPublisher.publishEvent(new AfterCreationEvent<>(this, content));
 	}
 
 	@Override
@@ -289,9 +289,9 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 		try {
 			final int count = answerRepository.deleteByContentId(contentId);
-			eventPublisher.publishEvent(new BeforeDeletionEvent<>(content));
+			eventPublisher.publishEvent(new BeforeDeletionEvent<>(this, content));
 			contentRepository.deleteById(contentId);
-			eventPublisher.publishEvent(new AfterDeletionEvent<>(content));
+			eventPublisher.publishEvent(new AfterDeletionEvent<>(this, content));
 			dbLogger.log("delete", "type", "content", "answerCount", count);
 		} catch (final IllegalArgumentException e) {
 			logger.error("Could not delete content {}.", contentId, e);
