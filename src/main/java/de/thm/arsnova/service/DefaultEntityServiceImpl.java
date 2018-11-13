@@ -22,12 +22,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import de.thm.arsnova.event.AfterCreationEvent;
 import de.thm.arsnova.event.AfterDeletionEvent;
+import de.thm.arsnova.event.AfterFullUpdateEvent;
 import de.thm.arsnova.event.AfterPatchEvent;
-import de.thm.arsnova.event.AfterUpdateEvent;
 import de.thm.arsnova.event.BeforeCreationEvent;
 import de.thm.arsnova.event.BeforeDeletionEvent;
+import de.thm.arsnova.event.BeforeFullUpdateEvent;
 import de.thm.arsnova.event.BeforePatchEvent;
-import de.thm.arsnova.event.BeforeUpdateEvent;
 import de.thm.arsnova.model.Entity;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.persistence.CrudRepository;
@@ -130,9 +130,9 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		newEntity.setUpdateTimestamp(new Date());
 
 		prepareUpdate(newEntity);
-		eventPublisher.publishEvent(new BeforeUpdateEvent<>(this, newEntity));
+		eventPublisher.publishEvent(new BeforeFullUpdateEvent<>(this, newEntity, oldEntity));
 		final T updatedEntity = repository.save(newEntity);
-		eventPublisher.publishEvent(new AfterUpdateEvent<>(this, updatedEntity));
+		eventPublisher.publishEvent(new AfterFullUpdateEvent<>(this, updatedEntity, oldEntity));
 		finalizeUpdate(updatedEntity);
 
 		return updatedEntity;
@@ -171,9 +171,9 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		reader.readValue(tree);
 		entity.setUpdateTimestamp(new Date());
 		preparePatch(entity);
-		eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity));
+		eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity, changes));
 		final T patchedEntity = repository.save(entity);
-		eventPublisher.publishEvent(new AfterPatchEvent<>(this, patchedEntity));
+		eventPublisher.publishEvent(new AfterPatchEvent<>(this, patchedEntity, changes));
 
 		return patchedEntity;
 	}
@@ -194,7 +194,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 			reader.readValue(tree);
 			entity.setUpdateTimestamp(new Date());
 			preparePatch(entity);
-			eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity));
+			eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity, changes));
 		}
 
 		return repository.saveAll(entities);
