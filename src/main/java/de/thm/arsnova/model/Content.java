@@ -99,6 +99,29 @@ public class Content extends Entity {
 		}
 
 		@Override
+		public int hashCode() {
+			return Objects.hash(round, roundEndTimestamp, visible, solutionVisible, responsesEnabled, responsesVisible);
+		}
+
+		@Override
+		public boolean equals(final Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (!super.equals(o)) {
+				return false;
+			}
+			final State state = (State) o;
+
+			return round == state.round &&
+					visible == state.visible &&
+					solutionVisible == state.solutionVisible &&
+					responsesEnabled == state.responsesEnabled &&
+					responsesVisible == state.responsesVisible &&
+					Objects.equals(roundEndTimestamp, state.roundEndTimestamp);
+		}
+
+		@Override
 		public String toString() {
 			return new ToStringCreator(this)
 					.append("round", round)

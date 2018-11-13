@@ -50,6 +50,26 @@ public class Room extends Entity {
 		}
 
 		@Override
+		public int hashCode() {
+			return Objects.hash(name, contentIds, autoSort);
+		}
+
+		@Override
+		public boolean equals(final Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
+			final ContentGroup that = (ContentGroup) o;
+
+			return autoSort == that.autoSort &&
+					Objects.equals(name, that.name) &&
+					Objects.equals(contentIds, that.contentIds);
+		}
+
+		@Override
 		public String toString() {
 			return new ToStringCreator(this)
 					.append("name", name)
@@ -172,6 +192,36 @@ public class Room extends Entity {
 		}
 
 		@Override
+		public int hashCode() {
+			return Objects.hash(
+					questionsEnabled, slidesEnabled, commentsEnabled, flashcardsEnabled,
+					quickSurveyEnabled, quickFeedbackEnabled, scoreEnabled, multipleRoundsEnabled,
+					timerEnabled, feedbackLocked);
+		}
+
+		@Override
+		public boolean equals(final Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
+			final Settings settings = (Settings) o;
+
+			return questionsEnabled == settings.questionsEnabled &&
+					slidesEnabled == settings.slidesEnabled &&
+					commentsEnabled == settings.commentsEnabled &&
+					flashcardsEnabled == settings.flashcardsEnabled &&
+					quickSurveyEnabled == settings.quickSurveyEnabled &&
+					quickFeedbackEnabled == settings.quickFeedbackEnabled &&
+					scoreEnabled == settings.scoreEnabled &&
+					multipleRoundsEnabled == settings.multipleRoundsEnabled &&
+					timerEnabled == settings.timerEnabled &&
+					feedbackLocked == settings.feedbackLocked;
+		}
+
+		@Override
 		public String toString() {
 			return new ToStringCreator(this)
 					.append("questionsEnabled", questionsEnabled)
@@ -246,6 +296,28 @@ public class Room extends Entity {
 		}
 
 		@Override
+		public int hashCode() {
+			return Objects.hash(name, mail, organizationName, organizationLogo, organizationUnit);
+		}
+
+		@Override
+		public boolean equals(final Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
+			final Author author = (Author) o;
+
+			return Objects.equals(name, author.name) &&
+					Objects.equals(mail, author.mail) &&
+					Objects.equals(organizationName, author.organizationName) &&
+					Objects.equals(organizationLogo, author.organizationLogo) &&
+					Objects.equals(organizationUnit, author.organizationUnit);
+		}
+
+		@Override
 		public String toString() {
 			return new ToStringCreator(this)
 					.append("name", name)
@@ -290,6 +362,26 @@ public class Room extends Entity {
 		@JsonView({View.Persistence.class, View.Public.class})
 		public void setLicense(final String license) {
 			this.license = license;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(category, level, license);
+		}
+
+		@Override
+		public boolean equals(final Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
+			final PoolProperties that = (PoolProperties) o;
+
+			return Objects.equals(category, that.category) &&
+					Objects.equals(level, that.level) &&
+					Objects.equals(license, that.license);
 		}
 
 		@Override

@@ -6,6 +6,7 @@ import org.springframework.core.style.ToStringCreator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ChoiceQuestionContent extends Content {
 	public static class AnswerOption {
@@ -30,6 +31,25 @@ public class ChoiceQuestionContent extends Content {
 		@JsonView({View.Persistence.class, View.Public.class})
 		public void setPoints(int points) {
 			this.points = points;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(label, points);
+		}
+
+		@Override
+		public boolean equals(final Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (!super.equals(o)) {
+				return false;
+			}
+			final AnswerOption that = (AnswerOption) o;
+
+			return points == that.points &&
+					Objects.equals(label, that.label);
 		}
 
 		@Override

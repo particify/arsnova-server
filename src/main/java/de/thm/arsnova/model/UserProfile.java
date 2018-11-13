@@ -70,6 +70,27 @@ public class UserProfile extends Entity {
 		}
 
 		@Override
+		public int hashCode() {
+			return Objects.hash(password, activationKey, passwordResetKey, passwordResetTime);
+		}
+
+		@Override
+		public boolean equals(final Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (!super.equals(o)) {
+				return false;
+			}
+			final Account account = (Account) o;
+
+			return Objects.equals(password, account.password) &&
+					Objects.equals(activationKey, account.activationKey) &&
+					Objects.equals(passwordResetKey, account.passwordResetKey) &&
+					Objects.equals(passwordResetTime, account.passwordResetTime);
+		}
+
+		@Override
 		public String toString() {
 			return new ToStringCreator(this)
 					.append("password", password)
@@ -114,6 +135,11 @@ public class UserProfile extends Entity {
 		}
 
 		@Override
+		public int hashCode() {
+			return Objects.hash(roomId);
+		}
+
+		@Override
 		public boolean equals(final Object o) {
 			if (this == o) {
 				return true;
@@ -124,11 +150,6 @@ public class UserProfile extends Entity {
 			final RoomHistoryEntry that = (RoomHistoryEntry) o;
 
 			return Objects.equals(roomId, that.roomId);
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(roomId);
 		}
 
 		@Override
