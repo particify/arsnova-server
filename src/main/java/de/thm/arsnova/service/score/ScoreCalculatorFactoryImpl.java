@@ -53,79 +53,79 @@ public class ScoreCalculatorFactoryImpl implements ScoreCalculatorFactory, Appli
 		return scoreCalculator;
 	}
 
-	@CacheEvict(value = "score", key = "#event.Room")
+	@CacheEvict(value = "score", key = "#event.entity.roomId")
 	@EventListener
 	public void handleAfterContentCreation(AfterCreationEvent<Content> event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
 	}
 
-	@CacheEvict(value = "score", key = "#event.Room")
+	@CacheEvict(value = "score", key = "#event.roomId")
 	@EventListener
 	public void handleUnlockQuestion(UnlockQuestionEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoomId()));
 	}
 
-	@CacheEvict(value = "score", key = "#event.Room")
+	@CacheEvict(value = "score", key = "#event.roomId")
 	@EventListener
 	public void handleUnlockQuestions(UnlockQuestionsEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoomId()));
 	}
 
-	@CacheEvict(value = "score", key = "#event.Room")
+	@CacheEvict(value = "score", key = "#event.roomId")
 	@EventListener
 	public void handleLockQuestion(LockQuestionEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoomId()));
 	}
 
-	@CacheEvict(value = "score", key = "#event.Room")
+	@CacheEvict(value = "score", key = "#event.roomId")
 	@EventListener
 	public void handleLockQuestions(LockQuestionsEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoomId()));
 	}
 
-	@CacheEvict(value = "score", key = "#event.Room")
+	@CacheEvict(value = "score", key = "#event.entity.roomId")
 	@EventListener
 	public void handleNewAnswer(AfterCreationEvent<Answer> event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
 	}
 
-	@CacheEvict(value = "score", key = "#event.Room")
+	@CacheEvict(value = "score", key = "#event.entity.roomId")
 	@EventListener
 	public void handleDeleteAnswer(AfterDeletionEvent<Answer> event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
 	}
 
-	@CacheEvict(value = "score", key = "#event.Room")
+	@CacheEvict(value = "score", key = "#event.entity.roomId")
 	@EventListener
 	public void handleDeleteQuestion(AfterDeletionEvent<Content> event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
 	}
 
-	@CacheEvict(value = "score", key = "#event.Room")
+	@CacheEvict(value = "score", key = "#event.roomId")
 	@EventListener
 	public void handleDeleteAllQuestions(DeleteAllQuestionsEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoomId()));
 	}
 
-	@CacheEvict(value = "score", key = "#event.Room")
+	@CacheEvict(value = "score", key = "#event.roomId")
 	@EventListener
 	public void handleDeleteAllQuestionsAnswers(DeleteAllQuestionsAnswersEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoomId()));
 	}
 
-	@CacheEvict(value = "score", key = "#event.Room")
+	@CacheEvict(value = "score", key = "#event.roomId")
 	@EventListener
 	public void handleDeleteAllPreparationAnswers(DeleteAllPreparationAnswersEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoomId()));
 	}
 
-	@CacheEvict(value = "score", key = "#event.Room")
+	@CacheEvict(value = "score", key = "#event.roomId")
 	@EventListener
 	public void handleDeleteAllLectureAnswers(DeleteAllLectureAnswersEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoomId()));
 	}
 
-	@CacheEvict(value = "score", key = "#event.Room")
+	@CacheEvict(value = "score", key = "#event.roomId")
 	@EventListener
 	public void handlePiRoundReset(PiRoundResetEvent event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoomId()));
