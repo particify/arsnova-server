@@ -31,24 +31,24 @@ public class StateEventDispatcher implements ApplicationEventPublisherAware {
 
 	@EventListener
 	public void dispatchRoomStateEvent(final AfterPatchEvent<Room> event) {
-		final Room room = event.getEntity();
-		final Map<String, Object> changes = event.getChanges();
-		publishEventIfPropertyChanged(room, changes, "closed", "closed");
-		publishEventIfPropertyChanged(room, changes, "settings", "settings");
+		publishEventIfPropertyChanged(event, Function.identity(), "closed", "closed");
+		publishEventIfPropertyChanged(event, Function.identity(), "settings", "settings");
+		publishEventIfPropertyChanged(event, Room::getSettings, null, "settings");
 	}
 
 	@EventListener
 	public void dispatchContentStateEvent(final AfterFullUpdateEvent<Content> event) {
 		final Content newContent = event.getEntity();
 		final Content oldContent = event.getOldEntity();
+		Function<Content, Content.State> f = Content::getState;
+		f.apply(newContent);
 		publishEventIfPropertyChanged(newContent, oldContent, Content::getState, "state");
 	}
 
 	@EventListener
 	public void dispatchContentStateEvent(final AfterPatchEvent<Content> event) {
-		final Content content = event.getEntity();
-		final Map<String, Object> changes = event.getChanges();
-		publishEventIfPropertyChanged(content, changes, "state", "state");
+		publishEventIfPropertyChanged(event, Function.identity(), "state", "state");
+		publishEventIfPropertyChanged(event, Content::getState, null, "state");
 	}
 
 	private <E extends Entity, T extends Object> void publishEventIfPropertyChanged(
@@ -60,11 +60,15 @@ public class StateEventDispatcher implements ApplicationEventPublisherAware {
 		}
 	}
 
-	private <E extends Entity> void publishEventIfPropertyChanged(
-			final E entity, final Map<String, Object> changes, final String property, final String stateName) {
-		if (changes.containsKey(property)) {
+	private <E extends Entity, T extends Object> void publishEventIfPropertyChanged(
+			final AfterPatchEvent<E> event, final Function<E, T> propertyGetter, final String property, final String stateName) {
+		final E entity = event.getEntity();
+		final Map<String, Object> changes = event.getChanges();
+		if (event.getPropertyGetter().apply(entity) == propertyGetter.apply(entity)
+				&& (property == null || changes.containsKey(property))) {
+			final Object value = property == null ? event.getPropertyGetter().apply(entity) : changes.get(property);
 			eventPublisher.publishEvent(
-					new StateChangeEvent<>(this, entity, stateName, changes.get(property), null));
+					new StateChangeEvent<>(this, entity, stateName, value, null));
 		}
 	}
 

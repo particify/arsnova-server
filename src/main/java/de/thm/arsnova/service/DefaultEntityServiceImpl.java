@@ -171,9 +171,9 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		reader.readValue(tree);
 		entity.setUpdateTimestamp(new Date());
 		preparePatch(entity);
-		eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity, changes));
+		eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity, propertyGetter, changes));
 		final T patchedEntity = repository.save(entity);
-		eventPublisher.publishEvent(new AfterPatchEvent<>(this, patchedEntity, changes));
+		eventPublisher.publishEvent(new AfterPatchEvent<>(this, patchedEntity, propertyGetter, changes));
 
 		return patchedEntity;
 	}
@@ -194,7 +194,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 			reader.readValue(tree);
 			entity.setUpdateTimestamp(new Date());
 			preparePatch(entity);
-			eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity, changes));
+			eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity, propertyGetter, changes));
 		}
 
 		return repository.saveAll(entities);
