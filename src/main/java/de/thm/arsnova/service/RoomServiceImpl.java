@@ -21,10 +21,7 @@ import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.event.AfterDeletionEvent;
 import de.thm.arsnova.event.BeforeDeletionEvent;
-import de.thm.arsnova.event.FeatureChangeEvent;
 import de.thm.arsnova.event.FlipFlashcardsEvent;
-import de.thm.arsnova.event.LockFeedbackEvent;
-import de.thm.arsnova.event.StatusRoomEvent;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.model.migration.v2.ClientAuthentication;
@@ -53,8 +50,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -401,11 +400,9 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	@Override
 	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
-	public Room setActive(final String id, final Boolean lock) {
+	public Room setActive(final String id, final Boolean lock) throws IOException {
 		final Room room = roomRepository.findOne(id);
-		room.setClosed(!lock);
-		this.eventPublisher.publishEvent(new StatusRoomEvent(this, room.getId()));
-		roomRepository.save(room);
+		patch(room, Collections.singletonMap("closed", lock));
 
 		return room;
 	}
@@ -519,7 +516,8 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	public Room.Settings updateFeatures(String id, Room.Settings settings) {
 		final Room room = roomRepository.findOne(id);
 		room.setSettings(settings);
-		this.eventPublisher.publishEvent(new FeatureChangeEvent(this, room.getId()));
+
+
 		roomRepository.save(room);
 
 		return room.getSettings();
@@ -527,15 +525,12 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	@Override
 	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
-	public boolean lockFeedbackInput(String id, Boolean lock) {
+	public boolean lockFeedbackInput(String id, Boolean lock) throws IOException {
 		final Room room = roomRepository.findOne(id);
 		if (!lock) {
 			feedbackService.cleanFeedbackVotesByRoomId(id, 0);
 		}
-
-		room.getSettings().setFeedbackLocked(lock);
-		this.eventPublisher.publishEvent(new LockFeedbackEvent(this, room.getId()));
-		roomRepository.save(room);
+		patch(room, Collections.singletonMap("feedbackLocked", lock), Room::getSettings);
 
 		return room.getSettings().isFeedbackLocked();
 	}

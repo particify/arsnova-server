@@ -1,18 +1,11 @@
 package de.thm.arsnova.service;
 
-import de.thm.arsnova.event.PiRoundCancelEvent;
-import de.thm.arsnova.event.PiRoundDelayedStartEvent;
-import de.thm.arsnova.event.PiRoundEndEvent;
-import de.thm.arsnova.event.PiRoundResetEvent;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.persistence.AnswerRepository;
-import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.security.User;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -22,26 +15,25 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 @Service
-public class TimerServiceImpl implements TimerService, ApplicationEventPublisherAware {
+public class TimerServiceImpl implements TimerService {
 	private HashMap<String, Timer> timerList = new HashMap<>();
 	private UserService userService;
 	private RoomRepository roomRepository;
-	private ContentRepository contentRepository;
+	private ContentService contentService;
 	private AnswerRepository answerRepository;
-	private ApplicationEventPublisher publisher;
 
 	public TimerServiceImpl(final UserService userService, final RoomRepository roomRepository,
-			final ContentRepository contentRepository, final AnswerRepository answerRepository) {
+			final ContentService contentService, final AnswerRepository answerRepository) {
 		this.userService = userService;
 		this.roomRepository = roomRepository;
-		this.contentRepository = contentRepository;
+		this.contentService = contentService;
 		this.answerRepository = answerRepository;
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#contentId, 'content', 'owner')")
 	public void startNewRound(final String contentId) {
-		final Content content = contentRepository.findOne(contentId);
+		final Content content = contentService.get(contentId);
 		final Room room = roomRepository.findOne(content.getRoomId());
 
 		cancelDelayedRoundChange(contentId);
@@ -49,25 +41,22 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 		content.getState().setRoundEndTimestamp(null);
 		content.getState().setResponsesEnabled(false);
 		updateRoundManagementState(content);
-		contentRepository.save(content);
-
-		this.publisher.publishEvent(new PiRoundEndEvent(this, room.getId(), content));
+		contentService.update(content);
 	}
 
 	@Override
 	@PreAuthorize("hasPermission(#contentId, 'content', 'owner')")
 	public void startNewRoundDelayed(final String contentId, final int time) {
 		final User user = userService.getCurrentUser();
-		final Content content = contentRepository.findOne(contentId);
+		final Content content = contentService.get(contentId);
 		final Room room = roomRepository.findOne(content.getRoomId());
 
 		final Date date = new Date();
 		final Timer timer = new Timer();
 		final Date endDate = new Date(date.getTime() + (time * 1000));
 		updateRoundStartVariables(content, date, endDate);
-		contentRepository.save(content);
+		contentService.update(content);
 
-		this.publisher.publishEvent(new PiRoundDelayedStartEvent(this, room.getId(), content));
 		timerList.put(contentId, timer);
 
 		timer.schedule(new TimerTask() {
@@ -81,7 +70,7 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 	@Override
 	@PreAuthorize("hasPermission(#contentId, 'content', 'owner')")
 	public void cancelRoundChange(final String contentId) {
-		final Content content = contentRepository.findOne(contentId);
+		final Content content = contentService.get(contentId);
 		final Room room = roomRepository.findOne(content.getRoomId());
 
 		cancelDelayedRoundChange(contentId);
@@ -92,8 +81,7 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 		}
 		content.getState().setRoundEndTimestamp(null);
 
-		contentRepository.save(content);
-		this.publisher.publishEvent(new PiRoundCancelEvent(this, room.getId(), content));
+		contentService.update(content);
 	}
 
 	@Override
@@ -111,7 +99,7 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 	@PreAuthorize("hasPermission(#contentId, 'content', 'owner')")
 	@CacheEvict("answerlists")
 	public void resetRoundState(final String contentId) {
-		final Content content = contentRepository.findOne(contentId);
+		final Content content = contentService.get(contentId);
 		final Room room = roomRepository.findOne(content.getRoomId());
 		cancelDelayedRoundChange(contentId);
 
@@ -123,8 +111,7 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 
 		resetRoundManagementState(content);
 		answerRepository.deleteByContentId(content.getId());
-		contentRepository.save(content);
-		this.publisher.publishEvent(new PiRoundResetEvent(this, room.getId(), content));
+		contentService.update(content);
 	}
 
 	private void updateRoundStartVariables(final Content content, final Date start, final Date end) {
@@ -156,10 +143,5 @@ public class TimerServiceImpl implements TimerService, ApplicationEventPublisher
 		content.getState().setResponsesEnabled(true);
 		content.getState().setRound(1);
 		content.getState().setRoundEndTimestamp(null);
-	}
-
-	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-		this.publisher = applicationEventPublisher;
 	}
 }

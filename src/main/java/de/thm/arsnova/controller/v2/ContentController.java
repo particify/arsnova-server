@@ -53,6 +53,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.naming.OperationNotSupportedException;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -250,7 +251,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(required = false) final Boolean publish,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false) boolean lectureContentsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) boolean preparationContentsOnly
-			) {
+			) throws IOException {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		boolean p = publish == null || publish;
 		Iterable<de.thm.arsnova.model.Content> contents;

@@ -17,7 +17,10 @@
  */
 package de.thm.arsnova.service.score;
 
-import de.thm.arsnova.event.*;
+import de.thm.arsnova.event.AfterCreationEvent;
+import de.thm.arsnova.event.AfterDeletionEvent;
+import de.thm.arsnova.event.ChangeScoreEvent;
+import de.thm.arsnova.event.StateChangeEvent;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.persistence.SessionStatisticsRepository;
@@ -59,28 +62,10 @@ public class ScoreCalculatorFactoryImpl implements ScoreCalculatorFactory, Appli
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
 	}
 
-	@CacheEvict(value = "score", key = "#event.roomId")
-	@EventListener
-	public void handleUnlockQuestion(UnlockQuestionEvent event) {
-		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoomId()));
-	}
-
-	@CacheEvict(value = "score", key = "#event.roomId")
-	@EventListener
-	public void handleUnlockQuestions(UnlockQuestionsEvent event) {
-		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoomId()));
-	}
-
-	@CacheEvict(value = "score", key = "#event.roomId")
-	@EventListener
-	public void handleLockQuestion(LockQuestionEvent event) {
-		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoomId()));
-	}
-
-	@CacheEvict(value = "score", key = "#event.roomId")
-	@EventListener
-	public void handleLockQuestions(LockQuestionsEvent event) {
-		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoomId()));
+	@CacheEvict(value = "score", key = "#event.entity.roomId")
+	@EventListener(condition = "#event.stateName == 'state'")
+	public void handleContentStateChange(StateChangeEvent<Content, Content.State> event) {
+		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.entity.roomId")
@@ -99,36 +84,6 @@ public class ScoreCalculatorFactoryImpl implements ScoreCalculatorFactory, Appli
 	@EventListener
 	public void handleDeleteQuestion(AfterDeletionEvent<Content> event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
-	}
-
-	@CacheEvict(value = "score", key = "#event.roomId")
-	@EventListener
-	public void handleDeleteAllQuestions(DeleteAllQuestionsEvent event) {
-		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoomId()));
-	}
-
-	@CacheEvict(value = "score", key = "#event.roomId")
-	@EventListener
-	public void handleDeleteAllQuestionsAnswers(DeleteAllQuestionsAnswersEvent event) {
-		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoomId()));
-	}
-
-	@CacheEvict(value = "score", key = "#event.roomId")
-	@EventListener
-	public void handleDeleteAllPreparationAnswers(DeleteAllPreparationAnswersEvent event) {
-		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoomId()));
-	}
-
-	@CacheEvict(value = "score", key = "#event.roomId")
-	@EventListener
-	public void handleDeleteAllLectureAnswers(DeleteAllLectureAnswersEvent event) {
-		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoomId()));
-	}
-
-	@CacheEvict(value = "score", key = "#event.roomId")
-	@EventListener
-	public void handlePiRoundReset(PiRoundResetEvent event) {
-		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getRoomId()));
 	}
 
 	@Override
