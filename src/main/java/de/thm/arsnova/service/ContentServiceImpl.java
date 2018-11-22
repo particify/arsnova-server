@@ -91,6 +91,10 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			}
 			//content.setSessionKeyword(roomRepository.getSessionFromId(content.getRoomId()).getKeyword());
 
+			Room room = roomRepository.findOne(content.getRoomId());
+			content.setGroups(room.getContentGroups().stream()
+					.map(Room.ContentGroup::getName).collect(Collectors.toSet()));
+
 			return content;
 		} catch (final DocumentNotFoundException e) {
 			logger.error("Could not get content {}.", id, e);
