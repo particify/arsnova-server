@@ -227,6 +227,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	@Override
 	@PreAuthorize("hasPermission(#entity, 'delete')")
 	public void delete(final T entity) {
+		prepareDelete(entity);
 		eventPublisher.publishEvent(new BeforeDeletionEvent<>(this, entity));
 		repository.delete(entity);
 		eventPublisher.publishEvent(new AfterDeletionEvent<>(this, entity));
