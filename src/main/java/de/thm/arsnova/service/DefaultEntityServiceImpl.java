@@ -68,20 +68,25 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 
 	@Override
 	public T get(final String id, final boolean internal) {
+		T entity;
 		if (internal) {
-			T entity = repository.findOne(id);
+			entity = repository.findOne(id);
 			entity.setInternal(true);
-
-			return entity;
+		} else {
+			entity = get(id);
 		}
+		modifyRetrieved(entity);
 
-		return get(id);
+		return entity;
 	}
 
 	@Override
 	@PreFilter(value = "hasPermission(filterObject, #this.this.getTypeName(), 'read')", filterTarget = "ids")
 	public Iterable<T> get(final Iterable<String> ids) {
-		return repository.findAllById(ids);
+		Iterable<T> entities = repository.findAllById(ids);
+		entities.forEach(this::modifyRetrieved);
+
+		return entities;
 	}
 
 	@Override
@@ -97,6 +102,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		final T createdEntity = repository.save(entity);
 		eventPublisher.publishEvent(new AfterCreationEvent<>(this, createdEntity));
 		finalizeCreate(entity);
+		modifyRetrieved(entity);
 
 		return createdEntity;
 	}
@@ -134,6 +140,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		final T updatedEntity = repository.save(newEntity);
 		eventPublisher.publishEvent(new AfterFullUpdateEvent<>(this, updatedEntity, oldEntity));
 		finalizeUpdate(updatedEntity);
+		modifyRetrieved(updatedEntity);
 
 		return updatedEntity;
 	}
@@ -174,6 +181,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity, propertyGetter, changes));
 		final T patchedEntity = repository.save(entity);
 		eventPublisher.publishEvent(new AfterPatchEvent<>(this, patchedEntity, propertyGetter, changes));
+		modifyRetrieved(patchedEntity);
 
 		return patchedEntity;
 	}
@@ -197,7 +205,10 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 			eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity, propertyGetter, changes));
 		}
 
-		return repository.saveAll(entities);
+		Iterable<T> patchedEntities = repository.saveAll(entities);
+		patchedEntities.forEach(this::modifyRetrieved);
+
+		return patchedEntities;
 	}
 
 	/**
@@ -224,6 +235,16 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	 * @param entity The entity to be deleted
 	 */
 	protected void prepareDelete(final T entity) {
+
+	}
+
+	/**
+	 * This method can be overridden by subclasses to modify a retrieved entity before it is returned by service
+	 * methods.
+	 *
+	 * @param entity The entity to be modified
+	 */
+	protected void modifyRetrieved(final T entity) {
 
 	}
 
