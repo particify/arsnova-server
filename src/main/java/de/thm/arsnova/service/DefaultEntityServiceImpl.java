@@ -206,7 +206,10 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		}
 
 		Iterable<T> patchedEntities = repository.saveAll(entities);
-		patchedEntities.forEach(this::modifyRetrieved);
+		patchedEntities.forEach((e) -> {
+			eventPublisher.publishEvent(new AfterPatchEvent<>(this, e, propertyGetter, changes));
+			modifyRetrieved(e);
+		});
 
 		return patchedEntities;
 	}
