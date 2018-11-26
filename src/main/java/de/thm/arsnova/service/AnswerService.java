@@ -42,8 +42,6 @@ public interface AnswerService extends EntityService<Answer> {
 
 	Answer updateAnswer(Answer answer);
 
-	void deleteAnswer(String contentId, String answerId);
-
 	Map<String, Object> countAnswersAndAbstentionsInternal(String contentId);
 
 	int countLectureContentAnswers(String roomId);

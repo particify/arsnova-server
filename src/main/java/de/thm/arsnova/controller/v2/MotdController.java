@@ -148,11 +148,7 @@ public class MotdController extends AbstractController {
 	@RequestMapping(value = "/{motdId}", method = RequestMethod.DELETE)
 	public void deleteMotd(@ApiParam(value = "Motd-key from the message that shall be deleted", required = true) @PathVariable final String motdId) {
 		de.thm.arsnova.model.Motd motd = motdService.get(motdId);
-		if (motd.getAudience() == de.thm.arsnova.model.Motd.Audience.ROOM) {
-			motdService.deleteByRoomId(motd.getRoomId(), motd);
-		} else {
-			motdService.delete(motd);
-		}
+		motdService.delete(motd);
 	}
 
 	@RequestMapping(value = "/userlist", method =  RequestMethod.GET)

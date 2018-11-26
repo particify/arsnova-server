@@ -3,7 +3,6 @@ package de.thm.arsnova.service;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.persistence.AnswerRepository;
-import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.security.User;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,14 +17,14 @@ import java.util.TimerTask;
 public class TimerServiceImpl implements TimerService {
 	private HashMap<String, Timer> timerList = new HashMap<>();
 	private UserService userService;
-	private RoomRepository roomRepository;
+	private RoomService roomService;
 	private ContentService contentService;
 	private AnswerRepository answerRepository;
 
-	public TimerServiceImpl(final UserService userService, final RoomRepository roomRepository,
+	public TimerServiceImpl(final UserService userService, final RoomService roomService,
 			final ContentService contentService, final AnswerRepository answerRepository) {
 		this.userService = userService;
-		this.roomRepository = roomRepository;
+		this.roomService = roomService;
 		this.contentService = contentService;
 		this.answerRepository = answerRepository;
 	}
@@ -34,7 +33,7 @@ public class TimerServiceImpl implements TimerService {
 	@PreAuthorize("isAuthenticated() and hasPermission(#contentId, 'content', 'owner')")
 	public void startNewRound(final String contentId) {
 		final Content content = contentService.get(contentId);
-		final Room room = roomRepository.findOne(content.getRoomId());
+		final Room room = roomService.get(content.getRoomId());
 
 		cancelDelayedRoundChange(contentId);
 
@@ -49,7 +48,7 @@ public class TimerServiceImpl implements TimerService {
 	public void startNewRoundDelayed(final String contentId, final int time) {
 		final User user = userService.getCurrentUser();
 		final Content content = contentService.get(contentId);
-		final Room room = roomRepository.findOne(content.getRoomId());
+		final Room room = roomService.get(content.getRoomId());
 
 		final Date date = new Date();
 		final Timer timer = new Timer();
@@ -71,7 +70,7 @@ public class TimerServiceImpl implements TimerService {
 	@PreAuthorize("hasPermission(#contentId, 'content', 'owner')")
 	public void cancelRoundChange(final String contentId) {
 		final Content content = contentService.get(contentId);
-		final Room room = roomRepository.findOne(content.getRoomId());
+		final Room room = roomService.get(content.getRoomId());
 
 		cancelDelayedRoundChange(contentId);
 		resetRoundManagementState(content);
@@ -100,7 +99,7 @@ public class TimerServiceImpl implements TimerService {
 	@CacheEvict("answerlists")
 	public void resetRoundState(final String contentId) {
 		final Content content = contentService.get(contentId);
-		final Room room = roomRepository.findOne(content.getRoomId());
+		final Room room = roomService.get(content.getRoomId());
 		cancelDelayedRoundChange(contentId);
 
 		if (Content.Format.TEXT == content.getFormat()) {

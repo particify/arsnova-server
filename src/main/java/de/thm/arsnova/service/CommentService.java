@@ -15,7 +15,5 @@ public interface CommentService extends EntityService<Comment> {
 
 	Comment getAndMarkRead(String commentId) throws IOException;
 
-	void delete(String commentId);
-
 	void deleteByRoomId(String roomId);
 }

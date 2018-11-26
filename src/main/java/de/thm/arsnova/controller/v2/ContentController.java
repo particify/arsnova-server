@@ -556,7 +556,7 @@ public class ContentController extends PaginationController {
 			@PathVariable final String answerId,
 			final HttpServletResponse response
 			) {
-		answerService.deleteAnswer(contentId, answerId);
+		answerService.delete(answerService.get(answerId));
 	}
 
 	@ApiOperation(value = "Delete answers from a content, identified by content ID",

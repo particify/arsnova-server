@@ -19,7 +19,6 @@ package de.thm.arsnova.service;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.transport.ImportExportContainer;
 import de.thm.arsnova.model.transport.ScoreStatistics;
 
@@ -62,8 +61,6 @@ public interface RoomService extends EntityService<Room> {
 	Room join(String id, UUID socketId);
 
 	Room updateCreator(String id, String newCreator);
-
-	Room updateInternal(Room room, ClientAuthentication user);
 
 	int[] deleteCascading(Room room);
 

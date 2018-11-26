@@ -126,6 +126,6 @@ public class CommentController extends PaginationController {
 			nickname = "deleteComment")
 	@RequestMapping(value = "/{commentId}", method = RequestMethod.DELETE)
 	public void deleteComment(@ApiParam(value = "ID of the comment that needs to be deleted", required = true) @PathVariable final String commentId) {
-		commentService.delete(commentId);
+		commentService.delete(commentService.get(commentId));
 	}
 }
