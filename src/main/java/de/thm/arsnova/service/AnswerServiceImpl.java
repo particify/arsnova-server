@@ -27,8 +27,6 @@ import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.TextAnswer;
 import de.thm.arsnova.model.transport.AnswerQueueElement;
 import de.thm.arsnova.persistence.AnswerRepository;
-import de.thm.arsnova.persistence.ContentRepository;
-import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 import de.thm.arsnova.web.exceptions.UnauthorizedException;
@@ -58,23 +56,21 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 
 	private final Queue<AnswerQueueElement> answerQueue = new ConcurrentLinkedQueue<>();
 
-	private RoomRepository roomRepository;
-	private ContentRepository contentRepository;
-	private AnswerRepository answerRepository;
+	private RoomService roomService;
 	private ContentService contentService;
+	private AnswerRepository answerRepository;
 	private UserService userService;
 
 	public AnswerServiceImpl(
 			AnswerRepository repository,
-			ContentRepository contentRepository,
-			RoomRepository roomRepository,
+			RoomService roomService,
 			ContentService contentService,
 			UserService userService,
 			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(Answer.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.answerRepository = repository;
-		this.contentRepository = contentRepository;
-		this.roomRepository = roomRepository;
+		this.roomService = roomService;
+		this.contentService = contentService;
 		this.contentService = contentService;
 		this.userService = userService;
 	}
@@ -110,7 +106,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	@Override
 	@PreAuthorize("hasPermission(#contentId, 'content', 'owner')")
 	public void deleteAnswers(final String contentId) {
-		final Content content = contentRepository.findOne(contentId);
+		final Content content = contentService.get(contentId);
 		content.resetState();
 		/* FIXME: cancel timer */
 		contentService.update(content);
@@ -129,7 +125,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 
 	@Override
 	public void getFreetextAnswerAndMarkRead(final String answerId, final String userId) {
-		final Answer answer = answerRepository.findOne(answerId);
+		final Answer answer = get(answerId);
 		if (!(answer instanceof TextAnswer)) {
 			throw new NotFoundException();
 		}
@@ -137,17 +133,17 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		if (textAnswer.isRead()) {
 			return;
 		}
-		final Room room = roomRepository.findOne(textAnswer.getRoomId());
+		final Room room = roomService.get(textAnswer.getRoomId());
 		if (room.getOwnerId().equals(userId)) {
 			textAnswer.setRead(true);
-			answerRepository.save(textAnswer);
+			update(textAnswer);
 		}
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public AnswerStatistics getStatistics(final String contentId, final int round) {
-		final ChoiceQuestionContent content = (ChoiceQuestionContent) contentRepository.findOne(contentId);
+		final ChoiceQuestionContent content = (ChoiceQuestionContent) contentService.get(contentId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
@@ -191,7 +187,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	@PreAuthorize("isAuthenticated()")
 	public List<TextAnswer> getTextAnswers(final String contentId, final int piRound, final int offset, final int limit) {
 		/* FIXME: round support not implemented */
-		final Content content = contentRepository.findOne(contentId);
+		final Content content = contentService.get(contentId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
@@ -320,7 +316,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		final Room room = roomRepository.findOne(content.getRoomId());
+		final Room room = roomService.get(content.getRoomId());
 
 		answer.setCreatorId(user.getId());
 		answer.setContentId(content.getId());
@@ -371,34 +367,13 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 			content.checkTextStrictOptions(realAnswer);
 		}
 		*/
-		final Room room = roomRepository.findOne(content.getRoomId());
+		final Room room = roomService.get(content.getRoomId());
 		answer.setCreatorId(user.getId());
 		answer.setContentId(content.getId());
 		answer.setRoomId(room.getId());
-		this.eventPublisher.publishEvent(new BeforeCreationEvent<>(this, realAnswer));
-		answerRepository.save(realAnswer);
-		this.eventPublisher.publishEvent(new AfterCreationEvent<>(this, realAnswer));
+		update(realAnswer);
 
 		return answer;
-	}
-
-	/* FIXME: Remove, this should be handled by EntityService! */
-	@Override
-	@PreAuthorize("isAuthenticated()")
-	@CacheEvict(value = "answerlists", allEntries = true)
-	public void deleteAnswer(final String contentId, final String answerId) {
-		final Content content = contentRepository.findOne(contentId);
-		if (content == null) {
-			throw new NotFoundException();
-		}
-		final User user = userService.getCurrentUser();
-		final Room room = roomRepository.findOne(content.getRoomId());
-		if (user == null || room == null || !room.getOwnerId().equals(user.getId())) {
-			throw new UnauthorizedException();
-		}
-		//this.eventPublisher.publishEvent(new BeforeDeletionEvent<>(answer));
-		answerRepository.deleteById(answerId);
-		//this.eventPublisher.publishEvent(new AfterDeletionEvent<>(answer));
 	}
 
 	/*
@@ -407,7 +382,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	 */
 	@Override
 	public int countLectureQuestionAnswersInternal(final String roomId) {
-		return answerRepository.countByRoomIdOnlyLectureVariant(roomRepository.findOne(roomId).getId());
+		return answerRepository.countByRoomIdOnlyLectureVariant(roomService.get(roomId).getId());
 	}
 
 	@Override
@@ -444,6 +419,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	 */
 	@Override
 	public int countPreparationQuestionAnswersInternal(final String roomId) {
-		return answerRepository.countByRoomIdOnlyPreparationVariant(roomRepository.findOne(roomId).getId());
+		return answerRepository.countByRoomIdOnlyPreparationVariant(roomService.get(roomId).getId());
 	}
 }

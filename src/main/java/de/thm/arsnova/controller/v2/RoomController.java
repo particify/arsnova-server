@@ -51,6 +51,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -307,7 +308,7 @@ public class RoomController extends PaginationController {
 			@ApiParam(value = "wether statistics shall be exported", required = true) @RequestParam(value = "withAnswerStatistics", defaultValue = "false") final Boolean withAnswerStatistics,
 			@ApiParam(value = "wether comments shall be exported", required = true) @RequestParam(value = "withFeedbackQuestions", defaultValue = "false") final Boolean withFeedbackQuestions,
 			final HttpServletResponse response
-		) {
+		) throws IOException {
 		List<ImportExportContainer> rooms = new ArrayList<>();
 		ImportExportContainer temp;
 		for (String shortId : shortIds) {
@@ -327,7 +328,7 @@ public class RoomController extends PaginationController {
 	public Room copyToPublicPool(
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
 			@ApiParam(value = "public pool attributes for Room", required = true) @RequestBody final ImportExportContainer.PublicPool publicPool
-			) {
+			) throws IOException {
 		String id = roomService.getIdByShortId(shortId);
 		roomService.setActive(id, false);
 		de.thm.arsnova.model.Room roomInfo = roomService.copyRoomToPublicPool(shortId, publicPool);
@@ -347,7 +348,7 @@ public class RoomController extends PaginationController {
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
 			@ApiParam(value = "lock", required = true) @RequestParam(required = false) final Boolean lock,
 			final HttpServletResponse response
-			) {
+			) throws IOException {
 		if (lock != null) {
 			return toV2Migrator.migrate(roomService.setActive(roomService.getIdByShortId(shortId), lock));
 		}
@@ -412,7 +413,7 @@ public class RoomController extends PaginationController {
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
 			@ApiParam(value = "lock", required = true) @RequestParam(required = true) final Boolean lock,
 			final HttpServletResponse response
-			) {
+			) throws IOException {
 		return String.valueOf(roomService.lockFeedbackInput(roomService.getIdByShortId(shortId), lock));
 	}
 

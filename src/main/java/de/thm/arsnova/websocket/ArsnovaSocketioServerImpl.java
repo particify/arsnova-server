@@ -28,7 +28,13 @@ import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
 import com.corundumstudio.socketio.protocol.Packet;
 import com.corundumstudio.socketio.protocol.PacketType;
-import de.thm.arsnova.event.*;
+import de.thm.arsnova.event.AfterCreationEvent;
+import de.thm.arsnova.event.AfterDeletionEvent;
+import de.thm.arsnova.event.ChangeScoreEvent;
+import de.thm.arsnova.event.DeleteFeedbackForRoomsEvent;
+import de.thm.arsnova.event.FlipFlashcardsEvent;
+import de.thm.arsnova.event.NewFeedbackEvent;
+import de.thm.arsnova.event.StateChangeEvent;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.ScoreOptions;
@@ -60,7 +66,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
@@ -496,24 +504,13 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 		this.reportContentAvailable(event.getEntity().getId(), Collections.singletonList(event.getEntity()));
 	}
 
-	@EventListener
-	public void handleUnlockQuestion(UnlockQuestionEvent event) {
-		this.reportContentAvailable(event.getRoomId(), Collections.singletonList(event.getQuestion()));
-	}
-
-	@EventListener
-	public void handleLockQuestion(LockQuestionEvent event) {
-		this.reportContentsLocked(event.getRoomId(), Collections.singletonList(event.getQuestion()));
-	}
-
-	@EventListener
-	public void handleUnlockQuestions(UnlockQuestionsEvent event) {
-		this.reportContentAvailable(event.getRoomId(), event.getQuestions());
-	}
-
-	@EventListener
-	public void handleLockQuestions(LockQuestionsEvent event) {
-		this.reportContentsLocked(event.getRoomId(), event.getQuestions());
+	@EventListener(condition = "#event.stateName == 'state'")
+	public void handleContentIsVisibleStateChange(StateChangeEvent<de.thm.arsnova.model.Content, de.thm.arsnova.model.Content.State> event) {
+		if (event.getEntity().getState().isVisible()) {
+			this.reportContentAvailable(event.getEntity().getRoomId(), Collections.singletonList(event.getEntity()));
+		} else {
+			this.reportContentsLocked(event.getEntity().getRoomId(), Collections.singletonList(event.getEntity()));
+		}
 	}
 
 	@EventListener
@@ -555,80 +552,80 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 	}
 
 	@Async
-	@EventListener
+	@EventListener(condition = "#event.stateName == 'state'")
 	@Timed
-	public void handlePiRoundDelayedStart(PiRoundDelayedStartEvent event) {
-		final String roomId = event.getRoomId();
-		broadcastInRoom(roomId, "startDelayedPiRound", event.getPiRoundInformations());
+	public void handlePiRoundDelayedStart(StateChangeEvent<de.thm.arsnova.model.Content, de.thm.arsnova.model.Content.State> event) {
+		broadcastInRoom(event.getEntity().getRoomId(), "startDelayedPiRound", generateRoundInfo(event.getEntity()));
 	}
 
 	@Async
-	@EventListener
+	@EventListener(condition = "#event.stateName == 'state'")
 	@Timed
-	public void handlePiRoundEnd(PiRoundEndEvent event) {
-		final String roomId = event.getRoomId();
-		broadcastInRoom(roomId, "endPiRound", event.getPiRoundEndInformations());
+	public void handlePiRoundEnd(StateChangeEvent<de.thm.arsnova.model.Content, de.thm.arsnova.model.Content.State> event) {
+		broadcastInRoom(event.getEntity().getRoomId(), "endPiRound", generateRoundInfo(event.getEntity()));
 	}
 
 	@Async
-	@EventListener
+	@EventListener(condition = "#event.stateName == 'state'")
 	@Timed
-	public void handlePiRoundCancel(PiRoundCancelEvent event) {
-		final String roomId = event.getRoomId();
-		broadcastInRoom(roomId, "cancelPiRound", event.getContentId());
+	public void handlePiRoundCancel(StateChangeEvent<de.thm.arsnova.model.Content, de.thm.arsnova.model.Content.State> event) {
+		broadcastInRoom(event.getEntity().getRoomId(), "cancelPiRound", event.getEntity().getId());
 	}
 
-	@EventListener
-	public void handlePiRoundReset(PiRoundResetEvent event) {
-		final String roomId = event.getRoomId();
-		broadcastInRoom(roomId, "resetPiRound", event.getPiRoundResetInformations());
+	@EventListener(condition = "#event.stateName == 'state'")
+	public void handlePiRoundReset(StateChangeEvent<de.thm.arsnova.model.Content, de.thm.arsnova.model.Content.State> event) {
+		broadcastInRoom(event.getEntity().getRoomId(), "resetPiRound", generateRoundInfo(event.getEntity()));
 	}
 
-	@EventListener
-	public void handleLockVote(LockVoteEvent event) {
-		final String roomId = event.getRoomId();
-		broadcastInRoom(roomId, "lockVote", event.getVotingAdmission());
-	}
-
-	@EventListener
-	public void handleUnlockVote(UnlockVoteEvent event) {
-		final String roomId = event.getRoomId();
-		broadcastInRoom(roomId, "unlockVote", event.getVotingAdmission());
-	}
-
-	@EventListener
-	public void handleLockVotes(LockVotesEvent event) {
-		List<Content> contents = new ArrayList<>();
-		for (de.thm.arsnova.model.Content q : event.getQuestions()) {
-			contents.add(new Content(q));
+	private Map<String, Object> generateRoundInfo(de.thm.arsnova.model.Content content) {
+		Map<String, Object> map = new HashMap<>();
+		map.put("_id", content.getId());
+		if (content.getState().getRoundEndTimestamp() != null) {
+			map.put("endTime", content.getState().getRoundEndTimestamp().getTime());
 		}
-		broadcastInRoom(event.getRoomId(), "lockVotes", contents);
-	}
-
-	@EventListener
-	public void handleUnlockVotes(UnlockVotesEvent event) {
-		List<Content> contents = new ArrayList<>();
-		for (de.thm.arsnova.model.Content q : event.getQuestions()) {
-			contents.add(new Content(q));
+		/* FIXME: getRoundStartTimestamp is not implemented for Content.State. Is a delayed start still useful? */
+		/*
+		if (content.getState().getRoundStartTimestamp() != null) {
+			map.put("startTime", content.getState().getRoundStartTimestamp().getTime());
 		}
-		broadcastInRoom(event.getRoomId(), "unlockVotes", contents);
+		*/
+		map.put("variant", content.getGroups());
+		map.put("round", content.getState().getRound());
+
+		return map;
 	}
 
-	@EventListener
-	public void handleFeatureChange(FeatureChangeEvent event) {
-//		final String roomId = event.getRoomId();
-//		final de.thm.arsnova.model.Room.Settings settings = event.getRoom().getSettings();
-//		broadcastInRoom(roomId, "featureChange", toV2Migrator.migrate(settings));
-//
-//		if (settings.isFlashcardsEnabled()) {
-//			broadcastInRoom(roomId, "countFlashcards", contentService.countFlashcardsForUserInternal(roomId));
-//			broadcastInRoom(roomId, "flipFlashcards", event.getRoom().getFlipFlashcards());
-//		}
+	@EventListener(condition = "#event.stateName == 'state'")
+	public void handleContentResponsesEnabledStateChange(StateChangeEvent<de.thm.arsnova.model.Content, de.thm.arsnova.model.Content.State> event) {
+		/* Multiple groups for a single Content are not handled. */
+		final String groupName = event.getEntity().getGroups().iterator().hasNext() ?
+				event.getEntity().getGroups().iterator().next() : "";
+		Map<String, Object> map = new HashMap<>();
+		map.put("_id", event.getEntity().getId());
+		map.put("variant", groupName);
+		if (event.getEntity().getState().isResponsesEnabled()) {
+			this.reportContentAvailable(event.getEntity().getRoomId(), Collections.singletonList(event.getEntity()));
+			broadcastInRoom(event.getEntity().getRoomId(), "unlockVote", map);
+		} else {
+			broadcastInRoom(event.getEntity().getRoomId(), "lockVote", map);
+		}
 	}
 
-	@EventListener
-	public void handleLockFeedback(LockFeedbackEvent event) {
-//		broadcastInRoom(event.getRoomId(), "lockFeedback", event.getRoom().getSettings().isFeedbackLocked());
+	@EventListener(condition = "#event.stateName == 'settings'")
+	public void handleFeatureChange(StateChangeEvent<de.thm.arsnova.model.Room, de.thm.arsnova.model.Room.Settings> event) {
+		final String roomId = event.getEntity().getId();
+		final de.thm.arsnova.model.Room.Settings settings = event.getEntity().getSettings();
+		broadcastInRoom(roomId, "featureChange", toV2Migrator.migrate(settings));
+
+		if (settings.isFlashcardsEnabled()) {
+			broadcastInRoom(roomId, "countFlashcards", contentService.countFlashcardsForUserInternal(roomId));
+//			broadcastInRoom(roomId, "flipFlashcards", event.getEntity().getSettings().isFlipFlashcards());
+		}
+	}
+
+	@EventListener(condition = "#event.stateName == 'settings'")
+	public void handleLockFeedback(StateChangeEvent<de.thm.arsnova.model.Room, de.thm.arsnova.model.Room.Settings> event) {
+		broadcastInRoom(event.getEntity().getId(), "lockFeedback", event.getEntity().getSettings().isFeedbackLocked());
 	}
 
 	@EventListener
@@ -647,9 +644,9 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 
 	}
 
-	@EventListener
-	public void handleStatusRoom(StatusRoomEvent event) {
-//		this.reportRoomStatus(event.getRoomId(), !event.getRoom().isClosed());
+	@EventListener(condition = "#event.stateName == 'closed'")
+	public void handleRoomClosedStateChange(StateChangeEvent<de.thm.arsnova.model.Room, Boolean> event) {
+		this.reportRoomStatus(event.getEntity().getId(), !event.getNewValue());
 	}
 
 	@EventListener

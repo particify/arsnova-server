@@ -19,15 +19,9 @@ package de.thm.arsnova.service;
 
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.event.AfterDeletionEvent;
-import de.thm.arsnova.event.BeforeDeletionEvent;
-import de.thm.arsnova.event.FeatureChangeEvent;
 import de.thm.arsnova.event.FlipFlashcardsEvent;
-import de.thm.arsnova.event.LockFeedbackEvent;
-import de.thm.arsnova.event.StatusRoomEvent;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.transport.ImportExportContainer;
 import de.thm.arsnova.model.transport.ScoreStatistics;
 import de.thm.arsnova.persistence.AnswerRepository;
@@ -53,8 +47,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -97,23 +93,35 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	public RoomServiceImpl(
 			RoomRepository repository,
-			ContentRepository contentRepository,
-			AnswerRepository answerRepository,
-			CommentRepository commentRepository,
 			LogEntryRepository dbLogger,
 			UserService userService,
-			FeedbackService feedbackService,
 			ScoreCalculatorFactory scoreCalculatorFactory,
 			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(Room.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.roomRepository = repository;
-		this.contentRepository = contentRepository;
-		this.answerRepository = answerRepository;
-		this.commentRepository = commentRepository;
 		this.dbLogger = dbLogger;
 		this.userService = userService;
-		this.feedbackService = feedbackService;
 		this.scoreCalculatorFactory = scoreCalculatorFactory;
+	}
+
+	@Autowired
+	public void setCommentRepository(final CommentRepository commentRepository) {
+		this.commentRepository = commentRepository;
+	}
+
+	@Autowired
+	public void setContentRepository(final ContentRepository contentRepository) {
+		this.contentRepository = contentRepository;
+	}
+
+	@Autowired
+	public void setAnswerRepository(final AnswerRepository answerRepository) {
+		this.answerRepository = answerRepository;
+	}
+
+	@Autowired
+	public void setFeedbackService(final FeedbackService feedbackService) {
+		this.feedbackService = feedbackService;
 	}
 
 	public static class RoomNameComparator implements Comparator<Room>, Serializable {
@@ -197,7 +205,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	@Override
 	public Room join(final String id, final UUID socketId) {
-		Room room = null != id ? roomRepository.findOne(id) : null;
+		Room room = null != id ? get(id) : null;
 		if (null == room) {
 			userService.removeUserFromRoomBySocketId(socketId);
 			return null;
@@ -241,7 +249,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
 	public Room getForAdmin(final String id) {
-		return roomRepository.findOne(id);
+		return get(id);
 	}
 
 	/*
@@ -250,7 +258,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	 */
 	@Override
 	public Room getInternal(final String id, final String userId) {
-		final Room room = roomRepository.findOne(id);
+		final Room room = get(id, true);
 		if (room == null) {
 			throw new NotFoundException();
 		}
@@ -401,11 +409,9 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	@Override
 	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
-	public Room setActive(final String id, final Boolean lock) {
-		final Room room = roomRepository.findOne(id);
-		room.setClosed(!lock);
-		this.eventPublisher.publishEvent(new StatusRoomEvent(this, room.getId()));
-		roomRepository.save(room);
+	public Room setActive(final String id, final Boolean lock) throws IOException {
+		final Room room = get(id);
+		patch(room, Collections.singletonMap("closed", lock));
 
 		return room;
 	}
@@ -414,7 +420,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	/* TODO: move caching to DefaultEntityServiceImpl */
 	//@CachePut(value = "rooms", key = "#room")
 	protected void prepareUpdate(final Room room) {
-		final Room existingRoom = roomRepository.findOne(room.getId());
+		final Room existingRoom = get(room.getId());
 		room.setOwnerId(existingRoom.getOwnerId());
 		handleLogo(room);
 
@@ -430,19 +436,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		throw new UnsupportedOperationException("No longer implemented.");
 	}
 
-	/*
-	 * The "internal" suffix means it is called by internal services that have no authentication!
-	 * TODO: Find a better way of doing this...
-	 */
-	@Override
-	public Room updateInternal(final Room room, final ClientAuthentication user) {
-		if (room.getOwnerId().equals(user.getId())) {
-			roomRepository.save(room);
-			return room;
-		}
-		return null;
-	}
-
 	@Override
 	@PreAuthorize("hasPermission(#room, 'owner')")
 	@Caching(evict = {
@@ -455,9 +448,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		count[2] = commentRepository.deleteByRoomId(room.getId());
 		count[1] = answerRepository.deleteByContentIds(contentIds);
 		count[0] = contentRepository.deleteByRoomId(room.getId());
-		this.eventPublisher.publishEvent(new BeforeDeletionEvent<>(this, room));
-		roomRepository.delete(room);
-		this.eventPublisher.publishEvent(new AfterDeletionEvent<>(this, room));
+		delete(room);
 		logger.debug("Deleted room document {} and related data.", room.getId());
 		dbLogger.log("delete", "type", "session", "id", room.getId());
 
@@ -467,7 +458,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Override
 	@PreAuthorize("hasPermission(#id, 'room', 'read')")
 	public ScoreStatistics getLearningProgress(final String id, final String type, final String questionVariant) {
-		final Room room = roomRepository.findOne(id);
+		final Room room = get(id);
 		ScoreCalculator scoreCalculator = scoreCalculatorFactory.create(type, questionVariant);
 		return scoreCalculator.getCourseProgress(room);
 	}
@@ -475,7 +466,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Override
 	@PreAuthorize("hasPermission(#id, 'room', 'read')")
 	public ScoreStatistics getMyLearningProgress(final String id, final String type, final String questionVariant) {
-		final Room room = roomRepository.findOne(id);
+		final Room room = get(id);
 		final User user = userService.getCurrentUser();
 		ScoreCalculator scoreCalculator = scoreCalculatorFactory.create(type, questionVariant);
 		return scoreCalculator.getMyProgress(room, user.getId());
@@ -511,31 +502,28 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Override
 	@PreAuthorize("hasPermission(#id, 'room', 'read')")
 	public Room.Settings getFeatures(String id) {
-		return roomRepository.findOne(id).getSettings();
+		return get(id).getSettings();
 	}
 
 	@Override
 	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
 	public Room.Settings updateFeatures(String id, Room.Settings settings) {
-		final Room room = roomRepository.findOne(id);
+		final Room room = get(id);
 		room.setSettings(settings);
-		this.eventPublisher.publishEvent(new FeatureChangeEvent(this, room.getId()));
-		roomRepository.save(room);
+
+		update(room);
 
 		return room.getSettings();
 	}
 
 	@Override
 	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
-	public boolean lockFeedbackInput(String id, Boolean lock) {
-		final Room room = roomRepository.findOne(id);
+	public boolean lockFeedbackInput(String id, Boolean lock) throws IOException {
+		final Room room = get(id);
 		if (!lock) {
 			feedbackService.cleanFeedbackVotesByRoomId(id, 0);
 		}
-
-		room.getSettings().setFeedbackLocked(lock);
-		this.eventPublisher.publishEvent(new LockFeedbackEvent(this, room.getId()));
-		roomRepository.save(room);
+		patch(room, Collections.singletonMap("feedbackLocked", lock), Room::getSettings);
 
 		return room.getSettings().isFeedbackLocked();
 	}
@@ -543,7 +531,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Override
 	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
 	public boolean flipFlashcards(String id, Boolean flip) {
-		final Room room = roomRepository.findOne(id);
+		final Room room = get(id);
 		this.eventPublisher.publishEvent(new FlipFlashcardsEvent(this, room.getId()));
 
 		return flip;

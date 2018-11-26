@@ -36,6 +36,7 @@ package de.thm.arsnova.service;
 
 import de.thm.arsnova.model.Content;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -74,9 +75,9 @@ public interface ContentService extends EntityService<Content> {
 
 	List<String> getUnAnsweredPreparationContentIds(String roomId, String userId);
 
-	void publishAll(String roomId, boolean publish);
+	void publishAll(String roomId, boolean publish) throws IOException;
 
-	void publishContents(String roomId, boolean publish, Iterable<Content> contents);
+	void publishContents(String roomId, boolean publish, Iterable<Content> contents) throws IOException;
 
 	void deleteAllContentsAnswers(String roomId);
 

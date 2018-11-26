@@ -135,7 +135,7 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	@CacheEvict(cacheNames = "motds", key = "#motd.audience + #motd.roomId")
 	private Motd createOrUpdateMotd(final Motd motd) {
 		if (motd.getId() != null) {
-			Motd oldMotd = motdRepository.findOne(motd.getId());
+			Motd oldMotd = get(motd.getId());
 			if (!(motd.getId().equals(oldMotd.getId()) && motd.getRoomId().equals(oldMotd.getRoomId())
 					&& motd.getAudience().equals(oldMotd.getAudience()))) {
 				throw new BadRequestException();
@@ -150,18 +150,5 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 		}
 
 		return super.create(motd);
-	}
-
-	@Override
-	@PreAuthorize("hasPermission('', 'motd', 'admin')")
-	@CacheEvict(cacheNames = "motds", key = "#motd.audience + #motd.roomId")
-	public void delete(Motd motd) {
-		motdRepository.delete(motd);
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#roomId, 'room', 'owner')")
-	public void deleteByRoomId(final String roomId, Motd motd) {
-		motdRepository.delete(motd);
 	}
 }

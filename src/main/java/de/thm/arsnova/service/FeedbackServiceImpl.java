@@ -21,7 +21,6 @@ import de.thm.arsnova.event.DeleteFeedbackForRoomsEvent;
 import de.thm.arsnova.event.NewFeedbackEvent;
 import de.thm.arsnova.model.Feedback;
 import de.thm.arsnova.model.Room;
-import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.web.exceptions.NoContentException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,15 +50,15 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	@Value("${feedback.cleanup}")
 	private int cleanupFeedbackDelay;
 
-	private RoomRepository roomRepository;
+	private RoomService roomService;
 
 	private FeedbackStorageService feedbackStorage;
 
 	private ApplicationEventPublisher publisher;
 
-	public FeedbackServiceImpl(FeedbackStorageService feedbackStorage, RoomRepository roomRepository) {
+	public FeedbackServiceImpl(FeedbackStorageService feedbackStorage, RoomService roomService) {
 		this.feedbackStorage = feedbackStorage;
-		this.roomRepository = roomRepository;
+		this.roomService = roomService;
 	}
 
 	@Override
@@ -101,7 +100,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 
 	@Override
 	public void cleanFeedbackVotesByRoomId(final String roomId, final int cleanupFeedbackDelayInMins) {
-		final Room room = roomRepository.findOne(roomId);
+		final Room room = roomService.get(roomId);
 		List<String> affectedUserIds = feedbackStorage.cleanVotesByRoom(room, cleanupFeedbackDelayInMins);
 		Set<Room> sessionSet = new HashSet<>();
 		sessionSet.add(room);
@@ -116,7 +115,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 
 	@Override
 	public Feedback getByRoomId(final String roomId) {
-		final Room room = roomRepository.findOne(roomId);
+		final Room room = roomService.get(roomId);
 		if (room == null) {
 			throw new NotFoundException();
 		}
@@ -133,7 +132,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 
 	@Override
 	public double calculateAverageFeedback(final String roomId) {
-		final Room room = roomRepository.findOne(roomId);
+		final Room room = roomService.get(roomId);
 		if (room == null) {
 			throw new NotFoundException();
 		}
@@ -157,7 +156,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 
 	@Override
 	public boolean save(final String roomId, final int value, final String userId) {
-		final Room room = roomRepository.findOne(roomId);
+		final Room room = roomService.get(roomId);
 		if (room == null) {
 			throw new NotFoundException();
 		}
@@ -169,7 +168,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 
 	@Override
 	public Integer getByRoomIdAndUserId(final String roomId, final String userId) {
-		final Room room = roomRepository.findOne(roomId);
+		final Room room = roomService.get(roomId);
 		if (room == null) {
 			throw new NotFoundException();
 		}

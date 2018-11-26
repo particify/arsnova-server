@@ -19,10 +19,10 @@ package de.thm.arsnova.service;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.transport.ImportExportContainer;
 import de.thm.arsnova.model.transport.ScoreStatistics;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,13 +56,11 @@ public interface RoomService extends EntityService<Room> {
 
 	int activeUsers(String id);
 
-	Room setActive(String id, Boolean lock);
+	Room setActive(String id, Boolean lock) throws IOException;
 
 	Room join(String id, UUID socketId);
 
 	Room updateCreator(String id, String newCreator);
-
-	Room updateInternal(Room room, ClientAuthentication user);
 
 	int[] deleteCascading(Room room);
 
@@ -88,7 +86,7 @@ public interface RoomService extends EntityService<Room> {
 
 	Room.Settings updateFeatures(String id, Room.Settings settings);
 
-	boolean lockFeedbackInput(String id, Boolean lock);
+	boolean lockFeedbackInput(String id, Boolean lock) throws IOException;
 
 	boolean flipFlashcards(String id, Boolean flip);
 

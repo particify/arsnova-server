@@ -101,7 +101,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		eventPublisher.publishEvent(new BeforeCreationEvent<>(this, entity));
 		final T createdEntity = repository.save(entity);
 		eventPublisher.publishEvent(new AfterCreationEvent<>(this, createdEntity));
-		finalizeCreate(entity);
+		finalizeCreate(createdEntity);
 		modifyRetrieved(entity);
 
 		return createdEntity;

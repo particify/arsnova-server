@@ -38,10 +38,6 @@ public interface MotdService extends EntityService<Motd> {
 
 	List<Motd> filterMotdsByList(List<Motd> list, List<String> ids);
 
-	void delete(Motd motd);
-
-	void deleteByRoomId(final String roomId, Motd motd);
-
 	Motd save(Motd motd);
 
 	Motd save(final String roomId, final Motd motd);
