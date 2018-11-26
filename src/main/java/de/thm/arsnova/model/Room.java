@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Room extends Entity {
 	public static class ContentGroup {
@@ -471,15 +473,23 @@ public class Room extends Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public Set<ContentGroup> getContentGroups() {
 		if (contentGroups == null) {
-			contentGroups = new HashSet<ContentGroup>();
+			contentGroups = new HashSet<>();
 		}
 
 		return contentGroups;
 	}
 
+	public Map<String, ContentGroup> getContentGroupsAsMap() {
+		return getContentGroups().stream().collect(Collectors.toMap(ContentGroup::getName, Function.identity()));
+	}
+
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setContentGroups(final Set<ContentGroup> contentGroups) {
 		this.contentGroups = contentGroups;
+	}
+
+	public void setContentGroupsFromMap(final Map<String, ContentGroup> groups) {
+		this.contentGroups = new HashSet<>(groups.values());
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})

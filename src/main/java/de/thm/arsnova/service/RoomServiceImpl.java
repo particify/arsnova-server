@@ -174,33 +174,29 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	/**
-	 * Fetches the room.
-	 * Adds content from this room that is in no content group to a no-name group.
-	 * @param id room id to fetch
-	 * @return Room with no-name content group
+	 * Adds a default content group with contents that have no other content group assigned.
+	 *
+	 * @param room The Room to be modified
 	 */
 	@Override
-	public Room get(final String id) {
-		Room r = super.get(id);
+	protected void modifyRetrieved(final Room room) {
 		// creates a set from all room content groups
-		Set<String> cIdsWithGroup = r.getContentGroups().stream()
+		Set<String> cIdsWithGroup = room.getContentGroups().stream()
 				.map(Room.ContentGroup::getContentIds)
 				.flatMap(ids -> ids.stream())
 				.collect(Collectors.toSet());
 
-		Set<String> cIds = new HashSet<String>(contentRepository.findIdsByRoomId(id));
+		Set<String> cIds = new HashSet<>(contentRepository.findIdsByRoomId(room.getId()));
 		cIds.removeAll(cIdsWithGroup);
 
 		if (!cIds.isEmpty()) {
-			Set<Room.ContentGroup> cgs = r.getContentGroups();
+			Set<Room.ContentGroup> cgs = room.getContentGroups();
 			Room.ContentGroup defaultGroup = new Room.ContentGroup();
 			defaultGroup.setContentIds(cIds);
 			defaultGroup.setAutoSort(true);
 			defaultGroup.setName("");
 			cgs.add(defaultGroup);
 		}
-
-		return r;
 	}
 
 	@Override
