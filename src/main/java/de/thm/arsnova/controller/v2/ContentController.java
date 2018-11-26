@@ -56,6 +56,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -233,14 +234,15 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/{contentId}/publish", method = RequestMethod.POST)
 	public void publishContent(
 			@PathVariable final String contentId,
-			@RequestParam(required = false) final Boolean publish,
+			@RequestParam(defaultValue = "true", required = false) final boolean publish,
 			@RequestBody final Content content
-			) {
+			) throws IOException {
 		de.thm.arsnova.model.Content contentV3 = fromV2Migrator.migrate(content);
-		if (publish != null) {
-			contentV3.getState().setVisible(publish);
+		boolean p = publish;
+		if (content != null) {
+			p = contentV3.getState().isVisible();
 		}
-		contentService.update(contentV3);
+		contentService.patch(contentV3, Collections.singletonMap("visible", p), de.thm.arsnova.model.Content::getState);
 	}
 
 	@ApiOperation(value = "Publish all contents",
@@ -272,14 +274,15 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/{contentId}/publishstatistics", method = RequestMethod.POST)
 	public void publishStatistics(
 			@PathVariable final String contentId,
-			@RequestParam(required = false) final Boolean showStatistics,
+			@RequestParam(defaultValue = "true", required = false) final Boolean showStatistics,
 			@RequestBody final Content content
-			) {
+			) throws IOException {
 		de.thm.arsnova.model.Content contentV3 = fromV2Migrator.migrate(content);
-		if (showStatistics != null) {
-			contentV3.getState().setResponsesVisible(showStatistics);
+		boolean p = showStatistics;
+		if (content != null) {
+			p = contentV3.getState().isResponsesVisible();
 		}
-		contentService.update(contentV3);
+		contentService.patch(contentV3, Collections.singletonMap("responsesVisible", p), de.thm.arsnova.model.Content::getState);
 	}
 
 	@ApiOperation(value = "Publish correct answer from content with provided id",
@@ -287,14 +290,15 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/{contentId}/publishcorrectanswer", method = RequestMethod.POST)
 	public void publishCorrectAnswer(
 			@PathVariable final String contentId,
-			@RequestParam(required = false) final Boolean showCorrectAnswer,
+			@RequestParam(defaultValue = "true", required = false) final boolean showCorrectAnswer,
 			@RequestBody final Content content
-			) {
+			) throws IOException {
 		de.thm.arsnova.model.Content contentV3 = fromV2Migrator.migrate(content);
-		if (showCorrectAnswer != null) {
-			contentV3.getState().setSolutionVisible(showCorrectAnswer);
+		boolean p = showCorrectAnswer;
+		if (content != null) {
+			p = contentV3.getState().isSolutionVisible();
 		}
-		contentService.update(contentV3);
+		contentService.patch(contentV3, Collections.singletonMap("solutionVisible", p), de.thm.arsnova.model.Content::getState);
 	}
 
 	@ApiOperation(value = "Get contents",
