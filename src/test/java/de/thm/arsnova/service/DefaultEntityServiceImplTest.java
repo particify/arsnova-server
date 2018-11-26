@@ -27,6 +27,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
@@ -87,7 +88,7 @@ public class DefaultEntityServiceImplTest {
 		final DefaultEntityServiceImpl<Room> entityService = new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper);
 		entityService.setApplicationEventPublisher(eventPublisher);
 
-		when(roomRepository.save(any(Room.class))).then(returnsFirstArg());
+		when(roomRepository.saveAll(anyListOf(Room.class))).then(returnsFirstArg());
 
 		List<Room> sessions = new ArrayList<>();
 		final String originalId1 = "d8833f0d78964a9487ded02ba2dfbbad";
