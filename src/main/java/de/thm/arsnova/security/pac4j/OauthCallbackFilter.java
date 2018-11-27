@@ -20,6 +20,8 @@ package de.thm.arsnova.security.pac4j;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.client.Clients;
 import org.pac4j.core.client.IndirectClient;
+import org.pac4j.core.client.finder.ClientFinder;
+import org.pac4j.core.client.finder.DefaultCallbackClientFinder;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.credentials.Credentials;
@@ -38,6 +40,7 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Handles callback requests by login redirects from OAuth providers.
@@ -47,6 +50,7 @@ import java.util.Collections;
 @Component
 public class OauthCallbackFilter extends AbstractAuthenticationProcessingFilter {
 	private static final Logger logger = LoggerFactory.getLogger(OauthCallbackFilter.class);
+	private final ClientFinder clientFinder = new DefaultCallbackClientFinder();
 	private Config config;
 
 	public OauthCallbackFilter(Config pac4jConfig) {
@@ -58,24 +62,30 @@ public class OauthCallbackFilter extends AbstractAuthenticationProcessingFilter 
 	public Authentication attemptAuthentication(
 			final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
 			throws AuthenticationException {
-		CommonProfile profile = retrieveProfile(new J2EContext(httpServletRequest, httpServletResponse));
+		final String clientName = httpServletRequest.getParameter("client_name");
+		final CommonProfile profile = retrieveProfile(new J2EContext(httpServletRequest, httpServletResponse), clientName);
 		return getAuthenticationManager().authenticate(new OAuthToken(null, profile, Collections.emptyList()));
 	}
 
-	private CommonProfile retrieveProfile(J2EContext context) throws AuthenticationServiceException {
+	private CommonProfile retrieveProfile(final J2EContext context, final String clientName)
+			throws AuthenticationServiceException {
 		/* Adapted from Pac4j: org.pac4j.core.engine.DefaultCallbackLogic.perform */
-		Clients clients = config.getClients();
+		final Clients clients = config.getClients();
 		CommonHelper.assertNotNull("clients", clients);
-		Client client = clients.findClient(context);
-		logger.debug("client: {}", client);
-		CommonHelper.assertNotNull("client", client);
-		CommonHelper.assertTrue(client instanceof IndirectClient,
+		final List<Client> foundClients = clientFinder.find(clients, context, clientName);
+		CommonHelper.assertTrue(foundClients != null && foundClients.size() == 1,
+				"unable to find one indirect client for the callback: check the callback URL for a client name parameter or suffix path"
+						+ " or ensure that your configuration defaults to one indirect client");
+		final Client foundClient = foundClients.get(0);
+		logger.debug("client: {}", foundClient);
+		CommonHelper.assertNotNull("client", foundClient);
+		CommonHelper.assertTrue(foundClient instanceof IndirectClient,
 				"only indirect clients are allowed on the callback url");
 
 		try {
-			Credentials credentials = client.getCredentials(context);
+			Credentials credentials = foundClient.getCredentials(context);
 			logger.debug("credentials: {}", credentials);
-			CommonProfile profile = client.getUserProfile(credentials, context);
+			CommonProfile profile = foundClient.getUserProfile(credentials, context);
 			logger.debug("profile: {}", profile);
 
 			return profile;
