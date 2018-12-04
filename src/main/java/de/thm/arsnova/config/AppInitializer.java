@@ -30,7 +30,8 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
 		return new Class[] {
 				AppConfig.class,
 				PersistenceConfig.class,
-				SecurityConfig.class
+				SecurityConfig.class,
+				WebSocketConfig.class,
 		};
 	}
 
