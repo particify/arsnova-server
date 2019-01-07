@@ -7,9 +7,9 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<spring-boot-version>2.0.6.RELEASE</spring-boot-version>
+		<spring-boot-version>2.1.1.RELEASE</spring-boot-version>
 		<commons-lang-version>2.6</commons-lang-version>
-		<guava-version>20.0</guava-version>
+		<guava-version>27.0.1-jre</guava-version>
 		<directory-server-version>1.5.5</directory-server-version>
 		<io.netty-version>4.1.32.Final</io.netty-version>
 		<org.aspectj-version>1.8.13</org.aspectj-version>
