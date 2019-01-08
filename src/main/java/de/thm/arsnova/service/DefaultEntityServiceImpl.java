@@ -24,6 +24,7 @@ import de.thm.arsnova.event.AfterCreationEvent;
 import de.thm.arsnova.event.AfterDeletionEvent;
 import de.thm.arsnova.event.AfterFullUpdateEvent;
 import de.thm.arsnova.event.AfterPatchEvent;
+import de.thm.arsnova.event.AfterUpdateEvent;
 import de.thm.arsnova.event.BeforeCreationEvent;
 import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.event.BeforeFullUpdateEvent;
@@ -31,10 +32,16 @@ import de.thm.arsnova.event.BeforePatchEvent;
 import de.thm.arsnova.model.Entity;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.persistence.CrudRepository;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.event.EventListener;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.access.prepost.PreFilter;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Date;
@@ -63,17 +70,16 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	@Override
 	@PreAuthorize("hasPermission(#id, #this.this.getTypeName(), 'read')")
 	public T get(final String id) {
-		return repository.findOne(id);
+		return get(id, false);
 	}
 
 	@Override
+	@Cacheable(cacheNames = "entity", key = "#root.target.getTypeName() + '-' + #id", condition = "#internal == false")
 	public T get(final String id, final boolean internal) {
 		T entity;
+		entity = repository.findOne(id);
 		if (internal) {
-			entity = repository.findOne(id);
 			entity.setInternal(true);
-		} else {
-			entity = get(id);
 		}
 		modifyRetrieved(entity);
 
@@ -259,5 +265,26 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	@Override
 	public void setApplicationEventPublisher(final ApplicationEventPublisher applicationEventPublisher) {
 		this.eventPublisher = applicationEventPublisher;
+	}
+
+	@Component
+	public static class EntityCacheHandler {
+		@CachePut(cacheNames = "entity", key = "#event.entity.class.simpleName.toLowerCase() + '-' + #event.entity.id")
+		@EventListener
+		public Entity handleCreate(AfterCreationEvent event) {
+			return event.getEntity();
+		}
+
+		@CachePut(cacheNames = "entity", key = "#event.entity.class.simpleName.toLowerCase() + '-' + #event.entity.id")
+		@EventListener
+		public Entity handleUpdate(AfterUpdateEvent event) {
+			return event.getEntity();
+		}
+
+		@CacheEvict(cacheNames = "entity", key = "#event.entity.class.simpleName.toLowerCase() + '-' + #event.entity.id")
+		@EventListener
+		public void handleDelete(AfterDeletionEvent event) {
+
+		}
 	}
 }
