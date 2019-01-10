@@ -5,12 +5,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class AbstractControllerExceptionHandler {
-	private static final Logger logger = LoggerFactory.getLogger(AbstractControllerExceptionHandler.class);
+@Component
+public class ControllerExceptionHelper {
+	private static final Logger logger = LoggerFactory.getLogger(ControllerExceptionHelper.class);
 
 	/* Since exception messages might contain sensitive data, they are not exposed by default. */
 	@Value("${api.expose-error-messages:false}") private boolean exposeMessages;
