@@ -12,7 +12,13 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 @ControllerAdvice
-public class DefaultControllerExceptionHandler extends AbstractControllerExceptionHandler {
+public class DefaultControllerExceptionHandler {
+	private ControllerExceptionHelper helper;
+
+	public DefaultControllerExceptionHandler(final ControllerExceptionHelper helper) {
+		this.helper = helper;
+	}
+
 	@ExceptionHandler
 	@ResponseBody
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -27,6 +33,6 @@ public class DefaultControllerExceptionHandler extends AbstractControllerExcepti
 			throw e;
 		}
 
-		return handleException(e, Level.ERROR);
+		return helper.handleException(e, Level.ERROR);
 	}
 }

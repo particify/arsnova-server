@@ -27,19 +27,20 @@ import de.thm.arsnova.web.exceptions.PreconditionFailedException;
 import de.thm.arsnova.web.exceptions.UnauthorizedException;
 import org.ektorp.DocumentNotFoundException;
 import org.slf4j.event.Level;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.naming.OperationNotSupportedException;
 import javax.servlet.http.HttpServletRequest;
@@ -50,40 +51,39 @@ import java.util.Map;
  * Translates exceptions into HTTP status codes.
  */
 @ControllerAdvice
-public class ControllerExceptionHandler extends AbstractControllerExceptionHandler {
+public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
+	private ControllerExceptionHelper helper;
+
+	public ControllerExceptionHandler(final ControllerExceptionHelper helper) {
+		this.helper = helper;
+	}
+
 	@ExceptionHandler(NoContentException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public Map<String, Object> handleNoContentException(final Exception e, final HttpServletRequest request) {
-		return handleException(e, Level.TRACE);
-	}
-
-	@ExceptionHandler(NoHandlerFoundException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.NOT_FOUND)
-	public Map<String, Object> handleNoHandlerFoundException(final Exception e, final HttpServletRequest request) {
-		return handleException(e, Level.TRACE);
+		return helper.handleException(e, Level.TRACE);
 	}
 
 	@ExceptionHandler(NotFoundException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	public Map<String, Object> handleNotFoundException(final Exception e, final HttpServletRequest request) {
-		return handleException(e, Level.TRACE);
+		return helper.handleException(e, Level.TRACE);
 	}
 
 	@ExceptionHandler(UnauthorizedException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	public Map<String, Object> handleUnauthorizedException(final Exception e, final HttpServletRequest request) {
-		return handleException(e, Level.TRACE);
+		return helper.handleException(e, Level.TRACE);
 	}
 
 	@ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	@ResponseBody
 	public Map<String, Object> handleAuthenticationCredentialsNotFoundException(final Exception e, final HttpServletRequest request) {
-		return handleException(e, Level.DEBUG);
+		return helper.handleException(e, Level.DEBUG);
 	}
 
 	@ExceptionHandler(AccessDeniedException.class)
@@ -102,49 +102,42 @@ public class ControllerExceptionHandler extends AbstractControllerExceptionHandl
 			response.setStatus(HttpStatus.FORBIDDEN.value());
 		}
 
-		return handleException(e, Level.DEBUG);
+		return helper.handleException(e, Level.DEBUG);
 	}
 
 	@ExceptionHandler(ForbiddenException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.FORBIDDEN)
 	public Map<String, Object> handleForbiddenException(final Exception e, final HttpServletRequest request) {
-		return handleException(e, Level.DEBUG);
+		return helper.handleException(e, Level.DEBUG);
 	}
 
-	@ExceptionHandler({BadRequestException.class, HttpRequestMethodNotSupportedException.class})
+	@ExceptionHandler(BadRequestException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public Map<String, Object> handleBadRequestException(final Exception e, final HttpServletRequest request) {
-		return handleException(e, Level.DEBUG);
+		return helper.handleException(e, Level.DEBUG);
 	}
 
 	@ExceptionHandler(PreconditionFailedException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.PRECONDITION_FAILED)
 	public Map<String, Object> handlePreconditionFailedException(final Exception e, final HttpServletRequest request) {
-		return handleException(e, Level.DEBUG);
+		return helper.handleException(e, Level.DEBUG);
 	}
 
 	@ExceptionHandler({NotImplementedException.class, OperationNotSupportedException.class})
 	@ResponseBody
 	@ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
 	public Map<String, Object> handleNotImplementedException(final Exception e, final HttpServletRequest request) {
-		return handleException(e, Level.DEBUG);
+		return helper.handleException(e, Level.DEBUG);
 	}
 
 	@ExceptionHandler(PayloadTooLargeException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
 	public Map<String, Object> handlePayloadTooLargeException(final Exception e, final HttpServletRequest request) {
-		return handleException(e, Level.DEBUG);
-	}
-
-	@ExceptionHandler(HttpMessageNotReadableException.class)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public Map<String, Object> handleHttpMessageNotReadableException(final Exception e, final HttpServletRequest request) {
-		return handleException(e, Level.DEBUG);
+		return helper.handleException(e, Level.DEBUG);
 	}
 
 	/* FIXME: Wrap persistance Exceptions - do not handle persistance Exceptions at the controller layer */
@@ -152,6 +145,12 @@ public class ControllerExceptionHandler extends AbstractControllerExceptionHandl
 	@ResponseBody
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	public Map<String, Object> handleDocumentNotFoundException(final Exception e, final HttpServletRequest request) {
-		return handleException(e, Level.TRACE);
+		return helper.handleException(e, Level.TRACE);
+	}
+
+	@Override
+	protected ResponseEntity<Object> handleExceptionInternal(final Exception ex, final Object body,
+			final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
+		return new ResponseEntity<>(helper.handleException(ex, Level.TRACE), headers, status);
 	}
 }
