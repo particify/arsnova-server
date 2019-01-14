@@ -62,4 +62,7 @@ public interface EntityService<T extends Entity> {
 
 	@PreAuthorize("hasPermission(#entity, 'delete')")
 	void delete(T entity);
+
+	@PreFilter(value = "hasPermission(filterObject, 'delete')", filterTarget = "entities")
+	void delete(Iterable<T> entities);
 }

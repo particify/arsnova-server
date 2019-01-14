@@ -239,6 +239,19 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		eventPublisher.publishEvent(new AfterDeletionEvent<>(this, entity));
 	}
 
+	@Override
+	@PreFilter(value = "hasPermission(filterObject, 'delete')", filterTarget = "entities")
+	public void delete(final Iterable<T> entities) {
+		for (T entity : entities) {
+			prepareDelete(entity);
+			eventPublisher.publishEvent(new BeforeDeletionEvent<>(this, entity));
+		}
+		repository.deleteAll(entities);
+		for (T entity : entities) {
+			eventPublisher.publishEvent(new AfterDeletionEvent<>(this, entity));
+		}
+	}
+
 	/**
 	 * This method can be overridden by subclasses to do additional entity related actions before deletion.
 	 *
