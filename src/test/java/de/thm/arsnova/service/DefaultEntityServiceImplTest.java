@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.ActiveProfiles;
@@ -24,8 +25,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.any;
@@ -43,6 +45,9 @@ public class DefaultEntityServiceImplTest {
 
 	@Autowired
 	private ApplicationEventPublisher eventPublisher;
+
+	@Autowired
+	private CacheManager cacheManager;
 
 	@Autowired
 	private RoomRepository roomRepository;
@@ -129,5 +134,41 @@ public class DefaultEntityServiceImplTest {
 		assertEquals(patchedName, room2.getName());
 		assertEquals(patchedClosed, room2.isClosed());
 		assertEquals(originalOwnerId2, room2.getOwnerId());
+	}
+
+	@Test
+	@WithMockUser("TestUser")
+	public void testCaching() {
+		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
+		final DefaultEntityServiceImpl<Room> entityService = new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper);
+		entityService.setApplicationEventPublisher(eventPublisher);
+
+		final Room room1 = new Room();
+		room1.setId("a34876427c634a9b9cb56789d73607f0");
+		room1.setOwnerId("TestUser");
+		final Room room2 = new Room();
+		room2.setId("4638748d89884ff7936d7fe994a4090c");
+		room2.setOwnerId("TestUser");
+		final Room room3 = new Room();
+		room3.setId("c9651db0a67b49789a354e90e0401032");
+		room3.setOwnerId("TestUser");
+		final Room room4 = new Room();
+		room4.setId("66c1673056b2410b87335b9f317da5aa");
+		room4.setOwnerId("TestUser");
+
+		when(roomRepository.findById(any(String.class))).thenReturn(Optional.of(room1));
+		when(roomRepository.findOne(any(String.class))).thenReturn(room1);
+		assertSame(room1, entityService.get(room1.getId()));
+		/* room1 should now be cached for room1.id */
+		assertSame(room1, cacheManager.getCache("entity").get("room-" + room1.getId()).get());
+		when(roomRepository.findById(any(String.class))).thenReturn(Optional.of(room2));
+		when(roomRepository.findOne(any(String.class))).thenReturn(room2);
+		assertSame(room1, entityService.get(room1.getId()));
+		assertSame("Cache should not be used if internal == true.", room2, entityService.get(room1.getId(), true));
+
+		entityService.delete(room1);
+		/* room1 should no longer be cached for room1.id */
+		assertSame("Entity should not be cached.", null, cacheManager.getCache("entity").get("room-" + room1.getId()));
+		assertSame(room2, entityService.get(room1.getId()));
 	}
 }
