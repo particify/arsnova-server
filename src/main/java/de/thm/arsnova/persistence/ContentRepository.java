@@ -10,8 +10,8 @@ public interface ContentRepository extends CrudRepository<Content, String> {
 	List<Content> findByRoomIdForSpeaker(String roomId);
 	int countByRoomId(String roomId);
 	List<String> findIdsByRoomId(String roomId);
-	List<String> findIdsByRoomIdAndVariant(String roomId, String variant);
-	int deleteByRoomId(String roomId);
+	Iterable<Content> findStubsByRoomId(final String roomId);
+	Iterable<Content> findStubsByRoomIdAndVariant(String roomId, String variant);
 	List<String> findUnansweredIdsByRoomIdAndUser(String roomId, String userId);
 	List<Content> findByRoomIdOnlyLectureVariantAndActive(String roomId);
 	List<Content> findByRoomIdOnlyLectureVariant(String roomId);

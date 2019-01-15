@@ -97,7 +97,7 @@ public class RoomController extends PaginationController {
 	@RequestMapping(value = "/{shortId}", method = RequestMethod.DELETE)
 	public void deleteRoom(@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId) {
 		de.thm.arsnova.model.Room room = roomService.getByShortId(shortId);
-		roomService.deleteCascading(room);
+		roomService.delete(room);
 	}
 
 	@ApiOperation(value = "count active users",

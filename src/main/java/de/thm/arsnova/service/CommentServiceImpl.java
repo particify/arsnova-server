@@ -1,5 +1,6 @@
 package de.thm.arsnova.service;
 
+import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.migration.v2.CommentReadingCount;
@@ -9,7 +10,9 @@ import de.thm.arsnova.web.exceptions.ForbiddenException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 import de.thm.arsnova.web.exceptions.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -63,9 +66,9 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		}
 		final User user = getCurrentUser();
 		if (room.getOwnerId().equals(user.getId())) {
-			commentRepository.deleteByRoomId(room.getId());
+			delete(commentRepository.findStubsByRoomId(room.getId()));
 		} else {
-			commentRepository.deleteByRoomIdAndUserId(room.getId(), user.getId());
+			delete(commentRepository.findStubsByRoomIdAndUserId(room.getId(), user.getId()));
 		}
 	}
 
@@ -122,5 +125,12 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 			throw new UnauthorizedException();
 		}
 		return user;
+	}
+
+	@EventListener
+	@Secured({"ROLE_USER", "RUN_AS_SYSTEM"})
+	public void handleRoomDeletion(final BeforeDeletionEvent<Room> event) {
+		final Iterable<Comment> comments = commentRepository.findStubsByRoomId(event.getEntity().getId());
+		delete(comments);
 	}
 }

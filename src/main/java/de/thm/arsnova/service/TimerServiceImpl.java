@@ -19,13 +19,16 @@ public class TimerServiceImpl implements TimerService {
 	private UserService userService;
 	private RoomService roomService;
 	private ContentService contentService;
+	private AnswerService answerService;
 	private AnswerRepository answerRepository;
 
 	public TimerServiceImpl(final UserService userService, final RoomService roomService,
-			final ContentService contentService, final AnswerRepository answerRepository) {
+			final ContentService contentService, final AnswerService answerService,
+			final AnswerRepository answerRepository) {
 		this.userService = userService;
 		this.roomService = roomService;
 		this.contentService = contentService;
+		this.answerService = answerService;
 		this.answerRepository = answerRepository;
 	}
 
@@ -109,7 +112,7 @@ public class TimerServiceImpl implements TimerService {
 		}
 
 		resetRoundManagementState(content);
-		answerRepository.deleteByContentId(content.getId());
+		answerRepository.findStubsByContentId(content.getId());
 		contentService.update(content);
 	}
 

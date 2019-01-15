@@ -62,8 +62,6 @@ public interface RoomService extends EntityService<Room> {
 
 	Room updateCreator(String id, String newCreator);
 
-	int[] deleteCascading(Room room);
-
 	ScoreStatistics getLearningProgress(String id, String type, String questionVariant);
 
 	ScoreStatistics getMyLearningProgress(String id, String type, String questionVariant);

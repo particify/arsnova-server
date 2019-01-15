@@ -19,6 +19,7 @@ package de.thm.arsnova.service;
 
 import de.thm.arsnova.event.AfterCreationEvent;
 import de.thm.arsnova.event.BeforeCreationEvent;
+import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.ChoiceQuestionContent;
@@ -33,10 +34,13 @@ import de.thm.arsnova.web.exceptions.UnauthorizedException;
 import org.ektorp.DbAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -64,15 +68,17 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	public AnswerServiceImpl(
 			AnswerRepository repository,
 			RoomService roomService,
-			ContentService contentService,
 			UserService userService,
 			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(Answer.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.answerRepository = repository;
 		this.roomService = roomService;
-		this.contentService = contentService;
-		this.contentService = contentService;
 		this.userService = userService;
+	}
+
+	@Autowired
+	public void setContentService(final ContentService contentService) {
+		this.contentService = contentService;
 	}
 
 	@Scheduled(fixedDelay = 5000)
@@ -110,7 +116,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		content.resetState();
 		/* FIXME: cancel timer */
 		contentService.update(content);
-		answerRepository.deleteByContentId(content.getId());
+		delete(answerRepository.findStubsByContentId(content.getId()));
 	}
 
 	@Override
@@ -420,5 +426,12 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	@Override
 	public int countPreparationQuestionAnswersInternal(final String roomId) {
 		return answerRepository.countByRoomIdOnlyPreparationVariant(roomService.get(roomId).getId());
+	}
+
+	@EventListener
+	@Secured({"ROLE_USER", "RUN_AS_SYSTEM"})
+	public void handleContentDeletion(final BeforeDeletionEvent<Content> event) {
+		final Iterable<Answer> answers = answerRepository.findStubsByContentId(event.getEntity().getId());
+		delete(answers);
 	}
 }

@@ -155,20 +155,10 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 			long lastActivityBefore = unixTime - guestRoomInactivityThresholdDays * 24 * 60 * 60 * 1000L;
 			int totalCount[] = new int[] {0, 0, 0};
 			List<Room> inactiveRooms = roomRepository.findInactiveGuestRoomsMetadata(lastActivityBefore);
-			for (Room room : inactiveRooms) {
-				int[] count = deleteCascading(room);
-				totalCount[0] += count[0];
-				totalCount[1] += count[1];
-				totalCount[2] += count[2];
-			}
+			delete(inactiveRooms);
 
 			if (!inactiveRooms.isEmpty()) {
 				logger.info("Deleted {} inactive guest rooms.", inactiveRooms.size());
-				dbLogger.log("cleanup", "type", "session",
-						"sessionCount", inactiveRooms.size(),
-						"questionCount", totalCount[0],
-						"answerCount", totalCount[1],
-						"commentCount", totalCount[2]);
 			}
 		}
 	}
@@ -430,25 +420,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Caching(evict = { @CacheEvict("rooms"), @CacheEvict(cacheNames = "rooms", key = "#id") })
 	public Room updateCreator(String id, String newCreator) {
 		throw new UnsupportedOperationException("No longer implemented.");
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#room, 'owner')")
-	@Caching(evict = {
-			@CacheEvict("rooms"),
-			@CacheEvict(value = "room.id-by-shortid", key = "#room.shortId")
-	})
-	public int[] deleteCascading(final Room room) {
-		int[] count = new int[] {0, 0, 0};
-		List<String> contentIds = contentRepository.findIdsByRoomId(room.getId());
-		count[2] = commentRepository.deleteByRoomId(room.getId());
-		count[1] = answerRepository.deleteByContentIds(contentIds);
-		count[0] = contentRepository.deleteByRoomId(room.getId());
-		delete(room);
-		logger.debug("Deleted room document {} and related data.", room.getId());
-		dbLogger.log("delete", "type", "session", "id", room.getId());
-
-		return count;
 	}
 
 	@Override

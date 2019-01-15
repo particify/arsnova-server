@@ -3,10 +3,8 @@ package de.thm.arsnova.persistence.couchdb;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
-import org.ektorp.BulkDeleteDocument;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
-import org.ektorp.DocumentOperationResult;
 import org.ektorp.ViewResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,28 +65,23 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public List<String> findIdsByRoomIdAndVariant(final String roomId, final String variant) {
-		return collectQuestionIds(db.queryView(createQuery("by_roomid_group_locked")
+	public Iterable<Content> findStubsByRoomId(final String roomId) {
+		return createEntityStubs(db.queryView(createQuery("by_roomid_group_locked")
+				.startKey(ComplexKey.of(roomId))
+				.endKey(ComplexKey.of(roomId, ComplexKey.emptyObject()))
+				.reduce(false)));
+	}
+
+	@Override
+	public Iterable<Content> findStubsByRoomIdAndVariant(final String roomId, final String variant) {
+		return createEntityStubs(db.queryView(createQuery("by_roomid_group_locked")
 				.startKey(ComplexKey.of(roomId, variant))
 				.endKey(ComplexKey.of(roomId, variant, ComplexKey.emptyObject()))
 				.reduce(false)));
 	}
 
-	@Override
-	public int deleteByRoomId(final String roomId) {
-		final ViewResult result = db.queryView(createQuery("by_roomid_group_locked")
-				.startKey(ComplexKey.of(roomId))
-				.endKey(ComplexKey.of(roomId, ComplexKey.emptyObject()))
-				.reduce(false));
-
-		final List<BulkDeleteDocument> deleteDocs = new ArrayList<>();
-		for (final ViewResult.Row a : result.getRows()) {
-			final BulkDeleteDocument d = new BulkDeleteDocument(a.getId(), a.getValueAsNode().get("_rev").asText());
-			deleteDocs.add(d);
-		}
-		List<DocumentOperationResult> errors = db.executeBulk(deleteDocs);
-
-		return deleteDocs.size() - errors.size();
+	protected Iterable<Content> createEntityStubs(final ViewResult viewResult) {
+		return super.createEntityStubs(viewResult, Content::setRoomId);
 	}
 
 	@Override

@@ -11,7 +11,7 @@ public interface CommentRepository extends CrudRepository<Comment, String> {
 	CommentReadingCount countReadingByRoomIdAndUserId(String roomId, String userId);
 	List<Comment> findByRoomId(String roomId, int start, int limit);
 	List<Comment> findByRoomIdAndUserId(String roomId, String userId, int start, int limit);
+	Iterable<Comment> findStubsByRoomId(String roomId);
+	Iterable<Comment> findStubsByRoomIdAndUserId(String roomId, String userId);
 	Comment findOne(String commentId);
-	int deleteByRoomId(String roomId);
-	int deleteByRoomIdAndUserId(String roomId, String userId);
 }
