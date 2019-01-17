@@ -56,31 +56,31 @@ public class ScoreCalculatorFactoryImpl implements ScoreCalculatorFactory, Appli
 		return scoreCalculator;
 	}
 
-	@CacheEvict(value = "score", key = "#event.entity.roomId")
+	@CacheEvict(value = "score", key = "#event.entity.roomId", condition = "#event.entity.roomId != null")
 	@EventListener
 	public void handleAfterContentCreation(AfterCreationEvent<Content> event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
 	}
 
-	@CacheEvict(value = "score", key = "#event.entity.roomId")
+	@CacheEvict(value = "score", key = "#event.entity.roomId", condition = "#event.entity.roomId != null")
 	@EventListener(condition = "#event.stateName == 'state'")
 	public void handleContentStateChange(StateChangeEvent<Content, Content.State> event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
 	}
 
-	@CacheEvict(value = "score", key = "#event.entity.roomId")
+	@CacheEvict(value = "score", key = "#event.entity.roomId", condition = "#event.entity.roomId != null")
 	@EventListener
 	public void handleNewAnswer(AfterCreationEvent<Answer> event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
 	}
 
-	@CacheEvict(value = "score", key = "#event.entity.roomId")
+	@CacheEvict(value = "score", key = "#event.entity.roomId", condition = "#event.entity.roomId != null")
 	@EventListener
 	public void handleDeleteAnswer(AfterDeletionEvent<Answer> event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
 	}
 
-	@CacheEvict(value = "score", key = "#event.entity.roomId")
+	@CacheEvict(value = "score", key = "#event.entity.roomId", condition = "#event.entity.roomId != null")
 	@EventListener
 	public void handleDeleteQuestion(AfterDeletionEvent<Content> event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
