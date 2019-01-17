@@ -46,6 +46,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.ldap.core.support.LdapContextSource;
+import org.springframework.security.access.intercept.RunAsManager;
+import org.springframework.security.access.intercept.RunAsManagerImpl;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.cas.ServiceProperties;
 import org.springframework.security.cas.authentication.CasAuthenticationProvider;
@@ -53,6 +55,7 @@ import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.cas.web.CasAuthenticationFilter;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -60,6 +63,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.keygen.Base64StringKeyGenerator;
+import org.springframework.security.crypto.keygen.StringKeyGenerator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
 import org.springframework.security.ldap.authentication.BindAuthenticator;
@@ -87,13 +92,13 @@ import java.util.List;
  * Loads property file and configures components used for authentication.
  */
 @Configuration
-@EnableGlobalMethodSecurity(mode = AdviceMode.ASPECTJ, prePostEnabled = true)
 @EnableWebSecurity
 @Profile("!test")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public static final String OAUTH_CALLBACK_PATH_SUFFIX = "/auth/oauth_callback";
 	public static final String CAS_LOGIN_PATH_SUFFIX = "/auth/login/cas";
 	public static final String CAS_LOGOUT_PATH_SUFFIX = "/auth/logout/cas";
+	public static final String RUN_AS_KEY_PREFIX = "RUN_AS_KEY";
 	private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
 	@Autowired
@@ -168,6 +173,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			super.configure(http);
 			http.antMatcher("/v2/**");
 			http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
+		}
+	}
+
+	@Configuration
+	@EnableGlobalMethodSecurity(mode = AdviceMode.ASPECTJ, prePostEnabled = true, securedEnabled = true)
+	public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
+		@Override
+		protected RunAsManager runAsManager() {
+			StringKeyGenerator keyGenerator = new Base64StringKeyGenerator();
+			RunAsManagerImpl runAsManager = new RunAsManagerImpl();
+			/* Since RunAsTokens should currently only be used internally, we generate a random key. */
+			runAsManager.setKey(RUN_AS_KEY_PREFIX + keyGenerator.generateKey());
+
+			return runAsManager;
 		}
 	}
 
