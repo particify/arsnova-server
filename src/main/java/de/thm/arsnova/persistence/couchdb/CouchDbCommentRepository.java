@@ -7,7 +7,6 @@ import de.thm.arsnova.persistence.CommentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
-import org.ektorp.UpdateConflictException;
 import org.ektorp.ViewResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,37 +141,18 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	}
 
 	@Override
-	public int deleteByRoomId(final String roomId) {
-		final ViewResult result = db.queryView(createQuery("by_roomid").key(roomId));
-
-		return delete(result);
+	public Iterable<Comment> findStubsByRoomId(final String roomId) {
+		return createEntityStubs(db.queryView(createQuery("by_roomid").key(roomId).reduce(false)));
 	}
 
 	@Override
-	public int deleteByRoomIdAndUserId(final String roomId, final String userId) {
-		final ViewResult result = db.queryView(createQuery("by_roomid_creatorid_read")
+	public Iterable<Comment> findStubsByRoomIdAndUserId(final String roomId, final String userId) {
+		return createEntityStubs(db.queryView(createQuery("by_roomid_creatorid_read")
 				.startKey(ComplexKey.of(roomId, userId))
-				.endKey(ComplexKey.of(roomId, userId, ComplexKey.emptyObject())));
-
-		return delete(result);
+				.endKey(ComplexKey.of(roomId, userId, ComplexKey.emptyObject()))));
 	}
 
-	private int delete(final ViewResult comments) {
-		if (comments.isEmpty()) {
-			return 0;
-		}
-		/* TODO: use bulk delete */
-		for (final ViewResult.Row row : comments.getRows()) {
-			try {
-				db.delete(row.getId(), row.getValueAsNode().get("rev").asText());
-			} catch (final UpdateConflictException e) {
-				logger.error("Could not delete comments.", e);
-			}
-		}
-
-		/* This does account for failed deletions */
-		dbLogger.log("delete", "type", "comment", "commentCount", comments.getSize());
-
-		return comments.getSize();
+	protected Iterable<Comment> createEntityStubs(final ViewResult viewResult) {
+		return super.createEntityStubs(viewResult, Comment::setRoomId);
 	}
 }

@@ -1,16 +1,12 @@
 package de.thm.arsnova.persistence.couchdb;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.Lists;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
-import org.ektorp.BulkDeleteDocument;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
-import org.ektorp.DbAccessException;
-import org.ektorp.DocumentOperationResult;
 import org.ektorp.ViewResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> implements AnswerRepository, ApplicationEventPublisherAware {
-	private static final int BULK_PARTITION_SIZE = 500;
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbAnswerRepository.class);
 
 	@Autowired
@@ -43,34 +38,18 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 		this.publisher = publisher;
 	}
 
+	protected Iterable<Answer> createEntityStubs(final ViewResult viewResult) {
+		return super.createEntityStubs(viewResult, Answer::setContentId);
+	}
+
 	@Override
-	public int deleteByContentId(final String contentId) {
-		try {
-			final ViewResult result = db.queryView(createQuery("by_contentid")
-					.key(contentId));
-			final List<List<ViewResult.Row>> partitions = Lists.partition(result.getRows(), BULK_PARTITION_SIZE);
+	public Iterable<Answer> findStubsByContentId(final String contentId) {
+		return createEntityStubs(db.queryView(createQuery("by_contentid").key(contentId)));
+	}
 
-			int count = 0;
-			for (final List<ViewResult.Row> partition: partitions) {
-				final List<BulkDeleteDocument> answersToDelete = new ArrayList<>();
-				for (final ViewResult.Row a : partition) {
-					final BulkDeleteDocument d = new BulkDeleteDocument(a.getId(), a.getValueAsNode().get("_rev").asText());
-					answersToDelete.add(d);
-				}
-				final List<DocumentOperationResult> errors = db.executeBulk(answersToDelete);
-				count += partition.size() - errors.size();
-				if (errors.size() > 0) {
-					logger.error("Could not bulk delete {} of {} answers.", errors.size(), partition.size());
-				}
-			}
-			dbLogger.log("delete", "type", "answer", "answerCount", count);
-
-			return count;
-		} catch (final DbAccessException e) {
-			logger.error("Could not delete answers for content {}.", contentId, e);
-		}
-
-		return 0;
+	@Override
+	public Iterable<Answer> findStubsByContentIds(final List<String> contentIds) {
+		return createEntityStubs(db.queryView(createQuery("by_contentid").keys(contentIds)));
 	}
 
 	@Override
@@ -191,46 +170,5 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 				.key(ComplexKey.of(sessionId, variant)));
 
 		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
-	}
-
-	@Override
-	public int deleteAllAnswersForQuestions(final List<String> contentIds) {
-		final ViewResult result = db.queryView(createQuery("by_contentid")
-				.keys(contentIds));
-		final List<BulkDeleteDocument> allAnswers = new ArrayList<>();
-		for (final ViewResult.Row a : result.getRows()) {
-			final BulkDeleteDocument d = new BulkDeleteDocument(a.getId(), a.getValueAsNode().get("_rev").asText());
-			allAnswers.add(d);
-		}
-		try {
-			final List<DocumentOperationResult> errors = db.executeBulk(allAnswers);
-
-			return allAnswers.size() - errors.size();
-		} catch (final DbAccessException e) {
-			logger.error("Could not bulk delete answers.", e);
-		}
-
-		return 0;
-	}
-
-	@Override
-	public int deleteByContentIds(final List<String> contentIds) {
-		final ViewResult result = db.queryView(createQuery("by_contentid")
-				.keys(contentIds));
-		final List<BulkDeleteDocument> deleteDocs = new ArrayList<>();
-		for (final ViewResult.Row a : result.getRows()) {
-			final BulkDeleteDocument d = new BulkDeleteDocument(a.getId(), a.getValueAsNode().get("_rev").asText());
-			deleteDocs.add(d);
-		}
-
-		try {
-			final List<DocumentOperationResult> errors = db.executeBulk(deleteDocs);
-
-			return deleteDocs.size() - errors.size();
-		} catch (final DbAccessException e) {
-			logger.error("Could not bulk delete answers.", e);
-		}
-
-		return 0;
 	}
 }
