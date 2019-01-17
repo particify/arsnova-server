@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.PermissionEvaluator;
+import org.springframework.security.access.intercept.RunAsUserToken;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -72,7 +73,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 		final String userId = getUserId(authentication);
 
-		return hasAdminRole(userId)
+		return isSystemAccess(authentication) || hasAdminRole(userId)
 				|| (targetDomainObject instanceof UserProfile
 						&& hasUserProfilePermission(userId, ((UserProfile) targetDomainObject), permission.toString()))
 				|| (targetDomainObject instanceof Room
@@ -246,6 +247,11 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		User user = (User) authentication.getPrincipal();
 
 		return user.getId();
+	}
+
+	private boolean isSystemAccess(Authentication auth) {
+		return auth instanceof RunAsUserToken
+				&& auth.getAuthorities().stream().anyMatch(ga -> ga.getAuthority().equals("ROLE_RUN_AS_SYSTEM"));
 	}
 
 	private boolean isWebsocketAccess(Authentication auth) {
