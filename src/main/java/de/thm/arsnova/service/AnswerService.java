@@ -38,9 +38,9 @@ public interface AnswerService extends EntityService<Answer> {
 
 	void deleteAnswers(String contentId);
 
-	Answer saveAnswer(String contentId, Answer answer);
+	Answer create(Answer answer);
 
-	Answer updateAnswer(Answer answer);
+	Answer update(Answer answer);
 
 	Map<String, Object> countAnswersAndAbstentionsInternal(String contentId);
 

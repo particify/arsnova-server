@@ -32,6 +32,7 @@ import de.thm.arsnova.service.TimerService;
 import de.thm.arsnova.util.PaginationListDecorator;
 import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.web.Pagination;
+import de.thm.arsnova.web.exceptions.BadRequestException;
 import de.thm.arsnova.web.exceptions.ForbiddenException;
 import de.thm.arsnova.web.exceptions.NoContentException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
@@ -513,11 +514,14 @@ public class ContentController extends PaginationController {
 			) {
 		final de.thm.arsnova.model.Content content = contentService.get(contentId);
 		final de.thm.arsnova.model.Answer answerV3 = fromV2Migrator.migrate(answer, content);
+		if (!contentId.equals(answerV3.getContentId())) {
+			throw new BadRequestException("Mismatching content IDs.");
+		}
 
 		if (answerV3 instanceof TextAnswer) {
-			return toV2Migrator.migrate((TextAnswer) answerService.saveAnswer(contentId, answerV3));
+			return toV2Migrator.migrate((TextAnswer) answerService.create(answerV3));
 		} else {
-			return  toV2Migrator.migrate((ChoiceAnswer) answerService.saveAnswer(contentId, answerV3), (ChoiceQuestionContent) content);
+			return  toV2Migrator.migrate((ChoiceAnswer) answerService.create(answerV3), (ChoiceQuestionContent) content);
 		}
 	}
 
@@ -534,9 +538,9 @@ public class ContentController extends PaginationController {
 		final de.thm.arsnova.model.Answer answerV3 = fromV2Migrator.migrate(answer, content);
 
 		if (answerV3 instanceof TextAnswer) {
-			return toV2Migrator.migrate((TextAnswer) answerService.updateAnswer(answerV3));
+			return toV2Migrator.migrate((TextAnswer) answerService.update(answerV3));
 		} else {
-			return  toV2Migrator.migrate((ChoiceAnswer) answerService.updateAnswer(answerV3), (ChoiceQuestionContent) content);
+			return  toV2Migrator.migrate((ChoiceAnswer) answerService.update(answerV3), (ChoiceQuestionContent) content);
 		}
 	}
 
