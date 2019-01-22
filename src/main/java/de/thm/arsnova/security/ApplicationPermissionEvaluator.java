@@ -17,11 +17,13 @@
  */
 package de.thm.arsnova.security;
 
+import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.Motd;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.CommentRepository;
 import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.MotdRepository;
@@ -59,6 +61,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	private ContentRepository contentRepository;
 
 	@Autowired
+	private AnswerRepository answerRepository;
+
+	@Autowired
 	private MotdRepository motdRepository;
 
 	@Override
@@ -80,6 +85,8 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 						&& hasRoomPermission(userId, ((Room) targetDomainObject), permission.toString()))
 				|| (targetDomainObject instanceof Content
 						&& hasContentPermission(userId, ((Content) targetDomainObject), permission.toString()))
+				|| (targetDomainObject instanceof Answer
+						&& hasAnswerPermission(userId, ((Answer) targetDomainObject), permission.toString()))
 				|| (targetDomainObject instanceof Comment
 						&& hasCommentPermission(userId, ((Comment) targetDomainObject), permission.toString()))
 				|| (targetDomainObject instanceof Motd
@@ -113,6 +120,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			case "content":
 				final Content targetContent = contentRepository.findOne(targetId.toString());
 				return targetContent != null && hasContentPermission(userId, targetContent, permission.toString());
+			case "answer":
+				final Answer targetAnswer = answerRepository.findOne(targetId.toString());
+				return targetAnswer != null && hasAnswerPermission(userId, targetAnswer, permission.toString());
 			case "comment":
 				final Comment targetComment = commentRepository.findOne(targetId.toString());
 				return targetComment != null && hasCommentPermission(userId, targetComment, permission.toString());
@@ -173,6 +183,37 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			case "delete":
 				final Room room = roomRepository.findOne(targetContent.getRoomId());
 				return room != null && room.getOwnerId().equals(userId);
+			default:
+				return false;
+		}
+	}
+
+	private boolean hasAnswerPermission(
+			final String userId,
+			final Answer targetAnswer,
+			final String permission) {
+		final Content content = contentRepository.findOne(targetAnswer.getContentId());
+		if (!hasContentPermission(userId, content, "read")) {
+			return false;
+		}
+		Room room;
+		switch (permission) {
+			case "read":
+				if (targetAnswer.getCreatorId().equals(userId) || content.getState().isResponsesVisible()) {
+					return true;
+				}
+				room = roomRepository.findOne(targetAnswer.getRoomId());
+				return room != null && hasRoomPermission(userId, room, "owner");
+			case "create":
+				return content.getState().isResponsesEnabled();
+			case "owner":
+				return targetAnswer.getCreatorId().equals(userId);
+			case "update":
+				/* TODO */
+				return false;
+			case "delete":
+				room = roomRepository.findOne(targetAnswer.getRoomId());
+				return room != null && hasRoomPermission(userId, room, "owner");
 			default:
 				return false;
 		}

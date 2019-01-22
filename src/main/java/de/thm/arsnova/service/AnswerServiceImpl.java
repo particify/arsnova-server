@@ -26,7 +26,6 @@ import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.TextAnswer;
-import de.thm.arsnova.model.transport.AnswerQueueElement;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.web.exceptions.NotFoundException;
@@ -36,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -58,7 +56,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implements AnswerService {
 	private static final Logger logger = LoggerFactory.getLogger(ContentServiceImpl.class);
 
-	private final Queue<AnswerQueueElement> answerQueue = new ConcurrentLinkedQueue<>();
+	private final Queue<Answer> answerQueue = new ConcurrentLinkedQueue<>();
 
 	private RoomService roomService;
 	private ContentService contentService;
@@ -88,21 +86,18 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 			return;
 		}
 
-		final List<Answer> answerList = new ArrayList<>();
-		final List<AnswerQueueElement> elements = new ArrayList<>();
-		AnswerQueueElement entry;
+		final List<Answer> answers = new ArrayList<>();
+		Answer entry;
 		while ((entry = this.answerQueue.poll()) != null) {
-			final Answer answer = entry.getAnswer();
-			answerList.add(answer);
-			elements.add(entry);
+			answers.add(entry);
 		}
 		try {
-			for (AnswerQueueElement e : elements) {
-				this.eventPublisher.publishEvent(new BeforeCreationEvent<>(this, e.getAnswer()));
+			for (Answer e : answers) {
+				this.eventPublisher.publishEvent(new BeforeCreationEvent<>(this, e));
 			}
-			answerRepository.saveAll(answerList);
-			for (AnswerQueueElement e : elements) {
-				this.eventPublisher.publishEvent(new AfterCreationEvent<>(this, e.getAnswer()));
+			answerRepository.saveAll(answers);
+			for (Answer e : answers) {
+				this.eventPublisher.publishEvent(new AfterCreationEvent<>(this, e));
 			}
 		} catch (final DbAccessException e) {
 			logger.error("Could not bulk save answers from queue.", e);
@@ -314,19 +309,24 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	}
 
 	@Override
-	@PreAuthorize("isAuthenticated()")
-	@CacheEvict(value = "answerlists", key = "#contentId")
-	public Answer saveAnswer(final String contentId, final Answer answer) {
+	@PreAuthorize("isAuthenticated() && hasPermission(#answer, 'create')")
+	public Answer create(final Answer answer) {
+		this.answerQueue.offer(answer);
+
+		return answer;
+	}
+
+	@Override
+	protected void prepareCreate(final Answer answer) {
+		/* TODO: prevent multiple answers from one user */
 		final User user = userService.getCurrentUser();
-		final Content content = contentService.get(contentId);
+		final Content content = contentService.get(answer.getContentId());
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		final Room room = roomService.get(content.getRoomId());
 
 		answer.setCreatorId(user.getId());
-		answer.setContentId(content.getId());
-		answer.setRoomId(room.getId());
+		answer.setRoomId(content.getRoomId());
 
 		/* FIXME: migrate
 		answer.setQuestionValue(content.calculateValue(answer));
@@ -349,17 +349,10 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		} else {
 			answer.setRound(content.getState().getRound());
 		}
-
-		this.answerQueue.offer(new AnswerQueueElement(room, content, answer, user.getId()));
-
-		return answer;
 	}
 
-	/* FIXME: Remove, this should be handled by EntityService! */
 	@Override
-	@PreAuthorize("isAuthenticated()")
-	@CacheEvict(value = "answerlists", allEntries = true)
-	public Answer updateAnswer(final Answer answer) {
+	protected void prepareUpdate(final Answer answer) {
 		final User user = userService.getCurrentUser();
 		final Answer realAnswer = this.getMyAnswer(answer.getContentId());
 		if (user == null || realAnswer == null || !user.getId().equals(realAnswer.getCreatorId())) {
@@ -377,9 +370,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		answer.setCreatorId(user.getId());
 		answer.setContentId(content.getId());
 		answer.setRoomId(room.getId());
-		update(realAnswer);
-
-		return answer;
 	}
 
 	/*
