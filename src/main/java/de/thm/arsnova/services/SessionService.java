@@ -447,6 +447,22 @@ public class SessionService implements ISessionService, ApplicationEventPublishe
 	}
 
 	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(#sessionkey, 'session', 'read')")
+	public SessionInfo copySessionFromPublicPool(final String sessionkey, final Session sessionAttributes) {
+		final Session ppSession = databaseDao.getSessionFromKeyword(sessionkey);
+		if (!"public_pool".equals(ppSession.getSessionType())) {
+			throw new ForbiddenException();
+		}
+		final ImportExportSession sessionContainer = databaseDao.exportSession(sessionkey, false, false);
+		final ImportExportSession.ImportExportSesssion newSession = sessionContainer.getSession();
+		newSession.setSessionType("");
+		newSession.setName(sessionAttributes.getName());
+		newSession.setShortName(sessionAttributes.getShortName());
+		final User user = userService.getCurrentUser();
+		return databaseDao.importSession(user, sessionContainer);
+	}
+
+	@Override
 	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
 		this.publisher = publisher;
 	}
