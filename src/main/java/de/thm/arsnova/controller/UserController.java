@@ -17,7 +17,10 @@
  */
 package de.thm.arsnova.controller;
 
+import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.DbUser;
+import de.thm.arsnova.entities.LoggedIn;
+import de.thm.arsnova.entities.User;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.services.UserSessionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +48,9 @@ public class UserController extends AbstractController {
 
 	@Autowired
 	private UserSessionService userSessionService;
+
+	@Autowired
+	private IDatabaseDao iDatabaseDao;
 
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
 	public void register(@RequestParam final String username,
@@ -76,12 +82,16 @@ public class UserController extends AbstractController {
 	}
 
 	@RequestMapping(value = "/{username}/", method = RequestMethod.DELETE)
-	public void activate(
+	public void delete(
 			@PathVariable final String username,
 			final HttpServletRequest request,
 			final HttpServletResponse response) {
-		if (null == userService.deleteDbUser(username)) {
+		LoggedIn loggedIn = iDatabaseDao.getLoggedInByUser(new User(username));
+		if (null == loggedIn) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+		} else {
+			userService.deleteUserContent(loggedIn);
+			userService.anonymizeUser(loggedIn);
 		}
 	}
 

@@ -246,6 +246,9 @@ session.demo-id=
 # Delete guest sessions automatically after X days of owner inactivity.
 #session.guest-session.cleanup-days=180
 
+# Anonymize user content for users with X days of inactivity
+#user.cleanup-days=180
+
 # Label underneath ARSnova logo
 ui.slogan=Audience Response System
 

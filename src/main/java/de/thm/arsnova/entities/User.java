@@ -79,6 +79,11 @@ public class User implements Serializable {
 		setType(LDAP);
 	}
 
+	public User(String username) {
+		setUsername(username);
+		setType(User.ANONYMOUS);
+	}
+
 	public String getUsername() {
 		return username;
 	}

@@ -827,6 +827,35 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 	}
 
 	@Override
+	public LoggedIn getLoggedInByUser(User user) {
+		final NovaView view = new NovaView("logged_in/all");
+		view.setKey(user.getUsername());
+		view.setIncludeDocs(true);
+		LoggedIn l = null;
+		final ViewResults result = getDatabase().view(view);
+		for (Document doc : result.getResults()) {
+			final MorpherRegistry morpherRegistry = JSONUtils.getMorpherRegistry();
+			final Morpher dynaMorpher = new BeanMorpher(VisitedSession.class, morpherRegistry);
+			morpherRegistry.registerMorpher(dynaMorpher);
+
+			if (result.getJSONArray("rows").optJSONObject(0) == null) {
+				return null;
+			}
+			l = (LoggedIn) JSONObject.toBean(
+					doc.getJSONObject().getJSONObject("doc"),
+					LoggedIn.class
+			);
+			@SuppressWarnings("unchecked")
+			final Collection<VisitedSession> vs = JSONArray.toCollection(
+					doc.getJSONObject().getJSONObject("doc").getJSONArray("visitedSessions"),
+					VisitedSession.class
+			);
+			l.setVisitedSessions(new ArrayList<>(vs));
+		}
+		return l;
+	}
+
+	@Override
 	@CachePut(value = "sessions")
 	public Session updateSessionOwnerActivity(final Session session) {
 		try {
@@ -911,6 +940,35 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 
 	@CacheEvict("answers")
 	@Override
+	public List<Answer> getUserAnswersForSession(String username, String sessionId) {
+		final NovaView view = new NovaView("answer/by_user");
+		view.setKey(username, sessionId);
+		view.setIncludeDocs(true);
+
+		List<Answer> answers = new ArrayList<>();
+
+		List<Document> results = this.getDatabase().view(view).getResults();
+
+		final List<List<Document>> partitions = Lists.partition(results, BULK_PARTITION_SIZE);
+		for (List<Document> partition: partitions) {
+			for (Document doc : partition) {
+				if (!"".equals(doc.optString("error"))) {
+					// Skip documents we could not load. Maybe they were deleted.
+					continue;
+				}
+				Answer a = (Answer) JSONObject.toBean(
+						doc.getJSONObject().getJSONObject("doc"),
+						Answer.class
+				);
+				answers.add(a);
+			}
+		}
+
+		return answers;
+	}
+
+	@CacheEvict("answers")
+	@Override
 	public int deleteAnswers(final Question question) {
 		try {
 			final NovaView view = new NovaView("answer/cleanup");
@@ -985,6 +1043,8 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			return null;
 		}
 	}
+
+
 
 	@Override
 	public List<Answer> getAnswers(final Question question, final int piRound) {
@@ -2234,16 +2294,22 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			questionIds.add(q.get_id());
 			allQuestions.add(d);
 		}
-		final NovaView bulkView = new NovaView("answer/cleanup");
-		bulkView.setKeys(questionIds);
-		bulkView.setIncludeDocs(true);
-		final List<Document> result = getDatabase().view(bulkView).getResults();
 
 		final List<Document> allAnswers = new ArrayList<>();
-		for (Document a : result) {
-			final Document d = new Document(a.getJSONObject("doc"));
-			d.put("_deleted", true);
-			allAnswers.add(d);
+		int resultCounter = 0;
+
+		for (String qId : questionIds) {
+			final NovaView bulkView = new NovaView("answer/cleanup");
+			bulkView.setKey(qId);
+			bulkView.setIncludeDocs(true);
+			final List<Document> result = getDatabase().view(bulkView).getResults();
+
+			for (Document a : result) {
+				final Document d = new Document(a.getJSONObject("doc"));
+				d.put("_deleted", true);
+				allAnswers.add(d);
+			}
+			resultCounter += result.size();
 		}
 
 		try {
@@ -2251,7 +2317,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 			deleteList.addAll(allQuestions);
 			getDatabase().bulkSaveDocuments(deleteList.toArray(new Document[deleteList.size()]));
 
-			return new int[] {deleteList.size(), result.size()};
+			return new int[] {deleteList.size(), resultCounter};
 		} catch (IOException e) {
 			logger.error("Could not bulk delete questions and answers.", e);
 		}
@@ -2400,6 +2466,41 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 
 		return 0;
+	}
+
+	@Override
+	public List<LoggedIn> getInactiveLoggedIn(long lastActivityBefore) {
+		final List<LoggedIn> loggedInDocs = new ArrayList<>();
+		NovaView view = new NovaView("logged_in/by_last_activity");
+		view.setEndKey(lastActivityBefore);
+		view.setIncludeDocs(true);
+		final MorpherRegistry morpherRegistry = JSONUtils.getMorpherRegistry();
+		final Morpher dynaMorpher = new BeanMorpher(VisitedSession.class, morpherRegistry);
+		morpherRegistry.registerMorpher(dynaMorpher);
+		List<Document> results = this.getDatabase().view(view).getResults();
+
+		final List<List<Document>> partitions = Lists.partition(results, BULK_PARTITION_SIZE);
+		for (List<Document> partition: partitions) {
+			for (Document doc : partition) {
+				if (!"".equals(doc.optString("error"))) {
+					// Skip documents we could not load. Maybe they were deleted.
+					continue;
+				}
+				LoggedIn l = (LoggedIn) JSONObject.toBean(
+						doc.getJSONObject().getJSONObject("doc"),
+						LoggedIn.class
+				);
+				@SuppressWarnings("unchecked")
+				final Collection<VisitedSession> vs = JSONArray.toCollection(
+						doc.getJSONObject().getJSONObject("doc").getJSONArray("visitedSessions"),
+						VisitedSession.class
+				);
+				l.setVisitedSessions(new ArrayList<>(vs));
+				loggedInDocs.add(l);
+			}
+		}
+
+		return loggedInDocs;
 	}
 
 	@Override
@@ -2830,6 +2931,70 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		}
 
 		return null;
+	}
+
+	@Override
+	public void bulkUpdateAnswers(List<Answer> answers) {
+		List<Document> docs = new ArrayList<>();
+		for (Answer a : answers) {
+			if (a.get_id() != null) {
+				final JSONObject json = JSONObject.fromObject(a);
+				docs.add(new Document(json));
+			}
+		}
+		try {
+			getDatabase().bulkSaveDocuments(docs.toArray(new Document[docs.size()]));
+		} catch (IOException e) {
+			logger.error("Could not update Answers document {}.", docs, e);
+		}
+	}
+
+	@Override
+	public void bulkUpdateInterposedQuestion(List<InterposedQuestion> interposedQuestions) {
+		List<Document> docs = new ArrayList<>();
+		for (InterposedQuestion a : interposedQuestions) {
+			if (a.get_id() != null) {
+				final JSONObject json = JSONObject.fromObject(a);
+				docs.add(new Document(json));
+			}
+		}
+		try {
+			getDatabase().bulkSaveDocuments(docs.toArray(new Document[docs.size()]));
+		} catch (IOException e) {
+			logger.error("Could not update interposed question document {}.", docs, e);
+		}
+	}
+
+	@Override
+	public void updateLoggedIn(LoggedIn l) {
+		if (l.get_id() == null) {
+			return;
+		}
+		try {
+			final JSONObject json = JSONObject.fromObject(l);
+			final Document doc = new Document(json);
+			getDatabase().saveDocument(doc);
+		} catch (IOException e) {
+			logger.error("Could not update LoggedIn document {}.", l, e);
+		}
+	}
+
+	@Override
+	public void bulkDeleteInterposedQuestionsForSessionAndUser(String sessionId, String username) {
+		final NovaView view = new NovaView("interposed_question/by_session_and_creator");
+		view.setKey(sessionId, username);
+		final List<Document> result = getDatabase().view(view).getResults();
+		final List<Document> allInterposedQuestions = new ArrayList<>();
+		for (Document a : result) {
+			final Document d = new Document(a.getJSONObject("doc"));
+			d.put("_deleted", true);
+			allInterposedQuestions.add(d);
+		}
+		try {
+			getDatabase().bulkSaveDocuments(allInterposedQuestions.toArray(new Document[allInterposedQuestions.size()]));
+		} catch (IOException e) {
+			logger.error("Could not bulk delete interposed questions.", e);
+		}
 	}
 
 }

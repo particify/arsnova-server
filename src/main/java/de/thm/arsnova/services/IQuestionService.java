@@ -22,6 +22,7 @@ import de.thm.arsnova.entities.InterposedQuestion;
 import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.VisitedSession;
 
 import java.util.List;
 import java.util.Map;
@@ -71,6 +72,8 @@ public interface IQuestionService {
 	int getAnswerCount(String questionId, int piRound);
 
 	List<Answer> getFreetextAnswers(String questionId, int offset, int limit);
+
+	List<Answer> getFreetextAnswersInternal(String questionId);
 
 	List<Answer> getMyAnswers(String sessionKey);
 
@@ -167,5 +170,7 @@ public interface IQuestionService {
 	String getQuestionFcImage(String questionId);
 
 	List<Question> replaceImageData(List<Question> questions);
+
+	void anonymizeParticipant(VisitedSession session, String oldUsername, String anonymizedUsername);
 
 }

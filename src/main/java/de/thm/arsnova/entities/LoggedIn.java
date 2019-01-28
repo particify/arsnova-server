@@ -33,6 +33,7 @@ public class LoggedIn {
 	private long timestamp;
 	private List<VisitedSession> visitedSessions = new ArrayList<>();
 	private List<String> _conflicts;
+	private boolean anonymized;
 
 	public LoggedIn() {
 		this.type = "logged_in";
@@ -124,6 +125,14 @@ public class LoggedIn {
 
 	public boolean hasConflicts() {
 		return !(_conflicts == null || _conflicts.isEmpty());
+	}
+
+	public boolean isAnonymized() {
+		return anonymized;
+	}
+
+	public void setAnonymized(boolean anonymized) {
+		this.anonymized = anonymized;
 	}
 
 	@Override

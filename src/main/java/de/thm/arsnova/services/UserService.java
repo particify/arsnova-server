@@ -21,7 +21,11 @@ import com.codahale.metrics.annotation.Gauge;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.LoggedIn;
+import de.thm.arsnova.entities.Session;
+import de.thm.arsnova.entities.VisitedSession;
 import de.thm.arsnova.exceptions.BadRequestException;
+import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import org.apache.commons.lang.RandomStringUtils;
@@ -47,6 +51,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.keygen.BytesKeyGenerator;
 import org.springframework.security.crypto.keygen.KeyGenerators;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,6 +82,8 @@ import java.util.regex.Pattern;
 @MonitorGauges
 public class UserService implements IUserService {
 
+	private IQuestionService questionService;
+
 	private static final int LOGIN_TRY_RESET_DELAY_MS = 30 * 1000;
 
 	private static final int LOGIN_BAN_RESET_DELAY_MS = 2 * 60 * 1000;
@@ -87,6 +94,8 @@ public class UserService implements IUserService {
 
 	private static final long ACTIVATION_KEY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
 	private static final long ACTIVATION_KEY_DURABILITY_MS = 6 * 60 * 60 * 1000L;
+
+	private static final long USER_INACTIVITY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
 
 	private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
@@ -140,6 +149,9 @@ public class UserService implements IUserService {
 	@Value("${security.admin-accounts}")
 	private String[] adminAccounts;
 
+	@Value("${user.cleanup-days:0}")
+	private int userCleanupThresholdDays;
+
 	private Pattern mailPattern;
 	private BytesKeyGenerator keygen;
 	private BCryptPasswordEncoder encoder;
@@ -149,6 +161,11 @@ public class UserService implements IUserService {
 	{
 		loginTries = new ConcurrentHashMap<>();
 		loginBans = Collections.synchronizedSet(new HashSet<String>());
+	}
+
+	@Autowired
+	public void setQuestionService(final IQuestionService questionService) {
+		this.questionService = questionService;
 	}
 
 	@Scheduled(fixedDelay = LOGIN_TRY_RESET_DELAY_MS)
@@ -167,12 +184,32 @@ public class UserService implements IUserService {
 		}
 	}
 
+	/*
+	 * This deletes users that did register but not activate their account
+	 */
 	@Scheduled(fixedDelay = ACTIVATION_KEY_CHECK_INTERVAL_MS)
 	public void deleteInactiveUsers() {
-		logger.info("Delete inactive users.");
+		logger.info("Delete not activated users.");
 		long unixTime = System.currentTimeMillis();
 		long lastActivityBefore = unixTime - ACTIVATION_KEY_DURABILITY_MS;
 		databaseDao.deleteInactiveUsers(lastActivityBefore);
+	}
+
+	/*
+	 * This triggers anonymization of users that have been inactive for userCleanupThresholdDays amount of days
+	 */
+	@Scheduled(fixedDelay = USER_INACTIVITY_CHECK_INTERVAL_MS)
+	public void anonymizeInactiveUsers() {
+		if (userCleanupThresholdDays > 0) {
+			logger.info("Anonymize inactive users");
+			long unixTime = System.currentTimeMillis();
+			long lastActivityBefore = unixTime - userCleanupThresholdDays * 24 * 60 * 60 * 1000L;
+			List<LoggedIn> loggedIns = databaseDao.getInactiveLoggedIn(lastActivityBefore);
+			for (LoggedIn l : loggedIns) {
+				deleteUserContent(l);
+				anonymizeUser(l);
+			}
+		}
 	}
 
 	@Override
@@ -531,6 +568,49 @@ public class UserService implements IUserService {
 		}
 
 		return true;
+	}
+
+	@Override
+	public void deleteUserContent(LoggedIn l) {
+		User user = getCurrentUser();
+		if (!user.isAdmin() && !user.getUsername().equals(l.getUser())) {
+			throw new ForbiddenException();
+		}
+
+		List<Session> userSessions = databaseDao.getSessionsForUsername(l.getUser(), 0, 0);
+		for (Session s : userSessions) {
+			databaseDao.deleteSession(s);
+		}
+	}
+
+	@Override
+	public void anonymizeUser(LoggedIn l) {
+		User user = getCurrentUser();
+		if (!user.isAdmin() && !user.getUsername().equals(l.getUser())) {
+			throw new ForbiddenException();
+		}
+
+		String username = l.getUser();
+		PasswordEncoder pe = new BCryptPasswordEncoder();
+		String anonymizedUsername = pe.encode(username + l.getTimestamp());
+		l.setUser(anonymizedUsername);
+		l.setAnonymized(true);
+		for (VisitedSession vs : l.getVisitedSessions()) {
+			questionService.anonymizeParticipant(vs, username, anonymizedUsername);
+		}
+		// this trims the document because it won't be deleted and stays forever
+		l.setVisitedSessions(new ArrayList<>());
+		DbUser dbUser = this.getDbUser(username);
+		if (dbUser != null) {
+			dbUser.setUsername(anonymizedUsername);
+			databaseDao.createOrUpdateUser(dbUser);
+		}
+		databaseDao.updateLoggedIn(l);
+	}
+
+	@Override
+	public LoggedIn getLoggedInFromUser(User user) {
+		return databaseDao.getLoggedInByUser(user);
 	}
 
 	private void sendEmail(DbUser dbUser, String subject, String body) {

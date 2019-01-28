@@ -25,6 +25,7 @@ import de.thm.arsnova.entities.InterposedReadingCount;
 import de.thm.arsnova.entities.Question;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.VisitedSession;
 import de.thm.arsnova.events.*;
 import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
@@ -46,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 /**
  * Performs all question, interposed question, and answer related operations.
@@ -463,7 +465,6 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 			return databaseDao.getAllAnswers(question);
 		}
 	}
-
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public int getAnswerCount(final String questionId) {
@@ -522,6 +523,17 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		/* Remove user for privacy concerns */
 		for (Answer answer : answers) {
 			answer.setUser(null);
+		}
+
+		return answers;
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public List<Answer> getFreetextAnswersInternal(final String questionId) {
+		final List<Answer> answers = databaseDao.getFreetextAnswers(questionId, 0, 0);
+		if (answers == null) {
+			throw new NotFoundException();
 		}
 
 		return answers;
@@ -1022,5 +1034,36 @@ public class QuestionService implements IQuestionService, ApplicationEventPublis
 		}
 
 		return imageData;
+	}
+
+	@Override
+	public void anonymizeParticipant(VisitedSession vs, String oldUsername, String anonymizedUsername) {
+		Session helperSession = new Session();
+		helperSession.set_id(vs.get_id());
+		helperSession.setKeyword(vs.getKeyword());
+		User helperUser = new User(oldUsername);
+
+		List<Answer> answers = new ArrayList<>();
+		List<Answer> questionAnswers = databaseDao.getUserAnswersForSession(oldUsername, vs.get_id());
+		for (Answer a : questionAnswers) {
+			if (a.getUser().equals(oldUsername)) {
+				a.setUser(anonymizedUsername);
+				answers.add(a);
+			}
+		}
+
+		List<InterposedQuestion> comments =
+				databaseDao.getInterposedQuestions(helperSession, helperUser, 0, 0);
+		for (InterposedQuestion c : comments) {
+			c.setCreator(anonymizedUsername);
+			c.setSessionId(vs.get_id());
+		}
+
+		if (!comments.isEmpty()) {
+			databaseDao.bulkUpdateInterposedQuestion(comments);
+		}
+		if (!answers.isEmpty()) {
+			databaseDao.bulkUpdateAnswers(answers);
+		}
 	}
 }
