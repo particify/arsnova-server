@@ -7,8 +7,8 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<io.spring.platform-version>Brussels-SR15</io.spring.platform-version>
-		<io.netty-version>4.1.32.Final</io.netty-version>
+		<io.spring.platform-version>Brussels-SR16</io.spring.platform-version>
+		<io.netty-version>4.1.33.Final</io.netty-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
@@ -243,7 +243,7 @@
 		<dependency>
 			<groupId>com.corundumstudio.socketio</groupId>
 			<artifactId>netty-socketio</artifactId>
-			<version>1.7.16</version>
+			<version>1.7.17</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.inject</groupId>
@@ -372,7 +372,7 @@
 			<plugin>
 				<groupId>org.sonarsource.scanner.maven</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
-				<version>3.5.0.1254</version>
+				<version>3.6.0.1398</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -382,7 +382,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.2</version>
+				<version>0.8.3</version>
 				<executions>
 					<execution>
 						<id>default-prepare-agent</id>
@@ -425,7 +425,7 @@
 			<plugin>
 				<groupId>com.github.kongchen</groupId>
 				<artifactId>swagger-maven-plugin</artifactId>
-				<version>3.1.7</version>
+				<version>3.1.8</version>
 				<configuration>
 					<apiSources>
 						<apiSource>
@@ -448,6 +448,7 @@
 								</contact>
 							</info>
 							<swaggerDirectory>${project.build.directory}/classes</swaggerDirectory>
+							<outputFormats>json</outputFormats>
 						</apiSource>
 					</apiSources>
 				</configuration>
