@@ -18,6 +18,7 @@
 package de.thm.arsnova.services;
 
 import de.thm.arsnova.entities.DbUser;
+import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.User;
 
 import java.util.Map;
@@ -69,4 +70,10 @@ public interface IUserService {
 	void initiatePasswordReset(String username);
 
 	boolean resetPassword(DbUser dbUser, String key, String password);
+
+	void deleteUserContent(LoggedIn user);
+
+	void anonymizeUser(LoggedIn username);
+
+	LoggedIn getLoggedInFromUser(User user);
 }

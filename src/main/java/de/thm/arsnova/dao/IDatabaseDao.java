@@ -103,6 +103,8 @@ public interface IDatabaseDao {
 
 	LoggedIn registerAsOnlineUser(User u, Session s);
 
+	LoggedIn getLoggedInByUser(User user);
+
 	Session updateSessionOwnerActivity(Session session);
 
 	List<String> getQuestionIds(Session session, User user);
@@ -112,6 +114,8 @@ public interface IDatabaseDao {
 	int[] deleteAllQuestionsWithAnswers(Session session);
 
 	List<String> getUnAnsweredQuestionIds(Session session, User user);
+
+	List<Answer> getUserAnswersForSession(String username, String sessionId);
 
 	Answer getMyAnswer(User me, String questionId, int piRound);
 
@@ -234,6 +238,8 @@ public interface IDatabaseDao {
 
 	int deleteInactiveUsers(long lastActivityBefore);
 
+	List<LoggedIn> getInactiveLoggedIn(long lastActivityBefore);
+
 	CourseScore getLearningProgress(Session session);
 
 	List<SessionInfo> getMySessionsInfo(User user, final int start, final int limit);
@@ -291,4 +297,12 @@ public interface IDatabaseDao {
 	MotdList getMotdListForUser(final String username);
 
 	MotdList createOrUpdateMotdList(MotdList motdlist);
+
+	void bulkUpdateAnswers(List<Answer> answers);
+
+	void bulkUpdateInterposedQuestion(List<InterposedQuestion> interposedQuestions);
+
+	void updateLoggedIn(LoggedIn l);
+
+	void bulkDeleteInterposedQuestionsForSessionAndUser(String sessionId, String username);
 }

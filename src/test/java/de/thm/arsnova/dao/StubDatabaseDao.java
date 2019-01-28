@@ -207,6 +207,12 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
+	public LoggedIn getLoggedInByUser(User user) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public Session updateSessionOwnerActivity(Session session) {
 		// TODO Auto-generated method stub
 		return null;
@@ -751,6 +757,38 @@ public class StubDatabaseDao implements IDatabaseDao {
 
 	@Override
 	public MotdList createOrUpdateMotdList(MotdList motdlist) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void bulkUpdateAnswers(List<Answer> answers) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void updateLoggedIn(LoggedIn l) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void bulkDeleteInterposedQuestionsForSessionAndUser(String sessionId, String username) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public List<LoggedIn> getInactiveLoggedIn(long lastActivityBefore) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void bulkUpdateInterposedQuestion(List<InterposedQuestion> interposedQuestions) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public List<Answer> getUserAnswersForSession(String username, String sessionId) {
 		// TODO Auto-generated method stub
 		return null;
 	}
