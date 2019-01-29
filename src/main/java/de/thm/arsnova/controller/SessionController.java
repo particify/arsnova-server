@@ -326,6 +326,15 @@ public class SessionController extends PaginationController {
 		return sessionInfo;
 	}
 
+	@ApiOperation(value = "copy a session from the public pool if enabled")
+	@RequestMapping(value = "/{sessionkey}/copyfrompublicpool", method = RequestMethod.POST)
+	public SessionInfo copyFromPublicPool(
+			@ApiParam(value = "session-key of the public pool session", required = true) @PathVariable final String sessionkey,
+			@ApiParam(value = "custom attributes for session", required = true) @RequestBody final Session sessionAttributes
+			) {
+		SessionInfo sessionInfo = sessionService.copySessionFromPublicPool(sessionkey, sessionAttributes);
+		return sessionInfo;
+	}
 
 	@ApiOperation(value = "Locks or unlocks a Session",
 			nickname = "lockSession")

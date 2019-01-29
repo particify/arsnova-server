@@ -86,6 +86,8 @@ public interface ISessionService {
 
 	SessionInfo copySessionToPublicPool(String sessionkey, de.thm.arsnova.entities.transport.ImportExportSession.PublicPool pp);
 
+	SessionInfo copySessionFromPublicPool(String sessionkey, Session sessionAttributes);
+
 	SessionFeature getSessionFeatures(String sessionkey);
 
 	SessionFeature changeSessionFeatures(String sessionkey, SessionFeature features);
