@@ -20,8 +20,8 @@ package de.thm.arsnova.config;
 import de.thm.arsnova.CasUserDetailsService;
 import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
 import org.pac4j.oauth.client.FacebookClient;
-import org.pac4j.oauth.client.Google2Client;
 import org.pac4j.oauth.client.TwitterClient;
+import org.pac4j.oidc.client.GoogleOidcClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -105,7 +105,7 @@ public class TestSecurityConfig extends SecurityConfig {
 	}
 
 	@Override
-	public Google2Client googleClient() {
+	public GoogleOidcClient googleClient() {
 		return null;
 	}
 

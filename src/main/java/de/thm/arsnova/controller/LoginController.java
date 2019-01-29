@@ -18,16 +18,14 @@
 package de.thm.arsnova.controller;
 
 import de.thm.arsnova.entities.ServiceDescription;
-import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
-import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.IUserService;
 import de.thm.arsnova.services.UserSessionService;
 import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.exception.HttpAction;
 import org.pac4j.oauth.client.FacebookClient;
-import org.pac4j.oauth.client.Google2Client;
 import org.pac4j.oauth.client.TwitterClient;
+import org.pac4j.oidc.client.GoogleOidcClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,7 +128,7 @@ public class LoginController extends AbstractController {
 	private TwitterClient twitterClient;
 
 	@Autowired(required = false)
-	private Google2Client google2Client;
+	private GoogleOidcClient googleOidcClient;
 
 	@Autowired(required = false)
 	private FacebookClient facebookClient;
@@ -287,9 +285,8 @@ public class LoginController extends AbstractController {
 			result = new RedirectView(
 					facebookClient.getRedirectAction(new J2EContext(request, response)).getLocation());
 		} else if (googleEnabled && "google".equals(type)) {
-			google2Client.setScope(Google2Client.Google2Scope.EMAIL);
 			result = new RedirectView(
-					google2Client.getRedirectAction(new J2EContext(request, response)).getLocation());
+					googleOidcClient.getRedirectAction(new J2EContext(request, response)).getLocation());
 		} else {
 			response.setStatus(HttpStatus.BAD_REQUEST.value());
 		}

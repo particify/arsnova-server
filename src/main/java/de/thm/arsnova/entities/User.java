@@ -20,8 +20,8 @@ package de.thm.arsnova.entities;
 import de.thm.arsnova.services.UserSessionService;
 import org.jasig.cas.client.authentication.AttributePrincipal;
 import org.pac4j.oauth.profile.facebook.FacebookProfile;
-import org.pac4j.oauth.profile.google2.Google2Profile;
 import org.pac4j.oauth.profile.twitter.TwitterProfile;
+import org.pac4j.oidc.profile.google.GoogleOidcProfile;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
@@ -48,7 +48,10 @@ public class User implements Serializable {
 	private UserSessionService.Role role;
 	private boolean isAdmin;
 
-	public User(Google2Profile profile) {
+	public User(GoogleOidcProfile profile) {
+		if (!profile.getEmailVerified()) {
+			throw new IllegalArgumentException("Email is not verified.");
+		}
 		setUsername(profile.getEmail());
 		setType(User.GOOGLE);
 	}
