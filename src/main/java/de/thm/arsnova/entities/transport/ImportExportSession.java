@@ -44,8 +44,6 @@ public class ImportExportSession {
 
 	private List<Motd> motds;
 
-	private SessionFeature sessionFeature = new SessionFeature();
-
 	private SessionInfo sessionInfo;
 
 	public ImportExportSession() {
@@ -91,11 +89,11 @@ public class ImportExportSession {
 	}
 
 	public SessionFeature getSessionFeature() {
-		return sessionFeature;
+		return session.sessionFeature;
 	}
 
 	public void setSessionFeature(SessionFeature sF) {
-		sessionFeature = sF;
+		session.sessionFeature = sF;
 	}
 
 	public SessionInfo getSessionInfo() {
@@ -114,7 +112,7 @@ public class ImportExportSession {
 		PublicPool p = new PublicPool();
 		p.setPpFromSession(s);
 		iesession.setPublicPool(p);
-		sessionFeature = s.getFeatures();
+		iesession.sessionFeature = s.getFeatures();
 		session = iesession;
 	}
 
@@ -240,7 +238,7 @@ public class ImportExportSession {
 
 		private PublicPool publicPool;
 
-		private SessionFeature sessionFeature;
+		private SessionFeature sessionFeature = new SessionFeature();
 
 		@ApiModelProperty(required = true, value = "used to display short name")
 		public String getName() {
@@ -287,7 +285,8 @@ public class ImportExportSession {
 			this.publicPool = publicPool;
 		}
 
-		public SessionFeature getSessionFeature() {
+		/* Use getSessionFeature() of outer class for public access. */
+		private SessionFeature getSessionFeature() {
 			return this.sessionFeature;
 		}
 
