@@ -7,12 +7,12 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<spring-boot-version>2.1.1.RELEASE</spring-boot-version>
+		<spring-boot-version>2.1.2.RELEASE</spring-boot-version>
 		<commons-lang-version>2.6</commons-lang-version>
 		<guava-version>27.0.1-jre</guava-version>
 		<directory-server-version>1.5.5</directory-server-version>
-		<io.netty-version>4.1.32.Final</io.netty-version>
-		<org.aspectj-version>1.8.13</org.aspectj-version>
+		<io.netty-version>4.1.33.Final</io.netty-version>
+		<org.aspectj-version>1.9.2</org.aspectj-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
@@ -252,7 +252,7 @@
 		<dependency>
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
-			<version>3.4.1</version>
+			<version>3.7.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.pac4j</groupId>
