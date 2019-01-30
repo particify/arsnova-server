@@ -257,7 +257,12 @@
 		<dependency>
 			<groupId>org.pac4j</groupId>
 			<artifactId>pac4j-oauth</artifactId>
-			<version>3.4.0</version>
+			<version>3.5.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.pac4j</groupId>
+			<artifactId>pac4j-oidc</artifactId>
+			<version>3.5.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.corundumstudio.socketio</groupId>

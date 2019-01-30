@@ -21,8 +21,8 @@ import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.service.UserService;
 import org.pac4j.oauth.profile.facebook.FacebookProfile;
-import org.pac4j.oauth.profile.google2.Google2Profile;
 import org.pac4j.oauth.profile.twitter.TwitterProfile;
+import org.pac4j.oidc.profile.google.GoogleOidcProfile;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.AuthenticationUserDetailsService;
@@ -53,8 +53,8 @@ public class OauthUserDetailsService implements AuthenticationUserDetailsService
 	public User loadUserDetails(final OAuthToken token)
 			throws UsernameNotFoundException {
 		User user;
-		if (token.getDetails() instanceof Google2Profile) {
-			final Google2Profile profile = (Google2Profile) token.getDetails();
+		if (token.getDetails() instanceof GoogleOidcProfile) {
+			final GoogleOidcProfile profile = (GoogleOidcProfile) token.getDetails();
 			user = userService.loadUser(UserProfile.AuthProvider.GOOGLE, profile.getEmail(),
 					grantedAuthorities, true);
 		} else if (token.getDetails() instanceof TwitterProfile) {
