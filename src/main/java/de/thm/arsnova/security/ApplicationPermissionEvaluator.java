@@ -25,7 +25,7 @@ import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import org.pac4j.oauth.profile.facebook.FacebookProfile;
 import org.pac4j.oauth.profile.twitter.TwitterProfile;
-import org.pac4j.oidc.profile.google.GoogleOidcProfile;
+import org.pac4j.oidc.profile.OidcProfile;
 import org.pac4j.springframework.security.authentication.Pac4jAuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -157,8 +157,8 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			User user = null;
 
 			final Pac4jAuthenticationToken token = (Pac4jAuthenticationToken) authentication;
-			if (token.getProfile() instanceof GoogleOidcProfile) {
-				final GoogleOidcProfile profile = (GoogleOidcProfile) token.getProfile();
+			if (token.getProfile() instanceof OidcProfile) {
+				final OidcProfile profile = (OidcProfile) token.getProfile();
 				user = new User(profile);
 			} else if (token.getProfile() instanceof TwitterProfile) {
 				final TwitterProfile profile = (TwitterProfile) token.getProfile();
