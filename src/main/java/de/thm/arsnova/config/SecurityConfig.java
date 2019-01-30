@@ -33,6 +33,7 @@ import org.pac4j.core.config.Config;
 import org.pac4j.oauth.client.FacebookClient;
 import org.pac4j.oauth.client.TwitterClient;
 import org.pac4j.oidc.client.GoogleOidcClient;
+import org.pac4j.oidc.client.OidcClient;
 import org.pac4j.oidc.config.OidcConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,6 +98,7 @@ import java.util.List;
 @Profile("!test")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public static final String OAUTH_CALLBACK_PATH_SUFFIX = "/auth/oauth_callback";
+	private static final String OIDC_DISCOVERY_PATH_SUFFIX = "/.well-known/openid-configuration";
 	public static final String CAS_LOGIN_PATH_SUFFIX = "/auth/login/cas";
 	public static final String CAS_LOGOUT_PATH_SUFFIX = "/auth/logout/cas";
 	public static final String RUN_AS_KEY_PREFIX = "RUN_AS_KEY";
@@ -121,6 +123,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Value("${security.cas.enabled}") private boolean casEnabled;
 	@Value("${security.cas-server-url}") private String casUrl;
+
+	@Value("${security.oidc.enabled}") private boolean oidcEnabled;
+	@Value("${security.oidc.issuer}") private String oidcIssuer;
+	@Value("${security.oidc.client-id}") private String oidcClientId;
+	@Value("${security.oidc.secret}") private String oidcSecret;
 
 	@Value("${security.facebook.enabled}") private boolean facebookEnabled;
 	@Value("${security.facebook.key}") private String facebookKey;
@@ -147,7 +154,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				http.addFilter(casLogoutFilter());
 			}
 
-			if (facebookEnabled || googleEnabled || twitterEnabled) {
+			if (oidcEnabled || facebookEnabled || googleEnabled || twitterEnabled) {
 				http.addFilterAfter(oauthCallbackFilter(), CasAuthenticationFilter.class);
 			}
 		}
@@ -213,6 +220,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		if (dbAuthEnabled) {
 			providers.add("user-db");
 			auth.authenticationProvider(daoAuthenticationProvider());
+		}
+		if (oidcEnabled) {
+			providers.add("oidc");
 		}
 		if (googleEnabled || facebookEnabled || twitterEnabled) {
 			if (googleEnabled) {
@@ -430,6 +440,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public Config oauthConfig() {
 		List<Client> clients = new ArrayList<>();
+		if (oidcEnabled) {
+			clients.add(oidcClient());
+		}
 		if (facebookEnabled) {
 			clients.add(facebookClient());
 		}
@@ -455,6 +468,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public OauthAuthenticationProvider oauthAuthenticationProvider() {
 		return new OauthAuthenticationProvider();
+	}
+
+	@Bean
+	public OidcClient oidcClient() {
+		OidcConfiguration config = new OidcConfiguration();
+		config.setDiscoveryURI(oidcIssuer + OIDC_DISCOVERY_PATH_SUFFIX);
+		config.setClientId(oidcClientId);
+		config.setSecret(oidcSecret);
+		config.setScope("openid");
+		OidcClient client = new OidcClient(config);
+		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH_SUFFIX + "?client_name=OidcClient");
+
+		return client;
 	}
 
 	@Bean
