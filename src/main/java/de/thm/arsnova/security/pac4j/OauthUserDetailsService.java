@@ -22,6 +22,7 @@ import de.thm.arsnova.security.User;
 import de.thm.arsnova.service.UserService;
 import org.pac4j.oauth.profile.facebook.FacebookProfile;
 import org.pac4j.oauth.profile.twitter.TwitterProfile;
+import org.pac4j.oidc.profile.OidcProfile;
 import org.pac4j.oidc.profile.google.GoogleOidcProfile;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -64,6 +65,10 @@ public class OauthUserDetailsService implements AuthenticationUserDetailsService
 		} else if (token.getDetails() instanceof FacebookProfile) {
 			final FacebookProfile profile = (FacebookProfile) token.getDetails();
 			user = userService.loadUser(UserProfile.AuthProvider.FACEBOOK, profile.getId(),
+					grantedAuthorities, true);
+		} else if (token.getDetails() instanceof OidcProfile) {
+			final OidcProfile profile = (OidcProfile) token.getDetails();
+			user = userService.loadUser(UserProfile.AuthProvider.OIDC, profile.getId(),
 					grantedAuthorities, true);
 		} else {
 			throw new IllegalArgumentException("AuthenticationToken not supported");
