@@ -35,6 +35,7 @@ public class LoggedIn implements Entity {
 	private String sessionId;
 	private long timestamp;
 	private List<VisitedRoom> visitedSessions = new ArrayList<>();
+	private boolean anonymized;
 
 	public LoggedIn() {
 		this.updateTimestamp();
@@ -117,6 +118,16 @@ public class LoggedIn implements Entity {
 	@JsonView(View.Persistence.class)
 	public void setVisitedSessions(List<VisitedRoom> visitedSessions) {
 		this.visitedSessions = visitedSessions;
+	}
+
+	@JsonView(View.Persistence.class)
+	public boolean isAnonymized() {
+		return anonymized;
+	}
+
+	@JsonView(View.Persistence.class)
+	public void setAnonymized(boolean anonymized) {
+		this.anonymized = anonymized;
 	}
 
 	@Override

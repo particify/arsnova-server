@@ -48,8 +48,6 @@ public class ImportExportContainer {
 
 	private List<Motd> motds;
 
-	private RoomFeature sessionFeature = new RoomFeature();
-
 	private RoomInfo sessionInfo;
 
 	public ImportExportContainer() {
@@ -100,11 +98,11 @@ public class ImportExportContainer {
 
 	@JsonView(View.Public.class)
 	public RoomFeature getSessionFeature() {
-		return sessionFeature;
+		return session.sessionFeature;
 	}
 
 	public void setSessionFeature(RoomFeature sF) {
-		sessionFeature = sF;
+		session.sessionFeature = sF;
 	}
 
 	@JsonView(View.Public.class)
@@ -124,7 +122,7 @@ public class ImportExportContainer {
 		PublicPool p = new PublicPool();
 		p.setPpFromSession(s);
 		iesession.setPublicPool(p);
-		sessionFeature = s.getFeatures();
+		iesession.sessionFeature = s.getFeatures();
 		session = iesession;
 	}
 
@@ -249,7 +247,7 @@ public class ImportExportContainer {
 
 		private PublicPool publicPool;
 
-		private RoomFeature sessionFeature;
+		private RoomFeature sessionFeature = new RoomFeature();
 
 		@ApiModelProperty(required = true, value = "used to display short name")
 		@JsonView(View.Public.class)
@@ -301,8 +299,8 @@ public class ImportExportContainer {
 			this.publicPool = publicPool;
 		}
 
-		@JsonView(View.Public.class)
-		public RoomFeature getSessionFeature() {
+		/* Use getSessionFeature() of outer class for public access. */
+		private RoomFeature getSessionFeature() {
 			return this.sessionFeature;
 		}
 

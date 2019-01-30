@@ -262,7 +262,7 @@
 		<dependency>
 			<groupId>com.corundumstudio.socketio</groupId>
 			<artifactId>netty-socketio</artifactId>
-			<version>1.7.16</version>
+			<version>1.7.17</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.inject</groupId>
@@ -440,7 +440,7 @@
 			<plugin>
 				<groupId>org.sonarsource.scanner.maven</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
-				<version>3.5.0.1254</version>
+				<version>3.6.0.1398</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -450,7 +450,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.2</version>
+				<version>0.8.3</version>
 				<executions>
 					<execution>
 						<id>default-prepare-agent</id>
@@ -493,7 +493,7 @@
 			<plugin>
 				<groupId>com.github.kongchen</groupId>
 				<artifactId>swagger-maven-plugin</artifactId>
-				<version>3.1.7</version>
+				<version>3.1.8</version>
 				<configuration>
 					<apiSources>
 						<apiSource>
@@ -516,6 +516,7 @@
 								</contact>
 							</info>
 							<swaggerDirectory>${project.build.directory}/classes</swaggerDirectory>
+							<outputFormats>json</outputFormats>
 						</apiSource>
 					</apiSources>
 				</configuration>

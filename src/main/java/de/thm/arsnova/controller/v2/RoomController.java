@@ -32,6 +32,7 @@ import de.thm.arsnova.service.RoomServiceImpl.RoomShortNameComparator;
 import de.thm.arsnova.service.UserService;
 import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.web.Pagination;
+import de.thm.arsnova.web.exceptions.NotImplementedException;
 import de.thm.arsnova.web.exceptions.UnauthorizedException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -337,6 +338,14 @@ public class RoomController extends PaginationController {
 		return toV2Migrator.migrate(roomInfo);
 	}
 
+	@ApiOperation(value = "copy a Room from the public pool if enabled")
+	@RequestMapping(value = "/{shortId}/copyfrompublicpool", method = RequestMethod.POST)
+	public Room copyFromPublicPool(
+			@ApiParam(value = "Short ID of the Room", required = true) @PathVariable final String shortId,
+			@ApiParam(value = "custom attributes for Room", required = true) @RequestBody final Room sessionAttributes
+	) {
+		throw new NotImplementedException();
+	}
 
 	@ApiOperation(value = "Locks or unlocks a Room",
 			nickname = "lockRoom")
