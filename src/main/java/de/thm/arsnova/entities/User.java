@@ -21,6 +21,7 @@ import de.thm.arsnova.services.UserSessionService;
 import org.jasig.cas.client.authentication.AttributePrincipal;
 import org.pac4j.oauth.profile.facebook.FacebookProfile;
 import org.pac4j.oauth.profile.twitter.TwitterProfile;
+import org.pac4j.oidc.profile.OidcProfile;
 import org.pac4j.oidc.profile.google.GoogleOidcProfile;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,6 +37,7 @@ public class User implements Serializable {
 	public static final String FACEBOOK = "facebook";
 	public static final String THM = "thm";
 	public static final String LDAP = "ldap";
+	public static final String OIDC = "oidc";
 	public static final String ARSNOVA = "arsnova";
 	public static final String ANONYMOUS = "anonymous";
 	public static final String GUEST = "guest";
@@ -48,12 +50,17 @@ public class User implements Serializable {
 	private UserSessionService.Role role;
 	private boolean isAdmin;
 
-	public User(GoogleOidcProfile profile) {
-		if (!profile.getEmailVerified()) {
-			throw new IllegalArgumentException("Email is not verified.");
+	public User(OidcProfile profile) {
+		if (profile instanceof GoogleOidcProfile) {
+			if (!profile.getEmailVerified()) {
+				throw new IllegalArgumentException("Email is not verified.");
+			}
+			setUsername(profile.getEmail());
+			setType(User.GOOGLE);
+		} else {
+			setUsername(User.OIDC + ":" + profile.getId());
+			setType(User.OIDC);
 		}
-		setUsername(profile.getEmail());
-		setType(User.GOOGLE);
 	}
 
 	public User(TwitterProfile profile) {
