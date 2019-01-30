@@ -22,10 +22,8 @@ import org.jasig.cas.client.authentication.AttributePrincipalImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
-import org.pac4j.oauth.profile.JsonHelper;
-import org.pac4j.oauth.profile.google2.Google2Email;
-import org.pac4j.oauth.profile.google2.Google2Profile;
-import org.pac4j.oauth.profile.google2.Google2ProfileDefinition;
+import org.pac4j.core.profile.definition.CommonProfileDefinition;
+import org.pac4j.oidc.profile.google.GoogleOidcProfile;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -57,13 +55,10 @@ public class UserServiceTest {
 		socketid2user.put(UUID.randomUUID(), new User(new UsernamePasswordAuthenticationToken("ptsr00", UUID.randomUUID())));
 		socketid2user.put(UUID.randomUUID(), new User(new AttributePrincipalImpl("ptstr0")));
 
-		Google2Email email = new Google2Email();
-		email.setEmail("mail@host.com");
-		ArrayList<Google2Email> emails = new ArrayList<>();
-		emails.add(email);
-		Google2Profile profile = new Google2Profile();
-		profile.addAttribute(Google2ProfileDefinition.DISPLAY_NAME, "ptsr00");
-		profile.addAttribute(Google2ProfileDefinition.EMAILS, emails);
+		GoogleOidcProfile profile = new GoogleOidcProfile();
+		profile.addAttribute(CommonProfileDefinition.DISPLAY_NAME, "ptsr00");
+		profile.addAttribute(CommonProfileDefinition.EMAIL, "mail@host.com");
+		profile.addAttribute("email_verified", true);
 
 		socketid2user.put(UUID.randomUUID(), new User(profile));
 		List<GrantedAuthority> authorities = new ArrayList<>();

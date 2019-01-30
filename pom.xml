@@ -233,12 +233,17 @@
 		<dependency>
 			<groupId>org.pac4j</groupId>
 			<artifactId>spring-security-pac4j</artifactId>
-			<version>3.1.0</version>
+			<version>4.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.pac4j</groupId>
 			<artifactId>pac4j-oauth</artifactId>
-			<version>2.3.1</version>
+			<version>3.5.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.pac4j</groupId>
+			<artifactId>pac4j-oidc</artifactId>
+			<version>3.5.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.corundumstudio.socketio</groupId>

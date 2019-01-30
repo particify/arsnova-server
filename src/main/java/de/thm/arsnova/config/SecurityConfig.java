@@ -28,8 +28,9 @@ import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.config.Config;
 import org.pac4j.oauth.client.FacebookClient;
-import org.pac4j.oauth.client.Google2Client;
 import org.pac4j.oauth.client.TwitterClient;
+import org.pac4j.oidc.client.GoogleOidcClient;
+import org.pac4j.oidc.config.OidcConfiguration;
 import org.pac4j.springframework.security.web.CallbackFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -405,9 +406,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public Google2Client googleClient() {
-		final Google2Client client = new Google2Client(googleKey, googleSecret);
-		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH_SUFFIX + "?client_name=Google2Client");
+	public GoogleOidcClient googleClient() {
+		OidcConfiguration config = new OidcConfiguration();
+		config.setClientId(googleKey);
+		config.setSecret(googleSecret);
+		config.setScope("openid email");
+		final GoogleOidcClient client = new GoogleOidcClient(config);
+		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH_SUFFIX + "?client_name=GoogleOidcClient");
 
 		return client;
 	}
