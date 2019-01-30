@@ -56,6 +56,9 @@ public class OauthUserDetailsService implements AuthenticationUserDetailsService
 		User user;
 		if (token.getDetails() instanceof GoogleOidcProfile) {
 			final GoogleOidcProfile profile = (GoogleOidcProfile) token.getDetails();
+			if (!profile.getEmailVerified()) {
+				throw new IllegalArgumentException("Email is not verified.");
+			}
 			user = userService.loadUser(UserProfile.AuthProvider.GOOGLE, profile.getEmail(),
 					grantedAuthorities, true);
 		} else if (token.getDetails() instanceof TwitterProfile) {
