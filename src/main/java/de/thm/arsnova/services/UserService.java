@@ -32,7 +32,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.pac4j.oauth.profile.facebook.FacebookProfile;
 import org.pac4j.oauth.profile.twitter.TwitterProfile;
-import org.pac4j.oidc.profile.google.GoogleOidcProfile;
+import org.pac4j.oidc.profile.OidcProfile;
 import org.pac4j.springframework.security.authentication.Pac4jAuthenticationToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -257,8 +257,8 @@ public class UserService implements IUserService {
 	private User getOAuthUser(final Authentication authentication) {
 		User user = null;
 		final Pac4jAuthenticationToken token = (Pac4jAuthenticationToken) authentication;
-		if (token.getProfile() instanceof GoogleOidcProfile) {
-			final GoogleOidcProfile profile = (GoogleOidcProfile) token.getProfile();
+		if (token.getProfile() instanceof OidcProfile) {
+			final OidcProfile profile = (OidcProfile) token.getProfile();
 			user = new User(profile);
 		} else if (token.getProfile() instanceof TwitterProfile) {
 			final TwitterProfile profile = (TwitterProfile) token.getProfile();

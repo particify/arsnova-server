@@ -26,6 +26,7 @@ import org.pac4j.core.exception.HttpAction;
 import org.pac4j.oauth.client.FacebookClient;
 import org.pac4j.oauth.client.TwitterClient;
 import org.pac4j.oidc.client.GoogleOidcClient;
+import org.pac4j.oidc.client.OidcClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,6 +107,12 @@ public class LoginController extends AbstractController {
 	@Value("${security.cas.image:}") private String casImage;
 	@Value("${security.cas.order}") private int casOrder;
 
+	@Value("${security.oidc.enabled}") private boolean oidcEnabled;
+	@Value("${security.oidc.allowed-roles:speaker,student}") private String[] oidcRoles;
+	@Value("${security.oidc.title:OIDC}") private String oidcTitle;
+	@Value("${security.oidc.image:}") private String oidcImage;
+	@Value("${security.oidc.order}") private int oidcOrder;
+
 	@Value("${security.facebook.enabled}") private boolean facebookEnabled;
 	@Value("${security.facebook.allowed-roles:speaker,student}") private String[] facebookRoles;
 	@Value("${security.facebook.order}") private int facebookOrder;
@@ -123,6 +130,9 @@ public class LoginController extends AbstractController {
 
 	@Autowired(required = false)
 	private DaoAuthenticationProvider daoProvider;
+
+	@Autowired(required = false)
+	private OidcClient oidcClient;
 
 	@Autowired(required = false)
 	private TwitterClient twitterClient;
@@ -276,6 +286,9 @@ public class LoginController extends AbstractController {
 
 		if (casEnabled && "cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);
+		} else if (oidcEnabled && "oidc".equals(type)) {
+			result = new RedirectView(
+					oidcClient.getRedirectAction(new J2EContext(request, response)).getLocation());
 		} else if (twitterEnabled && "twitter".equals(type)) {
 			result = new RedirectView(
 					twitterClient.getRedirectAction(new J2EContext(request, response)).getLocation());
@@ -376,6 +389,17 @@ public class LoginController extends AbstractController {
 				casRoles
 			);
 			sdesc.setOrder(casOrder);
+			services.add(sdesc);
+		}
+
+		if (oidcEnabled) {
+			ServiceDescription sdesc = new ServiceDescription(
+					"oidc",
+					oidcTitle,
+					MessageFormat.format(dialogUrl, "oidc"),
+					oidcRoles
+			);
+			sdesc.setOrder(oidcOrder);
 			services.add(sdesc);
 		}
 

@@ -142,6 +142,17 @@ security.cas.image=
 security.cas.order=0
 security.cas-server-url=https://example.com/cas
 
+# OpenID Connect authentication
+#
+security.oidc.enabled=false
+security.oidc.allowed-roles=speaker,student
+security.oidc.title=OIDC
+security.oidc.image=
+security.oidc.order=0
+security.oidc.issuer=https://example.com/oidc
+security.oidc.client-id=
+security.oidc.secret=
+
 # OAuth authentication with third party services
 # Specific parameters:
 # key: OAuth key/id provided by a third party auth service
