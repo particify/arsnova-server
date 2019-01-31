@@ -341,7 +341,8 @@ public class AuthenticationController extends AbstractController {
 				"cas",
 				casTitle,
 				MessageFormat.format(dialogUrl, "cas"),
-				casRoles
+				casRoles,
+				casImage
 			);
 			sdesc.setOrder(casOrder);
 			services.add(sdesc);
@@ -349,10 +350,11 @@ public class AuthenticationController extends AbstractController {
 
 		if (oidcEnabled) {
 			ServiceDescription sdesc = new ServiceDescription(
-					"oidc",
-					oidcTitle,
-					MessageFormat.format(dialogUrl, "oidc"),
-					oidcRoles
+				"oidc",
+				oidcTitle,
+				MessageFormat.format(dialogUrl, "oidc"),
+				oidcRoles,
+				oidcImage
 			);
 			sdesc.setOrder(oidcOrder);
 			services.add(sdesc);

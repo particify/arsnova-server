@@ -1,5 +1,32 @@
 # Changelog
 
+## 2.7
+Features:
+* Account deletion: Users can now delete their own accounts. Admins can delete
+  any user account. Account deletion removes sessions and their contents created
+  by the user and anonymizes data created through participation in other
+  sessions.
+* Auto-deletion: Accounts can be deleted automatically after a configurable
+  period of inactivity.
+* OpenID Connect: OIDC is now supported for authentication. Configuration
+  discovery support is required.
+
+Improvements:
+* Public Session Pool: Added API endpoint to clone a session from the pool.
+  Previously, cloning had to be performed by the client.
+
+Bug fixes:
+* Import/Export: The handling of session features during import has been fixed.
+  The raw exported data can now be imported without further manipulation by the
+  client.
+
+**This version is brought to you by:**  
+Project management: Klaus Quibeldey-Cirkel  
+Lead programming: Daniel Gerhardt, Tom "tekay" Käsler  
+Sponsoring: [AG QLS](https://www.thm.de/site/en/hochschule/service/ag-qls.html),
+[HMWK](https://wissenschaft.hessen.de/wissenschaft/it-neue-medien/kompetenznetz-e-learning-hessen)
+
+
 ## 2.6.3
 Bug fixes:
 * The backend now correctly responds with 4xx error codes instead of 500 to less
