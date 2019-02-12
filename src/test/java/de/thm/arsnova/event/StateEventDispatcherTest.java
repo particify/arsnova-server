@@ -34,6 +34,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.ActiveProfiles;
@@ -56,7 +57,6 @@ import static org.mockito.Mockito.when;
 @WebAppConfiguration
 @ContextConfiguration(classes = {
 		AppConfig.class,
-		StateEventDispatcherTest.EventListenerConfig.class,
 		TestAppConfig.class,
 		TestPersistanceConfig.class,
 		TestSecurityConfig.class})
@@ -128,6 +128,7 @@ public class StateEventDispatcherTest {
 		assertEquals(STATE_PROPERTY_NAME, eventListenerConfig.getContentStateChangeEvents().get(0).getStateName());
 	}
 
+	@Configuration
 	public static class EventListenerConfig {
 		private List<StateChangeEvent<Room, Room.Settings>> roomSettingsStateChangeEvents = new ArrayList<>();
 		private List<StateChangeEvent<Content, Content.State>> contentStateChangeEvents = new ArrayList<>();

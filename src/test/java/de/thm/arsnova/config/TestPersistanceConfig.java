@@ -26,8 +26,6 @@ import org.springframework.context.annotation.Profile;
 @Profile("test")
 @Configuration
 public class TestPersistanceConfig {
-	private static RoomRepository mockRoomRepositorySingleton;
-
 	@Bean
 	public LogEntryRepository logEntryRepository() {
 		return Mockito.mock(LogEntryRepository.class);
@@ -40,10 +38,7 @@ public class TestPersistanceConfig {
 
 	@Bean
 	public RoomRepository sessionRepository() {
-		if (mockRoomRepositorySingleton == null) {
-			mockRoomRepositorySingleton = Mockito.mock(RoomRepository.class);
-		}
-		return mockRoomRepositorySingleton;
+		return Mockito.mock(RoomRepository.class);
 	}
 
 	@Bean

@@ -24,9 +24,7 @@ import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -66,8 +64,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 public class TestAppConfig {
 	private static int testPortOffset = 0;
 
-	private static CacheManager cacheManagerSingleton;
-
 	@Value("${socketio.bind-address}") private String socketAddress;
 	@Value("${socketio.port}") private int socketPort;
 
@@ -101,13 +97,5 @@ public class TestAppConfig {
 			JavaMailSender mailSender,
 			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		return new StubUserService(repository, mailSender, jackson2HttpMessageConverter);
-	}
-
-	@Bean
-	public CacheManager cacheManager() {
-		if (cacheManagerSingleton == null) {
-			cacheManagerSingleton = new ConcurrentMapCacheManager();
-		}
-		return cacheManagerSingleton;
 	}
 }
