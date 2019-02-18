@@ -17,6 +17,8 @@
  */
 package de.thm.arsnova.persistence.couchdb.support;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -29,6 +31,7 @@ import de.thm.arsnova.model.serialization.View;
 import org.ektorp.CouchDbInstance;
 import org.ektorp.DbAccessException;
 import org.ektorp.http.HttpResponse;
+import org.ektorp.http.StdResponseHandler;
 import org.ektorp.impl.ObjectMapperFactory;
 import org.ektorp.impl.StdCouchDbConnector;
 import org.slf4j.Logger;
@@ -328,5 +331,31 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 		}
 
 		return true;
+	}
+
+	/* DbInfo type and getDbInfo() of Ektorp do not handle purge_seq of CouchDB 2.x correctly, so this workaround is
+	 * needed. */
+	@Override
+	public DbInfo getDbInfo() {
+		return restTemplate.get(dbURI.toString(),
+				new StdResponseHandler<DbInfo>() {
+
+					@Override
+					public DbInfo success(HttpResponse hr) throws Exception {
+						return objectMapper.readValue(hr.getContent(),
+								DbInfo.class);
+					}
+				}
+		);
+	}
+
+	@JsonIgnoreProperties("purge_seq")
+	public static class DbInfo extends org.ektorp.DbInfo {
+		private String purgeSeq;
+
+		@JsonCreator
+		public DbInfo(@JsonProperty("db_name") String dbName) {
+			super(dbName);
+		}
 	}
 }
