@@ -22,12 +22,12 @@ import de.thm.arsnova.model.serialization.View;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The feedback values of a single session.
  */
 public class Feedback {
-	private static final double Z_THRESHOLD = 0.1;
 
 	public static final int MIN_FEEDBACK_TYPE = 0;
 	public static final int MAX_FEEDBACK_TYPE = 3;
@@ -52,16 +52,16 @@ public class Feedback {
 		return values;
 	}
 
-	public double getAverage() {
-		final double count = this.getCount();
+	public Optional<Double> getAverage() {
+		final int count = this.getCount();
+		if (count == 0) {
+			return Optional.empty();
+		}
+
 		final double sum = values.get(FEEDBACK_OK) + values.get(FEEDBACK_SLOWER) * 2
 				+ values.get(FEEDBACK_AWAY) * 3;
 
-		if (Math.abs(count) < Z_THRESHOLD) {
-			return 0;
-		}
-
-		return sum / count;
+		return Optional.of(sum / count);
 	}
 
 	public int getCount() {

@@ -29,11 +29,7 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Performs all feedback related operations.
@@ -130,11 +126,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	@Override
 	public double calculateAverageFeedback(final String roomId) {
 		final Feedback feedback = this.getByRoomId(roomId);
-		if (feedback.getCount() == 0) {
-			throw new NoContentException();
-		}
-
-		return feedback.getAverage();
+		return feedback.getAverage().orElseThrow(NoContentException::new);
 	}
 
 	@Override
