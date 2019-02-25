@@ -42,7 +42,6 @@ import java.util.Set;
 public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPublisherAware {
 
 	private static final int DEFAULT_SCHEDULER_DELAY = 5000;
-	private static final double Z_THRESHOLD = 0.1;
 
 	/**
 	 * minutes, after which the feedback is deleted
@@ -125,28 +124,17 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	@Override
 	public int countFeedbackByRoomId(final String roomId) {
 		final Feedback feedback = this.getByRoomId(roomId);
-		final List<Integer> values = feedback.getValues();
-		return values.get(Feedback.FEEDBACK_FASTER) + values.get(Feedback.FEEDBACK_OK)
-				+ values.get(Feedback.FEEDBACK_SLOWER) + values.get(Feedback.FEEDBACK_AWAY);
+		return feedback.getCount();
 	}
 
 	@Override
 	public double calculateAverageFeedback(final String roomId) {
-		final Room room = roomService.get(roomId);
-		if (room == null) {
-			throw new NotFoundException();
-		}
-		final Feedback feedback = feedbackStorage.getByRoom(room);
-		final List<Integer> values = feedback.getValues();
-		final double count = values.get(Feedback.FEEDBACK_FASTER) + values.get(Feedback.FEEDBACK_OK)
-				+ values.get(Feedback.FEEDBACK_SLOWER) + values.get(Feedback.FEEDBACK_AWAY);
-		final double sum = values.get(Feedback.FEEDBACK_OK) + values.get(Feedback.FEEDBACK_SLOWER) * 2
-				+ values.get(Feedback.FEEDBACK_AWAY) * 3;
-
-		if (Math.abs(count) < Z_THRESHOLD) {
+		final Feedback feedback = this.getByRoomId(roomId);
+		if (feedback.getCount() == 0) {
 			throw new NoContentException();
 		}
-		return sum / count;
+
+		return feedback.getAverage();
 	}
 
 	@Override

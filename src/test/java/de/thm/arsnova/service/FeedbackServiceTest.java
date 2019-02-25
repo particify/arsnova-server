@@ -3,6 +3,8 @@ package de.thm.arsnova.service;
 import de.thm.arsnova.event.DeleteFeedbackForRoomsEvent;
 import de.thm.arsnova.model.Feedback;
 import de.thm.arsnova.model.Room;
+import de.thm.arsnova.web.exceptions.NoContentException;
+import de.thm.arsnova.web.exceptions.NotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,9 +19,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class FeedbackServiceTest {
@@ -42,7 +44,8 @@ public class FeedbackServiceTest {
 		this.room = new Room();
 		room.setId(this.roomId);
 
-		when(this.roomService.get(this.roomId)).thenReturn(room);
+		lenient().when(this.roomService.get(anyString())).thenReturn(null);
+		lenient().when(this.roomService.get(eq(this.roomId))).thenReturn(room);
 
 		FeedbackStorageService fss = new FeedbackStorageServiceImpl();
 		this.feedbackService = new FeedbackServiceImpl(fss, this.roomService);
@@ -68,6 +71,16 @@ public class FeedbackServiceTest {
 		double actual = feedbackService.calculateAverageFeedback(roomId);
 
 		assertEquals(expected, actual, 0.01);
+	}
+
+	@Test(expected = NoContentException.class)
+	public void averageCalculationShouldThrowNoContentExceptionWhenNoFeedbackIsPresent() {
+		feedbackService.calculateAverageFeedback(roomId);
+	}
+
+	@Test(expected = NotFoundException.class)
+	public void averageCalculationShouldThrowNotFoundExceptionWhenRoomIsUnknown() {
+		feedbackService.calculateAverageFeedback("room-id-does-not-exist");
 	}
 
 	@Test

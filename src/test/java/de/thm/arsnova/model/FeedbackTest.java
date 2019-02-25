@@ -19,8 +19,7 @@ package de.thm.arsnova.model;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class FeedbackTest {
 
@@ -63,5 +62,36 @@ public class FeedbackTest {
 
 		assertFalse(f1.equals(f2));
 		assertFalse(f2.equals(f1));
+	}
+
+	@Test
+	public void shouldCalculateAverageValue() {
+		Feedback f = new Feedback(1, 0, 0, 1);
+
+		double expected = 1.5;
+		double actual = f.getAverage();
+
+		assertEquals(expected, actual, 0.01);
+	}
+
+	@Test
+	public void averageCalculationShouldAvoidDivisionByZero() {
+		Feedback f = new Feedback(0, 0, 0, 0);
+
+		double expected = 0;
+		double actual = f.getAverage();
+
+		assertEquals(expected, actual, 0.01);
+	}
+
+	@Test
+	public void shouldCountVotes() {
+		Feedback f = new Feedback(2, 4, 8, 16);
+
+		int expected = 30;
+		int actual = f.getCount();
+
+		assertEquals(expected, actual);
+
 	}
 }

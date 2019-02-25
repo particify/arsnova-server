@@ -27,6 +27,8 @@ import java.util.List;
  * The feedback values of a single session.
  */
 public class Feedback {
+	private static final double Z_THRESHOLD = 0.1;
+
 	public static final int MIN_FEEDBACK_TYPE = 0;
 	public static final int MAX_FEEDBACK_TYPE = 3;
 
@@ -48,6 +50,23 @@ public class Feedback {
 	@JsonView(View.Public.class)
 	public final List<Integer> getValues() {
 		return values;
+	}
+
+	public double getAverage() {
+		final double count = this.getCount();
+		final double sum = values.get(FEEDBACK_OK) + values.get(FEEDBACK_SLOWER) * 2
+				+ values.get(FEEDBACK_AWAY) * 3;
+
+		if (Math.abs(count) < Z_THRESHOLD) {
+			return 0;
+		}
+
+		return sum / count;
+	}
+
+	public int getCount() {
+		return values.get(FEEDBACK_FASTER) + values.get(FEEDBACK_OK)
+				+ values.get(FEEDBACK_SLOWER) + values.get(FEEDBACK_AWAY);
 	}
 
 	@Override
