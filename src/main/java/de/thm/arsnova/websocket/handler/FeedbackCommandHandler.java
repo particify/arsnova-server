@@ -1,4 +1,4 @@
-package de.thm.arsnova.controller.handler;
+package de.thm.arsnova.websocket.handler;
 
 import de.thm.arsnova.websocket.message.CreateFeedback;
 import de.thm.arsnova.websocket.message.FeedbackChanged;

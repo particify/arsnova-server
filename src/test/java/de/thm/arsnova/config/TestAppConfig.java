@@ -45,6 +45,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 		"de.thm.arsnova.aop",
 		"de.thm.arsnova.cache",
 		"de.thm.arsnova.controller",
+		"de.thm.arsnova.controller.handler",
 		"de.thm.arsnova.dao",
 		"de.thm.arsnova.events",
 		"de.thm.arsnova.security",

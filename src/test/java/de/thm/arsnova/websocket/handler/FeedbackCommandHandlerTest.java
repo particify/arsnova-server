@@ -1,6 +1,5 @@
-package de.thm.arsnova.websocket;
+package de.thm.arsnova.websocket.handler;
 
-import de.thm.arsnova.controller.handler.FeedbackCommandHandler;
 import de.thm.arsnova.websocket.message.CreateFeedback;
 import de.thm.arsnova.websocket.message.CreateFeedbackPayload;
 import de.thm.arsnova.websocket.message.FeedbackChanged;
@@ -51,7 +50,7 @@ public class FeedbackCommandHandlerTest {
 				ArgumentCaptor.forClass(FeedbackChanged.class);
 
 		verify(messagingTemplate).convertAndSend(topicCaptor.capture(), messageCaptor.capture());
-		assertThat(topicCaptor.getValue()).isEqualTo("/room/" + roomId + "/feedback");
+		assertThat(topicCaptor.getValue()).isEqualTo("/room/" + roomId + "/feedback.stream");
 		assertThat(messageCaptor.getValue()).isEqualTo(feedbackChanged);
 	}
 
@@ -69,7 +68,7 @@ public class FeedbackCommandHandlerTest {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(messagingTemplate).convertAndSend(captor.capture(), any(FeedbackChanged.class));
-		assertThat(captor.getValue()).isEqualTo("/room/" + roomId + "/feedback");
+		assertThat(captor.getValue()).isEqualTo("/room/" + roomId + "/feedback.stream");
 	}
 }
 

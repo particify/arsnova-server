@@ -1,7 +1,5 @@
-package de.thm.arsnova.websocket;
+package de.thm.arsnova.websocket.handler;
 
-import de.thm.arsnova.controller.handler.FeedbackCommandHandler;
-import de.thm.arsnova.controller.handler.FeedbackHandler;
 import de.thm.arsnova.websocket.message.CreateFeedback;
 import org.junit.Before;
 import org.junit.Test;
