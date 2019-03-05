@@ -21,6 +21,7 @@ import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.config.TestAppConfig;
 import de.thm.arsnova.config.TestPersistanceConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
+import de.thm.arsnova.config.WebSocketConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ActiveProfiles;
@@ -34,7 +35,12 @@ import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@ContextConfiguration(classes = {AppConfig.class, TestAppConfig.class, TestPersistanceConfig.class, TestSecurityConfig.class})
+@ContextConfiguration(classes = {
+		AppConfig.class,
+		TestAppConfig.class,
+		TestPersistanceConfig.class,
+		TestSecurityConfig.class,
+		WebSocketConfig.class})
 @ActiveProfiles("test")
 public class ImageUtilsTest {
 

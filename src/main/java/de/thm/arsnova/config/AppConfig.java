@@ -82,7 +82,6 @@ import java.util.List;
 @ComponentScan({
 		"de.thm.arsnova.cache",
 		"de.thm.arsnova.controller",
-		"de.thm.arsnova.controller.handler",
 		"de.thm.arsnova.event",
 		"de.thm.arsnova.security",
 		"de.thm.arsnova.service",

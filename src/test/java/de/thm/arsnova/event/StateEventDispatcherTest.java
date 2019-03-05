@@ -22,6 +22,7 @@ import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.config.TestAppConfig;
 import de.thm.arsnova.config.TestPersistanceConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
+import de.thm.arsnova.config.WebSocketConfig;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.persistence.ContentRepository;
@@ -59,7 +60,8 @@ import static org.mockito.Mockito.when;
 		AppConfig.class,
 		TestAppConfig.class,
 		TestPersistanceConfig.class,
-		TestSecurityConfig.class})
+		TestSecurityConfig.class,
+		WebSocketConfig.class})
 @ActiveProfiles("test")
 public class StateEventDispatcherTest {
 	public static final String SETTINGS_PROPERTY_NAME = "settings";

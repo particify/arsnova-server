@@ -21,6 +21,7 @@ import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.config.TestAppConfig;
 import de.thm.arsnova.config.TestPersistanceConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
+import de.thm.arsnova.config.WebSocketConfig;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.security.User;
@@ -53,7 +54,12 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@ContextConfiguration(classes = {AppConfig.class, TestAppConfig.class, TestPersistanceConfig.class, TestSecurityConfig.class})
+@ContextConfiguration(classes = {
+		AppConfig.class,
+		TestAppConfig.class,
+		TestPersistanceConfig.class,
+		TestSecurityConfig.class,
+		WebSocketConfig.class})
 @ActiveProfiles("test")
 public class UserServiceTest {
 

@@ -21,6 +21,7 @@ import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.config.TestAppConfig;
 import de.thm.arsnova.config.TestPersistanceConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
+import de.thm.arsnova.config.WebSocketConfig;
 import de.thm.arsnova.service.StubUserService;
 import org.junit.After;
 import org.junit.runner.RunWith;
@@ -39,7 +40,12 @@ import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@ContextConfiguration(classes = {AppConfig.class, TestAppConfig.class, TestPersistanceConfig.class, TestSecurityConfig.class})
+@ContextConfiguration(classes = {
+		AppConfig.class,
+		TestAppConfig.class,
+		TestPersistanceConfig.class,
+		TestSecurityConfig.class,
+		WebSocketConfig.class})
 @ActiveProfiles("test")
 public abstract class AbstractControllerTest extends AbstractJUnit4SpringContextTests {
 
