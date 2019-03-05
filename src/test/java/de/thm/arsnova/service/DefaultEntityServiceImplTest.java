@@ -22,6 +22,7 @@ import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.config.TestAppConfig;
 import de.thm.arsnova.config.TestPersistanceConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
+import de.thm.arsnova.config.WebSocketConfig;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.test.context.support.WithMockUser;
@@ -53,7 +54,12 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@ContextConfiguration(classes = {AppConfig.class, TestAppConfig.class, TestPersistanceConfig.class, TestSecurityConfig.class})
+@ContextConfiguration(classes = {
+		AppConfig.class,
+		TestAppConfig.class,
+		TestPersistanceConfig.class,
+		TestSecurityConfig.class,
+		WebSocketConfig.class})
 @ActiveProfiles("test")
 public class DefaultEntityServiceImplTest {
 	@Autowired
