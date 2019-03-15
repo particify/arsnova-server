@@ -85,7 +85,8 @@ import java.util.List;
 		"de.thm.arsnova.event",
 		"de.thm.arsnova.security",
 		"de.thm.arsnova.service",
-		"de.thm.arsnova.web"})
+		"de.thm.arsnova.web",
+		"de.thm.arsnova.websocket.handler"})
 @Configuration
 @EnableAsync(mode = AdviceMode.ASPECTJ)
 @EnableCaching(mode = AdviceMode.ASPECTJ)
