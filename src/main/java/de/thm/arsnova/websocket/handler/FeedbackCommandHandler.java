@@ -39,7 +39,7 @@ public class FeedbackCommandHandler {
 		feedbackChanged.setPayload(feedbackChangedPayload);
 
 		messagingTemplate.convertAndSend(
-				"/room/" + command.getRoomId() + "/feedback.stream",
+				"/queue/" + command.getRoomId() + ".feedback.stream",
 				feedbackChanged
 		);
 	}
@@ -53,7 +53,7 @@ public class FeedbackCommandHandler {
 		feedbackChanged.setPayload(feedbackChangedPayload);
 
 		messagingTemplate.convertAndSend(
-				"/room/" + command.getRoomId() + "/feedback.stream",
+				"/queue/" + command.getRoomId() + ".feedback.stream",
 				feedbackChanged
 		);
 	}
