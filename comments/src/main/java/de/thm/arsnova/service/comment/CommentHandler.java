@@ -1,0 +1,27 @@
+package de.thm.arsnova.service.comment;
+
+import de.thm.arsnova.service.comment.message.CreateComment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+
+@Service
+@RabbitListener(queues = "comment.command")
+public class CommentHandler {
+    private final CommentCommandHandler commandHandler;
+
+    private static final Logger log = LoggerFactory.getLogger(CommentHandler.class);
+
+    @Autowired
+    public CommentHandler(CommentCommandHandler commandHandler) {
+        this.commandHandler = commandHandler;
+    }
+
+    @RabbitListener(queues = "comment.command")
+    public void receiveMessage(final CreateComment message) {
+        commandHandler.handle(message);
+    }
+}
