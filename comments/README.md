@@ -10,8 +10,8 @@ Setup DB:
 ```
 sudo -u postgres psql
 create database arsnovacomment;
-create user arsnovacomments with encrypted password 'arsnovacomment';
-grant all privileges on datavase arsnovacomment to arsnovacomment;
+create user arsnovacomment with encrypted password 'arsnovacomment';
+grant all privileges on database arsnovacomment to arsnovacomment;
 ```
 
 
