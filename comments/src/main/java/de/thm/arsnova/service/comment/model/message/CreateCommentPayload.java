@@ -1,23 +1,24 @@
-package de.thm.arsnova.service.comment.message;
+package de.thm.arsnova.service.comment.model.message;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.thm.arsnova.service.comment.model.Comment;
 
 import java.util.Objects;
 
 public class CreateCommentPayload implements WebSocketPayload {
-    private String creatorId;
     private String roomId;
+    private String creatorId;
     private String subject;
     private String body;
 
-    @JsonProperty("creatorId")
-    public String getCreatorId() {
-        return creatorId;
+    public CreateCommentPayload() {
     }
 
-    @JsonProperty("creatorId")
-    public void setCreatorId(String creatorId) {
-        this.creatorId = creatorId;
+    public CreateCommentPayload(Comment c) {
+        this.creatorId = c.getCreatorId();
+        this.roomId = c.getRoomId();
+        this.subject = c.getSubject();
+        this.body = c.getBody();
     }
 
     @JsonProperty("roomId")
@@ -28,6 +29,16 @@ public class CreateCommentPayload implements WebSocketPayload {
     @JsonProperty("roomId")
     public void setRoomId(String roomId) {
         this.roomId = roomId;
+    }
+
+    @JsonProperty("creatorId")
+    public String getCreatorId() {
+        return creatorId;
+    }
+
+    @JsonProperty("creatorId")
+    public void setCreatorId(String creatorId) {
+        this.creatorId = creatorId;
     }
 
     @JsonProperty("subject")

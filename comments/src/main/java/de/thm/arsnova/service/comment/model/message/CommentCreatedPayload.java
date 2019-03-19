@@ -1,14 +1,36 @@
-package de.thm.arsnova.service.comment.message;
+package de.thm.arsnova.service.comment.model.message;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.thm.arsnova.service.comment.model.Comment;
 
 import java.util.Date;
 import java.util.Objects;
 
 public class CommentCreatedPayload implements WebSocketPayload {
+    private String id;
     private String subject;
     private String body;
     private Date timestamp;
+
+    public CommentCreatedPayload() {}
+
+    public CommentCreatedPayload(Comment c) {
+        if (c != null) {
+            id = c.getId();
+            subject = c.getSubject();
+            body = c.getBody();
+        }
+    }
+
+    @JsonProperty("id")
+    public String getId() {
+        return id;
+    }
+
+    @JsonProperty("id")
+    public void setId(String id) {
+        this.id = id;
+    }
 
     @JsonProperty("subject")
     public String getSubject() {

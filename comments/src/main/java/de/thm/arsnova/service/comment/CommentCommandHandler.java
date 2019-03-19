@@ -1,14 +1,12 @@
 package de.thm.arsnova.service.comment;
 
-import de.thm.arsnova.service.comment.message.CommentCreated;
-import de.thm.arsnova.service.comment.message.CommentCreatedPayload;
-import de.thm.arsnova.service.comment.message.CreateComment;
-import de.thm.arsnova.service.comment.message.CreateCommentPayload;
+import de.thm.arsnova.service.comment.model.Comment;
+import de.thm.arsnova.service.comment.model.message.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -18,17 +16,17 @@ public class CommentCommandHandler {
     private HashMap<String, List<Comment>> commentList = new HashMap<>();
 
     private final SimpMessagingTemplate messagingTemplate;
+    private final CommentService service;
 
     @Autowired
-    public CommentCommandHandler(SimpMessagingTemplate messagingTemplate) {
+    public CommentCommandHandler(
+            SimpMessagingTemplate messagingTemplate,
+            CommentService service) {
         this.messagingTemplate = messagingTemplate;
+        this.service = service;
     }
 
-    synchronized private void addComment(Comment comment) {
-        commentList.getOrDefault(comment.getRoomId(), new ArrayList<>()).add(comment);
-    }
-
-    public void handle(CreateComment command) {
+    public Comment handle(CreateComment command) {
         Date now = new Date();
 
         Comment newComment = new Comment();
@@ -40,10 +38,9 @@ public class CommentCommandHandler {
         newComment.setTimestamp(now);
         newComment.setRead(false);
 
-        addComment(newComment);
-        CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload();
-        commentCreatedPayload.setSubject(newComment.getSubject());
-        commentCreatedPayload.setBody(newComment.getBody());
+        Comment saved = service.create(newComment);
+
+        CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(saved);
         commentCreatedPayload.setTimestamp(now);
 
         CommentCreated commentCreated = new CommentCreated();
@@ -53,5 +50,25 @@ public class CommentCommandHandler {
                 "/queue/" + payload.getRoomId() + ".comment.stream",
                 commentCreated
         );
+
+        return saved;
+    }
+
+    public Comment handle(PatchComment command) throws IOException {
+        PatchCommentPayload p = command.getPayload();
+        Comment c = this.service.get(p.getId());
+
+        Comment updated = this.service.patch(c, p.getChanges());
+
+        CommentPatchedPayload payload = new CommentPatchedPayload(updated.getId(), p.getChanges());
+        CommentPatched event = new CommentPatched();
+        event.setPayload(payload);
+
+        messagingTemplate.convertAndSend(
+                "/queue/" + c.getRoomId() + ".comment.stream",
+                event
+        );
+
+        return updated;
     }
 }

@@ -1,6 +1,6 @@
 package de.thm.arsnova.service.comment;
 
-import de.thm.arsnova.service.comment.message.CreateComment;
+import de.thm.arsnova.service.comment.model.message.CreateComment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;

@@ -1,8 +1,13 @@
-package de.thm.arsnova.service.comment.message;
+package de.thm.arsnova.service.comment.model.message;
 
 public class CommentCreated extends WebSocketMessage<CommentCreatedPayload> {
     public CommentCreated() {
         super(CommentCreated.class.getSimpleName());
+    }
+
+    public CommentCreated(CommentCreatedPayload p) {
+        super(CommentCreated.class.getSimpleName());
+        this.payload = p;
     }
 
     @Override

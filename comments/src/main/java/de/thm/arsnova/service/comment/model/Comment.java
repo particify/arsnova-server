@@ -1,14 +1,27 @@
-package de.thm.arsnova.service.comment;
+package de.thm.arsnova.service.comment.model;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.util.Date;
 
+@Entity
 public class Comment {
+    @Id
+    private String id;
     private String roomId;
     private String creatorId;
     private String subject;
     private String body;
     private Date timestamp;
     private boolean read;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getRoomId() {
         return roomId;
