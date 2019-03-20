@@ -3,6 +3,10 @@ package de.thm.arsnova.service.comment.model.event;
 import de.thm.arsnova.service.comment.model.command.UpdateComment;
 
 public class CommentUpdated extends WebSocketEvent<CommentUpdatedPayload> {
+    public CommentUpdated() {
+        super(UpdateComment.class.getSimpleName());
+    }
+
     public CommentUpdated(CommentUpdatedPayload p, String id) {
         super(UpdateComment.class.getSimpleName(), id);
         this.payload = p;
