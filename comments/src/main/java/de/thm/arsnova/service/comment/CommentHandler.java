@@ -29,7 +29,7 @@ public class CommentHandler {
         commandHandler.handle(message);
     }
 
-    @RabbitListener(queues = "comment.command")
+    /*@RabbitListener(queues = "comment.command")
     public void receiveMessage(final PatchComment message) throws IOException {
         commandHandler.handle(message);
     }
@@ -37,5 +37,5 @@ public class CommentHandler {
     @RabbitListener(queues = "comment.command")
     public void receiveMessage(final UpdateComment message) throws IOException {
         commandHandler.handle(message);
-    }
+    }*/
 }

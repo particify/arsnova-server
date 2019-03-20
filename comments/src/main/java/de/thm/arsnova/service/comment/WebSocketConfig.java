@@ -15,6 +15,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         config
                 .setApplicationDestinationPrefixes("/backend")
                 .enableStompBrokerRelay("/topic")
+                .setUserDestinationBroadcast("/queue/log-unresolved-user")
+                .setUserRegistryBroadcast("/topic/log-user-registry")
                 .setRelayHost("localhost")
                 .setRelayPort(61613)
                 .setClientLogin("arsnova")

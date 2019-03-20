@@ -3,6 +3,7 @@ package de.thm.arsnova.service.comment;
 import de.thm.arsnova.service.comment.model.Comment;
 import de.thm.arsnova.service.comment.model.command.*;
 import de.thm.arsnova.service.comment.model.event.*;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
@@ -16,12 +17,12 @@ import java.util.List;
 public class CommentCommandHandler {
     private HashMap<String, List<Comment>> commentList = new HashMap<>();
 
-    private final SimpMessagingTemplate messagingTemplate;
+    private final AmqpTemplate messagingTemplate;
     private final CommentService service;
 
     @Autowired
     public CommentCommandHandler(
-            SimpMessagingTemplate messagingTemplate,
+            AmqpTemplate messagingTemplate,
             CommentService service) {
         this.messagingTemplate = messagingTemplate;
         this.service = service;
@@ -48,7 +49,8 @@ public class CommentCommandHandler {
         CommentCreated event = new CommentCreated(commentCreatedPayload, saved.getRoomId());
 
         messagingTemplate.convertAndSend(
-                "/queue/" + payload.getRoomId() + ".comment.stream",
+                "amq.topic",
+                "log-user-registry",
                 event
         );
 

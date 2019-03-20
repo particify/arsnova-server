@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import de.thm.arsnova.service.comment.model.command.CreateComment;
 import de.thm.arsnova.service.comment.model.command.CreateCommentPayload;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,7 +20,7 @@ import static org.mockito.Mockito.verify;
 public class CommentCommandHandlerTest {
 
     @Mock
-    private SimpMessagingTemplate messagingTemplate;
+    private AmqpTemplate messagingTemplate;
 
     @Mock
     private CommentService commentService;
