@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import de.thm.arsnova.service.comment.model.Comment;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -17,8 +18,11 @@ public class CommentService {
     private ObjectMapper objectMapper;
 
     @Autowired
-    public CommentService(CommentRepository repository) {
+    public CommentService(
+            CommentRepository repository,
+            MappingJackson2MessageConverter jackson2Converter) {
         this.repository = repository;
+        this.objectMapper = jackson2Converter.getObjectMapper();
     }
 
     public Comment get(String id) {

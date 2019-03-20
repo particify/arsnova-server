@@ -83,7 +83,7 @@ public class Comment {
     @Override
     public String toString() {
         return "Comment{" +
-                "roomId='" + id + '\'' +
+                "id='" + id + '\'' +
                 ", roomId='" + roomId + '\'' +
                 ", creatorId='" + creatorId + '\'' +
                 ", body='" + body + '\'' +

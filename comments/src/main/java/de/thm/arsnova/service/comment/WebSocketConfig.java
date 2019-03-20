@@ -14,7 +14,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config
                 .setApplicationDestinationPrefixes("/backend")
-                .enableStompBrokerRelay("/topic")
+                .enableStompBrokerRelay("/topic", "/exchange", "/queue")
                 .setUserDestinationBroadcast("/queue/log-unresolved-user")
                 .setUserRegistryBroadcast("/topic/log-user-registry")
                 .setRelayHost("localhost")

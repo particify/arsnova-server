@@ -46,11 +46,12 @@ public class CommentCommandHandler {
         CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(saved);
         commentCreatedPayload.setTimestamp(now);
 
-        CommentCreated event = new CommentCreated(commentCreatedPayload, saved.getRoomId());
+        CommentCreated event = new CommentCreated(commentCreatedPayload, payload.getRoomId());
+        System.out.println(event.toString());
 
         messagingTemplate.convertAndSend(
                 "amq.topic",
-                "log-user-registry",
+                payload.getRoomId() + ".comment.stream",
                 event
         );
 
@@ -60,18 +61,25 @@ public class CommentCommandHandler {
     public Comment handle(PatchComment command) throws IOException {
         PatchCommentPayload p = command.getPayload();
         Comment c = this.service.get(p.getId());
+        System.out.println(c.toString());
 
-        Comment patched = this.service.patch(c, p.getChanges());
+        if (c.getId() != null) {
+            Comment patched = this.service.patch(c, p.getChanges());
 
-        CommentPatchedPayload payload = new CommentPatchedPayload(patched.getId(), p.getChanges());
-        CommentPatched event = new CommentPatched(payload, patched.getRoomId());
+            CommentPatchedPayload payload = new CommentPatchedPayload(patched.getId(), p.getChanges());
+            CommentPatched event = new CommentPatched(payload, patched.getRoomId());
 
-        messagingTemplate.convertAndSend(
-                "/queue/" + patched.getRoomId() + ".comment.stream",
-                event
-        );
+            messagingTemplate.convertAndSend(
+                    "amq.topic",
+                    c.getRoomId() + ".comment.stream",
+                    event
+            );
 
-        return patched;
+            return patched;
+        } else {
+            // ToDo: Error handling
+            return c;
+        }
     }
 
     public Comment handle(UpdateComment command) {
@@ -88,7 +96,8 @@ public class CommentCommandHandler {
         CommentUpdated event = new CommentUpdated(payload, updated.getRoomId());
 
         messagingTemplate.convertAndSend(
-                "/queue/" + updated.getRoomId() + ".comment.stream",
+                "amq.topic",
+                old.getRoomId() + ".comment.stream",
                 event
         );
 

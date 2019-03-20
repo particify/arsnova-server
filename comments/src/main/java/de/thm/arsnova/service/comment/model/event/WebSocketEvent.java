@@ -41,7 +41,7 @@ public class WebSocketEvent<P extends WebSocketPayload> extends WebSocketMessage
     public String toString() {
         return "WebSocketEvent{" +
                 "type='" + type + '\'' +
-                "roomId='" + roomId+ '\'' +
+                ", roomId='" + roomId+ '\'' +
                 ", payload=" + payload.toString() +
                 '}';
     }

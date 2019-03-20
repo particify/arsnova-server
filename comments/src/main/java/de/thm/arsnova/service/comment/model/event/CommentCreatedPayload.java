@@ -21,12 +21,12 @@ public class CommentCreatedPayload implements WebSocketPayload {
         }
     }
 
-    @JsonProperty("roomId")
+    @JsonProperty("id")
     public String getId() {
         return id;
     }
 
-    @JsonProperty("roomId")
+    @JsonProperty("id")
     public void setId(String id) {
         this.id = id;
     }
@@ -54,6 +54,7 @@ public class CommentCreatedPayload implements WebSocketPayload {
     @Override
     public String toString() {
         return "CommentCreatedPayload{" +
+                "id='" + id + '\'' +
                 ", body='" + body + '\'' +
                 ", timestamp=" + timestamp +
                 '}';

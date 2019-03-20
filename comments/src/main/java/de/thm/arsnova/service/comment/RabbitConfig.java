@@ -20,14 +20,6 @@ import org.springframework.messaging.handler.annotation.support.DefaultMessageHa
 
 @Configuration
 public class RabbitConfig implements RabbitListenerConfigurer {
-
-    static final String queueName = "comment.command";
-
-    /*@Bean
-    Queue queue() {
-        return new Queue(queueName, true);
-    }*/
-
     @Bean
     @Autowired
     public ConnectionFactory connectionFactory(
@@ -37,6 +29,7 @@ public class RabbitConfig implements RabbitListenerConfigurer {
         connectionFactory.setUsername("arsnova");
         connectionFactory.setPassword("arsnova");
         connectionFactory.setExecutor(executor);
+        connectionFactory.setVirtualHost("/");
         return connectionFactory;
     }
 
@@ -54,25 +47,10 @@ public class RabbitConfig implements RabbitListenerConfigurer {
         return new RabbitAdmin(connectionFactory);
     }
 
-    /*@Bean
-    SimpleMessageListenerContainer container(ConnectionFactory connectionFactory,
-                                             MessageListenerAdapter listenerAdapter) {
-        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-        container.setConnectionFactory(connectionFactory);
-        container.setQueueNames(queueName);
-        container.setMessageListener(listenerAdapter);
-        return container;
-    }*/
-
     @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
-
-    /*@Bean
-    MessageListenerAdapter listenerAdapter(CommentCommandHandler receiver) {
-        return new MessageListenerAdapter(receiver);
-    }*/
 
     @Bean
     public MappingJackson2MessageConverter jackson2Converter() {

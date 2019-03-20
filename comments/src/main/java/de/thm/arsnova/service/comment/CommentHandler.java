@@ -24,18 +24,23 @@ public class CommentHandler {
         this.commandHandler = commandHandler;
     }
 
-    @RabbitListener(queues = "comment.command")
+    @RabbitListener(queues = "comment.command.create")
     public void receiveMessage(final CreateComment message) {
         commandHandler.handle(message);
     }
 
-    /*@RabbitListener(queues = "comment.command")
+    @RabbitListener(queues = "comment.command.patch")
     public void receiveMessage(final PatchComment message) throws IOException {
-        commandHandler.handle(message);
+        //System.out.println(message.toString());
+        try {
+            commandHandler.handle(message);
+        } catch (IOException e) {
+            System.out.println(e.toString());
+        }
     }
 
-    @RabbitListener(queues = "comment.command")
+    @RabbitListener(queues = "comment.command.update")
     public void receiveMessage(final UpdateComment message) throws IOException {
         commandHandler.handle(message);
-    }*/
+    }
 }

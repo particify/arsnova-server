@@ -46,6 +46,7 @@ public class CommentCommandHandlerTest {
         CreateComment command = new CreateComment(payload);
 
         ArgumentCaptor<String> topicCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<CreateComment> messageCaptor =
                 ArgumentCaptor.forClass(CreateComment.class);
         ArgumentCaptor<Comment> commentCaptor = ArgumentCaptor.forClass(Comment.class);
@@ -55,8 +56,8 @@ public class CommentCommandHandlerTest {
 
         //Assert
         verify(commentService, times(1)).create(commentCaptor.capture());
-        verify(messagingTemplate, times(1)).convertAndSend(topicCaptor.capture(), messageCaptor.capture());
-        assertThat(topicCaptor.getValue()).isEqualTo("/queue/" + roomId + ".comment.stream");
+        verify(messagingTemplate, times(1)).convertAndSend(topicCaptor.capture(), topicCaptor.capture(), messageCaptor.capture());
+        assertThat(topicCaptor.getValue()).isEqualTo(roomId + ".comment.stream");
     }
 
 }

@@ -21,12 +21,12 @@ public class PatchCommentPayload implements WebSocketPayload {
     }
 
 
-    @JsonProperty("roomId")
+    @JsonProperty("id")
     public String getId() {
         return id;
     }
 
-    @JsonProperty("roomId")
+    @JsonProperty("id")
     public void setId(String id) {
         this.id = id;
     }
@@ -39,5 +39,13 @@ public class PatchCommentPayload implements WebSocketPayload {
     @JsonProperty("changes")
     public void setChanges(Map<String, Object> changes) {
         this.changes = changes;
+    }
+
+    @Override
+    public String toString() {
+        return "PatchCommentPayload{" +
+                "id='" + id + '\'' +
+                ", changes=" + changes +
+                '}';
     }
 }
