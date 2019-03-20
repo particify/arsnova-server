@@ -8,6 +8,9 @@ public class PatchCommentPayload implements WebSocketPayload {
     private String id;
     private Map<String, Object> changes;
 
+    public PatchCommentPayload() {
+    }
+
     public PatchCommentPayload(
             final String id,
             final Map<String, Object> changes

@@ -1,10 +1,7 @@
 package de.thm.arsnova.service.comment;
 
 import de.thm.arsnova.service.comment.model.Comment;
-import de.thm.arsnova.service.comment.model.message.CreateComment;
-import de.thm.arsnova.service.comment.model.message.CreateCommentPayload;
-import de.thm.arsnova.service.comment.model.message.PatchComment;
-import de.thm.arsnova.service.comment.model.message.PatchCommentPayload;
+import de.thm.arsnova.service.comment.model.message.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,6 +24,7 @@ public class CommentController {
     protected static final String PATCH_MAPPING = DEFAULT_ID_MAPPING;
     protected static final String GET_MAPPING = "/{id}";
     protected static final String POST_MAPPING = "/";
+    protected static final String PUT_MAPPING = DEFAULT_ID_MAPPING;
     protected static final String REQUEST_MAPPING = "/comment";
     protected static final String FIND_MAPPING = "/find";
 
@@ -66,6 +64,18 @@ public class CommentController {
         final String uri = UriComponentsBuilder.fromPath(REQUEST_MAPPING).path(GET_MAPPING)
                 .buildAndExpand(c.getId()).toUriString();
         httpServletResponse.setHeader(HttpHeaders.LOCATION, uri);
+        httpServletResponse.setHeader(ENTITY_ID_HEADER, c.getId());
+
+        return c;
+    }
+
+    @PutMapping(PUT_MAPPING)
+    public Comment put(@RequestBody final Comment entity, final HttpServletResponse httpServletResponse) {
+        UpdateCommentPayload p = new UpdateCommentPayload(entity);
+        UpdateComment command = new UpdateComment(p);
+
+        Comment c = this.commandHandler.handle(command);
+
         httpServletResponse.setHeader(ENTITY_ID_HEADER, c.getId());
 
         return c;

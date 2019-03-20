@@ -10,10 +10,11 @@ public class Comment {
     private String id;
     private String roomId;
     private String creatorId;
-    private String subject;
     private String body;
     private Date timestamp;
     private boolean read;
+    private boolean favorite;
+    private boolean correct;
 
     public String getId() {
         return id;
@@ -39,14 +40,6 @@ public class Comment {
         this.creatorId = creatorId;
     }
 
-    public String getSubject() {
-        return subject;
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
     public String getBody() {
         return body;
     }
@@ -69,5 +62,35 @@ public class Comment {
 
     public void setRead(boolean read) {
         this.read = read;
+    }
+
+    public boolean isFavorite() {
+        return favorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        this.favorite = favorite;
+    }
+
+    public boolean isCorrect() {
+        return correct;
+    }
+
+    public void setCorrect(boolean correct) {
+        this.correct = correct;
+    }
+
+    @Override
+    public String toString() {
+        return "Comment{" +
+                "id='" + id + '\'' +
+                ", roomId='" + roomId + '\'' +
+                ", creatorId='" + creatorId + '\'' +
+                ", body='" + body + '\'' +
+                ", timestamp=" + timestamp +
+                ", read=" + read +
+                ", favorite=" + favorite +
+                ", correct=" + correct +
+                '}';
     }
 }

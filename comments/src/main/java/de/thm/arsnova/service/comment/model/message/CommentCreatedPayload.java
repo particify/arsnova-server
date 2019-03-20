@@ -8,7 +8,6 @@ import java.util.Objects;
 
 public class CommentCreatedPayload implements WebSocketPayload {
     private String id;
-    private String subject;
     private String body;
     private Date timestamp;
 
@@ -17,7 +16,6 @@ public class CommentCreatedPayload implements WebSocketPayload {
     public CommentCreatedPayload(Comment c) {
         if (c != null) {
             id = c.getId();
-            subject = c.getSubject();
             body = c.getBody();
         }
     }
@@ -30,16 +28,6 @@ public class CommentCreatedPayload implements WebSocketPayload {
     @JsonProperty("id")
     public void setId(String id) {
         this.id = id;
-    }
-
-    @JsonProperty("subject")
-    public String getSubject() {
-        return subject;
-    }
-
-    @JsonProperty("subject")
-    public void setSubject(String subject) {
-        this.subject = subject;
     }
 
     @JsonProperty("body")
@@ -65,7 +53,6 @@ public class CommentCreatedPayload implements WebSocketPayload {
     @Override
     public String toString() {
         return "CommentCreatedPayload{" +
-                "subject='" + subject + '\'' +
                 ", body='" + body + '\'' +
                 ", timestamp=" + timestamp +
                 '}';
@@ -76,7 +63,7 @@ public class CommentCreatedPayload implements WebSocketPayload {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CommentCreatedPayload that = (CommentCreatedPayload) o;
-        return Objects.equals(subject, that.subject) &&
+        return Objects.equals(id, that.id) &&
                 Objects.equals(body, that.body) &&
                 Objects.equals(timestamp, that.timestamp);
     }
@@ -84,6 +71,6 @@ public class CommentCreatedPayload implements WebSocketPayload {
     @Override
     public int hashCode() {
 
-        return Objects.hash(subject, body, timestamp);
+        return Objects.hash(id, body, timestamp);
     }
 }

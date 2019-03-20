@@ -75,6 +75,12 @@ public class CommentService {
         return patchedEntities;
     }
 
+    public Comment update(final Comment c) {
+        final Comment updatedEntity = repository.save(c);
+
+        return updatedEntity;
+    }
+
     public List<Comment> getByRoomId(String roomId) {
         return repository.findByRoomId(roomId);
     }
