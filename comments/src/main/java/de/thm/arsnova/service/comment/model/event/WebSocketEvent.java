@@ -1,13 +1,12 @@
 package de.thm.arsnova.service.comment.model.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.thm.arsnova.service.comment.model.WebSocketMessage;
 import de.thm.arsnova.service.comment.model.WebSocketPayload;
-import de.thm.arsnova.service.comment.model.command.WebSocketCommand;
 
-public class WebSocketEvent<P extends WebSocketPayload> extends WebSocketCommand<P> {
+public class WebSocketEvent<P extends WebSocketPayload> extends WebSocketMessage<P> {
     // roomId of the entity the event is based on
     protected String roomId;
-    protected P payload;
 
     public WebSocketEvent(String type) {
         super(type);
@@ -38,20 +37,11 @@ public class WebSocketEvent<P extends WebSocketPayload> extends WebSocketCommand
         this.roomId = roomId;
     }
 
-    @JsonProperty("payload")
-    public P getPayload() {
-        return payload;
-    }
-
-    @JsonProperty("payload")
-    public void setPayload(P payload) {
-        this.payload = payload;
-    }
-
     @Override
     public String toString() {
         return "WebSocketEvent{" +
                 "type='" + type + '\'' +
+                "roomId='" + roomId+ '\'' +
                 ", payload=" + payload.toString() +
                 '}';
     }
