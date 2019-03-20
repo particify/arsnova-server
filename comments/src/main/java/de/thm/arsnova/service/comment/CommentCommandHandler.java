@@ -47,7 +47,6 @@ public class CommentCommandHandler {
         commentCreatedPayload.setTimestamp(now);
 
         CommentCreated event = new CommentCreated(commentCreatedPayload, payload.getRoomId());
-        System.out.println(event.toString());
 
         messagingTemplate.convertAndSend(
                 "amq.topic",
