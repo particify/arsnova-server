@@ -40,7 +40,6 @@ public class CommentCommandHandlerTest {
         Comment newComment = new Comment();
         newComment.setCreatorId(creatorId);
         newComment.setRoomId(roomId);
-        newComment.setSubject("subject");
         newComment.setBody("body");
         CreateCommentPayload payload = new CreateCommentPayload(newComment);
         CreateComment command = new CreateComment();
