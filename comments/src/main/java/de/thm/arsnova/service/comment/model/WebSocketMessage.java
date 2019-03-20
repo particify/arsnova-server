@@ -1,11 +1,11 @@
-package de.thm.arsnova.service.comment.model.message;
+package de.thm.arsnova.service.comment.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 
 public class WebSocketMessage<P extends WebSocketPayload> implements Serializable {
-    private String type;
+    protected String type;
 
     protected P payload;
 
@@ -35,7 +35,7 @@ public class WebSocketMessage<P extends WebSocketPayload> implements Serializabl
 
     @Override
     public String toString() {
-        return "WebSocketMessage{" +
+        return "WebSocketEvent{" +
                 "type='" + type + '\'' +
                 ", payload=" + payload.toString() +
                 '}';

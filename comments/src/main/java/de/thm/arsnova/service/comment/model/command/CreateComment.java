@@ -1,12 +1,8 @@
-package de.thm.arsnova.service.comment.model.message;
+package de.thm.arsnova.service.comment.model.command;
 
 import java.io.Serializable;
 
-public class CreateComment extends WebSocketMessage<CreateCommentPayload> implements Serializable {
-    public CreateComment() {
-        super(CreateComment.class.getSimpleName());
-    }
-
+public class CreateComment extends WebSocketCommand<CreateCommentPayload> implements Serializable {
     public CreateComment(CreateCommentPayload p) {
         super(CreateComment.class.getSimpleName());
         this.payload = p;

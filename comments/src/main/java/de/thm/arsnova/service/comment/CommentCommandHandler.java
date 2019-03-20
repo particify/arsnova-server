@@ -1,7 +1,8 @@
 package de.thm.arsnova.service.comment;
 
 import de.thm.arsnova.service.comment.model.Comment;
-import de.thm.arsnova.service.comment.model.message.*;
+import de.thm.arsnova.service.comment.model.command.*;
+import de.thm.arsnova.service.comment.model.event.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
@@ -44,12 +45,11 @@ public class CommentCommandHandler {
         CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(saved);
         commentCreatedPayload.setTimestamp(now);
 
-        CommentCreated commentCreated = new CommentCreated();
-        commentCreated.setPayload(commentCreatedPayload);
+        CommentCreated event = new CommentCreated(commentCreatedPayload, saved.getRoomId());
 
         messagingTemplate.convertAndSend(
                 "/queue/" + payload.getRoomId() + ".comment.stream",
-                commentCreated
+                event
         );
 
         return saved;
@@ -62,11 +62,10 @@ public class CommentCommandHandler {
         Comment patched = this.service.patch(c, p.getChanges());
 
         CommentPatchedPayload payload = new CommentPatchedPayload(patched.getId(), p.getChanges());
-        CommentPatched event = new CommentPatched();
-        event.setPayload(payload);
+        CommentPatched event = new CommentPatched(payload, patched.getRoomId());
 
         messagingTemplate.convertAndSend(
-                "/queue/" + c.getRoomId() + ".comment.stream",
+                "/queue/" + patched.getRoomId() + ".comment.stream",
                 event
         );
 
@@ -84,11 +83,11 @@ public class CommentCommandHandler {
         Comment updated = this.service.update(old);
 
         CommentUpdatedPayload payload = new CommentUpdatedPayload(updated);
-        CommentUpdated event = new CommentUpdated(payload);
+        CommentUpdated event = new CommentUpdated(payload, updated.getRoomId());
 
         messagingTemplate.convertAndSend(
                 "/queue/" + updated.getRoomId() + ".comment.stream",
-                updated
+                event
         );
 
         return updated;

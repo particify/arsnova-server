@@ -1,7 +1,8 @@
-package de.thm.arsnova.service.comment.model.message;
+package de.thm.arsnova.service.comment.model.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.thm.arsnova.service.comment.model.Comment;
+import de.thm.arsnova.service.comment.model.WebSocketPayload;
 
 import java.util.Date;
 import java.util.Objects;
@@ -20,12 +21,12 @@ public class CommentCreatedPayload implements WebSocketPayload {
         }
     }
 
-    @JsonProperty("id")
+    @JsonProperty("roomId")
     public String getId() {
         return id;
     }
 
-    @JsonProperty("id")
+    @JsonProperty("roomId")
     public void setId(String id) {
         this.id = id;
     }

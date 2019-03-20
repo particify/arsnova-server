@@ -1,7 +1,8 @@
-package de.thm.arsnova.service.comment.model.message;
+package de.thm.arsnova.service.comment.model.command;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.thm.arsnova.service.comment.model.Comment;
+import de.thm.arsnova.service.comment.model.WebSocketPayload;
 
 import java.util.Objects;
 

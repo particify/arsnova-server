@@ -1,10 +1,6 @@
-package de.thm.arsnova.service.comment.model.message;
+package de.thm.arsnova.service.comment.model.command;
 
-public class PatchComment extends WebSocketMessage<PatchCommentPayload> {
-    public PatchComment() {
-        super(PatchComment.class.getSimpleName());
-    }
-
+public class PatchComment extends WebSocketCommand<PatchCommentPayload> {
     public PatchComment(PatchCommentPayload p) {
         super(PatchComment.class.getSimpleName());
         this.payload = p;

@@ -7,8 +7,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import de.thm.arsnova.service.comment.model.message.CreateComment;
-import de.thm.arsnova.service.comment.model.message.CreateCommentPayload;
+import de.thm.arsnova.service.comment.model.command.CreateComment;
+import de.thm.arsnova.service.comment.model.command.CreateCommentPayload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,8 +42,7 @@ public class CommentCommandHandlerTest {
         newComment.setRoomId(roomId);
         newComment.setBody("body");
         CreateCommentPayload payload = new CreateCommentPayload(newComment);
-        CreateComment command = new CreateComment();
-        command.setPayload(payload);
+        CreateComment command = new CreateComment(payload);
 
         ArgumentCaptor<String> topicCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<CreateComment> messageCaptor =

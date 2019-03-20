@@ -1,7 +1,7 @@
 package de.thm.arsnova.service.comment;
 
 import de.thm.arsnova.service.comment.model.Comment;
-import de.thm.arsnova.service.comment.model.message.*;
+import de.thm.arsnova.service.comment.model.command.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,9 +20,9 @@ import java.util.Set;
 public class CommentController {
     protected static final String ENTITY_ID_HEADER = "Arsnova-Entity-Id";
     protected static final String ENTITY_REVISION_HEADER = "Arsnova-Entity-Revision";
-    protected static final String DEFAULT_ID_MAPPING = "/{id}";
+    protected static final String DEFAULT_ID_MAPPING = "/{roomId}";
     protected static final String PATCH_MAPPING = DEFAULT_ID_MAPPING;
-    protected static final String GET_MAPPING = "/{id}";
+    protected static final String GET_MAPPING = "/{roomId}";
     protected static final String POST_MAPPING = "/";
     protected static final String PUT_MAPPING = DEFAULT_ID_MAPPING;
     protected static final String REQUEST_MAPPING = "/comment";
@@ -56,8 +56,7 @@ public class CommentController {
     ) {
         // convert into command for the command handler
         final CreateCommentPayload payload = new CreateCommentPayload(comment);
-        final CreateComment command = new CreateComment();
-        command.setPayload(payload);
+        final CreateComment command = new CreateComment(payload);
 
         Comment c = commandHandler.handle(command);
 
@@ -85,7 +84,7 @@ public class CommentController {
     public List<Comment> find(@RequestBody final FindQuery findQuery) {
         Set<String> ids = findQueryService.resolveQuery(findQuery);
 
-        return service.get(new ArrayList<String>(ids));
+        return service.get(new ArrayList<>(ids));
     }
 
     @PatchMapping(PATCH_MAPPING)

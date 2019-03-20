@@ -1,11 +1,15 @@
 package de.thm.arsnova.service.comment;
 
-import de.thm.arsnova.service.comment.model.message.CreateComment;
+import de.thm.arsnova.service.comment.model.command.CreateComment;
+import de.thm.arsnova.service.comment.model.command.PatchComment;
+import de.thm.arsnova.service.comment.model.command.UpdateComment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 
 @Service
@@ -22,6 +26,16 @@ public class CommentHandler {
 
     @RabbitListener(queues = "comment.command")
     public void receiveMessage(final CreateComment message) {
+        commandHandler.handle(message);
+    }
+
+    @RabbitListener(queues = "comment.command")
+    public void receiveMessage(final PatchComment message) throws IOException {
+        commandHandler.handle(message);
+    }
+
+    @RabbitListener(queues = "comment.command")
+    public void receiveMessage(final UpdateComment message) throws IOException {
         commandHandler.handle(message);
     }
 }

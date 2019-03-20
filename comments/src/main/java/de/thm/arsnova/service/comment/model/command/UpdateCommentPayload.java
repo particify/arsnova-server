@@ -1,19 +1,20 @@
-package de.thm.arsnova.service.comment.model.message;
+package de.thm.arsnova.service.comment.model.command;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.thm.arsnova.service.comment.model.Comment;
+import de.thm.arsnova.service.comment.model.WebSocketPayload;
 
-public class CommentUpdatedPayload implements WebSocketPayload {
+public class UpdateCommentPayload implements WebSocketPayload {
     private String id;
     private String body;
     private boolean read;
     private boolean favorite;
     private boolean correct;
 
-    public CommentUpdatedPayload() {
+    public UpdateCommentPayload() {
     }
 
-    public CommentUpdatedPayload(Comment c) {
+    public UpdateCommentPayload(Comment c) {
         this.id = c.getId();
         this.body = c.getBody();
         this.read = c.isRead();
@@ -21,12 +22,20 @@ public class CommentUpdatedPayload implements WebSocketPayload {
         this.correct = c.isCorrect();
     }
 
-    @JsonProperty("id")
+    public UpdateCommentPayload(String id, String body, boolean read, boolean favorite, boolean correct) {
+        this.id = id;
+        this.body = body;
+        this.read = read;
+        this.favorite = favorite;
+        this.correct = correct;
+    }
+
+    @JsonProperty("roomId")
     public String getId() {
         return id;
     }
 
-    @JsonProperty("id")
+    @JsonProperty("roomId")
     public void setId(String id) {
         this.id = id;
     }
