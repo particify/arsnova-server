@@ -2,6 +2,7 @@ package de.thm.arsnova.service.comment.model;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import java.util.Date;
 
 @Entity
@@ -15,6 +16,8 @@ public class Comment {
     private boolean read;
     private boolean favorite;
     private boolean correct;
+    @Transient
+    private int score;
 
     public String getId() {
         return id;
@@ -78,6 +81,14 @@ public class Comment {
 
     public void setCorrect(boolean correct) {
         this.correct = correct;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
     }
 
     @Override

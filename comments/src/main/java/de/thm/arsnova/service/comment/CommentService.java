@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import de.thm.arsnova.service.comment.model.Comment;
+import de.thm.arsnova.service.comment.model.Vote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.stereotype.Service;
@@ -15,25 +16,35 @@ import java.util.function.Function;
 @Service
 public class CommentService {
     final CommentRepository repository;
+    final VoteRepository voteRepository;
     private ObjectMapper objectMapper;
 
     @Autowired
     public CommentService(
             CommentRepository repository,
+            VoteRepository voteRepository,
             MappingJackson2MessageConverter jackson2Converter) {
         this.repository = repository;
+        this.voteRepository = voteRepository;
         this.objectMapper = jackson2Converter.getObjectMapper();
     }
 
     public Comment get(String id) {
         // ToDo: error handling
-        return repository.findById(id).orElse(new Comment());
+        Comment c = repository.findById(id).orElse(new Comment());
+        List<Vote> voteList = voteRepository.findByCommentId(c.getId());
+        int voteSum = 0;
+        for (Vote v : voteList) {
+            voteSum = voteSum + v.getVote();
+        }
+        c.setScore(voteSum);
+
+        return c;
     }
 
     public List<Comment> get(List<String> ids) {
-        Iterable<Comment> it = repository.findAllById(ids);
         List<Comment> list = new ArrayList<Comment>();
-        it.forEach(list::add);
+        ids.forEach((c) -> list.add(get(c)));
 
         return list;
     }
