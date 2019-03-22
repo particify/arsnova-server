@@ -21,7 +21,7 @@ public class VoteService {
 
     public Vote get(String id) {
         // ToDo: error handling
-        return repository.findById(id).orElse(new Vote());
+        return repository.findById(id).orElse(null);
     }
 
     public List<Vote> get(List<String> ids) {
@@ -35,7 +35,7 @@ public class VoteService {
     public Vote create(Vote v) {
 
         Vote eventualOldVote = repository.findByCommentIdAndUserId(v.getCommentId(), v.getUserId());
-        if (eventualOldVote.getId() != null) {
+        if (eventualOldVote != null) {
             v.setId(eventualOldVote.getId());
         } else {
             String newId = UUID.randomUUID().toString().replace("-", "");
