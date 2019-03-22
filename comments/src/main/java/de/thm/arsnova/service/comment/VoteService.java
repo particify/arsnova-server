@@ -33,8 +33,14 @@ public class VoteService {
     }
 
     public Vote create(Vote v) {
-        String newId = UUID.randomUUID().toString().replace("-", "");
-        v.setId(newId);
+
+        Vote eventualOldVote = repository.findByCommentIdAndUserId(v.getCommentId(), v.getUserId());
+        if (eventualOldVote.getId() != null) {
+            v.setId(eventualOldVote.getId());
+        } else {
+            String newId = UUID.randomUUID().toString().replace("-", "");
+            v.setId(newId);
+        }
         repository.save(v);
 
         return v;

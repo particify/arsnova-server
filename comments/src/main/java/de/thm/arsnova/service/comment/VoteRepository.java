@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface VoteRepository extends CrudRepository<Vote, String> {
     List<Vote> findByCommentId(String commentId);
+    Vote findByCommentIdAndUserId(String commentId, String userId);
 }
