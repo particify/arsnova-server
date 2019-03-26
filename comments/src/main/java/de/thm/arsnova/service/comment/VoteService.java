@@ -55,4 +55,17 @@ public class VoteService {
 
         return score;
     }
+
+    public List<Vote> getForCommentsAndUser(List<String> commentIds, String userId) {
+        List<Vote> voteList = new ArrayList<>();
+
+        commentIds.forEach((id) -> {
+            Vote tmp = repository.findByCommentIdAndUserId(id, userId);
+            if (tmp != null) {
+                voteList.add(tmp);
+            }
+        });
+
+        return voteList;
+    }
 }

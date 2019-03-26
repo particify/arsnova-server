@@ -17,15 +17,8 @@ import java.util.Set;
 
 @RestController("CommentController")
 @RequestMapping("/comment")
-public class CommentController {
-    protected static final String ENTITY_ID_HEADER = "Arsnova-Entity-Id";
-    protected static final String DEFAULT_ID_MAPPING = "/{roomId}";
-    protected static final String PATCH_MAPPING = DEFAULT_ID_MAPPING;
-    protected static final String GET_MAPPING = "/{roomId}";
-    protected static final String POST_MAPPING = "/";
-    protected static final String PUT_MAPPING = DEFAULT_ID_MAPPING;
+public class CommentController extends AbstractEntityController {
     protected static final String REQUEST_MAPPING = "/comment";
-    protected static final String FIND_MAPPING = "/find";
 
     private final CommentCommandHandler commandHandler;
     private final CommentService service;
@@ -43,7 +36,7 @@ public class CommentController {
     }
 
     @GetMapping(GET_MAPPING)
-    public Comment getComment(@PathVariable String id) {
+    public Comment get(@PathVariable String id) {
         return service.get(id);
     }
 

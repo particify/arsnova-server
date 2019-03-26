@@ -6,14 +6,14 @@ import org.springframework.core.style.ToStringCreator;
 
 import java.util.Map;
 
-public class FindQuery {
+public class FindQuery<E> {
     enum LogicalOperator {
         AND,
         OR
     }
 
     private LogicalOperator operator = LogicalOperator.AND;
-    private Comment properties;
+    private E properties;
     private Map<String, Object> externalFilters;
 
     @JsonProperty("operator")
@@ -27,12 +27,12 @@ public class FindQuery {
     }
 
     @JsonProperty("properties")
-    public Comment getProperties() {
+    public E getProperties() {
         return properties;
     }
 
     @JsonProperty("properties")
-    public void setProperties(final Comment properties) {
+    public void setProperties(final E properties) {
         this.properties = properties;
     }
 

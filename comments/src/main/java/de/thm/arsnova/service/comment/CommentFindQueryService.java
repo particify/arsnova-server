@@ -18,7 +18,7 @@ public class CommentFindQueryService {
         this.commentService = commentService;
     }
 
-    public Set<String> resolveQuery(final FindQuery findQuery) {
+    public Set<String> resolveQuery(final FindQuery<Comment> findQuery) {
         Set<String> commentIds = new HashSet<>();
         if (findQuery.getProperties().getRoomId() != null) {
             List<Comment> contentList = commentService.getByRoomId(findQuery.getProperties().getRoomId());
