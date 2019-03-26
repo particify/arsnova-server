@@ -19,7 +19,6 @@ import java.util.Set;
 @RequestMapping("/comment")
 public class CommentController {
     protected static final String ENTITY_ID_HEADER = "Arsnova-Entity-Id";
-    protected static final String ENTITY_REVISION_HEADER = "Arsnova-Entity-Revision";
     protected static final String DEFAULT_ID_MAPPING = "/{roomId}";
     protected static final String PATCH_MAPPING = DEFAULT_ID_MAPPING;
     protected static final String GET_MAPPING = "/{roomId}";
@@ -48,7 +47,7 @@ public class CommentController {
         return service.get(id);
     }
 
-    @PostMapping("/")
+    @PostMapping(POST_MAPPING)
     @ResponseStatus(HttpStatus.CREATED)
     public Comment post(
             @RequestBody final Comment comment,
