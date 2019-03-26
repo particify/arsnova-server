@@ -30,8 +30,7 @@ public class CommentHandler {
     }
 
     @RabbitListener(queues = "comment.command.patch")
-    public void receiveMessage(final PatchComment message) throws IOException {
-        //System.out.println(message.toString());
+    public void receiveMessage(final PatchComment message) {
         try {
             commandHandler.handle(message);
         } catch (IOException e) {

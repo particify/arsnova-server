@@ -60,7 +60,6 @@ public class CommentCommandHandler {
     public Comment handle(PatchComment command) throws IOException {
         PatchCommentPayload p = command.getPayload();
         Comment c = this.service.get(p.getId());
-        System.out.println(c.toString());
 
         if (c.getId() != null) {
             Comment patched = this.service.patch(c, p.getChanges());
