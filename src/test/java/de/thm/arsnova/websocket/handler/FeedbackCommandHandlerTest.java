@@ -50,7 +50,7 @@ public class FeedbackCommandHandlerTest {
 				ArgumentCaptor.forClass(FeedbackChanged.class);
 
 		verify(messagingTemplate).convertAndSend(topicCaptor.capture(), messageCaptor.capture());
-		assertThat(topicCaptor.getValue()).isEqualTo("/queue/" + roomId + ".feedback.stream");
+		assertThat(topicCaptor.getValue()).isEqualTo("/topic/" + roomId + ".feedback.stream");
 		assertThat(messageCaptor.getValue()).isEqualTo(feedbackChanged);
 	}
 
@@ -68,7 +68,7 @@ public class FeedbackCommandHandlerTest {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(messagingTemplate).convertAndSend(captor.capture(), any(FeedbackChanged.class));
-		assertThat(captor.getValue()).isEqualTo("/queue/" + roomId + ".feedback.stream");
+		assertThat(captor.getValue()).isEqualTo("/topic/" + roomId + ".feedback.stream");
 	}
 }
 
