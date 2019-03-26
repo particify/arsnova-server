@@ -396,18 +396,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.directory.server</groupId>
-			<artifactId>apacheds-core</artifactId>
-			<version>${directory-server-version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.directory.server</groupId>
-			<artifactId>apacheds-server-jndi</artifactId>
-			<version>${directory-server-version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-annotations</artifactId>
 			<version>1.5.23</version>
