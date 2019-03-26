@@ -16,4 +16,4 @@ grant all privileges on database arsnovacomment to arsnovacomment;
 
 
 # Run
-mvn spring-boot:run
+`mvn spring-boot:run`
