@@ -1,5 +1,6 @@
 package de.thm.arsnova.service.comment;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
@@ -9,18 +10,26 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+    @Value("${messaging.prefix}") private String messagingPrefix;
+    @Value("${stomp.destination.prefix}") private String[] destinationPrefix;
+    @Value("${stomp.relay.host}") private String relayHost;
+    @Value("${stomp.relay.port}") private int relayPort;
+    @Value("${stomp.relay.user}") private String relayUser;
+    @Value("${stomp.relay.password}") private String relayPassword;
+    @Value("${stomp.user.registry.broadcast}") private String userRegistryBroadcast;
+    @Value("${stomp.user.destination.broadcast}") private String userDestinationBroadcast;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config
-                .setApplicationDestinationPrefixes("/backend")
-                .enableStompBrokerRelay("/topic", "/exchange", "/queue")
-                .setUserDestinationBroadcast("/queue/log-unresolved-user")
-                .setUserRegistryBroadcast("/topic/log-user-registry")
-                .setRelayHost("localhost")
-                .setRelayPort(61613)
-                .setClientLogin("arsnova")
-                .setClientPasscode("arsnova");
+                .setApplicationDestinationPrefixes(messagingPrefix)
+                .enableStompBrokerRelay(destinationPrefix)
+                .setUserRegistryBroadcast(userRegistryBroadcast)
+                .setUserDestinationBroadcast(userDestinationBroadcast)
+                .setRelayHost(relayHost)
+                .setRelayPort(relayPort)
+                .setClientLogin(relayUser)
+                .setClientPasscode(relayPassword);
     }
 
     @Override
