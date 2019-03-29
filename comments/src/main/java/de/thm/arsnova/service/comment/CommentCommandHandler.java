@@ -101,4 +101,22 @@ public class CommentCommandHandler {
 
         return updated;
     }
+
+    public void handle(DeleteComment command) {
+        String id = command.getPayload().getId();
+        Comment c = service.get(id);
+        if (c.getId() != null) {
+            service.delete(id);
+
+            CommentDeletedPayload p = new CommentDeletedPayload();
+            CommentDeleted event = new CommentDeleted(p, c.getRoomId());
+
+            messagingTemplate.convertAndSend(
+                    "amq.topic",
+                    c.getRoomId() + ".comment.stream",
+                    event
+            );
+        }
+    }
+
 }
