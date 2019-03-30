@@ -109,6 +109,7 @@ public class CommentCommandHandler {
             service.delete(id);
 
             CommentDeletedPayload p = new CommentDeletedPayload();
+            p.setId(c.getId());
             CommentDeleted event = new CommentDeleted(p, c.getRoomId());
 
             messagingTemplate.convertAndSend(
