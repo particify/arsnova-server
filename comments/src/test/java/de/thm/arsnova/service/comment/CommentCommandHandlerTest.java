@@ -1,6 +1,11 @@
 package de.thm.arsnova.service.comment;
 
 import de.thm.arsnova.service.comment.model.Comment;
+import de.thm.arsnova.service.comment.model.command.DeleteComment;
+import de.thm.arsnova.service.comment.model.command.DeleteCommentPayload;
+import de.thm.arsnova.service.comment.model.event.CommentDeleted;
+import de.thm.arsnova.service.comment.model.event.CommentDeletedPayload;
+import org.hibernate.sql.Delete;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,9 +17,10 @@ import de.thm.arsnova.service.comment.model.command.CreateCommentPayload;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CommentCommandHandlerTest {
@@ -58,6 +64,40 @@ public class CommentCommandHandlerTest {
         verify(commentService, times(1)).create(commentCaptor.capture());
         verify(messagingTemplate, times(1)).convertAndSend(topicCaptor.capture(), topicCaptor.capture(), messageCaptor.capture());
         assertThat(topicCaptor.getValue()).isEqualTo(roomId + ".comment.stream");
+    }
+
+    @Test
+    public void testShouldHandleDeleteComment() {
+        String id = "52f08e8314aba247c50faacef60025ff";
+        String roomId = "52f08e8314aba247c50faacef600254c";
+        Comment c = new Comment();
+        c.setId(id);
+        c.setRoomId(roomId);
+        when(commentService.get(id)).thenReturn(c);
+        DeleteCommentPayload payload = new DeleteCommentPayload(id);
+        DeleteComment command = new DeleteComment(payload);
+
+        ArgumentCaptor<String> topicCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<CommentDeleted> eventCaptor =
+                ArgumentCaptor.forClass(CommentDeleted.class);
+
+        commandHandler.handle(command);
+
+        CommentDeletedPayload p = new CommentDeletedPayload();
+        p.setId(id);
+        CommentDeleted expectedEvent = new CommentDeleted(p, roomId);
+
+        verify(commentService, times(1)).get(id);
+        verify(commentService, times(1)).delete(id);
+        verify(messagingTemplate, times(1)).convertAndSend(
+                topicCaptor.capture(),
+                keyCaptor.capture(),
+                eventCaptor.capture()
+        );
+
+        assertThat(keyCaptor.getValue()).isEqualTo(roomId + ".comment.stream");
+        assertThat(eventCaptor.getValue()).isEqualTo(expectedEvent);
     }
 
 }

@@ -16,9 +16,10 @@ import java.util.Map;
 import java.util.Set;
 
 @RestController("CommentController")
-@RequestMapping("/comment")
+@RequestMapping(CommentController.REQUEST_MAPPING)
 public class CommentController extends AbstractEntityController {
     protected static final String REQUEST_MAPPING = "/comment";
+    private static final String BULK_DELETE_MAPPING = POST_MAPPING + "bulkdelete";
 
     private final CommentCommandHandler commandHandler;
     private final CommentService service;
@@ -91,4 +92,25 @@ public class CommentController extends AbstractEntityController {
 
         return c;
     }
+
+    @DeleteMapping(DELETE_MAPPING)
+    public void delete(@PathVariable String id) {
+        DeleteCommentPayload p = new DeleteCommentPayload(id);
+        DeleteComment command = new DeleteComment(p);
+
+        commandHandler.handle(command);
+    }
+
+    @PostMapping(BULK_DELETE_MAPPING)
+    public void bulkDelete(
+            @RequestBody final String[] ids
+    ) {
+        for (String id : ids) {
+            DeleteCommentPayload p = new DeleteCommentPayload(id);
+            DeleteComment command = new DeleteComment(p);
+
+            commandHandler.handle(command);
+        }
+    }
+
 }

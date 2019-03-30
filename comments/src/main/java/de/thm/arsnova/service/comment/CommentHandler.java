@@ -1,6 +1,7 @@
 package de.thm.arsnova.service.comment;
 
 import de.thm.arsnova.service.comment.model.command.CreateComment;
+import de.thm.arsnova.service.comment.model.command.DeleteComment;
 import de.thm.arsnova.service.comment.model.command.PatchComment;
 import de.thm.arsnova.service.comment.model.command.UpdateComment;
 import org.slf4j.Logger;
@@ -40,6 +41,11 @@ public class CommentHandler {
 
     @RabbitListener(queues = "comment.command.update")
     public void receiveMessage(final UpdateComment message) throws IOException {
+        commandHandler.handle(message);
+    }
+
+    @RabbitListener(queues = "comment.command.delete")
+    public void receiveMessage(final DeleteComment message) {
         commandHandler.handle(message);
     }
 }

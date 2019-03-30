@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import de.thm.arsnova.service.comment.model.WebSocketPayload;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class CommentPatchedPayload implements WebSocketPayload {
     private String id;
@@ -35,5 +36,27 @@ public class CommentPatchedPayload implements WebSocketPayload {
     @JsonProperty("changes")
     public void setChanges(Map<String, Object> changes) {
         this.changes = changes;
+    }
+
+    @Override
+    public String toString() {
+        return "CommentPatchedPayload{" +
+                "id='" + id + '\'' +
+                ", changes=" + changes +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CommentPatchedPayload that = (CommentPatchedPayload) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(changes, that.changes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, changes);
     }
 }

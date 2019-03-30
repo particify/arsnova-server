@@ -99,4 +99,11 @@ public class CommentService {
     public List<Comment> getByRoomId(String roomId) {
         return repository.findByRoomId(roomId);
     }
+
+    public void delete(String id) {
+        List<Vote> voteList = voteRepository.findByCommentId(id);
+        voteRepository.deleteAll(voteList);
+        repository.deleteById(id);
+    }
+
 }
