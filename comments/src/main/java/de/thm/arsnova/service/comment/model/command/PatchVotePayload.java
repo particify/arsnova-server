@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import de.thm.arsnova.service.comment.model.WebSocketPayload;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class PatchVotePayload implements WebSocketPayload {
     private String id;
@@ -46,5 +47,19 @@ public class PatchVotePayload implements WebSocketPayload {
                 "id='" + id + '\'' +
                 ", changes=" + changes +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PatchVotePayload that = (PatchVotePayload) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(changes, that.changes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, changes);
     }
 }

@@ -15,6 +15,7 @@ public class CommentDeleted extends WebSocketEvent<CommentDeletedPayload> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CommentDeleted that = (CommentDeleted) o;
-        return this.getPayload().equals(that.getPayload());
+        if (this.getRoomId() != that.getRoomId());
+        return (this.getPayload().equals(that.getPayload()));
     }
 }
