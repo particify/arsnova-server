@@ -80,7 +80,7 @@ public class VoteController extends AbstractEntityController {
     }
 
     @PostMapping(FIND_MAPPING)
-    public List<Vote> find(@RequestBody final FindQuery findQuery) {
+    public List<Vote> find(@RequestBody final FindQuery<Vote> findQuery) {
         Set<String> ids = findQueryService.resolveQuery(findQuery);
 
         return service.get(new ArrayList<>(ids));

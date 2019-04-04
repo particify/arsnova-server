@@ -74,7 +74,7 @@ public class CommentController extends AbstractEntityController {
     }
 
     @PostMapping(FIND_MAPPING)
-    public List<Comment> find(@RequestBody final FindQuery findQuery) {
+    public List<Comment> find(@RequestBody final FindQuery<Comment> findQuery) {
         Set<String> ids = findQueryService.resolveQuery(findQuery);
 
         return service.get(new ArrayList<>(ids));
