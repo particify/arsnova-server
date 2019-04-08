@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.10
+This is a maintenance release which only brings libraries up to date to fix
+potential bugs.
+
 ## 2.6.3
 Bug fixes:
 * The backend now correctly responds with 4xx error codes instead of 500 to less
