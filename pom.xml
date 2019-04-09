@@ -7,8 +7,8 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<io.spring.platform-version>Brussels-SR16</io.spring.platform-version>
-		<io.netty-version>4.1.33.Final</io.netty-version>
+		<spring-boot-version>1.5.20.RELEASE</spring-boot-version>
+		<io.netty-version>4.1.34.Final</io.netty-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
@@ -115,9 +115,9 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>io.spring.platform</groupId>
-				<artifactId>platform-bom</artifactId>
-				<version>${io.spring.platform-version}</version>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring-boot-version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -135,6 +135,7 @@
 		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
+			<version>2.6</version>
 		</dependency>
 		<!-- Spring -->
 		<dependency>
@@ -187,6 +188,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
+			<version>20.0</version>
 		</dependency>
 		<dependency>
 			<groupId>cglib</groupId>
@@ -204,6 +206,7 @@
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
 		</dependency>
 		<dependency>
 			<groupId>de.thm.couchdb4j</groupId>
@@ -253,6 +256,7 @@
 		<dependency>
 			<groupId>javax.inject</groupId>
 			<artifactId>javax.inject</artifactId>
+			<version>1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -302,17 +306,19 @@
 		<dependency>
 			<groupId>org.apache.directory.server</groupId>
 			<artifactId>apacheds-core</artifactId>
+			<version>1.5.5</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.directory.server</groupId>
 			<artifactId>apacheds-server-jndi</artifactId>
+			<version>1.5.5</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-annotations</artifactId>
-			<version>1.5.21</version>
+			<version>1.5.22</version>
 		</dependency>
 		<dependency>
 			<groupId>com.codahale.metrics</groupId>
@@ -357,7 +363,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.4.14.v20181114</version>
+				<version>9.4.15.v20190215</version>
 				<configuration>
 					<scanIntervalSeconds>0</scanIntervalSeconds>
 					<webApp>
