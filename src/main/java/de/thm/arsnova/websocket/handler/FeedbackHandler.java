@@ -16,7 +16,7 @@ public class FeedbackHandler {
 		this.commandHandler = commandHandler;
 	}
 
-	@MessageMapping("/room/{roomId}/feedback.command")
+	@MessageMapping("/queue/{roomId}.feedback.command")
 	public void send(
 			@DestinationVariable("roomId") String roomId,
 			CreateFeedback value
@@ -28,7 +28,7 @@ public class FeedbackHandler {
 
 	}
 
-	@MessageMapping("/room/{roomId}/feedback.query")
+	@MessageMapping("/queue/{roomId}.feedback.query")
 	public void send(
 			@DestinationVariable("roomId") String roomId,
 			GetFeedback value
