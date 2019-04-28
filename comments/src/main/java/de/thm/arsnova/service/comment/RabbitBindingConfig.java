@@ -22,6 +22,7 @@ public class RabbitBindingConfig {
     static final String patchCommandQueueName = "comment.command.patch";
     static final String updateCommandQueueName = "comment.command.update";
     static final String deleteCommandQueueName = "comment.command.delete";
+    static final String highlightCommandQueueName = "comment.command.highlight";
 
     static final String upvoteQueueName = "vote.command.upvote";
     static final String downvoteQueueName = "vote.command.downvote";
@@ -76,6 +77,16 @@ public class RabbitBindingConfig {
     @Autowired
     public Queue deleteCommandQueueName(RabbitAdmin rabbitAdmin) {
         final Queue queue = new Queue(deleteCommandQueueName, true, false, false);
+
+        rabbitAdmin.declareQueue(queue);
+
+        return queue;
+    }
+
+    @Bean
+    @Autowired
+    public Queue highlightCommandQueueName(RabbitAdmin rabbitAdmin) {
+        final Queue queue = new Queue(highlightCommandQueueName, true, false, false);
 
         rabbitAdmin.declareQueue(queue);
 

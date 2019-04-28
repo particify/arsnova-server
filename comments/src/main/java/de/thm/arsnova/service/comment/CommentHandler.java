@@ -4,6 +4,7 @@ import de.thm.arsnova.service.comment.model.command.CreateComment;
 import de.thm.arsnova.service.comment.model.command.DeleteComment;
 import de.thm.arsnova.service.comment.model.command.PatchComment;
 import de.thm.arsnova.service.comment.model.command.UpdateComment;
+import de.thm.arsnova.service.comment.model.command.HighlightComment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -46,6 +47,11 @@ public class CommentHandler {
 
     @RabbitListener(queues = "comment.command.delete")
     public void receiveMessage(final DeleteComment message) {
+        commandHandler.handle(message);
+    }
+
+    @RabbitListener(queues = "comment.command.highlight")
+    public void receiveMessage(final HighlightComment message) {
         commandHandler.handle(message);
     }
 }

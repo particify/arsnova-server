@@ -120,4 +120,18 @@ public class CommentCommandHandler {
         }
     }
 
+    public void handle(HighlightComment command) {
+        String id = command.getPayload().getId();
+        Comment c = service.get(id);
+        if (c.getId() != null) {
+            CommentHighlightedPayload p = new CommentHighlightedPayload(c, command.getPayload().getLights());
+            CommentHighlighted event = new CommentHighlighted(p, c.getRoomId());
+            messagingTemplate.convertAndSend(
+                    "amq.topic",
+                    c.getRoomId() + ".comment.stream",
+                    event
+            );
+        }
+    }
+
 }
