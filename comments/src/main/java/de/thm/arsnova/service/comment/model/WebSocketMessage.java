@@ -35,7 +35,7 @@ public class WebSocketMessage<P extends WebSocketPayload> implements Serializabl
 
     @Override
     public String toString() {
-        return "WebSocketEvent{" +
+        return "WebSocketMessage{" +
                 "type='" + type + '\'' +
                 ", payload=" + payload.toString() +
                 '}';

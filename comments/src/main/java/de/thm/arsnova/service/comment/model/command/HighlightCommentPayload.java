@@ -1,5 +1,6 @@
 package de.thm.arsnova.service.comment.model.command;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import de.thm.arsnova.service.comment.model.WebSocketPayload;
 
 import java.util.Objects;
@@ -15,18 +16,22 @@ public class HighlightCommentPayload implements WebSocketPayload {
         this.id = id;
     }
 
+    @JsonProperty("id")
     public String getId() {
         return id;
     }
 
+    @JsonProperty("id")
     public void setId(String id) {
         this.id = id;
     }
 
+    @JsonProperty("lights")
     public Boolean getLights() {
         return lights;
     }
 
+    @JsonProperty("lights")
     public void setLights(Boolean lights) {
         this.lights = lights;
     }

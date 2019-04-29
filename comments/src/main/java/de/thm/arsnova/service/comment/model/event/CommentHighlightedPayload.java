@@ -15,7 +15,7 @@ public class CommentHighlightedPayload implements WebSocketPayload {
     public CommentHighlightedPayload(Comment c, Boolean lights) {
         if (c != null) {
             id = c.getId();
-            lights = lights;
+            this.lights = lights;
         }
     }
 
