@@ -7,15 +7,15 @@ import java.util.Objects;
 
 public class CommentHighlightedPayload implements WebSocketPayload {
     private String id;
-    private Boolean light;
+    private Boolean lights;
 
     public CommentHighlightedPayload() {
     }
 
-    public CommentHighlightedPayload(Comment c, Boolean light) {
+    public CommentHighlightedPayload(Comment c, Boolean lights) {
         if (c != null) {
             id = c.getId();
-            light = light;
+            lights = lights;
         }
     }
 
@@ -27,19 +27,19 @@ public class CommentHighlightedPayload implements WebSocketPayload {
         this.id = id;
     }
 
-    public Boolean getLight() {
-        return light;
+    public Boolean getLights() {
+        return lights;
     }
 
-    public void setLight(Boolean light) {
-        this.light = light;
+    public void setLights(Boolean lights) {
+        this.lights = lights;
     }
 
     @Override
     public String toString() {
         return "CommentHighlightedPayload{" +
                 "id='" + id + '\'' +
-                ", light=" + light +
+                ", lights=" + lights +
                 '}';
     }
 
@@ -49,11 +49,11 @@ public class CommentHighlightedPayload implements WebSocketPayload {
         if (o == null || getClass() != o.getClass()) return false;
         CommentHighlightedPayload that = (CommentHighlightedPayload) o;
         return Objects.equals(id, that.id) &&
-                Objects.equals(light, that.light);
+                Objects.equals(lights, that.lights);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, light);
+        return Objects.hash(id, lights);
     }
 }
