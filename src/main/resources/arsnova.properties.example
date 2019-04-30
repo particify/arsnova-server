@@ -326,6 +326,17 @@ pp.session-levels.en = General Education,\
 
 
 ################################################################################
+# Messaging / Microservices
+################################################################################
+messaging.relay.enabled=false
+messaging.relay.host=localhost
+messaging.relay.port=61613
+messaging.relay.user=arsnova
+messaging.relay.password=arsnova
+
+
+
+################################################################################
 # Tracking
 ################################################################################
 # It is possible to use an external tracking software with ARSnova. Currently
