@@ -89,4 +89,8 @@ public interface UserService extends EntityService<UserProfile> {
 	void initiatePasswordReset(String username);
 
 	boolean resetPassword(UserProfile userProfile, String key, String password);
+
+	void addWsSessionToJwtMapping(String wsSessionId, String jwt);
+
+	User getAuthenticatedUserByWsSession(String wsSessionId);
 }

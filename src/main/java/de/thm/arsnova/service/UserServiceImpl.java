@@ -93,6 +93,9 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 	private static final ConcurrentHashMap<UUID, String> socketIdToUserId = new ConcurrentHashMap<>();
 
+	/* for the new STOMP over ws functionality */
+	private static final ConcurrentHashMap<String, String> wsSessionIdToJwt = new ConcurrentHashMap<>();
+
 	/* used for Socket.IO online check solution (new) */
 	private static final ConcurrentHashMap<String, String> userIdToRoomId = new ConcurrentHashMap<>();
 
@@ -634,5 +637,17 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	@Autowired
 	public void setJwtService(final JwtService jwtService) {
 		this.jwtService = jwtService;
+	}
+
+	public void addWsSessionToJwtMapping(final String wsSessionId, final String jwt) {
+		wsSessionIdToJwt.put(wsSessionId, jwt);
+	}
+
+	public User getAuthenticatedUserByWsSession(final String wsSessionId) {
+		String jwt = wsSessionIdToJwt.getOrDefault(wsSessionId, null);
+		if (jwt == null) return null;
+		User u = jwtService.verifyToken(jwt);
+		if (u == null) return null;
+		return u;
 	}
 }
