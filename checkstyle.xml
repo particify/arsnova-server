@@ -4,15 +4,17 @@
 		"https://checkstyle.org/dtds/configuration_1_3.dtd">
 
 <!--
-	Checkstyle configuration that checks the Google coding conventions from Google Java Style
-	that can be found at https://google.github.io/styleguide/javaguide.html.
+	Checkstyle configuration that checks the coding conventions for ARSnova Java
+	projects. The conventions and configuration are based on Google coding
+	conventions from Google Java Style that can be found at
+	https://google.github.io/styleguide/javaguide.html.
 
 	Checkstyle is very configurable. Be sure to read the documentation at
 	http://checkstyle.sf.net (or in your downloaded distribution).
 
 	To completely disable a check, just comment it out or delete it from the file.
 
-	Authors: Max Vetrenko, Ruslan Diachenko, Roman Ivanov.
+	Original authors: Max Vetrenko, Ruslan Diachenko, Roman Ivanov.
 -->
 
 <module name="Checker">
@@ -20,19 +22,26 @@
 
 	<property name="severity" value="warning"/>
 
+	<module name="SeverityMatchFilter">
+		<property name="severity" value="info"/>
+		<property name="acceptOnMatch" value="false"/>
+	</module>
+
 	<property name="fileExtensions" value="java, properties, xml"/>
 	<!-- Excludes all 'module-info.java' files              -->
 	<!-- See https://checkstyle.org/config_filefilters.html -->
 	<module name="BeforeExecutionExclusionFileFilter">
 		<property name="fileNamePattern" value="module\-info\.java$"/>
 	</module>
-	<!-- Checks for whitespace                               -->
-	<!-- See http://checkstyle.sf.net/config_whitespace.html -->
-	<module name="FileTabCharacter">
-		<property name="eachLine" value="true"/>
-	</module>
 
 	<module name="TreeWalker">
+		<!-- Checks for whitespace -->
+		<property name="tabWidth" value="2"/>
+		<module name="RegexpSinglelineJava">
+			<property name="format" value="^\t* "/>
+			<property name="message" value="Indent must use tab characters"/>
+			<property name="ignoreComments" value="true"/>
+		</module>
 		<module name="OuterTypeFilename"/>
 		<module name="IllegalTokenText">
 			<property name="tokens" value="STRING_LITERAL, CHAR_LITERAL"/>
@@ -47,7 +56,7 @@
 			<property name="allowNonPrintableEscapes" value="true"/>
 		</module>
 		<module name="LineLength">
-			<property name="max" value="100"/>
+			<property name="max" value="120"/>
 			<property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
 		</module>
 		<module name="AvoidStarImport"/>
@@ -199,7 +208,8 @@
 		<module name="CustomImportOrder">
 			<property name="sortImportsInGroupAlphabetically" value="true"/>
 			<property name="separateLineBetweenGroups" value="true"/>
-			<property name="customImportOrderRules" value="STATIC###THIRD_PARTY_PACKAGE"/>
+			<property name="customImportOrderRules" value="STATIC###THIRD_PARTY_PACKAGE###SPECIAL_IMPORTS"/>
+			<property name="specialImportsRegExp" value="^de\.thm\.arsnova"/>
 		</module>
 		<module name="MethodParamPad"/>
 		<module name="NoWhitespaceBefore">
