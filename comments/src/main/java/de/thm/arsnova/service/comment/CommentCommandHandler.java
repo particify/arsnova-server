@@ -134,4 +134,20 @@ public class CommentCommandHandler {
         }
     }
 
+    public void handle(DeleteCommentsByRoom command) {
+        String roomId = command.getPayload().getRoomId();
+        List<Comment> deletedComments = service.deleteByRoomId(roomId);
+        for (Comment c : deletedComments) {
+            CommentDeletedPayload p = new CommentDeletedPayload();
+            p.setId(c.getId());
+            CommentDeleted event = new CommentDeleted(p, c.getRoomId());
+
+            messagingTemplate.convertAndSend(
+                    "amq.topic",
+                    c.getRoomId() + ".comment.stream",
+                    event
+            );
+        }
+    }
+
 }

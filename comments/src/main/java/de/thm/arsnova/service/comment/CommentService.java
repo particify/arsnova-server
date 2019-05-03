@@ -106,4 +106,8 @@ public class CommentService {
         repository.deleteById(id);
     }
 
+    public List<Comment> deleteByRoomId(String roomId) {
+        return repository.deleteByRoomId(roomId);
+    }
+
 }

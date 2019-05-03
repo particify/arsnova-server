@@ -20,6 +20,7 @@ import java.util.Set;
 public class CommentController extends AbstractEntityController {
     protected static final String REQUEST_MAPPING = "/comment";
     private static final String BULK_DELETE_MAPPING = POST_MAPPING + "bulkdelete";
+    private static final String DELETE_BY_ROOM_MAPPING = POST_MAPPING + "byRoom";
 
     private final CommentCommandHandler commandHandler;
     private final CommentService service;
@@ -111,6 +112,16 @@ public class CommentController extends AbstractEntityController {
 
             commandHandler.handle(command);
         }
+    }
+
+    @DeleteMapping(DELETE_BY_ROOM_MAPPING)
+    public void deleteByRoom(
+            @RequestParam final String roomId
+    ) {
+        DeleteCommentsByRoomPayload p = new DeleteCommentsByRoomPayload(roomId);
+        DeleteCommentsByRoom command = new DeleteCommentsByRoom(p);
+
+        commandHandler.handle(command);
     }
 
 }
