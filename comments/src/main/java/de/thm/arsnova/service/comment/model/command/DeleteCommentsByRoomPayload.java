@@ -24,7 +24,7 @@ public class DeleteCommentsByRoomPayload implements WebSocketPayload {
     @Override
     public String toString() {
         return "DeleteCommentPayload{" +
-                "id='" + id + '\'' +
+                "id='" + roomId + '\'' +
                 '}';
     }
 
