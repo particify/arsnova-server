@@ -1,9 +1,7 @@
 package de.thm.arsnova.service.comment;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.thm.arsnova.service.comment.model.Vote;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

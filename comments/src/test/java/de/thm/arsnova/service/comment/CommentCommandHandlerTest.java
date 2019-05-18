@@ -5,7 +5,6 @@ import de.thm.arsnova.service.comment.model.command.DeleteComment;
 import de.thm.arsnova.service.comment.model.command.DeleteCommentPayload;
 import de.thm.arsnova.service.comment.model.event.CommentDeleted;
 import de.thm.arsnova.service.comment.model.event.CommentDeletedPayload;
-import org.hibernate.sql.Delete;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,9 +14,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import de.thm.arsnova.service.comment.model.command.CreateComment;
 import de.thm.arsnova.service.comment.model.command.CreateCommentPayload;
 import org.springframework.amqp.core.AmqpTemplate;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;

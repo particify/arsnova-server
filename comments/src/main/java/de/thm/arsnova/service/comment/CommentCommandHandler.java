@@ -5,7 +5,6 @@ import de.thm.arsnova.service.comment.model.command.*;
 import de.thm.arsnova.service.comment.model.event.*;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -15,8 +14,6 @@ import java.util.List;
 
 @Component
 public class CommentCommandHandler {
-    private HashMap<String, List<Comment>> commentList = new HashMap<>();
-
     private final AmqpTemplate messagingTemplate;
     private final CommentService service;
 
