@@ -1,6 +1,8 @@
 package de.thm.arsnova.service.comment;
 
 import de.thm.arsnova.service.comment.model.Comment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +12,8 @@ import java.util.Set;
 
 @Service
 public class CommentFindQueryService {
+
+    private static final Logger logger = LoggerFactory.getLogger(CommentFindQueryService.class);
 
     private final CommentService commentService;
 

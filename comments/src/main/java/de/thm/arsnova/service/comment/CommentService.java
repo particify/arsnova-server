@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import de.thm.arsnova.service.comment.model.Comment;
 import de.thm.arsnova.service.comment.model.Vote;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,8 @@ import java.util.function.Function;
 
 @Service
 public class CommentService {
+    private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
+
     final CommentRepository repository;
     final VoteRepository voteRepository;
     private ObjectMapper objectMapper;
@@ -52,6 +56,7 @@ public class CommentService {
     public Comment create(Comment c) {
         String newId = UUID.randomUUID().toString().replace("-", "");
         c.setId(newId);
+        logger.trace("Creating new comment: " + c.toString());
         repository.save(c);
 
         return c;

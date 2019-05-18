@@ -2,6 +2,8 @@ package de.thm.arsnova.service.comment;
 
 import de.thm.arsnova.service.comment.model.Comment;
 import de.thm.arsnova.service.comment.model.command.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,8 @@ import java.util.Set;
 @RestController("CommentController")
 @RequestMapping(CommentController.REQUEST_MAPPING)
 public class CommentController extends AbstractEntityController {
+    private static final Logger logger = LoggerFactory.getLogger(CommentController.class);
+
     protected static final String REQUEST_MAPPING = "/comment";
     private static final String BULK_DELETE_MAPPING = POST_MAPPING + "bulkdelete";
     private static final String DELETE_BY_ROOM_MAPPING = POST_MAPPING + "byRoom";
@@ -76,7 +80,11 @@ public class CommentController extends AbstractEntityController {
 
     @PostMapping(FIND_MAPPING)
     public List<Comment> find(@RequestBody final FindQuery<Comment> findQuery) {
+        logger.debug("Resolving find query: {}", findQuery);
+
         Set<String> ids = findQueryService.resolveQuery(findQuery);
+
+        logger.debug("Resolved find query to IDs: {}", ids);
 
         return service.get(new ArrayList<>(ids));
     }

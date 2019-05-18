@@ -4,6 +4,8 @@ import de.thm.arsnova.service.comment.model.Vote;
 import de.thm.arsnova.service.comment.model.command.Downvote;
 import de.thm.arsnova.service.comment.model.command.Upvote;
 import de.thm.arsnova.service.comment.model.command.VotePayload;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,6 +27,8 @@ import java.util.Set;
 @RestController("VoteController")
 @RequestMapping("/vote")
 public class VoteController extends AbstractEntityController {
+    private static final Logger logger = LoggerFactory.getLogger(VoteController.class);
+
     protected static final String REQUEST_MAPPING = "/vote";
 
     private final VoteCommandHandler commandHandler;
@@ -75,13 +79,18 @@ public class VoteController extends AbstractEntityController {
 
             return v;
         } else {
+            logger.warn("Vote is neither up- nor downvote: " + vote.toString());
             throw new HttpMessageNotReadableException("Invalid request");
         }
     }
 
     @PostMapping(FIND_MAPPING)
     public List<Vote> find(@RequestBody final FindQuery<Vote> findQuery) {
+        logger.debug("Resolving find query: {}", findQuery);
+
         Set<String> ids = findQueryService.resolveQuery(findQuery);
+
+        logger.debug("Resolved find query to IDs: {}", ids);
 
         return service.get(new ArrayList<>(ids));
     }

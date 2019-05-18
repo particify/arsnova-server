@@ -17,3 +17,14 @@ grant all privileges on database arsnovacomment to arsnovacomment;
 
 # Run
 `mvn spring-boot:run`
+
+
+###Logging
+`-Dlogging.level.de.thm.arsnova=<debug-level>`
+
+Possible options for debug-level:
+- INFO
+- TRACE
+- DEBUG
+- WARN
+- ERROR

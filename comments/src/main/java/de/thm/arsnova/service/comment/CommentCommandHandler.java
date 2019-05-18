@@ -3,6 +3,8 @@ package de.thm.arsnova.service.comment;
 import de.thm.arsnova.service.comment.model.Comment;
 import de.thm.arsnova.service.comment.model.command.*;
 import de.thm.arsnova.service.comment.model.event.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,6 +15,8 @@ import java.util.List;
 
 @Component
 public class CommentCommandHandler {
+    private static final Logger logger = LoggerFactory.getLogger(CommentCommandHandler.class);
+
     private final AmqpTemplate messagingTemplate;
     private final CommentService service;
 
@@ -25,6 +29,8 @@ public class CommentCommandHandler {
     }
 
     public Comment handle(CreateComment command) {
+        logger.trace("got new command: " + command.toString());
+
         Date now = new Date();
 
         Comment newComment = new Comment();
@@ -54,6 +60,8 @@ public class CommentCommandHandler {
     }
 
     public Comment handle(PatchComment command) throws IOException {
+        logger.trace("got new command: " + command.toString());
+
         PatchCommentPayload p = command.getPayload();
         Comment c = this.service.get(p.getId());
 
@@ -77,6 +85,8 @@ public class CommentCommandHandler {
     }
 
     public Comment handle(UpdateComment command) {
+        logger.trace("got new command: " + command.toString());
+
         UpdateCommentPayload p = command.getPayload();
         Comment old = this.service.get(p.getId());
         old.setBody(p.getBody());
@@ -99,6 +109,8 @@ public class CommentCommandHandler {
     }
 
     public void handle(DeleteComment command) {
+        logger.trace("got new command: " + command.toString());
+
         String id = command.getPayload().getId();
         Comment c = service.get(id);
         if (c.getId() != null) {
@@ -117,6 +129,8 @@ public class CommentCommandHandler {
     }
 
     public void handle(HighlightComment command) {
+        logger.trace("got new command: " + command.toString());
+
         String id = command.getPayload().getId();
         Comment c = service.get(id);
         if (c.getId() != null) {
@@ -131,6 +145,8 @@ public class CommentCommandHandler {
     }
 
     public void handle(DeleteCommentsByRoom command) {
+        logger.trace("got new command: " + command.toString());
+
         String roomId = command.getPayload().getRoomId();
         List<Comment> deletedComments = service.deleteByRoomId(roomId);
         for (Comment c : deletedComments) {
