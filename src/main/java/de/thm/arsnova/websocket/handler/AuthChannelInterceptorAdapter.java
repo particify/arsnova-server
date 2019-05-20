@@ -31,13 +31,16 @@ public class AuthChannelInterceptorAdapter implements ChannelInterceptor {
 	@Nullable
 	@Override
 	public Message<?> preSend(final Message<?> message, final MessageChannel channel) {
+		logger.trace("Inspecting incoming message: {}", message);
 		final StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
 		final String sessionId = accessor.getSessionId();
 		if (accessor.getCommand() != null && accessor.getCommand().equals(StompCommand.CONNECT)) {
 			// user needs to authorize
+			logger.trace("Incoming message is a connect command");
 			final List<String> tokenList = accessor.getNativeHeader("token");
 			if (tokenList != null && tokenList.size() > 0) {
+				logger.trace("Adding token {} to the ws session mapping", tokenList.get(0));
 				final String token = tokenList.get(0);
 				service.addWsSessionToJwtMapping(sessionId, token);
 			} else {
@@ -46,9 +49,11 @@ public class AuthChannelInterceptorAdapter implements ChannelInterceptor {
 				return null;
 			}
 		} else {
+			logger.trace("Incoming message is anything but a connect command");
 			final List<String> userIdList = accessor.getNativeHeader("ars-user-id");
 			if (userIdList != null && userIdList.size() > 0) {
 				// user-id is given, check for auth
+				logger.trace("Checking user id with ws session mapping");
 				final String userId = userIdList.get(0);
 				final User u = service.getAuthenticatedUserByWsSession(sessionId);
 				if (u == null || !userId.equals(u.getId())) {
