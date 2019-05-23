@@ -1,5 +1,6 @@
-package de.thm.arsnova.service.comment;
+package de.thm.arsnova.service.comment.service;
 
+import de.thm.arsnova.service.comment.service.persistence.VoteRepository;
 import de.thm.arsnova.service.comment.model.Vote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

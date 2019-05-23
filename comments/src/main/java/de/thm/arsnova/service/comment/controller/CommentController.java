@@ -1,5 +1,9 @@
-package de.thm.arsnova.service.comment;
+package de.thm.arsnova.service.comment.controller;
 
+import de.thm.arsnova.service.comment.handler.CommentCommandHandler;
+import de.thm.arsnova.service.comment.service.CommentFindQueryService;
+import de.thm.arsnova.service.comment.service.CommentService;
+import de.thm.arsnova.service.comment.service.FindQuery;
 import de.thm.arsnova.service.comment.model.Comment;
 import de.thm.arsnova.service.comment.model.command.*;
 import org.slf4j.Logger;

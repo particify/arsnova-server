@@ -3,6 +3,8 @@ package de.thm.arsnova.service.comment;
 import de.thm.arsnova.service.comment.model.Comment;
 import de.thm.arsnova.service.comment.model.event.CommentPatched;
 import de.thm.arsnova.service.comment.model.event.CommentPatchedPayload;
+import de.thm.arsnova.service.comment.service.CommentService;
+import de.thm.arsnova.service.comment.service.VoteService;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

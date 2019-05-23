@@ -1,4 +1,4 @@
-package de.thm.arsnova.service.comment;
+package de.thm.arsnova.service.comment.service.persistence;
 
 import de.thm.arsnova.service.comment.model.Vote;
 import org.springframework.data.repository.CrudRepository;

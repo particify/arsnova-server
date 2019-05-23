@@ -1,6 +1,9 @@
 package de.thm.arsnova.service.comment;
 
 import de.thm.arsnova.service.comment.model.Comment;
+import de.thm.arsnova.service.comment.service.CommentService;
+import de.thm.arsnova.service.comment.service.persistence.CommentRepository;
+import de.thm.arsnova.service.comment.service.persistence.VoteRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

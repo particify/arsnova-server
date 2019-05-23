@@ -1,4 +1,4 @@
-package de.thm.arsnova.service.comment;
+package de.thm.arsnova.service.comment.config;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListenerConfigurer;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;

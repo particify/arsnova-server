@@ -1,5 +1,7 @@
-package de.thm.arsnova.service.comment;
+package de.thm.arsnova.service.comment.handler;
 
+import de.thm.arsnova.service.comment.CommentEventSource;
+import de.thm.arsnova.service.comment.service.VoteService;
 import de.thm.arsnova.service.comment.model.Vote;
 import de.thm.arsnova.service.comment.model.command.Downvote;
 import de.thm.arsnova.service.comment.model.command.Upvote;

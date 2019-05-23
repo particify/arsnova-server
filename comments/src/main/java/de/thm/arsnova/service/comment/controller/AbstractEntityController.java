@@ -1,4 +1,4 @@
-package de.thm.arsnova.service.comment;
+package de.thm.arsnova.service.comment.controller;
 
 abstract public class AbstractEntityController {
     protected static final String ENTITY_ID_HEADER = "Arsnova-Entity-Id";
