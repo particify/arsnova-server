@@ -1,4 +1,4 @@
-package de.thm.arsnova.service.comment;
+package de.thm.arsnova.service.comment.config;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

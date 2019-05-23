@@ -1,5 +1,9 @@
-package de.thm.arsnova.service.comment;
+package de.thm.arsnova.service.comment.controller;
 
+import de.thm.arsnova.service.comment.service.FindQuery;
+import de.thm.arsnova.service.comment.handler.VoteCommandHandler;
+import de.thm.arsnova.service.comment.service.VoteFindQueryService;
+import de.thm.arsnova.service.comment.service.VoteService;
 import de.thm.arsnova.service.comment.model.Vote;
 import de.thm.arsnova.service.comment.model.command.Downvote;
 import de.thm.arsnova.service.comment.model.command.Upvote;

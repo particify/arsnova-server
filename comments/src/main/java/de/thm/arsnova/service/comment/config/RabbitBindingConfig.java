@@ -1,4 +1,4 @@
-package de.thm.arsnova.service.comment;
+package de.thm.arsnova.service.comment.config;
 
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.core.FanoutExchange;

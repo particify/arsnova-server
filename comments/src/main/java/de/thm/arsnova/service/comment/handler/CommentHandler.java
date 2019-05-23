@@ -1,4 +1,4 @@
-package de.thm.arsnova.service.comment;
+package de.thm.arsnova.service.comment.handler;
 
 import de.thm.arsnova.service.comment.model.command.CreateComment;
 import de.thm.arsnova.service.comment.model.command.DeleteComment;

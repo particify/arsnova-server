@@ -1,8 +1,10 @@
-package de.thm.arsnova.service.comment;
+package de.thm.arsnova.service.comment.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import de.thm.arsnova.service.comment.service.persistence.CommentRepository;
+import de.thm.arsnova.service.comment.service.persistence.VoteRepository;
 import de.thm.arsnova.service.comment.model.Comment;
 import de.thm.arsnova.service.comment.model.Vote;
 import org.slf4j.Logger;

@@ -1,10 +1,12 @@
 package de.thm.arsnova.service.comment;
 
+import de.thm.arsnova.service.comment.handler.CommentCommandHandler;
 import de.thm.arsnova.service.comment.model.Comment;
 import de.thm.arsnova.service.comment.model.command.DeleteComment;
 import de.thm.arsnova.service.comment.model.command.DeleteCommentPayload;
 import de.thm.arsnova.service.comment.model.event.CommentDeleted;
 import de.thm.arsnova.service.comment.model.event.CommentDeletedPayload;
+import de.thm.arsnova.service.comment.service.CommentService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
