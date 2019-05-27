@@ -51,7 +51,7 @@ public abstract class AbstractEntityController<E extends Entity> {
 	protected static final String ENTITY_ID_HEADER = "Arsnova-Entity-Id";
 	protected static final String ENTITY_REVISION_HEADER = "Arsnova-Entity-Revision";
 	protected static final String DEFAULT_ROOT_MAPPING = "/";
-	protected static final String DEFAULT_ID_MAPPING = "/{id:[^~].+}";
+	protected static final String DEFAULT_ID_MAPPING = "/{id:[^~].*}";
 	protected static final String DEFAULT_ALIAS_MAPPING = "/~{alias}";
 	protected static final String DEFAULT_FIND_MAPPING = "/find";
 	protected static final String ALIAS_SUBPATH = "/{subPath:.+}";
