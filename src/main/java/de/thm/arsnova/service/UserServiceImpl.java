@@ -412,6 +412,11 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
+	public List<UserProfile> getByLoginId(final String loginId) {
+		return userRepository.findByLoginId(loginId);
+	}
+
+	@Override
 	public UserProfile getByUsername(String username) {
 		return userRepository.findByAuthProviderAndLoginId(UserProfile.AuthProvider.ARSNOVA, username.toLowerCase());
 	}

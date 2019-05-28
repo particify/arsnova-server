@@ -25,6 +25,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -75,6 +76,8 @@ public interface UserService extends EntityService<UserProfile> {
 	User loadUser(String userId, Collection<GrantedAuthority> grantedAuthorities);
 
 	UserProfile getByAuthProviderAndLoginId(UserProfile.AuthProvider authProvider, String loginId);
+
+	List<UserProfile> getByLoginId(String loginId);
 
 	UserProfile getByUsername(String username);
 

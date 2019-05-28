@@ -220,7 +220,7 @@ public class UserProfile extends Entity {
 		this.loginId = loginId;
 	}
 
-	@JsonView({View.Persistence.class, View.Public.class})
+	@JsonView({View.Persistence.class, View.Owner.class})
 	public Date getLastLoginTimestamp() {
 		return lastLoginTimestamp;
 	}
@@ -240,7 +240,7 @@ public class UserProfile extends Entity {
 		this.account = account;
 	}
 
-	@JsonView({View.Persistence.class, View.Public.class})
+	@JsonView({View.Persistence.class, View.Owner.class})
 	public Set<RoomHistoryEntry> getRoomHistory() {
 		return roomHistory;
 	}
@@ -250,7 +250,7 @@ public class UserProfile extends Entity {
 		this.roomHistory = roomHistory;
 	}
 
-	@JsonView({View.Persistence.class, View.Public.class})
+	@JsonView({View.Persistence.class, View.Owner.class})
 	public Set<String> getAcknowledgedMotds() {
 		return acknowledgedMotds;
 	}
@@ -260,7 +260,7 @@ public class UserProfile extends Entity {
 		this.acknowledgedMotds = acknowledgedMotds;
 	}
 
-	@JsonView({View.Persistence.class, View.Public.class})
+	@JsonView({View.Persistence.class, View.Owner.class})
 	public Map<String, Map<String, ?>> getExtensions() {
 		return extensions;
 	}
