@@ -30,7 +30,7 @@ socketio.port=8090
 # Admin accounts
 # Usernames of the accounts which are allowed to manage global messages of the
 # day. Multiple accounts are separated by commas.
-security.admin-accounts=
+security.admin-accounts=Admin
 
 
 ################################################################################
