@@ -31,9 +31,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -46,8 +49,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * This class tests {@link JsonViewControllerAdvice} which should be applied to
@@ -68,6 +70,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 		WebSocketConfig.class})
 @ActiveProfiles("test")
 public class JsonViewControllerAdviceTest {
+	private static final Logger logger = LoggerFactory.getLogger(JsonViewControllerAdviceTest.class);
+
 	@Autowired
 	private WebApplicationContext webApplicationContext;
 
@@ -88,28 +92,36 @@ public class JsonViewControllerAdviceTest {
 	@Test
 	@WithMockUser("TestUser")
 	public void testShouldNotSerializeAdminViewForRegularUser() throws Exception {
+		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1?view=admin").accept(MediaType.APPLICATION_JSON))
+				.andDo(h -> logger.info(h.getResponse().getContentAsString()))
 				.andExpect(status().isForbidden());
 	}
 
 	@Test
 	@WithMockUser("Admin")
 	public void testShouldSerializeAdminViewForAdmin() throws Exception {
+		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1?view=admin").accept(MediaType.APPLICATION_JSON))
+				.andDo(h -> logger.info(h.getResponse().getContentAsString()))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	@WithMockUser("Admin")
 	public void testShouldSerializeOwnerViewForAdmin() throws Exception {
+		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1?view=owner").accept(MediaType.APPLICATION_JSON))
+				.andDo(h -> logger.info(h.getResponse().getContentAsString()))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	@WithMockUser("Admin")
 	public void testAdminViewShouldContainAdminProperties() throws Exception {
+		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1?view=admin").accept(MediaType.APPLICATION_JSON))
+				.andDo(h -> logger.info(h.getResponse().getContentAsString()))
 				.andExpect(jsonPath("$.adminReadableString").exists())
 				.andExpect(jsonPath("$.ownerReadableString").exists())
 				.andExpect(jsonPath("$.publicReadableString").exists());
@@ -118,7 +130,9 @@ public class JsonViewControllerAdviceTest {
 	@Test
 	@WithMockUser("Admin")
 	public void testOwnerViewShouldContainOwnerProperties() throws Exception {
+		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1?view=owner").accept(MediaType.APPLICATION_JSON))
+				.andDo(h -> logger.info(h.getResponse().getContentAsString()))
 				.andExpect(jsonPath("$.adminReadableString").doesNotExist())
 				.andExpect(jsonPath("$.ownerReadableString").exists())
 				.andExpect(jsonPath("$.publicReadableString").exists());
@@ -127,7 +141,9 @@ public class JsonViewControllerAdviceTest {
 	@Test
 	@WithMockUser("Admin")
 	public void testDefaultViewShouldContainPublicProperties() throws Exception {
+		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1").accept(MediaType.APPLICATION_JSON))
+				.andDo(h -> logger.info(h.getResponse().getContentAsString()))
 				.andExpect(jsonPath("$.adminReadableString").doesNotExist())
 				.andExpect(jsonPath("$.ownerReadableString").doesNotExist())
 				.andExpect(jsonPath("$.publicReadableString").exists());
