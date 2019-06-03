@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
@@ -68,7 +69,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 		TestPersistanceConfig.class,
 		TestSecurityConfig.class,
 		WebSocketConfig.class})
-@ActiveProfiles("test")
+@ActiveProfiles({"test", "w/DummyEntityController"})
 public class JsonViewControllerAdviceTest {
 	private static final Logger logger = LoggerFactory.getLogger(JsonViewControllerAdviceTest.class);
 
@@ -149,6 +150,7 @@ public class JsonViewControllerAdviceTest {
 				.andExpect(jsonPath("$.publicReadableString").exists());
 	}
 
+	@Profile("w/DummyEntityController")
 	@RestController
 	@RequestMapping(DummyEntityController.REQUEST_MAPPING)
 	static class DummyEntityController extends AbstractEntityController<DummyEntity> {
