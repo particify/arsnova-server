@@ -46,6 +46,8 @@ public interface RoomService extends EntityService<Room> {
 
 	List<String> getUserRoomIds(String userId);
 
+	List<String> getRoomIdsByModeratorId(String userId);
+
 	List<Room> getUserRoomHistory(String userId);
 
 	List<Room> getMyRooms(int offset, int limit);

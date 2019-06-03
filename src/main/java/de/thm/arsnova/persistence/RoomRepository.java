@@ -30,6 +30,7 @@ public interface RoomRepository extends CrudRepository<Room, String> {
 	List<Room> findByOwner(ClientAuthentication owner, int start, int limit);
 	List<Room> findByOwnerId(String ownerId, int start, int limit);
 	List<String> findIdsByOwnerId(String ownerId);
+	List<String> findIdsByModeratorId(String moderatorId);
 	List<Room> findAllForPublicPool();
 	List<Room> findForPublicPoolByOwnerId(String ownerId);
 	List<Room> getRoomsWithStatsForOwnerId(String ownerId, int start, int limit);
