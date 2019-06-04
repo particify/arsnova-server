@@ -34,8 +34,6 @@ import org.mockito.InjectMocks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
@@ -69,7 +67,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 		TestPersistanceConfig.class,
 		TestSecurityConfig.class,
 		WebSocketConfig.class})
-@ActiveProfiles({"test", "w/DummyEntityController"})
+@ActiveProfiles("test")
 public class JsonViewControllerAdviceTest {
 	private static final Logger logger = LoggerFactory.getLogger(JsonViewControllerAdviceTest.class);
 
@@ -81,7 +79,7 @@ public class JsonViewControllerAdviceTest {
 	@InjectMocks
 	private DummyEntityController dummyEntityController;
 
-	@MockBean
+	@Autowired
 	private EntityService<DummyEntity> dummyEntityService;
 
 	@Before
@@ -150,7 +148,6 @@ public class JsonViewControllerAdviceTest {
 				.andExpect(jsonPath("$.publicReadableString").exists());
 	}
 
-	@Profile("w/DummyEntityController")
 	@RestController
 	@RequestMapping(DummyEntityController.REQUEST_MAPPING)
 	static class DummyEntityController extends AbstractEntityController<DummyEntity> {
@@ -166,7 +163,7 @@ public class JsonViewControllerAdviceTest {
 		}
 	}
 
-	static class DummyEntity extends Entity {
+	public static class DummyEntity extends Entity {
 		@JsonView(View.Public.class) public String publicReadableString = "public";
 		@JsonView(View.Owner.class) public String ownerReadableString = "owner";
 		@JsonView(View.Admin.class) public String adminReadableString = "admin";

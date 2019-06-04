@@ -17,10 +17,13 @@
  */
 package de.thm.arsnova.config;
 
+import de.thm.arsnova.controller.JsonViewControllerAdviceTest;
 import de.thm.arsnova.persistence.UserRepository;
+import de.thm.arsnova.service.EntityService;
 import de.thm.arsnova.service.StubUserService;
 import de.thm.arsnova.websocket.ArsnovaSocketioServer;
 import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
@@ -97,5 +100,10 @@ public class TestAppConfig {
 			JavaMailSender mailSender,
 			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		return new StubUserService(repository, mailSender, jackson2HttpMessageConverter);
+	}
+
+	@Bean
+	public EntityService<JsonViewControllerAdviceTest.DummyEntity> dummyEntityService() {
+		return Mockito.mock(EntityService.class);
 	}
 }
