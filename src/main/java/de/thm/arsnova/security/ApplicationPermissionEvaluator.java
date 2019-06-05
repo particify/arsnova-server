@@ -140,7 +140,10 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final String permission) {
 		switch (permission) {
 			case "read":
-				return userId.equals(targetUserProfile.getId());
+				/* While the profile is readable for all authenticated users, it
+				 * only contains a limited amount of properties for the default
+				 * view. */
+				return true;
 			case "create":
 				return true;
 			case "owner":
