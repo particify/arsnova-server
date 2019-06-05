@@ -322,11 +322,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		return null;
 	}
 
-	@PreDestroy
-	public void destroy() {
-		logger.error("Destroy UserServiceImpl");
-	}
-
 	@Override
 	public void removeUserIdFromMaps(final String userId) {
 		if (userId != null) {
