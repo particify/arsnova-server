@@ -98,7 +98,7 @@ public class JsonViewControllerAdviceTest {
 	}
 
 	@Test
-	@WithMockUser("Admin")
+	@WithMockUser("TestAdmin")
 	public void testShouldSerializeAdminViewForAdmin() throws Exception {
 		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1?view=admin").accept(MediaType.APPLICATION_JSON))
@@ -107,7 +107,7 @@ public class JsonViewControllerAdviceTest {
 	}
 
 	@Test
-	@WithMockUser("Admin")
+	@WithMockUser("TestAdmin")
 	public void testShouldSerializeOwnerViewForAdmin() throws Exception {
 		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1?view=owner").accept(MediaType.APPLICATION_JSON))
@@ -116,7 +116,7 @@ public class JsonViewControllerAdviceTest {
 	}
 
 	@Test
-	@WithMockUser("Admin")
+	@WithMockUser("TestAdmin")
 	public void testAdminViewShouldContainAdminProperties() throws Exception {
 		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1?view=admin").accept(MediaType.APPLICATION_JSON))
@@ -127,7 +127,7 @@ public class JsonViewControllerAdviceTest {
 	}
 
 	@Test
-	@WithMockUser("Admin")
+	@WithMockUser("TestAdmin")
 	public void testOwnerViewShouldContainOwnerProperties() throws Exception {
 		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1?view=owner").accept(MediaType.APPLICATION_JSON))
@@ -138,7 +138,7 @@ public class JsonViewControllerAdviceTest {
 	}
 
 	@Test
-	@WithMockUser("Admin")
+	@WithMockUser("TestAdmin")
 	public void testDefaultViewShouldContainPublicProperties() throws Exception {
 		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1").accept(MediaType.APPLICATION_JSON))

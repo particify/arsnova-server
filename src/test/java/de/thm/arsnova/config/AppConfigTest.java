@@ -21,12 +21,17 @@ import de.thm.arsnova.connector.client.ConnectorClient;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -43,9 +48,18 @@ public class AppConfigTest extends AbstractJUnit4SpringContextTests {
 	@Autowired(required = false)
 	private ConnectorClient connectorClient;
 
+	@Value("${security.admin-accounts}") private String[] adminAccounts;
+
 	@Test
 	public void testShouldNotLoadConnectorClientByDefault() {
 		assertNull(connectorClient);
 	}
 
+	@Test
+	public void testShouldUseAdminAccountFromTestPropertiesFile() {
+		List<String> expected = Arrays.asList("TestAdmin");
+		List<String> actual = Arrays.asList(adminAccounts);
+
+		assertEquals("Configuration did not load correct property file", expected, actual);
+	}
 }
