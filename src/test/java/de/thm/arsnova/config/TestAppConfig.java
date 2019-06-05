@@ -59,9 +59,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableSpringConfigured
 @EnableWebMvc
 @PropertySource(
-		value = {"classpath:arsnova.properties.example", "file:/etc/arsnova/arsnova.properties"},
-		ignoreResourceNotFound = true,
-		encoding = "UTF-8"
+	value = "classpath:arsnova.test.properties.example",
+	encoding = "UTF-8"
 )
 @Profile("test")
 public class TestAppConfig {
