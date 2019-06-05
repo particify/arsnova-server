@@ -362,11 +362,6 @@ public class UserService implements IUserService {
 		return null;
 	}
 
-	@PreDestroy
-	public void destroy() {
-		logger.error("Destroy UserService");
-	}
-
 	@Override
 	public void removeUserFromMaps(final User user) {
 		if (user != null) {
