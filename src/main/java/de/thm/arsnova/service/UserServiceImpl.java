@@ -469,15 +469,16 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	private void sendActivationEmail(UserProfile userProfile) {
+		String activationKey = userProfile.getAccount().getActivationKey();
 		String activationUrl = MessageFormat.format(
 				"{0}{1}/{2}?action=activate&username={3}&key={4}",
 				rootUrl,
 				customizationPath,
 				activationPath,
 				UriUtils.encodeQueryParam(userProfile.getLoginId(), "UTF-8"),
-				userProfile.getAccount().getActivationKey());
+				activationKey);
 
-		sendEmail(userProfile, regMailSubject, MessageFormat.format(regMailBody, activationUrl));
+		sendEmail(userProfile, regMailSubject, MessageFormat.format(regMailBody, activationUrl, activationKey));
 	}
 
 	private void parseMailAddressPattern() {

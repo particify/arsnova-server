@@ -111,7 +111,8 @@ security.user-db.order=0
 security.user-db.allowed-email-domains=*
 security.user-db.registration-mail.subject=ARSnova Registration
 security.user-db.registration-mail.body=Welcome to ARSnova!\n\nPlease confirm \
-    your registration by visiting the following web address:\n{0}\n\n\
+    your registration by visiting the following web address:\n{0}\n\
+    Your activation key is:\n{1}\n\n\
     Afterwards, you can log into ARSnova with your e-mail address and password.
 security.user-db.reset-password-mail.subject=ARSnova Password Reset
 security.user-db.reset-password-mail.body=You requested to reset your \
