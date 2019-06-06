@@ -31,6 +31,15 @@ var designDoc = {
 				}
 			}
 		},
+		"by_moderators_containing_userid": {
+			"map": function (doc) {
+				if (doc.type === "Room" && doc.moderators) {
+					doc.moderators.forEach(function (moderator) {
+						emit(moderator.userId, {_rev: doc._rev});
+					});
+				}
+			}
+		},
 		"by_lastactivity_for_guests": { /* needs rewrite */
 			"map": function (doc) {
 				if (doc.type === "Room" && !doc.poolProperties && doc.creator.indexOf("Guest") === 0) {

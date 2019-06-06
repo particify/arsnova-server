@@ -279,6 +279,12 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
+	@PreAuthorize("isAuthenticated() and hasPermission(#userId, 'userprofile', 'owner')")
+	public List<String> getRoomIdsByModeratorId(final String userId) {
+		return roomRepository.findIdsByModeratorId(userId);
+	}
+
+	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Room> getMyRooms(final int offset, final int limit) {
 		return roomRepository.findByOwnerId(userService.getCurrentUser().getId(), offset, limit);

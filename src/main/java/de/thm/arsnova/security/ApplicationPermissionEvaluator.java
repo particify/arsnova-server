@@ -161,11 +161,13 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final String permission) {
 		switch (permission) {
 			case "read":
-				return !targetRoom.isClosed();
+				return !targetRoom.isClosed() || hasUserIdRoomModeratingPermission(targetRoom, userId);
 			case "create":
 				return !userId.isEmpty();
-			case "owner":
 			case "update":
+				return targetRoom.getOwnerId().equals(userId)
+						|| hasUserIdRoomModeratorRole(targetRoom, userId, Room.Moderator.Role.EDITING_MODERATOR);
+			case "owner":
 			case "delete":
 				return targetRoom.getOwnerId().equals(userId);
 			default:
@@ -177,15 +179,21 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final String userId,
 			final Content targetContent,
 			final String permission) {
+		final Room room = roomRepository.findOne(targetContent.getRoomId());
+		if (room == null) {
+			return false;
+		}
+
 		switch (permission) {
 			case "read":
-				return !roomRepository.findOne(targetContent.getRoomId()).isClosed();
+				return !room.isClosed() || hasUserIdRoomModeratingPermission(room, userId);
 			case "create":
-			case "owner":
 			case "update":
 			case "delete":
-				final Room room = roomRepository.findOne(targetContent.getRoomId());
-				return room != null && room.getOwnerId().equals(userId);
+			case "owner":
+				/* TODO: Remove owner permission for content. Use create/update/delete instead. */
+				return room.getOwnerId().equals(userId)
+						|| hasUserIdRoomModeratorRole(room, userId, Room.Moderator.Role.EDITING_MODERATOR);
 			default:
 				return false;
 		}
@@ -206,7 +214,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 					return true;
 				}
 				room = roomRepository.findOne(targetAnswer.getRoomId());
-				return room != null && hasRoomPermission(userId, room, "owner");
+				return room != null && hasUserIdRoomModeratingPermission(room, userId);
 			case "create":
 				return content.getState().isResponsesEnabled();
 			case "owner":
@@ -216,7 +224,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				return false;
 			case "delete":
 				room = roomRepository.findOne(targetAnswer.getRoomId());
-				return room != null && hasRoomPermission(userId, room, "owner");
+				return room != null && hasUserIdRoomModeratingPermission(room, userId);
 			default:
 				return false;
 		}
@@ -241,7 +249,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				/* Allow reading & deletion by session owner */
 				final Room room = roomRepository.findOne(targetComment.getRoomId());
 
-				return room != null && room.getOwnerId().equals(userId);
+				return room != null && hasUserIdRoomModeratingPermission(room, userId);
 			default:
 				return false;
 		}
@@ -254,7 +262,6 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		Room room;
 		switch (permission) {
 			case "create":
-			case "owner":
 			case "update":
 			case "delete":
 				if (userId.isEmpty() || targetMotd.getRoomId() == null || targetMotd.getAudience() != Motd.Audience.ROOM) {
@@ -265,17 +272,40 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 					return false;
 				}
 
-				return userId.equals(room.getOwnerId());
+				return userId.equals(room.getOwnerId())
+						|| hasUserIdRoomModeratorRole(room, userId, Room.Moderator.Role.EDITING_MODERATOR);
 			case "read":
 				if (targetMotd.getAudience() != Motd.Audience.ROOM) {
 					return true;
 				}
 				room = roomRepository.findOne(targetMotd.getRoomId());
 
-				return room != null && (!room.isClosed() || room.getOwnerId().equals(userId));
+				return room != null && (!room.isClosed() || hasUserIdRoomModeratingPermission(room, userId));
 			default:
 				return false;
 		}
+	}
+
+	/**
+	 * Checks if the user is owner or has any moderating role for the room.
+	 */
+	private boolean hasUserIdRoomModeratingPermission(final Room room, final String userId) {
+		return room.getOwnerId().equals(userId) || room.getModerators().stream()
+				.anyMatch(m -> m.getUserId().equals(userId));
+	}
+
+	/**
+	 * Checks if the user has a specific moderating role for the room.
+	 *
+	 * @param room The room to check the role for.
+	 * @param userId The ID of the user to check the role for.
+	 * @param role The role that is checked.
+	 * @return Returns true if the user has the moderator role for the room.
+	 */
+	private boolean hasUserIdRoomModeratorRole(final Room room, final String userId, Room.Moderator.Role role) {
+		return room.getModerators().stream()
+				.filter(m -> m.getUserId().equals(userId))
+				.anyMatch(m -> m.getRoles().contains(role));
 	}
 
 	private boolean hasAdminRole(final String username) {

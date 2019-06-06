@@ -98,6 +98,40 @@ public class Room extends Entity {
 		}
 	}
 
+	public static class Moderator {
+		public enum Role {
+			EDITING_MODERATOR,
+			EXECUTIVE_MODERATOR
+		}
+
+		private String userId;
+		private Set<Role> roles;
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public String getUserId() {
+			return userId;
+		}
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public void setUserId(final String userId) {
+			this.userId = userId;
+		}
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public Set<Role> getRoles() {
+			if (roles == null) {
+				roles = new HashSet<>();
+			}
+
+			return roles;
+		}
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public void setRoles(final Set<Role> roles) {
+			this.roles = roles;
+		}
+	}
+
 	public static class Settings {
 		private boolean questionsEnabled = true;
 		private boolean slidesEnabled = true;
@@ -420,6 +454,7 @@ public class Room extends Entity {
 	private String description;
 	private boolean closed;
 	private Set<ContentGroup> contentGroups;
+	private Set<Moderator> moderators;
 	private Settings settings;
 	private Author author;
 	private PoolProperties poolProperties;
@@ -507,6 +542,20 @@ public class Room extends Entity {
 
 	public void setContentGroupsFromMap(final Map<String, ContentGroup> groups) {
 		this.contentGroups = new HashSet<>(groups.values());
+	}
+
+	@JsonView(View.Persistence.class)
+	public Set<Moderator> getModerators() {
+		if (moderators == null) {
+			moderators = new HashSet<>();
+		}
+
+		return moderators;
+	}
+
+	@JsonView(View.Persistence.class)
+	public void setModerators(final Set<Moderator> moderators) {
+		this.moderators = moderators;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
