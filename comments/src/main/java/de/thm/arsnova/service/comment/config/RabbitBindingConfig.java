@@ -23,6 +23,7 @@ public class RabbitBindingConfig {
 
     static final String upvoteQueueName = "vote.command.upvote";
     static final String downvoteQueueName = "vote.command.downvote";
+    static final String resetVoteQueueName = "vote.command.resetvote";
 
     static final Map<String, Object> commandMapper = new HashMap<String, Object>(){{
         put("create", createCommandQueueName);
@@ -94,6 +95,16 @@ public class RabbitBindingConfig {
     @Autowired
     public Queue upvoteQueueName(RabbitAdmin rabbitAdmin) {
         final Queue queue = new Queue(upvoteQueueName, true, false, false);
+
+        rabbitAdmin.declareQueue(queue);
+
+        return queue;
+    }
+
+    @Bean
+    @Autowired
+    public Queue resetVoteQueueName(RabbitAdmin rabbitAdmin) {
+        final Queue queue = new Queue(resetVoteQueueName, true, false, false);
 
         rabbitAdmin.declareQueue(queue);
 

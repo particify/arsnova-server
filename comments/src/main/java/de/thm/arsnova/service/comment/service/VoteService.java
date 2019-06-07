@@ -45,6 +45,10 @@ public class VoteService {
         return v;
     }
 
+    public void delete(Vote v) {
+        repository.delete(v);
+    }
+
     public int scoreForComment(String commentId) {
         List<Vote> l = repository.findByCommentId(commentId);
         int score = 0;
@@ -66,5 +70,9 @@ public class VoteService {
         });
 
         return voteList;
+    }
+
+    public Vote getForCommentAndUser(String commentId, String userId) {
+        return repository.findByCommentIdAndUserId(commentId, userId);
     }
 }

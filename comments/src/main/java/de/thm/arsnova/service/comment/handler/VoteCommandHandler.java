@@ -1,6 +1,7 @@
 package de.thm.arsnova.service.comment.handler;
 
 import de.thm.arsnova.service.comment.CommentEventSource;
+import de.thm.arsnova.service.comment.model.command.ResetVote;
 import de.thm.arsnova.service.comment.service.VoteService;
 import de.thm.arsnova.service.comment.model.Vote;
 import de.thm.arsnova.service.comment.model.command.Downvote;
@@ -57,5 +58,20 @@ public class VoteCommandHandler {
         eventer.ScoreChanged(p.getCommentId());
 
         return saved;
+    }
+
+    public void handle(ResetVote vote) {
+        logger.trace("got new command: " + vote.toString());
+
+        VotePayload p = vote.getPayload();
+        Vote v = service.getForCommentAndUser(p.getCommentId(), p.getUserId());
+
+        if (v == null) {
+            logger.info("No vote to reset");
+        }
+
+        service.delete(v);
+
+        eventer.ScoreChanged(p.getCommentId());
     }
 }
