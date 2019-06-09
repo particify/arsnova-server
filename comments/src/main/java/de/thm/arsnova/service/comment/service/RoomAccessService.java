@@ -25,6 +25,6 @@ public class RoomAccessService {
 
     public RoomAccess create(RoomAccess roomAccess) {
         logger.trace("Creating RoomAccess: " + roomAccess.toString());
-        repository.save(roomAccess);
+        return repository.save(roomAccess);
     }
 }
