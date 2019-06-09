@@ -8,7 +8,7 @@ public class CommentUpdated extends WebSocketEvent<CommentUpdatedPayload> {
     }
 
     public CommentUpdated(CommentUpdatedPayload p, String id) {
-        super(UpdateComment.class.getSimpleName(), id);
+        super(CommentUpdated.class.getSimpleName(), id);
         this.payload = p;
     }
 
