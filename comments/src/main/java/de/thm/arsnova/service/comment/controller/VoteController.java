@@ -1,5 +1,6 @@
 package de.thm.arsnova.service.comment.controller;
 
+import de.thm.arsnova.service.comment.model.VotePK;
 import de.thm.arsnova.service.comment.service.FindQuery;
 import de.thm.arsnova.service.comment.handler.VoteCommandHandler;
 import de.thm.arsnova.service.comment.service.VoteFindQueryService;
@@ -50,10 +51,10 @@ public class VoteController extends AbstractEntityController {
         this.findQueryService = findQueryService;
     }
 
-    @GetMapping(GET_MAPPING)
+    /*@GetMapping(GET_MAPPING)
     public Vote get(@PathVariable String id) {
         return service.get(id);
-    }
+    }*/
 
     @PostMapping(POST_MAPPING)
     @ResponseStatus(HttpStatus.CREATED)
@@ -76,10 +77,10 @@ public class VoteController extends AbstractEntityController {
         }
 
         if (v != null) {
-            final String uri = UriComponentsBuilder.fromPath(REQUEST_MAPPING).path(GET_MAPPING)
+            /*final String uri = UriComponentsBuilder.fromPath(REQUEST_MAPPING).path(GET_MAPPING)
                     .buildAndExpand(v.getId()).toUriString();
             httpServletResponse.setHeader(HttpHeaders.LOCATION, uri);
-            httpServletResponse.setHeader(ENTITY_ID_HEADER, v.getId());
+            httpServletResponse.setHeader(ENTITY_ID_HEADER, v.getId());*/
 
             return v;
         } else {
@@ -92,7 +93,7 @@ public class VoteController extends AbstractEntityController {
     public List<Vote> find(@RequestBody final FindQuery<Vote> findQuery) {
         logger.debug("Resolving find query: {}", findQuery);
 
-        Set<String> ids = findQueryService.resolveQuery(findQuery);
+        Set<VotePK> ids = findQueryService.resolveQuery(findQuery);
 
         logger.debug("Resolved find query to IDs: {}", ids);
 

@@ -2,6 +2,7 @@ package de.thm.arsnova.service.comment.service;
 
 import de.thm.arsnova.service.comment.model.Comment;
 import de.thm.arsnova.service.comment.model.Vote;
+import de.thm.arsnova.service.comment.model.VotePK;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,8 +25,8 @@ public class VoteFindQueryService {
         this.commentService = commentService;
     }
 
-    public Set<String> resolveQuery(final FindQuery<Vote> findQuery) {
-        Set<String> voteIds = new HashSet<>();
+    public Set<VotePK> resolveQuery(final FindQuery<Vote> findQuery) {
+        Set<VotePK> voteIds = new HashSet<>();
         if (findQuery.getExternalFilters().get("roomId") instanceof String && findQuery.getProperties().getUserId() != null) {
             String roomId = (String) findQuery.getExternalFilters().get("roomId");
             String userId = findQuery.getProperties().getUserId();
@@ -33,7 +34,7 @@ public class VoteFindQueryService {
             List<String> commentIds = commentList.stream().map(Comment::getId).collect(Collectors.toList());
             List<Vote> voteList = voteService.getForCommentsAndUser(commentIds, userId);
 
-            voteList.forEach((v) -> voteIds.add(v.getId()));
+            voteList.forEach((v) -> voteIds.add(new VotePK(userId, v.getCommentId())));
         }
 
         return voteIds;

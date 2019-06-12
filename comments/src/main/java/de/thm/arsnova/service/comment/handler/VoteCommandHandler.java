@@ -64,14 +64,12 @@ public class VoteCommandHandler {
         logger.trace("got new command: " + vote.toString());
 
         VotePayload p = vote.getPayload();
-        Vote v = service.getForCommentAndUser(p.getCommentId(), p.getUserId());
+        Vote v = service.resetVote(p.getCommentId(), p.getUserId());
 
         if (v == null) {
             logger.info("No vote to reset");
+        } else {
+            eventer.ScoreChanged(p.getCommentId());
         }
-
-        service.delete(v);
-
-        eventer.ScoreChanged(p.getCommentId());
     }
 }
