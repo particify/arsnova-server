@@ -6,7 +6,6 @@ import de.thm.arsnova.service.comment.model.WebSocketPayload;
 import java.util.Objects;
 
 public class VoteCreatedPayload implements WebSocketPayload {
-    private String id;
     private String commentId;
     private int vote;
 
@@ -15,18 +14,9 @@ public class VoteCreatedPayload implements WebSocketPayload {
 
     public VoteCreatedPayload(Vote v) {
         if (v != null) {
-            id = v.getId();
             commentId = v.getCommentId();
             vote = v.getVote();
         }
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getCommentId() {
@@ -48,7 +38,6 @@ public class VoteCreatedPayload implements WebSocketPayload {
     @Override
     public String toString() {
         return "VoteCreatedPayload{" +
-                "id='" + id + '\'' +
                 ", commentId='" + commentId + '\'' +
                 ", vote=" + vote +
                 '}';
@@ -60,13 +49,12 @@ public class VoteCreatedPayload implements WebSocketPayload {
         if (o == null || getClass() != o.getClass()) return false;
         VoteCreatedPayload that = (VoteCreatedPayload) o;
         return vote == that.vote &&
-                Objects.equals(id, that.id) &&
                 Objects.equals(commentId, that.commentId);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, commentId, vote);
+        return Objects.hash(commentId, vote);
     }
 }

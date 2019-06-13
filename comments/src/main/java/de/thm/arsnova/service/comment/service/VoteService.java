@@ -1,13 +1,15 @@
 package de.thm.arsnova.service.comment.service;
 
+import de.thm.arsnova.service.comment.model.VotePK;
 import de.thm.arsnova.service.comment.service.persistence.VoteRepository;
 import de.thm.arsnova.service.comment.model.Vote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 
+import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class VoteService {
@@ -18,12 +20,12 @@ public class VoteService {
         this.repository = repository;
     }
 
-    public Vote get(String id) {
+    public Vote get(VotePK id) {
         // ToDo: error handling
         return repository.findById(id).orElse(null);
     }
 
-    public List<Vote> get(List<String> ids) {
+    public List<Vote> get(List<VotePK> ids) {
         Iterable<Vote> it = repository.findAllById(ids);
         List<Vote> list = new ArrayList<Vote>();
         it.forEach(list::add);
@@ -31,22 +33,33 @@ public class VoteService {
         return list;
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public Vote create(Vote v) {
+        Vote oldVote = repository.findById(new VotePK(v.getCommentId(), v.getUserId())).orElse(null);
 
-        Vote eventualOldVote = repository.findByCommentIdAndUserId(v.getCommentId(), v.getUserId());
-        if (eventualOldVote != null) {
-            v.setId(eventualOldVote.getId());
+        if (repository.existsById(new VotePK(v.getCommentId(), v.getUserId()))) {
+            oldVote.setVote(v.getVote());
+            repository.save(oldVote);
+            return oldVote;
         } else {
-            String newId = UUID.randomUUID().toString().replace("-", "");
-            v.setId(newId);
+            repository.save(v);
+            return v;
         }
-        repository.save(v);
-
-        return v;
     }
 
     public void delete(Vote v) {
         repository.delete(v);
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public Vote delete(String commentId, String userId) {
+        Vote v = repository.findById(new VotePK(userId, commentId)).orElse(null);
+
+        if (v != null) {
+            repository.delete(v);
+        }
+
+        return v;
     }
 
     public int scoreForComment(String commentId) {
@@ -63,7 +76,7 @@ public class VoteService {
         List<Vote> voteList = new ArrayList<>();
 
         commentIds.forEach((id) -> {
-            Vote tmp = repository.findByCommentIdAndUserId(id, userId);
+            Vote tmp = repository.findById(new VotePK(id, userId)).orElse(null);
             if (tmp != null) {
                 voteList.add(tmp);
             }
@@ -73,6 +86,17 @@ public class VoteService {
     }
 
     public Vote getForCommentAndUser(String commentId, String userId) {
-        return repository.findByCommentIdAndUserId(commentId, userId);
+        return repository.findById(new VotePK(commentId, userId)).orElse(null);
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public Vote resetVote(String commentId, String userId) {
+        Vote v = repository.findById(new VotePK(userId, commentId)).orElse(null);
+
+        if (v != null) {
+            repository.delete(v);
+        }
+
+        return v;
     }
 }
