@@ -585,7 +585,13 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 			resetPasswordPath,
 			UriUtils.encodeQueryParam(userProfile.getLoginId(), "UTF-8"), account.getPasswordResetKey());
 
-		sendEmail(userProfile, resetPasswordMailSubject, MessageFormat.format(resetPasswordMailBody, resetPasswordUrl));
+		String mailBody = MessageFormat.format(
+				resetPasswordMailBody,
+				resetPasswordUrl,
+				account.getPasswordResetKey()
+		);
+
+		sendEmail(userProfile, resetPasswordMailSubject, MessageFormat.format(mailBody, resetPasswordUrl));
 	}
 
 	@Override

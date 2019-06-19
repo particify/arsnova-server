@@ -116,7 +116,8 @@ security.user-db.registration-mail.body=Welcome to ARSnova!\n\nPlease confirm \
     Afterwards, you can log into ARSnova with your e-mail address and password.
 security.user-db.reset-password-mail.subject=ARSnova Password Reset
 security.user-db.reset-password-mail.body=You requested to reset your \
-    password.\n\nPlease follow the link below to set a new password:\n{0}
+    password.\n\nPlease follow the link below to set a new password:\n{0}\n\n\
+    Your reset key is:\n{1}
 
 # LDAP authentication
 #
