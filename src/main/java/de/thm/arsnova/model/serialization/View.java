@@ -20,7 +20,10 @@ package de.thm.arsnova.model.serialization;
 
 public class View {
 	public interface Persistence {}
+
 	public interface Public {}
+
 	public interface Owner extends Public {}
+
 	public interface Admin extends Owner {}
 }

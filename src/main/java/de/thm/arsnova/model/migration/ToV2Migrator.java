@@ -387,7 +387,9 @@ public class ToV2Migrator {
 			choices = stats.getCombinatedCounts().stream().collect(Collectors.toMap(
 					c -> migrateChoice(c.getSelectedChoiceIndexes(), content.getOptions()),
 					c -> c.getCount(),
-					(u, v) -> { throw new IllegalStateException(String.format("Duplicate key %s", u)); },
+					(u, v) -> {
+						throw new IllegalStateException(String.format("Duplicate key %s", u));
+					},
 					LinkedHashMap::new));
 		} else {
 			choices = new LinkedHashMap<>();

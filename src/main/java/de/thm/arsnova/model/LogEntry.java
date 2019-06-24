@@ -145,11 +145,11 @@ public class LogEntry extends Entity {
 		}
 		final LogEntry logEntry = (LogEntry) o;
 
-		return level == logEntry.level &&
-				Objects.equals(id, logEntry.id) &&
-				Objects.equals(rev, logEntry.rev) &&
-				Objects.equals(creationTimestamp, logEntry.creationTimestamp) &&
-				Objects.equals(updateTimestamp, logEntry.updateTimestamp) &&
-				Objects.equals(event, logEntry.event);
+		return level == logEntry.level
+				&& Objects.equals(id, logEntry.id)
+				&& Objects.equals(rev, logEntry.rev)
+				&& Objects.equals(creationTimestamp, logEntry.creationTimestamp)
+				&& Objects.equals(updateTimestamp, logEntry.updateTimestamp)
+				&& Objects.equals(event, logEntry.event);
 	}
 }

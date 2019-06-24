@@ -441,7 +441,7 @@ public class V2ToV3Migration implements Migration {
 			query.setBookmark(bookmark);
 			List<Answer> answersV3 = new ArrayList<>();
 			PagedMangoResponse<de.thm.arsnova.model.migration.v2.Answer> response =
-					 fromConnector.queryForPage(query, de.thm.arsnova.model.migration.v2.Answer.class);
+					fromConnector.queryForPage(query, de.thm.arsnova.model.migration.v2.Answer.class);
 			List<de.thm.arsnova.model.migration.v2.Answer> answersV2 = response.getEntities();
 			bookmark = response.getBookmark();
 			if (answersV2.size() == 0) {

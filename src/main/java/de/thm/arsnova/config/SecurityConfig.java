@@ -244,8 +244,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		final PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
 		configurer.setLocations(
-			new ClassPathResource("arsnova.properties.example"),
-			new FileSystemResource("file:///etc/arsnova/arsnova.properties")
+				new ClassPathResource("arsnova.properties.example"),
+				new FileSystemResource("file:///etc/arsnova/arsnova.properties")
 		);
 		configurer.setIgnoreResourceNotFound(true);
 		configurer.setIgnoreUnresolvablePlaceholders(false);

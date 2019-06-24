@@ -103,10 +103,10 @@ public class UserProfile extends Entity {
 			}
 			final Account account = (Account) o;
 
-			return Objects.equals(password, account.password) &&
-					Objects.equals(activationKey, account.activationKey) &&
-					Objects.equals(passwordResetKey, account.passwordResetKey) &&
-					Objects.equals(passwordResetTime, account.passwordResetTime);
+			return Objects.equals(password, account.password)
+					&& Objects.equals(activationKey, account.activationKey)
+					&& Objects.equals(passwordResetKey, account.passwordResetKey)
+					&& Objects.equals(passwordResetTime, account.passwordResetTime);
 		}
 
 		@Override
@@ -287,9 +287,9 @@ public class UserProfile extends Entity {
 		}
 		final UserProfile that = (UserProfile) o;
 
-		return authProvider == that.authProvider &&
-				Objects.equals(loginId, that.loginId) &&
-				Objects.equals(lastLoginTimestamp, that.lastLoginTimestamp);
+		return authProvider == that.authProvider
+				&& Objects.equals(loginId, that.loginId)
+				&& Objects.equals(lastLoginTimestamp, that.lastLoginTimestamp);
 	}
 
 	@Override

@@ -129,7 +129,7 @@ public class MigrationState extends Entity {
 		}
 		final MigrationState that = (MigrationState) o;
 
-		return Objects.equals(active, that.active) &&
-				Objects.equals(completed, that.completed);
+		return Objects.equals(active, that.active)
+				&& Objects.equals(completed, that.completed);
 	}
 }

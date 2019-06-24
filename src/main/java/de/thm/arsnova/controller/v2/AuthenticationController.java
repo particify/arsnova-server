@@ -292,10 +292,10 @@ public class AuthenticationController extends AbstractController {
 
 		if (guestEnabled) {
 			ServiceDescription sdesc = new ServiceDescription(
-				"guest",
-				"Guest",
-				null,
-				guestRoles
+					"guest",
+					"Guest",
+					null,
+					guestRoles
 			);
 			sdesc.setOrder(guestOrder);
 			services.add(sdesc);
@@ -303,11 +303,11 @@ public class AuthenticationController extends AbstractController {
 
 		if (customLoginEnabled && !"".equals(customLoginDialog)) {
 			ServiceDescription sdesc = new ServiceDescription(
-				"custom",
-				customLoginTitle,
-				customizationPath + "/" + customLoginDialog + "?redirect={0}",
-				customLoginRoles,
-				customLoginImage
+					"custom",
+					customLoginTitle,
+					customizationPath + "/" + customLoginDialog + "?redirect={0}",
+					customLoginRoles,
+					customLoginImage
 			);
 			sdesc.setOrder(customLoginOrder);
 			services.add(sdesc);
@@ -315,11 +315,11 @@ public class AuthenticationController extends AbstractController {
 
 		if (dbAuthEnabled && !"".equals(dbAuthDialog)) {
 			ServiceDescription sdesc = new ServiceDescription(
-				"arsnova",
-				dbAuthTitle,
-				customizationPath + "/" + dbAuthDialog + "?redirect={0}",
-				dbAuthRoles,
-				dbAuthImage
+					"arsnova",
+					dbAuthTitle,
+					customizationPath + "/" + dbAuthDialog + "?redirect={0}",
+					dbAuthRoles,
+					dbAuthImage
 			);
 			sdesc.setOrder(dbAuthOrder);
 			services.add(sdesc);
@@ -327,11 +327,11 @@ public class AuthenticationController extends AbstractController {
 
 		if (ldapEnabled && !"".equals(ldapDialog)) {
 			ServiceDescription sdesc = new ServiceDescription(
-				"ldap",
-				ldapTitle,
-				customizationPath + "/" + ldapDialog + "?redirect={0}",
-				ldapRoles,
-				ldapImage
+					"ldap",
+					ldapTitle,
+					customizationPath + "/" + ldapDialog + "?redirect={0}",
+					ldapRoles,
+					ldapImage
 			);
 			sdesc.setOrder(ldapOrder);
 			services.add(sdesc);
@@ -339,11 +339,11 @@ public class AuthenticationController extends AbstractController {
 
 		if (casEnabled) {
 			ServiceDescription sdesc = new ServiceDescription(
-				"cas",
-				casTitle,
-				MessageFormat.format(dialogUrl, "cas"),
-				casRoles,
-				casImage
+					"cas",
+					casTitle,
+					MessageFormat.format(dialogUrl, "cas"),
+					casRoles,
+					casImage
 			);
 			sdesc.setOrder(casOrder);
 			services.add(sdesc);
@@ -351,11 +351,11 @@ public class AuthenticationController extends AbstractController {
 
 		if (oidcEnabled) {
 			ServiceDescription sdesc = new ServiceDescription(
-				"oidc",
-				oidcTitle,
-				MessageFormat.format(dialogUrl, "oidc"),
-				oidcRoles,
-				oidcImage
+					"oidc",
+					oidcTitle,
+					MessageFormat.format(dialogUrl, "oidc"),
+					oidcRoles,
+					oidcImage
 			);
 			sdesc.setOrder(oidcOrder);
 			services.add(sdesc);
@@ -363,10 +363,10 @@ public class AuthenticationController extends AbstractController {
 
 		if (facebookEnabled) {
 			ServiceDescription sdesc = new ServiceDescription(
-				"facebook",
-				"Facebook",
-				MessageFormat.format(dialogUrl, "facebook"),
-				facebookRoles
+					"facebook",
+					"Facebook",
+					MessageFormat.format(dialogUrl, "facebook"),
+					facebookRoles
 			);
 			sdesc.setOrder(facebookOrder);
 			services.add(sdesc);
@@ -374,10 +374,10 @@ public class AuthenticationController extends AbstractController {
 
 		if (googleEnabled) {
 			ServiceDescription sdesc = new ServiceDescription(
-				"google",
-				"Google",
-				MessageFormat.format(dialogUrl, "google"),
-				googleRoles
+					"google",
+					"Google",
+					MessageFormat.format(dialogUrl, "google"),
+					googleRoles
 			);
 			sdesc.setOrder(googleOrder);
 			services.add(sdesc);
@@ -385,10 +385,10 @@ public class AuthenticationController extends AbstractController {
 
 		if (twitterEnabled) {
 			ServiceDescription sdesc = new ServiceDescription(
-				"twitter",
-				"Twitter",
-				MessageFormat.format(dialogUrl, "twitter"),
-				twitterRoles
+					"twitter",
+					"Twitter",
+					MessageFormat.format(dialogUrl, "twitter"),
+					twitterRoles
 			);
 			sdesc.setOrder(twitterOrder);
 			services.add(sdesc);

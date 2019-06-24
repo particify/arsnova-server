@@ -121,13 +121,13 @@ public class Comment extends Entity {
 		}
 		final Comment comment = (Comment) o;
 
-		return read == comment.read &&
-				Objects.equals(roomId, comment.roomId) &&
-				Objects.equals(creatorId, comment.creatorId) &&
-				Objects.equals(subject, comment.subject) &&
-				Objects.equals(body, comment.body) &&
-				Objects.equals(timestamp, comment.timestamp) &&
-				Objects.equals(extensions, comment.extensions);
+		return read == comment.read
+				&& Objects.equals(roomId, comment.roomId)
+				&& Objects.equals(creatorId, comment.creatorId)
+				&& Objects.equals(subject, comment.subject)
+				&& Objects.equals(body, comment.body)
+				&& Objects.equals(timestamp, comment.timestamp)
+				&& Objects.equals(extensions, comment.extensions);
 	}
 
 	@Override

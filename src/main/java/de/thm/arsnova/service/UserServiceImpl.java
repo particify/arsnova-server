@@ -228,8 +228,8 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 			return null;
 		}
 		User user = (User) authentication.getPrincipal();
-		String jwt = authentication instanceof JwtToken ?
-				(String) authentication.getCredentials() : jwtService.createSignedToken(user);
+		String jwt = authentication instanceof JwtToken
+				? (String) authentication.getCredentials() : jwtService.createSignedToken(user);
 
 		ClientAuthentication clientAuthentication =
 				new ClientAuthentication(user.getId(), user.getUsername(),
@@ -572,9 +572,9 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		}
 		UserProfile.Account account = userProfile.getAccount();
 		// checks if a password reset process in in progress
-		if ((account.getPasswordResetTime() != null) &&
-				(System.currentTimeMillis() <
-						account.getPasswordResetTime().getTime() + REPEATED_PASSWORD_RESET_DELAY_MS)) {
+		if ((account.getPasswordResetTime() != null)
+				&& (System.currentTimeMillis()
+						< account.getPasswordResetTime().getTime() + REPEATED_PASSWORD_RESET_DELAY_MS)) {
 			
 			logger.info("Password reset failed. The reset delay for User {} is still active.", username);
 
@@ -589,11 +589,11 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		}
 
 		String resetPasswordUrl = MessageFormat.format(
-			"{0}{1}/{2}?action=resetpassword&username={3}&key={4}",
-			rootUrl,
-			customizationPath,
-			resetPasswordPath,
-			UriUtils.encodeQueryParam(userProfile.getLoginId(), "UTF-8"), account.getPasswordResetKey());
+				"{0}{1}/{2}?action=resetpassword&username={3}&key={4}",
+				rootUrl,
+				customizationPath,
+				resetPasswordPath,
+				UriUtils.encodeQueryParam(userProfile.getLoginId(), "UTF-8"), account.getPasswordResetKey());
 
 		String mailBody = MessageFormat.format(
 				resetPasswordMailBody,

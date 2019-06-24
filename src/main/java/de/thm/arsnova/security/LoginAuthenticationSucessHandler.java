@@ -34,8 +34,7 @@ public class LoginAuthenticationSucessHandler extends
 	@Override
 	protected String determineTargetUrl(
 			final HttpServletRequest request,
-			final HttpServletResponse response
-	) {
+			final HttpServletResponse response) {
 		HttpSession session = request.getSession();
 		if (session == null || session.getAttribute("ars-login-success-url") == null) {
 			return targetUrl;

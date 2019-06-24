@@ -221,8 +221,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	private List<String> collectUnansweredQuestionIds(
 			final List<String> contentIds,
-			final List<String> answeredContentIds
-	) {
+			final List<String> answeredContentIds) {
 		final List<String> unanswered = new ArrayList<>();
 		for (final String contentId : contentIds) {
 			if (!answeredContentIds.contains(contentId)) {
@@ -234,8 +233,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	private List<String> collectUnansweredQuestionIdsByPiRound(
 			final List<Content> contents,
-			final Map<String, Integer> answeredQuestions
-	) {
+			final Map<String, Integer> answeredQuestions) {
 		final List<String> unanswered = new ArrayList<>();
 
 		for (final Content content : contents) {

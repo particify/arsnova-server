@@ -41,7 +41,9 @@ public class ScoreOptions implements Serializable {
 		this.questionVariant = scoreOptions.getQuestionVariant();
 	}
 
-	public ScoreOptions() { }
+	public ScoreOptions() {
+
+	}
 
 	@ApiModelProperty(required = true, value = "the type")
 	@JsonView({View.Persistence.class, View.Public.class})

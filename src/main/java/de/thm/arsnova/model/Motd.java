@@ -128,12 +128,12 @@ public class Motd extends Entity {
 		}
 		final Motd motd = (Motd) o;
 
-		return Objects.equals(roomId, motd.roomId) &&
-				Objects.equals(startDate, motd.startDate) &&
-				Objects.equals(endDate, motd.endDate) &&
-				Objects.equals(title, motd.title) &&
-				Objects.equals(body, motd.body) &&
-				audience == motd.audience;
+		return Objects.equals(roomId, motd.roomId)
+				&& Objects.equals(startDate, motd.startDate)
+				&& Objects.equals(endDate, motd.endDate)
+				&& Objects.equals(title, motd.title)
+				&& Objects.equals(body, motd.body)
+				&& audience == motd.audience;
 	}
 
 	@Override

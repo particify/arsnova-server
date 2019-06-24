@@ -24,6 +24,8 @@ import de.thm.arsnova.model.UserProfile;
 
 public interface UserRepository extends CrudRepository<UserProfile, String> {
 	UserProfile findByAuthProviderAndLoginId(UserProfile.AuthProvider authProvider, String loginId);
+
 	List<UserProfile> findByLoginId(String loginId);
+
 	int deleteInactiveUsers(long lastActivityBefore);
 }

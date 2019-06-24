@@ -124,10 +124,10 @@ public class Answer extends Entity {
 		}
 		final Answer answer = (Answer) o;
 
-		return round == answer.round &&
-				Objects.equals(contentId, answer.contentId) &&
-				Objects.equals(roomId, answer.roomId) &&
-				Objects.equals(creatorId, answer.creatorId);
+		return round == answer.round
+				&& Objects.equals(contentId, answer.contentId)
+				&& Objects.equals(roomId, answer.roomId)
+				&& Objects.equals(creatorId, answer.creatorId);
 	}
 
 	@Override

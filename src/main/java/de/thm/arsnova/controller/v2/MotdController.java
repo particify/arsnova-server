@@ -75,15 +75,14 @@ public class MotdController extends AbstractController {
 	@ApiOperation(value = "get messages. if adminview=false, only messages with startdate<clientdate<enddate are returned")
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@ApiResponses(value = {
-		@ApiResponse(code = 204, message = HTML_STATUS_204),
-		@ApiResponse(code = 501, message = HTML_STATUS_501)
+			@ApiResponse(code = 204, message = HTML_STATUS_204),
+			@ApiResponse(code = 501, message = HTML_STATUS_501)
 	})
 	public List<Motd> getMotd(
-		@ApiParam(value = "clientdate", required = false) @RequestParam(value = "clientdate", defaultValue = "") final String clientdate,
-		@ApiParam(value = "adminview", required = false) @RequestParam(value = "adminview", defaultValue = "false") final Boolean adminview,
-		@ApiParam(value = "audience", required = false) @RequestParam(value = "audience", defaultValue = "all") final String audience,
-		@ApiParam(value = "sessionkey", required = false) @RequestParam(value = "sessionkey", required = false) final String roomShortId
-	) {
+			@ApiParam(value = "clientdate", required = false) @RequestParam(value = "clientdate", defaultValue = "") final String clientdate,
+			@ApiParam(value = "adminview", required = false) @RequestParam(value = "adminview", defaultValue = "false") final Boolean adminview,
+			@ApiParam(value = "audience", required = false) @RequestParam(value = "audience", defaultValue = "all") final String audience,
+			@ApiParam(value = "sessionkey", required = false) @RequestParam(value = "sessionkey", required = false) final String roomShortId) {
 		List<de.thm.arsnova.model.Motd> motds;
 		Date date = new Date(System.currentTimeMillis());
 		if (!clientdate.isEmpty()) {
@@ -94,13 +93,13 @@ public class MotdController extends AbstractController {
 			roomId = roomService.getIdByShortId(roomShortId);
 		}
 		if (adminview) {
-			motds = roomShortId != null ?
-					motdService.getAllRoomMotds(roomId) :
-					motdService.getAdminMotds();
+			motds = roomShortId != null
+					? motdService.getAllRoomMotds(roomId)
+					: motdService.getAdminMotds();
 		} else {
-			motds = roomShortId != null ?
-					motdService.getCurrentRoomMotds(date, roomId) :
-					motdService.getCurrentMotds(date, audience);
+			motds = roomShortId != null
+					? motdService.getCurrentRoomMotds(date, roomId)
+					: motdService.getCurrentMotds(date, audience);
 		}
 
 		return motds.stream().map(toV2Migrator::migrate).collect(Collectors.toList());
@@ -108,15 +107,14 @@ public class MotdController extends AbstractController {
 
 	@ApiOperation(value = "create a new message of the day", nickname = "createMotd")
 	@ApiResponses(value = {
-		@ApiResponse(code = 201, message = HTML_STATUS_201),
-		@ApiResponse(code = 503, message = HTML_STATUS_503)
+			@ApiResponse(code = 201, message = HTML_STATUS_201),
+			@ApiResponse(code = 503, message = HTML_STATUS_503)
 	})
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Motd postNewMotd(
 			@ApiParam(value = "current motd", required = true) @RequestBody final Motd motd,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		de.thm.arsnova.model.Motd motdV3 = fromV2Migrator.migrate(motd);
 		String roomId = roomService.getIdByShortId(motd.getSessionkey());
 		if (de.thm.arsnova.model.Motd.Audience.ROOM == motdV3.getAudience() && roomId != null) {
@@ -131,9 +129,8 @@ public class MotdController extends AbstractController {
 	@ApiOperation(value = "update a message of the day", nickname = "updateMotd")
 	@RequestMapping(value = "/{motdId}", method = RequestMethod.PUT)
 	public Motd updateMotd(
-			@ApiParam(value = "motdkey from current motd", required = true) @PathVariable final String motdId,
-			@ApiParam(value = "current motd", required = true) @RequestBody final Motd motd
-			) {
+				@ApiParam(value = "motdkey from current motd", required = true) @PathVariable final String motdId,
+				@ApiParam(value = "current motd", required = true) @RequestBody final Motd motd) {
 		de.thm.arsnova.model.Motd motdV3 = fromV2Migrator.migrate(motd);
 		String roomId = roomService.getIdByShortId(motd.getSessionkey());
 		if (motdV3.getAudience() == de.thm.arsnova.model.Motd.Audience.ROOM && roomId != null) {

@@ -61,7 +61,9 @@ public class RoomInfo {
 		this.ppSubject = room.getPpSubject();
 	}
 
-	public RoomInfo() { }
+	public RoomInfo() {
+
+	}
 
 	public static List<RoomInfo> fromSessionList(List<Room> sessions) {
 		List<RoomInfo> infos = new ArrayList<>();

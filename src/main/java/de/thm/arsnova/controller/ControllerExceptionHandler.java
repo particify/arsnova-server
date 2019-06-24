@@ -92,8 +92,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 	public Map<String, Object> handleAccessDeniedException(
 			final Exception e,
 			final HttpServletRequest request,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication == null
 				|| authentication.getPrincipal() == null

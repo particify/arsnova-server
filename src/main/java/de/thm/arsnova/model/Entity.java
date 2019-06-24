@@ -125,10 +125,10 @@ public abstract class Entity {
 		}
 		final Entity entity = (Entity) o;
 
-		return Objects.equals(id, entity.id) &&
-				Objects.equals(rev, entity.rev) &&
-				Objects.equals(creationTimestamp, entity.creationTimestamp) &&
-				Objects.equals(updateTimestamp, entity.updateTimestamp);
+		return Objects.equals(id, entity.id)
+				&& Objects.equals(rev, entity.rev)
+				&& Objects.equals(creationTimestamp, entity.creationTimestamp)
+				&& Objects.equals(updateTimestamp, entity.updateTimestamp);
 	}
 
 	@Override

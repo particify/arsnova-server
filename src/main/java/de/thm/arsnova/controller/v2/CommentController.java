@@ -109,14 +109,13 @@ public class CommentController extends PaginationController {
 	@ApiOperation(value = "Creates a new Comment for a Room and returns the Comment's data",
 			nickname = "postComment")
 	@ApiResponses(value = {
-		@ApiResponse(code = 400, message = HTML_STATUS_400)
+			@ApiResponse(code = 400, message = HTML_STATUS_400)
 	})
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void postComment(
 			@ApiParam(value = "Room-Key from current room", required = true) @RequestParam("sessionkey") final String roomShortId,
-			@ApiParam(value = "the body from the new comment", required = true) @RequestBody final Comment comment
-			) {
+			@ApiParam(value = "the body from the new comment", required = true) @RequestBody final Comment comment) {
 		de.thm.arsnova.model.Comment commentV3 = fromV2Migrator.migrate(comment);
 		Room roomV3 = roomService.getByShortId(roomShortId);
 		commentV3.setRoomId(roomV3.getId());

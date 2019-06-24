@@ -91,7 +91,7 @@ public class ContentController extends PaginationController {
 	@ApiOperation(value = "Get content with provided content Id",
 			nickname = "getContent")
 	@ApiResponses(value = {
-		@ApiResponse(code = 404, message = HTML_STATUS_404)
+			@ApiResponse(code = 404, message = HTML_STATUS_404)
 	})
 	@RequestMapping(value = "/{contentId}", method = RequestMethod.GET)
 	public Content getContent(@PathVariable final String contentId) {
@@ -106,7 +106,7 @@ public class ContentController extends PaginationController {
 	@ApiOperation(value = "Post provided content",
 			nickname = "postContent")
 	@ApiResponses(value = {
-		@ApiResponse(code = 400, message = HTML_STATUS_400)
+			@ApiResponse(code = 400, message = HTML_STATUS_400)
 	})
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -121,7 +121,7 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Post provided contents", nickname = "bulkPostContents")
 	@ApiResponses(value = {
-		@ApiResponse(code = 400, message = HTML_STATUS_400)
+			@ApiResponse(code = 400, message = HTML_STATUS_400)
 	})
 	@RequestMapping(value = "/bulk", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -134,13 +134,12 @@ public class ContentController extends PaginationController {
 	@ApiOperation(value = "Update the content, identified by provided id, with the provided content in the Request Body",
 			nickname = "updateContent")
 	@ApiResponses(value = {
-		@ApiResponse(code = 400, message = HTML_STATUS_400)
+			@ApiResponse(code = 400, message = HTML_STATUS_400)
 	})
 	@RequestMapping(value = "/{contentId}", method = RequestMethod.PUT)
 	public Content updateContent(
 			@PathVariable final String contentId,
-			@RequestBody final Content content
-			) {
+			@RequestBody final Content content) {
 		return toV2Migrator.migrate(contentService.update(fromV2Migrator.migrate(content)));
 	}
 
@@ -149,8 +148,7 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/{contentId}/questionimage", method = RequestMethod.GET)
 	public String getContentImage(
 			@PathVariable final String contentId,
-			@RequestParam(value = "fcImage", defaultValue = "false", required = false) final boolean fcImage
-			) {
+			@RequestParam(value = "fcImage", defaultValue = "false", required = false) final boolean fcImage) {
 
 		throw new NotImplementedException();
 	}
@@ -158,8 +156,7 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/{contentId}/startnewpiround", method = RequestMethod.POST)
 	public void startPiRound(
 			@PathVariable final String contentId,
-			@RequestParam(value = "time", defaultValue = "0", required = false) final int time
-			) {
+			@RequestParam(value = "time", defaultValue = "0", required = false) final int time) {
 
 		if (time == 0) {
 			timerService.startNewRound(contentId);
@@ -172,8 +169,7 @@ public class ContentController extends PaginationController {
 	@ApiOperation(value = "Cancel Pi Round on content, identified by provided id",
 			nickname = "cancelPiRound")
 	public void cancelPiRound(
-			@PathVariable final String contentId
-			) {
+			@PathVariable final String contentId) {
 		timerService.cancelRoundChange(contentId);
 	}
 
@@ -181,8 +177,7 @@ public class ContentController extends PaginationController {
 	@ApiOperation(value = "Reset Pi Round on content, identified by provided id",
 			nickname = "resetPiContent")
 	public void resetPiContent(
-			@PathVariable final String contentId
-			) {
+			@PathVariable final String contentId) {
 		timerService.resetRoundState(contentId);
 	}
 
@@ -191,8 +186,7 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/{contentId}/disablevote", method = RequestMethod.POST)
 	public void setVotingAdmission(
 			@PathVariable final String contentId,
-			@RequestParam(value = "disable", defaultValue = "false", required = false) final Boolean disableVote
-			) {
+			@RequestParam(value = "disable", defaultValue = "false", required = false) final Boolean disableVote) {
 		boolean disable = false;
 
 		if (disableVote != null) {
@@ -209,8 +203,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "sessionkey") final String roomShortId,
 			@RequestParam(value = "disable", defaultValue = "false", required = false) final Boolean disableVote,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false) boolean lectureContentsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) boolean preparationContentsOnly
-			) {
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) boolean preparationContentsOnly) {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		boolean disable = false;
 		Iterable<de.thm.arsnova.model.Content> contents;
@@ -238,7 +231,7 @@ public class ContentController extends PaginationController {
 			@PathVariable final String contentId,
 			@RequestParam(defaultValue = "true", required = false) final boolean publish,
 			@RequestBody final Content content
-			) throws IOException {
+	) throws IOException {
 		de.thm.arsnova.model.Content contentV3 = fromV2Migrator.migrate(content);
 		boolean p = publish;
 		if (content != null) {
@@ -255,7 +248,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(required = false) final Boolean publish,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false) boolean lectureContentsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) boolean preparationContentsOnly
-			) throws IOException {
+	) throws IOException {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		boolean p = publish == null || publish;
 		Iterable<de.thm.arsnova.model.Content> contents;
@@ -278,7 +271,7 @@ public class ContentController extends PaginationController {
 			@PathVariable final String contentId,
 			@RequestParam(defaultValue = "true", required = false) final Boolean showStatistics,
 			@RequestBody final Content content
-			) throws IOException {
+	) throws IOException {
 		de.thm.arsnova.model.Content contentV3 = fromV2Migrator.migrate(content);
 		boolean p = showStatistics;
 		if (content != null) {
@@ -294,7 +287,7 @@ public class ContentController extends PaginationController {
 			@PathVariable final String contentId,
 			@RequestParam(defaultValue = "true", required = false) final boolean showCorrectAnswer,
 			@RequestBody final Content content
-			) throws IOException {
+	) throws IOException {
 		de.thm.arsnova.model.Content contentV3 = fromV2Migrator.migrate(content);
 		boolean p = showCorrectAnswer;
 		if (content != null) {
@@ -313,8 +306,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "flashcardsonly", defaultValue = "false") boolean flashcardsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly,
 			@RequestParam(value = "requestImageData", defaultValue = "false") boolean requestImageData,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		Iterable<de.thm.arsnova.model.Content> contents;
 		if (lectureContentsOnly) {
@@ -343,8 +335,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
 			@RequestParam(value = "flashcardsonly", defaultValue = "false") boolean flashcardsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		/* FIXME: Content variant is ignored for now */
 		lectureContentsOnly = preparationContentsOnly = flashcardsOnly = false;
@@ -368,8 +359,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "sessionkey") final String roomShortId,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
 			@RequestParam(value = "flashcardsonly", defaultValue = "false") boolean flashcardsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly
-			) {
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly) {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		int count;
 		if (lectureContentsOnly) {
@@ -389,8 +379,7 @@ public class ContentController extends PaginationController {
 			nickname = "deleteAnswersAndContent")
 	@RequestMapping(value = "/{contentId}", method = RequestMethod.DELETE)
 	public void deleteAnswersAndContent(
-			@PathVariable final String contentId
-			) {
+			@PathVariable final String contentId) {
 		contentService.delete(contentId);
 	}
 
@@ -402,8 +391,7 @@ public class ContentController extends PaginationController {
 	public List<String> getUnAnsweredContentIds(
 			@RequestParam(value = "sessionkey") final String roomShortId,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly
-			) {
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly) {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		List<String> answers;
 		/* FIXME: Content variant is ignored for now */
@@ -442,8 +430,7 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/{contentId}/myanswer", method = RequestMethod.GET)
 	public Answer getMyAnswer(
 			@PathVariable final String contentId,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		final de.thm.arsnova.model.Content content = contentService.get(contentId);
 		final de.thm.arsnova.model.Answer answer = answerService.getMyAnswer(contentId);
 		if (answer == null) {
@@ -511,8 +498,7 @@ public class ContentController extends PaginationController {
 	public Answer saveAnswer(
 			@PathVariable final String contentId,
 			@RequestBody final Answer answer,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		final de.thm.arsnova.model.Content content = contentService.get(contentId);
 		final de.thm.arsnova.model.Answer answerV3 = fromV2Migrator.migrate(answer, content);
 		if (!contentId.equals(answerV3.getContentId())) {
@@ -533,8 +519,7 @@ public class ContentController extends PaginationController {
 			@PathVariable final String contentId,
 			@PathVariable final String answerId,
 			@RequestBody final Answer answer,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		final de.thm.arsnova.model.Content content = contentService.get(contentId);
 		final de.thm.arsnova.model.Answer answerV3 = fromV2Migrator.migrate(answer, content);
 
@@ -551,8 +536,7 @@ public class ContentController extends PaginationController {
 	public String getImage(
 			@PathVariable final String contentId,
 			@PathVariable final String answerId,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 
 		throw new NotImplementedException();
 	}
@@ -563,8 +547,7 @@ public class ContentController extends PaginationController {
 	public void deleteAnswer(
 			@PathVariable final String contentId,
 			@PathVariable final String answerId,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		answerService.delete(answerService.get(answerId));
 	}
 
@@ -573,8 +556,7 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/{contentId}/answer/", method = RequestMethod.DELETE)
 	public void deleteAnswers(
 			@PathVariable final String contentId,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		answerService.deleteAnswers(contentId);
 	}
 
@@ -585,8 +567,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "sessionkey") final String roomShortId,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		/* FIXME: Content variant is ignored for now */
 		lectureContentsOnly = preparationContentsOnly = false;
@@ -680,8 +661,7 @@ public class ContentController extends PaginationController {
 	public String getTotalAnswerCount(
 			@RequestParam(value = "sessionkey") final String roomShortId,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly
-			) {
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly) {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		int count = 0;
 		/* FIXME: Content variant is ignored for now */

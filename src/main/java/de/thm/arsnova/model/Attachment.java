@@ -109,10 +109,10 @@ public class Attachment extends Entity {
 		}
 		final Attachment that = (Attachment) o;
 
-		return size == that.size &&
-				Objects.equals(mediaType, that.mediaType) &&
-				Objects.equals(originalSourceUrl, that.originalSourceUrl) &&
-				Objects.equals(storageLocation, that.storageLocation);
+		return size == that.size
+				&& Objects.equals(mediaType, that.mediaType)
+				&& Objects.equals(originalSourceUrl, that.originalSourceUrl)
+				&& Objects.equals(storageLocation, that.storageLocation);
 	}
 
 	@Override

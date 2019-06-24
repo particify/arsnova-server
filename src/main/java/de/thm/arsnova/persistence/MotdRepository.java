@@ -24,9 +24,14 @@ import de.thm.arsnova.model.Motd;
 
 public interface MotdRepository extends CrudRepository<Motd, String> {
 	List<Motd> findGlobalForAdmin();
+
 	List<Motd> findGlobalForAll();
+
 	List<Motd> findGlobalForLoggedIn();
+
 	List<Motd> findGlobalForTutors();
+
 	List<Motd> findForStudents();
+
 	List<Motd> findByRoomId(String roomId);
 }

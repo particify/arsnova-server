@@ -25,14 +25,24 @@ import de.thm.arsnova.model.AnswerStatistics;
 
 public interface AnswerRepository extends CrudRepository<Answer, String> {
 	<T extends Answer> T findByContentIdUserIdPiRound(String contentId, Class<T> type, String userId, int piRound);
+
 	AnswerStatistics findByContentIdRound(String contentId, int round, final int optionCount);
+
 	int countByContentIdRound(String contentId, int round);
+
 	int countByContentId(String contentId);
+
 	<T extends Answer> List<T> findByContentId(String contentId, Class<T> type, int start, int limit);
+
 	List<Answer> findByUserIdRoomId(String userId, String roomId);
+
 	Iterable<Answer> findStubsByContentId(String contentId);
+
 	Iterable<Answer> findStubsByContentIds(List<String> contentId);
+
 	int countByRoomId(String roomId);
+
 	int countByRoomIdOnlyLectureVariant(String roomId);
+
 	int countByRoomIdOnlyPreparationVariant(String roomId);
 }

@@ -21,4 +21,6 @@ package de.thm.arsnova.cache;
 /**
  * This interface is used as a tag to make Spring dependency injection happy...
  */
-public interface CacheBuster { }
+public interface CacheBuster {
+
+}

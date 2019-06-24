@@ -36,7 +36,7 @@ public class MangoResponseHandler<T> extends StdResponseHandler<List<T>> {
 	}
 
 	public MangoResponseHandler(Class<T> docType, ObjectMapper om,
-										  boolean ignoreNotFound) {
+			boolean ignoreNotFound) {
 		Assert.notNull(om, "ObjectMapper may not be null");
 		Assert.notNull(docType, "docType may not be null");
 		parser = new MangoQueryResultParser<T>(docType, om);

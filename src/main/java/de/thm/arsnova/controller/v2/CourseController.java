@@ -53,8 +53,7 @@ public class CourseController extends AbstractController {
 	@RequestMapping(value = "/v2/mycourses", method = RequestMethod.GET)
 	public List<Course> myCourses(
 			@ApiParam(value = "sort my courses by name", required = true)
-			@RequestParam(value = "sortby", defaultValue = "name") final String sortby
-			) {
+			@RequestParam(value = "sortby", defaultValue = "name") final String sortby) {
 
 		final User currentUser = userService.getCurrentUser();
 
@@ -71,8 +70,7 @@ public class CourseController extends AbstractController {
 		for (final Course course : connectorClient.getCourses(currentUser.getUsername()).getCourse()) {
 			if (
 					course.getMembership().isMember()
-					&& course.getMembership().getUserrole().equals(UserRole.TEACHER)
-					) {
+					&& course.getMembership().getUserrole().equals(UserRole.TEACHER)) {
 				result.add(course);
 			}
 		}

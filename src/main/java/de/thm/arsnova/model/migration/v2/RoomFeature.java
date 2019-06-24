@@ -73,7 +73,9 @@ public class RoomFeature implements Serializable {
 		}
 	}
 
-	public RoomFeature() { }
+	public RoomFeature() {
+
+	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isLecture() {

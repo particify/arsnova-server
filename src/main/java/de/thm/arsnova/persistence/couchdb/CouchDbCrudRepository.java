@@ -155,7 +155,7 @@ abstract class CouchDbCrudRepository<T extends Entity> extends CouchDbRepository
 	 *
 	 * @param viewResult A CouchDB ViewResult. The first part of its keys is expected to be the id of another entity.
 	 * @param keyPropertySetter A setter method of the Entity class which is called to store the first element of the
-	 *   key.
+	 *     key.
 	 * @return Entity stubs
 	 */
 	protected Iterable<T> createEntityStubs(final ViewResult viewResult, final BiConsumer<T, String> keyPropertySetter) {

@@ -130,8 +130,8 @@ public class FromV2Migrator {
 	}
 
 	public de.thm.arsnova.model.Room migrate(final Room from, final Optional<UserProfile> owner) {
-		if (!owner.isPresent() && from.getCreator() != null ||
-				owner.isPresent() && !owner.get().getLoginId().equals(from.getCreator())) {
+		if (!owner.isPresent() && from.getCreator() != null
+				|| owner.isPresent() && !owner.get().getLoginId().equals(from.getCreator())) {
 			throw new IllegalArgumentException("Username of owner object does not match session creator.");
 		}
 		final de.thm.arsnova.model.Room to = new de.thm.arsnova.model.Room();
@@ -303,8 +303,8 @@ public class FromV2Migrator {
 	}
 
 	public de.thm.arsnova.model.Comment migrate(final Comment from, @Nullable final UserProfile creator) {
-		if (creator == null && from.getCreator() != null ||
-				creator != null && !creator.getLoginId().equals(from.getCreator())) {
+		if (creator == null && from.getCreator() != null
+				|| creator != null && !creator.getLoginId().equals(from.getCreator())) {
 			throw new IllegalArgumentException("Username of creator object does not match comment creator.");
 		}
 		final de.thm.arsnova.model.Comment to = new de.thm.arsnova.model.Comment();

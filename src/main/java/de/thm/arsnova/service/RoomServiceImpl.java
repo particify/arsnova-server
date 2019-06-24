@@ -344,8 +344,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		/* FIXME: migrate LMS course support
 		if (connectorClient != null && room.getCourseId() != null) {
 			if (!connectorClient.getMembership(
-					userService.getCurrentUser().getUsername(), room.getCourseId()).isMember()
-					) {
+					userService.getCurrentUser().getUsername(), room.getCourseId()).isMember()) {
 				throw new ForbiddenException();
 			}
 		}

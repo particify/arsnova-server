@@ -210,20 +210,20 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 				"readInterposedQuestion",
 				Comment.class,
 				new DataListener<Comment>() {
-			@Override
-			@Timed(name = "readInterposedQuestionEvent.onData")
-			public void onData(
-					SocketIOClient client,
-					Comment comment,
-					AckRequest ackRequest) {
-				final String user = userService.getUserIdToSocketId(client.getSessionId());
-				try {
-					commentService.getAndMarkRead(comment.getId());
-				} catch (IOException | NotFoundException | UnauthorizedException e) {
-					logger.error("Loading of comment {} failed for user {} with exception {}", comment.getId(), user, e.getMessage());
-				}
-			}
-		});
+					@Override
+					@Timed(name = "readInterposedQuestionEvent.onData")
+					public void onData(
+							SocketIOClient client,
+							Comment comment,
+							AckRequest ackRequest) {
+						final String user = userService.getUserIdToSocketId(client.getSessionId());
+						try {
+							commentService.getAndMarkRead(comment.getId());
+						} catch (IOException | NotFoundException | UnauthorizedException e) {
+							logger.error("Loading of comment {} failed for user {} with exception {}", comment.getId(), user, e.getMessage());
+						}
+					}
+				});
 
 		server.addEventListener("readFreetextAnswer", String.class, new DataListener<String>() {
 			@Override
@@ -241,20 +241,20 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 				"setLearningProgressOptions",
 				ScoreOptions.class,
 				new DataListener<ScoreOptions>() {
-			@Override
-			@Timed(name = "setLearningProgressOptionsEvent.onData")
-			public void onData(SocketIOClient client, ScoreOptions scoreOptions, AckRequest ack) {
-				throw new UnsupportedOperationException("Not implemented.");
-//				final ClientAuthentication user = userService.getUserToSocketId(client.getSessionId());
-//				final String shortRoomId = userService.getSessionByUsername(user.getUsername());
-//				final de.thm.arsnova.entities.Room room = roomService.getInternal(shortRoomId, user);
-//				if (room.getOwnerId().equals(user.getId())) {
-//					room.setLearningProgressOptions(scoreOptions);
-//					roomService.updateInternal(room, user);
-//					broadcastInRoom(room.getShortId(), "learningProgressOptions", scoreOptions);
-//				}
-			}
-		});
+					@Override
+					@Timed(name = "setLearningProgressOptionsEvent.onData")
+					public void onData(SocketIOClient client, ScoreOptions scoreOptions, AckRequest ack) {
+						throw new UnsupportedOperationException("Not implemented.");
+//						final ClientAuthentication user = userService.getUserToSocketId(client.getSessionId());
+//						final String shortRoomId = userService.getSessionByUsername(user.getUsername());
+//						final de.thm.arsnova.entities.Room room = roomService.getInternal(shortRoomId, user);
+//						if (room.getOwnerId().equals(user.getId())) {
+//							room.setLearningProgressOptions(scoreOptions);
+//							roomService.updateInternal(room, user);
+//							broadcastInRoom(room.getShortId(), "learningProgressOptions", scoreOptions);
+//						}
+					}
+				});
 
 		server.addConnectListener(new ConnectListener() {
 			@Override
@@ -271,8 +271,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 				if (
 						userService == null
 						|| client.getSessionId() == null
-						|| userService.getUserIdToSocketId(client.getSessionId()) == null
-						) {
+						|| userService.getUserIdToSocketId(client.getSessionId()) == null) {
 					return;
 				}
 				final String userId = userService.getUserIdToSocketId(client.getSessionId());
@@ -599,8 +598,8 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 	@EventListener(condition = "#event.stateName == 'state'")
 	public void handleContentResponsesEnabledStateChange(StateChangeEvent<de.thm.arsnova.model.Content, de.thm.arsnova.model.Content.State> event) {
 		/* Multiple groups for a single Content are not handled. */
-		final String groupName = event.getEntity().getGroups().iterator().hasNext() ?
-				event.getEntity().getGroups().iterator().next() : "";
+		final String groupName = event.getEntity().getGroups().iterator().hasNext()
+				? event.getEntity().getGroups().iterator().next() : "";
 		Map<String, Object> map = new HashMap<>();
 		map.put("_id", event.getEntity().getId());
 		map.put("variant", groupName);

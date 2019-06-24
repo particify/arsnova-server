@@ -53,9 +53,11 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 		public int getValue() {
 			return value;
 		}
+
 		public Date getTimestamp() {
 			return timestamp;
 		}
+
 		public boolean fromUser(final String userId) {
 			return this.userId.equals(userId);
 		}
@@ -79,20 +81,20 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 
 		for (final FeedbackStorageObject fso : data.get(room).values()) {
 			switch (fso.getValue()) {
-			case Feedback.FEEDBACK_FASTER:
-				a++;
-				break;
-			case Feedback.FEEDBACK_OK:
-				b++;
-				break;
-			case Feedback.FEEDBACK_SLOWER:
-				c++;
-				break;
-			case Feedback.FEEDBACK_AWAY:
-				d++;
-				break;
-			default:
-				break;
+				case Feedback.FEEDBACK_FASTER:
+					a++;
+					break;
+				case Feedback.FEEDBACK_OK:
+					b++;
+					break;
+				case Feedback.FEEDBACK_SLOWER:
+					c++;
+					break;
+				case Feedback.FEEDBACK_AWAY:
+					d++;
+					break;
+				default:
+					break;
 			}
 		}
 		return new Feedback(a, b, c, d);

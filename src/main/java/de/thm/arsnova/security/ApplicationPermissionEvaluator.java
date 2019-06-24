@@ -315,8 +315,8 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	}
 
 	private String getUserId(final Authentication authentication) {
-		if (authentication == null || authentication instanceof AnonymousAuthenticationToken ||
-				!(authentication.getPrincipal() instanceof User)) {
+		if (authentication == null || authentication instanceof AnonymousAuthenticationToken
+				|| !(authentication.getPrincipal() instanceof User)) {
 			return "";
 		}
 		User user = (User) authentication.getPrincipal();

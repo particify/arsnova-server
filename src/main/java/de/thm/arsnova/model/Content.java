@@ -131,12 +131,12 @@ public class Content extends Entity {
 			}
 			final State state = (State) o;
 
-			return round == state.round &&
-					visible == state.visible &&
-					solutionVisible == state.solutionVisible &&
-					responsesEnabled == state.responsesEnabled &&
-					responsesVisible == state.responsesVisible &&
-					Objects.equals(roundEndTimestamp, state.roundEndTimestamp);
+			return round == state.round
+					&& visible == state.visible
+					&& solutionVisible == state.solutionVisible
+					&& responsesEnabled == state.responsesEnabled
+					&& responsesVisible == state.responsesVisible
+					&& Objects.equals(roundEndTimestamp, state.roundEndTimestamp);
 		}
 
 		@Override
@@ -294,12 +294,12 @@ public class Content extends Entity {
 		}
 		final Content content = (Content) o;
 
-		return Objects.equals(roomId, content.roomId) &&
-				Objects.equals(subject, content.subject) &&
-				Objects.equals(body, content.body) &&
-				format == content.format &&
-				Objects.equals(groups, content.groups) &&
-				Objects.equals(timestamp, content.timestamp);
+		return Objects.equals(roomId, content.roomId)
+				&& Objects.equals(subject, content.subject)
+				&& Objects.equals(body, content.body)
+				&& format == content.format
+				&& Objects.equals(groups, content.groups)
+				&& Objects.equals(timestamp, content.timestamp);
 	}
 
 	@Override

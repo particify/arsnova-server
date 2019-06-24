@@ -59,8 +59,8 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	@Override
 	@PreAuthorize("hasPermission('', 'motd', 'admin')")
 	public List<Motd> getAdminMotds() {
-    return motdRepository.findGlobalForAdmin();
-  }
+		return motdRepository.findGlobalForAdmin();
+	}
 
 	@Override
 	@PreAuthorize("hasPermission(#roomId, 'room', 'owner')")

@@ -764,6 +764,7 @@ public class Content implements Entity {
 		}
 		return answerText;
 	}
+
 	public String checkWhitespaces(String answerText) {
 		if (this.isIgnoreWhitespaces()) {
 			this.setCorrectAnswer(this.getCorrectAnswer().replaceAll("[\\s]", ""));
@@ -771,6 +772,7 @@ public class Content implements Entity {
 		}
 		return answerText;
 	}
+
 	public String checkPunctuation(String answerText) {
 		if (this.isIgnorePunctuation()) {
 			this.setCorrectAnswer(this.getCorrectAnswer().replaceAll("\\p{Punct}", ""));

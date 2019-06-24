@@ -133,7 +133,7 @@ public abstract class AbstractEntityController<E extends Entity> {
 
 	@PatchMapping(PATCH_MAPPING)
 	public E patch(@PathVariable final String id, @RequestBody final Map<String, Object> changes,
-					  final HttpServletResponse httpServletResponse) throws IOException {
+			final HttpServletResponse httpServletResponse) throws IOException {
 		E entity = entityService.get(id);
 		entityService.patch(entity, changes);
 		httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
@@ -168,7 +168,7 @@ public abstract class AbstractEntityController<E extends Entity> {
 		final String targetPath = String.format(
 				"%s/%s%s", getMapping(), resolveAlias(alias), subPath != null ? "/" + subPath : "");
 		logger.debug("Forwarding alias request to {}", targetPath);
-		httpServletRequest.getRequestDispatcher( targetPath)
+		httpServletRequest.getRequestDispatcher(targetPath)
 				.forward(httpServletRequest, httpServletResponse);
 	}
 

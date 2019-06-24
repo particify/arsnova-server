@@ -66,8 +66,8 @@ public class ChoiceQuestionContent extends Content {
 			}
 			final AnswerOption that = (AnswerOption) o;
 
-			return points == that.points &&
-					Objects.equals(label, that.label);
+			return points == that.points
+					&& Objects.equals(label, that.label);
 		}
 
 		@Override

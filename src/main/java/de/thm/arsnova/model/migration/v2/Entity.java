@@ -24,9 +24,11 @@ import de.thm.arsnova.model.serialization.View;
 
 public interface Entity {
 	String getId();
+
 	void setId(String id);
 
 	String getRevision();
+
 	void setRevision(String rev);
 
 	@JsonView(View.Persistence.class)

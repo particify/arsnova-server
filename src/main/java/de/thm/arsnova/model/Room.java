@@ -84,9 +84,9 @@ public class Room extends Entity {
 			}
 			final ContentGroup that = (ContentGroup) o;
 
-			return autoSort == that.autoSort &&
-					Objects.equals(name, that.name) &&
-					Objects.equals(contentIds, that.contentIds);
+			return autoSort == that.autoSort
+					&& Objects.equals(name, that.name)
+					&& Objects.equals(contentIds, that.contentIds);
 		}
 
 		@Override
@@ -263,16 +263,16 @@ public class Room extends Entity {
 			}
 			final Settings settings = (Settings) o;
 
-			return questionsEnabled == settings.questionsEnabled &&
-					slidesEnabled == settings.slidesEnabled &&
-					commentsEnabled == settings.commentsEnabled &&
-					flashcardsEnabled == settings.flashcardsEnabled &&
-					quickSurveyEnabled == settings.quickSurveyEnabled &&
-					quickFeedbackEnabled == settings.quickFeedbackEnabled &&
-					scoreEnabled == settings.scoreEnabled &&
-					multipleRoundsEnabled == settings.multipleRoundsEnabled &&
-					timerEnabled == settings.timerEnabled &&
-					feedbackLocked == settings.feedbackLocked;
+			return questionsEnabled == settings.questionsEnabled
+					&& slidesEnabled == settings.slidesEnabled
+					&& commentsEnabled == settings.commentsEnabled
+					&& flashcardsEnabled == settings.flashcardsEnabled
+					&& quickSurveyEnabled == settings.quickSurveyEnabled
+					&& quickFeedbackEnabled == settings.quickFeedbackEnabled
+					&& scoreEnabled == settings.scoreEnabled
+					&& multipleRoundsEnabled == settings.multipleRoundsEnabled
+					&& timerEnabled == settings.timerEnabled
+					&& feedbackLocked == settings.feedbackLocked;
 		}
 
 		@Override
@@ -364,11 +364,11 @@ public class Room extends Entity {
 			}
 			final Author author = (Author) o;
 
-			return Objects.equals(name, author.name) &&
-					Objects.equals(mail, author.mail) &&
-					Objects.equals(organizationName, author.organizationName) &&
-					Objects.equals(organizationLogo, author.organizationLogo) &&
-					Objects.equals(organizationUnit, author.organizationUnit);
+			return Objects.equals(name, author.name)
+					&& Objects.equals(mail, author.mail)
+					&& Objects.equals(organizationName, author.organizationName)
+					&& Objects.equals(organizationLogo, author.organizationLogo)
+					&& Objects.equals(organizationUnit, author.organizationUnit);
 		}
 
 		@Override
@@ -433,9 +433,9 @@ public class Room extends Entity {
 			}
 			final PoolProperties that = (PoolProperties) o;
 
-			return Objects.equals(category, that.category) &&
-					Objects.equals(level, that.level) &&
-					Objects.equals(license, that.license);
+			return Objects.equals(category, that.category)
+					&& Objects.equals(level, that.level)
+					&& Objects.equals(license, that.license);
 		}
 
 		@Override
@@ -639,12 +639,12 @@ public class Room extends Entity {
 		}
 		final Room room = (Room) o;
 
-		return closed == room.closed &&
-				Objects.equals(shortId, room.shortId) &&
-				Objects.equals(ownerId, room.ownerId) &&
-				Objects.equals(name, room.name) &&
-				Objects.equals(abbreviation, room.abbreviation) &&
-				Objects.equals(description, room.description);
+		return closed == room.closed
+				&& Objects.equals(shortId, room.shortId)
+				&& Objects.equals(ownerId, room.ownerId)
+				&& Objects.equals(name, room.name)
+				&& Objects.equals(abbreviation, room.abbreviation)
+				&& Objects.equals(description, room.description);
 	}
 
 	@Override

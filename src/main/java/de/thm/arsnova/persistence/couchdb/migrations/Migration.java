@@ -20,5 +20,6 @@ package de.thm.arsnova.persistence.couchdb.migrations;
 
 public interface Migration {
 	String getId();
+
 	void migrate();
 }

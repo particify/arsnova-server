@@ -102,8 +102,7 @@ public class FeedbackController extends AbstractController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public Feedback postFeedback(
 			@PathVariable final String shortId,
-			@RequestBody final int value
-			) {
+			@RequestBody final int value) {
 		String roomId = roomService.getIdByShortId(shortId);
 		User user = userService.getCurrentUser();
 		feedbackService.save(roomId, value, user.getId());
