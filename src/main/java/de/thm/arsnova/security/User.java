@@ -15,13 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.security;
+
+import java.util.Collection;
+import org.springframework.security.core.GrantedAuthority;
 
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.model.migration.v2.ClientAuthentication;
-import org.springframework.security.core.GrantedAuthority;
-
-import java.util.Collection;
 
 /**
  * UserDetails implementation which identifies a user by internal (database) and external (AuthProvider + loginId) ID.

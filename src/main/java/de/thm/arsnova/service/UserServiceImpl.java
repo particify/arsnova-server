@@ -15,20 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service;
 
 import com.codahale.metrics.annotation.Gauge;
-import de.thm.arsnova.model.ClientAuthentication;
-import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.persistence.UserRepository;
-import de.thm.arsnova.security.GuestUserDetailsService;
-import de.thm.arsnova.security.User;
-import de.thm.arsnova.security.jwt.JwtService;
-import de.thm.arsnova.security.jwt.JwtToken;
-import de.thm.arsnova.web.exceptions.BadRequestException;
-import de.thm.arsnova.web.exceptions.NotFoundException;
-import de.thm.arsnova.web.exceptions.UnauthorizedException;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
+import javax.annotation.PreDestroy;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -61,15 +69,17 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriUtils;
 import org.stagemonitor.core.metrics.MonitorGauges;
 
-import javax.annotation.PreDestroy;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
+import de.thm.arsnova.model.ClientAuthentication;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.persistence.UserRepository;
+import de.thm.arsnova.security.GuestUserDetailsService;
+import de.thm.arsnova.security.User;
+import de.thm.arsnova.security.jwt.JwtService;
+import de.thm.arsnova.security.jwt.JwtToken;
+import de.thm.arsnova.web.exceptions.BadRequestException;
+import de.thm.arsnova.web.exceptions.NotFoundException;
+import de.thm.arsnova.web.exceptions.UnauthorizedException;
 
 /**
  * Performs all user related operations.

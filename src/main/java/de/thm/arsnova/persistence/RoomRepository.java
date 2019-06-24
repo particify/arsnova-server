@@ -15,14 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.persistence;
+
+import java.util.List;
 
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.transport.ImportExportContainer;
-
-import java.util.List;
 
 public interface RoomRepository extends CrudRepository<Room, String> {
 	Room findByShortId(String shortId);

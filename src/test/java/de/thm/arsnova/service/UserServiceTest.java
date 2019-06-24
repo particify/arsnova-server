@@ -15,28 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service;
 
-import de.thm.arsnova.config.AppConfig;
-import de.thm.arsnova.config.TestAppConfig;
-import de.thm.arsnova.config.TestPersistanceConfig;
-import de.thm.arsnova.config.TestSecurityConfig;
-import de.thm.arsnova.config.WebSocketConfig;
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
-import de.thm.arsnova.security.User;
-import de.thm.arsnova.security.pac4j.OAuthToken;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.pac4j.core.profile.definition.CommonProfileDefinition;
-import org.pac4j.oidc.profile.google.GoogleOidcProfile;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -49,8 +31,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.pac4j.core.profile.definition.CommonProfileDefinition;
+import org.pac4j.oidc.profile.google.GoogleOidcProfile;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
-import static org.junit.Assert.assertEquals;
+import de.thm.arsnova.config.AppConfig;
+import de.thm.arsnova.config.TestAppConfig;
+import de.thm.arsnova.config.TestPersistanceConfig;
+import de.thm.arsnova.config.TestSecurityConfig;
+import de.thm.arsnova.config.WebSocketConfig;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.model.migration.v2.ClientAuthentication;
+import de.thm.arsnova.security.User;
+import de.thm.arsnova.security.pac4j.OAuthToken;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration

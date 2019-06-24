@@ -1,7 +1,7 @@
 package de.thm.arsnova.websocket.handler;
 
-import de.thm.arsnova.security.User;
-import de.thm.arsnova.service.UserService;
+import java.util.List;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +13,8 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import java.util.List;
+import de.thm.arsnova.security.User;
+import de.thm.arsnova.service.UserService;
 
 @Component
 public class AuthChannelInterceptorAdapter implements ChannelInterceptor {

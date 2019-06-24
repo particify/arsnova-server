@@ -15,20 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
-import de.thm.arsnova.model.serialization.FormatContentTypeIdResolver;
-import de.thm.arsnova.model.serialization.View;
-import org.springframework.core.style.ToStringCreator;
-
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import org.springframework.core.style.ToStringCreator;
+
+import de.thm.arsnova.model.serialization.FormatContentTypeIdResolver;
+import de.thm.arsnova.model.serialization.View;
 
 @JsonTypeInfo(
 		use = JsonTypeInfo.Id.CUSTOM,

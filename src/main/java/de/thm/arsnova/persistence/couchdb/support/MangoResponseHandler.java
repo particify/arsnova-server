@@ -15,14 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.persistence.couchdb.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import org.ektorp.http.HttpResponse;
 import org.ektorp.http.StdResponseHandler;
 import org.ektorp.util.Assert;
-
-import java.util.List;
 
 public class MangoResponseHandler<T> extends StdResponseHandler<List<T>> {
 

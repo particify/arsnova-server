@@ -15,11 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.event;
 
-import de.thm.arsnova.model.Room;
-
 import java.util.Set;
+
+import de.thm.arsnova.model.Room;
 
 /**
  * Fires whenever the feedback of a specific user has been reset.

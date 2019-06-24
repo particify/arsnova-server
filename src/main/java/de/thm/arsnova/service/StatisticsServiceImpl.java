@@ -15,13 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service;
 
-import de.thm.arsnova.model.Statistics;
-import de.thm.arsnova.persistence.StatisticsRepository;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import de.thm.arsnova.model.Statistics;
+import de.thm.arsnova.persistence.StatisticsRepository;
 
 /**
  * Performs all statistics related operations. To reduce pressure on the database, data is cached for a fixed amount of

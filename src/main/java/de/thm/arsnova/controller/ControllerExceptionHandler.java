@@ -15,16 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.web.exceptions.BadRequestException;
-import de.thm.arsnova.web.exceptions.ForbiddenException;
-import de.thm.arsnova.web.exceptions.NoContentException;
-import de.thm.arsnova.web.exceptions.NotFoundException;
-import de.thm.arsnova.web.exceptions.NotImplementedException;
-import de.thm.arsnova.web.exceptions.PayloadTooLargeException;
-import de.thm.arsnova.web.exceptions.PreconditionFailedException;
-import de.thm.arsnova.web.exceptions.UnauthorizedException;
+import java.util.Map;
+import javax.naming.OperationNotSupportedException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.ektorp.DocumentNotFoundException;
 import org.slf4j.event.Level;
 import org.springframework.http.HttpHeaders;
@@ -42,10 +39,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import javax.naming.OperationNotSupportedException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
+import de.thm.arsnova.web.exceptions.BadRequestException;
+import de.thm.arsnova.web.exceptions.ForbiddenException;
+import de.thm.arsnova.web.exceptions.NoContentException;
+import de.thm.arsnova.web.exceptions.NotFoundException;
+import de.thm.arsnova.web.exceptions.NotImplementedException;
+import de.thm.arsnova.web.exceptions.PayloadTooLargeException;
+import de.thm.arsnova.web.exceptions.PreconditionFailedException;
+import de.thm.arsnova.web.exceptions.UnauthorizedException;
 
 /**
  * Translates exceptions into HTTP status codes.

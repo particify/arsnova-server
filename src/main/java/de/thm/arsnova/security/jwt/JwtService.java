@@ -15,20 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.security.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.security.User;
-import de.thm.arsnova.service.UserService;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.stereotype.Service;
-
 import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -37,6 +30,14 @@ import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.stereotype.Service;
+
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.security.User;
+import de.thm.arsnova.service.UserService;
 
 @Service
 public class JwtService {

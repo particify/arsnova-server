@@ -15,7 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.persistence.couchdb.migrations;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import org.ektorp.DbAccessException;
+import org.ektorp.DocumentNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Comment;
@@ -32,22 +49,6 @@ import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.persistence.UserRepository;
 import de.thm.arsnova.persistence.couchdb.support.MangoCouchDbConnector;
 import de.thm.arsnova.persistence.couchdb.support.PagedMangoResponse;
-import org.ektorp.DbAccessException;
-import org.ektorp.DocumentNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Conditional;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * Performs the data migration from version 2 to version 3.

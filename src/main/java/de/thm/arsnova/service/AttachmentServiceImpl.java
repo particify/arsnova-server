@@ -15,13 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service;
 
-import de.thm.arsnova.model.Attachment;
-import de.thm.arsnova.persistence.AttachmentRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.multipart.MultipartFile;
+
+import de.thm.arsnova.model.Attachment;
+import de.thm.arsnova.persistence.AttachmentRepository;
 
 public class AttachmentServiceImpl extends DefaultEntityServiceImpl<Attachment> implements AttachmentService {
 	private AttachmentRepository attachmentRepository;

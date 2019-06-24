@@ -15,9 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.transport;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import de.thm.arsnova.model.migration.v2.Answer;
 import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.migration.v2.Comment;
@@ -27,12 +34,6 @@ import de.thm.arsnova.model.migration.v2.Room;
 import de.thm.arsnova.model.migration.v2.RoomFeature;
 import de.thm.arsnova.model.migration.v2.RoomInfo;
 import de.thm.arsnova.model.serialization.View;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 /**
  * This class is used to allow the import and export of a session.

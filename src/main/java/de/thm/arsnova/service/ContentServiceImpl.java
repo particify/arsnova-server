@@ -15,18 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.	 If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service;
 
-import de.thm.arsnova.event.BeforeDeletionEvent;
-import de.thm.arsnova.model.Content;
-import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.Room.ContentGroup;
-import de.thm.arsnova.persistence.AnswerRepository;
-import de.thm.arsnova.persistence.ContentRepository;
-import de.thm.arsnova.persistence.LogEntryRepository;
-import de.thm.arsnova.security.User;
-import de.thm.arsnova.web.exceptions.NotFoundException;
-import de.thm.arsnova.web.exceptions.UnauthorizedException;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,15 +39,16 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import de.thm.arsnova.event.BeforeDeletionEvent;
+import de.thm.arsnova.model.Content;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.Room.ContentGroup;
+import de.thm.arsnova.persistence.AnswerRepository;
+import de.thm.arsnova.persistence.ContentRepository;
+import de.thm.arsnova.persistence.LogEntryRepository;
+import de.thm.arsnova.security.User;
+import de.thm.arsnova.web.exceptions.NotFoundException;
+import de.thm.arsnova.web.exceptions.UnauthorizedException;
 
 /**
  * Performs all content related operations.

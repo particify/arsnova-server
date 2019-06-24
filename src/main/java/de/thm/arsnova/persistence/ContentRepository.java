@@ -1,8 +1,8 @@
 package de.thm.arsnova.persistence;
 
-import de.thm.arsnova.model.Content;
-
 import java.util.List;
+
+import de.thm.arsnova.model.Content;
 
 public interface ContentRepository extends CrudRepository<Content, String> {
 	List<Content> findByRoomIdAndVariantAndActive(Object... keys);

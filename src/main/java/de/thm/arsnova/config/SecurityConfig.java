@@ -15,18 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.config;
 
-import de.thm.arsnova.security.CasLogoutSuccessHandler;
-import de.thm.arsnova.security.CasUserDetailsService;
-import de.thm.arsnova.security.CustomLdapUserDetailsMapper;
-import de.thm.arsnova.security.LoginAuthenticationFailureHandler;
-import de.thm.arsnova.security.LoginAuthenticationSucessHandler;
-import de.thm.arsnova.security.RegisteredUserDetailsService;
-import de.thm.arsnova.security.jwt.JwtAuthenticationProvider;
-import de.thm.arsnova.security.jwt.JwtTokenFilter;
-import de.thm.arsnova.security.pac4j.OauthAuthenticationProvider;
-import de.thm.arsnova.security.pac4j.OauthCallbackFilter;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.PostConstruct;
+import javax.servlet.ServletContext;
 import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.config.Config;
@@ -85,10 +80,16 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.security.web.header.writers.HstsHeaderWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
-import java.util.ArrayList;
-import java.util.List;
+import de.thm.arsnova.security.CasLogoutSuccessHandler;
+import de.thm.arsnova.security.CasUserDetailsService;
+import de.thm.arsnova.security.CustomLdapUserDetailsMapper;
+import de.thm.arsnova.security.LoginAuthenticationFailureHandler;
+import de.thm.arsnova.security.LoginAuthenticationSucessHandler;
+import de.thm.arsnova.security.RegisteredUserDetailsService;
+import de.thm.arsnova.security.jwt.JwtAuthenticationProvider;
+import de.thm.arsnova.security.jwt.JwtTokenFilter;
+import de.thm.arsnova.security.pac4j.OauthAuthenticationProvider;
+import de.thm.arsnova.security.pac4j.OauthCallbackFilter;
 
 /**
  * Loads property file and configures components used for authentication.

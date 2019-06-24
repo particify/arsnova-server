@@ -15,17 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.service;
 
-import de.thm.arsnova.model.FindQuery;
-import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.UserProfile;
-import org.springframework.stereotype.Service;
+package de.thm.arsnova.service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
+
+import de.thm.arsnova.model.FindQuery;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.UserProfile;
 
 @Service
 public class RoomFindQueryService implements FindQueryService<Room> {

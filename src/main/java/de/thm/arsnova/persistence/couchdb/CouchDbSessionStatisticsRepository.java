@@ -15,16 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.persistence.couchdb;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import de.thm.arsnova.model.Room;
-import de.thm.arsnova.persistence.SessionStatisticsRepository;
-import de.thm.arsnova.service.score.Score;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.ViewResult;
 import org.ektorp.support.CouchDbRepositorySupport;
+
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.persistence.SessionStatisticsRepository;
+import de.thm.arsnova.service.score.Score;
 
 public class CouchDbSessionStatisticsRepository extends CouchDbRepositorySupport implements SessionStatisticsRepository {
 	public CouchDbSessionStatisticsRepository(final CouchDbConnector db, final boolean createIfNotExists) {

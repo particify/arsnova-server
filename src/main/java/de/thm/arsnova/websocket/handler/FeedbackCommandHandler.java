@@ -1,14 +1,14 @@
 package de.thm.arsnova.websocket.handler;
 
-import de.thm.arsnova.websocket.message.CreateFeedback;
-import de.thm.arsnova.websocket.message.FeedbackChanged;
-import de.thm.arsnova.websocket.message.FeedbackChangedPayload;
-import de.thm.arsnova.websocket.message.GetFeedback;
+import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
+import de.thm.arsnova.websocket.message.CreateFeedback;
+import de.thm.arsnova.websocket.message.FeedbackChanged;
+import de.thm.arsnova.websocket.message.FeedbackChangedPayload;
+import de.thm.arsnova.websocket.message.GetFeedback;
 
 @Component
 public class FeedbackCommandHandler {

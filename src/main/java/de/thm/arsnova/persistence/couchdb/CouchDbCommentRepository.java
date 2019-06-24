@@ -15,13 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.persistence.couchdb;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import de.thm.arsnova.model.Comment;
-import de.thm.arsnova.model.migration.v2.CommentReadingCount;
-import de.thm.arsnova.persistence.CommentRepository;
-import de.thm.arsnova.persistence.LogEntryRepository;
+import java.util.List;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.ViewResult;
@@ -29,7 +27,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
+import de.thm.arsnova.model.Comment;
+import de.thm.arsnova.model.migration.v2.CommentReadingCount;
+import de.thm.arsnova.persistence.CommentRepository;
+import de.thm.arsnova.persistence.LogEntryRepository;
 
 public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> implements CommentRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbCommentRepository.class);

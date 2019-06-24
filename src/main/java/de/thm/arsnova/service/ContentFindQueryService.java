@@ -15,15 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.service;
 
-import de.thm.arsnova.model.Content;
-import de.thm.arsnova.model.FindQuery;
-import org.springframework.stereotype.Service;
+package de.thm.arsnova.service;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.springframework.stereotype.Service;
+
+import de.thm.arsnova.model.Content;
+import de.thm.arsnova.model.FindQuery;
 
 @Service
 public class ContentFindQueryService implements FindQueryService<Content> {

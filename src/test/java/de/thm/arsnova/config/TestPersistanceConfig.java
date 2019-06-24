@@ -15,13 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.config;
 
-import de.thm.arsnova.persistence.*;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+
+import de.thm.arsnova.persistence.AnswerRepository;
+import de.thm.arsnova.persistence.AttachmentRepository;
+import de.thm.arsnova.persistence.CommentRepository;
+import de.thm.arsnova.persistence.ContentRepository;
+import de.thm.arsnova.persistence.LogEntryRepository;
+import de.thm.arsnova.persistence.MotdRepository;
+import de.thm.arsnova.persistence.RoomRepository;
+import de.thm.arsnova.persistence.SessionStatisticsRepository;
+import de.thm.arsnova.persistence.StatisticsRepository;
+import de.thm.arsnova.persistence.UserRepository;
 
 @Profile("test")
 @Configuration

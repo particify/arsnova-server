@@ -15,7 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.cache;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 
 import de.thm.arsnova.event.AfterCreationEvent;
 import de.thm.arsnova.event.AfterDeletionEvent;
@@ -23,9 +28,6 @@ import de.thm.arsnova.event.ChangeScoreEvent;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.Room;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
 
 /**
  * This class is used to evict caches based on events. The events carry all necessary information to clear the

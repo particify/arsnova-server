@@ -15,13 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.persistence.couchdb;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import de.thm.arsnova.model.Answer;
-import de.thm.arsnova.model.AnswerStatistics;
-import de.thm.arsnova.persistence.AnswerRepository;
-import de.thm.arsnova.persistence.LogEntryRepository;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.ViewResult;
@@ -31,12 +34,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import de.thm.arsnova.model.Answer;
+import de.thm.arsnova.model.AnswerStatistics;
+import de.thm.arsnova.persistence.AnswerRepository;
+import de.thm.arsnova.persistence.LogEntryRepository;
 
 public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> implements AnswerRepository, ApplicationEventPublisherAware {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbAnswerRepository.class);

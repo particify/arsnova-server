@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.security;
 
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.service.UserService;
+import java.util.HashSet;
+import java.util.Set;
 import org.jasig.cas.client.validation.Assertion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.cas.userdetails.AbstractCasAssertionUserDetailsService;
@@ -27,8 +28,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Set;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.service.UserService;
 
 /**
  * Class to load a user based on the results from CAS.

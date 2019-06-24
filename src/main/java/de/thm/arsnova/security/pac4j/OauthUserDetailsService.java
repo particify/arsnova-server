@@ -15,11 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.security.pac4j;
 
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.security.User;
-import de.thm.arsnova.service.UserService;
+import java.util.Collection;
+import java.util.HashSet;
 import org.pac4j.oauth.profile.facebook.FacebookProfile;
 import org.pac4j.oauth.profile.twitter.TwitterProfile;
 import org.pac4j.oidc.profile.OidcProfile;
@@ -30,8 +30,9 @@ import org.springframework.security.core.userdetails.AuthenticationUserDetailsSe
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.HashSet;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.security.User;
+import de.thm.arsnova.service.UserService;
 
 /**
  * Loads UserDetails for an OAuth user (e.g. {@link UserProfile.AuthProvider#GOOGLE}) based on an unique identifier

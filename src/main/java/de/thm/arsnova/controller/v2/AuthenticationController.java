@@ -15,16 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.controller.v2;
 
-import de.thm.arsnova.config.SecurityConfig;
-import de.thm.arsnova.controller.AbstractController;
-import de.thm.arsnova.model.ServiceDescription;
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
-import de.thm.arsnova.security.User;
-import de.thm.arsnova.service.UserService;
-import de.thm.arsnova.web.exceptions.UnauthorizedException;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import javax.annotation.PostConstruct;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.exception.HttpAction;
 import org.pac4j.oauth.client.FacebookClient;
@@ -54,16 +57,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import de.thm.arsnova.config.SecurityConfig;
+import de.thm.arsnova.controller.AbstractController;
+import de.thm.arsnova.model.ServiceDescription;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.model.migration.v2.ClientAuthentication;
+import de.thm.arsnova.security.User;
+import de.thm.arsnova.service.UserService;
+import de.thm.arsnova.web.exceptions.UnauthorizedException;
 
 /**
  * Handles authentication specific requests.

@@ -15,15 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.persistence.couchdb;
 
-import de.thm.arsnova.model.Entity;
-import de.thm.arsnova.persistence.CrudRepository;
-import org.ektorp.BulkDeleteDocument;
-import org.ektorp.CouchDbConnector;
-import org.ektorp.ViewResult;
-import org.ektorp.support.CouchDbRepositorySupport;
-import org.springframework.data.repository.NoRepositoryBean;
+package de.thm.arsnova.persistence.couchdb;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -31,6 +24,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import org.ektorp.BulkDeleteDocument;
+import org.ektorp.CouchDbConnector;
+import org.ektorp.ViewResult;
+import org.ektorp.support.CouchDbRepositorySupport;
+import org.springframework.data.repository.NoRepositoryBean;
+
+import de.thm.arsnova.model.Entity;
+import de.thm.arsnova.persistence.CrudRepository;
 
 @NoRepositoryBean
 abstract class CouchDbCrudRepository<T extends Entity> extends CouchDbRepositorySupport<T> implements CrudRepository<T, String> {

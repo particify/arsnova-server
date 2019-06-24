@@ -15,18 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.service.score;
 
-import de.thm.arsnova.model.TestClient;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
-import de.thm.arsnova.model.transport.ScoreStatistics;
-import de.thm.arsnova.persistence.SessionStatisticsRepository;
-import org.junit.Before;
-import org.junit.Test;
+package de.thm.arsnova.service.score;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import de.thm.arsnova.model.transport.ScoreStatistics;
+import de.thm.arsnova.persistence.SessionStatisticsRepository;
 
 public class QuestionBasedScoreCalculatorTest {
 

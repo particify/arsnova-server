@@ -15,11 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.serialization;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.Converter;
+import java.util.HashMap;
+import java.util.Map;
+
 import de.thm.arsnova.model.migration.v2.Answer;
 import de.thm.arsnova.model.migration.v2.Comment;
 import de.thm.arsnova.model.migration.v2.Content;
@@ -29,9 +33,6 @@ import de.thm.arsnova.model.migration.v2.LogEntry;
 import de.thm.arsnova.model.migration.v2.Motd;
 import de.thm.arsnova.model.migration.v2.MotdList;
 import de.thm.arsnova.model.migration.v2.Room;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class CouchDbTypeFieldV2Converter implements Converter<Class<? extends Entity>, String> {
 	private static final Map<Class<? extends Entity>, String> typeMapping = new HashMap<>();

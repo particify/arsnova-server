@@ -15,16 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.persistence.couchdb;
 
-import de.thm.arsnova.model.Motd;
-import de.thm.arsnova.persistence.MotdRepository;
+import java.util.ArrayList;
+import java.util.List;
 import org.ektorp.CouchDbConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import de.thm.arsnova.model.Motd;
+import de.thm.arsnova.persistence.MotdRepository;
 
 public class CouchDbMotdRepository extends CouchDbCrudRepository<Motd> implements MotdRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbMotdRepository.class);

@@ -15,18 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.event;
 
-import de.thm.arsnova.model.Content;
-import de.thm.arsnova.model.Entity;
-import de.thm.arsnova.model.Room;
+import java.util.Map;
+import java.util.function.Function;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-import java.util.function.Function;
+import de.thm.arsnova.model.Content;
+import de.thm.arsnova.model.Entity;
+import de.thm.arsnova.model.Room;
 
 /**
  * StateEventDispatcher publishes additional, more specific events for state changes of entities when

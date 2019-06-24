@@ -15,17 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.persistence.couchdb;
 
-import de.thm.arsnova.model.Content;
-import de.thm.arsnova.persistence.ContentRepository;
-import de.thm.arsnova.persistence.LogEntryRepository;
-import org.ektorp.ComplexKey;
-import org.ektorp.CouchDbConnector;
-import org.ektorp.ViewResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+package de.thm.arsnova.persistence.couchdb;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +25,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.ektorp.ComplexKey;
+import org.ektorp.CouchDbConnector;
+import org.ektorp.ViewResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import de.thm.arsnova.model.Content;
+import de.thm.arsnova.persistence.ContentRepository;
+import de.thm.arsnova.persistence.LogEntryRepository;
 
 public class CouchDbContentRepository extends CouchDbCrudRepository<Content> implements ContentRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbContentRepository.class);

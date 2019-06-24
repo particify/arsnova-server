@@ -15,12 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service.score;
+
+import org.springframework.cache.annotation.Cacheable;
 
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.transport.ScoreStatistics;
 import de.thm.arsnova.persistence.SessionStatisticsRepository;
-import org.springframework.cache.annotation.Cacheable;
 
 /**
  * Base class for the score feature that allows filtering on the question variant.

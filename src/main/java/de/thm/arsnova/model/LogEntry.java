@@ -15,15 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.serialization.View;
-
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
+
+import de.thm.arsnova.model.serialization.View;
 
 public class LogEntry extends Entity {
 	public enum LogLevel {

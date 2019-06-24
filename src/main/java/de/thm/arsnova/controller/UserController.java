@@ -15,16 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.LoginCredentials;
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.model.serialization.View;
-import de.thm.arsnova.service.RoomService;
-import de.thm.arsnova.service.UserService;
-import de.thm.arsnova.web.exceptions.BadRequestException;
-import de.thm.arsnova.web.exceptions.ForbiddenException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,6 +26,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import de.thm.arsnova.model.LoginCredentials;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.model.serialization.View;
+import de.thm.arsnova.service.RoomService;
+import de.thm.arsnova.service.UserService;
+import de.thm.arsnova.web.exceptions.BadRequestException;
+import de.thm.arsnova.web.exceptions.ForbiddenException;
 
 @RestController
 @RequestMapping(UserController.REQUEST_MAPPING)

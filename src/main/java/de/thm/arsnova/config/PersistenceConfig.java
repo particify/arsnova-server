@@ -15,7 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.config;
+
+import org.ektorp.impl.StdCouchDbInstance;
+import org.ektorp.spring.HttpClientFactoryBean;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 
 import de.thm.arsnova.model.serialization.CouchDbObjectMapperFactory;
 import de.thm.arsnova.persistence.AnswerRepository;
@@ -37,14 +47,6 @@ import de.thm.arsnova.persistence.couchdb.CouchDbSessionStatisticsRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbStatisticsRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbUserRepository;
 import de.thm.arsnova.persistence.couchdb.support.MangoCouchDbConnector;
-import org.ektorp.impl.StdCouchDbInstance;
-import org.ektorp.spring.HttpClientFactoryBean;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
 
 @ComponentScan({
 		"de.thm.arsnova.persistence.couchdb"

@@ -15,20 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service;
 
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.persistence.UserRepository;
-import de.thm.arsnova.security.User;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.persistence.UserRepository;
+import de.thm.arsnova.security.User;
 
 public class StubUserService extends UserServiceImpl {
 	private final Set<GrantedAuthority> grantedAuthorities;

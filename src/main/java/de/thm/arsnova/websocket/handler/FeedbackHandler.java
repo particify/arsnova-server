@@ -1,11 +1,12 @@
 package de.thm.arsnova.websocket.handler;
 
-import de.thm.arsnova.websocket.message.CreateFeedback;
-import de.thm.arsnova.websocket.message.GetFeedback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
+
+import de.thm.arsnova.websocket.message.CreateFeedback;
+import de.thm.arsnova.websocket.message.GetFeedback;
 
 @Controller
 public class FeedbackHandler {

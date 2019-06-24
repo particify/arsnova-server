@@ -15,23 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.persistence.couchdb;
 
-import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.RoomStatistics;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
-import de.thm.arsnova.model.transport.ImportExportContainer;
-import de.thm.arsnova.persistence.LogEntryRepository;
-import de.thm.arsnova.persistence.MotdRepository;
-import de.thm.arsnova.persistence.RoomRepository;
-import org.ektorp.ComplexKey;
-import org.ektorp.CouchDbConnector;
-import org.ektorp.ViewQuery;
-import org.ektorp.ViewResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+package de.thm.arsnova.persistence.couchdb;
 
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -42,6 +27,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.ektorp.ComplexKey;
+import org.ektorp.CouchDbConnector;
+import org.ektorp.ViewQuery;
+import org.ektorp.ViewResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import de.thm.arsnova.connector.model.Course;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.RoomStatistics;
+import de.thm.arsnova.model.migration.v2.ClientAuthentication;
+import de.thm.arsnova.model.transport.ImportExportContainer;
+import de.thm.arsnova.persistence.LogEntryRepository;
+import de.thm.arsnova.persistence.MotdRepository;
+import de.thm.arsnova.persistence.RoomRepository;
 
 public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implements RoomRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbRoomRepository.class);

@@ -15,16 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model;
+
+import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+import org.junit.Test;
 
 import de.thm.arsnova.model.migration.v2.Answer;
 import de.thm.arsnova.model.migration.v2.AnswerOption;
 import de.thm.arsnova.model.migration.v2.Content;
-import org.junit.Test;
-
-import java.util.ArrayList;
-
-import static org.junit.Assert.assertEquals;
 
 public class ContentTest {
 

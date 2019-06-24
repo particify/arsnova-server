@@ -15,14 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.model.migration;
 
-import de.thm.arsnova.model.ChoiceAnswer;
-import de.thm.arsnova.model.ChoiceQuestionContent;
-import de.thm.arsnova.model.TextAnswer;
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.model.migration.v2.*;
-import org.checkerframework.checker.nullness.qual.Nullable;
+package de.thm.arsnova.model.migration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +27,22 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import de.thm.arsnova.model.ChoiceAnswer;
+import de.thm.arsnova.model.ChoiceQuestionContent;
+import de.thm.arsnova.model.TextAnswer;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.model.migration.v2.Answer;
+import de.thm.arsnova.model.migration.v2.Comment;
+import de.thm.arsnova.model.migration.v2.Content;
+import de.thm.arsnova.model.migration.v2.DbUser;
+import de.thm.arsnova.model.migration.v2.Entity;
+import de.thm.arsnova.model.migration.v2.LoggedIn;
+import de.thm.arsnova.model.migration.v2.Motd;
+import de.thm.arsnova.model.migration.v2.MotdList;
+import de.thm.arsnova.model.migration.v2.Room;
+import de.thm.arsnova.model.migration.v2.RoomFeature;
 
 /**
  * Converts legacy entities from version 2 to current model version.

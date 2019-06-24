@@ -15,11 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.websocket;
 
 import com.corundumstudio.socketio.SocketIOClient;
-import de.thm.arsnova.security.User;
-import de.thm.arsnova.service.UserService;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -35,9 +37,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import de.thm.arsnova.security.User;
+import de.thm.arsnova.service.UserService;
 
 /**
  * This aspect populates the SecurityContextHolder of Spring Security when data are received via WebSockets.

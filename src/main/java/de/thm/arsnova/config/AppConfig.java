@@ -15,25 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import de.thm.arsnova.connector.client.ConnectorClient;
-import de.thm.arsnova.connector.client.ConnectorClientImpl;
-import de.thm.arsnova.model.migration.FromV2Migrator;
-import de.thm.arsnova.model.migration.ToV2Migrator;
-import de.thm.arsnova.model.serialization.CouchDbDocumentModule;
-import de.thm.arsnova.model.serialization.View;
-import de.thm.arsnova.util.ImageUtils;
-import de.thm.arsnova.web.CacheControlInterceptorHandler;
-import de.thm.arsnova.web.CorsFilter;
-import de.thm.arsnova.web.DeprecatedApiInterceptorHandler;
-import de.thm.arsnova.web.PathApiVersionContentNegotiationStrategy;
-import de.thm.arsnova.web.ResponseInterceptorHandler;
-import de.thm.arsnova.websocket.ArsnovaSocketioServer;
-import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
@@ -67,10 +58,20 @@ import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import de.thm.arsnova.connector.client.ConnectorClient;
+import de.thm.arsnova.connector.client.ConnectorClientImpl;
+import de.thm.arsnova.model.migration.FromV2Migrator;
+import de.thm.arsnova.model.migration.ToV2Migrator;
+import de.thm.arsnova.model.serialization.CouchDbDocumentModule;
+import de.thm.arsnova.model.serialization.View;
+import de.thm.arsnova.util.ImageUtils;
+import de.thm.arsnova.web.CacheControlInterceptorHandler;
+import de.thm.arsnova.web.CorsFilter;
+import de.thm.arsnova.web.DeprecatedApiInterceptorHandler;
+import de.thm.arsnova.web.PathApiVersionContentNegotiationStrategy;
+import de.thm.arsnova.web.ResponseInterceptorHandler;
+import de.thm.arsnova.websocket.ArsnovaSocketioServer;
+import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 
 /**
  * Loads property file and configures non-security related beans and components.

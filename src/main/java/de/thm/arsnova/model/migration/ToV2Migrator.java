@@ -15,13 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.migration;
 
-import de.thm.arsnova.model.AnswerStatistics;
-import de.thm.arsnova.model.ChoiceQuestionContent;
-import de.thm.arsnova.model.RoomStatistics;
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.model.migration.v2.*;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_ABCD;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_FREETEXT;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_GRID;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_MC;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_SCHOOL;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_VOTE;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_YESNO;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -30,7 +33,22 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static de.thm.arsnova.model.migration.FromV2Migrator.*;
+import de.thm.arsnova.model.AnswerStatistics;
+import de.thm.arsnova.model.ChoiceQuestionContent;
+import de.thm.arsnova.model.RoomStatistics;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.model.migration.v2.Answer;
+import de.thm.arsnova.model.migration.v2.AnswerOption;
+import de.thm.arsnova.model.migration.v2.Comment;
+import de.thm.arsnova.model.migration.v2.Content;
+import de.thm.arsnova.model.migration.v2.Entity;
+import de.thm.arsnova.model.migration.v2.LoggedIn;
+import de.thm.arsnova.model.migration.v2.Motd;
+import de.thm.arsnova.model.migration.v2.MotdList;
+import de.thm.arsnova.model.migration.v2.Room;
+import de.thm.arsnova.model.migration.v2.RoomFeature;
+import de.thm.arsnova.model.migration.v2.RoomInfo;
+import de.thm.arsnova.model.migration.v2.VisitedRoom;
 
 /**
  * Converts entities from current model version to legacy version 2.

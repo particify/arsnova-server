@@ -1,10 +1,9 @@
 package de.thm.arsnova.websocket.handler;
 
-import de.thm.arsnova.websocket.message.CreateFeedback;
-import de.thm.arsnova.websocket.message.CreateFeedbackPayload;
-import de.thm.arsnova.websocket.message.FeedbackChanged;
-import de.thm.arsnova.websocket.message.FeedbackChangedPayload;
-import de.thm.arsnova.websocket.message.GetFeedback;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,9 +12,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
+import de.thm.arsnova.websocket.message.CreateFeedback;
+import de.thm.arsnova.websocket.message.CreateFeedbackPayload;
+import de.thm.arsnova.websocket.message.FeedbackChanged;
+import de.thm.arsnova.websocket.message.FeedbackChangedPayload;
+import de.thm.arsnova.websocket.message.GetFeedback;
 
 @RunWith(SpringRunner.class)
 public class FeedbackCommandHandlerTest {

@@ -15,11 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.persistence.couchdb;
 
 import com.google.common.collect.Lists;
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.persistence.UserRepository;
+import java.util.ArrayList;
+import java.util.List;
 import org.ektorp.BulkDeleteDocument;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
@@ -30,8 +31,8 @@ import org.ektorp.ViewResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.persistence.UserRepository;
 
 public class CouchDbUserRepository extends CouchDbCrudRepository<UserProfile> implements UserRepository {
 	private static final int BULK_PARTITION_SIZE = 500;

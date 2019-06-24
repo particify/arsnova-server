@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.test.context.support;
 
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.security.User;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -27,8 +28,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.security.User;
 
 /**
  * @author Daniel Gerhardt

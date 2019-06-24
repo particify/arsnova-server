@@ -15,18 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.controller.v2;
 
-import de.thm.arsnova.controller.AbstractController;
-import de.thm.arsnova.service.CommentService;
-import de.thm.arsnova.service.ContentService;
-import de.thm.arsnova.web.DeprecatedApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import de.thm.arsnova.controller.AbstractController;
+import de.thm.arsnova.service.CommentService;
+import de.thm.arsnova.service.ContentService;
+import de.thm.arsnova.web.DeprecatedApi;
 
 /**
  * This controller forwards requests from deprecated URLs to their new controller, where the requests are handled.

@@ -15,10 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.test.context.support;
 
-import de.thm.arsnova.model.UserProfile;
-import org.springframework.security.test.context.support.WithSecurityContext;
+package de.thm.arsnova.test.context.support;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -26,6 +24,9 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.springframework.security.test.context.support.WithSecurityContext;
+
+import de.thm.arsnova.model.UserProfile;
 
 /**
  * @author Daniel Gerhardt

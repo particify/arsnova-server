@@ -15,12 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.	 If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service;
 
-import de.thm.arsnova.model.Motd;
-import de.thm.arsnova.model.Room;
-import de.thm.arsnova.persistence.MotdRepository;
-import de.thm.arsnova.web.exceptions.BadRequestException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -28,10 +29,10 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
+import de.thm.arsnova.model.Motd;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.persistence.MotdRepository;
+import de.thm.arsnova.web.exceptions.BadRequestException;
 
 /**
  * Performs all question, interposed question, and answer related operations.
