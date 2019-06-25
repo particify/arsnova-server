@@ -65,8 +65,8 @@ public class WelcomeController extends AbstractController {
 	@RequestMapping(value = "/", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
 	public Map<String, Object> jsonHome() {
-		Map<String, Object> response = new HashMap<>();
-		Map<String, Object> version = new HashMap<>();
+		final Map<String, Object> response = new HashMap<>();
+		final Map<String, Object> version = new HashMap<>();
 
 		version.put("string", versionInfoProperties.getProperty("version.string"));
 		version.put("buildTime", versionInfoProperties.getProperty("version.build-time"));

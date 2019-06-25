@@ -89,7 +89,7 @@ public class SocketController extends AbstractController {
 			nickname = "getSocketUrl")
 	@RequestMapping(value = "/url", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getSocketUrl(final HttpServletRequest request) {
-		return (server.isUseSSL() ? "https://" : "http://") + request.getServerName() + ":" + server.getPortNumber();
+		return (server.isUseSsl() ? "https://" : "http://") + request.getServerName() + ":" + server.getPortNumber();
 	}
 
 }

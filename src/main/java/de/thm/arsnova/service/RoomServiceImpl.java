@@ -154,7 +154,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 			logger.info("Delete inactive rooms.");
 			long unixTime = System.currentTimeMillis();
 			long lastActivityBefore = unixTime - guestRoomInactivityThresholdDays * 24 * 60 * 60 * 1000L;
-			int totalCount[] = new int[] {0, 0, 0};
+			int[] totalCount = new int[] {0, 0, 0};
 			List<Room> inactiveRooms = roomRepository.findInactiveGuestRoomsMetadata(lastActivityBefore);
 			delete(inactiveRooms);
 
@@ -172,18 +172,18 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Override
 	protected void modifyRetrieved(final Room room) {
 		// creates a set from all room content groups
-		Set<String> cIdsWithGroup = room.getContentGroups().stream()
+		Set<String> cidsWithGroup = room.getContentGroups().stream()
 				.map(Room.ContentGroup::getContentIds)
 				.flatMap(ids -> ids.stream())
 				.collect(Collectors.toSet());
 
-		Set<String> cIds = new HashSet<>(contentRepository.findIdsByRoomId(room.getId()));
-		cIds.removeAll(cIdsWithGroup);
+		Set<String> cids = new HashSet<>(contentRepository.findIdsByRoomId(room.getId()));
+		cids.removeAll(cidsWithGroup);
 
-		if (!cIds.isEmpty()) {
-			Set<Room.ContentGroup> cgs = room.getContentGroups();
+		if (!cids.isEmpty()) {
+			final Set<Room.ContentGroup> cgs = room.getContentGroups();
 			Room.ContentGroup defaultGroup = new Room.ContentGroup();
-			defaultGroup.setContentIds(cIds);
+			defaultGroup.setContentIds(cids);
 			defaultGroup.setAutoSort(true);
 			defaultGroup.setName("");
 			cgs.add(defaultGroup);

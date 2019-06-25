@@ -115,9 +115,9 @@ public class V2ToV3Migration implements Migration {
 	}
 
 	private void createV2Index() {
-		List<MangoCouchDbConnector.MangoQuery.Sort> fields;
-		Map<String, Object> filterSelector;
-		Map<String, Object> subFilterSelector;
+		final List<MangoCouchDbConnector.MangoQuery.Sort> fields;
+		final Map<String, Object> filterSelector;
+		final Map<String, Object> subFilterSelector;
 
 		fields = new ArrayList<>();
 		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("type", false));
@@ -130,35 +130,35 @@ public class V2ToV3Migration implements Migration {
 		subFilterSelector.put("$exists", false);
 		filterSelector.put("locked", subFilterSelector);
 		fromConnector.createPartialJsonIndex(USER_INDEX, new ArrayList<>(), filterSelector);
-		fields = new ArrayList<>();
+		fields.clear();
 		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("username", false));
 		fromConnector.createPartialJsonIndex(USER_INDEX, fields, filterSelector);
 
-		filterSelector = new HashMap<>();
+		filterSelector.clear();
 		filterSelector.put("type", "logged_in");
 		fromConnector.createPartialJsonIndex(LOGGEDIN_INDEX, new ArrayList<>(), filterSelector);
-		fields = new ArrayList<>();
+		fields.clear();
 		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("user", false));
 		fromConnector.createPartialJsonIndex(LOGGEDIN_INDEX, fields, filterSelector);
 
-		filterSelector = new HashMap<>();
+		filterSelector.clear();
 		filterSelector.put("type", "session");
 		fromConnector.createPartialJsonIndex(SESSION_INDEX, new ArrayList<>(), filterSelector);
-		fields = new ArrayList<>();
+		fields.clear();
 		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("keyword", false));
 		fromConnector.createPartialJsonIndex(SESSION_INDEX, fields, filterSelector);
 
-		filterSelector = new HashMap<>();
+		filterSelector.clear();
 		filterSelector.put("type", "motd");
 		fromConnector.createPartialJsonIndex(MOTD_INDEX, new ArrayList<>(), filterSelector);
-		fields = new ArrayList<>();
+		fields.clear();
 		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("motdkey", false));
 		fromConnector.createPartialJsonIndex(MOTD_INDEX, fields, filterSelector);
 
-		filterSelector = new HashMap<>();
+		filterSelector.clear();
 		filterSelector.put("type", "motdlist");
 		fromConnector.createPartialJsonIndex(MOTDLIST_INDEX, new ArrayList<>(), filterSelector);
-		fields = new ArrayList<>();
+		fields.clear();
 		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("username", false));
 		fromConnector.createPartialJsonIndex(MOTDLIST_INDEX, fields, filterSelector);
 	}

@@ -22,7 +22,7 @@ public class FeedbackCommandHandler {
 		this.messagingTemplate = messagingTemplate;
 	}
 
-	synchronized private int[] updateFeedbackForRoom(String roomId, int index) {
+	private synchronized int[] updateFeedbackForRoom(String roomId, int index) {
 		int[] values = roomValues.getOrDefault(roomId, new int[4]);
 		values[index]++;
 		roomValues.put(roomId, values);

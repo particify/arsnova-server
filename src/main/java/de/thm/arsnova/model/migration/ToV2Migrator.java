@@ -62,27 +62,6 @@ public class ToV2Migrator {
 		to.setRevision(from.getRevision());
 	}
 
-	public LoggedIn migrateLoggedIn(final UserProfile from) {
-		final LoggedIn to = new LoggedIn();
-		copyCommonProperties(from, to);
-		to.setUser(from.getLoginId());
-		to.setTimestamp(from.getLastLoginTimestamp().getTime());
-		to.setVisitedSessions(from.getRoomHistory().stream()
-				.map(entry -> new VisitedRoom())
-				.collect(Collectors.toList()));
-
-		return to;
-	}
-
-	public MotdList migrateMotdList(final UserProfile from) {
-		final MotdList to = new MotdList();
-		copyCommonProperties(from, to);
-		to.setUsername(from.getLoginId());
-		to.setMotdkeys(String.join(",", from.getAcknowledgedMotds()));
-
-		return to;
-	}
-
 	public Room migrate(final de.thm.arsnova.model.Room from, final Optional<UserProfile> owner) {
 		final Room to = new Room();
 		copyCommonProperties(from, to);
@@ -177,18 +156,6 @@ public class ToV2Migrator {
 		return feature;
 	}
 
-	public RoomInfo migrateStats(final de.thm.arsnova.model.Room from) {
-		RoomInfo to = new RoomInfo(migrate(from));
-		RoomStatistics stats = from.getStatistics();
-		to.setNumQuestions(stats.getContentCount());
-		to.setNumUnanswered(stats.getUnansweredContentCount());
-		to.setNumAnswers(stats.getAnswerCount());
-		to.setNumInterposed(stats.getCommentCount());
-		to.setNumUnredInterposed(stats.getUnreadCommentCount());
-
-		return to;
-	}
-
 	public Content migrate(final de.thm.arsnova.model.Content from) {
 		final Content to = new Content();
 		copyCommonProperties(from, to);
@@ -281,16 +248,6 @@ public class ToV2Migrator {
 		return to;
 	}
 
-	public String migrateChoice(final List<Integer> selectedChoiceIndexes,
-			final List<ChoiceQuestionContent.AnswerOption> options) {
-		List<String> answers = new ArrayList<>();
-		for (int i = 0; i < options.size(); i++) {
-			answers.add(selectedChoiceIndexes.contains(i) ? "1" : "0");
-		}
-
-		return answers.stream().collect(Collectors.joining(","));
-	}
-
 	public Answer migrate(final de.thm.arsnova.model.ChoiceAnswer from,
 			final de.thm.arsnova.model.ChoiceQuestionContent content) {
 		return migrate(from, content, Optional.empty());
@@ -356,6 +313,8 @@ public class ToV2Migrator {
 			case ROOM:
 				to.setAudience("session");
 				break;
+			default:
+				break;
 		}
 		to.setTitle(from.getTitle());
 		to.setText(from.getBody());
@@ -411,5 +370,48 @@ public class ToV2Migrator {
 		}
 
 		return to;
+	}
+
+	public LoggedIn migrateLoggedIn(final UserProfile from) {
+		final LoggedIn to = new LoggedIn();
+		copyCommonProperties(from, to);
+		to.setUser(from.getLoginId());
+		to.setTimestamp(from.getLastLoginTimestamp().getTime());
+		to.setVisitedSessions(from.getRoomHistory().stream()
+				.map(entry -> new VisitedRoom())
+				.collect(Collectors.toList()));
+
+		return to;
+	}
+
+	public MotdList migrateMotdList(final UserProfile from) {
+		final MotdList to = new MotdList();
+		copyCommonProperties(from, to);
+		to.setUsername(from.getLoginId());
+		to.setMotdkeys(String.join(",", from.getAcknowledgedMotds()));
+
+		return to;
+	}
+
+	public RoomInfo migrateStats(final de.thm.arsnova.model.Room from) {
+		RoomInfo to = new RoomInfo(migrate(from));
+		RoomStatistics stats = from.getStatistics();
+		to.setNumQuestions(stats.getContentCount());
+		to.setNumUnanswered(stats.getUnansweredContentCount());
+		to.setNumAnswers(stats.getAnswerCount());
+		to.setNumInterposed(stats.getCommentCount());
+		to.setNumUnredInterposed(stats.getUnreadCommentCount());
+
+		return to;
+	}
+
+	public String migrateChoice(final List<Integer> selectedChoiceIndexes,
+			final List<ChoiceQuestionContent.AnswerOption> options) {
+		List<String> answers = new ArrayList<>();
+		for (int i = 0; i < options.size(); i++) {
+			answers.add(selectedChoiceIndexes.contains(i) ? "1" : "0");
+		}
+
+		return answers.stream().collect(Collectors.joining(","));
 	}
 }

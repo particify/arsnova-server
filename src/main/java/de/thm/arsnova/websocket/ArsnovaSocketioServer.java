@@ -25,7 +25,7 @@ package de.thm.arsnova.websocket;
  */
 public interface ArsnovaSocketioServer {
 
-	boolean isUseSSL();
+	boolean isUseSsl();
 
 	int getPortNumber();
 

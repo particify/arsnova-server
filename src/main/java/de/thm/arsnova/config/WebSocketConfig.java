@@ -14,10 +14,10 @@ import de.thm.arsnova.websocket.handler.AuthChannelInterceptorAdapter;
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-	private final String MESSAGING_PREFIX = "/backend";
-	private final String[] DESTINATION_PREFIX = {"/exchange", "/topic", "/queue"};
-	private final String USER_REGISTRY_BROADCAST = "/topic/log-user-registry";
-	private final String USER_DESTINATION_BROADCAST = "/queue/log-unresolved-user";
+	private static final String MESSAGING_PREFIX = "/backend";
+	private static final String[] DESTINATION_PREFIX = {"/exchange", "/topic", "/queue"};
+	private static final String USER_REGISTRY_BROADCAST = "/topic/log-user-registry";
+	private static final String USER_DESTINATION_BROADCAST = "/queue/log-unresolved-user";
 
 	@Value("${messaging.relay.enabled}") private Boolean relayEnabled;
 	@Value("${messaging.relay.host}") private String relayHost;
@@ -32,8 +32,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	public WebSocketConfig(AuthChannelInterceptorAdapter authChannelInterceptorAdapter) {
 		this.authChannelInterceptorAdapter = authChannelInterceptorAdapter;
 	}
-
-
 
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -58,10 +56,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 		registry.addEndpoint("/ws").setAllowedOrigins(corsOrigins).withSockJS();
 	}
 
-
 	@Override
 	public void configureClientInboundChannel(ChannelRegistration registration) {
 		registration.setInterceptors(authChannelInterceptorAdapter);
 	}
-
 }

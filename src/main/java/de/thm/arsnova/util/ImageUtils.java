@@ -175,7 +175,10 @@ public class ImageUtils {
 
 				final double ratio = ((double) originalImage.getWidth()) / ((double) originalImage.getHeight());
 
-				int x = 0, y = 0, w = width, h = height;
+				int x = 0;
+				int y = 0;
+				int w = width;
+				int h = height;
 				if (originalImage.getWidth() > originalImage.getHeight()) {
 					final int newWidth = (int) Math.round((float) height * ratio);
 					x = -(newWidth - width) >> 1;

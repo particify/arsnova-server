@@ -75,7 +75,7 @@ public class MigrationState extends Entity {
 	public void setId(final String id) {
 		if (!id.equals(this.ID)) {
 			throw new IllegalArgumentException("ID of this entity must not be changed.");
-		};
+		}
 	}
 
 	@Override

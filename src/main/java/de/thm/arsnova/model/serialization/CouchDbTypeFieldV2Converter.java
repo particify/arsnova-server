@@ -49,8 +49,8 @@ public class CouchDbTypeFieldV2Converter implements Converter<Class<? extends En
 	}
 
 	@Override
-	public String convert(Class<? extends Entity> aClass) {
-		return typeMapping.get(aClass);
+	public String convert(Class<? extends Entity> clazz) {
+		return typeMapping.get(clazz);
 	}
 
 	@Override

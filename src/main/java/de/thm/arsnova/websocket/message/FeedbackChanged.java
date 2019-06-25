@@ -7,8 +7,12 @@ public class FeedbackChanged extends WebSocketMessage<FeedbackChangedPayload> {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
 		FeedbackChanged that = (FeedbackChanged) o;
 		return this.getPayload().equals(that.getPayload());
 	}

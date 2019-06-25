@@ -163,10 +163,10 @@ public class ConfigurationController extends AbstractController {
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public Map<String, Object> getConfiguration(HttpServletRequest request) {
-		Map<String, Object> config = new HashMap<>();
-		Map<String, Boolean> features = new HashMap<>();
-		Map<String, String> publicPool = new HashMap<>();
-		Map<String, Object> splashscreen = new HashMap<>();
+		final Map<String, Object> config = new HashMap<>();
+		final Map<String, Boolean> features = new HashMap<>();
+		final Map<String, String> publicPool = new HashMap<>();
+		final Map<String, Object> splashscreen = new HashMap<>();
 
 		/* The API path could be unknown to the client in case the request was forwarded */
 		if ("".equals(apiPath)) {

@@ -85,7 +85,8 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 		// {"key":["cecebabb21b096e592d81f9c1322b877","Guestc9350cf4a3","read"],"value":1},
 		// {"key":["cecebabb21b096e592d81f9c1322b877","Guestc9350cf4a3","unread"],"value":1}
 		// ]}
-		int read = 0, unread = 0;
+		int read = 0;
+		int unread = 0;
 		boolean isRead = false;
 		final ViewResult.Row fst = viewResult.getRows().get(0);
 		final ViewResult.Row snd = viewResult.getRows().size() > 1 ? viewResult.getRows().get(1) : null;

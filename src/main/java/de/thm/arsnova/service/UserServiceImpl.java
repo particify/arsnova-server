@@ -667,9 +667,14 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 	public User getAuthenticatedUserByWsSession(final String wsSessionId) {
 		String jwt = wsSessionIdToJwt.getOrDefault(wsSessionId, null);
-		if (jwt == null) return null;
+		if (jwt == null) {
+			return null;
+		}
 		User u = jwtService.verifyToken(jwt);
-		if (u == null) return null;
+		if (u == null) {
+			return null;
+		}
+
 		return u;
 	}
 }

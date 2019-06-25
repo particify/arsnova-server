@@ -105,7 +105,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 
 	private int portNumber;
 	private String hostIp;
-	private boolean useSSL = false;
+	private boolean useSsl = false;
 	private String keystore;
 	private String storepass;
 	private final Configuration config;
@@ -140,7 +140,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 		config.setSocketConfig(soConfig);
 		config.setPort(portNumber);
 		config.setHostname(hostIp);
-		if (useSSL) {
+		if (useSsl) {
 			try {
 				final InputStream stream = new FileInputStream(keystore);
 				config.setKeyStore(stream);
@@ -341,13 +341,13 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 	}
 
 	@Override
-	public boolean isUseSSL() {
-		return useSSL;
+	public boolean isUseSsl() {
+		return useSsl;
 	}
 
 	@Required
-	public void setUseSSL(final boolean useSSL) {
-		this.useSSL = useSSL;
+	public void setUseSsl(final boolean useSsl) {
+		this.useSsl = useSsl;
 	}
 
 	public void reportDeletedFeedback(final String userId, final Set<de.thm.arsnova.model.Room> rooms) {
@@ -471,7 +471,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 
 		/* TODO role handling implementation, send this only to users with role audience */
 		if (!qs.isEmpty()) {
-			broadcastInRoom(roomId, "lecQuestionAvail", contents.get(0).get_id()); // deprecated!
+			broadcastInRoom(roomId, "lecQuestionAvail", contents.get(0).getId()); // deprecated!
 		}
 		broadcastInRoom(roomId, "lecturerQuestionAvailable", contents);
 	}

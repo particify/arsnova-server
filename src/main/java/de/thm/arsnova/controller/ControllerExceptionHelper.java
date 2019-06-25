@@ -63,6 +63,8 @@ public class ControllerExceptionHelper {
 			case TRACE:
 				logger.trace(message, e);
 				break;
+			default:
+				break;
 		}
 	}
 }

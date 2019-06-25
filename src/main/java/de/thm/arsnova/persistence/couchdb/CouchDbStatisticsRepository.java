@@ -77,6 +77,8 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
 						case "flashcards":
 							stats.setFlashcards(stats.getFlashcards() + value);
 							break;
+						default:
+							break;
 					}
 				}
 			}

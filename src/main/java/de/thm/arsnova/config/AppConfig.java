@@ -270,7 +270,7 @@ public class AppConfig implements WebMvcConfigurer {
 		final ArsnovaSocketioServerImpl socketioServer = new ArsnovaSocketioServerImpl();
 		socketioServer.setHostIp(socketAddress);
 		socketioServer.setPortNumber(socketPort);
-		socketioServer.setUseSSL(!socketKeystore.isEmpty());
+		socketioServer.setUseSsl(!socketKeystore.isEmpty());
 		socketioServer.setKeystore(socketKeystore);
 		socketioServer.setStorepass(socketKeystorePassword);
 		return socketioServer;

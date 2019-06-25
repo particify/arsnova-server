@@ -80,11 +80,20 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	public List<Motd> getCurrentMotds(final Date clientdate, final String audience) {
 		final List<Motd> motds;
 		switch (audience) {
-			case "all": motds = motdRepository.findGlobalForAll(); break;
-			case "loggedIn": motds = motdRepository.findGlobalForLoggedIn(); break;
-			case "students": motds = motdRepository.findForStudents(); break;
-			case "tutors": motds = motdRepository.findGlobalForTutors(); break;
-			default: throw new IllegalArgumentException("Invalid audience.");
+			case "all":
+				motds = motdRepository.findGlobalForAll();
+				break;
+			case "loggedIn":
+				motds = motdRepository.findGlobalForLoggedIn();
+				break;
+			case "students":
+				motds = motdRepository.findForStudents();
+				break;
+			case "tutors":
+				motds = motdRepository.findGlobalForTutors();
+				break;
+			default:
+				throw new IllegalArgumentException("Invalid audience.");
 		}
 
 		return filterMotdsByDate(motds, clientdate);

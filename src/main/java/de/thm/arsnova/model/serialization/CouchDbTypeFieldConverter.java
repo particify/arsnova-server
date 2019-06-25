@@ -27,8 +27,8 @@ import de.thm.arsnova.model.Entity;
 public class CouchDbTypeFieldConverter implements Converter<Class<? extends Entity>, String> {
 
 	@Override
-	public String convert(Class<? extends Entity> aClass) {
-		return aClass.getSimpleName();
+	public String convert(Class<? extends Entity> clazz) {
+		return clazz.getSimpleName();
 	}
 
 	@Override

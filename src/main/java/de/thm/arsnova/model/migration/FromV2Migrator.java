@@ -347,6 +347,9 @@ public class FromV2Migrator {
 			case "session":
 				to.setAudience(de.thm.arsnova.model.Motd.Audience.ROOM);
 				break;
+			default:
+				/* TODO: Add log message. */
+				break;
 		}
 		to.setTitle(from.getTitle());
 		to.setBody(from.getText());

@@ -15,8 +15,12 @@ public class FeedbackChangedPayload implements WebSocketPayload {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
 		FeedbackChangedPayload that = (FeedbackChangedPayload) o;
 		return Arrays.equals(values, that.values);
 	}

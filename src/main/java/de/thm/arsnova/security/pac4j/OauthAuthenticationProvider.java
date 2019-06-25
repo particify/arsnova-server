@@ -38,15 +38,15 @@ public class OauthAuthenticationProvider implements AuthenticationProvider {
 
 	@Override
 	public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
-		OAuthToken oAuthToken = (OAuthToken) authentication;
-		User user = oauthUserDetailsService.loadUserDetails(oAuthToken);
+		OAuthToken oauthToken = (OAuthToken) authentication;
+		User user = oauthUserDetailsService.loadUserDetails(oauthToken);
 
-		return new OAuthToken(user, (CommonProfile) oAuthToken.getDetails(), user.getAuthorities());
+		return new OAuthToken(user, (CommonProfile) oauthToken.getDetails(), user.getAuthorities());
 	}
 
 	@Override
-	public boolean supports(final Class<?> aClass) {
-		return aClass.isAssignableFrom(OAuthToken.class);
+	public boolean supports(final Class<?> authentication) {
+		return authentication.isAssignableFrom(OAuthToken.class);
 	}
 
 	@Autowired
