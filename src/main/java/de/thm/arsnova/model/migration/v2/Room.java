@@ -197,7 +197,8 @@ public class Room implements Entity {
 		this.learningProgressOptions = learningProgressOptions;
 	}
 
-	@ApiModelProperty(required = true, value = "the enabled features (e.g. feedback, interposed, learning Progress, lecture)")
+	@ApiModelProperty(required = true,
+			value = "the enabled features (e.g. feedback, interposed, learning Progress, lecture)")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public RoomFeature getFeatures() {
 		return features;

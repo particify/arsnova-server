@@ -72,17 +72,26 @@ public class MotdController extends AbstractController {
 	@Autowired
 	private FromV2Migrator fromV2Migrator;
 
-	@ApiOperation(value = "get messages. if adminview=false, only messages with startdate<clientdate<enddate are returned")
+	@ApiOperation(value = "get messages. if adminview=false,"
+			+ " only messages with startdate<clientdate<enddate are returned")
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@ApiResponses(value = {
 			@ApiResponse(code = 204, message = HTML_STATUS_204),
 			@ApiResponse(code = 501, message = HTML_STATUS_501)
 	})
 	public List<Motd> getMotd(
-			@ApiParam(value = "clientdate", required = false) @RequestParam(value = "clientdate", defaultValue = "") final String clientdate,
-			@ApiParam(value = "adminview", required = false) @RequestParam(value = "adminview", defaultValue = "false") final Boolean adminview,
-			@ApiParam(value = "audience", required = false) @RequestParam(value = "audience", defaultValue = "all") final String audience,
-			@ApiParam(value = "sessionkey", required = false) @RequestParam(value = "sessionkey", required = false) final String roomShortId) {
+			@ApiParam(value = "clientdate", required = false)
+			@RequestParam(value = "clientdate", defaultValue = "")
+			final String clientdate,
+			@ApiParam(value = "adminview", required = false)
+			@RequestParam(value = "adminview", defaultValue = "false")
+			final Boolean adminview,
+			@ApiParam(value = "audience", required = false)
+			@RequestParam(value = "audience", defaultValue = "all")
+			final String audience,
+			@ApiParam(value = "sessionkey", required = false)
+			@RequestParam(value = "sessionkey", required = false)
+			final String roomShortId) {
 		List<de.thm.arsnova.model.Motd> motds;
 		Date date = new Date(System.currentTimeMillis());
 		if (!clientdate.isEmpty()) {
@@ -144,7 +153,10 @@ public class MotdController extends AbstractController {
 
 	@ApiOperation(value = "deletes a message of the day", nickname = "deleteMotd")
 	@RequestMapping(value = "/{motdId}", method = RequestMethod.DELETE)
-	public void deleteMotd(@ApiParam(value = "Motd-key from the message that shall be deleted", required = true) @PathVariable final String motdId) {
+	public void deleteMotd(
+			@ApiParam(value = "Motd-key from the message that shall be deleted", required = true)
+			@PathVariable
+			final String motdId) {
 		de.thm.arsnova.model.Motd motd = motdService.get(motdId);
 		motdService.delete(motd);
 	}

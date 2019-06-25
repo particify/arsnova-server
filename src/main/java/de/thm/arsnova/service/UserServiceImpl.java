@@ -509,7 +509,8 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 				}
 			}
 
-			mailPattern = Pattern.compile("[a-z0-9._-]+?@(" + StringUtils.join(patterns, "|") + ")", Pattern.CASE_INSENSITIVE);
+			mailPattern = Pattern.compile("[a-z0-9._-]+?@(" + StringUtils.join(patterns, "|") + ")",
+					Pattern.CASE_INSENSITIVE);
 			logger.info("Allowed e-mail addresses (pattern) for registration: '{}'.", mailPattern.pattern());
 		}
 	}

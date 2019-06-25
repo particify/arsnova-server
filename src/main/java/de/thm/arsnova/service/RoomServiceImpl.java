@@ -321,7 +321,8 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@PreAuthorize("hasPermission(#userId, 'userprofile', 'read')")
 	public List<Room> getUserRoomHistory(final String userId) {
 		final UserProfile profile = userService.get(userId);
-		final List<String> roomIds = profile.getRoomHistory().stream().map(entry -> entry.getRoomId()).collect(Collectors.toList());
+		final List<String> roomIds = profile.getRoomHistory().stream()
+				.map(entry -> entry.getRoomId()).collect(Collectors.toList());
 		List<Room> rooms = new ArrayList<>();
 		roomRepository.findAllById(roomIds).forEach(rooms::add);
 

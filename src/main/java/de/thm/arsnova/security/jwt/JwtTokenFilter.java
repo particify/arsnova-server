@@ -39,7 +39,10 @@ public class JwtTokenFilter extends GenericFilterBean {
 	private JwtAuthenticationProvider jwtAuthenticationProvider;
 
 	@Override
-	public void doFilter(final ServletRequest servletRequest, final ServletResponse servletResponse, final FilterChain filterChain) throws IOException, ServletException {
+	public void doFilter(final ServletRequest servletRequest,
+			final ServletResponse servletResponse,
+			final FilterChain filterChain)
+			throws IOException, ServletException {
 		final HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
 		if (httpServletRequest.getRequestURI().startsWith("/v2/")) {
 			filterChain.doFilter(servletRequest, servletResponse);

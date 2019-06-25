@@ -68,7 +68,8 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 			AnswerRepository repository,
 			RoomService roomService,
 			UserService userService,
-			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+			@Qualifier("defaultJsonMessageConverter")
+			MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(Answer.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.answerRepository = repository;
 		this.roomService = roomService;
@@ -122,7 +123,8 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		return answerRepository.findByContentIdUserIdPiRound(contentId, Answer.class, userService.getCurrentUser().getId(), content.getState().getRound());
+		return answerRepository.findByContentIdUserIdPiRound(
+				contentId, Answer.class, userService.getCurrentUser().getId(), content.getState().getRound());
 	}
 
 	@Override

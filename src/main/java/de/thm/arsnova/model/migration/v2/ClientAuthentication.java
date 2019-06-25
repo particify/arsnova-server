@@ -125,7 +125,8 @@ public class ClientAuthentication implements Serializable {
 		}
 		ClientAuthentication other = (ClientAuthentication) obj;
 
-		return this.authProvider == other.authProvider && Objects.equals(this.id, other.id) && this.username.equals(other.username);
+		return this.authProvider == other.authProvider
+				&& Objects.equals(this.id, other.id) && this.username.equals(other.username);
 	}
 
 }

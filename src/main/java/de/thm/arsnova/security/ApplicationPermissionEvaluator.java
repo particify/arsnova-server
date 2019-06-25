@@ -100,7 +100,8 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Serializable targetId,
 			final String targetType,
 			final Object permission) {
-		logger.debug("Evaluating permission: hasPermission({}, {}, {}, {})", authentication, targetId, targetType, permission);
+		logger.debug("Evaluating permission: hasPermission({}, {}, {}, {})",
+				authentication, targetId, targetType, permission);
 		if (authentication == null || targetId == null || targetType == null || !(permission instanceof String)) {
 			return false;
 		}

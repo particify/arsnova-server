@@ -200,10 +200,14 @@ public class ContentController extends PaginationController {
 			nickname = "setVotingAdmissionForAllContents")
 	@RequestMapping(value = "/disablevote", method = RequestMethod.POST)
 	public void setVotingAdmissionForAllContents(
-			@RequestParam(value = "sessionkey") final String roomShortId,
-			@RequestParam(value = "disable", defaultValue = "false", required = false) final Boolean disableVote,
-			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false) boolean lectureContentsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) boolean preparationContentsOnly) {
+			@RequestParam(value = "sessionkey")
+			final String roomShortId,
+			@RequestParam(value = "disable", defaultValue = "false", required = false)
+			final Boolean disableVote,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false)
+			boolean lectureContentsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false)
+			boolean preparationContentsOnly) {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		boolean disable = false;
 		Iterable<de.thm.arsnova.model.Content> contents;
@@ -244,10 +248,14 @@ public class ContentController extends PaginationController {
 			nickname = "publishAllContents")
 	@RequestMapping(value = "/publish", method = RequestMethod.POST)
 	public void publishAllContents(
-			@RequestParam(value = "sessionkey") final String roomShortId,
-			@RequestParam(required = false) final Boolean publish,
-			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false) boolean lectureContentsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) boolean preparationContentsOnly
+			@RequestParam(value = "sessionkey")
+			final String roomShortId,
+			@RequestParam(required = false)
+			final Boolean publish,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false)
+			boolean lectureContentsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false)
+			boolean preparationContentsOnly
 	) throws IOException {
 		String roomId = roomService.getIdByShortId(roomShortId);
 		boolean p = publish == null || publish;
@@ -277,7 +285,8 @@ public class ContentController extends PaginationController {
 		if (content != null) {
 			p = contentV3.getState().isResponsesVisible();
 		}
-		contentService.patch(contentV3, Collections.singletonMap("responsesVisible", p), de.thm.arsnova.model.Content::getState);
+		contentService.patch(contentV3, Collections.singletonMap("responsesVisible", p),
+				de.thm.arsnova.model.Content::getState);
 	}
 
 	@ApiOperation(value = "Publish correct answer from content with provided id",
@@ -293,7 +302,8 @@ public class ContentController extends PaginationController {
 		if (content != null) {
 			p = contentV3.getState().isSolutionVisible();
 		}
-		contentService.patch(contentV3, Collections.singletonMap("solutionVisible", p), de.thm.arsnova.model.Content::getState);
+		contentService.patch(contentV3, Collections.singletonMap("solutionVisible", p),
+				de.thm.arsnova.model.Content::getState);
 	}
 
 	@ApiOperation(value = "Get contents",
@@ -612,7 +622,8 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Get the total amount of answers by a content, identified by the content ID",
 			nickname = "getTotalAnswerCountByContent")
-	@RequestMapping(value = "/{contentId}/totalanswercount", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
+	@RequestMapping(value = "/{contentId}/totalanswercount", method = RequestMethod.GET,
+			produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getTotalAnswerCountByContent(@PathVariable final String contentId) {
 		return String.valueOf(answerService.countTotalAnswersByContentId(contentId));
 	}
@@ -641,7 +652,8 @@ public class ContentController extends PaginationController {
 	@DeprecatedApi
 	@Deprecated
 	@RequestMapping(value = "/myanswers", method = RequestMethod.GET)
-	public List<Answer> getMyAnswers(@RequestParam(value = "sessionkey") final String roomShortId) throws OperationNotSupportedException {
+	public List<Answer> getMyAnswers(@RequestParam(value = "sessionkey") final String roomShortId)
+			throws OperationNotSupportedException {
 		return answerService.getMyAnswersByRoomId(roomService.getIdByShortId(roomShortId)).stream()
 				.map(a -> {
 					if (a instanceof ChoiceAnswer) {

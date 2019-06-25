@@ -42,7 +42,8 @@ public class WithMockUserSecurityContextFactory implements WithSecurityContextFa
 		userProfile.setId(!withMockUser.userId().isEmpty() ? withMockUser.userId() : loginId);
 		User user = new User(userProfile, Arrays.stream(withMockUser.roles())
 				.map(r -> new SimpleGrantedAuthority("ROLE_" + r)).collect(Collectors.toList()));
-		Authentication authentication = new UsernamePasswordAuthenticationToken(user, withMockUser.password(), user.getAuthorities());
+		Authentication authentication =
+				new UsernamePasswordAuthenticationToken(user, withMockUser.password(), user.getAuthorities());
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 

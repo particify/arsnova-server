@@ -42,7 +42,10 @@ public class MaintenanceModeFilter extends OncePerRequestFilter {
 	}
 
 	@Override
-	protected void doFilterInternal(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse, final FilterChain filterChain) throws ServletException, IOException {
+	protected void doFilterInternal(final HttpServletRequest httpServletRequest,
+			final HttpServletResponse httpServletResponse,
+			final FilterChain filterChain)
+			throws ServletException, IOException {
 		if (statusService.isMaintenanceActive()) {
 			httpServletResponse.setStatus(503);
 			return;

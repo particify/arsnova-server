@@ -46,7 +46,8 @@ public class ServiceDescription {
 		this.allowedRoles = allowedRoles;
 	}
 
-	public ServiceDescription(final String id, final String name, final String dialogUrl, final String[] allowedRoles, final String image) {
+	public ServiceDescription(final String id, final String name, final String dialogUrl,
+			final String[] allowedRoles, final String image) {
 		this.id = id;
 		this.name = name;
 		this.dialogUrl = dialogUrl;

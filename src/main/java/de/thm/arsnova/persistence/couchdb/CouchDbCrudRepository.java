@@ -34,7 +34,8 @@ import de.thm.arsnova.model.Entity;
 import de.thm.arsnova.persistence.CrudRepository;
 
 @NoRepositoryBean
-abstract class CouchDbCrudRepository<T extends Entity> extends CouchDbRepositorySupport<T> implements CrudRepository<T, String> {
+abstract class CouchDbCrudRepository<T extends Entity>
+		extends CouchDbRepositorySupport<T> implements CrudRepository<T, String> {
 	private String countableAllViewName;
 
 	protected CouchDbCrudRepository(

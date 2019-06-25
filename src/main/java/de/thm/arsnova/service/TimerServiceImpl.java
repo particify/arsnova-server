@@ -147,7 +147,8 @@ public class TimerServiceImpl implements TimerService {
 	}
 
 	private void updateRoundManagementState(final Content content) {
-		if (content.getState().getRoundEndTimestamp() != null && new Date().compareTo(content.getState().getRoundEndTimestamp()) > 0) {
+		if (content.getState().getRoundEndTimestamp() != null
+				&& new Date().compareTo(content.getState().getRoundEndTimestamp()) > 0) {
 			content.getState().setRoundEndTimestamp(null);
 		}
 	}

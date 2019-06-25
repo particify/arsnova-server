@@ -28,7 +28,8 @@ import de.thm.arsnova.model.serialization.View;
 /**
  * Contains fields that describe which specific Feature is activated for a Room.
  */
-@ApiModel(value = "RoomFeature", description = "Room (Session) Feature entity - Represents feature/use case settings of a Room")
+@ApiModel(value = "RoomFeature",
+		description = "Room (Session) Feature entity - Represents feature/use case settings of a Room")
 public class RoomFeature implements Serializable {
 
 	private boolean custom = false;

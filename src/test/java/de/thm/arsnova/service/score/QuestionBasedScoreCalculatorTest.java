@@ -221,7 +221,8 @@ public class QuestionBasedScoreCalculatorTest {
 		int denominator = lp.getCourseProgress(null).getDenominator();
 
 		// If the percentage is wrong, then we need to adapt this test case!
-		assertEquals("Precondition failed -- The underlying calculation has changed", 17, lp.getCourseProgress(null).getCourseProgress());
+		assertEquals("Precondition failed -- The underlying calculation has changed",
+				17, lp.getCourseProgress(null).getCourseProgress());
 		assertEquals(0, numerator);
 		assertEquals(2, denominator);
 	}

@@ -60,7 +60,8 @@ public class EntityTest {
 	class AnotherEntity extends SomeEntity {
 		private String testB;
 
-		public AnotherEntity(String id, String rev, Date creationTimestamp, Date updateTimestamp, String testA, String testB) {
+		public AnotherEntity(
+				String id, String rev, Date creationTimestamp, Date updateTimestamp, String testA, String testB) {
 			super(id, rev, creationTimestamp, updateTimestamp, testA);
 			this.testB = testB;
 		}

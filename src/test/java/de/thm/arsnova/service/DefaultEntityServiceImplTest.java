@@ -81,7 +81,8 @@ public class DefaultEntityServiceImplTest {
 	@WithMockUser("TestUser")
 	public void testPatch() throws IOException {
 		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
-		final DefaultEntityServiceImpl<Room> entityService = new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper);
+		final DefaultEntityServiceImpl<Room> entityService =
+				new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper);
 		entityService.setApplicationEventPublisher(eventPublisher);
 
 		when(roomRepository.save(any(Room.class))).then(returnsFirstArg());
@@ -115,7 +116,8 @@ public class DefaultEntityServiceImplTest {
 	@WithMockUser("TestUser")
 	public void testPatchWithList() throws IOException {
 		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
-		final DefaultEntityServiceImpl<Room> entityService = new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper);
+		final DefaultEntityServiceImpl<Room> entityService =
+				new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper);
 		entityService.setApplicationEventPublisher(eventPublisher);
 
 		when(roomRepository.saveAll(anyListOf(Room.class))).then(returnsFirstArg());
@@ -165,7 +167,8 @@ public class DefaultEntityServiceImplTest {
 	@WithMockUser("TestUser")
 	public void testCaching() {
 		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
-		final DefaultEntityServiceImpl<Room> entityService = new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper);
+		final DefaultEntityServiceImpl<Room> entityService =
+				new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper);
 		entityService.setApplicationEventPublisher(eventPublisher);
 
 		final Room room1 = new Room();

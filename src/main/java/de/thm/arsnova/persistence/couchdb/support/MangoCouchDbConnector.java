@@ -248,7 +248,8 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 			throw new DbAccessException("Could not serialize Mango query.");
 		}
 		List<T> result = restTemplate.postUncached(dbURI.append("_find").toString(), queryString, rh);
-		//List<T> result = restTemplate.post(dbURI.append("_find").toString(), new JacksonableEntity(query, objectMapper), rh);
+		//List<T> result = restTemplate.post(dbURI.append("_find").toString(),
+		//		new JacksonableEntity(query, objectMapper), rh);
 
 		logger.debug("Answer from CouchDB Mango query: {}", result);
 
@@ -291,7 +292,8 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 		return new PagedMangoResponse<T>(query(query, rh), rh.getBookmark());
 	}
 
-	public void createPartialJsonIndex(final String name, final List<MangoQuery.Sort> fields, final Map<String, Object> filterSelector) {
+	public void createPartialJsonIndex(
+			final String name, final List<MangoQuery.Sort> fields, final Map<String, Object> filterSelector) {
 		Map<String, Object> query = new HashMap<>();
 		Map<String, Object> index = new HashMap<>();
 		query.put("ddoc", name);

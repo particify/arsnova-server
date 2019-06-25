@@ -426,7 +426,8 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			@CacheEvict(value = "lecturecontentlists", key = "#roomId"),
 			@CacheEvict(value = "preparationcontentlists", key = "#roomId"),
 			@CacheEvict(value = "flashcardcontentlists", key = "#roomId") })
-	public void publishContents(final String roomId, final boolean publish, Iterable<Content> contents) throws IOException {
+	public void publishContents(final String roomId, final boolean publish, Iterable<Content> contents)
+			throws IOException {
 		final User user = getCurrentUser();
 		final Room room = roomService.get(roomId);
 		if (!room.getOwnerId().equals(user.getId())) {

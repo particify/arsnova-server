@@ -39,7 +39,8 @@ import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
 
-public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> implements AnswerRepository, ApplicationEventPublisherAware {
+public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
+		implements AnswerRepository, ApplicationEventPublisherAware {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbAnswerRepository.class);
 
 	@Autowired
@@ -71,7 +72,8 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	}
 
 	@Override
-	public <T extends Answer> T findByContentIdUserIdPiRound(final String contentId, final Class<T> type, final String userId, final int piRound) {
+	public <T extends Answer> T findByContentIdUserIdPiRound(
+			final String contentId, final Class<T> type, final String userId, final int piRound) {
 		final List<T> answerList = db.queryView(createQuery("by_contentid_creatorid_round")
 				.key(ComplexKey.of(contentId, userId, piRound)), type);
 		return answerList.isEmpty() ? null : answerList.get(0);
@@ -143,7 +145,8 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	}
 
 	@Override
-	public <T extends Answer> List<T> findByContentId(final String contentId, final Class<T> type, final int start, final int limit) {
+	public <T extends Answer> List<T> findByContentId(
+			final String contentId, final Class<T> type, final int start, final int limit) {
 		final int qSkip = start > 0 ? start : -1;
 		final int qLimit = limit > 0 ? limit : -1;
 

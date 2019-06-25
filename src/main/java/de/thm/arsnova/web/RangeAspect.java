@@ -56,7 +56,8 @@ public class RangeAspect {
 
 	/** Sets start and end parameters based on request's range header and sets content range header for the response.
 	 */
-	@Around("execution(java.util.List+ de.thm.arsnova.controller.*.*(..)) && this(controller) && @annotation(de.thm.arsnova.web.Pagination)")
+	@Around("execution(java.util.List+ de.thm.arsnova.controller.*.*(..))"
+			+ " && this(controller) && @annotation(de.thm.arsnova.web.Pagination)")
 	public Object handlePaginationRange(ProceedingJoinPoint pjp, final PaginationController controller) throws Throwable {
 		logger.debug("handlePaginationRange");
 		String rangeHeader = request.getHeader("Range");

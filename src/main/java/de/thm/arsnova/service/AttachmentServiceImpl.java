@@ -30,7 +30,8 @@ public class AttachmentServiceImpl extends DefaultEntityServiceImpl<Attachment> 
 
 	public AttachmentServiceImpl(
 			final AttachmentRepository repository,
-			@Qualifier("defaultJsonMessageConverter") final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+			@Qualifier("defaultJsonMessageConverter")
+			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(Attachment.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.attachmentRepository = repository;
 	}

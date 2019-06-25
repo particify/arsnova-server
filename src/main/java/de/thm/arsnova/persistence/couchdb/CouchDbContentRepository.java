@@ -129,7 +129,8 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public List<String> findUnansweredIdsByRoomIdAndUserOnlyPreparationVariant(final String roomId, final String userId) {
+	public List<String> findUnansweredIdsByRoomIdAndUserOnlyPreparationVariant(
+			final String roomId, final String userId) {
 		final ViewResult result = db.queryView(createQuery("contentid_round_by_creatorid_roomid_variant")
 				.designDocId("_design/Answer")
 				.key(ComplexKey.of(userId, roomId, "preparation")));
@@ -138,7 +139,8 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 			answeredQuestions.put(row.getId(), row.getKeyAsNode().get(2).asInt());
 		}
 
-		return collectUnansweredQuestionIdsByPiRound(findByRoomIdOnlyPreparationVariantAndActive(roomId), answeredQuestions);
+		return collectUnansweredQuestionIdsByPiRound(
+				findByRoomIdOnlyPreparationVariantAndActive(roomId), answeredQuestions);
 	}
 
 	@Override
@@ -239,7 +241,8 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 		for (final Content content : contents) {
 			// TODO: Set correct format for slides, which currently aren't implemented
 			if (Content.Format.TEXT != content.getFormat() && (!answeredQuestions.containsKey(content.getId())
-					|| (answeredQuestions.containsKey(content.getId()) && answeredQuestions.get(content.getId()) != content.getState().getRound()))) {
+					|| (answeredQuestions.containsKey(content.getId())
+					&& answeredQuestions.get(content.getId()) != content.getState().getRound()))) {
 				unanswered.add(content.getId());
 			}
 		}
@@ -257,7 +260,8 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	/* TODO: remove if this method is no longer used */
 	@Override
-	public List<String> findIdsByRoomIdAndVariantAndSubject(final String roomId, final String questionVariant, final String subject) {
+	public List<String> findIdsByRoomIdAndVariantAndSubject(
+			final String roomId, final String questionVariant, final String subject) {
 		final ViewResult result = db.queryView(createQuery("by_roomid_group_locked")
 				.startKey(ComplexKey.of(roomId, questionVariant, false, subject))
 				.endKey(ComplexKey.of(roomId, questionVariant, false, subject, ComplexKey.emptyObject())));

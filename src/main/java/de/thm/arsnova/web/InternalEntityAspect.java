@@ -34,7 +34,8 @@ import de.thm.arsnova.model.Entity;
 public class InternalEntityAspect {
 	private static final Logger logger = LoggerFactory.getLogger(InternalEntityAspect.class);
 
-	@AfterReturning(pointcut = "execution(de.thm.arsnova.model.Entity+ de.thm.arsnova.controller.*.*(..))", returning = "entity")
+	@AfterReturning(pointcut = "execution(de.thm.arsnova.model.Entity+ de.thm.arsnova.controller.*.*(..))",
+			returning = "entity")
 	public void prohibitInternalEntitySerialization(final Entity entity) {
 		logger.debug("Executing InternalEntityAspect for entity: {}", entity);
 

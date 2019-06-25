@@ -84,8 +84,11 @@ public class RoomController extends PaginationController {
 	@Deprecated
 	@RequestMapping(value = "/{shortId}", method = RequestMethod.GET)
 	public Room joinRoom(
-				@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
-				@ApiParam(value = "Adminflag", required = false) @RequestParam(value = "admin", defaultValue = "false")	final boolean admin) {
+				@ApiParam(value = "Room-Key from current Room", required = true)
+				@PathVariable final String shortId,
+				@ApiParam(value = "Adminflag", required = false)
+				@RequestParam(value = "admin", defaultValue = "false")
+				final boolean admin) {
 		if (admin) {
 			return toV2Migrator.migrate(roomService.getForAdmin(shortId));
 		} else {
@@ -96,7 +99,10 @@ public class RoomController extends PaginationController {
 	@ApiOperation(value = "deletes a Room",
 			nickname = "deleteRoom")
 	@RequestMapping(value = "/{shortId}", method = RequestMethod.DELETE)
-	public void deleteRoom(@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId) {
+	public void deleteRoom(
+			@ApiParam(value = "Room-Key from current Room", required = true)
+			@PathVariable
+			final String shortId) {
 		de.thm.arsnova.model.Room room = roomService.getByShortId(shortId);
 		roomService.delete(room);
 	}
@@ -105,8 +111,10 @@ public class RoomController extends PaginationController {
 			nickname = "countActiveUsers")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/{shortId}/activeusercount", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
-	public String countActiveUsers(@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId) {
+	@RequestMapping(value = "/{shortId}/activeusercount", method = RequestMethod.GET,
+			produces = MediaType.TEXT_PLAIN_VALUE)
+	public String countActiveUsers(
+			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId) {
 		return String.valueOf(roomService.activeUsers(roomService.getIdByShortId(shortId)));
 	}
 
@@ -118,7 +126,11 @@ public class RoomController extends PaginationController {
 	})
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Room postNewRoom(@ApiParam(value = "current Room", required = true) @RequestBody final Room room, final HttpServletResponse response) {
+	public Room postNewRoom(
+			@ApiParam(value = "current Room", required = true)
+			@RequestBody
+			final Room room,
+			final HttpServletResponse response) {
 		/* FIXME: migrate LMS course support
 		if (room != null && room.isCourseSession()) {
 			final List<Course> courses = new ArrayList<>();
@@ -163,11 +175,18 @@ public class RoomController extends PaginationController {
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
 	public List<Room> getRooms(
-			@ApiParam(value = "ownedOnly", required = true) @RequestParam(value = "ownedonly", defaultValue = "false") final boolean ownedOnly,
-			@ApiParam(value = "visitedOnly", required = true) @RequestParam(value = "visitedonly", defaultValue = "false") final boolean visitedOnly,
-			@ApiParam(value = "sortby", required = true) @RequestParam(value = "sortby", defaultValue = "name") final String sortby,
-			@ApiParam(value = "for a given username. admin rights needed", required = false) @RequestParam(value =
-					"username", defaultValue = "") final String username,
+			@ApiParam(value = "ownedOnly", required = true)
+			@RequestParam(value = "ownedonly", defaultValue = "false")
+			final boolean ownedOnly,
+			@ApiParam(value = "visitedOnly", required = true)
+			@RequestParam(value = "visitedonly", defaultValue = "false")
+			final boolean visitedOnly,
+			@ApiParam(value = "sortby", required = true)
+			@RequestParam(value = "sortby", defaultValue = "name")
+			final String sortby,
+			@ApiParam(value = "for a given username. admin rights needed", required = false)
+			@RequestParam(value = "username", defaultValue = "")
+			final String username,
 			final HttpServletResponse response) {
 		List<de.thm.arsnova.model.Room> rooms;
 
@@ -226,8 +245,12 @@ public class RoomController extends PaginationController {
 	@RequestMapping(value = "/", method = RequestMethod.GET, params = "statusonly=true")
 	@Pagination
 	public List<RoomInfo> getMyRooms(
-			@ApiParam(value = "visitedOnly", required = true) @RequestParam(value = "visitedonly", defaultValue = "false") final boolean visitedOnly,
-			@ApiParam(value = "sort by", required = false) @RequestParam(value = "sortby", defaultValue = "name") final String sortby,
+			@ApiParam(value = "visitedOnly", required = true)
+			@RequestParam(value = "visitedonly", defaultValue = "false")
+			final boolean visitedOnly,
+			@ApiParam(value = "sort by", required = false)
+			@RequestParam(value = "sortby", defaultValue = "name")
+			final String sortby,
 			final HttpServletResponse response) {
 		List<de.thm.arsnova.model.Room> rooms;
 		if (!visitedOnly) {
@@ -298,9 +321,15 @@ public class RoomController extends PaginationController {
 	@ApiOperation(value = "export Rooms", nickname = "exportRoom")
 	@RequestMapping(value = "/export", method = RequestMethod.GET)
 	public List<ImportExportContainer> getExport(
-			@ApiParam(value = "Room-Key", required = true) @RequestParam(value = "sessionkey", defaultValue = "") final List<String> shortIds,
-			@ApiParam(value = "wether statistics shall be exported", required = true) @RequestParam(value = "withAnswerStatistics", defaultValue = "false") final Boolean withAnswerStatistics,
-			@ApiParam(value = "wether comments shall be exported", required = true) @RequestParam(value = "withFeedbackQuestions", defaultValue = "false") final Boolean withFeedbackQuestions,
+			@ApiParam(value = "Room-Key", required = true)
+			@RequestParam(value = "sessionkey", defaultValue = "")
+			final List<String> shortIds,
+			@ApiParam(value = "wether statistics shall be exported", required = true)
+			@RequestParam(value = "withAnswerStatistics", defaultValue = "false")
+			final Boolean withAnswerStatistics,
+			@ApiParam(value = "wether comments shall be exported", required = true)
+			@RequestParam(value = "withFeedbackQuestions", defaultValue = "false")
+			final Boolean withFeedbackQuestions,
 			final HttpServletResponse response) throws IOException {
 		List<ImportExportContainer> rooms = new ArrayList<>();
 		ImportExportContainer temp;
@@ -319,8 +348,13 @@ public class RoomController extends PaginationController {
 	@ApiOperation(value = "copy a Rooms to the public pool if enabled")
 	@RequestMapping(value = "/{shortId}/copytopublicpool", method = RequestMethod.POST)
 	public Room copyToPublicPool(
-			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
-			@ApiParam(value = "public pool attributes for Room", required = true) @RequestBody final ImportExportContainer.PublicPool publicPool) throws IOException {
+			@ApiParam(value = "Room-Key from current Room", required = true)
+			@PathVariable
+			final String shortId,
+			@ApiParam(value = "public pool attributes for Room", required = true)
+			@RequestBody
+			final ImportExportContainer.PublicPool publicPool)
+			throws IOException {
 		String id = roomService.getIdByShortId(shortId);
 		roomService.setActive(id, false);
 		de.thm.arsnova.model.Room roomInfo = roomService.copyRoomToPublicPool(shortId, publicPool);
@@ -358,9 +392,15 @@ public class RoomController extends PaginationController {
 			nickname = "getLearningProgress")
 	@RequestMapping(value = "/{shortId}/learningprogress", method = RequestMethod.GET)
 	public ScoreStatistics getLearningProgress(
-			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
-			@ApiParam(value = "type", required = false) @RequestParam(value = "type", defaultValue = "questions") final String type,
-			@ApiParam(value = "question variant", required = false) @RequestParam(value = "questionVariant", required = false) final String questionVariant,
+			@ApiParam(value = "Room-Key from current Room", required = true)
+			@PathVariable
+			final String shortId,
+			@ApiParam(value = "type", required = false)
+			@RequestParam(value = "type", defaultValue = "questions")
+			final String type,
+			@ApiParam(value = "question variant", required = false)
+			@RequestParam(value = "questionVariant", required = false)
+			final String questionVariant,
 			final HttpServletResponse response) {
 		return roomService.getLearningProgress(roomService.getIdByShortId(shortId), type, questionVariant);
 	}
@@ -400,7 +440,8 @@ public class RoomController extends PaginationController {
 		return toV2Migrator.migrate(room.getSettings());
 	}
 
-	@RequestMapping(value = "/{shortId}/lockfeedbackinput", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
+	@RequestMapping(value = "/{shortId}/lockfeedbackinput", method = RequestMethod.POST,
+			produces = MediaType.TEXT_PLAIN_VALUE)
 	@ApiOperation(value = "locks input of user live feedback",
 			nickname = "lockFeedbackInput")
 	public String lockFeedbackInput(
@@ -410,7 +451,8 @@ public class RoomController extends PaginationController {
 		return String.valueOf(roomService.lockFeedbackInput(roomService.getIdByShortId(shortId), lock));
 	}
 
-	@RequestMapping(value = "/{shortId}/flipflashcards", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
+	@RequestMapping(value = "/{shortId}/flipflashcards", method = RequestMethod.POST,
+			produces = MediaType.TEXT_PLAIN_VALUE)
 	@ApiOperation(value = "flip all flashcards in Room",
 			nickname = "lockFeedbackInput")
 	public String flipFlashcards(

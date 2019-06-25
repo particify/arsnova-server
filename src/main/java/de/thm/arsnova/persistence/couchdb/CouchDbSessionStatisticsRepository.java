@@ -28,7 +28,8 @@ import de.thm.arsnova.model.Room;
 import de.thm.arsnova.persistence.SessionStatisticsRepository;
 import de.thm.arsnova.service.score.Score;
 
-public class CouchDbSessionStatisticsRepository extends CouchDbRepositorySupport implements SessionStatisticsRepository {
+public class CouchDbSessionStatisticsRepository
+		extends CouchDbRepositorySupport implements SessionStatisticsRepository {
 	public CouchDbSessionStatisticsRepository(final CouchDbConnector db, final boolean createIfNotExists) {
 		super(Object.class, db, "learning_progress", createIfNotExists);
 	}

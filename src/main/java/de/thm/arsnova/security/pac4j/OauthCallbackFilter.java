@@ -74,7 +74,8 @@ public class OauthCallbackFilter extends AbstractAuthenticationProcessingFilter 
 		CommonHelper.assertNotNull("clients", clients);
 		final List<Client> foundClients = clientFinder.find(clients, context, clientName);
 		CommonHelper.assertTrue(foundClients != null && foundClients.size() == 1,
-				"unable to find one indirect client for the callback: check the callback URL for a client name parameter or suffix path"
+				"unable to find one indirect client for the callback:"
+						+ " check the callback URL for a client name parameter or suffix path"
 						+ " or ensure that your configuration defaults to one indirect client");
 		final Client foundClient = foundClients.get(0);
 		logger.debug("client: {}", foundClient);

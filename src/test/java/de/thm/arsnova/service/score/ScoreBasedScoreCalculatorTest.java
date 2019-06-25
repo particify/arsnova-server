@@ -150,7 +150,8 @@ public class ScoreBasedScoreCalculatorTest {
 		int denominator = lp.getCourseProgress(null).getDenominator();
 
 		// If the percentage is wrong, then we need to adapt this test case!
-		assertEquals("Precondition failed -- The underlying calculation has changed", 50, lp.getCourseProgress(null).getCourseProgress());
+		assertEquals("Precondition failed -- The underlying calculation has changed",
+				50, lp.getCourseProgress(null).getCourseProgress());
 		assertEquals(10, numerator);
 		assertEquals(20, denominator);
 	}

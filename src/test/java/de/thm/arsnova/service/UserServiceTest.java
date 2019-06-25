@@ -69,7 +69,8 @@ public class UserServiceTest {
 
 	@Test
 	public void testSocket2UserPersistence() throws IOException, ClassNotFoundException {
-		//socketid2user.put(UUID.randomUUID(), new ClientAuthentication(new UsernamePasswordAuthenticationToken("ptsr00", UUID.randomUUID())));
+		//socketid2user.put(UUID.randomUUID(),
+		//		new ClientAuthentication(new UsernamePasswordAuthenticationToken("ptsr00", UUID.randomUUID())));
 		//socketid2user.put(UUID.randomUUID(), new ClientAuthentication(new AttributePrincipalImpl("ptstr0")));
 
 		GoogleOidcProfile profile = new GoogleOidcProfile();
@@ -84,7 +85,8 @@ public class UserServiceTest {
 
 		List<GrantedAuthority> authorities = new ArrayList<>();
 		authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
-		socketid2user.put(UUID.randomUUID(), new ClientAuthentication(new AnonymousAuthenticationToken("ptsr00", UUID.randomUUID(), authorities)));
+		socketid2user.put(UUID.randomUUID(), new ClientAuthentication(
+				new AnonymousAuthenticationToken("ptsr00", UUID.randomUUID(), authorities)));
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		ObjectOutputStream objOut = new ObjectOutputStream(out);

@@ -79,7 +79,8 @@ public class StateEventDispatcher implements ApplicationEventPublisherAware {
 	}
 
 	private <E extends Entity, T extends Object> void publishEventIfPropertyChanged(
-			final AfterPatchEvent<E> event, final Function<E, T> propertyGetter, final String property, final String stateName) {
+			final AfterPatchEvent<E> event, final Function<E, T> propertyGetter,
+			final String property, final String stateName) {
 		final E entity = event.getEntity();
 		final Map<String, Object> changes = event.getChanges();
 		if (event.getPropertyGetter().apply(entity) == propertyGetter.apply(entity)

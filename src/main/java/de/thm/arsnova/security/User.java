@@ -59,7 +59,8 @@ public class User implements org.springframework.security.core.userdetails.UserD
 		providerUserDetails = details;
 	}
 
-	public User(final ClientAuthentication clientAuthentication, final Collection<? extends GrantedAuthority> authorities) {
+	public User(final ClientAuthentication clientAuthentication,
+			final Collection<? extends GrantedAuthority> authorities) {
 		id = clientAuthentication.getId();
 		loginId = clientAuthentication.getUsername();
 		authProvider = clientAuthentication.getAuthProvider();

@@ -82,7 +82,8 @@ public class ImageUtils {
 		if (urlParts.length > 0) {
 			final String extension = urlParts[urlParts.length - 1];
 
-			return IMAGE_PREFIX_START + extension + IMAGE_PREFIX_MIDDLE + Base64.encodeBase64String(convertFileToByteArray(imageUrl));
+			return IMAGE_PREFIX_START + extension + IMAGE_PREFIX_MIDDLE
+					+ Base64.encodeBase64String(convertFileToByteArray(imageUrl));
 		}
 
 		return null;

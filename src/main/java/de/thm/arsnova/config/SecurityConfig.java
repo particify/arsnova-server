@@ -320,7 +320,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public LdapAuthenticationProvider ldapAuthenticationProvider() {
-		LdapAuthenticationProvider ldapAuthenticationProvider = new LdapAuthenticationProvider(ldapAuthenticator(), ldapAuthoritiesPopulator());
+		LdapAuthenticationProvider ldapAuthenticationProvider =
+				new LdapAuthenticationProvider(ldapAuthenticator(), ldapAuthoritiesPopulator());
 		ldapAuthenticationProvider.setUserDetailsContextMapper(customLdapUserDetailsMapper());
 
 		return ldapAuthenticationProvider;

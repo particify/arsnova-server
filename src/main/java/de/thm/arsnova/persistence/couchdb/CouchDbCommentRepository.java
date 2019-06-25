@@ -139,7 +139,8 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 	}
 
 	@Override
-	public List<Comment> findByRoomIdAndUserId(final String roomId, final String userId, final int start, final int limit) {
+	public List<Comment> findByRoomIdAndUserId(
+			final String roomId, final String userId, final int start, final int limit) {
 		final int qSkip = start > 0 ? start : -1;
 		final int qLimit = limit > 0 ? limit : -1;
 

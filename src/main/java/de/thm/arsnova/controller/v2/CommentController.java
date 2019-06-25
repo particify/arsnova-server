@@ -77,7 +77,10 @@ public class CommentController extends PaginationController {
 	@RequestMapping(value = "/count", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
 	@DeprecatedApi
 	@Deprecated
-	public String getCommentCount(@ApiParam(value = "Room-Key from current room", required = true) @RequestParam("sessionkey") final String roomShortId) {
+	public String getCommentCount(
+			@ApiParam(value = "Room-Key from current room", required = true)
+			@RequestParam("sessionkey")
+			final String roomShortId) {
 		return String.valueOf(commentService.count(roomService.getIdByShortId(roomShortId)));
 	}
 
@@ -86,7 +89,9 @@ public class CommentController extends PaginationController {
 	@RequestMapping(value = "/readcount", method = RequestMethod.GET)
 	@DeprecatedApi
 	@Deprecated
-	public CommentReadingCount getUnreadCommentCount(@ApiParam(value = "Room-Key from current room", required = true) @RequestParam("sessionkey") final String roomShortId, String user) {
+	public CommentReadingCount getUnreadCommentCount(
+			@ApiParam(value = "Room-Key from current room", required = true)
+			@RequestParam("sessionkey") final String roomShortId, String user) {
 		return commentService.countRead(roomService.getIdByShortId(roomShortId), user);
 	}
 
@@ -94,7 +99,10 @@ public class CommentController extends PaginationController {
 			nickname = "getComments")
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
-	public List<Comment> getComments(@ApiParam(value = "Room-Key from current room", required = true) @RequestParam("sessionkey") final String roomShortId) {
+	public List<Comment> getComments(
+			@ApiParam(value = "Room-Key from current room", required = true)
+			@RequestParam("sessionkey")
+			final String roomShortId) {
 		return commentService.getByRoomId(roomService.getIdByShortId(roomShortId), offset, limit).stream()
 				.map(toV2Migrator::migrate).collect(Collectors.toList());
 	}
@@ -102,7 +110,11 @@ public class CommentController extends PaginationController {
 	@ApiOperation(value = "Retrieves an Comment",
 			nickname = "getComment")
 	@RequestMapping(value = "/{commentId}", method = RequestMethod.GET)
-	public Comment getComment(@ApiParam(value = "ID of the Comment that needs to be deleted", required = true) @PathVariable final String commentId) throws IOException {
+	public Comment getComment(
+			@ApiParam(value = "ID of the Comment that needs to be deleted", required = true)
+			@PathVariable
+			final String commentId)
+			throws IOException {
 		return toV2Migrator.migrate(commentService.getAndMarkRead(commentId));
 	}
 
@@ -114,8 +126,12 @@ public class CommentController extends PaginationController {
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void postComment(
-			@ApiParam(value = "Room-Key from current room", required = true) @RequestParam("sessionkey") final String roomShortId,
-			@ApiParam(value = "the body from the new comment", required = true) @RequestBody final Comment comment) {
+			@ApiParam(value = "Room-Key from current room", required = true)
+			@RequestParam("sessionkey")
+			final String roomShortId,
+			@ApiParam(value = "the body from the new comment", required = true)
+			@RequestBody
+			final Comment comment) {
 		de.thm.arsnova.model.Comment commentV3 = fromV2Migrator.migrate(comment);
 		Room roomV3 = roomService.getByShortId(roomShortId);
 		commentV3.setRoomId(roomV3.getId());
@@ -125,7 +141,10 @@ public class CommentController extends PaginationController {
 	@ApiOperation(value = "Deletes a Comment",
 			nickname = "deleteComment")
 	@RequestMapping(value = "/{commentId}", method = RequestMethod.DELETE)
-	public void deleteComment(@ApiParam(value = "ID of the comment that needs to be deleted", required = true) @PathVariable final String commentId) {
+	public void deleteComment(
+			@ApiParam(value = "ID of the comment that needs to be deleted", required = true)
+			@PathVariable
+			final String commentId) {
 		commentService.delete(commentService.get(commentId));
 	}
 }

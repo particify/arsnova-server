@@ -83,7 +83,8 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	@ResponseBody
-	public Map<String, Object> handleAuthenticationCredentialsNotFoundException(final Exception e, final HttpServletRequest request) {
+	public Map<String, Object> handleAuthenticationCredentialsNotFoundException(
+			final Exception e, final HttpServletRequest request) {
 		return helper.handleException(e, Level.DEBUG);
 	}
 

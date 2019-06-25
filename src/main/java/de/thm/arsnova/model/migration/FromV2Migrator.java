@@ -251,7 +251,8 @@ public class FromV2Migrator {
 		return answer;
 	}
 
-	public ChoiceAnswer migrate(final Answer from, final List<ChoiceQuestionContent.AnswerOption> options, final boolean multiple) {
+	public ChoiceAnswer migrate(
+			final Answer from, final List<ChoiceQuestionContent.AnswerOption> options, final boolean multiple) {
 		final ChoiceAnswer to = new ChoiceAnswer();
 		copyCommonProperties(from, to);
 		to.setContentId(from.getQuestionId());

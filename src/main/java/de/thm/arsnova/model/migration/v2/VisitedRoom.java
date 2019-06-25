@@ -27,7 +27,8 @@ import de.thm.arsnova.model.serialization.View;
 /**
  * A Room (Session) a user has visited previously.
  */
-@ApiModel(value = "VisitedRoom", description = "Visited Room (Session) entity - An entry of the Room History for the Logged In entity")
+@ApiModel(value = "VisitedRoom",
+		description = "Visited Room (Session) entity - An entry of the Room History for the Logged In entity")
 public class VisitedRoom {
 	@JsonProperty("_id")
 	private String id;

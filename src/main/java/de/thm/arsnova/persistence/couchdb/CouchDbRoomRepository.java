@@ -208,7 +208,8 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 //			final List<de.thm.arsnova.entities.transport.Answer> answerList = new ArrayList<>();
 //			if (withAnswers) {
 //				for (final Answer a : this.getDatabaseDao().getAllAnswers(question)) {
-//					final de.thm.arsnova.entities.transport.Answer transportAnswer = new de.thm.arsnova.entities.transport.Answer(a);
+//					final de.thm.arsnova.entities.transport.Answer transportAnswer =
+//							new de.thm.arsnova.entities.transport.Answer(a);
 //					answerList.add(transportAnswer);
 //				}
 //				// getAllAnswers does not grep for whole answer object so i need to add empty entries for abstentions
@@ -227,7 +228,8 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 //		if (withFeedbackQuestions) {
 //			final List<de.thm.arsnova.entities.transport.Comment> interposedQuestionList = new ArrayList<>();
 //			for (final Comment i : getDatabaseDao().getInterposedQuestions(session, 0, 0)) {
-//				de.thm.arsnova.entities.transport.Comment transportInterposedQuestion = new de.thm.arsnova.entities.transport.Comment(i);
+//				de.thm.arsnova.entities.transport.Comment transportInterposedQuestion =
+//						new de.thm.arsnova.entities.transport.Comment(i);
 //				interposedQuestionList.add(transportInterposedQuestion);
 //			}
 //			importExportSession.setFeedbackQuestions(interposedQuestionList);
@@ -359,15 +361,18 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 		final ViewQuery commentCountView = createQuery("by_roomid").designDocId("_design/Comment")
 				.group(true).keys(roomIds);
 		final ViewQuery unreadCommentCountView = createQuery("by_roomid_read").designDocId("_design/Comment")
-				.group(true).keys(rooms.stream().map(session -> ComplexKey.of(session.getId(), false)).collect(Collectors.toList()));
+				.group(true).keys(rooms.stream().map(session -> ComplexKey.of(session.getId(), false))
+				.collect(Collectors.toList()));
 
 		return attachStats(rooms, questionCountView, answerCountView, commentCountView, unreadCommentCountView);
 	}
 
 	/* TODO: Move to service layer. */
 	public List<Room> getRoomHistoryWithStatsForUser(final List<Room> rooms, final String ownerId) {
-		final ViewQuery answeredQuestionsView = createQuery("by_creatorid_roomid").designDocId("_design/Answer")
-				.reduce(false).keys(rooms.stream().map(room -> ComplexKey.of(ownerId, room.getId())).collect(Collectors.toList()));
+		final ViewQuery answeredQuestionsView = createQuery("by_creatorid_roomid")
+				.designDocId("_design/Answer")
+				.reduce(false).keys(rooms.stream().map(room -> ComplexKey.of(ownerId, room.getId()))
+				.collect(Collectors.toList()));
 		final ViewQuery contentIdsView = createQuery("by_roomid").designDocId("_design/Content")
 				.reduce(false).keys(rooms.stream().map(Room::getId).collect(Collectors.toList()));
 

@@ -97,7 +97,8 @@ public class Motd implements Entity {
 		text = ttext;
 	}
 
-	@ApiModelProperty(required = true, value = "defines the target audience for this motd (one of the following: 'student', 'tutor', 'loggedIn', 'all')")
+	@ApiModelProperty(required = true, value = "defines the target audience for this motd (one of the following: "
+			+ "'student', 'tutor', 'loggedIn', 'all')")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getAudience() {
 		return audience;
@@ -118,7 +119,8 @@ public class Motd implements Entity {
 		this.sessionId = sessionId;
 	}
 
-	@ApiModelProperty(required = true, value = "when audience equals session, the sessionkey referes to the session the messages belong to")
+	@ApiModelProperty(required = true,
+			value = "when audience equals session, the sessionkey referes to the session the messages belong to")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getSessionkey() {
 		return sessionkey;
