@@ -44,7 +44,8 @@ public class LogEntry extends Entity {
 	private int level;
 	private Map<String, Object> payload;
 
-	public LogEntry(@JsonProperty String event, @JsonProperty int level, @JsonProperty Map<String, Object> payload) {
+	public LogEntry(@JsonProperty final String event, @JsonProperty final int level,
+			@JsonProperty final Map<String, Object> payload) {
 		this.event = event;
 		this.level = level;
 		this.payload = payload;

@@ -100,14 +100,14 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 				/* Answers:
 				 * Extract selected indexes from key[2] and count from value */
 				final JsonNode jsonIndexes = d.getKeyAsNode().get(2);
-				Integer[] indexes = new Integer[jsonIndexes.size()];
+				final Integer[] indexes = new Integer[jsonIndexes.size()];
 				/* Count independently */
 				for (int i = 0; i < jsonIndexes.size(); i++) {
 					indexes[i] = jsonIndexes.get(i).asInt();
 					independentCounts.set(indexes[i], independentCounts.get(indexes[i]) + d.getValueAsInt());
 				}
 				/* Count option combinations */
-				AnswerStatistics.RoundStatistics.Combination combination =
+				final AnswerStatistics.RoundStatistics.Combination combination =
 						combinations.getOrDefault(Arrays.asList(indexes),
 								new AnswerStatistics.RoundStatistics.Combination(
 										Arrays.asList(indexes), d.getValueAsInt()));
@@ -117,7 +117,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 		}
 		roundStats.setIndependentCounts(independentCounts);
 		/* TODO: Review - might lead easily to IndexOutOfBoundsExceptions - use a Map instead? */
-		List<AnswerStatistics.RoundStatistics> roundStatisticsList = new ArrayList(Collections.nCopies(round, null));
+		final List<AnswerStatistics.RoundStatistics> roundStatisticsList = new ArrayList(Collections.nCopies(round, null));
 		roundStatisticsList.set(round - 1, roundStats);
 		stats.setRoundStatistics(roundStatisticsList);
 

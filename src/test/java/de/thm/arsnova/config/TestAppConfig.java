@@ -97,9 +97,9 @@ public class TestAppConfig {
 	@Bean
 	@Primary
 	public StubUserService stubUserService(
-			UserRepository repository,
-			JavaMailSender mailSender,
-			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+			final UserRepository repository,
+			final JavaMailSender mailSender,
+			@Qualifier("defaultJsonMessageConverter") final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		return new StubUserService(repository, mailSender, jackson2HttpMessageConverter);
 	}
 

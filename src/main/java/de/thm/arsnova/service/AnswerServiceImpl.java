@@ -65,10 +65,10 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	private UserService userService;
 
 	public AnswerServiceImpl(
-			AnswerRepository repository,
-			RoomService roomService,
-			UserService userService,
-			@Qualifier("defaultJsonMessageConverter")
+			final AnswerRepository repository,
+			final RoomService roomService,
+			final UserService userService,
+			@Qualifier("defaultJsonMessageConverter") final
 			MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(Answer.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.answerRepository = repository;
@@ -94,11 +94,11 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 			answers.add(entry);
 		}
 		try {
-			for (Answer e : answers) {
+			for (final Answer e : answers) {
 				this.eventPublisher.publishEvent(new BeforeCreationEvent<>(this, e));
 			}
 			answerRepository.saveAll(answers);
-			for (Answer e : answers) {
+			for (final Answer e : answers) {
 				this.eventPublisher.publishEvent(new AfterCreationEvent<>(this, e));
 			}
 		} catch (final DbAccessException e) {
@@ -151,10 +151,10 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		AnswerStatistics stats = answerRepository.findByContentIdRound(
+		final AnswerStatistics stats = answerRepository.findByContentIdRound(
 				content.getId(), round, content.getOptions().size());
 		/* Fill list with zeros to prevent IndexOutOfBoundsExceptions */
-		List<Integer> independentCounts = stats.getRoundStatistics().get(round - 1).getIndependentCounts();
+		final List<Integer> independentCounts = stats.getRoundStatistics().get(round - 1).getIndependentCounts();
 		while (independentCounts.size() < content.getOptions().size()) {
 			independentCounts.add(0);
 		}
@@ -180,8 +180,8 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		AnswerStatistics stats = getStatistics(content.getId(), 1);
-		AnswerStatistics stats2 = getStatistics(content.getId(), 2);
+		final AnswerStatistics stats = getStatistics(content.getId(), 1);
+		final AnswerStatistics stats2 = getStatistics(content.getId(), 2);
 		stats.getRoundStatistics().add(stats2.getRoundStatistics().get(1));
 
 		return stats;
@@ -387,7 +387,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	@Override
 	public Map<String, Object> countAnswersAndAbstentionsInternal(final String contentId) {
 		final Content content = contentService.get(contentId);
-		HashMap<String, Object> map = new HashMap<>();
+		final HashMap<String, Object> map = new HashMap<>();
 
 		if (content == null) {
 			return null;

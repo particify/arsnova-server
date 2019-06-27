@@ -46,10 +46,11 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	private MotdRepository motdRepository;
 
 	public MotdServiceImpl(
-			MotdRepository repository,
-			UserService userService,
-			RoomService roomService,
-			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+			final MotdRepository repository,
+			final UserService userService,
+			final RoomService roomService,
+			@Qualifier("defaultJsonMessageConverter")
+			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(Motd.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.motdRepository = repository;
 		this.userService = userService;
@@ -100,9 +101,9 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	}
 
 	@Override
-	public List<Motd> filterMotdsByDate(List<Motd> list, Date clientdate) {
-		List<Motd> returns = new ArrayList<>();
-		for (Motd motd : list) {
+	public List<Motd> filterMotdsByDate(final List<Motd> list, final Date clientdate) {
+		final List<Motd> returns = new ArrayList<>();
+		for (final Motd motd : list) {
 			if (motd.getStartDate().before(clientdate) && motd.getEndDate().after(clientdate)) {
 				returns.add(motd);
 			}
@@ -111,7 +112,7 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	}
 
 	@Override
-	public List<Motd> filterMotdsByList(List<Motd> list, List<String> ids) {
+	public List<Motd> filterMotdsByList(final List<Motd> list, final List<String> ids) {
 		return list.stream().filter(id -> ids.contains(id)).collect(Collectors.toList());
 	}
 
@@ -124,7 +125,7 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	@Override
 	@PreAuthorize("hasPermission(#roomId, 'room', 'owner')")
 	public Motd save(final String roomId, final Motd motd) {
-		Room room = roomService.get(roomId);
+		final Room room = roomService.get(roomId);
 		motd.setRoomId(room.getId());
 
 		return createOrUpdateMotd(motd);
@@ -145,7 +146,7 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	@CacheEvict(cacheNames = "motds", key = "#motd.audience + #motd.roomId")
 	private Motd createOrUpdateMotd(final Motd motd) {
 		if (motd.getId() != null) {
-			Motd oldMotd = get(motd.getId());
+			final Motd oldMotd = get(motd.getId());
 			if (!(motd.getId().equals(oldMotd.getId()) && motd.getRoomId().equals(oldMotd.getRoomId())
 					&& motd.getAudience().equals(oldMotd.getAudience()))) {
 				throw new BadRequestException();
@@ -153,7 +154,7 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 		}
 
 		if (null != motd.getId()) {
-			Motd oldMotd = get(motd.getId());
+			final Motd oldMotd = get(motd.getId());
 			motd.setId(oldMotd.getId());
 
 			return super.update(oldMotd, motd);

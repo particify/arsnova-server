@@ -36,21 +36,21 @@ public class StubUserService extends UserServiceImpl {
 	private User stubUser = null;
 
 	public StubUserService(
-			UserRepository repository,
-			JavaMailSender mailSender,
-			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+			final UserRepository repository,
+			final JavaMailSender mailSender,
+			@Qualifier("defaultJsonMessageConverter") final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(repository, mailSender, jackson2HttpMessageConverter);
 		grantedAuthorities = new HashSet<>();
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 	}
 
-	public void setUserAuthenticated(boolean isAuthenticated) {
+	public void setUserAuthenticated(final boolean isAuthenticated) {
 		this.setUserAuthenticated(isAuthenticated, "ptsr00");
 	}
 
-	public void setUserAuthenticated(boolean isAuthenticated, String username) {
+	public void setUserAuthenticated(final boolean isAuthenticated, final String username) {
 		if (isAuthenticated) {
-			UserProfile userProfile = new UserProfile(UserProfile.AuthProvider.ARSNOVA, username);
+			final UserProfile userProfile = new UserProfile(UserProfile.AuthProvider.ARSNOVA, username);
 			userProfile.setId(UUID.randomUUID().toString());
 			stubUser = new User(userProfile, grantedAuthorities);
 		} else {

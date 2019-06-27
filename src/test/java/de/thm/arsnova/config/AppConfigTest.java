@@ -59,8 +59,8 @@ public class AppConfigTest extends AbstractJUnit4SpringContextTests {
 
 	@Test
 	public void testShouldUseAdminAccountFromTestPropertiesFile() {
-		List<String> expected = Arrays.asList("TestAdmin");
-		List<String> actual = Arrays.asList(adminAccounts);
+		final List<String> expected = Arrays.asList("TestAdmin");
+		final List<String> actual = Arrays.asList(adminAccounts);
 
 		assertEquals("Configuration did not load correct property file", expected, actual);
 	}

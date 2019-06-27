@@ -26,13 +26,13 @@ import de.thm.arsnova.persistence.SessionStatisticsRepository;
  */
 public class ScoreBasedScoreCalculator extends VariantScoreCalculator {
 
-	public ScoreBasedScoreCalculator(SessionStatisticsRepository sessionStatisticsRepository) {
+	public ScoreBasedScoreCalculator(final SessionStatisticsRepository sessionStatisticsRepository) {
 		super(sessionStatisticsRepository);
 	}
 
 	@Override
 	protected ScoreStatistics createCourseProgress() {
-		ScoreStatistics lpv = new ScoreStatistics();
+		final ScoreStatistics lpv = new ScoreStatistics();
 		lpv.setCourseProgress(coursePercentage());
 		lpv.setNumQuestions(courseScore.getQuestionCount());
 		lpv.setNumUsers(courseScore.getTotalUserCount());
@@ -54,8 +54,8 @@ public class ScoreBasedScoreCalculator extends VariantScoreCalculator {
 	}
 
 	@Override
-	protected ScoreStatistics createMyProgress(String userId) {
-		ScoreStatistics lpv = new ScoreStatistics();
+	protected ScoreStatistics createMyProgress(final String userId) {
+		final ScoreStatistics lpv = new ScoreStatistics();
 		lpv.setCourseProgress(coursePercentage());
 		lpv.setNumQuestions(courseScore.getQuestionCount());
 		lpv.setNumUsers(courseScore.getTotalUserCount());
@@ -65,7 +65,7 @@ public class ScoreBasedScoreCalculator extends VariantScoreCalculator {
 		return lpv;
 	}
 
-	private int myPercentage(String userId) {
+	private int myPercentage(final String userId) {
 		final int courseMaximumValue = courseScore.getMaximumScore();
 		final double userTotalValue = courseScore.getTotalUserScore(userId);
 		if (courseMaximumValue == 0) {

@@ -25,7 +25,7 @@ public abstract class PaginationController extends AbstractController {
 	protected int offset = -1;
 	protected int limit = -1;
 
-	public void setRange(int start, int end) {
+	public void setRange(final int start, final int end) {
 		this.offset = start;
 		this.limit = end != -1 && start <= end ? end - start + 1 : -1;
 	}

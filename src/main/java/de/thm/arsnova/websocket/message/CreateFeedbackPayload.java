@@ -6,7 +6,7 @@ public class CreateFeedbackPayload implements WebSocketPayload {
 	public CreateFeedbackPayload() {
 	}
 
-	public CreateFeedbackPayload(int value) {
+	public CreateFeedbackPayload(final int value) {
 		this.value = value;
 	}
 
@@ -14,7 +14,7 @@ public class CreateFeedbackPayload implements WebSocketPayload {
 		return value;
 	}
 
-	public void setValue(int value) {
+	public void setValue(final int value) {
 		this.value = value;
 	}
 }

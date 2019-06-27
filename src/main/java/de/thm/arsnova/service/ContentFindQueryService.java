@@ -38,10 +38,10 @@ public class ContentFindQueryService implements FindQueryService<Content> {
 
 	@Override
 	public Set<String> resolveQuery(final FindQuery<Content> findQuery) {
-		Set<String> contentIds = new HashSet<>();
+		final Set<String> contentIds = new HashSet<>();
 		if (findQuery.getProperties().getRoomId() != null) {
-			List<Content> contentList = contentService.getByRoomId(findQuery.getProperties().getRoomId());
-			for (Content c : contentList) {
+			final List<Content> contentList = contentService.getByRoomId(findQuery.getProperties().getRoomId());
+			for (final Content c : contentList) {
 				contentIds.add(c.getId());
 			}
 		}

@@ -10,15 +10,15 @@ public class UnauthorizedException extends RuntimeException {
 		super();
 	}
 
-	public UnauthorizedException(String message) {
+	public UnauthorizedException(final String message) {
 		super(message);
 	}
 
-	public UnauthorizedException(Throwable e) {
+	public UnauthorizedException(final Throwable e) {
 		super(e);
 	}
 
-	public UnauthorizedException(String message, Throwable e) {
+	public UnauthorizedException(final String message, final Throwable e) {
 		super(message, e);
 	}
 }

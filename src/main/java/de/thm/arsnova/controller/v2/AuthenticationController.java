@@ -157,12 +157,12 @@ public class AuthenticationController extends AbstractController {
 	@RequestMapping(value = { "/login", "/doLogin" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public void doLogin(
 			@RequestParam("type") final String type,
-			@RequestParam(value = "user", required = false) String username,
+			@RequestParam(value = "user", required = false) final String username,
 			@RequestParam(required = false) final String password,
 			final HttpServletRequest request,
 			final HttpServletResponse response
 	) throws IOException {
-		String addr = request.getRemoteAddr();
+		final String addr = request.getRemoteAddr();
 		if (userService.isBannedFromLogin(addr)) {
 			response.sendError(429, "Too Many Requests");
 
@@ -174,7 +174,7 @@ public class AuthenticationController extends AbstractController {
 		if (dbAuthEnabled && "arsnova".equals(type)) {
 			try {
 				userService.authenticate(authRequest, UserProfile.AuthProvider.ARSNOVA);
-			} catch (AuthenticationException e) {
+			} catch (final AuthenticationException e) {
 				logger.info("Database authentication failed.", e);
 				userService.increaseFailedLoginCount(addr);
 				response.setStatus(HttpStatus.UNAUTHORIZED.value());
@@ -182,7 +182,7 @@ public class AuthenticationController extends AbstractController {
 		} else if (ldapEnabled && "ldap".equals(type)) {
 			try {
 				userService.authenticate(authRequest, UserProfile.AuthProvider.LDAP);
-			} catch (AuthenticationException e) {
+			} catch (final AuthenticationException e) {
 				logger.info("LDAP authentication failed.", e);
 				userService.increaseFailedLoginCount(addr);
 				response.setStatus(HttpStatus.UNAUTHORIZED.value());
@@ -263,7 +263,7 @@ public class AuthenticationController extends AbstractController {
 
 	@RequestMapping(value = { "/", "/whoami" }, method = RequestMethod.GET)
 	@ResponseBody
-	public ClientAuthentication whoami(@AuthenticationPrincipal User user) {
+	public ClientAuthentication whoami(@AuthenticationPrincipal final User user) {
 		if (user == null) {
 			throw new UnauthorizedException();
 		}
@@ -285,13 +285,13 @@ public class AuthenticationController extends AbstractController {
 	@RequestMapping(value = { "/services" }, method = RequestMethod.GET)
 	@ResponseBody
 	public List<ServiceDescription> getServices(final HttpServletRequest request) {
-		List<ServiceDescription> services = new ArrayList<>();
+		final List<ServiceDescription> services = new ArrayList<>();
 
 		/* The first parameter is replaced by the backend, the second one by the frondend */
-		String dialogUrl = apiPath + "/auth/dialog?type={0}&successurl='{0}'";
+		final String dialogUrl = apiPath + "/auth/dialog?type={0}&successurl='{0}'";
 
 		if (guestEnabled) {
-			ServiceDescription sdesc = new ServiceDescription(
+			final ServiceDescription sdesc = new ServiceDescription(
 					"guest",
 					"Guest",
 					null,
@@ -302,7 +302,7 @@ public class AuthenticationController extends AbstractController {
 		}
 
 		if (customLoginEnabled && !"".equals(customLoginDialog)) {
-			ServiceDescription sdesc = new ServiceDescription(
+			final ServiceDescription sdesc = new ServiceDescription(
 					"custom",
 					customLoginTitle,
 					customizationPath + "/" + customLoginDialog + "?redirect={0}",
@@ -314,7 +314,7 @@ public class AuthenticationController extends AbstractController {
 		}
 
 		if (dbAuthEnabled && !"".equals(dbAuthDialog)) {
-			ServiceDescription sdesc = new ServiceDescription(
+			final ServiceDescription sdesc = new ServiceDescription(
 					"arsnova",
 					dbAuthTitle,
 					customizationPath + "/" + dbAuthDialog + "?redirect={0}",
@@ -326,7 +326,7 @@ public class AuthenticationController extends AbstractController {
 		}
 
 		if (ldapEnabled && !"".equals(ldapDialog)) {
-			ServiceDescription sdesc = new ServiceDescription(
+			final ServiceDescription sdesc = new ServiceDescription(
 					"ldap",
 					ldapTitle,
 					customizationPath + "/" + ldapDialog + "?redirect={0}",
@@ -338,7 +338,7 @@ public class AuthenticationController extends AbstractController {
 		}
 
 		if (casEnabled) {
-			ServiceDescription sdesc = new ServiceDescription(
+			final ServiceDescription sdesc = new ServiceDescription(
 					"cas",
 					casTitle,
 					MessageFormat.format(dialogUrl, "cas"),
@@ -350,7 +350,7 @@ public class AuthenticationController extends AbstractController {
 		}
 
 		if (oidcEnabled) {
-			ServiceDescription sdesc = new ServiceDescription(
+			final ServiceDescription sdesc = new ServiceDescription(
 					"oidc",
 					oidcTitle,
 					MessageFormat.format(dialogUrl, "oidc"),
@@ -362,7 +362,7 @@ public class AuthenticationController extends AbstractController {
 		}
 
 		if (facebookEnabled) {
-			ServiceDescription sdesc = new ServiceDescription(
+			final ServiceDescription sdesc = new ServiceDescription(
 					"facebook",
 					"Facebook",
 					MessageFormat.format(dialogUrl, "facebook"),
@@ -373,7 +373,7 @@ public class AuthenticationController extends AbstractController {
 		}
 
 		if (googleEnabled) {
-			ServiceDescription sdesc = new ServiceDescription(
+			final ServiceDescription sdesc = new ServiceDescription(
 					"google",
 					"Google",
 					MessageFormat.format(dialogUrl, "google"),
@@ -384,7 +384,7 @@ public class AuthenticationController extends AbstractController {
 		}
 
 		if (twitterEnabled) {
-			ServiceDescription sdesc = new ServiceDescription(
+			final ServiceDescription sdesc = new ServiceDescription(
 					"twitter",
 					"Twitter",
 					MessageFormat.format(dialogUrl, "twitter"),
@@ -398,7 +398,7 @@ public class AuthenticationController extends AbstractController {
 	}
 
 	private Collection<GrantedAuthority> getAuthorities(final boolean admin) {
-		List<GrantedAuthority> authList = new ArrayList<>();
+		final List<GrantedAuthority> authList = new ArrayList<>();
 		authList.add(new SimpleGrantedAuthority("ROLE_USER"));
 		if (admin) {
 			authList.add(new SimpleGrantedAuthority("ROLE_ADMIN"));

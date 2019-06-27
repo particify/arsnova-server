@@ -5,7 +5,7 @@ public class WebSocketMessage<P extends WebSocketPayload> {
 
 	private P payload;
 
-	public WebSocketMessage(String type) {
+	public WebSocketMessage(final String type) {
 		this.type = type;
 	}
 
@@ -13,7 +13,7 @@ public class WebSocketMessage<P extends WebSocketPayload> {
 		return type;
 	}
 
-	public void setType(String type) {
+	public void setType(final String type) {
 		this.type = type;
 	}
 
@@ -21,7 +21,7 @@ public class WebSocketMessage<P extends WebSocketPayload> {
 		return payload;
 	}
 
-	public void setPayload(P payload) {
+	public void setPayload(final P payload) {
 		this.payload = payload;
 	}
 }

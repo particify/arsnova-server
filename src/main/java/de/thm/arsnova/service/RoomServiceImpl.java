@@ -93,11 +93,12 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	private int uploadFileSizeByte;
 
 	public RoomServiceImpl(
-			RoomRepository repository,
-			LogEntryRepository dbLogger,
-			UserService userService,
-			ScoreCalculatorFactory scoreCalculatorFactory,
-			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+			final RoomRepository repository,
+			final LogEntryRepository dbLogger,
+			final UserService userService,
+			final ScoreCalculatorFactory scoreCalculatorFactory,
+			@Qualifier("defaultJsonMessageConverter")
+			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(Room.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.roomRepository = repository;
 		this.dbLogger = dbLogger;
@@ -144,7 +145,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Autowired(required = false)
-	public void setConnectorClient(ConnectorClient connectorClient) {
+	public void setConnectorClient(final ConnectorClient connectorClient) {
 		this.connectorClient = connectorClient;
 	}
 
@@ -152,10 +153,10 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	public void deleteInactiveRooms() {
 		if (guestRoomInactivityThresholdDays > 0) {
 			logger.info("Delete inactive rooms.");
-			long unixTime = System.currentTimeMillis();
-			long lastActivityBefore = unixTime - guestRoomInactivityThresholdDays * 24 * 60 * 60 * 1000L;
-			int[] totalCount = new int[] {0, 0, 0};
-			List<Room> inactiveRooms = roomRepository.findInactiveGuestRoomsMetadata(lastActivityBefore);
+			final long unixTime = System.currentTimeMillis();
+			final long lastActivityBefore = unixTime - guestRoomInactivityThresholdDays * 24 * 60 * 60 * 1000L;
+			final int[] totalCount = new int[] {0, 0, 0};
+			final List<Room> inactiveRooms = roomRepository.findInactiveGuestRoomsMetadata(lastActivityBefore);
 			delete(inactiveRooms);
 
 			if (!inactiveRooms.isEmpty()) {
@@ -172,17 +173,17 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Override
 	protected void modifyRetrieved(final Room room) {
 		// creates a set from all room content groups
-		Set<String> cidsWithGroup = room.getContentGroups().stream()
+		final Set<String> cidsWithGroup = room.getContentGroups().stream()
 				.map(Room.ContentGroup::getContentIds)
 				.flatMap(ids -> ids.stream())
 				.collect(Collectors.toSet());
 
-		Set<String> cids = new HashSet<>(contentRepository.findIdsByRoomId(room.getId()));
+		final Set<String> cids = new HashSet<>(contentRepository.findIdsByRoomId(room.getId()));
 		cids.removeAll(cidsWithGroup);
 
 		if (!cids.isEmpty()) {
 			final Set<Room.ContentGroup> cgs = room.getContentGroups();
-			Room.ContentGroup defaultGroup = new Room.ContentGroup();
+			final Room.ContentGroup defaultGroup = new Room.ContentGroup();
 			defaultGroup.setContentIds(cids);
 			defaultGroup.setAutoSort(true);
 			defaultGroup.setName("");
@@ -192,7 +193,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	@Override
 	public Room join(final String id, final UUID socketId) {
-		Room room = null != id ? get(id) : null;
+		final Room room = null != id ? get(id) : null;
 		if (null == room) {
 			userService.removeUserFromRoomBySocketId(socketId);
 			return null;
@@ -226,7 +227,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		if (shortId == null) {
 			throw new NullPointerException("shortId cannot be null");
 		}
-		Room room = roomRepository.findByShortId(shortId);
+		final Room room = roomRepository.findByShortId(shortId);
 		if (room == null) {
 			throw new NotFoundException("No Room exists for short ID");
 		}
@@ -268,14 +269,14 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	/* TODO: Updated SpEL expression has not been tested yet */
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#userId, 'userprofile', 'owner')")
-	public List<Room> getUserRooms(String userId) {
+	public List<Room> getUserRooms(final String userId) {
 		return roomRepository.findByOwnerId(userId, 0, 0);
 	}
 
 	/* TODO: Updated SpEL expression has not been tested yet */
 	@Override
 	@PreAuthorize("isAuthenticated() and hasPermission(#userId, 'userprofile', 'owner')")
-	public List<String> getUserRoomIds(String userId) {
+	public List<String> getUserRoomIds(final String userId) {
 		return roomRepository.findIdsByOwnerId(userId);
 	}
 
@@ -323,7 +324,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		final UserProfile profile = userService.get(userId);
 		final List<String> roomIds = profile.getRoomHistory().stream()
 				.map(entry -> entry.getRoomId()).collect(Collectors.toList());
-		List<Room> rooms = new ArrayList<>();
+		final List<Room> rooms = new ArrayList<>();
 		roomRepository.findAllById(roomIds).forEach(rooms::add);
 
 		return rooms;
@@ -332,7 +333,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public List<Room> getMyRoomHistoryInfo(final int offset, final int limit) {
-		List<Room> rooms = getMyRoomHistory(0, 0);
+		final List<Room> rooms = getMyRoomHistory(0, 0);
 		roomRepository.getRoomHistoryWithStatsForUser(rooms, userService.getCurrentUser().getId());
 
 		return rooms;
@@ -353,7 +354,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 		handleLogo(room);
 
-		Room.Settings sf = new Room.Settings();
+		final Room.Settings sf = new Room.Settings();
 		room.setSettings(sf);
 
 		room.setShortId(generateShortId());
@@ -425,7 +426,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Override
 	@PreAuthorize("hasPermission('', 'motd', 'admin')")
 	@Caching(evict = { @CacheEvict("rooms"), @CacheEvict(cacheNames = "rooms", key = "#id") })
-	public Room updateCreator(String id, String newCreator) {
+	public Room updateCreator(final String id, final String newCreator) {
 		throw new UnsupportedOperationException("No longer implemented.");
 	}
 
@@ -433,7 +434,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@PreAuthorize("hasPermission(#id, 'room', 'read')")
 	public ScoreStatistics getLearningProgress(final String id, final String type, final String questionVariant) {
 		final Room room = get(id);
-		ScoreCalculator scoreCalculator = scoreCalculatorFactory.create(type, questionVariant);
+		final ScoreCalculator scoreCalculator = scoreCalculatorFactory.create(type, questionVariant);
 		return scoreCalculator.getCourseProgress(room);
 	}
 
@@ -442,13 +443,13 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	public ScoreStatistics getMyLearningProgress(final String id, final String type, final String questionVariant) {
 		final Room room = get(id);
 		final User user = userService.getCurrentUser();
-		ScoreCalculator scoreCalculator = scoreCalculatorFactory.create(type, questionVariant);
+		final ScoreCalculator scoreCalculator = scoreCalculatorFactory.create(type, questionVariant);
 		return scoreCalculator.getMyProgress(room, user.getId());
 	}
 
 	@Override
 	@PreAuthorize("hasPermission('', 'room', 'create')")
-	public Room importRooms(ImportExportContainer importRoom) {
+	public Room importRooms(final ImportExportContainer importRoom) {
 		final User user = userService.getCurrentUser();
 		final Room info = roomRepository.importRoom(user.getId(), importRoom);
 		if (info == null) {
@@ -459,14 +460,15 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	@Override
 	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
-	public ImportExportContainer exportRoom(String id, Boolean withAnswerStatistics, Boolean withFeedbackQuestions) {
+	public ImportExportContainer exportRoom(
+			final String id, final Boolean withAnswerStatistics, final Boolean withFeedbackQuestions) {
 		return roomRepository.exportRoom(id, withAnswerStatistics, withFeedbackQuestions);
 	}
 
 	@Override
 	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
-	public Room copyRoomToPublicPool(String id, ImportExportContainer.PublicPool pp) {
-		ImportExportContainer temp = roomRepository.exportRoom(id, false, false);
+	public Room copyRoomToPublicPool(final String id, final ImportExportContainer.PublicPool pp) {
+		final ImportExportContainer temp = roomRepository.exportRoom(id, false, false);
 		temp.getSession().setPublicPool(pp);
 		temp.getSession().setSessionType("public_pool");
 		final User user = userService.getCurrentUser();
@@ -475,13 +477,13 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	@Override
 	@PreAuthorize("hasPermission(#id, 'room', 'read')")
-	public Room.Settings getFeatures(String id) {
+	public Room.Settings getFeatures(final String id) {
 		return get(id).getSettings();
 	}
 
 	@Override
 	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
-	public Room.Settings updateFeatures(String id, Room.Settings settings) {
+	public Room.Settings updateFeatures(final String id, final Room.Settings settings) {
 		final Room room = get(id);
 		room.setSettings(settings);
 
@@ -492,7 +494,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	@Override
 	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
-	public boolean lockFeedbackInput(String id, Boolean lock) throws IOException {
+	public boolean lockFeedbackInput(final String id, final Boolean lock) throws IOException {
 		final Room room = get(id);
 		if (!lock) {
 			feedbackService.cleanFeedbackVotesByRoomId(id, 0);
@@ -504,14 +506,14 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	@Override
 	@PreAuthorize("hasPermission(#id, 'room', 'owner')")
-	public boolean flipFlashcards(String id, Boolean flip) {
+	public boolean flipFlashcards(final String id, final Boolean flip) {
 		final Room room = get(id);
 		this.eventPublisher.publishEvent(new FlipFlashcardsEvent(this, room.getId()));
 
 		return flip;
 	}
 
-	private void handleLogo(Room room) {
+	private void handleLogo(final Room room) {
 		if (room.getAuthor() != null && room.getAuthor().getOrganizationLogo() != null) {
 			if (!room.getAuthor().getOrganizationLogo().startsWith("http")) {
 				throw new IllegalArgumentException("Invalid logo URL.");

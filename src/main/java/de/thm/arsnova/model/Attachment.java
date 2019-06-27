@@ -60,7 +60,7 @@ public class Attachment extends Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setMediaType(String mediaType) {
+	public void setMediaType(final String mediaType) {
 		this.mediaType = mediaType;
 	}
 
@@ -70,7 +70,7 @@ public class Attachment extends Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setSize(long size) {
+	public void setSize(final long size) {
 		this.size = size;
 	}
 
@@ -80,7 +80,7 @@ public class Attachment extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setOriginalSourceUrl(String originalSourceUrl) {
+	public void setOriginalSourceUrl(final String originalSourceUrl) {
 		this.originalSourceUrl = originalSourceUrl;
 	}
 
@@ -90,7 +90,7 @@ public class Attachment extends Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setStorageLocation(String storageLocation) {
+	public void setStorageLocation(final String storageLocation) {
 		this.storageLocation = storageLocation;
 	}
 

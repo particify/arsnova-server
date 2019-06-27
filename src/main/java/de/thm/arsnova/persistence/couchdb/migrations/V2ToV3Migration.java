@@ -108,7 +108,7 @@ public class V2ToV3Migration implements Migration {
 			migrateComments();
 			migrateContents();
 			migrateAnswers();
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			throw new DbAccessException(e);
 		}
 		migrator.setIgnoreRevision(false);
@@ -125,7 +125,7 @@ public class V2ToV3Migration implements Migration {
 
 		filterSelector = new HashMap<>();
 		filterSelector.put("type", "userdetails");
-		Map<String, String> lockedFilter = new HashMap<>();
+		final Map<String, String> lockedFilter = new HashMap<>();
 		subFilterSelector = new HashMap<>();
 		subFilterSelector.put("$exists", false);
 		filterSelector.put("locked", subFilterSelector);
@@ -175,9 +175,9 @@ public class V2ToV3Migration implements Migration {
 	private void migrateUsers() throws InterruptedException {
 		waitForV2Index(USER_INDEX);
 		waitForV2Index(LOGGEDIN_INDEX);
-		Map<String, Object> queryOptions = new HashMap<>();
+		final Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "userdetails");
-		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
+		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(USER_INDEX);
 		query.setLimit(LIMIT);
 		String bookmark = null;
@@ -185,25 +185,26 @@ public class V2ToV3Migration implements Migration {
 		for (int skip = 0;; skip += LIMIT) {
 			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
 			query.setBookmark(bookmark);
-			List<UserProfile> profilesV3 = new ArrayList<>();
-			PagedMangoResponse<de.thm.arsnova.model.migration.v2.DbUser> response =
+			final List<UserProfile> profilesV3 = new ArrayList<>();
+			final PagedMangoResponse<de.thm.arsnova.model.migration.v2.DbUser> response =
 					fromConnector.queryForPage(query, de.thm.arsnova.model.migration.v2.DbUser.class);
-			List<de.thm.arsnova.model.migration.v2.DbUser> dbUsersV2 = response.getEntities();
+			final List<de.thm.arsnova.model.migration.v2.DbUser> dbUsersV2 = response.getEntities();
 			bookmark = response.getBookmark();
 			if (dbUsersV2.size() == 0) {
 				break;
 			}
 
-			for (DbUser userV2 : dbUsersV2) {
-				HashMap<String, Object> loggedInQueryOptions = new HashMap<>();
+			for (final DbUser userV2 : dbUsersV2) {
+				final HashMap<String, Object> loggedInQueryOptions = new HashMap<>();
 				loggedInQueryOptions.put("type", "logged_in");
 				loggedInQueryOptions.put("user", userV2.getUsername());
-				MangoCouchDbConnector.MangoQuery loggedInQuery = new MangoCouchDbConnector.MangoQuery(loggedInQueryOptions);
+				final MangoCouchDbConnector.MangoQuery loggedInQuery =
+						new MangoCouchDbConnector.MangoQuery(loggedInQueryOptions);
 				loggedInQuery.setIndexDocument(LOGGEDIN_INDEX);
-				List<LoggedIn> loggedInList = fromConnector.query(loggedInQuery, LoggedIn.class);
-				LoggedIn loggedIn = loggedInList.size() > 0 ? loggedInList.get(0) : null;
+				final List<LoggedIn> loggedInList = fromConnector.query(loggedInQuery, LoggedIn.class);
+				final LoggedIn loggedIn = loggedInList.size() > 0 ? loggedInList.get(0) : null;
 
-				UserProfile profileV3 = migrator.migrate(userV2, loggedIn, loadMotdList(userV2.getUsername()));
+				final UserProfile profileV3 = migrator.migrate(userV2, loggedIn, loadMotdList(userV2.getUsername()));
 				profileV3.setAcknowledgedMotds(migrateMotdIds(profileV3.getAcknowledgedMotds()));
 				profilesV3.add(profileV3);
 			}
@@ -221,11 +222,11 @@ public class V2ToV3Migration implements Migration {
 		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(USER_INDEX);
 		query.setLimit(LIMIT);
-		Set<String> usernames = new HashSet<>();
+		final Set<String> usernames = new HashSet<>();
 		for (int skip = 0;; skip += LIMIT) {
 			logger.debug("Migration progress: {}", skip);
 			query.setSkip(skip);
-			List<String> result = fromConnector.query(query, "username", String.class);
+			final List<String> result = fromConnector.query(query, "username", String.class);
 			if (result.isEmpty()) {
 				break;
 			}
@@ -241,21 +242,21 @@ public class V2ToV3Migration implements Migration {
 		for (int skip = 0;; skip += LIMIT) {
 			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
 			query.setBookmark(bookmark);
-			List<UserProfile> profilesV3 = new ArrayList<>();
-			PagedMangoResponse<de.thm.arsnova.model.migration.v2.LoggedIn> response =
+			final List<UserProfile> profilesV3 = new ArrayList<>();
+			final PagedMangoResponse<de.thm.arsnova.model.migration.v2.LoggedIn> response =
 					fromConnector.queryForPage(query, de.thm.arsnova.model.migration.v2.LoggedIn.class);
-			List<de.thm.arsnova.model.migration.v2.LoggedIn> loggedInsV2 = response.getEntities();
+			final List<de.thm.arsnova.model.migration.v2.LoggedIn> loggedInsV2 = response.getEntities();
 			bookmark = response.getBookmark();
 			if (loggedInsV2.isEmpty()) {
 				break;
 			}
-			for (LoggedIn loggedInV2 : loggedInsV2) {
+			for (final LoggedIn loggedInV2 : loggedInsV2) {
 				if (usernames.contains(loggedInV2.getUser())) {
 					continue;
 				}
 				/* There might be rare cases of duplicate LoggedIn records for a user so add them to the filter list */
 				usernames.add(loggedInV2.getUser());
-				UserProfile profileV3 = migrator.migrate(null, loggedInV2, loadMotdList(loggedInV2.getUser()));
+				final UserProfile profileV3 = migrator.migrate(null, loggedInV2, loadMotdList(loggedInV2.getUser()));
 				profileV3.setAcknowledgedMotds(migrateMotdIds(profileV3.getAcknowledgedMotds()));
 				profilesV3.add(profileV3);
 			}
@@ -265,9 +266,9 @@ public class V2ToV3Migration implements Migration {
 
 	private void migrateRooms() throws InterruptedException {
 		waitForV2Index(SESSION_INDEX);
-		Map<String, Object> queryOptions = new HashMap<>();
+		final Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "session");
-		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
+		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(SESSION_INDEX);
 		query.setLimit(LIMIT);
 		String bookmark = null;
@@ -275,17 +276,17 @@ public class V2ToV3Migration implements Migration {
 		for (int skip = 0;; skip += LIMIT) {
 			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
 			query.setBookmark(bookmark);
-			List<Room> roomsV3 = new ArrayList<>();
-			PagedMangoResponse<de.thm.arsnova.model.migration.v2.Room> response =
+			final List<Room> roomsV3 = new ArrayList<>();
+			final PagedMangoResponse<de.thm.arsnova.model.migration.v2.Room> response =
 					fromConnector.queryForPage(query, de.thm.arsnova.model.migration.v2.Room.class);
-			List<de.thm.arsnova.model.migration.v2.Room> roomsV2 = response.getEntities();
+			final List<de.thm.arsnova.model.migration.v2.Room> roomsV2 = response.getEntities();
 			bookmark = response.getBookmark();
 			if (roomsV2.size() == 0) {
 				break;
 			}
 
-			for (de.thm.arsnova.model.migration.v2.Room roomV2 : roomsV2) {
-				List<UserProfile> profiles = userRepository.findByLoginId(roomV2.getCreator());
+			for (final de.thm.arsnova.model.migration.v2.Room roomV2 : roomsV2) {
+				final List<UserProfile> profiles = userRepository.findByLoginId(roomV2.getCreator());
 				if (profiles.size() == 0) {
 					logger.warn("Skipping migration of Room {}. Creator {} does not exist.",
 							roomV2.getId(), roomV2.getCreator());
@@ -300,13 +301,13 @@ public class V2ToV3Migration implements Migration {
 
 	private void migrateMotds() throws InterruptedException {
 		waitForV2Index(MOTD_INDEX);
-		Map<String, Object> queryOptions = new HashMap<>();
+		final Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "motd");
 		/* Exclude outdated MotDs */
-		HashMap<String, String> subQuery = new HashMap<>();
+		final HashMap<String, String> subQuery = new HashMap<>();
 		subQuery.put("$gt", String.valueOf(referenceTimestamp - OUTDATED_AFTER));
 		queryOptions.put("enddate", subQuery);
-		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
+		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(MOTD_INDEX);
 		query.setLimit(LIMIT);
 		String bookmark = null;
@@ -314,18 +315,18 @@ public class V2ToV3Migration implements Migration {
 		for (int skip = 0;; skip += LIMIT) {
 			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
 			query.setBookmark(bookmark);
-			List<Motd> motdsV3 = new ArrayList<>();
-			PagedMangoResponse<de.thm.arsnova.model.migration.v2.Motd> response =
+			final List<Motd> motdsV3 = new ArrayList<>();
+			final PagedMangoResponse<de.thm.arsnova.model.migration.v2.Motd> response =
 					fromConnector.queryForPage(query, de.thm.arsnova.model.migration.v2.Motd.class);
-			List<de.thm.arsnova.model.migration.v2.Motd> motdsV2 = response.getEntities();
+			final List<de.thm.arsnova.model.migration.v2.Motd> motdsV2 = response.getEntities();
 			bookmark = response.getBookmark();
 			if (motdsV2.size() == 0) {
 				break;
 			}
 
-			for (de.thm.arsnova.model.migration.v2.Motd motdV2 : motdsV2) {
+			for (final de.thm.arsnova.model.migration.v2.Motd motdV2 : motdsV2) {
 				if (motdV2.getAudience().equals("session")) {
-					Room room = roomRepository.findByShortId(motdV2.getSessionkey());
+					final Room room = roomRepository.findByShortId(motdV2.getSessionkey());
 					/* sessionId has not been set for some old MotDs */
 					if (room == null) {
 						logger.warn("Skipping migration of Motd {}. Room {} does not exist.",
@@ -343,9 +344,9 @@ public class V2ToV3Migration implements Migration {
 
 	private void migrateComments() throws InterruptedException {
 		waitForV2Index(FULL_INDEX_BY_TYPE);
-		Map<String, Object> queryOptions = new HashMap<>();
+		final Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "interposed_question");
-		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
+		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(FULL_INDEX_BY_TYPE);
 		query.setLimit(LIMIT);
 		String bookmark = null;
@@ -353,18 +354,18 @@ public class V2ToV3Migration implements Migration {
 		for (int skip = 0;; skip += LIMIT) {
 			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
 			query.setBookmark(bookmark);
-			List<Comment> commentsV3 = new ArrayList<>();
-			PagedMangoResponse<de.thm.arsnova.model.migration.v2.Comment> response =
+			final List<Comment> commentsV3 = new ArrayList<>();
+			final PagedMangoResponse<de.thm.arsnova.model.migration.v2.Comment> response =
 					fromConnector.queryForPage(query, de.thm.arsnova.model.migration.v2.Comment.class);
-			List<de.thm.arsnova.model.migration.v2.Comment> commentsV2 = response.getEntities();
+			final List<de.thm.arsnova.model.migration.v2.Comment> commentsV2 = response.getEntities();
 			bookmark = response.getBookmark();
 			if (commentsV2.size() == 0) {
 				break;
 			}
 
-			for (de.thm.arsnova.model.migration.v2.Comment commentV2 : commentsV2) {
+			for (final de.thm.arsnova.model.migration.v2.Comment commentV2 : commentsV2) {
 				try {
-					Room roomV3 = roomRepository.findOne(commentV2.getSessionId());
+					final Room roomV3 = roomRepository.findOne(commentV2.getSessionId());
 					List<UserProfile> profiles = Collections.EMPTY_LIST;
 					if (commentV2.getCreator() != null && !commentV2.getCreator().equals("")) {
 						profiles = userRepository.findByLoginId(commentV2.getCreator());
@@ -372,13 +373,13 @@ public class V2ToV3Migration implements Migration {
 					if (profiles.size() == 0) {
 						/* No creator is set or creator does not exist -> fallback: creator = Room owner */
 						commentV2.setCreator(null);
-						Comment commentV3 = migrator.migrate(commentV2);
+						final Comment commentV3 = migrator.migrate(commentV2);
 						commentV3.setCreatorId(roomV3.getOwnerId());
 						commentsV3.add(commentV3);
 					} else {
 						commentsV3.add(migrator.migrate(commentV2, profiles.get(0)));
 					}
-				} catch (DocumentNotFoundException e) {
+				} catch (final DocumentNotFoundException e) {
 					logger.warn("Skipping migration of Comment {}. Room {} does not exist.",
 							commentV2.getId(), commentV2.getSessionId());
 					continue;
@@ -391,9 +392,9 @@ public class V2ToV3Migration implements Migration {
 
 	private void migrateContents() throws InterruptedException {
 		waitForV2Index(FULL_INDEX_BY_TYPE);
-		Map<String, Object> queryOptions = new HashMap<>();
+		final Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "skill_question");
-		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
+		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(FULL_INDEX_BY_TYPE);
 		query.setLimit(LIMIT);
 		String bookmark = null;
@@ -401,20 +402,20 @@ public class V2ToV3Migration implements Migration {
 		for (int skip = 0;; skip += LIMIT) {
 			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
 			query.setBookmark(bookmark);
-			List<Content> contentsV3 = new ArrayList<>();
-			PagedMangoResponse<de.thm.arsnova.model.migration.v2.Content> response =
+			final List<Content> contentsV3 = new ArrayList<>();
+			final PagedMangoResponse<de.thm.arsnova.model.migration.v2.Content> response =
 					fromConnector.queryForPage(query, de.thm.arsnova.model.migration.v2.Content.class);
-			List<de.thm.arsnova.model.migration.v2.Content> contentsV2 = response.getEntities();
+			final List<de.thm.arsnova.model.migration.v2.Content> contentsV2 = response.getEntities();
 			bookmark = response.getBookmark();
 			if (contentsV2.size() == 0) {
 				break;
 			}
 
-			for (de.thm.arsnova.model.migration.v2.Content contentV2 : contentsV2) {
+			for (final de.thm.arsnova.model.migration.v2.Content contentV2 : contentsV2) {
 				if (roomRepository.existsById(contentV2.getSessionId())) {
 					try {
 						contentsV3.add(migrator.migrate(contentV2));
-					} catch (IllegalArgumentException e) {
+					} catch (final IllegalArgumentException e) {
 						logger.warn("Skipping migration of Content {}.", contentV2.getId(), e);
 					}
 				} else {
@@ -429,9 +430,9 @@ public class V2ToV3Migration implements Migration {
 
 	private void migrateAnswers() throws InterruptedException {
 		waitForV2Index(FULL_INDEX_BY_TYPE);
-		Map<String, Object> queryOptions = new HashMap<>();
+		final Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "skill_question_answer");
-		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
+		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(FULL_INDEX_BY_TYPE);
 		query.setLimit(LIMIT);
 		String bookmark = null;
@@ -439,29 +440,29 @@ public class V2ToV3Migration implements Migration {
 		for (int skip = 0;; skip += LIMIT) {
 			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
 			query.setBookmark(bookmark);
-			List<Answer> answersV3 = new ArrayList<>();
-			PagedMangoResponse<de.thm.arsnova.model.migration.v2.Answer> response =
+			final List<Answer> answersV3 = new ArrayList<>();
+			final PagedMangoResponse<de.thm.arsnova.model.migration.v2.Answer> response =
 					fromConnector.queryForPage(query, de.thm.arsnova.model.migration.v2.Answer.class);
-			List<de.thm.arsnova.model.migration.v2.Answer> answersV2 = response.getEntities();
+			final List<de.thm.arsnova.model.migration.v2.Answer> answersV2 = response.getEntities();
 			bookmark = response.getBookmark();
 			if (answersV2.size() == 0) {
 				break;
 			}
 
-			for (de.thm.arsnova.model.migration.v2.Answer answerV2 : answersV2) {
+			for (final de.thm.arsnova.model.migration.v2.Answer answerV2 : answersV2) {
 				if (!roomRepository.existsById(answerV2.getSessionId())) {
 					logger.warn("Skipping migration of Answer {}. Room {} does not exist.",
 							answerV2.getId(), answerV2.getQuestionId());
 					continue;
 				}
 				try {
-					Content contentV3 = contentRepository.findOne(answerV2.getQuestionId());
+					final Content contentV3 = contentRepository.findOne(answerV2.getQuestionId());
 					answersV3.add(migrator.migrate(answerV2, contentV3));
-				} catch (DocumentNotFoundException e) {
+				} catch (final DocumentNotFoundException e) {
 					logger.warn("Skipping migration of Answer {}. Content {} does not exist.",
 							answerV2.getId(), answerV2.getQuestionId());
 					continue;
-				} catch (IndexOutOfBoundsException e) {
+				} catch (final IndexOutOfBoundsException e) {
 					logger.warn("Skipping migration of Answer {}. Data inconsistency detected.", answerV2.getId());
 				}
 			}
@@ -475,16 +476,16 @@ public class V2ToV3Migration implements Migration {
 			return new HashSet<>();
 		}
 		waitForV2Index(MOTD_INDEX);
-		Map<String, Object> queryOptions = new HashMap<>();
-		Map<String, Set<String>> subQuery1 = new HashMap<>();
+		final Map<String, Object> queryOptions = new HashMap<>();
+		final Map<String, Set<String>> subQuery1 = new HashMap<>();
 		subQuery1.put("$in", oldIds);
 		queryOptions.put("type", "motd");
 		queryOptions.put("motdkey", subQuery1);
 		/* Exclude outdated MotDs */
-		HashMap<String, String> subQuery2 = new HashMap<>();
+		final HashMap<String, String> subQuery2 = new HashMap<>();
 		subQuery2.put("$gt", String.valueOf(referenceTimestamp - OUTDATED_AFTER));
 		queryOptions.put("enddate", subQuery2);
-		MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
+		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(MOTD_INDEX);
 		query.setLimit(LIMIT);
 
@@ -493,12 +494,12 @@ public class V2ToV3Migration implements Migration {
 
 	private MotdList loadMotdList(final String username) throws InterruptedException {
 		waitForV2Index(MOTDLIST_INDEX);
-		HashMap<String, Object> motdListQueryOptions = new HashMap<>();
+		final HashMap<String, Object> motdListQueryOptions = new HashMap<>();
 		motdListQueryOptions.put("type", "motdlist");
 		motdListQueryOptions.put("username", username);
-		MangoCouchDbConnector.MangoQuery motdListQuery = new MangoCouchDbConnector.MangoQuery(motdListQueryOptions);
+		final MangoCouchDbConnector.MangoQuery motdListQuery = new MangoCouchDbConnector.MangoQuery(motdListQueryOptions);
 		motdListQuery.setIndexDocument(MOTDLIST_INDEX);
-		List<MotdList> motdListList = fromConnector.query(motdListQuery, MotdList.class);
+		final List<MotdList> motdListList = fromConnector.query(motdListQuery, MotdList.class);
 
 		return motdListList.size() > 0 ? motdListList.get(0) : null;
 	}

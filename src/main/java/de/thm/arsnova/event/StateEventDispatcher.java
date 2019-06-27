@@ -58,7 +58,7 @@ public class StateEventDispatcher implements ApplicationEventPublisherAware {
 	public void dispatchContentStateEvent(final AfterFullUpdateEvent<Content> event) {
 		final Content newContent = event.getEntity();
 		final Content oldContent = event.getOldEntity();
-		Function<Content, Content.State> f = Content::getState;
+		final Function<Content, Content.State> f = Content::getState;
 		f.apply(newContent);
 		publishEventIfPropertyChanged(newContent, oldContent, Content::getState, "state");
 	}
@@ -71,8 +71,8 @@ public class StateEventDispatcher implements ApplicationEventPublisherAware {
 
 	private <E extends Entity, T extends Object> void publishEventIfPropertyChanged(
 			final E newEntity, final E oldEntity, final Function<E, T> propertyGetter, final String stateName) {
-		T newValue = propertyGetter.apply(newEntity);
-		T oldValue = propertyGetter.apply(oldEntity);
+		final T newValue = propertyGetter.apply(newEntity);
+		final T oldValue = propertyGetter.apply(oldEntity);
 		if (!newValue.equals(oldValue)) {
 			eventPublisher.publishEvent(new StateChangeEvent<>(this, newEntity, stateName, newValue, oldValue));
 		}

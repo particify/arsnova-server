@@ -59,7 +59,7 @@ public class Answer extends Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setRoomId(String roomId) {
+	public void setRoomId(final String roomId) {
 		this.roomId = roomId;
 	}
 
@@ -98,7 +98,7 @@ public class Answer extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setExtensions(Map<String, Map<String, ?>> extensions) {
+	public void setExtensions(final Map<String, Map<String, ?>> extensions) {
 		this.extensions = extensions;
 	}
 

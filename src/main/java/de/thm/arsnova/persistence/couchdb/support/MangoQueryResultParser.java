@@ -44,19 +44,19 @@ public class MangoQueryResultParser<T> {
 	private String bookmark;
 	private String propertyName = null;
 
-	public MangoQueryResultParser(Class<T> type, ObjectMapper objectMapper) {
+	public MangoQueryResultParser(final Class<T> type, final ObjectMapper objectMapper) {
 		this.type = type;
 		this.objectMapper = objectMapper;
 	}
 
-	public MangoQueryResultParser(String propertyName, Class<T> type, ObjectMapper objectMapper) {
+	public MangoQueryResultParser(final String propertyName, final Class<T> type, final ObjectMapper objectMapper) {
 		this.propertyName = propertyName;
 		this.type = type;
 		this.objectMapper = objectMapper;
 	}
 
-	public void parseResult(InputStream json) throws IOException {
-		JsonParser jp = objectMapper.getFactory().createParser(json);
+	public void parseResult(final InputStream json) throws IOException {
+		final JsonParser jp = objectMapper.getFactory().createParser(json);
 
 		try {
 			parseResult(jp);
@@ -65,7 +65,7 @@ public class MangoQueryResultParser<T> {
 		}
 	}
 
-	private void parseResult(JsonParser jp) throws IOException {
+	private void parseResult(final JsonParser jp) throws IOException {
 		if (jp.nextToken() != JsonToken.START_OBJECT) {
 			throw new DbAccessException("Expected data to start with an Object");
 		}
@@ -75,7 +75,7 @@ public class MangoQueryResultParser<T> {
 
 		// Issue #98: Can't assume order of JSON fields.
 		while (jp.nextValue() != JsonToken.END_OBJECT) {
-			String currentName = jp.getCurrentName();
+			final String currentName = jp.getCurrentName();
 			if (DOCS_FIELD_NAME.equals(currentName)) {
 				docs = new ArrayList<T>();
 				parseDocs(jp);
@@ -91,12 +91,12 @@ public class MangoQueryResultParser<T> {
 		}
 
 		if (error != null) {
-			String errorDesc = reason != null ? reason : error;
+			final String errorDesc = reason != null ? reason : error;
 			throw new DbAccessException("CouchDB Mango query failed: " + errorDesc);
 		}
 	}
 
-	private void parseDocs(JsonParser jp) throws IOException {
+	private void parseDocs(final JsonParser jp) throws IOException {
 		if (jp.getCurrentToken() != JsonToken.START_ARRAY) {
 			throw new DbAccessException("Expected rows to start with an Array");
 		}
@@ -108,7 +108,7 @@ public class MangoQueryResultParser<T> {
 				docs.add(doc);
 			} else {
 				while (jp.nextToken() == JsonToken.FIELD_NAME) {
-					String fieldName = jp.getText();
+					final String fieldName = jp.getText();
 					jp.nextToken();
 					if (fieldName.equals(propertyName)) {
 						doc = jp.readValueAs(type);

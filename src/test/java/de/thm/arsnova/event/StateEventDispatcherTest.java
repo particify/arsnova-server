@@ -103,7 +103,7 @@ public class StateEventDispatcherTest {
 
 		when(roomRepository.save(any(Room.class))).then(returnsFirstArg());
 
-		Room room = new Room();
+		final Room room = new Room();
 		room.setOwnerId(TEST_USER_ID);
 		entityService.patch(room, Collections.singletonMap(QUESTIONS_ENABLED_PROPERTY_NAME, false), Room::getSettings);
 		assertEquals(1, eventListenerConfig.getRoomSettingsStateChangeEvents().size());
@@ -118,13 +118,13 @@ public class StateEventDispatcherTest {
 				Content.class, contentRepository, objectMapper);
 		entityService.setApplicationEventPublisher(eventPublisher);
 
-		Room room = new Room();
+		final Room room = new Room();
 		room.setId(TEST_ROOM_ID);
 		room.setOwnerId(TEST_USER_ID);
 		when(contentRepository.save(any(Content.class))).then(returnsFirstArg());
 		when(roomRepository.findOne(eq(room.getId()))).thenReturn(room);
 
-		Content content = new Content();
+		final Content content = new Content();
 		content.setRoomId(room.getId());
 		entityService.patch(content, Collections.singletonMap(VISIBLE_PROPERTY_NAME, false), Content::getState);
 		assertEquals(1, eventListenerConfig.getContentStateChangeEvents().size());
@@ -137,12 +137,12 @@ public class StateEventDispatcherTest {
 		private List<StateChangeEvent<Content, Content.State>> contentStateChangeEvents = new ArrayList<>();
 
 		@EventListener(condition = "#event.stateName == '" + SETTINGS_PROPERTY_NAME + "'")
-		public void handleRoomSettingsStateChangeEvent(StateChangeEvent<Room, Room.Settings> event) {
+		public void handleRoomSettingsStateChangeEvent(final StateChangeEvent<Room, Room.Settings> event) {
 			roomSettingsStateChangeEvents.add(event);
 		}
 
 		@EventListener(condition = "#event.stateName == '" + STATE_PROPERTY_NAME + "'")
-		public void handleContentStateChangeEvent(StateChangeEvent<Content, Content.State> event) {
+		public void handleContentStateChangeEvent(final StateChangeEvent<Content, Content.State> event) {
 			contentStateChangeEvents.add(event);
 		}
 

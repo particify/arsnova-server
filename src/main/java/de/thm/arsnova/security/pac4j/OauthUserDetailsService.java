@@ -45,7 +45,7 @@ public class OauthUserDetailsService implements AuthenticationUserDetailsService
 	private final UserService userService;
 	protected final Collection<GrantedAuthority> grantedAuthorities;
 
-	public OauthUserDetailsService(UserService userService) {
+	public OauthUserDetailsService(final UserService userService) {
 		this.userService = userService;
 		grantedAuthorities = new HashSet<>();
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
@@ -54,7 +54,7 @@ public class OauthUserDetailsService implements AuthenticationUserDetailsService
 
 	public User loadUserDetails(final OAuthToken token)
 			throws UsernameNotFoundException {
-		User user;
+		final User user;
 		if (token.getDetails() instanceof GoogleOidcProfile) {
 			final GoogleOidcProfile profile = (GoogleOidcProfile) token.getDetails();
 			if (!profile.getEmailVerified()) {

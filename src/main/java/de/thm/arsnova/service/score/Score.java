@@ -36,18 +36,19 @@ public class Score implements Iterable<QuestionScore> {
 		this(new HashMap<String, QuestionScore>());
 	}
 
-	public Score(Map<String, QuestionScore> theScores) {
+	public Score(final Map<String, QuestionScore> theScores) {
 		this.scores = theScores;
 	}
 
-	public void addQuestion(String questionId, String questionVariant, int piRound, int questionScore) {
+	public void addQuestion(
+			final String questionId, final String questionVariant, final int piRound, final int questionScore) {
 		if (questionScore == 0) {
 			return;
 		}
 		scores.put(questionId, new QuestionScore(questionId, questionVariant, piRound, questionScore));
 	}
 
-	public void addAnswer(String questionId, int piRound, String userId, int userscore) {
+	public void addAnswer(final String questionId, final int piRound, final String userId, final int userscore) {
 		if (!scores.containsKey(questionId)) {
 			// Precondition failed, ignore this element.
 			// Most likely this is a question that has no score value.
@@ -57,15 +58,15 @@ public class Score implements Iterable<QuestionScore> {
 			// Precondition failed: ignore anonymous users
 			return;
 		}
-		QuestionScore questionScore = scores.get(questionId);
+		final QuestionScore questionScore = scores.get(questionId);
 		questionScore.add(piRound, userId, userscore);
 	}
 
-	public Score filterVariant(String questionVariant) {
-		Map<String, QuestionScore> newScores = new HashMap<>();
-		for (Entry<String, QuestionScore> entry : this.scores.entrySet()) {
-			String questionId = entry.getKey();
-			QuestionScore questionScore = entry.getValue();
+	public Score filterVariant(final String questionVariant) {
+		final Map<String, QuestionScore> newScores = new HashMap<>();
+		for (final Entry<String, QuestionScore> entry : this.scores.entrySet()) {
+			final String questionId = entry.getKey();
+			final QuestionScore questionScore = entry.getValue();
 			if (questionScore.isVariant(questionVariant)) {
 				newScores.put(questionId, questionScore);
 			}
@@ -75,7 +76,7 @@ public class Score implements Iterable<QuestionScore> {
 
 	public int getMaximumScore() {
 		int score = 0;
-		for (QuestionScore questionScore : this) {
+		for (final QuestionScore questionScore : this) {
 			score += questionScore.getMaximum();
 		}
 		return score;
@@ -83,23 +84,23 @@ public class Score implements Iterable<QuestionScore> {
 
 	public int getTotalUserScore() {
 		int score = 0;
-		for (QuestionScore questionScore : this) {
+		for (final QuestionScore questionScore : this) {
 			score += questionScore.getTotalUserScore();
 		}
 		return score;
 	}
 
-	public double getTotalUserScore(String userId) {
+	public double getTotalUserScore(final String userId) {
 		int score = 0;
-		for (QuestionScore questionScore : this) {
+		for (final QuestionScore questionScore : this) {
 			score += questionScore.getTotalUserScore(userId);
 		}
 		return score;
 	}
 
 	public int getTotalUserCount() {
-		Set<String> users = new HashSet<>();
-		for (QuestionScore questionScore : this) {
+		final Set<String> users = new HashSet<>();
+		for (final QuestionScore questionScore : this) {
 			questionScore.collectUsers(users);
 		}
 		return users.size();

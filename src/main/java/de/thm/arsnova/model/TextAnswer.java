@@ -55,7 +55,7 @@ public class TextAnswer extends Answer {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setRead(boolean read) {
+	public void setRead(final boolean read) {
 		this.read = read;
 	}
 

@@ -91,7 +91,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 				createQuery("by_lastactivity_for_guests").endKey(lastActivityBefore));
 		final int[] count = new int[3];
 
-		List<Room> rooms = new ArrayList<>();
+		final List<Room> rooms = new ArrayList<>();
 		for (final ViewResult.Row row : result.getRows()) {
 			final Room s = new Room();
 			s.setId(row.getId());
@@ -148,7 +148,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 
 	@Override
 	public List<String> findIdsByOwnerId(final String ownerId) {
-		ViewResult result = db.queryView(createQuery("by_ownerid")
+		final ViewResult result = db.queryView(createQuery("by_ownerid")
 				.key(ownerId)
 				.includeDocs(false));
 
@@ -157,7 +157,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 
 	@Override
 	public List<String> findIdsByModeratorId(final String moderatorId) {
-		ViewResult result = db.queryView(createQuery("by_moderators_containing_userid")
+		final ViewResult result = db.queryView(createQuery("by_moderators_containing_userid")
 				.key(moderatorId)
 				.includeDocs(false));
 
@@ -289,7 +289,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 			if (unansweredQuestionsCountMap.containsKey(room.getId())) {
 				numUnanswered = unansweredQuestionsCountMap.get(room.getId());
 			}
-			RoomStatistics stats = new RoomStatistics();
+			final RoomStatistics stats = new RoomStatistics();
 			room.setStatistics(stats);
 			stats.setUnansweredContentCount(numUnanswered);
 		}

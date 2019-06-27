@@ -78,10 +78,10 @@ public class ToV2MigratorTest {
 		final ChoiceQuestionContent.AnswerOption option1 = new ChoiceQuestionContent.AnswerOption();
 		option1.setLabel(OPTION1_LABEL);
 		options.add(option1);
-		ChoiceQuestionContent.AnswerOption option2 = new ChoiceQuestionContent.AnswerOption();
+		final ChoiceQuestionContent.AnswerOption option2 = new ChoiceQuestionContent.AnswerOption();
 		option2.setLabel(OPTION2_LABEL);
 		options.add(option2);
-		ChoiceQuestionContent.AnswerOption option3 = new ChoiceQuestionContent.AnswerOption();
+		final ChoiceQuestionContent.AnswerOption option3 = new ChoiceQuestionContent.AnswerOption();
 		option3.setLabel(OPTION3_LABEL);
 		options.add(option3);
 
@@ -123,11 +123,11 @@ public class ToV2MigratorTest {
 
 		final ChoiceQuestionContent.AnswerOption option1 = new ChoiceQuestionContent.AnswerOption();
 		option1.setLabel(OPTION1_LABEL);
-		ChoiceQuestionContent.AnswerOption option2 = new ChoiceQuestionContent.AnswerOption();
+		final ChoiceQuestionContent.AnswerOption option2 = new ChoiceQuestionContent.AnswerOption();
 		option2.setLabel(OPTION2_LABEL);
-		ChoiceQuestionContent.AnswerOption option3 = new ChoiceQuestionContent.AnswerOption();
+		final ChoiceQuestionContent.AnswerOption option3 = new ChoiceQuestionContent.AnswerOption();
 		option3.setLabel(OPTION3_LABEL);
-		ChoiceQuestionContent.AnswerOption option4 = new ChoiceQuestionContent.AnswerOption();
+		final ChoiceQuestionContent.AnswerOption option4 = new ChoiceQuestionContent.AnswerOption();
 		option3.setLabel(OPTION4_LABEL);
 		final List<ChoiceQuestionContent.AnswerOption> options = Arrays.asList(new ChoiceQuestionContent.AnswerOption[] {
 			option1, option2, option3, option4
@@ -145,7 +145,7 @@ public class ToV2MigratorTest {
 		assertEquals(ABSTENTION_COUNT, abstentionStatsV2.getAbstentionCount());
 
 		for (int i = 0; i < ANSWER_COUNTS.size(); i++) {
-			Answer answerStatsV2 = statsV2.get(i + 1);
+			final Answer answerStatsV2 = statsV2.get(i + 1);
 			assertEquals(ANSWER_COUNTS.get(i).intValue(), answerStatsV2.getAnswerCount());
 			assertEquals(ABSTENTION_COUNT, answerStatsV2.getAbstentionCount());
 			assertEquals(options.get(i).getLabel(), answerStatsV2.getAnswerText());

@@ -108,7 +108,7 @@ public abstract class Entity {
 		if (additionalFields == null) {
 			return result;
 		}
-		for (Object element : additionalFields) {
+		for (final Object element : additionalFields) {
 			result = 31 * result + (element == null ? 0 : element.hashCode());
 		}
 
@@ -116,7 +116,7 @@ public abstract class Entity {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
@@ -143,7 +143,7 @@ public abstract class Entity {
 	 * {@link org.springframework.core.style.ToStringCreator#append} on the <tt>ToStringCreator</tt>.
 	 */
 	protected ToStringCreator buildToString() {
-		ToStringCreator toStringCreator = new ToStringCreator(this);
+		final ToStringCreator toStringCreator = new ToStringCreator(this);
 		toStringCreator
 				.append("id", id)
 				.append("revision", rev)

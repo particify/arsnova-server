@@ -25,7 +25,7 @@ public class FlipFlashcardsEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public FlipFlashcardsEvent(Object source, String roomId) {
+	public FlipFlashcardsEvent(final Object source, final String roomId) {
 		super(source, roomId);
 	}
 }

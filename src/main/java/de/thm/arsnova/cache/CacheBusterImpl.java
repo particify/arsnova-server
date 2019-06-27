@@ -38,37 +38,37 @@ public class CacheBusterImpl implements CacheBuster {
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@EventListener
-	public void handleAfterCommentCreation(AfterCreationEvent<Comment> event) {
+	public void handleAfterCommentCreation(final AfterCreationEvent<Comment> event) {
 
 	}
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@EventListener
-	public void handleAfterCommentDeletion(AfterDeletionEvent<Comment> event) {
+	public void handleAfterCommentDeletion(final AfterDeletionEvent<Comment> event) {
 
 	}
 
 	@CacheEvict(value = "answerlists", key = "#event.content.id")
 	@EventListener
-	public void handleAfterAnswerCreation(AfterCreationEvent<Answer> event) {
+	public void handleAfterAnswerCreation(final AfterCreationEvent<Answer> event) {
 
 	}
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@EventListener
-	public void handleChangeScore(ChangeScoreEvent event) {
+	public void handleChangeScore(final ChangeScoreEvent event) {
 
 	}
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@EventListener
-	public void handleAfterRoomCreation(AfterCreationEvent<Room> event) {
+	public void handleAfterRoomCreation(final AfterCreationEvent<Room> event) {
 
 	}
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@EventListener
-	public void handleAfterRoomDeletion(AfterDeletionEvent<Room> event) {
+	public void handleAfterRoomDeletion(final AfterDeletionEvent<Room> event) {
 
 	}
 }

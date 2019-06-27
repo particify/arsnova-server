@@ -89,7 +89,7 @@ public class ToV2Migrator {
 	}
 
 	public RoomFeature migrate(final de.thm.arsnova.model.Room.Settings settings) {
-		RoomFeature feature = new RoomFeature();
+		final RoomFeature feature = new RoomFeature();
 
 		/* Features */
 		feature.setInterposed(settings.isCommentsEnabled());
@@ -193,7 +193,7 @@ public class ToV2Migrator {
 			final List<AnswerOption> toOptions = new ArrayList<>();
 			to.setPossibleAnswers(toOptions);
 			for (int i = 0; i < fromChoiceQuestionContent.getOptions().size(); i++) {
-				AnswerOption option = new AnswerOption();
+				final AnswerOption option = new AnswerOption();
 				option.setText(fromChoiceQuestionContent.getOptions().get(i).getLabel());
 				option.setValue(fromChoiceQuestionContent.getOptions().get(i).getPoints());
 				option.setCorrect(fromChoiceQuestionContent.getCorrectOptionIndexes().contains(i));
@@ -211,7 +211,7 @@ public class ToV2Migrator {
 					throw new IllegalArgumentException("Unsupported content format.");
 			}
 		}
-		de.thm.arsnova.model.Content.State state = from.getState();
+		final de.thm.arsnova.model.Content.State state = from.getState();
 		to.setPiRound(state.getRound());
 		to.setActive(state.isVisible());
 		to.setShowStatistic(state.isResponsesVisible());
@@ -240,7 +240,7 @@ public class ToV2Migrator {
 			if (content.isMultiple()) {
 				to.setAnswerText(migrateChoice(from.getSelectedChoiceIndexes(), content.getOptions()));
 			} else {
-				int index = from.getSelectedChoiceIndexes().get(0);
+				final int index = from.getSelectedChoiceIndexes().get(0);
 				to.setAnswerText(content.getOptions().get(index).getLabel());
 			}
 		}
@@ -324,7 +324,7 @@ public class ToV2Migrator {
 	}
 
 	public List<Answer> migrate(final AnswerStatistics from,
-			final de.thm.arsnova.model.ChoiceQuestionContent content, int round) {
+			final de.thm.arsnova.model.ChoiceQuestionContent content, final int round) {
 		if (round < 1 || round > content.getState().getRound()) {
 			throw new IllegalArgumentException("Invalid value for round");
 		}
@@ -340,7 +340,7 @@ public class ToV2Migrator {
 			to.add(abstention);
 		}
 
-		Map<String, Integer> choices;
+		final Map<String, Integer> choices;
 		if (content.isMultiple()) {
 			/* Map selected choice indexes -> answer count */
 			choices = stats.getCombinatedCounts().stream().collect(Collectors.toMap(
@@ -353,14 +353,14 @@ public class ToV2Migrator {
 		} else {
 			choices = new LinkedHashMap<>();
 			int i = 0;
-			for (ChoiceQuestionContent.AnswerOption option : content.getOptions()) {
+			for (final ChoiceQuestionContent.AnswerOption option : content.getOptions()) {
 				choices.put(option.getLabel(), stats.getIndependentCounts().get(i));
 				i++;
 			}
 		}
 
-		for (Map.Entry<String, Integer> choice : choices.entrySet()) {
-			Answer answer = new Answer();
+		for (final Map.Entry<String, Integer> choice : choices.entrySet()) {
+			final Answer answer = new Answer();
 			answer.setQuestionId(content.getId());
 			answer.setPiRound(round);
 			answer.setAnswerCount(choice.getValue());
@@ -394,8 +394,8 @@ public class ToV2Migrator {
 	}
 
 	public RoomInfo migrateStats(final de.thm.arsnova.model.Room from) {
-		RoomInfo to = new RoomInfo(migrate(from));
-		RoomStatistics stats = from.getStatistics();
+		final RoomInfo to = new RoomInfo(migrate(from));
+		final RoomStatistics stats = from.getStatistics();
 		to.setNumQuestions(stats.getContentCount());
 		to.setNumUnanswered(stats.getUnansweredContentCount());
 		to.setNumAnswers(stats.getAnswerCount());
@@ -407,7 +407,7 @@ public class ToV2Migrator {
 
 	public String migrateChoice(final List<Integer> selectedChoiceIndexes,
 			final List<ChoiceQuestionContent.AnswerOption> options) {
-		List<String> answers = new ArrayList<>();
+		final List<String> answers = new ArrayList<>();
 		for (int i = 0; i < options.size(); i++) {
 			answers.add(selectedChoiceIndexes.contains(i) ? "1" : "0");
 		}

@@ -40,15 +40,15 @@ public class ContentTest {
 		p2.setText("No");
 		p2.setCorrect(false);
 		p2.setValue(-10);
-		Content q = new Content();
+		final Content q = new Content();
 		q.setQuestionType("yesno");
 		q.setPossibleAnswers(new ArrayList<AnswerOption>() {{
 			add(p1);
 			add(p2);
 		}});
-		Answer answer1 = new Answer();
+		final Answer answer1 = new Answer();
 		answer1.setAnswerText("Yes");
-		Answer answer2 = new Answer();
+		final Answer answer2 = new Answer();
 		answer2.setAnswerText("No");
 
 		assertEquals(10, q.calculateValue(answer1));
@@ -66,13 +66,13 @@ public class ContentTest {
 		p2.setText("No");
 		p2.setCorrect(false);
 		p2.setValue(-10);
-		Content q = new Content();
+		final Content q = new Content();
 		q.setAbstention(true);
 		q.setPossibleAnswers(new ArrayList<AnswerOption>() {{
 			add(p1);
 			add(p2);
 		}});
-		Answer answer = new Answer();
+		final Answer answer = new Answer();
 		answer.setAbstention(true);
 
 		assertEquals(0, q.calculateValue(answer));
@@ -93,21 +93,21 @@ public class ContentTest {
 		p3.setText("Maybe");
 		p3.setCorrect(true);
 		p3.setValue(10);
-		Content q = new Content();
+		final Content q = new Content();
 		q.setQuestionType("mc");
 		q.setPossibleAnswers(new ArrayList<AnswerOption>() {{
 			add(p1);
 			add(p2);
 			add(p3);
 		}});
-		Answer answer1 = createAnswerWithText("0,0,0");
-		Answer answer2 = createAnswerWithText("0,0,1");
-		Answer answer3 = createAnswerWithText("0,1,0");
-		Answer answer4 = createAnswerWithText("0,1,1");
-		Answer answer5 = createAnswerWithText("1,0,0");
-		Answer answer6 = createAnswerWithText("1,0,1");
-		Answer answer7 = createAnswerWithText("1,1,0");
-		Answer answer8 = createAnswerWithText("1,1,1");
+		final Answer answer1 = createAnswerWithText("0,0,0");
+		final Answer answer2 = createAnswerWithText("0,0,1");
+		final Answer answer3 = createAnswerWithText("0,1,0");
+		final Answer answer4 = createAnswerWithText("0,1,1");
+		final Answer answer5 = createAnswerWithText("1,0,0");
+		final Answer answer6 = createAnswerWithText("1,0,1");
+		final Answer answer7 = createAnswerWithText("1,1,0");
+		final Answer answer8 = createAnswerWithText("1,1,1");
 
 		assertEquals(0, q.calculateValue(answer1));
 		assertEquals(10, q.calculateValue(answer2));
@@ -138,7 +138,7 @@ public class ContentTest {
 		p4.setText("1;1");
 		p4.setCorrect(true);
 		p4.setValue(10);
-		Content q = new Content();
+		final Content q = new Content();
 		q.setQuestionType("grid");
 		q.setPossibleAnswers(new ArrayList<AnswerOption>() {{
 			add(p1);
@@ -146,17 +146,17 @@ public class ContentTest {
 			add(p3);
 			add(p4);
 		}});
-		Answer answer1 = createAnswerWithText("0;0");
-		Answer answer2 = createAnswerWithText("0;1,1;1");
-		Answer answer3 = createAnswerWithText("0;0,1;0,1;1");
+		final Answer answer1 = createAnswerWithText("0;0");
+		final Answer answer2 = createAnswerWithText("0;1,1;1");
+		final Answer answer3 = createAnswerWithText("0;0,1;0,1;1");
 
 		assertEquals(10, q.calculateValue(answer1));
 		assertEquals(0, q.calculateValue(answer2));
 		assertEquals(30, q.calculateValue(answer3));
 	}
 
-	private static Answer createAnswerWithText(String text) {
-		Answer answer = new Answer();
+	private static Answer createAnswerWithText(final String text) {
+		final Answer answer = new Answer();
 		answer.setAnswerText(text);
 		return answer;
 	}

@@ -70,12 +70,13 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	private static final Logger logger = LoggerFactory.getLogger(ContentServiceImpl.class);
 
 	public ContentServiceImpl(
-			ContentRepository repository,
-			RoomService roomService,
-			AnswerRepository answerRepository,
-			LogEntryRepository dbLogger,
-			UserService userService,
-			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+			final ContentRepository repository,
+			final RoomService roomService,
+			final AnswerRepository answerRepository,
+			final LogEntryRepository dbLogger,
+			final UserService userService,
+			@Qualifier("defaultJsonMessageConverter")
+			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(Content.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.contentRepository = repository;
 		this.roomService = roomService;
@@ -96,7 +97,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			content.getState().setRound(1);
 		}
 
-		Room room = roomService.get(content.getRoomId());
+		final Room room = roomService.get(content.getRoomId());
 		content.setGroups(room.getContentGroups().stream()
 				.map(Room.ContentGroup::getName).filter(g -> !g.isEmpty()).collect(Collectors.toSet()));
 	}
@@ -119,7 +120,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	public Iterable<Content> getByRoomIdAndGroup(final String roomId, final String group) {
 		final Room room = roomService.get(roomId);
 		Room.ContentGroup contentGroup = null;
-		for (Room.ContentGroup cg : room.getContentGroups()) {
+		for (final Room.ContentGroup cg : room.getContentGroups()) {
 			if (cg.getName().equals(group)) {
 				contentGroup = cg;
 			}
@@ -141,7 +142,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	public int countByRoomIdAndGroup(final String roomId, final String group) {
 		final Room room = roomService.get(roomId);
 		Room.ContentGroup contentGroup = null;
-		for (Room.ContentGroup cg : room.getContentGroups()) {
+		for (final Room.ContentGroup cg : room.getContentGroups()) {
 			if (cg.getName().equals(group)) {
 				contentGroup = cg;
 			}
@@ -182,7 +183,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		final Room room = roomService.get(content.getRoomId());
 		final Map<String, Room.ContentGroup> groups = room.getContentGroupsAsMap();
 		for (final String groupName : content.getGroups()) {
-			Room.ContentGroup group = groups.getOrDefault(groupName, new Room.ContentGroup());
+			final Room.ContentGroup group = groups.getOrDefault(groupName, new Room.ContentGroup());
 			groups.put(groupName, group);
 			group.getContentIds().add(content.getId());
 			group.setName(groupName);
@@ -224,7 +225,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		final Map<String, Room.ContentGroup> groups = room.getContentGroupsAsMap();
 		allGroupNames.addAll(groups.keySet());
 		for (final String groupName : allGroupNames) {
-			Room.ContentGroup group = groups.getOrDefault(groupName, new Room.ContentGroup());
+			final Room.ContentGroup group = groups.getOrDefault(groupName, new Room.ContentGroup());
 			if (contentsGroupNames.contains(groupName)) {
 				group.getContentIds().add(content.getId());
 				group.setName(groupName);
@@ -248,9 +249,9 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	}
 
 	@Override
-	protected void prepareDelete(Content content) {
+	protected void prepareDelete(final Content content) {
 		final Room room = roomService.get(content.getRoomId());
-		for (ContentGroup group : room.getContentGroups()) {
+		for (final ContentGroup group : room.getContentGroups()) {
 			group.getContentIds().remove(content.getId());
 		}
 		roomService.update(room);
@@ -332,7 +333,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			@CacheEvict(value = "lecturecontentlists", key = "#roomId"),
 			@CacheEvict(value = "preparationcontentlists", key = "#roomId"),
 			@CacheEvict(value = "flashcardcontentlists", key = "#roomId") })
-	public void setVotingAdmissions(final String roomId, final boolean disableVoting, Iterable<Content> contents) {
+	public void setVotingAdmissions(final String roomId, final boolean disableVoting, final Iterable<Content> contents) {
 		final User user = getCurrentUser();
 		final Room room = roomService.get(roomId);
 		if (!room.getOwnerId().equals(user.getId())) {
@@ -344,7 +345,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		patches.put("responsesEnabled", !disableVoting);
 		try {
 			patch(contents, patches, Content::getState);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.error("Patching of contents failed", e);
 		}
 	}
@@ -426,7 +427,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			@CacheEvict(value = "lecturecontentlists", key = "#roomId"),
 			@CacheEvict(value = "preparationcontentlists", key = "#roomId"),
 			@CacheEvict(value = "flashcardcontentlists", key = "#roomId") })
-	public void publishContents(final String roomId, final boolean publish, Iterable<Content> contents)
+	public void publishContents(final String roomId, final boolean publish, final Iterable<Content> contents)
 			throws IOException {
 		final User user = getCurrentUser();
 		final Room room = roomService.get(roomId);
@@ -453,7 +454,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public void deleteAllPreparationAnswers(String roomId) {
+	public void deleteAllPreparationAnswers(final String roomId) {
 		final Room room = roomService.get(roomId);
 
 		final List<Content> contents = contentRepository.findByRoomIdAndVariantAndActive(room.getId(), "preparation");
@@ -464,7 +465,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public void deleteAllLectureAnswers(String roomId) {
+	public void deleteAllLectureAnswers(final String roomId) {
 		final Room room = roomService.get(roomId);
 
 		final List<Content> contents = contentRepository.findByRoomIdAndVariantAndActive(room.getId(), "lecture");

@@ -98,7 +98,7 @@ public abstract class AbstractEntityController<E extends Entity> {
 
 	@PutMapping(PUT_MAPPING)
 	public E put(@RequestBody final E entity, final HttpServletResponse httpServletResponse) {
-		E oldEntity = entityService.get(entity.getId());
+		final E oldEntity = entityService.get(entity.getId());
 		entityService.update(oldEntity, entity);
 		httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
 		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
@@ -134,7 +134,7 @@ public abstract class AbstractEntityController<E extends Entity> {
 	@PatchMapping(PATCH_MAPPING)
 	public E patch(@PathVariable final String id, @RequestBody final Map<String, Object> changes,
 			final HttpServletResponse httpServletResponse) throws IOException {
-		E entity = entityService.get(id);
+		final E entity = entityService.get(id);
 		entityService.patch(entity, changes);
 		httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
 		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
@@ -144,7 +144,7 @@ public abstract class AbstractEntityController<E extends Entity> {
 
 	@DeleteMapping(DELETE_MAPPING)
 	public void delete(@PathVariable final String id) {
-		E entity = entityService.get(id);
+		final E entity = entityService.get(id);
 		entityService.delete(entity);
 	}
 
@@ -152,7 +152,7 @@ public abstract class AbstractEntityController<E extends Entity> {
 	public Iterable<E> find(@RequestBody final FindQuery<E> findQuery) throws OperationNotSupportedException {
 		if (findQueryService != null) {
 			logger.debug("Resolving find query: {}", findQuery);
-			Set<String> ids = findQueryService.resolveQuery(findQuery);
+			final Set<String> ids = findQueryService.resolveQuery(findQuery);
 			logger.debug("Resolved find query to IDs: {}", ids);
 
 			return entityService.get(ids);
@@ -162,8 +162,8 @@ public abstract class AbstractEntityController<E extends Entity> {
 	}
 
 	@RequestMapping(value = {DEFAULT_ALIAS_MAPPING, DEFAULT_ALIAS_MAPPING + ALIAS_SUBPATH})
-	public void forwardAlias(@PathVariable final String alias, @PathVariable(required = false) String subPath,
-			HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
+	public void forwardAlias(@PathVariable final String alias, @PathVariable(required = false) final String subPath,
+			final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
 			throws ServletException, IOException {
 		final String targetPath = String.format(
 				"%s/%s%s", getMapping(), resolveAlias(alias), subPath != null ? "/" + subPath : "");

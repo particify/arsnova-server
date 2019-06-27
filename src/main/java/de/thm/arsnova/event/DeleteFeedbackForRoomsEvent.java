@@ -33,7 +33,7 @@ public class DeleteFeedbackForRoomsEvent extends ArsnovaEvent {
 
 	private final String userId;
 
-	public DeleteFeedbackForRoomsEvent(Object source, Set<Room> rooms, String userId) {
+	public DeleteFeedbackForRoomsEvent(final Object source, final Set<Room> rooms, final String userId) {
 		super(source);
 		this.sessions = rooms;
 		this.userId = userId;

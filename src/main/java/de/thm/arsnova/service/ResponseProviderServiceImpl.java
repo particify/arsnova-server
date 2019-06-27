@@ -30,7 +30,7 @@ public class ResponseProviderServiceImpl implements ResponseProviderService {
 	HttpServletResponse response;
 
 	@Override
-	public void setResponse(HttpServletResponse response) {
+	public void setResponse(final HttpServletResponse response) {
 		this.response = response;
 	}
 

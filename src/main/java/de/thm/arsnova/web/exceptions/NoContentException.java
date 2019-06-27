@@ -10,15 +10,15 @@ public class NoContentException extends RuntimeException {
 		super();
 	}
 
-	public NoContentException(String message) {
+	public NoContentException(final String message) {
 		super(message);
 	}
 
-	public NoContentException(Throwable e) {
+	public NoContentException(final Throwable e) {
 		super(e);
 	}
 
-	public NoContentException(String message, Throwable e) {
+	public NoContentException(final String message, final Throwable e) {
 		super(message, e);
 	}
 }

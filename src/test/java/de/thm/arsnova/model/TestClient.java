@@ -29,7 +29,7 @@ public class TestClient extends ClientAuthentication {
 	private static final long serialVersionUID = 1L;
 	private final Set<GrantedAuthority> grantedAuthorities;
 
-	public TestClient(String username) {
+	public TestClient(final String username) {
 		super();
 		grantedAuthorities = new HashSet<>();
 		setId(UUID.randomUUID().toString());

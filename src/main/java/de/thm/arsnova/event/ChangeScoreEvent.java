@@ -25,7 +25,7 @@ public class ChangeScoreEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public ChangeScoreEvent(Object source, String roomId) {
+	public ChangeScoreEvent(final Object source, final String roomId) {
 		super(source, roomId);
 	}
 

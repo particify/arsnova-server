@@ -182,7 +182,7 @@ public class Room implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setCreationTime(long creationTime) {
+	public void setCreationTime(final long creationTime) {
 		this.creationTime = creationTime;
 	}
 
@@ -193,7 +193,7 @@ public class Room implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setLearningProgressOptions(ScoreOptions learningProgressOptions) {
+	public void setLearningProgressOptions(final ScoreOptions learningProgressOptions) {
 		this.learningProgressOptions = learningProgressOptions;
 	}
 
@@ -205,7 +205,7 @@ public class Room implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setFeatures(RoomFeature features) {
+	public void setFeatures(final RoomFeature features) {
 		this.features = features;
 	}
 
@@ -326,7 +326,7 @@ public class Room implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setFeedbackLock(Boolean lock) {
+	public void setFeedbackLock(final Boolean lock) {
 		this.feedbackLock = lock;
 	}
 
@@ -337,7 +337,7 @@ public class Room implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setFlipFlashcards(Boolean flip) {
+	public void setFlipFlashcards(final Boolean flip) {
 		this.flipFlashcards = flip;
 	}
 
@@ -364,11 +364,11 @@ public class Room implements Entity {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (obj == null || !obj.getClass().equals(this.getClass())) {
 			return false;
 		}
-		Room other = (Room) obj;
+		final Room other = (Room) obj;
 		return this.keyword.equals(other.keyword);
 	}
 

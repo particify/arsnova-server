@@ -65,7 +65,7 @@ public class AnswerStatistics {
 			return round;
 		}
 
-		public void setRound(int round) {
+		public void setRound(final int round) {
 			this.round = round;
 		}
 
@@ -83,7 +83,7 @@ public class AnswerStatistics {
 			return combinatedCounts;
 		}
 
-		public void setCombinatedCounts(Collection<Combination> combinatedCounts) {
+		public void setCombinatedCounts(final Collection<Combination> combinatedCounts) {
 			this.combinatedCounts = combinatedCounts;
 		}
 
@@ -92,7 +92,7 @@ public class AnswerStatistics {
 			return abstentionCount;
 		}
 
-		public void setAbstentionCount(int abstentionCount) {
+		public void setAbstentionCount(final int abstentionCount) {
 			this.abstentionCount = abstentionCount;
 		}
 
@@ -178,7 +178,7 @@ public class AnswerStatistics {
 		return roundStatistics;
 	}
 
-	public void setRoundStatistics(List<RoundStatistics> roundStatistics) {
+	public void setRoundStatistics(final List<RoundStatistics> roundStatistics) {
 		this.roundStatistics = roundStatistics;
 	}
 
@@ -187,7 +187,7 @@ public class AnswerStatistics {
 		return roundTransitions;
 	}
 
-	public void setRoundTransitions(List<RoundTransition> roundTransitions) {
+	public void setRoundTransitions(final List<RoundTransition> roundTransitions) {
 		this.roundTransitions = roundTransitions;
 	}
 

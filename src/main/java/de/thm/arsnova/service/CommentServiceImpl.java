@@ -52,10 +52,11 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 	private CommentRepository commentRepository;
 
 	public CommentServiceImpl(
-			CommentRepository repository,
-			RoomService roomService,
-			UserService userService,
-			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+			final CommentRepository repository,
+			final RoomService roomService,
+			final UserService userService,
+			@Qualifier("defaultJsonMessageConverter")
+			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(Comment.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.commentRepository = repository;
 		this.roomService = roomService;
@@ -98,11 +99,11 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public CommentReadingCount countRead(final String roomId, String username) {
+	public CommentReadingCount countRead(final String roomId, final String username) {
 		if (username == null) {
 			return commentRepository.countReadingByRoomId(roomId);
 		} else {
-			User user = userService.getCurrentUser();
+			final User user = userService.getCurrentUser();
 			if (!user.getUsername().equals(username)) {
 				throw new ForbiddenException();
 			}
@@ -130,7 +131,7 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		if (comment == null) {
 			throw new NotFoundException();
 		}
-		Map<String, Object> changes = new HashMap<>();
+		final Map<String, Object> changes = new HashMap<>();
 		changes.put("read", true);
 		patch(comment, changes);
 

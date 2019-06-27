@@ -67,8 +67,8 @@ public class FeedbackController extends AbstractController {
 	@Deprecated
 	@RequestMapping(value = "/myfeedback", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getMyFeedback(@PathVariable final String shortId) {
-		String roomId = roomService.getIdByShortId(shortId);
-		Integer value = feedbackService.getByRoomIdAndUserId(roomId, userService.getCurrentUser().getId());
+		final String roomId = roomService.getIdByShortId(shortId);
+		final Integer value = feedbackService.getByRoomIdAndUserId(roomId, userService.getCurrentUser().getId());
 		if (value != null && value >= Feedback.MIN_FEEDBACK_TYPE && value <= Feedback.MAX_FEEDBACK_TYPE) {
 			return value.toString();
 		}
@@ -103,10 +103,10 @@ public class FeedbackController extends AbstractController {
 	public Feedback postFeedback(
 			@PathVariable final String shortId,
 			@RequestBody final int value) {
-		String roomId = roomService.getIdByShortId(shortId);
-		User user = userService.getCurrentUser();
+		final String roomId = roomService.getIdByShortId(shortId);
+		final User user = userService.getCurrentUser();
 		feedbackService.save(roomId, value, user.getId());
-		Feedback feedback = feedbackService.getByRoomId(roomId);
+		final Feedback feedback = feedbackService.getByRoomId(roomId);
 
 		return feedback;
 	}

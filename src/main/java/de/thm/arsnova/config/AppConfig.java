@@ -122,7 +122,7 @@ public class AppConfig implements WebMvcConfigurer {
 	@Value(value = "${api.indent-response-body:false}") private boolean apiIndent;
 
 	@Override
-	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+	public void configureMessageConverters(final List<HttpMessageConverter<?>> converters) {
 		converters.add(defaultJsonMessageConverter());
 		converters.add(apiV2JsonMessageConverter());
 		converters.add(stringMessageConverter());
@@ -130,8 +130,8 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 
 	@Override
-	public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
-		PathApiVersionContentNegotiationStrategy strategy =
+	public void configureContentNegotiation(final ContentNegotiationConfigurer configurer) {
+		final PathApiVersionContentNegotiationStrategy strategy =
 				new PathApiVersionContentNegotiationStrategy(API_V3_MEDIA_TYPE);
 		configurer.mediaType("json", MediaType.APPLICATION_JSON_UTF8);
 		configurer.mediaType("xml", MediaType.APPLICATION_XML);
@@ -147,19 +147,19 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 
 	@Override
-	public void configureViewResolvers(ViewResolverRegistry registry) {
+	public void configureViewResolvers(final ViewResolverRegistry registry) {
 		registry.viewResolver(new InternalResourceViewResolver());
 	}
 
 	@Override
-	public void addInterceptors(InterceptorRegistry registry) {
+	public void addInterceptors(final InterceptorRegistry registry) {
 		registry.addInterceptor(cacheControlInterceptorHandler());
 		registry.addInterceptor(deprecatedApiInterceptorHandler());
 		registry.addInterceptor(responseInterceptorHandler());
 	}
 
 	@Override
-	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+	public void addResourceHandlers(final ResourceHandlerRegistry registry) {
 		registry.addResourceHandler("swagger.json").addResourceLocations("classpath:/");
 	}
 
@@ -180,10 +180,10 @@ public class AppConfig implements WebMvcConfigurer {
 
 	@Bean
 	public StringHttpMessageConverter stringMessageConverter() {
-		StringHttpMessageConverter messageConverter = new StringHttpMessageConverter();
+		final StringHttpMessageConverter messageConverter = new StringHttpMessageConverter();
 		messageConverter.setDefaultCharset(Charset.forName("UTF-8"));
 		messageConverter.setWriteAcceptCharset(false);
-		List<MediaType> mediaTypes = new ArrayList<>();
+		final List<MediaType> mediaTypes = new ArrayList<>();
 		mediaTypes.add(MediaType.TEXT_PLAIN);
 		messageConverter.setSupportedMediaTypes(mediaTypes);
 
@@ -192,16 +192,16 @@ public class AppConfig implements WebMvcConfigurer {
 
 	@Bean
 	public MappingJackson2HttpMessageConverter defaultJsonMessageConverter() {
-		Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
+		final Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
 		builder
 				.serializationInclusion(JsonInclude.Include.NON_EMPTY)
 				.defaultViewInclusion(false)
 				.indentOutput(apiIndent)
 				.simpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-		ObjectMapper mapper = builder.build();
+		final ObjectMapper mapper = builder.build();
 		mapper.setConfig(mapper.getSerializationConfig().withView(View.Public.class));
-		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
-		List<MediaType> mediaTypes = new ArrayList<>();
+		final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
+		final List<MediaType> mediaTypes = new ArrayList<>();
 		mediaTypes.add(API_V3_MEDIA_TYPE);
 		mediaTypes.add(MediaType.APPLICATION_JSON_UTF8);
 		converter.setSupportedMediaTypes(mediaTypes);
@@ -211,7 +211,7 @@ public class AppConfig implements WebMvcConfigurer {
 
 	@Bean
 	public MappingJackson2HttpMessageConverter apiV2JsonMessageConverter() {
-		Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
+		final Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
 		builder
 				.serializationInclusion(JsonInclude.Include.NON_NULL)
 				.defaultViewInclusion(false)
@@ -219,10 +219,10 @@ public class AppConfig implements WebMvcConfigurer {
 				.featuresToEnable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 				.featuresToEnable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
 				.modules(new CouchDbDocumentModule());
-		ObjectMapper mapper = builder.build();
+		final ObjectMapper mapper = builder.build();
 		mapper.setConfig(mapper.getSerializationConfig().withView(View.Public.class));
-		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
-		List<MediaType> mediaTypes = new ArrayList<>();
+		final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
+		final List<MediaType> mediaTypes = new ArrayList<>();
 		mediaTypes.add(API_V2_MEDIA_TYPE);
 		mediaTypes.add(MediaType.APPLICATION_JSON_UTF8);
 		converter.setSupportedMediaTypes(mediaTypes);
@@ -240,7 +240,7 @@ public class AppConfig implements WebMvcConfigurer {
 
 	@Bean
 	public PropertiesFactoryBean versionInfoProperties() {
-		PropertiesFactoryBean propertiesFactoryBean = new PropertiesFactoryBean();
+		final PropertiesFactoryBean propertiesFactoryBean = new PropertiesFactoryBean();
 		propertiesFactoryBean.setLocation(new ClassPathResource("version.properties"));
 
 		return propertiesFactoryBean;

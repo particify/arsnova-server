@@ -28,7 +28,7 @@ public class Content {
 	private final String id;
 	private final String variant;
 
-	public Content(de.thm.arsnova.model.Content content) {
+	public Content(final de.thm.arsnova.model.Content content) {
 		this.id = content.getId();
 		/* FIXME: Message does not support content with multiple groups */
 		this.variant = content.getGroups().toArray(new String[1])[0];

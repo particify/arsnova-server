@@ -61,7 +61,7 @@ public class JwtService {
 		this.serverId = serverId;
 		try {
 			this.defaultValidityPeriod = Duration.parse("P" + defaultValidityPeriod);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new IllegalArgumentException(defaultValidityPeriod, e);
 		}
 		guestValidityPeriod = Duration.parse("P180D");
@@ -72,7 +72,7 @@ public class JwtService {
 	}
 
 	public String createSignedToken(final User user) {
-		String[] roles = user.getAuthorities().stream()
+		final String[] roles = user.getAuthorities().stream()
 				.map(ga -> ga.getAuthority())
 				.filter(ga -> ga.startsWith(ROLE_PREFIX))
 				.map(ga -> ga.substring(ROLE_PREFIX.length())).toArray(String[]::new);

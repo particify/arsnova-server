@@ -78,7 +78,7 @@ public class Feedback {
 		if (!(obj instanceof Feedback)) {
 			return false;
 		}
-		Feedback other = (Feedback) obj;
+		final Feedback other = (Feedback) obj;
 
 		if (this.values.size() != other.values.size()) {
 			return false;
@@ -95,7 +95,7 @@ public class Feedback {
 	public int hashCode() {
 		// See http://stackoverflow.com/a/113600
 		int result = 42;
-		for (Integer v : values) {
+		for (final Integer v : values) {
 			result = 37 * result + v;
 		}
 		return result;

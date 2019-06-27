@@ -67,35 +67,35 @@ public class FromV2MigratorTest {
 
 	@Test
 	public void testMigrateAnswerMultipleResponse() {
-		Answer answerV2 = new Answer();
+		final Answer answerV2 = new Answer();
 		answerV2.setId(ANSWER_ID);
 		answerV2.setQuestionId(CONTENT_ID);
 		answerV2.setSessionId(ROOM_ID);
 		answerV2.setPiRound(ROUND);
 		answerV2.setAnswerText("0,1,1");
 
-		List<ChoiceQuestionContent.AnswerOption> options = new ArrayList<>();
-		ChoiceQuestionContent.AnswerOption option1 = new ChoiceQuestionContent.AnswerOption();
+		final List<ChoiceQuestionContent.AnswerOption> options = new ArrayList<>();
+		final ChoiceQuestionContent.AnswerOption option1 = new ChoiceQuestionContent.AnswerOption();
 		option1.setLabel(OPTION1_LABEL);
 		options.add(option1);
-		ChoiceQuestionContent.AnswerOption option2 = new ChoiceQuestionContent.AnswerOption();
+		final ChoiceQuestionContent.AnswerOption option2 = new ChoiceQuestionContent.AnswerOption();
 		option2.setLabel(OPTION2_LABEL);
 		options.add(option2);
-		ChoiceQuestionContent.AnswerOption option3 = new ChoiceQuestionContent.AnswerOption();
+		final ChoiceQuestionContent.AnswerOption option3 = new ChoiceQuestionContent.AnswerOption();
 		option3.setLabel(OPTION3_LABEL);
 		options.add(option3);
 
-		ChoiceQuestionContent content = new ChoiceQuestionContent();
+		final ChoiceQuestionContent content = new ChoiceQuestionContent();
 		content.setFormat(FORMAT);
 		content.setRoomId(ROOM_ID);
 		content.setMultiple(true);
 		content.setOptions(options);
 
-		List<Integer> selectedChoices = new ArrayList<>();
+		final List<Integer> selectedChoices = new ArrayList<>();
 		selectedChoices.add(1);
 		selectedChoices.add(2);
 
-		ChoiceAnswer answerV3 = (ChoiceAnswer) fromV2Migrator.migrate(answerV2, content);
+		final ChoiceAnswer answerV3 = (ChoiceAnswer) fromV2Migrator.migrate(answerV2, content);
 
 		assertEquals(ANSWER_ID, answerV3.getId());
 		assertEquals(CONTENT_ID, answerV3.getContentId());

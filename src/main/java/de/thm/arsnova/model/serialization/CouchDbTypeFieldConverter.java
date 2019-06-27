@@ -27,17 +27,17 @@ import de.thm.arsnova.model.Entity;
 public class CouchDbTypeFieldConverter implements Converter<Class<? extends Entity>, String> {
 
 	@Override
-	public String convert(Class<? extends Entity> clazz) {
+	public String convert(final Class<? extends Entity> clazz) {
 		return clazz.getSimpleName();
 	}
 
 	@Override
-	public JavaType getInputType(TypeFactory typeFactory) {
+	public JavaType getInputType(final TypeFactory typeFactory) {
 		return typeFactory.constructGeneralizedType(typeFactory.constructType(Class.class), Entity.class);
 	}
 
 	@Override
-	public JavaType getOutputType(TypeFactory typeFactory) {
+	public JavaType getOutputType(final TypeFactory typeFactory) {
 		return typeFactory.constructType(String.class);
 	}
 }

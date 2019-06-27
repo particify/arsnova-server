@@ -53,7 +53,7 @@ abstract class VariantScoreCalculator implements ScoreCalculator {
 	}
 
 	@Override
-	public ScoreStatistics getCourseProgress(Room room) {
+	public ScoreStatistics getCourseProgress(final Room room) {
 		this.refreshProgress(room);
 		this.filterVariant();
 		return this.createCourseProgress();
@@ -62,7 +62,7 @@ abstract class VariantScoreCalculator implements ScoreCalculator {
 	protected abstract ScoreStatistics createCourseProgress();
 
 	@Override
-	public ScoreStatistics getMyProgress(Room room, String userId) {
+	public ScoreStatistics getMyProgress(final Room room, final String userId) {
 		this.refreshProgress(room);
 		this.filterVariant();
 		return this.createMyProgress(userId);

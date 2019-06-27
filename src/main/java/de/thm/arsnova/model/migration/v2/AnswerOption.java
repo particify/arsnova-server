@@ -41,7 +41,7 @@ public class AnswerOption implements Serializable {
 		return this.id;
 	}
 
-	public void setId(String id) {
+	public void setId(final String id) {
 		this.id = id;
 	}
 
@@ -52,7 +52,7 @@ public class AnswerOption implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setText(String text) {
+	public void setText(final String text) {
 		this.text = text;
 	}
 
@@ -63,7 +63,7 @@ public class AnswerOption implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setCorrect(boolean correct) {
+	public void setCorrect(final boolean correct) {
 		this.correct = correct;
 	}
 
@@ -74,7 +74,7 @@ public class AnswerOption implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setValue(int value) {
+	public void setValue(final int value) {
 		this.value = value;
 	}
 

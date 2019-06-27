@@ -38,7 +38,7 @@ public class VisitedRoom {
 	public VisitedRoom() {
 	}
 
-	public VisitedRoom(Room s) {
+	public VisitedRoom(final Room s) {
 		this.id = s.getId();
 		this.name = s.getName();
 		this.keyword = s.getKeyword();
@@ -60,7 +60,7 @@ public class VisitedRoom {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
@@ -70,7 +70,7 @@ public class VisitedRoom {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setKeyword(String keyword) {
+	public void setKeyword(final String keyword) {
 		this.keyword = keyword;
 	}
 

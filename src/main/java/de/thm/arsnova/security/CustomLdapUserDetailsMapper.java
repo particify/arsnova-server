@@ -44,7 +44,7 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
 	@Autowired
 	private UserService userService;
 
-	public CustomLdapUserDetailsMapper(String ldapUserIdAttr) {
+	public CustomLdapUserDetailsMapper(final String ldapUserIdAttr) {
 		this.userIdAttr = ldapUserIdAttr;
 	}
 

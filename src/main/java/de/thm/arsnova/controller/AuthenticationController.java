@@ -44,7 +44,7 @@ public class AuthenticationController {
 	}
 
 	@PostMapping("/login/registered")
-	public ClientAuthentication loginRegistered(@RequestBody LoginCredentials loginCredentials) {
+	public ClientAuthentication loginRegistered(@RequestBody final LoginCredentials loginCredentials) {
 		final String loginId = loginCredentials.getLoginId().toLowerCase();
 		userService.authenticate(new UsernamePasswordAuthenticationToken(loginId, loginCredentials.getPassword()),
 				UserProfile.AuthProvider.ARSNOVA);

@@ -43,7 +43,7 @@ public class CouchDbUserRepository extends CouchDbCrudRepository<UserProfile> im
 		super(UserProfile.class, db, "by_id", createIfNotExists);
 	}
 
-	private void log(Object... strings) {
+	private void log(final Object... strings) {
 		/* TODO: method stub */
 	}
 

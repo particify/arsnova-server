@@ -33,7 +33,7 @@ public class FeedbackHandlerTest {
 				new CreateFeedback()
 		);
 
-		ArgumentCaptor<FeedbackCommandHandler.CreateFeedbackCommand> captor =
+		final ArgumentCaptor<FeedbackCommandHandler.CreateFeedbackCommand> captor =
 				ArgumentCaptor.forClass(FeedbackCommandHandler.CreateFeedbackCommand.class);
 		verify(feedbackCommandHandler, times(1)).handle(captor.capture());
 

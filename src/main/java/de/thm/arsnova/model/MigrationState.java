@@ -35,7 +35,7 @@ public class MigrationState extends Entity {
 
 		}
 
-		public Migration(String id, Date start) {
+		public Migration(final String id, final Date start) {
 			this.id = id;
 			this.start = start;
 		}

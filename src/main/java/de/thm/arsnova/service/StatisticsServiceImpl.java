@@ -36,8 +36,8 @@ public class StatisticsServiceImpl implements StatisticsService {
 	private UserService userService;
 
 	public StatisticsServiceImpl(
-			StatisticsRepository repository,
-			UserService userService) {
+			final StatisticsRepository repository,
+			final UserService userService) {
 		this.statisticsRepository = repository;
 		this.userService = userService;
 	}

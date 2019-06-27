@@ -53,7 +53,7 @@ public class OauthCallbackFilter extends AbstractAuthenticationProcessingFilter 
 	private final ClientFinder clientFinder = new DefaultCallbackClientFinder();
 	private Config config;
 
-	public OauthCallbackFilter(Config pac4jConfig) {
+	public OauthCallbackFilter(final Config pac4jConfig) {
 		super(new AntPathRequestMatcher("/login/oauth"));
 		this.config = pac4jConfig;
 	}
@@ -84,9 +84,9 @@ public class OauthCallbackFilter extends AbstractAuthenticationProcessingFilter 
 				"only indirect clients are allowed on the callback url");
 
 		try {
-			Credentials credentials = foundClient.getCredentials(context);
+			final Credentials credentials = foundClient.getCredentials(context);
 			logger.debug("credentials: {}", credentials);
-			CommonProfile profile = foundClient.getUserProfile(credentials, context);
+			final CommonProfile profile = foundClient.getUserProfile(credentials, context);
 			logger.debug("profile: {}", profile);
 
 			return profile;

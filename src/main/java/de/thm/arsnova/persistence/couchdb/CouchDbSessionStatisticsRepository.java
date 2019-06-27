@@ -50,7 +50,7 @@ public class CouchDbSessionStatisticsRepository
 		}
 
 		// collect mapping (questionId -> max value)
-		for (ViewResult.Row row : maximumValueResult) {
+		for (final ViewResult.Row row : maximumValueResult) {
 			final String contentId = row.getKeyAsNode().get(1).asText();
 			final JsonNode value = row.getValueAsNode();
 			final int questionScore = value.get("value").asInt();
@@ -59,7 +59,7 @@ public class CouchDbSessionStatisticsRepository
 			courseScore.addQuestion(contentId, questionVariant, piRound, questionScore);
 		}
 		// collect mapping (questionId -> (user -> value))
-		for (ViewResult.Row row : answerSumResult) {
+		for (final ViewResult.Row row : answerSumResult) {
 			final String username = row.getKeyAsNode().get(1).asText();
 			final JsonNode value = row.getValueAsNode();
 			final String contentId = value.get("questionId").asText();

@@ -37,9 +37,9 @@ public class CommentFindQueryService implements FindQueryService<Comment> {
 
 	@Override
 	public Set<String> resolveQuery(final FindQuery<Comment> findQuery) {
-		Set<String> ids = new HashSet<>();
+		final Set<String> ids = new HashSet<>();
 		if (findQuery.getProperties().getRoomId() != null) {
-			for (Comment c : commentService.getByRoomId(findQuery.getProperties().getRoomId(), 0, 0)) {
+			for (final Comment c : commentService.getByRoomId(findQuery.getProperties().getRoomId(), 0, 0)) {
 				ids.add(c.getId());
 			}
 		}

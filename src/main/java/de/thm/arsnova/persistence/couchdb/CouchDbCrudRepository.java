@@ -125,7 +125,7 @@ abstract class CouchDbCrudRepository<T extends Entity>
 
 	@Override
 	public void deleteById(final String id) {
-		T entity = get(id);
+		final T entity = get(id);
 		db.delete(id, entity.getRevision());
 	}
 

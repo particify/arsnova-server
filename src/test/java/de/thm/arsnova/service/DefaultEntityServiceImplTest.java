@@ -122,7 +122,7 @@ public class DefaultEntityServiceImplTest {
 
 		when(roomRepository.saveAll(anyListOf(Room.class))).then(returnsFirstArg());
 
-		List<Room> sessions = new ArrayList<>();
+		final List<Room> sessions = new ArrayList<>();
 		final String originalId1 = "d8833f0d78964a9487ded02ba2dfbbad";
 		final String originalName1 = "Test Room 1";
 		final String originalOwnerId1 = "TestUser";

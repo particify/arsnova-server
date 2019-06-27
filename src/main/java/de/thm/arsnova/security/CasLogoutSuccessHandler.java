@@ -48,7 +48,7 @@ public class CasLogoutSuccessHandler implements LogoutSuccessHandler {
 			final Authentication authentication
 	) throws IOException, ServletException {
 		/* Typo in "referer" intended. It is in the spec. */
-		String referrer = request.getHeader("referer");
+		final String referrer = request.getHeader("referer");
 		if (response.isCommitted()) {
 			logger.info("Response has already been committed. Unable to redirect to target");
 			return;

@@ -51,7 +51,7 @@ public class FeedbackServiceTest {
 		lenient().when(this.roomService.get(anyString())).thenReturn(null);
 		lenient().when(this.roomService.get(eq(this.roomId))).thenReturn(room);
 
-		FeedbackStorageService fss = new FeedbackStorageServiceImpl();
+		final FeedbackStorageService fss = new FeedbackStorageServiceImpl();
 		this.feedbackService = new FeedbackServiceImpl(fss, this.roomService);
 		((FeedbackServiceImpl) this.feedbackService).setApplicationEventPublisher(this.publisher);
 	}
@@ -61,7 +61,7 @@ public class FeedbackServiceTest {
 		feedbackService.save(roomId, 0, "user-id-one");
 		feedbackService.save(roomId, 0, "user-id-two");
 
-		int actual = feedbackService.countFeedbackByRoomId(roomId);
+		final int actual = feedbackService.countFeedbackByRoomId(roomId);
 
 		assertEquals(2, actual);
 	}
@@ -71,8 +71,8 @@ public class FeedbackServiceTest {
 		feedbackService.save(roomId, 0, "user-id-one");
 		feedbackService.save(roomId, 3, "user-id-two");
 
-		double expected = 1.5;
-		double actual = feedbackService.calculateAverageFeedback(roomId);
+		final double expected = 1.5;
+		final double actual = feedbackService.calculateAverageFeedback(roomId);
 
 		assertEquals(expected, actual, 0.01);
 	}
@@ -92,8 +92,8 @@ public class FeedbackServiceTest {
 		feedbackService.save(roomId, 0, "user-id-one");
 		feedbackService.save(roomId, 3, "user-id-two");
 
-		Feedback expected = new Feedback(1, 0, 0, 1);
-		Feedback actual = feedbackService.getByRoomId(roomId);
+		final Feedback expected = new Feedback(1, 0, 0, 1);
+		final Feedback actual = feedbackService.getByRoomId(roomId);
 
 		assertEquals(expected, actual);
 	}
@@ -102,18 +102,18 @@ public class FeedbackServiceTest {
 	public void shouldReturnSingleVoteFromUser() {
 		feedbackService.save(roomId, 2, "user-id-one");
 
-		int actual = feedbackService.getByRoomIdAndUserId(roomId, "user-id-one");
+		final int actual = feedbackService.getByRoomIdAndUserId(roomId, "user-id-one");
 
 		assertEquals(2, actual);
 	}
 
 	@Test
 	public void shouldDeleteOldFeedbackVotes() {
-		FeedbackStorageService fss = Mockito.mock(FeedbackStorageService.class);
+		final FeedbackStorageService fss = Mockito.mock(FeedbackStorageService.class);
 		this.feedbackService = new FeedbackServiceImpl(fss, this.roomService);
 		((FeedbackServiceImpl) this.feedbackService).setApplicationEventPublisher(this.publisher);
 
-		Map<Room, List<String>> roomToUserMappings = new HashMap<Room, List<String>>() {{
+		final Map<Room, List<String>> roomToUserMappings = new HashMap<Room, List<String>>() {{
 			put(room, Arrays.asList("user-id-one"));
 		}};
 		when(fss.cleanVotes(anyInt())).thenReturn(roomToUserMappings);
@@ -126,7 +126,7 @@ public class FeedbackServiceTest {
 
 	@Test
 	public void shouldDeleteOldFeedbackVotesForSpecificRoom() {
-		FeedbackStorageService fss = Mockito.mock(FeedbackStorageService.class);
+		final FeedbackStorageService fss = Mockito.mock(FeedbackStorageService.class);
 		this.feedbackService = new FeedbackServiceImpl(fss, this.roomService);
 		((FeedbackServiceImpl) this.feedbackService).setApplicationEventPublisher(this.publisher);
 

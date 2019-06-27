@@ -33,7 +33,7 @@ public class CommentReadingCount {
 	private int read;
 	private int unread;
 
-	public CommentReadingCount(int readCount, int unreadCount) {
+	public CommentReadingCount(final int readCount, final int unreadCount) {
 		this.read = readCount;
 		this.unread = unreadCount;
 	}
@@ -49,7 +49,7 @@ public class CommentReadingCount {
 		return read;
 	}
 
-	public void setRead(int read) {
+	public void setRead(final int read) {
 		this.read = read;
 	}
 
@@ -59,7 +59,7 @@ public class CommentReadingCount {
 		return unread;
 	}
 
-	public void setUnread(int unread) {
+	public void setUnread(final int unread) {
 		this.unread = unread;
 	}
 

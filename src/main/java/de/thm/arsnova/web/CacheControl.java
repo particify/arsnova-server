@@ -39,7 +39,7 @@ public @interface CacheControl {
 			this.policyString = null;
 		}
 
-		Policy(String policyString) {
+		Policy(final String policyString) {
 			this.policyString = policyString;
 		}
 

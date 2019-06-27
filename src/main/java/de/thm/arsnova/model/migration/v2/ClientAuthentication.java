@@ -45,21 +45,21 @@ public class ClientAuthentication implements Serializable {
 		authProvider = UserProfile.AuthProvider.NONE;
 	}
 
-	public ClientAuthentication(User user) {
+	public ClientAuthentication(final User user) {
 		id = user.getId();
 		username = user.getUsername();
 		authProvider = user.getAuthProvider();
 		isAdmin = user.isAdmin();
 	}
 
-	public ClientAuthentication(Authentication authentication) {
+	public ClientAuthentication(final Authentication authentication) {
 		if (authentication instanceof AnonymousAuthenticationToken) {
 			setUsername(ClientAuthentication.ANONYMOUS);
 		} else {
 			if (!(authentication.getPrincipal() instanceof User)) {
 				throw new IllegalArgumentException("Unsupported authentication token");
 			}
-			User user = (User) authentication.getPrincipal();
+			final User user = (User) authentication.getPrincipal();
 			id = user.getId();
 			username = user.getUsername();
 			authProvider = user.getAuthProvider();
@@ -123,7 +123,7 @@ public class ClientAuthentication implements Serializable {
 		if (obj == null || !obj.getClass().equals(this.getClass())) {
 			return false;
 		}
-		ClientAuthentication other = (ClientAuthentication) obj;
+		final ClientAuthentication other = (ClientAuthentication) obj;
 
 		return this.authProvider == other.authProvider
 				&& Objects.equals(this.id, other.id) && this.username.equals(other.username);

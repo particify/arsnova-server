@@ -62,7 +62,7 @@ public class MotdList implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setMotdkeys(String motds) {
+	public void setMotdkeys(final String motds) {
 		motdkeys = motds;
 	}
 

@@ -29,12 +29,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	@Value(value = "${security.cors.origins:}") private String[] corsOrigins;
 
 	@Autowired
-	public WebSocketConfig(AuthChannelInterceptorAdapter authChannelInterceptorAdapter) {
+	public WebSocketConfig(final AuthChannelInterceptorAdapter authChannelInterceptorAdapter) {
 		this.authChannelInterceptorAdapter = authChannelInterceptorAdapter;
 	}
 
 	@Override
-	public void configureMessageBroker(MessageBrokerRegistry config) {
+	public void configureMessageBroker(final MessageBrokerRegistry config) {
 		config.setApplicationDestinationPrefixes(MESSAGING_PREFIX);
 
 		if (relayEnabled) {
@@ -52,12 +52,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	}
 
 	@Override
-	public void registerStompEndpoints(StompEndpointRegistry registry) {
+	public void registerStompEndpoints(final StompEndpointRegistry registry) {
 		registry.addEndpoint("/ws").setAllowedOrigins(corsOrigins).withSockJS();
 	}
 
 	@Override
-	public void configureClientInboundChannel(ChannelRegistration registration) {
+	public void configureClientInboundChannel(final ChannelRegistration registration) {
 		registration.setInterceptors(authChannelInterceptorAdapter);
 	}
 }

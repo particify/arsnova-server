@@ -103,7 +103,7 @@ public class RoomController extends PaginationController {
 			@ApiParam(value = "Room-Key from current Room", required = true)
 			@PathVariable
 			final String shortId) {
-		de.thm.arsnova.model.Room room = roomService.getByShortId(shortId);
+		final de.thm.arsnova.model.Room room = roomService.getByShortId(shortId);
 		roomService.delete(room);
 	}
 
@@ -188,7 +188,7 @@ public class RoomController extends PaginationController {
 			@RequestParam(value = "username", defaultValue = "")
 			final String username,
 			final HttpServletResponse response) {
-		List<de.thm.arsnova.model.Room> rooms;
+		final List<de.thm.arsnova.model.Room> rooms;
 
 		if (!"".equals(username)) {
 			final String userId = userService.getByUsername(username).getId();
@@ -252,7 +252,7 @@ public class RoomController extends PaginationController {
 			@RequestParam(value = "sortby", defaultValue = "name")
 			final String sortby,
 			final HttpServletResponse response) {
-		List<de.thm.arsnova.model.Room> rooms;
+		final List<de.thm.arsnova.model.Room> rooms;
 		if (!visitedOnly) {
 			rooms = roomService.getMyRoomsInfo(offset, limit);
 		} else {
@@ -281,7 +281,7 @@ public class RoomController extends PaginationController {
 	@RequestMapping(value = "/publicpool", method = RequestMethod.GET, params = "statusonly=true")
 	public List<RoomInfo> getMyPublicPoolRooms(
 			final HttpServletResponse response) {
-		List<de.thm.arsnova.model.Room> rooms = roomService.getMyPublicPoolRoomsInfo();
+		final List<de.thm.arsnova.model.Room> rooms = roomService.getMyPublicPoolRoomsInfo();
 
 		if (rooms == null || rooms.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
@@ -299,7 +299,7 @@ public class RoomController extends PaginationController {
 	@RequestMapping(value = "/publicpool", method = RequestMethod.GET)
 	public List<Room> getPublicPoolRooms(
 			final HttpServletResponse response) {
-		List<de.thm.arsnova.model.Room> rooms = roomService.getPublicPoolRoomsInfo();
+		final List<de.thm.arsnova.model.Room> rooms = roomService.getPublicPoolRoomsInfo();
 
 		if (rooms == null || rooms.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
@@ -331,10 +331,10 @@ public class RoomController extends PaginationController {
 			@RequestParam(value = "withFeedbackQuestions", defaultValue = "false")
 			final Boolean withFeedbackQuestions,
 			final HttpServletResponse response) throws IOException {
-		List<ImportExportContainer> rooms = new ArrayList<>();
+		final List<ImportExportContainer> rooms = new ArrayList<>();
 		ImportExportContainer temp;
-		for (String shortId : shortIds) {
-			String id = roomService.getIdByShortId(shortId);
+		for (final String shortId : shortIds) {
+			final String id = roomService.getIdByShortId(shortId);
 			roomService.setActive(id, false);
 			temp = roomService.exportRoom(id, withAnswerStatistics, withFeedbackQuestions);
 			if (temp != null) {
@@ -355,9 +355,9 @@ public class RoomController extends PaginationController {
 			@RequestBody
 			final ImportExportContainer.PublicPool publicPool)
 			throws IOException {
-		String id = roomService.getIdByShortId(shortId);
+		final String id = roomService.getIdByShortId(shortId);
 		roomService.setActive(id, false);
-		de.thm.arsnova.model.Room roomInfo = roomService.copyRoomToPublicPool(shortId, publicPool);
+		final de.thm.arsnova.model.Room roomInfo = roomService.copyRoomToPublicPool(shortId, publicPool);
 		roomService.setActive(id, true);
 
 		return toV2Migrator.migrate(roomInfo);
@@ -422,7 +422,7 @@ public class RoomController extends PaginationController {
 	public RoomFeature getRoomFeatures(
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
 			final HttpServletResponse response) {
-		de.thm.arsnova.model.Room room = roomService.getByShortId(shortId);
+		final de.thm.arsnova.model.Room room = roomService.getByShortId(shortId);
 		return toV2Migrator.migrate(room.getSettings());
 	}
 
@@ -433,7 +433,7 @@ public class RoomController extends PaginationController {
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
 			@ApiParam(value = "Room feature", required = true) @RequestBody final RoomFeature features,
 			final HttpServletResponse response) {
-		de.thm.arsnova.model.Room room = roomService.getByShortId(shortId);
+		final de.thm.arsnova.model.Room room = roomService.getByShortId(shortId);
 		room.setSettings(fromV2Migrator.migrate(features));
 		roomService.update(room);
 

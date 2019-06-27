@@ -27,7 +27,7 @@ public abstract class RoomEvent extends ArsnovaEvent {
 
 	private final String roomId;
 
-	public RoomEvent(Object source, String roomId) {
+	public RoomEvent(final Object source, final String roomId) {
 		super(source);
 		this.roomId = roomId;
 	}

@@ -68,15 +68,15 @@ public class WebsocketAuthenticationAspect {
 	}
 
 	private void populateSecurityContext(final UUID socketId) {
-		String userId = userService.getUserIdToSocketId(socketId);
+		final String userId = userService.getUserIdToSocketId(socketId);
 		if (userId == null) {
 			throw new AccessDeniedException("No user authenticated for WebSocket connection");
 		}
-		SecurityContext context = SecurityContextHolder.getContext();
-		Set<GrantedAuthority> authorities = new HashSet<>();
+		final SecurityContext context = SecurityContextHolder.getContext();
+		final Set<GrantedAuthority> authorities = new HashSet<>();
 		authorities.add(WEBSOCKET_AUTHORITY);
-		User user = userService.loadUser(userId, authorities);
-		Authentication auth = new UsernamePasswordAuthenticationToken(user, null, authorities);
+		final User user = userService.loadUser(userId, authorities);
+		final Authentication auth = new UsernamePasswordAuthenticationToken(user, null, authorities);
 		context.setAuthentication(auth);
 		SecurityContextHolder.setContext(context);
 	}

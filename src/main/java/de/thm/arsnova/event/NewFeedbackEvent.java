@@ -25,7 +25,7 @@ public class NewFeedbackEvent extends RoomEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public NewFeedbackEvent(Object source, String roomId) {
+	public NewFeedbackEvent(final Object source, final String roomId) {
 		super(source, roomId);
 	}
 

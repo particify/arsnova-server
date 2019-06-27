@@ -13,14 +13,14 @@ public class FeedbackHandler {
 	private final FeedbackCommandHandler commandHandler;
 
 	@Autowired
-	public FeedbackHandler(FeedbackCommandHandler commandHandler) {
+	public FeedbackHandler(final FeedbackCommandHandler commandHandler) {
 		this.commandHandler = commandHandler;
 	}
 
 	@MessageMapping("/queue/{roomId}.feedback.command")
 	public void send(
-			@DestinationVariable("roomId") String roomId,
-			CreateFeedback value
+			@DestinationVariable("roomId") final String roomId,
+			final CreateFeedback value
 	) throws Exception {
 
 		commandHandler.handle(
@@ -31,8 +31,8 @@ public class FeedbackHandler {
 
 	@MessageMapping("/queue/{roomId}.feedback.query")
 	public void send(
-			@DestinationVariable("roomId") String roomId,
-			GetFeedback value
+			@DestinationVariable("roomId") final String roomId,
+			final GetFeedback value
 	) throws Exception {
 
 		commandHandler.handle(

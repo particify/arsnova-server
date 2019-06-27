@@ -35,14 +35,14 @@ public class ScoreBasedScoreCalculatorTest {
 
 	private int id = 1;
 
-	private String addQuestion(String questionVariant, int points) {
+	private String addQuestion(final String questionVariant, final int points) {
 		final String questionId = "question" + (id++);
 		final int piRound = 1;
 		courseScore.addQuestion(questionId, questionVariant, piRound, points);
 		return questionId;
 	}
 
-	private void addAnswer(String questionId, String userId, int points) {
+	private void addAnswer(final String questionId, final String userId, final int points) {
 		final int piRound = 1;
 		courseScore.addAnswer(questionId, piRound, userId, points);
 	}
@@ -50,7 +50,7 @@ public class ScoreBasedScoreCalculatorTest {
 	@Before
 	public void setUp() {
 		this.courseScore = new Score();
-		SessionStatisticsRepository db = mock(SessionStatisticsRepository.class);
+		final SessionStatisticsRepository db = mock(SessionStatisticsRepository.class);
 		when(db.getLearningProgress(null)).thenReturn(courseScore);
 		this.lp = new ScoreBasedScoreCalculator(db);
 	}
@@ -58,12 +58,12 @@ public class ScoreBasedScoreCalculatorTest {
 	@Test
 	public void shouldFilterBasedOnQuestionVariant() {
 		// Total of 300 Points
-		String q1 = this.addQuestion("lecture", 100);
-		String q2 = this.addQuestion("lecture", 100);
-		String q3 = this.addQuestion("lecture", 100);
-		String userId1 = "user1";
-		String userId2 = "user2";
-		String userId3 = "user3";
+		final String q1 = this.addQuestion("lecture", 100);
+		final String q2 = this.addQuestion("lecture", 100);
+		final String q3 = this.addQuestion("lecture", 100);
+		final String userId1 = "user1";
+		final String userId2 = "user2";
+		final String userId3 = "user3";
 		// Both users achieve 200 points
 		this.addAnswer(q1, userId1, 100);
 		this.addAnswer(q1, userId2, 100);
@@ -76,7 +76,7 @@ public class ScoreBasedScoreCalculatorTest {
 		this.addAnswer(q3, userId3, 0);
 
 		lp.setQuestionVariant("lecture");
-		ScoreStatistics u1LectureProgress = lp.getMyProgress(null, userId1);
+		final ScoreStatistics u1LectureProgress = lp.getMyProgress(null, userId1);
 		// (500/3) / 300 ~= 0,56.
 		assertEquals(56, u1LectureProgress.getCourseProgress());
 		// 200 / 300 ~= 0,67.
@@ -86,11 +86,11 @@ public class ScoreBasedScoreCalculatorTest {
 	@Test
 	public void shouldNotContainRoundingErrors() {
 		// Total of 300 Points
-		String q1 = this.addQuestion("lecture", 100);
-		String q2 = this.addQuestion("lecture", 100);
-		String q3 = this.addQuestion("lecture", 100);
-		String userId1 = "user1";
-		String userId2 = "user2";
+		final String q1 = this.addQuestion("lecture", 100);
+		final String q2 = this.addQuestion("lecture", 100);
+		final String q3 = this.addQuestion("lecture", 100);
+		final String userId1 = "user1";
+		final String userId2 = "user2";
 		// Both users achieve 200 points
 		this.addAnswer(q1, userId1, 100);
 		this.addAnswer(q1, userId2, 100);
@@ -100,7 +100,7 @@ public class ScoreBasedScoreCalculatorTest {
 		this.addAnswer(q3, userId2, 100);
 
 		lp.setQuestionVariant("lecture");
-		ScoreStatistics u1LectureProgress = lp.getMyProgress(null, userId1);
+		final ScoreStatistics u1LectureProgress = lp.getMyProgress(null, userId1);
 		// 200 / 300 = 0,67
 		assertEquals(67, u1LectureProgress.getCourseProgress());
 		assertEquals(67, u1LectureProgress.getMyProgress());
@@ -108,8 +108,8 @@ public class ScoreBasedScoreCalculatorTest {
 
 	@Test
 	public void shouldConsiderAnswersOfSamePiRound() {
-		String userId1 = "user1";
-		String userId2 = "user2";
+		final String userId1 = "user1";
+		final String userId2 = "user2";
 		// question is in round 2
 		courseScore.addQuestion("q1", "lecture", 2, 100);
 		// 25 points in round 1, 75 points in round two for the first user
@@ -119,8 +119,8 @@ public class ScoreBasedScoreCalculatorTest {
 		courseScore.addAnswer("q1", 1, userId2, 75);
 		courseScore.addAnswer("q1", 2, userId2, 25);
 
-		ScoreStatistics u1Progress = lp.getMyProgress(null, userId1);
-		ScoreStatistics u2Progress = lp.getMyProgress(null, userId2);
+		final ScoreStatistics u1Progress = lp.getMyProgress(null, userId1);
+		final ScoreStatistics u2Progress = lp.getMyProgress(null, userId2);
 
 		// only the answer for round 2 should be considered
 		assertEquals(50, u1Progress.getCourseProgress());
@@ -132,12 +132,12 @@ public class ScoreBasedScoreCalculatorTest {
 	@Test
 	public void shouldIncludeNominatorAndDenominatorOfResultExcludingStudentCount() {
 		// two questions
-		String q1 = this.addQuestion("lecture", 10);
-		String q2 = this.addQuestion("lecture", 10);
+		final String q1 = this.addQuestion("lecture", 10);
+		final String q2 = this.addQuestion("lecture", 10);
 		// three users
-		String userId1 = "user1";
-		String userId2 = "user2";
-		String userId3 = "user3";
+		final String userId1 = "user1";
+		final String userId2 = "user2";
+		final String userId3 = "user3";
 		// six answers
 		this.addAnswer(q1, userId1, 10);
 		this.addAnswer(q2, userId1, 0);
@@ -146,8 +146,8 @@ public class ScoreBasedScoreCalculatorTest {
 		this.addAnswer(q1, userId3, 10);
 		this.addAnswer(q2, userId3, 0);
 
-		int numerator = lp.getCourseProgress(null).getNumerator();
-		int denominator = lp.getCourseProgress(null).getDenominator();
+		final int numerator = lp.getCourseProgress(null).getNumerator();
+		final int denominator = lp.getCourseProgress(null).getDenominator();
 
 		// If the percentage is wrong, then we need to adapt this test case!
 		assertEquals("Precondition failed -- The underlying calculation has changed",

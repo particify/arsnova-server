@@ -62,7 +62,7 @@ public class UserController extends AbstractController {
 			@PathVariable final String username,
 			@RequestParam final String key, final HttpServletRequest request,
 			final HttpServletResponse response) {
-		UserProfile userProfile = userService.getByUsername(username);
+		final UserProfile userProfile = userService.getByUsername(username);
 		if (null != userProfile && key.equals(userProfile.getAccount().getActivationKey())) {
 			userProfile.getAccount().setActivationKey(null);
 			userService.update(userProfile);
@@ -90,7 +90,7 @@ public class UserController extends AbstractController {
 			@RequestParam(required = false) final String password,
 			final HttpServletRequest request,
 			final HttpServletResponse response) {
-		UserProfile userProfile = userService.getByUsername(username);
+		final UserProfile userProfile = userService.getByUsername(username);
 		if (null == userProfile) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 

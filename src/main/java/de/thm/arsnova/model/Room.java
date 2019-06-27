@@ -191,7 +191,7 @@ public class Room extends Entity {
 		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
-		public void setQuickSurveyEnabled(boolean quickSurveyEnabled) {
+		public void setQuickSurveyEnabled(final boolean quickSurveyEnabled) {
 			this.quickSurveyEnabled = quickSurveyEnabled;
 		}
 
@@ -201,7 +201,7 @@ public class Room extends Entity {
 		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
-		public void setQuickFeedbackEnabled(boolean quickFeedbackEnabled) {
+		public void setQuickFeedbackEnabled(final boolean quickFeedbackEnabled) {
 			this.quickFeedbackEnabled = quickFeedbackEnabled;
 		}
 
@@ -569,7 +569,7 @@ public class Room extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setSettings(Settings settings) {
+	public void setSettings(final Settings settings) {
 		this.settings = settings;
 	}
 

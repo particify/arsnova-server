@@ -271,5 +271,11 @@
 			<property name="exceptionVariableName" value="expected"/>
 		</module>
 		<module name="CommentsIndentation"/>
+
+		<!-- ARSnova-specific rules -->
+		<module name="FinalLocalVariable">
+			<property name="tokens" value="VARIABLE_DEF,PARAMETER_DEF"/>
+			<property name="validateEnhancedForLoopVariable" value="true"/>
+		</module>
 	</module>
 </module>

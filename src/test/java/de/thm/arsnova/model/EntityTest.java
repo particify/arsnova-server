@@ -38,7 +38,7 @@ public class EntityTest {
 	class SomeEntity extends Entity {
 		private String testA;
 
-		public SomeEntity(String id, String rev, Date creationTimestamp, Date updateTimestamp, String testA) {
+		public SomeEntity(final String id, final String rev, final Date creationTimestamp, final Date updateTimestamp, final String testA) {
 			this.id = id;
 			this.rev = rev;
 			this.creationTimestamp = creationTimestamp;
@@ -61,7 +61,7 @@ public class EntityTest {
 		private String testB;
 
 		public AnotherEntity(
-				String id, String rev, Date creationTimestamp, Date updateTimestamp, String testA, String testB) {
+				final String id, final String rev, final Date creationTimestamp, final Date updateTimestamp, final String testA, final String testB) {
 			super(id, rev, creationTimestamp, updateTimestamp, testA);
 			this.testB = testB;
 		}
@@ -79,33 +79,33 @@ public class EntityTest {
 
 	@Test
 	public void testHashCode() {
-		SomeEntity entity1 = new SomeEntity("id", "rev", new Date(0), new Date(0), "test");
-		SomeEntity entity2 = new SomeEntity("id", "rev", new Date(0), new Date(0), "test");
-		SomeEntity entity3 = new SomeEntity("wrongId", "rev", new Date(0), new Date(0), "test");
+		final SomeEntity entity1 = new SomeEntity("id", "rev", new Date(0), new Date(0), "test");
+		final SomeEntity entity2 = new SomeEntity("id", "rev", new Date(0), new Date(0), "test");
+		final SomeEntity entity3 = new SomeEntity("wrongId", "rev", new Date(0), new Date(0), "test");
 		assertEquals(entity1.hashCode(), entity2.hashCode());
 		assertNotEquals(entity1.hashCode(), entity3.hashCode());
-		AnotherEntity entity4 = new AnotherEntity("id", "rev", new Date(0), new Date(0), "someTest", "anotherTest");
-		AnotherEntity entity5 = new AnotherEntity("id", "rev", new Date(0), new Date(0), "someTest", "anotherTest");
-		AnotherEntity entity6 = new AnotherEntity("id", "rev", new Date(0), new Date(0), "someTest", "wrong");
+		final AnotherEntity entity4 = new AnotherEntity("id", "rev", new Date(0), new Date(0), "someTest", "anotherTest");
+		final AnotherEntity entity5 = new AnotherEntity("id", "rev", new Date(0), new Date(0), "someTest", "anotherTest");
+		final AnotherEntity entity6 = new AnotherEntity("id", "rev", new Date(0), new Date(0), "someTest", "wrong");
 		assertEquals(entity4.hashCode(), entity5.hashCode());
 		assertNotEquals(entity4.hashCode(), entity6.hashCode());
 	}
 
 	@Test
 	public void testEquals() {
-		SomeEntity entity1 = new SomeEntity("id", "rev", new Date(0), new Date(0), "test");
-		SomeEntity entity2 = new SomeEntity("id", "rev", new Date(0), new Date(0), "test");
-		SomeEntity entity3 = new SomeEntity("wrongId", "rev", new Date(0), new Date(0), "test");
+		final SomeEntity entity1 = new SomeEntity("id", "rev", new Date(0), new Date(0), "test");
+		final SomeEntity entity2 = new SomeEntity("id", "rev", new Date(0), new Date(0), "test");
+		final SomeEntity entity3 = new SomeEntity("wrongId", "rev", new Date(0), new Date(0), "test");
 		assertEquals(entity1, entity2);
 		assertNotEquals(entity1, entity3);
 	}
 
 	@Test
 	public void testToString() {
-		SomeEntity entity1 = new SomeEntity("id", "rev", new Date(0), new Date(0), "test");
+		final SomeEntity entity1 = new SomeEntity("id", "rev", new Date(0), new Date(0), "test");
 		assertThat(entity1.toString(), startsWith("[EntityTest.SomeEntity"));
 		assertThat(entity1.toString(), endsWith("testA = 'test']"));
-		AnotherEntity entity2 = new AnotherEntity("id", "rev", new Date(0), new Date(0), "someTest", "anotherTest");
+		final AnotherEntity entity2 = new AnotherEntity("id", "rev", new Date(0), new Date(0), "someTest", "anotherTest");
 		assertThat(entity2.toString(), startsWith("[EntityTest.AnotherEntity"));
 		assertThat(entity2.toString(), endsWith("testA = 'someTest', testB = 'anotherTest']"));
 	}

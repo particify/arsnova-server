@@ -64,7 +64,7 @@ public class ImportExportContainer {
 		return session;
 	}
 
-	public void setSession(ImportExportRoom session) {
+	public void setSession(final ImportExportRoom session) {
 		this.session = session;
 	}
 
@@ -74,7 +74,7 @@ public class ImportExportContainer {
 		return questions;
 	}
 
-	public void setQuestions(List<ImportExportContent> questions) {
+	public void setQuestions(final List<ImportExportContent> questions) {
 		this.questions = questions;
 	}
 
@@ -84,7 +84,7 @@ public class ImportExportContainer {
 		return feedbackQuestions;
 	}
 
-	public void setFeedbackQuestions(List<Comment> feedbackQuestions) {
+	public void setFeedbackQuestions(final List<Comment> feedbackQuestions) {
 		this.feedbackQuestions = feedbackQuestions;
 	}
 
@@ -93,7 +93,7 @@ public class ImportExportContainer {
 		return motds;
 	}
 
-	public void setMotds(List<Motd> motdList) {
+	public void setMotds(final List<Motd> motdList) {
 		this.motds = motdList;
 	}
 
@@ -102,7 +102,7 @@ public class ImportExportContainer {
 		return session.sessionFeature;
 	}
 
-	public void setSessionFeature(RoomFeature roomFeature) {
+	public void setSessionFeature(final RoomFeature roomFeature) {
 		session.sessionFeature = roomFeature;
 	}
 
@@ -111,29 +111,29 @@ public class ImportExportContainer {
 		return sessionInfo;
 	}
 
-	public void setSessionInfo(RoomInfo roomInfo) {
+	public void setSessionInfo(final RoomInfo roomInfo) {
 		sessionInfo = roomInfo;
 	}
 
-	public void setSessionFromSessionObject(Room s) {
-		ImportExportRoom importExportRoom = new ImportExportRoom();
+	public void setSessionFromSessionObject(final Room s) {
+		final ImportExportRoom importExportRoom = new ImportExportRoom();
 		importExportRoom.setName(s.getName());
 		importExportRoom.setShortName(s.getShortName());
 		importExportRoom.setActive(s.isActive());
-		PublicPool p = new PublicPool();
+		final PublicPool p = new PublicPool();
 		p.setPpFromSession(s);
 		importExportRoom.setPublicPool(p);
 		importExportRoom.sessionFeature = s.getFeatures();
 		session = importExportRoom;
 	}
 
-	public void addQuestionWithAnswers(Content content, List<Answer> answerList) {
-		ImportExportContent importExportContent = new ImportExportContent(content);
+	public void addQuestionWithAnswers(final Content content, final List<Answer> answerList) {
+		final ImportExportContent importExportContent = new ImportExportContent(content);
 		importExportContent.setAnswers(answerList);
 		questions.add(importExportContent);
 	}
 
-	public Room generateSessionEntity(ClientAuthentication user) {
+	public Room generateSessionEntity(final ClientAuthentication user) {
 		final Room room = new Room();
 		// import fields
 		room.setActive(session.isActive());
@@ -169,7 +169,7 @@ public class ImportExportContainer {
 
 		}
 
-		public ImportExportContent(Content content) {
+		public ImportExportContent(final Content content) {
 			setQuestionType(content.getQuestionType());
 			setQuestionVariant(content.getQuestionVariant());
 			setSubject(content.getSubject());
@@ -231,7 +231,7 @@ public class ImportExportContainer {
 			return answers;
 		}
 
-		public void setAnswers(List<Answer> answers) {
+		public void setAnswers(final List<Answer> answers) {
 			this.answers = answers;
 		}
 	}
@@ -256,7 +256,7 @@ public class ImportExportContainer {
 			return name;
 		}
 
-		public void setName(String name) {
+		public void setName(final String name) {
 			this.name = name;
 		}
 
@@ -266,7 +266,7 @@ public class ImportExportContainer {
 			return sessionType;
 		}
 
-		public void setSessionType(String sessionType) {
+		public void setSessionType(final String sessionType) {
 			this.sessionType = sessionType;
 		}
 
@@ -276,7 +276,7 @@ public class ImportExportContainer {
 			return shortName;
 		}
 
-		public void setShortName(String shortName) {
+		public void setShortName(final String shortName) {
 			this.shortName = shortName;
 		}
 
@@ -286,7 +286,7 @@ public class ImportExportContainer {
 			return active;
 		}
 
-		public void setActive(boolean active) {
+		public void setActive(final boolean active) {
 			this.active = active;
 		}
 
@@ -296,7 +296,7 @@ public class ImportExportContainer {
 			return publicPool;
 		}
 
-		public void setPublicPool(PublicPool publicPool) {
+		public void setPublicPool(final PublicPool publicPool) {
 			this.publicPool = publicPool;
 		}
 
@@ -305,7 +305,7 @@ public class ImportExportContainer {
 			return this.sessionFeature;
 		}
 
-		public void setSessionFeature(RoomFeature roomFeature) {
+		public void setSessionFeature(final RoomFeature roomFeature) {
 			this.sessionFeature = roomFeature;
 		}
 	}
@@ -334,7 +334,7 @@ public class ImportExportContainer {
 
 		private String shortName;
 
-		public void setPpFromSession(Room room) {
+		public void setPpFromSession(final Room room) {
 			ppAuthorName = room.getPpAuthorName();
 			ppAuthorMail = room.getPpAuthorMail();
 			ppUniversity = room.getPpUniversity();
@@ -354,7 +354,7 @@ public class ImportExportContainer {
 			return ppAuthorName;
 		}
 
-		public void setPpAuthorName(String ppAuthorName) {
+		public void setPpAuthorName(final String ppAuthorName) {
 			this.ppAuthorName = ppAuthorName;
 		}
 
@@ -364,7 +364,7 @@ public class ImportExportContainer {
 			return ppAuthorMail;
 		}
 
-		public void setPpAuthorMail(String ppAuthorMail) {
+		public void setPpAuthorMail(final String ppAuthorMail) {
 			this.ppAuthorMail = ppAuthorMail;
 		}
 
@@ -374,7 +374,7 @@ public class ImportExportContainer {
 			return ppUniversity;
 		}
 
-		public void setPpUniversity(String ppUniversity) {
+		public void setPpUniversity(final String ppUniversity) {
 			this.ppUniversity = ppUniversity;
 		}
 
@@ -384,7 +384,7 @@ public class ImportExportContainer {
 			return ppLogo;
 		}
 
-		public void setPpLogo(String ppLogo) {
+		public void setPpLogo(final String ppLogo) {
 			this.ppLogo = ppLogo;
 		}
 
@@ -394,7 +394,7 @@ public class ImportExportContainer {
 			return ppSubject;
 		}
 
-		public void setPpSubject(String ppSubject) {
+		public void setPpSubject(final String ppSubject) {
 			this.ppSubject = ppSubject;
 		}
 
@@ -404,7 +404,7 @@ public class ImportExportContainer {
 			return ppLicense;
 		}
 
-		public void setPpLicense(String ppLicense) {
+		public void setPpLicense(final String ppLicense) {
 			this.ppLicense = ppLicense;
 		}
 
@@ -414,7 +414,7 @@ public class ImportExportContainer {
 			return ppLevel;
 		}
 
-		public void setPpLevel(String ppLevel) {
+		public void setPpLevel(final String ppLevel) {
 			this.ppLevel = ppLevel;
 		}
 
@@ -424,7 +424,7 @@ public class ImportExportContainer {
 			return ppDescription;
 		}
 
-		public void setPpDescription(String ppDescription) {
+		public void setPpDescription(final String ppDescription) {
 			this.ppDescription = ppDescription;
 		}
 
@@ -434,7 +434,7 @@ public class ImportExportContainer {
 			return ppFaculty;
 		}
 
-		public void setPpFaculty(String ppFaculty) {
+		public void setPpFaculty(final String ppFaculty) {
 			this.ppFaculty = ppFaculty;
 		}
 
@@ -444,7 +444,7 @@ public class ImportExportContainer {
 			return name;
 		}
 
-		public void setName(String name) {
+		public void setName(final String name) {
 			this.name = name;
 		}
 
@@ -454,7 +454,7 @@ public class ImportExportContainer {
 			return shortName;
 		}
 
-		public void setShortName(String shortName) {
+		public void setShortName(final String shortName) {
 			this.shortName = shortName;
 		}
 	}

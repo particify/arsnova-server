@@ -24,8 +24,8 @@ import org.ektorp.CouchDbConnector;
 import org.ektorp.impl.StdObjectMapperFactory;
 
 public class CouchDbObjectMapperFactory extends StdObjectMapperFactory {
-	public ObjectMapper createObjectMapper(CouchDbConnector connector) {
-		ObjectMapper om = super.createObjectMapper(connector);
+	public ObjectMapper createObjectMapper(final CouchDbConnector connector) {
+		final ObjectMapper om = super.createObjectMapper(connector);
 		om.configure(MapperFeature.DEFAULT_VIEW_INCLUSION, false);
 		om.setConfig(om.getSerializationConfig().withView(View.Persistence.class));
 		om.registerModule(new CouchDbDocumentModule());

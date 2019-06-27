@@ -48,11 +48,11 @@ public class JwtTokenFilter extends GenericFilterBean {
 			filterChain.doFilter(servletRequest, servletResponse);
 			return;
 		}
-		String jwtHeader = httpServletRequest.getHeader(JWT_HEADER_NAME);
+		final String jwtHeader = httpServletRequest.getHeader(JWT_HEADER_NAME);
 		if (jwtHeader != null) {
-			JwtToken token = new JwtToken(jwtHeader);
+			final JwtToken token = new JwtToken(jwtHeader);
 			try {
-				Authentication authenticatedToken = jwtAuthenticationProvider.authenticate(token);
+				final Authentication authenticatedToken = jwtAuthenticationProvider.authenticate(token);
 				if (authenticatedToken != null) {
 					logger.debug("Storing JWT to SecurityContext: {}", authenticatedToken);
 					SecurityContextHolder.getContext().setAuthentication(authenticatedToken);

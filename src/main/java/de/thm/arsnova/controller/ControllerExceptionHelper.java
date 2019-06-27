@@ -34,7 +34,7 @@ public class ControllerExceptionHelper {
 	/* Since exception messages might contain sensitive data, they are not exposed by default. */
 	@Value("${api.expose-error-messages:false}") private boolean exposeMessages;
 
-	protected Map<String, Object> handleException(@NonNull Throwable e, @NonNull Level level) {
+	protected Map<String, Object> handleException(@NonNull final Throwable e, @NonNull final Level level) {
 		final String message = e.getMessage() != null ? e.getMessage() : "";
 		log(level, message, e);
 		final Map<String, Object> result = new HashMap<>();
@@ -46,7 +46,7 @@ public class ControllerExceptionHelper {
 		return result;
 	}
 
-	private void log(Level level, String message, Throwable e) {
+	private void log(final Level level, final String message, final Throwable e) {
 		switch (level) {
 			case ERROR:
 				logger.error(message, e);

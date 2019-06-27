@@ -111,7 +111,7 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public Content postContent(@RequestBody final Content content) {
-		de.thm.arsnova.model.Content contentV3 = fromV2Migrator.migrate(content);
+		final de.thm.arsnova.model.Content contentV3 = fromV2Migrator.migrate(content);
 		final String roomId = roomService.getIdByShortId(content.getSessionKeyword());
 		contentV3.setRoomId(roomId);
 		contentService.create(contentV3);
@@ -126,7 +126,7 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/bulk", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public List<Content> bulkPostContents(@RequestBody final List<Content> contents) {
-		List<de.thm.arsnova.model.Content> contentsV3 =
+		final List<de.thm.arsnova.model.Content> contentsV3 =
 				contents.stream().map(c -> contentService.create(fromV2Migrator.migrate(c))).collect(Collectors.toList());
 		return contentsV3.stream().map(toV2Migrator::migrate).collect(Collectors.toList());
 	}
@@ -204,13 +204,13 @@ public class ContentController extends PaginationController {
 			final String roomShortId,
 			@RequestParam(value = "disable", defaultValue = "false", required = false)
 			final Boolean disableVote,
-			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false)
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false) final
 			boolean lectureContentsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false)
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) final
 			boolean preparationContentsOnly) {
-		String roomId = roomService.getIdByShortId(roomShortId);
+		final String roomId = roomService.getIdByShortId(roomShortId);
 		boolean disable = false;
-		Iterable<de.thm.arsnova.model.Content> contents;
+		final Iterable<de.thm.arsnova.model.Content> contents;
 
 		if (disableVote != null) {
 			disable = disableVote;
@@ -236,7 +236,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(defaultValue = "true", required = false) final boolean publish,
 			@RequestBody final Content content
 	) throws IOException {
-		de.thm.arsnova.model.Content contentV3 = fromV2Migrator.migrate(content);
+		final de.thm.arsnova.model.Content contentV3 = fromV2Migrator.migrate(content);
 		boolean p = publish;
 		if (content != null) {
 			p = contentV3.getState().isVisible();
@@ -252,14 +252,14 @@ public class ContentController extends PaginationController {
 			final String roomShortId,
 			@RequestParam(required = false)
 			final Boolean publish,
-			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false)
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false", required = false) final
 			boolean lectureContentsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false)
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false", required = false) final
 			boolean preparationContentsOnly
 	) throws IOException {
-		String roomId = roomService.getIdByShortId(roomShortId);
-		boolean p = publish == null || publish;
-		Iterable<de.thm.arsnova.model.Content> contents;
+		final String roomId = roomService.getIdByShortId(roomShortId);
+		final boolean p = publish == null || publish;
+		final Iterable<de.thm.arsnova.model.Content> contents;
 
 		if (lectureContentsOnly) {
 			contents = contentService.getByRoomIdAndGroup(roomId, "lecture");
@@ -280,7 +280,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(defaultValue = "true", required = false) final Boolean showStatistics,
 			@RequestBody final Content content
 	) throws IOException {
-		de.thm.arsnova.model.Content contentV3 = fromV2Migrator.migrate(content);
+		final de.thm.arsnova.model.Content contentV3 = fromV2Migrator.migrate(content);
 		boolean p = showStatistics;
 		if (content != null) {
 			p = contentV3.getState().isResponsesVisible();
@@ -297,7 +297,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(defaultValue = "true", required = false) final boolean showCorrectAnswer,
 			@RequestBody final Content content
 	) throws IOException {
-		de.thm.arsnova.model.Content contentV3 = fromV2Migrator.migrate(content);
+		final de.thm.arsnova.model.Content contentV3 = fromV2Migrator.migrate(content);
 		boolean p = showCorrectAnswer;
 		if (content != null) {
 			p = contentV3.getState().isSolutionVisible();
@@ -312,13 +312,13 @@ public class ContentController extends PaginationController {
 	@Pagination
 	public List<Content> getContents(
 			@RequestParam(value = "sessionkey") final String roomShortId,
-			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
-			@RequestParam(value = "flashcardsonly", defaultValue = "false") boolean flashcardsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly,
-			@RequestParam(value = "requestImageData", defaultValue = "false") boolean requestImageData,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureContentsOnly,
+			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationContentsOnly,
+			@RequestParam(value = "requestImageData", defaultValue = "false") final boolean requestImageData,
 			final HttpServletResponse response) {
-		String roomId = roomService.getIdByShortId(roomShortId);
-		Iterable<de.thm.arsnova.model.Content> contents;
+		final String roomId = roomService.getIdByShortId(roomShortId);
+		final Iterable<de.thm.arsnova.model.Content> contents;
 		if (lectureContentsOnly) {
 			contents = contentService.getByRoomIdAndGroup(roomId, "lecture");
 		} else if (flashcardsOnly) {
@@ -346,7 +346,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "flashcardsonly", defaultValue = "false") boolean flashcardsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly,
 			final HttpServletResponse response) {
-		String roomId = roomService.getIdByShortId(roomShortId);
+		final String roomId = roomService.getIdByShortId(roomShortId);
 		/* FIXME: Content variant is ignored for now */
 		lectureContentsOnly = preparationContentsOnly = flashcardsOnly = false;
 		if (lectureContentsOnly) {
@@ -367,11 +367,11 @@ public class ContentController extends PaginationController {
 	@RequestMapping(value = "/count", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getContentCount(
 			@RequestParam(value = "sessionkey") final String roomShortId,
-			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
-			@RequestParam(value = "flashcardsonly", defaultValue = "false") boolean flashcardsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly) {
-		String roomId = roomService.getIdByShortId(roomShortId);
-		int count;
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureContentsOnly,
+			@RequestParam(value = "flashcardsonly", defaultValue = "false") final boolean flashcardsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") final boolean preparationContentsOnly) {
+		final String roomId = roomService.getIdByShortId(roomShortId);
+		final int count;
 		if (lectureContentsOnly) {
 			count = contentService.countByRoomIdAndGroup(roomId, "lecture");
 		} else if (preparationContentsOnly) {
@@ -402,8 +402,8 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "sessionkey") final String roomShortId,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly) {
-		String roomId = roomService.getIdByShortId(roomShortId);
-		List<String> answers;
+		final String roomId = roomService.getIdByShortId(roomShortId);
+		final List<String> answers;
 		/* FIXME: Content variant is ignored for now */
 		lectureContentsOnly = preparationContentsOnly = false;
 		if (lectureContentsOnly) {
@@ -482,7 +482,7 @@ public class ContentController extends PaginationController {
 			return toV2Migrator.migrate(answerService.getAllStatistics(contentId),
 					(ChoiceQuestionContent) content, content.getState().getRound());
 		} else {
-			List<de.thm.arsnova.model.TextAnswer> answers;
+			final List<de.thm.arsnova.model.TextAnswer> answers;
 			if (allAnswers) {
 				answers = answerService.getAllTextAnswers(contentId, -1, -1);
 			} else if (null == piRound) {
@@ -578,7 +578,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly,
 			final HttpServletResponse response) {
-		String roomId = roomService.getIdByShortId(roomShortId);
+		final String roomId = roomService.getIdByShortId(roomShortId);
 		/* FIXME: Content variant is ignored for now */
 		lectureContentsOnly = preparationContentsOnly = false;
 		if (lectureContentsOnly) {
@@ -674,7 +674,7 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "sessionkey") final String roomShortId,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
 			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly) {
-		String roomId = roomService.getIdByShortId(roomShortId);
+		final String roomId = roomService.getIdByShortId(roomShortId);
 		int count = 0;
 		/* FIXME: Content variant is ignored for now */
 		lectureContentsOnly = preparationContentsOnly = false;

@@ -92,8 +92,8 @@ public class MotdController extends AbstractController {
 			@ApiParam(value = "sessionkey", required = false)
 			@RequestParam(value = "sessionkey", required = false)
 			final String roomShortId) {
-		List<de.thm.arsnova.model.Motd> motds;
-		Date date = new Date(System.currentTimeMillis());
+		final List<de.thm.arsnova.model.Motd> motds;
+		final Date date = new Date(System.currentTimeMillis());
 		if (!clientdate.isEmpty()) {
 			date.setTime(Long.parseLong(clientdate));
 		}
@@ -124,8 +124,8 @@ public class MotdController extends AbstractController {
 	public Motd postNewMotd(
 			@ApiParam(value = "current motd", required = true) @RequestBody final Motd motd,
 			final HttpServletResponse response) {
-		de.thm.arsnova.model.Motd motdV3 = fromV2Migrator.migrate(motd);
-		String roomId = roomService.getIdByShortId(motd.getSessionkey());
+		final de.thm.arsnova.model.Motd motdV3 = fromV2Migrator.migrate(motd);
+		final String roomId = roomService.getIdByShortId(motd.getSessionkey());
 		if (de.thm.arsnova.model.Motd.Audience.ROOM == motdV3.getAudience() && roomId != null) {
 			motdService.save(roomId, motdV3);
 		} else {
@@ -140,8 +140,8 @@ public class MotdController extends AbstractController {
 	public Motd updateMotd(
 				@ApiParam(value = "motdkey from current motd", required = true) @PathVariable final String motdId,
 				@ApiParam(value = "current motd", required = true) @RequestBody final Motd motd) {
-		de.thm.arsnova.model.Motd motdV3 = fromV2Migrator.migrate(motd);
-		String roomId = roomService.getIdByShortId(motd.getSessionkey());
+		final de.thm.arsnova.model.Motd motdV3 = fromV2Migrator.migrate(motd);
+		final String roomId = roomService.getIdByShortId(motd.getSessionkey());
 		if (motdV3.getAudience() == de.thm.arsnova.model.Motd.Audience.ROOM && roomId != null) {
 			motdService.update(roomId, motdV3);
 		} else {
@@ -157,26 +157,26 @@ public class MotdController extends AbstractController {
 			@ApiParam(value = "Motd-key from the message that shall be deleted", required = true)
 			@PathVariable
 			final String motdId) {
-		de.thm.arsnova.model.Motd motd = motdService.get(motdId);
+		final de.thm.arsnova.model.Motd motd = motdService.get(motdId);
 		motdService.delete(motd);
 	}
 
 	@RequestMapping(value = "/userlist", method =  RequestMethod.GET)
-	public MotdList getAcknowledgedIds(@AuthenticationPrincipal User user, @RequestParam final String username) {
+	public MotdList getAcknowledgedIds(@AuthenticationPrincipal final User user, @RequestParam final String username) {
 		if (user == null || !user.getUsername().equals(username)) {
 			throw new ForbiddenException();
 		}
-		UserProfile profile = userService.get(user.getId());
+		final UserProfile profile = userService.get(user.getId());
 
 		return toV2Migrator.migrateMotdList(profile);
 	}
 
 	@RequestMapping(value = "/userlist", method =  RequestMethod.PUT)
-	public void putAcknowledgedIds(@AuthenticationPrincipal User user, @RequestBody final MotdList motdList) {
+	public void putAcknowledgedIds(@AuthenticationPrincipal final User user, @RequestBody final MotdList motdList) {
 		if (user == null || !user.getUsername().equals(motdList.getUsername())) {
 			throw new ForbiddenException();
 		}
-		UserProfile profile = userService.get(user.getId());
+		final UserProfile profile = userService.get(user.getId());
 		profile.setAcknowledgedMotds(fromV2Migrator.migrate(motdList));
 		userService.update(profile);
 	}

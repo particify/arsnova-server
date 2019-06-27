@@ -27,12 +27,12 @@ public class UserScore {
 
 	private int score;
 
-	public UserScore(String userId, int score) {
+	public UserScore(final String userId, final int score) {
 		this.userId = userId;
 		this.score = score;
 	}
 
-	public boolean hasScore(int score) {
+	public boolean hasScore(final int score) {
 		return this.score == score;
 	}
 
@@ -40,7 +40,7 @@ public class UserScore {
 		return score;
 	}
 
-	public boolean isUser(String userId) {
+	public boolean isUser(final String userId) {
 		return this.userId.equals(userId);
 	}
 

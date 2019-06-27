@@ -49,10 +49,10 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
 
 	@Override
 	protected Filter[] getServletFilters() {
-		CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter("UTF-8");
-		DelegatingFilterProxy corsFilter = new DelegatingFilterProxy("corsFilter");
-		DelegatingFilterProxy maintenanceModeFilter = new DelegatingFilterProxy("maintenanceModeFilter");
-		DelegatingFilterProxy v2ContentTypeOverrideFilter = new DelegatingFilterProxy("v2ContentTypeOverrideFilter");
+		final CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter("UTF-8");
+		final DelegatingFilterProxy corsFilter = new DelegatingFilterProxy("corsFilter");
+		final DelegatingFilterProxy maintenanceModeFilter = new DelegatingFilterProxy("maintenanceModeFilter");
+		final DelegatingFilterProxy v2ContentTypeOverrideFilter = new DelegatingFilterProxy("v2ContentTypeOverrideFilter");
 
 		return new Filter[] {
 				characterEncodingFilter,

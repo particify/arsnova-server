@@ -128,7 +128,7 @@ public class UserProfile extends Entity {
 
 		}
 
-		public RoomHistoryEntry(String roomId, Date lastVisit) {
+		public RoomHistoryEntry(final String roomId, final Date lastVisit) {
 			this.roomId = roomId;
 			this.lastVisit = lastVisit;
 		}
@@ -139,7 +139,7 @@ public class UserProfile extends Entity {
 		}
 
 		@JsonView(View.Persistence.class)
-		public void setRoomId(String roomId) {
+		public void setRoomId(final String roomId) {
 			this.roomId = roomId;
 		}
 
@@ -149,7 +149,7 @@ public class UserProfile extends Entity {
 		}
 
 		@JsonView(View.Persistence.class)
-		public void setLastVisit(Date lastVisit) {
+		public void setLastVisit(final Date lastVisit) {
 			this.lastVisit = lastVisit;
 		}
 
@@ -267,7 +267,7 @@ public class UserProfile extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setExtensions(Map<String, Map<String, ?>> extensions) {
+	public void setExtensions(final Map<String, Map<String, ?>> extensions) {
 		this.extensions = extensions;
 	}
 

@@ -27,7 +27,7 @@ public abstract class ArsnovaEvent extends ApplicationEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public ArsnovaEvent(Object source) {
+	public ArsnovaEvent(final Object source) {
 		super(source);
 	}
 

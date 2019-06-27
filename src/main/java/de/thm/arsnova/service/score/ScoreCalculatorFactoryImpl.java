@@ -47,8 +47,8 @@ public class ScoreCalculatorFactoryImpl implements ScoreCalculatorFactory, Appli
 	private ApplicationEventPublisher publisher;
 
 	@Override
-	public ScoreCalculator create(String type, String questionVariant) {
-		VariantScoreCalculator scoreCalculator;
+	public ScoreCalculator create(final String type, final String questionVariant) {
+		final VariantScoreCalculator scoreCalculator;
 		if ("questions".equals(type)) {
 			scoreCalculator = new QuestionBasedScoreCalculator(sessionStatisticsRepository);
 		} else {
@@ -60,36 +60,36 @@ public class ScoreCalculatorFactoryImpl implements ScoreCalculatorFactory, Appli
 
 	@CacheEvict(value = "score", key = "#event.entity.roomId", condition = "#event.entity.roomId != null")
 	@EventListener
-	public void handleAfterContentCreation(AfterCreationEvent<Content> event) {
+	public void handleAfterContentCreation(final AfterCreationEvent<Content> event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.entity.roomId", condition = "#event.entity.roomId != null")
 	@EventListener(condition = "#event.stateName == 'state'")
-	public void handleContentStateChange(StateChangeEvent<Content, Content.State> event) {
+	public void handleContentStateChange(final StateChangeEvent<Content, Content.State> event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.entity.roomId", condition = "#event.entity.roomId != null")
 	@EventListener
-	public void handleNewAnswer(AfterCreationEvent<Answer> event) {
+	public void handleNewAnswer(final AfterCreationEvent<Answer> event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.entity.roomId", condition = "#event.entity.roomId != null")
 	@EventListener
-	public void handleDeleteAnswer(AfterDeletionEvent<Answer> event) {
+	public void handleDeleteAnswer(final AfterDeletionEvent<Answer> event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.entity.roomId", condition = "#event.entity.roomId != null")
 	@EventListener
-	public void handleDeleteQuestion(AfterDeletionEvent<Content> event) {
+	public void handleDeleteQuestion(final AfterDeletionEvent<Content> event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
 	}
 
 	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+	public void setApplicationEventPublisher(final ApplicationEventPublisher publisher) {
 		this.publisher = publisher;
 	}
 

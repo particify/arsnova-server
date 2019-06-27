@@ -1,7 +1,7 @@
 package de.thm.arsnova.websocket.message;
 
 public class Patched extends WebSocketMessage<PatchedPayload> {
-	public Patched(String type) {
+	public Patched(final String type) {
 		super(type);
 	}
 }

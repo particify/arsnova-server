@@ -38,8 +38,8 @@ public class OauthAuthenticationProvider implements AuthenticationProvider {
 
 	@Override
 	public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
-		OAuthToken oauthToken = (OAuthToken) authentication;
-		User user = oauthUserDetailsService.loadUserDetails(oauthToken);
+		final OAuthToken oauthToken = (OAuthToken) authentication;
+		final User user = oauthUserDetailsService.loadUserDetails(oauthToken);
 
 		return new OAuthToken(user, (CommonProfile) oauthToken.getDetails(), user.getAuthorities());
 	}

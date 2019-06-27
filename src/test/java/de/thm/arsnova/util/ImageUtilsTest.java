@@ -68,7 +68,7 @@ public class ImageUtilsTest {
       "data:image/png;base63,IMAGE-DATA"
     };
 
-    for (String fakeString : fakeStrings) {
+    for (final String fakeString : fakeStrings) {
       assertFalse(
         String.format("The String %s is not a valid Base64 String.", fakeString),
         imageUtils.isBase64EncodedImage(fakeString)

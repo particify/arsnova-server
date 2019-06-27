@@ -72,7 +72,7 @@ public class Content extends Entity {
 		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
-		public void setRoundEndTimestamp(Date roundEndTimestamp) {
+		public void setRoundEndTimestamp(final Date roundEndTimestamp) {
 			this.roundEndTimestamp = roundEndTimestamp;
 		}
 
@@ -238,7 +238,7 @@ public class Content extends Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setTimestamp(Date timestamp) {
+	public void setTimestamp(final Date timestamp) {
 		this.timestamp = timestamp;
 	}
 
@@ -248,7 +248,7 @@ public class Content extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setExtensions(Map<String, Map<String, ?>> extensions) {
+	public void setExtensions(final Map<String, Map<String, ?>> extensions) {
 		this.extensions = extensions;
 	}
 

@@ -95,7 +95,7 @@ public class UserController extends AbstractEntityController<UserProfile> {
 	}
 
 	@PostMapping(REGISTER_MAPPING)
-	public void register(@RequestBody LoginCredentials loginCredentials) {
+	public void register(@RequestBody final LoginCredentials loginCredentials) {
 		if (userService.create(loginCredentials.getLoginId(), loginCredentials.getPassword()) == null) {
 			throw new ForbiddenException();
 		}
@@ -105,7 +105,7 @@ public class UserController extends AbstractEntityController<UserProfile> {
 	public void activate(
 			@PathVariable final String id,
 			@RequestParam final String key) {
-		UserProfile userProfile = userService.get(id, true);
+		final UserProfile userProfile = userService.get(id, true);
 		if (userProfile == null || !key.equals(userProfile.getAccount().getActivationKey())) {
 			throw new BadRequestException();
 		}
@@ -117,7 +117,7 @@ public class UserController extends AbstractEntityController<UserProfile> {
 	public void resetPassword(
 			@PathVariable final String id,
 			@RequestBody final PasswordReset passwordReset) {
-		UserProfile userProfile = userService.get(id, true);
+		final UserProfile userProfile = userService.get(id, true);
 		if (userProfile == null) {
 			throw new BadRequestException();
 		}

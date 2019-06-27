@@ -9,7 +9,7 @@ public class PatchedPayload implements WebSocketPayload {
 
 	boolean propertyValue;
 
-	public PatchedPayload(String type) {
+	public PatchedPayload(final String type) {
 		this.type = type;
 	}
 
@@ -17,7 +17,7 @@ public class PatchedPayload implements WebSocketPayload {
 		return type;
 	}
 
-	public void setType(String type) {
+	public void setType(final String type) {
 		this.type = type;
 	}
 
@@ -25,7 +25,7 @@ public class PatchedPayload implements WebSocketPayload {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(final String id) {
 		this.id = id;
 	}
 
@@ -33,7 +33,7 @@ public class PatchedPayload implements WebSocketPayload {
 		return propertyName;
 	}
 
-	public void setPropertyName(String propertyName) {
+	public void setPropertyName(final String propertyName) {
 		this.propertyName = propertyName;
 	}
 
@@ -41,7 +41,7 @@ public class PatchedPayload implements WebSocketPayload {
 		return propertyValue;
 	}
 
-	public void setPropertyValue(boolean propertyValue) {
+	public void setPropertyValue(final boolean propertyValue) {
 		this.propertyValue = propertyValue;
 	}
 }

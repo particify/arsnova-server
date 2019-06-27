@@ -79,7 +79,7 @@ public class Comment implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setRead(boolean read) {
+	public void setRead(final boolean read) {
 		this.read = read;
 	}
 
@@ -90,7 +90,7 @@ public class Comment implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setSubject(String subject) {
+	public void setSubject(final String subject) {
 		this.subject = subject;
 	}
 
@@ -101,7 +101,7 @@ public class Comment implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setText(String text) {
+	public void setText(final String text) {
 		this.text = text;
 	}
 
@@ -112,7 +112,7 @@ public class Comment implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setSessionId(String sessionId) {
+	public void setSessionId(final String sessionId) {
 		this.sessionId = sessionId;
 	}
 
@@ -123,7 +123,7 @@ public class Comment implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setTimestamp(long timestamp) {
+	public void setTimestamp(final long timestamp) {
 		this.timestamp = timestamp;
 	}
 
@@ -133,11 +133,11 @@ public class Comment implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setCreator(String creator) {
+	public void setCreator(final String creator) {
 		this.creator = creator;
 	}
 
-	public boolean isCreator(ClientAuthentication user) {
+	public boolean isCreator(final ClientAuthentication user) {
 		return user.getUsername().equals(creator);
 	}
 }

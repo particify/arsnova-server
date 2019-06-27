@@ -95,7 +95,7 @@ public class ImageUtils {
 	 * @param maybeImage The Image as a base64 encoded {@link String}
 	 * @return true if the string is a potentially a base 64 encoded image.
 	 */
-	boolean isBase64EncodedImage(String maybeImage) {
+	boolean isBase64EncodedImage(final String maybeImage) {
 		return extractImageInfo(maybeImage) != null;
 	}
 
@@ -156,7 +156,7 @@ public class ImageUtils {
 	 * @return The rescaled Image as Base64-encoded {@link String}, returns null
 	 *         if the passed-on image isn't in a valid format (a Base64-Image).
 	 */
-	String createCover(String originalImageString, final int width, final int height) {
+	String createCover(final String originalImageString, final int width, final int height) {
 		if (!isBase64EncodedImage(originalImageString)) {
 			return null;
 		} else {
@@ -166,12 +166,12 @@ public class ImageUtils {
 			final String extension = imgInfo[0];
 			final String base64String = imgInfo[1];
 
-			byte[] imageData = Base64.decodeBase64(base64String);
+			final byte[] imageData = Base64.decodeBase64(base64String);
 			try (final ByteArrayInputStream bais = new ByteArrayInputStream(imageData);
 					final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-				BufferedImage originalImage = ImageIO.read(bais);
-				BufferedImage newImage = new BufferedImage(width, height, originalImage.getType());
-				Graphics2D g = newImage.createGraphics();
+				final BufferedImage originalImage = ImageIO.read(bais);
+				final BufferedImage newImage = new BufferedImage(width, height, originalImage.getType());
+				final Graphics2D g = newImage.createGraphics();
 
 				final double ratio = ((double) originalImage.getWidth()) / ((double) originalImage.getHeight());
 
@@ -191,7 +191,7 @@ public class ImageUtils {
 				g.drawImage(originalImage, x, y, w, h, null);
 				g.dispose();
 
-				StringBuilder result = new StringBuilder();
+				final StringBuilder result = new StringBuilder();
 				result.append(IMAGE_PREFIX_START);
 				result.append(extension);
 				result.append(IMAGE_PREFIX_MIDDLE);
@@ -203,7 +203,7 @@ public class ImageUtils {
 				result.append(Base64.encodeBase64String(baos.toByteArray()));
 
 				return result.toString();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				logger.error(e.getLocalizedMessage());
 				return null;
 			}
@@ -218,7 +218,7 @@ public class ImageUtils {
 	 * @return true if the thumbnail image didn't exist before calling this
 	 *         method, false otherwise
 	 */
-	public boolean generateThumbnailImage(Answer answer) {
+	public boolean generateThumbnailImage(final Answer answer) {
 		if (!isBase64EncodedImage(answer.getAnswerThumbnailImage())) {
 			final String thumbImage = createCover(answer.getAnswerImage(), thumbWidth, thumbHeight);
 			answer.setAnswerThumbnailImage(thumbImage);
@@ -246,7 +246,7 @@ public class ImageUtils {
 			baos.flush();
 
 			return baos.toByteArray();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.error(e.getLocalizedMessage());
 		}
 

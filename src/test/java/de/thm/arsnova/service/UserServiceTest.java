@@ -73,27 +73,27 @@ public class UserServiceTest {
 		//		new ClientAuthentication(new UsernamePasswordAuthenticationToken("ptsr00", UUID.randomUUID())));
 		//socketid2user.put(UUID.randomUUID(), new ClientAuthentication(new AttributePrincipalImpl("ptstr0")));
 
-		GoogleOidcProfile profile = new GoogleOidcProfile();
+		final GoogleOidcProfile profile = new GoogleOidcProfile();
 		profile.addAttribute(CommonProfileDefinition.DISPLAY_NAME, "ptsr00");
 		profile.addAttribute(CommonProfileDefinition.EMAIL, "mail@host.com");
 		profile.addAttribute("email_verified", true);
-		UserProfile userProfile = new UserProfile(UserProfile.AuthProvider.GOOGLE, "ptsr00");
+		final UserProfile userProfile = new UserProfile(UserProfile.AuthProvider.GOOGLE, "ptsr00");
 		userProfile.setId(UUID.randomUUID().toString());
-		User user = new User(userProfile, Collections.emptyList());
-		OAuthToken token = new OAuthToken(user, profile, Collections.emptyList());
+		final User user = new User(userProfile, Collections.emptyList());
+		final OAuthToken token = new OAuthToken(user, profile, Collections.emptyList());
 		socketid2user.put(UUID.randomUUID(), new ClientAuthentication(token));
 
-		List<GrantedAuthority> authorities = new ArrayList<>();
+		final List<GrantedAuthority> authorities = new ArrayList<>();
 		authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
 		socketid2user.put(UUID.randomUUID(), new ClientAuthentication(
 				new AnonymousAuthenticationToken("ptsr00", UUID.randomUUID(), authorities)));
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		ObjectOutputStream objOut = new ObjectOutputStream(out);
+		final ByteArrayOutputStream out = new ByteArrayOutputStream();
+		final ObjectOutputStream objOut = new ObjectOutputStream(out);
 		objOut.writeObject(socketid2user);
 		objOut.close();
-		ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(out.toByteArray()));
-		Map<UUID, ClientAuthentication> actual = (Map<UUID, ClientAuthentication>) objIn.readObject();
+		final ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(out.toByteArray()));
+		final Map<UUID, ClientAuthentication> actual = (Map<UUID, ClientAuthentication>) objIn.readObject();
 		assertEquals(actual, socketid2user);
 	}
 
@@ -104,12 +104,12 @@ public class UserServiceTest {
 		user2session.put("ptsr02", UUID.randomUUID().toString());
 		user2session.put("ptsr03", UUID.randomUUID().toString());
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		ObjectOutputStream objOut = new ObjectOutputStream(out);
+		final ByteArrayOutputStream out = new ByteArrayOutputStream();
+		final ObjectOutputStream objOut = new ObjectOutputStream(out);
 		objOut.writeObject(user2session);
 		objOut.close();
-		ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(out.toByteArray()));
-		Map<String, String> actual = (Map<String, String>) objIn.readObject();
+		final ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(out.toByteArray()));
+		final Map<String, String> actual = (Map<String, String>) objIn.readObject();
 		assertEquals(actual, user2session);
 	}
 

@@ -94,21 +94,21 @@ public class WelcomeController extends AbstractController {
 			if (addr.isSiteLocalAddress()) {
 				throw new BadRequestException("Access to site-local addresses not allowed.");
 			}
-		} catch (UnknownHostException | MalformedURLException e) {
+		} catch (final UnknownHostException | MalformedURLException e) {
 			throw new BadRequestException();
 		}
 
-		RestTemplate restTemplate = new RestTemplate();
-		SimpleClientHttpRequestFactory rf = (SimpleClientHttpRequestFactory) restTemplate.getRequestFactory();
+		final RestTemplate restTemplate = new RestTemplate();
+		final SimpleClientHttpRequestFactory rf = (SimpleClientHttpRequestFactory) restTemplate.getRequestFactory();
 		rf.setConnectTimeout(2000);
 		rf.setReadTimeout(2000);
 
 		try {
-			HttpHeaders headers = restTemplate.headForHeaders(url);
+			final HttpHeaders headers = restTemplate.headForHeaders(url);
 			if (headers.isEmpty() || headers.containsKey("x-frame-options")) {
 				throw new NoContentException();
 			}
-		} catch (RestClientException e) {
+		} catch (final RestClientException e) {
 			throw new NoContentException();
 		}
 	}

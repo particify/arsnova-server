@@ -38,9 +38,9 @@ public class ResponseInterceptorHandler extends HandlerInterceptorAdapter {
 
 	@Override
 	public boolean preHandle(
-			HttpServletRequest request,
-			HttpServletResponse response,
-			Object handler
+			final HttpServletRequest request,
+			final HttpServletResponse response,
+			final Object handler
 	) throws Exception {
 		responseProviderService.setResponse(response);
 

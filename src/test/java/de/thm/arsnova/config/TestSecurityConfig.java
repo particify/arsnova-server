@@ -44,7 +44,7 @@ import de.thm.arsnova.security.CasUserDetailsService;
 @Profile("test")
 public class TestSecurityConfig extends SecurityConfig {
 	@Override
-	protected void configure(HttpSecurity http) {}
+	protected void configure(final HttpSecurity http) {}
 
 	@Override
 	@Bean

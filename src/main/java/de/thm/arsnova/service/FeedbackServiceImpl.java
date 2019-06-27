@@ -56,7 +56,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 
 	private ApplicationEventPublisher publisher;
 
-	public FeedbackServiceImpl(FeedbackStorageService feedbackStorage, RoomService roomService) {
+	public FeedbackServiceImpl(final FeedbackStorageService feedbackStorage, final RoomService roomService) {
 		this.feedbackStorage = feedbackStorage;
 		this.roomService = roomService;
 	}
@@ -64,7 +64,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	@Override
 	@Scheduled(fixedDelay = DEFAULT_SCHEDULER_DELAY)
 	public void cleanFeedbackVotes() {
-		Map<Room, List<String>> deletedFeedbackOfUsersInSession = feedbackStorage.cleanVotes(cleanupFeedbackDelay);
+		final Map<Room, List<String>> deletedFeedbackOfUsersInSession = feedbackStorage.cleanVotes(cleanupFeedbackDelay);
 		/*
 		 * mapping (Room -> Users) is not suitable for web sockets, because we want to sent all affected
 		 * sessions to a single user in one go instead of sending multiple messages for each session. Hence,
@@ -72,11 +72,11 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 		 */
 		final Map<String, Set<Room>> affectedSessionsOfUsers = new HashMap<>();
 
-		for (Map.Entry<Room, List<String>> entry : deletedFeedbackOfUsersInSession.entrySet()) {
+		for (final Map.Entry<Room, List<String>> entry : deletedFeedbackOfUsersInSession.entrySet()) {
 			final Room room = entry.getKey();
 			final List<String> userIds = entry.getValue();
-			for (String userId : userIds) {
-				Set<Room> affectedSessions;
+			for (final String userId : userIds) {
+				final Set<Room> affectedSessions;
 				if (affectedSessionsOfUsers.containsKey(userId)) {
 					affectedSessions = affectedSessionsOfUsers.get(userId);
 				} else {
@@ -87,13 +87,13 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 			}
 		}
 		// Send feedback reset event to all affected users
-		for (Map.Entry<String, Set<Room>> entry : affectedSessionsOfUsers.entrySet()) {
+		for (final Map.Entry<String, Set<Room>> entry : affectedSessionsOfUsers.entrySet()) {
 			final String userId = entry.getKey();
 			final Set<Room> rooms = entry.getValue();
 			this.publisher.publishEvent(new DeleteFeedbackForRoomsEvent(this, rooms, userId));
 		}
 		// For each session that has deleted feedback, send the new feedback to all clients
-		for (Room room : deletedFeedbackOfUsersInSession.keySet()) {
+		for (final Room room : deletedFeedbackOfUsersInSession.keySet()) {
 			this.publisher.publishEvent(new NewFeedbackEvent(this, room.getId()));
 		}
 	}
@@ -101,12 +101,12 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	@Override
 	public void cleanFeedbackVotesByRoomId(final String roomId, final int cleanupFeedbackDelayInMins) {
 		final Room room = roomService.get(roomId);
-		List<String> affectedUserIds = feedbackStorage.cleanVotesByRoom(room, cleanupFeedbackDelayInMins);
-		Set<Room> sessionSet = new HashSet<>();
+		final List<String> affectedUserIds = feedbackStorage.cleanVotesByRoom(room, cleanupFeedbackDelayInMins);
+		final Set<Room> sessionSet = new HashSet<>();
 		sessionSet.add(room);
 
 		// Send feedback reset event to all affected users
-		for (String userId : affectedUserIds) {
+		for (final String userId : affectedUserIds) {
 			this.publisher.publishEvent(new DeleteFeedbackForRoomsEvent(this, sessionSet, userId));
 		}
 		// send the new feedback to all clients in affected session
@@ -161,7 +161,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	}
 
 	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+	public void setApplicationEventPublisher(final ApplicationEventPublisher publisher) {
 		this.publisher = publisher;
 	}
 }

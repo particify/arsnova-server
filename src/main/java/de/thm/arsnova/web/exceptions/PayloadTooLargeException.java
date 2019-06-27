@@ -10,15 +10,15 @@ public class PayloadTooLargeException extends RuntimeException {
 		super();
 	}
 
-	public PayloadTooLargeException(String message) {
+	public PayloadTooLargeException(final String message) {
 		super(message);
 	}
 
-	public PayloadTooLargeException(Throwable e) {
+	public PayloadTooLargeException(final Throwable e) {
 		super(e);
 	}
 
-	public PayloadTooLargeException(String message, Throwable e) {
+	public PayloadTooLargeException(final String message, final Throwable e) {
 		super(message, e);
 	}
 }

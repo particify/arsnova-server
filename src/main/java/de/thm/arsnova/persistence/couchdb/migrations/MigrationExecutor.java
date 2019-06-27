@@ -49,7 +49,7 @@ public class MigrationExecutor {
 	}
 
 	public boolean runMigrations(@NonNull final MigrationState migrationState) {
-		List<Migration> pendingMigrations = migrations.stream()
+		final List<Migration> pendingMigrations = migrations.stream()
 				.filter(m -> !migrationState.getCompleted().contains(m.getId())).collect(Collectors.toList());
 		boolean stateChange = false;
 		if (migrationState.getActive() != null) {
@@ -57,7 +57,7 @@ public class MigrationExecutor {
 		}
 		logger.debug("Pending migrations: " + pendingMigrations.stream()
 				.map(Migration::getId).collect(Collectors.joining()));
-		for (Migration migration : pendingMigrations) {
+		for (final Migration migration : pendingMigrations) {
 			stateChange = true;
 			migrationState.setActive(migration.getId(), new Date());
 			migration.migrate();

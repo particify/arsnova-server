@@ -40,15 +40,15 @@ public class RoomFindQueryService implements FindQueryService<Room> {
 
 	@Override
 	public Set<String> resolveQuery(final FindQuery<Room> findQuery) {
-		List<List<String>> ids = new ArrayList<>();
+		final List<List<String>> ids = new ArrayList<>();
 		if (findQuery.getExternalFilters().get("inHistoryOfUserId") instanceof String) {
-			UserProfile inHistoryOfUser = userService.get(
+			final UserProfile inHistoryOfUser = userService.get(
 					(String) findQuery.getExternalFilters().get("inHistoryOfUserId"));
 			ids.add(inHistoryOfUser.getRoomHistory().stream()
 					.map(UserProfile.RoomHistoryEntry::getRoomId).collect(Collectors.toList()));
 		}
 		if (findQuery.getExternalFilters().get("moderatedByUserId") instanceof String) {
-			List<String> moderatedRoomIds = roomService.getRoomIdsByModeratorId(
+			final List<String> moderatedRoomIds = roomService.getRoomIdsByModeratorId(
 					(String) findQuery.getExternalFilters().get("moderatedByUserId"));
 			ids.add(moderatedRoomIds);
 		}

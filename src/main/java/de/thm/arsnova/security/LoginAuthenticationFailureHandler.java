@@ -44,7 +44,7 @@ public class LoginAuthenticationFailureHandler extends
 			final HttpServletResponse response,
 			final AuthenticationException exception
 	) throws IOException, ServletException {
-		HttpSession session = request.getSession();
+		final HttpSession session = request.getSession();
 		if (session != null && session.getAttribute("ars-login-failure-url") != null) {
 			failureUrl = (String) session.getAttribute("ars-login-failure-url");
 		}

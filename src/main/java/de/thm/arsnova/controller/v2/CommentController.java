@@ -91,7 +91,7 @@ public class CommentController extends PaginationController {
 	@Deprecated
 	public CommentReadingCount getUnreadCommentCount(
 			@ApiParam(value = "Room-Key from current room", required = true)
-			@RequestParam("sessionkey") final String roomShortId, String user) {
+			@RequestParam("sessionkey") final String roomShortId, final String user) {
 		return commentService.countRead(roomService.getIdByShortId(roomShortId), user);
 	}
 
@@ -132,8 +132,8 @@ public class CommentController extends PaginationController {
 			@ApiParam(value = "the body from the new comment", required = true)
 			@RequestBody
 			final Comment comment) {
-		de.thm.arsnova.model.Comment commentV3 = fromV2Migrator.migrate(comment);
-		Room roomV3 = roomService.getByShortId(roomShortId);
+		final de.thm.arsnova.model.Comment commentV3 = fromV2Migrator.migrate(comment);
+		final Room roomV3 = roomService.getByShortId(roomShortId);
 		commentV3.setRoomId(roomV3.getId());
 		commentService.create(commentV3);
 	}

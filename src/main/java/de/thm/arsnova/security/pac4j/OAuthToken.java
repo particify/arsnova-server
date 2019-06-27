@@ -33,8 +33,8 @@ import de.thm.arsnova.security.User;
 public class OAuthToken extends AbstractAuthenticationToken {
 	private User principal;
 
-	public OAuthToken(User principal, CommonProfile profile,
-			Collection<? extends GrantedAuthority> grantedAuthorities) {
+	public OAuthToken(final User principal, final CommonProfile profile,
+			final Collection<? extends GrantedAuthority> grantedAuthorities) {
 		super(grantedAuthorities);
 		this.principal = principal;
 		this.setDetails(profile);

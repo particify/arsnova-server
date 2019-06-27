@@ -36,12 +36,12 @@ public class AttachmentServiceImpl extends DefaultEntityServiceImpl<Attachment> 
 		this.attachmentRepository = repository;
 	}
 
-	public void upload(Attachment attachment, MultipartFile file) {
+	public void upload(final Attachment attachment, final MultipartFile file) {
 		/* TODO: implement file upload to storage */
 		create(attachment);
 	}
 
-	public void download(Attachment attachment) {
+	public void download(final Attachment attachment) {
 		/* TODO: implement file download from external URL to storage */
 		create(attachment);
 	}

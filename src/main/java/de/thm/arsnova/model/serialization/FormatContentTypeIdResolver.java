@@ -45,7 +45,7 @@ public class FormatContentTypeIdResolver extends TypeIdResolverBase {
 
 	@Override
 	public JavaType typeFromId(final DatabindContext context, final String id) throws IOException {
-		Content.Format format = Content.Format.valueOf(id);
+		final Content.Format format = Content.Format.valueOf(id);
 		switch (format) {
 			case BINARY:
 				return TypeFactory.defaultInstance().constructType(ChoiceQuestionContent.class);

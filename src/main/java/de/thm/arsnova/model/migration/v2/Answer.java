@@ -150,7 +150,7 @@ public class Answer implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setPiRound(int piRound) {
+	public void setPiRound(final int piRound) {
 		this.piRound = piRound;
 	}
 
@@ -172,7 +172,7 @@ public class Answer implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setAnswerImage(String answerImage) {
+	public void setAnswerImage(final String answerImage) {
 		this.answerImage = answerImage;
 	}
 
@@ -183,7 +183,7 @@ public class Answer implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setAnswerThumbnailImage(String answerThumbnailImage) {
+	public void setAnswerThumbnailImage(final String answerThumbnailImage) {
 		this.answerThumbnailImage = answerThumbnailImage;
 	}
 
@@ -194,7 +194,7 @@ public class Answer implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setTimestamp(long timestamp) {
+	public void setTimestamp(final long timestamp) {
 		this.timestamp = timestamp;
 	}
 
@@ -205,7 +205,7 @@ public class Answer implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setRead(boolean read) {
+	public void setRead(final boolean read) {
 		this.read = read;
 	}
 
@@ -226,7 +226,7 @@ public class Answer implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setAbstention(boolean abstention) {
+	public void setAbstention(final boolean abstention) {
 		this.abstention = abstention;
 	}
 
@@ -236,7 +236,7 @@ public class Answer implements Entity {
 		return abstentionCount;
 	}
 
-	public void setAbstentionCount(int abstentionCount) {
+	public void setAbstentionCount(final int abstentionCount) {
 		this.abstentionCount = abstentionCount;
 	}
 
@@ -247,7 +247,7 @@ public class Answer implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setQuestionVariant(String questionVariant) {
+	public void setQuestionVariant(final String questionVariant) {
 		this.questionVariant = questionVariant;
 	}
 
@@ -258,7 +258,7 @@ public class Answer implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setQuestionValue(int questionValue) {
+	public void setQuestionValue(final int questionValue) {
 		this.questionValue = questionValue;
 	}
 
@@ -291,7 +291,7 @@ public class Answer implements Entity {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		// auto generated!
 		if (this == obj) {
 			return true;
@@ -302,7 +302,7 @@ public class Answer implements Entity {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		Answer other = (Answer) obj;
+		final Answer other = (Answer) obj;
 		if (id == null) {
 			if (other.id != null) {
 				return false;

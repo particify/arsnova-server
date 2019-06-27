@@ -157,7 +157,7 @@ public class Motd implements Entity {
 		// See http://stackoverflow.com/a/113600
 		final int prim = 37;
 
-		int result = 42;
+		final int result = 42;
 		return prim * result + this.motdkey.hashCode();
 	}
 
@@ -166,7 +166,7 @@ public class Motd implements Entity {
 		if (obj == null || !obj.getClass().equals(this.getClass())) {
 			return false;
 		}
-		Motd other = (Motd) obj;
+		final Motd other = (Motd) obj;
 		return this.getMotdkey().equals(other.getMotdkey());
 	}
 }

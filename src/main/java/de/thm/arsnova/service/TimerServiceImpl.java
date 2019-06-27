@@ -106,7 +106,7 @@ public class TimerServiceImpl implements TimerService {
 
 	@Override
 	public void cancelDelayedRoundChange(final String contentId) {
-		Timer timer = timerList.get(contentId);
+		final Timer timer = timerList.get(contentId);
 
 		if (null != timer) {
 			timer.cancel();

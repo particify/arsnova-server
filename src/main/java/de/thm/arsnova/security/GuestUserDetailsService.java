@@ -41,7 +41,7 @@ public class GuestUserDetailsService implements UserDetailsService {
 	private final UserService userService;
 	private final Collection<GrantedAuthority> grantedAuthorities;
 
-	public GuestUserDetailsService(UserService userService) {
+	public GuestUserDetailsService(final UserService userService) {
 		this.userService = userService;
 		grantedAuthorities = new HashSet<>();
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));

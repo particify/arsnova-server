@@ -162,7 +162,7 @@ public class ConfigurationController extends AbstractController {
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
-	public Map<String, Object> getConfiguration(HttpServletRequest request) {
+	public Map<String, Object> getConfiguration(final HttpServletRequest request) {
 		final Map<String, Object> config = new HashMap<>();
 		final Map<String, Boolean> features = new HashMap<>();
 		final Map<String, String> publicPool = new HashMap<>();
@@ -269,7 +269,7 @@ public class ConfigurationController extends AbstractController {
 		}
 
 		if (!"".equals(trackingTrackerUrl)) {
-			Map<String, String> tracking = new HashMap<>();
+			final Map<String, String> tracking = new HashMap<>();
 			config.put("tracking", tracking);
 
 			tracking.put("provider", trackingProvider);

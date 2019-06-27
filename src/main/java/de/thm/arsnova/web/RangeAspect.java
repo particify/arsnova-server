@@ -58,9 +58,10 @@ public class RangeAspect {
 	 */
 	@Around("execution(java.util.List+ de.thm.arsnova.controller.*.*(..))"
 			+ " && this(controller) && @annotation(de.thm.arsnova.web.Pagination)")
-	public Object handlePaginationRange(ProceedingJoinPoint pjp, final PaginationController controller) throws Throwable {
+	public Object handlePaginationRange(final ProceedingJoinPoint pjp, final PaginationController controller)
+			throws Throwable {
 		logger.debug("handlePaginationRange");
-		String rangeHeader = request.getHeader("Range");
+		final String rangeHeader = request.getHeader("Range");
 		Matcher matcher = null;
 		int start = -1;
 		int end = -1;
@@ -76,12 +77,12 @@ public class RangeAspect {
 		}
 		controller.setRange(start, end);
 
-		List<?> list = (List<?>) pjp.proceed();
+		final List<?> list = (List<?>) pjp.proceed();
 
 		if (list != null && matcher != null && matcher.matches()) {
 			int totalSize = -1;
 			if (list instanceof PaginationListDecorator) {
-				PaginationListDecorator<?> pl = (PaginationListDecorator<?>) list;
+				final PaginationListDecorator<?> pl = (PaginationListDecorator<?>) list;
 				totalSize = pl.getTotalSize();
 			}
 
@@ -90,8 +91,8 @@ public class RangeAspect {
 			 * The value for end is calculated since the result list
 			 * could be shorter than requested.
 			 */
-			String rangeStr = String.format("items %d-%d/%d", start, start + list.size() - 1, totalSize);
-			HttpServletResponse response = responseProviderService.getResponse();
+			final String rangeStr = String.format("items %d-%d/%d", start, start + list.size() - 1, totalSize);
+			final HttpServletResponse response = responseProviderService.getResponse();
 			response.addHeader("Content-Range", rangeStr);
 		}
 

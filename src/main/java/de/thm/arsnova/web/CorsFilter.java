@@ -28,14 +28,14 @@ public class CorsFilter extends org.springframework.web.filter.CorsFilter {
 	private static final String TOKEN_HEADER_NAME = "Arsnova-Auth-Token";
 	private final Logger logger = LoggerFactory.getLogger(CorsFilter.class);
 
-	public CorsFilter(List<String> origins) {
+	public CorsFilter(final List<String> origins) {
 		super(configurationSource(origins));
 		logger.info("CorsFilter initialized. Allowed origins: {}", origins);
 	}
 
-	private static UrlBasedCorsConfigurationSource configurationSource(List<String> origins) {
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		CorsConfiguration config;
+	private static UrlBasedCorsConfigurationSource configurationSource(final List<String> origins) {
+		final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		final CorsConfiguration config;
 
 		if (!origins.isEmpty()) {
 			/* Grant full access from specified origins */

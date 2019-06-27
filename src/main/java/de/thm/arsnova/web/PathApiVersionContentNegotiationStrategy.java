@@ -45,7 +45,7 @@ public class PathApiVersionContentNegotiationStrategy implements ContentNegotiat
 	private MediaType fallback;
 	private MediaType empty = MediaType.valueOf(AbstractEntityController.MEDIATYPE_EMPTY);
 
-	public PathApiVersionContentNegotiationStrategy(MediaType fallback) {
+	public PathApiVersionContentNegotiationStrategy(final MediaType fallback) {
 		this.fallback = fallback;
 	}
 

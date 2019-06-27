@@ -61,10 +61,10 @@ public class V2ContentTypeOverrideFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response,
 			final FilterChain filterChain) throws IOException, ServletException {
-		HttpServletRequest requestWrapper = new HttpServletRequestWrapper(request) {
+		final HttpServletRequest requestWrapper = new HttpServletRequestWrapper(request) {
 			@Override
 			public String getHeader(final String name) {
-				String header = super.getHeader(name);
+				final String header = super.getHeader(name);
 				if (header != null && HttpHeaders.CONTENT_TYPE.equals(name)
 						&& MediaType.APPLICATION_JSON.includes(MediaType.valueOf(header))) {
 					logger.debug("Overriding {} header: {}", HttpHeaders.CONTENT_TYPE, AppConfig.API_V2_MEDIA_TYPE_VALUE);
@@ -81,7 +81,7 @@ public class V2ContentTypeOverrideFilter extends OncePerRequestFilter {
 
 			@Override
 			public Enumeration<String> getHeaders(final String name) {
-				String firstHeader = super.getHeaders(name).nextElement();
+				final String firstHeader = super.getHeaders(name).nextElement();
 				if (firstHeader != null && HttpHeaders.CONTENT_TYPE.equals(name)
 						&& MediaType.APPLICATION_JSON.includes(MediaType.valueOf(firstHeader))) {
 					logger.debug("Overriding {} header: {}", HttpHeaders.CONTENT_TYPE, AppConfig.API_V2_MEDIA_TYPE_VALUE);

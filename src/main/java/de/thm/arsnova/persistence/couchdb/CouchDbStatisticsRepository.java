@@ -84,14 +84,14 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
 			}
 			if (!creatorResult.isEmpty()) {
 				final Set<String> creators = new HashSet<>();
-				for (ViewResult.Row row: statsResult.getRows()) {
+				for (final ViewResult.Row row: statsResult.getRows()) {
 					creators.add(row.getKey());
 				}
 				stats.setCreators(creators.size());
 			}
 			if (!studentUserResult.isEmpty()) {
 				final Set<String> students = new HashSet<>();
-				for (ViewResult.Row row: statsResult.getRows()) {
+				for (final ViewResult.Row row: statsResult.getRows()) {
 					students.add(row.getKey());
 				}
 				stats.setActiveStudents(students.size());
