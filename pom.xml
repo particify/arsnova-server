@@ -16,6 +16,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
+		<checkstyle.missing-javadoc.severity>warning</checkstyle.missing-javadoc.severity>
 	</properties>
 
 	<developers>
@@ -517,6 +518,9 @@
 				<configuration>
 					<configLocation>checkstyle.xml</configLocation>
 					<violationSeverity>warning</violationSeverity>
+					<propertyExpansion>
+						checkstyle.missing-javadoc.severity=${checkstyle.missing-javadoc.severity}
+					</propertyExpansion>
 				</configuration>
 			</plugin>
 			<plugin>

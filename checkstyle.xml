@@ -255,6 +255,7 @@
 			<property name="allowThrowsTagsForSubclasses" value="true"/>
 		</module>
 		<module name="MissingJavadocMethod">
+			<property name="severity" value="${checkstyle.missing-javadoc.severity}" default="warning"/>
 			<property name="scope" value="public"/>
 			<property name="minLineCount" value="2"/>
 			<property name="allowedAnnotations" value="Override, Test"/>
