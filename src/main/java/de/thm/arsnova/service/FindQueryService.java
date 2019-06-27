@@ -24,6 +24,7 @@ import de.thm.arsnova.model.Entity;
 import de.thm.arsnova.model.FindQuery;
 
 /**
+ * Provides a method to find entity IDs by {@link FindQuery}.
  *
  * @param <E> Entity type
  * @author Daniel Gerhardt

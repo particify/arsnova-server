@@ -97,7 +97,9 @@ public class Attachment extends Entity {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * <p>
 	 * All fields of <tt>Attachment</tt> are included in equality checks.
+	 * </p>
 	 */
 	@Override
 	public boolean equals(final Object o) {

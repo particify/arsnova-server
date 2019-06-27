@@ -50,9 +50,6 @@ import de.thm.arsnova.service.RoomService;
 import de.thm.arsnova.service.UserService;
 import de.thm.arsnova.web.exceptions.ForbiddenException;
 
-/**
- *
- */
 @RestController("v2MotdController")
 @RequestMapping("/v2/motd")
 @Api(value = "/motd", description = "Message of the Day API")

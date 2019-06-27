@@ -46,10 +46,10 @@ public class ImageUtils {
 	// Or whatever size you want to read in at a time.
 	static final int CHUNK_SIZE = 4096;
 
-	/** Base64-Mimetype-Prefix start */
+	/* Base64-Mimetype-Prefix start */
 	static final String IMAGE_PREFIX_START = "data:image/";
 
-	/** Base64-Mimetype-Prefix middle part */
+	/* Base64-Mimetype-Prefix middle part */
 	static final String IMAGE_PREFIX_MIDDLE = ";base64,";
 
 	/* default value is 200 pixel in width, set the value in the configuration file */
@@ -144,7 +144,7 @@ public class ImageUtils {
 	}
 
 	/**
-	 * Rescales an image represented by a Base64-encoded {@link String}
+	 * Rescales an image represented by a Base64-encoded {@link String}.
 	 *
 	 * @param originalImageString
 	 *            The original image represented by a Base64-encoded

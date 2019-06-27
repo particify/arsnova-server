@@ -116,7 +116,9 @@ public class Motd extends Entity {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * <p>
 	 * All fields of <tt>Motd</tt> are included in equality checks.
+	 * </p>
 	 */
 	@Override
 	public boolean equals(final Object o) {

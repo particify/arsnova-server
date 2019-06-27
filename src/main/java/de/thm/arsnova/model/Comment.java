@@ -108,8 +108,10 @@ public class Comment extends Entity {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * <p>
 	 * The following fields of <tt>LogEntry</tt> are excluded from equality checks:
 	 * {@link #extensions}.
+	 * </p>
 	 */
 	@Override
 	public boolean equals(final Object o) {

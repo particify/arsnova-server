@@ -28,7 +28,9 @@ import de.thm.arsnova.model.serialization.View;
 /**
  * Both a regular (single choice, evaluation, etc.) as well as a freetext answer.
  *
+ * <p>
  * This class has additional fields to transport generated answer statistics.
+ * </p>
  */
 @ApiModel(value = "Answer", description = "Answer entity - Can represent a single answer or summarized statistics")
 public class Answer implements Entity {

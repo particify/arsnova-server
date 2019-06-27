@@ -421,7 +421,7 @@ public class ContentController extends PaginationController {
 	}
 
 	/**
-	 * returns a JSON document which represents the given answer of a content.
+	 * Returns a JSON document which represents the given answer of a content.
 	 *
 	 * @param contentId
 	 *            CouchDB Content ID for which the given answer should be
@@ -456,10 +456,10 @@ public class ContentController extends PaginationController {
 	}
 
 	/**
-	 * returns a list of {@link Answer}s encoded as a JSON document for a given
+	 * Returns a list of {@link Answer}s encoded as a JSON document for a given
 	 * content id. In this case only {@link Answer} <tt>contentId</tt>,
 	 * <tt>answerText</tt>, <tt>answerSubject</tt> and <tt>answerCount</tt>
-	 * properties are set
+	 * properties are set.
 	 *
 	 * @param contentId
 	 *            CouchDB Content ID for which the given answers should be
@@ -591,11 +591,11 @@ public class ContentController extends PaginationController {
 	}
 
 	/**
+	 * Returns the count of answers for given content ID.
 	 *
 	 * @param contentId
 	 *            Content ID for which the given answers should be
 	 *            retrieved
-	 * @return count of answers for given content ID
 	 * @throws NotFoundException
 	 *             if wrong room or wrong content
 	 * @throws ForbiddenException

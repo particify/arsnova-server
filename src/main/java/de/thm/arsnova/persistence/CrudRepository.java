@@ -28,8 +28,9 @@ package de.thm.arsnova.persistence;
  */
 public interface CrudRepository<T, I> extends org.springframework.data.repository.CrudRepository<T, I> {
 	/**
+	 * Retrieve a single entity by ID.
 	 *
-	 * @param id The entity's Id
+	 * @param id The entity's ID
 	 * @return The retrieved entity or null
 	 * @deprecated Use {@link #findById(Object)} instead.
 	 */

@@ -281,8 +281,10 @@ public class Content extends Entity {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * <p>
 	 * The following fields of <tt>LogEntry</tt> are excluded from equality checks:
 	 * {@link #state}, {@link #extensions}, {@link #attachments}.
+	 * </p>
 	 */
 	@Override
 	public boolean equals(final Object o) {

@@ -20,8 +20,6 @@ package de.thm.arsnova.websocket;
 
 /**
  * This interface is used to auto-wire the Socket Server.
- *
- * Extend this interface as you see fit.
  */
 public interface ArsnovaSocketioServer {
 

@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * Contains the entities of the response and the bookmark to query the next page.
  *
- * @param <T>
+ * @param <T> Type of entites
  * @author Daniel Gerhardt
  */
 public class PagedMangoResponse<T> {

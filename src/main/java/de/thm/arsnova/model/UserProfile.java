@@ -274,8 +274,10 @@ public class UserProfile extends Entity {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * <p>
 	 * The following fields of <tt>UserProfile</tt> are excluded from equality checks:
 	 * {@link #account}, {@link #roomHistory}, {@link #acknowledgedMotds}, {@link #extensions}.
+	 * </p>
 	 */
 	@Override
 	public boolean equals(final Object o) {

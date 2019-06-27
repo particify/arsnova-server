@@ -111,8 +111,10 @@ public class Answer extends Entity {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * <p>
 	 * The following fields of <tt>Answer</tt> are excluded from equality checks:
 	 * {@link #extensions}.
+	 * </p>
 	 */
 	@Override
 	public boolean equals(final Object o) {

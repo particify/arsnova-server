@@ -118,6 +118,8 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 		}
 
 		/**
+		 * Create a {@link MangoQuery} from criteria used to select documents.
+		 *
 		 * @param selector See http://docs.couchdb.org/en/stable/api/database/find.html#selector-syntax.
 		 */
 		public MangoQuery(final Map<String, Object> selector) {
@@ -131,6 +133,8 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 		}
 
 		/**
+		 * Set a Map with criteria used to select documents.
+		 *
 		 * @param selector See http://docs.couchdb.org/en/stable/api/database/find.html#selector-syntax.
 		 */
 		public void setSelector(final Map<String, Object> selector) {
@@ -234,6 +238,7 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 	}
 
 	/**
+	 * Retrieves entities from the database selected by the query.
 	 *
 	 * @param query The query sent to CouchDB's Mango API
 	 * @param rh Handler for the response to the query
@@ -257,6 +262,7 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 	}
 
 	/**
+	 * Retrieves entities from the database selected by the query.
 	 *
 	 * @param query The query sent to CouchDB's Mango API
 	 * @param type Type for deserialization of retrieved entities
@@ -268,6 +274,7 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 	}
 
 	/**
+	 * Retrieves entities from the database selected by the query.
 	 *
 	 * @param query The query sent to CouchDB's Mango API
 	 * @param propertyName Name of the entity's property to be parsed
@@ -282,10 +289,11 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 	}
 
 	/**
+	 * Retrieves entities with pagination metadata from the database selected by the query.
 	 *
 	 * @param query The query sent to CouchDB's Mango API
 	 * @param type Type for deserialization of retrieved entities
-	 * @return List of retrieved entities
+	 * @return List of retrieved entities wrapped with pagination metadata
 	 */
 	public <T> PagedMangoResponse<T> queryForPage(final MangoQuery query, final Class<T> type) {
 		final MangoResponseHandler<T> rh = new MangoResponseHandler<>(type, objectMapper, true);

@@ -76,9 +76,11 @@ import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 /**
  * Loads property file and configures non-security related beans and components.
  *
+ * <p>
  * expose-proxy for AspectJ is needed to access the proxy object via AopContext.currentProxy() in CouchDBDao. It might
  * have a negative impact on performance but is needed for caching until a better solution is implemented (e.g. use of
  * AspectJ's weaving).
+ * </p>
  */
 @ComponentScan({
 		"de.thm.arsnova.cache",

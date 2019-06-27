@@ -133,8 +133,10 @@ public class LogEntry extends Entity {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * <p>
 	 * The following fields of <tt>LogEntry</tt> are excluded from equality checks:
 	 * {@link #payload}.
+	 * </p>
 	 */
 	@Override
 	public boolean equals(final Object o) {

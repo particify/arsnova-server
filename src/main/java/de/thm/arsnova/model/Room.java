@@ -625,9 +625,11 @@ public class Room extends Entity {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * <p>
 	 * The following fields of <tt>Room</tt> are excluded from equality checks:
 	 * {@link #contentGroups}, {@link #settings}, {@link #author}, {@link #poolProperties}, {@link #extensions},
 	 * {@link #attachments}, {@link #statistics}.
+	 * </p>
 	 */
 	@Override
 	public boolean equals(final Object o) {

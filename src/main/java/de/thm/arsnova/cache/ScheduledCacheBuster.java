@@ -22,7 +22,9 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-/** This component cleares caches at fixed time intervals:
+/** This component cleares caches at fixed time intervals.
+ *
+ * <p>Time intervals:
  * <ul>
  *   <li><code>sessions</code>: 6h</li>
  *   <li><code>skillquestions</code>, <code>lecturequestions</code>, <code>preparationquestions</code>,
@@ -31,6 +33,7 @@ import org.springframework.stereotype.Component;
  *   <li><code>answers</code>: 15min</li>
  *   <li><code>learningprogress</code>: 15min</li>
  * </ul>
+ * </p>
  */
 @Component
 public class ScheduledCacheBuster {

@@ -36,7 +36,9 @@ import de.thm.arsnova.persistence.SessionStatisticsRepository;
 /**
  * Creates a score calculator implementation.
  *
+ * <p>
  * This class additionally clears all score caches and reports this via event system.
+ * </p>
  */
 @Component
 public class ScoreCalculatorFactoryImpl implements ScoreCalculatorFactory, ApplicationEventPublisherAware {

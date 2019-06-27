@@ -45,7 +45,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	private static final int DEFAULT_SCHEDULER_DELAY = 5000;
 
 	/**
-	 * minutes, after which the feedback is deleted
+	 * Minutes, after which the feedback is deleted.
 	 */
 	@Value("${feedback.cleanup}")
 	private int cleanupFeedbackDelay;
