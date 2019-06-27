@@ -132,9 +132,6 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 						.endKey(ComplexKey.of(roomId))
 						.includeDocs(true),
 				Comment.class);
-//		for (Comment comment : comments) {
-//			comment.setRoomId(session.getKeyword());
-//		}
 
 		return comments;
 	}
@@ -153,9 +150,6 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 						.endKey(ComplexKey.of(roomId, userId))
 						.includeDocs(true),
 				Comment.class);
-//		for (Comment comment : comments) {
-//			comment.setRoomId(session.getKeyword());
-//		}
 
 		return comments;
 	}

@@ -56,7 +56,7 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
 							stats.setClosedSessions(stats.getClosedSessions() + value);
 							break;
 						case "deletedSessions":
-						/* Deleted sessions are not exposed separately for now. */
+							/* Deleted sessions are not exposed separately for now. */
 							stats.setClosedSessions(stats.getClosedSessions() + value);
 							break;
 						case "answers":

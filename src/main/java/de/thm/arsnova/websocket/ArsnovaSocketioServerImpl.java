@@ -247,14 +247,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 					@Timed(name = "setLearningProgressOptionsEvent.onData")
 					public void onData(SocketIOClient client, ScoreOptions scoreOptions, AckRequest ack) {
 						throw new UnsupportedOperationException("Not implemented.");
-//						final ClientAuthentication user = userService.getUserToSocketId(client.getSessionId());
-//						final String shortRoomId = userService.getSessionByUsername(user.getUsername());
-//						final de.thm.arsnova.entities.Room room = roomService.getInternal(shortRoomId, user);
-//						if (room.getOwnerId().equals(user.getId())) {
-//							room.setLearningProgressOptions(scoreOptions);
-//							roomService.updateInternal(room, user);
-//							broadcastInRoom(room.getShortId(), "learningProgressOptions", scoreOptions);
-//						}
+						/* FIXME: missing implementation */
 					}
 				});
 
@@ -398,13 +391,15 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 		client.sendEvent("countLectureQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
 		client.sendEvent("countPreparationQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
 		client.sendEvent("activeUserCountData", roomService.activeUsers(roomId));
-//		client.sendEvent("learningProgressOptions", room.getLearningProgressOptions());
+		/* FIXME: missing implementation */
+		//client.sendEvent("learningProgressOptions", room.getLearningProgressOptions());
 		final de.thm.arsnova.model.Feedback fb = feedbackService.getByRoomId(roomId);
 		client.sendEvent("feedbackData", fb.getValues());
 
 		if (settings.isFlashcardsEnabled()) {
 			client.sendEvent("countFlashcards", contentService.countFlashcardsForUserInternal(roomId));
-//			client.sendEvent("flipFlashcards", room.getFlipFlashcards());
+			/* FIXME: missing implementation */
+			//client.sendEvent("flipFlashcards", room.getFlipFlashcards());
 		}
 
 		try {
@@ -538,15 +533,9 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 				answerService.countTotalAnswersByRoomId(roomId));
 
 		// Update the unanswered count for the content variant that was answered.
-		/* Is this still relevant? */
-//		final de.thm.arsnova.model.Content content = // event.getSource().getContentId();
-//		if (content.getGroups().contains("lecture")) {
-//			sendToUser(event.getSource().getCreatorId(), "unansweredLecturerQuestions",
-//					contentService.getUnAnsweredLectureContentIds(roomId, event.getSource().getCreatorId()));
-//		} else if (content.getGroups().contains("preparation")) {
-//			sendToUser(event.getSource().getCreatorId(), "unansweredPreparationQuestions",
-//					contentService.getUnAnsweredPreparationContentIds(roomId, event.getSource().getCreatorId()));
-//		}
+		/* Is this still relevant?
+		 * FIXME: Send unansweredLecturerQuestions and unansweredPreparationQuestions event messages.
+		 **/
 	}
 
 	@Async
@@ -637,7 +626,8 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 		if (settings.isFlashcardsEnabled()) {
 			broadcastInRoom(roomId, "countFlashcards",
 					contentService.countFlashcardsForUserInternal(roomId));
-//			broadcastInRoom(roomId, "flipFlashcards", event.getEntity().getSettings().isFlipFlashcards());
+			/* FIXME: missing implementation */
+			//broadcastInRoom(roomId, "flipFlashcards", event.getEntity().getSettings().isFlipFlashcards());
 		}
 	}
 
@@ -650,7 +640,8 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 
 	@EventListener
 	public void handleFlipFlashcards(FlipFlashcardsEvent event) {
-//		broadcastInRoom(event.getRoom().getId(), "flipFlashcards", event.getRoom().getFlipFlashcards());
+		/* FIXME: missing implementation */
+		//broadcastInRoom(event.getRoom().getId(), "flipFlashcards", event.getRoom().getFlipFlashcards());
 	}
 
 	@EventListener

@@ -107,89 +107,6 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 	public Room importRoom(final String userId, final ImportExportContainer importRoom) {
 		/* FIXME: not yet migrated - move to service layer */
 		throw new UnsupportedOperationException();
-//		final Room session = this.saveSession(user, importRoom.generateSessionEntity(user));
-//		final List<Document> questions = new ArrayList<>();
-//		// We need to remember which answers belong to which question.
-//		// The answers need a questionId, so we first store the questions to get the IDs.
-//		// Then we update the answer objects and store them as well.
-//		final Map<Document, ImportExportContainer.ImportExportContent> mapping = new HashMap<>();
-//		// Later, generate all answer documents
-//		List<Document> answers = new ArrayList<>();
-//		// We can then push answers together with comments in one large bulk request
-//		List<Document> interposedQuestions = new ArrayList<>();
-//		// Motds shouldn't be forgotten, too
-//		List<Document> motds = new ArrayList<>();
-//		try {
-//			// add session id to all questions and generate documents
-//			for (final ImportExportContainer.ImportExportContent question : importRoom.getQuestions()) {
-//				final Document doc = toQuestionDocument(session, question);
-//				question.setRoomId(session.getId());
-//				questions.add(doc);
-//				mapping.put(doc, question);
-//			}
-//			database.bulkSaveDocuments(questions.toArray(new Document[questions.size()]));
-//
-//			// bulk import answers together with interposed questions
-//			for (Map.Entry<Document, ImportExportContainer.ImportExportContent> entry : mapping.entrySet()) {
-//				final Document doc = entry.getKey();
-//				final ImportExportContainer.ImportExportContent question = entry.getValue();
-//				question.setId(doc.getId());
-//				question.setRevision(doc.getRev());
-//				for (final de.thm.arsnova.entities.transport.Answer answer : question.getAnswers()) {
-//					final Answer a = answer.generateAnswerEntity(user, question);
-//					final Document answerDoc = new Document();
-//					answerDoc.put("type", "skill_question_answer");
-//					answerDoc.put("sessionId", a.getRoomId());
-//					answerDoc.put("questionId", a.getContentId());
-//					answerDoc.put("answerSubject", a.getAnswerSubject());
-//					answerDoc.put("questionVariant", a.getGroups());
-//					answerDoc.put("questionValue", a.getQuestionValue());
-//					answerDoc.put("answerText", a.getAnswerText());
-//					answerDoc.put("answerTextRaw", a.getAnswerTextRaw());
-//					answerDoc.put("timestamp", a.getTimestamp());
-//					answerDoc.put("piRound", a.getPiRound());
-//					answerDoc.put("abstention", a.isAbstention());
-//					answerDoc.put("successfulFreeTextAnswer", a.isSuccessfulFreeTextAnswer());
-//					// we do not store the user's name
-//					answerDoc.put("user", "");
-//					answers.add(answerDoc);
-//				}
-//			}
-//			for (final de.thm.arsnova.entities.transport.Comment i : importRoom.getFeedbackQuestions()) {
-//				final Document q = new Document();
-//				q.put("type", "interposed_question");
-//				q.put("sessionId", session.getId());
-//				q.put("subject", i.getSubject());
-//				q.put("text", i.getText());
-//				q.put("timestamp", i.getTimestamp());
-//				q.put("read", i.isRead());
-//				// we do not store the creator's name
-//				q.put("creator", "");
-//				interposedQuestions.add(q);
-//			}
-//			for (final Motd m : importRoom.getMotds()) {
-//				final Document d = new Document();
-//				d.put("type", "motd");
-//				d.put("motdkey", m.getMotdkey());
-//				d.put("title", m.getTitle());
-//				d.put("text", m.getText());
-//				d.put("audience", m.getAudience());
-//				d.put("sessionkey", session.getKeyword());
-//				d.put("startdate", String.valueOf(m.getStartDate().getTime()));
-//				d.put("enddate", String.valueOf(m.getEndDate().getTime()));
-//				motds.add(d);
-//			}
-//			final List<Document> documents = new ArrayList<>(answers);
-//			database.bulkSaveDocuments(interposedQuestions.toArray(new Document[interposedQuestions.size()]));
-//			database.bulkSaveDocuments(motds.toArray(new Document[motds.size()]));
-//			database.bulkSaveDocuments(documents.toArray(new Document[documents.size()]));
-//		} catch (final IOException e) {
-//			logger.error("Could not import session.", e);
-//			// Something went wrong, delete this session since we do not want a partial import
-//			this.delete(session);
-//			return null;
-//		}
-//		return this.calculateSessionInfo(importRoom, session);
 	}
 
 	/* TODO: Move to service layer. */
@@ -200,73 +117,12 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 			final Boolean withFeedbackQuestions) {
 		/* FIXME: not yet migrated - move to service layer */
 		throw new UnsupportedOperationException();
-//		final ImportExportContainer importExportSession = new ImportExportContainer();
-//		final Room session = getDatabaseDao().getSessionFromKeyword(sessionkey);
-//		importExportSession.setSessionFromSessionObject(session);
-//		final List<Content> questionList = getDatabaseDao().getAllSkillQuestions(session);
-//		for (final Content question : questionList) {
-//			final List<de.thm.arsnova.entities.transport.Answer> answerList = new ArrayList<>();
-//			if (withAnswers) {
-//				for (final Answer a : this.getDatabaseDao().getAllAnswers(question)) {
-//					final de.thm.arsnova.entities.transport.Answer transportAnswer =
-//							new de.thm.arsnova.entities.transport.Answer(a);
-//					answerList.add(transportAnswer);
-//				}
-//				// getAllAnswers does not grep for whole answer object so i need to add empty entries for abstentions
-//				int i = this.getDatabaseDao().getAbstentionAnswerCount(question.getId());
-//				for (int b = 0; b < i; b++) {
-//					final de.thm.arsnova.entities.transport.Answer ans = new de.thm.arsnova.entities.transport.Answer();
-//					ans.setAnswerSubject("");
-//					ans.setAnswerImage("");
-//					ans.setAnswerText("");
-//					ans.setAbstention(true);
-//					answerList.add(ans);
-//				}
-//			}
-//			importExportSession.addQuestionWithAnswers(question, answerList);
-//		}
-//		if (withFeedbackQuestions) {
-//			final List<de.thm.arsnova.entities.transport.Comment> interposedQuestionList = new ArrayList<>();
-//			for (final Comment i : getDatabaseDao().getInterposedQuestions(session, 0, 0)) {
-//				de.thm.arsnova.entities.transport.Comment transportInterposedQuestion =
-//						new de.thm.arsnova.entities.transport.Comment(i);
-//				interposedQuestionList.add(transportInterposedQuestion);
-//			}
-//			importExportSession.setFeedbackQuestions(interposedQuestionList);
-//		}
-//		if (withAnswers) {
-//			importExportSession.setSessionInfo(this.calculateSessionInfo(importExportSession, session));
-//		}
-//		importExportSession.setMotds(motdRepository.getMotdsForSession(session.getKeyword()));
-//		return importExportSession;
 	}
 
 	/* TODO: Move to service layer. */
 	private Room calculateSessionInfo(final ImportExportContainer importExportSession, final Room room) {
 		/* FIXME: not yet migrated - move to service layer */
 		throw new UnsupportedOperationException();
-//		int unreadComments = 0;
-//		int numUnanswered = 0;
-//		int numAnswers = 0;
-//		for (Comment i : importExportSession.getFeedbackQuestions()) {
-//			if (!i.isRead()) {
-//				unreadComments++;
-//			}
-//		}
-//		for (ImportExportContainer.ImportExportContent question : importExportSession.getQuestions()) {
-//			numAnswers += question.getAnswers().size();
-//			if (question.getAnswers().isEmpty()) {
-//				numUnanswered++;
-//			}
-//		}
-//		RoomStatistics stats = new RoomStatistics();
-//		stats.setContentCount(importExportSession.getQuestions().size());
-//		stats.setAnswerCount(numAnswers);
-//		stats.setUnreadAnswerCount(numUnanswered);
-//		stats.setCommentCount(importExportSession.getFeedbackQuestions().size());
-//		stats.setUnreadCommentCount(unreadComments);
-//
-//		return room;
 	}
 
 	@Override
