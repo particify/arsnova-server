@@ -10,4 +10,5 @@ abstract public class AbstractEntityController {
     protected static final String DELETE_MAPPING = DEFAULT_ID_MAPPING;
     protected static final String REQUEST_MAPPING = "/";
     protected static final String FIND_MAPPING = "/find";
+    protected static final String COUNT_MAPPING = "/count";
 }

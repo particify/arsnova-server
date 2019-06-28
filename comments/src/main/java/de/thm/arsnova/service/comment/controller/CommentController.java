@@ -93,6 +93,17 @@ public class CommentController extends AbstractEntityController {
         return service.get(new ArrayList<>(ids));
     }
 
+    @PostMapping(FIND_MAPPING + COUNT_MAPPING)
+    public int findAndCount(@RequestBody final FindQuery<Comment> findQuery) {
+        logger.debug("Resolving find query: {}", findQuery);
+
+        Set<String> ids = findQueryService.resolveQuery(findQuery);
+
+        logger.debug("Resolved find query to IDs: {}", ids);
+
+        return service.get(new ArrayList<>(ids)).size();
+    }
+
     @PatchMapping(PATCH_MAPPING)
     public Comment patch(@PathVariable final String id, @RequestBody final Map<String, Object> changes,
                    final HttpServletResponse httpServletResponse) throws IOException {
