@@ -22,7 +22,7 @@ public class RoomEventHandler {
     }
 
 
-    @RabbitListener(queues = "comment.service.room.created")
+    //@RabbitListener(queues = "comment.service.room.created")
     public void handleEvent(RoomCreated event) {
         RoomCreatedPayload p = event.getPayload();
 
