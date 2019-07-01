@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.7.2
+This is a maintenance release which only brings libraries up to date to fix
+potential bugs.
+
 ## 2.7.1
 This is a maintenance release which only brings libraries up to date to fix
 potential bugs.
