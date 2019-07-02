@@ -15,7 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.security;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.PermissionEvaluator;
+import org.springframework.security.access.intercept.RunAsUserToken;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
 
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Comment;
@@ -28,18 +41,6 @@ import de.thm.arsnova.persistence.CommentRepository;
 import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.MotdRepository;
 import de.thm.arsnova.persistence.RoomRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.PermissionEvaluator;
-import org.springframework.security.access.intercept.RunAsUserToken;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
-
-import java.io.Serializable;
-import java.util.Arrays;
 
 /**
  * Provides access control methods that can be used in annotations.
@@ -99,7 +100,8 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Serializable targetId,
 			final String targetType,
 			final Object permission) {
-		logger.debug("Evaluating permission: hasPermission({}, {}, {}, {})", authentication, targetId, targetType, permission);
+		logger.debug("Evaluating permission: hasPermission({}, {}, {}, {})",
+				authentication, targetId, targetType, permission);
 		if (authentication == null || targetId == null || targetType == null || !(permission instanceof String)) {
 			return false;
 		}
@@ -207,7 +209,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		if (!hasContentPermission(userId, content, "read")) {
 			return false;
 		}
-		Room room;
+		final Room room;
 		switch (permission) {
 			case "read":
 				if (targetAnswer.getCreatorId().equals(userId) || content.getState().isResponsesVisible()) {
@@ -259,7 +261,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final String userId,
 			final Motd targetMotd,
 			final String permission) {
-		Room room;
+		final Room room;
 		switch (permission) {
 			case "create":
 			case "update":
@@ -302,7 +304,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	 * @param role The role that is checked.
 	 * @return Returns true if the user has the moderator role for the room.
 	 */
-	private boolean hasUserIdRoomModeratorRole(final Room room, final String userId, Room.Moderator.Role role) {
+	private boolean hasUserIdRoomModeratorRole(final Room room, final String userId, final Room.Moderator.Role role) {
 		return room.getModerators().stream()
 				.filter(m -> m.getUserId().equals(userId))
 				.anyMatch(m -> m.getRoles().contains(role));
@@ -314,21 +316,21 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	}
 
 	private String getUserId(final Authentication authentication) {
-		if (authentication == null || authentication instanceof AnonymousAuthenticationToken ||
-				!(authentication.getPrincipal() instanceof User)) {
+		if (authentication == null || authentication instanceof AnonymousAuthenticationToken
+				|| !(authentication.getPrincipal() instanceof User)) {
 			return "";
 		}
-		User user = (User) authentication.getPrincipal();
+		final User user = (User) authentication.getPrincipal();
 
 		return user.getId();
 	}
 
-	private boolean isSystemAccess(Authentication auth) {
+	private boolean isSystemAccess(final Authentication auth) {
 		return auth instanceof RunAsUserToken
 				&& auth.getAuthorities().stream().anyMatch(ga -> ga.getAuthority().equals("ROLE_RUN_AS_SYSTEM"));
 	}
 
-	private boolean isWebsocketAccess(Authentication auth) {
+	private boolean isWebsocketAccess(final Authentication auth) {
 		return auth instanceof AnonymousAuthenticationToken && auth.getAuthorities().contains("ROLE_WEBSOCKET_ACCESS");
 	}
 }

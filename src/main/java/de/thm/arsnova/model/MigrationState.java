@@ -15,15 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.serialization.View;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+
+import de.thm.arsnova.model.serialization.View;
 
 public class MigrationState extends Entity {
 	public static class Migration {
@@ -34,7 +35,7 @@ public class MigrationState extends Entity {
 
 		}
 
-		public Migration(String id, Date start) {
+		public Migration(final String id, final Date start) {
 			this.id = id;
 			this.start = start;
 		}
@@ -74,7 +75,7 @@ public class MigrationState extends Entity {
 	public void setId(final String id) {
 		if (!id.equals(this.ID)) {
 			throw new IllegalArgumentException("ID of this entity must not be changed.");
-		};
+		}
 	}
 
 	@Override
@@ -116,7 +117,9 @@ public class MigrationState extends Entity {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * <p>
 	 * All fields of <tt>MigrationState</tt> are included in equality checks.
+	 * </p>
 	 */
 	@Override
 	public boolean equals(final Object o) {
@@ -128,7 +131,7 @@ public class MigrationState extends Entity {
 		}
 		final MigrationState that = (MigrationState) o;
 
-		return Objects.equals(active, that.active) &&
-				Objects.equals(completed, that.completed);
+		return Objects.equals(active, that.active)
+				&& Objects.equals(completed, that.completed);
 	}
 }

@@ -15,14 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.config;
 
 import de.thm.arsnova.controller.JsonViewControllerAdviceTest;
-import de.thm.arsnova.persistence.UserRepository;
 import de.thm.arsnova.service.EntityService;
-import de.thm.arsnova.service.StubUserService;
-import de.thm.arsnova.websocket.ArsnovaSocketioServer;
-import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,6 +40,11 @@ import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
+import de.thm.arsnova.persistence.UserRepository;
+import de.thm.arsnova.service.StubUserService;
+import de.thm.arsnova.websocket.ArsnovaSocketioServer;
+import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 
 @ComponentScan({
 		"de.thm.arsnova.aop",
@@ -95,9 +97,9 @@ public class TestAppConfig {
 	@Bean
 	@Primary
 	public StubUserService stubUserService(
-			UserRepository repository,
-			JavaMailSender mailSender,
-			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+			final UserRepository repository,
+			final JavaMailSender mailSender,
+			@Qualifier("defaultJsonMessageConverter") final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		return new StubUserService(repository, mailSender, jackson2HttpMessageConverter);
 	}
 

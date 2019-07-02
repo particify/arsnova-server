@@ -15,12 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.	 If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service;
 
-import de.thm.arsnova.model.Motd;
-import de.thm.arsnova.model.Room;
-import de.thm.arsnova.persistence.MotdRepository;
-import de.thm.arsnova.web.exceptions.BadRequestException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -28,10 +29,10 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
+import de.thm.arsnova.model.Motd;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.persistence.MotdRepository;
+import de.thm.arsnova.web.exceptions.BadRequestException;
 
 /**
  * Performs all question, interposed question, and answer related operations.
@@ -45,10 +46,11 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	private MotdRepository motdRepository;
 
 	public MotdServiceImpl(
-			MotdRepository repository,
-			UserService userService,
-			RoomService roomService,
-			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+			final MotdRepository repository,
+			final UserService userService,
+			final RoomService roomService,
+			@Qualifier("defaultJsonMessageConverter")
+			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(Motd.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.motdRepository = repository;
 		this.userService = userService;
@@ -58,8 +60,8 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	@Override
 	@PreAuthorize("hasPermission('', 'motd', 'admin')")
 	public List<Motd> getAdminMotds() {
-    return motdRepository.findGlobalForAdmin();
-  }
+		return motdRepository.findGlobalForAdmin();
+	}
 
 	@Override
 	@PreAuthorize("hasPermission(#roomId, 'room', 'owner')")
@@ -79,20 +81,29 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	public List<Motd> getCurrentMotds(final Date clientdate, final String audience) {
 		final List<Motd> motds;
 		switch (audience) {
-			case "all": motds = motdRepository.findGlobalForAll(); break;
-			case "loggedIn": motds = motdRepository.findGlobalForLoggedIn(); break;
-			case "students": motds = motdRepository.findForStudents(); break;
-			case "tutors": motds = motdRepository.findGlobalForTutors(); break;
-			default: throw new IllegalArgumentException("Invalid audience.");
+			case "all":
+				motds = motdRepository.findGlobalForAll();
+				break;
+			case "loggedIn":
+				motds = motdRepository.findGlobalForLoggedIn();
+				break;
+			case "students":
+				motds = motdRepository.findForStudents();
+				break;
+			case "tutors":
+				motds = motdRepository.findGlobalForTutors();
+				break;
+			default:
+				throw new IllegalArgumentException("Invalid audience.");
 		}
 
 		return filterMotdsByDate(motds, clientdate);
 	}
 
 	@Override
-	public List<Motd> filterMotdsByDate(List<Motd> list, Date clientdate) {
-		List<Motd> returns = new ArrayList<>();
-		for (Motd motd : list) {
+	public List<Motd> filterMotdsByDate(final List<Motd> list, final Date clientdate) {
+		final List<Motd> returns = new ArrayList<>();
+		for (final Motd motd : list) {
 			if (motd.getStartDate().before(clientdate) && motd.getEndDate().after(clientdate)) {
 				returns.add(motd);
 			}
@@ -101,7 +112,7 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	}
 
 	@Override
-	public List<Motd> filterMotdsByList(List<Motd> list, List<String> ids) {
+	public List<Motd> filterMotdsByList(final List<Motd> list, final List<String> ids) {
 		return list.stream().filter(id -> ids.contains(id)).collect(Collectors.toList());
 	}
 
@@ -114,7 +125,7 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	@Override
 	@PreAuthorize("hasPermission(#roomId, 'room', 'owner')")
 	public Motd save(final String roomId, final Motd motd) {
-		Room room = roomService.get(roomId);
+		final Room room = roomService.get(roomId);
 		motd.setRoomId(room.getId());
 
 		return createOrUpdateMotd(motd);
@@ -135,7 +146,7 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 	@CacheEvict(cacheNames = "motds", key = "#motd.audience + #motd.roomId")
 	private Motd createOrUpdateMotd(final Motd motd) {
 		if (motd.getId() != null) {
-			Motd oldMotd = get(motd.getId());
+			final Motd oldMotd = get(motd.getId());
 			if (!(motd.getId().equals(oldMotd.getId()) && motd.getRoomId().equals(oldMotd.getRoomId())
 					&& motd.getAudience().equals(oldMotd.getAudience()))) {
 				throw new BadRequestException();
@@ -143,7 +154,7 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 		}
 
 		if (null != motd.getId()) {
-			Motd oldMotd = get(motd.getId());
+			final Motd oldMotd = get(motd.getId());
 			motd.setId(oldMotd.getId());
 
 			return super.update(oldMotd, motd);

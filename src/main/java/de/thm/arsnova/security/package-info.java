@@ -1,5 +1,5 @@
-/** This package contains security related implementations
- * @author Paul-Christian Volkmer
- *
+/**
+ * Authentication and authorization related classes.
  */
+
 package de.thm.arsnova.security;

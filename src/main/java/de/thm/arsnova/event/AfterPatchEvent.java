@@ -15,12 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.event;
 
-import de.thm.arsnova.model.Entity;
+package de.thm.arsnova.event;
 
 import java.util.Map;
 import java.util.function.Function;
+
+import de.thm.arsnova.model.Entity;
 
 public class AfterPatchEvent<E extends Entity> extends AfterUpdateEvent<E> {
 	private final Function<E, ? extends Object> propertyGetter;

@@ -15,17 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.model.serialization.View;
-import de.thm.arsnova.security.User;
+import java.io.Serializable;
+import java.util.Objects;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
-import java.io.Serializable;
-import java.util.Objects;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.model.serialization.View;
+import de.thm.arsnova.security.User;
 
 /**
  * Represents a user.
@@ -44,21 +45,21 @@ public class ClientAuthentication implements Serializable {
 		authProvider = UserProfile.AuthProvider.NONE;
 	}
 
-	public ClientAuthentication(User user) {
+	public ClientAuthentication(final User user) {
 		id = user.getId();
 		username = user.getUsername();
 		authProvider = user.getAuthProvider();
 		isAdmin = user.isAdmin();
 	}
 
-	public ClientAuthentication(Authentication authentication) {
+	public ClientAuthentication(final Authentication authentication) {
 		if (authentication instanceof AnonymousAuthenticationToken) {
 			setUsername(ClientAuthentication.ANONYMOUS);
 		} else {
 			if (!(authentication.getPrincipal() instanceof User)) {
 				throw new IllegalArgumentException("Unsupported authentication token");
 			}
-			User user = (User) authentication.getPrincipal();
+			final User user = (User) authentication.getPrincipal();
 			id = user.getId();
 			username = user.getUsername();
 			authProvider = user.getAuthProvider();
@@ -122,9 +123,10 @@ public class ClientAuthentication implements Serializable {
 		if (obj == null || !obj.getClass().equals(this.getClass())) {
 			return false;
 		}
-		ClientAuthentication other = (ClientAuthentication) obj;
+		final ClientAuthentication other = (ClientAuthentication) obj;
 
-		return this.authProvider == other.authProvider && Objects.equals(this.id, other.id) && this.username.equals(other.username);
+		return this.authProvider == other.authProvider
+				&& Objects.equals(this.id, other.id) && this.username.equals(other.username);
 	}
 
 }

@@ -15,14 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.service;
 
-import de.thm.arsnova.model.Comment;
-import de.thm.arsnova.model.FindQuery;
-import org.springframework.stereotype.Service;
+package de.thm.arsnova.service;
 
 import java.util.HashSet;
 import java.util.Set;
+import org.springframework.stereotype.Service;
+
+import de.thm.arsnova.model.Comment;
+import de.thm.arsnova.model.FindQuery;
 
 @Service
 public class CommentFindQueryService implements FindQueryService<Comment> {
@@ -36,9 +37,9 @@ public class CommentFindQueryService implements FindQueryService<Comment> {
 
 	@Override
 	public Set<String> resolveQuery(final FindQuery<Comment> findQuery) {
-		Set<String> ids = new HashSet<>();
+		final Set<String> ids = new HashSet<>();
 		if (findQuery.getProperties().getRoomId() != null) {
-			for (Comment c : commentService.getByRoomId(findQuery.getProperties().getRoomId(), 0, 0)) {
+			for (final Comment c : commentService.getByRoomId(findQuery.getProperties().getRoomId(), 0, 0)) {
 				ids.add(c.getId());
 			}
 		}

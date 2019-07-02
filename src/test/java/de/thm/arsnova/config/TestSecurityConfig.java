@@ -15,9 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.config;
 
-import de.thm.arsnova.security.CasUserDetailsService;
 import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
 import org.pac4j.oauth.client.FacebookClient;
 import org.pac4j.oauth.client.TwitterClient;
@@ -36,13 +36,15 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 
+import de.thm.arsnova.security.CasUserDetailsService;
+
 @Configuration
 @EnableGlobalMethodSecurity(mode = AdviceMode.ASPECTJ, prePostEnabled = true)
 @EnableWebSecurity
 @Profile("test")
 public class TestSecurityConfig extends SecurityConfig {
 	@Override
-	protected void configure(HttpSecurity http) {}
+	protected void configure(final HttpSecurity http) {}
 
 	@Override
 	@Bean

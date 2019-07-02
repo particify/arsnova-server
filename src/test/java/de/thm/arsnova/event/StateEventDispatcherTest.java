@@ -15,20 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.event;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.thm.arsnova.config.AppConfig;
-import de.thm.arsnova.config.TestAppConfig;
-import de.thm.arsnova.config.TestPersistanceConfig;
-import de.thm.arsnova.config.TestSecurityConfig;
-import de.thm.arsnova.config.WebSocketConfig;
-import de.thm.arsnova.model.Content;
-import de.thm.arsnova.model.Room;
-import de.thm.arsnova.persistence.ContentRepository;
-import de.thm.arsnova.persistence.RoomRepository;
-import de.thm.arsnova.service.DefaultEntityServiceImpl;
-import de.thm.arsnova.test.context.support.WithMockUser;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,16 +43,17 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.when;
+import de.thm.arsnova.config.AppConfig;
+import de.thm.arsnova.config.TestAppConfig;
+import de.thm.arsnova.config.TestPersistanceConfig;
+import de.thm.arsnova.config.TestSecurityConfig;
+import de.thm.arsnova.config.WebSocketConfig;
+import de.thm.arsnova.model.Content;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.persistence.ContentRepository;
+import de.thm.arsnova.persistence.RoomRepository;
+import de.thm.arsnova.service.DefaultEntityServiceImpl;
+import de.thm.arsnova.test.context.support.WithMockUser;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -102,7 +103,7 @@ public class StateEventDispatcherTest {
 
 		when(roomRepository.save(any(Room.class))).then(returnsFirstArg());
 
-		Room room = new Room();
+		final Room room = new Room();
 		room.setOwnerId(TEST_USER_ID);
 		entityService.patch(room, Collections.singletonMap(QUESTIONS_ENABLED_PROPERTY_NAME, false), Room::getSettings);
 		assertEquals(1, eventListenerConfig.getRoomSettingsStateChangeEvents().size());
@@ -117,13 +118,13 @@ public class StateEventDispatcherTest {
 				Content.class, contentRepository, objectMapper);
 		entityService.setApplicationEventPublisher(eventPublisher);
 
-		Room room = new Room();
+		final Room room = new Room();
 		room.setId(TEST_ROOM_ID);
 		room.setOwnerId(TEST_USER_ID);
 		when(contentRepository.save(any(Content.class))).then(returnsFirstArg());
 		when(roomRepository.findOne(eq(room.getId()))).thenReturn(room);
 
-		Content content = new Content();
+		final Content content = new Content();
 		content.setRoomId(room.getId());
 		entityService.patch(content, Collections.singletonMap(VISIBLE_PROPERTY_NAME, false), Content::getState);
 		assertEquals(1, eventListenerConfig.getContentStateChangeEvents().size());
@@ -136,12 +137,12 @@ public class StateEventDispatcherTest {
 		private List<StateChangeEvent<Content, Content.State>> contentStateChangeEvents = new ArrayList<>();
 
 		@EventListener(condition = "#event.stateName == '" + SETTINGS_PROPERTY_NAME + "'")
-		public void handleRoomSettingsStateChangeEvent(StateChangeEvent<Room, Room.Settings> event) {
+		public void handleRoomSettingsStateChangeEvent(final StateChangeEvent<Room, Room.Settings> event) {
 			roomSettingsStateChangeEvents.add(event);
 		}
 
 		@EventListener(condition = "#event.stateName == '" + STATE_PROPERTY_NAME + "'")
-		public void handleContentStateChangeEvent(StateChangeEvent<Content, Content.State> event) {
+		public void handleContentStateChangeEvent(final StateChangeEvent<Content, Content.State> event) {
 			contentStateChangeEvents.add(event);
 		}
 

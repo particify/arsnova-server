@@ -15,20 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
-import de.thm.arsnova.model.serialization.FormatContentTypeIdResolver;
-import de.thm.arsnova.model.serialization.View;
-import org.springframework.core.style.ToStringCreator;
-
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import org.springframework.core.style.ToStringCreator;
+
+import de.thm.arsnova.model.serialization.FormatContentTypeIdResolver;
+import de.thm.arsnova.model.serialization.View;
 
 @JsonTypeInfo(
 		use = JsonTypeInfo.Id.CUSTOM,
@@ -71,7 +72,7 @@ public class Content extends Entity {
 		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
-		public void setRoundEndTimestamp(Date roundEndTimestamp) {
+		public void setRoundEndTimestamp(final Date roundEndTimestamp) {
 			this.roundEndTimestamp = roundEndTimestamp;
 		}
 
@@ -130,12 +131,12 @@ public class Content extends Entity {
 			}
 			final State state = (State) o;
 
-			return round == state.round &&
-					visible == state.visible &&
-					solutionVisible == state.solutionVisible &&
-					responsesEnabled == state.responsesEnabled &&
-					responsesVisible == state.responsesVisible &&
-					Objects.equals(roundEndTimestamp, state.roundEndTimestamp);
+			return round == state.round
+					&& visible == state.visible
+					&& solutionVisible == state.solutionVisible
+					&& responsesEnabled == state.responsesEnabled
+					&& responsesVisible == state.responsesVisible
+					&& Objects.equals(roundEndTimestamp, state.roundEndTimestamp);
 		}
 
 		@Override
@@ -237,7 +238,7 @@ public class Content extends Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setTimestamp(Date timestamp) {
+	public void setTimestamp(final Date timestamp) {
 		this.timestamp = timestamp;
 	}
 
@@ -247,7 +248,7 @@ public class Content extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setExtensions(Map<String, Map<String, ?>> extensions) {
+	public void setExtensions(final Map<String, Map<String, ?>> extensions) {
 		this.extensions = extensions;
 	}
 
@@ -280,8 +281,10 @@ public class Content extends Entity {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * <p>
 	 * The following fields of <tt>LogEntry</tt> are excluded from equality checks:
 	 * {@link #state}, {@link #extensions}, {@link #attachments}.
+	 * </p>
 	 */
 	@Override
 	public boolean equals(final Object o) {
@@ -293,12 +296,12 @@ public class Content extends Entity {
 		}
 		final Content content = (Content) o;
 
-		return Objects.equals(roomId, content.roomId) &&
-				Objects.equals(subject, content.subject) &&
-				Objects.equals(body, content.body) &&
-				format == content.format &&
-				Objects.equals(groups, content.groups) &&
-				Objects.equals(timestamp, content.timestamp);
+		return Objects.equals(roomId, content.roomId)
+				&& Objects.equals(subject, content.subject)
+				&& Objects.equals(body, content.body)
+				&& format == content.format
+				&& Objects.equals(groups, content.groups)
+				&& Objects.equals(timestamp, content.timestamp);
 	}
 
 	@Override

@@ -15,41 +15,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service;
 
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.persistence.UserRepository;
-import de.thm.arsnova.security.User;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.persistence.UserRepository;
+import de.thm.arsnova.security.User;
 
 public class StubUserService extends UserServiceImpl {
 	private final Set<GrantedAuthority> grantedAuthorities;
 	private User stubUser = null;
 
 	public StubUserService(
-			UserRepository repository,
-			JavaMailSender mailSender,
-			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+			final UserRepository repository,
+			final JavaMailSender mailSender,
+			@Qualifier("defaultJsonMessageConverter") final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(repository, mailSender, jackson2HttpMessageConverter);
 		grantedAuthorities = new HashSet<>();
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 	}
 
-	public void setUserAuthenticated(boolean isAuthenticated) {
+	public void setUserAuthenticated(final boolean isAuthenticated) {
 		this.setUserAuthenticated(isAuthenticated, "ptsr00");
 	}
 
-	public void setUserAuthenticated(boolean isAuthenticated, String username) {
+	public void setUserAuthenticated(final boolean isAuthenticated, final String username) {
 		if (isAuthenticated) {
-			UserProfile userProfile = new UserProfile(UserProfile.AuthProvider.ARSNOVA, username);
+			final UserProfile userProfile = new UserProfile(UserProfile.AuthProvider.ARSNOVA, username);
 			userProfile.setId(UUID.randomUUID().toString());
 			stubUser = new User(userProfile, grantedAuthorities);
 		} else {

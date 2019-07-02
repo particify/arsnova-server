@@ -9,15 +9,19 @@ public class FeedbackChangedPayload implements WebSocketPayload {
 		return values;
 	}
 
-	public void setValues(int[] values) {
+	public void setValues(final int[] values) {
 		this.values = values;
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		FeedbackChangedPayload that = (FeedbackChangedPayload) o;
+	public boolean equals(final Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		final FeedbackChangedPayload that = (FeedbackChangedPayload) o;
 		return Arrays.equals(values, that.values);
 	}
 

@@ -15,18 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.config;
 
-import de.thm.arsnova.security.CasLogoutSuccessHandler;
-import de.thm.arsnova.security.CasUserDetailsService;
-import de.thm.arsnova.security.CustomLdapUserDetailsMapper;
-import de.thm.arsnova.security.LoginAuthenticationFailureHandler;
-import de.thm.arsnova.security.LoginAuthenticationSucessHandler;
-import de.thm.arsnova.security.RegisteredUserDetailsService;
-import de.thm.arsnova.security.jwt.JwtAuthenticationProvider;
-import de.thm.arsnova.security.jwt.JwtTokenFilter;
-import de.thm.arsnova.security.pac4j.OauthAuthenticationProvider;
-import de.thm.arsnova.security.pac4j.OauthCallbackFilter;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.PostConstruct;
+import javax.servlet.ServletContext;
 import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.config.Config;
@@ -85,10 +80,16 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.security.web.header.writers.HstsHeaderWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
-import java.util.ArrayList;
-import java.util.List;
+import de.thm.arsnova.security.CasLogoutSuccessHandler;
+import de.thm.arsnova.security.CasUserDetailsService;
+import de.thm.arsnova.security.CustomLdapUserDetailsMapper;
+import de.thm.arsnova.security.LoginAuthenticationFailureHandler;
+import de.thm.arsnova.security.LoginAuthenticationSucessHandler;
+import de.thm.arsnova.security.RegisteredUserDetailsService;
+import de.thm.arsnova.security.jwt.JwtAuthenticationProvider;
+import de.thm.arsnova.security.jwt.JwtTokenFilter;
+import de.thm.arsnova.security.pac4j.OauthAuthenticationProvider;
+import de.thm.arsnova.security.pac4j.OauthCallbackFilter;
 
 /**
  * Loads property file and configures components used for authentication.
@@ -143,7 +144,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	public class HttpSecurityConfig extends WebSecurityConfigurerAdapter {
 		@Override
-		protected void configure(HttpSecurity http) throws Exception {
+		protected void configure(final HttpSecurity http) throws Exception {
 			http.exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint());
 			http.csrf().disable();
 			http.headers().addHeaderWriter(new HstsHeaderWriter(false));
@@ -165,7 +166,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Profile("!test")
 	public class StatelessHttpSecurityConfig extends HttpSecurityConfig {
 		@Override
-		protected void configure(HttpSecurity http) throws Exception {
+		protected void configure(final HttpSecurity http) throws Exception {
 			super.configure(http);
 			http.antMatcher("/**");
 			http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
@@ -177,7 +178,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Profile("!test")
 	public class StatefulHttpSecurityConfig extends HttpSecurityConfig {
 		@Override
-		protected void configure(HttpSecurity http) throws Exception {
+		protected void configure(final HttpSecurity http) throws Exception {
 			super.configure(http);
 			http.antMatcher("/v2/**");
 			http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
@@ -189,8 +190,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
 		@Override
 		protected RunAsManager runAsManager() {
-			StringKeyGenerator keyGenerator = new Base64StringKeyGenerator();
-			RunAsManagerImpl runAsManager = new RunAsManagerImpl();
+			final StringKeyGenerator keyGenerator = new Base64StringKeyGenerator();
+			final RunAsManagerImpl runAsManager = new RunAsManagerImpl();
 			/* Since RunAsTokens should currently only be used internally, we generate a random key. */
 			runAsManager.setKey(RUN_AS_KEY_PREFIX + keyGenerator.generateKey());
 
@@ -206,8 +207,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Override
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		List<String> providers = new ArrayList<>();
+	protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
+		final List<String> providers = new ArrayList<>();
 		auth.authenticationProvider(jwtAuthenticationProvider());
 		if (ldapEnabled) {
 			providers.add("ldap");
@@ -243,8 +244,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		final PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
 		configurer.setLocations(
-			new ClassPathResource("arsnova.properties.example"),
-			new FileSystemResource("file:///etc/arsnova/arsnova.properties")
+				new ClassPathResource("arsnova.properties.example"),
+				new FileSystemResource("file:///etc/arsnova/arsnova.properties")
 		);
 		configurer.setIgnoreResourceNotFound(true);
 		configurer.setIgnoreUnresolvablePlaceholders(false);
@@ -269,7 +270,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public JwtTokenFilter jwtTokenFilter() throws Exception {
-		JwtTokenFilter jwtTokenFilter = new JwtTokenFilter();
+		final JwtTokenFilter jwtTokenFilter = new JwtTokenFilter();
 		return jwtTokenFilter;
 	}
 
@@ -319,7 +320,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public LdapAuthenticationProvider ldapAuthenticationProvider() {
-		LdapAuthenticationProvider ldapAuthenticationProvider = new LdapAuthenticationProvider(ldapAuthenticator(), ldapAuthoritiesPopulator());
+		final LdapAuthenticationProvider ldapAuthenticationProvider =
+				new LdapAuthenticationProvider(ldapAuthenticator(), ldapAuthoritiesPopulator());
 		ldapAuthenticationProvider.setUserDetailsContextMapper(customLdapUserDetailsMapper());
 
 		return ldapAuthenticationProvider;
@@ -327,7 +329,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public LdapContextSource ldapContextSource() {
-		DefaultSpringSecurityContextSource contextSource = new DefaultSpringSecurityContextSource(ldapUrl);
+		final DefaultSpringSecurityContextSource contextSource = new DefaultSpringSecurityContextSource(ldapUrl);
 		/* TODO: implement support for LDAP bind using manager credentials */
 		if (!"".equals(ldapManagerUserDn) && !"".equals(ldapManagerPassword)) {
 			logger.debug("ldapManagerUserDn: {}", ldapManagerUserDn);
@@ -340,7 +342,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public LdapAuthenticator ldapAuthenticator() {
-		BindAuthenticator authenticator = new BindAuthenticator(ldapContextSource());
+		final BindAuthenticator authenticator = new BindAuthenticator(ldapContextSource());
 		authenticator.setUserAttributes(new String[] {ldapUserIdAttr});
 		if (!"".equals(ldapSearchFilter)) {
 			logger.debug("ldapSearch: {} {}", ldapSearchBase, ldapSearchFilter);
@@ -369,7 +371,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public CasAuthenticationProvider casAuthenticationProvider() {
-		CasAuthenticationProvider authProvider = new CasAuthenticationProvider();
+		final CasAuthenticationProvider authProvider = new CasAuthenticationProvider();
 		authProvider.setAuthenticationUserDetailsService(casUserDetailsService());
 		authProvider.setServiceProperties(casServiceProperties());
 		authProvider.setTicketValidator(casTicketValidator());
@@ -385,7 +387,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public ServiceProperties casServiceProperties() {
-		ServiceProperties properties = new ServiceProperties();
+		final ServiceProperties properties = new ServiceProperties();
 		properties.setService(rootUrl + apiPath + CAS_LOGIN_PATH_SUFFIX);
 		properties.setSendRenew(false);
 
@@ -399,7 +401,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public CasAuthenticationEntryPoint casAuthenticationEntryPoint() {
-		CasAuthenticationEntryPoint entryPoint = new CasAuthenticationEntryPoint();
+		final CasAuthenticationEntryPoint entryPoint = new CasAuthenticationEntryPoint();
 		entryPoint.setLoginUrl(casUrl + "/login");
 		entryPoint.setServiceProperties(casServiceProperties());
 
@@ -408,7 +410,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public CasAuthenticationFilter casAuthenticationFilter() throws Exception {
-		CasAuthenticationFilter filter = new CasAuthenticationFilter();
+		final CasAuthenticationFilter filter = new CasAuthenticationFilter();
 		filter.setAuthenticationManager(authenticationManager());
 		filter.setServiceProperties(casServiceProperties());
 		filter.setFilterProcessesUrl("/**" + CAS_LOGIN_PATH_SUFFIX);
@@ -420,7 +422,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public LogoutFilter casLogoutFilter() {
-		LogoutFilter filter = new LogoutFilter(casLogoutSuccessHandler(), logoutHandler());
+		final LogoutFilter filter = new LogoutFilter(casLogoutSuccessHandler(), logoutHandler());
 		filter.setLogoutRequestMatcher(new AntPathRequestMatcher("/**" + CAS_LOGOUT_PATH_SUFFIX));
 
 		return filter;
@@ -428,7 +430,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public LogoutSuccessHandler casLogoutSuccessHandler() {
-		CasLogoutSuccessHandler handler = new CasLogoutSuccessHandler();
+		final CasLogoutSuccessHandler handler = new CasLogoutSuccessHandler();
 		handler.setCasUrl(casUrl);
 		handler.setDefaultTarget(rootUrl);
 
@@ -439,7 +441,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public Config oauthConfig() {
-		List<Client> clients = new ArrayList<>();
+		final List<Client> clients = new ArrayList<>();
 		if (oidcEnabled) {
 			clients.add(oidcClient());
 		}
@@ -458,7 +460,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public OauthCallbackFilter oauthCallbackFilter() throws Exception {
-		OauthCallbackFilter callbackFilter = new OauthCallbackFilter(oauthConfig());
+		final OauthCallbackFilter callbackFilter = new OauthCallbackFilter(oauthConfig());
 		callbackFilter.setAuthenticationManager(authenticationManager());
 		callbackFilter.setFilterProcessesUrl("/**" + OAUTH_CALLBACK_PATH_SUFFIX);
 
@@ -472,12 +474,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public OidcClient oidcClient() {
-		OidcConfiguration config = new OidcConfiguration();
+		final OidcConfiguration config = new OidcConfiguration();
 		config.setDiscoveryURI(oidcIssuer + OIDC_DISCOVERY_PATH_SUFFIX);
 		config.setClientId(oidcClientId);
 		config.setSecret(oidcSecret);
 		config.setScope("openid");
-		OidcClient client = new OidcClient(config);
+		final OidcClient client = new OidcClient(config);
 		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH_SUFFIX + "?client_name=OidcClient");
 
 		return client;
@@ -501,7 +503,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public GoogleOidcClient googleClient() {
-		OidcConfiguration config = new OidcConfiguration();
+		final OidcConfiguration config = new OidcConfiguration();
 		config.setClientId(googleKey);
 		config.setSecret(googleSecret);
 		config.setScope("openid email");

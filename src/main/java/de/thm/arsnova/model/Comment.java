@@ -15,15 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.serialization.View;
-import org.springframework.core.style.ToStringCreator;
-
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
+import org.springframework.core.style.ToStringCreator;
+
+import de.thm.arsnova.model.serialization.View;
 
 public class Comment extends Entity {
 	private String roomId;
@@ -100,15 +101,17 @@ public class Comment extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setExtensions(Map<String, Map<String, ?>> extensions) {
+	public void setExtensions(final Map<String, Map<String, ?>> extensions) {
 		this.extensions = extensions;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 *
+	 * <p>
 	 * The following fields of <tt>LogEntry</tt> are excluded from equality checks:
 	 * {@link #extensions}.
+	 * </p>
 	 */
 	@Override
 	public boolean equals(final Object o) {
@@ -120,13 +123,13 @@ public class Comment extends Entity {
 		}
 		final Comment comment = (Comment) o;
 
-		return read == comment.read &&
-				Objects.equals(roomId, comment.roomId) &&
-				Objects.equals(creatorId, comment.creatorId) &&
-				Objects.equals(subject, comment.subject) &&
-				Objects.equals(body, comment.body) &&
-				Objects.equals(timestamp, comment.timestamp) &&
-				Objects.equals(extensions, comment.extensions);
+		return read == comment.read
+				&& Objects.equals(roomId, comment.roomId)
+				&& Objects.equals(creatorId, comment.creatorId)
+				&& Objects.equals(subject, comment.subject)
+				&& Objects.equals(body, comment.body)
+				&& Objects.equals(timestamp, comment.timestamp)
+				&& Objects.equals(extensions, comment.extensions);
 	}
 
 	@Override

@@ -15,25 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import de.thm.arsnova.connector.client.ConnectorClient;
-import de.thm.arsnova.connector.client.ConnectorClientImpl;
-import de.thm.arsnova.model.migration.FromV2Migrator;
-import de.thm.arsnova.model.migration.ToV2Migrator;
-import de.thm.arsnova.model.serialization.CouchDbDocumentModule;
-import de.thm.arsnova.model.serialization.View;
-import de.thm.arsnova.util.ImageUtils;
-import de.thm.arsnova.web.CacheControlInterceptorHandler;
-import de.thm.arsnova.web.CorsFilter;
-import de.thm.arsnova.web.DeprecatedApiInterceptorHandler;
-import de.thm.arsnova.web.PathApiVersionContentNegotiationStrategy;
-import de.thm.arsnova.web.ResponseInterceptorHandler;
-import de.thm.arsnova.websocket.ArsnovaSocketioServer;
-import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
@@ -67,17 +58,29 @@ import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import de.thm.arsnova.connector.client.ConnectorClient;
+import de.thm.arsnova.connector.client.ConnectorClientImpl;
+import de.thm.arsnova.model.migration.FromV2Migrator;
+import de.thm.arsnova.model.migration.ToV2Migrator;
+import de.thm.arsnova.model.serialization.CouchDbDocumentModule;
+import de.thm.arsnova.model.serialization.View;
+import de.thm.arsnova.util.ImageUtils;
+import de.thm.arsnova.web.CacheControlInterceptorHandler;
+import de.thm.arsnova.web.CorsFilter;
+import de.thm.arsnova.web.DeprecatedApiInterceptorHandler;
+import de.thm.arsnova.web.PathApiVersionContentNegotiationStrategy;
+import de.thm.arsnova.web.ResponseInterceptorHandler;
+import de.thm.arsnova.websocket.ArsnovaSocketioServer;
+import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 
 /**
  * Loads property file and configures non-security related beans and components.
  *
+ * <p>
  * expose-proxy for AspectJ is needed to access the proxy object via AopContext.currentProxy() in CouchDBDao. It might
  * have a negative impact on performance but is needed for caching until a better solution is implemented (e.g. use of
  * AspectJ's weaving).
+ * </p>
  */
 @ComponentScan({
 		"de.thm.arsnova.cache",
@@ -121,7 +124,7 @@ public class AppConfig implements WebMvcConfigurer {
 	@Value(value = "${api.indent-response-body:false}") private boolean apiIndent;
 
 	@Override
-	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+	public void configureMessageConverters(final List<HttpMessageConverter<?>> converters) {
 		converters.add(defaultJsonMessageConverter());
 		converters.add(apiV2JsonMessageConverter());
 		converters.add(stringMessageConverter());
@@ -129,8 +132,8 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 
 	@Override
-	public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
-		PathApiVersionContentNegotiationStrategy strategy =
+	public void configureContentNegotiation(final ContentNegotiationConfigurer configurer) {
+		final PathApiVersionContentNegotiationStrategy strategy =
 				new PathApiVersionContentNegotiationStrategy(API_V3_MEDIA_TYPE);
 		configurer.mediaType("json", MediaType.APPLICATION_JSON_UTF8);
 		configurer.mediaType("xml", MediaType.APPLICATION_XML);
@@ -146,19 +149,19 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 
 	@Override
-	public void configureViewResolvers(ViewResolverRegistry registry) {
+	public void configureViewResolvers(final ViewResolverRegistry registry) {
 		registry.viewResolver(new InternalResourceViewResolver());
 	}
 
 	@Override
-	public void addInterceptors(InterceptorRegistry registry) {
+	public void addInterceptors(final InterceptorRegistry registry) {
 		registry.addInterceptor(cacheControlInterceptorHandler());
 		registry.addInterceptor(deprecatedApiInterceptorHandler());
 		registry.addInterceptor(responseInterceptorHandler());
 	}
 
 	@Override
-	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+	public void addResourceHandlers(final ResourceHandlerRegistry registry) {
 		registry.addResourceHandler("swagger.json").addResourceLocations("classpath:/");
 	}
 
@@ -179,10 +182,10 @@ public class AppConfig implements WebMvcConfigurer {
 
 	@Bean
 	public StringHttpMessageConverter stringMessageConverter() {
-		StringHttpMessageConverter messageConverter = new StringHttpMessageConverter();
+		final StringHttpMessageConverter messageConverter = new StringHttpMessageConverter();
 		messageConverter.setDefaultCharset(Charset.forName("UTF-8"));
 		messageConverter.setWriteAcceptCharset(false);
-		List<MediaType> mediaTypes = new ArrayList<>();
+		final List<MediaType> mediaTypes = new ArrayList<>();
 		mediaTypes.add(MediaType.TEXT_PLAIN);
 		messageConverter.setSupportedMediaTypes(mediaTypes);
 
@@ -191,16 +194,16 @@ public class AppConfig implements WebMvcConfigurer {
 
 	@Bean
 	public MappingJackson2HttpMessageConverter defaultJsonMessageConverter() {
-		Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
+		final Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
 		builder
 				.serializationInclusion(JsonInclude.Include.NON_EMPTY)
 				.defaultViewInclusion(false)
 				.indentOutput(apiIndent)
 				.simpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-		ObjectMapper mapper = builder.build();
+		final ObjectMapper mapper = builder.build();
 		mapper.setConfig(mapper.getSerializationConfig().withView(View.Public.class));
-		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
-		List<MediaType> mediaTypes = new ArrayList<>();
+		final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
+		final List<MediaType> mediaTypes = new ArrayList<>();
 		mediaTypes.add(API_V3_MEDIA_TYPE);
 		mediaTypes.add(MediaType.APPLICATION_JSON_UTF8);
 		converter.setSupportedMediaTypes(mediaTypes);
@@ -210,7 +213,7 @@ public class AppConfig implements WebMvcConfigurer {
 
 	@Bean
 	public MappingJackson2HttpMessageConverter apiV2JsonMessageConverter() {
-		Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
+		final Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
 		builder
 				.serializationInclusion(JsonInclude.Include.NON_NULL)
 				.defaultViewInclusion(false)
@@ -218,10 +221,10 @@ public class AppConfig implements WebMvcConfigurer {
 				.featuresToEnable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 				.featuresToEnable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
 				.modules(new CouchDbDocumentModule());
-		ObjectMapper mapper = builder.build();
+		final ObjectMapper mapper = builder.build();
 		mapper.setConfig(mapper.getSerializationConfig().withView(View.Public.class));
-		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
-		List<MediaType> mediaTypes = new ArrayList<>();
+		final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
+		final List<MediaType> mediaTypes = new ArrayList<>();
 		mediaTypes.add(API_V2_MEDIA_TYPE);
 		mediaTypes.add(MediaType.APPLICATION_JSON_UTF8);
 		converter.setSupportedMediaTypes(mediaTypes);
@@ -239,7 +242,7 @@ public class AppConfig implements WebMvcConfigurer {
 
 	@Bean
 	public PropertiesFactoryBean versionInfoProperties() {
-		PropertiesFactoryBean propertiesFactoryBean = new PropertiesFactoryBean();
+		final PropertiesFactoryBean propertiesFactoryBean = new PropertiesFactoryBean();
 		propertiesFactoryBean.setLocation(new ClassPathResource("version.properties"));
 
 		return propertiesFactoryBean;
@@ -269,7 +272,7 @@ public class AppConfig implements WebMvcConfigurer {
 		final ArsnovaSocketioServerImpl socketioServer = new ArsnovaSocketioServerImpl();
 		socketioServer.setHostIp(socketAddress);
 		socketioServer.setPortNumber(socketPort);
-		socketioServer.setUseSSL(!socketKeystore.isEmpty());
+		socketioServer.setUseSsl(!socketKeystore.isEmpty());
 		socketioServer.setKeystore(socketKeystore);
 		socketioServer.setStorepass(socketKeystorePassword);
 		return socketioServer;

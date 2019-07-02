@@ -15,16 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonView;
+
 import de.thm.arsnova.model.serialization.View;
 
 public interface Entity {
 	String getId();
+
 	void setId(String id);
 
 	String getRevision();
+
 	void setRevision(String rev);
 
 	@JsonView(View.Persistence.class)

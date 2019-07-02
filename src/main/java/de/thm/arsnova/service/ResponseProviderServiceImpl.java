@@ -15,13 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service;
 
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
-
-import javax.servlet.http.HttpServletResponse;
 
 @Service
 @Scope(value = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -30,7 +30,7 @@ public class ResponseProviderServiceImpl implements ResponseProviderService {
 	HttpServletResponse response;
 
 	@Override
-	public void setResponse(HttpServletResponse response) {
+	public void setResponse(final HttpServletResponse response) {
 		this.response = response;
 	}
 

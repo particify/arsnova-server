@@ -15,20 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.security.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.security.User;
-import de.thm.arsnova.service.UserService;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.stereotype.Service;
-
 import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -37,6 +30,14 @@ import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.stereotype.Service;
+
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.security.User;
+import de.thm.arsnova.service.UserService;
 
 @Service
 public class JwtService {
@@ -60,7 +61,7 @@ public class JwtService {
 		this.serverId = serverId;
 		try {
 			this.defaultValidityPeriod = Duration.parse("P" + defaultValidityPeriod);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new IllegalArgumentException(defaultValidityPeriod, e);
 		}
 		guestValidityPeriod = Duration.parse("P180D");
@@ -71,7 +72,7 @@ public class JwtService {
 	}
 
 	public String createSignedToken(final User user) {
-		String[] roles = user.getAuthorities().stream()
+		final String[] roles = user.getAuthorities().stream()
 				.map(ga -> ga.getAuthority())
 				.filter(ga -> ga.startsWith(ROLE_PREFIX))
 				.map(ga -> ga.substring(ROLE_PREFIX.length())).toArray(String[]::new);

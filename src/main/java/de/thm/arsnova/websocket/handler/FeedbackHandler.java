@@ -1,25 +1,26 @@
 package de.thm.arsnova.websocket.handler;
 
-import de.thm.arsnova.websocket.message.CreateFeedback;
-import de.thm.arsnova.websocket.message.GetFeedback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
+
+import de.thm.arsnova.websocket.message.CreateFeedback;
+import de.thm.arsnova.websocket.message.GetFeedback;
 
 @Controller
 public class FeedbackHandler {
 	private final FeedbackCommandHandler commandHandler;
 
 	@Autowired
-	public FeedbackHandler(FeedbackCommandHandler commandHandler) {
+	public FeedbackHandler(final FeedbackCommandHandler commandHandler) {
 		this.commandHandler = commandHandler;
 	}
 
 	@MessageMapping("/queue/{roomId}.feedback.command")
 	public void send(
-			@DestinationVariable("roomId") String roomId,
-			CreateFeedback value
+			@DestinationVariable("roomId") final String roomId,
+			final CreateFeedback value
 	) throws Exception {
 
 		commandHandler.handle(
@@ -30,8 +31,8 @@ public class FeedbackHandler {
 
 	@MessageMapping("/queue/{roomId}.feedback.query")
 	public void send(
-			@DestinationVariable("roomId") String roomId,
-			GetFeedback value
+			@DestinationVariable("roomId") final String roomId,
+			final GetFeedback value
 	) throws Exception {
 
 		commandHandler.handle(

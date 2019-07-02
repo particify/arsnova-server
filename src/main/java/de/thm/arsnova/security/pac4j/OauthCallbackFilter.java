@@ -15,8 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.security.pac4j;
 
+import java.util.Collections;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.client.Clients;
 import org.pac4j.core.client.IndirectClient;
@@ -37,11 +42,6 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.Collections;
-import java.util.List;
-
 /**
  * Handles callback requests by login redirects from OAuth providers.
  *
@@ -53,7 +53,7 @@ public class OauthCallbackFilter extends AbstractAuthenticationProcessingFilter 
 	private final ClientFinder clientFinder = new DefaultCallbackClientFinder();
 	private Config config;
 
-	public OauthCallbackFilter(Config pac4jConfig) {
+	public OauthCallbackFilter(final Config pac4jConfig) {
 		super(new AntPathRequestMatcher("/login/oauth"));
 		this.config = pac4jConfig;
 	}
@@ -74,7 +74,8 @@ public class OauthCallbackFilter extends AbstractAuthenticationProcessingFilter 
 		CommonHelper.assertNotNull("clients", clients);
 		final List<Client> foundClients = clientFinder.find(clients, context, clientName);
 		CommonHelper.assertTrue(foundClients != null && foundClients.size() == 1,
-				"unable to find one indirect client for the callback: check the callback URL for a client name parameter or suffix path"
+				"unable to find one indirect client for the callback:"
+						+ " check the callback URL for a client name parameter or suffix path"
 						+ " or ensure that your configuration defaults to one indirect client");
 		final Client foundClient = foundClients.get(0);
 		logger.debug("client: {}", foundClient);
@@ -83,9 +84,9 @@ public class OauthCallbackFilter extends AbstractAuthenticationProcessingFilter 
 				"only indirect clients are allowed on the callback url");
 
 		try {
-			Credentials credentials = foundClient.getCredentials(context);
+			final Credentials credentials = foundClient.getCredentials(context);
 			logger.debug("credentials: {}", credentials);
-			CommonProfile profile = foundClient.getUserProfile(credentials, context);
+			final CommonProfile profile = foundClient.getUserProfile(credentials, context);
 			logger.debug("profile: {}", profile);
 
 			return profile;

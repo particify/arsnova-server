@@ -15,14 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.ScoreOptions;
-import de.thm.arsnova.model.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
+import de.thm.arsnova.model.ScoreOptions;
+import de.thm.arsnova.model.serialization.View;
 
 /**
  * Represents a Room (Session).
@@ -180,7 +182,7 @@ public class Room implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setCreationTime(long creationTime) {
+	public void setCreationTime(final long creationTime) {
 		this.creationTime = creationTime;
 	}
 
@@ -191,18 +193,19 @@ public class Room implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setLearningProgressOptions(ScoreOptions learningProgressOptions) {
+	public void setLearningProgressOptions(final ScoreOptions learningProgressOptions) {
 		this.learningProgressOptions = learningProgressOptions;
 	}
 
-	@ApiModelProperty(required = true, value = "the enabled features (e.g. feedback, interposed, learning Progress, lecture)")
+	@ApiModelProperty(required = true,
+			value = "the enabled features (e.g. feedback, interposed, learning Progress, lecture)")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public RoomFeature getFeatures() {
 		return features;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setFeatures(RoomFeature features) {
+	public void setFeatures(final RoomFeature features) {
 		this.features = features;
 	}
 
@@ -323,7 +326,7 @@ public class Room implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setFeedbackLock(Boolean lock) {
+	public void setFeedbackLock(final Boolean lock) {
 		this.feedbackLock = lock;
 	}
 
@@ -334,7 +337,7 @@ public class Room implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setFlipFlashcards(Boolean flip) {
+	public void setFlipFlashcards(final Boolean flip) {
 		this.flipFlashcards = flip;
 	}
 
@@ -361,11 +364,11 @@ public class Room implements Entity {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (obj == null || !obj.getClass().equals(this.getClass())) {
 			return false;
 		}
-		Room other = (Room) obj;
+		final Room other = (Room) obj;
 		return this.keyword.equals(other.keyword);
 	}
 

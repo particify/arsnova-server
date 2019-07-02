@@ -16,9 +16,17 @@ checkstyle:
   tags:
     - maven
   cache: *maven_cache
+  script:
+    - mvn -B checkstyle:check -Dcheckstyle.missing-javadoc.severity=info
+
+checkstyle_javadoc:
+  stage: build
+  tags:
+    - maven
+  cache: *maven_cache
   allow_failure: true
   script:
-    - mvn -B checkstyle:check
+    - mvn -B checkstyle:check -Dcheckstyle.missing-javadoc.severity=warning
 
 compile:
   stage: build

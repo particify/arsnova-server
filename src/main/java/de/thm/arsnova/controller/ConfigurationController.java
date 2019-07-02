@@ -15,8 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,10 +28,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * The ConfigurationController provides frontend clients with information necessary to correctly interact with the
@@ -162,11 +162,11 @@ public class ConfigurationController extends AbstractController {
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
-	public Map<String, Object> getConfiguration(HttpServletRequest request) {
-		Map<String, Object> config = new HashMap<>();
-		Map<String, Boolean> features = new HashMap<>();
-		Map<String, String> publicPool = new HashMap<>();
-		Map<String, Object> splashscreen = new HashMap<>();
+	public Map<String, Object> getConfiguration(final HttpServletRequest request) {
+		final Map<String, Object> config = new HashMap<>();
+		final Map<String, Boolean> features = new HashMap<>();
+		final Map<String, String> publicPool = new HashMap<>();
+		final Map<String, Object> splashscreen = new HashMap<>();
 
 		/* The API path could be unknown to the client in case the request was forwarded */
 		if ("".equals(apiPath)) {
@@ -269,7 +269,7 @@ public class ConfigurationController extends AbstractController {
 		}
 
 		if (!"".equals(trackingTrackerUrl)) {
-			Map<String, String> tracking = new HashMap<>();
+			final Map<String, String> tracking = new HashMap<>();
 			config.put("tracking", tracking);
 
 			tracking.put("provider", trackingProvider);

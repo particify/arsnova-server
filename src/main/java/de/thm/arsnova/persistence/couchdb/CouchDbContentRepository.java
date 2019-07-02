@@ -15,17 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.persistence.couchdb;
 
-import de.thm.arsnova.model.Content;
-import de.thm.arsnova.persistence.ContentRepository;
-import de.thm.arsnova.persistence.LogEntryRepository;
-import org.ektorp.ComplexKey;
-import org.ektorp.CouchDbConnector;
-import org.ektorp.ViewResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+package de.thm.arsnova.persistence.couchdb;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +25,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.ektorp.ComplexKey;
+import org.ektorp.CouchDbConnector;
+import org.ektorp.ViewResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import de.thm.arsnova.model.Content;
+import de.thm.arsnova.persistence.ContentRepository;
+import de.thm.arsnova.persistence.LogEntryRepository;
 
 public class CouchDbContentRepository extends CouchDbCrudRepository<Content> implements ContentRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbContentRepository.class);
@@ -128,7 +129,8 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 	}
 
 	@Override
-	public List<String> findUnansweredIdsByRoomIdAndUserOnlyPreparationVariant(final String roomId, final String userId) {
+	public List<String> findUnansweredIdsByRoomIdAndUserOnlyPreparationVariant(
+			final String roomId, final String userId) {
 		final ViewResult result = db.queryView(createQuery("contentid_round_by_creatorid_roomid_variant")
 				.designDocId("_design/Answer")
 				.key(ComplexKey.of(userId, roomId, "preparation")));
@@ -137,7 +139,8 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 			answeredQuestions.put(row.getId(), row.getKeyAsNode().get(2).asInt());
 		}
 
-		return collectUnansweredQuestionIdsByPiRound(findByRoomIdOnlyPreparationVariantAndActive(roomId), answeredQuestions);
+		return collectUnansweredQuestionIdsByPiRound(
+				findByRoomIdOnlyPreparationVariantAndActive(roomId), answeredQuestions);
 	}
 
 	@Override
@@ -220,8 +223,7 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	private List<String> collectUnansweredQuestionIds(
 			final List<String> contentIds,
-			final List<String> answeredContentIds
-	) {
+			final List<String> answeredContentIds) {
 		final List<String> unanswered = new ArrayList<>();
 		for (final String contentId : contentIds) {
 			if (!answeredContentIds.contains(contentId)) {
@@ -233,14 +235,14 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	private List<String> collectUnansweredQuestionIdsByPiRound(
 			final List<Content> contents,
-			final Map<String, Integer> answeredQuestions
-	) {
+			final Map<String, Integer> answeredQuestions) {
 		final List<String> unanswered = new ArrayList<>();
 
 		for (final Content content : contents) {
 			// TODO: Set correct format for slides, which currently aren't implemented
 			if (Content.Format.TEXT != content.getFormat() && (!answeredQuestions.containsKey(content.getId())
-					|| (answeredQuestions.containsKey(content.getId()) && answeredQuestions.get(content.getId()) != content.getState().getRound()))) {
+					|| (answeredQuestions.containsKey(content.getId())
+					&& answeredQuestions.get(content.getId()) != content.getState().getRound()))) {
 				unanswered.add(content.getId());
 			}
 		}
@@ -258,7 +260,8 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	/* TODO: remove if this method is no longer used */
 	@Override
-	public List<String> findIdsByRoomIdAndVariantAndSubject(final String roomId, final String questionVariant, final String subject) {
+	public List<String> findIdsByRoomIdAndVariantAndSubject(
+			final String roomId, final String questionVariant, final String subject) {
 		final ViewResult result = db.queryView(createQuery("by_roomid_group_locked")
 				.startKey(ComplexKey.of(roomId, questionVariant, false, subject))
 				.endKey(ComplexKey.of(roomId, questionVariant, false, subject, ComplexKey.emptyObject())));

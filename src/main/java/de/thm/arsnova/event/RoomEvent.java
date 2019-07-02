@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.event;
 
 /**
@@ -26,7 +27,7 @@ public abstract class RoomEvent extends ArsnovaEvent {
 
 	private final String roomId;
 
-	public RoomEvent(Object source, String roomId) {
+	public RoomEvent(final Object source, final String roomId) {
 		super(source);
 		this.roomId = roomId;
 	}

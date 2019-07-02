@@ -15,18 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.event;
 
-import de.thm.arsnova.model.Content;
-import de.thm.arsnova.model.Entity;
-import de.thm.arsnova.model.Room;
+import java.util.Map;
+import java.util.function.Function;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-import java.util.function.Function;
+import de.thm.arsnova.model.Content;
+import de.thm.arsnova.model.Entity;
+import de.thm.arsnova.model.Room;
 
 /**
  * StateEventDispatcher publishes additional, more specific events for state changes of entities when
@@ -57,7 +58,7 @@ public class StateEventDispatcher implements ApplicationEventPublisherAware {
 	public void dispatchContentStateEvent(final AfterFullUpdateEvent<Content> event) {
 		final Content newContent = event.getEntity();
 		final Content oldContent = event.getOldEntity();
-		Function<Content, Content.State> f = Content::getState;
+		final Function<Content, Content.State> f = Content::getState;
 		f.apply(newContent);
 		publishEventIfPropertyChanged(newContent, oldContent, Content::getState, "state");
 	}
@@ -70,15 +71,16 @@ public class StateEventDispatcher implements ApplicationEventPublisherAware {
 
 	private <E extends Entity, T extends Object> void publishEventIfPropertyChanged(
 			final E newEntity, final E oldEntity, final Function<E, T> propertyGetter, final String stateName) {
-		T newValue = propertyGetter.apply(newEntity);
-		T oldValue = propertyGetter.apply(oldEntity);
+		final T newValue = propertyGetter.apply(newEntity);
+		final T oldValue = propertyGetter.apply(oldEntity);
 		if (!newValue.equals(oldValue)) {
 			eventPublisher.publishEvent(new StateChangeEvent<>(this, newEntity, stateName, newValue, oldValue));
 		}
 	}
 
 	private <E extends Entity, T extends Object> void publishEventIfPropertyChanged(
-			final AfterPatchEvent<E> event, final Function<E, T> propertyGetter, final String property, final String stateName) {
+			final AfterPatchEvent<E> event, final Function<E, T> propertyGetter,
+			final String property, final String stateName) {
 		final E entity = event.getEntity();
 		final Map<String, Object> changes = event.getChanges();
 		if (event.getPropertyGetter().apply(entity) == propertyGetter.apply(entity)

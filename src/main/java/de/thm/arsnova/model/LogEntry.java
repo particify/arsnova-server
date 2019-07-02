@@ -15,15 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.serialization.View;
-
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
+
+import de.thm.arsnova.model.serialization.View;
 
 public class LogEntry extends Entity {
 	public enum LogLevel {
@@ -43,7 +44,8 @@ public class LogEntry extends Entity {
 	private int level;
 	private Map<String, Object> payload;
 
-	public LogEntry(@JsonProperty String event, @JsonProperty int level, @JsonProperty Map<String, Object> payload) {
+	public LogEntry(@JsonProperty final String event, @JsonProperty final int level,
+			@JsonProperty final Map<String, Object> payload) {
 		this.event = event;
 		this.level = level;
 		this.payload = payload;
@@ -131,8 +133,10 @@ public class LogEntry extends Entity {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * <p>
 	 * The following fields of <tt>LogEntry</tt> are excluded from equality checks:
 	 * {@link #payload}.
+	 * </p>
 	 */
 	@Override
 	public boolean equals(final Object o) {
@@ -144,11 +148,11 @@ public class LogEntry extends Entity {
 		}
 		final LogEntry logEntry = (LogEntry) o;
 
-		return level == logEntry.level &&
-				Objects.equals(id, logEntry.id) &&
-				Objects.equals(rev, logEntry.rev) &&
-				Objects.equals(creationTimestamp, logEntry.creationTimestamp) &&
-				Objects.equals(updateTimestamp, logEntry.updateTimestamp) &&
-				Objects.equals(event, logEntry.event);
+		return level == logEntry.level
+				&& Objects.equals(id, logEntry.id)
+				&& Objects.equals(rev, logEntry.rev)
+				&& Objects.equals(creationTimestamp, logEntry.creationTimestamp)
+				&& Objects.equals(updateTimestamp, logEntry.updateTimestamp)
+				&& Objects.equals(event, logEntry.event);
 	}
 }

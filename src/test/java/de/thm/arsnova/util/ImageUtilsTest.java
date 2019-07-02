@@ -15,13 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.util;
 
-import de.thm.arsnova.config.AppConfig;
-import de.thm.arsnova.config.TestAppConfig;
-import de.thm.arsnova.config.TestPersistanceConfig;
-import de.thm.arsnova.config.TestSecurityConfig;
-import de.thm.arsnova.config.WebSocketConfig;
+import static de.thm.arsnova.util.ImageUtils.IMAGE_PREFIX_MIDDLE;
+import static de.thm.arsnova.util.ImageUtils.IMAGE_PREFIX_START;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ActiveProfiles;
@@ -29,9 +32,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import static de.thm.arsnova.util.ImageUtils.IMAGE_PREFIX_MIDDLE;
-import static de.thm.arsnova.util.ImageUtils.IMAGE_PREFIX_START;
-import static org.junit.Assert.*;
+import de.thm.arsnova.config.AppConfig;
+import de.thm.arsnova.config.TestAppConfig;
+import de.thm.arsnova.config.TestPersistanceConfig;
+import de.thm.arsnova.config.TestSecurityConfig;
+import de.thm.arsnova.config.WebSocketConfig;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -63,7 +68,7 @@ public class ImageUtilsTest {
       "data:image/png;base63,IMAGE-DATA"
     };
 
-    for (String fakeString : fakeStrings) {
+    for (final String fakeString : fakeStrings) {
       assertFalse(
         String.format("The String %s is not a valid Base64 String.", fakeString),
         imageUtils.isBase64EncodedImage(fakeString)

@@ -15,16 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import de.thm.arsnova.model.serialization.View;
 
 /**
  * Represents Content (Skill/Lecturer Question) in a Room.
@@ -265,7 +266,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setImageQuestion(boolean imageQuestion) {
+	public void setImageQuestion(final boolean imageQuestion) {
 		this.imageQuestion = imageQuestion;
 	}
 
@@ -287,7 +288,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setPiRoundEndTime(long piRoundEndTime) {
+	public void setPiRoundEndTime(final long piRoundEndTime) {
 		this.piRoundEndTime = piRoundEndTime;
 	}
 
@@ -298,7 +299,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setPiRoundStartTime(long piRoundStartTime) {
+	public void setPiRoundStartTime(final long piRoundStartTime) {
 		this.piRoundStartTime = piRoundStartTime;
 	}
 
@@ -307,7 +308,7 @@ public class Content implements Entity {
 		return piRoundActive;
 	}
 
-	public void setPiRoundActive(boolean piRoundActive) {
+	public void setPiRoundActive(final boolean piRoundActive) {
 		this.piRoundActive = piRoundActive;
 	}
 
@@ -316,7 +317,7 @@ public class Content implements Entity {
 		return piRoundFinished;
 	}
 
-	public void setPiRoundFinished(boolean piRoundFinished) {
+	public void setPiRoundFinished(final boolean piRoundFinished) {
 		this.piRoundFinished = piRoundFinished;
 	}
 
@@ -338,7 +339,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setCvIsColored(boolean cvIsColored) {
+	public void setCvIsColored(final boolean cvIsColored) {
 		this.cvIsColored = cvIsColored;
 	}
 
@@ -507,7 +508,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setGridOffsetX(int gridOffsetX) {
+	public void setGridOffsetX(final int gridOffsetX) {
 		this.gridOffsetX = gridOffsetX;
 	}
 
@@ -518,7 +519,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setGridOffsetY(int gridOffsetY) {
+	public void setGridOffsetY(final int gridOffsetY) {
 		this.gridOffsetY = gridOffsetY;
 	}
 
@@ -529,7 +530,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setGridZoomLvl(int gridZoomLvl) {
+	public void setGridZoomLvl(final int gridZoomLvl) {
 		this.gridZoomLvl = gridZoomLvl;
 	}
 
@@ -540,7 +541,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setGridSizeX(int gridSizeX) {
+	public void setGridSizeX(final int gridSizeX) {
 		this.gridSizeX = gridSizeX;
 	}
 
@@ -551,7 +552,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setGridSizeY(int gridSizeY) {
+	public void setGridSizeY(final int gridSizeY) {
 		this.gridSizeY = gridSizeY;
 	}
 
@@ -562,7 +563,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setGridIsHidden(boolean gridIsHidden) {
+	public void setGridIsHidden(final boolean gridIsHidden) {
 		this.gridIsHidden = gridIsHidden;
 	}
 
@@ -573,7 +574,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setImgRotation(int imgRotation) {
+	public void setImgRotation(final int imgRotation) {
 		this.imgRotation = imgRotation;
 	}
 
@@ -584,7 +585,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setToggleFieldsLeft(boolean toggleFieldsLeft) {
+	public void setToggleFieldsLeft(final boolean toggleFieldsLeft) {
 		this.toggleFieldsLeft = toggleFieldsLeft;
 	}
 
@@ -595,7 +596,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setNumClickableFields(int numClickableFields) {
+	public void setNumClickableFields(final int numClickableFields) {
 		this.numClickableFields = numClickableFields;
 	}
 
@@ -606,7 +607,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setThresholdCorrectAnswers(int thresholdCorrectAnswers) {
+	public void setThresholdCorrectAnswers(final int thresholdCorrectAnswers) {
 		this.thresholdCorrectAnswers = thresholdCorrectAnswers;
 	}
 
@@ -617,7 +618,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setGridLineColor(String gridLineColor) {
+	public void setGridLineColor(final String gridLineColor) {
 		this.gridLineColor = gridLineColor;
 	}
 
@@ -628,7 +629,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setNumberOfDots(int numberOfDots) {
+	public void setNumberOfDots(final int numberOfDots) {
 		this.numberOfDots = numberOfDots;
 	}
 
@@ -639,12 +640,12 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setGridType(String gridType) {
+	public void setGridType(final String gridType) {
 		this.gridType = gridType;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setScaleFactor(String scaleFactor) {
+	public void setScaleFactor(final String scaleFactor) {
 		this.scaleFactor = scaleFactor;
 	}
 
@@ -655,7 +656,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setGridScaleFactor(String scaleFactor) {
+	public void setGridScaleFactor(final String scaleFactor) {
 		this.gridScaleFactor = scaleFactor;
 	}
 
@@ -672,7 +673,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setTextAnswerEnabled(boolean textAnswerEnabled) {
+	public void setTextAnswerEnabled(final boolean textAnswerEnabled) {
 		this.textAnswerEnabled = textAnswerEnabled;
 	}
 
@@ -683,7 +684,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setVotingDisabled(boolean votingDisabled) {
+	public void setVotingDisabled(final boolean votingDisabled) {
 		this.votingDisabled = votingDisabled;
 	}
 
@@ -693,7 +694,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setHint(String hint) {
+	public void setHint(final String hint) {
 		this.hint = hint;
 	}
 
@@ -703,7 +704,7 @@ public class Content implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setSolution(String solution) {
+	public void setSolution(final String solution) {
 		this.solution = solution;
 	}
 
@@ -722,7 +723,7 @@ public class Content implements Entity {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		// auto generated!
 		if (this == obj) {
 			return true;
@@ -733,7 +734,7 @@ public class Content implements Entity {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		Content other = (Content) obj;
+		final Content other = (Content) obj;
 		if (id == null) {
 			if (other.id != null) {
 				return false;
@@ -744,7 +745,7 @@ public class Content implements Entity {
 		return true;
 	}
 
-	public int calculateValue(Answer answer) {
+	public int calculateValue(final Answer answer) {
 		if (answer.isAbstention()) {
 			return 0;
 		} else if ("mc".equals(this.questionType)) {
@@ -756,21 +757,23 @@ public class Content implements Entity {
 		}
 	}
 
-	public String checkCaseSensitive(String answerText) {
+	public String checkCaseSensitive(final String answerText) {
 		if (this.isIgnoreCaseSensitive()) {
 			this.setCorrectAnswer(this.getCorrectAnswer().toLowerCase());
 			return answerText.toLowerCase();
 		}
 		return answerText;
 	}
-	public String checkWhitespaces(String answerText) {
+
+	public String checkWhitespaces(final String answerText) {
 		if (this.isIgnoreWhitespaces()) {
 			this.setCorrectAnswer(this.getCorrectAnswer().replaceAll("[\\s]", ""));
 			return answerText.replaceAll("[\\s]", "");
 		}
 		return answerText;
 	}
-	public String checkPunctuation(String answerText) {
+
+	public String checkPunctuation(final String answerText) {
 		if (this.isIgnorePunctuation()) {
 			this.setCorrectAnswer(this.getCorrectAnswer().replaceAll("\\p{Punct}", ""));
 			return answerText.replaceAll("\\p{Punct}", "");
@@ -778,13 +781,13 @@ public class Content implements Entity {
 		return answerText;
 	}
 
-	public void checkTextStrictOptions(Answer answer) {
+	public void checkTextStrictOptions(final Answer answer) {
 		answer.setAnswerTextRaw(this.checkCaseSensitive(answer.getAnswerTextRaw()));
 		answer.setAnswerTextRaw(this.checkPunctuation(answer.getAnswerTextRaw()));
 		answer.setAnswerTextRaw(this.checkWhitespaces(answer.getAnswerTextRaw()));
 	}
 
-	public int evaluateCorrectAnswerFixedText(String answerTextRaw) {
+	public int evaluateCorrectAnswerFixedText(final String answerTextRaw) {
 		if (answerTextRaw != null) {
 			if (answerTextRaw.equals(this.getCorrectAnswer())) {
 				return this.getRating();
@@ -793,11 +796,11 @@ public class Content implements Entity {
 		return 0;
 	}
 
-	public boolean isSuccessfulFreeTextAnswer(String answerTextRaw) {
+	public boolean isSuccessfulFreeTextAnswer(final String answerTextRaw) {
 		return answerTextRaw != null && answerTextRaw.equals(this.getCorrectAnswer());
 	}
 
-	public void updateRoundStartVariables(Date start, Date end) {
+	public void updateRoundStartVariables(final Date start, final Date end) {
 		if (this.getPiRound() == 1 && this.isPiRoundFinished()) {
 			this.setPiRound(2);
 		}
@@ -847,9 +850,9 @@ public class Content implements Entity {
 		}
 	}
 
-	private int calculateRegularValue(Answer answer) {
-		String answerText = answer.getAnswerText();
-		for (AnswerOption p : this.possibleAnswers) {
+	private int calculateRegularValue(final Answer answer) {
+		final String answerText = answer.getAnswerText();
+		for (final AnswerOption p : this.possibleAnswers) {
 			if (answerText.equals(p.getText())) {
 				return p.getValue();
 			}
@@ -857,11 +860,11 @@ public class Content implements Entity {
 		return 0;
 	}
 
-	private int calculateGridValue(Answer answer) {
+	private int calculateGridValue(final Answer answer) {
 		int value = 0;
-		String[] answers = answer.getAnswerText().split(",");
-		for (String a : answers) {
-			for (AnswerOption p : this.possibleAnswers) {
+		final String[] answers = answer.getAnswerText().split(",");
+		for (final String a : answers) {
+			for (final AnswerOption p : this.possibleAnswers) {
 				if (a.equals(p.getText())) {
 					value += p.getValue();
 				}
@@ -870,12 +873,12 @@ public class Content implements Entity {
 		return value;
 	}
 
-	private int calculateMultipleChoiceValue(Answer answer) {
+	private int calculateMultipleChoiceValue(final Answer answer) {
 		int value = 0;
-		String[] answers = answer.getAnswerText().split(",");
+		final String[] answers = answer.getAnswerText().split(",");
 		for (int i = 0; i < this.possibleAnswers.size() && i < answers.length; i++) {
 			if ("1".equals(answers[i])) {
-				AnswerOption p = this.possibleAnswers.get(i);
+				final AnswerOption p = this.possibleAnswers.get(i);
 				value += p.getValue();
 			}
 		}

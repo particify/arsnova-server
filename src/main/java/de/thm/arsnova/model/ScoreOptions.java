@@ -15,14 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
 import java.io.Serializable;
+
+import de.thm.arsnova.model.serialization.View;
 
 /**
  * A session's settings regarding the calculation of the score.
@@ -40,7 +41,9 @@ public class ScoreOptions implements Serializable {
 		this.questionVariant = scoreOptions.getQuestionVariant();
 	}
 
-	public ScoreOptions() { }
+	public ScoreOptions() {
+
+	}
 
 	@ApiModelProperty(required = true, value = "the type")
 	@JsonView({View.Persistence.class, View.Public.class})

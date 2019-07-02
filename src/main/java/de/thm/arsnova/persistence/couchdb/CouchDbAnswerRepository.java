@@ -15,13 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.persistence.couchdb;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import de.thm.arsnova.model.Answer;
-import de.thm.arsnova.model.AnswerStatistics;
-import de.thm.arsnova.persistence.AnswerRepository;
-import de.thm.arsnova.persistence.LogEntryRepository;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.ViewResult;
@@ -31,14 +34,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import de.thm.arsnova.model.Answer;
+import de.thm.arsnova.model.AnswerStatistics;
+import de.thm.arsnova.persistence.AnswerRepository;
+import de.thm.arsnova.persistence.LogEntryRepository;
 
-public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> implements AnswerRepository, ApplicationEventPublisherAware {
+public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
+		implements AnswerRepository, ApplicationEventPublisherAware {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbAnswerRepository.class);
 
 	@Autowired
@@ -70,7 +72,8 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	}
 
 	@Override
-	public <T extends Answer> T findByContentIdUserIdPiRound(final String contentId, final Class<T> type, final String userId, final int piRound) {
+	public <T extends Answer> T findByContentIdUserIdPiRound(
+			final String contentId, final Class<T> type, final String userId, final int piRound) {
 		final List<T> answerList = db.queryView(createQuery("by_contentid_creatorid_round")
 				.key(ComplexKey.of(contentId, userId, piRound)), type);
 		return answerList.isEmpty() ? null : answerList.get(0);
@@ -97,14 +100,14 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 				/* Answers:
 				 * Extract selected indexes from key[2] and count from value */
 				final JsonNode jsonIndexes = d.getKeyAsNode().get(2);
-				Integer[] indexes = new Integer[jsonIndexes.size()];
+				final Integer[] indexes = new Integer[jsonIndexes.size()];
 				/* Count independently */
 				for (int i = 0; i < jsonIndexes.size(); i++) {
 					indexes[i] = jsonIndexes.get(i).asInt();
 					independentCounts.set(indexes[i], independentCounts.get(indexes[i]) + d.getValueAsInt());
 				}
 				/* Count option combinations */
-				AnswerStatistics.RoundStatistics.Combination combination =
+				final AnswerStatistics.RoundStatistics.Combination combination =
 						combinations.getOrDefault(Arrays.asList(indexes),
 								new AnswerStatistics.RoundStatistics.Combination(
 										Arrays.asList(indexes), d.getValueAsInt()));
@@ -114,7 +117,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 		}
 		roundStats.setIndependentCounts(independentCounts);
 		/* TODO: Review - might lead easily to IndexOutOfBoundsExceptions - use a Map instead? */
-		List<AnswerStatistics.RoundStatistics> roundStatisticsList = new ArrayList(Collections.nCopies(round, null));
+		final List<AnswerStatistics.RoundStatistics> roundStatisticsList = new ArrayList(Collections.nCopies(round, null));
 		roundStatisticsList.set(round - 1, roundStats);
 		stats.setRoundStatistics(roundStatisticsList);
 
@@ -142,7 +145,8 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer> imple
 	}
 
 	@Override
-	public <T extends Answer> List<T> findByContentId(final String contentId, final Class<T> type, final int start, final int limit) {
+	public <T extends Answer> List<T> findByContentId(
+			final String contentId, final Class<T> type, final int start, final int limit) {
 		final int qSkip = start > 0 ? start : -1;
 		final int qLimit = limit > 0 ? limit : -1;
 

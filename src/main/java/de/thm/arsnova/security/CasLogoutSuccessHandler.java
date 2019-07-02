@@ -15,19 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.security;
 
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * This class gets called when a user has been successfully logged out from CAS.
@@ -48,7 +48,7 @@ public class CasLogoutSuccessHandler implements LogoutSuccessHandler {
 			final Authentication authentication
 	) throws IOException, ServletException {
 		/* Typo in "referer" intended. It is in the spec. */
-		String referrer = request.getHeader("referer");
+		final String referrer = request.getHeader("referer");
 		if (response.isCommitted()) {
 			logger.info("Response has already been committed. Unable to redirect to target");
 			return;

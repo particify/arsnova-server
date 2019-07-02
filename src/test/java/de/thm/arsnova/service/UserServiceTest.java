@@ -15,28 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service;
 
-import de.thm.arsnova.config.AppConfig;
-import de.thm.arsnova.config.TestAppConfig;
-import de.thm.arsnova.config.TestPersistanceConfig;
-import de.thm.arsnova.config.TestSecurityConfig;
-import de.thm.arsnova.config.WebSocketConfig;
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
-import de.thm.arsnova.security.User;
-import de.thm.arsnova.security.pac4j.OAuthToken;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.pac4j.core.profile.definition.CommonProfileDefinition;
-import org.pac4j.oidc.profile.google.GoogleOidcProfile;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -49,8 +31,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.pac4j.core.profile.definition.CommonProfileDefinition;
+import org.pac4j.oidc.profile.google.GoogleOidcProfile;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
-import static org.junit.Assert.assertEquals;
+import de.thm.arsnova.config.AppConfig;
+import de.thm.arsnova.config.TestAppConfig;
+import de.thm.arsnova.config.TestPersistanceConfig;
+import de.thm.arsnova.config.TestSecurityConfig;
+import de.thm.arsnova.config.WebSocketConfig;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.model.migration.v2.ClientAuthentication;
+import de.thm.arsnova.security.User;
+import de.thm.arsnova.security.pac4j.OAuthToken;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -68,29 +69,31 @@ public class UserServiceTest {
 
 	@Test
 	public void testSocket2UserPersistence() throws IOException, ClassNotFoundException {
-		//socketid2user.put(UUID.randomUUID(), new ClientAuthentication(new UsernamePasswordAuthenticationToken("ptsr00", UUID.randomUUID())));
+		//socketid2user.put(UUID.randomUUID(),
+		//		new ClientAuthentication(new UsernamePasswordAuthenticationToken("ptsr00", UUID.randomUUID())));
 		//socketid2user.put(UUID.randomUUID(), new ClientAuthentication(new AttributePrincipalImpl("ptstr0")));
 
-		GoogleOidcProfile profile = new GoogleOidcProfile();
+		final GoogleOidcProfile profile = new GoogleOidcProfile();
 		profile.addAttribute(CommonProfileDefinition.DISPLAY_NAME, "ptsr00");
 		profile.addAttribute(CommonProfileDefinition.EMAIL, "mail@host.com");
 		profile.addAttribute("email_verified", true);
-		UserProfile userProfile = new UserProfile(UserProfile.AuthProvider.GOOGLE, "ptsr00");
+		final UserProfile userProfile = new UserProfile(UserProfile.AuthProvider.GOOGLE, "ptsr00");
 		userProfile.setId(UUID.randomUUID().toString());
-		User user = new User(userProfile, Collections.emptyList());
-		OAuthToken token = new OAuthToken(user, profile, Collections.emptyList());
+		final User user = new User(userProfile, Collections.emptyList());
+		final OAuthToken token = new OAuthToken(user, profile, Collections.emptyList());
 		socketid2user.put(UUID.randomUUID(), new ClientAuthentication(token));
 
-		List<GrantedAuthority> authorities = new ArrayList<>();
+		final List<GrantedAuthority> authorities = new ArrayList<>();
 		authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
-		socketid2user.put(UUID.randomUUID(), new ClientAuthentication(new AnonymousAuthenticationToken("ptsr00", UUID.randomUUID(), authorities)));
+		socketid2user.put(UUID.randomUUID(), new ClientAuthentication(
+				new AnonymousAuthenticationToken("ptsr00", UUID.randomUUID(), authorities)));
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		ObjectOutputStream objOut = new ObjectOutputStream(out);
+		final ByteArrayOutputStream out = new ByteArrayOutputStream();
+		final ObjectOutputStream objOut = new ObjectOutputStream(out);
 		objOut.writeObject(socketid2user);
 		objOut.close();
-		ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(out.toByteArray()));
-		Map<UUID, ClientAuthentication> actual = (Map<UUID, ClientAuthentication>) objIn.readObject();
+		final ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(out.toByteArray()));
+		final Map<UUID, ClientAuthentication> actual = (Map<UUID, ClientAuthentication>) objIn.readObject();
 		assertEquals(actual, socketid2user);
 	}
 
@@ -101,12 +104,12 @@ public class UserServiceTest {
 		user2session.put("ptsr02", UUID.randomUUID().toString());
 		user2session.put("ptsr03", UUID.randomUUID().toString());
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		ObjectOutputStream objOut = new ObjectOutputStream(out);
+		final ByteArrayOutputStream out = new ByteArrayOutputStream();
+		final ObjectOutputStream objOut = new ObjectOutputStream(out);
 		objOut.writeObject(user2session);
 		objOut.close();
-		ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(out.toByteArray()));
-		Map<String, String> actual = (Map<String, String>) objIn.readObject();
+		final ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(out.toByteArray()));
+		final Map<String, String> actual = (Map<String, String>) objIn.readObject();
 		assertEquals(actual, user2session);
 	}
 

@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.security;
 
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.service.UserService;
+import java.util.Collection;
+import java.util.HashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +29,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
 
-import java.util.Collection;
-import java.util.HashSet;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.service.UserService;
 
 /**
  * Replaces the user ID provided by the authenticating user with the one that is part of LDAP object. This is necessary
@@ -43,7 +44,7 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
 	@Autowired
 	private UserService userService;
 
-	public CustomLdapUserDetailsMapper(String ldapUserIdAttr) {
+	public CustomLdapUserDetailsMapper(final String ldapUserIdAttr) {
 		this.userIdAttr = ldapUserIdAttr;
 	}
 

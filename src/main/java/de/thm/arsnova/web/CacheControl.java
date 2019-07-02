@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.web;
 
 import java.lang.annotation.ElementType;
@@ -38,7 +39,7 @@ public @interface CacheControl {
 			this.policyString = null;
 		}
 
-		Policy(String policyString) {
+		Policy(final String policyString) {
 			this.policyString = policyString;
 		}
 

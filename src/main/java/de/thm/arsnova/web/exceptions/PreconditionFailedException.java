@@ -10,15 +10,15 @@ public class PreconditionFailedException extends RuntimeException {
 		super();
 	}
 
-	public PreconditionFailedException(String message) {
+	public PreconditionFailedException(final String message) {
 		super(message);
 	}
 
-	public PreconditionFailedException(Throwable e) {
+	public PreconditionFailedException(final Throwable e) {
 		super(e);
 	}
 
-	public PreconditionFailedException(String message, Throwable e) {
+	public PreconditionFailedException(final String message, final Throwable e) {
 		super(message, e);
 	}
 }

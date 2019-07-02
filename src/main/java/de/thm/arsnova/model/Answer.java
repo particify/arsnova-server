@@ -15,17 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
-import de.thm.arsnova.model.serialization.FormatAnswerTypeIdResolver;
-import de.thm.arsnova.model.serialization.View;
-import org.springframework.core.style.ToStringCreator;
-
 import java.util.Map;
 import java.util.Objects;
+import org.springframework.core.style.ToStringCreator;
+
+import de.thm.arsnova.model.serialization.FormatAnswerTypeIdResolver;
+import de.thm.arsnova.model.serialization.View;
 
 @JsonTypeInfo(
 		use = JsonTypeInfo.Id.CUSTOM,
@@ -58,7 +59,7 @@ public class Answer extends Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setRoomId(String roomId) {
+	public void setRoomId(final String roomId) {
 		this.roomId = roomId;
 	}
 
@@ -97,7 +98,7 @@ public class Answer extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setExtensions(Map<String, Map<String, ?>> extensions) {
+	public void setExtensions(final Map<String, Map<String, ?>> extensions) {
 		this.extensions = extensions;
 	}
 
@@ -110,8 +111,10 @@ public class Answer extends Entity {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * <p>
 	 * The following fields of <tt>Answer</tt> are excluded from equality checks:
 	 * {@link #extensions}.
+	 * </p>
 	 */
 	@Override
 	public boolean equals(final Object o) {
@@ -123,10 +126,10 @@ public class Answer extends Entity {
 		}
 		final Answer answer = (Answer) o;
 
-		return round == answer.round &&
-				Objects.equals(contentId, answer.contentId) &&
-				Objects.equals(roomId, answer.roomId) &&
-				Objects.equals(creatorId, answer.creatorId);
+		return round == answer.round
+				&& Objects.equals(contentId, answer.contentId)
+				&& Objects.equals(roomId, answer.roomId)
+				&& Objects.equals(creatorId, answer.creatorId);
 	}
 
 	@Override

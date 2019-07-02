@@ -15,7 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.	 If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import org.ektorp.DbAccessException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.event.EventListener;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.event.AfterCreationEvent;
 import de.thm.arsnova.event.BeforeCreationEvent;
@@ -30,24 +49,6 @@ import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 import de.thm.arsnova.web.exceptions.UnauthorizedException;
-import org.ektorp.DbAccessException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.event.EventListener;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Performs all answer related operations.
@@ -64,10 +65,11 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	private UserService userService;
 
 	public AnswerServiceImpl(
-			AnswerRepository repository,
-			RoomService roomService,
-			UserService userService,
-			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+			final AnswerRepository repository,
+			final RoomService roomService,
+			final UserService userService,
+			@Qualifier("defaultJsonMessageConverter") final
+			MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(Answer.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.answerRepository = repository;
 		this.roomService = roomService;
@@ -92,11 +94,11 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 			answers.add(entry);
 		}
 		try {
-			for (Answer e : answers) {
+			for (final Answer e : answers) {
 				this.eventPublisher.publishEvent(new BeforeCreationEvent<>(this, e));
 			}
 			answerRepository.saveAll(answers);
-			for (Answer e : answers) {
+			for (final Answer e : answers) {
 				this.eventPublisher.publishEvent(new AfterCreationEvent<>(this, e));
 			}
 		} catch (final DbAccessException e) {
@@ -121,7 +123,8 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		return answerRepository.findByContentIdUserIdPiRound(contentId, Answer.class, userService.getCurrentUser().getId(), content.getState().getRound());
+		return answerRepository.findByContentIdUserIdPiRound(
+				contentId, Answer.class, userService.getCurrentUser().getId(), content.getState().getRound());
 	}
 
 	@Override
@@ -148,10 +151,10 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		AnswerStatistics stats = answerRepository.findByContentIdRound(
+		final AnswerStatistics stats = answerRepository.findByContentIdRound(
 				content.getId(), round, content.getOptions().size());
 		/* Fill list with zeros to prevent IndexOutOfBoundsExceptions */
-		List<Integer> independentCounts = stats.getRoundStatistics().get(round - 1).getIndependentCounts();
+		final List<Integer> independentCounts = stats.getRoundStatistics().get(round - 1).getIndependentCounts();
 		while (independentCounts.size() < content.getOptions().size()) {
 			independentCounts.add(0);
 		}
@@ -177,8 +180,8 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		if (content == null) {
 			throw new NotFoundException();
 		}
-		AnswerStatistics stats = getStatistics(content.getId(), 1);
-		AnswerStatistics stats2 = getStatistics(content.getId(), 2);
+		final AnswerStatistics stats = getStatistics(content.getId(), 1);
+		final AnswerStatistics stats2 = getStatistics(content.getId(), 2);
 		stats.getRoundStatistics().add(stats2.getRoundStatistics().get(1));
 
 		return stats;
@@ -384,7 +387,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	@Override
 	public Map<String, Object> countAnswersAndAbstentionsInternal(final String contentId) {
 		final Content content = contentService.get(contentId);
-		HashMap<String, Object> map = new HashMap<>();
+		final HashMap<String, Object> map = new HashMap<>();
 
 		if (content == null) {
 			return null;

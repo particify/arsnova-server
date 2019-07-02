@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.persistence.couchdb.support;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -27,7 +28,12 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.Converter;
-import de.thm.arsnova.model.serialization.View;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.ektorp.CouchDbInstance;
 import org.ektorp.DbAccessException;
 import org.ektorp.http.HttpResponse;
@@ -37,12 +43,7 @@ import org.ektorp.impl.StdCouchDbConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import de.thm.arsnova.model.serialization.View;
 
 /**
  * This Connector adds a query method which uses CouchDB's Mango API to retrieve data.
@@ -58,20 +59,20 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 		public static class Sort {
 			public static class ToMapConverter implements Converter<Sort, Map<String, String>> {
 				@Override
-				public Map<String, String> convert(Sort value) {
-					Map<String, String> map = new HashMap<>();
+				public Map<String, String> convert(final Sort value) {
+					final Map<String, String> map = new HashMap<>();
 					map.put(value.field, value.descending ? "desc" : "asc");
 
 					return map;
 				}
 
 				@Override
-				public JavaType getInputType(TypeFactory typeFactory) {
+				public JavaType getInputType(final TypeFactory typeFactory) {
 					return typeFactory.constructType(Sort.class);
 				}
 
 				@Override
-				public JavaType getOutputType(TypeFactory typeFactory) {
+				public JavaType getOutputType(final TypeFactory typeFactory) {
 					return typeFactory.constructMapType(Map.class, String.class, String.class);
 				}
 			}
@@ -79,7 +80,7 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 			private String field;
 			private boolean descending = false;
 
-			public Sort(String field, boolean descending) {
+			public Sort(final String field, final boolean descending) {
 				this.field = field;
 				this.descending = descending;
 			}
@@ -88,7 +89,7 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 				return field;
 			}
 
-			public void setField(String field) {
+			public void setField(final String field) {
 				this.field = field;
 			}
 
@@ -96,7 +97,7 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 				return descending;
 			}
 
-			public void setDescending(boolean descending) {
+			public void setDescending(final boolean descending) {
 				this.descending = descending;
 			}
 		}
@@ -117,9 +118,11 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 		}
 
 		/**
+		 * Create a {@link MangoQuery} from criteria used to select documents.
+		 *
 		 * @param selector See http://docs.couchdb.org/en/stable/api/database/find.html#selector-syntax.
 		 */
-		public MangoQuery(Map<String, Object> selector) {
+		public MangoQuery(final Map<String, Object> selector) {
 			this.selector = selector;
 		}
 
@@ -130,9 +133,11 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 		}
 
 		/**
+		 * Set a Map with criteria used to select documents.
+		 *
 		 * @param selector See http://docs.couchdb.org/en/stable/api/database/find.html#selector-syntax.
 		 */
-		public void setSelector(Map<String, Object> selector) {
+		public void setSelector(final Map<String, Object> selector) {
 			this.selector = selector;
 		}
 
@@ -141,7 +146,7 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 			return fields;
 		}
 
-		public void setFields(List<String> fields) {
+		public void setFields(final List<String> fields) {
 			this.fields = fields;
 		}
 
@@ -150,7 +155,7 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 			return sort;
 		}
 
-		public void setSort(List<Sort> sort) {
+		public void setSort(final List<Sort> sort) {
 			this.sort = sort;
 		}
 
@@ -159,7 +164,7 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 			return limit;
 		}
 
-		public void setLimit(int limit) {
+		public void setLimit(final int limit) {
 			this.limit = limit;
 		}
 
@@ -168,7 +173,7 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 			return skip;
 		}
 
-		public void setSkip(int skip) {
+		public void setSkip(final int skip) {
 			this.skip = skip;
 		}
 
@@ -176,7 +181,7 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 			return indexDocument;
 		}
 
-		public void setIndexDocument(String indexDocument) {
+		public void setIndexDocument(final String indexDocument) {
 			this.indexDocument = indexDocument;
 		}
 
@@ -184,7 +189,7 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 			return indexName;
 		}
 
-		public void setIndexName(String indexName) {
+		public void setIndexName(final String indexName) {
 			this.indexName = indexName;
 		}
 
@@ -199,7 +204,7 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 			return update;
 		}
 
-		public void setUpdate(boolean update) {
+		public void setUpdate(final boolean update) {
 			this.update = update;
 		}
 
@@ -208,7 +213,7 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 			return stable;
 		}
 
-		public void setStable(boolean stable) {
+		public void setStable(final boolean stable) {
 			this.stable = stable;
 		}
 
@@ -224,30 +229,32 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 
 	private static final Logger logger = LoggerFactory.getLogger(MangoCouchDbConnector.class);
 
-	public MangoCouchDbConnector(String databaseName, CouchDbInstance dbInstance) {
+	public MangoCouchDbConnector(final String databaseName, final CouchDbInstance dbInstance) {
 		super(databaseName, dbInstance);
 	}
 
-	public MangoCouchDbConnector(String databaseName, CouchDbInstance dbi, ObjectMapperFactory om) {
+	public MangoCouchDbConnector(final String databaseName, final CouchDbInstance dbi, final ObjectMapperFactory om) {
 		super(databaseName, dbi, om);
 	}
 
 	/**
+	 * Retrieves entities from the database selected by the query.
 	 *
 	 * @param query The query sent to CouchDB's Mango API
 	 * @param rh Handler for the response to the query
 	 * @return List of retrieved entities
 	 */
 	public <T> List<T> query(final MangoQuery query, final MangoResponseHandler<T> rh) {
-		String queryString;
+		final String queryString;
 		try {
 			queryString = objectMapper.writeValueAsString(query);
 			logger.debug("Querying CouchDB using Mango API: {}", queryString);
-		} catch (JsonProcessingException e) {
+		} catch (final JsonProcessingException e) {
 			throw new DbAccessException("Could not serialize Mango query.");
 		}
-		List<T> result = restTemplate.postUncached(dbURI.append("_find").toString(), queryString, rh);
-		//List<T> result = restTemplate.post(dbURI.append("_find").toString(), new JacksonableEntity(query, objectMapper), rh);
+		final List<T> result = restTemplate.postUncached(dbURI.append("_find").toString(), queryString, rh);
+		//List<T> result = restTemplate.post(dbURI.append("_find").toString(),
+		//		new JacksonableEntity(query, objectMapper), rh);
 
 		logger.debug("Answer from CouchDB Mango query: {}", result);
 
@@ -255,17 +262,19 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 	}
 
 	/**
+	 * Retrieves entities from the database selected by the query.
 	 *
 	 * @param query The query sent to CouchDB's Mango API
 	 * @param type Type for deserialization of retrieved entities
 	 * @return List of retrieved entities
 	 */
 	public <T> List<T> query(final MangoQuery query, final Class<T> type) {
-		MangoResponseHandler<T> rh = new MangoResponseHandler<>(type, objectMapper, true);
+		final MangoResponseHandler<T> rh = new MangoResponseHandler<>(type, objectMapper, true);
 		return query(query, rh);
 	}
 
 	/**
+	 * Retrieves entities from the database selected by the query.
 	 *
 	 * @param query The query sent to CouchDB's Mango API
 	 * @param propertyName Name of the entity's property to be parsed
@@ -274,25 +283,27 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 	 */
 	public <T> List<T> query(final MangoQuery query, final String propertyName, final Class<T> type) {
 		query.setFields(Arrays.asList(new String[] {propertyName}));
-		MangoResponseHandler<T> rh = new MangoResponseHandler<>(propertyName, type, objectMapper);
+		final MangoResponseHandler<T> rh = new MangoResponseHandler<>(propertyName, type, objectMapper);
 
 		return query(query, rh);
 	}
 
 	/**
+	 * Retrieves entities with pagination metadata from the database selected by the query.
 	 *
 	 * @param query The query sent to CouchDB's Mango API
 	 * @param type Type for deserialization of retrieved entities
-	 * @return List of retrieved entities
+	 * @return List of retrieved entities wrapped with pagination metadata
 	 */
 	public <T> PagedMangoResponse<T> queryForPage(final MangoQuery query, final Class<T> type) {
-		MangoResponseHandler<T> rh = new MangoResponseHandler<>(type, objectMapper, true);
+		final MangoResponseHandler<T> rh = new MangoResponseHandler<>(type, objectMapper, true);
 		return new PagedMangoResponse<T>(query(query, rh), rh.getBookmark());
 	}
 
-	public void createPartialJsonIndex(final String name, final List<MangoQuery.Sort> fields, final Map<String, Object> filterSelector) {
-		Map<String, Object> query = new HashMap<>();
-		Map<String, Object> index = new HashMap<>();
+	public void createPartialJsonIndex(
+			final String name, final List<MangoQuery.Sort> fields, final Map<String, Object> filterSelector) {
+		final Map<String, Object> query = new HashMap<>();
+		final Map<String, Object> index = new HashMap<>();
 		query.put("ddoc", name);
 		query.put("type", "json");
 		query.put("index", index);
@@ -300,11 +311,11 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 		if (filterSelector != null) {
 			index.put("partial_filter_selector", filterSelector);
 		}
-		String queryString;
+		final String queryString;
 		try {
 			queryString = objectMapper.writeValueAsString(query);
 			logger.debug("Creating CouchDB index using Mango API: {}", queryString);
-		} catch (JsonProcessingException e) {
+		} catch (final JsonProcessingException e) {
 			throw new DbAccessException(e);
 		}
 		restTemplate.postUncached(dbURI.append("_index").toString(), queryString);
@@ -315,17 +326,17 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 	}
 
 	public boolean initializeIndex(final String name) {
-		MangoQuery query = new MangoQuery(Collections.EMPTY_MAP);
+		final MangoQuery query = new MangoQuery(Collections.EMPTY_MAP);
 		query.setIndexDocument(name);
 		query.setLimit(0);
 		try {
-			String queryString = objectMapper.writeValueAsString(query);
+			final String queryString = objectMapper.writeValueAsString(query);
 			logger.debug("Using Mango API query to initialize CouchDB index: {}", queryString);
-			HttpResponse response = restTemplate.postUncached(dbURI.append("_find").toString(), queryString);
+			final HttpResponse response = restTemplate.postUncached(dbURI.append("_find").toString(), queryString);
 			response.releaseConnection();
-		} catch (JsonProcessingException e) {
+		} catch (final JsonProcessingException e) {
 			throw new DbAccessException("Could not serialize Mango query.");
-		} catch (DbAccessException e) {
+		} catch (final DbAccessException e) {
 			logger.debug("CouchDB index is not ready yet: {}", name, e);
 			return false;
 		}
@@ -341,7 +352,7 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 				new StdResponseHandler<DbInfo>() {
 
 					@Override
-					public DbInfo success(HttpResponse hr) throws Exception {
+					public DbInfo success(final HttpResponse hr) throws Exception {
 						return objectMapper.readValue(hr.getContent(),
 								DbInfo.class);
 					}
@@ -354,7 +365,7 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 		private String purgeSeq;
 
 		@JsonCreator
-		public DbInfo(@JsonProperty("db_name") String dbName) {
+		public DbInfo(@JsonProperty("db_name") final String dbName) {
 			super(dbName);
 		}
 	}

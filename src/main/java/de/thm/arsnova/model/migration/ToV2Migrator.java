@@ -15,13 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.migration;
 
-import de.thm.arsnova.model.AnswerStatistics;
-import de.thm.arsnova.model.ChoiceQuestionContent;
-import de.thm.arsnova.model.RoomStatistics;
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.model.migration.v2.*;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_ABCD;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_FREETEXT;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_GRID;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_MC;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_SCHOOL;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_VOTE;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_YESNO;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -30,7 +33,22 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static de.thm.arsnova.model.migration.FromV2Migrator.*;
+import de.thm.arsnova.model.AnswerStatistics;
+import de.thm.arsnova.model.ChoiceQuestionContent;
+import de.thm.arsnova.model.RoomStatistics;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.model.migration.v2.Answer;
+import de.thm.arsnova.model.migration.v2.AnswerOption;
+import de.thm.arsnova.model.migration.v2.Comment;
+import de.thm.arsnova.model.migration.v2.Content;
+import de.thm.arsnova.model.migration.v2.Entity;
+import de.thm.arsnova.model.migration.v2.LoggedIn;
+import de.thm.arsnova.model.migration.v2.Motd;
+import de.thm.arsnova.model.migration.v2.MotdList;
+import de.thm.arsnova.model.migration.v2.Room;
+import de.thm.arsnova.model.migration.v2.RoomFeature;
+import de.thm.arsnova.model.migration.v2.RoomInfo;
+import de.thm.arsnova.model.migration.v2.VisitedRoom;
 
 /**
  * Converts entities from current model version to legacy version 2.
@@ -42,27 +60,6 @@ public class ToV2Migrator {
 	private void copyCommonProperties(final de.thm.arsnova.model.Entity from, final Entity to) {
 		to.setId(from.getId());
 		to.setRevision(from.getRevision());
-	}
-
-	public LoggedIn migrateLoggedIn(final UserProfile from) {
-		final LoggedIn to = new LoggedIn();
-		copyCommonProperties(from, to);
-		to.setUser(from.getLoginId());
-		to.setTimestamp(from.getLastLoginTimestamp().getTime());
-		to.setVisitedSessions(from.getRoomHistory().stream()
-				.map(entry -> new VisitedRoom())
-				.collect(Collectors.toList()));
-
-		return to;
-	}
-
-	public MotdList migrateMotdList(final UserProfile from) {
-		final MotdList to = new MotdList();
-		copyCommonProperties(from, to);
-		to.setUsername(from.getLoginId());
-		to.setMotdkeys(String.join(",", from.getAcknowledgedMotds()));
-
-		return to;
 	}
 
 	public Room migrate(final de.thm.arsnova.model.Room from, final Optional<UserProfile> owner) {
@@ -92,7 +89,7 @@ public class ToV2Migrator {
 	}
 
 	public RoomFeature migrate(final de.thm.arsnova.model.Room.Settings settings) {
-		RoomFeature feature = new RoomFeature();
+		final RoomFeature feature = new RoomFeature();
 
 		/* Features */
 		feature.setInterposed(settings.isCommentsEnabled());
@@ -159,18 +156,6 @@ public class ToV2Migrator {
 		return feature;
 	}
 
-	public RoomInfo migrateStats(final de.thm.arsnova.model.Room from) {
-		RoomInfo to = new RoomInfo(migrate(from));
-		RoomStatistics stats = from.getStatistics();
-		to.setNumQuestions(stats.getContentCount());
-		to.setNumUnanswered(stats.getUnansweredContentCount());
-		to.setNumAnswers(stats.getAnswerCount());
-		to.setNumInterposed(stats.getCommentCount());
-		to.setNumUnredInterposed(stats.getUnreadCommentCount());
-
-		return to;
-	}
-
 	public Content migrate(final de.thm.arsnova.model.Content from) {
 		final Content to = new Content();
 		copyCommonProperties(from, to);
@@ -208,7 +193,7 @@ public class ToV2Migrator {
 			final List<AnswerOption> toOptions = new ArrayList<>();
 			to.setPossibleAnswers(toOptions);
 			for (int i = 0; i < fromChoiceQuestionContent.getOptions().size(); i++) {
-				AnswerOption option = new AnswerOption();
+				final AnswerOption option = new AnswerOption();
 				option.setText(fromChoiceQuestionContent.getOptions().get(i).getLabel());
 				option.setValue(fromChoiceQuestionContent.getOptions().get(i).getPoints());
 				option.setCorrect(fromChoiceQuestionContent.getCorrectOptionIndexes().contains(i));
@@ -226,7 +211,7 @@ public class ToV2Migrator {
 					throw new IllegalArgumentException("Unsupported content format.");
 			}
 		}
-		de.thm.arsnova.model.Content.State state = from.getState();
+		final de.thm.arsnova.model.Content.State state = from.getState();
 		to.setPiRound(state.getRound());
 		to.setActive(state.isVisible());
 		to.setShowStatistic(state.isResponsesVisible());
@@ -255,22 +240,12 @@ public class ToV2Migrator {
 			if (content.isMultiple()) {
 				to.setAnswerText(migrateChoice(from.getSelectedChoiceIndexes(), content.getOptions()));
 			} else {
-				int index = from.getSelectedChoiceIndexes().get(0);
+				final int index = from.getSelectedChoiceIndexes().get(0);
 				to.setAnswerText(content.getOptions().get(index).getLabel());
 			}
 		}
 
 		return to;
-	}
-
-	public String migrateChoice(final List<Integer> selectedChoiceIndexes,
-			final List<ChoiceQuestionContent.AnswerOption> options) {
-		List<String> answers = new ArrayList<>();
-		for (int i = 0; i < options.size(); i++) {
-			answers.add(selectedChoiceIndexes.contains(i) ? "1" : "0");
-		}
-
-		return answers.stream().collect(Collectors.joining(","));
 	}
 
 	public Answer migrate(final de.thm.arsnova.model.ChoiceAnswer from,
@@ -338,6 +313,8 @@ public class ToV2Migrator {
 			case ROOM:
 				to.setAudience("session");
 				break;
+			default:
+				break;
 		}
 		to.setTitle(from.getTitle());
 		to.setText(from.getBody());
@@ -347,7 +324,7 @@ public class ToV2Migrator {
 	}
 
 	public List<Answer> migrate(final AnswerStatistics from,
-			final de.thm.arsnova.model.ChoiceQuestionContent content, int round) {
+			final de.thm.arsnova.model.ChoiceQuestionContent content, final int round) {
 		if (round < 1 || round > content.getState().getRound()) {
 			throw new IllegalArgumentException("Invalid value for round");
 		}
@@ -363,25 +340,27 @@ public class ToV2Migrator {
 			to.add(abstention);
 		}
 
-		Map<String, Integer> choices;
+		final Map<String, Integer> choices;
 		if (content.isMultiple()) {
 			/* Map selected choice indexes -> answer count */
 			choices = stats.getCombinatedCounts().stream().collect(Collectors.toMap(
 					c -> migrateChoice(c.getSelectedChoiceIndexes(), content.getOptions()),
 					c -> c.getCount(),
-					(u, v) -> { throw new IllegalStateException(String.format("Duplicate key %s", u)); },
+					(u, v) -> {
+						throw new IllegalStateException(String.format("Duplicate key %s", u));
+					},
 					LinkedHashMap::new));
 		} else {
 			choices = new LinkedHashMap<>();
 			int i = 0;
-			for (ChoiceQuestionContent.AnswerOption option : content.getOptions()) {
+			for (final ChoiceQuestionContent.AnswerOption option : content.getOptions()) {
 				choices.put(option.getLabel(), stats.getIndependentCounts().get(i));
 				i++;
 			}
 		}
 
-		for (Map.Entry<String, Integer> choice : choices.entrySet()) {
-			Answer answer = new Answer();
+		for (final Map.Entry<String, Integer> choice : choices.entrySet()) {
+			final Answer answer = new Answer();
 			answer.setQuestionId(content.getId());
 			answer.setPiRound(round);
 			answer.setAnswerCount(choice.getValue());
@@ -391,5 +370,48 @@ public class ToV2Migrator {
 		}
 
 		return to;
+	}
+
+	public LoggedIn migrateLoggedIn(final UserProfile from) {
+		final LoggedIn to = new LoggedIn();
+		copyCommonProperties(from, to);
+		to.setUser(from.getLoginId());
+		to.setTimestamp(from.getLastLoginTimestamp().getTime());
+		to.setVisitedSessions(from.getRoomHistory().stream()
+				.map(entry -> new VisitedRoom())
+				.collect(Collectors.toList()));
+
+		return to;
+	}
+
+	public MotdList migrateMotdList(final UserProfile from) {
+		final MotdList to = new MotdList();
+		copyCommonProperties(from, to);
+		to.setUsername(from.getLoginId());
+		to.setMotdkeys(String.join(",", from.getAcknowledgedMotds()));
+
+		return to;
+	}
+
+	public RoomInfo migrateStats(final de.thm.arsnova.model.Room from) {
+		final RoomInfo to = new RoomInfo(migrate(from));
+		final RoomStatistics stats = from.getStatistics();
+		to.setNumQuestions(stats.getContentCount());
+		to.setNumUnanswered(stats.getUnansweredContentCount());
+		to.setNumAnswers(stats.getAnswerCount());
+		to.setNumInterposed(stats.getCommentCount());
+		to.setNumUnredInterposed(stats.getUnreadCommentCount());
+
+		return to;
+	}
+
+	public String migrateChoice(final List<Integer> selectedChoiceIndexes,
+			final List<ChoiceQuestionContent.AnswerOption> options) {
+		final List<String> answers = new ArrayList<>();
+		for (int i = 0; i < options.size(); i++) {
+			answers.add(selectedChoiceIndexes.contains(i) ? "1" : "0");
+		}
+
+		return answers.stream().collect(Collectors.joining(","));
 	}
 }

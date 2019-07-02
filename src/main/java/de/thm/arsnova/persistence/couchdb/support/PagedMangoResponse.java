@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.persistence.couchdb.support;
 
 import java.util.List;
@@ -22,7 +23,7 @@ import java.util.List;
 /**
  * Contains the entities of the response and the bookmark to query the next page.
  *
- * @param <T>
+ * @param <T> Type of entites
  * @author Daniel Gerhardt
  */
 public class PagedMangoResponse<T> {

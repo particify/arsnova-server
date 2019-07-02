@@ -15,29 +15,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.controller;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+import javax.naming.OperationNotSupportedException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import de.thm.arsnova.model.Entity;
 import de.thm.arsnova.model.FindQuery;
 import de.thm.arsnova.service.EntityService;
 import de.thm.arsnova.service.FindQueryService;
 import de.thm.arsnova.web.exceptions.NotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import javax.naming.OperationNotSupportedException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Base type for Entity controllers which provides basic CRUD operations and supports Entity patching.
@@ -88,7 +98,7 @@ public abstract class AbstractEntityController<E extends Entity> {
 
 	@PutMapping(PUT_MAPPING)
 	public E put(@RequestBody final E entity, final HttpServletResponse httpServletResponse) {
-		E oldEntity = entityService.get(entity.getId());
+		final E oldEntity = entityService.get(entity.getId());
 		entityService.update(oldEntity, entity);
 		httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
 		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
@@ -123,8 +133,8 @@ public abstract class AbstractEntityController<E extends Entity> {
 
 	@PatchMapping(PATCH_MAPPING)
 	public E patch(@PathVariable final String id, @RequestBody final Map<String, Object> changes,
-					  final HttpServletResponse httpServletResponse) throws IOException {
-		E entity = entityService.get(id);
+			final HttpServletResponse httpServletResponse) throws IOException {
+		final E entity = entityService.get(id);
 		entityService.patch(entity, changes);
 		httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
 		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
@@ -134,7 +144,7 @@ public abstract class AbstractEntityController<E extends Entity> {
 
 	@DeleteMapping(DELETE_MAPPING)
 	public void delete(@PathVariable final String id) {
-		E entity = entityService.get(id);
+		final E entity = entityService.get(id);
 		entityService.delete(entity);
 	}
 
@@ -142,7 +152,7 @@ public abstract class AbstractEntityController<E extends Entity> {
 	public Iterable<E> find(@RequestBody final FindQuery<E> findQuery) throws OperationNotSupportedException {
 		if (findQueryService != null) {
 			logger.debug("Resolving find query: {}", findQuery);
-			Set<String> ids = findQueryService.resolveQuery(findQuery);
+			final Set<String> ids = findQueryService.resolveQuery(findQuery);
 			logger.debug("Resolved find query to IDs: {}", ids);
 
 			return entityService.get(ids);
@@ -152,13 +162,13 @@ public abstract class AbstractEntityController<E extends Entity> {
 	}
 
 	@RequestMapping(value = {DEFAULT_ALIAS_MAPPING, DEFAULT_ALIAS_MAPPING + ALIAS_SUBPATH})
-	public void forwardAlias(@PathVariable final String alias, @PathVariable(required = false) String subPath,
-			HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
+	public void forwardAlias(@PathVariable final String alias, @PathVariable(required = false) final String subPath,
+			final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
 			throws ServletException, IOException {
 		final String targetPath = String.format(
 				"%s/%s%s", getMapping(), resolveAlias(alias), subPath != null ? "/" + subPath : "");
 		logger.debug("Forwarding alias request to {}", targetPath);
-		httpServletRequest.getRequestDispatcher( targetPath)
+		httpServletRequest.getRequestDispatcher(targetPath)
 				.forward(httpServletRequest, httpServletResponse);
 	}
 

@@ -15,15 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.serialization.View;
-import org.springframework.core.style.ToStringCreator;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.springframework.core.style.ToStringCreator;
+
+import de.thm.arsnova.model.serialization.View;
 
 public class ChoiceQuestionContent extends Content {
 	public static class AnswerOption {
@@ -36,7 +37,7 @@ public class ChoiceQuestionContent extends Content {
 		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
-		public void setLabel(String label) {
+		public void setLabel(final String label) {
 			this.label = label;
 		}
 
@@ -46,7 +47,7 @@ public class ChoiceQuestionContent extends Content {
 		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
-		public void setPoints(int points) {
+		public void setPoints(final int points) {
 			this.points = points;
 		}
 
@@ -65,8 +66,8 @@ public class ChoiceQuestionContent extends Content {
 			}
 			final AnswerOption that = (AnswerOption) o;
 
-			return points == that.points &&
-					Objects.equals(label, that.label);
+			return points == that.points
+					&& Objects.equals(label, that.label);
 		}
 
 		@Override

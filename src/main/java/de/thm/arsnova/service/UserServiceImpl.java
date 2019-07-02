@@ -15,20 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service;
 
 import com.codahale.metrics.annotation.Gauge;
-import de.thm.arsnova.model.ClientAuthentication;
-import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.persistence.UserRepository;
-import de.thm.arsnova.security.GuestUserDetailsService;
-import de.thm.arsnova.security.User;
-import de.thm.arsnova.security.jwt.JwtService;
-import de.thm.arsnova.security.jwt.JwtToken;
-import de.thm.arsnova.web.exceptions.BadRequestException;
-import de.thm.arsnova.web.exceptions.NotFoundException;
-import de.thm.arsnova.web.exceptions.UnauthorizedException;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
+import javax.annotation.PreDestroy;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -61,15 +69,17 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriUtils;
 import org.stagemonitor.core.metrics.MonitorGauges;
 
-import javax.annotation.PreDestroy;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
+import de.thm.arsnova.model.ClientAuthentication;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.persistence.UserRepository;
+import de.thm.arsnova.security.GuestUserDetailsService;
+import de.thm.arsnova.security.User;
+import de.thm.arsnova.security.jwt.JwtService;
+import de.thm.arsnova.security.jwt.JwtToken;
+import de.thm.arsnova.web.exceptions.BadRequestException;
+import de.thm.arsnova.web.exceptions.NotFoundException;
+import de.thm.arsnova.web.exceptions.UnauthorizedException;
 
 /**
  * Performs all user related operations.
@@ -163,9 +173,10 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	public UserServiceImpl(
-			UserRepository repository,
-			JavaMailSender mailSender,
-			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+			final UserRepository repository,
+			final JavaMailSender mailSender,
+			@Qualifier("defaultJsonMessageConverter")
+			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(UserProfile.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.userRepository = repository;
 		this.mailSender = mailSender;
@@ -190,8 +201,8 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	@Scheduled(fixedDelay = ACTIVATION_KEY_CHECK_INTERVAL_MS)
 	public void deleteInactiveUsers() {
 		logger.info("Delete inactive users.");
-		long unixTime = System.currentTimeMillis();
-		long lastActivityBefore = unixTime - ACTIVATION_KEY_DURABILITY_MS;
+		final long unixTime = System.currentTimeMillis();
+		final long lastActivityBefore = unixTime - ACTIVATION_KEY_DURABILITY_MS;
 		userRepository.deleteInactiveUsers(lastActivityBefore);
 	}
 
@@ -213,15 +224,15 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 	@Override
 	public de.thm.arsnova.model.ClientAuthentication getCurrentClientAuthentication() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
 			return null;
 		}
-		User user = (User) authentication.getPrincipal();
-		String jwt = authentication instanceof JwtToken ?
-				(String) authentication.getCredentials() : jwtService.createSignedToken(user);
+		final User user = (User) authentication.getPrincipal();
+		final String jwt = authentication instanceof JwtToken
+				? (String) authentication.getCredentials() : jwtService.createSignedToken(user);
 
-		ClientAuthentication clientAuthentication =
+		final ClientAuthentication clientAuthentication =
 				new ClientAuthentication(user.getId(), user.getUsername(),
 						user.getAuthProvider(), jwt);
 
@@ -234,12 +245,12 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	public boolean isBannedFromLogin(String addr) {
+	public boolean isBannedFromLogin(final String addr) {
 		return loginBans.contains(addr);
 	}
 
 	@Override
-	public void increaseFailedLoginCount(String addr) {
+	public void increaseFailedLoginCount(final String addr) {
 		Byte tries = loginTries.get(addr);
 		if (null == tries) {
 			tries = 0;
@@ -275,7 +286,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 	@Override
 	public boolean isUserInRoom(final String userId, final String expectedRoomId) {
-		String actualRoomId = userIdToRoomId.get(userId);
+		final String actualRoomId = userIdToRoomId.get(userId);
 
 		return actualRoomId != null && actualRoomId.equals(expectedRoomId);
 	}
@@ -338,7 +349,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	@Override
 	public void authenticate(final UsernamePasswordAuthenticationToken token,
 			final UserProfile.AuthProvider authProvider) {
-		Authentication auth;
+		final Authentication auth;
 		switch (authProvider) {
 			case LDAP:
 				auth = ldapAuthenticationProvider.authenticate(token);
@@ -353,11 +364,12 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 					id = generateGuestId();
 					autoCreate = true;
 				}
-				UserDetails userDetails = guestUserDetailsService.loadUserByUsername(id, autoCreate);
+				final UserDetails userDetails = guestUserDetailsService.loadUserByUsername(id, autoCreate);
 				if (userDetails == null) {
 					throw new UsernameNotFoundException("Guest user does not exist");
 				}
-				auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+				auth = new UsernamePasswordAuthenticationToken(
+						userDetails, null, userDetails.getAuthorities());
 
 				break;
 			default:
@@ -393,7 +405,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	public User loadUser(final String userId, final Collection<GrantedAuthority> grantedAuthorities)
 			throws UsernameNotFoundException {
 		logger.debug("Load user: UserId: {}", userId);
-		UserProfile userProfile = userRepository.findOne(userId);
+		final UserProfile userProfile = userRepository.findOne(userId);
 		if (userProfile == null) {
 			throw new UsernameNotFoundException("User does not exist.");
 		}
@@ -412,13 +424,13 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	public UserProfile getByUsername(String username) {
+	public UserProfile getByUsername(final String username) {
 		return userRepository.findByAuthProviderAndLoginId(UserProfile.AuthProvider.ARSNOVA, username.toLowerCase());
 	}
 
 	@Override
-	public UserProfile create(String username, String password) {
-		String lcUsername = username.toLowerCase();
+	public UserProfile create(final String username, final String password) {
+		final String lcUsername = username.toLowerCase();
 
 		if (null == keygen) {
 			keygen = KeyGenerators.secureRandom(16);
@@ -440,8 +452,8 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 			return null;
 		}
 
-		UserProfile userProfile = new UserProfile();
-		UserProfile.Account account = new UserProfile.Account();
+		final UserProfile userProfile = new UserProfile();
+		final UserProfile.Account account = new UserProfile.Account();
 		userProfile.setAccount(account);
 		userProfile.setAuthProvider(UserProfile.AuthProvider.ARSNOVA);
 		userProfile.setLoginId(lcUsername);
@@ -450,7 +462,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		userProfile.setCreationTimestamp(new Date());
 
 		/* Repository is accessed directly without EntityService to skip permission check */
-		UserProfile result = userRepository.save(userProfile);
+		final UserProfile result = userRepository.save(userProfile);
 		if (null != result) {
 			sendActivationEmail(result);
 		} else {
@@ -460,7 +472,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		return result;
 	}
 
-	private String encodePassword(String password) {
+	private String encodePassword(final String password) {
 		if (null == encoder) {
 			encoder = new BCryptPasswordEncoder(12);
 		}
@@ -468,9 +480,9 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		return encoder.encode(password);
 	}
 
-	private void sendActivationEmail(UserProfile userProfile) {
-		String activationKey = userProfile.getAccount().getActivationKey();
-		String activationUrl = MessageFormat.format(
+	private void sendActivationEmail(final UserProfile userProfile) {
+		final String activationKey = userProfile.getAccount().getActivationKey();
+		final String activationUrl = MessageFormat.format(
 				"{0}{1}/{2}?action=activate&username={3}&key={4}",
 				rootUrl,
 				customizationPath,
@@ -484,28 +496,30 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	private void parseMailAddressPattern() {
 		/* TODO: Add Unicode support */
 
-		List<String> domainList = Arrays.asList(allowedEmailDomains.split(","));
+		final List<String> domainList = Arrays.asList(allowedEmailDomains.split(","));
 
 		if (!domainList.isEmpty()) {
-			List<String> patterns = new ArrayList<>();
+			final List<String> patterns = new ArrayList<>();
 			if (domainList.contains("*")) {
 				patterns.add("([a-z0-9-]+\\.)+[a-z0-9-]+");
 			} else {
-				Pattern patternPattern = Pattern.compile("[a-z0-9.*-]+", Pattern.CASE_INSENSITIVE);
-				for (String patternStr : domainList) {
+				final Pattern patternPattern = Pattern.compile("[a-z0-9.*-]+", Pattern.CASE_INSENSITIVE);
+				for (final String patternStr : domainList) {
 					if (patternPattern.matcher(patternStr).matches()) {
-						patterns.add(patternStr.replaceAll("[.]", "[.]").replaceAll("[*]", "[a-z0-9-]+?"));
+						patterns.add(
+								patternStr.replaceAll("[.]", "[.]").replaceAll("[*]", "[a-z0-9-]+?"));
 					}
 				}
 			}
 
-			mailPattern = Pattern.compile("[a-z0-9._-]+?@(" + StringUtils.join(patterns, "|") + ")", Pattern.CASE_INSENSITIVE);
+			mailPattern = Pattern.compile("[a-z0-9._-]+?@(" + StringUtils.join(patterns, "|") + ")",
+					Pattern.CASE_INSENSITIVE);
 			logger.info("Allowed e-mail addresses (pattern) for registration: '{}'.", mailPattern.pattern());
 		}
 	}
 
 	@Override
-	public UserProfile update(UserProfile userProfile) {
+	public UserProfile update(final UserProfile userProfile) {
 		if (null != userProfile.getId()) {
 			return userRepository.save(userProfile);
 		}
@@ -514,15 +528,15 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	public UserProfile deleteByUsername(String username) {
-		User user = getCurrentUser();
+	public UserProfile deleteByUsername(final String username) {
+		final User user = getCurrentUser();
 		if (!user.getUsername().equals(username.toLowerCase())
 				&& !SecurityContextHolder.getContext().getAuthentication().getAuthorities()
 						.contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
 			throw new UnauthorizedException();
 		}
 
-		UserProfile userProfile = getByUsername(username);
+		final UserProfile userProfile = getByUsername(username);
 		if (null == userProfile) {
 			throw new NotFoundException();
 		}
@@ -538,33 +552,33 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		if (userProfile.getId().equals(room.getOwnerId())) {
 			return;
 		}
-		Set<UserProfile.RoomHistoryEntry> roomHistory = userProfile.getRoomHistory();
-		UserProfile.RoomHistoryEntry entry = new UserProfile.RoomHistoryEntry(room.getId(), new Date());
+		final Set<UserProfile.RoomHistoryEntry> roomHistory = userProfile.getRoomHistory();
+		final UserProfile.RoomHistoryEntry entry = new UserProfile.RoomHistoryEntry(room.getId(), new Date());
 		/* TODO: lastVisit in roomHistory is currently not updated by subsequent method invocations */
 		if (!roomHistory.contains(entry)) {
 			roomHistory.add(entry);
-			Map<String, Object> changes = Collections.singletonMap("roomHistory", roomHistory);
+			final Map<String, Object> changes = Collections.singletonMap("roomHistory", roomHistory);
 			try {
 				super.patch(userProfile, changes);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				logger.error("Could not patch RoomHistory");
 			}
 		}
 	}
 
 	@Override
-	public void initiatePasswordReset(String username) {
-		UserProfile userProfile = getByUsername(username);
+	public void initiatePasswordReset(final String username) {
+		final UserProfile userProfile = getByUsername(username);
 		if (null == userProfile) {
 			logger.info("Password reset failed. User {} does not exist.", username);
 
 			throw new NotFoundException();
 		}
-		UserProfile.Account account = userProfile.getAccount();
+		final UserProfile.Account account = userProfile.getAccount();
 		// checks if a password reset process in in progress
-		if ((account.getPasswordResetTime() != null) &&
-				(System.currentTimeMillis() <
-						account.getPasswordResetTime().getTime() + REPEATED_PASSWORD_RESET_DELAY_MS)) {
+		if ((account.getPasswordResetTime() != null)
+				&& (System.currentTimeMillis()
+						< account.getPasswordResetTime().getTime() + REPEATED_PASSWORD_RESET_DELAY_MS)) {
 			
 			logger.info("Password reset failed. The reset delay for User {} is still active.", username);
 
@@ -578,14 +592,14 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 			logger.error("Password reset failed. {} could not be updated.", username);
 		}
 
-		String resetPasswordUrl = MessageFormat.format(
-			"{0}{1}/{2}?action=resetpassword&username={3}&key={4}",
-			rootUrl,
-			customizationPath,
-			resetPasswordPath,
-			UriUtils.encodeQueryParam(userProfile.getLoginId(), "UTF-8"), account.getPasswordResetKey());
+		final String resetPasswordUrl = MessageFormat.format(
+				"{0}{1}/{2}?action=resetpassword&username={3}&key={4}",
+				rootUrl,
+				customizationPath,
+				resetPasswordPath,
+				UriUtils.encodeQueryParam(userProfile.getLoginId(), "UTF-8"), account.getPasswordResetKey());
 
-		String mailBody = MessageFormat.format(
+		final String mailBody = MessageFormat.format(
 				resetPasswordMailBody,
 				resetPasswordUrl,
 				account.getPasswordResetKey()
@@ -595,8 +609,8 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	public boolean resetPassword(UserProfile userProfile, String key, String password) {
-		UserProfile.Account account = userProfile.getAccount();
+	public boolean resetPassword(final UserProfile userProfile, final String key, final String password) {
+		final UserProfile.Account account = userProfile.getAccount();
 		if (null == key || "".equals(key) || !key.equals(account.getPasswordResetKey())) {
 			logger.info("Password reset failed. Invalid key provided for User {}.", userProfile.getLoginId());
 
@@ -621,9 +635,9 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		return true;
 	}
 
-	private void sendEmail(UserProfile userProfile, String subject, String body) {
-		MimeMessage msg = mailSender.createMimeMessage();
-		MimeMessageHelper helper = new MimeMessageHelper(msg, "UTF-8");
+	private void sendEmail(final UserProfile userProfile, final String subject, final String body) {
+		final MimeMessage msg = mailSender.createMimeMessage();
+		final MimeMessageHelper helper = new MimeMessageHelper(msg, "UTF-8");
 		try {
 			helper.setFrom(mailSenderName + "<" + mailSenderAddress + ">");
 			helper.setTo(userProfile.getLoginId());
@@ -632,7 +646,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 			logger.info("Sending mail \"{}\" from \"{}\" to \"{}\"", subject, msg.getFrom(), userProfile.getLoginId());
 			mailSender.send(msg);
-		} catch (MailException | MessagingException e) {
+		} catch (final MailException | MessagingException e) {
 			logger.warn("Mail \"{}\" could not be sent.", subject, e);
 		}
 	}
@@ -655,10 +669,15 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	public User getAuthenticatedUserByWsSession(final String wsSessionId) {
-		String jwt = wsSessionIdToJwt.getOrDefault(wsSessionId, null);
-		if (jwt == null) return null;
-		User u = jwtService.verifyToken(jwt);
-		if (u == null) return null;
+		final String jwt = wsSessionIdToJwt.getOrDefault(wsSessionId, null);
+		if (jwt == null) {
+			return null;
+		}
+		final User u = jwtService.verifyToken(jwt);
+		if (u == null) {
+			return null;
+		}
+
 		return u;
 	}
 }

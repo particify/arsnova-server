@@ -15,17 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.controller;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 public class ControllerExceptionHelper {
@@ -34,7 +34,7 @@ public class ControllerExceptionHelper {
 	/* Since exception messages might contain sensitive data, they are not exposed by default. */
 	@Value("${api.expose-error-messages:false}") private boolean exposeMessages;
 
-	protected Map<String, Object> handleException(@NonNull Throwable e, @NonNull Level level) {
+	protected Map<String, Object> handleException(@NonNull final Throwable e, @NonNull final Level level) {
 		final String message = e.getMessage() != null ? e.getMessage() : "";
 		log(level, message, e);
 		final Map<String, Object> result = new HashMap<>();
@@ -46,7 +46,7 @@ public class ControllerExceptionHelper {
 		return result;
 	}
 
-	private void log(Level level, String message, Throwable e) {
+	private void log(final Level level, final String message, final Throwable e) {
 		switch (level) {
 			case ERROR:
 				logger.error(message, e);
@@ -62,6 +62,8 @@ public class ControllerExceptionHelper {
 				break;
 			case TRACE:
 				logger.trace(message, e);
+				break;
+			default:
 				break;
 		}
 	}

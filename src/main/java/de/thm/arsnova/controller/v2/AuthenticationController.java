@@ -15,16 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.controller.v2;
 
-import de.thm.arsnova.config.SecurityConfig;
-import de.thm.arsnova.controller.AbstractController;
-import de.thm.arsnova.model.ServiceDescription;
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
-import de.thm.arsnova.security.User;
-import de.thm.arsnova.service.UserService;
-import de.thm.arsnova.web.exceptions.UnauthorizedException;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import javax.annotation.PostConstruct;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.exception.HttpAction;
 import org.pac4j.oauth.client.FacebookClient;
@@ -54,16 +57,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import de.thm.arsnova.config.SecurityConfig;
+import de.thm.arsnova.controller.AbstractController;
+import de.thm.arsnova.model.ServiceDescription;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.model.migration.v2.ClientAuthentication;
+import de.thm.arsnova.security.User;
+import de.thm.arsnova.service.UserService;
+import de.thm.arsnova.web.exceptions.UnauthorizedException;
 
 /**
  * Handles authentication specific requests.
@@ -156,12 +157,12 @@ public class AuthenticationController extends AbstractController {
 	@RequestMapping(value = { "/login", "/doLogin" }, method = { RequestMethod.POST, RequestMethod.GET })
 	public void doLogin(
 			@RequestParam("type") final String type,
-			@RequestParam(value = "user", required = false) String username,
+			@RequestParam(value = "user", required = false) final String username,
 			@RequestParam(required = false) final String password,
 			final HttpServletRequest request,
 			final HttpServletResponse response
 	) throws IOException {
-		String addr = request.getRemoteAddr();
+		final String addr = request.getRemoteAddr();
 		if (userService.isBannedFromLogin(addr)) {
 			response.sendError(429, "Too Many Requests");
 
@@ -173,7 +174,7 @@ public class AuthenticationController extends AbstractController {
 		if (dbAuthEnabled && "arsnova".equals(type)) {
 			try {
 				userService.authenticate(authRequest, UserProfile.AuthProvider.ARSNOVA);
-			} catch (AuthenticationException e) {
+			} catch (final AuthenticationException e) {
 				logger.info("Database authentication failed.", e);
 				userService.increaseFailedLoginCount(addr);
 				response.setStatus(HttpStatus.UNAUTHORIZED.value());
@@ -181,7 +182,7 @@ public class AuthenticationController extends AbstractController {
 		} else if (ldapEnabled && "ldap".equals(type)) {
 			try {
 				userService.authenticate(authRequest, UserProfile.AuthProvider.LDAP);
-			} catch (AuthenticationException e) {
+			} catch (final AuthenticationException e) {
 				logger.info("LDAP authentication failed.", e);
 				userService.increaseFailedLoginCount(addr);
 				response.setStatus(HttpStatus.UNAUTHORIZED.value());
@@ -262,7 +263,7 @@ public class AuthenticationController extends AbstractController {
 
 	@RequestMapping(value = { "/", "/whoami" }, method = RequestMethod.GET)
 	@ResponseBody
-	public ClientAuthentication whoami(@AuthenticationPrincipal User user) {
+	public ClientAuthentication whoami(@AuthenticationPrincipal final User user) {
 		if (user == null) {
 			throw new UnauthorizedException();
 		}
@@ -284,110 +285,110 @@ public class AuthenticationController extends AbstractController {
 	@RequestMapping(value = { "/services" }, method = RequestMethod.GET)
 	@ResponseBody
 	public List<ServiceDescription> getServices(final HttpServletRequest request) {
-		List<ServiceDescription> services = new ArrayList<>();
+		final List<ServiceDescription> services = new ArrayList<>();
 
 		/* The first parameter is replaced by the backend, the second one by the frondend */
-		String dialogUrl = apiPath + "/auth/dialog?type={0}&successurl='{0}'";
+		final String dialogUrl = apiPath + "/auth/dialog?type={0}&successurl='{0}'";
 
 		if (guestEnabled) {
-			ServiceDescription sdesc = new ServiceDescription(
-				"guest",
-				"Guest",
-				null,
-				guestRoles
+			final ServiceDescription sdesc = new ServiceDescription(
+					"guest",
+					"Guest",
+					null,
+					guestRoles
 			);
 			sdesc.setOrder(guestOrder);
 			services.add(sdesc);
 		}
 
 		if (customLoginEnabled && !"".equals(customLoginDialog)) {
-			ServiceDescription sdesc = new ServiceDescription(
-				"custom",
-				customLoginTitle,
-				customizationPath + "/" + customLoginDialog + "?redirect={0}",
-				customLoginRoles,
-				customLoginImage
+			final ServiceDescription sdesc = new ServiceDescription(
+					"custom",
+					customLoginTitle,
+					customizationPath + "/" + customLoginDialog + "?redirect={0}",
+					customLoginRoles,
+					customLoginImage
 			);
 			sdesc.setOrder(customLoginOrder);
 			services.add(sdesc);
 		}
 
 		if (dbAuthEnabled && !"".equals(dbAuthDialog)) {
-			ServiceDescription sdesc = new ServiceDescription(
-				"arsnova",
-				dbAuthTitle,
-				customizationPath + "/" + dbAuthDialog + "?redirect={0}",
-				dbAuthRoles,
-				dbAuthImage
+			final ServiceDescription sdesc = new ServiceDescription(
+					"arsnova",
+					dbAuthTitle,
+					customizationPath + "/" + dbAuthDialog + "?redirect={0}",
+					dbAuthRoles,
+					dbAuthImage
 			);
 			sdesc.setOrder(dbAuthOrder);
 			services.add(sdesc);
 		}
 
 		if (ldapEnabled && !"".equals(ldapDialog)) {
-			ServiceDescription sdesc = new ServiceDescription(
-				"ldap",
-				ldapTitle,
-				customizationPath + "/" + ldapDialog + "?redirect={0}",
-				ldapRoles,
-				ldapImage
+			final ServiceDescription sdesc = new ServiceDescription(
+					"ldap",
+					ldapTitle,
+					customizationPath + "/" + ldapDialog + "?redirect={0}",
+					ldapRoles,
+					ldapImage
 			);
 			sdesc.setOrder(ldapOrder);
 			services.add(sdesc);
 		}
 
 		if (casEnabled) {
-			ServiceDescription sdesc = new ServiceDescription(
-				"cas",
-				casTitle,
-				MessageFormat.format(dialogUrl, "cas"),
-				casRoles,
-				casImage
+			final ServiceDescription sdesc = new ServiceDescription(
+					"cas",
+					casTitle,
+					MessageFormat.format(dialogUrl, "cas"),
+					casRoles,
+					casImage
 			);
 			sdesc.setOrder(casOrder);
 			services.add(sdesc);
 		}
 
 		if (oidcEnabled) {
-			ServiceDescription sdesc = new ServiceDescription(
-				"oidc",
-				oidcTitle,
-				MessageFormat.format(dialogUrl, "oidc"),
-				oidcRoles,
-				oidcImage
+			final ServiceDescription sdesc = new ServiceDescription(
+					"oidc",
+					oidcTitle,
+					MessageFormat.format(dialogUrl, "oidc"),
+					oidcRoles,
+					oidcImage
 			);
 			sdesc.setOrder(oidcOrder);
 			services.add(sdesc);
 		}
 
 		if (facebookEnabled) {
-			ServiceDescription sdesc = new ServiceDescription(
-				"facebook",
-				"Facebook",
-				MessageFormat.format(dialogUrl, "facebook"),
-				facebookRoles
+			final ServiceDescription sdesc = new ServiceDescription(
+					"facebook",
+					"Facebook",
+					MessageFormat.format(dialogUrl, "facebook"),
+					facebookRoles
 			);
 			sdesc.setOrder(facebookOrder);
 			services.add(sdesc);
 		}
 
 		if (googleEnabled) {
-			ServiceDescription sdesc = new ServiceDescription(
-				"google",
-				"Google",
-				MessageFormat.format(dialogUrl, "google"),
-				googleRoles
+			final ServiceDescription sdesc = new ServiceDescription(
+					"google",
+					"Google",
+					MessageFormat.format(dialogUrl, "google"),
+					googleRoles
 			);
 			sdesc.setOrder(googleOrder);
 			services.add(sdesc);
 		}
 
 		if (twitterEnabled) {
-			ServiceDescription sdesc = new ServiceDescription(
-				"twitter",
-				"Twitter",
-				MessageFormat.format(dialogUrl, "twitter"),
-				twitterRoles
+			final ServiceDescription sdesc = new ServiceDescription(
+					"twitter",
+					"Twitter",
+					MessageFormat.format(dialogUrl, "twitter"),
+					twitterRoles
 			);
 			sdesc.setOrder(twitterOrder);
 			services.add(sdesc);
@@ -397,7 +398,7 @@ public class AuthenticationController extends AbstractController {
 	}
 
 	private Collection<GrantedAuthority> getAuthorities(final boolean admin) {
-		List<GrantedAuthority> authList = new ArrayList<>();
+		final List<GrantedAuthority> authList = new ArrayList<>();
 		authList.add(new SimpleGrantedAuthority("ROLE_USER"));
 		if (admin) {
 			authList.add(new SimpleGrantedAuthority("ROLE_ADMIN"));

@@ -15,11 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import java.io.IOException;
+import java.util.Date;
+import java.util.Map;
+import java.util.function.Function;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.event.EventListener;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.prepost.PreFilter;
+import org.springframework.stereotype.Component;
+
 import de.thm.arsnova.event.AfterCreationEvent;
 import de.thm.arsnova.event.AfterDeletionEvent;
 import de.thm.arsnova.event.AfterFullUpdateEvent;
@@ -32,21 +47,6 @@ import de.thm.arsnova.event.BeforePatchEvent;
 import de.thm.arsnova.model.Entity;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.persistence.CrudRepository;
-
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.context.event.EventListener;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.access.prepost.PreFilter;
-import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.util.Date;
-import java.util.Map;
-import java.util.function.Function;
 
 /**
  * Default implementation of {@link EntityService} which provides CRUD operations for entities independently from the
@@ -61,7 +61,8 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	protected ApplicationEventPublisher eventPublisher;
 	private ObjectMapper objectMapper;
 
-	public DefaultEntityServiceImpl(Class<T> type, CrudRepository<T, String> repository, ObjectMapper objectMapper) {
+	public DefaultEntityServiceImpl(
+			final Class<T> type, final CrudRepository<T, String> repository, final ObjectMapper objectMapper) {
 		this.type = type;
 		this.repository = repository;
 		this.objectMapper = objectMapper;
@@ -76,7 +77,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	@Override
 	@Cacheable(cacheNames = "entity", key = "#root.target.getTypeName() + '-' + #id", condition = "#internal == false")
 	public T get(final String id, final boolean internal) {
-		T entity;
+		final T entity;
 		entity = repository.findOne(id);
 		if (internal) {
 			entity.setInternal(true);
@@ -89,7 +90,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	@Override
 	@PreFilter(value = "hasPermission(filterObject, #this.this.getTypeName(), 'read')", filterTarget = "ids")
 	public Iterable<T> get(final Iterable<String> ids) {
-		Iterable<T> entities = repository.findAllById(ids);
+		final Iterable<T> entities = repository.findAllById(ids);
 		entities.forEach(this::modifyRetrieved);
 
 		return entities;
@@ -178,9 +179,9 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	@PreAuthorize("hasPermission(#entity, 'update')")
 	public T patch(final T entity, final Map<String, Object> changes,
 			final Function<T, ? extends Object> propertyGetter) throws IOException {
-		Object obj = propertyGetter.apply(entity);
-		ObjectReader reader = objectMapper.readerForUpdating(obj).withView(View.Public.class);
-		JsonNode tree = objectMapper.valueToTree(changes);
+		final Object obj = propertyGetter.apply(entity);
+		final ObjectReader reader = objectMapper.readerForUpdating(obj).withView(View.Public.class);
+		final JsonNode tree = objectMapper.valueToTree(changes);
 		reader.readValue(tree);
 		entity.setUpdateTimestamp(new Date());
 		preparePatch(entity);
@@ -202,16 +203,16 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	public Iterable<T> patch(final Iterable<T> entities, final Map<String, Object> changes,
 			final Function<T, ? extends Object> propertyGetter) throws IOException {
 		final JsonNode tree = objectMapper.valueToTree(changes);
-		for (T entity : entities) {
-			Object obj = propertyGetter.apply(entity);
-			ObjectReader reader = objectMapper.readerForUpdating(obj).withView(View.Public.class);
+		for (final T entity : entities) {
+			final Object obj = propertyGetter.apply(entity);
+			final ObjectReader reader = objectMapper.readerForUpdating(obj).withView(View.Public.class);
 			reader.readValue(tree);
 			entity.setUpdateTimestamp(new Date());
 			preparePatch(entity);
 			eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity, propertyGetter, changes));
 		}
 
-		Iterable<T> patchedEntities = repository.saveAll(entities);
+		final Iterable<T> patchedEntities = repository.saveAll(entities);
 		patchedEntities.forEach((e) -> {
 			eventPublisher.publishEvent(new AfterPatchEvent<>(this, e, propertyGetter, changes));
 			modifyRetrieved(e);
@@ -242,12 +243,12 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	@Override
 	@PreFilter(value = "hasPermission(filterObject, 'delete')", filterTarget = "entities")
 	public void delete(final Iterable<T> entities) {
-		for (T entity : entities) {
+		for (final T entity : entities) {
 			prepareDelete(entity);
 			eventPublisher.publishEvent(new BeforeDeletionEvent<>(this, entity));
 		}
 		repository.deleteAll(entities);
-		for (T entity : entities) {
+		for (final T entity : entities) {
 			eventPublisher.publishEvent(new AfterDeletionEvent<>(this, entity));
 		}
 	}
@@ -284,19 +285,19 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	public static class EntityCacheHandler {
 		@CachePut(cacheNames = "entity", key = "#event.entity.class.simpleName.toLowerCase() + '-' + #event.entity.id")
 		@EventListener
-		public Entity handleCreate(AfterCreationEvent event) {
+		public Entity handleCreate(final AfterCreationEvent event) {
 			return event.getEntity();
 		}
 
 		@CachePut(cacheNames = "entity", key = "#event.entity.class.simpleName.toLowerCase() + '-' + #event.entity.id")
 		@EventListener
-		public Entity handleUpdate(AfterUpdateEvent event) {
+		public Entity handleUpdate(final AfterUpdateEvent event) {
 			return event.getEntity();
 		}
 
 		@CacheEvict(cacheNames = "entity", key = "#event.entity.class.simpleName.toLowerCase() + '-' + #event.entity.id")
 		@EventListener
-		public void handleDelete(AfterDeletionEvent event) {
+		public void handleDelete(final AfterDeletionEvent event) {
 
 		}
 	}

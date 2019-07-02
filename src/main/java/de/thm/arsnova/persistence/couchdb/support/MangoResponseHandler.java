@@ -15,34 +15,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.persistence.couchdb.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import org.ektorp.http.HttpResponse;
 import org.ektorp.http.StdResponseHandler;
 import org.ektorp.util.Assert;
-
-import java.util.List;
 
 public class MangoResponseHandler<T> extends StdResponseHandler<List<T>> {
 
 	private MangoQueryResultParser<T> parser;
 	private String bookmark;
 
-	public MangoResponseHandler(Class<T> docType, ObjectMapper om) {
+	public MangoResponseHandler(final Class<T> docType, final ObjectMapper om) {
 		Assert.notNull(om, "ObjectMapper may not be null");
 		Assert.notNull(docType, "docType may not be null");
 		parser = new MangoQueryResultParser<T>(docType, om);
 	}
 
-	public MangoResponseHandler(Class<T> docType, ObjectMapper om,
-										  boolean ignoreNotFound) {
+	public MangoResponseHandler(final Class<T> docType, final ObjectMapper om,
+			final boolean ignoreNotFound) {
 		Assert.notNull(om, "ObjectMapper may not be null");
 		Assert.notNull(docType, "docType may not be null");
 		parser = new MangoQueryResultParser<T>(docType, om);
 	}
 
-	public MangoResponseHandler(String propertyName, Class<T> propertyType, ObjectMapper om) {
+	public MangoResponseHandler(final String propertyName, final Class<T> propertyType, final ObjectMapper om) {
 		Assert.notNull(om, "ObjectMapper may not be null");
 		Assert.notNull(propertyType, "propertyType may not be null");
 		Assert.notNull(propertyName, "propertyName may not be null");
@@ -50,7 +50,7 @@ public class MangoResponseHandler<T> extends StdResponseHandler<List<T>> {
 	}
 
 	@Override
-	public List<T> success(HttpResponse hr) throws Exception {
+	public List<T> success(final HttpResponse hr) throws Exception {
 		parser.parseResult(hr.getContent());
 		bookmark = parser.getBookmark();
 

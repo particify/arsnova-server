@@ -15,15 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.service;
 
-import de.thm.arsnova.model.Entity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.access.prepost.PreFilter;
+package de.thm.arsnova.service;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.function.Function;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.prepost.PreFilter;
+
+import de.thm.arsnova.model.Entity;
 
 /**
  * Provides CRUD operations for entities independently from the underlying persistence implementation.

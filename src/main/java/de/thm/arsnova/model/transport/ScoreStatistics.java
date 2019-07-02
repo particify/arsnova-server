@@ -15,12 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.transport;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
+import de.thm.arsnova.model.serialization.View;
 
 /**
  * The calculated score along with meta-data.
@@ -46,7 +48,7 @@ public class ScoreStatistics {
 		return courseProgress;
 	}
 
-	public void setCourseProgress(int courseProgress) {
+	public void setCourseProgress(final int courseProgress) {
 		this.courseProgress = courseProgress;
 	}
 
@@ -56,7 +58,7 @@ public class ScoreStatistics {
 		return myProgress;
 	}
 
-	public void setMyProgress(int myProgress) {
+	public void setMyProgress(final int myProgress) {
 		this.myProgress = myProgress;
 	}
 
@@ -66,7 +68,7 @@ public class ScoreStatistics {
 		return numQuestions;
 	}
 
-	public void setNumQuestions(int numQuestions) {
+	public void setNumQuestions(final int numQuestions) {
 		this.numQuestions = numQuestions;
 	}
 
@@ -75,7 +77,7 @@ public class ScoreStatistics {
 		return numerator;
 	}
 
-	public void setNumerator(int numerator) {
+	public void setNumerator(final int numerator) {
 		this.numerator = numerator;
 	}
 
@@ -84,7 +86,7 @@ public class ScoreStatistics {
 		return denominator;
 	}
 
-	public void setDenominator(int denominator) {
+	public void setDenominator(final int denominator) {
 		this.denominator = denominator;
 	}
 
@@ -94,7 +96,7 @@ public class ScoreStatistics {
 		return numUsers;
 	}
 
-	public void setNumUsers(int numUsers) {
+	public void setNumUsers(final int numUsers) {
 		this.numUsers = numUsers;
 	}
 
@@ -110,7 +112,7 @@ public class ScoreStatistics {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		// auto generated!
 		if (this == obj) {
 			return true;
@@ -121,7 +123,7 @@ public class ScoreStatistics {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		ScoreStatistics other = (ScoreStatistics) obj;
+		final ScoreStatistics other = (ScoreStatistics) obj;
 		if (courseProgress != other.courseProgress) {
 			return false;
 		}

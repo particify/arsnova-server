@@ -15,17 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.model.ClientAuthentication;
-import de.thm.arsnova.model.LoginCredentials;
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.service.UserService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import de.thm.arsnova.model.ClientAuthentication;
+import de.thm.arsnova.model.LoginCredentials;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.service.UserService;
 
 @RestController
 @RequestMapping("/auth")
@@ -42,7 +44,7 @@ public class AuthenticationController {
 	}
 
 	@PostMapping("/login/registered")
-	public ClientAuthentication loginRegistered(@RequestBody LoginCredentials loginCredentials) {
+	public ClientAuthentication loginRegistered(@RequestBody final LoginCredentials loginCredentials) {
 		final String loginId = loginCredentials.getLoginId().toLowerCase();
 		userService.authenticate(new UsernamePasswordAuthenticationToken(loginId, loginCredentials.getPassword()),
 				UserProfile.AuthProvider.ARSNOVA);

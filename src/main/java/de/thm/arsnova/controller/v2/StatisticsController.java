@@ -15,13 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.controller.v2;
 
-import de.thm.arsnova.controller.AbstractController;
-import de.thm.arsnova.model.Statistics;
-import de.thm.arsnova.service.StatisticsService;
-import de.thm.arsnova.web.CacheControl;
-import de.thm.arsnova.web.DeprecatedApi;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +25,12 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import de.thm.arsnova.controller.AbstractController;
+import de.thm.arsnova.model.Statistics;
+import de.thm.arsnova.service.StatisticsService;
+import de.thm.arsnova.web.CacheControl;
+import de.thm.arsnova.web.DeprecatedApi;
 
 /**
  * Allows retrieval of several statistics such as the number of active users.

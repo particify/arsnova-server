@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.test.context.support;
 
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.security.User;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -27,8 +28,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.security.User;
 
 /**
  * @author Daniel Gerhardt
@@ -36,13 +37,14 @@ import java.util.stream.Collectors;
 public class WithMockUserSecurityContextFactory implements WithSecurityContextFactory<WithMockUser> {
 	@Override
 	public SecurityContext createSecurityContext(final WithMockUser withMockUser) {
-		String loginId = StringUtils.hasLength(withMockUser.loginId()) ? withMockUser.loginId() : withMockUser.value();
-		UserProfile userProfile = new UserProfile(withMockUser.authProvider(), loginId);
+		final String loginId = StringUtils.hasLength(withMockUser.loginId()) ? withMockUser.loginId() : withMockUser.value();
+		final UserProfile userProfile = new UserProfile(withMockUser.authProvider(), loginId);
 		userProfile.setId(!withMockUser.userId().isEmpty() ? withMockUser.userId() : loginId);
-		User user = new User(userProfile, Arrays.stream(withMockUser.roles())
+		final User user = new User(userProfile, Arrays.stream(withMockUser.roles())
 				.map(r -> new SimpleGrantedAuthority("ROLE_" + r)).collect(Collectors.toList()));
-		Authentication authentication = new UsernamePasswordAuthenticationToken(user, withMockUser.password(), user.getAuthorities());
-		SecurityContext context = SecurityContextHolder.createEmptyContext();
+		final Authentication authentication =
+				new UsernamePasswordAuthenticationToken(user, withMockUser.password(), user.getAuthorities());
+		final SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 
 		return context;

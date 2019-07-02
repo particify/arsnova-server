@@ -15,17 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.thm.arsnova.config.AppConfig;
-import de.thm.arsnova.config.TestAppConfig;
-import de.thm.arsnova.config.TestPersistanceConfig;
-import de.thm.arsnova.config.TestSecurityConfig;
-import de.thm.arsnova.config.WebSocketConfig;
-import de.thm.arsnova.model.Room;
-import de.thm.arsnova.persistence.RoomRepository;
-import de.thm.arsnova.test.context.support.WithMockUser;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,18 +44,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.junit.Assert.*;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
+import de.thm.arsnova.config.AppConfig;
+import de.thm.arsnova.config.TestAppConfig;
+import de.thm.arsnova.config.TestPersistanceConfig;
+import de.thm.arsnova.config.TestSecurityConfig;
+import de.thm.arsnova.config.WebSocketConfig;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.persistence.RoomRepository;
+import de.thm.arsnova.test.context.support.WithMockUser;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -79,7 +81,8 @@ public class DefaultEntityServiceImplTest {
 	@WithMockUser("TestUser")
 	public void testPatch() throws IOException {
 		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
-		final DefaultEntityServiceImpl<Room> entityService = new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper);
+		final DefaultEntityServiceImpl<Room> entityService =
+				new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper);
 		entityService.setApplicationEventPublisher(eventPublisher);
 
 		when(roomRepository.save(any(Room.class))).then(returnsFirstArg());
@@ -113,12 +116,13 @@ public class DefaultEntityServiceImplTest {
 	@WithMockUser("TestUser")
 	public void testPatchWithList() throws IOException {
 		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
-		final DefaultEntityServiceImpl<Room> entityService = new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper);
+		final DefaultEntityServiceImpl<Room> entityService =
+				new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper);
 		entityService.setApplicationEventPublisher(eventPublisher);
 
 		when(roomRepository.saveAll(anyListOf(Room.class))).then(returnsFirstArg());
 
-		List<Room> sessions = new ArrayList<>();
+		final List<Room> sessions = new ArrayList<>();
 		final String originalId1 = "d8833f0d78964a9487ded02ba2dfbbad";
 		final String originalName1 = "Test Room 1";
 		final String originalOwnerId1 = "TestUser";
@@ -163,7 +167,8 @@ public class DefaultEntityServiceImplTest {
 	@WithMockUser("TestUser")
 	public void testCaching() {
 		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
-		final DefaultEntityServiceImpl<Room> entityService = new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper);
+		final DefaultEntityServiceImpl<Room> entityService =
+				new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper);
 		entityService.setApplicationEventPublisher(eventPublisher);
 
 		final Room room1 = new Room();

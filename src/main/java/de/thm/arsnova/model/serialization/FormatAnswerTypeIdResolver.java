@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.serialization;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -22,12 +23,12 @@ import com.fasterxml.jackson.databind.DatabindContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.jsontype.impl.TypeIdResolverBase;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import java.io.IOException;
+
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.ChoiceAnswer;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.TextAnswer;
-
-import java.io.IOException;
 
 public class FormatAnswerTypeIdResolver extends TypeIdResolverBase {
 	@Override
@@ -46,7 +47,7 @@ public class FormatAnswerTypeIdResolver extends TypeIdResolverBase {
 
 	@Override
 	public JavaType typeFromId(final DatabindContext context, final String id) throws IOException {
-		Content.Format format = Content.Format.valueOf(id);
+		final Content.Format format = Content.Format.valueOf(id);
 		switch (format) {
 			case BINARY:
 				return TypeFactory.defaultInstance().constructType(ChoiceAnswer.class);

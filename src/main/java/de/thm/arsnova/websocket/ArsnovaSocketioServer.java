@@ -15,16 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.websocket;
 
 /**
  * This interface is used to auto-wire the Socket Server.
- *
- * Extend this interface as you see fit.
  */
 public interface ArsnovaSocketioServer {
 
-	boolean isUseSSL();
+	boolean isUseSsl();
 
 	int getPortNumber();
 

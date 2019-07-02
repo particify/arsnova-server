@@ -15,14 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.event;
 
-import de.thm.arsnova.model.Entity;
+import java.util.Optional;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.ResolvableTypeProvider;
 
-import java.util.Optional;
+import de.thm.arsnova.model.Entity;
 
 public class StateChangeEvent<E extends Entity, T> extends ApplicationEvent implements ResolvableTypeProvider {
 	private final E entity;

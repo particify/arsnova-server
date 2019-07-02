@@ -15,13 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.security.jwt;
 
-import de.thm.arsnova.security.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+
+import de.thm.arsnova.security.User;
 
 public class JwtAuthenticationProvider implements AuthenticationProvider {
 	private JwtService jwtService;
@@ -35,8 +37,8 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
 	}
 
 	@Override
-	public boolean supports(final Class<?> aClass) {
-		return JwtToken.class.isAssignableFrom(aClass);
+	public boolean supports(final Class<?> authentication) {
+		return JwtToken.class.isAssignableFrom(authentication);
 	}
 
 	@Autowired

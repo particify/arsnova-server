@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service.score;
 
 import de.thm.arsnova.model.transport.ScoreStatistics;
@@ -26,7 +27,7 @@ import de.thm.arsnova.persistence.SessionStatisticsRepository;
  */
 public class QuestionBasedScoreCalculator extends VariantScoreCalculator {
 
-	public QuestionBasedScoreCalculator(SessionStatisticsRepository sessionStatisticsRepository) {
+	public QuestionBasedScoreCalculator(final SessionStatisticsRepository sessionStatisticsRepository) {
 		super(sessionStatisticsRepository);
 	}
 
@@ -35,7 +36,7 @@ public class QuestionBasedScoreCalculator extends VariantScoreCalculator {
 		final int courseProgress = calculateCourseProgress();
 		final int numerator = courseScore.getQuestionCount() * courseProgress / 100;
 		final int denominator = courseScore.getQuestionCount();
-		ScoreStatistics lpv = new ScoreStatistics();
+		final ScoreStatistics lpv = new ScoreStatistics();
 		lpv.setCourseProgress(courseProgress);
 		lpv.setNumQuestions(courseScore.getQuestionCount());
 		lpv.setNumUsers(courseScore.getTotalUserCount());
@@ -46,11 +47,11 @@ public class QuestionBasedScoreCalculator extends VariantScoreCalculator {
 
 	private int calculateCourseProgress() {
 		double ratio = 0;
-		for (QuestionScore questionScore : courseScore) {
+		for (final QuestionScore questionScore : courseScore) {
 			if (!questionScore.hasScores()) {
 				continue;
 			}
-			int numAnswers = questionScore.getUserCount();
+			final int numAnswers = questionScore.getUserCount();
 			if (numAnswers != 0) {
 				ratio += (double) countCorrectAnswers(questionScore) / (numAnswers * courseScore.getQuestionCount());
 			}
@@ -58,10 +59,10 @@ public class QuestionBasedScoreCalculator extends VariantScoreCalculator {
 		return (int) Math.min(100, Math.round(ratio * 100));
 	}
 
-	private int countCorrectAnswers(QuestionScore questionScore) {
-		int requiredScore = questionScore.getMaximum();
+	private int countCorrectAnswers(final QuestionScore questionScore) {
+		final int requiredScore = questionScore.getMaximum();
 		int numAnswersCorrect = 0;
-		for (UserScore userScore : questionScore) {
+		for (final UserScore userScore : questionScore) {
 			if (userScore.hasScore(requiredScore)) {
 				numAnswersCorrect++;
 			}
@@ -70,10 +71,10 @@ public class QuestionBasedScoreCalculator extends VariantScoreCalculator {
 	}
 
 	@Override
-	protected ScoreStatistics createMyProgress(String userId) {
+	protected ScoreStatistics createMyProgress(final String userId) {
 		final int numerator = numQuestionsCorrectForUser(userId);
 		final int denominator = courseScore.getQuestionCount();
-		ScoreStatistics lpv = new ScoreStatistics();
+		final ScoreStatistics lpv = new ScoreStatistics();
 		lpv.setCourseProgress(calculateCourseProgress());
 		lpv.setMyProgress(myPercentage(numerator, denominator));
 		lpv.setNumQuestions(courseScore.getQuestionCount());
@@ -83,18 +84,18 @@ public class QuestionBasedScoreCalculator extends VariantScoreCalculator {
 		return lpv;
 	}
 
-	private int numQuestionsCorrectForUser(String userId) {
+	private int numQuestionsCorrectForUser(final String userId) {
 		int numQuestionsCorrect = 0;
-		for (QuestionScore questionScore : courseScore) {
+		for (final QuestionScore questionScore : courseScore) {
 			numQuestionsCorrect += countCorrectAnswersForUser(userId, questionScore);
 		}
 		return numQuestionsCorrect;
 	}
 
-	private int countCorrectAnswersForUser(String userId, QuestionScore questionScore) {
+	private int countCorrectAnswersForUser(final String userId, final QuestionScore questionScore) {
 		int numQuestionsCorrect = 0;
-		int requiredScore = questionScore.getMaximum();
-		for (UserScore userScore : questionScore) {
+		final int requiredScore = questionScore.getMaximum();
+		for (final UserScore userScore : questionScore) {
 			if (!userScore.isUser(userId)) {
 				continue;
 			}
@@ -105,7 +106,7 @@ public class QuestionBasedScoreCalculator extends VariantScoreCalculator {
 		return numQuestionsCorrect;
 	}
 
-	private int myPercentage(int numQuestionsCorrect, int questionCount) {
+	private int myPercentage(final int numQuestionsCorrect, final int questionCount) {
 		final double myLearningProgress = numQuestionsCorrect / (double) questionCount;
 		return (int) Math.min(100, Math.round(myLearningProgress * 100));
 	}

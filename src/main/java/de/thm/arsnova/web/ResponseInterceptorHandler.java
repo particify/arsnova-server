@@ -15,15 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.web;
 
-import de.thm.arsnova.service.ResponseProviderService;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import de.thm.arsnova.service.ResponseProviderService;
 
 /**
  *  Injects a {@link HttpServletResponse} into {@link ResponseProviderService} to allow access to it outside of
@@ -37,9 +38,9 @@ public class ResponseInterceptorHandler extends HandlerInterceptorAdapter {
 
 	@Override
 	public boolean preHandle(
-		HttpServletRequest request,
-		HttpServletResponse response,
-		Object handler
+			final HttpServletRequest request,
+			final HttpServletResponse response,
+			final Object handler
 	) throws Exception {
 		responseProviderService.setResponse(response);
 

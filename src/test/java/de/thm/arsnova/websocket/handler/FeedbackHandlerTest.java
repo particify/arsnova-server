@@ -1,6 +1,9 @@
 package de.thm.arsnova.websocket.handler;
 
-import de.thm.arsnova.websocket.message.CreateFeedback;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,9 +11,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import de.thm.arsnova.websocket.message.CreateFeedback;
 
 @RunWith(SpringRunner.class)
 public class FeedbackHandlerTest {
@@ -32,7 +33,7 @@ public class FeedbackHandlerTest {
 				new CreateFeedback()
 		);
 
-		ArgumentCaptor<FeedbackCommandHandler.CreateFeedbackCommand> captor =
+		final ArgumentCaptor<FeedbackCommandHandler.CreateFeedbackCommand> captor =
 				ArgumentCaptor.forClass(FeedbackCommandHandler.CreateFeedbackCommand.class);
 		verify(feedbackCommandHandler, times(1)).handle(captor.capture());
 

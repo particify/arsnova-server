@@ -15,17 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.web;
 
-import de.thm.arsnova.service.StatusService;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
-
+import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import de.thm.arsnova.service.StatusService;
 
 /**
  * Blocks API requests while maintenance reasons are active.
@@ -41,7 +42,10 @@ public class MaintenanceModeFilter extends OncePerRequestFilter {
 	}
 
 	@Override
-	protected void doFilterInternal(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse, final FilterChain filterChain) throws ServletException, IOException {
+	protected void doFilterInternal(final HttpServletRequest httpServletRequest,
+			final HttpServletResponse httpServletResponse,
+			final FilterChain filterChain)
+			throws ServletException, IOException {
 		if (statusService.isMaintenanceActive()) {
 			httpServletResponse.setStatus(503);
 			return;

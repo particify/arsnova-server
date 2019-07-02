@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.event;
 
 import org.springframework.context.ApplicationEvent;
@@ -26,7 +27,7 @@ public abstract class ArsnovaEvent extends ApplicationEvent {
 
 	private static final long serialVersionUID = 1L;
 
-	public ArsnovaEvent(Object source) {
+	public ArsnovaEvent(final Object source) {
 		super(source);
 	}
 

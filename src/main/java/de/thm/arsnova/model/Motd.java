@@ -15,14 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.serialization.View;
-import org.springframework.core.style.ToStringCreator;
-
 import java.util.Date;
 import java.util.Objects;
+import org.springframework.core.style.ToStringCreator;
+
+import de.thm.arsnova.model.serialization.View;
 
 public class Motd extends Entity {
 	public enum Audience {
@@ -115,7 +116,9 @@ public class Motd extends Entity {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * <p>
 	 * All fields of <tt>Motd</tt> are included in equality checks.
+	 * </p>
 	 */
 	@Override
 	public boolean equals(final Object o) {
@@ -127,12 +130,12 @@ public class Motd extends Entity {
 		}
 		final Motd motd = (Motd) o;
 
-		return Objects.equals(roomId, motd.roomId) &&
-				Objects.equals(startDate, motd.startDate) &&
-				Objects.equals(endDate, motd.endDate) &&
-				Objects.equals(title, motd.title) &&
-				Objects.equals(body, motd.body) &&
-				audience == motd.audience;
+		return Objects.equals(roomId, motd.roomId)
+				&& Objects.equals(startDate, motd.startDate)
+				&& Objects.equals(endDate, motd.endDate)
+				&& Objects.equals(title, motd.title)
+				&& Objects.equals(body, motd.body)
+				&& audience == motd.audience;
 	}
 
 	@Override

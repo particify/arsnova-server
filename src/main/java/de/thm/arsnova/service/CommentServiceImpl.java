@@ -15,7 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service;
+
+import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.event.EventListener;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.model.Comment;
@@ -26,18 +39,6 @@ import de.thm.arsnova.security.User;
 import de.thm.arsnova.web.exceptions.ForbiddenException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 import de.thm.arsnova.web.exceptions.UnauthorizedException;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.event.EventListener;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Performs all comment related operations.
@@ -51,10 +52,11 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 	private CommentRepository commentRepository;
 
 	public CommentServiceImpl(
-			CommentRepository repository,
-			RoomService roomService,
-			UserService userService,
-			@Qualifier("defaultJsonMessageConverter") MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+			final CommentRepository repository,
+			final RoomService roomService,
+			final UserService userService,
+			@Qualifier("defaultJsonMessageConverter")
+			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(Comment.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.commentRepository = repository;
 		this.roomService = roomService;
@@ -97,11 +99,11 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
-	public CommentReadingCount countRead(final String roomId, String username) {
+	public CommentReadingCount countRead(final String roomId, final String username) {
 		if (username == null) {
 			return commentRepository.countReadingByRoomId(roomId);
 		} else {
-			User user = userService.getCurrentUser();
+			final User user = userService.getCurrentUser();
 			if (!user.getUsername().equals(username)) {
 				throw new ForbiddenException();
 			}
@@ -129,7 +131,7 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 		if (comment == null) {
 			throw new NotFoundException();
 		}
-		Map<String, Object> changes = new HashMap<>();
+		final Map<String, Object> changes = new HashMap<>();
 		changes.put("read", true);
 		patch(comment, changes);
 

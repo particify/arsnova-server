@@ -15,14 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.persistence;
 
-import de.thm.arsnova.model.UserProfile;
+package de.thm.arsnova.persistence;
 
 import java.util.List;
 
+import de.thm.arsnova.model.UserProfile;
+
 public interface UserRepository extends CrudRepository<UserProfile, String> {
 	UserProfile findByAuthProviderAndLoginId(UserProfile.AuthProvider authProvider, String loginId);
+
 	List<UserProfile> findByLoginId(String loginId);
+
 	int deleteInactiveUsers(long lastActivityBefore);
 }

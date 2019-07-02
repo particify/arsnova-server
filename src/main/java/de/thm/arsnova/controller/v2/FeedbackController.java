@@ -15,7 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.controller.v2;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.controller.AbstractController;
 import de.thm.arsnova.model.Feedback;
@@ -26,15 +37,6 @@ import de.thm.arsnova.service.UserService;
 import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Handles requests concerning the user's feedback, i.e., "too fast" or "faster, please". This HTTP API is
@@ -65,8 +67,8 @@ public class FeedbackController extends AbstractController {
 	@Deprecated
 	@RequestMapping(value = "/myfeedback", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getMyFeedback(@PathVariable final String shortId) {
-		String roomId = roomService.getIdByShortId(shortId);
-		Integer value = feedbackService.getByRoomIdAndUserId(roomId, userService.getCurrentUser().getId());
+		final String roomId = roomService.getIdByShortId(shortId);
+		final Integer value = feedbackService.getByRoomIdAndUserId(roomId, userService.getCurrentUser().getId());
 		if (value != null && value >= Feedback.MIN_FEEDBACK_TYPE && value <= Feedback.MAX_FEEDBACK_TYPE) {
 			return value.toString();
 		}
@@ -100,12 +102,11 @@ public class FeedbackController extends AbstractController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public Feedback postFeedback(
 			@PathVariable final String shortId,
-			@RequestBody final int value
-			) {
-		String roomId = roomService.getIdByShortId(shortId);
-		User user = userService.getCurrentUser();
+			@RequestBody final int value) {
+		final String roomId = roomService.getIdByShortId(shortId);
+		final User user = userService.getCurrentUser();
 		feedbackService.save(roomId, value, user.getId());
-		Feedback feedback = feedbackService.getByRoomId(roomId);
+		final Feedback feedback = feedbackService.getByRoomId(roomId);
 
 		return feedback;
 	}

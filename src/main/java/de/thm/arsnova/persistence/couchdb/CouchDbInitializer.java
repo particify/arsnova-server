@@ -15,13 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.persistence.couchdb;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.thm.arsnova.model.MigrationState;
-import de.thm.arsnova.persistence.couchdb.migrations.MigrationExecutor;
-import de.thm.arsnova.service.StatusService;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
+import javax.script.Bindings;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DbAccessException;
 import org.ektorp.DocumentNotFoundException;
@@ -39,18 +49,9 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
 
-import javax.annotation.PostConstruct;
-import javax.script.Bindings;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import de.thm.arsnova.model.MigrationState;
+import de.thm.arsnova.persistence.couchdb.migrations.MigrationExecutor;
+import de.thm.arsnova.service.StatusService;
 
 @Component
 public class CouchDbInitializer implements ResourceLoaderAware {
@@ -77,7 +78,7 @@ public class CouchDbInitializer implements ResourceLoaderAware {
 
 		final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 		final Resource[] resources = resolver.getResources("classpath:couchdb/*.design.js");
-		for (Resource resource : resources) {
+		for (final Resource resource : resources) {
 			logger.debug("Loading CouchDB design doc: {}", resource.getFilename());
 			final String js = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
 			/* Reset designDoc before parsing a new one. */
@@ -107,7 +108,7 @@ public class CouchDbInitializer implements ResourceLoaderAware {
 			} catch (final DocumentNotFoundException e) {
 				logger.debug("Design doc {} will be created.", doc.get("_id"));
 				return true;
-			} catch (JsonProcessingException e) {
+			} catch (final JsonProcessingException e) {
 				logger.warn("Failed to serialize design doc {}.", doc.get("_id"), e);
 				return false;
 			}
@@ -118,7 +119,7 @@ public class CouchDbInitializer implements ResourceLoaderAware {
 		MigrationState state;
 		try {
 			state = connector.get(MigrationState.class, MigrationState.ID);
-		} catch (DocumentNotFoundException e) {
+		} catch (final DocumentNotFoundException e) {
 			logger.debug("No migration state found in database.", e);
 			if (connector.getDbInfo().getDocCount() > 0) {
 				/* TODO: use a custom exception */
@@ -143,7 +144,7 @@ public class CouchDbInitializer implements ResourceLoaderAware {
 	}
 
 	@EventListener
-	private void onApplicationEvent(ContextRefreshedEvent event) throws IOException, ScriptException {
+	private void onApplicationEvent(final ContextRefreshedEvent event) throws IOException, ScriptException {
 		/* Event is triggered more than once */
 		if (migrationStarted) {
 			return;
@@ -157,7 +158,7 @@ public class CouchDbInitializer implements ResourceLoaderAware {
 			createDesignDocs();
 			migrate(state);
 			statusService.removeMaintenanceReason(this.getClass());
-		} catch (DbAccessException e) {
+		} catch (final DbAccessException e) {
 			logger.error("Database is invalid.", e);
 			statusService.putMaintenanceReason(this.getClass(), "Invalid database");
 		}

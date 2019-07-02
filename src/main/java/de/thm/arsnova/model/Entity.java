@@ -15,14 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.serialization.View;
-import org.springframework.core.style.ToStringCreator;
-
 import java.util.Date;
 import java.util.Objects;
+import org.springframework.core.style.ToStringCreator;
+
+import de.thm.arsnova.model.serialization.View;
 
 /**
  * Used as base for classes that represent persistent data with an unique ID.
@@ -107,7 +108,7 @@ public abstract class Entity {
 		if (additionalFields == null) {
 			return result;
 		}
-		for (Object element : additionalFields) {
+		for (final Object element : additionalFields) {
 			result = 31 * result + (element == null ? 0 : element.hashCode());
 		}
 
@@ -115,7 +116,7 @@ public abstract class Entity {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) {
 			return true;
 		}
@@ -124,10 +125,10 @@ public abstract class Entity {
 		}
 		final Entity entity = (Entity) o;
 
-		return Objects.equals(id, entity.id) &&
-				Objects.equals(rev, entity.rev) &&
-				Objects.equals(creationTimestamp, entity.creationTimestamp) &&
-				Objects.equals(updateTimestamp, entity.updateTimestamp);
+		return Objects.equals(id, entity.id)
+				&& Objects.equals(rev, entity.rev)
+				&& Objects.equals(creationTimestamp, entity.creationTimestamp)
+				&& Objects.equals(updateTimestamp, entity.updateTimestamp);
 	}
 
 	@Override
@@ -142,7 +143,7 @@ public abstract class Entity {
 	 * {@link org.springframework.core.style.ToStringCreator#append} on the <tt>ToStringCreator</tt>.
 	 */
 	protected ToStringCreator buildToString() {
-		ToStringCreator toStringCreator = new ToStringCreator(this);
+		final ToStringCreator toStringCreator = new ToStringCreator(this);
 		toStringCreator
 				.append("id", id)
 				.append("revision", rev)

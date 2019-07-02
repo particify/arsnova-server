@@ -15,15 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.security.pac4j;
 
-import de.thm.arsnova.security.User;
 import org.pac4j.core.profile.CommonProfile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
+
+import de.thm.arsnova.security.User;
 
 /**
  * Sets up the SecurityContext OAuth users.
@@ -36,15 +38,15 @@ public class OauthAuthenticationProvider implements AuthenticationProvider {
 
 	@Override
 	public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
-		OAuthToken oAuthToken = (OAuthToken) authentication;
-		User user = oauthUserDetailsService.loadUserDetails(oAuthToken);
+		final OAuthToken oauthToken = (OAuthToken) authentication;
+		final User user = oauthUserDetailsService.loadUserDetails(oauthToken);
 
-		return new OAuthToken(user, (CommonProfile) oAuthToken.getDetails(), user.getAuthorities());
+		return new OAuthToken(user, (CommonProfile) oauthToken.getDetails(), user.getAuthorities());
 	}
 
 	@Override
-	public boolean supports(final Class<?> aClass) {
-		return aClass.isAssignableFrom(OAuthToken.class);
+	public boolean supports(final Class<?> authentication) {
+		return authentication.isAssignableFrom(OAuthToken.class);
 	}
 
 	@Autowired

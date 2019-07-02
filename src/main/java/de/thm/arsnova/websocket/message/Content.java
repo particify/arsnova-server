@@ -15,24 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.websocket.message;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Represents a question.
  */
 public class Content {
 
-	private final String _id;
+	private final String id;
 	private final String variant;
 
-	public Content(de.thm.arsnova.model.Content content) {
-		this._id = content.getId();
+	public Content(final de.thm.arsnova.model.Content content) {
+		this.id = content.getId();
 		/* FIXME: Message does not support content with multiple groups */
 		this.variant = content.getGroups().toArray(new String[1])[0];
 	}
 
-	public String get_id() {
-		return _id;
+	@JsonProperty("_id")
+	public String getId() {
+		return id;
 	}
 
 	public String getVariant() {

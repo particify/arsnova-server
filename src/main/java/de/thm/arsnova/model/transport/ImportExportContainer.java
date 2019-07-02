@@ -15,9 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.transport;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import de.thm.arsnova.model.migration.v2.Answer;
 import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.migration.v2.Comment;
@@ -27,12 +34,6 @@ import de.thm.arsnova.model.migration.v2.Room;
 import de.thm.arsnova.model.migration.v2.RoomFeature;
 import de.thm.arsnova.model.migration.v2.RoomInfo;
 import de.thm.arsnova.model.serialization.View;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 /**
  * This class is used to allow the import and export of a session.
@@ -63,7 +64,7 @@ public class ImportExportContainer {
 		return session;
 	}
 
-	public void setSession(ImportExportRoom session) {
+	public void setSession(final ImportExportRoom session) {
 		this.session = session;
 	}
 
@@ -73,7 +74,7 @@ public class ImportExportContainer {
 		return questions;
 	}
 
-	public void setQuestions(List<ImportExportContent> questions) {
+	public void setQuestions(final List<ImportExportContent> questions) {
 		this.questions = questions;
 	}
 
@@ -83,7 +84,7 @@ public class ImportExportContainer {
 		return feedbackQuestions;
 	}
 
-	public void setFeedbackQuestions(List<Comment> feedbackQuestions) {
+	public void setFeedbackQuestions(final List<Comment> feedbackQuestions) {
 		this.feedbackQuestions = feedbackQuestions;
 	}
 
@@ -92,8 +93,8 @@ public class ImportExportContainer {
 		return motds;
 	}
 
-	public void setMotds(List<Motd> mL) {
-		this.motds = mL;
+	public void setMotds(final List<Motd> motdList) {
+		this.motds = motdList;
 	}
 
 	@JsonView(View.Public.class)
@@ -101,8 +102,8 @@ public class ImportExportContainer {
 		return session.sessionFeature;
 	}
 
-	public void setSessionFeature(RoomFeature sF) {
-		session.sessionFeature = sF;
+	public void setSessionFeature(final RoomFeature roomFeature) {
+		session.sessionFeature = roomFeature;
 	}
 
 	@JsonView(View.Public.class)
@@ -110,54 +111,54 @@ public class ImportExportContainer {
 		return sessionInfo;
 	}
 
-	public void setSessionInfo(RoomInfo si) {
-		sessionInfo = si;
+	public void setSessionInfo(final RoomInfo roomInfo) {
+		sessionInfo = roomInfo;
 	}
 
-	public void setSessionFromSessionObject(Room s) {
-		ImportExportRoom iesession = new ImportExportRoom();
-		iesession.setName(s.getName());
-		iesession.setShortName(s.getShortName());
-		iesession.setActive(s.isActive());
-		PublicPool p = new PublicPool();
+	public void setSessionFromSessionObject(final Room s) {
+		final ImportExportRoom importExportRoom = new ImportExportRoom();
+		importExportRoom.setName(s.getName());
+		importExportRoom.setShortName(s.getShortName());
+		importExportRoom.setActive(s.isActive());
+		final PublicPool p = new PublicPool();
 		p.setPpFromSession(s);
-		iesession.setPublicPool(p);
-		iesession.sessionFeature = s.getFeatures();
-		session = iesession;
+		importExportRoom.setPublicPool(p);
+		importExportRoom.sessionFeature = s.getFeatures();
+		session = importExportRoom;
 	}
 
-	public void addQuestionWithAnswers(Content q, List<Answer> aL) {
-		ImportExportContent ieq = new ImportExportContent(q);
-		ieq.setAnswers(aL);
-		questions.add(ieq);
+	public void addQuestionWithAnswers(final Content content, final List<Answer> answerList) {
+		final ImportExportContent importExportContent = new ImportExportContent(content);
+		importExportContent.setAnswers(answerList);
+		questions.add(importExportContent);
 	}
 
-	public Room generateSessionEntity(ClientAuthentication user) {
-		final Room s = new Room();
+	public Room generateSessionEntity(final ClientAuthentication user) {
+		final Room room = new Room();
 		// import fields
-		s.setActive(session.isActive());
+		room.setActive(session.isActive());
 		// overwrite name and shortname
-		s.setName(session.getName());
-		s.setShortName(session.getShortName());
+		room.setName(session.getName());
+		room.setShortName(session.getShortName());
 		// mark as public pool session
-		s.setSessionType(session.getSessionType());
-		s.setFeatures(session.getSessionFeature());
+		room.setSessionType(session.getSessionType());
+		room.setFeatures(session.getSessionFeature());
 		if (session.getPublicPool() != null) {
 			// set pool fields (which are also used as a session info)
-			s.setPpAuthorMail(session.getPublicPool().getPpAuthorMail());
-			s.setPpAuthorName(session.getPublicPool().getPpAuthorName());
-			s.setPpDescription(session.getPublicPool().getPpDescription());
-			s.setPpFaculty(session.getPublicPool().getPpFaculty());
-			s.setPpLevel(session.getPublicPool().getPpLevel());
-			s.setPpLicense(session.getPublicPool().getPpLicense());
-			s.setPpLogo(session.getPublicPool().getPpLogo());
-			s.setPpSubject(session.getPublicPool().getPpSubject());
-			s.setPpUniversity(session.getPublicPool().getPpUniversity());
+			room.setPpAuthorMail(session.getPublicPool().getPpAuthorMail());
+			room.setPpAuthorName(session.getPublicPool().getPpAuthorName());
+			room.setPpDescription(session.getPublicPool().getPpDescription());
+			room.setPpFaculty(session.getPublicPool().getPpFaculty());
+			room.setPpLevel(session.getPublicPool().getPpLevel());
+			room.setPpLicense(session.getPublicPool().getPpLicense());
+			room.setPpLogo(session.getPublicPool().getPpLogo());
+			room.setPpSubject(session.getPublicPool().getPpSubject());
+			room.setPpUniversity(session.getPublicPool().getPpUniversity());
 		}
 		// other fields
-		s.setCreator(user.getUsername());
-		s.setCreationTime(new Date().getTime());
-		return s;
+		room.setCreator(user.getUsername());
+		room.setCreationTime(new Date().getTime());
+		return room;
 	}
 
 	public static class ImportExportContent extends Content {
@@ -168,60 +169,60 @@ public class ImportExportContainer {
 
 		}
 
-		public ImportExportContent(Content q) {
-			setQuestionType(q.getQuestionType());
-			setQuestionVariant(q.getQuestionVariant());
-			setSubject(q.getSubject());
-			setText(q.getText());
-			setActive(q.isActive());
-			setReleasedFor(q.getReleasedFor());
-			setPossibleAnswers(q.getPossibleAnswers());
-			setNoCorrect(q.isNoCorrect());
-			setSessionId(q.getSessionId());
-			setSessionKeyword(q.getSessionKeyword());
-			setTimestamp(q.getTimestamp());
-			setNumber(q.getNumber());
-			setDuration(q.getDuration());
-			setPiRound(q.getPiRound());
-			setPiRoundEndTime(q.getPiRoundEndTime());
-			setPiRoundStartTime(q.getPiRoundStartTime());
-			setPiRoundFinished(q.isPiRoundFinished());
-			setVotingDisabled(q.isVotingDisabled());
-			setShowStatistic(q.isShowStatistic());
-			setShowAnswer(q.isShowAnswer());
-			setAbstention(q.isAbstention());
-			setImage(q.getImage());
-			setFcImage(q.getFcImage());
-			setGridSize(q.getGridSize());
-			setOffsetX(q.getOffsetX());
-			setOffsetY(q.getOffsetY());
-			setZoomLvl(q.getZoomLvl());
-			setGridOffsetX(q.getGridOffsetX());
-			setGridOffsetY(q.getGridOffsetY());
-			setGridZoomLvl(q.getGridZoomLvl());
-			setGridSizeX(q.getGridSizeX());
-			setGridSizeY(q.getGridSizeY());
-			setGridIsHidden(q.getGridIsHidden());
-			setImgRotation(q.getImgRotation());
-			setToggleFieldsLeft(q.getToggleFieldsLeft());
-			setNumClickableFields(q.getNumClickableFields());
-			setThresholdCorrectAnswers(q.getThresholdCorrectAnswers());
-			setCvIsColored(q.getCvIsColored());
-			setGridLineColor(q.getGridLineColor());
-			setNumberOfDots(q.getNumberOfDots());
-			setGridType(q.getGridType());
-			setScaleFactor(q.getScaleFactor());
-			setGridScaleFactor(q.getGridScaleFactor());
-			setImageQuestion(q.isImageQuestion());
-			setTextAnswerEnabled(q.isTextAnswerEnabled());
-			setHint(q.getHint());
-			setSolution(q.getSolution());
-			setCorrectAnswer(q.getCorrectAnswer());
-			setFixedAnswer(q.isFixedAnswer());
-			setIgnoreCaseSensitive(q.isIgnoreCaseSensitive());
-			setIgnorePunctuation(q.isIgnorePunctuation());
-			setIgnoreWhitespaces(q.isIgnoreWhitespaces());
-			setRating(q.getRating());
+		public ImportExportContent(final Content content) {
+			setQuestionType(content.getQuestionType());
+			setQuestionVariant(content.getQuestionVariant());
+			setSubject(content.getSubject());
+			setText(content.getText());
+			setActive(content.isActive());
+			setReleasedFor(content.getReleasedFor());
+			setPossibleAnswers(content.getPossibleAnswers());
+			setNoCorrect(content.isNoCorrect());
+			setSessionId(content.getSessionId());
+			setSessionKeyword(content.getSessionKeyword());
+			setTimestamp(content.getTimestamp());
+			setNumber(content.getNumber());
+			setDuration(content.getDuration());
+			setPiRound(content.getPiRound());
+			setPiRoundEndTime(content.getPiRoundEndTime());
+			setPiRoundStartTime(content.getPiRoundStartTime());
+			setPiRoundFinished(content.isPiRoundFinished());
+			setVotingDisabled(content.isVotingDisabled());
+			setShowStatistic(content.isShowStatistic());
+			setShowAnswer(content.isShowAnswer());
+			setAbstention(content.isAbstention());
+			setImage(content.getImage());
+			setFcImage(content.getFcImage());
+			setGridSize(content.getGridSize());
+			setOffsetX(content.getOffsetX());
+			setOffsetY(content.getOffsetY());
+			setZoomLvl(content.getZoomLvl());
+			setGridOffsetX(content.getGridOffsetX());
+			setGridOffsetY(content.getGridOffsetY());
+			setGridZoomLvl(content.getGridZoomLvl());
+			setGridSizeX(content.getGridSizeX());
+			setGridSizeY(content.getGridSizeY());
+			setGridIsHidden(content.getGridIsHidden());
+			setImgRotation(content.getImgRotation());
+			setToggleFieldsLeft(content.getToggleFieldsLeft());
+			setNumClickableFields(content.getNumClickableFields());
+			setThresholdCorrectAnswers(content.getThresholdCorrectAnswers());
+			setCvIsColored(content.getCvIsColored());
+			setGridLineColor(content.getGridLineColor());
+			setNumberOfDots(content.getNumberOfDots());
+			setGridType(content.getGridType());
+			setScaleFactor(content.getScaleFactor());
+			setGridScaleFactor(content.getGridScaleFactor());
+			setImageQuestion(content.isImageQuestion());
+			setTextAnswerEnabled(content.isTextAnswerEnabled());
+			setHint(content.getHint());
+			setSolution(content.getSolution());
+			setCorrectAnswer(content.getCorrectAnswer());
+			setFixedAnswer(content.isFixedAnswer());
+			setIgnoreCaseSensitive(content.isIgnoreCaseSensitive());
+			setIgnorePunctuation(content.isIgnorePunctuation());
+			setIgnoreWhitespaces(content.isIgnoreWhitespaces());
+			setRating(content.getRating());
 		}
 
 		@ApiModelProperty(required = true, value = " used to display answers")
@@ -230,7 +231,7 @@ public class ImportExportContainer {
 			return answers;
 		}
 
-		public void setAnswers(List<Answer> answers) {
+		public void setAnswers(final List<Answer> answers) {
 			this.answers = answers;
 		}
 	}
@@ -255,7 +256,7 @@ public class ImportExportContainer {
 			return name;
 		}
 
-		public void setName(String name) {
+		public void setName(final String name) {
 			this.name = name;
 		}
 
@@ -265,7 +266,7 @@ public class ImportExportContainer {
 			return sessionType;
 		}
 
-		public void setSessionType(String sessionType) {
+		public void setSessionType(final String sessionType) {
 			this.sessionType = sessionType;
 		}
 
@@ -275,7 +276,7 @@ public class ImportExportContainer {
 			return shortName;
 		}
 
-		public void setShortName(String shortName) {
+		public void setShortName(final String shortName) {
 			this.shortName = shortName;
 		}
 
@@ -285,7 +286,7 @@ public class ImportExportContainer {
 			return active;
 		}
 
-		public void setActive(boolean active) {
+		public void setActive(final boolean active) {
 			this.active = active;
 		}
 
@@ -295,7 +296,7 @@ public class ImportExportContainer {
 			return publicPool;
 		}
 
-		public void setPublicPool(PublicPool publicPool) {
+		public void setPublicPool(final PublicPool publicPool) {
 			this.publicPool = publicPool;
 		}
 
@@ -304,8 +305,8 @@ public class ImportExportContainer {
 			return this.sessionFeature;
 		}
 
-		public void setSessionFeature(RoomFeature sF) {
-			this.sessionFeature = sF;
+		public void setSessionFeature(final RoomFeature roomFeature) {
+			this.sessionFeature = roomFeature;
 		}
 	}
 
@@ -333,18 +334,18 @@ public class ImportExportContainer {
 
 		private String shortName;
 
-		public void setPpFromSession(Room s) {
-			ppAuthorName = s.getPpAuthorName();
-			ppAuthorMail = s.getPpAuthorMail();
-			ppUniversity = s.getPpUniversity();
-			ppLogo = s.getPpLogo();
-			ppSubject = s.getPpSubject();
-			ppLicense = s.getPpLicense();
-			ppLevel = s.getPpLevel();
-			ppDescription = s.getPpDescription();
-			ppFaculty = s.getPpFaculty();
-			name = s.getName();
-			shortName = s.getShortName();
+		public void setPpFromSession(final Room room) {
+			ppAuthorName = room.getPpAuthorName();
+			ppAuthorMail = room.getPpAuthorMail();
+			ppUniversity = room.getPpUniversity();
+			ppLogo = room.getPpLogo();
+			ppSubject = room.getPpSubject();
+			ppLicense = room.getPpLicense();
+			ppLevel = room.getPpLevel();
+			ppDescription = room.getPpDescription();
+			ppFaculty = room.getPpFaculty();
+			name = room.getName();
+			shortName = room.getShortName();
 		}
 
 		@ApiModelProperty(required = true, value = "used to display author name")
@@ -353,7 +354,7 @@ public class ImportExportContainer {
 			return ppAuthorName;
 		}
 
-		public void setPpAuthorName(String ppAuthorName) {
+		public void setPpAuthorName(final String ppAuthorName) {
 			this.ppAuthorName = ppAuthorName;
 		}
 
@@ -363,7 +364,7 @@ public class ImportExportContainer {
 			return ppAuthorMail;
 		}
 
-		public void setPpAuthorMail(String ppAuthorMail) {
+		public void setPpAuthorMail(final String ppAuthorMail) {
 			this.ppAuthorMail = ppAuthorMail;
 		}
 
@@ -373,7 +374,7 @@ public class ImportExportContainer {
 			return ppUniversity;
 		}
 
-		public void setPpUniversity(String ppUniversity) {
+		public void setPpUniversity(final String ppUniversity) {
 			this.ppUniversity = ppUniversity;
 		}
 
@@ -383,7 +384,7 @@ public class ImportExportContainer {
 			return ppLogo;
 		}
 
-		public void setPpLogo(String ppLogo) {
+		public void setPpLogo(final String ppLogo) {
 			this.ppLogo = ppLogo;
 		}
 
@@ -393,7 +394,7 @@ public class ImportExportContainer {
 			return ppSubject;
 		}
 
-		public void setPpSubject(String ppSubject) {
+		public void setPpSubject(final String ppSubject) {
 			this.ppSubject = ppSubject;
 		}
 
@@ -403,7 +404,7 @@ public class ImportExportContainer {
 			return ppLicense;
 		}
 
-		public void setPpLicense(String ppLicense) {
+		public void setPpLicense(final String ppLicense) {
 			this.ppLicense = ppLicense;
 		}
 
@@ -413,7 +414,7 @@ public class ImportExportContainer {
 			return ppLevel;
 		}
 
-		public void setPpLevel(String ppLevel) {
+		public void setPpLevel(final String ppLevel) {
 			this.ppLevel = ppLevel;
 		}
 
@@ -423,7 +424,7 @@ public class ImportExportContainer {
 			return ppDescription;
 		}
 
-		public void setPpDescription(String ppDescription) {
+		public void setPpDescription(final String ppDescription) {
 			this.ppDescription = ppDescription;
 		}
 
@@ -433,7 +434,7 @@ public class ImportExportContainer {
 			return ppFaculty;
 		}
 
-		public void setPpFaculty(String ppFaculty) {
+		public void setPpFaculty(final String ppFaculty) {
 			this.ppFaculty = ppFaculty;
 		}
 
@@ -443,7 +444,7 @@ public class ImportExportContainer {
 			return name;
 		}
 
-		public void setName(String name) {
+		public void setName(final String name) {
 			this.name = name;
 		}
 
@@ -453,7 +454,7 @@ public class ImportExportContainer {
 			return shortName;
 		}
 
-		public void setShortName(String shortName) {
+		public void setShortName(final String shortName) {
 			this.shortName = shortName;
 		}
 	}

@@ -15,7 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.controller.v2;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.controller.PaginationController;
 import de.thm.arsnova.model.Room;
@@ -28,25 +48,6 @@ import de.thm.arsnova.service.RoomService;
 import de.thm.arsnova.service.UserService;
 import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.web.Pagination;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Handles requests related to comments.
@@ -76,7 +77,10 @@ public class CommentController extends PaginationController {
 	@RequestMapping(value = "/count", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
 	@DeprecatedApi
 	@Deprecated
-	public String getCommentCount(@ApiParam(value = "Room-Key from current room", required = true) @RequestParam("sessionkey") final String roomShortId) {
+	public String getCommentCount(
+			@ApiParam(value = "Room-Key from current room", required = true)
+			@RequestParam("sessionkey")
+			final String roomShortId) {
 		return String.valueOf(commentService.count(roomService.getIdByShortId(roomShortId)));
 	}
 
@@ -85,7 +89,9 @@ public class CommentController extends PaginationController {
 	@RequestMapping(value = "/readcount", method = RequestMethod.GET)
 	@DeprecatedApi
 	@Deprecated
-	public CommentReadingCount getUnreadCommentCount(@ApiParam(value = "Room-Key from current room", required = true) @RequestParam("sessionkey") final String roomShortId, String user) {
+	public CommentReadingCount getUnreadCommentCount(
+			@ApiParam(value = "Room-Key from current room", required = true)
+			@RequestParam("sessionkey") final String roomShortId, final String user) {
 		return commentService.countRead(roomService.getIdByShortId(roomShortId), user);
 	}
 
@@ -93,7 +99,10 @@ public class CommentController extends PaginationController {
 			nickname = "getComments")
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
-	public List<Comment> getComments(@ApiParam(value = "Room-Key from current room", required = true) @RequestParam("sessionkey") final String roomShortId) {
+	public List<Comment> getComments(
+			@ApiParam(value = "Room-Key from current room", required = true)
+			@RequestParam("sessionkey")
+			final String roomShortId) {
 		return commentService.getByRoomId(roomService.getIdByShortId(roomShortId), offset, limit).stream()
 				.map(toV2Migrator::migrate).collect(Collectors.toList());
 	}
@@ -101,23 +110,30 @@ public class CommentController extends PaginationController {
 	@ApiOperation(value = "Retrieves an Comment",
 			nickname = "getComment")
 	@RequestMapping(value = "/{commentId}", method = RequestMethod.GET)
-	public Comment getComment(@ApiParam(value = "ID of the Comment that needs to be deleted", required = true) @PathVariable final String commentId) throws IOException {
+	public Comment getComment(
+			@ApiParam(value = "ID of the Comment that needs to be deleted", required = true)
+			@PathVariable
+			final String commentId)
+			throws IOException {
 		return toV2Migrator.migrate(commentService.getAndMarkRead(commentId));
 	}
 
 	@ApiOperation(value = "Creates a new Comment for a Room and returns the Comment's data",
 			nickname = "postComment")
 	@ApiResponses(value = {
-		@ApiResponse(code = 400, message = HTML_STATUS_400)
+			@ApiResponse(code = 400, message = HTML_STATUS_400)
 	})
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void postComment(
-			@ApiParam(value = "Room-Key from current room", required = true) @RequestParam("sessionkey") final String roomShortId,
-			@ApiParam(value = "the body from the new comment", required = true) @RequestBody final Comment comment
-			) {
-		de.thm.arsnova.model.Comment commentV3 = fromV2Migrator.migrate(comment);
-		Room roomV3 = roomService.getByShortId(roomShortId);
+			@ApiParam(value = "Room-Key from current room", required = true)
+			@RequestParam("sessionkey")
+			final String roomShortId,
+			@ApiParam(value = "the body from the new comment", required = true)
+			@RequestBody
+			final Comment comment) {
+		final de.thm.arsnova.model.Comment commentV3 = fromV2Migrator.migrate(comment);
+		final Room roomV3 = roomService.getByShortId(roomShortId);
 		commentV3.setRoomId(roomV3.getId());
 		commentService.create(commentV3);
 	}
@@ -125,7 +141,10 @@ public class CommentController extends PaginationController {
 	@ApiOperation(value = "Deletes a Comment",
 			nickname = "deleteComment")
 	@RequestMapping(value = "/{commentId}", method = RequestMethod.DELETE)
-	public void deleteComment(@ApiParam(value = "ID of the comment that needs to be deleted", required = true) @PathVariable final String commentId) {
+	public void deleteComment(
+			@ApiParam(value = "ID of the comment that needs to be deleted", required = true)
+			@PathVariable
+			final String commentId) {
 		commentService.delete(commentService.get(commentId));
 	}
 }

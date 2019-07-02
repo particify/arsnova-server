@@ -15,12 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.persistence;
 
-import de.thm.arsnova.model.migration.v2.LogEntry;
+package de.thm.arsnova.persistence;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import de.thm.arsnova.model.migration.v2.LogEntry;
 
 public interface LogEntryRepository {
 	/**
@@ -69,7 +70,7 @@ public interface LogEntryRepository {
 		if (rawPayload.length % 2 != 0) {
 			throw new IllegalArgumentException("");
 		}
-		Map<String, Object> payload = new HashMap<>();
+		final Map<String, Object> payload = new HashMap<>();
 		for (int i = 0; i < rawPayload.length; i += 2) {
 			payload.put((String) rawPayload[i], rawPayload[i + 1]);
 		}

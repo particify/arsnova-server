@@ -15,9 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.serialization;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
+
 import de.thm.arsnova.model.Entity;
 
 public class CouchDbDocumentModule extends SimpleModule {
@@ -26,7 +28,7 @@ public class CouchDbDocumentModule extends SimpleModule {
 	}
 
 	@Override
-	public void setupModule(SetupContext context) {
+	public void setupModule(final SetupContext context) {
 		context.setMixInAnnotations(Entity.class, CouchDbDocumentMixIn.class);
 		context.setMixInAnnotations(de.thm.arsnova.model.migration.v2.Entity.class, CouchDbDocumentV2MixIn.class);
 	}

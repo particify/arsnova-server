@@ -15,20 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.model;
 
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
-import org.springframework.security.core.GrantedAuthority;
+package de.thm.arsnova.model;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.security.core.GrantedAuthority;
+
+import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 
 public class TestClient extends ClientAuthentication {
 	private static final long serialVersionUID = 1L;
 	private final Set<GrantedAuthority> grantedAuthorities;
 
-	public TestClient(String username) {
+	public TestClient(final String username) {
 		super();
 		grantedAuthorities = new HashSet<>();
 		setId(UUID.randomUUID().toString());

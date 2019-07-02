@@ -15,11 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.websocket;
 
 import com.corundumstudio.socketio.SocketIOClient;
-import de.thm.arsnova.security.User;
-import de.thm.arsnova.service.UserService;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -35,9 +37,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import de.thm.arsnova.security.User;
+import de.thm.arsnova.service.UserService;
 
 /**
  * This aspect populates the SecurityContextHolder of Spring Security when data are received via WebSockets.
@@ -67,15 +68,15 @@ public class WebsocketAuthenticationAspect {
 	}
 
 	private void populateSecurityContext(final UUID socketId) {
-		String userId = userService.getUserIdToSocketId(socketId);
+		final String userId = userService.getUserIdToSocketId(socketId);
 		if (userId == null) {
 			throw new AccessDeniedException("No user authenticated for WebSocket connection");
 		}
-		SecurityContext context = SecurityContextHolder.getContext();
-		Set<GrantedAuthority> authorities = new HashSet<>();
+		final SecurityContext context = SecurityContextHolder.getContext();
+		final Set<GrantedAuthority> authorities = new HashSet<>();
 		authorities.add(WEBSOCKET_AUTHORITY);
-		User user = userService.loadUser(userId, authorities);
-		Authentication auth = new UsernamePasswordAuthenticationToken(user, null, authorities);
+		final User user = userService.loadUser(userId, authorities);
+		final Authentication auth = new UsernamePasswordAuthenticationToken(user, null, authorities);
 		context.setAuthentication(auth);
 		SecurityContextHolder.setContext(context);
 	}

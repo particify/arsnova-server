@@ -15,18 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.persistence.couchdb;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import de.thm.arsnova.model.Room;
-import de.thm.arsnova.persistence.SessionStatisticsRepository;
-import de.thm.arsnova.service.score.Score;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.ViewResult;
 import org.ektorp.support.CouchDbRepositorySupport;
 
-public class CouchDbSessionStatisticsRepository extends CouchDbRepositorySupport implements SessionStatisticsRepository {
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.persistence.SessionStatisticsRepository;
+import de.thm.arsnova.service.score.Score;
+
+public class CouchDbSessionStatisticsRepository
+		extends CouchDbRepositorySupport implements SessionStatisticsRepository {
 	public CouchDbSessionStatisticsRepository(final CouchDbConnector db, final boolean createIfNotExists) {
 		super(Object.class, db, "learning_progress", createIfNotExists);
 	}
@@ -47,7 +50,7 @@ public class CouchDbSessionStatisticsRepository extends CouchDbRepositorySupport
 		}
 
 		// collect mapping (questionId -> max value)
-		for (ViewResult.Row row : maximumValueResult) {
+		for (final ViewResult.Row row : maximumValueResult) {
 			final String contentId = row.getKeyAsNode().get(1).asText();
 			final JsonNode value = row.getValueAsNode();
 			final int questionScore = value.get("value").asInt();
@@ -56,7 +59,7 @@ public class CouchDbSessionStatisticsRepository extends CouchDbRepositorySupport
 			courseScore.addQuestion(contentId, questionVariant, piRound, questionScore);
 		}
 		// collect mapping (questionId -> (user -> value))
-		for (ViewResult.Row row : answerSumResult) {
+		for (final ViewResult.Row row : answerSumResult) {
 			final String username = row.getKeyAsNode().get(1).asText();
 			final JsonNode value = row.getValueAsNode();
 			final String contentId = value.get("questionId").asText();

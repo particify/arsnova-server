@@ -10,15 +10,15 @@ public class NotImplementedException extends RuntimeException {
 		super();
 	}
 
-	public NotImplementedException(String message) {
+	public NotImplementedException(final String message) {
 		super(message);
 	}
 
-	public NotImplementedException(Throwable e) {
+	public NotImplementedException(final Throwable e) {
 		super(e);
 	}
 
-	public NotImplementedException(String message, Throwable e) {
+	public NotImplementedException(final String message, final Throwable e) {
 		super(message, e);
 	}
 }

@@ -15,15 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.persistence.couchdb;
 
-import de.thm.arsnova.model.Entity;
-import de.thm.arsnova.persistence.CrudRepository;
-import org.ektorp.BulkDeleteDocument;
-import org.ektorp.CouchDbConnector;
-import org.ektorp.ViewResult;
-import org.ektorp.support.CouchDbRepositorySupport;
-import org.springframework.data.repository.NoRepositoryBean;
+package de.thm.arsnova.persistence.couchdb;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -31,9 +24,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import org.ektorp.BulkDeleteDocument;
+import org.ektorp.CouchDbConnector;
+import org.ektorp.ViewResult;
+import org.ektorp.support.CouchDbRepositorySupport;
+import org.springframework.data.repository.NoRepositoryBean;
+
+import de.thm.arsnova.model.Entity;
+import de.thm.arsnova.persistence.CrudRepository;
 
 @NoRepositoryBean
-abstract class CouchDbCrudRepository<T extends Entity> extends CouchDbRepositorySupport<T> implements CrudRepository<T, String> {
+abstract class CouchDbCrudRepository<T extends Entity>
+		extends CouchDbRepositorySupport<T> implements CrudRepository<T, String> {
 	private String countableAllViewName;
 
 	protected CouchDbCrudRepository(
@@ -123,7 +125,7 @@ abstract class CouchDbCrudRepository<T extends Entity> extends CouchDbRepository
 
 	@Override
 	public void deleteById(final String id) {
-		T entity = get(id);
+		final T entity = get(id);
 		db.delete(id, entity.getRevision());
 	}
 
@@ -154,7 +156,7 @@ abstract class CouchDbCrudRepository<T extends Entity> extends CouchDbRepository
 	 *
 	 * @param viewResult A CouchDB ViewResult. The first part of its keys is expected to be the id of another entity.
 	 * @param keyPropertySetter A setter method of the Entity class which is called to store the first element of the
-	 *   key.
+	 *     key.
 	 * @return Entity stubs
 	 */
 	protected Iterable<T> createEntityStubs(final ViewResult viewResult, final BiConsumer<T, String> keyPropertySetter) {

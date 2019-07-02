@@ -15,9 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.model.serialization.View;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
@@ -30,9 +33,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.AbstractMappingJacksonResponseBodyAdvice;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import de.thm.arsnova.model.serialization.View;
 
 /**
  * This {@link ControllerAdvice} applies a {@link View} based on the

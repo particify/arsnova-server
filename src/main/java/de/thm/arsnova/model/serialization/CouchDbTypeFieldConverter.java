@@ -15,27 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.serialization;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.Converter;
+
 import de.thm.arsnova.model.Entity;
 
 public class CouchDbTypeFieldConverter implements Converter<Class<? extends Entity>, String> {
 
 	@Override
-	public String convert(Class<? extends Entity> aClass) {
-		return aClass.getSimpleName();
+	public String convert(final Class<? extends Entity> clazz) {
+		return clazz.getSimpleName();
 	}
 
 	@Override
-	public JavaType getInputType(TypeFactory typeFactory) {
+	public JavaType getInputType(final TypeFactory typeFactory) {
 		return typeFactory.constructGeneralizedType(typeFactory.constructType(Class.class), Entity.class);
 	}
 
 	@Override
-	public JavaType getOutputType(TypeFactory typeFactory) {
+	public JavaType getOutputType(final TypeFactory typeFactory) {
 		return typeFactory.constructType(String.class);
 	}
 }

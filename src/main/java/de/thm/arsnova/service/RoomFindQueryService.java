@@ -15,17 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.service;
 
-import de.thm.arsnova.model.FindQuery;
-import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.UserProfile;
-import org.springframework.stereotype.Service;
+package de.thm.arsnova.service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
+
+import de.thm.arsnova.model.FindQuery;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.UserProfile;
 
 @Service
 public class RoomFindQueryService implements FindQueryService<Room> {
@@ -39,15 +40,15 @@ public class RoomFindQueryService implements FindQueryService<Room> {
 
 	@Override
 	public Set<String> resolveQuery(final FindQuery<Room> findQuery) {
-		List<List<String>> ids = new ArrayList<>();
+		final List<List<String>> ids = new ArrayList<>();
 		if (findQuery.getExternalFilters().get("inHistoryOfUserId") instanceof String) {
-			UserProfile inHistoryOfUser = userService.get(
+			final UserProfile inHistoryOfUser = userService.get(
 					(String) findQuery.getExternalFilters().get("inHistoryOfUserId"));
 			ids.add(inHistoryOfUser.getRoomHistory().stream()
 					.map(UserProfile.RoomHistoryEntry::getRoomId).collect(Collectors.toList()));
 		}
 		if (findQuery.getExternalFilters().get("moderatedByUserId") instanceof String) {
-			List<String> moderatedRoomIds = roomService.getRoomIdsByModeratorId(
+			final List<String> moderatedRoomIds = roomService.getRoomIdsByModeratorId(
 					(String) findQuery.getExternalFilters().get("moderatedByUserId"));
 			ids.add(moderatedRoomIds);
 		}

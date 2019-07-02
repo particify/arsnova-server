@@ -15,18 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.controller.v2;
 
-import de.thm.arsnova.controller.AbstractController;
-import de.thm.arsnova.service.CommentService;
-import de.thm.arsnova.service.ContentService;
-import de.thm.arsnova.web.DeprecatedApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import de.thm.arsnova.controller.AbstractController;
+import de.thm.arsnova.service.CommentService;
+import de.thm.arsnova.service.ContentService;
+import de.thm.arsnova.web.DeprecatedApi;
 
 /**
  * This controller forwards requests from deprecated URLs to their new controller, where the requests are handled.
@@ -122,8 +124,7 @@ public class LegacyController extends AbstractController {
 	@RequestMapping(value = { "/session/{shortId}/question/{arg1}", "/session/{shortId}/questions/{arg1}" })
 	public String redirectQuestionByLecturerWithOneArgument(
 			@PathVariable final String shortId,
-			@PathVariable final String arg1
-			) {
+			@PathVariable final String arg1) {
 		return String.format("forward:/v2/lecturerquestion/%s/?sessionkey=%s", arg1, shortId);
 	}
 
@@ -134,8 +135,7 @@ public class LegacyController extends AbstractController {
 	public String redirectQuestionByLecturerWithTwoArguments(
 			@PathVariable final String shortId,
 			@PathVariable final String arg1,
-			@PathVariable final String arg2
-			) {
+			@PathVariable final String arg2) {
 		return String.format("forward:/v2/lecturerquestion/%s/%s/?sessionkey=%s", arg1, arg2, shortId);
 	}
 
@@ -143,8 +143,7 @@ public class LegacyController extends AbstractController {
 	@RequestMapping(value = "/session/{shortId}/interposed/{arg1}")
 	public String redirectQuestionByAudienceWithOneArgument(
 			@PathVariable final String shortId,
-			@PathVariable final String arg1
-			) {
+			@PathVariable final String arg1) {
 		return String.format("forward:/v2/audiencequestion/%s/?sessionkey=%s", arg1, shortId);
 	}
 
@@ -153,8 +152,7 @@ public class LegacyController extends AbstractController {
 	public String redirectQuestionByAudienceWithTwoArguments(
 			@PathVariable final String shortId,
 			@PathVariable final String arg1,
-			@PathVariable final String arg2
-			) {
+			@PathVariable final String arg2) {
 		return String.format("forward:/v2/audiencequestion/%s/%s/?sessionkey=%s", arg1, arg2, shortId);
 	}
 

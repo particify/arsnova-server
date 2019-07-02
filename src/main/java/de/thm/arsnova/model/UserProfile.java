@@ -15,17 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.serialization.View;
-import org.springframework.core.style.ToStringCreator;
-
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import org.springframework.core.style.ToStringCreator;
+
+import de.thm.arsnova.model.serialization.View;
 
 public class UserProfile extends Entity {
 	public enum AuthProvider {
@@ -102,10 +103,10 @@ public class UserProfile extends Entity {
 			}
 			final Account account = (Account) o;
 
-			return Objects.equals(password, account.password) &&
-					Objects.equals(activationKey, account.activationKey) &&
-					Objects.equals(passwordResetKey, account.passwordResetKey) &&
-					Objects.equals(passwordResetTime, account.passwordResetTime);
+			return Objects.equals(password, account.password)
+					&& Objects.equals(activationKey, account.activationKey)
+					&& Objects.equals(passwordResetKey, account.passwordResetKey)
+					&& Objects.equals(passwordResetTime, account.passwordResetTime);
 		}
 
 		@Override
@@ -127,7 +128,7 @@ public class UserProfile extends Entity {
 
 		}
 
-		public RoomHistoryEntry(String roomId, Date lastVisit) {
+		public RoomHistoryEntry(final String roomId, final Date lastVisit) {
 			this.roomId = roomId;
 			this.lastVisit = lastVisit;
 		}
@@ -138,7 +139,7 @@ public class UserProfile extends Entity {
 		}
 
 		@JsonView(View.Persistence.class)
-		public void setRoomId(String roomId) {
+		public void setRoomId(final String roomId) {
 			this.roomId = roomId;
 		}
 
@@ -148,7 +149,7 @@ public class UserProfile extends Entity {
 		}
 
 		@JsonView(View.Persistence.class)
-		public void setLastVisit(Date lastVisit) {
+		public void setLastVisit(final Date lastVisit) {
 			this.lastVisit = lastVisit;
 		}
 
@@ -266,15 +267,17 @@ public class UserProfile extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setExtensions(Map<String, Map<String, ?>> extensions) {
+	public void setExtensions(final Map<String, Map<String, ?>> extensions) {
 		this.extensions = extensions;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 *
+	 * <p>
 	 * The following fields of <tt>UserProfile</tt> are excluded from equality checks:
 	 * {@link #account}, {@link #roomHistory}, {@link #acknowledgedMotds}, {@link #extensions}.
+	 * </p>
 	 */
 	@Override
 	public boolean equals(final Object o) {
@@ -286,9 +289,9 @@ public class UserProfile extends Entity {
 		}
 		final UserProfile that = (UserProfile) o;
 
-		return authProvider == that.authProvider &&
-				Objects.equals(loginId, that.loginId) &&
-				Objects.equals(lastLoginTimestamp, that.lastLoginTimestamp);
+		return authProvider == that.authProvider
+				&& Objects.equals(loginId, that.loginId)
+				&& Objects.equals(lastLoginTimestamp, that.lastLoginTimestamp);
 	}
 
 	@Override

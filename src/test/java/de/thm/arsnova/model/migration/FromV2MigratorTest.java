@@ -15,7 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.migration;
+
+import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.config.TestAppConfig;
@@ -26,18 +39,6 @@ import de.thm.arsnova.model.ChoiceAnswer;
 import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.migration.v2.Answer;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Daniel Gerhardt
@@ -66,35 +67,35 @@ public class FromV2MigratorTest {
 
 	@Test
 	public void testMigrateAnswerMultipleResponse() {
-		Answer answerV2 = new Answer();
+		final Answer answerV2 = new Answer();
 		answerV2.setId(ANSWER_ID);
 		answerV2.setQuestionId(CONTENT_ID);
 		answerV2.setSessionId(ROOM_ID);
 		answerV2.setPiRound(ROUND);
 		answerV2.setAnswerText("0,1,1");
 
-		List<ChoiceQuestionContent.AnswerOption> options = new ArrayList<>();
-		ChoiceQuestionContent.AnswerOption option1 = new ChoiceQuestionContent.AnswerOption();
+		final List<ChoiceQuestionContent.AnswerOption> options = new ArrayList<>();
+		final ChoiceQuestionContent.AnswerOption option1 = new ChoiceQuestionContent.AnswerOption();
 		option1.setLabel(OPTION1_LABEL);
 		options.add(option1);
-		ChoiceQuestionContent.AnswerOption option2 = new ChoiceQuestionContent.AnswerOption();
+		final ChoiceQuestionContent.AnswerOption option2 = new ChoiceQuestionContent.AnswerOption();
 		option2.setLabel(OPTION2_LABEL);
 		options.add(option2);
-		ChoiceQuestionContent.AnswerOption option3 = new ChoiceQuestionContent.AnswerOption();
+		final ChoiceQuestionContent.AnswerOption option3 = new ChoiceQuestionContent.AnswerOption();
 		option3.setLabel(OPTION3_LABEL);
 		options.add(option3);
 
-		ChoiceQuestionContent content = new ChoiceQuestionContent();
+		final ChoiceQuestionContent content = new ChoiceQuestionContent();
 		content.setFormat(FORMAT);
 		content.setRoomId(ROOM_ID);
 		content.setMultiple(true);
 		content.setOptions(options);
 
-		List<Integer> selectedChoices = new ArrayList<>();
+		final List<Integer> selectedChoices = new ArrayList<>();
 		selectedChoices.add(1);
 		selectedChoices.add(2);
 
-		ChoiceAnswer answerV3 = (ChoiceAnswer) fromV2Migrator.migrate(answerV2, content);
+		final ChoiceAnswer answerV3 = (ChoiceAnswer) fromV2Migrator.migrate(answerV2, content);
 
 		assertEquals(ANSWER_ID, answerV3.getId());
 		assertEquals(CONTENT_ID, answerV3.getContentId());

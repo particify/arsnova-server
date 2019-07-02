@@ -15,9 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.config;
 
-import de.thm.arsnova.connector.client.ConnectorClient;
+import static org.junit.Assert.assertNull;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +31,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.Arrays;
+import de.thm.arsnova.connector.client.ConnectorClient;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -57,8 +59,8 @@ public class AppConfigTest extends AbstractJUnit4SpringContextTests {
 
 	@Test
 	public void testShouldUseAdminAccountFromTestPropertiesFile() {
-		List<String> expected = Arrays.asList("TestAdmin");
-		List<String> actual = Arrays.asList(adminAccounts);
+		final List<String> expected = Arrays.asList("TestAdmin");
+		final List<String> actual = Arrays.asList(adminAccounts);
 
 		assertEquals("Configuration did not load correct property file", expected, actual);
 	}

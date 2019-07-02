@@ -15,17 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.serialization.View;
 import io.swagger.annotations.ApiModel;
+
+import de.thm.arsnova.model.serialization.View;
 
 /**
  * A Room (Session) a user has visited previously.
  */
-@ApiModel(value = "VisitedRoom", description = "Visited Room (Session) entity - An entry of the Room History for the Logged In entity")
+@ApiModel(value = "VisitedRoom",
+		description = "Visited Room (Session) entity - An entry of the Room History for the Logged In entity")
 public class VisitedRoom {
 	@JsonProperty("_id")
 	private String id;
@@ -35,7 +38,7 @@ public class VisitedRoom {
 	public VisitedRoom() {
 	}
 
-	public VisitedRoom(Room s) {
+	public VisitedRoom(final Room s) {
 		this.id = s.getId();
 		this.name = s.getName();
 		this.keyword = s.getKeyword();
@@ -57,7 +60,7 @@ public class VisitedRoom {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
@@ -67,7 +70,7 @@ public class VisitedRoom {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setKeyword(String keyword) {
+	public void setKeyword(final String keyword) {
 		this.keyword = keyword;
 	}
 

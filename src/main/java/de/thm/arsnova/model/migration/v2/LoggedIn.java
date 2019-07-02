@@ -15,14 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.serialization.View;
 import io.swagger.annotations.ApiModel;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import de.thm.arsnova.model.serialization.View;
 
 /**
  * Once a user joins a session, this class is used to identify a returning user.
@@ -41,14 +42,14 @@ public class LoggedIn implements Entity {
 		this.updateTimestamp();
 	}
 
-	public void addVisitedSession(Room s) {
+	public void addVisitedSession(final Room s) {
 		if (!isAlreadyVisited(s)) {
 			this.visitedSessions.add(new VisitedRoom(s));
 		}
 	}
 
-	private boolean isAlreadyVisited(Room s) {
-		for (VisitedRoom vs : this.visitedSessions) {
+	private boolean isAlreadyVisited(final Room s) {
+		for (final VisitedRoom vs : this.visitedSessions) {
 			if (vs.getId().equals(s.getId())) {
 				return true;
 			}
@@ -86,7 +87,7 @@ public class LoggedIn implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setUser(String user) {
+	public void setUser(final String user) {
 		this.user = user;
 	}
 
@@ -96,7 +97,7 @@ public class LoggedIn implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setSessionId(String sessionId) {
+	public void setSessionId(final String sessionId) {
 		this.sessionId = sessionId;
 	}
 
@@ -106,7 +107,7 @@ public class LoggedIn implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setTimestamp(long timestamp) {
+	public void setTimestamp(final long timestamp) {
 		this.timestamp = timestamp;
 	}
 
@@ -116,7 +117,7 @@ public class LoggedIn implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setVisitedSessions(List<VisitedRoom> visitedSessions) {
+	public void setVisitedSessions(final List<VisitedRoom> visitedSessions) {
 		this.visitedSessions = visitedSessions;
 	}
 
@@ -126,7 +127,7 @@ public class LoggedIn implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setAnonymized(boolean anonymized) {
+	public void setAnonymized(final boolean anonymized) {
 		this.anonymized = anonymized;
 	}
 

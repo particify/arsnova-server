@@ -15,12 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
+import de.thm.arsnova.model.serialization.View;
 
 /**
  * Wrapper class for counting read and unread Comments for a Room or a single user.
@@ -31,7 +33,7 @@ public class CommentReadingCount {
 	private int read;
 	private int unread;
 
-	public CommentReadingCount(int readCount, int unreadCount) {
+	public CommentReadingCount(final int readCount, final int unreadCount) {
 		this.read = readCount;
 		this.unread = unreadCount;
 	}
@@ -47,7 +49,7 @@ public class CommentReadingCount {
 		return read;
 	}
 
-	public void setRead(int read) {
+	public void setRead(final int read) {
 		this.read = read;
 	}
 
@@ -57,7 +59,7 @@ public class CommentReadingCount {
 		return unread;
 	}
 
-	public void setUnread(int unread) {
+	public void setUnread(final int unread) {
 		this.unread = unread;
 	}
 

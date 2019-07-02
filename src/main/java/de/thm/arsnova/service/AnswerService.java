@@ -15,14 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service;
+
+import java.util.List;
+import java.util.Map;
 
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.TextAnswer;
-
-import java.util.List;
-import java.util.Map;
 
 public interface AnswerService extends EntityService<Answer> {
 	Answer getMyAnswer(String contentId);

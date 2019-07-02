@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service.score;
 
 import java.util.ArrayList;
@@ -38,7 +39,8 @@ public class QuestionScore implements Iterable<UserScore> {
 
 	private List<UserScore> userScores = new ArrayList<>();
 
-	public QuestionScore(String questionId, String questionVariant, int piRound, int maximumScore) {
+	public QuestionScore(
+			final String questionId, final String questionVariant, final int piRound, final int maximumScore) {
 		this.questionId = questionId;
 		this.questionVariant = questionVariant;
 		this.piRound = piRound;
@@ -58,7 +60,7 @@ public class QuestionScore implements Iterable<UserScore> {
 		return !this.userScores.isEmpty();
 	}
 
-	public void add(int piRound, String userId, int userscore) {
+	public void add(final int piRound, final String userId, final int userscore) {
 		if (this.piRound == piRound) {
 			userScores.add(new UserScore(userId, userscore));
 		}
@@ -66,15 +68,15 @@ public class QuestionScore implements Iterable<UserScore> {
 
 	public int getTotalUserScore() {
 		int totalScore = 0;
-		for (UserScore score : userScores) {
+		for (final UserScore score : userScores) {
 			totalScore += score.getScore();
 		}
 		return totalScore;
 	}
 
-	public int getTotalUserScore(String userId) {
+	public int getTotalUserScore(final String userId) {
 		int totalScore = 0;
-		for (UserScore score : userScores) {
+		for (final UserScore score : userScores) {
 			if (score.isUser(userId)) {
 				totalScore += score.getScore();
 			}
@@ -86,13 +88,13 @@ public class QuestionScore implements Iterable<UserScore> {
 		return userScores.size();
 	}
 
-	public void collectUsers(Set<String> users) {
-		for (UserScore score : userScores) {
+	public void collectUsers(final Set<String> users) {
+		for (final UserScore score : userScores) {
 			users.add(score.getUserId());
 		}
 	}
 
-	public boolean isVariant(String questionVariant) {
+	public boolean isVariant(final String questionVariant) {
 		return this.questionVariant.equals(questionVariant);
 	}
 }

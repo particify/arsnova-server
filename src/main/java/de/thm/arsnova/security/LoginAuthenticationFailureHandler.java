@@ -15,18 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.security;
 
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.DefaultRedirectStrategy;
-import org.springframework.security.web.RedirectStrategy;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
-
+import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.DefaultRedirectStrategy;
+import org.springframework.security.web.RedirectStrategy;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 
 
 /**
@@ -44,7 +44,7 @@ public class LoginAuthenticationFailureHandler extends
 			final HttpServletResponse response,
 			final AuthenticationException exception
 	) throws IOException, ServletException {
-		HttpSession session = request.getSession();
+		final HttpSession session = request.getSession();
 		if (session != null && session.getAttribute("ars-login-failure-url") != null) {
 			failureUrl = (String) session.getAttribute("ars-login-failure-url");
 		}

@@ -15,11 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.serialization;
 
 public class View {
 	public interface Persistence {}
+
 	public interface Public {}
+
 	public interface Owner extends Public {}
+
 	public interface Admin extends Owner {}
 }

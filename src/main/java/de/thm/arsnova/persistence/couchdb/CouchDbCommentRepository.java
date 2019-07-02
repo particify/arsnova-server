@@ -15,13 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.persistence.couchdb;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import de.thm.arsnova.model.Comment;
-import de.thm.arsnova.model.migration.v2.CommentReadingCount;
-import de.thm.arsnova.persistence.CommentRepository;
-import de.thm.arsnova.persistence.LogEntryRepository;
+import java.util.List;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.ViewResult;
@@ -29,7 +27,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
+import de.thm.arsnova.model.Comment;
+import de.thm.arsnova.model.migration.v2.CommentReadingCount;
+import de.thm.arsnova.persistence.CommentRepository;
+import de.thm.arsnova.persistence.LogEntryRepository;
 
 public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> implements CommentRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbCommentRepository.class);
@@ -84,7 +85,8 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 		// {"key":["cecebabb21b096e592d81f9c1322b877","Guestc9350cf4a3","read"],"value":1},
 		// {"key":["cecebabb21b096e592d81f9c1322b877","Guestc9350cf4a3","unread"],"value":1}
 		// ]}
-		int read = 0, unread = 0;
+		int read = 0;
+		int unread = 0;
 		boolean isRead = false;
 		final ViewResult.Row fst = viewResult.getRows().get(0);
 		final ViewResult.Row snd = viewResult.getRows().size() > 1 ? viewResult.getRows().get(1) : null;
@@ -130,15 +132,13 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 						.endKey(ComplexKey.of(roomId))
 						.includeDocs(true),
 				Comment.class);
-//		for (Comment comment : comments) {
-//			comment.setRoomId(session.getKeyword());
-//		}
 
 		return comments;
 	}
 
 	@Override
-	public List<Comment> findByRoomIdAndUserId(final String roomId, final String userId, final int start, final int limit) {
+	public List<Comment> findByRoomIdAndUserId(
+			final String roomId, final String userId, final int start, final int limit) {
 		final int qSkip = start > 0 ? start : -1;
 		final int qLimit = limit > 0 ? limit : -1;
 
@@ -150,9 +150,6 @@ public class CouchDbCommentRepository extends CouchDbCrudRepository<Comment> imp
 						.endKey(ComplexKey.of(roomId, userId))
 						.includeDocs(true),
 				Comment.class);
-//		for (Comment comment : comments) {
-//			comment.setRoomId(session.getKeyword());
-//		}
 
 		return comments;
 	}

@@ -15,14 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.config;
 
-import org.springframework.web.filter.CharacterEncodingFilter;
-import org.springframework.web.filter.DelegatingFilterProxy;
-import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
+package de.thm.arsnova.config;
 
 import javax.servlet.Filter;
 import javax.servlet.ServletRegistration;
+import org.springframework.web.filter.CharacterEncodingFilter;
+import org.springframework.web.filter.DelegatingFilterProxy;
+import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
 	@Override
@@ -49,10 +49,10 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
 
 	@Override
 	protected Filter[] getServletFilters() {
-		CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter("UTF-8");
-		DelegatingFilterProxy corsFilter = new DelegatingFilterProxy("corsFilter");
-		DelegatingFilterProxy maintenanceModeFilter = new DelegatingFilterProxy("maintenanceModeFilter");
-		DelegatingFilterProxy v2ContentTypeOverrideFilter = new DelegatingFilterProxy("v2ContentTypeOverrideFilter");
+		final CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter("UTF-8");
+		final DelegatingFilterProxy corsFilter = new DelegatingFilterProxy("corsFilter");
+		final DelegatingFilterProxy maintenanceModeFilter = new DelegatingFilterProxy("maintenanceModeFilter");
+		final DelegatingFilterProxy v2ContentTypeOverrideFilter = new DelegatingFilterProxy("v2ContentTypeOverrideFilter");
 
 		return new Filter[] {
 				characterEncodingFilter,

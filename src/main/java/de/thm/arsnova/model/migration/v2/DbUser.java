@@ -15,9 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonView;
+
 import de.thm.arsnova.model.serialization.View;
 
 /**
@@ -40,7 +42,7 @@ public class DbUser implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setId(String id) {
+	public void setId(final String id) {
 		this.id = id;
 	}
 
@@ -50,7 +52,7 @@ public class DbUser implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setRevision(String rev) {
+	public void setRevision(final String rev) {
 		this.rev = rev;
 	}
 
@@ -60,7 +62,7 @@ public class DbUser implements Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setUsername(String username) {
+	public void setUsername(final String username) {
 		this.username = username;
 	}
 
@@ -70,7 +72,7 @@ public class DbUser implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setPassword(String password) {
+	public void setPassword(final String password) {
 		this.password = password;
 	}
 
@@ -80,7 +82,7 @@ public class DbUser implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setActivationKey(String activationKey) {
+	public void setActivationKey(final String activationKey) {
 		this.activationKey = activationKey;
 	}
 
@@ -90,7 +92,7 @@ public class DbUser implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setPasswordResetKey(String passwordResetKey) {
+	public void setPasswordResetKey(final String passwordResetKey) {
 		this.passwordResetKey = passwordResetKey;
 	}
 
@@ -100,7 +102,7 @@ public class DbUser implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setPasswordResetTime(long passwordResetTime) {
+	public void setPasswordResetTime(final long passwordResetTime) {
 		this.passwordResetTime = passwordResetTime;
 	}
 
@@ -110,7 +112,7 @@ public class DbUser implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setCreation(long creation) {
+	public void setCreation(final long creation) {
 		this.creation = creation;
 	}
 
@@ -120,7 +122,7 @@ public class DbUser implements Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setLastLogin(long lastLogin) {
+	public void setLastLogin(final long lastLogin) {
 		this.lastLogin = lastLogin;
 	}
 }

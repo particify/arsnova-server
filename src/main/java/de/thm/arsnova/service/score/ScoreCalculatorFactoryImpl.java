@@ -15,7 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service.score;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 
 import de.thm.arsnova.event.AfterCreationEvent;
 import de.thm.arsnova.event.AfterDeletionEvent;
@@ -24,17 +32,13 @@ import de.thm.arsnova.event.StateChangeEvent;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.persistence.SessionStatisticsRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
 
 /**
  * Creates a score calculator implementation.
  *
+ * <p>
  * This class additionally clears all score caches and reports this via event system.
+ * </p>
  */
 @Component
 public class ScoreCalculatorFactoryImpl implements ScoreCalculatorFactory, ApplicationEventPublisherAware {
@@ -45,8 +49,8 @@ public class ScoreCalculatorFactoryImpl implements ScoreCalculatorFactory, Appli
 	private ApplicationEventPublisher publisher;
 
 	@Override
-	public ScoreCalculator create(String type, String questionVariant) {
-		VariantScoreCalculator scoreCalculator;
+	public ScoreCalculator create(final String type, final String questionVariant) {
+		final VariantScoreCalculator scoreCalculator;
 		if ("questions".equals(type)) {
 			scoreCalculator = new QuestionBasedScoreCalculator(sessionStatisticsRepository);
 		} else {
@@ -58,36 +62,36 @@ public class ScoreCalculatorFactoryImpl implements ScoreCalculatorFactory, Appli
 
 	@CacheEvict(value = "score", key = "#event.entity.roomId", condition = "#event.entity.roomId != null")
 	@EventListener
-	public void handleAfterContentCreation(AfterCreationEvent<Content> event) {
+	public void handleAfterContentCreation(final AfterCreationEvent<Content> event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.entity.roomId", condition = "#event.entity.roomId != null")
 	@EventListener(condition = "#event.stateName == 'state'")
-	public void handleContentStateChange(StateChangeEvent<Content, Content.State> event) {
+	public void handleContentStateChange(final StateChangeEvent<Content, Content.State> event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.entity.roomId", condition = "#event.entity.roomId != null")
 	@EventListener
-	public void handleNewAnswer(AfterCreationEvent<Answer> event) {
+	public void handleNewAnswer(final AfterCreationEvent<Answer> event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.entity.roomId", condition = "#event.entity.roomId != null")
 	@EventListener
-	public void handleDeleteAnswer(AfterDeletionEvent<Answer> event) {
+	public void handleDeleteAnswer(final AfterDeletionEvent<Answer> event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
 	}
 
 	@CacheEvict(value = "score", key = "#event.entity.roomId", condition = "#event.entity.roomId != null")
 	@EventListener
-	public void handleDeleteQuestion(AfterDeletionEvent<Content> event) {
+	public void handleDeleteQuestion(final AfterDeletionEvent<Content> event) {
 		this.publisher.publishEvent(new ChangeScoreEvent(this, event.getEntity().getRoomId()));
 	}
 
 	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+	public void setApplicationEventPublisher(final ApplicationEventPublisher publisher) {
 		this.publisher = publisher;
 	}
 

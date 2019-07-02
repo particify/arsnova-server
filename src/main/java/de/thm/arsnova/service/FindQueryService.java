@@ -15,14 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service;
+
+import java.util.Set;
 
 import de.thm.arsnova.model.Entity;
 import de.thm.arsnova.model.FindQuery;
 
-import java.util.Set;
-
 /**
+ * Provides a method to find entity IDs by {@link FindQuery}.
  *
  * @param <E> Entity type
  * @author Daniel Gerhardt

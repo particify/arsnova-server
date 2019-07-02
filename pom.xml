@@ -16,6 +16,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
+		<checkstyle.missing-javadoc.severity>warning</checkstyle.missing-javadoc.severity>
 	</properties>
 
 	<developers>
@@ -506,9 +507,20 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.1.0</version>
+				<dependencies>
+					<dependency>
+						<groupId>com.puppycrawl.tools</groupId>
+						<artifactId>checkstyle</artifactId>
+						<version>8.21</version>
+					</dependency>
+					</dependencies>
 				<configuration>
-					<configLocation>ARSnova-checkstyle-checker.xml</configLocation>
+					<configLocation>checkstyle.xml</configLocation>
+					<violationSeverity>warning</violationSeverity>
+					<propertyExpansion>
+						checkstyle.missing-javadoc.severity=${checkstyle.missing-javadoc.severity}
+					</propertyExpansion>
 				</configuration>
 			</plugin>
 			<plugin>

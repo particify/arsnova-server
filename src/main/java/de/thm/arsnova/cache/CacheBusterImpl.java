@@ -15,7 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.cache;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 
 import de.thm.arsnova.event.AfterCreationEvent;
 import de.thm.arsnova.event.AfterDeletionEvent;
@@ -23,9 +28,6 @@ import de.thm.arsnova.event.ChangeScoreEvent;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.Room;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
 
 /**
  * This class is used to evict caches based on events. The events carry all necessary information to clear the
@@ -36,25 +38,37 @@ public class CacheBusterImpl implements CacheBuster {
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@EventListener
-	public void handleAfterCommentCreation(AfterCreationEvent<Comment> event) { }
+	public void handleAfterCommentCreation(final AfterCreationEvent<Comment> event) {
+
+	}
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@EventListener
-	public void handleAfterCommentDeletion(AfterDeletionEvent<Comment> event) { }
+	public void handleAfterCommentDeletion(final AfterDeletionEvent<Comment> event) {
+
+	}
 
 	@CacheEvict(value = "answerlists", key = "#event.content.id")
 	@EventListener
-	public void handleAfterAnswerCreation(AfterCreationEvent<Answer> event) { }
+	public void handleAfterAnswerCreation(final AfterCreationEvent<Answer> event) {
+
+	}
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@EventListener
-	public void handleChangeScore(ChangeScoreEvent event) { }
+	public void handleChangeScore(final ChangeScoreEvent event) {
+
+	}
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@EventListener
-	public void handleAfterRoomCreation(AfterCreationEvent<Room> event) { }
+	public void handleAfterRoomCreation(final AfterCreationEvent<Room> event) {
+
+	}
 
 	@CacheEvict(value = "statistics", allEntries = true)
 	@EventListener
-	public void handleAfterRoomDeletion(AfterDeletionEvent<Room> event) { }
+	public void handleAfterRoomDeletion(final AfterDeletionEvent<Room> event) {
+
+	}
 }

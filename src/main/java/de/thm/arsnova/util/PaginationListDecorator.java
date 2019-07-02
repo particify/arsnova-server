@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.util;
 
 import java.util.Collection;
@@ -51,21 +52,21 @@ public class PaginationListDecorator<T> implements List<T> {
 	}
 
 	/**
-	 * @return the original (not paginated) List
+	 * Returns the original (not paginated) List.
 	 */
 	public List<T> getList() {
 		return list;
 	}
 
 	/**
-	 * @return the number of skipped items
+	 * Returns the number of skipped items.
 	 */
 	public int getOffset() {
 		return offset;
 	}
 
 	/**
-	 * @param offset the number of items to be skipped
+	 * Sets the number of items to be skipped.
 	 */
 	public void setOffset(final int offset) {
 		this.offset = offset;
@@ -74,14 +75,14 @@ public class PaginationListDecorator<T> implements List<T> {
 	}
 
 	/**
-	 * @return the size limit of the paginated list
+	 * Returns the size limit of the paginated list.
 	 */
 	public int getLimit() {
 		return limit;
 	}
 
 	/**
-	 * @param limit the size limit for the resulting list
+	 * Sets the size limit for the resulting list.
 	 */
 	public void setLimit(final int limit) {
 		this.limit = limit;
@@ -90,7 +91,7 @@ public class PaginationListDecorator<T> implements List<T> {
 	}
 
 	/**
-	 * @return the size of the original (not paginated) List
+	 * Returns the size of the original (not paginated) List.
 	 */
 	public int getTotalSize() {
 		return list.size();

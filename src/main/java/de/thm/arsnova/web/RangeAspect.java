@@ -15,11 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.web;
 
-import de.thm.arsnova.controller.PaginationController;
-import de.thm.arsnova.service.ResponseProviderService;
-import de.thm.arsnova.util.PaginationListDecorator;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -28,11 +31,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import de.thm.arsnova.controller.PaginationController;
+import de.thm.arsnova.service.ResponseProviderService;
+import de.thm.arsnova.util.PaginationListDecorator;
 
 /**
  * An aspect which parses requests for pagination parameters in a "Range" header and adds a "Content-Range" header to
@@ -55,10 +56,12 @@ public class RangeAspect {
 
 	/** Sets start and end parameters based on request's range header and sets content range header for the response.
 	 */
-	@Around("execution(java.util.List+ de.thm.arsnova.controller.*.*(..)) && this(controller) && @annotation(de.thm.arsnova.web.Pagination)")
-	public Object handlePaginationRange(ProceedingJoinPoint pjp, final PaginationController controller) throws Throwable {
+	@Around("execution(java.util.List+ de.thm.arsnova.controller.*.*(..))"
+			+ " && this(controller) && @annotation(de.thm.arsnova.web.Pagination)")
+	public Object handlePaginationRange(final ProceedingJoinPoint pjp, final PaginationController controller)
+			throws Throwable {
 		logger.debug("handlePaginationRange");
-		String rangeHeader = request.getHeader("Range");
+		final String rangeHeader = request.getHeader("Range");
 		Matcher matcher = null;
 		int start = -1;
 		int end = -1;
@@ -74,12 +77,12 @@ public class RangeAspect {
 		}
 		controller.setRange(start, end);
 
-		List<?> list = (List<?>) pjp.proceed();
+		final List<?> list = (List<?>) pjp.proceed();
 
 		if (list != null && matcher != null && matcher.matches()) {
 			int totalSize = -1;
 			if (list instanceof PaginationListDecorator) {
-				PaginationListDecorator<?> pl = (PaginationListDecorator<?>) list;
+				final PaginationListDecorator<?> pl = (PaginationListDecorator<?>) list;
 				totalSize = pl.getTotalSize();
 			}
 
@@ -88,8 +91,8 @@ public class RangeAspect {
 			 * The value for end is calculated since the result list
 			 * could be shorter than requested.
 			 */
-			String rangeStr = String.format("items %d-%d/%d", start, start + list.size() - 1, totalSize);
-			HttpServletResponse response = responseProviderService.getResponse();
+			final String rangeStr = String.format("items %d-%d/%d", start, start + list.size() - 1, totalSize);
+			final HttpServletResponse response = responseProviderService.getResponse();
 			response.addHeader("Content-Range", rangeStr);
 		}
 

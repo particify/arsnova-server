@@ -15,7 +15,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.controller.v2;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.controller.PaginationController;
 import de.thm.arsnova.model.migration.FromV2Migrator;
@@ -34,29 +58,6 @@ import de.thm.arsnova.web.DeprecatedApi;
 import de.thm.arsnova.web.Pagination;
 import de.thm.arsnova.web.exceptions.NotImplementedException;
 import de.thm.arsnova.web.exceptions.UnauthorizedException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Handles requests related to ARSnova Rooms.
@@ -83,9 +84,11 @@ public class RoomController extends PaginationController {
 	@Deprecated
 	@RequestMapping(value = "/{shortId}", method = RequestMethod.GET)
 	public Room joinRoom(
-			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
-			@ApiParam(value = "Adminflag", required = false) @RequestParam(value = "admin", defaultValue = "false")	final boolean admin
-			) {
+				@ApiParam(value = "Room-Key from current Room", required = true)
+				@PathVariable final String shortId,
+				@ApiParam(value = "Adminflag", required = false)
+				@RequestParam(value = "admin", defaultValue = "false")
+				final boolean admin) {
 		if (admin) {
 			return toV2Migrator.migrate(roomService.getForAdmin(shortId));
 		} else {
@@ -96,8 +99,11 @@ public class RoomController extends PaginationController {
 	@ApiOperation(value = "deletes a Room",
 			nickname = "deleteRoom")
 	@RequestMapping(value = "/{shortId}", method = RequestMethod.DELETE)
-	public void deleteRoom(@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId) {
-		de.thm.arsnova.model.Room room = roomService.getByShortId(shortId);
+	public void deleteRoom(
+			@ApiParam(value = "Room-Key from current Room", required = true)
+			@PathVariable
+			final String shortId) {
+		final de.thm.arsnova.model.Room room = roomService.getByShortId(shortId);
 		roomService.delete(room);
 	}
 
@@ -105,20 +111,26 @@ public class RoomController extends PaginationController {
 			nickname = "countActiveUsers")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/{shortId}/activeusercount", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
-	public String countActiveUsers(@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId) {
+	@RequestMapping(value = "/{shortId}/activeusercount", method = RequestMethod.GET,
+			produces = MediaType.TEXT_PLAIN_VALUE)
+	public String countActiveUsers(
+			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId) {
 		return String.valueOf(roomService.activeUsers(roomService.getIdByShortId(shortId)));
 	}
 
 	@ApiOperation(value = "Creates a new Room and returns the Room's data",
 			nickname = "postNewRoom")
 	@ApiResponses(value = {
-		@ApiResponse(code = 201, message = HTML_STATUS_201),
-		@ApiResponse(code = 503, message = HTML_STATUS_503)
+			@ApiResponse(code = 201, message = HTML_STATUS_201),
+			@ApiResponse(code = 503, message = HTML_STATUS_503)
 	})
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public Room postNewRoom(@ApiParam(value = "current Room", required = true) @RequestBody final Room room, final HttpServletResponse response) {
+	public Room postNewRoom(
+			@ApiParam(value = "current Room", required = true)
+			@RequestBody
+			final Room room,
+			final HttpServletResponse response) {
 		/* FIXME: migrate LMS course support
 		if (room != null && room.isCourseSession()) {
 			final List<Course> courses = new ArrayList<>();
@@ -142,37 +154,41 @@ public class RoomController extends PaginationController {
 	@RequestMapping(value = "/{shortId}", method = RequestMethod.PUT)
 	public Room updateRoom(
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
-			@ApiParam(value = "current room", required = true) @RequestBody final Room room
-			) {
+			@ApiParam(value = "current room", required = true) @RequestBody final Room room) {
 		return toV2Migrator.migrate(roomService.update(fromV2Migrator.migrate(room)));
 	}
 
 	@ApiOperation(value = "change the Room creator (owner)", nickname = "changeRoomCreator")
 	@RequestMapping(value = "/{shortId}/changecreator", method = RequestMethod.PUT)
 	public Room changeRoomCreator(
-			@ApiParam(value = "Room-key from current Room", required = true) @PathVariable final String shortId,
-			@ApiParam(value = "new Room creator", required = true) @RequestBody final String newCreator
-			) {
+				@ApiParam(value = "Room-key from current Room", required = true) @PathVariable final String shortId,
+				@ApiParam(value = "new Room creator", required = true) @RequestBody final String newCreator) {
 		return toV2Migrator.migrate(roomService.updateCreator(roomService.getIdByShortId(shortId), newCreator));
 	}
 
 	@ApiOperation(value = "Retrieves a list of Rooms",
 			nickname = "getRooms")
 	@ApiResponses(value = {
-		@ApiResponse(code = 204, message = HTML_STATUS_204),
-		@ApiResponse(code = 501, message = HTML_STATUS_501)
+			@ApiResponse(code = 204, message = HTML_STATUS_204),
+			@ApiResponse(code = 501, message = HTML_STATUS_501)
 	})
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@Pagination
 	public List<Room> getRooms(
-			@ApiParam(value = "ownedOnly", required = true) @RequestParam(value = "ownedonly", defaultValue = "false") final boolean ownedOnly,
-			@ApiParam(value = "visitedOnly", required = true) @RequestParam(value = "visitedonly", defaultValue = "false") final boolean visitedOnly,
-			@ApiParam(value = "sortby", required = true) @RequestParam(value = "sortby", defaultValue = "name") final String sortby,
-			@ApiParam(value = "for a given username. admin rights needed", required = false) @RequestParam(value =
-					"username", defaultValue = "") final String username,
-			final HttpServletResponse response
-			) {
-		List<de.thm.arsnova.model.Room> rooms;
+			@ApiParam(value = "ownedOnly", required = true)
+			@RequestParam(value = "ownedonly", defaultValue = "false")
+			final boolean ownedOnly,
+			@ApiParam(value = "visitedOnly", required = true)
+			@RequestParam(value = "visitedonly", defaultValue = "false")
+			final boolean visitedOnly,
+			@ApiParam(value = "sortby", required = true)
+			@RequestParam(value = "sortby", defaultValue = "name")
+			final String sortby,
+			@ApiParam(value = "for a given username. admin rights needed", required = false)
+			@RequestParam(value = "username", defaultValue = "")
+			final String username,
+			final HttpServletResponse response) {
+		final List<de.thm.arsnova.model.Room> rooms;
 
 		if (!"".equals(username)) {
 			final String userId = userService.getByUsername(username).getId();
@@ -224,16 +240,19 @@ public class RoomController extends PaginationController {
 	@ApiOperation(value = "Retrieves a Room",
 			nickname = "getMyRooms")
 	@ApiResponses(value = {
-		@ApiResponse(code = 204, message = HTML_STATUS_204)
+			@ApiResponse(code = 204, message = HTML_STATUS_204)
 	})
 	@RequestMapping(value = "/", method = RequestMethod.GET, params = "statusonly=true")
 	@Pagination
 	public List<RoomInfo> getMyRooms(
-			@ApiParam(value = "visitedOnly", required = true) @RequestParam(value = "visitedonly", defaultValue = "false") final boolean visitedOnly,
-			@ApiParam(value = "sort by", required = false) @RequestParam(value = "sortby", defaultValue = "name") final String sortby,
-			final HttpServletResponse response
-			) {
-		List<de.thm.arsnova.model.Room> rooms;
+			@ApiParam(value = "visitedOnly", required = true)
+			@RequestParam(value = "visitedonly", defaultValue = "false")
+			final boolean visitedOnly,
+			@ApiParam(value = "sort by", required = false)
+			@RequestParam(value = "sortby", defaultValue = "name")
+			final String sortby,
+			final HttpServletResponse response) {
+		final List<de.thm.arsnova.model.Room> rooms;
 		if (!visitedOnly) {
 			rooms = roomService.getMyRoomsInfo(offset, limit);
 		} else {
@@ -257,13 +276,12 @@ public class RoomController extends PaginationController {
 	@ApiOperation(value = "Retrieves all public pool Rooms for the current user",
 			nickname = "getMyPublicPoolRooms")
 	@ApiResponses(value = {
-		@ApiResponse(code = 204, message = HTML_STATUS_204)
+			@ApiResponse(code = 204, message = HTML_STATUS_204)
 	})
 	@RequestMapping(value = "/publicpool", method = RequestMethod.GET, params = "statusonly=true")
 	public List<RoomInfo> getMyPublicPoolRooms(
-			final HttpServletResponse response
-			) {
-		List<de.thm.arsnova.model.Room> rooms = roomService.getMyPublicPoolRoomsInfo();
+			final HttpServletResponse response) {
+		final List<de.thm.arsnova.model.Room> rooms = roomService.getMyPublicPoolRoomsInfo();
 
 		if (rooms == null || rooms.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
@@ -276,13 +294,12 @@ public class RoomController extends PaginationController {
 	@ApiOperation(value = "Retrieves all public pool Rooms",
 			nickname = "getMyPublicPoolRooms")
 	@ApiResponses(value = {
-		@ApiResponse(code = 204, message = HTML_STATUS_204)
+			@ApiResponse(code = 204, message = HTML_STATUS_204)
 	})
 	@RequestMapping(value = "/publicpool", method = RequestMethod.GET)
 	public List<Room> getPublicPoolRooms(
-			final HttpServletResponse response
-			) {
-		List<de.thm.arsnova.model.Room> rooms = roomService.getPublicPoolRoomsInfo();
+			final HttpServletResponse response) {
+		final List<de.thm.arsnova.model.Room> rooms = roomService.getPublicPoolRoomsInfo();
 
 		if (rooms == null || rooms.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
@@ -297,23 +314,27 @@ public class RoomController extends PaginationController {
 	@RequestMapping(value = "/import", method = RequestMethod.POST)
 	public Room importRoom(
 			@ApiParam(value = "current Room", required = true) @RequestBody final ImportExportContainer room,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		return toV2Migrator.migrate(roomService.importRooms(room));
 	}
 
 	@ApiOperation(value = "export Rooms", nickname = "exportRoom")
 	@RequestMapping(value = "/export", method = RequestMethod.GET)
 	public List<ImportExportContainer> getExport(
-			@ApiParam(value = "Room-Key", required = true) @RequestParam(value = "sessionkey", defaultValue = "") final List<String> shortIds,
-			@ApiParam(value = "wether statistics shall be exported", required = true) @RequestParam(value = "withAnswerStatistics", defaultValue = "false") final Boolean withAnswerStatistics,
-			@ApiParam(value = "wether comments shall be exported", required = true) @RequestParam(value = "withFeedbackQuestions", defaultValue = "false") final Boolean withFeedbackQuestions,
-			final HttpServletResponse response
-		) throws IOException {
-		List<ImportExportContainer> rooms = new ArrayList<>();
+			@ApiParam(value = "Room-Key", required = true)
+			@RequestParam(value = "sessionkey", defaultValue = "")
+			final List<String> shortIds,
+			@ApiParam(value = "wether statistics shall be exported", required = true)
+			@RequestParam(value = "withAnswerStatistics", defaultValue = "false")
+			final Boolean withAnswerStatistics,
+			@ApiParam(value = "wether comments shall be exported", required = true)
+			@RequestParam(value = "withFeedbackQuestions", defaultValue = "false")
+			final Boolean withFeedbackQuestions,
+			final HttpServletResponse response) throws IOException {
+		final List<ImportExportContainer> rooms = new ArrayList<>();
 		ImportExportContainer temp;
-		for (String shortId : shortIds) {
-			String id = roomService.getIdByShortId(shortId);
+		for (final String shortId : shortIds) {
+			final String id = roomService.getIdByShortId(shortId);
 			roomService.setActive(id, false);
 			temp = roomService.exportRoom(id, withAnswerStatistics, withFeedbackQuestions);
 			if (temp != null) {
@@ -327,12 +348,16 @@ public class RoomController extends PaginationController {
 	@ApiOperation(value = "copy a Rooms to the public pool if enabled")
 	@RequestMapping(value = "/{shortId}/copytopublicpool", method = RequestMethod.POST)
 	public Room copyToPublicPool(
-			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
-			@ApiParam(value = "public pool attributes for Room", required = true) @RequestBody final ImportExportContainer.PublicPool publicPool
-			) throws IOException {
-		String id = roomService.getIdByShortId(shortId);
+			@ApiParam(value = "Room-Key from current Room", required = true)
+			@PathVariable
+			final String shortId,
+			@ApiParam(value = "public pool attributes for Room", required = true)
+			@RequestBody
+			final ImportExportContainer.PublicPool publicPool)
+			throws IOException {
+		final String id = roomService.getIdByShortId(shortId);
 		roomService.setActive(id, false);
-		de.thm.arsnova.model.Room roomInfo = roomService.copyRoomToPublicPool(shortId, publicPool);
+		final de.thm.arsnova.model.Room roomInfo = roomService.copyRoomToPublicPool(shortId, publicPool);
 		roomService.setActive(id, true);
 
 		return toV2Migrator.migrate(roomInfo);
@@ -342,22 +367,20 @@ public class RoomController extends PaginationController {
 	@RequestMapping(value = "/{shortId}/copyfrompublicpool", method = RequestMethod.POST)
 	public Room copyFromPublicPool(
 			@ApiParam(value = "Short ID of the Room", required = true) @PathVariable final String shortId,
-			@ApiParam(value = "custom attributes for Room", required = true) @RequestBody final Room sessionAttributes
-	) {
+			@ApiParam(value = "custom attributes for Room", required = true) @RequestBody final Room sessionAttributes) {
 		throw new NotImplementedException();
 	}
 
 	@ApiOperation(value = "Locks or unlocks a Room",
 			nickname = "lockRoom")
 	@ApiResponses(value = {
-		@ApiResponse(code = 404, message = HTML_STATUS_404)
+			@ApiResponse(code = 404, message = HTML_STATUS_404)
 	})
 	@RequestMapping(value = "/{shortId}/lock", method = RequestMethod.POST)
 	public Room lockRoom(
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
 			@ApiParam(value = "lock", required = true) @RequestParam(required = false) final Boolean lock,
-			final HttpServletResponse response
-			) throws IOException {
+			final HttpServletResponse response) throws IOException {
 		if (lock != null) {
 			return toV2Migrator.migrate(roomService.setActive(roomService.getIdByShortId(shortId), lock));
 		}
@@ -369,11 +392,16 @@ public class RoomController extends PaginationController {
 			nickname = "getLearningProgress")
 	@RequestMapping(value = "/{shortId}/learningprogress", method = RequestMethod.GET)
 	public ScoreStatistics getLearningProgress(
-			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
-			@ApiParam(value = "type", required = false) @RequestParam(value = "type", defaultValue = "questions") final String type,
-			@ApiParam(value = "question variant", required = false) @RequestParam(value = "questionVariant", required = false) final String questionVariant,
-			final HttpServletResponse response
-			) {
+			@ApiParam(value = "Room-Key from current Room", required = true)
+			@PathVariable
+			final String shortId,
+			@ApiParam(value = "type", required = false)
+			@RequestParam(value = "type", defaultValue = "questions")
+			final String type,
+			@ApiParam(value = "question variant", required = false)
+			@RequestParam(value = "questionVariant", required = false)
+			final String questionVariant,
+			final HttpServletResponse response) {
 		return roomService.getLearningProgress(roomService.getIdByShortId(shortId), type, questionVariant);
 	}
 
@@ -384,8 +412,7 @@ public class RoomController extends PaginationController {
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
 			@RequestParam(value = "type", defaultValue = "questions") final String type,
 			@RequestParam(value = "questionVariant", required = false) final String questionVariant,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		return roomService.getMyLearningProgress(roomService.getIdByShortId(shortId), type, questionVariant);
 	}
 
@@ -394,9 +421,8 @@ public class RoomController extends PaginationController {
 	@RequestMapping(value = "/{shortId}/features", method = RequestMethod.GET)
 	public RoomFeature getRoomFeatures(
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
-			final HttpServletResponse response
-			) {
-		de.thm.arsnova.model.Room room = roomService.getByShortId(shortId);
+			final HttpServletResponse response) {
+		final de.thm.arsnova.model.Room room = roomService.getByShortId(shortId);
 		return toV2Migrator.migrate(room.getSettings());
 	}
 
@@ -406,34 +432,33 @@ public class RoomController extends PaginationController {
 	public RoomFeature changeRoomFeatures(
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
 			@ApiParam(value = "Room feature", required = true) @RequestBody final RoomFeature features,
-			final HttpServletResponse response
-			) {
-		de.thm.arsnova.model.Room room = roomService.getByShortId(shortId);
+			final HttpServletResponse response) {
+		final de.thm.arsnova.model.Room room = roomService.getByShortId(shortId);
 		room.setSettings(fromV2Migrator.migrate(features));
 		roomService.update(room);
 
 		return toV2Migrator.migrate(room.getSettings());
 	}
 
-	@RequestMapping(value = "/{shortId}/lockfeedbackinput", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
+	@RequestMapping(value = "/{shortId}/lockfeedbackinput", method = RequestMethod.POST,
+			produces = MediaType.TEXT_PLAIN_VALUE)
 	@ApiOperation(value = "locks input of user live feedback",
 			nickname = "lockFeedbackInput")
 	public String lockFeedbackInput(
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
 			@ApiParam(value = "lock", required = true) @RequestParam(required = true) final Boolean lock,
-			final HttpServletResponse response
-			) throws IOException {
+			final HttpServletResponse response) throws IOException {
 		return String.valueOf(roomService.lockFeedbackInput(roomService.getIdByShortId(shortId), lock));
 	}
 
-	@RequestMapping(value = "/{shortId}/flipflashcards", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
+	@RequestMapping(value = "/{shortId}/flipflashcards", method = RequestMethod.POST,
+			produces = MediaType.TEXT_PLAIN_VALUE)
 	@ApiOperation(value = "flip all flashcards in Room",
 			nickname = "lockFeedbackInput")
 	public String flipFlashcards(
 			@ApiParam(value = "Room-Key from current Room", required = true) @PathVariable final String shortId,
 			@ApiParam(value = "flip", required = true) @RequestParam(required = true) final Boolean flip,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		return String.valueOf(roomService.flipFlashcards(roomService.getIdByShortId(shortId), flip));
 	}
 
@@ -442,8 +467,7 @@ public class RoomController extends PaginationController {
 	@RequestMapping(value = "/{shortId}/lecturerquestion")
 	public String redirectLecturerQuestion(
 			@PathVariable final String shortId,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		response.addHeader(X_FORWARDED, "1");
 
 		return String.format("forward:/lecturerquestion/?sessionkey=%s", shortId);
@@ -453,8 +477,7 @@ public class RoomController extends PaginationController {
 	public String redirectLecturerQuestionWithOneArgument(
 			@PathVariable final String shortId,
 			@PathVariable final String arg1,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		response.addHeader(X_FORWARDED, "1");
 
 		return String.format("forward:/lecturerquestion/%s/?sessionkey=%s", arg1, shortId);
@@ -465,8 +488,7 @@ public class RoomController extends PaginationController {
 			@PathVariable final String shortId,
 			@PathVariable final String arg1,
 			@PathVariable final String arg2,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		response.addHeader(X_FORWARDED, "1");
 
 		return String.format("forward:/lecturerquestion/%s/%s/?sessionkey=%s", arg1, arg2, shortId);
@@ -478,8 +500,7 @@ public class RoomController extends PaginationController {
 			@PathVariable final String arg1,
 			@PathVariable final String arg2,
 			@PathVariable final String arg3,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		response.addHeader(X_FORWARDED, "1");
 
 		return String.format("forward:/lecturerquestion/%s/%s/%s/?sessionkey=%s", arg1, arg2, arg3, shortId);
@@ -488,8 +509,7 @@ public class RoomController extends PaginationController {
 	@RequestMapping(value = "/{shortId}/audiencequestion")
 	public String redirectAudienceQuestion(
 			@PathVariable final String shortId,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		response.addHeader(X_FORWARDED, "1");
 
 		return String.format("forward:/audiencequestion/?sessionkey=%s", shortId);
@@ -499,8 +519,7 @@ public class RoomController extends PaginationController {
 	public String redirectAudienceQuestionWithOneArgument(
 			@PathVariable final String shortId,
 			@PathVariable final String arg1,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		response.addHeader(X_FORWARDED, "1");
 
 		return String.format("forward:/audiencequestion/%s/?sessionkey=%s", arg1, shortId);
@@ -511,8 +530,7 @@ public class RoomController extends PaginationController {
 			@PathVariable final String shortId,
 			@PathVariable final String arg1,
 			@PathVariable final String arg2,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		response.addHeader(X_FORWARDED, "1");
 
 		return String.format("forward:/audiencequestion/%s/%s/?sessionkey=%s", arg1, arg2, shortId);
@@ -524,8 +542,7 @@ public class RoomController extends PaginationController {
 			@PathVariable final String arg1,
 			@PathVariable final String arg2,
 			@PathVariable final String arg3,
-			final HttpServletResponse response
-			) {
+			final HttpServletResponse response) {
 		response.addHeader(X_FORWARDED, "1");
 
 		return String.format("forward:/audiencequestion/%s/%s/%s/?sessionkey=%s", arg1, arg2, arg3, shortId);

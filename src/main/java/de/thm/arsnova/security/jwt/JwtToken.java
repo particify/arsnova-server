@@ -15,14 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.security.jwt;
 
-import de.thm.arsnova.security.User;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
+package de.thm.arsnova.security.jwt;
 
 import java.util.Collection;
 import java.util.Collections;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+
+import de.thm.arsnova.security.User;
 
 public class JwtToken extends AbstractAuthenticationToken {
 	private String token;

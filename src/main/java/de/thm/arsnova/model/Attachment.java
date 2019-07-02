@@ -15,13 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.serialization.View;
+import java.util.Objects;
 import org.springframework.core.style.ToStringCreator;
 
-import java.util.Objects;
+import de.thm.arsnova.model.serialization.View;
 
 public class Attachment extends Entity {
 	private String mediaType;
@@ -59,7 +60,7 @@ public class Attachment extends Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setMediaType(String mediaType) {
+	public void setMediaType(final String mediaType) {
 		this.mediaType = mediaType;
 	}
 
@@ -69,7 +70,7 @@ public class Attachment extends Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setSize(long size) {
+	public void setSize(final long size) {
 		this.size = size;
 	}
 
@@ -79,7 +80,7 @@ public class Attachment extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setOriginalSourceUrl(String originalSourceUrl) {
+	public void setOriginalSourceUrl(final String originalSourceUrl) {
 		this.originalSourceUrl = originalSourceUrl;
 	}
 
@@ -89,14 +90,16 @@ public class Attachment extends Entity {
 	}
 
 	@JsonView(View.Persistence.class)
-	public void setStorageLocation(String storageLocation) {
+	public void setStorageLocation(final String storageLocation) {
 		this.storageLocation = storageLocation;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 *
+	 * <p>
 	 * All fields of <tt>Attachment</tt> are included in equality checks.
+	 * </p>
 	 */
 	@Override
 	public boolean equals(final Object o) {
@@ -108,10 +111,10 @@ public class Attachment extends Entity {
 		}
 		final Attachment that = (Attachment) o;
 
-		return size == that.size &&
-				Objects.equals(mediaType, that.mediaType) &&
-				Objects.equals(originalSourceUrl, that.originalSourceUrl) &&
-				Objects.equals(storageLocation, that.storageLocation);
+		return size == that.size
+				&& Objects.equals(mediaType, that.mediaType)
+				&& Objects.equals(originalSourceUrl, that.originalSourceUrl)
+				&& Objects.equals(storageLocation, that.storageLocation);
 	}
 
 	@Override

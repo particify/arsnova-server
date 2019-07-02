@@ -1,6 +1,5 @@
 package de.thm.arsnova.config;
 
-import de.thm.arsnova.websocket.handler.AuthChannelInterceptorAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -10,13 +9,15 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+import de.thm.arsnova.websocket.handler.AuthChannelInterceptorAdapter;
+
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-	private final String MESSAGING_PREFIX = "/backend";
-	private final String[] DESTINATION_PREFIX = {"/exchange", "/topic", "/queue"};
-	private final String USER_REGISTRY_BROADCAST = "/topic/log-user-registry";
-	private final String USER_DESTINATION_BROADCAST = "/queue/log-unresolved-user";
+	private static final String MESSAGING_PREFIX = "/backend";
+	private static final String[] DESTINATION_PREFIX = {"/exchange", "/topic", "/queue"};
+	private static final String USER_REGISTRY_BROADCAST = "/topic/log-user-registry";
+	private static final String USER_DESTINATION_BROADCAST = "/queue/log-unresolved-user";
 
 	@Value("${messaging.relay.enabled}") private Boolean relayEnabled;
 	@Value("${messaging.relay.host}") private String relayHost;
@@ -28,14 +29,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	@Value(value = "${security.cors.origins:}") private String[] corsOrigins;
 
 	@Autowired
-	public WebSocketConfig(AuthChannelInterceptorAdapter authChannelInterceptorAdapter) {
+	public WebSocketConfig(final AuthChannelInterceptorAdapter authChannelInterceptorAdapter) {
 		this.authChannelInterceptorAdapter = authChannelInterceptorAdapter;
 	}
 
-
-
 	@Override
-	public void configureMessageBroker(MessageBrokerRegistry config) {
+	public void configureMessageBroker(final MessageBrokerRegistry config) {
 		config.setApplicationDestinationPrefixes(MESSAGING_PREFIX);
 
 		if (relayEnabled) {
@@ -53,14 +52,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	}
 
 	@Override
-	public void registerStompEndpoints(StompEndpointRegistry registry) {
+	public void registerStompEndpoints(final StompEndpointRegistry registry) {
 		registry.addEndpoint("/ws").setAllowedOrigins(corsOrigins).withSockJS();
 	}
 
-
 	@Override
-	public void configureClientInboundChannel(ChannelRegistration registration) {
+	public void configureClientInboundChannel(final ChannelRegistration registration) {
 		registration.setInterceptors(authChannelInterceptorAdapter);
 	}
-
 }

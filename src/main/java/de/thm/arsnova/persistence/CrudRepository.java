@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.persistence;
 
 /**
@@ -25,13 +26,14 @@ package de.thm.arsnova.persistence;
  *
  * @author Daniel Gerhardt
  */
-public interface CrudRepository<T, ID> extends org.springframework.data.repository.CrudRepository<T, ID> {
+public interface CrudRepository<T, I> extends org.springframework.data.repository.CrudRepository<T, I> {
 	/**
+	 * Retrieve a single entity by ID.
 	 *
-	 * @param id The entity's Id
+	 * @param id The entity's ID
 	 * @return The retrieved entity or null
 	 * @deprecated Use {@link #findById(Object)} instead.
 	 */
 	@Deprecated
-	T findOne(final ID id);
+	T findOne(final I id);
 }

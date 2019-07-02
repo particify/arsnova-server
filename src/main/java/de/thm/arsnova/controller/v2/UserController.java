@@ -15,11 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.controller.v2;
 
-import de.thm.arsnova.controller.AbstractController;
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.service.UserService;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.stereotype.Controller;
@@ -28,8 +28,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import de.thm.arsnova.controller.AbstractController;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.service.UserService;
 
 /**
  * Handles requests related to ARSnova's own user registration and login process.
@@ -61,7 +62,7 @@ public class UserController extends AbstractController {
 			@PathVariable final String username,
 			@RequestParam final String key, final HttpServletRequest request,
 			final HttpServletResponse response) {
-		UserProfile userProfile = userService.getByUsername(username);
+		final UserProfile userProfile = userService.getByUsername(username);
 		if (null != userProfile && key.equals(userProfile.getAccount().getActivationKey())) {
 			userProfile.getAccount().setActivationKey(null);
 			userService.update(userProfile);
@@ -89,7 +90,7 @@ public class UserController extends AbstractController {
 			@RequestParam(required = false) final String password,
 			final HttpServletRequest request,
 			final HttpServletResponse response) {
-		UserProfile userProfile = userService.getByUsername(username);
+		final UserProfile userProfile = userService.getByUsername(username);
 		if (null == userProfile) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 

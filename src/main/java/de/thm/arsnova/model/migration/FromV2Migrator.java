@@ -15,14 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.model.migration;
 
-import de.thm.arsnova.model.ChoiceAnswer;
-import de.thm.arsnova.model.ChoiceQuestionContent;
-import de.thm.arsnova.model.TextAnswer;
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.model.migration.v2.*;
-import org.checkerframework.checker.nullness.qual.Nullable;
+package de.thm.arsnova.model.migration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +27,22 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import de.thm.arsnova.model.ChoiceAnswer;
+import de.thm.arsnova.model.ChoiceQuestionContent;
+import de.thm.arsnova.model.TextAnswer;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.model.migration.v2.Answer;
+import de.thm.arsnova.model.migration.v2.Comment;
+import de.thm.arsnova.model.migration.v2.Content;
+import de.thm.arsnova.model.migration.v2.DbUser;
+import de.thm.arsnova.model.migration.v2.Entity;
+import de.thm.arsnova.model.migration.v2.LoggedIn;
+import de.thm.arsnova.model.migration.v2.Motd;
+import de.thm.arsnova.model.migration.v2.MotdList;
+import de.thm.arsnova.model.migration.v2.Room;
+import de.thm.arsnova.model.migration.v2.RoomFeature;
 
 /**
  * Converts legacy entities from version 2 to current model version.
@@ -88,7 +98,7 @@ public class FromV2Migrator {
 			profile.setAuthProvider(UserProfile.AuthProvider.ARSNOVA);
 			profile.setCreationTimestamp(new Date(dbUser.getCreation()));
 			profile.setUpdateTimestamp(new Date());
-			UserProfile.Account account = new UserProfile.Account();
+			final UserProfile.Account account = new UserProfile.Account();
 			profile.setAccount(account);
 			account.setPassword(dbUser.getPassword());
 			account.setActivationKey(dbUser.getActivationKey());
@@ -103,7 +113,7 @@ public class FromV2Migrator {
 				profile.setCreationTimestamp(new Date());
 			}
 			profile.setLastLoginTimestamp(new Date(loggedIn.getTimestamp()));
-			Set<UserProfile.RoomHistoryEntry> sessionHistory = loggedIn.getVisitedSessions().stream()
+			final Set<UserProfile.RoomHistoryEntry> sessionHistory = loggedIn.getVisitedSessions().stream()
 					.map(entry -> new UserProfile.RoomHistoryEntry(entry.getId(), new Date(0)))
 					.collect(Collectors.toSet());
 			profile.setRoomHistory(sessionHistory);
@@ -120,8 +130,8 @@ public class FromV2Migrator {
 	}
 
 	public de.thm.arsnova.model.Room migrate(final Room from, final Optional<UserProfile> owner) {
-		if (!owner.isPresent() && from.getCreator() != null ||
-				owner.isPresent() && !owner.get().getLoginId().equals(from.getCreator())) {
+		if (!owner.isPresent() && from.getCreator() != null
+				|| owner.isPresent() && !owner.get().getLoginId().equals(from.getCreator())) {
 			throw new IllegalArgumentException("Username of owner object does not match session creator.");
 		}
 		final de.thm.arsnova.model.Room to = new de.thm.arsnova.model.Room();
@@ -162,7 +172,7 @@ public class FromV2Migrator {
 	}
 
 	public de.thm.arsnova.model.Room.Settings migrate(final RoomFeature feature) {
-		de.thm.arsnova.model.Room.Settings settings = new de.thm.arsnova.model.Room.Settings();
+		final de.thm.arsnova.model.Room.Settings settings = new de.thm.arsnova.model.Room.Settings();
 		if (feature != null) {
 			settings.setCommentsEnabled(feature.isInterposed() || feature.isInterposedFeedback()
 					|| feature.isTwitterWall() || feature.isTotal());
@@ -180,7 +190,7 @@ public class FromV2Migrator {
 	}
 
 	public de.thm.arsnova.model.Content migrate(final Content from) {
-		de.thm.arsnova.model.Content to;
+		final de.thm.arsnova.model.Content to;
 		switch (from.getQuestionType()) {
 			case V2_TYPE_ABCD:
 			case V2_TYPE_SC:
@@ -188,13 +198,13 @@ public class FromV2Migrator {
 			case V2_TYPE_VOTE:
 			case V2_TYPE_SCHOOL:
 			case V2_TYPE_YESNO:
-				ChoiceQuestionContent choiceQuestionContent = new ChoiceQuestionContent();
+				final ChoiceQuestionContent choiceQuestionContent = new ChoiceQuestionContent();
 				to = choiceQuestionContent;
 				to.setFormat(formatMapping.get(from.getQuestionType()));
 				choiceQuestionContent.setMultiple(V2_TYPE_MC.equals(from.getQuestionType()));
 				for (int i = 0; i < from.getPossibleAnswers().size(); i++) {
-					de.thm.arsnova.model.migration.v2.AnswerOption fromOption = from.getPossibleAnswers().get(i);
-					ChoiceQuestionContent.AnswerOption toOption = new ChoiceQuestionContent.AnswerOption();
+					final de.thm.arsnova.model.migration.v2.AnswerOption fromOption = from.getPossibleAnswers().get(i);
+					final ChoiceQuestionContent.AnswerOption toOption = new ChoiceQuestionContent.AnswerOption();
 					toOption.setLabel(fromOption.getText());
 					toOption.setPoints(fromOption.getValue());
 					choiceQuestionContent.getOptions().add(toOption);
@@ -218,7 +228,7 @@ public class FromV2Migrator {
 		to.setBody(from.getText());
 		to.setAbstentionsAllowed(from.isAbstention());
 		to.setAbstentionsAllowed(from.isAbstention());
-		de.thm.arsnova.model.Content.State state = to.getState();
+		final de.thm.arsnova.model.Content.State state = to.getState();
 		state.setRound(from.getPiRound());
 		state.setVisible(from.isActive());
 		state.setResponsesVisible(from.isShowStatistic());
@@ -229,9 +239,9 @@ public class FromV2Migrator {
 	}
 
 	public de.thm.arsnova.model.Answer migrate(final Answer from, final de.thm.arsnova.model.Content content) {
-		de.thm.arsnova.model.Answer answer;
+		final de.thm.arsnova.model.Answer answer;
 		if (content instanceof ChoiceQuestionContent) {
-			ChoiceQuestionContent choiceQuestionContent = (ChoiceQuestionContent) content;
+			final ChoiceQuestionContent choiceQuestionContent = (ChoiceQuestionContent) content;
 			answer = migrate(from, choiceQuestionContent.getOptions(), choiceQuestionContent.isMultiple());
 		} else {
 			answer = migrate(from);
@@ -241,25 +251,26 @@ public class FromV2Migrator {
 		return answer;
 	}
 
-	public ChoiceAnswer migrate(final Answer from, final List<ChoiceQuestionContent.AnswerOption> options, final boolean multiple) {
+	public ChoiceAnswer migrate(
+			final Answer from, final List<ChoiceQuestionContent.AnswerOption> options, final boolean multiple) {
 		final ChoiceAnswer to = new ChoiceAnswer();
 		copyCommonProperties(from, to);
 		to.setContentId(from.getQuestionId());
 		to.setRoomId(from.getSessionId());
 		to.setRound(from.getPiRound());
-		List<Integer> selectedChoiceIndexes = new ArrayList<>();
+		final List<Integer> selectedChoiceIndexes = new ArrayList<>();
 		to.setSelectedChoiceIndexes(selectedChoiceIndexes);
 
 		if (!from.isAbstention()) {
 			if (multiple) {
-				List<Boolean> flags = Arrays.stream(from.getAnswerText().split(","))
+				final List<Boolean> flags = Arrays.stream(from.getAnswerText().split(","))
 						.map("1"::equals).collect(Collectors.toList());
 				if (flags.size() != options.size()) {
 					throw new IndexOutOfBoundsException(
 							"Number of answer's choice flags does not match number of content's answer options");
 				}
 				int i = 0;
-				for (boolean flag : flags) {
+				for (final boolean flag : flags) {
 					if (flag) {
 						selectedChoiceIndexes.add(i);
 					}
@@ -267,7 +278,7 @@ public class FromV2Migrator {
 				}
 			} else {
 				int i = 0;
-				for (ChoiceQuestionContent.AnswerOption option : options) {
+				for (final ChoiceQuestionContent.AnswerOption option : options) {
 					if (option.getLabel().equals(from.getAnswerText())) {
 						selectedChoiceIndexes.add(i);
 						break;
@@ -293,8 +304,8 @@ public class FromV2Migrator {
 	}
 
 	public de.thm.arsnova.model.Comment migrate(final Comment from, @Nullable final UserProfile creator) {
-		if (creator == null && from.getCreator() != null ||
-				creator != null && !creator.getLoginId().equals(from.getCreator())) {
+		if (creator == null && from.getCreator() != null
+				|| creator != null && !creator.getLoginId().equals(from.getCreator())) {
 			throw new IllegalArgumentException("Username of creator object does not match comment creator.");
 		}
 		final de.thm.arsnova.model.Comment to = new de.thm.arsnova.model.Comment();
@@ -335,6 +346,9 @@ public class FromV2Migrator {
 				break;
 			case "session":
 				to.setAudience(de.thm.arsnova.model.Motd.Audience.ROOM);
+				break;
+			default:
+				/* TODO: Add log message. */
 				break;
 		}
 		to.setTitle(from.getTitle());

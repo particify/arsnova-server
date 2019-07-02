@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.persistence.couchdb;
 
-import de.thm.arsnova.model.Statistics;
-import de.thm.arsnova.persistence.StatisticsRepository;
+import java.util.HashSet;
+import java.util.Set;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DbAccessException;
 import org.ektorp.ViewResult;
@@ -26,8 +27,8 @@ import org.ektorp.support.CouchDbRepositorySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Set;
+import de.thm.arsnova.model.Statistics;
+import de.thm.arsnova.persistence.StatisticsRepository;
 
 public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implements StatisticsRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbStatisticsRepository.class);
@@ -55,7 +56,7 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
 							stats.setClosedSessions(stats.getClosedSessions() + value);
 							break;
 						case "deletedSessions":
-						/* Deleted sessions are not exposed separately for now. */
+							/* Deleted sessions are not exposed separately for now. */
 							stats.setClosedSessions(stats.getClosedSessions() + value);
 							break;
 						case "answers":
@@ -76,19 +77,21 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
 						case "flashcards":
 							stats.setFlashcards(stats.getFlashcards() + value);
 							break;
+						default:
+							break;
 					}
 				}
 			}
 			if (!creatorResult.isEmpty()) {
 				final Set<String> creators = new HashSet<>();
-				for (ViewResult.Row row: statsResult.getRows()) {
+				for (final ViewResult.Row row: statsResult.getRows()) {
 					creators.add(row.getKey());
 				}
 				stats.setCreators(creators.size());
 			}
 			if (!studentUserResult.isEmpty()) {
 				final Set<String> students = new HashSet<>();
-				for (ViewResult.Row row: statsResult.getRows()) {
+				for (final ViewResult.Row row: statsResult.getRows()) {
 					students.add(row.getKey());
 				}
 				stats.setActiveStudents(students.size());

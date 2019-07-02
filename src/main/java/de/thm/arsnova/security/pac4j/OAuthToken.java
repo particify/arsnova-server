@@ -15,14 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.security.pac4j;
 
-import de.thm.arsnova.security.User;
+import java.util.Collection;
 import org.pac4j.core.profile.CommonProfile;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
-import java.util.Collection;
+import de.thm.arsnova.security.User;
 
 /**
  * Authentication token implementation for OAuth.
@@ -32,8 +33,8 @@ import java.util.Collection;
 public class OAuthToken extends AbstractAuthenticationToken {
 	private User principal;
 
-	public OAuthToken(User principal, CommonProfile profile,
-			Collection<? extends GrantedAuthority> grantedAuthorities) {
+	public OAuthToken(final User principal, final CommonProfile profile,
+			final Collection<? extends GrantedAuthority> grantedAuthorities) {
 		super(grantedAuthorities);
 		this.principal = principal;
 		this.setDetails(profile);

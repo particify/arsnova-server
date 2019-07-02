@@ -15,15 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import de.thm.arsnova.model.serialization.View;
 
 /**
  * Summary information of a specific Room. For example, this is used to display list entries of a user's Rooms as well
@@ -48,7 +49,7 @@ public class RoomInfo {
 	private int numUnreadComments;
 	private int numUnanswered;
 
-	public RoomInfo(Room room) {
+	public RoomInfo(final Room room) {
 		this.name = room.getName();
 		this.shortName = room.getShortName();
 		this.keyword = room.getKeyword();
@@ -60,11 +61,13 @@ public class RoomInfo {
 		this.ppSubject = room.getPpSubject();
 	}
 
-	public RoomInfo() { }
+	public RoomInfo() {
 
-	public static List<RoomInfo> fromSessionList(List<Room> sessions) {
-		List<RoomInfo> infos = new ArrayList<>();
-		for (Room s : sessions) {
+	}
+
+	public static List<RoomInfo> fromSessionList(final List<Room> sessions) {
+		final List<RoomInfo> infos = new ArrayList<>();
+		for (final Room s : sessions) {
 			infos.add(new RoomInfo(s));
 		}
 		return infos;
@@ -76,7 +79,7 @@ public class RoomInfo {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
@@ -86,7 +89,7 @@ public class RoomInfo {
 		return shortName;
 	}
 
-	public void setShortName(String shortName) {
+	public void setShortName(final String shortName) {
 		this.shortName = shortName;
 	}
 
@@ -96,7 +99,7 @@ public class RoomInfo {
 		return keyword;
 	}
 
-	public void setKeyword(String keyword) {
+	public void setKeyword(final String keyword) {
 		this.keyword = keyword;
 	}
 
@@ -106,7 +109,7 @@ public class RoomInfo {
 		return active;
 	}
 
-	public void setActive(boolean active) {
+	public void setActive(final boolean active) {
 		this.active = active;
 	}
 
@@ -116,7 +119,7 @@ public class RoomInfo {
 		return courseType;
 	}
 
-	public void setCourseType(String courseType) {
+	public void setCourseType(final String courseType) {
 		this.courseType = courseType;
 	}
 
@@ -126,7 +129,7 @@ public class RoomInfo {
 		return sessionType;
 	}
 
-	public void setSessionType(String sessionType) {
+	public void setSessionType(final String sessionType) {
 		this.sessionType = sessionType;
 	}
 
@@ -136,7 +139,7 @@ public class RoomInfo {
 		return ppLevel;
 	}
 
-	public void setPpLevel(String ppLevel) {
+	public void setPpLevel(final String ppLevel) {
 		this.ppLevel = ppLevel;
 	}
 
@@ -146,7 +149,7 @@ public class RoomInfo {
 		return ppSubject;
 	}
 
-	public void setPpSubject(String ppSubject) {
+	public void setPpSubject(final String ppSubject) {
 		this.ppSubject = ppSubject;
 	}
 
@@ -156,7 +159,7 @@ public class RoomInfo {
 		return numQuestions;
 	}
 
-	public void setNumQuestions(int numQuestions) {
+	public void setNumQuestions(final int numQuestions) {
 		this.numQuestions = numQuestions;
 	}
 
@@ -166,7 +169,7 @@ public class RoomInfo {
 		return numAnswers;
 	}
 
-	public void setNumAnswers(int numAnswers) {
+	public void setNumAnswers(final int numAnswers) {
 		this.numAnswers = numAnswers;
 	}
 
@@ -178,7 +181,7 @@ public class RoomInfo {
 	}
 
 	/* Still named "Interposed" instead of "Comments" here for compatibilty reasons. */
-	public void setNumInterposed(int numComments) {
+	public void setNumInterposed(final int numComments) {
 		this.numComments = numComments;
 	}
 
@@ -188,7 +191,7 @@ public class RoomInfo {
 		return numUnanswered;
 	}
 
-	public void setNumUnanswered(int numUnanswered) {
+	public void setNumUnanswered(final int numUnanswered) {
 		this.numUnanswered = numUnanswered;
 	}
 
@@ -198,7 +201,7 @@ public class RoomInfo {
 		return creationTime;
 	}
 
-	public void setCreationTime(long creationTime) {
+	public void setCreationTime(final long creationTime) {
 		this.creationTime = creationTime;
 	}
 
@@ -210,7 +213,7 @@ public class RoomInfo {
 	}
 
 	/* Still named "Interposed" instead of "Comments" here for compatibilty reasons. */
-	public void setNumUnredInterposed(int numUnreadComments) {
+	public void setNumUnredInterposed(final int numUnreadComments) {
 		this.numUnreadComments = numUnreadComments;
 	}
 
@@ -224,7 +227,7 @@ public class RoomInfo {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		// auto generated!
 		if (this == obj) {
 			return true;
@@ -235,7 +238,7 @@ public class RoomInfo {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		RoomInfo other = (RoomInfo) obj;
+		final RoomInfo other = (RoomInfo) obj;
 		if (keyword == null) {
 			if (other.keyword != null) {
 				return false;

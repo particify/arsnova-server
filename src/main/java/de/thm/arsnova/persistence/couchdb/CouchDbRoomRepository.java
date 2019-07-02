@@ -15,23 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.persistence.couchdb;
 
-import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.RoomStatistics;
-import de.thm.arsnova.model.migration.v2.ClientAuthentication;
-import de.thm.arsnova.model.transport.ImportExportContainer;
-import de.thm.arsnova.persistence.LogEntryRepository;
-import de.thm.arsnova.persistence.MotdRepository;
-import de.thm.arsnova.persistence.RoomRepository;
-import org.ektorp.ComplexKey;
-import org.ektorp.CouchDbConnector;
-import org.ektorp.ViewQuery;
-import org.ektorp.ViewResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+package de.thm.arsnova.persistence.couchdb;
 
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -42,6 +27,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.ektorp.ComplexKey;
+import org.ektorp.CouchDbConnector;
+import org.ektorp.ViewQuery;
+import org.ektorp.ViewResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import de.thm.arsnova.connector.model.Course;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.RoomStatistics;
+import de.thm.arsnova.model.migration.v2.ClientAuthentication;
+import de.thm.arsnova.model.transport.ImportExportContainer;
+import de.thm.arsnova.persistence.LogEntryRepository;
+import de.thm.arsnova.persistence.MotdRepository;
+import de.thm.arsnova.persistence.RoomRepository;
 
 public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implements RoomRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbRoomRepository.class);
@@ -90,7 +91,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 				createQuery("by_lastactivity_for_guests").endKey(lastActivityBefore));
 		final int[] count = new int[3];
 
-		List<Room> rooms = new ArrayList<>();
+		final List<Room> rooms = new ArrayList<>();
 		for (final ViewResult.Row row : result.getRows()) {
 			final Room s = new Room();
 			s.setId(row.getId());
@@ -106,89 +107,6 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 	public Room importRoom(final String userId, final ImportExportContainer importRoom) {
 		/* FIXME: not yet migrated - move to service layer */
 		throw new UnsupportedOperationException();
-//		final Room session = this.saveSession(user, importRoom.generateSessionEntity(user));
-//		final List<Document> questions = new ArrayList<>();
-//		// We need to remember which answers belong to which question.
-//		// The answers need a questionId, so we first store the questions to get the IDs.
-//		// Then we update the answer objects and store them as well.
-//		final Map<Document, ImportExportContainer.ImportExportContent> mapping = new HashMap<>();
-//		// Later, generate all answer documents
-//		List<Document> answers = new ArrayList<>();
-//		// We can then push answers together with comments in one large bulk request
-//		List<Document> interposedQuestions = new ArrayList<>();
-//		// Motds shouldn't be forgotten, too
-//		List<Document> motds = new ArrayList<>();
-//		try {
-//			// add session id to all questions and generate documents
-//			for (final ImportExportContainer.ImportExportContent question : importRoom.getQuestions()) {
-//				final Document doc = toQuestionDocument(session, question);
-//				question.setRoomId(session.getId());
-//				questions.add(doc);
-//				mapping.put(doc, question);
-//			}
-//			database.bulkSaveDocuments(questions.toArray(new Document[questions.size()]));
-//
-//			// bulk import answers together with interposed questions
-//			for (Map.Entry<Document, ImportExportContainer.ImportExportContent> entry : mapping.entrySet()) {
-//				final Document doc = entry.getKey();
-//				final ImportExportContainer.ImportExportContent question = entry.getValue();
-//				question.setId(doc.getId());
-//				question.setRevision(doc.getRev());
-//				for (final de.thm.arsnova.entities.transport.Answer answer : question.getAnswers()) {
-//					final Answer a = answer.generateAnswerEntity(user, question);
-//					final Document answerDoc = new Document();
-//					answerDoc.put("type", "skill_question_answer");
-//					answerDoc.put("sessionId", a.getRoomId());
-//					answerDoc.put("questionId", a.getContentId());
-//					answerDoc.put("answerSubject", a.getAnswerSubject());
-//					answerDoc.put("questionVariant", a.getGroups());
-//					answerDoc.put("questionValue", a.getQuestionValue());
-//					answerDoc.put("answerText", a.getAnswerText());
-//					answerDoc.put("answerTextRaw", a.getAnswerTextRaw());
-//					answerDoc.put("timestamp", a.getTimestamp());
-//					answerDoc.put("piRound", a.getPiRound());
-//					answerDoc.put("abstention", a.isAbstention());
-//					answerDoc.put("successfulFreeTextAnswer", a.isSuccessfulFreeTextAnswer());
-//					// we do not store the user's name
-//					answerDoc.put("user", "");
-//					answers.add(answerDoc);
-//				}
-//			}
-//			for (final de.thm.arsnova.entities.transport.Comment i : importRoom.getFeedbackQuestions()) {
-//				final Document q = new Document();
-//				q.put("type", "interposed_question");
-//				q.put("sessionId", session.getId());
-//				q.put("subject", i.getSubject());
-//				q.put("text", i.getText());
-//				q.put("timestamp", i.getTimestamp());
-//				q.put("read", i.isRead());
-//				// we do not store the creator's name
-//				q.put("creator", "");
-//				interposedQuestions.add(q);
-//			}
-//			for (final Motd m : importRoom.getMotds()) {
-//				final Document d = new Document();
-//				d.put("type", "motd");
-//				d.put("motdkey", m.getMotdkey());
-//				d.put("title", m.getTitle());
-//				d.put("text", m.getText());
-//				d.put("audience", m.getAudience());
-//				d.put("sessionkey", session.getKeyword());
-//				d.put("startdate", String.valueOf(m.getStartDate().getTime()));
-//				d.put("enddate", String.valueOf(m.getEndDate().getTime()));
-//				motds.add(d);
-//			}
-//			final List<Document> documents = new ArrayList<>(answers);
-//			database.bulkSaveDocuments(interposedQuestions.toArray(new Document[interposedQuestions.size()]));
-//			database.bulkSaveDocuments(motds.toArray(new Document[motds.size()]));
-//			database.bulkSaveDocuments(documents.toArray(new Document[documents.size()]));
-//		} catch (final IOException e) {
-//			logger.error("Could not import session.", e);
-//			// Something went wrong, delete this session since we do not want a partial import
-//			this.delete(session);
-//			return null;
-//		}
-//		return this.calculateSessionInfo(importRoom, session);
 	}
 
 	/* TODO: Move to service layer. */
@@ -199,71 +117,12 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 			final Boolean withFeedbackQuestions) {
 		/* FIXME: not yet migrated - move to service layer */
 		throw new UnsupportedOperationException();
-//		final ImportExportContainer importExportSession = new ImportExportContainer();
-//		final Room session = getDatabaseDao().getSessionFromKeyword(sessionkey);
-//		importExportSession.setSessionFromSessionObject(session);
-//		final List<Content> questionList = getDatabaseDao().getAllSkillQuestions(session);
-//		for (final Content question : questionList) {
-//			final List<de.thm.arsnova.entities.transport.Answer> answerList = new ArrayList<>();
-//			if (withAnswers) {
-//				for (final Answer a : this.getDatabaseDao().getAllAnswers(question)) {
-//					final de.thm.arsnova.entities.transport.Answer transportAnswer = new de.thm.arsnova.entities.transport.Answer(a);
-//					answerList.add(transportAnswer);
-//				}
-//				// getAllAnswers does not grep for whole answer object so i need to add empty entries for abstentions
-//				int i = this.getDatabaseDao().getAbstentionAnswerCount(question.getId());
-//				for (int b = 0; b < i; b++) {
-//					final de.thm.arsnova.entities.transport.Answer ans = new de.thm.arsnova.entities.transport.Answer();
-//					ans.setAnswerSubject("");
-//					ans.setAnswerImage("");
-//					ans.setAnswerText("");
-//					ans.setAbstention(true);
-//					answerList.add(ans);
-//				}
-//			}
-//			importExportSession.addQuestionWithAnswers(question, answerList);
-//		}
-//		if (withFeedbackQuestions) {
-//			final List<de.thm.arsnova.entities.transport.Comment> interposedQuestionList = new ArrayList<>();
-//			for (final Comment i : getDatabaseDao().getInterposedQuestions(session, 0, 0)) {
-//				de.thm.arsnova.entities.transport.Comment transportInterposedQuestion = new de.thm.arsnova.entities.transport.Comment(i);
-//				interposedQuestionList.add(transportInterposedQuestion);
-//			}
-//			importExportSession.setFeedbackQuestions(interposedQuestionList);
-//		}
-//		if (withAnswers) {
-//			importExportSession.setSessionInfo(this.calculateSessionInfo(importExportSession, session));
-//		}
-//		importExportSession.setMotds(motdRepository.getMotdsForSession(session.getKeyword()));
-//		return importExportSession;
 	}
 
 	/* TODO: Move to service layer. */
 	private Room calculateSessionInfo(final ImportExportContainer importExportSession, final Room room) {
 		/* FIXME: not yet migrated - move to service layer */
 		throw new UnsupportedOperationException();
-//		int unreadComments = 0;
-//		int numUnanswered = 0;
-//		int numAnswers = 0;
-//		for (Comment i : importExportSession.getFeedbackQuestions()) {
-//			if (!i.isRead()) {
-//				unreadComments++;
-//			}
-//		}
-//		for (ImportExportContainer.ImportExportContent question : importExportSession.getQuestions()) {
-//			numAnswers += question.getAnswers().size();
-//			if (question.getAnswers().isEmpty()) {
-//				numUnanswered++;
-//			}
-//		}
-//		RoomStatistics stats = new RoomStatistics();
-//		stats.setContentCount(importExportSession.getQuestions().size());
-//		stats.setAnswerCount(numAnswers);
-//		stats.setUnreadAnswerCount(numUnanswered);
-//		stats.setCommentCount(importExportSession.getFeedbackQuestions().size());
-//		stats.setUnreadCommentCount(unreadComments);
-//
-//		return room;
 	}
 
 	@Override
@@ -289,7 +148,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 
 	@Override
 	public List<String> findIdsByOwnerId(final String ownerId) {
-		ViewResult result = db.queryView(createQuery("by_ownerid")
+		final ViewResult result = db.queryView(createQuery("by_ownerid")
 				.key(ownerId)
 				.includeDocs(false));
 
@@ -298,7 +157,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 
 	@Override
 	public List<String> findIdsByModeratorId(final String moderatorId) {
-		ViewResult result = db.queryView(createQuery("by_moderators_containing_userid")
+		final ViewResult result = db.queryView(createQuery("by_moderators_containing_userid")
 				.key(moderatorId)
 				.includeDocs(false));
 
@@ -358,15 +217,18 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 		final ViewQuery commentCountView = createQuery("by_roomid").designDocId("_design/Comment")
 				.group(true).keys(roomIds);
 		final ViewQuery unreadCommentCountView = createQuery("by_roomid_read").designDocId("_design/Comment")
-				.group(true).keys(rooms.stream().map(session -> ComplexKey.of(session.getId(), false)).collect(Collectors.toList()));
+				.group(true).keys(rooms.stream().map(session -> ComplexKey.of(session.getId(), false))
+				.collect(Collectors.toList()));
 
 		return attachStats(rooms, questionCountView, answerCountView, commentCountView, unreadCommentCountView);
 	}
 
 	/* TODO: Move to service layer. */
 	public List<Room> getRoomHistoryWithStatsForUser(final List<Room> rooms, final String ownerId) {
-		final ViewQuery answeredQuestionsView = createQuery("by_creatorid_roomid").designDocId("_design/Answer")
-				.reduce(false).keys(rooms.stream().map(room -> ComplexKey.of(ownerId, room.getId())).collect(Collectors.toList()));
+		final ViewQuery answeredQuestionsView = createQuery("by_creatorid_roomid")
+				.designDocId("_design/Answer")
+				.reduce(false).keys(rooms.stream().map(room -> ComplexKey.of(ownerId, room.getId()))
+				.collect(Collectors.toList()));
 		final ViewQuery contentIdsView = createQuery("by_roomid").designDocId("_design/Content")
 				.reduce(false).keys(rooms.stream().map(Room::getId).collect(Collectors.toList()));
 
@@ -427,7 +289,7 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 			if (unansweredQuestionsCountMap.containsKey(room.getId())) {
 				numUnanswered = unansweredQuestionsCountMap.get(room.getId());
 			}
-			RoomStatistics stats = new RoomStatistics();
+			final RoomStatistics stats = new RoomStatistics();
 			room.setStatistics(stats);
 			stats.setUnansweredContentCount(numUnanswered);
 		}

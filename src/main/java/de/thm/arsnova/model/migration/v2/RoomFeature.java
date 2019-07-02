@@ -15,19 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
 import java.io.Serializable;
+
+import de.thm.arsnova.model.serialization.View;
 
 /**
  * Contains fields that describe which specific Feature is activated for a Room.
  */
-@ApiModel(value = "RoomFeature", description = "Room (Session) Feature entity - Represents feature/use case settings of a Room")
+@ApiModel(value = "RoomFeature",
+		description = "Room (Session) Feature entity - Represents feature/use case settings of a Room")
 public class RoomFeature implements Serializable {
 
 	private boolean custom = false;
@@ -49,7 +51,7 @@ public class RoomFeature implements Serializable {
 	private boolean flashcardFeature = false;
 	private boolean slides = false;
 
-	public RoomFeature(RoomFeature features) {
+	public RoomFeature(final RoomFeature features) {
 		this();
 		if (features != null) {
 			this.custom = features.custom;
@@ -72,7 +74,9 @@ public class RoomFeature implements Serializable {
 		}
 	}
 
-	public RoomFeature() { }
+	public RoomFeature() {
+
+	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public boolean isLecture() {
@@ -80,7 +84,7 @@ public class RoomFeature implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setLecture(boolean lecture) {
+	public void setLecture(final boolean lecture) {
 		this.lecture = lecture;
 	}
 
@@ -91,7 +95,7 @@ public class RoomFeature implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setJitt(boolean jitt) {
+	public void setJitt(final boolean jitt) {
 		this.jitt = jitt;
 	}
 
@@ -102,7 +106,7 @@ public class RoomFeature implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setFeedback(boolean feedback) {
+	public void setFeedback(final boolean feedback) {
 		this.feedback = feedback;
 	}
 
@@ -113,7 +117,7 @@ public class RoomFeature implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setInterposed(boolean interposed) {
+	public void setInterposed(final boolean interposed) {
 		this.interposed = interposed;
 	}
 
@@ -124,7 +128,7 @@ public class RoomFeature implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setPi(boolean pi) {
+	public void setPi(final boolean pi) {
 		this.pi = pi;
 	}
 
@@ -135,7 +139,7 @@ public class RoomFeature implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setLearningProgress(boolean learningProgress) {
+	public void setLearningProgress(final boolean learningProgress) {
 		this.learningProgress = learningProgress;
 	}
 
@@ -145,7 +149,7 @@ public class RoomFeature implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setCustom(boolean custom) {
+	public void setCustom(final boolean custom) {
 		this.custom = custom;
 	}
 
@@ -155,7 +159,7 @@ public class RoomFeature implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setClicker(boolean clicker) {
+	public void setClicker(final boolean clicker) {
 		this.clicker = clicker;
 	}
 
@@ -165,7 +169,7 @@ public class RoomFeature implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setPeerGrading(boolean peerGrading) {
+	public void setPeerGrading(final boolean peerGrading) {
 		this.peerGrading = peerGrading;
 	}
 
@@ -175,7 +179,7 @@ public class RoomFeature implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setFlashcardFeature(boolean flashcardFeature) {
+	public void setFlashcardFeature(final boolean flashcardFeature) {
 		this.flashcardFeature = flashcardFeature;
 	}
 
@@ -185,7 +189,7 @@ public class RoomFeature implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setFlashcard(boolean flashcard) {
+	public void setFlashcard(final boolean flashcard) {
 		this.flashcard = flashcard;
 	}
 
@@ -195,7 +199,7 @@ public class RoomFeature implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setTotal(boolean total) {
+	public void setTotal(final boolean total) {
 		this.total = total;
 	}
 
@@ -205,7 +209,7 @@ public class RoomFeature implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setLiveFeedback(boolean liveFeedback) {
+	public void setLiveFeedback(final boolean liveFeedback) {
 		this.liveFeedback = liveFeedback;
 	}
 
@@ -215,7 +219,7 @@ public class RoomFeature implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setInterposedFeedback(boolean interposedFeedback) {
+	public void setInterposedFeedback(final boolean interposedFeedback) {
 		this.interposedFeedback = interposedFeedback;
 	}
 
@@ -225,7 +229,7 @@ public class RoomFeature implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setLiveClicker(boolean liveClicker) {
+	public void setLiveClicker(final boolean liveClicker) {
 		this.liveClicker = liveClicker;
 	}
 
@@ -235,7 +239,7 @@ public class RoomFeature implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setTwitterWall(boolean twitterWall) {
+	public void setTwitterWall(final boolean twitterWall) {
 		this.twitterWall = twitterWall;
 	}
 
@@ -245,7 +249,7 @@ public class RoomFeature implements Serializable {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setSlides(boolean slides) {
+	public void setSlides(final boolean slides) {
 		this.slides = slides;
 	}
 

@@ -15,18 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.service;
 
-import de.thm.arsnova.model.Feedback;
-import de.thm.arsnova.model.Room;
+package de.thm.arsnova.service;
 
 import java.util.List;
 import java.util.Map;
 
+import de.thm.arsnova.model.Feedback;
+import de.thm.arsnova.model.Room;
+
 public interface FeedbackStorageService {
 	Feedback getByRoom(Room room);
+
 	Integer getByRoomAndUserId(Room room, String userId);
+
 	void save(Room room, int value, String userId);
+
 	Map<Room, List<String>> cleanVotes(int cleanupFeedbackDelay);
+
 	List<String> cleanVotesByRoom(Room room, int cleanupFeedbackDelayInMins);
 }

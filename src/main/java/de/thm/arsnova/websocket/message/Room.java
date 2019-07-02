@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.websocket.message;
 
 /**
@@ -27,7 +28,7 @@ public class Room {
 		return keyword;
 	}
 
-	public void setKeyword(String keyword) {
+	public void setKeyword(final String keyword) {
 		this.keyword = keyword;
 	}
 }

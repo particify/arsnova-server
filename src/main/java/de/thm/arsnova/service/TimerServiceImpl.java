@@ -15,20 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.service;
 
-import de.thm.arsnova.model.Content;
-import de.thm.arsnova.model.Room;
-import de.thm.arsnova.persistence.AnswerRepository;
-import de.thm.arsnova.security.User;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
+package de.thm.arsnova.service;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import de.thm.arsnova.model.Content;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.persistence.AnswerRepository;
+import de.thm.arsnova.security.User;
 
 @Service
 public class TimerServiceImpl implements TimerService {
@@ -105,7 +106,7 @@ public class TimerServiceImpl implements TimerService {
 
 	@Override
 	public void cancelDelayedRoundChange(final String contentId) {
-		Timer timer = timerList.get(contentId);
+		final Timer timer = timerList.get(contentId);
 
 		if (null != timer) {
 			timer.cancel();
@@ -146,7 +147,8 @@ public class TimerServiceImpl implements TimerService {
 	}
 
 	private void updateRoundManagementState(final Content content) {
-		if (content.getState().getRoundEndTimestamp() != null && new Date().compareTo(content.getState().getRoundEndTimestamp()) > 0) {
+		if (content.getState().getRoundEndTimestamp() != null
+				&& new Date().compareTo(content.getState().getRoundEndTimestamp()) > 0) {
 			content.getState().setRoundEndTimestamp(null);
 		}
 	}

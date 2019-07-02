@@ -15,27 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.web;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
-
 public class CorsFilter extends org.springframework.web.filter.CorsFilter {
 	private static final String TOKEN_HEADER_NAME = "Arsnova-Auth-Token";
 	private final Logger logger = LoggerFactory.getLogger(CorsFilter.class);
 
-	public CorsFilter(List<String> origins) {
+	public CorsFilter(final List<String> origins) {
 		super(configurationSource(origins));
 		logger.info("CorsFilter initialized. Allowed origins: {}", origins);
 	}
 
-	private static UrlBasedCorsConfigurationSource configurationSource(List<String> origins) {
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		CorsConfiguration config;
+	private static UrlBasedCorsConfigurationSource configurationSource(final List<String> origins) {
+		final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		final CorsConfiguration config;
 
 		if (!origins.isEmpty()) {
 			/* Grant full access from specified origins */

@@ -15,23 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.util;
 
-import de.thm.arsnova.model.migration.v2.Answer;
-import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import javax.imageio.ImageIO;
+import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import de.thm.arsnova.model.migration.v2.Answer;
 
 /**
  * Util class for image operations.
@@ -45,10 +46,10 @@ public class ImageUtils {
 	// Or whatever size you want to read in at a time.
 	static final int CHUNK_SIZE = 4096;
 
-	/** Base64-Mimetype-Prefix start */
+	/* Base64-Mimetype-Prefix start */
 	static final String IMAGE_PREFIX_START = "data:image/";
 
-	/** Base64-Mimetype-Prefix middle part */
+	/* Base64-Mimetype-Prefix middle part */
 	static final String IMAGE_PREFIX_MIDDLE = ";base64,";
 
 	/* default value is 200 pixel in width, set the value in the configuration file */
@@ -81,7 +82,8 @@ public class ImageUtils {
 		if (urlParts.length > 0) {
 			final String extension = urlParts[urlParts.length - 1];
 
-			return IMAGE_PREFIX_START + extension + IMAGE_PREFIX_MIDDLE + Base64.encodeBase64String(convertFileToByteArray(imageUrl));
+			return IMAGE_PREFIX_START + extension + IMAGE_PREFIX_MIDDLE
+					+ Base64.encodeBase64String(convertFileToByteArray(imageUrl));
 		}
 
 		return null;
@@ -93,7 +95,7 @@ public class ImageUtils {
 	 * @param maybeImage The Image as a base64 encoded {@link String}
 	 * @return true if the string is a potentially a base 64 encoded image.
 	 */
-	boolean isBase64EncodedImage(String maybeImage) {
+	boolean isBase64EncodedImage(final String maybeImage) {
 		return extractImageInfo(maybeImage) != null;
 	}
 
@@ -142,7 +144,7 @@ public class ImageUtils {
 	}
 
 	/**
-	 * Rescales an image represented by a Base64-encoded {@link String}
+	 * Rescales an image represented by a Base64-encoded {@link String}.
 	 *
 	 * @param originalImageString
 	 *            The original image represented by a Base64-encoded
@@ -154,7 +156,7 @@ public class ImageUtils {
 	 * @return The rescaled Image as Base64-encoded {@link String}, returns null
 	 *         if the passed-on image isn't in a valid format (a Base64-Image).
 	 */
-	String createCover(String originalImageString, final int width, final int height) {
+	String createCover(final String originalImageString, final int width, final int height) {
 		if (!isBase64EncodedImage(originalImageString)) {
 			return null;
 		} else {
@@ -164,16 +166,19 @@ public class ImageUtils {
 			final String extension = imgInfo[0];
 			final String base64String = imgInfo[1];
 
-			byte[] imageData = Base64.decodeBase64(base64String);
+			final byte[] imageData = Base64.decodeBase64(base64String);
 			try (final ByteArrayInputStream bais = new ByteArrayInputStream(imageData);
 					final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-				BufferedImage originalImage = ImageIO.read(bais);
-				BufferedImage newImage = new BufferedImage(width, height, originalImage.getType());
-				Graphics2D g = newImage.createGraphics();
+				final BufferedImage originalImage = ImageIO.read(bais);
+				final BufferedImage newImage = new BufferedImage(width, height, originalImage.getType());
+				final Graphics2D g = newImage.createGraphics();
 
 				final double ratio = ((double) originalImage.getWidth()) / ((double) originalImage.getHeight());
 
-				int x = 0, y = 0, w = width, h = height;
+				int x = 0;
+				int y = 0;
+				int w = width;
+				int h = height;
 				if (originalImage.getWidth() > originalImage.getHeight()) {
 					final int newWidth = (int) Math.round((float) height * ratio);
 					x = -(newWidth - width) >> 1;
@@ -186,7 +191,7 @@ public class ImageUtils {
 				g.drawImage(originalImage, x, y, w, h, null);
 				g.dispose();
 
-				StringBuilder result = new StringBuilder();
+				final StringBuilder result = new StringBuilder();
 				result.append(IMAGE_PREFIX_START);
 				result.append(extension);
 				result.append(IMAGE_PREFIX_MIDDLE);
@@ -198,7 +203,7 @@ public class ImageUtils {
 				result.append(Base64.encodeBase64String(baos.toByteArray()));
 
 				return result.toString();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				logger.error(e.getLocalizedMessage());
 				return null;
 			}
@@ -213,7 +218,7 @@ public class ImageUtils {
 	 * @return true if the thumbnail image didn't exist before calling this
 	 *         method, false otherwise
 	 */
-	public boolean generateThumbnailImage(Answer answer) {
+	public boolean generateThumbnailImage(final Answer answer) {
 		if (!isBase64EncodedImage(answer.getAnswerThumbnailImage())) {
 			final String thumbImage = createCover(answer.getAnswerImage(), thumbWidth, thumbHeight);
 			answer.setAnswerThumbnailImage(thumbImage);
@@ -241,7 +246,7 @@ public class ImageUtils {
 			baos.flush();
 
 			return baos.toByteArray();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.error(e.getLocalizedMessage());
 		}
 

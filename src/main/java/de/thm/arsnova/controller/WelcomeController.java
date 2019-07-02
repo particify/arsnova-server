@@ -15,10 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.web.exceptions.BadRequestException;
-import de.thm.arsnova.web.exceptions.NoContentException;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -34,15 +42,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import de.thm.arsnova.web.exceptions.BadRequestException;
+import de.thm.arsnova.web.exceptions.NoContentException;
 
 /**
  * Default controller that handles requests which have not set a path.
@@ -64,8 +65,8 @@ public class WelcomeController extends AbstractController {
 	@RequestMapping(value = "/", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
 	public Map<String, Object> jsonHome() {
-		Map<String, Object> response = new HashMap<>();
-		Map<String, Object> version = new HashMap<>();
+		final Map<String, Object> response = new HashMap<>();
+		final Map<String, Object> version = new HashMap<>();
 
 		version.put("string", versionInfoProperties.getProperty("version.string"));
 		version.put("buildTime", versionInfoProperties.getProperty("version.build-time"));
@@ -82,8 +83,7 @@ public class WelcomeController extends AbstractController {
 	@ResponseStatus(HttpStatus.OK)
 	public void checkFrameOptionsHeader(
 			@RequestParam final String url,
-			final HttpServletRequest request
-		) {
+			final HttpServletRequest request) {
 		/* Block requests from the server itself to prevent DoS attacks caused by request loops */
 		if ("127.0.0.1".equals(request.getRemoteAddr()) || "::1".equals(request.getRemoteAddr())) {
 			throw new BadRequestException("Access to localhost not allowed.");
@@ -94,21 +94,21 @@ public class WelcomeController extends AbstractController {
 			if (addr.isSiteLocalAddress()) {
 				throw new BadRequestException("Access to site-local addresses not allowed.");
 			}
-		} catch (UnknownHostException | MalformedURLException e) {
+		} catch (final UnknownHostException | MalformedURLException e) {
 			throw new BadRequestException();
 		}
 
-		RestTemplate restTemplate = new RestTemplate();
-		SimpleClientHttpRequestFactory rf = (SimpleClientHttpRequestFactory) restTemplate.getRequestFactory();
+		final RestTemplate restTemplate = new RestTemplate();
+		final SimpleClientHttpRequestFactory rf = (SimpleClientHttpRequestFactory) restTemplate.getRequestFactory();
 		rf.setConnectTimeout(2000);
 		rf.setReadTimeout(2000);
 
 		try {
-			HttpHeaders headers = restTemplate.headForHeaders(url);
+			final HttpHeaders headers = restTemplate.headForHeaders(url);
 			if (headers.isEmpty() || headers.containsKey("x-frame-options")) {
 				throw new NoContentException();
 			}
-		} catch (RestClientException e) {
+		} catch (final RestClientException e) {
 			throw new NoContentException();
 		}
 	}

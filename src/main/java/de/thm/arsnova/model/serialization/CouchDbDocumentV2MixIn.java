@@ -15,12 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.serialization;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import de.thm.arsnova.model.Entity;
 
 @JsonIgnoreProperties(value = {"type"}, allowGetters = true)
@@ -29,13 +31,15 @@ public abstract class CouchDbDocumentV2MixIn {
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	abstract String getId();
 
-	@JsonProperty("_id") abstract void setId(String id);
+	@JsonProperty("_id")
+	abstract void setId(String id);
 
 	@JsonProperty("_rev")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	abstract String getRevision();
 
-	@JsonProperty("_rev") abstract String setRevision(String rev);
+	@JsonProperty("_rev")
+	abstract String setRevision(String rev);
 
 	@JsonSerialize(converter = CouchDbTypeFieldV2Converter.class)
 	abstract Class<? extends Entity> getType();

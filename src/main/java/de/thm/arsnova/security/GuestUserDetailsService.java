@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.security;
 
-import de.thm.arsnova.model.UserProfile;
-import de.thm.arsnova.service.UserService;
+import java.util.Collection;
+import java.util.HashSet;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,8 +27,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.HashSet;
+import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.service.UserService;
 
 /**
  * Loads UserDetails for a guest user ({@link UserProfile.AuthProvider#ARSNOVA_GUEST}) based on the username (guest
@@ -40,7 +41,7 @@ public class GuestUserDetailsService implements UserDetailsService {
 	private final UserService userService;
 	private final Collection<GrantedAuthority> grantedAuthorities;
 
-	public GuestUserDetailsService(UserService userService) {
+	public GuestUserDetailsService(final UserService userService) {
 		this.userService = userService;
 		grantedAuthorities = new HashSet<>();
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));

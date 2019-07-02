@@ -15,10 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.model.Room;
-import de.thm.arsnova.service.RoomService;
+import java.util.Set;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,7 +27,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Set;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.service.RoomService;
 
 @RestController
 @RequestMapping(RoomController.REQUEST_MAPPING)

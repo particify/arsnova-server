@@ -15,15 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.thm.arsnova.service;
 
-import de.thm.arsnova.model.Feedback;
-import de.thm.arsnova.model.Room;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
+package de.thm.arsnova.service;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,6 +25,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+
+import de.thm.arsnova.model.Feedback;
+import de.thm.arsnova.model.Room;
 
 /**
  * In-memory storage of feedback data.
@@ -52,9 +53,11 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 		public int getValue() {
 			return value;
 		}
+
 		public Date getTimestamp() {
 			return timestamp;
 		}
+
 		public boolean fromUser(final String userId) {
 			return this.userId.equals(userId);
 		}
@@ -78,20 +81,20 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 
 		for (final FeedbackStorageObject fso : data.get(room).values()) {
 			switch (fso.getValue()) {
-			case Feedback.FEEDBACK_FASTER:
-				a++;
-				break;
-			case Feedback.FEEDBACK_OK:
-				b++;
-				break;
-			case Feedback.FEEDBACK_SLOWER:
-				c++;
-				break;
-			case Feedback.FEEDBACK_AWAY:
-				d++;
-				break;
-			default:
-				break;
+				case Feedback.FEEDBACK_FASTER:
+					a++;
+					break;
+				case Feedback.FEEDBACK_OK:
+					b++;
+					break;
+				case Feedback.FEEDBACK_SLOWER:
+					c++;
+					break;
+				case Feedback.FEEDBACK_AWAY:
+					d++;
+					break;
+				default:
+					break;
 			}
 		}
 		return new Feedback(a, b, c, d);
@@ -133,7 +136,7 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 		final Map<Room, List<String>> removedFeedbackOfUsersInSession = new HashMap<>();
 		for (final Room room : data.keySet()) {
 			if (!room.getSettings().isQuickSurveyEnabled()) {
-				List<String> affectedUserIds = cleanVotesByRoom(room, cleanupFeedbackDelay);
+				final List<String> affectedUserIds = cleanVotesByRoom(room, cleanupFeedbackDelay);
 				if (!affectedUserIds.isEmpty()) {
 					removedFeedbackOfUsersInSession.put(room, affectedUserIds);
 				}

@@ -15,12 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service;
 
-import de.thm.arsnova.model.Attachment;
 import org.springframework.web.multipart.MultipartFile;
+
+import de.thm.arsnova.model.Attachment;
 
 public interface AttachmentService extends EntityService<Attachment> {
 	void upload(Attachment attachment, MultipartFile file);
+
 	void download(Attachment attachment);
 }

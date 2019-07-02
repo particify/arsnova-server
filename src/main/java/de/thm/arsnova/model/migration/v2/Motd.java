@@ -15,14 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.model.migration.v2;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import de.thm.arsnova.model.serialization.View;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
 import java.util.Date;
+
+import de.thm.arsnova.model.serialization.View;
 
 /**
  * Represents a Message of the Day.
@@ -96,7 +97,8 @@ public class Motd implements Entity {
 		text = ttext;
 	}
 
-	@ApiModelProperty(required = true, value = "defines the target audience for this motd (one of the following: 'student', 'tutor', 'loggedIn', 'all')")
+	@ApiModelProperty(required = true, value = "defines the target audience for this motd (one of the following: "
+			+ "'student', 'tutor', 'loggedIn', 'all')")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getAudience() {
 		return audience;
@@ -117,7 +119,8 @@ public class Motd implements Entity {
 		this.sessionId = sessionId;
 	}
 
-	@ApiModelProperty(required = true, value = "when audience equals session, the sessionkey referes to the session the messages belong to")
+	@ApiModelProperty(required = true,
+			value = "when audience equals session, the sessionkey referes to the session the messages belong to")
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getSessionkey() {
 		return sessionkey;
@@ -154,7 +157,7 @@ public class Motd implements Entity {
 		// See http://stackoverflow.com/a/113600
 		final int prim = 37;
 
-		int result = 42;
+		final int result = 42;
 		return prim * result + this.motdkey.hashCode();
 	}
 
@@ -163,7 +166,7 @@ public class Motd implements Entity {
 		if (obj == null || !obj.getClass().equals(this.getClass())) {
 			return false;
 		}
-		Motd other = (Motd) obj;
+		final Motd other = (Motd) obj;
 		return this.getMotdkey().equals(other.getMotdkey());
 	}
 }

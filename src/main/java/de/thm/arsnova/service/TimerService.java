@@ -15,12 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package de.thm.arsnova.service;
 
 public interface TimerService {
 	void startNewRound(final String contentId);
+
 	void startNewRoundDelayed(final String contentId, final int time);
+
 	void cancelRoundChange(final String contentId);
+
 	void cancelDelayedRoundChange(final String contentId);
+
 	void resetRoundState(final String contentId);
 }
