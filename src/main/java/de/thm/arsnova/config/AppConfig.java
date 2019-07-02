@@ -97,9 +97,10 @@ import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 @EnableSpringConfigured
 @EnableWebMvc
 @PropertySource(
-		value = {"classpath:arsnova.properties.example", "file:/etc/arsnova/arsnova.properties"},
+		value = {"classpath:config/defaults.yml", "file:/etc/arsnova/application.yml"},
 		ignoreResourceNotFound = true,
-		encoding = "UTF-8"
+		encoding = "UTF-8",
+		factory = YamlPropertySourceFactory.class
 )
 public class AppConfig implements WebMvcConfigurer {
 	public static final String API_V2_MEDIA_TYPE_VALUE = "application/vnd.de.thm.arsnova.v2+json";

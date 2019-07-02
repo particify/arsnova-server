@@ -61,8 +61,9 @@ import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 @EnableSpringConfigured
 @EnableWebMvc
 @PropertySource(
-	value = "classpath:arsnova.test.properties.example",
-	encoding = "UTF-8"
+	value = "classpath:config/test.yml",
+	encoding = "UTF-8",
+	factory = YamlPropertySourceFactory.class
 )
 @Profile("test")
 public class TestAppConfig {

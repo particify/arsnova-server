@@ -1,0 +1,4 @@
+# Configuration overrides for test environment
+arsnova:
+  security:
+    admin-accounts: "TestAdmin"
