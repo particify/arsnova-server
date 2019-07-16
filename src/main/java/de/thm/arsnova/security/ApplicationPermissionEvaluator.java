@@ -20,6 +20,7 @@ package de.thm.arsnova.security;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import de.thm.arsnova.config.properties.SecurityProperties;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.Content;
@@ -49,8 +51,7 @@ import de.thm.arsnova.persistence.RoomRepository;
 public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	private static final Logger logger = LoggerFactory.getLogger(ApplicationPermissionEvaluator.class);
 
-	@Value("${security.admin-accounts}")
-	private String[] adminAccounts;
+	private List<String> adminAccounts;
 
 	@Autowired
 	private RoomRepository roomRepository;
@@ -66,6 +67,10 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 	@Autowired
 	private MotdRepository motdRepository;
+
+	public ApplicationPermissionEvaluator(final SecurityProperties securityProperties) {
+		adminAccounts = securityProperties.getAdminAccounts();
+	}
 
 	@Override
 	public boolean hasPermission(
@@ -312,7 +317,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 	private boolean hasAdminRole(final String username) {
 		/* TODO: only allow accounts from arsnova db */
-		return Arrays.asList(adminAccounts).contains(username);
+		return adminAccounts.contains(username);
 	}
 
 	private String getUserId(final Authentication authentication) {

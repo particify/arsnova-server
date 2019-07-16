@@ -21,12 +21,14 @@ package de.thm.arsnova.config;
 import org.ektorp.impl.StdCouchDbInstance;
 import org.ektorp.spring.HttpClientFactoryBean;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 
+import de.thm.arsnova.config.properties.CouchDbProperties;
 import de.thm.arsnova.model.serialization.CouchDbObjectMapperFactory;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.CommentRepository;
@@ -52,29 +54,29 @@ import de.thm.arsnova.persistence.couchdb.support.MangoCouchDbConnector;
 		"de.thm.arsnova.persistence.couchdb"
 })
 @Configuration
+@EnableConfigurationProperties(CouchDbProperties.class)
 @Profile("!test")
 public class PersistenceConfig {
 	private static final int MIGRATION_SOCKET_TIMEOUT = 30000;
 
-	@Value("${couchdb.name}") private String couchDbName;
-	@Value("${couchdb.host}") private String couchDbHost;
-	@Value("${couchdb.port}") private int couchDbPort;
-	@Value("${couchdb.username:}") private String couchDbUsername;
-	@Value("${couchdb.password:}") private String couchDbPassword;
-	@Value("${couchdb.migrate-from:}") private String couchDbMigrateFrom;
+	private CouchDbProperties properties;
+
+	public PersistenceConfig(final CouchDbProperties couchDbProperties) {
+		this.properties = couchDbProperties;
+	}
 
 	@Bean
 	@Primary
 	public MangoCouchDbConnector couchDbConnector() throws Exception {
-		return new MangoCouchDbConnector(couchDbName, couchDbInstance(), couchDbObjectMapperFactory());
+		return new MangoCouchDbConnector(properties.getDbName(), couchDbInstance(), couchDbObjectMapperFactory());
 	}
 
 	@Bean
 	public MangoCouchDbConnector couchDbMigrationConnector() throws Exception {
-		if (couchDbMigrateFrom.isEmpty()) {
+		if (properties.getMigrateFrom().isEmpty()) {
 			return null;
 		}
-		return new MangoCouchDbConnector(couchDbMigrateFrom, couchDbInstance(), couchDbObjectMapperFactory());
+		return new MangoCouchDbConnector(properties.getMigrateFrom(), couchDbInstance(), couchDbObjectMapperFactory());
 	}
 
 	@Bean
@@ -90,11 +92,11 @@ public class PersistenceConfig {
 	@Bean
 	public HttpClientFactoryBean couchDbHttpClientFactory() throws Exception {
 		final HttpClientFactoryBean factory = new HttpClientFactoryBean();
-		factory.setHost(couchDbHost);
-		factory.setPort(couchDbPort);
-		if (!couchDbUsername.isEmpty()) {
-			factory.setUsername(couchDbUsername);
-			factory.setPassword(couchDbPassword);
+		factory.setHost(properties.getHost());
+		factory.setPort(properties.getPort());
+		if (!properties.getUsername().isEmpty()) {
+			factory.setUsername(properties.getUsername());
+			factory.setPassword(properties.getPassword());
 		}
 
 		return factory;

@@ -27,6 +27,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import de.thm.arsnova.config.properties.SystemProperties;
+import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
+import de.thm.arsnova.config.properties.SecurityProperties;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.persistence.UserRepository;
 import de.thm.arsnova.security.User;
@@ -37,9 +40,14 @@ public class StubUserService extends UserServiceImpl {
 
 	public StubUserService(
 			final UserRepository repository,
+			final SystemProperties systemProperties,
+			final SecurityProperties securityProperties,
+			final AuthenticationProviderProperties authenticationProviderProperties,
 			final JavaMailSender mailSender,
-			@Qualifier("defaultJsonMessageConverter") final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
-		super(repository, mailSender, jackson2HttpMessageConverter);
+			@Qualifier("defaultJsonMessageConverter")
+			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+		super(repository, systemProperties, securityProperties, authenticationProviderProperties,
+				mailSender, jackson2HttpMessageConverter);
 		grantedAuthorities = new HashSet<>();
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 	}

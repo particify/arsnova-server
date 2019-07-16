@@ -29,6 +29,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import de.thm.arsnova.config.properties.SystemProperties;
+
 /**
  * The ConfigurationController provides frontend clients with information necessary to correctly interact with the
  * backend and other frontends as well as settings for ARSnova. The the alternative /arsnova-config route is necessary
@@ -40,10 +42,7 @@ public class ConfigurationController extends AbstractController {
 	private static final Logger logger = LoggerFactory
 			.getLogger(ConfigurationController.class);
 
-	@Value("${api.path:}")
 	private String apiPath;
-
-	@Value("${socketio.proxy-path:}")
 	private String socketioPath;
 
 	@Value("${customization.path}")
@@ -159,6 +158,11 @@ public class ConfigurationController extends AbstractController {
 
 	@Value("${pp.session-levels.en}")
 	private String ppLevelsEn;
+
+	public ConfigurationController(final SystemProperties systemProperties) {
+		apiPath = systemProperties.getApi().getPath();
+		socketioPath = systemProperties.getSocketio().getProxyPath();
+	}
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody

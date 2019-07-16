@@ -1,240 +1,220 @@
 arsnova:
-  ################################################################################
-  # General server settings
-  ################################################################################
+  ##############################################################################
+  # System settings
+  ##############################################################################
+  system:
+    # The URL under which the ARSnova server is reachable. Use
+    # http://localhost:8080 for development.
+    root-url: https://example.com
 
-  # The URL under which the ARSnova server is reachable. Use
-  # http://localhost:8080 for development.
-  root-url: https://example.com
+    # The path where the ARSnova API is accessible by clients. By default,
+    # this path is set to the context path of the backend. If you are running
+    # the backend behind a proxy server, you might need to set this path
+    # manually.
+    api:
+      path: /api
 
-  # The path where the ARSnova API is accessible by clients. By default, this path
-  # is set to the context path of the backend. If you are running the backend
-  # behind a proxy server, you might need to set this path manually.
-  api:
-    path: /api
+    # Database
+    couchdb:
+      host: localhost
+      port: 5984
+      db-name: arsnova3
+      username: admin
+      password: ""
+      migrate-from: ""
 
-  # The context paths where the ARSnova modules have been deployed
-  customization:
-    path: /customization
-  mobile:
-    path: /mobile
-  presenter:
-    path: /presenter
+    # Mail server
+    mail:
+      host: ""
+      sender-name: ARSnova
+      sender-address: ""
 
-  # WebSocket server
-  socketio:
-    bind-address: localhost
-    port: 8090
-    ssl:
-      # To enable SSL for Socket.IO you have to import your key and certificate files into a Java Key Store. If you tunnel
-      # WebSocket connections through a proxy server, you can skip this configuration.
-      # See https://docs.oracle.com/javase/8/docs/technotes/tools/unix/keytool.html
-      jks-file: /etc/arsnova/arsnova.jks
-      jks-password: arsnova
-    proxy-path: /socket.io
+    # Message broker for internal service communication
+    message-broker:
+      relay:
+        enabled: false
+        host: localhost
+        port: 61613
+        username: arsnova
+        password: arsnova
 
-  ################################################################################
-  # Database
-  ################################################################################
-  couchdb:
-    host: localhost
-    port: 5984
-    name: arsnova3
-    username: admin
-    password: ""
-    migrate-from: arsnova
+    # LMS connector service
+    lms-connector:
+      enabled: false
+      host-url: http://localhost:8080/lms-connector-service
+      username: test
+      password: test
 
-  ################################################################################
-  # E-Mail
-  ################################################################################
-  mail:
-    sender:
-      name: ARSnova
-      address: ""
-    host: ""
+    # Legacy WebSocket server
+    socketio:
+      bind-address: localhost
+      port: 8090
+      proxy-path: /socket.io
 
-  ################################################################################
+  ##############################################################################
   # Authentication
-  ################################################################################
+  ##############################################################################
   security:
     # Admin accounts
-    # Usernames of the accounts which are allowed to manage global messages of the
-    # day. Multiple accounts are separated by commas.
+    # Usernames of the accounts which are allowed to manage global messages of
+    # the day. Multiple accounts are separated by commas.
     admin-accounts: ""
-    authentication:
-      # After the specified number of login tries the client IP will be banned for
-      # several minutes
-      login-try-limit: 50
+    # After the specified number of login tries the client IP will be banned for
+    # several minutes
+    login-try-limit: 50
 
     # JSON Web Tokens
     jwt:
       serverId: arsnova.backend.v3:com.example
       secret: ""
-      validity-period: T6H
+      validity-period: 6H
 
-    # CORS grants full API access to client-side (browser) applications from other
-    # domains. Multiple entries are separated by commas. Untrusted and vulnerable
-    # applications running on these domains pose a security risk to ARSnova users.
-    cors:
-      origins: https://
+    # CORS grants full API access to client-side (browser) applications from
+    # other domains. Multiple entries are separated by commas. Untrusted and
+    # vulnerable applications running on these domains pose a security risk to
+    # ARSnova users.
+    cors-origins: https://
 
-    # Guest authentication
-    guest:
-      enabled: true
-      allowed-roles: speaker,student
-      order: 0
+    authentication-providers:
+      # Guest authentication
+      guest:
+        enabled: true
+        allowed-roles:
+          - moderator
+          - participant
+        order: 0
 
-    # Setup combined login if you want to use a single, customized login page
-    # which is used for multiple authentication services.
-    custom-login:
-      enabled: false
-      allowed-roles: speaker,student
-      title: University
-      login-dialog-path: ""
-      image: ""
-      order: 0
-
-    # Internal authentication
-    #
-    # Specific parameters:
-    # activation-path: URL of the account activation page
-    # allowed-email-domains: Allows you to restrict registration to specific
-    #     domains. You can use wildcards (*), e. g. *.*.example.com. Multiple
-    #     entries are separated by commas.
-    # registration-mail.subject: Subject used for registration e-mail
-    # registration-mail.body: Text body used for registration e-mail. {0} will be
-    #     replaced by the value of activation-path.
-    user-db:
-      enabled: true
-      allowed-roles: speaker,student
-      title: ARSnova
-      login-dialog-path: account.html
-      activation-path: account.html
-      reset-password-path: account.html
-      image: ""
-      order: 0
-      allowed-email-domains: '*'
-      registration-mail:
-        subject: ARSnova Registration
-        body: |-
+      # Internal authentication
+      #
+      # Specific parameters:
+      # activation-path: URL of the account activation page
+      # allowed-email-domains: Allows you to restrict registration to specific
+      #     domains. You can use wildcards (*), e. g. *.*.example.com. Multiple
+      #     entries are separated by commas.
+      # registration-mail.subject: Subject used for registration e-mail
+      # registration-mail.body: Text body used for registration e-mail. {0} will
+      #     be replaced by the value of activation-path.
+      registered:
+        enabled: true
+        allowed-roles:
+          - moderator
+          - participant
+        title: ARSnova
+        order: 0
+        allowed-email-domains:
+          - '*'
+        registration-mail-subject: ARSnova Registration
+        registration-mail-body: |-
           Welcome to ARSnova!
 
           Please confirm your registration by visiting the following web address:
           {0}
 
           Afterwards, you can log into ARSnova with your e-mail address and password.
-      reset-password-mail:
-        subject: ARSnova Password Reset
-        body: |-
+        reset-password-mail-subject: ARSnova Password Reset
+        reset-password-mail-body: |-
           You requested to reset your password.
 
           Please follow the link below to set a new password:
           {0}
 
-    # LDAP authentication
-    #
-    # Specific parameters:
-    # url: LDAP server URL
-    # user-dn-pattern: Pattern used to check user credentials against the LDAP
-    #     server. {0} will be replaced with the user ID by ARSnova.
-    ldap:
-      enabled: false
-      allowed-roles: speaker,student
-      title: LDAP
-      login-dialog-path: login-ldap.html
-      image: ""
-      order: 0
-      url: ldaps://example.com:636/dc=example,dc=com
-      user-dn-pattern: uid={0},ou=arsnova
-      # Set the following properties if you want to use LDAP search instead of binding
-      # with a DN pattern
-      user-search-filter: (uid={0})
-      user-search-base: '"ou=people"'
-      # Configure the LDAP manager user if anonymous binding is not allowed
-      manager-user-dn: cn=arsnova-manager,dc=example,dc=com
-      manager-password: arsnova
+      # LDAP authentication
+      #
+      # Specific parameters:
+      # url: LDAP server URL
+      # user-dn-pattern: Pattern used to check user credentials against the LDAP
+      #     server. {0} will be replaced with the user ID by ARSnova.
+      ldap:
+        - enabled: false
+          allowed-roles:
+            - moderator
+            - participant
+          title: LDAP
+          order: 0
+          host-url: ldaps://example.com:636/dc=example,dc=com
+          user-dn-pattern: uid={0},ou=arsnova
+          user-id-attribute: uid
+          # Set the following properties if you want to use LDAP search instead
+          # of binding with a DN pattern
+          user-search-filter: (uid={0})
+          user-search-base: '"ou=people"'
+          # Configure the LDAP manager user if anonymous binding is not allowed
+          manager-user-dn: cn=arsnova-manager,dc=example,dc=com
+          manager-password: arsnova
 
-    # CAS authentication
-    cas:
-      enabled: false
-      allowed-roles: speaker,student
-      title: CAS
-      image: ""
-      order: 0
-    cas-server-url: https://example.com/cas
+      # CAS authentication
+      cas:
+        enabled: false
+        allowed-roles:
+          - moderator
+          - participant
+        title: CAS
+        order: 0
+        host-url: https://example.com/cas
 
-    # OpenID Connect authentication
-    oidc:
-      enabled: false
-      allowed-roles: speaker,student
-      title: OIDC
-      image: ""
-      order: 0
-      issuer: https://example.com/oidc
-      client-id: ""
-      secret: ""
+      # OpenID Connect authentication
+      oidc:
+        - enabled: false
+          allowed-roles:
+            - moderator
+            - participant
+          title: OIDC
+          order: 0
+          issuer: https://example.com/oidc
+          client-id: ""
+          secret: ""
 
-    # OAuth authentication with third party services
-    # Specific parameters:
-    # key: OAuth key/id provided by a third party auth service
-    # secret: OAuth secret provided by a third party auth service
-    facebook:
-      enabled: false
-      allowed-roles: speaker,student
-      order: 0
-      key: ""
-      secret: ""
-    twitter:
-      enabled: false
-      allowed-roles: speaker,student
-      order: 0
-      key: ""
-      secret: ""
-    google:
-      enabled: false
-      allowed-roles: speaker,student
-      order: 0
-      key: ""
-      secret: ""
+      # OAuth authentication with third party services
+      # Specific parameters:
+      # key: OAuth key/id provided by a third party auth service
+      # secret: OAuth secret provided by a third party auth service
+      oauth:
+        facebook:
+          enabled: false
+          allowed-roles:
+            - moderator
+            - participant
+          order: 0
+          key: ""
+          secret: ""
+        twitter:
+          enabled: false
+          allowed-roles:
+            - moderator
+            - participant
+          order: 0
+          key: ""
+          secret: ""
+        google:
+          enabled: false
+          allowed-roles:
+            - moderator
+            - participant
+          order: 0
+          key: ""
+          secret: ""
 
-  messaging:
-    relay:
-      enabled: false
-      host: localhost
-      port: 61613
-      user: arsnova
-      password: arsnova
-
-  ################################################################################
-  # ARSnova Connector (for LMS)
-  ################################################################################
-  connector:
-    enable: false
-    uri: http://localhost:8080/connector-service
-    username: test
-    password: test
-
-  ################################################################################
+  ##############################################################################
   # Features
-  ################################################################################
+  ##############################################################################
   features:
     mathjax:
-      # Enable MathJax to allow the use of Math formulas written in TeX syntax in
-      # text fields.
+      # Enable MathJax to allow the use of Math formulas written in TeX syntax
+      # in text fields.
       enabled: true
       src: //cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js
 
-    # The following features are considered experimental because they have not been
-    # tested in a production environment over a longer time frame and/or their
-    # behavior will change in future releases.
+    # The following features are considered experimental because they have not
+    # been tested in a production environment over a longer time frame and/or
+    # their behavior will change in future releases.
     freetext-imageanswer:
       enabled: true
     question-format:
       grid-square:
         enabled: true
 
-    # Without enabled session-import-export feature no sessions can be added to the
-    # public pool
+    # Without enabled session-import-export feature no sessions can be added to
+    # the public pool
     session-import-export:
       enabled: true
     public-pool:
@@ -242,13 +222,14 @@ arsnova:
     export-to-click:
       enabled: true
 
-  ################################################################################
+  ##############################################################################
   # Customization
-  ################################################################################
+  ##############################################################################
   feedback:
     # Minutes, after which the feedback is deleted
     cleanup: 10
-    # Number of "you've lost me"/"abgehängt" votes, starting to show warning sign
+    # Number of "you've lost me"/"abgehängt" votes, starting to show warning
+    # sign
     warning: 15
   upload:
     # Maximal filesize in bytes
@@ -261,15 +242,15 @@ arsnova:
   question:
     # Maximal number of answer options allowed for a skill question
     answer-option-limit: 8
-    # Enable Markdown and MathJax parsing in answer options. Formatting in answer
-    # options should be used cautiously since it could lead to display errors.
-    # Answer options will still not be parsed in diagrams. This setting has no
-    # effect if neither MathJax nor Markdown are enabled.
+    # Enable Markdown and MathJax parsing in answer options. Formatting in
+    # answer options should be used cautiously since it could lead to display
+    # errors. Answer options will still not be parsed in diagrams. This setting
+    # has no effect if neither MathJax nor Markdown are enabled.
     parse-answer-option-formatting: false
   session:
     # Demo session id to show above session login button
-    # You can freely use the demo session of https://arsnova.eu/mobile which can be
-    # imported from the repro:
+    # You can freely use the demo session of https://arsnova.eu/mobile which can
+    # be imported from the repro:
     # https://github.com/thm-projects/arsnova-mobile/tree/master/demo-sessions
     demo-id: ""
     guest-session:
@@ -323,9 +304,17 @@ arsnova:
       de: Allgemeinbildung,Abitur,Bachelor,Master,Wer wird Millionär,Sonstiges
       en: General Education,Highschool,Bachelor,Master,Who Wants to Be a Millionaire,Miscellaneous
 
-  ################################################################################
+  # The context paths where the ARSnova modules have been deployed
+  customization:
+    path: /customization
+  mobile:
+    path: /mobile
+  presenter:
+    path: /presenter
+
+  ##############################################################################
   # Tracking
-  ################################################################################
+  ##############################################################################
   # It is possible to use an external tracking software with ARSnova. Currently
   # Matomo is the only supported tracking provider.
   tracking:

@@ -18,11 +18,14 @@
 
 package de.thm.arsnova.config;
 
+import de.thm.arsnova.config.properties.SystemProperties;
+import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
+import de.thm.arsnova.config.properties.SecurityProperties;
 import de.thm.arsnova.controller.JsonViewControllerAdviceTest;
 import de.thm.arsnova.service.EntityService;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.AdviceMode;
@@ -69,8 +72,8 @@ import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 public class TestAppConfig {
 	private static int testPortOffset = 0;
 
-	@Value("${socketio.bind-address}") private String socketAddress;
-	@Value("${socketio.port}") private int socketPort;
+	@Autowired
+	private SystemProperties systemProperties;
 
 	@Bean
 	public MockServletContext servletContext() {
@@ -78,7 +81,7 @@ public class TestAppConfig {
 	}
 
 	@Bean
-	public CustomScopeConfigurer customScopeConfigurer() {
+	public static CustomScopeConfigurer customScopeConfigurer() {
 		final CustomScopeConfigurer configurer = new CustomScopeConfigurer();
 		configurer.addScope("session", new SimpleThreadScope());
 
@@ -89,8 +92,8 @@ public class TestAppConfig {
 	public ArsnovaSocketioServer socketTestServer() {
 		final int testSocketPort = 1234 + testPortOffset++ % 10;
 		final ArsnovaSocketioServerImpl socketServer = new ArsnovaSocketioServerImpl();
-		socketServer.setHostIp(socketAddress);
-		socketServer.setPortNumber(socketPort + testSocketPort);
+		socketServer.setHostIp(systemProperties.getSocketio().getBindAddress());
+		socketServer.setPortNumber(systemProperties.getSocketio().getPort() + testSocketPort);
 
 		return socketServer;
 	}
@@ -99,9 +102,14 @@ public class TestAppConfig {
 	@Primary
 	public StubUserService stubUserService(
 			final UserRepository repository,
+			final SystemProperties systemProperties,
+			final SecurityProperties securityProperties,
+			final AuthenticationProviderProperties authenticationProviderProperties,
 			final JavaMailSender mailSender,
-			@Qualifier("defaultJsonMessageConverter") final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
-		return new StubUserService(repository, mailSender, jackson2HttpMessageConverter);
+			@Qualifier("defaultJsonMessageConverter")
+			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+		return new StubUserService(repository, systemProperties, securityProperties, authenticationProviderProperties,
+				mailSender, jackson2HttpMessageConverter);
 	}
 
 	@Bean

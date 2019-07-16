@@ -24,15 +24,20 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import de.thm.arsnova.config.properties.SystemProperties;
 
 @Component
 public class ControllerExceptionHelper {
 	private static final Logger logger = LoggerFactory.getLogger(ControllerExceptionHelper.class);
 
 	/* Since exception messages might contain sensitive data, they are not exposed by default. */
-	@Value("${api.expose-error-messages:false}") private boolean exposeMessages;
+	private boolean exposeMessages;
+
+	public ControllerExceptionHelper(final SystemProperties systemProperties) {
+		this.exposeMessages = systemProperties.getApi().isExposeErrorMessages();
+	}
 
 	protected Map<String, Object> handleException(@NonNull final Throwable e, @NonNull final Level level) {
 		final String message = e.getMessage() != null ? e.getMessage() : "";

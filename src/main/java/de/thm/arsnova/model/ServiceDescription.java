@@ -18,8 +18,13 @@
 
 package de.thm.arsnova.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
 import de.thm.arsnova.model.serialization.View;
 
 /**
@@ -31,7 +36,8 @@ public class ServiceDescription {
 	private String dialogUrl;
 	private String image;
 	private int order = 0;
-	private String[] allowedRoles;
+	private Set<AuthenticationProviderProperties.Provider.Role> allowedRoles;
+	private Set<String> allowedRoleStrings;
 
 	public ServiceDescription(final String id, final String name, final String dialogUrl) {
 		this.id = id;
@@ -39,19 +45,20 @@ public class ServiceDescription {
 		this.dialogUrl = dialogUrl;
 	}
 
-	public ServiceDescription(final String id, final String name, final String dialogUrl, final String[] allowedRoles) {
+	public ServiceDescription(final String id, final String name, final String dialogUrl,
+			final Set<AuthenticationProviderProperties.Provider.Role> allowedRoles) {
 		this.id = id;
 		this.name = name;
 		this.dialogUrl = dialogUrl;
-		this.allowedRoles = allowedRoles;
+		setAllowedRoles(allowedRoles);
 	}
 
 	public ServiceDescription(final String id, final String name, final String dialogUrl,
-			final String[] allowedRoles, final String image) {
+			final Set<AuthenticationProviderProperties.Provider.Role> allowedRoles, final String image) {
 		this.id = id;
 		this.name = name;
 		this.dialogUrl = dialogUrl;
-		this.allowedRoles = allowedRoles;
+		setAllowedRoles(allowedRoles);
 		if (!"".equals(image)) {
 			this.image = image;
 		}
@@ -102,12 +109,27 @@ public class ServiceDescription {
 		this.order = order;
 	}
 
-	@JsonView(View.Public.class)
-	public String[] getAllowedRoles() {
+	public Set<AuthenticationProviderProperties.Provider.Role> getAllowedRoles() {
 		return allowedRoles;
 	}
 
-	public void setAllowedRoles(final String[] roles) {
-		this.allowedRoles = roles;
+	public void setAllowedRoles(final Set<AuthenticationProviderProperties.Provider.Role> roles) {
+		this.allowedRoles = allowedRoles;
+		this.allowedRoleStrings = roles.stream().map(r -> {
+			switch (r) {
+				case MODERATOR:
+					return "speaker";
+				case PARTICIPANT:
+					return "student";
+				default:
+					throw new IllegalArgumentException();
+			}
+		}).collect(Collectors.toSet());
+	}
+
+	@JsonView(View.Public.class)
+	@JsonProperty("allowedRoles")
+	public Set<String> getAllowedRolesAsStrings() {
+		return allowedRoleStrings;
 	}
 }
