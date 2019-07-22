@@ -98,7 +98,7 @@ import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 @EnableSpringConfigured
 @EnableWebMvc
 @PropertySource(
-		value = {"classpath:config/defaults.yml", "file:/etc/arsnova/application.yml"},
+		value = {"classpath:config/defaults.yml", "file:${arsnova.config-dir:.}/application.yml"},
 		ignoreResourceNotFound = true,
 		encoding = "UTF-8",
 		factory = YamlPropertySourceFactory.class
