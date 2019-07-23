@@ -20,6 +20,7 @@ package de.thm.arsnova.config;
 
 import static org.junit.Assert.assertNull;
 
+import java.util.Collections;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.Arrays;
+
+import de.thm.arsnova.config.properties.SecurityProperties;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import java.util.List;
 
@@ -46,11 +49,13 @@ import static org.junit.Assert.assertEquals;
 		WebSocketConfig.class})
 @ActiveProfiles("test")
 public class AppConfigTest extends AbstractJUnit4SpringContextTests {
+	@Autowired
+	private SecurityProperties securityProperties;
 
 	@Autowired(required = false)
 	private ConnectorClient connectorClient;
 
-	@Value("${security.admin-accounts}") private String[] adminAccounts;
+	private List<String> adminAccounts;
 
 	@Test
 	public void testShouldNotLoadConnectorClientByDefault() {
@@ -59,8 +64,8 @@ public class AppConfigTest extends AbstractJUnit4SpringContextTests {
 
 	@Test
 	public void testShouldUseAdminAccountFromTestPropertiesFile() {
-		final List<String> expected = Arrays.asList("TestAdmin");
-		final List<String> actual = Arrays.asList(adminAccounts);
+		final List<String> expected = Collections.singletonList("TestAdmin");
+		final List<String> actual = securityProperties.getAdminAccounts();
 
 		assertEquals("Configuration did not load correct property file", expected, actual);
 	}

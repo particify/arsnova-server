@@ -32,8 +32,7 @@ import org.pac4j.oidc.client.OidcClient;
 import org.pac4j.oidc.config.OidcConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -80,6 +79,9 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.security.web.header.writers.HstsHeaderWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
+import de.thm.arsnova.config.properties.SecurityProperties;
+import de.thm.arsnova.config.properties.SystemProperties;
 import de.thm.arsnova.security.CasLogoutSuccessHandler;
 import de.thm.arsnova.security.CasUserDetailsService;
 import de.thm.arsnova.security.CustomLdapUserDetailsMapper;
@@ -96,6 +98,9 @@ import de.thm.arsnova.security.pac4j.OauthCallbackFilter;
  */
 @Configuration
 @EnableWebSecurity
+@EnableConfigurationProperties({
+		AuthenticationProviderProperties.class,
+		SecurityProperties.class})
 @Profile("!test")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public static final String OAUTH_CALLBACK_PATH_SUFFIX = "/auth/oauth_callback";
@@ -105,42 +110,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public static final String RUN_AS_KEY_PREFIX = "RUN_AS_KEY";
 	private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
-	@Autowired
 	private ServletContext servletContext;
+	private AuthenticationProviderProperties providerProperties;
+	private String rootUrl;
+	private String apiPath;
 
-	@Value("${root-url}") private String rootUrl;
-	@Value("${api.path:}") private String apiPath;
-
-	@Value("${security.user-db.enabled}") private boolean dbAuthEnabled;
-
-	@Value("${security.ldap.enabled}") private boolean ldapEnabled;
-	@Value("${security.ldap.url}") private String ldapUrl;
-	@Value("${security.ldap.user-id-attr:uid}") private String ldapUserIdAttr;
-	@Value("${security.ldap.user-dn-pattern:}") private String ldapUserDn;
-	@Value("${security.ldap.user-search-base:}") private String ldapSearchBase;
-	@Value("${security.ldap.user-search-filter:}") private String ldapSearchFilter;
-	@Value("${security.ldap.manager-user-dn:}") private String ldapManagerUserDn;
-	@Value("${security.ldap.manager-password:}") private String ldapManagerPassword;
-
-	@Value("${security.cas.enabled}") private boolean casEnabled;
-	@Value("${security.cas-server-url}") private String casUrl;
-
-	@Value("${security.oidc.enabled}") private boolean oidcEnabled;
-	@Value("${security.oidc.issuer}") private String oidcIssuer;
-	@Value("${security.oidc.client-id}") private String oidcClientId;
-	@Value("${security.oidc.secret}") private String oidcSecret;
-
-	@Value("${security.facebook.enabled}") private boolean facebookEnabled;
-	@Value("${security.facebook.key}") private String facebookKey;
-	@Value("${security.facebook.secret}") private String facebookSecret;
-
-	@Value("${security.twitter.enabled}") private boolean twitterEnabled;
-	@Value("${security.twitter.key}") private String twitterKey;
-	@Value("${security.twitter.secret}") private String twitterSecret;
-
-	@Value("${security.google.enabled}") private boolean googleEnabled;
-	@Value("${security.google.key}") private String googleKey;
-	@Value("${security.google.secret}") private String googleSecret;
+	public SecurityConfig(
+			final SystemProperties systemProperties,
+			final AuthenticationProviderProperties authenticationProviderProperties,
+			final ServletContext servletContext) {
+		this.providerProperties = authenticationProviderProperties;
+		this.rootUrl = systemProperties.getRootUrl();
+		this.apiPath = systemProperties.getApi().getPath();
+		this.servletContext = servletContext;
+	}
 
 	public class HttpSecurityConfig extends WebSecurityConfigurerAdapter {
 		@Override
@@ -150,12 +133,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			http.headers().addHeaderWriter(new HstsHeaderWriter(false));
 
 			http.addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-			if (casEnabled) {
+			if (providerProperties.getCas().isEnabled()) {
 				http.addFilter(casAuthenticationFilter());
 				http.addFilter(casLogoutFilter());
 			}
 
-			if (oidcEnabled || facebookEnabled || googleEnabled || twitterEnabled) {
+			if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())
+					|| providerProperties.getOauth().values().stream().anyMatch(p -> p.isEnabled())) {
 				http.addFilterAfter(oauthCallbackFilter(), CasAuthenticationFilter.class);
 			}
 		}
@@ -210,29 +194,33 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
 		final List<String> providers = new ArrayList<>();
 		auth.authenticationProvider(jwtAuthenticationProvider());
-		if (ldapEnabled) {
+		logger.info("oauthProps: {}", providerProperties.getOauth());
+		if (providerProperties.getLdap().stream().anyMatch(p -> p.isEnabled())) {
 			providers.add("ldap");
 			auth.authenticationProvider(ldapAuthenticationProvider());
 		}
-		if (casEnabled) {
+		if (providerProperties.getCas().isEnabled()) {
 			providers.add("cas");
 			auth.authenticationProvider(casAuthenticationProvider());
 		}
-		if (dbAuthEnabled) {
+		if (providerProperties.getRegistered().isEnabled()) {
 			providers.add("user-db");
 			auth.authenticationProvider(daoAuthenticationProvider());
 		}
-		if (oidcEnabled) {
+		if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())) {
 			providers.add("oidc");
 		}
-		if (googleEnabled || facebookEnabled || twitterEnabled) {
-			if (googleEnabled) {
+		if (providerProperties.getOauth().values().stream().anyMatch(p -> p.isEnabled())) {
+			if (providerProperties.getOauth().containsKey("google")
+					&& providerProperties.getOauth().get("google").isEnabled()) {
 				providers.add("google");
 			}
-			if (facebookEnabled) {
+			if (providerProperties.getOauth().containsKey("facebook")
+					&& providerProperties.getOauth().get("facebook").isEnabled()) {
 				providers.add("facebook");
 			}
-			if (twitterEnabled) {
+			if (providerProperties.getOauth().containsKey("twitter")
+					&& providerProperties.getOauth().get("twitter").isEnabled()) {
 				providers.add("twitter");
 			}
 			auth.authenticationProvider(oauthAuthenticationProvider());
@@ -329,12 +317,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public LdapContextSource ldapContextSource() {
-		final DefaultSpringSecurityContextSource contextSource = new DefaultSpringSecurityContextSource(ldapUrl);
+		final AuthenticationProviderProperties.Ldap ldapProperties = providerProperties.getLdap().get(0);
+		final DefaultSpringSecurityContextSource contextSource =
+				new DefaultSpringSecurityContextSource(ldapProperties.getHostUrl());
 		/* TODO: implement support for LDAP bind using manager credentials */
-		if (!"".equals(ldapManagerUserDn) && !"".equals(ldapManagerPassword)) {
-			logger.debug("ldapManagerUserDn: {}", ldapManagerUserDn);
-			contextSource.setUserDn(ldapManagerUserDn);
-			contextSource.setPassword(ldapManagerPassword);
+		if (!"".equals(ldapProperties.getManagerUserDn()) && !"".equals(ldapProperties.getManagerPassword())) {
+			logger.debug("ldapManagerUserDn: {}", ldapProperties.getManagerUserDn());
+			contextSource.setUserDn(ldapProperties.getManagerUserDn());
+			contextSource.setPassword(ldapProperties.getManagerPassword());
 		}
 
 		return contextSource;
@@ -342,14 +332,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public LdapAuthenticator ldapAuthenticator() {
+		final AuthenticationProviderProperties.Ldap ldapProperties = providerProperties.getLdap().get(0);
 		final BindAuthenticator authenticator = new BindAuthenticator(ldapContextSource());
-		authenticator.setUserAttributes(new String[] {ldapUserIdAttr});
-		if (!"".equals(ldapSearchFilter)) {
-			logger.debug("ldapSearch: {} {}", ldapSearchBase, ldapSearchFilter);
-			authenticator.setUserSearch(new FilterBasedLdapUserSearch(ldapSearchBase, ldapSearchFilter, ldapContextSource()));
+		authenticator.setUserAttributes(new String[] {ldapProperties.getUserIdAttribute()});
+		if (!"".equals(ldapProperties.getUserSearchFilter())) {
+			logger.debug("ldapSearch: {} {}", ldapProperties.getUserSearchBase(), ldapProperties.getUserSearchFilter());
+			authenticator.setUserSearch(new FilterBasedLdapUserSearch(
+					ldapProperties.getUserSearchBase(), ldapProperties.getUserSearchFilter(), ldapContextSource()));
 		} else {
-			logger.debug("ldapUserDn: {}", ldapUserDn);
-			authenticator.setUserDnPatterns(new String[] {ldapUserDn});
+			logger.debug("ldapUserDn: {}", ldapProperties.getUserDnPattern());
+			authenticator.setUserDnPatterns(new String[] {ldapProperties.getUserDnPattern()});
 		}
 
 		return authenticator;
@@ -362,9 +354,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public LdapUserDetailsMapper customLdapUserDetailsMapper() {
-		logger.debug("ldapUserIdAttr: {}", ldapUserIdAttr);
+		final AuthenticationProviderProperties.Ldap ldapProperties = providerProperties.getLdap().get(0);
+		logger.debug("ldapUserIdAttr: {}", ldapProperties.getUserIdAttribute());
 
-		return new CustomLdapUserDetailsMapper(ldapUserIdAttr);
+		return new CustomLdapUserDetailsMapper(ldapProperties.getUserIdAttribute());
 	}
 
 	// CAS Authentication Configuration
@@ -396,13 +389,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public Cas20ProxyTicketValidator casTicketValidator() {
-		return new Cas20ProxyTicketValidator(casUrl);
+		return new Cas20ProxyTicketValidator(providerProperties.getCas().getHostUrl());
 	}
 
 	@Bean
 	public CasAuthenticationEntryPoint casAuthenticationEntryPoint() {
 		final CasAuthenticationEntryPoint entryPoint = new CasAuthenticationEntryPoint();
-		entryPoint.setLoginUrl(casUrl + "/login");
+		entryPoint.setLoginUrl(providerProperties.getCas().getHostUrl() + "/login");
 		entryPoint.setServiceProperties(casServiceProperties());
 
 		return entryPoint;
@@ -431,7 +424,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public LogoutSuccessHandler casLogoutSuccessHandler() {
 		final CasLogoutSuccessHandler handler = new CasLogoutSuccessHandler();
-		handler.setCasUrl(casUrl);
+		handler.setCasUrl(providerProperties.getCas().getHostUrl());
 		handler.setDefaultTarget(rootUrl);
 
 		return handler;
@@ -442,16 +435,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public Config oauthConfig() {
 		final List<Client> clients = new ArrayList<>();
-		if (oidcEnabled) {
+		if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())) {
 			clients.add(oidcClient());
 		}
-		if (facebookEnabled) {
+		if (providerProperties.getOauth().containsKey("facebook")
+				&& providerProperties.getOauth().get("facebook").isEnabled()) {
 			clients.add(facebookClient());
 		}
-		if (googleEnabled) {
+		if (providerProperties.getOauth().containsKey("google")
+				&& providerProperties.getOauth().get("google").isEnabled()) {
 			clients.add(googleClient());
 		}
-		if (twitterEnabled) {
+		if (providerProperties.getOauth().containsKey("twitter")
+				&& providerProperties.getOauth().get("twitter").isEnabled()) {
 			clients.add(twitterClient());
 		}
 
@@ -474,10 +470,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public OidcClient oidcClient() {
+		final AuthenticationProviderProperties.Oidc oidcProperties = providerProperties.getOidc().get(0);
 		final OidcConfiguration config = new OidcConfiguration();
-		config.setDiscoveryURI(oidcIssuer + OIDC_DISCOVERY_PATH_SUFFIX);
-		config.setClientId(oidcClientId);
-		config.setSecret(oidcSecret);
+		config.setDiscoveryURI(oidcProperties.getIssuer() + OIDC_DISCOVERY_PATH_SUFFIX);
+		config.setClientId(oidcProperties.getClientId());
+		config.setSecret(oidcProperties.getSecret());
 		config.setScope("openid");
 		final OidcClient client = new OidcClient(config);
 		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH_SUFFIX + "?client_name=OidcClient");
@@ -487,7 +484,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public FacebookClient facebookClient() {
-		final FacebookClient client = new FacebookClient(facebookKey, facebookSecret);
+		final AuthenticationProviderProperties.Oauth oauthProperties = providerProperties.getOauth().get("facebook");
+		final FacebookClient client = new FacebookClient(oauthProperties.getKey(), oauthProperties.getSecret());
 		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH_SUFFIX + "?client_name=FacebookClient");
 
 		return client;
@@ -495,7 +493,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public TwitterClient twitterClient() {
-		final TwitterClient client = new TwitterClient(twitterKey, twitterSecret);
+		final AuthenticationProviderProperties.Oauth oauthProperties = providerProperties.getOauth().get("twitter");
+		final TwitterClient client = new TwitterClient(oauthProperties.getKey(), oauthProperties.getSecret());
 		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH_SUFFIX + "?client_name=TwitterClient");
 
 		return client;
@@ -503,9 +502,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public GoogleOidcClient googleClient() {
+		final AuthenticationProviderProperties.Oauth oauthProperties = providerProperties.getOauth().get("google");
 		final OidcConfiguration config = new OidcConfiguration();
-		config.setClientId(googleKey);
-		config.setSecret(googleSecret);
+		config.setClientId(oauthProperties.getKey());
+		config.setSecret(oauthProperties.getSecret());
 		config.setScope("openid email");
 		final GoogleOidcClient client = new GoogleOidcClient(config);
 		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH_SUFFIX + "?client_name=GoogleOidcClient");

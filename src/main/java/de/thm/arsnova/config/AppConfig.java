@@ -23,11 +23,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
@@ -58,6 +57,8 @@ import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
+import de.thm.arsnova.config.properties.SecurityProperties;
+import de.thm.arsnova.config.properties.SystemProperties;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.client.ConnectorClientImpl;
 import de.thm.arsnova.model.migration.FromV2Migrator;
@@ -97,10 +98,12 @@ import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 @EnableSpringConfigured
 @EnableWebMvc
 @PropertySource(
-		value = {"classpath:arsnova.properties.example", "file:/etc/arsnova/arsnova.properties"},
+		value = {"classpath:config/defaults.yml", "file:${arsnova.config-dir:.}/application.yml"},
 		ignoreResourceNotFound = true,
-		encoding = "UTF-8"
+		encoding = "UTF-8",
+		factory = YamlPropertySourceFactory.class
 )
+@EnableConfigurationProperties(SystemProperties.class)
 public class AppConfig implements WebMvcConfigurer {
 	public static final String API_V2_MEDIA_TYPE_VALUE = "application/vnd.de.thm.arsnova.v2+json";
 	public static final String API_V3_MEDIA_TYPE_VALUE = "application/vnd.de.thm.arsnova.v3+json";
@@ -110,18 +113,11 @@ public class AppConfig implements WebMvcConfigurer {
 	@Autowired
 	private Environment env;
 
-	@Value(value = "${connector.enable}") private boolean connectorEnable;
-	@Value(value = "${connector.uri}") private String connectorUri;
-	@Value(value = "${connector.username}") private String connectorUsername;
-	@Value(value = "${connector.password}") private String connectorPassword;
+	@Autowired
+	private SystemProperties systemProperties;
 
-	@Value(value = "${socketio.bind-address}") private String socketAddress;
-	@Value(value = "${socketio.port}") private int socketPort;
-	@Value(value = "${socketio.ssl.jks-file:}") private String socketKeystore;
-	@Value(value = "${socketio.ssl.jks-password:}") private String socketKeystorePassword;
-	@Value(value = "${security.cors.origins:}") private String[] corsOrigins;
-	@Value(value = "${mail.host}") private String mailHost;
-	@Value(value = "${api.indent-response-body:false}") private boolean apiIndent;
+	@Autowired
+	private SecurityProperties securityProperties;
 
 	@Override
 	public void configureMessageConverters(final List<HttpMessageConverter<?>> converters) {
@@ -198,7 +194,7 @@ public class AppConfig implements WebMvcConfigurer {
 		builder
 				.serializationInclusion(JsonInclude.Include.NON_EMPTY)
 				.defaultViewInclusion(false)
-				.indentOutput(apiIndent)
+				.indentOutput(systemProperties.getApi().isIndentResponseBody())
 				.simpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 		final ObjectMapper mapper = builder.build();
 		mapper.setConfig(mapper.getSerializationConfig().withView(View.Public.class));
@@ -217,7 +213,7 @@ public class AppConfig implements WebMvcConfigurer {
 		builder
 				.serializationInclusion(JsonInclude.Include.NON_NULL)
 				.defaultViewInclusion(false)
-				.indentOutput(apiIndent)
+				.indentOutput(systemProperties.getApi().isIndentResponseBody())
 				.featuresToEnable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 				.featuresToEnable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
 				.modules(new CouchDbDocumentModule());
@@ -250,19 +246,19 @@ public class AppConfig implements WebMvcConfigurer {
 
 	@Bean
 	public CorsFilter corsFilter() {
-		return new CorsFilter(Arrays.asList(corsOrigins));
+		return new CorsFilter(securityProperties.getCorsOrigins());
 	}
 
 	@Bean(name = "connectorClient")
 	public ConnectorClient connectorClient() {
-		if (!connectorEnable) {
+		if (!systemProperties.getLmsConnector().isEnabled()) {
 			return null;
 		}
 
 		final ConnectorClientImpl connectorClient = new ConnectorClientImpl();
-		connectorClient.setServiceLocation(connectorUri);
-		connectorClient.setUsername(connectorUsername);
-		connectorClient.setPassword(connectorPassword);
+		connectorClient.setServiceLocation(systemProperties.getLmsConnector().getHostUrl());
+		connectorClient.setUsername(systemProperties.getLmsConnector().getUsername());
+		connectorClient.setPassword(systemProperties.getLmsConnector().getPassword());
 		return connectorClient;
 	}
 
@@ -270,11 +266,9 @@ public class AppConfig implements WebMvcConfigurer {
 	@Bean(name = "socketServer", initMethod = "startServer", destroyMethod = "stopServer")
 	public ArsnovaSocketioServer socketServer() {
 		final ArsnovaSocketioServerImpl socketioServer = new ArsnovaSocketioServerImpl();
-		socketioServer.setHostIp(socketAddress);
-		socketioServer.setPortNumber(socketPort);
-		socketioServer.setUseSsl(!socketKeystore.isEmpty());
-		socketioServer.setKeystore(socketKeystore);
-		socketioServer.setStorepass(socketKeystorePassword);
+		socketioServer.setHostIp(systemProperties.getSocketio().getBindAddress());
+		socketioServer.setPortNumber(systemProperties.getSocketio().getPort());
+
 		return socketioServer;
 	}
 
@@ -286,7 +280,7 @@ public class AppConfig implements WebMvcConfigurer {
 	@Bean
 	public JavaMailSenderImpl mailSender() {
 		final JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-		mailSender.setHost(mailHost);
+		mailSender.setHost(systemProperties.getMail().getHost());
 
 		return mailSender;
 	}

@@ -22,7 +22,6 @@ import com.codahale.metrics.annotation.Gauge;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -34,7 +33,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
-import javax.annotation.PreDestroy;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import org.apache.commons.lang.RandomStringUtils;
@@ -69,6 +67,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriUtils;
 import org.stagemonitor.core.metrics.MonitorGauges;
 
+import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
+import de.thm.arsnova.config.properties.SecurityProperties;
+import de.thm.arsnova.config.properties.SystemProperties;
 import de.thm.arsnova.model.ClientAuthentication;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.UserProfile;
@@ -113,6 +114,10 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	private JwtService jwtService;
 	private JavaMailSender mailSender;
 
+	private SystemProperties systemProperties;
+	private SecurityProperties securityProperties;
+	private AuthenticationProviderProperties.Registered registeredProperties;
+
 	@Autowired(required = false)
 	private GuestUserDetailsService guestUserDetailsService;
 
@@ -122,44 +127,12 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	@Autowired(required = false)
 	private LdapAuthenticationProvider ldapAuthenticationProvider;
 
-	@Value("${root-url}")
 	private String rootUrl;
+	private String mailSenderAddress;
+	private String mailSenderName;
 
 	@Value("${customization.path}")
 	private String customizationPath;
-
-	@Value("${security.user-db.allowed-email-domains}")
-	private String allowedEmailDomains;
-
-	@Value("${security.user-db.activation-path}")
-	private String activationPath;
-
-	@Value("${security.user-db.reset-password-path}")
-	private String resetPasswordPath;
-
-	@Value("${mail.sender.address}")
-	private String mailSenderAddress;
-
-	@Value("${mail.sender.name}")
-	private String mailSenderName;
-
-	@Value("${security.user-db.registration-mail.subject}")
-	private String regMailSubject;
-
-	@Value("${security.user-db.registration-mail.body}")
-	private String regMailBody;
-
-	@Value("${security.user-db.reset-password-mail.subject}")
-	private String resetPasswordMailSubject;
-
-	@Value("${security.user-db.reset-password-mail.body}")
-	private String resetPasswordMailBody;
-
-	@Value("${security.authentication.login-try-limit}")
-	private int loginTryLimit;
-
-	@Value("${security.admin-accounts}")
-	private String[] adminAccounts;
 
 	private Pattern mailPattern;
 	private BytesKeyGenerator keygen;
@@ -174,12 +147,20 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 	public UserServiceImpl(
 			final UserRepository repository,
+			final SystemProperties systemProperties,
+			final SecurityProperties securityProperties,
+			final AuthenticationProviderProperties authenticationProviderProperties,
 			final JavaMailSender mailSender,
 			@Qualifier("defaultJsonMessageConverter")
 			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
 		super(UserProfile.class, repository, jackson2HttpMessageConverter.getObjectMapper());
 		this.userRepository = repository;
+		this.securityProperties = securityProperties;
+		this.registeredProperties = authenticationProviderProperties.getRegistered();
 		this.mailSender = mailSender;
+		this.rootUrl = systemProperties.getRootUrl();
+		this.mailSenderAddress = systemProperties.getMail().getSenderAddress();
+		this.mailSenderName = systemProperties.getMail().getSenderName();
 	}
 
 	@Scheduled(fixedDelay = LOGIN_TRY_RESET_DELAY_MS)
@@ -241,7 +222,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 	@Override
 	public boolean isAdmin(final String username) {
-		return Arrays.asList(adminAccounts).contains(username);
+		return securityProperties.getAdminAccounts().contains(username);
 	}
 
 	@Override
@@ -255,9 +236,9 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		if (null == tries) {
 			tries = 0;
 		}
-		if (tries < loginTryLimit) {
+		if (tries < securityProperties.getLoginTryLimit()) {
 			loginTries.put(addr, ++tries);
-			if (loginTryLimit == tries) {
+			if (securityProperties.getLoginTryLimit() == tries) {
 				logger.info("Temporarily banned {} from login.", addr);
 				loginBans.add(addr);
 			}
@@ -483,28 +464,26 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	private void sendActivationEmail(final UserProfile userProfile) {
 		final String activationKey = userProfile.getAccount().getActivationKey();
 		final String activationUrl = MessageFormat.format(
-				"{0}{1}/{2}?action=activate&username={3}&key={4}",
+				"{0}{1}/login?action=activate&username={3}&key={4}",
 				rootUrl,
 				customizationPath,
-				activationPath,
 				UriUtils.encodeQueryParam(userProfile.getLoginId(), "UTF-8"),
 				activationKey);
 
-		sendEmail(userProfile, regMailSubject, MessageFormat.format(regMailBody, activationUrl, activationKey));
+		sendEmail(userProfile, registeredProperties.getRegistrationMailSubject(),
+				MessageFormat.format(registeredProperties.getRegistrationMailBody(), activationUrl, activationKey));
 	}
 
 	private void parseMailAddressPattern() {
 		/* TODO: Add Unicode support */
 
-		final List<String> domainList = Arrays.asList(allowedEmailDomains.split(","));
-
-		if (!domainList.isEmpty()) {
+		if (!registeredProperties.getAllowedEmailDomains().isEmpty()) {
 			final List<String> patterns = new ArrayList<>();
-			if (domainList.contains("*")) {
+			if (registeredProperties.getAllowedEmailDomains().contains("*")) {
 				patterns.add("([a-z0-9-]+\\.)+[a-z0-9-]+");
 			} else {
 				final Pattern patternPattern = Pattern.compile("[a-z0-9.*-]+", Pattern.CASE_INSENSITIVE);
-				for (final String patternStr : domainList) {
+				for (final String patternStr : registeredProperties.getAllowedEmailDomains()) {
 					if (patternPattern.matcher(patternStr).matches()) {
 						patterns.add(
 								patternStr.replaceAll("[.]", "[.]").replaceAll("[*]", "[a-z0-9-]+?"));
@@ -593,19 +572,19 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		}
 
 		final String resetPasswordUrl = MessageFormat.format(
-				"{0}{1}/{2}?action=resetpassword&username={3}&key={4}",
+				"{0}{1}/login?action=resetpassword&username={3}&key={4}",
 				rootUrl,
 				customizationPath,
-				resetPasswordPath,
 				UriUtils.encodeQueryParam(userProfile.getLoginId(), "UTF-8"), account.getPasswordResetKey());
 
 		final String mailBody = MessageFormat.format(
-				resetPasswordMailBody,
+				registeredProperties.getResetPasswordMailBody(),
 				resetPasswordUrl,
 				account.getPasswordResetKey()
 		);
 
-		sendEmail(userProfile, resetPasswordMailSubject, MessageFormat.format(mailBody, resetPasswordUrl));
+		sendEmail(userProfile, registeredProperties.getResetPasswordMailSubject(),
+				MessageFormat.format(mailBody, resetPasswordUrl));
 	}
 
 	@Override

@@ -23,7 +23,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import javax.annotation.PostConstruct;
+import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -58,6 +58,8 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
 import de.thm.arsnova.config.SecurityConfig;
+import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
+import de.thm.arsnova.config.properties.SystemProperties;
 import de.thm.arsnova.controller.AbstractController;
 import de.thm.arsnova.model.ServiceDescription;
 import de.thm.arsnova.model.UserProfile;
@@ -72,60 +74,21 @@ import de.thm.arsnova.web.exceptions.UnauthorizedException;
 @Controller("v2AuthenticationController")
 @RequestMapping("/v2/auth")
 public class AuthenticationController extends AbstractController {
-	@Value("${api.path:}") private String apiPath;
+	private String apiPath;
 	@Value("${customization.path}") private String customizationPath;
 
-	@Value("${security.guest.enabled}") private boolean guestEnabled;
-	@Value("${security.guest.allowed-roles:speaker,student}") private String[] guestRoles;
-	@Value("${security.guest.order}") private int guestOrder;
-
-	@Value("${security.custom-login.enabled}") private boolean customLoginEnabled;
-	@Value("${security.custom-login.allowed-roles:speaker,student}") private String[] customLoginRoles;
-	@Value("${security.custom-login.title:University}") private String customLoginTitle;
-	@Value("${security.custom-login.login-dialog-path}") private String customLoginDialog;
-	@Value("${security.custom-login.image:}") private String customLoginImage;
-	@Value("${security.custom-login.order}") private int customLoginOrder;
-
-	@Value("${security.user-db.enabled}") private boolean dbAuthEnabled;
-	@Value("${security.user-db.allowed-roles:speaker,student}") private String[] dbAuthRoles;
-	@Value("${security.user-db.title:ARSnova}") private String dbAuthTitle;
-	@Value("${security.user-db.login-dialog-path}") private String dbAuthDialog;
-	@Value("${security.user-db.image:}") private String dbAuthImage;
-	@Value("${security.user-db.order}") private int dbAuthOrder;
-
-	@Value("${security.ldap.enabled}") private boolean ldapEnabled;
-	@Value("${security.ldap.allowed-roles:speaker,student}") private String[] ldapRoles;
-	@Value("${security.ldap.title:LDAP}") private String ldapTitle;
-	@Value("${security.ldap.login-dialog-path}") private String ldapDialog;
-	@Value("${security.ldap.image:}") private String ldapImage;
-	@Value("${security.ldap.order}") private int ldapOrder;
-
-	@Value("${security.cas.enabled}") private boolean casEnabled;
-	@Value("${security.cas.allowed-roles:speaker,student}") private String[] casRoles;
-	@Value("${security.cas.title:CAS}") private String casTitle;
-	@Value("${security.cas.image:}") private String casImage;
-	@Value("${security.cas.order}") private int casOrder;
-
-	@Value("${security.oidc.enabled}") private boolean oidcEnabled;
-	@Value("${security.oidc.allowed-roles:speaker,student}") private String[] oidcRoles;
-	@Value("${security.oidc.title:OIDC}") private String oidcTitle;
-	@Value("${security.oidc.image:}") private String oidcImage;
-	@Value("${security.oidc.order}") private int oidcOrder;
-
-	@Value("${security.facebook.enabled}") private boolean facebookEnabled;
-	@Value("${security.facebook.allowed-roles:speaker,student}") private String[] facebookRoles;
-	@Value("${security.facebook.order}") private int facebookOrder;
-
-	@Value("${security.google.enabled}") private boolean googleEnabled;
-	@Value("${security.google.allowed-roles:speaker,student}") private String[] googleRoles;
-	@Value("${security.google.order}") private int googleOrder;
-
-	@Value("${security.twitter.enabled}") private boolean twitterEnabled;
-	@Value("${security.twitter.allowed-roles:speaker,student}") private String[] twitterRoles;
-	@Value("${security.twitter.order}") private int twitterOrder;
+	private AuthenticationProviderProperties.Guest guestProperties;
+	private AuthenticationProviderProperties.Registered registeredProperties;
+	private List<AuthenticationProviderProperties.Ldap> ldapProperties;
+	private List<AuthenticationProviderProperties.Oidc> oidcProperties;
+	private AuthenticationProviderProperties.Cas casProperties;
+	private Map<String, AuthenticationProviderProperties.Oauth> oauthProperties;
 
 	@Autowired
 	private ServletContext servletContext;
+
+	@Autowired
+	private AuthenticationProviderProperties providerProperties;
 
 	@Autowired(required = false)
 	private OidcClient oidcClient;
@@ -147,11 +110,18 @@ public class AuthenticationController extends AbstractController {
 
 	private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
 
-	@PostConstruct
-	private void init() {
+	public AuthenticationController(final SystemProperties systemProperties,
+			final AuthenticationProviderProperties authenticationProviderProperties) {
+		apiPath = systemProperties.getApi().getPath();
 		if ("".equals(apiPath)) {
 			apiPath = servletContext.getContextPath();
 		}
+		guestProperties = authenticationProviderProperties.getGuest();
+		registeredProperties = authenticationProviderProperties.getRegistered();
+		ldapProperties = authenticationProviderProperties.getLdap();
+		oidcProperties = authenticationProviderProperties.getOidc();
+		casProperties = authenticationProviderProperties.getCas();
+		oauthProperties = authenticationProviderProperties.getOauth();
 	}
 
 	@RequestMapping(value = { "/login", "/doLogin" }, method = { RequestMethod.POST, RequestMethod.GET })
@@ -171,7 +141,7 @@ public class AuthenticationController extends AbstractController {
 		final UsernamePasswordAuthenticationToken authRequest =
 				new UsernamePasswordAuthenticationToken(username, password);
 
-		if (dbAuthEnabled && "arsnova".equals(type)) {
+		if (registeredProperties.isEnabled() && "arsnova".equals(type)) {
 			try {
 				userService.authenticate(authRequest, UserProfile.AuthProvider.ARSNOVA);
 			} catch (final AuthenticationException e) {
@@ -179,7 +149,7 @@ public class AuthenticationController extends AbstractController {
 				userService.increaseFailedLoginCount(addr);
 				response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			}
-		} else if (ldapEnabled && "ldap".equals(type)) {
+		} else if (ldapProperties.stream().anyMatch(p -> p.isEnabled()) && "ldap".equals(type)) {
 			try {
 				userService.authenticate(authRequest, UserProfile.AuthProvider.LDAP);
 			} catch (final AuthenticationException e) {
@@ -187,7 +157,7 @@ public class AuthenticationController extends AbstractController {
 				userService.increaseFailedLoginCount(addr);
 				response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			}
-		} else if (guestEnabled && "guest".equals(type)) {
+		} else if (guestProperties.isEnabled() && "guest".equals(type)) {
 			try {
 				userService.authenticate(authRequest, UserProfile.AuthProvider.ARSNOVA_GUEST);
 			} catch (final AuthenticationException e) {
@@ -238,20 +208,20 @@ public class AuthenticationController extends AbstractController {
 		request.getSession().setAttribute("ars-login-success-url", serverUrl + successUrl);
 		request.getSession().setAttribute("ars-login-failure-url", serverUrl + failureUrl);
 
-		if (casEnabled && "cas".equals(type)) {
+		if (casProperties.isEnabled() && "cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);
-		} else if (oidcEnabled && "oidc".equals(type)) {
+		} else if (oidcProperties.stream().anyMatch(p -> p.isEnabled()) && "oidc".equals(type)) {
 			result = new RedirectView(
 					oidcClient.getRedirectAction(new J2EContext(request, response)).getLocation());
-		} else if (twitterEnabled && "twitter".equals(type)) {
+		} else if (twitterClient != null && "twitter".equals(type)) {
 			result = new RedirectView(
 					twitterClient.getRedirectAction(new J2EContext(request, response)).getLocation());
-		} else if (facebookEnabled && "facebook".equals(type)) {
+		} else if (facebookClient != null && "facebook".equals(type)) {
 			facebookClient.setFields("id");
 			facebookClient.setScope("");
 			result = new RedirectView(
 					facebookClient.getRedirectAction(new J2EContext(request, response)).getLocation());
-		} else if (googleEnabled && "google".equals(type)) {
+		} else if (googleOidcClient != null && "google".equals(type)) {
 			result = new RedirectView(
 					googleOidcClient.getRedirectAction(new J2EContext(request, response)).getLocation());
 		} else {
@@ -290,107 +260,94 @@ public class AuthenticationController extends AbstractController {
 		/* The first parameter is replaced by the backend, the second one by the frondend */
 		final String dialogUrl = apiPath + "/auth/dialog?type={0}&successurl='{0}'";
 
-		if (guestEnabled) {
+		if (guestProperties.isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(
 					"guest",
 					"Guest",
 					null,
-					guestRoles
+					guestProperties.getAllowedRoles()
 			);
-			sdesc.setOrder(guestOrder);
+			sdesc.setOrder(guestProperties.getOrder());
 			services.add(sdesc);
 		}
 
-		if (customLoginEnabled && !"".equals(customLoginDialog)) {
-			final ServiceDescription sdesc = new ServiceDescription(
-					"custom",
-					customLoginTitle,
-					customizationPath + "/" + customLoginDialog + "?redirect={0}",
-					customLoginRoles,
-					customLoginImage
-			);
-			sdesc.setOrder(customLoginOrder);
-			services.add(sdesc);
-		}
-
-		if (dbAuthEnabled && !"".equals(dbAuthDialog)) {
+		if (registeredProperties.isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(
 					"arsnova",
-					dbAuthTitle,
-					customizationPath + "/" + dbAuthDialog + "?redirect={0}",
-					dbAuthRoles,
-					dbAuthImage
+					registeredProperties.getTitle(),
+					customizationPath + "/login?provider=arsnova&redirect={0}",
+					registeredProperties.getAllowedRoles()
 			);
-			sdesc.setOrder(dbAuthOrder);
+			sdesc.setOrder(registeredProperties.getOrder());
 			services.add(sdesc);
 		}
 
-		if (ldapEnabled && !"".equals(ldapDialog)) {
+		if (ldapProperties.get(0).isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(
 					"ldap",
-					ldapTitle,
-					customizationPath + "/" + ldapDialog + "?redirect={0}",
-					ldapRoles,
-					ldapImage
+					ldapProperties.get(0).getTitle(),
+					customizationPath + "/login?provider=ldap&redirect={0}",
+					ldapProperties.get(0).getAllowedRoles()
 			);
-			sdesc.setOrder(ldapOrder);
+			sdesc.setOrder(ldapProperties.get(0).getOrder());
 			services.add(sdesc);
 		}
 
-		if (casEnabled) {
+		if (casProperties.isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(
 					"cas",
-					casTitle,
+					casProperties.getTitle(),
 					MessageFormat.format(dialogUrl, "cas"),
-					casRoles,
-					casImage
+					casProperties.getAllowedRoles()
 			);
-			sdesc.setOrder(casOrder);
+			sdesc.setOrder(casProperties.getOrder());
 			services.add(sdesc);
 		}
 
-		if (oidcEnabled) {
+		if (oidcProperties.get(0).isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(
 					"oidc",
-					oidcTitle,
+					oidcProperties.get(0).getTitle(),
 					MessageFormat.format(dialogUrl, "oidc"),
-					oidcRoles,
-					oidcImage
+					oidcProperties.get(0).getAllowedRoles()
 			);
-			sdesc.setOrder(oidcOrder);
+			sdesc.setOrder(oidcProperties.get(0).getOrder());
 			services.add(sdesc);
 		}
 
-		if (facebookEnabled) {
+		final AuthenticationProviderProperties.Oauth facebookProperties = oauthProperties.get("facebook");
+		if (facebookProperties != null && facebookProperties.isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(
 					"facebook",
 					"Facebook",
 					MessageFormat.format(dialogUrl, "facebook"),
-					facebookRoles
+					facebookProperties.getAllowedRoles()
 			);
-			sdesc.setOrder(facebookOrder);
+			sdesc.setOrder(facebookProperties.getOrder());
 			services.add(sdesc);
 		}
 
-		if (googleEnabled) {
+		final AuthenticationProviderProperties.Oauth googleProperties = oauthProperties.get("google");
+		if (googleProperties != null && googleProperties.isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(
 					"google",
 					"Google",
 					MessageFormat.format(dialogUrl, "google"),
-					googleRoles
+					googleProperties.getAllowedRoles()
 			);
-			sdesc.setOrder(googleOrder);
+			sdesc.setOrder(googleProperties.getOrder());
 			services.add(sdesc);
 		}
 
-		if (twitterEnabled) {
+		final AuthenticationProviderProperties.Oauth twitterProperties = oauthProperties.get("twitter");
+		if (twitterProperties != null && twitterProperties.isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(
 					"twitter",
 					"Twitter",
 					MessageFormat.format(dialogUrl, "twitter"),
-					twitterRoles
+					twitterProperties.getAllowedRoles()
 			);
-			sdesc.setOrder(twitterOrder);
+			sdesc.setOrder(twitterProperties.getOrder());
 			services.add(sdesc);
 		}
 

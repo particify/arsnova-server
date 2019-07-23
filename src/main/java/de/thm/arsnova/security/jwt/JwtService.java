@@ -35,13 +35,13 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
+import de.thm.arsnova.config.properties.SecurityProperties;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.service.UserService;
 
 @Service
 public class JwtService {
-	private static final String CONFIG_PREFIX = "security.jwt.";
 	private static final String ROLE_PREFIX = "ROLE_";
 	private static final String ROLES_CLAIM_NAME = "roles";
 	private Algorithm algorithm;
@@ -53,19 +53,12 @@ public class JwtService {
 
 	public JwtService(
 			final UserService userService,
-			@Value("${" + CONFIG_PREFIX + "secret}") final String secret,
-			@Value("${" + CONFIG_PREFIX + "serverId}") final String serverId,
-			@Value("${" + CONFIG_PREFIX + "validity-period}") final String defaultValidityPeriod)
-			throws UnsupportedEncodingException {
+			final SecurityProperties securityProperties) {
 		this.userService = userService;
-		this.serverId = serverId;
-		try {
-			this.defaultValidityPeriod = Duration.parse("P" + defaultValidityPeriod);
-		} catch (final Exception e) {
-			throw new IllegalArgumentException(defaultValidityPeriod, e);
-		}
+		this.serverId = securityProperties.getJwt().getServerId();
+		this.defaultValidityPeriod = securityProperties.getJwt().getValidityPeriod();
 		guestValidityPeriod = Duration.parse("P180D");
-		algorithm = Algorithm.HMAC256(secret);
+		algorithm = Algorithm.HMAC256(securityProperties.getJwt().getSecret());
 		verifier = JWT.require(algorithm)
 				.withAudience(serverId)
 				.build();
