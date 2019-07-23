@@ -29,6 +29,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.Validator;
 
 import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.model.Comment;
@@ -56,8 +57,9 @@ public class CommentServiceImpl extends DefaultEntityServiceImpl<Comment> implem
 			final RoomService roomService,
 			final UserService userService,
 			@Qualifier("defaultJsonMessageConverter")
-			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
-		super(Comment.class, repository, jackson2HttpMessageConverter.getObjectMapper());
+			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
+			final Validator validator) {
+		super(Comment.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
 		this.commentRepository = repository;
 		this.roomService = roomService;
 		this.userService = userService;

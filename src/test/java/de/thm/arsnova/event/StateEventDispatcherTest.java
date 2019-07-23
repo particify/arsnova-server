@@ -42,6 +42,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.validation.Validator;
 
 import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.config.TestAppConfig;
@@ -65,6 +66,7 @@ import de.thm.arsnova.test.context.support.WithMockUser;
 		WebSocketConfig.class})
 @ActiveProfiles("test")
 public class StateEventDispatcherTest {
+	private static final String SOME_TEXT = "SomeText";
 	public static final String SETTINGS_PROPERTY_NAME = "settings";
 	public static final String STATE_PROPERTY_NAME = "state";
 	private static final String QUESTIONS_ENABLED_PROPERTY_NAME = "questionsEnabled";
@@ -78,6 +80,9 @@ public class StateEventDispatcherTest {
 	@Autowired
 	@Qualifier("defaultJsonMessageConverter")
 	private MappingJackson2HttpMessageConverter jackson2HttpMessageConverter;
+
+	@Autowired
+	private Validator validator;
 
 	@Autowired
 	private ApplicationEventPublisher eventPublisher;
@@ -98,12 +103,13 @@ public class StateEventDispatcherTest {
 	public void testDispatchRoomSettingsStateEvent() throws IOException {
 		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
 		final DefaultEntityServiceImpl<Room> entityService = new DefaultEntityServiceImpl<>(
-				Room.class, roomRepository, objectMapper);
+				Room.class, roomRepository, objectMapper, validator);
 		entityService.setApplicationEventPublisher(eventPublisher);
 
 		when(roomRepository.save(any(Room.class))).then(returnsFirstArg());
 
 		final Room room = new Room();
+		prefillRoomFields(room);
 		room.setOwnerId(TEST_USER_ID);
 		entityService.patch(room, Collections.singletonMap(QUESTIONS_ENABLED_PROPERTY_NAME, false), Room::getSettings);
 		assertEquals(1, eventListenerConfig.getRoomSettingsStateChangeEvents().size());
@@ -115,20 +121,34 @@ public class StateEventDispatcherTest {
 	public void testDispatchContentStateEvent() throws IOException {
 		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
 		final DefaultEntityServiceImpl<Content> entityService = new DefaultEntityServiceImpl<>(
-				Content.class, contentRepository, objectMapper);
+				Content.class, contentRepository, objectMapper, validator);
 		entityService.setApplicationEventPublisher(eventPublisher);
 
 		final Room room = new Room();
+		prefillRoomFields(room);
 		room.setId(TEST_ROOM_ID);
 		room.setOwnerId(TEST_USER_ID);
 		when(contentRepository.save(any(Content.class))).then(returnsFirstArg());
 		when(roomRepository.findOne(eq(room.getId()))).thenReturn(room);
 
 		final Content content = new Content();
+		prefillContentFields(content);
 		content.setRoomId(room.getId());
 		entityService.patch(content, Collections.singletonMap(VISIBLE_PROPERTY_NAME, false), Content::getState);
 		assertEquals(1, eventListenerConfig.getContentStateChangeEvents().size());
 		assertEquals(STATE_PROPERTY_NAME, eventListenerConfig.getContentStateChangeEvents().get(0).getStateName());
+	}
+
+	private void prefillRoomFields(final Room room) {
+		room.setName(SOME_TEXT);
+		room.setAbbreviation(SOME_TEXT);
+		room.setShortId("12345678");
+	}
+
+	private void prefillContentFields(final Content content) {
+		content.setSubject(SOME_TEXT);
+		content.setBody(SOME_TEXT);
+		content.setFormat(Content.Format.CHOICE);
 	}
 
 	@Configuration

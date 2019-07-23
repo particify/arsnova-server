@@ -40,6 +40,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.Validator;
 
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
@@ -98,8 +99,9 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 			final UserService userService,
 			final ScoreCalculatorFactory scoreCalculatorFactory,
 			@Qualifier("defaultJsonMessageConverter")
-			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
-		super(Room.class, repository, jackson2HttpMessageConverter.getObjectMapper());
+			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
+			final Validator validator) {
+		super(Room.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
 		this.roomRepository = repository;
 		this.dbLogger = dbLogger;
 		this.userService = userService;

@@ -23,6 +23,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
 import java.util.Map;
 import java.util.Objects;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.FormatAnswerTypeIdResolver;
@@ -36,11 +39,21 @@ import de.thm.arsnova.model.serialization.View;
 )
 @JsonTypeIdResolver(FormatAnswerTypeIdResolver.class)
 public class Answer extends Entity {
+	@NotEmpty
 	private String contentId;
+
+	@NotEmpty
 	private String roomId;
+
+	@NotEmpty
 	private String creatorId;
+
+	@NotNull
 	private Content.Format format;
+
+	@Positive
 	private int round;
+
 	private Map<String, Map<String, ?>> extensions;
 
 	@JsonView({View.Persistence.class, View.Public.class})

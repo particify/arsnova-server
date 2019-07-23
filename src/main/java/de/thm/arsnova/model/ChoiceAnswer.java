@@ -20,12 +20,13 @@ package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import java.util.List;
+import javax.validation.constraints.PositiveOrZero;
 import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
 
 public class ChoiceAnswer extends Answer {
-	private List<Integer> selectedChoiceIndexes;
+	private List<@PositiveOrZero Integer> selectedChoiceIndexes;
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public List<Integer> getSelectedChoiceIndexes() {

@@ -26,6 +26,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.FormatContentTypeIdResolver;
@@ -49,7 +53,9 @@ public class Content extends Entity {
 	}
 
 	public static class State {
+		@Positive
 		private int round = 1;
+
 		private Date roundEndTimestamp;
 		private boolean visible = true;
 		private boolean solutionVisible = false;
@@ -152,10 +158,18 @@ public class Content extends Entity {
 		}
 	}
 
+	@NotEmpty
 	private String roomId;
+
+	@NotBlank
 	private String subject;
+
+	@NotBlank
 	private String body;
+
+	@NotNull
 	private Format format;
+
 	private Set<String> groups;
 	private boolean abstentionsAllowed;
 	private State state;

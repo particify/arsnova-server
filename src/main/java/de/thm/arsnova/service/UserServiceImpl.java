@@ -64,6 +64,7 @@ import org.springframework.security.ldap.authentication.LdapAuthenticationProvid
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.Validator;
 import org.springframework.web.util.UriUtils;
 import org.stagemonitor.core.metrics.MonitorGauges;
 
@@ -152,8 +153,9 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 			final AuthenticationProviderProperties authenticationProviderProperties,
 			final JavaMailSender mailSender,
 			@Qualifier("defaultJsonMessageConverter")
-			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
-		super(UserProfile.class, repository, jackson2HttpMessageConverter.getObjectMapper());
+			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
+			final Validator validator) {
+		super(UserProfile.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
 		this.userRepository = repository;
 		this.securityProperties = securityProperties;
 		this.registeredProperties = authenticationProviderProperties.getRegistered();

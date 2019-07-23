@@ -22,13 +22,16 @@ import com.fasterxml.jackson.annotation.JsonView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import javax.validation.constraints.NotBlank;
 import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
 
 public class ChoiceQuestionContent extends Content {
 	public static class AnswerOption {
+		@NotBlank
 		private String label;
+
 		private int points;
 
 		@JsonView({View.Persistence.class, View.Public.class})

@@ -22,16 +22,30 @@ import com.fasterxml.jackson.annotation.JsonView;
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
 
 public class Comment extends Entity {
+	@NotEmpty
 	private String roomId;
+
+	@NotEmpty
 	private String creatorId;
+
+	@NotBlank
 	private String subject;
+
+	@NotBlank
 	private String body;
+
+	@NotNull
 	private Date timestamp;
+
 	private boolean read;
 	private Map<String, Map<String, ?>> extensions;
 

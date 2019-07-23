@@ -20,6 +20,7 @@ package de.thm.arsnova.service;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.validation.Validator;
 import org.springframework.web.multipart.MultipartFile;
 
 import de.thm.arsnova.model.Attachment;
@@ -31,8 +32,9 @@ public class AttachmentServiceImpl extends DefaultEntityServiceImpl<Attachment> 
 	public AttachmentServiceImpl(
 			final AttachmentRepository repository,
 			@Qualifier("defaultJsonMessageConverter")
-			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
-		super(Attachment.class, repository, jackson2HttpMessageConverter.getObjectMapper());
+			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
+			final Validator validator) {
+		super(Attachment.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
 		this.attachmentRepository = repository;
 	}
 

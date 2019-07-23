@@ -34,6 +34,9 @@ import org.springframework.context.event.EventListener;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.access.prepost.PreFilter;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 
 import de.thm.arsnova.event.AfterCreationEvent;
 import de.thm.arsnova.event.AfterDeletionEvent;
@@ -45,6 +48,7 @@ import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.event.BeforeFullUpdateEvent;
 import de.thm.arsnova.event.BeforePatchEvent;
 import de.thm.arsnova.model.Entity;
+import de.thm.arsnova.model.EntityValidationException;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.persistence.CrudRepository;
 
@@ -60,12 +64,17 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	protected CrudRepository<T, String> repository;
 	protected ApplicationEventPublisher eventPublisher;
 	private ObjectMapper objectMapper;
+	private Validator validator;
 
 	public DefaultEntityServiceImpl(
-			final Class<T> type, final CrudRepository<T, String> repository, final ObjectMapper objectMapper) {
+			final Class<T> type,
+			final CrudRepository<T, String> repository,
+			final ObjectMapper objectMapper,
+			final Validator validator) {
 		this.type = type;
 		this.repository = repository;
 		this.objectMapper = objectMapper;
+		this.validator = validator;
 	}
 
 	@Override
@@ -106,6 +115,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 
 		prepareCreate(entity);
 		eventPublisher.publishEvent(new BeforeCreationEvent<>(this, entity));
+		validate(entity);
 		final T createdEntity = repository.save(entity);
 		eventPublisher.publishEvent(new AfterCreationEvent<>(this, createdEntity));
 		finalizeCreate(createdEntity);
@@ -144,6 +154,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 
 		prepareUpdate(newEntity);
 		eventPublisher.publishEvent(new BeforeFullUpdateEvent<>(this, newEntity, oldEntity));
+		validate(newEntity);
 		final T updatedEntity = repository.save(newEntity);
 		eventPublisher.publishEvent(new AfterFullUpdateEvent<>(this, updatedEntity, oldEntity));
 		finalizeUpdate(updatedEntity);
@@ -186,6 +197,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		entity.setUpdateTimestamp(new Date());
 		preparePatch(entity);
 		eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity, propertyGetter, changes));
+		validate(entity);
 		final T patchedEntity = repository.save(entity);
 		eventPublisher.publishEvent(new AfterPatchEvent<>(this, patchedEntity, propertyGetter, changes));
 		modifyRetrieved(patchedEntity);
@@ -210,6 +222,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 			entity.setUpdateTimestamp(new Date());
 			preparePatch(entity);
 			eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity, propertyGetter, changes));
+			validate(entity);
 		}
 
 		final Iterable<T> patchedEntities = repository.saveAll(entities);
@@ -270,6 +283,14 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	 */
 	protected void modifyRetrieved(final T entity) {
 
+	}
+
+	protected void validate(final T entity) {
+		final Errors errors = new BeanPropertyBindingResult(entity, type.getName());
+		validator.validate(entity, errors);
+		if (errors.hasErrors()) {
+			throw new EntityValidationException(errors, entity);
+		}
 	}
 
 	public String getTypeName() {
