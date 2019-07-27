@@ -20,7 +20,10 @@ public class SettingsService {
     }
 
     public Settings get(String id) {
-        Settings s = repository.findById(id).orElse(new Settings());
+        Settings defaults = new Settings();
+        defaults.setRoomId(id);
+        defaults.setDirectSend(true);
+        Settings s = repository.findById(id).orElse(defaults);
 
         return s;
     }

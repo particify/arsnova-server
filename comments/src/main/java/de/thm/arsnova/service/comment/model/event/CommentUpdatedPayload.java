@@ -12,6 +12,7 @@ public class CommentUpdatedPayload implements WebSocketPayload {
     private boolean read;
     private boolean favorite;
     private boolean correct;
+    private boolean ack;
 
     public CommentUpdatedPayload() {
     }
@@ -22,6 +23,7 @@ public class CommentUpdatedPayload implements WebSocketPayload {
         this.read = c.isRead();
         this.favorite = c.isFavorite();
         this.correct = c.isCorrect();
+        this.ack = c.isAck();
     }
 
     @JsonProperty("roomId")
@@ -74,6 +76,14 @@ public class CommentUpdatedPayload implements WebSocketPayload {
         this.correct = correct;
     }
 
+    public boolean isAck() {
+        return ack;
+    }
+
+    public void setAck(boolean ack) {
+        this.ack = ack;
+    }
+
     @Override
     public String toString() {
         return "CommentUpdatedPayload{" +
@@ -82,6 +92,7 @@ public class CommentUpdatedPayload implements WebSocketPayload {
                 ", read=" + read +
                 ", favorite=" + favorite +
                 ", correct=" + correct +
+                ", ack=" + ack +
                 '}';
     }
 

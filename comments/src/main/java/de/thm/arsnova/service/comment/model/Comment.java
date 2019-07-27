@@ -16,6 +16,7 @@ public class Comment {
     private boolean read;
     private boolean favorite;
     private boolean correct;
+    private boolean ack;
     @Transient
     private int score;
 
@@ -83,6 +84,14 @@ public class Comment {
         this.correct = correct;
     }
 
+    public boolean isAck() {
+        return ack;
+    }
+
+    public void setAck(boolean ack) {
+        this.ack = ack;
+    }
+
     public int getScore() {
         return score;
     }
@@ -102,6 +111,8 @@ public class Comment {
                 ", read=" + read +
                 ", favorite=" + favorite +
                 ", correct=" + correct +
+                ", ack=" + ack +
+                ", score=" + score +
                 '}';
     }
 }

@@ -27,7 +27,9 @@ public class CommentFindQueryService {
         if (findQuery.getProperties().getRoomId() != null) {
             List<Comment> contentList = commentService.getByRoomId(findQuery.getProperties().getRoomId());
             for (Comment c : contentList) {
-                commentIds.add(c.getId());
+                if (findQuery.getProperties().isAck() == c.isAck()) {
+                    commentIds.add(c.getId());
+                }
             }
         }
 

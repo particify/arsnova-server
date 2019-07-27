@@ -1,9 +1,11 @@
 package de.thm.arsnova.service.comment.handler;
 
+import de.thm.arsnova.service.comment.model.Settings;
 import de.thm.arsnova.service.comment.service.CommentService;
 import de.thm.arsnova.service.comment.model.Comment;
 import de.thm.arsnova.service.comment.model.command.*;
 import de.thm.arsnova.service.comment.model.event.*;
+import de.thm.arsnova.service.comment.service.SettingsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -20,13 +22,17 @@ public class CommentCommandHandler {
 
     private final AmqpTemplate messagingTemplate;
     private final CommentService service;
+    private final SettingsService settingsService;
 
     @Autowired
     public CommentCommandHandler(
             AmqpTemplate messagingTemplate,
-            CommentService service) {
+            CommentService service,
+            SettingsService settingsService
+    ) {
         this.messagingTemplate = messagingTemplate;
         this.service = service;
+        this.settingsService = settingsService;
     }
 
     public Comment handle(CreateComment command) {
@@ -36,6 +42,9 @@ public class CommentCommandHandler {
 
         Comment newComment = new Comment();
         CreateCommentPayload payload = command.getPayload();
+
+        Settings settings = settingsService.get(payload.getRoomId());
+
         newComment.setRoomId(payload.getRoomId());
         newComment.setCreatorId(payload.getCreatorId());
         newComment.setBody(payload.getBody());
@@ -43,6 +52,7 @@ public class CommentCommandHandler {
         newComment.setRead(false);
         newComment.setCorrect(false);
         newComment.setFavorite(false);
+        newComment.setAck(settings.getDirectSend());
 
         Comment saved = service.create(newComment);
 
@@ -51,11 +61,19 @@ public class CommentCommandHandler {
 
         CommentCreated event = new CommentCreated(commentCreatedPayload, payload.getRoomId());
 
-        messagingTemplate.convertAndSend(
-                "amq.topic",
-                payload.getRoomId() + ".comment.stream",
-                event
-        );
+        if (settings.getDirectSend()) {
+            messagingTemplate.convertAndSend(
+                    "amq.topic",
+                    payload.getRoomId() + ".comment.stream",
+                    event
+            );
+        } else {
+            messagingTemplate.convertAndSend(
+                    "amq.topic",
+                    payload.getRoomId() + ".comment.moderator.stream",
+                    event
+            );
+        }
 
         return saved;
     }
@@ -66,11 +84,33 @@ public class CommentCommandHandler {
         PatchCommentPayload p = command.getPayload();
         Comment c = this.service.get(p.getId());
 
+        boolean wasAck = c.isAck();
+
         if (c.getId() != null) {
             Comment patched = this.service.patch(c, p.getChanges());
 
             CommentPatchedPayload payload = new CommentPatchedPayload(patched.getId(), p.getChanges());
             CommentPatched event = new CommentPatched(payload, patched.getRoomId());
+
+            if (!wasAck && patched.isAck()) {
+                CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(patched);
+                commentCreatedPayload.setTimestamp(new Date());
+                CommentCreated quoteOnQuoteNew = new CommentCreated(commentCreatedPayload, patched.getRoomId());
+                messagingTemplate.convertAndSend(
+                        "amq.topic",
+                        c.getRoomId() + ".comment.stream",
+                        quoteOnQuoteNew
+                );
+            } else if (wasAck && !patched.isAck()) {
+                CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(patched);
+                commentCreatedPayload.setTimestamp(new Date());
+                CommentCreated quoteOnQuoteNew = new CommentCreated(commentCreatedPayload, patched.getRoomId());
+                messagingTemplate.convertAndSend(
+                        "amq.topic",
+                        c.getRoomId() + ".comment.moderator.stream",
+                        quoteOnQuoteNew
+                );
+            }
 
             messagingTemplate.convertAndSend(
                     "amq.topic",
@@ -99,6 +139,27 @@ public class CommentCommandHandler {
 
         CommentUpdatedPayload payload = new CommentUpdatedPayload(updated);
         CommentUpdated event = new CommentUpdated(payload, updated.getRoomId());
+
+
+        if (!old.isAck() && updated.isAck()) {
+            CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(updated);
+            commentCreatedPayload.setTimestamp(new Date());
+            CommentCreated quoteOnQuoteNew = new CommentCreated(commentCreatedPayload, updated.getRoomId());
+            messagingTemplate.convertAndSend(
+                    "amq.topic",
+                    old.getRoomId() + ".comment.stream",
+                    quoteOnQuoteNew
+            );
+        } else if (old.isAck() && !updated.isAck()) {
+            CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(updated);
+            commentCreatedPayload.setTimestamp(new Date());
+            CommentCreated quoteOnQuoteNew = new CommentCreated(commentCreatedPayload, updated.getRoomId());
+            messagingTemplate.convertAndSend(
+                    "amq.topic",
+                    old.getRoomId() + ".comment.moderator.stream",
+                    quoteOnQuoteNew
+            );
+        }
 
         messagingTemplate.convertAndSend(
                 "amq.topic",
