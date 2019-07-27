@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,8 +41,8 @@ import org.springframework.validation.Validator;
 
 import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.model.Content;
+import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.Room;
-import de.thm.arsnova.model.Room.ContentGroup;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
@@ -63,6 +62,8 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	private LogEntryRepository dbLogger;
 
 	private ContentRepository contentRepository;
+
+	private ContentGroupService contentGroupService;
 
 	private AnswerService answerService;
 
@@ -92,16 +93,17 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 		this.answerService = answerService;
 	}
 
+	@Autowired
+	public void setContentGroupService(final ContentGroupService contentGroupService) {
+		this.contentGroupService = contentGroupService;
+	}
+
 	@Override
 	protected void modifyRetrieved(final Content content) {
 		if (content.getFormat() != Content.Format.TEXT && 0 == content.getState().getRound()) {
 			/* needed for legacy questions whose piRound property has not been set */
 			content.getState().setRound(1);
 		}
-
-		final Room room = roomService.get(content.getRoomId());
-		content.setGroups(room.getContentGroups().stream()
-				.map(Room.ContentGroup::getName).filter(g -> !g.isEmpty()).collect(Collectors.toSet()));
 	}
 
 	/* FIXME: caching */
@@ -120,13 +122,8 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	public Iterable<Content> getByRoomIdAndGroup(final String roomId, final String group) {
-		final Room room = roomService.get(roomId);
-		Room.ContentGroup contentGroup = null;
-		for (final Room.ContentGroup cg : room.getContentGroups()) {
-			if (cg.getName().equals(group)) {
-				contentGroup = cg;
-			}
-		}
+		final ContentGroup contentGroup = contentGroupService.getByRoomIdAndName(roomId, group);
+
 		if (contentGroup == null) {
 			throw new NotFoundException("Content group does not exist.");
 		}
@@ -142,13 +139,8 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	public int countByRoomIdAndGroup(final String roomId, final String group) {
-		final Room room = roomService.get(roomId);
-		Room.ContentGroup contentGroup = null;
-		for (final Room.ContentGroup cg : room.getContentGroups()) {
-			if (cg.getName().equals(group)) {
-				contentGroup = cg;
-			}
-		}
+		final ContentGroup contentGroup = contentGroupService.getByRoomIdAndName(roomId, group);
+
 		if (contentGroup == null) {
 			throw new NotFoundException("Content group does not exist.");
 		}
@@ -180,22 +172,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	}
 
 	@Override
-	protected void finalizeCreate(final Content content) {
-		/* Update content groups of room */
-		final Room room = roomService.get(content.getRoomId());
-		final Map<String, Room.ContentGroup> groups = room.getContentGroupsAsMap();
-		for (final String groupName : content.getGroups()) {
-			final Room.ContentGroup group = groups.getOrDefault(groupName, new Room.ContentGroup());
-			groups.put(groupName, group);
-			group.getContentIds().add(content.getId());
-			group.setName(groupName);
-			group.setAutoSort(true);
-		}
-		room.setContentGroupsFromMap(groups);
-		roomService.update(room);
-	}
-
-	@Override
 	protected void prepareUpdate(final Content content) {
 		final User user = userService.getCurrentUser();
 		final Content oldContent = get(content.getId());
@@ -220,25 +196,6 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	protected void finalizeUpdate(final Content content) {
-		/* Update content groups of room */
-		final Room room = roomService.get(content.getRoomId());
-		final Set<String> contentsGroupNames = content.getGroups();
-		final Set<String> allGroupNames = new HashSet<>(contentsGroupNames);
-		final Map<String, Room.ContentGroup> groups = room.getContentGroupsAsMap();
-		allGroupNames.addAll(groups.keySet());
-		for (final String groupName : allGroupNames) {
-			final Room.ContentGroup group = groups.getOrDefault(groupName, new Room.ContentGroup());
-			if (contentsGroupNames.contains(groupName)) {
-				group.getContentIds().add(content.getId());
-				group.setName(groupName);
-				group.setAutoSort(true);
-			} else {
-				group.getContentIds().remove(content.getId());
-			}
-		}
-		room.setContentGroupsFromMap(groups);
-		roomService.update(room);
-
 		/* TODO: not sure yet how to refactor this code - we need access to the old and new entity
 		if (!oldContent.getState().isVisible() && content.getState().isVisible()) {
 			final UnlockQuestionEvent event = new UnlockQuestionEvent(this, room, content);
@@ -252,11 +209,18 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	protected void prepareDelete(final Content content) {
-		final Room room = roomService.get(content.getRoomId());
-		for (final ContentGroup group : room.getContentGroups()) {
-			group.getContentIds().remove(content.getId());
+		final List<ContentGroup> contentGroups = contentGroupService.getByRoomId(content.getRoomId());
+		for (final ContentGroup contentGroup : contentGroups) {
+			final Set<String> ids = contentGroup.getContentIds();
+			if (ids.contains(content.getId())) {
+				ids.remove(content.getId());
+				if (!ids.isEmpty()) {
+					contentGroupService.update(contentGroup);
+				} else {
+					contentGroupService.delete(contentGroup);
+				}
+			}
 		}
-		roomService.update(room);
 	}
 
 	@Override

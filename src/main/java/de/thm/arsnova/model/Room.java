@@ -23,8 +23,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import org.springframework.core.style.ToStringCreator;
@@ -32,77 +30,6 @@ import org.springframework.core.style.ToStringCreator;
 import de.thm.arsnova.model.serialization.View;
 
 public class Room extends Entity {
-	public static class ContentGroup {
-		@NotBlank
-		private String name;
-
-		private Set<String> contentIds;
-		private boolean autoSort;
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public String getName() {
-			return this.name;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setName(final String name) {
-			this.name = name;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public Set<String> getContentIds() {
-			if (contentIds == null) {
-				contentIds = new HashSet<>();
-			}
-
-			return contentIds;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setContentIds(final Set<String> contentIds) {
-			this.contentIds = contentIds;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public boolean isAutoSort() {
-			return autoSort;
-		}
-
-		@JsonView({View.Persistence.class, View.Public.class})
-		public void setAutoSort(final boolean autoSort) {
-			this.autoSort = autoSort;
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(name, contentIds, autoSort);
-		}
-
-		@Override
-		public boolean equals(final Object o) {
-			if (this == o) {
-				return true;
-			}
-			if (o == null || getClass() != o.getClass()) {
-				return false;
-			}
-			final ContentGroup that = (ContentGroup) o;
-
-			return autoSort == that.autoSort
-					&& Objects.equals(name, that.name)
-					&& Objects.equals(contentIds, that.contentIds);
-		}
-
-		@Override
-		public String toString() {
-			return new ToStringCreator(this)
-					.append("name", name)
-					.append("contentIds", contentIds)
-					.append("autoSort", autoSort)
-					.toString();
-		}
-	}
-
 	public static class Moderator {
 		public enum Role {
 			EDITING_MODERATOR,
@@ -468,7 +395,6 @@ public class Room extends Entity {
 
 	private String description;
 	private boolean closed;
-	private Set<ContentGroup> contentGroups;
 	private Set<Moderator> moderators;
 	private Settings settings;
 	private Author author;
@@ -535,28 +461,6 @@ public class Room extends Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setClosed(final boolean closed) {
 		this.closed = closed;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public Set<ContentGroup> getContentGroups() {
-		if (contentGroups == null) {
-			contentGroups = new HashSet<>();
-		}
-
-		return contentGroups;
-	}
-
-	public Map<String, ContentGroup> getContentGroupsAsMap() {
-		return getContentGroups().stream().collect(Collectors.toMap(ContentGroup::getName, Function.identity()));
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setContentGroups(final Set<ContentGroup> contentGroups) {
-		this.contentGroups = contentGroups;
-	}
-
-	public void setContentGroupsFromMap(final Map<String, ContentGroup> groups) {
-		this.contentGroups = new HashSet<>(groups.values());
 	}
 
 	@JsonView(View.Persistence.class)
@@ -641,8 +545,8 @@ public class Room extends Entity {
 	 *
 	 * <p>
 	 * The following fields of <tt>Room</tt> are excluded from equality checks:
-	 * {@link #contentGroups}, {@link #settings}, {@link #author}, {@link #poolProperties}, {@link #extensions},
-	 * {@link #attachments}, {@link #statistics}.
+	 * {@link #settings}, {@link #author}, {@link #poolProperties}, {@link #extensions}, {@link #attachments},
+	 * {@link #statistics}.
 	 * </p>
 	 */
 	@Override
@@ -672,7 +576,6 @@ public class Room extends Entity {
 				.append("abbreviation", abbreviation)
 				.append("description", description)
 				.append("closed", closed)
-				.append("contentGroups", contentGroups)
 				.append("settings", settings)
 				.append("author", author)
 				.append("poolProperties", poolProperties)

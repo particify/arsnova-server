@@ -23,9 +23,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -164,32 +162,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 			if (!inactiveRooms.isEmpty()) {
 				logger.info("Deleted {} inactive guest rooms.", inactiveRooms.size());
 			}
-		}
-	}
-
-	/**
-	 * Adds a default content group with contents that have no other content group assigned.
-	 *
-	 * @param room The Room to be modified
-	 */
-	@Override
-	protected void modifyRetrieved(final Room room) {
-		// creates a set from all room content groups
-		final Set<String> cidsWithGroup = room.getContentGroups().stream()
-				.map(Room.ContentGroup::getContentIds)
-				.flatMap(ids -> ids.stream())
-				.collect(Collectors.toSet());
-
-		final Set<String> cids = new HashSet<>(contentRepository.findIdsByRoomId(room.getId()));
-		cids.removeAll(cidsWithGroup);
-
-		if (!cids.isEmpty()) {
-			final Set<Room.ContentGroup> cgs = room.getContentGroups();
-			final Room.ContentGroup defaultGroup = new Room.ContentGroup();
-			defaultGroup.setContentIds(cids);
-			defaultGroup.setAutoSort(true);
-			defaultGroup.setName("");
-			cgs.add(defaultGroup);
 		}
 	}
 

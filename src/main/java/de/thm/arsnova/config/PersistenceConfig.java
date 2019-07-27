@@ -32,6 +32,7 @@ import de.thm.arsnova.config.properties.CouchDbProperties;
 import de.thm.arsnova.model.serialization.CouchDbObjectMapperFactory;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.CommentRepository;
+import de.thm.arsnova.persistence.ContentGroupRepository;
 import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.persistence.MotdRepository;
@@ -41,6 +42,7 @@ import de.thm.arsnova.persistence.StatisticsRepository;
 import de.thm.arsnova.persistence.UserRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbAnswerRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbCommentRepository;
+import de.thm.arsnova.persistence.couchdb.CouchDbContentGroupRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbContentRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbLogEntryRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbMotdRepository;
@@ -138,6 +140,11 @@ public class PersistenceConfig {
 	@Bean
 	public ContentRepository contentRepository() throws Exception {
 		return new CouchDbContentRepository(couchDbConnector(), false);
+	}
+
+	@Bean
+	public ContentGroupRepository contentGroupRepository() throws Exception {
+		return new CouchDbContentGroupRepository(couchDbConnector(), false);
 	}
 
 	@Bean
