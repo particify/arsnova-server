@@ -1,0 +1,11 @@
+arsnova:
+  management:
+    endpoints:
+      web:
+        base-path: /management
+        exposure:
+          include: "*"
+    metrics:
+      web:
+        server:
+          auto-time-requests: true

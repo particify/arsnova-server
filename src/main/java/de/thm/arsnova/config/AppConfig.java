@@ -21,21 +21,23 @@ package de.thm.arsnova.config;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
+import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
+import org.springframework.boot.actuate.autoconfigure.metrics.MetricsProperties;
+import org.springframework.boot.actuate.endpoint.http.ActuatorMediaType;
+import org.springframework.boot.actuate.metrics.web.servlet.WebMvcMetricsFilter;
+import org.springframework.boot.actuate.metrics.web.servlet.WebMvcTagsProvider;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
-import org.springframework.context.annotation.AdviceMode;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.*;
 import org.springframework.context.annotation.aspectj.EnableSpringConfigured;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
@@ -69,7 +71,7 @@ import de.thm.arsnova.util.ImageUtils;
 import de.thm.arsnova.web.CacheControlInterceptorHandler;
 import de.thm.arsnova.web.CorsFilter;
 import de.thm.arsnova.web.DeprecatedApiInterceptorHandler;
-import de.thm.arsnova.web.PathApiVersionContentNegotiationStrategy;
+import de.thm.arsnova.web.PathBasedContentNegotiationStrategy;
 import de.thm.arsnova.web.ResponseInterceptorHandler;
 import de.thm.arsnova.websocket.ArsnovaSocketioServer;
 import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
@@ -87,18 +89,23 @@ import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 		"de.thm.arsnova.cache",
 		"de.thm.arsnova.controller",
 		"de.thm.arsnova.event",
+		"de.thm.arsnova.management",
 		"de.thm.arsnova.security",
 		"de.thm.arsnova.service",
 		"de.thm.arsnova.web",
 		"de.thm.arsnova.websocket.handler"})
 @Configuration
 @EnableAsync(mode = AdviceMode.ASPECTJ)
+@EnableAutoConfiguration
 @EnableCaching(mode = AdviceMode.ASPECTJ)
 @EnableScheduling
 @EnableSpringConfigured
 @EnableWebMvc
 @PropertySource(
-		value = {"classpath:config/defaults.yml", "file:${arsnova.config-dir:.}/application.yml"},
+		value = {
+			"classpath:config/defaults.yml",
+			"classpath:config/actuator.yml",
+			"file:${arsnova.config-dir:.}/application.yml"},
 		ignoreResourceNotFound = true,
 		encoding = "UTF-8",
 		factory = YamlPropertySourceFactory.class
@@ -109,6 +116,7 @@ public class AppConfig implements WebMvcConfigurer {
 	public static final String API_V3_MEDIA_TYPE_VALUE = "application/vnd.de.thm.arsnova.v3+json";
 	public static final MediaType API_V2_MEDIA_TYPE = MediaType.valueOf(API_V2_MEDIA_TYPE_VALUE);
 	public static final MediaType API_V3_MEDIA_TYPE = MediaType.valueOf(API_V3_MEDIA_TYPE_VALUE);
+	public static final MediaType ACTUATOR_MEDIA_TYPE = MediaType.valueOf(ActuatorMediaType.V2_JSON);
 
 	@Autowired
 	private Environment env;
@@ -119,18 +127,22 @@ public class AppConfig implements WebMvcConfigurer {
 	@Autowired
 	private SecurityProperties securityProperties;
 
+	@Autowired
+	private WebEndpointProperties webEndpointProperties;
+
 	@Override
 	public void configureMessageConverters(final List<HttpMessageConverter<?>> converters) {
 		converters.add(defaultJsonMessageConverter());
 		converters.add(apiV2JsonMessageConverter());
+		converters.add(managementJsonMessageConverter());
 		converters.add(stringMessageConverter());
 		//converters.add(new MappingJackson2XmlHttpMessageConverter(builder.createXmlMapper(true).build()));
 	}
 
 	@Override
 	public void configureContentNegotiation(final ContentNegotiationConfigurer configurer) {
-		final PathApiVersionContentNegotiationStrategy strategy =
-				new PathApiVersionContentNegotiationStrategy(API_V3_MEDIA_TYPE);
+		final PathBasedContentNegotiationStrategy strategy =
+				new PathBasedContentNegotiationStrategy(API_V3_MEDIA_TYPE, webEndpointProperties.getBasePath());
 		configurer.mediaType("json", MediaType.APPLICATION_JSON_UTF8);
 		configurer.mediaType("xml", MediaType.APPLICATION_XML);
 		configurer.favorParameter(false);
@@ -159,6 +171,15 @@ public class AppConfig implements WebMvcConfigurer {
 	@Override
 	public void addResourceHandlers(final ResourceHandlerRegistry registry) {
 		registry.addResourceHandler("swagger.json").addResourceLocations("classpath:/");
+	}
+
+	/* Provides a Spring Framework (non-Boot) compatible Filter. */
+	@Bean
+	public WebMvcMetricsFilter webMvcMetricsFilterOverride(
+			final MeterRegistry registry, final WebMvcTagsProvider tagsProvider) {
+		final MetricsProperties.Web.Server serverProperties = new MetricsProperties.Web.Server();
+		return new WebMvcMetricsFilter(registry, tagsProvider,
+				serverProperties.getRequestsMetricName(), serverProperties.isAutoTimeRequests());
 	}
 
 	@Bean
@@ -222,6 +243,22 @@ public class AppConfig implements WebMvcConfigurer {
 		final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
 		final List<MediaType> mediaTypes = new ArrayList<>();
 		mediaTypes.add(API_V2_MEDIA_TYPE);
+		mediaTypes.add(MediaType.APPLICATION_JSON_UTF8);
+		converter.setSupportedMediaTypes(mediaTypes);
+
+		return converter;
+	}
+
+	@Bean
+	public MappingJackson2HttpMessageConverter managementJsonMessageConverter() {
+		final Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
+		builder
+				.indentOutput(systemProperties.getApi().isIndentResponseBody())
+				.simpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+		final ObjectMapper mapper = builder.build();
+		final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
+		final List<MediaType> mediaTypes = new ArrayList<>();
+		mediaTypes.add(ACTUATOR_MEDIA_TYPE);
 		mediaTypes.add(MediaType.APPLICATION_JSON_UTF8);
 		converter.setSupportedMediaTypes(mediaTypes);
 

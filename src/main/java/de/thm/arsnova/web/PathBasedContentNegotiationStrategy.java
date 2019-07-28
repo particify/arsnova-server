@@ -39,14 +39,17 @@ import de.thm.arsnova.controller.AbstractEntityController;
  *
  * @author Daniel Gerhardt
  */
-public class PathApiVersionContentNegotiationStrategy implements ContentNegotiationStrategy {
-	private static final Logger logger = LoggerFactory.getLogger(PathApiVersionContentNegotiationStrategy.class);
+public class PathBasedContentNegotiationStrategy implements ContentNegotiationStrategy {
+	private static final Logger logger = LoggerFactory.getLogger(PathBasedContentNegotiationStrategy.class);
+
+	private final String managementPath;
 
 	private MediaType fallback;
 	private MediaType empty = MediaType.valueOf(AbstractEntityController.MEDIATYPE_EMPTY);
 
-	public PathApiVersionContentNegotiationStrategy(final MediaType fallback) {
+	public PathBasedContentNegotiationStrategy(final MediaType fallback, final String managementPath) {
 		this.fallback = fallback;
+		this.managementPath = managementPath + "/";
 	}
 
 	@Override
@@ -54,7 +57,11 @@ public class PathApiVersionContentNegotiationStrategy implements ContentNegotiat
 			throws HttpMediaTypeNotAcceptableException {
 		final HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 		final List<MediaType> mediaTypes = new ArrayList<>();
-		if (servletRequest.getServletPath().startsWith("/v2/")) {
+		if (servletRequest.getServletPath().startsWith(managementPath)) {
+			logger.trace("Negotiating content based on path for management API");
+			mediaTypes.add(AppConfig.ACTUATOR_MEDIA_TYPE);
+			mediaTypes.add(MediaType.TEXT_PLAIN);
+		} else if (servletRequest.getServletPath().startsWith("/v2/")) {
 			logger.trace("Negotiating content based on path for API v2");
 			mediaTypes.add(AppConfig.API_V2_MEDIA_TYPE);
 			mediaTypes.add(MediaType.TEXT_PLAIN);
