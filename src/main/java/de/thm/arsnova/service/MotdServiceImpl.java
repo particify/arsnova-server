@@ -28,6 +28,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.Validator;
 
 import de.thm.arsnova.model.Motd;
 import de.thm.arsnova.model.Room;
@@ -50,8 +51,9 @@ public class MotdServiceImpl extends DefaultEntityServiceImpl<Motd> implements M
 			final UserService userService,
 			final RoomService roomService,
 			@Qualifier("defaultJsonMessageConverter")
-			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
-		super(Motd.class, repository, jackson2HttpMessageConverter.getObjectMapper());
+			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
+			final Validator validator) {
+		super(Motd.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
 		this.motdRepository = repository;
 		this.userService = userService;
 		this.roomService = roomService;

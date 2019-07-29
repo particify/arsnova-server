@@ -21,6 +21,9 @@ package de.thm.arsnova.model;
 import com.fasterxml.jackson.annotation.JsonView;
 import java.util.Date;
 import java.util.Objects;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
@@ -34,11 +37,19 @@ public class Motd extends Entity {
 		ROOM
 	}
 
+	@NotEmpty
 	private String roomId;
+
 	private Date startDate;
 	private Date endDate;
+
+	@NotBlank
 	private String title;
+
+	@NotBlank
 	private String body;
+
+	@NotNull
 	private Audience audience;
 
 	@Override

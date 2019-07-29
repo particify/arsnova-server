@@ -38,6 +38,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.Validator;
 
 import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.model.Content;
@@ -76,8 +77,9 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			final LogEntryRepository dbLogger,
 			final UserService userService,
 			@Qualifier("defaultJsonMessageConverter")
-			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
-		super(Content.class, repository, jackson2HttpMessageConverter.getObjectMapper());
+			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
+			final Validator validator) {
+		super(Content.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
 		this.contentRepository = repository;
 		this.roomService = roomService;
 		this.answerRepository = answerRepository;

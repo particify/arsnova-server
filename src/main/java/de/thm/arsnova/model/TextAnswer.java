@@ -20,13 +20,19 @@ package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import java.util.Date;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
 
 public class TextAnswer extends Answer {
+	@NotBlank
 	private String subject;
+
+	@NotBlank
 	private String body;
+
 	private boolean read;
 
 	@JsonView({View.Persistence.class, View.Public.class})

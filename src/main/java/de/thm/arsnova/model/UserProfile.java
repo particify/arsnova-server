@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import javax.validation.constraints.NotEmpty;
 import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
@@ -43,7 +44,9 @@ public class UserProfile extends Entity {
 	}
 
 	public static class Account {
+		@NotEmpty
 		private String password;
+
 		private String activationKey;
 		private String passwordResetKey;
 		private Date passwordResetTime;

@@ -35,6 +35,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.Validator;
 
 import de.thm.arsnova.event.AfterCreationEvent;
 import de.thm.arsnova.event.BeforeCreationEvent;
@@ -69,8 +70,9 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 			final RoomService roomService,
 			final UserService userService,
 			@Qualifier("defaultJsonMessageConverter") final
-			MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
-		super(Answer.class, repository, jackson2HttpMessageConverter.getObjectMapper());
+			MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
+			final Validator validator) {
+		super(Answer.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
 		this.answerRepository = repository;
 		this.roomService = roomService;
 		this.userService = userService;

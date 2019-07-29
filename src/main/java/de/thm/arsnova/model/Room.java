@@ -25,13 +25,17 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
 
 public class Room extends Entity {
 	public static class ContentGroup {
+		@NotBlank
 		private String name;
+
 		private Set<String> contentIds;
 		private boolean autoSort;
 
@@ -105,7 +109,9 @@ public class Room extends Entity {
 			EXECUTIVE_MODERATOR
 		}
 
+		@NotEmpty
 		private String userId;
+
 		private Set<Role> roles;
 
 		@JsonView({View.Persistence.class, View.Public.class})
@@ -448,10 +454,18 @@ public class Room extends Entity {
 		}
 	}
 
+	@NotEmpty
 	private String shortId;
+
+	@NotEmpty
 	private String ownerId;
+
+	@NotBlank
 	private String name;
+
+	@NotBlank
 	private String abbreviation;
+
 	private String description;
 	private boolean closed;
 	private Set<ContentGroup> contentGroups;

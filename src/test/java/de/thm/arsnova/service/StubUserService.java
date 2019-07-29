@@ -26,6 +26,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.validation.Validator;
 
 import de.thm.arsnova.config.properties.SystemProperties;
 import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
@@ -45,9 +46,10 @@ public class StubUserService extends UserServiceImpl {
 			final AuthenticationProviderProperties authenticationProviderProperties,
 			final JavaMailSender mailSender,
 			@Qualifier("defaultJsonMessageConverter")
-			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
+			final Validator validator) {
 		super(repository, systemProperties, securityProperties, authenticationProviderProperties,
-				mailSender, jackson2HttpMessageConverter);
+				mailSender, jackson2HttpMessageConverter, validator);
 		grantedAuthorities = new HashSet<>();
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 	}

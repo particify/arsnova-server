@@ -42,6 +42,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.validation.Validator;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import de.thm.arsnova.persistence.UserRepository;
@@ -107,9 +108,10 @@ public class TestAppConfig {
 			final AuthenticationProviderProperties authenticationProviderProperties,
 			final JavaMailSender mailSender,
 			@Qualifier("defaultJsonMessageConverter")
-			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
+			final Validator validator) {
 		return new StubUserService(repository, systemProperties, securityProperties, authenticationProviderProperties,
-				mailSender, jackson2HttpMessageConverter);
+				mailSender, jackson2HttpMessageConverter, validator);
 	}
 
 	@Bean

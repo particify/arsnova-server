@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import javax.validation.ValidationException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.validation.Validator;
 
 import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.config.TestAppConfig;
@@ -64,9 +66,14 @@ import de.thm.arsnova.test.context.support.WithMockUser;
 		WebSocketConfig.class})
 @ActiveProfiles("test")
 public class DefaultEntityServiceImplTest {
+	private static final String SOME_TEXT = "SomeText";
+
 	@Autowired
 	@Qualifier("defaultJsonMessageConverter")
 	private MappingJackson2HttpMessageConverter jackson2HttpMessageConverter;
+
+	@Autowired
+	private Validator validator;
 
 	@Autowired
 	private ApplicationEventPublisher eventPublisher;
@@ -82,7 +89,7 @@ public class DefaultEntityServiceImplTest {
 	public void testPatch() throws IOException {
 		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
 		final DefaultEntityServiceImpl<Room> entityService =
-				new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper);
+				new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper, validator);
 		entityService.setApplicationEventPublisher(eventPublisher);
 
 		when(roomRepository.save(any(Room.class))).then(returnsFirstArg());
@@ -92,6 +99,7 @@ public class DefaultEntityServiceImplTest {
 		final String originalOwnerId = "TestUser";
 		final boolean originalActive = true;
 		final Room room = new Room();
+		prefillRoomFields(room);
 		room.setId(originalId);
 		room.setName(originalName);
 		room.setClosed(originalActive);
@@ -117,7 +125,7 @@ public class DefaultEntityServiceImplTest {
 	public void testPatchWithList() throws IOException {
 		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
 		final DefaultEntityServiceImpl<Room> entityService =
-				new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper);
+				new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper, validator);
 		entityService.setApplicationEventPublisher(eventPublisher);
 
 		when(roomRepository.saveAll(anyListOf(Room.class))).then(returnsFirstArg());
@@ -128,6 +136,7 @@ public class DefaultEntityServiceImplTest {
 		final String originalOwnerId1 = "TestUser";
 		final boolean originalClosed1 = true;
 		final Room room1 = new Room();
+		prefillRoomFields(room1);
 		room1.setId(originalId1);
 		room1.setName(originalName1);
 		room1.setClosed(originalClosed1);
@@ -138,6 +147,7 @@ public class DefaultEntityServiceImplTest {
 		final String originalOwnerId2 = "TestUser";
 		final boolean originalClosed2 = true;
 		final Room room2 = new Room();
+		prefillRoomFields(room2);
 		room2.setId(originalId2);
 		room2.setName(originalName2);
 		room2.setClosed(originalClosed2);
@@ -168,19 +178,23 @@ public class DefaultEntityServiceImplTest {
 	public void testCaching() {
 		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
 		final DefaultEntityServiceImpl<Room> entityService =
-				new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper);
+				new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper, validator);
 		entityService.setApplicationEventPublisher(eventPublisher);
 
 		final Room room1 = new Room();
+		prefillRoomFields(room1);
 		room1.setId("a34876427c634a9b9cb56789d73607f0");
 		room1.setOwnerId("TestUser");
 		final Room room2 = new Room();
+		prefillRoomFields(room2);
 		room2.setId("4638748d89884ff7936d7fe994a4090c");
 		room2.setOwnerId("TestUser");
 		final Room room3 = new Room();
+		prefillRoomFields(room3);
 		room3.setId("c9651db0a67b49789a354e90e0401032");
 		room3.setOwnerId("TestUser");
 		final Room room4 = new Room();
+		prefillRoomFields(room4);
 		room4.setId("66c1673056b2410b87335b9f317da5aa");
 		room4.setOwnerId("TestUser");
 
@@ -198,5 +212,28 @@ public class DefaultEntityServiceImplTest {
 		/* room1 should no longer be cached for room1.id */
 		assertSame("Entity should not be cached.", null, cacheManager.getCache("entity").get("room-" + room1.getId()));
 		assertSame(room2, entityService.get(room1.getId()));
+	}
+
+	@Test(expected = ValidationException.class)
+	@WithMockUser("TestUser")
+	public void testValidation() {
+		final ObjectMapper objectMapper = jackson2HttpMessageConverter.getObjectMapper();
+		final DefaultEntityServiceImpl<Room> entityService =
+			new DefaultEntityServiceImpl<>(Room.class, roomRepository, objectMapper, validator);
+		entityService.setApplicationEventPublisher(eventPublisher);
+
+		when(roomRepository.save(any(Room.class))).then(returnsFirstArg());
+
+		final Room room1 = new Room();
+		room1.setOwnerId("TestUser");
+		room1.setName("");
+
+		entityService.create(room1);
+	}
+
+	private void prefillRoomFields(final Room room) {
+		room.setName(SOME_TEXT);
+		room.setAbbreviation(SOME_TEXT);
+		room.setShortId("12345678");
 	}
 }

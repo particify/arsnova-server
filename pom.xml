@@ -214,6 +214,19 @@
 			<artifactId>spring-security-ldap</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator-annotation-processor</artifactId>
+		</dependency>
+		<!-- A javax.el (Unified Expression Language) implementation is needed for bean validation. -->
+		<dependency>
+			<groupId>org.mortbay.jasper</groupId>
+			<artifactId>apache-el</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>${guava-version}</version>
