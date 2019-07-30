@@ -460,6 +460,14 @@
 						<artifactId>aspectjtools</artifactId>
 						<version>${org.aspectj-version}</version>
 					</dependency>
+					<!-- Workaround: Override unnecessary dependency which causes compatibility issues. -->
+					<dependency>
+						<groupId>com.sun</groupId>
+						<artifactId>tools</artifactId>
+						<version>${java.version}</version>
+						<scope>system</scope>
+						<systemPath>${project.basedir}/pom.xml</systemPath>
+					</dependency>
 				</dependencies>
 			</plugin>
 			<plugin>
