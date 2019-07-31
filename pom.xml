@@ -13,6 +13,7 @@
 		<directory-server-version>1.5.5</directory-server-version>
 		<io.netty-version>4.1.37.Final</io.netty-version>
 		<org.aspectj-version>1.9.2</org.aspectj-version>
+		<javax-jaxb.version>2.3.1</javax-jaxb.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
@@ -148,6 +149,10 @@
 	</dependencyManagement>
 
 	<dependencies>
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
@@ -597,6 +602,13 @@
 						</goals>
 					</execution>
 				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>javax.xml.bind</groupId>
+						<artifactId>jaxb-api</artifactId>
+						<version>${javax-jaxb.version}</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
@@ -611,6 +623,19 @@
 				</executions>
 			</plugin>
 		</plugins>
+
+		<!-- Workaround for JDK 11 support. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=539791 -->
+		<extensions>
+			<extension>
+				<groupId>javax.annotation</groupId>
+				<artifactId>javax.annotation-api</artifactId>
+			</extension>
+			<extension>
+				<groupId>javax.annotation</groupId>
+				<artifactId>jsr250-api</artifactId>
+				<version>1.0</version>
+			</extension>
+		</extensions>
 	</build>
 
 	<name>ARSnova Backend</name>
