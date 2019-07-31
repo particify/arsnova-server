@@ -14,6 +14,7 @@
 		<io.netty-version>4.1.37.Final</io.netty-version>
 		<org.aspectj-version>1.9.2</org.aspectj-version>
 		<javax-jaxb.version>2.3.1</javax-jaxb.version>
+		<graalvm.version>19.1.1</graalvm.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
@@ -351,6 +352,16 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aspects</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.graalvm.js</groupId>
+			<artifactId>js</artifactId>
+			<version>${graalvm.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.graalvm.js</groupId>
+			<artifactId>js-scriptengine</artifactId>
+			<version>${graalvm.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
