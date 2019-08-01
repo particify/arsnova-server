@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
-import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -56,7 +55,7 @@ import de.thm.arsnova.service.StatusService;
 @Component
 public class CouchDbInitializer implements ResourceLoaderAware {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbInitializer.class);
-	private final List<Bindings> docs = new ArrayList<>();
+	private final List<Map<String, Object>> docs = new ArrayList<>();
 
 	private ResourceLoader resourceLoader;
 	private MigrationExecutor migrationExecutor;
@@ -83,7 +82,7 @@ public class CouchDbInitializer implements ResourceLoaderAware {
 			final String js = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
 			/* Reset designDoc before parsing a new one. */
 			engine.eval("var designDoc = null;" + js);
-			final Bindings jsonObject = (Bindings) engine.eval("jsToJson(designDoc)");
+			final Map<String, Object> jsonObject = (Map<String, Object>) engine.eval("jsToJson(designDoc)");
 			docs.add(jsonObject);
 		}
 	}
