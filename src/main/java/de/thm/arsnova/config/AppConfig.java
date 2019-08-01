@@ -33,6 +33,8 @@ import org.springframework.boot.actuate.endpoint.http.ActuatorMediaType;
 import org.springframework.boot.actuate.metrics.web.servlet.WebMvcMetricsFilter;
 import org.springframework.boot.actuate.metrics.web.servlet.WebMvcTagsProvider;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -101,7 +103,9 @@ import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 		"de.thm.arsnova.websocket.handler"})
 @Configuration
 @EnableAsync(mode = AdviceMode.ASPECTJ)
-@EnableAutoConfiguration
+@EnableAutoConfiguration(exclude = {
+		DataSourceAutoConfiguration.class,
+		DataSourceTransactionManagerAutoConfiguration.class})
 @EnableCaching(mode = AdviceMode.ASPECTJ)
 @EnableScheduling
 @EnableSpringConfigured
