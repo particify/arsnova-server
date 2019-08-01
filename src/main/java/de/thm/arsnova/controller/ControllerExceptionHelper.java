@@ -39,7 +39,7 @@ public class ControllerExceptionHelper {
 		this.exposeMessages = systemProperties.getApi().isExposeErrorMessages();
 	}
 
-	protected Map<String, Object> handleException(@NonNull final Throwable e, @NonNull final Level level) {
+	public Map<String, Object> handleException(@NonNull final Throwable e, @NonNull final Level level) {
 		final String message = e.getMessage() != null ? e.getMessage() : "";
 		log(level, message, e);
 		final Map<String, Object> result = new HashMap<>();
