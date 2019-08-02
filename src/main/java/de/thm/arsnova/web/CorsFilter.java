@@ -46,8 +46,8 @@ public class CorsFilter extends org.springframework.web.filter.CorsFilter {
 			config.setAllowedOrigins(origins);
 			config.addAllowedHeader(HttpHeaders.ACCEPT);
 			config.addAllowedHeader(HttpHeaders.CONTENT_TYPE);
+			config.addAllowedHeader(HttpHeaders.AUTHORIZATION);
 			config.addAllowedHeader(X_REQUESTED_WITH);
-			config.addAllowedHeader(TOKEN_HEADER_NAME);
 			config.addAllowedMethod(HttpMethod.GET);
 			config.addAllowedMethod(HttpMethod.POST);
 			config.addAllowedMethod(HttpMethod.PUT);
