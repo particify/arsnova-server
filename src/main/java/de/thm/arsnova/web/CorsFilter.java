@@ -21,10 +21,13 @@ package de.thm.arsnova.web;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 public class CorsFilter extends org.springframework.web.filter.CorsFilter {
+	private static final String X_REQUESTED_WITH = "X-Requested-With";
 	private static final String TOKEN_HEADER_NAME = "Arsnova-Auth-Token";
 	private final Logger logger = LoggerFactory.getLogger(CorsFilter.class);
 
@@ -41,24 +44,24 @@ public class CorsFilter extends org.springframework.web.filter.CorsFilter {
 			/* Grant full access from specified origins */
 			config = new CorsConfiguration();
 			config.setAllowedOrigins(origins);
-			config.addAllowedHeader("Accept");
-			config.addAllowedHeader("Content-Type");
-			config.addAllowedHeader("X-Requested-With");
+			config.addAllowedHeader(HttpHeaders.ACCEPT);
+			config.addAllowedHeader(HttpHeaders.CONTENT_TYPE);
+			config.addAllowedHeader(X_REQUESTED_WITH);
 			config.addAllowedHeader(TOKEN_HEADER_NAME);
-			config.addAllowedMethod("GET");
-			config.addAllowedMethod("POST");
-			config.addAllowedMethod("PUT");
-			config.addAllowedMethod("PATCH");
-			config.addAllowedMethod("DELETE");
+			config.addAllowedMethod(HttpMethod.GET);
+			config.addAllowedMethod(HttpMethod.POST);
+			config.addAllowedMethod(HttpMethod.PUT);
+			config.addAllowedMethod(HttpMethod.PATCH);
+			config.addAllowedMethod(HttpMethod.DELETE);
 			config.setAllowCredentials(true);
 			source.registerCorsConfiguration("/**", config);
 		} else {
 			/* Grant limited access from all origins */
 			config = new CorsConfiguration();
 			config.addAllowedOrigin("*");
-			config.addAllowedHeader("Accept");
-			config.addAllowedHeader("X-Requested-With");
-			config.addAllowedMethod("GET");
+			config.addAllowedHeader(HttpHeaders.ACCEPT);
+			config.addAllowedHeader(X_REQUESTED_WITH);
+			config.addAllowedMethod(HttpMethod.GET);
 			source.registerCorsConfiguration("/", config);
 			source.registerCorsConfiguration("/arsnova-config", config);
 			source.registerCorsConfiguration("/configuration/", config);
