@@ -50,7 +50,7 @@ unit_test:
       - $OUTPUT_DIR
   cache: *maven_cache
   script:
-    - mvn -B surefire:test
+    - mvn -B jacoco:prepare-agent surefire:test jacoco:report
 
 package:
   stage: post-build
