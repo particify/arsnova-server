@@ -18,7 +18,6 @@
 
 package de.thm.arsnova.websocket;
 
-import com.codahale.metrics.annotation.Timed;
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.Configuration;
 import com.corundumstudio.socketio.SocketConfig;
@@ -29,6 +28,7 @@ import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
 import com.corundumstudio.socketio.protocol.Packet;
 import com.corundumstudio.socketio.protocol.PacketType;
+import io.micrometer.core.annotation.Timed;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -153,7 +153,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 
 		server.addEventListener("setFeedback", Feedback.class, new DataListener<Feedback>() {
 			@Override
-			@Timed(name = "setFeedbackEvent.onData")
+			@Timed("setFeedbackEvent.onData")
 			public void onData(final SocketIOClient client, final Feedback data, final AckRequest ackSender) {
 				final String userId = userService.getUserIdToSocketId(client.getSessionId());
 				if (userId == null) {
@@ -177,7 +177,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 
 		server.addEventListener("setSession", Room.class, new DataListener<Room>() {
 			@Override
-			@Timed(name = "setSessionEvent.onData")
+			@Timed("setSessionEvent.onData")
 			public void onData(final SocketIOClient client, final Room room, final AckRequest ackSender) {
 				final String userId = userService.getUserIdToSocketId(client.getSessionId());
 				if (null == userId) {
@@ -211,7 +211,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 				Comment.class,
 				new DataListener<Comment>() {
 					@Override
-					@Timed(name = "readInterposedQuestionEvent.onData")
+					@Timed("readInterposedQuestionEvent.onData")
 					public void onData(
 							final SocketIOClient client,
 							final Comment comment,
@@ -244,7 +244,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 				ScoreOptions.class,
 				new DataListener<ScoreOptions>() {
 					@Override
-					@Timed(name = "setLearningProgressOptionsEvent.onData")
+					@Timed("setLearningProgressOptionsEvent.onData")
 					public void onData(
 							final SocketIOClient client, final ScoreOptions scoreOptions, final AckRequest ack) {
 						throw new UnsupportedOperationException("Not implemented.");
@@ -254,7 +254,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 
 		server.addConnectListener(new ConnectListener() {
 			@Override
-			@Timed
+			@Timed("onConnect")
 			public void onConnect(final SocketIOClient client) {
 
 			}
@@ -262,7 +262,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 
 		server.addDisconnectListener(new DisconnectListener() {
 			@Override
-			@Timed
+			@Timed("onDisconnect")
 			public void onDisconnect(final SocketIOClient client) {
 				if (
 						userService == null

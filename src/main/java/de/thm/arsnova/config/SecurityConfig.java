@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletResponse;
 import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.config.Config;
@@ -32,15 +33,21 @@ import org.pac4j.oidc.client.OidcClient;
 import org.pac4j.oidc.config.OidcConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.access.intercept.RunAsManager;
 import org.springframework.security.access.intercept.RunAsManagerImpl;
@@ -71,7 +78,7 @@ import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
 import org.springframework.security.ldap.userdetails.LdapAuthoritiesPopulator;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
 import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
@@ -82,6 +89,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
 import de.thm.arsnova.config.properties.SecurityProperties;
 import de.thm.arsnova.config.properties.SystemProperties;
+import de.thm.arsnova.controller.ControllerExceptionHelper;
 import de.thm.arsnova.security.CasLogoutSuccessHandler;
 import de.thm.arsnova.security.CasUserDetailsService;
 import de.thm.arsnova.security.CustomLdapUserDetailsMapper;
@@ -126,9 +134,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	public class HttpSecurityConfig extends WebSecurityConfigurerAdapter {
+		protected AuthenticationEntryPoint authenticationEntryPoint;
+		protected AccessDeniedHandler accessDeniedHandler;
+
+		public HttpSecurityConfig(final AuthenticationEntryPoint authenticationEntryPoint,
+				final AccessDeniedHandler accessDeniedHandler) {
+			this.authenticationEntryPoint = authenticationEntryPoint;
+			this.accessDeniedHandler = accessDeniedHandler;
+		}
+
 		@Override
 		protected void configure(final HttpSecurity http) throws Exception {
-			http.exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint());
+			http.exceptionHandling()
+					.authenticationEntryPoint(authenticationEntryPoint)
+					.accessDeniedHandler(accessDeniedHandler);
 			http.csrf().disable();
 			http.headers().addHeaderWriter(new HstsHeaderWriter(false));
 
@@ -149,6 +168,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Order(2)
 	@Profile("!test")
 	public class StatelessHttpSecurityConfig extends HttpSecurityConfig {
+		public StatelessHttpSecurityConfig(
+				@Qualifier("restAuthenticationEntryPoint") final AuthenticationEntryPoint authenticationEntryPoint,
+				final AccessDeniedHandler accessDeniedHandler) {
+			super(authenticationEntryPoint, accessDeniedHandler);
+		}
+
 		@Override
 		protected void configure(final HttpSecurity http) throws Exception {
 			super.configure(http);
@@ -161,11 +186,40 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Order(1)
 	@Profile("!test")
 	public class StatefulHttpSecurityConfig extends HttpSecurityConfig {
+		public StatefulHttpSecurityConfig(
+				@Qualifier("restAuthenticationEntryPoint") final AuthenticationEntryPoint authenticationEntryPoint,
+				final AccessDeniedHandler accessDeniedHandler) {
+			super(authenticationEntryPoint, accessDeniedHandler);
+		}
+
 		@Override
 		protected void configure(final HttpSecurity http) throws Exception {
 			super.configure(http);
 			http.antMatcher("/v2/**");
 			http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
+		}
+	}
+
+	@Configuration
+	@Order(Ordered.HIGHEST_PRECEDENCE)
+	@Profile("!test")
+	public class ManagementHttpSecurityConfig extends HttpSecurityConfig {
+		private final String managementPath;
+
+		public ManagementHttpSecurityConfig(
+				@Qualifier("restAuthenticationEntryPoint") final AuthenticationEntryPoint authenticationEntryPoint,
+				final AccessDeniedHandler accessDeniedHandler,
+				final WebEndpointProperties webEndpointProperties) {
+			super(authenticationEntryPoint, accessDeniedHandler);
+			this.managementPath = webEndpointProperties.getBasePath();
+		}
+
+		@Override
+		protected void configure(final HttpSecurity http) throws Exception {
+			super.configure(http);
+			http.antMatcher(managementPath + "/**");
+			http.authorizeRequests().anyRequest().hasRole("ADMIN");
+			http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		}
 	}
 
@@ -247,8 +301,29 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public static AuthenticationEntryPoint restAuthenticationEntryPoint() {
-		return new Http403ForbiddenEntryPoint();
+	public static AuthenticationEntryPoint restAuthenticationEntryPoint(
+			@Qualifier("defaultJsonMessageConverter")
+			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
+			final ControllerExceptionHelper controllerExceptionHelper) {
+		return (request, response, accessDeniedException) -> {
+			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+			response.setContentType(MediaType.APPLICATION_JSON_UTF8.toString());
+			response.getWriter().write(jackson2HttpMessageConverter.getObjectMapper().writeValueAsString(
+					controllerExceptionHelper.handleException(accessDeniedException, Level.DEBUG)));
+		};
+	}
+
+	@Bean
+	public AccessDeniedHandler customAccessDeniedHandler(
+			@Qualifier("defaultJsonMessageConverter")
+			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
+			final ControllerExceptionHelper controllerExceptionHelper) {
+		return (request, response, accessDeniedException) -> {
+			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+			response.setContentType(MediaType.APPLICATION_JSON_UTF8.toString());
+			response.getWriter().write(jackson2HttpMessageConverter.getObjectMapper().writeValueAsString(
+					controllerExceptionHelper.handleException(accessDeniedException, Level.DEBUG)));
+		};
 	}
 
 	@Bean

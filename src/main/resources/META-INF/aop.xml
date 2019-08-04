@@ -9,5 +9,9 @@
 		<aspect name="de.thm.arsnova.web.RangeAspect"/>
 		<aspect name="de.thm.arsnova.web.InternalEntityAspect"/>
 		<aspect name="de.thm.arsnova.websocket.WebsocketAuthenticationAspect"/>
+		<!-- Micrometer does not have a aop.xml config for its aspects. -->
+		<!-- Disabled for now, see https://github.com/micrometer-metrics/micrometer/issues/1149.
+		<aspect name="io.micrometer.core.aop.TimedAspect"/>
+		-->
 	</aspects>
 </aspectj>

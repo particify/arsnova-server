@@ -18,7 +18,6 @@
 
 package de.thm.arsnova.service;
 
-import com.codahale.metrics.annotation.Gauge;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -66,7 +65,6 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Validator;
 import org.springframework.web.util.UriUtils;
-import org.stagemonitor.core.metrics.MonitorGauges;
 
 import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
 import de.thm.arsnova.config.properties.SecurityProperties;
@@ -87,7 +85,6 @@ import de.thm.arsnova.web.exceptions.UnauthorizedException;
  * Performs all user related operations.
  */
 @Service
-@MonitorGauges
 public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> implements UserService {
 
 	private static final int LOGIN_TRY_RESET_DELAY_MS = 30 * 1000;
@@ -324,7 +321,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	@Gauge
 	public int loggedInUsers() {
 		return userIdToRoomId.size();
 	}

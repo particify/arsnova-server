@@ -22,11 +22,9 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -42,6 +40,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
+import de.thm.arsnova.management.VersionInfoContributor;
 import de.thm.arsnova.web.exceptions.BadRequestException;
 import de.thm.arsnova.web.exceptions.NoContentException;
 
@@ -54,8 +53,8 @@ public class WelcomeController extends AbstractController {
 	@Value("${mobile.path}")
 	private String mobileContextPath;
 
-	@Resource(name = "versionInfoProperties")
-	private Properties versionInfoProperties;
+	@Autowired
+	private VersionInfoContributor versionInfoContributor;
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public View home() {
@@ -65,18 +64,7 @@ public class WelcomeController extends AbstractController {
 	@RequestMapping(value = "/", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
 	public Map<String, Object> jsonHome() {
-		final Map<String, Object> response = new HashMap<>();
-		final Map<String, Object> version = new HashMap<>();
-
-		version.put("string", versionInfoProperties.getProperty("version.string"));
-		version.put("buildTime", versionInfoProperties.getProperty("version.build-time"));
-		version.put("gitCommitId", versionInfoProperties.getProperty("version.git.commit-id"));
-		version.put("gitDirty", Boolean.parseBoolean(versionInfoProperties.getProperty("version.git.dirty")));
-
-		response.put("productName", "arsnova-backend");
-		response.put("version", version);
-
-		return response;
+		return versionInfoContributor.getInfoDetails();
 	}
 
 	@RequestMapping(value = "/checkframeoptionsheader", method = RequestMethod.POST)
