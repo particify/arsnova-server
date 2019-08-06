@@ -19,6 +19,8 @@
 package de.thm.arsnova.security.jwt;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -27,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -34,7 +37,7 @@ import org.springframework.web.filter.GenericFilterBean;
 
 @Component
 public class JwtTokenFilter extends GenericFilterBean {
-	private static final String JWT_HEADER_NAME = "Arsnova-Auth-Token";
+	private static final Pattern BEARER_TOKEN_PATTERN = Pattern.compile("Bearer (.*)", Pattern.CASE_INSENSITIVE);
 	private static final Logger logger = LoggerFactory.getLogger(JwtTokenFilter.class);
 	private JwtAuthenticationProvider jwtAuthenticationProvider;
 
@@ -48,19 +51,24 @@ public class JwtTokenFilter extends GenericFilterBean {
 			filterChain.doFilter(servletRequest, servletResponse);
 			return;
 		}
-		final String jwtHeader = httpServletRequest.getHeader(JWT_HEADER_NAME);
+		final String jwtHeader = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
 		if (jwtHeader != null) {
-			final JwtToken token = new JwtToken(jwtHeader);
-			try {
-				final Authentication authenticatedToken = jwtAuthenticationProvider.authenticate(token);
-				if (authenticatedToken != null) {
-					logger.debug("Storing JWT to SecurityContext: {}", authenticatedToken);
-					SecurityContextHolder.getContext().setAuthentication(authenticatedToken);
-				} else {
-					logger.debug("Could not authenticate JWT.");
+			final Matcher tokenMatcher = BEARER_TOKEN_PATTERN.matcher(jwtHeader);
+			if (tokenMatcher.matches()) {
+				final JwtToken token = new JwtToken(tokenMatcher.group(1));
+				try {
+					final Authentication authenticatedToken = jwtAuthenticationProvider.authenticate(token);
+					if (authenticatedToken != null) {
+						logger.debug("Storing JWT to SecurityContext: {}", authenticatedToken);
+						SecurityContextHolder.getContext().setAuthentication(authenticatedToken);
+					} else {
+						logger.debug("Could not authenticate JWT.");
+					}
+				} catch (final Exception e) {
+					logger.debug("JWT authentication failed", e);
 				}
-			} catch (final Exception e) {
-				logger.debug("JWT authentication failed", e);
+			} else {
+				logger.debug("Unsupported authentication scheme.");
 			}
 		} else {
 			logger.debug("No authentication header present.");
