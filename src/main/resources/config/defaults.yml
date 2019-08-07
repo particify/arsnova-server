@@ -107,16 +107,20 @@ arsnova:
         registration-mail-body: |-
           Welcome to ARSnova!
 
-          Please confirm your registration by visiting the following web address:
-          {0}
+          Here is the activation code you need for your first login to ARSnova:
 
-          Afterwards, you can log into ARSnova with your e-mail address and password.
+              {0}
+
+          {1}
         reset-password-mail-subject: ARSnova Password Reset
         reset-password-mail-body: |-
           You requested to reset your password.
 
-          Please follow the link below to set a new password:
-          {0}
+          Here is the confirmation code you need to set a new password:
+
+              {0}
+
+          {1}
 
       # LDAP authentication
       #
