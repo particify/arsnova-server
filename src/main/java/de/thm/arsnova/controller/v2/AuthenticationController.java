@@ -133,8 +133,8 @@ public class AuthenticationController extends AbstractController {
 			final HttpServletRequest request,
 			final HttpServletResponse response
 	) throws IOException {
-		final String addr = request.getRemoteAddr();
-		if (userService.isBannedFromLogin(addr)) {
+		final String address = request.getRemoteAddr();
+		if (userService.isBannedFromLogin(address)) {
 			response.sendError(429, "Too Many Requests");
 
 			return;
@@ -144,26 +144,23 @@ public class AuthenticationController extends AbstractController {
 
 		if (registeredProperties.isEnabled() && "arsnova".equals(type)) {
 			try {
-				userService.authenticate(authRequest, UserProfile.AuthProvider.ARSNOVA);
+				userService.authenticate(authRequest, UserProfile.AuthProvider.ARSNOVA, address);
 			} catch (final AuthenticationException e) {
 				logger.info("Database authentication failed.", e);
-				userService.increaseFailedLoginCount(addr);
 				response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			}
 		} else if (ldapProperties.stream().anyMatch(p -> p.isEnabled()) && "ldap".equals(type)) {
 			try {
-				userService.authenticate(authRequest, UserProfile.AuthProvider.LDAP);
+				userService.authenticate(authRequest, UserProfile.AuthProvider.LDAP, address);
 			} catch (final AuthenticationException e) {
 				logger.info("LDAP authentication failed.", e);
-				userService.increaseFailedLoginCount(addr);
 				response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			}
 		} else if (guestProperties.isEnabled() && "guest".equals(type)) {
 			try {
-				userService.authenticate(authRequest, UserProfile.AuthProvider.ARSNOVA_GUEST);
+				userService.authenticate(authRequest, UserProfile.AuthProvider.ARSNOVA_GUEST, address);
 			} catch (final AuthenticationException e) {
 				logger.debug("Guest authentication failed.", e);
-				userService.increaseFailedLoginCount(addr);
 				response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			}
 		} else {

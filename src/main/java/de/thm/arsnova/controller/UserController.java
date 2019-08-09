@@ -19,6 +19,7 @@
 package de.thm.arsnova.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -104,13 +105,11 @@ public class UserController extends AbstractEntityController<UserProfile> {
 	@PostMapping(ACTIVATE_MAPPING)
 	public void activate(
 			@PathVariable final String id,
-			@RequestParam final String key) {
-		final UserProfile userProfile = userService.get(id, true);
-		if (userProfile == null || !key.equals(userProfile.getAccount().getActivationKey())) {
+			@RequestParam final String key,
+			final HttpServletRequest request) {
+		if (!userService.activateAccount(id, key, request.getRemoteAddr())) {
 			throw new BadRequestException();
 		}
-		userProfile.getAccount().setActivationKey(null);
-		userService.update(userProfile);
 	}
 
 	@PostMapping(RESET_PASSWORD_MAPPING)

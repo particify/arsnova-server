@@ -61,17 +61,13 @@ public class UserController extends AbstractController {
 	@PostMapping(value = "/{username}/activate")
 	public void activate(
 			@PathVariable final String username,
-			@RequestParam final String key, final HttpServletRequest request,
+			@RequestParam final String key,
+			final HttpServletRequest request,
 			final HttpServletResponse response) {
 		final UserProfile userProfile = userService.getByUsername(username);
-		if (null != userProfile && key.equals(userProfile.getAccount().getActivationKey())) {
-			userProfile.getAccount().setActivationKey(null);
-			userService.update(userProfile);
-
-			return;
+		if (userProfile == null || !userService.activateAccount(userProfile.getId(), key, request.getRemoteAddr())) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 		}
-
-		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 	}
 
 	@DeleteMapping(value = "/{username}/")

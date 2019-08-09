@@ -18,6 +18,7 @@
 
 package de.thm.arsnova.controller;
 
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,22 +45,23 @@ public class AuthenticationController {
 	}
 
 	@PostMapping("/login/registered")
-	public ClientAuthentication loginRegistered(@RequestBody final LoginCredentials loginCredentials) {
+	public ClientAuthentication loginRegistered(@RequestBody final LoginCredentials loginCredentials,
+			final HttpServletRequest request) {
 		final String loginId = loginCredentials.getLoginId().toLowerCase();
 		userService.authenticate(new UsernamePasswordAuthenticationToken(loginId, loginCredentials.getPassword()),
-				UserProfile.AuthProvider.ARSNOVA);
+				UserProfile.AuthProvider.ARSNOVA, request.getRemoteAddr());
 		return userService.getCurrentClientAuthentication();
 	}
 
 	@PostMapping("/login/guest")
-	public ClientAuthentication loginGuest() {
+	public ClientAuthentication loginGuest(final HttpServletRequest request) {
 		final ClientAuthentication currentAuthentication = userService.getCurrentClientAuthentication();
 		if (currentAuthentication != null
 				&& currentAuthentication.getAuthProvider() == UserProfile.AuthProvider.ARSNOVA_GUEST) {
 			return currentAuthentication;
 		}
 		userService.authenticate(new UsernamePasswordAuthenticationToken(null, null),
-				UserProfile.AuthProvider.ARSNOVA_GUEST);
+				UserProfile.AuthProvider.ARSNOVA_GUEST, request.getRemoteAddr());
 
 		return userService.getCurrentClientAuthentication();
 	}

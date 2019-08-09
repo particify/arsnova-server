@@ -328,7 +328,11 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 	@Override
 	public void authenticate(final UsernamePasswordAuthenticationToken token,
-			final UserProfile.AuthProvider authProvider) {
+			final UserProfile.AuthProvider authProvider, final String clientAddress) {
+		if (isBannedFromLogin(clientAddress)) {
+			throw new BadRequestException();
+		}
+
 		final Authentication auth;
 		switch (authProvider) {
 			case LDAP:
@@ -357,6 +361,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		}
 
 		if (!auth.isAuthenticated()) {
+			increaseFailedLoginCount(clientAddress);
 			throw new BadRequestException();
 		}
 		SecurityContextHolder.getContext().setAuthentication(auth);
@@ -536,6 +541,22 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 				logger.error("Could not patch RoomHistory");
 			}
 		}
+	}
+
+	public boolean activateAccount(final String id, final String key, final String clientAddress) {
+		if (isBannedFromLogin(clientAddress)) {
+			return false;
+		}
+		final UserProfile userProfile = get(id, true);
+		if (userProfile == null || !key.equals(userProfile.getAccount().getActivationKey())) {
+			increaseFailedLoginCount(clientAddress);
+			return false;
+		}
+
+		userProfile.getAccount().setActivationKey(null);
+		update(userProfile);
+
+		return true;
 	}
 
 	@Override
