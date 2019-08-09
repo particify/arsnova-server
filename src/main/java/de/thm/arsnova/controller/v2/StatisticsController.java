@@ -22,6 +22,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,7 +46,7 @@ public class StatisticsController extends AbstractController {
 
 	@ApiOperation(value = "Retrieves global statistics",
 			nickname = "getStatistics")
-	@RequestMapping(method = RequestMethod.GET, value = "/")
+	@GetMapping("/")
 	@CacheControl(maxAge = 60, policy = CacheControl.Policy.PUBLIC)
 	public Statistics getStatistics() {
 		return statisticsService.getStatistics();
@@ -55,7 +56,7 @@ public class StatisticsController extends AbstractController {
 			nickname = "countActiveUsers")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(method = RequestMethod.GET, value = "/activeusercount", produces = MediaType.TEXT_PLAIN_VALUE)
+	@GetMapping(value = "/activeusercount", produces = MediaType.TEXT_PLAIN_VALUE)
 	public String countActiveUsers() {
 		return String.valueOf(statisticsService.getStatistics().getActiveUsers());
 	}
@@ -64,7 +65,7 @@ public class StatisticsController extends AbstractController {
 			nickname = "countLoggedInUsers")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(method = RequestMethod.GET, value = "/loggedinusercount", produces = MediaType.TEXT_PLAIN_VALUE)
+	@GetMapping(value = "/loggedinusercount", produces = MediaType.TEXT_PLAIN_VALUE)
 	public String countLoggedInUsers() {
 		return String.valueOf(statisticsService.getStatistics().getLoggedinUsers());
 	}
@@ -73,7 +74,7 @@ public class StatisticsController extends AbstractController {
 			nickname = "countSessions")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(method = RequestMethod.GET, value = "/sessioncount", produces = MediaType.TEXT_PLAIN_VALUE)
+	@GetMapping(value = "/sessioncount", produces = MediaType.TEXT_PLAIN_VALUE)
 	public String countSessions() {
 		return String.valueOf(statisticsService.getStatistics().getOpenSessions()
 				+ statisticsService.getStatistics().getClosedSessions());

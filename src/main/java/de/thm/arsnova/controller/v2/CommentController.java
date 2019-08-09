@@ -29,7 +29,10 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -74,7 +77,7 @@ public class CommentController extends PaginationController {
 
 	@ApiOperation(value = "Count all the comments in current room",
 			nickname = "getCommentCount")
-	@RequestMapping(value = "/count", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
+	@GetMapping(value = "/count", produces = MediaType.TEXT_PLAIN_VALUE)
 	@DeprecatedApi
 	@Deprecated
 	public String getCommentCount(
@@ -86,7 +89,7 @@ public class CommentController extends PaginationController {
 
 	@ApiOperation(value = "count all unread comments",
 			nickname = "getUnreadCommentCount")
-	@RequestMapping(value = "/readcount", method = RequestMethod.GET)
+	@GetMapping("/readcount")
 	@DeprecatedApi
 	@Deprecated
 	public CommentReadingCount getUnreadCommentCount(
@@ -97,7 +100,7 @@ public class CommentController extends PaginationController {
 
 	@ApiOperation(value = "Retrieves all Comments for a Room",
 			nickname = "getComments")
-	@RequestMapping(value = "/", method = RequestMethod.GET)
+	@GetMapping("/")
 	@Pagination
 	public List<Comment> getComments(
 			@ApiParam(value = "Room-Key from current room", required = true)
@@ -109,7 +112,7 @@ public class CommentController extends PaginationController {
 
 	@ApiOperation(value = "Retrieves an Comment",
 			nickname = "getComment")
-	@RequestMapping(value = "/{commentId}", method = RequestMethod.GET)
+	@GetMapping("/{commentId}")
 	public Comment getComment(
 			@ApiParam(value = "ID of the Comment that needs to be deleted", required = true)
 			@PathVariable
@@ -123,7 +126,7 @@ public class CommentController extends PaginationController {
 	@ApiResponses(value = {
 			@ApiResponse(code = 400, message = HTML_STATUS_400)
 	})
-	@RequestMapping(value = "/", method = RequestMethod.POST)
+	@PostMapping("/")
 	@ResponseStatus(HttpStatus.CREATED)
 	public void postComment(
 			@ApiParam(value = "Room-Key from current room", required = true)
@@ -140,7 +143,7 @@ public class CommentController extends PaginationController {
 
 	@ApiOperation(value = "Deletes a Comment",
 			nickname = "deleteComment")
-	@RequestMapping(value = "/{commentId}", method = RequestMethod.DELETE)
+	@DeleteMapping("/{commentId}")
 	public void deleteComment(
 			@ApiParam(value = "ID of the comment that needs to be deleted", required = true)
 			@PathVariable

@@ -50,8 +50,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.View;
@@ -124,7 +125,7 @@ public class AuthenticationController extends AbstractController {
 		oauthProperties = authenticationProviderProperties.getOauth();
 	}
 
-	@RequestMapping(value = { "/login", "/doLogin" }, method = { RequestMethod.POST, RequestMethod.GET })
+	@PostMapping({ "/login", "/doLogin" })
 	public void doLogin(
 			@RequestParam("type") final String type,
 			@RequestParam(value = "user", required = false) final String username,
@@ -170,7 +171,7 @@ public class AuthenticationController extends AbstractController {
 		}
 	}
 
-	@RequestMapping(value = { "/dialog" }, method = RequestMethod.GET)
+	@GetMapping("/dialog")
 	@ResponseBody
 	public View dialog(
 			@RequestParam("type") final String type,
@@ -231,7 +232,7 @@ public class AuthenticationController extends AbstractController {
 		return result;
 	}
 
-	@RequestMapping(value = { "/", "/whoami" }, method = RequestMethod.GET)
+	@GetMapping({ "/", "/whoami" })
 	@ResponseBody
 	public ClientAuthentication whoami(@AuthenticationPrincipal final User user) {
 		if (user == null) {
@@ -240,7 +241,7 @@ public class AuthenticationController extends AbstractController {
 		return new ClientAuthentication(user);
 	}
 
-	@RequestMapping(value = { "/logout" }, method = { RequestMethod.POST, RequestMethod.GET })
+	@PostMapping("/logout")
 	public String doLogout(final HttpServletRequest request) {
 		final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		userService.removeUserIdFromMaps(userService.getCurrentUser().getId());
@@ -252,7 +253,7 @@ public class AuthenticationController extends AbstractController {
 		return "redirect:" + request.getHeader("referer") != null ? request.getHeader("referer") : "/";
 	}
 
-	@RequestMapping(value = { "/services" }, method = RequestMethod.GET)
+	@GetMapping("/services")
 	@ResponseBody
 	public List<ServiceDescription> getServices(final HttpServletRequest request) {
 		final List<ServiceDescription> services = new ArrayList<>();

@@ -20,7 +20,10 @@ package de.thm.arsnova.controller.v2;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -46,13 +49,13 @@ public class LegacyController extends AbstractController {
 	/* specific routes */
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/mysessions", method = RequestMethod.GET)
+	@GetMapping("/session/mysessions")
 	public String redirectSessionMy() {
 		return "forward:/v2/session/?ownedonly=true";
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/visitedsessions", method = RequestMethod.GET)
+	@GetMapping("/session/visitedsessions")
 	public String redirectSessionVisited() {
 		return "forward:/v2/session/?visitedonly=true";
 	}
@@ -64,31 +67,31 @@ public class LegacyController extends AbstractController {
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/{shortId}/skillquestions", method = RequestMethod.GET)
+	@GetMapping("/session/{shortId}/skillquestions")
 	public String redirectQuestionByLecturerList(@PathVariable final String shortId) {
 		return String.format("forward:/v2/lecturerquestion/?sessionkey=%s", shortId);
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/{shortId}/skillquestioncount", method = RequestMethod.GET)
+	@GetMapping("/session/{shortId}/skillquestioncount")
 	public String redirectQuestionByLecturerCount(@PathVariable final String shortId) {
 		return String.format("forward:/v2/lecturerquestion/count?sessionkey=%s", shortId);
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/{shortId}/answercount", method = RequestMethod.GET)
+	@GetMapping("/session/{shortId}/answercount")
 	public String redirectQuestionByLecturerAnswerCount(@PathVariable final String shortId) {
 		return String.format("forward:/v2/lecturerquestion/answercount?sessionkey=%s", shortId);
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/{shortId}/unanswered", method = RequestMethod.GET)
+	@GetMapping("/session/{shortId}/unanswered")
 	public String redirectQuestionByLecturerUnnsweredCount(@PathVariable final String shortId) {
 		return String.format("forward:/v2/lecturerquestion/answercount?sessionkey=%s", shortId);
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/{shortId}/myanswers", method = RequestMethod.GET)
+	@GetMapping("/session/{shortId}/myanswers")
 	public String redirectQuestionByLecturerMyAnswers(@PathVariable final String shortId) {
 		return String.format("forward:/v2/lecturerquestion/myanswers?sessionkey=%s", shortId);
 	}
@@ -100,22 +103,34 @@ public class LegacyController extends AbstractController {
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/{shortId}/interposed", method = RequestMethod.DELETE)
+	@DeleteMapping("/session/{shortId}/interposed")
 	@ResponseBody
 	public void deleteAllInterposedQuestions(@PathVariable final String shortId) {
 		commentService.deleteByRoomId(shortId);
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/{shortId}/interposedcount", method = RequestMethod.GET)
+	@GetMapping("/session/{shortId}/interposedcount")
 	public String redirectQuestionByAudienceCount(@PathVariable final String shortId) {
 		return String.format("forward:/v2/audiencequestion/count?sessionkey=%s", shortId);
 	}
 
 	@DeprecatedApi
-	@RequestMapping(value = "/session/{shortId}/interposedreadingcount", method = RequestMethod.GET)
+	@GetMapping("/session/{shortId}/interposedreadingcount")
 	public String redirectQuestionByAudienceReadCount(@PathVariable final String shortId) {
 		return String.format("forward:/v2/audiencequestion/readcount?sessionkey=%s", shortId);
+	}
+
+	@DeprecatedApi
+	@GetMapping(value = { "/whoami", "/whoami.json" })
+	public String redirectWhoami() {
+		return "forward:/v2/auth/whoami";
+	}
+
+	@DeprecatedApi
+	@PostMapping(value = "/doLogin")
+	public String redirectLogin() {
+		return "forward:/v2/auth/login";
 	}
 
 	/* generalized routes */
@@ -154,17 +169,5 @@ public class LegacyController extends AbstractController {
 			@PathVariable final String arg1,
 			@PathVariable final String arg2) {
 		return String.format("forward:/v2/audiencequestion/%s/%s/?sessionkey=%s", arg1, arg2, shortId);
-	}
-
-	@DeprecatedApi
-	@RequestMapping(value = { "/whoami", "/whoami.json" })
-	public String redirectWhoami() {
-		return "forward:/v2/auth/whoami";
-	}
-
-	@DeprecatedApi
-	@RequestMapping(value = "/doLogin")
-	public String redirectLogin() {
-		return "forward:/v2/auth/login";
 	}
 }

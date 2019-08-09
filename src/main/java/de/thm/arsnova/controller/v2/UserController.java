@@ -23,7 +23,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -44,7 +46,7 @@ public class UserController extends AbstractController {
 	@Autowired
 	private UserService userService;
 
-	@RequestMapping(value = "/register", method = RequestMethod.POST)
+	@PostMapping(value = "/register")
 	public void register(@RequestParam final String username,
 			@RequestParam final String password,
 			final HttpServletRequest request, final HttpServletResponse response) {
@@ -56,8 +58,7 @@ public class UserController extends AbstractController {
 		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 	}
 
-	@RequestMapping(value = "/{username}/activate", method = { RequestMethod.POST,
-			RequestMethod.GET })
+	@PostMapping(value = "/{username}/activate")
 	public void activate(
 			@PathVariable final String username,
 			@RequestParam final String key, final HttpServletRequest request,
@@ -73,7 +74,7 @@ public class UserController extends AbstractController {
 		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 	}
 
-	@RequestMapping(value = "/{username}/", method = RequestMethod.DELETE)
+	@DeleteMapping(value = "/{username}/")
 	public void activate(
 			@PathVariable final String username,
 			final HttpServletRequest request,
@@ -83,7 +84,7 @@ public class UserController extends AbstractController {
 		}
 	}
 
-	@RequestMapping(value = "/{username}/resetpassword", method = RequestMethod.POST)
+	@PostMapping(value = "/{username}/resetpassword")
 	public void resetPassword(
 			@PathVariable final String username,
 			@RequestParam(required = false) final String key,

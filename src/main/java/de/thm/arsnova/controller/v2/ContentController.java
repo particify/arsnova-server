@@ -34,10 +34,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -93,7 +96,7 @@ public class ContentController extends PaginationController {
 	@ApiResponses(value = {
 			@ApiResponse(code = 404, message = HTML_STATUS_404)
 	})
-	@RequestMapping(value = "/{contentId}", method = RequestMethod.GET)
+	@GetMapping("/{contentId}")
 	public Content getContent(@PathVariable final String contentId) {
 		final de.thm.arsnova.model.Content content = contentService.get(contentId);
 		if (content != null) {
@@ -108,7 +111,7 @@ public class ContentController extends PaginationController {
 	@ApiResponses(value = {
 			@ApiResponse(code = 400, message = HTML_STATUS_400)
 	})
-	@RequestMapping(value = "/", method = RequestMethod.POST)
+	@PostMapping("/")
 	@ResponseStatus(HttpStatus.CREATED)
 	public Content postContent(@RequestBody final Content content) {
 		final de.thm.arsnova.model.Content contentV3 = fromV2Migrator.migrate(content);
@@ -123,7 +126,7 @@ public class ContentController extends PaginationController {
 	@ApiResponses(value = {
 			@ApiResponse(code = 400, message = HTML_STATUS_400)
 	})
-	@RequestMapping(value = "/bulk", method = RequestMethod.POST)
+	@PostMapping("/bulk")
 	@ResponseStatus(HttpStatus.CREATED)
 	public List<Content> bulkPostContents(@RequestBody final List<Content> contents) {
 		final List<de.thm.arsnova.model.Content> contentsV3 =
@@ -136,7 +139,7 @@ public class ContentController extends PaginationController {
 	@ApiResponses(value = {
 			@ApiResponse(code = 400, message = HTML_STATUS_400)
 	})
-	@RequestMapping(value = "/{contentId}", method = RequestMethod.PUT)
+	@PutMapping("/{contentId}")
 	public Content updateContent(
 			@PathVariable final String contentId,
 			@RequestBody final Content content) {
@@ -145,7 +148,7 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Start new Pi Round on content, identified by provided id, with an optional time",
 			nickname = "startPiRound")
-	@RequestMapping(value = "/{contentId}/questionimage", method = RequestMethod.GET)
+	@GetMapping("/{contentId}/questionimage")
 	public String getContentImage(
 			@PathVariable final String contentId,
 			@RequestParam(value = "fcImage", defaultValue = "false", required = false) final boolean fcImage) {
@@ -153,7 +156,7 @@ public class ContentController extends PaginationController {
 		throw new NotImplementedException();
 	}
 
-	@RequestMapping(value = "/{contentId}/startnewpiround", method = RequestMethod.POST)
+	@PostMapping("/{contentId}/startnewpiround")
 	public void startPiRound(
 			@PathVariable final String contentId,
 			@RequestParam(value = "time", defaultValue = "0", required = false) final int time) {
@@ -165,7 +168,7 @@ public class ContentController extends PaginationController {
 		}
 	}
 
-	@RequestMapping(value = "/{contentId}/canceldelayedpiround", method = RequestMethod.POST)
+	@PostMapping("/{contentId}/canceldelayedpiround")
 	@ApiOperation(value = "Cancel Pi Round on content, identified by provided id",
 			nickname = "cancelPiRound")
 	public void cancelPiRound(
@@ -173,7 +176,7 @@ public class ContentController extends PaginationController {
 		timerService.cancelRoundChange(contentId);
 	}
 
-	@RequestMapping(value = "/{contentId}/resetpiroundstate", method = RequestMethod.POST)
+	@PostMapping("/{contentId}/resetpiroundstate")
 	@ApiOperation(value = "Reset Pi Round on content, identified by provided id",
 			nickname = "resetPiContent")
 	public void resetPiContent(
@@ -183,7 +186,7 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Set voting admission on content, identified by provided id",
 			nickname = "setVotingAdmission")
-	@RequestMapping(value = "/{contentId}/disablevote", method = RequestMethod.POST)
+	@PostMapping("/{contentId}/disablevote")
 	public void setVotingAdmission(
 			@PathVariable final String contentId,
 			@RequestParam(value = "disable", defaultValue = "false", required = false) final Boolean disableVote) {
@@ -198,7 +201,7 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Set voting admission for all contents",
 			nickname = "setVotingAdmissionForAllContents")
-	@RequestMapping(value = "/disablevote", method = RequestMethod.POST)
+	@PostMapping("/disablevote")
 	public void setVotingAdmissionForAllContents(
 			@RequestParam(value = "sessionkey")
 			final String roomShortId,
@@ -230,7 +233,7 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Publish a content, identified by provided id and content in Request Body.",
 			nickname = "publishContent")
-	@RequestMapping(value = "/{contentId}/publish", method = RequestMethod.POST)
+	@PostMapping("/{contentId}/publish")
 	public void publishContent(
 			@PathVariable final String contentId,
 			@RequestParam(defaultValue = "true", required = false) final boolean publish,
@@ -246,7 +249,7 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Publish all contents",
 			nickname = "publishAllContents")
-	@RequestMapping(value = "/publish", method = RequestMethod.POST)
+	@PostMapping("/publish")
 	public void publishAllContents(
 			@RequestParam(value = "sessionkey")
 			final String roomShortId,
@@ -274,7 +277,7 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Publish statistics from content with provided id",
 			nickname = "publishStatistics")
-	@RequestMapping(value = "/{contentId}/publishstatistics", method = RequestMethod.POST)
+	@PostMapping("/{contentId}/publishstatistics")
 	public void publishStatistics(
 			@PathVariable final String contentId,
 			@RequestParam(defaultValue = "true", required = false) final Boolean showStatistics,
@@ -291,7 +294,7 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Publish correct answer from content with provided id",
 			nickname = "publishCorrectAnswer")
-	@RequestMapping(value = "/{contentId}/publishcorrectanswer", method = RequestMethod.POST)
+	@PostMapping("/{contentId}/publishcorrectanswer")
 	public void publishCorrectAnswer(
 			@PathVariable final String contentId,
 			@RequestParam(defaultValue = "true", required = false) final boolean showCorrectAnswer,
@@ -308,7 +311,7 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Get contents",
 			nickname = "getContents")
-	@RequestMapping(value = "/", method = RequestMethod.GET)
+	@GetMapping("/")
 	@Pagination
 	public List<Content> getContents(
 			@RequestParam(value = "sessionkey") final String roomShortId,
@@ -339,7 +342,7 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Delete contents",
 			nickname = "deleteContents")
-	@RequestMapping(value = { "/" }, method = RequestMethod.DELETE)
+	@DeleteMapping("/")
 	public void deleteContents(
 			@RequestParam(value = "sessionkey") final String roomShortId,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
@@ -364,7 +367,7 @@ public class ContentController extends PaginationController {
 			nickname = "getContentCount")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/count", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
+	@GetMapping(value = "/count", produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getContentCount(
 			@RequestParam(value = "sessionkey") final String roomShortId,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") final boolean lectureContentsOnly,
@@ -387,7 +390,7 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Delete answers and content",
 			nickname = "deleteAnswersAndContent")
-	@RequestMapping(value = "/{contentId}", method = RequestMethod.DELETE)
+	@DeleteMapping("/{contentId}")
 	public void deleteAnswersAndContent(
 			@PathVariable final String contentId) {
 		contentService.delete(contentId);
@@ -397,7 +400,7 @@ public class ContentController extends PaginationController {
 			nickname = "getUnAnsweredContentIds")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/unanswered", method = RequestMethod.GET)
+	@GetMapping("/unanswered")
 	public List<String> getUnAnsweredContentIds(
 			@RequestParam(value = "sessionkey") final String roomShortId,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
@@ -437,7 +440,7 @@ public class ContentController extends PaginationController {
 			nickname = "getMyAnswer")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/{contentId}/myanswer", method = RequestMethod.GET)
+	@GetMapping("/{contentId}/myanswer")
 	public Answer getMyAnswer(
 			@PathVariable final String contentId,
 			final HttpServletResponse response) {
@@ -471,7 +474,7 @@ public class ContentController extends PaginationController {
 	 */
 	@ApiOperation(value = "Get answers for a content, identified by provided content ID",
 			nickname = "getAnswers")
-	@RequestMapping(value = "/{contentId}/answer/", method = RequestMethod.GET)
+	@GetMapping("/{contentId}/answer/")
 	public List<Answer> getAnswers(
 			@PathVariable final String contentId,
 			@RequestParam(value = "piround", required = false) final Integer piRound,
@@ -504,7 +507,7 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Save answer, provided in the Request Body, for a content, identified by provided content ID",
 			nickname = "saveAnswer")
-	@RequestMapping(value = "/{contentId}/answer/", method = RequestMethod.POST)
+	@PostMapping("/{contentId}/answer/")
 	public Answer saveAnswer(
 			@PathVariable final String contentId,
 			@RequestBody final Answer answer,
@@ -524,7 +527,7 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Update answer, provided in Request Body, identified by content ID and answer ID",
 			nickname = "updateAnswer")
-	@RequestMapping(value = "/{contentId}/answer/{answerId}", method = RequestMethod.PUT)
+	@PutMapping("/{contentId}/answer/{answerId}")
 	public Answer updateAnswer(
 			@PathVariable final String contentId,
 			@PathVariable final String answerId,
@@ -542,7 +545,7 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Get Image, identified by content ID and answer ID",
 			nickname = "getImage")
-	@RequestMapping(value = "/{contentId}/answer/{answerId}/image", method = RequestMethod.GET)
+	@GetMapping("/{contentId}/answer/{answerId}/image")
 	public String getImage(
 			@PathVariable final String contentId,
 			@PathVariable final String answerId,
@@ -553,7 +556,7 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Delete answer, identified by content ID and answer ID",
 			nickname = "deleteAnswer")
-	@RequestMapping(value = "/{contentId}/answer/{answerId}", method = RequestMethod.DELETE)
+	@DeleteMapping("/{contentId}/answer/{answerId}")
 	public void deleteAnswer(
 			@PathVariable final String contentId,
 			@PathVariable final String answerId,
@@ -563,7 +566,7 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Delete answers from a content, identified by content ID",
 			nickname = "deleteAnswers")
-	@RequestMapping(value = "/{contentId}/answer/", method = RequestMethod.DELETE)
+	@DeleteMapping("/{contentId}/answer/")
 	public void deleteAnswers(
 			@PathVariable final String contentId,
 			final HttpServletResponse response) {
@@ -572,7 +575,7 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Delete all answers and contents from a room, identified by room short ID",
 			nickname = "deleteAllContentsAnswers")
-	@RequestMapping(value = "/answers", method = RequestMethod.DELETE)
+	@DeleteMapping("/answers")
 	public void deleteAllContentsAnswers(
 			@RequestParam(value = "sessionkey") final String roomShortId,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
@@ -605,14 +608,14 @@ public class ContentController extends PaginationController {
 			nickname = "getAnswerCount")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/{contentId}/answercount", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
+	@GetMapping(value = "/{contentId}/answercount", produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getAnswerCount(@PathVariable final String contentId) {
 		return String.valueOf(answerService.countAnswersByContentIdAndRound(contentId));
 	}
 
 	@ApiOperation(value = "Get the amount of answers for a content, identified by the content ID",
 			nickname = "getAllAnswerCount")
-	@RequestMapping(value = "/{contentId}/allroundanswercount", method = RequestMethod.GET)
+	@GetMapping("/{contentId}/allroundanswercount")
 	public List<Integer> getAllAnswerCount(@PathVariable final String contentId) {
 		return Arrays.asList(
 				answerService.countAnswersByContentIdAndRound(contentId, 1),
@@ -622,15 +625,14 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Get the total amount of answers by a content, identified by the content ID",
 			nickname = "getTotalAnswerCountByContent")
-	@RequestMapping(value = "/{contentId}/totalanswercount", method = RequestMethod.GET,
-			produces = MediaType.TEXT_PLAIN_VALUE)
+	@GetMapping(value = "/{contentId}/totalanswercount", produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getTotalAnswerCountByContent(@PathVariable final String contentId) {
 		return String.valueOf(answerService.countTotalAnswersByContentId(contentId));
 	}
 
 	@ApiOperation(value = "Get the amount of answers and abstention answers by a content, identified by the content ID",
 			nickname = "getAnswerAndAbstentionCount")
-	@RequestMapping(value = "/{contentId}/answerandabstentioncount", method = RequestMethod.GET)
+	@GetMapping("/{contentId}/answerandabstentioncount")
 	public List<Integer> getAnswerAndAbstentionCount(@PathVariable final String contentId) {
 		return Arrays.asList(
 				answerService.countAnswersByContentIdAndRound(contentId),
@@ -640,7 +642,7 @@ public class ContentController extends PaginationController {
 
 	@ApiOperation(value = "Get all Freetext answers by a content, identified by the content ID",
 			nickname = "getFreetextAnswers")
-	@RequestMapping(value = "/{contentId}/freetextanswer/", method = RequestMethod.GET)
+	@GetMapping("/{contentId}/freetextanswer/")
 	@Pagination
 	public List<Answer> getFreetextAnswers(@PathVariable final String contentId) {
 		return answerService.getTextAnswersByContentId(contentId, offset, limit).stream()
@@ -651,7 +653,7 @@ public class ContentController extends PaginationController {
 			nickname = "getMyAnswers")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/myanswers", method = RequestMethod.GET)
+	@GetMapping("/myanswers")
 	public List<Answer> getMyAnswers(@RequestParam(value = "sessionkey") final String roomShortId)
 			throws OperationNotSupportedException {
 		return answerService.getMyAnswersByRoomId(roomService.getIdByShortId(roomShortId)).stream()
@@ -669,7 +671,7 @@ public class ContentController extends PaginationController {
 			nickname = "getTotalAnswerCount")
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/answercount", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
+	@GetMapping(value = "/answercount", produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getTotalAnswerCount(
 			@RequestParam(value = "sessionkey") final String roomShortId,
 			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,

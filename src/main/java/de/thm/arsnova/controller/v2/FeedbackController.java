@@ -21,7 +21,9 @@ package de.thm.arsnova.controller.v2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -58,14 +60,14 @@ public class FeedbackController extends AbstractController {
 
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/feedback", method = RequestMethod.GET)
+	@GetMapping("/feedback")
 	public Feedback getFeedback(@PathVariable final String shortId) {
 		return feedbackService.getByRoomId(roomService.getIdByShortId(shortId));
 	}
 
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/myfeedback", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
+	@GetMapping(value = "/myfeedback", produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getMyFeedback(@PathVariable final String shortId) {
 		final String roomId = roomService.getIdByShortId(shortId);
 		final Integer value = feedbackService.getByRoomIdAndUserId(roomId, userService.getCurrentUser().getId());
@@ -77,28 +79,28 @@ public class FeedbackController extends AbstractController {
 
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/feedbackcount", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
+	@GetMapping(value = "/feedbackcount", produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getFeedbackCount(@PathVariable final String shortId) {
 		return String.valueOf(feedbackService.countFeedbackByRoomId(roomService.getIdByShortId(shortId)));
 	}
 
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/roundedaveragefeedback", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
+	@GetMapping(value = "/roundedaveragefeedback", produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getAverageFeedbackRounded(@PathVariable final String shortId) {
 		return String.valueOf(feedbackService.calculateRoundedAverageFeedback(roomService.getIdByShortId(shortId)));
 	}
 
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/averagefeedback", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
+	@GetMapping(value = "/averagefeedback", produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getAverageFeedback(@PathVariable final String shortId) {
 		return String.valueOf(feedbackService.calculateAverageFeedback(roomService.getIdByShortId(shortId)));
 	}
 
 	@DeprecatedApi
 	@Deprecated
-	@RequestMapping(value = "/feedback", method = RequestMethod.POST)
+	@PostMapping("/feedback")
 	@ResponseStatus(HttpStatus.CREATED)
 	public Feedback postFeedback(
 			@PathVariable final String shortId,

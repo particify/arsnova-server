@@ -30,8 +30,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -56,18 +56,18 @@ public class WelcomeController extends AbstractController {
 	@Autowired
 	private VersionInfoContributor versionInfoContributor;
 
-	@RequestMapping(value = "/", method = RequestMethod.GET)
+	@GetMapping("/")
 	public View home() {
 		return new RedirectView(mobileContextPath + "/", false);
 	}
 
-	@RequestMapping(value = "/", method = RequestMethod.GET, produces = "application/json")
+	@GetMapping(value = "/", produces = "application/json")
 	@ResponseBody
 	public Map<String, Object> jsonHome() {
 		return versionInfoContributor.getInfoDetails();
 	}
 
-	@RequestMapping(value = "/checkframeoptionsheader", method = RequestMethod.POST)
+	@PostMapping("/checkframeoptionsheader")
 	@ResponseStatus(HttpStatus.OK)
 	public void checkFrameOptionsHeader(
 			@RequestParam final String url,

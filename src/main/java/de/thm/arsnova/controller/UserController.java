@@ -101,7 +101,7 @@ public class UserController extends AbstractEntityController<UserProfile> {
 		}
 	}
 
-	@RequestMapping(value = ACTIVATE_MAPPING, method = RequestMethod.POST)
+	@PostMapping(ACTIVATE_MAPPING)
 	public void activate(
 			@PathVariable final String id,
 			@RequestParam final String key) {
@@ -113,7 +113,7 @@ public class UserController extends AbstractEntityController<UserProfile> {
 		userService.update(userProfile);
 	}
 
-	@RequestMapping(value = RESET_PASSWORD_MAPPING, method = RequestMethod.POST)
+	@PostMapping(RESET_PASSWORD_MAPPING)
 	public void resetPassword(
 			@PathVariable final String id,
 			@RequestBody final PasswordReset passwordReset) {
