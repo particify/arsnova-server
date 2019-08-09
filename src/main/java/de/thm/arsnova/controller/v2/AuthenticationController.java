@@ -250,7 +250,7 @@ public class AuthenticationController extends AbstractController {
 		if (auth instanceof CasAuthenticationToken) {
 			return "redirect:" + apiPath + SecurityConfig.CAS_LOGOUT_PATH_SUFFIX;
 		}
-		return "redirect:" + request.getHeader("referer") != null ? request.getHeader("referer") : "/";
+		return "redirect:" + (request.getHeader("referer") != null ? request.getHeader("referer") : "/");
 	}
 
 	@GetMapping("/services")
