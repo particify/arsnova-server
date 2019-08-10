@@ -328,7 +328,11 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 	@Override
 	public void authenticate(final UsernamePasswordAuthenticationToken token,
-			final UserProfile.AuthProvider authProvider) {
+			final UserProfile.AuthProvider authProvider, final String clientAddress) {
+		if (isBannedFromLogin(clientAddress)) {
+			throw new BadRequestException();
+		}
+
 		final Authentication auth;
 		switch (authProvider) {
 			case LDAP:
@@ -357,6 +361,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		}
 
 		if (!auth.isAuthenticated()) {
+			increaseFailedLoginCount(clientAddress);
 			throw new BadRequestException();
 		}
 		SecurityContextHolder.getContext().setAuthentication(auth);
@@ -438,7 +443,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		userProfile.setAuthProvider(UserProfile.AuthProvider.ARSNOVA);
 		userProfile.setLoginId(lcUsername);
 		account.setPassword(encodePassword(password));
-		account.setActivationKey(RandomStringUtils.randomAlphanumeric(32));
+		account.setActivationKey(RandomStringUtils.randomAlphanumeric(8));
 		userProfile.setCreationTimestamp(new Date());
 
 		/* Repository is accessed directly without EntityService to skip permission check */
@@ -462,15 +467,9 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 	private void sendActivationEmail(final UserProfile userProfile) {
 		final String activationKey = userProfile.getAccount().getActivationKey();
-		final String activationUrl = MessageFormat.format(
-				"{0}{1}/login?action=activate&username={3}&key={4}",
-				rootUrl,
-				customizationPath,
-				UriUtils.encodeQueryParam(userProfile.getLoginId(), "UTF-8"),
-				activationKey);
 
 		sendEmail(userProfile, registeredProperties.getRegistrationMailSubject(),
-				MessageFormat.format(registeredProperties.getRegistrationMailBody(), activationUrl, activationKey));
+				MessageFormat.format(registeredProperties.getRegistrationMailBody(), activationKey, rootUrl));
 	}
 
 	private void parseMailAddressPattern() {
@@ -544,6 +543,22 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		}
 	}
 
+	public boolean activateAccount(final String id, final String key, final String clientAddress) {
+		if (isBannedFromLogin(clientAddress)) {
+			return false;
+		}
+		final UserProfile userProfile = get(id, true);
+		if (userProfile == null || !key.equals(userProfile.getAccount().getActivationKey())) {
+			increaseFailedLoginCount(clientAddress);
+			return false;
+		}
+
+		userProfile.getAccount().setActivationKey(null);
+		update(userProfile);
+
+		return true;
+	}
+
 	@Override
 	public void initiatePasswordReset(final String username) {
 		final UserProfile userProfile = getByUsername(username);
@@ -563,27 +578,15 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 			throw new BadRequestException();
 		}
 
-		account.setPasswordResetKey(RandomStringUtils.randomAlphanumeric(32));
+		account.setPasswordResetKey(RandomStringUtils.randomAlphanumeric(8));
 		account.setPasswordResetTime(new Date());
 
 		if (null == userRepository.save(userProfile)) {
 			logger.error("Password reset failed. {} could not be updated.", username);
 		}
 
-		final String resetPasswordUrl = MessageFormat.format(
-				"{0}{1}/login?action=resetpassword&username={3}&key={4}",
-				rootUrl,
-				customizationPath,
-				UriUtils.encodeQueryParam(userProfile.getLoginId(), "UTF-8"), account.getPasswordResetKey());
-
-		final String mailBody = MessageFormat.format(
-				registeredProperties.getResetPasswordMailBody(),
-				resetPasswordUrl,
-				account.getPasswordResetKey()
-		);
-
-		sendEmail(userProfile, registeredProperties.getResetPasswordMailSubject(),
-				MessageFormat.format(mailBody, resetPasswordUrl));
+		sendEmail(userProfile, registeredProperties.getResetPasswordMailSubject(), MessageFormat.format(
+				registeredProperties.getResetPasswordMailBody(), account.getPasswordResetKey(), rootUrl));
 	}
 
 	@Override

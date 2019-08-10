@@ -69,7 +69,8 @@ public interface UserService extends EntityService<UserProfile> {
 
 	int loggedInUsers();
 
-	void authenticate(UsernamePasswordAuthenticationToken token, UserProfile.AuthProvider authProvider);
+	void authenticate(UsernamePasswordAuthenticationToken token, UserProfile.AuthProvider authProvider,
+			String clientAddress);
 
 	User loadUser(UserProfile.AuthProvider authProvider, String loginId,
 			Collection<GrantedAuthority> grantedAuthorities, boolean autoCreate) throws UsernameNotFoundException;
@@ -89,6 +90,8 @@ public interface UserService extends EntityService<UserProfile> {
 	UserProfile deleteByUsername(String username);
 
 	void addRoomToHistory(UserProfile userProfile, Room room);
+
+	boolean activateAccount(String id, String key, String clientAddress);
 
 	void initiatePasswordReset(String username);
 
