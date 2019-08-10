@@ -22,9 +22,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.micrometer.core.instrument.MeterRegistry;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang.CharEncoding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
@@ -116,7 +117,7 @@ import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 			"classpath:config/actuator.yml",
 			"file:${arsnova.config-dir:.}/application.yml"},
 		ignoreResourceNotFound = true,
-		encoding = "UTF-8",
+		encoding = CharEncoding.UTF_8,
 		factory = YamlPropertySourceFactory.class
 )
 @EnableConfigurationProperties(SystemProperties.class)
@@ -209,7 +210,7 @@ public class AppConfig implements WebMvcConfigurer {
 	@Bean
 	public StringHttpMessageConverter stringMessageConverter() {
 		final StringHttpMessageConverter messageConverter = new StringHttpMessageConverter();
-		messageConverter.setDefaultCharset(Charset.forName("UTF-8"));
+		messageConverter.setDefaultCharset(StandardCharsets.UTF_8);
 		messageConverter.setWriteAcceptCharset(false);
 		final List<MediaType> mediaTypes = new ArrayList<>();
 		mediaTypes.add(MediaType.TEXT_PLAIN);

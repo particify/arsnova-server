@@ -49,6 +49,11 @@ import de.thm.arsnova.persistence.RoomRepository;
  */
 @Component
 public class ApplicationPermissionEvaluator implements PermissionEvaluator {
+	public static final String READ_PERMISSION = "read";
+	public static final String CREATE_PERMISSION = "create";
+	public static final String UPDATE_PERMISSION = "update";
+	public static final String DELETE_PERMISSION = "delete";
+	public static final String OWNER_PERMISSION = "owner";
 	private static final Logger logger = LoggerFactory.getLogger(ApplicationPermissionEvaluator.class);
 
 	private List<String> adminAccounts;
@@ -146,16 +151,16 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final UserProfile targetUserProfile,
 			final String permission) {
 		switch (permission) {
-			case "read":
+			case READ_PERMISSION:
 				/* While the profile is readable for all authenticated users, it
 				 * only contains a limited amount of properties for the default
 				 * view. */
 				return true;
-			case "create":
+			case CREATE_PERMISSION:
 				return true;
-			case "owner":
-			case "update":
-			case "delete":
+			case OWNER_PERMISSION:
+			case UPDATE_PERMISSION:
+			case DELETE_PERMISSION:
 				return userId.equals(targetUserProfile.getId());
 			default:
 				return false;
@@ -167,15 +172,15 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Room targetRoom,
 			final String permission) {
 		switch (permission) {
-			case "read":
+			case READ_PERMISSION:
 				return !targetRoom.isClosed() || hasUserIdRoomModeratingPermission(targetRoom, userId);
-			case "create":
+			case CREATE_PERMISSION:
 				return !userId.isEmpty();
-			case "update":
+			case UPDATE_PERMISSION:
 				return targetRoom.getOwnerId().equals(userId)
 						|| hasUserIdRoomModeratorRole(targetRoom, userId, Room.Moderator.Role.EDITING_MODERATOR);
-			case "owner":
-			case "delete":
+			case OWNER_PERMISSION:
+			case DELETE_PERMISSION:
 				return targetRoom.getOwnerId().equals(userId);
 			default:
 				return false;
@@ -192,12 +197,12 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		}
 
 		switch (permission) {
-			case "read":
+			case READ_PERMISSION:
 				return !room.isClosed() || hasUserIdRoomModeratingPermission(room, userId);
-			case "create":
-			case "update":
-			case "delete":
-			case "owner":
+			case CREATE_PERMISSION:
+			case UPDATE_PERMISSION:
+			case DELETE_PERMISSION:
+			case OWNER_PERMISSION:
 				/* TODO: Remove owner permission for content. Use create/update/delete instead. */
 				return room.getOwnerId().equals(userId)
 						|| hasUserIdRoomModeratorRole(room, userId, Room.Moderator.Role.EDITING_MODERATOR);
@@ -216,20 +221,20 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		}
 		final Room room;
 		switch (permission) {
-			case "read":
+			case READ_PERMISSION:
 				if (targetAnswer.getCreatorId().equals(userId) || content.getState().isResponsesVisible()) {
 					return true;
 				}
 				room = roomRepository.findOne(targetAnswer.getRoomId());
 				return room != null && hasUserIdRoomModeratingPermission(room, userId);
-			case "create":
+			case CREATE_PERMISSION:
 				return content.getState().isResponsesEnabled();
-			case "owner":
+			case OWNER_PERMISSION:
 				return targetAnswer.getCreatorId().equals(userId);
-			case "update":
+			case UPDATE_PERMISSION:
 				/* TODO */
 				return false;
-			case "delete":
+			case DELETE_PERMISSION:
 				room = roomRepository.findOne(targetAnswer.getRoomId());
 				return room != null && hasUserIdRoomModeratingPermission(room, userId);
 			default:
@@ -242,13 +247,13 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final Comment targetComment,
 			final String permission) {
 		switch (permission) {
-			case "create":
+			case CREATE_PERMISSION:
 				return !userId.isEmpty() && !roomRepository.findOne(targetComment.getRoomId()).isClosed();
-			case "owner":
-			case "update":
+			case OWNER_PERMISSION:
+			case UPDATE_PERMISSION:
 				return targetComment.getCreatorId() != null && targetComment.getCreatorId().equals(userId);
-			case "read":
-			case "delete":
+			case READ_PERMISSION:
+			case DELETE_PERMISSION:
 				if (targetComment.getCreatorId() != null && targetComment.getCreatorId().equals(userId)) {
 					return true;
 				}
@@ -268,9 +273,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			final String permission) {
 		final Room room;
 		switch (permission) {
-			case "create":
-			case "update":
-			case "delete":
+			case CREATE_PERMISSION:
+			case UPDATE_PERMISSION:
+			case DELETE_PERMISSION:
 				if (userId.isEmpty() || targetMotd.getRoomId() == null || targetMotd.getAudience() != Motd.Audience.ROOM) {
 					return false;
 				}
@@ -281,7 +286,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 				return userId.equals(room.getOwnerId())
 						|| hasUserIdRoomModeratorRole(room, userId, Room.Moderator.Role.EDITING_MODERATOR);
-			case "read":
+			case READ_PERMISSION:
 				if (targetMotd.getAudience() != Motd.Audience.ROOM) {
 					return true;
 				}

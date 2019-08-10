@@ -285,9 +285,9 @@ public class AuthenticationController extends AbstractController {
 
 		if (ldapProperties.get(0).isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(
-					"ldap",
+					SecurityConfig.LDAP_PROVIDER_ID,
 					ldapProperties.get(0).getTitle(),
-					customizationPath + "/login?provider=ldap&redirect={0}",
+					customizationPath + "/login?provider=" + SecurityConfig.LDAP_PROVIDER_ID + "&redirect={0}",
 					ldapProperties.get(0).getAllowedRoles()
 			);
 			sdesc.setOrder(ldapProperties.get(0).getOrder());
@@ -296,9 +296,9 @@ public class AuthenticationController extends AbstractController {
 
 		if (casProperties.isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(
-					"cas",
+					SecurityConfig.CAS_PROVIDER_ID,
 					casProperties.getTitle(),
-					MessageFormat.format(dialogUrl, "cas"),
+					MessageFormat.format(dialogUrl, SecurityConfig.CAS_PROVIDER_ID),
 					casProperties.getAllowedRoles()
 			);
 			sdesc.setOrder(casProperties.getOrder());
@@ -307,45 +307,48 @@ public class AuthenticationController extends AbstractController {
 
 		if (oidcProperties.get(0).isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(
-					"oidc",
+					SecurityConfig.OIDC_PROVIDER_ID,
 					oidcProperties.get(0).getTitle(),
-					MessageFormat.format(dialogUrl, "oidc"),
+					MessageFormat.format(dialogUrl, SecurityConfig.OIDC_PROVIDER_ID),
 					oidcProperties.get(0).getAllowedRoles()
 			);
 			sdesc.setOrder(oidcProperties.get(0).getOrder());
 			services.add(sdesc);
 		}
 
-		final AuthenticationProviderProperties.Oauth facebookProperties = oauthProperties.get("facebook");
+		final AuthenticationProviderProperties.Oauth facebookProperties =
+				oauthProperties.get(SecurityConfig.FACEBOOK_PROVIDER_ID);
 		if (facebookProperties != null && facebookProperties.isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(
-					"facebook",
+					SecurityConfig.FACEBOOK_PROVIDER_ID,
 					"Facebook",
-					MessageFormat.format(dialogUrl, "facebook"),
+					MessageFormat.format(dialogUrl, SecurityConfig.FACEBOOK_PROVIDER_ID),
 					facebookProperties.getAllowedRoles()
 			);
 			sdesc.setOrder(facebookProperties.getOrder());
 			services.add(sdesc);
 		}
 
-		final AuthenticationProviderProperties.Oauth googleProperties = oauthProperties.get("google");
+		final AuthenticationProviderProperties.Oauth googleProperties =
+				oauthProperties.get(SecurityConfig.GOOGLE_PROVIDER_ID);
 		if (googleProperties != null && googleProperties.isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(
-					"google",
+					SecurityConfig.GOOGLE_PROVIDER_ID,
 					"Google",
-					MessageFormat.format(dialogUrl, "google"),
+					MessageFormat.format(dialogUrl, SecurityConfig.GOOGLE_PROVIDER_ID),
 					googleProperties.getAllowedRoles()
 			);
 			sdesc.setOrder(googleProperties.getOrder());
 			services.add(sdesc);
 		}
 
-		final AuthenticationProviderProperties.Oauth twitterProperties = oauthProperties.get("twitter");
+		final AuthenticationProviderProperties.Oauth twitterProperties =
+				oauthProperties.get(SecurityConfig.TWITTER_PROVIDER_ID);
 		if (twitterProperties != null && twitterProperties.isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(
-					"twitter",
+					SecurityConfig.TWITTER_PROVIDER_ID,
 					"Twitter",
-					MessageFormat.format(dialogUrl, "twitter"),
+					MessageFormat.format(dialogUrl, SecurityConfig.TWITTER_PROVIDER_ID),
 					twitterProperties.getAllowedRoles()
 			);
 			sdesc.setOrder(twitterProperties.getOrder());

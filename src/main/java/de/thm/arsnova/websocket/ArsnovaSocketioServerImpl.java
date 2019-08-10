@@ -79,6 +79,32 @@ import de.thm.arsnova.websocket.message.Room;
  */
 @Component
 public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
+	private static final String ACTIVE_USER_COUNT_DATA_EVENTNAME = "activeUserCountData";
+	private static final String SET_ROOM_ACTIVE_EVENTNAME = "setSessionActive";
+	private static final String FEATURE_CHANGE_EVENTNAME = "featureChange";
+	private static final String COMMENT_AVAILABLE_EVENTNAME = "audQuestionAvail";
+	private static final String CONTENT_AVAILABLE_SINGLE_EVENTNAME = "lecQuestionAvail";
+	private static final String CONTENT_AVAILABLE_LIST_EVENTNAME = "lecturerQuestionAvailable";
+	private static final String CONTENT_LOCKED_EVENTNAME = "lecturerQuestionLocked";
+	private static final String UNANSWERED_LECTURE_CONTENTS_EVENTNAME = "unansweredLecturerQuestions";
+	private static final String UNANSWERED_PREPARATION_CONTENTS_EVENTNAME = "unansweredPreparationQuestions";
+	private static final String ANSWERS_TO_CONTENT_AVAILABLE_EVENTNAME = "answersToLecQuestionAvail";
+	private static final String COUNT_LECTURE_CONTENT_ANSWERS_EVENTNAME = "countLectureQuestionAnswers";
+	private static final String COUNT_PREPARATION_CONTENT_ANSWERS_EVENTNAME = "countPreparationQuestionAnswers";
+	private static final String COUNT_CONTENT_ANSWERS_BY_CONTENT_ID_EVENTNAME = "countQuestionAnswersByQuestionId";
+	private static final String COUNT_FLASHCARDS_EVENTNAME = "countFlashcards";
+	private static final String FLIP_FLASHCARDS_EVENTNAME = "flipFlashcards";
+	private static final String FEEDBACK_DATA_EVENTNAME = "feedbackData";
+	private static final String FEEDBACK_DATA_ROUNDED_AVERAGE_EVENTNAME = "feedbackDataRoundedAverage";
+	private static final String FEEDBACK_RESET_EVENTNAME = "feedbackReset";
+	private static final String LOCK_FEEDBACK_EVENTNAME = "lockFeedback";
+	private static final String START_DELAYED_ROUND_EVENTNAME = "startDelayedPiRound";
+	private static final String END_ROUND_EVENTNAME = "endPiRound";
+	private static final String CANCEL_ROUND_EVENTNAME = "cancelPiRound";
+	private static final String RESET_ROUND_EVENTNAME = "resetPiRound";
+	private static final String LOCK_VOTE_EVENTNAME = "lockVote";
+	private static final String UNLOCK_VOTE_EVENTNAME = "unlockVote";
+	private static final String SCORE_CHANGE_EVENTNAME = "learningProgressChange";
 
 	@Autowired
 	private FeedbackService feedbackService;
@@ -349,7 +375,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 		for (final de.thm.arsnova.model.Room room : rooms) {
 			roomShortIds.add(room.getShortId());
 		}
-		this.sendToUser(userId, "feedbackReset", roomShortIds);
+		this.sendToUser(userId, FEEDBACK_RESET_EVENTNAME, roomShortIds);
 	}
 
 	private List<UUID> findConnectionIdForUserId(final String userId) {
@@ -384,42 +410,42 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 		final de.thm.arsnova.model.Room room = roomService.getInternal(roomId, userId);
 		final de.thm.arsnova.model.Room.Settings settings = room.getSettings();
 
-		client.sendEvent("unansweredLecturerQuestions",
+		client.sendEvent(UNANSWERED_LECTURE_CONTENTS_EVENTNAME,
 				contentService.getUnAnsweredLectureContentIds(roomId, userId));
-		client.sendEvent("unansweredPreparationQuestions",
+		client.sendEvent(UNANSWERED_PREPARATION_CONTENTS_EVENTNAME,
 				contentService.getUnAnsweredPreparationContentIds(roomId, userId));
 		/* FIXME: Content variant is ignored for now */
-		client.sendEvent("countLectureQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
-		client.sendEvent("countPreparationQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
-		client.sendEvent("activeUserCountData", roomService.activeUsers(roomId));
+		client.sendEvent(COUNT_LECTURE_CONTENT_ANSWERS_EVENTNAME, answerService.countTotalAnswersByRoomId(roomId));
+		client.sendEvent(COUNT_PREPARATION_CONTENT_ANSWERS_EVENTNAME, answerService.countTotalAnswersByRoomId(roomId));
+		client.sendEvent(ACTIVE_USER_COUNT_DATA_EVENTNAME, roomService.activeUsers(roomId));
 		/* FIXME: missing implementation */
 		//client.sendEvent("learningProgressOptions", room.getLearningProgressOptions());
 		final de.thm.arsnova.model.Feedback fb = feedbackService.getByRoomId(roomId);
-		client.sendEvent("feedbackData", fb.getValues());
+		client.sendEvent(FEEDBACK_DATA_EVENTNAME, fb.getValues());
 
 		if (settings.isFlashcardsEnabled()) {
-			client.sendEvent("countFlashcards", contentService.countFlashcardsForUserInternal(roomId));
+			client.sendEvent(COUNT_FLASHCARDS_EVENTNAME, contentService.countFlashcardsForUserInternal(roomId));
 			/* FIXME: missing implementation */
 			//client.sendEvent("flipFlashcards", room.getFlipFlashcards());
 		}
 
 		try {
 			final long averageFeedback = feedbackService.calculateRoundedAverageFeedback(roomId);
-			client.sendEvent("feedbackDataRoundedAverage", averageFeedback);
+			client.sendEvent(FEEDBACK_DATA_ROUNDED_AVERAGE_EVENTNAME, averageFeedback);
 		} catch (final NoContentException e) {
 			final Object object = null; // can't directly use "null".
-			client.sendEvent("feedbackDataRoundedAverage", object);
+			client.sendEvent(FEEDBACK_DATA_ROUNDED_AVERAGE_EVENTNAME, object);
 		}
 	}
 
 	public void reportUpdatedFeedbackForRoom(final String roomId) {
 		final de.thm.arsnova.model.Feedback fb = feedbackService.getByRoomId(roomId);
-		broadcastInRoom(roomId, "feedbackData", fb.getValues());
+		broadcastInRoom(roomId, FEEDBACK_DATA_EVENTNAME, fb.getValues());
 		try {
 			final long averageFeedback = feedbackService.calculateRoundedAverageFeedback(roomId);
-			broadcastInRoom(roomId, "feedbackDataRoundedAverage", averageFeedback);
+			broadcastInRoom(roomId, FEEDBACK_DATA_ROUNDED_AVERAGE_EVENTNAME, averageFeedback);
 		} catch (final NoContentException e) {
-			broadcastInRoom(roomId, "feedbackDataRoundedAverage", null);
+			broadcastInRoom(roomId, FEEDBACK_DATA_ROUNDED_AVERAGE_EVENTNAME, null);
 		}
 	}
 
@@ -438,8 +464,8 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 
 		for (final SocketIOClient client : server.getAllClients()) {
 			if (connectionIds.contains(client.getSessionId())) {
-				client.sendEvent("feedbackData", fb.getValues());
-				client.sendEvent("feedbackDataRoundedAverage", averageFeedback);
+				client.sendEvent(FEEDBACK_DATA_EVENTNAME, fb.getValues());
+				client.sendEvent(FEEDBACK_DATA_ROUNDED_AVERAGE_EVENTNAME, averageFeedback);
 			}
 		}
 	}
@@ -447,16 +473,16 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 	public void reportActiveUserCountForRoom(final String roomId) {
 		final int count = userService.getUsersByRoomId(roomId).size();
 
-		broadcastInRoom(roomId, "activeUserCountData", count);
+		broadcastInRoom(roomId, ACTIVE_USER_COUNT_DATA_EVENTNAME, count);
 	}
 
 	public void reportAnswersToContentAvailable(final String roomId, final String contentId) {
-		broadcastInRoom(roomId, "answersToLecQuestionAvail", contentId);
+		broadcastInRoom(roomId, ANSWERS_TO_CONTENT_AVAILABLE_EVENTNAME, contentId);
 	}
 
 	public void reportCommentAvailable(final String roomId, final String commentId) {
 		/* TODO role handling implementation, send this only to users with role lecturer */
-		broadcastInRoom(roomId, "audQuestionAvail", commentId);
+		broadcastInRoom(roomId, COMMENT_AVAILABLE_EVENTNAME, commentId);
 	}
 
 	public void reportContentAvailable(final String roomId, final List<de.thm.arsnova.model.Content> qs) {
@@ -467,9 +493,9 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 
 		/* TODO role handling implementation, send this only to users with role audience */
 		if (!qs.isEmpty()) {
-			broadcastInRoom(roomId, "lecQuestionAvail", contents.get(0).getId()); // deprecated!
+			broadcastInRoom(roomId, CONTENT_AVAILABLE_SINGLE_EVENTNAME, contents.get(0).getId()); // deprecated!
 		}
-		broadcastInRoom(roomId, "lecturerQuestionAvailable", contents);
+		broadcastInRoom(roomId, CONTENT_AVAILABLE_LIST_EVENTNAME, contents);
 	}
 
 	public void reportContentsLocked(final String roomId, final List<de.thm.arsnova.model.Content> qs) {
@@ -477,11 +503,11 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 		for (final de.thm.arsnova.model.Content q : qs) {
 			contents.add(new Content(q));
 		}
-		broadcastInRoom(roomId, "lecturerQuestionLocked", contents);
+		broadcastInRoom(roomId, CONTENT_LOCKED_EVENTNAME, contents);
 	}
 
 	public void reportRoomStatus(final String roomId, final boolean active) {
-		broadcastInRoom(roomId, "setSessionActive", active);
+		broadcastInRoom(roomId, SET_ROOM_ACTIVE_EVENTNAME, active);
 	}
 
 	public void broadcastInRoom(final String roomId, final String eventName, final Object data) {
@@ -525,12 +551,12 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 	public void handleNewAnswer(final AfterCreationEvent<Answer> event) {
 		final String roomId = event.getEntity().getRoomId();
 		this.reportAnswersToContentAvailable(event.getEntity().getRoomId(), event.getEntity().getContentId());
-		broadcastInRoom(roomId, "countQuestionAnswersByQuestionId",
+		broadcastInRoom(roomId, COUNT_CONTENT_ANSWERS_BY_CONTENT_ID_EVENTNAME,
 				answerService.countAnswersAndAbstentionsInternal(event.getEntity().getContentId()));
 		/* FIXME: Content variant is ignored for now */
-		broadcastInRoom(roomId, "countLectureQuestionAnswers",
+		broadcastInRoom(roomId, COUNT_LECTURE_CONTENT_ANSWERS_EVENTNAME,
 				answerService.countTotalAnswersByRoomId(roomId));
-		broadcastInRoom(roomId, "countPreparationQuestionAnswers",
+		broadcastInRoom(roomId, COUNT_PREPARATION_CONTENT_ANSWERS_EVENTNAME,
 				answerService.countTotalAnswersByRoomId(roomId));
 
 		// Update the unanswered count for the content variant that was answered.
@@ -547,8 +573,10 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 		this.reportAnswersToContentAvailable(event.getEntity().getRoomId(), event.getEntity().getContentId());
 		// We do not know which user's answer was deleted, so we can't update his 'unanswered' list of questions...
 		/* FIXME: Content variant is ignored for now */
-		broadcastInRoom(roomId, "countLectureQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
-		broadcastInRoom(roomId, "countPreparationQuestionAnswers", answerService.countTotalAnswersByRoomId(roomId));
+		broadcastInRoom(roomId, COUNT_LECTURE_CONTENT_ANSWERS_EVENTNAME,
+				answerService.countTotalAnswersByRoomId(roomId));
+		broadcastInRoom(roomId, COUNT_PREPARATION_CONTENT_ANSWERS_EVENTNAME,
+				answerService.countTotalAnswersByRoomId(roomId));
 	}
 
 	@Async
@@ -556,7 +584,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 	@Timed
 	public void handlePiRoundDelayedStart(
 			final StateChangeEvent<de.thm.arsnova.model.Content, de.thm.arsnova.model.Content.State> event) {
-		broadcastInRoom(event.getEntity().getRoomId(), "startDelayedPiRound",
+		broadcastInRoom(event.getEntity().getRoomId(), START_DELAYED_ROUND_EVENTNAME,
 				generateRoundInfo(event.getEntity()));
 	}
 
@@ -565,7 +593,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 	@Timed
 	public void handlePiRoundEnd(
 			final StateChangeEvent<de.thm.arsnova.model.Content, de.thm.arsnova.model.Content.State> event) {
-		broadcastInRoom(event.getEntity().getRoomId(), "endPiRound", generateRoundInfo(event.getEntity()));
+		broadcastInRoom(event.getEntity().getRoomId(), END_ROUND_EVENTNAME, generateRoundInfo(event.getEntity()));
 	}
 
 	@Async
@@ -573,13 +601,13 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 	@Timed
 	public void handlePiRoundCancel(
 			final StateChangeEvent<de.thm.arsnova.model.Content, de.thm.arsnova.model.Content.State> event) {
-		broadcastInRoom(event.getEntity().getRoomId(), "cancelPiRound", event.getEntity().getId());
+		broadcastInRoom(event.getEntity().getRoomId(), CANCEL_ROUND_EVENTNAME, event.getEntity().getId());
 	}
 
 	@EventListener(condition = "#event.stateName == 'state'")
 	public void handlePiRoundReset(
 			final StateChangeEvent<de.thm.arsnova.model.Content, de.thm.arsnova.model.Content.State> event) {
-		broadcastInRoom(event.getEntity().getRoomId(), "resetPiRound", generateRoundInfo(event.getEntity()));
+		broadcastInRoom(event.getEntity().getRoomId(), RESET_ROUND_EVENTNAME, generateRoundInfo(event.getEntity()));
 	}
 
 	private Map<String, Object> generateRoundInfo(final de.thm.arsnova.model.Content content) {
@@ -611,9 +639,9 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 		map.put("variant", groupName);
 		if (event.getEntity().getState().isResponsesEnabled()) {
 			this.reportContentAvailable(event.getEntity().getRoomId(), Collections.singletonList(event.getEntity()));
-			broadcastInRoom(event.getEntity().getRoomId(), "unlockVote", map);
+			broadcastInRoom(event.getEntity().getRoomId(), UNLOCK_VOTE_EVENTNAME, map);
 		} else {
-			broadcastInRoom(event.getEntity().getRoomId(), "lockVote", map);
+			broadcastInRoom(event.getEntity().getRoomId(), LOCK_VOTE_EVENTNAME, map);
 		}
 	}
 
@@ -622,10 +650,10 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 			final StateChangeEvent<de.thm.arsnova.model.Room, de.thm.arsnova.model.Room.Settings> event) {
 		final String roomId = event.getEntity().getId();
 		final de.thm.arsnova.model.Room.Settings settings = event.getEntity().getSettings();
-		broadcastInRoom(roomId, "featureChange", toV2Migrator.migrate(settings));
+		broadcastInRoom(roomId, FEATURE_CHANGE_EVENTNAME, toV2Migrator.migrate(settings));
 
 		if (settings.isFlashcardsEnabled()) {
-			broadcastInRoom(roomId, "countFlashcards",
+			broadcastInRoom(roomId, COUNT_FLASHCARDS_EVENTNAME,
 					contentService.countFlashcardsForUserInternal(roomId));
 			/* FIXME: missing implementation */
 			//broadcastInRoom(roomId, "flipFlashcards", event.getEntity().getSettings().isFlipFlashcards());
@@ -635,14 +663,14 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 	@EventListener(condition = "#event.stateName == 'settings'")
 	public void handleLockFeedback(
 			final StateChangeEvent<de.thm.arsnova.model.Room, de.thm.arsnova.model.Room.Settings> event) {
-		broadcastInRoom(event.getEntity().getId(), "lockFeedback",
+		broadcastInRoom(event.getEntity().getId(), LOCK_FEEDBACK_EVENTNAME,
 				event.getEntity().getSettings().isFeedbackLocked());
 	}
 
 	@EventListener
 	public void handleFlipFlashcards(final FlipFlashcardsEvent event) {
 		/* FIXME: missing implementation */
-		//broadcastInRoom(event.getRoom().getId(), "flipFlashcards", event.getRoom().getFlipFlashcards());
+		//broadcastInRoom(event.getRoom().getId(), FLIP_FLASHCARDS_EVENTNAME, event.getRoom().getFlipFlashcards());
 	}
 
 	@EventListener
@@ -663,6 +691,6 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 
 	@EventListener
 	public void handleChangeScore(final ChangeScoreEvent event) {
-		broadcastInRoom(event.getRoomId(), "learningProgressChange", null);
+		broadcastInRoom(event.getRoomId(), SCORE_CHANGE_EVENTNAME, null);
 	}
 }

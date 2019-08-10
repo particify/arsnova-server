@@ -37,21 +37,25 @@ import de.thm.arsnova.model.Room;
  */
 @Component
 public class StateEventDispatcher implements ApplicationEventPublisherAware {
+	private static final String STATE_PROPERTY = "state";
+	private static final String SETTINGS_PROPERTY = "settings";
+	private static final String CLOSED_PROPERTY = "closed";
+
 	private ApplicationEventPublisher eventPublisher;
 
 	@EventListener
 	public void dispatchRoomStateEvent(final AfterFullUpdateEvent<Room> event) {
 		final Room newRoom = event.getEntity();
 		final Room oldRoom = event.getOldEntity();
-		publishEventIfPropertyChanged(newRoom, oldRoom, Room::isClosed, "closed");
-		publishEventIfPropertyChanged(newRoom, oldRoom, Room::getSettings, "settings");
+		publishEventIfPropertyChanged(newRoom, oldRoom, Room::isClosed, CLOSED_PROPERTY);
+		publishEventIfPropertyChanged(newRoom, oldRoom, Room::getSettings, SETTINGS_PROPERTY);
 	}
 
 	@EventListener
 	public void dispatchRoomStateEvent(final AfterPatchEvent<Room> event) {
-		publishEventIfPropertyChanged(event, Function.identity(), "closed", "closed");
-		publishEventIfPropertyChanged(event, Function.identity(), "settings", "settings");
-		publishEventIfPropertyChanged(event, Room::getSettings, null, "settings");
+		publishEventIfPropertyChanged(event, Function.identity(), CLOSED_PROPERTY, CLOSED_PROPERTY);
+		publishEventIfPropertyChanged(event, Function.identity(), SETTINGS_PROPERTY, SETTINGS_PROPERTY);
+		publishEventIfPropertyChanged(event, Room::getSettings, null, SETTINGS_PROPERTY);
 	}
 
 	@EventListener
@@ -60,13 +64,13 @@ public class StateEventDispatcher implements ApplicationEventPublisherAware {
 		final Content oldContent = event.getOldEntity();
 		final Function<Content, Content.State> f = Content::getState;
 		f.apply(newContent);
-		publishEventIfPropertyChanged(newContent, oldContent, Content::getState, "state");
+		publishEventIfPropertyChanged(newContent, oldContent, Content::getState, STATE_PROPERTY);
 	}
 
 	@EventListener
 	public void dispatchContentStateEvent(final AfterPatchEvent<Content> event) {
-		publishEventIfPropertyChanged(event, Function.identity(), "state", "state");
-		publishEventIfPropertyChanged(event, Content::getState, null, "state");
+		publishEventIfPropertyChanged(event, Function.identity(), STATE_PROPERTY, STATE_PROPERTY);
+		publishEventIfPropertyChanged(event, Content::getState, null, STATE_PROPERTY);
 	}
 
 	private <E extends Entity, T extends Object> void publishEventIfPropertyChanged(

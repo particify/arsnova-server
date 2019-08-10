@@ -116,6 +116,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public static final String CAS_LOGIN_PATH_SUFFIX = "/auth/login/cas";
 	public static final String CAS_LOGOUT_PATH_SUFFIX = "/auth/logout/cas";
 	public static final String RUN_AS_KEY_PREFIX = "RUN_AS_KEY";
+	public static final String INTERNAL_PROVIDER_ID = "user-db";
+	public static final String LDAP_PROVIDER_ID = "ldap";
+	public static final String OIDC_PROVIDER_ID = "oidc";
+	public static final String CAS_PROVIDER_ID = "cas";
+	public static final String GOOGLE_PROVIDER_ID = "google";
+	public static final String TWITTER_PROVIDER_ID = "twitter";
+	public static final String FACEBOOK_PROVIDER_ID = "facebook";
 	private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
 	private ServletContext servletContext;
@@ -250,32 +257,32 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		auth.authenticationProvider(jwtAuthenticationProvider());
 		logger.info("oauthProps: {}", providerProperties.getOauth());
 		if (providerProperties.getLdap().stream().anyMatch(p -> p.isEnabled())) {
-			providers.add("ldap");
+			providers.add(LDAP_PROVIDER_ID);
 			auth.authenticationProvider(ldapAuthenticationProvider());
 		}
 		if (providerProperties.getCas().isEnabled()) {
-			providers.add("cas");
+			providers.add(CAS_PROVIDER_ID);
 			auth.authenticationProvider(casAuthenticationProvider());
 		}
 		if (providerProperties.getRegistered().isEnabled()) {
-			providers.add("user-db");
+			providers.add(INTERNAL_PROVIDER_ID);
 			auth.authenticationProvider(daoAuthenticationProvider());
 		}
 		if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())) {
-			providers.add("oidc");
+			providers.add(OIDC_PROVIDER_ID);
 		}
 		if (providerProperties.getOauth().values().stream().anyMatch(p -> p.isEnabled())) {
-			if (providerProperties.getOauth().containsKey("google")
-					&& providerProperties.getOauth().get("google").isEnabled()) {
-				providers.add("google");
+			if (providerProperties.getOauth().containsKey(GOOGLE_PROVIDER_ID)
+					&& providerProperties.getOauth().get(GOOGLE_PROVIDER_ID).isEnabled()) {
+				providers.add(GOOGLE_PROVIDER_ID);
 			}
-			if (providerProperties.getOauth().containsKey("facebook")
-					&& providerProperties.getOauth().get("facebook").isEnabled()) {
-				providers.add("facebook");
+			if (providerProperties.getOauth().containsKey(FACEBOOK_PROVIDER_ID)
+					&& providerProperties.getOauth().get(FACEBOOK_PROVIDER_ID).isEnabled()) {
+				providers.add(FACEBOOK_PROVIDER_ID);
 			}
-			if (providerProperties.getOauth().containsKey("twitter")
-					&& providerProperties.getOauth().get("twitter").isEnabled()) {
-				providers.add("twitter");
+			if (providerProperties.getOauth().containsKey(TWITTER_PROVIDER_ID)
+					&& providerProperties.getOauth().get(TWITTER_PROVIDER_ID).isEnabled()) {
+				providers.add(TWITTER_PROVIDER_ID);
 			}
 			auth.authenticationProvider(oauthAuthenticationProvider());
 		}
@@ -513,16 +520,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())) {
 			clients.add(oidcClient());
 		}
-		if (providerProperties.getOauth().containsKey("facebook")
-				&& providerProperties.getOauth().get("facebook").isEnabled()) {
+		if (providerProperties.getOauth().containsKey(FACEBOOK_PROVIDER_ID)
+				&& providerProperties.getOauth().get(FACEBOOK_PROVIDER_ID).isEnabled()) {
 			clients.add(facebookClient());
 		}
-		if (providerProperties.getOauth().containsKey("google")
-				&& providerProperties.getOauth().get("google").isEnabled()) {
+		if (providerProperties.getOauth().containsKey(GOOGLE_PROVIDER_ID)
+				&& providerProperties.getOauth().get(GOOGLE_PROVIDER_ID).isEnabled()) {
 			clients.add(googleClient());
 		}
-		if (providerProperties.getOauth().containsKey("twitter")
-				&& providerProperties.getOauth().get("twitter").isEnabled()) {
+		if (providerProperties.getOauth().containsKey(TWITTER_PROVIDER_ID)
+				&& providerProperties.getOauth().get(TWITTER_PROVIDER_ID).isEnabled()) {
 			clients.add(twitterClient());
 		}
 
@@ -559,7 +566,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public FacebookClient facebookClient() {
-		final AuthenticationProviderProperties.Oauth oauthProperties = providerProperties.getOauth().get("facebook");
+		final AuthenticationProviderProperties.Oauth oauthProperties =
+				providerProperties.getOauth().get(FACEBOOK_PROVIDER_ID);
 		final FacebookClient client = new FacebookClient(oauthProperties.getKey(), oauthProperties.getSecret());
 		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH_SUFFIX + "?client_name=FacebookClient");
 
@@ -568,7 +576,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public TwitterClient twitterClient() {
-		final AuthenticationProviderProperties.Oauth oauthProperties = providerProperties.getOauth().get("twitter");
+		final AuthenticationProviderProperties.Oauth oauthProperties =
+				providerProperties.getOauth().get(TWITTER_PROVIDER_ID);
 		final TwitterClient client = new TwitterClient(oauthProperties.getKey(), oauthProperties.getSecret());
 		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH_SUFFIX + "?client_name=TwitterClient");
 
@@ -577,7 +586,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public GoogleOidcClient googleClient() {
-		final AuthenticationProviderProperties.Oauth oauthProperties = providerProperties.getOauth().get("google");
+		final AuthenticationProviderProperties.Oauth oauthProperties =
+				providerProperties.getOauth().get(GOOGLE_PROVIDER_ID);
 		final OidcConfiguration config = new OidcConfiguration();
 		config.setClientId(oauthProperties.getKey());
 		config.setSecret(oauthProperties.getSecret());
