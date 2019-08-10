@@ -20,7 +20,6 @@ package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 
@@ -36,10 +35,6 @@ public class LogEntry extends Entity {
 		FATAL
 	}
 
-	private String id;
-	private String rev;
-	private Date creationTimestamp;
-	private Date updateTimestamp;
 	private String event;
 	private int level;
 	private Map<String, Object> payload;
@@ -49,50 +44,6 @@ public class LogEntry extends Entity {
 		this.event = event;
 		this.level = level;
 		this.payload = payload;
-	}
-
-	@JsonView(View.Persistence.class)
-	public String getId() {
-		return id;
-	}
-
-	@JsonView(View.Persistence.class)
-	public void setId(final String id) {
-		this.id = id;
-	}
-
-	@JsonView(View.Persistence.class)
-	public String getRevision() {
-		return rev;
-	}
-
-	@JsonView(View.Persistence.class)
-	public void setRevision(final String rev) {
-		this.rev = rev;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public Date getCreationTimestamp() {
-		return creationTimestamp;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public void setCreationTimestamp(final Date creationTimestamp) {
-		this.creationTimestamp = creationTimestamp;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public Date getUpdateTimestamp() {
-		return updateTimestamp;
-	}
-
-	@Override
-	@JsonView(View.Persistence.class)
-	public void setUpdateTimestamp(final Date updateTimestamp) {
-		this.updateTimestamp = updateTimestamp;
 	}
 
 	@JsonView(View.Persistence.class)
