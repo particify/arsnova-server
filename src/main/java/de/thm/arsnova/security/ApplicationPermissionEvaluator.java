@@ -339,8 +339,4 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		return auth instanceof RunAsUserToken
 				&& auth.getAuthorities().stream().anyMatch(ga -> ga.getAuthority().equals("ROLE_RUN_AS_SYSTEM"));
 	}
-
-	private boolean isWebsocketAccess(final Authentication auth) {
-		return auth instanceof AnonymousAuthenticationToken && auth.getAuthorities().contains("ROLE_WEBSOCKET_ACCESS");
-	}
 }
