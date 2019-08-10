@@ -278,14 +278,6 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 					}
 				});
 
-		server.addConnectListener(new ConnectListener() {
-			@Override
-			@Timed("onConnect")
-			public void onConnect(final SocketIOClient client) {
-
-			}
-		});
-
 		server.addDisconnectListener(new DisconnectListener() {
 			@Override
 			@Timed("onDisconnect")
