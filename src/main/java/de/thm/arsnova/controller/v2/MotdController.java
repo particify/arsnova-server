@@ -30,7 +30,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -71,7 +75,7 @@ public class MotdController extends AbstractController {
 
 	@ApiOperation(value = "get messages. if adminview=false,"
 			+ " only messages with startdate<clientdate<enddate are returned")
-	@RequestMapping(value = "/", method = RequestMethod.GET)
+	@GetMapping("/")
 	@ApiResponses(value = {
 			@ApiResponse(code = 204, message = HTML_STATUS_204),
 			@ApiResponse(code = 501, message = HTML_STATUS_501)
@@ -116,7 +120,7 @@ public class MotdController extends AbstractController {
 			@ApiResponse(code = 201, message = HTML_STATUS_201),
 			@ApiResponse(code = 503, message = HTML_STATUS_503)
 	})
-	@RequestMapping(value = "/", method = RequestMethod.POST)
+	@PostMapping("/")
 	@ResponseStatus(HttpStatus.CREATED)
 	public Motd postNewMotd(
 			@ApiParam(value = "current motd", required = true) @RequestBody final Motd motd,
@@ -133,7 +137,7 @@ public class MotdController extends AbstractController {
 	}
 
 	@ApiOperation(value = "update a message of the day", nickname = "updateMotd")
-	@RequestMapping(value = "/{motdId}", method = RequestMethod.PUT)
+	@PutMapping("/{motdId}")
 	public Motd updateMotd(
 				@ApiParam(value = "motdkey from current motd", required = true) @PathVariable final String motdId,
 				@ApiParam(value = "current motd", required = true) @RequestBody final Motd motd) {
@@ -149,7 +153,7 @@ public class MotdController extends AbstractController {
 	}
 
 	@ApiOperation(value = "deletes a message of the day", nickname = "deleteMotd")
-	@RequestMapping(value = "/{motdId}", method = RequestMethod.DELETE)
+	@DeleteMapping("/{motdId}")
 	public void deleteMotd(
 			@ApiParam(value = "Motd-key from the message that shall be deleted", required = true)
 			@PathVariable
@@ -158,7 +162,7 @@ public class MotdController extends AbstractController {
 		motdService.delete(motd);
 	}
 
-	@RequestMapping(value = "/userlist", method =  RequestMethod.GET)
+	@GetMapping("/userlist")
 	public MotdList getAcknowledgedIds(@AuthenticationPrincipal final User user, @RequestParam final String username) {
 		if (user == null || !user.getUsername().equals(username)) {
 			throw new ForbiddenException();
@@ -168,7 +172,7 @@ public class MotdController extends AbstractController {
 		return toV2Migrator.migrateMotdList(profile);
 	}
 
-	@RequestMapping(value = "/userlist", method =  RequestMethod.PUT)
+	@PutMapping("/userlist")
 	public void putAcknowledgedIds(@AuthenticationPrincipal final User user, @RequestBody final MotdList motdList) {
 		if (user == null || !user.getUsername().equals(motdList.getUsername())) {
 			throw new ForbiddenException();

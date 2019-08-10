@@ -34,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import org.apache.commons.lang.CharEncoding;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -614,7 +615,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 	private void sendEmail(final UserProfile userProfile, final String subject, final String body) {
 		final MimeMessage msg = mailSender.createMimeMessage();
-		final MimeMessageHelper helper = new MimeMessageHelper(msg, "UTF-8");
+		final MimeMessageHelper helper = new MimeMessageHelper(msg, CharEncoding.UTF_8);
 		try {
 			helper.setFrom(mailSenderName + "<" + mailSenderAddress + ">");
 			helper.setTo(userProfile.getLoginId());

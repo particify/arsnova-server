@@ -25,8 +25,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -50,7 +49,7 @@ public class CourseController extends AbstractController {
 	@Autowired
 	private UserService userService;
 
-	@RequestMapping(value = "/v2/mycourses", method = RequestMethod.GET)
+	@GetMapping("/v2/mycourses")
 	public List<Course> myCourses(
 			@ApiParam(value = "sort my courses by name", required = true)
 			@RequestParam(value = "sortby", defaultValue = "name") final String sortby) {

@@ -50,8 +50,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.View;
@@ -124,7 +125,7 @@ public class AuthenticationController extends AbstractController {
 		oauthProperties = authenticationProviderProperties.getOauth();
 	}
 
-	@RequestMapping(value = { "/login", "/doLogin" }, method = { RequestMethod.POST, RequestMethod.GET })
+	@PostMapping({ "/login", "/doLogin" })
 	public void doLogin(
 			@RequestParam("type") final String type,
 			@RequestParam(value = "user", required = false) final String username,
@@ -170,7 +171,7 @@ public class AuthenticationController extends AbstractController {
 		}
 	}
 
-	@RequestMapping(value = { "/dialog" }, method = RequestMethod.GET)
+	@GetMapping("/dialog")
 	@ResponseBody
 	public View dialog(
 			@RequestParam("type") final String type,
@@ -231,7 +232,7 @@ public class AuthenticationController extends AbstractController {
 		return result;
 	}
 
-	@RequestMapping(value = { "/", "/whoami" }, method = RequestMethod.GET)
+	@GetMapping({ "/", "/whoami" })
 	@ResponseBody
 	public ClientAuthentication whoami(@AuthenticationPrincipal final User user) {
 		if (user == null) {
@@ -240,7 +241,7 @@ public class AuthenticationController extends AbstractController {
 		return new ClientAuthentication(user);
 	}
 
-	@RequestMapping(value = { "/logout" }, method = { RequestMethod.POST, RequestMethod.GET })
+	@PostMapping("/logout")
 	public String doLogout(final HttpServletRequest request) {
 		final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		userService.removeUserIdFromMaps(userService.getCurrentUser().getId());
@@ -249,10 +250,10 @@ public class AuthenticationController extends AbstractController {
 		if (auth instanceof CasAuthenticationToken) {
 			return "redirect:" + apiPath + SecurityConfig.CAS_LOGOUT_PATH_SUFFIX;
 		}
-		return "redirect:" + request.getHeader("referer") != null ? request.getHeader("referer") : "/";
+		return "redirect:" + (request.getHeader("referer") != null ? request.getHeader("referer") : "/");
 	}
 
-	@RequestMapping(value = { "/services" }, method = RequestMethod.GET)
+	@GetMapping("/services")
 	@ResponseBody
 	public List<ServiceDescription> getServices(final HttpServletRequest request) {
 		final List<ServiceDescription> services = new ArrayList<>();
@@ -284,9 +285,9 @@ public class AuthenticationController extends AbstractController {
 
 		if (ldapProperties.get(0).isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(
-					"ldap",
+					SecurityConfig.LDAP_PROVIDER_ID,
 					ldapProperties.get(0).getTitle(),
-					customizationPath + "/login?provider=ldap&redirect={0}",
+					customizationPath + "/login?provider=" + SecurityConfig.LDAP_PROVIDER_ID + "&redirect={0}",
 					ldapProperties.get(0).getAllowedRoles()
 			);
 			sdesc.setOrder(ldapProperties.get(0).getOrder());
@@ -295,9 +296,9 @@ public class AuthenticationController extends AbstractController {
 
 		if (casProperties.isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(
-					"cas",
+					SecurityConfig.CAS_PROVIDER_ID,
 					casProperties.getTitle(),
-					MessageFormat.format(dialogUrl, "cas"),
+					MessageFormat.format(dialogUrl, SecurityConfig.CAS_PROVIDER_ID),
 					casProperties.getAllowedRoles()
 			);
 			sdesc.setOrder(casProperties.getOrder());
@@ -306,45 +307,48 @@ public class AuthenticationController extends AbstractController {
 
 		if (oidcProperties.get(0).isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(
-					"oidc",
+					SecurityConfig.OIDC_PROVIDER_ID,
 					oidcProperties.get(0).getTitle(),
-					MessageFormat.format(dialogUrl, "oidc"),
+					MessageFormat.format(dialogUrl, SecurityConfig.OIDC_PROVIDER_ID),
 					oidcProperties.get(0).getAllowedRoles()
 			);
 			sdesc.setOrder(oidcProperties.get(0).getOrder());
 			services.add(sdesc);
 		}
 
-		final AuthenticationProviderProperties.Oauth facebookProperties = oauthProperties.get("facebook");
+		final AuthenticationProviderProperties.Oauth facebookProperties =
+				oauthProperties.get(SecurityConfig.FACEBOOK_PROVIDER_ID);
 		if (facebookProperties != null && facebookProperties.isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(
-					"facebook",
+					SecurityConfig.FACEBOOK_PROVIDER_ID,
 					"Facebook",
-					MessageFormat.format(dialogUrl, "facebook"),
+					MessageFormat.format(dialogUrl, SecurityConfig.FACEBOOK_PROVIDER_ID),
 					facebookProperties.getAllowedRoles()
 			);
 			sdesc.setOrder(facebookProperties.getOrder());
 			services.add(sdesc);
 		}
 
-		final AuthenticationProviderProperties.Oauth googleProperties = oauthProperties.get("google");
+		final AuthenticationProviderProperties.Oauth googleProperties =
+				oauthProperties.get(SecurityConfig.GOOGLE_PROVIDER_ID);
 		if (googleProperties != null && googleProperties.isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(
-					"google",
+					SecurityConfig.GOOGLE_PROVIDER_ID,
 					"Google",
-					MessageFormat.format(dialogUrl, "google"),
+					MessageFormat.format(dialogUrl, SecurityConfig.GOOGLE_PROVIDER_ID),
 					googleProperties.getAllowedRoles()
 			);
 			sdesc.setOrder(googleProperties.getOrder());
 			services.add(sdesc);
 		}
 
-		final AuthenticationProviderProperties.Oauth twitterProperties = oauthProperties.get("twitter");
+		final AuthenticationProviderProperties.Oauth twitterProperties =
+				oauthProperties.get(SecurityConfig.TWITTER_PROVIDER_ID);
 		if (twitterProperties != null && twitterProperties.isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(
-					"twitter",
+					SecurityConfig.TWITTER_PROVIDER_ID,
 					"Twitter",
-					MessageFormat.format(dialogUrl, "twitter"),
+					MessageFormat.format(dialogUrl, SecurityConfig.TWITTER_PROVIDER_ID),
 					twitterProperties.getAllowedRoles()
 			);
 			sdesc.setOrder(twitterProperties.getOrder());

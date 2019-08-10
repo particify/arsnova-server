@@ -130,7 +130,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	 * @param entity The entity to be created
 	 */
 	protected void prepareCreate(final T entity) {
-
+		/* Implementation provided by subclasses. */
 	}
 
 	/**
@@ -139,7 +139,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	 * @param entity The entity which has been created
 	 */
 	protected void finalizeCreate(final T entity) {
-
+		/* Implementation provided by subclasses. */
 	}
 
 	public T update(final T entity) {
@@ -169,7 +169,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	 * @param entity The entity to be updated
 	 */
 	protected void prepareUpdate(final T entity) {
-
+		/* Implementation provided by subclasses. */
 	}
 
 	/**
@@ -178,7 +178,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	 * @param entity The entity which has been updated
 	 */
 	protected void finalizeUpdate(final T entity) {
-
+		/* Implementation provided by subclasses. */
 	}
 
 	@Override
@@ -272,7 +272,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	 * @param entity The entity to be deleted
 	 */
 	protected void prepareDelete(final T entity) {
-
+		/* Implementation provided by subclasses. */
 	}
 
 	/**
@@ -282,7 +282,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	 * @param entity The entity to be modified
 	 */
 	protected void modifyRetrieved(final T entity) {
-
+		/* Implementation provided by subclasses. */
 	}
 
 	protected void validate(final T entity) {

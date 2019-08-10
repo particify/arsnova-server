@@ -41,49 +41,49 @@ public class ScheduledCacheBuster {
 	@CacheEvict(value = "rooms", allEntries = true)
 	@Scheduled(initialDelay = 1000 * 25, fixedRate = 1000 * 60 * 60 * 6)
 	private void clearSessionCache() {
-
+		/* Implementation provided by caching aspect. */
 	}
 
 	@CacheEvict(value = "contents", allEntries = true)
 	@Scheduled(initialDelay = 1000 * 50, fixedRate = 1000 * 60 * 30)
 	private void clearQuestionCache() {
-
+		/* Implementation provided by caching aspect. */
 	}
 
 	@CacheEvict(value = "contentlists", allEntries = true)
 	@Scheduled(initialDelay = 1000 * 75, fixedRate = 1000 * 60 * 30)
 	private void clearSkillQuestionCache() {
-
+		/* Implementation provided by caching aspect. */
 	}
 
 	@CacheEvict(value = "lecturecontentlists", allEntries = true)
 	@Scheduled(initialDelay = 1000 * 100, fixedRate = 1000 * 60 * 30)
 	private void clearLectureQuestionCache() {
-
+		/* Implementation provided by caching aspect. */
 	}
 
 	@CacheEvict(value = "preparationcontentlists", allEntries = true)
 	@Scheduled(initialDelay = 1000 * 125, fixedRate = 1000 * 60 * 30)
 	private void clearPreparationQuestionCache() {
-
+		/* Implementation provided by caching aspect. */
 	}
 
 	@CacheEvict(value = "flashcardcontentlists", allEntries = true)
 	@Scheduled(initialDelay = 1000 * 150, fixedRate = 1000 * 60 * 30)
 	private void clearFlashcardQuestionCache() {
-
+		/* Implementation provided by caching aspect. */
 	}
 
 	@CacheEvict(value = "answerlists", allEntries = true)
 	@Scheduled(initialDelay = 1000 * 175, fixedRate = 1000 * 60 * 15)
 	private void clearAnswerCache() {
-
+		/* Implementation provided by caching aspect. */
 	}
 
 	@CacheEvict(value = "score", allEntries = true)
 	@Scheduled(initialDelay = 1000 * 200, fixedRate = 1000 * 60 * 15)
 	private void clearLearningProgressCache() {
-
+		/* Implementation provided by caching aspect. */
 	}
 
 }
