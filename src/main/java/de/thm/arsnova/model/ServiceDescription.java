@@ -113,9 +113,9 @@ public class ServiceDescription {
 		return allowedRoles;
 	}
 
-	public void setAllowedRoles(final Set<AuthenticationProviderProperties.Provider.Role> roles) {
+	public void setAllowedRoles(final Set<AuthenticationProviderProperties.Provider.Role> allowedRoles) {
 		this.allowedRoles = allowedRoles;
-		this.allowedRoleStrings = roles.stream().map(r -> {
+		this.allowedRoleStrings = allowedRoles.stream().map(r -> {
 			switch (r) {
 				case MODERATOR:
 					return "speaker";
