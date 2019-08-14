@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.naming.OperationNotSupportedException;
@@ -48,12 +49,14 @@ import org.springframework.web.bind.annotation.RestController;
 import de.thm.arsnova.controller.PaginationController;
 import de.thm.arsnova.model.ChoiceAnswer;
 import de.thm.arsnova.model.ChoiceQuestionContent;
+import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.TextAnswer;
 import de.thm.arsnova.model.migration.FromV2Migrator;
 import de.thm.arsnova.model.migration.ToV2Migrator;
 import de.thm.arsnova.model.migration.v2.Answer;
 import de.thm.arsnova.model.migration.v2.Content;
 import de.thm.arsnova.service.AnswerService;
+import de.thm.arsnova.service.ContentGroupService;
 import de.thm.arsnova.service.ContentService;
 import de.thm.arsnova.service.RoomService;
 import de.thm.arsnova.service.TimerService;
@@ -75,6 +78,9 @@ import de.thm.arsnova.web.exceptions.NotImplementedException;
 public class ContentController extends PaginationController {
 	@Autowired
 	private ContentService contentService;
+
+	@Autowired
+	private ContentGroupService contentGroupService;
 
 	@Autowired
 	private AnswerService answerService;
@@ -100,7 +106,12 @@ public class ContentController extends PaginationController {
 	public Content getContent(@PathVariable final String contentId) {
 		final de.thm.arsnova.model.Content content = contentService.get(contentId);
 		if (content != null) {
-			return toV2Migrator.migrate(content);
+			final Optional<ContentGroup> contentGroup = contentGroupService.getByRoomId(content.getRoomId()).stream()
+					.filter(cg -> cg.getContentIds().contains(contentId)).findFirst();
+			final Content contentV2 = toV2Migrator.migrate(content);
+			contentGroup.ifPresent(cg -> contentV2.setQuestionVariant(cg.getName()));
+
+			return contentV2;
 		}
 
 		throw new NotFoundException();
@@ -118,6 +129,7 @@ public class ContentController extends PaginationController {
 		final String roomId = roomService.getIdByShortId(content.getSessionKeyword());
 		contentV3.setRoomId(roomId);
 		contentService.create(contentV3);
+		contentGroupService.addContentToGroup(roomId, content.getQuestionVariant(), contentV3.getId());
 
 		return toV2Migrator.migrate(contentV3);
 	}
