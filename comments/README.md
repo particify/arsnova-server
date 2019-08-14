@@ -1,5 +1,7 @@
 # Setup
 
+Install instructions for the arsnova systems are in the src/site/markdown/arsnova-installation.md.
+
 Install dependencies:
 ```
 apt-get install libpostgresql-jdbc-java postgresql
@@ -19,7 +21,7 @@ grant all privileges on database arsnovacomment to arsnovacomment;
 `mvn spring-boot:run`
 
 
-###Logging
+### Logging
 `-Dlogging.level.de.thm.arsnova=<debug-level>`
 
 Possible options for debug-level:
