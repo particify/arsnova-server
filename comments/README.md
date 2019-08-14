@@ -1,6 +1,6 @@
 # Setup
 
-Install instructions for the arsnova systems are in the src/site/markdown/arsnova-installation.md.
+Install instructions for the arsnova systems are [here](src/site/markdown/arsnova-installation.md).
 
 Install dependencies:
 ```
