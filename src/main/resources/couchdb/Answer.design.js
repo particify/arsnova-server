@@ -15,7 +15,8 @@ var designDoc = {
 				if (doc.type === "Answer") {
 					emit(doc.contentId, {_rev: doc._rev});
 				}
-			}
+			},
+            "reduce": "_count"
 		},
 		"by_contentid_round_body_subject": {
 			"map": function (doc) {
@@ -55,32 +56,10 @@ var designDoc = {
 			},
 			"reduce": "_count"
 		},
-		"by_roomid_variant": {
-			"map": function (doc) {
-				if (doc.type === "Answer") {
-					emit([doc.roomId, doc.questionVariant], {_rev: doc._rev});
-				}
-			},
-			"reduce": "_count"
-		},
 		"by_creatorid_roomid": {
 			"map": function (doc) {
 				if (doc.type === "Answer") {
 					emit([doc.creatorId, doc.roomId], {_rev: doc._rev});
-				}
-			}
-		},
-		"contentid_by_creatorid_roomid_variant": {
-			"map": function (doc) {
-				if (doc.type === "Answer") {
-					emit([doc.user, doc.roomId, doc.questionVariant], doc.contentId);
-				}
-			}
-		},
-		"contentid_round_by_creatorid_roomid_variant": {
-			"map": function (doc) {
-				if (doc.type === "Answer") {
-					emit([doc.creatorId, doc.roomId, doc.questionVariant], [doc.contentId, doc.round]);
 				}
 			}
 		}

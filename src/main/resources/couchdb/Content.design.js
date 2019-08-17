@@ -18,10 +18,10 @@ var designDoc = {
 			},
 			"reduce": "_count"
 		},
-		"by_roomid_group_locked": {
+		"by_roomid_locked": {
 			"map": function (doc) {
 				if (doc.type === "Content") {
-					emit([doc.roomId, doc.group, doc.locked, doc.subject, doc.body.substr(0, 16)], {_rev: doc._rev});
+					emit([doc.roomId, doc.locked, doc.subject, doc.body.substr(0, 16)], {_rev: doc._rev});
 				}
 			},
 			"reduce": "_count"

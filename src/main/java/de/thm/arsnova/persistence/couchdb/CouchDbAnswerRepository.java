@@ -21,6 +21,7 @@ package de.thm.arsnova.persistence.couchdb;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +68,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 	}
 
 	@Override
-	public Iterable<Answer> findStubsByContentIds(final List<String> contentIds) {
+	public Iterable<Answer> findStubsByContentIds(final Collection<String> contentIds) {
 		return createEntityStubs(db.queryView(createQuery("by_contentid").keys(contentIds)));
 	}
 
@@ -145,6 +146,16 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 	}
 
 	@Override
+	public int countByContentIds(final Collection<String> contentIds) {
+		final ViewResult result = db.queryView(createQuery("by_contentid")
+				.reduce(true)
+				.group(true)
+				.keys(contentIds));
+
+		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
+	}
+
+	@Override
 	public <T extends Answer> List<T> findByContentId(
 			final String contentId, final Class<T> type, final int start, final int limit) {
 		final int qSkip = start > 0 ? start : -1;
@@ -172,23 +183,6 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 		final ViewResult result = db.queryView(createQuery("by_roomid")
 				.key(roomId)
 				.reduce(true));
-
-		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
-	}
-
-	@Override
-	public int countByRoomIdOnlyLectureVariant(final String roomId) {
-		return countBySessionIdVariant(roomId, "lecture");
-	}
-
-	@Override
-	public int countByRoomIdOnlyPreparationVariant(final String roomId) {
-		return countBySessionIdVariant(roomId, "preparation");
-	}
-
-	private int countBySessionIdVariant(final String sessionId, final String variant) {
-		final ViewResult result = db.queryView(createQuery("by_roomid_variant")
-				.key(ComplexKey.of(sessionId, variant)));
 
 		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
 	}

@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Profile;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.AttachmentRepository;
 import de.thm.arsnova.persistence.CommentRepository;
+import de.thm.arsnova.persistence.ContentGroupRepository;
 import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.persistence.MotdRepository;
@@ -60,6 +61,11 @@ public class TestPersistanceConfig {
 	@Bean
 	public ContentRepository contentRepository() {
 		return Mockito.mock(ContentRepository.class);
+	}
+
+	@Bean
+	public ContentGroupRepository contentGroupRepository() {
+		return Mockito.mock(ContentGroupRepository.class);
 	}
 
 	@Bean
