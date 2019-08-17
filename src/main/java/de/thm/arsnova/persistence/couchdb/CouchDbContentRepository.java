@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.ViewResult;
@@ -82,9 +83,9 @@ public class CouchDbContentRepository extends CouchDbCrudRepository<Content> imp
 
 	@Override
 	public Iterable<Content> findStubsByIds(final Set<String> ids) {
-		return createEntityStubs(db.queryView(createQuery("by_id")
+		return super.createEntityStubs(db.queryView(createQuery("by_id")
 				.keys(ids)
-				.reduce(false)));
+				.reduce(false)), (a, b) -> {});
 	}
 
 	@Override

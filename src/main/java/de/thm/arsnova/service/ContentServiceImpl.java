@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -240,12 +241,13 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@PreAuthorize("isAuthenticated()")
 	private void deleteByRoomAndGroupName(final Room room, final String groupName) {
-		final Iterable<Content> contents;
 		if ("all".equals(groupName)) {
 			delete(contentRepository.findStubsByRoomId(room.getId()));
 		} else {
 			final Set<String> ids = contentGroupService.getByRoomIdAndName(room.getId(), groupName).getContentIds();
-			delete(contentRepository.findStubsByIds(ids));
+			final Iterable<Content> contents = contentRepository.findStubsByIds(ids);
+			contents.forEach(c -> c.setRoomId(room.getId()));
+			delete(contents);
 		}
 	}
 

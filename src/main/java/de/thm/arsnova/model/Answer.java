@@ -52,7 +52,7 @@ public class Answer extends Entity {
 	private Content.Format format;
 
 	@Positive
-	private int round;
+	private int round = 1;
 
 	private Map<String, Map<String, ?>> extensions;
 

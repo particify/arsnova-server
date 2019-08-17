@@ -122,7 +122,9 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		content.resetState();
 		/* FIXME: cancel timer */
 		contentService.update(content);
-		delete(answerRepository.findStubsByContentId(content.getId()));
+		final Iterable<Answer> answers = answerRepository.findStubsByContentId(content.getId());
+		answers.forEach(a -> a.setRoomId(content.getRoomId()));
+		delete(answers);
 	}
 
 	@Override
@@ -323,7 +325,9 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	@Override
 	@PreAuthorize("isAuthenticated() && hasPermission(#answer, 'create')")
 	public Answer create(final Answer answer) {
-		this.answerQueue.offer(answer);
+		prepareCreate(answer);
+		answerQueue.offer(answer);
+		finalizeCreate(answer);
 
 		return answer;
 	}
@@ -438,6 +442,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	@Secured({"ROLE_USER", "RUN_AS_SYSTEM"})
 	public void handleContentDeletion(final BeforeDeletionEvent<Content> event) {
 		final Iterable<Answer> answers = answerRepository.findStubsByContentId(event.getEntity().getId());
+		answers.forEach(a -> a.setRoomId(event.getEntity().getRoomId()));
 		delete(answers);
 	}
 }
