@@ -239,43 +239,42 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	}
 
 	@PreAuthorize("isAuthenticated()")
-	private void deleteBySessionAndVariant(final Room room, final String variant) {
+	private void deleteByRoomAndGroupName(final Room room, final String groupName) {
 		final Iterable<Content> contents;
-		if ("all".equals(variant)) {
-			contents = contentRepository.findStubsByRoomId(room.getId());
+		if ("all".equals(groupName)) {
+			delete(contentRepository.findStubsByRoomId(room.getId()));
 		} else {
-			contents = contentRepository.findStubsByRoomIdAndVariant(room.getId(), variant);
+			final Set<String> ids = contentGroupService.getByRoomIdAndName(room.getId(), groupName).getContentIds();
+			delete(contentRepository.findStubsByIds(ids));
 		}
-
-		delete(contents);
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public void deleteAllContents(final String roomId) {
 		final Room room = getRoomWithAuthCheck(roomId);
-		deleteBySessionAndVariant(room, "all");
+		deleteByRoomAndGroupName(room, "all");
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public void deleteLectureContents(final String roomId) {
 		final Room room = getRoomWithAuthCheck(roomId);
-		deleteBySessionAndVariant(room, "lecture");
+		deleteByRoomAndGroupName(room, "lecture");
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public void deletePreparationContents(final String roomId) {
 		final Room room = getRoomWithAuthCheck(roomId);
-		deleteBySessionAndVariant(room, "preparation");
+		deleteByRoomAndGroupName(room, "preparation");
 	}
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public void deleteFlashcards(final String roomId) {
 		final Room room = getRoomWithAuthCheck(roomId);
-		deleteBySessionAndVariant(room, "flashcard");
+		deleteByRoomAndGroupName(room, "flashcard");
 	}
 
 	@Override
@@ -358,7 +357,10 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	public List<String> getUnAnsweredLectureContentIds(final String roomId, final String userId) {
-		return contentRepository.findUnansweredIdsByRoomIdAndUserOnlyLectureVariant(roomId, userId);
+		final List<String> ids = contentRepository.findUnansweredIdsByRoomIdAndUser(roomId, userId);
+		ids.retainAll(contentGroupService.getByRoomIdAndName(roomId, "lecture").getContentIds());
+
+		return ids;
 	}
 
 	@Override
@@ -370,7 +372,10 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 
 	@Override
 	public List<String> getUnAnsweredPreparationContentIds(final String roomId, final String userId) {
-		return contentRepository.findUnansweredIdsByRoomIdAndUserOnlyPreparationVariant(roomId, userId);
+		final List<String> ids = contentRepository.findUnansweredIdsByRoomIdAndUser(roomId, userId);
+		ids.retainAll(contentGroupService.getByRoomIdAndName(roomId, "preparation").getContentIds());
+
+		return ids;
 	}
 
 	@Override
@@ -422,10 +427,9 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@PreAuthorize("isAuthenticated()")
 	public void deleteAllPreparationAnswers(final String roomId) {
 		final Room room = roomService.get(roomId);
-
-		final List<Content> contents = contentRepository.findByRoomIdAndVariantAndActive(room.getId(), "preparation");
-		resetContentsRoundState(room.getId(), contents);
-		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
+		contentGroupService.getByRoomIdAndName(roomId, "preparation").getContentIds();
+		final Set<String> contentIds = contentGroupService.getByRoomIdAndName(roomId, "preparation").getContentIds();
+		resetContentsRoundState(room.getId(), get(contentIds));
 		answerService.delete(answerRepository.findStubsByContentIds(contentIds));
 	}
 
@@ -433,10 +437,9 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 	@PreAuthorize("isAuthenticated()")
 	public void deleteAllLectureAnswers(final String roomId) {
 		final Room room = roomService.get(roomId);
-
-		final List<Content> contents = contentRepository.findByRoomIdAndVariantAndActive(room.getId(), "lecture");
-		resetContentsRoundState(room.getId(), contents);
-		final List<String> contentIds = contents.stream().map(Content::getId).collect(Collectors.toList());
+		contentGroupService.getByRoomIdAndName(roomId, "lecture").getContentIds();
+		final Set<String> contentIds = contentGroupService.getByRoomIdAndName(roomId, "lecture").getContentIds();
+		resetContentsRoundState(room.getId(), get(contentIds));
 		answerService.delete(answerRepository.findStubsByContentIds(contentIds));
 	}
 
@@ -446,7 +449,7 @@ public class ContentServiceImpl extends DefaultEntityServiceImpl<Content> implem
 			@CacheEvict(value = "lecturecontentlists", key = "#roomId"),
 			@CacheEvict(value = "preparationcontentlists", key = "#roomId"),
 			@CacheEvict(value = "flashcardcontentlists", key = "#roomId") })
-	private void resetContentsRoundState(final String roomId, final List<Content> contents) {
+	private void resetContentsRoundState(final String roomId, final Iterable<Content> contents) {
 		for (final Content q : contents) {
 			/* TODO: Check if setting the sessionId is necessary. */
 			q.setRoomId(roomId);

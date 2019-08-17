@@ -356,14 +356,16 @@ public class ContentController extends PaginationController {
 			nickname = "deleteContents")
 	@DeleteMapping("/")
 	public void deleteContents(
-			@RequestParam(value = "sessionkey") final String roomShortId,
-			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
-			@RequestParam(value = "flashcardsonly", defaultValue = "false") boolean flashcardsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly,
+			@RequestParam(value = "sessionkey")
+			final String roomShortId,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false")
+			final boolean lectureContentsOnly,
+			@RequestParam(value = "flashcardsonly", defaultValue = "false")
+			final boolean flashcardsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false")
+			final boolean preparationContentsOnly,
 			final HttpServletResponse response) {
 		final String roomId = roomService.getIdByShortId(roomShortId);
-		/* FIXME: Content variant is ignored for now */
-		lectureContentsOnly = preparationContentsOnly = flashcardsOnly = false;
 		if (lectureContentsOnly) {
 			contentService.deleteLectureContents(roomId);
 		} else if (preparationContentsOnly) {
@@ -414,13 +416,14 @@ public class ContentController extends PaginationController {
 	@Deprecated
 	@GetMapping("/unanswered")
 	public List<String> getUnAnsweredContentIds(
-			@RequestParam(value = "sessionkey") final String roomShortId,
-			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly) {
+			@RequestParam(value = "sessionkey")
+			final String roomShortId,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false")
+			final boolean lectureContentsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false")
+			final boolean preparationContentsOnly) {
 		final String roomId = roomService.getIdByShortId(roomShortId);
 		final List<String> answers;
-		/* FIXME: Content variant is ignored for now */
-		lectureContentsOnly = preparationContentsOnly = false;
 		if (lectureContentsOnly) {
 			answers = contentService.getUnAnsweredLectureContentIds(roomId);
 		} else if (preparationContentsOnly) {
@@ -589,13 +592,14 @@ public class ContentController extends PaginationController {
 			nickname = "deleteAllContentsAnswers")
 	@DeleteMapping("/answers")
 	public void deleteAllContentsAnswers(
-			@RequestParam(value = "sessionkey") final String roomShortId,
-			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly,
+			@RequestParam(value = "sessionkey")
+			final String roomShortId,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false")
+			final boolean lectureContentsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false")
+			final boolean preparationContentsOnly,
 			final HttpServletResponse response) {
 		final String roomId = roomService.getIdByShortId(roomShortId);
-		/* FIXME: Content variant is ignored for now */
-		lectureContentsOnly = preparationContentsOnly = false;
 		if (lectureContentsOnly) {
 			contentService.deleteAllLectureAnswers(roomId);
 		} else if (preparationContentsOnly) {
@@ -685,13 +689,14 @@ public class ContentController extends PaginationController {
 	@Deprecated
 	@GetMapping(value = "/answercount", produces = MediaType.TEXT_PLAIN_VALUE)
 	public String getTotalAnswerCount(
-			@RequestParam(value = "sessionkey") final String roomShortId,
-			@RequestParam(value = "lecturequestionsonly", defaultValue = "false") boolean lectureContentsOnly,
-			@RequestParam(value = "preparationquestionsonly", defaultValue = "false") boolean preparationContentsOnly) {
+			@RequestParam(value = "sessionkey")
+			final String roomShortId,
+			@RequestParam(value = "lecturequestionsonly", defaultValue = "false")
+			final boolean lectureContentsOnly,
+			@RequestParam(value = "preparationquestionsonly", defaultValue = "false")
+			final boolean preparationContentsOnly) {
 		final String roomId = roomService.getIdByShortId(roomShortId);
 		int count = 0;
-		/* FIXME: Content variant is ignored for now */
-		lectureContentsOnly = preparationContentsOnly = false;
 		if (lectureContentsOnly) {
 			count = answerService.countLectureContentAnswers(roomId);
 		} else if (preparationContentsOnly) {

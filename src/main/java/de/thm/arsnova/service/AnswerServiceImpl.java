@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import org.ektorp.DbAccessException;
 import org.slf4j.Logger;
@@ -62,6 +63,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 
 	private RoomService roomService;
 	private ContentService contentService;
+	private ContentGroupService contentGroupService;
 	private AnswerRepository answerRepository;
 	private UserService userService;
 
@@ -81,6 +83,11 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	@Autowired
 	public void setContentService(final ContentService contentService) {
 		this.contentService = contentService;
+	}
+
+	@Autowired
+	public void setContentGroupService(final ContentGroupService contentGroupService) {
+		this.contentGroupService = contentGroupService;
 	}
 
 	@Scheduled(fixedDelay = 5000)
@@ -377,15 +384,6 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 		answer.setRoomId(room.getId());
 	}
 
-	/*
-	 * The "internal" suffix means it is called by internal services that have no authentication!
-	 * TODO: Find a better way of doing this...
-	 */
-	@Override
-	public int countLectureQuestionAnswersInternal(final String roomId) {
-		return answerRepository.countByRoomIdOnlyLectureVariant(roomService.get(roomId).getId());
-	}
-
 	@Override
 	public Map<String, Object> countAnswersAndAbstentionsInternal(final String contentId) {
 		final Content content = contentService.get(contentId);
@@ -419,8 +417,21 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	 * TODO: Find a better way of doing this...
 	 */
 	@Override
+	public int countLectureQuestionAnswersInternal(final String roomId) {
+		final Set<String> contentIds =
+				contentGroupService.getByRoomIdAndName(roomId, "lecture").getContentIds();
+		return answerRepository.countByContentIds(contentIds);
+	}
+
+	/*
+	 * The "internal" suffix means it is called by internal services that have no authentication!
+	 * TODO: Find a better way of doing this...
+	 */
+	@Override
 	public int countPreparationQuestionAnswersInternal(final String roomId) {
-		return answerRepository.countByRoomIdOnlyPreparationVariant(roomService.get(roomId).getId());
+		final Set<String> contentIds =
+				contentGroupService.getByRoomIdAndName(roomId, "preparation").getContentIds();
+		return answerRepository.countByContentIds(contentIds);
 	}
 
 	@EventListener

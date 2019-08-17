@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -42,12 +43,15 @@ public class ContentGroupService extends DefaultEntityServiceImpl<ContentGroup> 
 
 	public ContentGroupService(
 			final ContentGroupRepository repository,
-			final ContentService contentService,
 			@Qualifier("defaultJsonMessageConverter")
 			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
 			final Validator validator) {
 		super(ContentGroup.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
 		this.contentGroupRepository = repository;
+	}
+
+	@Autowired
+	public void setContentService(final ContentService contentService) {
 		this.contentService = contentService;
 	}
 
