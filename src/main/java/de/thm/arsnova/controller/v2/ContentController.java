@@ -529,6 +529,9 @@ public class ContentController extends PaginationController {
 			final HttpServletResponse response) {
 		final de.thm.arsnova.model.Content content = contentService.get(contentId);
 		final de.thm.arsnova.model.Answer answerV3 = fromV2Migrator.migrate(answer, content);
+		if (answerV3.getContentId() == null) {
+			answerV3.setContentId(contentId);
+		}
 		if (!contentId.equals(answerV3.getContentId())) {
 			throw new BadRequestException("Mismatching content IDs.");
 		}

@@ -64,12 +64,12 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 
 	@Override
 	public Iterable<Answer> findStubsByContentId(final String contentId) {
-		return createEntityStubs(db.queryView(createQuery("by_contentid").key(contentId)));
+		return createEntityStubs(db.queryView(createQuery("by_contentid").reduce(false).key(contentId)));
 	}
 
 	@Override
 	public Iterable<Answer> findStubsByContentIds(final Collection<String> contentIds) {
-		return createEntityStubs(db.queryView(createQuery("by_contentid").keys(contentIds)));
+		return createEntityStubs(db.queryView(createQuery("by_contentid").reduce(false).keys(contentIds)));
 	}
 
 	@Override
@@ -152,7 +152,9 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 				.group(true)
 				.keys(contentIds));
 
-		return result.isEmpty() ? 0 : result.getRows().get(0).getValueAsInt();
+		return result.isEmpty() ? 0 : result.getRows().stream()
+				.map(ViewResult.Row::getValueAsInt)
+				.reduce(0, (a, b) -> a + b);
 	}
 
 	@Override
