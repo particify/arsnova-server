@@ -59,20 +59,22 @@ todos:
 ## core
 
 * repo: `https://git.thm.de/arsnova/arsnova-backend`
+* clone url: `git@git.thm.de:arsnova/arsnova-backend.git`
 * branch: `master` 
 
 todos:
-- copy config `cp src/main/resources/defaults.yml /etc/arsnova/application.yml`
+- copy config `cp src/main/resources/config/defaults.yml /etc/arsnova/application.yml`
 - change config:
   - change the password in the section couchdb accordingly
   - change the db name in the section couchdb accordingly
   - change cors-origins to `*`
-  - change mmessage-broker relay enabled to `true`
+  - change message-broker relay enabled to `true`
 
 
 ## comment service
 
 * repo: `https://git.thm.de/arsnova/arsnova-comment-service`
+* clone url: `git@git.thm.de:arsnova/arsnova-comment-service.git`
 * branch: `master`
 
 todos:
