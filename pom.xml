@@ -7,8 +7,8 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<spring-boot-version>1.5.21.RELEASE</spring-boot-version>
-		<io.netty-version>4.1.37.Final</io.netty-version>
+		<spring-boot-version>1.5.22.RELEASE</spring-boot-version>
+		<io.netty-version>4.1.39.Final</io.netty-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
@@ -363,7 +363,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.4.19.v20190610</version>
+				<version>9.4.20.v20190813</version>
 				<configuration>
 					<scanIntervalSeconds>0</scanIntervalSeconds>
 					<webApp>
