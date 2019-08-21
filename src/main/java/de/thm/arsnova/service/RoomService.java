@@ -35,7 +35,7 @@ public interface RoomService extends EntityService<Room> {
 
 	Room getByShortId(String shortId);
 
-	Room getForAdmin(final String id);
+	Room getForAdmin(String id);
 
 	Room getInternal(String id, String userId);
 

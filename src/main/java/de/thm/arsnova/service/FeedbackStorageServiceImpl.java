@@ -44,7 +44,7 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 		private final Date timestamp;
 		private final String userId;
 
-		public FeedbackStorageObject(final int initValue, final String userId) {
+		FeedbackStorageObject(final int initValue, final String userId) {
 			value = initValue;
 			timestamp = new Date();
 			this.userId = userId;

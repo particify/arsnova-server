@@ -167,8 +167,8 @@ public class ImageUtils {
 			final String base64String = imgInfo[1];
 
 			final byte[] imageData = Base64.decodeBase64(base64String);
-			try (final ByteArrayInputStream bais = new ByteArrayInputStream(imageData);
-					final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+			try (ByteArrayInputStream bais = new ByteArrayInputStream(imageData);
+					ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 				final BufferedImage originalImage = ImageIO.read(bais);
 				final BufferedImage newImage = new BufferedImage(width, height, originalImage.getType());
 				final Graphics2D g = newImage.createGraphics();
@@ -234,8 +234,8 @@ public class ImageUtils {
 	 * @return The <code>byte[]</code> of the image on success, otherwise <code>null</code>.
 	 */
 	byte[] convertFileToByteArray(final String imageUrl) {
-		try (final InputStream is = new URL(imageUrl).openStream();
-				final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+		try (InputStream is = new URL(imageUrl).openStream();
+				ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 			final byte[] byteChunk = new byte[CHUNK_SIZE];
 			int n;
 

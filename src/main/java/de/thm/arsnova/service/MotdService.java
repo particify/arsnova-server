@@ -29,11 +29,11 @@ import de.thm.arsnova.model.Motd;
 public interface MotdService extends EntityService<Motd> {
 	List<Motd> getAdminMotds();  //all w/o the sessionmotds
 
-	List<Motd> getAllRoomMotds(final String roomId);
+	List<Motd> getAllRoomMotds(String roomId);
 
-	List<Motd> getCurrentMotds(final Date clientdate, final String audience);
+	List<Motd> getCurrentMotds(Date clientdate, String audience);
 
-	List<Motd> getCurrentRoomMotds(final Date clientdate, final String roomId);
+	List<Motd> getCurrentRoomMotds(Date clientdate, String roomId);
 
 	List<Motd> filterMotdsByDate(List<Motd> list, Date clientdate);
 
@@ -41,9 +41,9 @@ public interface MotdService extends EntityService<Motd> {
 
 	Motd save(Motd motd);
 
-	Motd save(final String roomId, final Motd motd);
+	Motd save(String roomId, Motd motd);
 
 	Motd update(Motd motd);
 
-	Motd update(final String roomId, Motd motd);
+	Motd update(String roomId, Motd motd);
 }

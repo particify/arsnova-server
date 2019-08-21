@@ -27,7 +27,7 @@ import de.thm.arsnova.model.AnswerStatistics;
 public interface AnswerRepository extends CrudRepository<Answer, String> {
 	<T extends Answer> T findByContentIdUserIdPiRound(String contentId, Class<T> type, String userId, int piRound);
 
-	AnswerStatistics findByContentIdRound(String contentId, int round, final int optionCount);
+	AnswerStatistics findByContentIdRound(String contentId, int round, int optionCount);
 
 	int countByContentIdRound(String contentId, int round);
 
