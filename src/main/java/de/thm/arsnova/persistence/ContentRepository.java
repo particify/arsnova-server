@@ -18,7 +18,7 @@ public interface ContentRepository extends CrudRepository<Content, String> {
 
 	Iterable<Content> findStubsByIds(Set<String> ids);
 
-	Iterable<Content> findStubsByRoomId(final String roomId);
+	Iterable<Content> findStubsByRoomId(String roomId);
 
 	List<String> findUnansweredIdsByRoomIdAndUser(String roomId, String userId);
 

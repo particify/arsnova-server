@@ -35,7 +35,7 @@ abstract class VariantScoreCalculator implements ScoreCalculator {
 
 	private final SessionStatisticsRepository sessionStatisticsRepository;
 
-	public VariantScoreCalculator(final SessionStatisticsRepository sessionStatisticsRepository) {
+	VariantScoreCalculator(final SessionStatisticsRepository sessionStatisticsRepository) {
 		this.sessionStatisticsRepository = sessionStatisticsRepository;
 	}
 

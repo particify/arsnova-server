@@ -35,5 +35,5 @@ public interface CrudRepository<T, I> extends org.springframework.data.repositor
 	 * @deprecated Use {@link #findById(Object)} instead.
 	 */
 	@Deprecated
-	T findOne(final I id);
+	T findOne(I id);
 }

@@ -571,7 +571,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		if ((account.getPasswordResetTime() != null)
 				&& (System.currentTimeMillis()
 						< account.getPasswordResetTime().getTime() + REPEATED_PASSWORD_RESET_DELAY_MS)) {
-			
+
 			logger.info("Password reset failed. The reset delay for User {} is still active.", username);
 
 			throw new BadRequestException();
