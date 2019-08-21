@@ -11,7 +11,7 @@
 		<commons-lang-version>2.6</commons-lang-version>
 		<guava-version>27.0.1-jre</guava-version>
 		<directory-server-version>1.5.5</directory-server-version>
-		<io.netty-version>4.1.37.Final</io.netty-version>
+		<io.netty-version>4.1.39.Final</io.netty-version>
 		<org.aspectj-version>1.9.2</org.aspectj-version>
 		<javax-jaxb.version>2.3.1</javax-jaxb.version>
 		<graalvm.version>19.1.1</graalvm.version>
@@ -506,7 +506,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.4.19.v20190610</version>
+				<version>9.4.20.v20190813</version>
 				<configuration>
 					<scanIntervalSeconds>0</scanIntervalSeconds>
 					<webApp>
