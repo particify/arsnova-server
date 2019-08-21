@@ -70,7 +70,6 @@
 
     <module name="TreeWalker">
 
-        <property name="cacheFile" value="${checkstyle.cache.file}"/>
         <property name="tabWidth" value="4"/>
 
         <!-- Checks for Javadoc comments.                     -->
