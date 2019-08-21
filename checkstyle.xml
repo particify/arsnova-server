@@ -278,5 +278,7 @@
 			<property name="tokens" value="VARIABLE_DEF,PARAMETER_DEF"/>
 			<property name="validateEnhancedForLoopVariable" value="true"/>
 		</module>
+		<module name="RedundantImport"/>
+		<module name="UnusedImports"/>
 	</module>
 </module>

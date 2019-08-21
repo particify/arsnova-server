@@ -20,7 +20,6 @@ package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
