@@ -11,9 +11,9 @@ If you are viewing this file from the repository, please make sure you are on th
 While ARSnova should be able to run on any Linux distribution, we officially only support Debian and Ubuntu systems on which we test the installation procedure regularly.
 We recommend to use the latest (LTS) versions of the distributions.
 
-For Debian 8 you need to enable the backports repository to install Java 8:
+For Debian 9 you can enable the backports repository to install Tomcat 9:
 
-	# grep '^deb .*jessie-backports' -q /etc/apt/sources.list || echo "deb http://ftp.debian.org/debian jessie-backports main" >> /etc/apt/sources.list
+	# grep -q '^deb .*stretch-backports' /etc/apt/sources.list || echo "deb http://deb.debian.org/debian stretch-backports main" >> /etc/apt/sources.list
 
 
 ### Hardware
@@ -47,7 +47,7 @@ You want to change the paths to make them match your environment.
 
 In order to build up a full featured server installation you have to install at least the following software:
 
-* Oracle Java SE 8 or OpenJDK 8 (or newer)
+* Oracle Java SE 8 or OpenJDK 8
 * Apache Tomcat 8 (or newer)
 * Apache CouchDB 1.x (1.2 or newer recommended)
 * One of the following webservers acting as a reverse proxy:
@@ -58,8 +58,7 @@ Additionally, you need Python 2.7 (3.0 or newer will not work) to run the "Setup
 We further recommend installing the "Apache Portable Runtime (APR) based Native library for Tomcat" (libapr and libtcnative) for improved performance.
 
 Most of this software can easily be installed on Linux systems using the distribution's package manager:
-* Debian: `# apt-get install -t jessie-backports nginx openjdk-8-jre && apt-get install libtcnative-1 tomcat8`
-* Ubuntu: `# sudo apt-get install couchdb libtcnative-1 nginx openjdk-8-jre tomcat8`
+* Debian/Ubuntu: `# apt-get install libtcnative-1 nginx openjdk-8-jre tomcat9`
 
 While running ARSnova without a reverse proxy is possible, we do not recommend to do so.
 A reverse proxy significantly simplifies the setup of HTTPS and allows running Websocket connections over the default HTTP(S) port.
@@ -67,34 +66,26 @@ A reverse proxy significantly simplifies the setup of HTTPS and allows running W
 
 ### CouchDB
 
-Install CouchDB:
-Depending on your operation system or distribution you might need to compile CouchDB from source code.
-In this case follow CouchDB's
-[installation guide](http://docs.couchdb.org/en/1.6.1/install/index.html).
+If you are installing ARSnova for the first time and don't have any data from an older version that needs to be migrated,
+you can follow CouchDB's guides to set up CouchDB 2:
+* [Installation](https://docs.couchdb.org/en/stable/install/unix.html)
+* [Single Node Setup](https://docs.couchdb.org/en/stable/setup/single-node.html)
 
-Before you proceed, make sure that CouchDB is up and running:
+After CouchDB is installed successfully, [set up an admin user](https://docs.couchdb.org/en/stable/config/auth.html)
+with the credentials set before for `couchdb.username` and `couchdb.password`.
 
-	$ curl localhost:5984
-
-CouchDB should respond with version information.
-
-Use the values you set for `couchdb.username` and `couchdb.password` before to set the database credentials with the following command:
-
-	$ curl -X PUT -d '"<password>"' localhost:5984/_config/admins/<username>
-
-We provide a Python script that will set up all database essentials.
+We provide a Python script that will set up a new database for ARSnova.
 This "Setup Tool" is located at [thm-projects/arsnova-setuptool](https://github.com/thm-projects/arsnova-setuptool).
 
 To set up the database, run:
 
-	$ python tool.py
+	$ ./tool.py
 
 This will create the database along with all required view documents.
 
-CouchDB is now usable for ARSnova, but there are still a few things that should be setup for security and performance reasons.
-We recommend that you make the following adjustments to the CouchDB configuration `local.ini` which is usually located in either `/etc/couchdb` or `/usr/local/etc/couchdb` depending on the installation method.
-First, make sure the CouchDB daemon only listens to local connections by setting `bind_address` in the `httpd` section to `127.0.0.1`.
-Next, append the following section which instructs CouchDB to cleanup at night.
+CouchDB is now usable for ARSnova, but there are still a few things that should be setup for performance reasons.
+We recommend that you enable scheduled compactions of databases and their views.
+Create a new file `99-compactions.ini` in the CouchDB configuration directory (usually located at `/opt/couchdb/etc/local.d`) with the following content:
 
 	[compactions]
 	_default = [{db_fragmentation, "70%"}, {view_fragmentation, "60%"}, {from, "01:00"}, {to, "05:00"}]
@@ -113,13 +104,13 @@ On Debian-based systems this is done by appending
 
 	JAVA_OPTS="$JAVA_OPTS -Xms3072m -Xmx3072m"
 
-to `/etc/default/tomcat8`.
+to `/etc/default/tomcat9`.
 For most other distributions append this to `setenv.sh` in Tomcat's `bin` directory.
 Adjust the values based on the memory available to the system, but make sure to reserve 1 GiB for the operating system, web server, and database system.
 
 By default, Tomcat listens on a public interface.
 If you follow our recommendation to use a reverse proxy, you should change the configuration so Tomcat only accepts requests from localhost.
-Open `/etc/tomcat8/server.xml`, look for `<Connector port="8080" ...>`, and change it to:
+Open `/etc/tomcat9/server.xml`, look for `<Connector port="8080" ...>`, and change it to:
 
 	<Connector port="8080" address="127.0.0.1" ...>
 
