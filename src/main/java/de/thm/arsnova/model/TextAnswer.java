@@ -21,7 +21,6 @@ package de.thm.arsnova.model;
 import com.fasterxml.jackson.annotation.JsonView;
 import java.util.Date;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
