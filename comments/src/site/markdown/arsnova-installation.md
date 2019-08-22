@@ -67,7 +67,8 @@ todos:
 - change config:
   - change the password in the section couchdb accordingly
   - change the db name in the section couchdb accordingly
-  - change cors-origins to `*`
+  - change cors-origins to `'*'`
+  - add a (random) jwt secret
   - change message-broker relay enabled to `true`
 
 
@@ -97,7 +98,7 @@ todos:
 
 - ensure postgres and rabbitmq are running
 - core:
-  - `mvn jetty:run -D arsnova.config.dir=/etc/arsnova`
+  - `mvn -D arsnova.config-dir=/etc/arsnova jetty:run`
 - comment-service:
   - `mvn spring-boot:run`
 - lite:
