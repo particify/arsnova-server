@@ -49,8 +49,10 @@ unit_test:
     paths:
       - $OUTPUT_DIR
   cache: *maven_cache
+  coverage: '/Code coverage: \d+\.\d+/'
   script:
     - mvn -B jacoco:prepare-agent surefire:test jacoco:report
+    - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print "Instructions covered:", covered, "/", instructions; print "Code coverage:", 100 * covered / instructions "%" }' "$OUTPUT_DIR/site/jacoco/jacoco.csv"
 
 package:
   stage: post-build
