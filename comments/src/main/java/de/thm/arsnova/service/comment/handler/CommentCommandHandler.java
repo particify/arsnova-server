@@ -50,7 +50,7 @@ public class CommentCommandHandler {
         newComment.setBody(payload.getBody());
         newComment.setTimestamp(now);
         newComment.setRead(false);
-        newComment.setCorrect(false);
+        newComment.setCorrect(0);
         newComment.setFavorite(false);
         newComment.setAck(settings.getDirectSend());
 
@@ -133,7 +133,7 @@ public class CommentCommandHandler {
         old.setBody(p.getBody());
         old.setRead(p.isRead());
         old.setFavorite(p.isFavorite());
-        old.setCorrect(p.isCorrect());
+        old.setCorrect(p.getCorrect());
 
         Comment updated = this.service.update(old);
 
