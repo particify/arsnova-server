@@ -34,14 +34,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
+import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.event.FlipFlashcardsEvent;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.UserProfile;
@@ -147,6 +150,13 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Autowired(required = false)
 	public void setConnectorClient(final ConnectorClient connectorClient) {
 		this.connectorClient = connectorClient;
+	}
+
+	@EventListener
+	@Secured({"ROLE_USER", "RUN_AS_SYSTEM"})
+	public void handleUserDeletion(final BeforeDeletionEvent<UserProfile> event) {
+		final Iterable<Room> rooms = roomRepository.findByOwnerId(event.getEntity().getId(), -1, -1);
+		delete(rooms);
 	}
 
 	@Scheduled(fixedDelay = ROOM_INACTIVITY_CHECK_INTERVAL_MS)
