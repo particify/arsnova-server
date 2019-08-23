@@ -11,7 +11,7 @@ public class CommentUpdatedPayload implements WebSocketPayload {
     private String body;
     private boolean read;
     private boolean favorite;
-    private boolean correct;
+    private int correct;
     private boolean ack;
 
     public CommentUpdatedPayload() {
@@ -22,7 +22,7 @@ public class CommentUpdatedPayload implements WebSocketPayload {
         this.body = c.getBody();
         this.read = c.isRead();
         this.favorite = c.isFavorite();
-        this.correct = c.isCorrect();
+        this.correct = c.getCorrect();
         this.ack = c.isAck();
     }
 
@@ -67,12 +67,12 @@ public class CommentUpdatedPayload implements WebSocketPayload {
     }
 
     @JsonProperty("correct")
-    public boolean isCorrect() {
+    public int getCorrect() {
         return correct;
     }
 
     @JsonProperty("correct")
-    public void setCorrect(boolean correct) {
+    public void setCorrect(int correct) {
         this.correct = correct;
     }
 

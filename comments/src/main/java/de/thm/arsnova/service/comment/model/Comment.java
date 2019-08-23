@@ -15,7 +15,7 @@ public class Comment {
     private Date timestamp;
     private boolean read;
     private boolean favorite;
-    private boolean correct;
+    private int correct;
     private boolean ack;
     @Transient
     private int score;
@@ -76,11 +76,11 @@ public class Comment {
         this.favorite = favorite;
     }
 
-    public boolean isCorrect() {
+    public int getCorrect() {
         return correct;
     }
 
-    public void setCorrect(boolean correct) {
+    public void setCorrect(int correct) {
         this.correct = correct;
     }
 
