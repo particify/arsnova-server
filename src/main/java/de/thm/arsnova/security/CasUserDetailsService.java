@@ -26,7 +26,6 @@ import org.springframework.security.cas.userdetails.AbstractCasAssertionUserDeta
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.service.UserService;
@@ -34,7 +33,6 @@ import de.thm.arsnova.service.UserService;
 /**
  * Class to load a user based on the results from CAS.
  */
-@Service
 public class CasUserDetailsService extends AbstractCasAssertionUserDetailsService {
 	@Autowired
 	private UserService userService;
