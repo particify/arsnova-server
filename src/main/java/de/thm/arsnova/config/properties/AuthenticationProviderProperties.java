@@ -24,8 +24,10 @@ import java.util.Set;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.style.ToStringCreator;
 
-@ConfigurationProperties("security.authentication-providers")
+@ConfigurationProperties(AuthenticationProviderProperties.PREFIX)
 public class AuthenticationProviderProperties {
+	public static final String PREFIX = SecurityProperties.PREFIX + ".authentication-providers";
+
 	public abstract static class Provider {
 		public enum Role {
 			MODERATOR,

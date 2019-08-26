@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
@@ -163,7 +164,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 			if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())
 					|| providerProperties.getOauth().values().stream().anyMatch(p -> p.isEnabled())) {
-				http.addFilterAfter(oauthCallbackFilter(), CasAuthenticationFilter.class);
+				http.addFilterAfter(oauthCallbackFilter(), UsernamePasswordAuthenticationFilter.class);
 			}
 		}
 	}
@@ -373,6 +374,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	// LDAP Authentication Configuration
 
 	@Bean
+	@ConditionalOnProperty(
+			name = "ldap[0].enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
 	public LdapAuthenticationProvider ldapAuthenticationProvider() {
 		final LdapAuthenticationProvider ldapAuthenticationProvider =
 				new LdapAuthenticationProvider(ldapAuthenticator(), ldapAuthoritiesPopulator());
@@ -382,6 +387,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
+	@ConditionalOnProperty(
+			name = "ldap[0].enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
 	public LdapContextSource ldapContextSource() {
 		final AuthenticationProviderProperties.Ldap ldapProperties = providerProperties.getLdap().get(0);
 		final DefaultSpringSecurityContextSource contextSource =
@@ -397,6 +406,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
+	@ConditionalOnProperty(
+			name = "ldap[0].enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
 	public LdapAuthenticator ldapAuthenticator() {
 		final AuthenticationProviderProperties.Ldap ldapProperties = providerProperties.getLdap().get(0);
 		final BindAuthenticator authenticator = new BindAuthenticator(ldapContextSource());
@@ -414,11 +427,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
+	@ConditionalOnProperty(
+			name = "ldap[0].enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
 	public LdapAuthoritiesPopulator ldapAuthoritiesPopulator() {
 		return new NullLdapAuthoritiesPopulator();
 	}
 
 	@Bean
+	@ConditionalOnProperty(
+			name = "ldap[0].enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
 	public LdapUserDetailsMapper customLdapUserDetailsMapper() {
 		final AuthenticationProviderProperties.Ldap ldapProperties = providerProperties.getLdap().get(0);
 		logger.debug("ldapUserIdAttr: {}", ldapProperties.getUserIdAttribute());
@@ -429,6 +450,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	// CAS Authentication Configuration
 
 	@Bean
+	@ConditionalOnProperty(
+			name = "cas.enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
 	public CasAuthenticationProvider casAuthenticationProvider() {
 		final CasAuthenticationProvider authProvider = new CasAuthenticationProvider();
 		authProvider.setAuthenticationUserDetailsService(casUserDetailsService());
@@ -440,11 +465,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
+	@ConditionalOnProperty(
+			name = "cas.enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
 	public CasUserDetailsService casUserDetailsService() {
 		return new CasUserDetailsService();
 	}
 
 	@Bean
+	@ConditionalOnProperty(
+			name = "cas.enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
 	public ServiceProperties casServiceProperties() {
 		final ServiceProperties properties = new ServiceProperties();
 		properties.setService(rootUrl + apiPath + CAS_LOGIN_PATH_SUFFIX);
@@ -454,11 +487,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
+	@ConditionalOnProperty(
+			name = "cas.enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
 	public Cas20ProxyTicketValidator casTicketValidator() {
 		return new Cas20ProxyTicketValidator(providerProperties.getCas().getHostUrl());
 	}
 
 	@Bean
+	@ConditionalOnProperty(
+			name = "cas.enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
 	public CasAuthenticationEntryPoint casAuthenticationEntryPoint() {
 		final CasAuthenticationEntryPoint entryPoint = new CasAuthenticationEntryPoint();
 		entryPoint.setLoginUrl(providerProperties.getCas().getHostUrl() + "/login");
@@ -468,6 +509,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
+	@ConditionalOnProperty(
+			name = "cas.enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
 	public CasAuthenticationFilter casAuthenticationFilter() throws Exception {
 		final CasAuthenticationFilter filter = new CasAuthenticationFilter();
 		filter.setAuthenticationManager(authenticationManager());
@@ -480,6 +525,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
+	@ConditionalOnProperty(
+			name = "cas.enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
 	public LogoutFilter casLogoutFilter() {
 		final LogoutFilter filter = new LogoutFilter(casLogoutSuccessHandler(), logoutHandler());
 		filter.setLogoutRequestMatcher(new AntPathRequestMatcher("/**" + CAS_LOGOUT_PATH_SUFFIX));
@@ -488,6 +537,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
+	@ConditionalOnProperty(
+			name = "cas.enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
 	public LogoutSuccessHandler casLogoutSuccessHandler() {
 		final CasLogoutSuccessHandler handler = new CasLogoutSuccessHandler();
 		handler.setCasUrl(providerProperties.getCas().getHostUrl());
@@ -535,6 +588,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
+	@ConditionalOnProperty(
+			name = "oidc[0].enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
 	public OidcClient oidcClient() {
 		final AuthenticationProviderProperties.Oidc oidcProperties = providerProperties.getOidc().get(0);
 		final OidcConfiguration config = new OidcConfiguration();
@@ -549,6 +606,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
+	@ConditionalOnProperty(
+			name = "oauth.facebook.enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
 	public FacebookClient facebookClient() {
 		final AuthenticationProviderProperties.Oauth oauthProperties =
 				providerProperties.getOauth().get(FACEBOOK_PROVIDER_ID);
@@ -559,6 +620,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
+	@ConditionalOnProperty(
+			name = "oauth.twitter.enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
 	public TwitterClient twitterClient() {
 		final AuthenticationProviderProperties.Oauth oauthProperties =
 				providerProperties.getOauth().get(TWITTER_PROVIDER_ID);
@@ -569,6 +634,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
+	@ConditionalOnProperty(
+			name = "oauth.google.enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
 	public GoogleOidcClient googleClient() {
 		final AuthenticationProviderProperties.Oauth oauthProperties =
 				providerProperties.getOauth().get(GOOGLE_PROVIDER_ID);
