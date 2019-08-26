@@ -24,8 +24,10 @@ import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.convert.DurationUnit;
 
-@ConfigurationProperties("security")
+@ConfigurationProperties(SecurityProperties.PREFIX)
 public class SecurityProperties {
+	public static final String PREFIX = "security";
+
 	public static class Jwt {
 		private String serverId;
 		private String secret;

@@ -20,8 +20,9 @@ package de.thm.arsnova.config.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties("system.couchdb")
+@ConfigurationProperties(CouchDbProperties.PREFIX)
 public class CouchDbProperties {
+	public static final String PREFIX = SystemProperties.PREFIX + ".couchdb";
 	private String host;
 	private int port;
 	private String dbName;

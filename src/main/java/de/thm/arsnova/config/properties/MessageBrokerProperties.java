@@ -20,8 +20,10 @@ package de.thm.arsnova.config.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties("system.message-broker")
+@ConfigurationProperties(MessageBrokerProperties.PREFIX)
 public class MessageBrokerProperties {
+	public static final String PREFIX = SystemProperties.PREFIX + ".message-broker";
+
 	public static class Relay {
 		private boolean enabled;
 		private String host;

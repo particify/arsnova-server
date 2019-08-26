@@ -20,8 +20,10 @@ package de.thm.arsnova.config.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties("system")
+@ConfigurationProperties(SystemProperties.PREFIX)
 public class SystemProperties {
+	public static final String PREFIX = "system";
+
 	public static class Api {
 		private String path;
 		private boolean indentResponseBody;
