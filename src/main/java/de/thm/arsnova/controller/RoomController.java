@@ -18,7 +18,9 @@
 
 package de.thm.arsnova.controller;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.RoomStatistics;
 import de.thm.arsnova.service.ContentGroupService;
 import de.thm.arsnova.service.RoomService;
 
@@ -41,6 +44,7 @@ public class RoomController extends AbstractEntityController<Room> {
 	private static final String MODERATOR_MAPPING = DEFAULT_ID_MAPPING + "/moderator/{userId}";
 	private static final String CONTENTGROUP_MAPPING = DEFAULT_ID_MAPPING + "/contentgroup/{groupName}";
 	private static final String CONTENTGROUP_ADD_MAPPING = CONTENTGROUP_MAPPING + "/{contentId}";
+	private static final String STATS_MAPPING = DEFAULT_ID_MAPPING + "/stats";
 
 	private RoomService roomService;
 	private ContentGroupService contentGroupService;
@@ -95,5 +99,17 @@ public class RoomController extends AbstractEntityController<Room> {
 	public void addContentToGroup(@PathVariable final String id, @PathVariable final String groupName,
 			@RequestBody final String contentId) {
 		contentGroupService.addContentToGroup(id, groupName, contentId);
+	}
+
+	@GetMapping(STATS_MAPPING)
+	public RoomStatistics getStats(@PathVariable final String id) {
+		final RoomStatistics roomStatistics = new RoomStatistics();
+		final List<ContentGroup> contentGroups = contentGroupService.getByRoomId(id);
+		roomStatistics.setGroupStats(contentGroups.stream()
+				.map(cg ->  new RoomStatistics.ContentGroupStatistics(cg)).collect(Collectors.toList()));
+		roomStatistics.setContentCount(contentGroups.stream()
+				.mapToInt(cg -> cg.getContentIds().size()).reduce((a, b) -> a + b).getAsInt());
+
+		return roomStatistics;
 	}
 }

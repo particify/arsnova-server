@@ -19,24 +19,35 @@
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
 
 public class RoomStatistics {
+	private int currentParticipants;
 	private int contentCount = 0;
 	private int unansweredContentCount = 0;
 	private int answerCount = 0;
 	private int unreadAnswerCount = 0;
 	private int commentCount = 0;
 	private int unreadCommentCount = 0;
+	private List<ContentGroupStatistics> groupStats;
 
 	@JsonView(View.Public.class)
+	public int getCurrentParticipants() {
+		return currentParticipants;
+	}
+
+	public void setCurrentParticipants(final int currentParticipants) {
+		this.currentParticipants = currentParticipants;
+	}
+
 	public int getUnansweredContentCount() {
 		return unansweredContentCount;
 	}
 
-	@JsonView(View.Public.class)
 	public void setUnansweredContentCount(final int unansweredContentCount) {
 		this.unansweredContentCount = unansweredContentCount;
 	}
@@ -59,7 +70,6 @@ public class RoomStatistics {
 		this.answerCount = answerCount;
 	}
 
-	@JsonView(View.Public.class)
 	public int getUnreadAnswerCount() {
 		return unreadAnswerCount;
 	}
@@ -77,7 +87,6 @@ public class RoomStatistics {
 		this.commentCount = commentCount;
 	}
 
-	@JsonView(View.Public.class)
 	public int getUnreadCommentCount() {
 		return unreadCommentCount;
 	}
@@ -86,15 +95,70 @@ public class RoomStatistics {
 		this.unreadCommentCount = unreadCommentCount;
 	}
 
+	@JsonView(View.Public.class)
+	public List<ContentGroupStatistics> getGroupStats() {
+		if (groupStats == null) {
+			groupStats = new ArrayList<>();
+		}
+
+		return groupStats;
+	}
+
+	public void setGroupStats(final List<ContentGroupStatistics> groupStats) {
+		this.groupStats = groupStats;
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringCreator(this)
+			.append("currentParticipants", currentParticipants)
+			.append("contentCount", contentCount)
+			.append("unansweredContentCount", unansweredContentCount)
+			.append("answerCount", answerCount)
+			.append("unreadAnswerCount", unreadAnswerCount)
+			.append("commentCount", commentCount)
+			.append("unreadCommentCount", unreadCommentCount)
+			.append("groupStats", groupStats)
+			.toString();
+	}
+
+	public static class ContentGroupStatistics {
+		private String groupName;
+		private int contentCount = 0;
+
+		public ContentGroupStatistics() {
+
+		}
+
+		public ContentGroupStatistics(final ContentGroup contentGroup) {
+			this.setGroupName(contentGroup.getName());
+			this.setContentCount(contentGroup.getContentIds().size());
+		}
+
+		@JsonView(View.Public.class)
+		public String getGroupName() {
+			return groupName;
+		}
+
+		public void setGroupName(final String groupName) {
+			this.groupName = groupName;
+		}
+
+		@JsonView(View.Public.class)
+		public int getContentCount() {
+			return contentCount;
+		}
+
+		public void setContentCount(final int contentCount) {
+			this.contentCount = contentCount;
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringCreator(this)
+				.append("groupName", groupName)
 				.append("contentCount", contentCount)
-				.append("unansweredContentCount", unansweredContentCount)
-				.append("answerCount", answerCount)
-				.append("unreadAnswerCount", unreadAnswerCount)
-				.append("commentCount", commentCount)
-				.append("unreadCommentCount", unreadCommentCount)
 				.toString();
+		}
 	}
 }
