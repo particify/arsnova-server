@@ -11,7 +11,7 @@ Please note that this aims at debian-based systems. I can't give support for any
 Dependencies:
 - maven
 - java 8
-- node 8
+- node 10
 - erlang (covered in the couchdb install instructions)
 - curl
 - git (obviously...)
