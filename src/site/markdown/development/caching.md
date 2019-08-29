@@ -28,7 +28,7 @@ public ResultObject veryCacheable(Session session) { ... }
 
 Be aware though that you need to carefully choose the fields which should be part of the `equals`/`hashCode`: In case of CouchDB, for example, it is not a good idea to use a document's `rev` field. Every time a document is updated, it gets a new `rev` which will make it _unequal_ to all its previous versions, making cache updates using `@CachePut` impossible.
 
-[ARSnova's event system](https://github.com/thm-projects/arsnova-backend/wiki/Event-System) provides a useful way for fine-grained cache updates because the events contain all relevant domain objects. If you need to clear or update a cache based on one of ARSnova's events, you can use the `CacheBuster` class to add your annotations.
+[ARSnova's event system](event-system.md) provides a useful way for fine-grained cache updates because the events contain all relevant domain objects. If you need to clear or update a cache based on one of ARSnova's events, you can use the `CacheBuster` class to add your annotations.
 
 
 ## Issues
