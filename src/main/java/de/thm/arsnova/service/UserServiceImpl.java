@@ -91,6 +91,10 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 	private static final int LOGIN_BAN_RESET_DELAY_MS = 2 * 60 * 1000;
 
+	private static final int MAIL_RESEND_TRY_RESET_DELAY_MS = 30 * 1000;
+
+	private static final int MAIL_RESEND_BAN_RESET_DELAY_MS = 2 * 60 * 1000;
+
 	private static final int REPEATED_PASSWORD_RESET_DELAY_MS = 3 * 60 * 1000;
 
 	private static final int PASSWORD_RESET_KEY_DURABILITY_MS = 2 * 60 * 60 * 1000;
@@ -137,10 +141,14 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	private BCryptPasswordEncoder encoder;
 	private ConcurrentHashMap<String, Byte> loginTries;
 	private Set<String> loginBans;
+	private ConcurrentHashMap<String, Byte> resentMailCount;
+	private Set<String> resendMailBans;
 
 	{
 		loginTries = new ConcurrentHashMap<>();
 		loginBans = Collections.synchronizedSet(new HashSet<String>());
+		resentMailCount = new ConcurrentHashMap<>();
+		resendMailBans = Collections.synchronizedSet(new HashSet<String>());
 	}
 
 	public UserServiceImpl(
@@ -175,6 +183,22 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		if (!loginBans.isEmpty()) {
 			logger.info("Reset temporary login bans.");
 			loginBans.clear();
+		}
+	}
+
+	@Scheduled(fixedDelay = MAIL_RESEND_TRY_RESET_DELAY_MS)
+	public void resetResendingActivationTries() {
+		if (!resentMailCount.isEmpty()) {
+			logger.info("Reset failed mail activation resending counters.");
+			resentMailCount.clear();
+		}
+	}
+
+	@Scheduled(fixedDelay = MAIL_RESEND_BAN_RESET_DELAY_MS)
+	public void resetResendingActivationBan() {
+		if (!resendMailBans.isEmpty()) {
+			logger.info("Reset temporary bans from resending activation mail.");
+			resendMailBans.clear();
 		}
 	}
 
@@ -230,6 +254,11 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
+	public boolean isBannedFromSendingActivationMail(final String addr) {
+		return resendMailBans.contains(addr);
+	}
+
+	@Override
 	public void increaseFailedLoginCount(final String addr) {
 		Byte tries = loginTries.get(addr);
 		if (null == tries) {
@@ -240,6 +269,22 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 			if (securityProperties.getLoginTryLimit() == tries) {
 				logger.info("Temporarily banned {} from login.", addr);
 				loginBans.add(addr);
+			}
+		}
+	}
+
+	@Override
+	public void increaseSentMailCount(final String addr) {
+		Byte tries = resentMailCount.get(addr);
+		if (null == tries) {
+			tries = 0;
+		}
+		if (tries < securityProperties.getResendMailLimit()) {
+			resentMailCount.put(addr, ++tries);
+			if (securityProperties.getResendMailLimit() == tries) {
+				logger.info("Temporarily banned {} from resending activation"
+						+ " mails in due to too many resent activation mails.", addr);
+				resendMailBans.add(addr);
 			}
 		}
 	}
@@ -523,6 +568,25 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		}
 	}
 
+	@Override
+	@Secured({"ROLE_ANONYMOUS", "ROLE_USER", "RUN_AS_ACCOUNT_MANAGEMENT"})
+	public UserProfile resetActivation(final String id, final String clientAddress) {
+		if (isBannedFromSendingActivationMail(clientAddress)) {
+			return null;
+		}
+		final UserProfile userProfile = get(id, true);
+		if (null == userProfile) {
+			logger.info("Reset of account activation failed. User {} does not exist.", id);
+			increaseFailedLoginCount(clientAddress);
+
+			throw new NotFoundException();
+		}
+		sendActivationEmail(userProfile);
+
+		return userProfile;
+	}
+
+	@Override
 	@Secured({"ROLE_ANONYMOUS", "ROLE_USER", "RUN_AS_ACCOUNT_MANAGEMENT"})
 	public boolean activateAccount(final String id, final String key, final String clientAddress) {
 		if (isBannedFromLogin(clientAddress)) {
@@ -530,7 +594,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		}
 		final UserProfile userProfile = get(id, true);
 		if (userProfile == null || !key.equals(userProfile.getAccount().getActivationKey())) {
-			increaseFailedLoginCount(clientAddress);
+			increaseSentMailCount(clientAddress);
 			return false;
 		}
 

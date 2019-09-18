@@ -77,6 +77,8 @@ arsnova:
     # After the specified number of login tries the client IP will be banned for
     # several minutes
     login-try-limit: 50
+    # After the specific number of resent emails the client IP will be banned for several minutes from resending
+    resend-mail-limit: 5
 
     # JSON Web Tokens
     jwt:
