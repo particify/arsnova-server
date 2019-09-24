@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.thm.arsnova.controller;
+package de.thm.arsnova.controller.v2;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,14 +30,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import de.thm.arsnova.config.properties.SystemProperties;
+import de.thm.arsnova.controller.AbstractController;
 
 /**
  * The ConfigurationController provides frontend clients with information necessary to correctly interact with the
  * backend and other frontends as well as settings for ARSnova. The the alternative /arsnova-config route is necessary
  * in case the backend application is deployed as root context.
  */
-@Controller
-@RequestMapping({"/configuration", "/arsnova-config"})
+@Controller("v2ConfigurationController")
+@RequestMapping({"/v2/configuration", "/v2/arsnova-config"})
 public class ConfigurationController extends AbstractController {
 	private static final Logger logger = LoggerFactory
 			.getLogger(ConfigurationController.class);
