@@ -18,7 +18,10 @@
 
 package de.thm.arsnova.config.properties;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import de.thm.arsnova.model.serialization.View;
 
 @ConfigurationProperties(FeatureProperties.PREFIX)
 public class FeatureProperties {
@@ -28,6 +31,7 @@ public class FeatureProperties {
 		private boolean enabled;
 		private int answerOptionLimit;
 
+		@JsonView(View.Public.class)
 		public boolean isEnabled() {
 			return enabled;
 		}
@@ -36,6 +40,7 @@ public class FeatureProperties {
 			this.enabled = enabled;
 		}
 
+		@JsonView(View.Public.class)
 		public int getAnswerOptionLimit() {
 			return answerOptionLimit;
 		}
@@ -48,6 +53,7 @@ public class FeatureProperties {
 	public static class Comments {
 		private boolean enabled;
 
+		@JsonView(View.Public.class)
 		public boolean isEnabled() {
 			return enabled;
 		}
@@ -61,6 +67,7 @@ public class FeatureProperties {
 		private boolean enabled;
 		private int resetInterval;
 
+		@JsonView(View.Public.class)
 		public boolean isEnabled() {
 			return enabled;
 		}
@@ -81,6 +88,7 @@ public class FeatureProperties {
 	public static class ContentPool {
 		private boolean enabled;
 
+		@JsonView(View.Public.class)
 		public boolean isEnabled() {
 			return enabled;
 		}
@@ -95,6 +103,7 @@ public class FeatureProperties {
 	private LiveFeedback liveFeedback;
 	private ContentPool contentPool;
 
+	@JsonView(View.Public.class)
 	public Contents getContents() {
 		return contents;
 	}
@@ -103,6 +112,7 @@ public class FeatureProperties {
 		this.contents = contents;
 	}
 
+	@JsonView(View.Public.class)
 	public Comments getComments() {
 		return comments;
 	}
@@ -111,6 +121,7 @@ public class FeatureProperties {
 		this.comments = comments;
 	}
 
+	@JsonView(View.Public.class)
 	public LiveFeedback getLiveFeedback() {
 		return liveFeedback;
 	}
@@ -119,6 +130,7 @@ public class FeatureProperties {
 		this.liveFeedback = liveFeedback;
 	}
 
+	@JsonView(View.Public.class)
 	public ContentPool getContentPool() {
 		return contentPool;
 	}
