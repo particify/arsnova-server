@@ -115,7 +115,9 @@ import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 		value = {
 			"classpath:config/defaults.yml",
 			"classpath:config/actuator.yml",
-			"file:${arsnova.config-dir:.}/application.yml"},
+			"file:${arsnova.config-dir:.}/application.yml",
+			"file:${arsnova.config-dir:.}/secrets.yml",
+			"file:${arsnova.config-dir:.}/ui.yml"},
 		ignoreResourceNotFound = true,
 		encoding = CharEncoding.UTF_8,
 		factory = YamlPropertySourceFactory.class
