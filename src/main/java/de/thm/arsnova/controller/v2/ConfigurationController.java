@@ -55,82 +55,78 @@ public class ConfigurationController extends AbstractController {
 	@Value("${presenter.path}")
 	private String presenterPath;
 
-	@Value("${links.overlay.url}")
+	@Value("${ui.links.overlay.url}")
 	private String overlayUrl;
 
-	@Value("${links.organization.url}")
+	@Value("${ui.links.organization.url}")
 	private String organizationUrl;
 
-	@Value("${links.imprint.url}")
+	@Value("${ui.links.imprint.url}")
 	private String imprintUrl;
 
-	@Value("${links.blog.url:}")
+	@Value("${ui.links.blog.url:}")
 	private String blogUrl;
 
-	@Value("${links.privacy-policy.url}")
+	@Value("${ui.links.privacy-policy.url}")
 	private String privacyPolicyUrl;
 
-	@Value("${links.documentation.url}")
+	@Value("${ui.links.documentation.url}")
 	private String documentationUrl;
 
-	@Value("${links.presenter-documentation.url}")
+	@Value("${ui.links.presenter-documentation.url}")
 	private String presenterDocumentationUrl;
 
-	@Value("${feedback.warning:5}")
+	@Value("${ui.feedback.warning:5}")
 	private String feedbackWarningOffset;
 
-	@Value("${features.mathjax.enabled:true}")
+	@Value("${ui.mathjax.enabled:true}")
 	private String mathJaxEnabled;
 
-	@Value("${features.mathjax.src:}")
+	@Value("${ui.mathjax.src:}")
 	private String mathJaxSrc;
 
-	@Value("${features.freetext-imageanswer.enabled:false}")
+	@Value("${features.contents.formats.freetext.imageanswer.enabled:false}")
 	private String imageAnswerEnabled;
 
-	@Value("${features.question-format.grid-square.enabled:false}")
+	@Value("${features.contents.formats.grid-square.enabled:false}")
 	private String gridSquareEnabled;
 
-	@Value("${features.session-import-export.enabled:false}")
-	private String roomImportExportEnabled;
+	private String roomImportExportEnabled = "true";
 
-	@Value("${features.public-pool.enabled:false}")
+	@Value("${features.content-pool.enabled:false}")
 	private String publicPoolEnabled;
 
-	@Value("${features.export-to-click.enabled:false}")
-	private String exportToClickEnabled;
-
-	@Value("${question.answer-option-limit:8}")
+	@Value("${features.contents.answer-option-limit:8}")
 	private String answerOptionLimit;
 
-	@Value("${upload.filesize_b:}")
+	@Value("${system.uploads.max-filesize:}")
 	private String maxUploadFilesize;
 
-	@Value("${question.parse-answer-option-formatting:false}")
+	@Value("${ui.parse-answer-option-formatting:false}")
 	private String parseAnswerOptionFormatting;
 
-	@Value("${pp.subjects}")
+	@Value("${features.content-pool.subjects}")
 	private String ppSubjects;
 
-	@Value("${pp.licenses}")
+	@Value("${features.content-pool.licenses}")
 	private String ppLicenses;
 
-	@Value("${pp.logofilesize_b}")
+	@Value("${features.content-pool.logo-max-filesize}")
 	private String ppLogoMaxFilesize;
 
-	@Value("${upload.filesize_b}")
+	@Value("${system.uploads.max-filesize}")
 	private String gridImageMaxFileSize;
 
-	@Value("${tracking.provider}")
+	@Value("${ui.tracking.provider}")
 	private String trackingProvider;
 
-	@Value("${tracking.tracker-url}")
+	@Value("${ui.tracking.tracker-url}")
 	private String trackingTrackerUrl;
 
-	@Value("${tracking.site-id}")
+	@Value("${ui.tracking.site-id}")
 	private String trackingSiteId;
 
-	@Value("${session.demo-id:}")
+	@Value("${ui.demo-room-id:}")
 	private String demoRoomShortId;
 
 	@Value("${ui.slogan:}")
@@ -154,10 +150,10 @@ public class ConfigurationController extends AbstractController {
 	@Value("${ui.splashscreen.min-delay:}")
 	private String splashscreenDelay;
 
-	@Value("${pp.session-levels.de}")
+	@Value("${features.content-pool.session-levels.de}")
 	private String ppLevelsDe;
 
-	@Value("${pp.session-levels.en}")
+	@Value("${features.content-pool.session-levels.en}")
 	private String ppLevelsEn;
 
 	public ConfigurationController(final SystemProperties systemProperties) {
@@ -240,7 +236,7 @@ public class ConfigurationController extends AbstractController {
 		features.put("gridSquare", "true".equals(gridSquareEnabled));
 		features.put("sessionImportExport", "true".equals(roomImportExportEnabled));
 		features.put("publicPool", "true".equals(publicPoolEnabled));
-		features.put("exportToClick", "true".equals(exportToClickEnabled));
+		features.put("exportToClick", false);
 
 		// add public pool configuration on demand
 		if (features.get("publicPool")) {

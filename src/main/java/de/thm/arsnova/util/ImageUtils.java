@@ -59,10 +59,10 @@ public class ImageUtils {
 
 	private static final Logger logger = LoggerFactory.getLogger(ImageUtils.class);
 
-	@Value("${imageupload.thumbnail.width}")
+	@Value("${system.uploads.thumbnail.width}")
 	private int thumbWidth = THUMB_WIDTH_DEFAULT;
 
-	@Value("${imageupload.thumbnail.height}")
+	@Value("${system.uploads.thumbnail.height}")
 	private int thumbHeight = THUMB_HEIGHT_DEFAULT;
 
 	/**
