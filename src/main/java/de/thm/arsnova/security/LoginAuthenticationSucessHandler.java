@@ -18,29 +18,55 @@
 
 package de.thm.arsnova.security;
 
+import java.io.IOException;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+
+import de.thm.arsnova.security.jwt.JwtService;
 
 /**
  * This class gets called when a user successfully logged in.
  */
 public class LoginAuthenticationSucessHandler extends
 		SimpleUrlAuthenticationSuccessHandler {
+	public static final String URL_ATTRIBUTE = "ars-login-success-url";
+	private static final String AUTHENTICATION_ATTRIBUTE = "authentication";
 
+	private JwtService jwtService;
 	private String targetUrl;
+
+	@Autowired
+	public void setJwtService(final JwtService jwtService) {
+		this.jwtService = jwtService;
+	}
 
 	@Override
 	protected String determineTargetUrl(
 			final HttpServletRequest request,
 			final HttpServletResponse response) {
-		final HttpSession session = request.getSession();
-		if (session == null || session.getAttribute("ars-login-success-url") == null) {
-			return targetUrl;
+		final HttpSession session = request.getSession(false);
+		if (session == null || session.getAttribute(URL_ATTRIBUTE) == null) {
+			final Authentication authentication = (Authentication) request.getAttribute(AUTHENTICATION_ATTRIBUTE);
+			final String token = jwtService.createSignedToken((User) authentication.getPrincipal());
+			return targetUrl + "?token=" + token;
 		}
 
-		return (String) session.getAttribute("ars-login-success-url");
+		final String url = (String) session.getAttribute(URL_ATTRIBUTE);
+		session.removeAttribute(URL_ATTRIBUTE);
+
+		return url;
+	}
+
+	@Override
+	public void onAuthenticationSuccess(final HttpServletRequest request, final HttpServletResponse response,
+			final Authentication authentication) throws IOException, ServletException {
+		request.setAttribute(AUTHENTICATION_ATTRIBUTE, authentication);
+		super.onAuthenticationSuccess(request, response, authentication);
 	}
 
 	public void setTargetUrl(final String url) {

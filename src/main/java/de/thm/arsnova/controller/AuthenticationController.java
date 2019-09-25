@@ -18,13 +18,25 @@
 
 package de.thm.arsnova.controller;
 
+import java.io.IOException;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.pac4j.core.context.J2EContext;
+import org.pac4j.oidc.client.OidcClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.view.RedirectView;
 
+import de.thm.arsnova.config.SecurityConfig;
 import de.thm.arsnova.model.ClientAuthentication;
 import de.thm.arsnova.model.LoginCredentials;
 import de.thm.arsnova.model.UserProfile;
@@ -34,22 +46,25 @@ import de.thm.arsnova.service.UserService;
 @RequestMapping("/auth")
 public class AuthenticationController {
 	private UserService userService;
+	private OidcClient oidcClient;
+	private CasAuthenticationEntryPoint casEntryPoint;
 
 	public AuthenticationController(final UserService userService) {
 		this.userService = userService;
 	}
 
-	@PostMapping("/login")
-	public ClientAuthentication login() {
-		return userService.getCurrentClientAuthentication();
+	@Autowired(required = false)
+	public void setOidcClient(final OidcClient oidcClient) {
+		this.oidcClient = oidcClient;
 	}
 
-	@PostMapping("/login/registered")
-	public ClientAuthentication loginRegistered(@RequestBody final LoginCredentials loginCredentials,
-			final HttpServletRequest request) {
-		final String loginId = loginCredentials.getLoginId().toLowerCase();
-		userService.authenticate(new UsernamePasswordAuthenticationToken(loginId, loginCredentials.getPassword()),
-				UserProfile.AuthProvider.ARSNOVA, request.getRemoteAddr());
+	@Autowired(required = false)
+	public void setCasEntryPoint(final CasAuthenticationEntryPoint casEntryPoint) {
+		this.casEntryPoint = casEntryPoint;
+	}
+
+	@PostMapping("/login")
+	public ClientAuthentication login() {
 		return userService.getCurrentClientAuthentication();
 	}
 
@@ -64,5 +79,50 @@ public class AuthenticationController {
 				UserProfile.AuthProvider.ARSNOVA_GUEST, request.getRemoteAddr());
 
 		return userService.getCurrentClientAuthentication();
+	}
+
+	@PostMapping("/login/{providerId}")
+	public ClientAuthentication loginViaProvider(
+			@PathVariable final String providerId,
+			@RequestBody final LoginCredentials loginCredentials,
+			final HttpServletRequest request) {
+		switch (providerId) {
+			case "registered":
+				final String loginId = loginCredentials.getLoginId().toLowerCase();
+				userService.authenticate(new UsernamePasswordAuthenticationToken(
+						loginId, loginCredentials.getPassword()),
+						UserProfile.AuthProvider.ARSNOVA, request.getRemoteAddr());
+
+				return userService.getCurrentClientAuthentication();
+			case SecurityConfig.LDAP_PROVIDER_ID:
+				userService.authenticate(new UsernamePasswordAuthenticationToken(
+						loginCredentials.getLoginId(), loginCredentials.getPassword()),
+						UserProfile.AuthProvider.LDAP, request.getRemoteAddr());
+
+				return userService.getCurrentClientAuthentication();
+			default:
+				throw new IllegalArgumentException("Invalid provider ID.");
+		}
+	}
+
+	@GetMapping("/sso/{providerId}")
+	public View redirectToSso(@PathVariable final String providerId,
+			final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
+		switch (providerId) {
+			case SecurityConfig.OIDC_PROVIDER_ID:
+				if (oidcClient == null) {
+					throw new IllegalArgumentException("Invalid provider ID.");
+				}
+				return new RedirectView(
+						oidcClient.getRedirectAction(new J2EContext(request, response)).getLocation());
+			case SecurityConfig.CAS_PROVIDER_ID:
+				if (casEntryPoint == null) {
+					throw new IllegalArgumentException("Invalid provider ID.");
+				}
+				casEntryPoint.commence(request, response, null);
+				return null;
+			default:
+				throw new IllegalArgumentException("Invalid provider ID.");
+		}
 	}
 }

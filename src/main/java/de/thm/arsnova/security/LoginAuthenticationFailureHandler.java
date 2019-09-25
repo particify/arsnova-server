@@ -34,6 +34,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
  */
 public class LoginAuthenticationFailureHandler extends
 		SimpleUrlAuthenticationFailureHandler {
+	public static final String URL_ATTRIBUTE = "ars-login-failure-url";
 
 	private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 	private String failureUrl;
@@ -45,8 +46,8 @@ public class LoginAuthenticationFailureHandler extends
 			final AuthenticationException exception
 	) throws IOException, ServletException {
 		final HttpSession session = request.getSession();
-		if (session != null && session.getAttribute("ars-login-failure-url") != null) {
-			failureUrl = (String) session.getAttribute("ars-login-failure-url");
+		if (session != null && session.getAttribute(URL_ATTRIBUTE) != null) {
+			failureUrl = (String) session.getAttribute(URL_ATTRIBUTE);
 		}
 
 		redirectStrategy.sendRedirect(request, response, failureUrl);
