@@ -51,6 +51,21 @@ arsnova:
       port: 8090
       proxy-path: /socket.io
 
+    inactivity-thresholds:
+      # Anonymize user content for users with X days of inactivity
+      anonymize-users: 180
+
+      # Delete guest sessions automatically after X days of owner inactivity.
+      delete-guest-rooms: 180
+
+    uploads:
+      # Maximal filesize in bytes
+      max-filesize: 4194304
+      thumbnail:
+        # Maximal thumbnail size in pixels
+        width: 400
+        height: 400
+
   ##############################################################################
   # Authentication
   ##############################################################################
@@ -202,70 +217,49 @@ arsnova:
   # Features
   ##############################################################################
   features:
-    mathjax:
-      # Enable MathJax to allow the use of Math formulas written in TeX syntax
-      # in text fields.
+    contents:
       enabled: true
-      src: //cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js
+      formats:
+        grid-square:
+          enabled: false
+        freetext:
+          imageanswer:
+            enabled: false
+      # Maximal number of answer options allowed for a skill question
+      answer-option-limit: 8
 
-    # The following features are considered experimental because they have not
-    # been tested in a production environment over a longer time frame and/or
-    # their behavior will change in future releases.
-    freetext-imageanswer:
+    comments:
       enabled: true
-    question-format:
-      grid-square:
-        enabled: true
 
-    # Without enabled session-import-export feature no sessions can be added to
-    # the public pool
-    session-import-export:
+    live-feedback:
       enabled: true
-    public-pool:
-      enabled: true
-    export-to-click:
-      enabled: true
+      # Minutes, after which the feedback is deleted
+      reset-interval: 10
+
+    content-pool:
+      enabled: false
+      subjects: Allgemeines,Anglistik,Architektur,Bauingenieurwesen,Betriebswirtschaftslehre,Biologie,Chemie,Elektrotechnik,Geographie,Geowissenschaften,Germanistik,Geschichtswissenschaft,Informatik,Kunst,Kunstpädagogik,Maschinenbau,Mathematik,Medienwissenschaften,Medizin,Musik,Pharmazie,Physik,Psychologie,Rechtswissenschaften,Stadtplanung,Theaterwissenschaften,Theologie,Vermessungswesen,Volkswirtschaftslehre
+      licenses: CC by - Attribution,CC nc - Non-Commercial,CC nd - No Derivatives,CC sa - Share Alike,CCO - Public Domain,CC by-nd -  Attribution-No Derivatives,CC by-c - Attribution-Non-Commercial,CC by-nc-sa - Attribution-Non-Derivatives-Share Alike,CC by-nc-nd Attribution-Non-Commercial- No Derivatives,GNU GPL - GNU General Public License
+      # Logo file size in bytes
+      logo-max-filesize: 102400
+      # Do not reorder levels. Append new levels to the end of the list. Otherwise,
+      # references in existing public sessions could be mixed up.
+      session-levels:
+        de: Allgemeinbildung,Abitur,Bachelor,Master,Wer wird Millionär,Sonstiges
+        en: General Education,Highschool,Bachelor,Master,Who Wants to Be a Millionaire,Miscellaneous
 
   ##############################################################################
-  # Customization
+  # User interface
   ##############################################################################
-  feedback:
-    # Minutes, after which the feedback is deleted
-    cleanup: 10
-    # Number of "you've lost me"/"abgehängt" votes, starting to show warning
-    # sign
-    warning: 15
-  upload:
-    # Maximal filesize in bytes
-    filesize_b: 4194304
-  imageupload:
-    thumbnail:
-      # Maximal thumbnail size in pixels
-      width: 400
-      height: 400
-  question:
-    # Maximal number of answer options allowed for a skill question
-    answer-option-limit: 8
-    # Enable Markdown and MathJax parsing in answer options. Formatting in
-    # answer options should be used cautiously since it could lead to display
-    # errors. Answer options will still not be parsed in diagrams. This setting
-    # has no effect if neither MathJax nor Markdown are enabled.
-    parse-answer-option-formatting: false
-  session:
-    # Demo session id to show above session login button
-    # You can freely use the demo session of https://arsnova.eu/mobile which can
-    # be imported from the repro:
-    # https://github.com/thm-projects/arsnova-mobile/tree/master/demo-sessions
-    demo-id: ""
-    guest-session:
-      # Delete guest sessions automatically after X days of owner inactivity.
-      cleanup-days: 180
-  user:
-    # Anonymize user content for users with X days of inactivity
-    cleanup-days: 180
   ui:
     # Label underneath ARSnova logo
     slogan: Audience Response System
+
+    # Demo room short id to show above room login button
+    # You can freely use the demo room of https://arsnova.eu/mobile which can
+    # be imported from the repo:
+    # https://github.com/thm-projects/arsnova-mobile/tree/master/demo-sessions
+    demo-room-id: ""
 
     # Splashscreen configuration
     # Best results are achieved with logos that have the same width and height.
@@ -280,33 +274,45 @@ arsnova:
       background-color: ""
       loading-ind-color: ""
 
-  # Links which are displayed in the frontend applications
-  links:
-    blog:
-      url: https://arsnova.eu/blog/
-    documentation:
-      url: https://arsnova.eu/manual/
-    presenter-documentation:
-      url: ""
-    overlay:
-      url: https://arsnova.eu/overlay/
-    organization:
-      url: ""
-    imprint:
-      url: ""
-    privacy-policy:
-      url: ""
+    # Enable Markdown and MathJax parsing in answer options. Formatting in
+    # answer options should be used cautiously since it could lead to display
+    # errors. Answer options will still not be parsed in diagrams. This setting
+    # has no effect if neither MathJax nor Markdown are enabled.
+    parse-answer-option-formatting: false
 
-  # Configuration for the public pool
-  pp:
-    subjects: Allgemeines,Anglistik,Architektur,Bauingenieurwesen,Betriebswirtschaftslehre,Biologie,Chemie,Elektrotechnik,Geographie,Geowissenschaften,Germanistik,Geschichtswissenschaft,Informatik,Kunst,Kunstpädagogik,Maschinenbau,Mathematik,Medienwissenschaften,Medizin,Musik,Pharmazie,Physik,Psychologie,Rechtswissenschaften,Stadtplanung,Theaterwissenschaften,Theologie,Vermessungswesen,Volkswirtschaftslehre
-    licenses: CC by - Attribution,CC nc - Non-Commercial,CC nd - No Derivatives,CC sa - Share Alike,CCO - Public Domain,CC by-nd -  Attribution-No Derivatives,CC by-c - Attribution-Non-Commercial,CC by-nc-sa - Attribution-Non-Derivatives-Share Alike,CC by-nc-nd Attribution-Non-Commercial- No Derivatives,GNU GPL - GNU General Public License
-    logofilesize_b: 102400
-    # Do not reorder levels. Append new levels to the end of the list. Otherwise,
-    # references in existing public sessions could be mixed up.
-    session-levels:
-      de: Allgemeinbildung,Abitur,Bachelor,Master,Wer wird Millionär,Sonstiges
-      en: General Education,Highschool,Bachelor,Master,Who Wants to Be a Millionaire,Miscellaneous
+    mathjax:
+      # Enable MathJax to allow the use of Math formulas written in TeX syntax
+      # in text fields.
+      enabled: true
+      src: //cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js
+
+    # Number of "you've lost me"/"abgehängt" votes, starting to show warning
+    # sign
+    feedback-warning: 15
+
+    # Links which are displayed in the frontend applications
+    links:
+      blog:
+        url: https://arsnova.eu/blog/
+      documentation:
+        url: https://arsnova.eu/manual/
+      presenter-documentation:
+        url: ""
+      overlay:
+        url: https://arsnova.eu/overlay/
+      organization:
+        url: ""
+      imprint:
+        url: ""
+      privacy-policy:
+        url: ""
+
+    # It is possible to use an external tracking software with ARSnova. Currently
+    # Matomo is the only supported tracking provider.
+    tracking:
+      provider: matomo
+      tracker-url: ""
+      site-id: ""
 
   # The context paths where the ARSnova modules have been deployed
   customization:
@@ -315,13 +321,3 @@ arsnova:
     path: /mobile
   presenter:
     path: /presenter
-
-  ##############################################################################
-  # Tracking
-  ##############################################################################
-  # It is possible to use an external tracking software with ARSnova. Currently
-  # Matomo is the only supported tracking provider.
-  tracking:
-    provider: matomo
-    tracker-url: ""
-    site-id: ""

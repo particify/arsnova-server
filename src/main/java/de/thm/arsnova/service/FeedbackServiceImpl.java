@@ -47,7 +47,7 @@ public class FeedbackServiceImpl implements FeedbackService, ApplicationEventPub
 	/**
 	 * Minutes, after which the feedback is deleted.
 	 */
-	@Value("${feedback.cleanup}")
+	@Value("${features.live-feedback.reset-interval}")
 	private int cleanupFeedbackDelay;
 
 	private RoomService roomService;

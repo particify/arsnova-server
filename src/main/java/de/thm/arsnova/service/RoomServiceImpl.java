@@ -88,10 +88,10 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	private ConnectorClient connectorClient;
 
-	@Value("${session.guest-session.cleanup-days:0}")
+	@Value("${system.inactivity-thresholds.delete-inactive-guest-rooms:0}")
 	private int guestRoomInactivityThresholdDays;
 
-	@Value("${pp.logofilesize_b}")
+	@Value("${features.content-pool.logo-max-filesize}")
 	private int uploadFileSizeByte;
 
 	public RoomServiceImpl(

@@ -67,6 +67,7 @@ import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
+import de.thm.arsnova.config.properties.FeatureProperties;
 import de.thm.arsnova.config.properties.SecurityProperties;
 import de.thm.arsnova.config.properties.SystemProperties;
 import de.thm.arsnova.connector.client.ConnectorClient;
@@ -115,12 +116,16 @@ import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
 		value = {
 			"classpath:config/defaults.yml",
 			"classpath:config/actuator.yml",
-			"file:${arsnova.config-dir:.}/application.yml"},
+			"file:${arsnova.config-dir:.}/application.yml",
+			"file:${arsnova.config-dir:.}/secrets.yml",
+			"file:${arsnova.config-dir:.}/ui.yml"},
 		ignoreResourceNotFound = true,
 		encoding = CharEncoding.UTF_8,
 		factory = YamlPropertySourceFactory.class
 )
-@EnableConfigurationProperties(SystemProperties.class)
+@EnableConfigurationProperties({
+		FeatureProperties.class,
+		SystemProperties.class})
 public class AppConfig implements WebMvcConfigurer {
 	public static final String API_V2_MEDIA_TYPE_VALUE = "application/vnd.de.thm.arsnova.v2+json";
 	public static final String API_V3_MEDIA_TYPE_VALUE = "application/vnd.de.thm.arsnova.v3+json";
