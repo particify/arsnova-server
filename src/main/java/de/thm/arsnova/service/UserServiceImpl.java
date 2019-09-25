@@ -203,14 +203,14 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	public de.thm.arsnova.model.ClientAuthentication getCurrentClientAuthentication() {
+	public de.thm.arsnova.model.ClientAuthentication getCurrentClientAuthentication(final boolean refresh) {
 		final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
 			return null;
 		}
 		final User user = (User) authentication.getPrincipal();
-		final String jwt = authentication instanceof JwtToken
-				? (String) authentication.getCredentials() : jwtService.createSignedToken(user);
+		final String jwt = !refresh && authentication instanceof JwtToken
+				? (String) authentication.getCredentials() : jwtService.createSignedToken(user, false);
 
 		final ClientAuthentication clientAuthentication =
 				new ClientAuthentication(user.getId(), user.getUsername(),

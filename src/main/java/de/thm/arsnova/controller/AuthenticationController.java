@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
@@ -64,13 +65,13 @@ public class AuthenticationController {
 	}
 
 	@PostMapping("/login")
-	public ClientAuthentication login() {
-		return userService.getCurrentClientAuthentication();
+	public ClientAuthentication login(@RequestParam(defaultValue = "false") final boolean refresh) {
+		return userService.getCurrentClientAuthentication(refresh);
 	}
 
 	@PostMapping("/login/guest")
 	public ClientAuthentication loginGuest(final HttpServletRequest request) {
-		final ClientAuthentication currentAuthentication = userService.getCurrentClientAuthentication();
+		final ClientAuthentication currentAuthentication = userService.getCurrentClientAuthentication(false);
 		if (currentAuthentication != null
 				&& currentAuthentication.getAuthProvider() == UserProfile.AuthProvider.ARSNOVA_GUEST) {
 			return currentAuthentication;
@@ -78,7 +79,7 @@ public class AuthenticationController {
 		userService.authenticate(new UsernamePasswordAuthenticationToken(null, null),
 				UserProfile.AuthProvider.ARSNOVA_GUEST, request.getRemoteAddr());
 
-		return userService.getCurrentClientAuthentication();
+		return userService.getCurrentClientAuthentication(false);
 	}
 
 	@PostMapping("/login/{providerId}")
@@ -93,13 +94,13 @@ public class AuthenticationController {
 						loginId, loginCredentials.getPassword()),
 						UserProfile.AuthProvider.ARSNOVA, request.getRemoteAddr());
 
-				return userService.getCurrentClientAuthentication();
+				return userService.getCurrentClientAuthentication(false);
 			case SecurityConfig.LDAP_PROVIDER_ID:
 				userService.authenticate(new UsernamePasswordAuthenticationToken(
 						loginCredentials.getLoginId(), loginCredentials.getPassword()),
 						UserProfile.AuthProvider.LDAP, request.getRemoteAddr());
 
-				return userService.getCurrentClientAuthentication();
+				return userService.getCurrentClientAuthentication(false);
 			default:
 				throw new IllegalArgumentException("Invalid provider ID.");
 		}

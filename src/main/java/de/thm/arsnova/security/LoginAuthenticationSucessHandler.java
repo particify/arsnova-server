@@ -52,7 +52,7 @@ public class LoginAuthenticationSucessHandler extends
 		final HttpSession session = request.getSession(false);
 		if (session == null || session.getAttribute(URL_ATTRIBUTE) == null) {
 			final Authentication authentication = (Authentication) request.getAttribute(AUTHENTICATION_ATTRIBUTE);
-			final String token = jwtService.createSignedToken((User) authentication.getPrincipal());
+			final String token = jwtService.createSignedToken((User) authentication.getPrincipal(), true);
 			return targetUrl + "?token=" + token;
 		}
 

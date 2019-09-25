@@ -46,6 +46,7 @@ public class JwtService {
 	private String serverId;
 	private TemporalAmount defaultValidityPeriod;
 	private TemporalAmount guestValidityPeriod;
+	private TemporalAmount temporaryValidityPeriod;
 	private JWTVerifier verifier;
 	private UserService userService;
 
@@ -56,19 +57,21 @@ public class JwtService {
 		this.serverId = securityProperties.getJwt().getServerId();
 		this.defaultValidityPeriod = securityProperties.getJwt().getValidityPeriod();
 		guestValidityPeriod = Duration.parse("P180D");
+		temporaryValidityPeriod = Duration.parse("PT30S");
 		algorithm = Algorithm.HMAC256(securityProperties.getJwt().getSecret());
 		verifier = JWT.require(algorithm)
 				.withAudience(serverId)
 				.build();
 	}
 
-	public String createSignedToken(final User user) {
+	public String createSignedToken(final User user, final boolean temporary) {
 		final String[] roles = user.getAuthorities().stream()
 				.map(ga -> ga.getAuthority())
 				.filter(ga -> ga.startsWith(ROLE_PREFIX))
 				.map(ga -> ga.substring(ROLE_PREFIX.length())).toArray(String[]::new);
-		final TemporalAmount expiresAt = user.getAuthProvider() == UserProfile.AuthProvider.ARSNOVA_GUEST
-				? guestValidityPeriod : defaultValidityPeriod;
+		final TemporalAmount expiresAt = temporary ? temporaryValidityPeriod
+				: (user.getAuthProvider() == UserProfile.AuthProvider.ARSNOVA_GUEST
+				? guestValidityPeriod : defaultValidityPeriod);
 		return JWT.create()
 				.withIssuer(serverId)
 				.withAudience(serverId)
