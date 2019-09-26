@@ -19,7 +19,9 @@
 package de.thm.arsnova.controller;
 
 import java.io.IOException;
+import java.util.Arrays;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.pac4j.core.context.J2EContext;
@@ -41,6 +43,7 @@ import de.thm.arsnova.config.SecurityConfig;
 import de.thm.arsnova.model.ClientAuthentication;
 import de.thm.arsnova.model.LoginCredentials;
 import de.thm.arsnova.model.UserProfile;
+import de.thm.arsnova.security.LoginAuthenticationSucessHandler;
 import de.thm.arsnova.service.UserService;
 
 @RestController
@@ -65,7 +68,17 @@ public class AuthenticationController {
 	}
 
 	@PostMapping("/login")
-	public ClientAuthentication login(@RequestParam(defaultValue = "false") final boolean refresh) {
+	public ClientAuthentication login(@RequestParam(defaultValue = "false") final boolean refresh,
+			final HttpServletRequest request, final HttpServletResponse response) {
+		if (request.getCookies() != null && Arrays.stream(request.getCookies())
+				.anyMatch(c -> c.getName().equalsIgnoreCase(LoginAuthenticationSucessHandler.AUTH_COOKIE_NAME))) {
+			/* Delete cookie */
+			final Cookie cookie = new Cookie(LoginAuthenticationSucessHandler.AUTH_COOKIE_NAME, null);
+			cookie.setPath(request.getContextPath());
+			cookie.setMaxAge(0);
+			response.addCookie(cookie);
+		}
+
 		return userService.getCurrentClientAuthentication(refresh);
 	}
 
