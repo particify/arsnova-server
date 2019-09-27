@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -56,7 +57,7 @@ public class ConfigurationController {
 		buildFeatureConfig();
 	}
 
-	@RequestMapping
+	@GetMapping
 	public Configuration get() {
 		final Configuration configuration = new Configuration();
 		configuration.setAuthenticationProviders(authenticationProviders);
