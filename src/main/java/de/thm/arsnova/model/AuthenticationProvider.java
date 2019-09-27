@@ -28,7 +28,7 @@ public class AuthenticationProvider {
 	public enum Type {
 		ANONYMOUS,
 		USERNAME_PASSWORD,
-		EXTERNAL
+		SSO
 	}
 
 	private String id;
@@ -51,7 +51,7 @@ public class AuthenticationProvider {
 				|| provider instanceof AuthenticationProviderProperties.Ldap) {
 			type = Type.USERNAME_PASSWORD;
 		} else {
-			type = Type.EXTERNAL;
+			type = Type.SSO;
 		}
 	}
 
