@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
@@ -68,6 +69,8 @@ public class LoginAuthenticationSucessHandler extends
 			cookie.setSecure(request.isSecure());
 			cookie.setHttpOnly(true);
 			response.addCookie(cookie);
+			response.setContentType(MediaType.TEXT_HTML_VALUE);
+			response.getWriter().println("<!DOCTYPE html><script>if (window.opener) window.close()</script>");
 
 			return;
 		}
