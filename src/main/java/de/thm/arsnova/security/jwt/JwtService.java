@@ -24,7 +24,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.time.temporal.TemporalAmount;
 import java.util.Collection;
 import java.util.Date;
@@ -73,7 +73,8 @@ public class JwtService {
 				.withIssuer(serverId)
 				.withAudience(serverId)
 				.withIssuedAt(new Date())
-				.withExpiresAt(Date.from(LocalDateTime.now().plus(expiresAt).toInstant(ZoneOffset.UTC)))
+				.withExpiresAt(Date.from(
+						LocalDateTime.now().plus(expiresAt).atZone(ZoneId.systemDefault()).toInstant()))
 				.withSubject(user.getId())
 				.withArrayClaim(ROLES_CLAIM_NAME, roles)
 				.sign(algorithm);
