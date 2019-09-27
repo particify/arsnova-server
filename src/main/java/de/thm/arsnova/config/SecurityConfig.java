@@ -266,10 +266,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			providers.add(INTERNAL_PROVIDER_ID);
 			auth.authenticationProvider(daoAuthenticationProvider());
 		}
+		boolean oauthOrOidcProvider = false;
 		if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())) {
+			oauthOrOidcProvider = true;
 			providers.add(OIDC_PROVIDER_ID);
 		}
 		if (providerProperties.getOauth().values().stream().anyMatch(p -> p.isEnabled())) {
+			oauthOrOidcProvider = true;
 			if (providerProperties.getOauth().containsKey(GOOGLE_PROVIDER_ID)
 					&& providerProperties.getOauth().get(GOOGLE_PROVIDER_ID).isEnabled()) {
 				providers.add(GOOGLE_PROVIDER_ID);
@@ -282,6 +285,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 					&& providerProperties.getOauth().get(TWITTER_PROVIDER_ID).isEnabled()) {
 				providers.add(TWITTER_PROVIDER_ID);
 			}
+		}
+		if (oauthOrOidcProvider) {
 			auth.authenticationProvider(oauthAuthenticationProvider());
 		}
 		logger.info("Enabled authentication providers: {}", providers);
