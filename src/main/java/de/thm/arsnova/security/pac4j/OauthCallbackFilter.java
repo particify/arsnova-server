@@ -51,8 +51,8 @@ public class OauthCallbackFilter extends AbstractAuthenticationProcessingFilter 
 	private final ClientFinder clientFinder = new DefaultCallbackClientFinder();
 	private Config config;
 
-	public OauthCallbackFilter(final Config pac4jConfig) {
-		super(new AntPathRequestMatcher("/login/oauth"));
+	public OauthCallbackFilter(final Config pac4jConfig, final String callbackPath) {
+		super(new AntPathRequestMatcher("/**" + callbackPath + "/**"));
 		this.config = pac4jConfig;
 	}
 
@@ -60,8 +60,7 @@ public class OauthCallbackFilter extends AbstractAuthenticationProcessingFilter 
 	public Authentication attemptAuthentication(
 			final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
 			throws AuthenticationException {
-		final String clientName = httpServletRequest.getParameter("client_name");
-		final CommonProfile profile = retrieveProfile(new J2EContext(httpServletRequest, httpServletResponse), clientName);
+		final CommonProfile profile = retrieveProfile(new J2EContext(httpServletRequest, httpServletResponse), null);
 		return getAuthenticationManager().authenticate(new OAuthToken(null, profile, Collections.emptyList()));
 	}
 
