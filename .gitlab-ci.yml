@@ -7,22 +7,21 @@ stages:
   - post-build
   - deploy
 
+default:
+  image: maven:3-jdk-11-slim
+
 .maven_cache: &maven_cache
   paths:
     - .m2/
 
 checkstyle:
   stage: build
-  tags:
-    - maven
   cache: *maven_cache
   script:
     - mvn -B checkstyle:check -Dcheckstyle.missing-javadoc.severity=info
 
 checkstyle_javadoc:
   stage: build
-  tags:
-    - maven
   cache: *maven_cache
   allow_failure: true
   script:
@@ -30,8 +29,6 @@ checkstyle_javadoc:
 
 compile:
   stage: build
-  tags:
-    - maven
   artifacts:
     paths:
       - $OUTPUT_DIR
@@ -41,8 +38,6 @@ compile:
 
 unit_test:
   stage: post-build
-  tags:
-    - maven
   dependencies:
     - compile
   artifacts:
@@ -56,8 +51,6 @@ unit_test:
 
 package:
   stage: post-build
-  tags:
-    - maven
   dependencies:
     - compile
   artifacts:
@@ -70,8 +63,7 @@ package:
 
 .deploy: &deploy
   stage: deploy
-  tags:
-    - python
+  image: python:3
   when: manual
   variables:
     DEPLOY_CONTEXT: api
@@ -122,8 +114,6 @@ sonarqube:
   stage: deploy
   only:
     - master
-  tags:
-    - maven
   dependencies:
     - compile
     - unit_test
