@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.config.Config;
+import org.pac4j.core.http.callback.PathParameterCallbackUrlResolver;
 import org.pac4j.oauth.client.FacebookClient;
 import org.pac4j.oauth.client.TwitterClient;
 import org.pac4j.oidc.client.GoogleOidcClient;
@@ -109,10 +110,10 @@ import de.thm.arsnova.security.pac4j.OauthCallbackFilter;
 		SecurityProperties.class})
 @Profile("!test")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-	public static final String OAUTH_CALLBACK_PATH_SUFFIX = "/auth/oauth_callback";
-	private static final String OIDC_DISCOVERY_PATH_SUFFIX = "/.well-known/openid-configuration";
-	public static final String CAS_LOGIN_PATH_SUFFIX = "/auth/login/cas";
-	public static final String CAS_LOGOUT_PATH_SUFFIX = "/auth/logout/cas";
+	public static final String AUTH_CALLBACK_PATH = "/auth/callback";
+	public static final String OAUTH_CALLBACK_PATH = AUTH_CALLBACK_PATH + "/oauth";
+	public static final String CAS_CALLBACK_PATH = OAUTH_CALLBACK_PATH + "/cas";
+	public static final String CAS_LOGOUT_PATH = "/auth/logout/cas";
 	public static final String RUN_AS_KEY_PREFIX = "RUN_AS_KEY";
 	public static final String INTERNAL_PROVIDER_ID = "user-db";
 	public static final String LDAP_PROVIDER_ID = "ldap";
@@ -121,6 +122,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public static final String GOOGLE_PROVIDER_ID = "google";
 	public static final String TWITTER_PROVIDER_ID = "twitter";
 	public static final String FACEBOOK_PROVIDER_ID = "facebook";
+	private static final String OIDC_DISCOVERY_PATH = "/.well-known/openid-configuration";
 	private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
 	private ServletContext servletContext;
@@ -207,7 +209,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		@Override
 		protected void configure(final HttpSecurity http) throws Exception {
 			super.configure(http);
-			http.antMatcher("/v2/**");
+			http.requestMatchers().antMatchers(AUTH_CALLBACK_PATH + "/**", "/v2/**");
 			http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
 		}
 	}
@@ -485,7 +487,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			havingValue = "true")
 	public ServiceProperties casServiceProperties() {
 		final ServiceProperties properties = new ServiceProperties();
-		properties.setService(rootUrl + apiPath + CAS_LOGIN_PATH_SUFFIX);
+		properties.setService(rootUrl + apiPath + CAS_CALLBACK_PATH);
 		properties.setSendRenew(false);
 
 		return properties;
@@ -522,7 +524,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		final CasAuthenticationFilter filter = new CasAuthenticationFilter();
 		filter.setAuthenticationManager(authenticationManager());
 		filter.setServiceProperties(casServiceProperties());
-		filter.setFilterProcessesUrl("/**" + CAS_LOGIN_PATH_SUFFIX);
+		filter.setFilterProcessesUrl("/**" + CAS_CALLBACK_PATH);
 		filter.setAuthenticationSuccessHandler(successHandler());
 		filter.setAuthenticationFailureHandler(failureHandler());
 
@@ -536,7 +538,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			havingValue = "true")
 	public LogoutFilter casLogoutFilter() {
 		final LogoutFilter filter = new LogoutFilter(casLogoutSuccessHandler(), logoutHandler());
-		filter.setLogoutRequestMatcher(new AntPathRequestMatcher("/**" + CAS_LOGOUT_PATH_SUFFIX));
+		filter.setLogoutRequestMatcher(new AntPathRequestMatcher("/**" + CAS_LOGOUT_PATH));
 
 		return filter;
 	}
@@ -575,14 +577,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			clients.add(twitterClient());
 		}
 
-		return new Config(rootUrl + apiPath + OAUTH_CALLBACK_PATH_SUFFIX, clients);
+		return new Config(rootUrl + apiPath + OAUTH_CALLBACK_PATH, clients);
 	}
 
 	@Bean
 	public OauthCallbackFilter oauthCallbackFilter() throws Exception {
-		final OauthCallbackFilter callbackFilter = new OauthCallbackFilter(oauthConfig());
+		final OauthCallbackFilter callbackFilter = new OauthCallbackFilter(oauthConfig(), OAUTH_CALLBACK_PATH);
 		callbackFilter.setAuthenticationManager(authenticationManager());
-		callbackFilter.setFilterProcessesUrl("/**" + OAUTH_CALLBACK_PATH_SUFFIX);
 
 		return callbackFilter;
 	}
@@ -593,6 +594,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
+	public PathParameterCallbackUrlResolver pathParameterCallbackUrlResolver() {
+		return new PathParameterCallbackUrlResolver();
+	}
+
+	@Bean
 	@ConditionalOnProperty(
 			name = "oidc[0].enabled",
 			prefix = AuthenticationProviderProperties.PREFIX,
@@ -600,12 +606,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public OidcClient oidcClient() {
 		final AuthenticationProviderProperties.Oidc oidcProperties = providerProperties.getOidc().get(0);
 		final OidcConfiguration config = new OidcConfiguration();
-		config.setDiscoveryURI(oidcProperties.getIssuer() + OIDC_DISCOVERY_PATH_SUFFIX);
+		config.setDiscoveryURI(oidcProperties.getIssuer() + OIDC_DISCOVERY_PATH);
 		config.setClientId(oidcProperties.getClientId());
 		config.setSecret(oidcProperties.getSecret());
 		config.setScope("openid");
 		final OidcClient client = new OidcClient(config);
-		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH_SUFFIX + "?client_name=OidcClient");
+		client.setName(OIDC_PROVIDER_ID);
+		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH);
+		client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
 
 		return client;
 	}
@@ -619,7 +627,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		final AuthenticationProviderProperties.Oauth oauthProperties =
 				providerProperties.getOauth().get(FACEBOOK_PROVIDER_ID);
 		final FacebookClient client = new FacebookClient(oauthProperties.getKey(), oauthProperties.getSecret());
-		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH_SUFFIX + "?client_name=FacebookClient");
+		client.setName(FACEBOOK_PROVIDER_ID);
+		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH);
+		client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
 
 		return client;
 	}
@@ -633,7 +643,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		final AuthenticationProviderProperties.Oauth oauthProperties =
 				providerProperties.getOauth().get(TWITTER_PROVIDER_ID);
 		final TwitterClient client = new TwitterClient(oauthProperties.getKey(), oauthProperties.getSecret());
-		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH_SUFFIX + "?client_name=TwitterClient");
+		client.setName(TWITTER_PROVIDER_ID);
+		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH);
+		client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
 
 		return client;
 	}
@@ -651,7 +663,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		config.setSecret(oauthProperties.getSecret());
 		config.setScope("openid email");
 		final GoogleOidcClient client = new GoogleOidcClient(config);
-		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH_SUFFIX + "?client_name=GoogleOidcClient");
+		client.setName(GOOGLE_PROVIDER_ID);
+		client.setCallbackUrl(rootUrl + apiPath + OAUTH_CALLBACK_PATH);
+		client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
 
 		return client;
 	}
