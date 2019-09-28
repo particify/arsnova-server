@@ -20,6 +20,8 @@ package de.thm.arsnova.controller.v2;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.PostConstruct;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +45,7 @@ public class ConfigurationController extends AbstractController {
 	private static final Logger logger = LoggerFactory
 			.getLogger(ConfigurationController.class);
 
+	private ServletContext servletContext;
 	private String apiPath;
 	private String socketioPath;
 
@@ -156,9 +159,17 @@ public class ConfigurationController extends AbstractController {
 	@Value("${features.content-pool.session-levels.en}")
 	private String ppLevelsEn;
 
-	public ConfigurationController(final SystemProperties systemProperties) {
-		apiPath = systemProperties.getApi().getPath();
+	public ConfigurationController(final SystemProperties systemProperties, final ServletContext servletContext) {
+		apiPath = systemProperties.getApi().getProxyPath();
 		socketioPath = systemProperties.getSocketio().getProxyPath();
+		this.servletContext = servletContext;
+	}
+
+	@PostConstruct
+	private void init() {
+		if (apiPath == null || "".equals(apiPath)) {
+			apiPath = servletContext.getContextPath();
+		}
 	}
 
 	@GetMapping
@@ -169,12 +180,7 @@ public class ConfigurationController extends AbstractController {
 		final Map<String, String> publicPool = new HashMap<>();
 		final Map<String, Object> splashscreen = new HashMap<>();
 
-		/* The API path could be unknown to the client in case the request was forwarded */
-		if ("".equals(apiPath)) {
-			apiPath = request.getContextPath();
-		}
-		config.put("apiPath", apiPath);
-
+		config.put("apiPath", apiPath + "/v2");
 
 		if (!"".equals(socketioPath)) {
 			config.put("socketioPath", socketioPath);
