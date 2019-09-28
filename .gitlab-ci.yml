@@ -7,49 +7,53 @@ stages:
   - post-build
   - deploy
 
-default:
+.maven: &maven
   image: maven:3-jdk-11-slim
-
-.maven_cache: &maven_cache
-  paths:
-    - .m2/
+  variables:
+    MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss.SSS -Djava.awt.headless=true"
+    MAVEN_CLI_OPTS: "--batch-mode --fail-at-end --show-version"
+  cache:
+    key: maven-repository
+    paths:
+      - .m2/repository
 
 checkstyle:
+  <<: *maven
   stage: build
-  cache: *maven_cache
   script:
-    - mvn -B checkstyle:check -Dcheckstyle.missing-javadoc.severity=info
+    - mvn $MAVEN_CLI_OPTS checkstyle:check -Dcheckstyle.missing-javadoc.severity=info
 
 checkstyle_javadoc:
+  <<: *maven
   stage: build
-  cache: *maven_cache
   allow_failure: true
   script:
-    - mvn -B checkstyle:check -Dcheckstyle.missing-javadoc.severity=warning
+    - mvn $MAVEN_CLI_OPTS checkstyle:check -Dcheckstyle.missing-javadoc.severity=warning
 
 compile:
+  <<: *maven
   stage: build
   artifacts:
     paths:
       - $OUTPUT_DIR
-  cache: *maven_cache
   script:
-    - mvn -B test-compile
+    - mvn $MAVEN_CLI_OPTS test-compile
 
 unit_test:
+  <<: *maven
   stage: post-build
   dependencies:
     - compile
   artifacts:
     paths:
       - $OUTPUT_DIR
-  cache: *maven_cache
   coverage: '/Code coverage: \d+\.\d+/'
   script:
-    - mvn -B jacoco:prepare-agent surefire:test jacoco:report
+    - mvn $MAVEN_CLI_OPTS jacoco:prepare-agent surefire:test jacoco:report
     - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print "Instructions covered:", covered, "/", instructions; print "Code coverage:", 100 * covered / instructions "%" }' "$OUTPUT_DIR/site/jacoco/jacoco.csv"
 
 package:
+  <<: *maven
   stage: post-build
   dependencies:
     - compile
@@ -57,9 +61,8 @@ package:
     name: package
     paths:
       - $WAR_FILE
-  cache: *maven_cache
   script:
-    - mvn -B war:war
+    - mvn $MAVEN_CLI_OPTS war:war
 
 .deploy: &deploy
   stage: deploy
@@ -111,13 +114,13 @@ tomcat_development:
     - DEPLOY_HOST=$DEV_DEPLOY_HOST
 
 sonarqube:
+  <<: *maven
   stage: deploy
   only:
     - master
   dependencies:
     - compile
     - unit_test
-  cache: *maven_cache
   allow_failure: true
   script:
-    - mvn -B sonar:sonar
+    - mvn $MAVEN_CLI_OPTS sonar:sonar
