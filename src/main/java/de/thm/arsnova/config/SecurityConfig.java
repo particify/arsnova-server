@@ -134,8 +134,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			final ServletContext servletContext) {
 		this.providerProperties = authenticationProviderProperties;
 		this.rootUrl = systemProperties.getRootUrl();
-		this.apiPath = systemProperties.getApi().getPath();
+		this.apiPath = systemProperties.getApi().getProxyPath();
 		this.servletContext = servletContext;
+	}
+
+	@PostConstruct
+	private void init() {
+		if (apiPath == null || "".equals(apiPath)) {
+			apiPath = servletContext.getContextPath();
+		}
 	}
 
 	public class HttpSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -239,13 +246,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			runAsManager.setKey(RUN_AS_KEY_PREFIX + keyGenerator.generateKey());
 
 			return runAsManager;
-		}
-	}
-
-	@PostConstruct
-	private void init() {
-		if ("".equals(apiPath)) {
-			apiPath = servletContext.getContextPath();
 		}
 	}
 

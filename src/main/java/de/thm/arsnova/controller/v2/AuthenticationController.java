@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -113,16 +114,20 @@ public class AuthenticationController extends AbstractController {
 
 	public AuthenticationController(final SystemProperties systemProperties,
 			final AuthenticationProviderProperties authenticationProviderProperties) {
-		apiPath = systemProperties.getApi().getPath();
-		if ("".equals(apiPath)) {
-			apiPath = servletContext.getContextPath();
-		}
+		apiPath = systemProperties.getApi().getProxyPath();
 		guestProperties = authenticationProviderProperties.getGuest();
 		registeredProperties = authenticationProviderProperties.getRegistered();
 		ldapProperties = authenticationProviderProperties.getLdap();
 		oidcProperties = authenticationProviderProperties.getOidc();
 		casProperties = authenticationProviderProperties.getCas();
 		oauthProperties = authenticationProviderProperties.getOauth();
+	}
+
+	@PostConstruct
+	private void init() {
+		if (apiPath == null || "".equals(apiPath)) {
+			apiPath = servletContext.getContextPath();
+		}
 	}
 
 	@PostMapping({ "/login", "/doLogin" })
@@ -256,7 +261,7 @@ public class AuthenticationController extends AbstractController {
 		final List<ServiceDescription> services = new ArrayList<>();
 
 		/* The first parameter is replaced by the backend, the second one by the frondend */
-		final String dialogUrl = apiPath + "/auth/dialog?type={0}&successurl='{0}'";
+		final String dialogUrl = apiPath + "/v2/auth/dialog?type={0}&successurl='{0}'";
 
 		if (guestProperties.isEnabled()) {
 			final ServiceDescription sdesc = new ServiceDescription(

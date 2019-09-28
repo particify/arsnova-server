@@ -25,16 +25,16 @@ public class SystemProperties {
 	public static final String PREFIX = "system";
 
 	public static class Api {
-		private String path;
+		private String proxyPath;
 		private boolean indentResponseBody;
 		private boolean exposeErrorMessages;
 
-		public String getPath() {
-			return path;
+		public String getProxyPath() {
+			return proxyPath;
 		}
 
-		public void setPath(final String path) {
-			this.path = path;
+		public void setProxyPath(final String proxyPath) {
+			this.proxyPath = proxyPath;
 		}
 
 		public boolean isIndentResponseBody() {

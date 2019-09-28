@@ -12,7 +12,7 @@ arsnova:
     # the backend behind a proxy server, you might need to set this path
     # manually.
     api:
-      path: /api
+      proxy-path: ~
 
     # Database
     couchdb:
