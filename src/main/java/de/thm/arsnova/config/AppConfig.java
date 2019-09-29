@@ -219,6 +219,7 @@ public class AppConfig implements WebMvcConfigurer {
 		messageConverter.setWriteAcceptCharset(false);
 		final List<MediaType> mediaTypes = new ArrayList<>();
 		mediaTypes.add(MediaType.TEXT_PLAIN);
+		mediaTypes.add(MediaType.APPLICATION_XML);
 		messageConverter.setSupportedMediaTypes(mediaTypes);
 
 		return messageConverter;

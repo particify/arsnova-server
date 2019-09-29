@@ -620,6 +620,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		client.setCallbackUrl(rootUrl + apiPath + AUTH_CALLBACK_PATH);
 		client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
 
+		/* Initialize the client manually for the metadata endpoint */
+		client.init();
+
 		return client;
 	}
 

@@ -28,6 +28,7 @@ import org.pac4j.core.context.J2EContext;
 import org.pac4j.oidc.client.OidcClient;
 import org.pac4j.saml.client.SAML2Client;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,6 +47,7 @@ import de.thm.arsnova.model.LoginCredentials;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.security.LoginAuthenticationSucessHandler;
 import de.thm.arsnova.service.UserService;
+import de.thm.arsnova.web.exceptions.NotImplementedException;
 
 @RestController
 @RequestMapping("/auth")
@@ -151,5 +153,14 @@ public class AuthenticationController {
 			default:
 				throw new IllegalArgumentException("Invalid provider ID.");
 		}
+	}
+
+	@GetMapping(value = "/config/saml/sp-metadata.xml", produces = MediaType.APPLICATION_XML_VALUE)
+	public String samlSpMetadata() throws IOException {
+		if (saml2Client == null) {
+			throw new NotImplementedException("SAML authentication is disabled.");
+		}
+
+		return saml2Client.getServiceProviderMetadataResolver().getMetadata();
 	}
 }
