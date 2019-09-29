@@ -35,6 +35,7 @@ import org.pac4j.oauth.client.FacebookClient;
 import org.pac4j.oauth.client.TwitterClient;
 import org.pac4j.oidc.client.GoogleOidcClient;
 import org.pac4j.oidc.client.OidcClient;
+import org.pac4j.saml.client.SAML2Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +86,7 @@ public class AuthenticationController extends AbstractController {
 	private AuthenticationProviderProperties.Registered registeredProperties;
 	private List<AuthenticationProviderProperties.Ldap> ldapProperties;
 	private List<AuthenticationProviderProperties.Oidc> oidcProperties;
+	private AuthenticationProviderProperties.Saml samlProperties;
 	private AuthenticationProviderProperties.Cas casProperties;
 	private Map<String, AuthenticationProviderProperties.Oauth> oauthProperties;
 
@@ -107,6 +109,9 @@ public class AuthenticationController extends AbstractController {
 	private FacebookClient facebookClient;
 
 	@Autowired(required = false)
+	private SAML2Client saml2Client;
+
+	@Autowired(required = false)
 	private CasAuthenticationEntryPoint casEntryPoint;
 
 	@Autowired
@@ -121,6 +126,7 @@ public class AuthenticationController extends AbstractController {
 		registeredProperties = authenticationProviderProperties.getRegistered();
 		ldapProperties = authenticationProviderProperties.getLdap();
 		oidcProperties = authenticationProviderProperties.getOidc();
+		samlProperties = authenticationProviderProperties.getSaml();
 		casProperties = authenticationProviderProperties.getCas();
 		oauthProperties = authenticationProviderProperties.getOauth();
 	}
@@ -215,6 +221,9 @@ public class AuthenticationController extends AbstractController {
 
 		if (casProperties.isEnabled() && "cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);
+		} else if (saml2Client != null && "saml".equals(type)) {
+			result = new RedirectView(
+					saml2Client.getRedirectAction(new J2EContext(request, response)).getLocation());
 		} else if (oidcProperties.stream().anyMatch(p -> p.isEnabled()) && "oidc".equals(type)) {
 			result = new RedirectView(
 					oidcClient.getRedirectAction(new J2EContext(request, response)).getLocation());
@@ -295,6 +304,17 @@ public class AuthenticationController extends AbstractController {
 					ldapProperties.get(0).getAllowedRoles()
 			);
 			sdesc.setOrder(ldapProperties.get(0).getOrder());
+			services.add(sdesc);
+		}
+
+		if (samlProperties.isEnabled()) {
+			final ServiceDescription sdesc = new ServiceDescription(
+					SecurityConfig.SAML_PROVIDER_ID,
+					samlProperties.getTitle(),
+					MessageFormat.format(dialogUrl, SecurityConfig.SAML_PROVIDER_ID),
+					samlProperties.getAllowedRoles()
+			);
+			sdesc.setOrder(samlProperties.getOrder());
 			services.add(sdesc);
 		}
 

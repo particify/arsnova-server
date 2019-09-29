@@ -24,6 +24,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
+import org.opensaml.saml.common.xml.SAMLConstants;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.http.callback.PathParameterCallbackUrlResolver;
@@ -32,6 +33,8 @@ import org.pac4j.oauth.client.TwitterClient;
 import org.pac4j.oidc.client.GoogleOidcClient;
 import org.pac4j.oidc.client.OidcClient;
 import org.pac4j.oidc.config.OidcConfiguration;
+import org.pac4j.saml.client.SAML2Client;
+import org.pac4j.saml.config.SAML2Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -112,12 +115,14 @@ import de.thm.arsnova.security.pac4j.OauthCallbackFilter;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public static final String AUTH_CALLBACK_PATH = "/auth/callback";
 	public static final String OAUTH_CALLBACK_PATH = AUTH_CALLBACK_PATH + "/oauth";
+	public static final String SAML_CALLBACK_PATH = AUTH_CALLBACK_PATH + "/saml";
 	public static final String CAS_CALLBACK_PATH = AUTH_CALLBACK_PATH + "/cas";
 	public static final String CAS_LOGOUT_PATH = "/auth/logout/cas";
 	public static final String RUN_AS_KEY_PREFIX = "RUN_AS_KEY";
 	public static final String INTERNAL_PROVIDER_ID = "user-db";
 	public static final String LDAP_PROVIDER_ID = "ldap";
 	public static final String OIDC_PROVIDER_ID = "oidc";
+	public static final String SAML_PROVIDER_ID = "saml";
 	public static final String CAS_PROVIDER_ID = "cas";
 	public static final String GOOGLE_PROVIDER_ID = "google";
 	public static final String TWITTER_PROVIDER_ID = "twitter";
@@ -170,7 +175,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				http.addFilter(casAuthenticationFilter());
 				http.addFilter(casLogoutFilter());
 			}
-
+			if (providerProperties.getSaml().isEnabled()) {
+				http.addFilterAfter(samlCallbackFilter(), UsernamePasswordAuthenticationFilter.class);
+			}
 			if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())
 					|| providerProperties.getOauth().values().stream().anyMatch(p -> p.isEnabled())) {
 				http.addFilterAfter(oauthCallbackFilter(), UsernamePasswordAuthenticationFilter.class);
@@ -267,6 +274,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		if (providerProperties.getRegistered().isEnabled()) {
 			providers.add(INTERNAL_PROVIDER_ID);
 			auth.authenticationProvider(daoAuthenticationProvider());
+		}
+		if (providerProperties.getSaml().isEnabled()) {
+			providers.add(SAML_PROVIDER_ID);
 		}
 		boolean oauthOrOidcProvider = false;
 		if (providerProperties.getOidc().stream().anyMatch(p -> p.isEnabled())) {
@@ -556,6 +566,63 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return handler;
 	}
 
+	// SAML Authentication Configuration
+
+	@Bean
+	@ConditionalOnProperty(
+			name = "saml.enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
+	public Config samlConfig() {
+		return new Config(rootUrl + apiPath + SAML_CALLBACK_PATH, saml2Client());
+	}
+
+	@Bean
+	@ConditionalOnProperty(
+			name = "saml.enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
+	public OauthCallbackFilter samlCallbackFilter() throws Exception {
+		final OauthCallbackFilter callbackFilter = new OauthCallbackFilter(samlConfig(), SAML_CALLBACK_PATH);
+		callbackFilter.setAuthenticationManager(authenticationManager());
+		callbackFilter.setAuthenticationSuccessHandler(successHandler());
+		callbackFilter.setAuthenticationFailureHandler(failureHandler());
+
+		return callbackFilter;
+	}
+
+	@Bean
+	@ConditionalOnProperty(
+			name = "saml.enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
+	public SAML2Client saml2Client() {
+		final AuthenticationProviderProperties.Saml samlProperties = providerProperties.getSaml();
+		final SAML2Configuration config = new SAML2Configuration(
+				"file:" + samlProperties.getKeystore().getFile(),
+				samlProperties.getKeystore().getStorePassword(),
+				samlProperties.getKeystore().getKeyPassword(),
+				"file:" + samlProperties.getIdp().getMetaFile());
+		config.setKeystoreAlias(samlProperties.getKeystore().getKeyAlias());
+		if (!samlProperties.getSp().getMetaFile().isEmpty()) {
+			config.setServiceProviderMetadataPath("file:" + samlProperties.getSp().getMetaFile());
+		}
+		if (!samlProperties.getSp().getEntityId().isEmpty()) {
+			config.setServiceProviderEntityId(samlProperties.getSp().getEntityId());
+		}
+		config.setAssertionConsumerServiceIndex(samlProperties.getAssertionConsumerServiceIndex());
+		config.setMaximumAuthenticationLifetime(samlProperties.getMaxAuthenticationLifetime());
+		config.setAuthnRequestBindingType(SAMLConstants.SAML2_REDIRECT_BINDING_URI);
+		config.setAuthnRequestSigned(true);
+		config.setWantsAssertionsSigned(true);
+		final SAML2Client client = new SAML2Client(config);
+		client.setName(SAML_PROVIDER_ID);
+		client.setCallbackUrl(rootUrl + apiPath + AUTH_CALLBACK_PATH);
+		client.setCallbackUrlResolver(pathParameterCallbackUrlResolver());
+
+		return client;
+	}
+
 	// OAuth Authentication Configuration
 
 	@Bean
@@ -582,7 +649,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public OauthCallbackFilter oauthCallbackFilter() throws Exception {
-		final OauthCallbackFilter callbackFilter = new OauthCallbackFilter(oauthConfig(), OAUTH_CALLBACK_PATH);
+		final OauthCallbackFilter callbackFilter = new OauthCallbackFilter(oauthConfig(), OAUTH_CALLBACK_PATH + "/**");
 		callbackFilter.setAuthenticationManager(authenticationManager());
 		callbackFilter.setAuthenticationSuccessHandler(successHandler());
 		callbackFilter.setAuthenticationFailureHandler(failureHandler());

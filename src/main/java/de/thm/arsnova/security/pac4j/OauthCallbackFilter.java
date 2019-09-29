@@ -52,7 +52,7 @@ public class OauthCallbackFilter extends AbstractAuthenticationProcessingFilter 
 	private Config config;
 
 	public OauthCallbackFilter(final Config pac4jConfig, final String callbackPath) {
-		super(new AntPathRequestMatcher("/**" + callbackPath + "/**"));
+		super(new AntPathRequestMatcher("/**" + callbackPath));
 		this.config = pac4jConfig;
 	}
 

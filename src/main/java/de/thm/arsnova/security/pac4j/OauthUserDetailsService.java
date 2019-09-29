@@ -24,6 +24,7 @@ import org.pac4j.oauth.profile.facebook.FacebookProfile;
 import org.pac4j.oauth.profile.twitter.TwitterProfile;
 import org.pac4j.oidc.profile.OidcProfile;
 import org.pac4j.oidc.profile.google.GoogleOidcProfile;
+import org.pac4j.saml.profile.SAML2Profile;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.AuthenticationUserDetailsService;
@@ -73,6 +74,10 @@ public class OauthUserDetailsService implements AuthenticationUserDetailsService
 		} else if (token.getDetails() instanceof OidcProfile) {
 			final OidcProfile profile = (OidcProfile) token.getDetails();
 			user = userService.loadUser(UserProfile.AuthProvider.OIDC, profile.getId(),
+					grantedAuthorities, true);
+		} else if (token.getDetails() instanceof SAML2Profile) {
+			final SAML2Profile profile = (SAML2Profile) token.getDetails();
+			user = userService.loadUser(UserProfile.AuthProvider.SAML, profile.getId(),
 					grantedAuthorities, true);
 		} else {
 			throw new IllegalArgumentException("AuthenticationToken not supported");

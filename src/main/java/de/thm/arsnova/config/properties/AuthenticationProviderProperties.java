@@ -220,6 +220,137 @@ public class AuthenticationProviderProperties {
 		}
 	}
 
+	public static class Saml extends Provider {
+		public static class Idp {
+			private String metaFile;
+
+			public String getMetaFile() {
+				return metaFile;
+			}
+
+			public void setMetaFile(final String metaFile) {
+				this.metaFile = metaFile;
+			}
+		}
+
+		public static class Sp {
+			private String metaFile;
+			private String entityId;
+
+			public String getMetaFile() {
+				return metaFile;
+			}
+
+			public void setMetaFile(final String metaFile) {
+				this.metaFile = metaFile;
+			}
+
+			public String getEntityId() {
+				return entityId;
+			}
+
+			public void setEntityId(final String entityId) {
+				this.entityId = entityId;
+			}
+		}
+
+		public static class Keystore {
+			private String file;
+			private String storePassword;
+			private String keyAlias;
+			private String keyPassword;
+
+			public String getFile() {
+				return file;
+			}
+
+			public void setFile(final String file) {
+				this.file = file;
+			}
+
+			public String getStorePassword() {
+				return storePassword;
+			}
+
+			public void setStorePassword(final String storePassword) {
+				this.storePassword = storePassword;
+			}
+
+			public String getKeyAlias() {
+				return keyAlias;
+			}
+
+			public void setKeyAlias(final String keyAlias) {
+				this.keyAlias = keyAlias;
+			}
+
+			public String getKeyPassword() {
+				return keyPassword;
+			}
+
+			public void setKeyPassword(final String keyPassword) {
+				this.keyPassword = keyPassword;
+			}
+		}
+
+		private boolean enabled;
+		private Idp idp;
+		private Sp sp;
+		private Keystore keystore;
+		private int assertionConsumerServiceIndex;
+		private int maxAuthenticationLifetime;
+
+		@Override
+		public boolean isEnabled() {
+			return enabled;
+		}
+
+		@Override
+		public void setEnabled(final boolean enabled) {
+			this.enabled = enabled;
+		}
+
+		public Idp getIdp() {
+			return idp;
+		}
+
+		public void setIdp(final Idp idp) {
+			this.idp = idp;
+		}
+
+		public Sp getSp() {
+			return sp;
+		}
+
+		public void setSp(final Sp sp) {
+			this.sp = sp;
+		}
+
+		public Keystore getKeystore() {
+			return keystore;
+		}
+
+		public void setKeystore(final Keystore keystore) {
+			this.keystore = keystore;
+		}
+
+		public int getAssertionConsumerServiceIndex() {
+			return assertionConsumerServiceIndex;
+		}
+
+		public void setAssertionConsumerServiceIndex(final int assertionConsumerServiceIndex) {
+			this.assertionConsumerServiceIndex = assertionConsumerServiceIndex;
+		}
+
+		public int getMaxAuthenticationLifetime() {
+			return maxAuthenticationLifetime;
+		}
+
+		public void setMaxAuthenticationLifetime(final int maxAuthenticationLifetime) {
+			this.maxAuthenticationLifetime = maxAuthenticationLifetime;
+		}
+	}
+
 	public static class Cas extends Provider {
 		private String hostUrl;
 
@@ -262,6 +393,7 @@ public class AuthenticationProviderProperties {
 	private Guest guest;
 	private List<Ldap> ldap;
 	private List<Oidc> oidc;
+	private Saml saml;
 	private Cas cas;
 	private Map<String, Oauth> oauth;
 
@@ -295,6 +427,14 @@ public class AuthenticationProviderProperties {
 
 	public void setOidc(final List<Oidc> oidc) {
 		this.oidc = oidc;
+	}
+
+	public Saml getSaml() {
+		return saml;
+	}
+
+	public void setSaml(final Saml saml) {
+		this.saml = saml;
 	}
 
 	public Cas getCas() {

@@ -161,6 +161,27 @@ arsnova:
           manager-user-dn: cn=arsnova-manager,dc=example,dc=com
           manager-password: arsnova
 
+      # SAML authentication
+      saml:
+        enabled: false
+        allowed-roles:
+          - moderator
+          - participant
+        title: SAML
+        order: 0
+        idp:
+          meta-file: saml-idp.xml
+        sp:
+          meta-file: ""
+          entity-id: ""
+        keystore:
+          file: arsnova.jks
+          store-password: arsnova
+          key-alias: saml
+          key-password: arsnova
+        assertion-consumer-service-index: 0
+        max-authentication-lifetime: 3600
+
       # CAS authentication
       cas:
         enabled: false
