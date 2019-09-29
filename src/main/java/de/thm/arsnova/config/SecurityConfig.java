@@ -112,7 +112,7 @@ import de.thm.arsnova.security.pac4j.OauthCallbackFilter;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public static final String AUTH_CALLBACK_PATH = "/auth/callback";
 	public static final String OAUTH_CALLBACK_PATH = AUTH_CALLBACK_PATH + "/oauth";
-	public static final String CAS_CALLBACK_PATH = OAUTH_CALLBACK_PATH + "/cas";
+	public static final String CAS_CALLBACK_PATH = AUTH_CALLBACK_PATH + "/cas";
 	public static final String CAS_LOGOUT_PATH = "/auth/logout/cas";
 	public static final String RUN_AS_KEY_PREFIX = "RUN_AS_KEY";
 	public static final String INTERNAL_PROVIDER_ID = "user-db";
