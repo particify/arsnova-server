@@ -66,6 +66,8 @@ import de.thm.arsnova.controller.AbstractController;
 import de.thm.arsnova.model.ServiceDescription;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.model.migration.v2.ClientAuthentication;
+import de.thm.arsnova.security.LoginAuthenticationFailureHandler;
+import de.thm.arsnova.security.LoginAuthenticationSucessHandler;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.service.UserService;
 import de.thm.arsnova.web.exceptions.UnauthorizedException;
@@ -208,8 +210,8 @@ public class AuthenticationController extends AbstractController {
 			}
 		}
 
-		request.getSession().setAttribute("ars-login-success-url", serverUrl + successUrl);
-		request.getSession().setAttribute("ars-login-failure-url", serverUrl + failureUrl);
+		request.getSession().setAttribute(LoginAuthenticationSucessHandler.URL_ATTRIBUTE, serverUrl + successUrl);
+		request.getSession().setAttribute(LoginAuthenticationFailureHandler.URL_ATTRIBUTE, serverUrl + failureUrl);
 
 		if (casProperties.isEnabled() && "cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);

@@ -18,29 +18,63 @@
 
 package de.thm.arsnova.security;
 
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+
+import de.thm.arsnova.security.jwt.JwtService;
 
 /**
  * This class gets called when a user successfully logged in.
  */
 public class LoginAuthenticationSucessHandler extends
 		SimpleUrlAuthenticationSuccessHandler {
+	public static final String AUTH_COOKIE_NAME = "auth";
+	public static final String URL_ATTRIBUTE = "ars-login-success-url";
 
+	private JwtService jwtService;
 	private String targetUrl;
+
+	@Autowired
+	public void setJwtService(final JwtService jwtService) {
+		this.jwtService = jwtService;
+	}
 
 	@Override
 	protected String determineTargetUrl(
 			final HttpServletRequest request,
 			final HttpServletResponse response) {
-		final HttpSession session = request.getSession();
-		if (session == null || session.getAttribute("ars-login-success-url") == null) {
-			return targetUrl;
-		}
+		final HttpSession session = request.getSession(false);
+		final String url = (String) session.getAttribute(URL_ATTRIBUTE);
+		session.removeAttribute(URL_ATTRIBUTE);
 
-		return (String) session.getAttribute("ars-login-success-url");
+		return url;
+	}
+
+	@Override
+	public void onAuthenticationSuccess(final HttpServletRequest request, final HttpServletResponse response,
+			final Authentication authentication) throws IOException, ServletException {
+		final HttpSession session = request.getSession(false);
+		if (session == null || session.getAttribute(URL_ATTRIBUTE) == null) {
+			final String token = jwtService.createSignedToken((User) authentication.getPrincipal(), true);
+			final Cookie cookie = new Cookie(AUTH_COOKIE_NAME, token);
+			cookie.setPath(request.getContextPath());
+			cookie.setSecure(request.isSecure());
+			cookie.setHttpOnly(true);
+			response.addCookie(cookie);
+			response.setContentType(MediaType.TEXT_HTML_VALUE);
+			response.getWriter().println("<!DOCTYPE html><script>if (window.opener) window.close()</script>");
+
+			return;
+		}
+		super.onAuthenticationSuccess(request, response, authentication);
 	}
 
 	public void setTargetUrl(final String url) {

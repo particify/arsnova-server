@@ -39,7 +39,7 @@ public interface UserService extends EntityService<UserProfile> {
 
 	User getCurrentUser();
 
-	de.thm.arsnova.model.ClientAuthentication getCurrentClientAuthentication();
+	de.thm.arsnova.model.ClientAuthentication getCurrentClientAuthentication(boolean refresh);
 
 	boolean isAdmin(String username);
 

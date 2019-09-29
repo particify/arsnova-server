@@ -584,6 +584,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public OauthCallbackFilter oauthCallbackFilter() throws Exception {
 		final OauthCallbackFilter callbackFilter = new OauthCallbackFilter(oauthConfig(), OAUTH_CALLBACK_PATH);
 		callbackFilter.setAuthenticationManager(authenticationManager());
+		callbackFilter.setAuthenticationSuccessHandler(successHandler());
+		callbackFilter.setAuthenticationFailureHandler(failureHandler());
 
 		return callbackFilter;
 	}
