@@ -179,6 +179,7 @@ arsnova:
           store-password: arsnova
           key-alias: saml
           key-password: arsnova
+        user-id-attribute: uid
         assertion-consumer-service-index: 0
         max-authentication-lifetime: 3600
 

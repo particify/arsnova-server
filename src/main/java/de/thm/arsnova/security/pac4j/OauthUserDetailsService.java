@@ -20,6 +20,7 @@ package de.thm.arsnova.security.pac4j;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import org.pac4j.oauth.profile.facebook.FacebookProfile;
 import org.pac4j.oauth.profile.twitter.TwitterProfile;
 import org.pac4j.oidc.profile.OidcProfile;
@@ -31,6 +32,7 @@ import org.springframework.security.core.userdetails.AuthenticationUserDetailsSe
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import de.thm.arsnova.config.properties.AuthenticationProviderProperties;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.service.UserService;
@@ -44,10 +46,13 @@ import de.thm.arsnova.service.UserService;
 @Service
 public class OauthUserDetailsService implements AuthenticationUserDetailsService<OAuthToken> {
 	private final UserService userService;
+	private final AuthenticationProviderProperties.Saml samlProperties;
 	protected final Collection<GrantedAuthority> grantedAuthorities;
 
-	public OauthUserDetailsService(final UserService userService) {
+	public OauthUserDetailsService(final UserService userService,
+			final AuthenticationProviderProperties authenticationProviderProperties) {
 		this.userService = userService;
+		this.samlProperties = authenticationProviderProperties.getSaml();
 		grantedAuthorities = new HashSet<>();
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_OAUTH_USER"));
@@ -77,7 +82,14 @@ public class OauthUserDetailsService implements AuthenticationUserDetailsService
 					grantedAuthorities, true);
 		} else if (token.getDetails() instanceof SAML2Profile) {
 			final SAML2Profile profile = (SAML2Profile) token.getDetails();
-			user = userService.loadUser(UserProfile.AuthProvider.SAML, profile.getId(),
+			final String uidAttr = samlProperties.getUserIdAttribute();
+			final String uid;
+			if (uidAttr == null || "".equals(uidAttr)) {
+				uid = profile.getId();
+			} else {
+				uid = profile.getAttribute(uidAttr, List.class).get(0).toString();
+			}
+			user = userService.loadUser(UserProfile.AuthProvider.SAML, uid,
 					grantedAuthorities, true);
 		} else {
 			throw new IllegalArgumentException("AuthenticationToken not supported");

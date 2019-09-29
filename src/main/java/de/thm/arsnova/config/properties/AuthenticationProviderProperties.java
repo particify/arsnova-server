@@ -297,6 +297,7 @@ public class AuthenticationProviderProperties {
 		private Idp idp;
 		private Sp sp;
 		private Keystore keystore;
+		private String userIdAttribute;
 		private int assertionConsumerServiceIndex;
 		private int maxAuthenticationLifetime;
 
@@ -332,6 +333,14 @@ public class AuthenticationProviderProperties {
 
 		public void setKeystore(final Keystore keystore) {
 			this.keystore = keystore;
+		}
+
+		public String getUserIdAttribute() {
+			return userIdAttribute;
+		}
+
+		public void setUserIdAttribute(final String userIdAttribute) {
+			this.userIdAttribute = userIdAttribute;
 		}
 
 		public int getAssertionConsumerServiceIndex() {
