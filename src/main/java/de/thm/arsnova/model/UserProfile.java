@@ -33,6 +33,7 @@ public class UserProfile extends Entity {
 	public enum AuthProvider {
 		NONE,
 		UNKNOWN,
+		ANONYMIZED,
 		ARSNOVA,
 		ARSNOVA_GUEST,
 		LDAP,

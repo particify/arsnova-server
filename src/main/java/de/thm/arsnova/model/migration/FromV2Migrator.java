@@ -108,8 +108,7 @@ public class FromV2Migrator {
 		if (loggedIn != null) {
 			if (dbUser == null) {
 				copyCommonProperties(loggedIn, profile);
-				profile.setLoginId(loggedIn.getUser());
-				profile.setAuthProvider(detectAuthProvider(profile.getLoginId()));
+				updateProfileFromLoginId(profile, loggedIn.getUser());
 				profile.setCreationTimestamp(new Date());
 			}
 			profile.setLastLoginTimestamp(new Date(loggedIn.getTimestamp()));
@@ -365,18 +364,31 @@ public class FromV2Migrator {
 		return to;
 	}
 
-	private UserProfile.AuthProvider detectAuthProvider(final String loginId) {
+	private void updateProfileFromLoginId(final UserProfile profile, final String loginId) {
 		if (loginId.length() == 15 && loginId.startsWith("Guest")) {
-			return UserProfile.AuthProvider.ARSNOVA_GUEST;
+			profile.setAuthProvider(UserProfile.AuthProvider.ARSNOVA_GUEST);
+			profile.setLoginId(loginId);
+		} else if (loginId.startsWith("$")) {
+			profile.setAuthProvider(UserProfile.AuthProvider.ANONYMIZED);
+			/* Remove redundant prefix and shorten ID to 10 chars */
+			profile.setLoginId(loginId.substring(loginId.lastIndexOf("$") + 1).substring(0, 10));
+		} else if (loginId.startsWith("oidc:")) {
+			profile.setAuthProvider(UserProfile.AuthProvider.OIDC);
+			profile.setLoginId(loginId.substring(5));
+		} else if (loginId.startsWith("saml:")) {
+			profile.setAuthProvider(UserProfile.AuthProvider.SAML);
+			profile.setLoginId(loginId.substring(5));
+		} else if (loginId.startsWith("https://www.facebook.com/") || loginId.startsWith("http://www.facebook.com/")) {
+			profile.setAuthProvider(UserProfile.AuthProvider.FACEBOOK);
+			/* Extract ID from URL */
+			profile.setLoginId(loginId.substring(loginId.indexOf("/", 23) + 1, loginId.length() - 1));
+		} else if (loginId.contains("@")) {
+			profile.setAuthProvider(UserProfile.AuthProvider.GOOGLE);
+			profile.setLoginId(loginId);
+		} else {
+			profile.setAuthProvider(UserProfile.AuthProvider.UNKNOWN);
+			profile.setLoginId(loginId);
 		}
-		if (loginId.startsWith("https://www.facebook.com/") || loginId.startsWith("http://www.facebook.com/")) {
-			return UserProfile.AuthProvider.FACEBOOK;
-		}
-		if (loginId.contains("@")) {
-			return UserProfile.AuthProvider.GOOGLE;
-		}
-
-		return UserProfile.AuthProvider.UNKNOWN;
 	}
 
 	public void setIgnoreRevision(final boolean ignoreRevision) {
