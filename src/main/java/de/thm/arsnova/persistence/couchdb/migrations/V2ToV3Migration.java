@@ -19,6 +19,7 @@
 package de.thm.arsnova.persistence.couchdb.migrations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,6 +38,7 @@ import org.springframework.stereotype.Service;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.Content;
+import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.Motd;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.UserProfile;
@@ -65,6 +67,7 @@ public class V2ToV3Migration implements Migration {
 	private static final String USER_INDEX = "user-index";
 	private static final String LOGGEDIN_INDEX = "loggedin-index";
 	private static final String SESSION_INDEX = "session-index";
+	private static final String SKILLQUESTION_INDEX = "skillquestion-index";
 	private static final String MOTD_INDEX = "motd-index";
 	private static final String MOTDLIST_INDEX = "motdlist-index";
 
@@ -107,6 +110,7 @@ public class V2ToV3Migration implements Migration {
 			migrateMotds();
 			migrateComments();
 			migrateContents();
+			migrateContentGroups();
 			migrateAnswers();
 		} catch (final InterruptedException e) {
 			throw new DbAccessException(e);
@@ -147,6 +151,14 @@ public class V2ToV3Migration implements Migration {
 		fields.clear();
 		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("keyword", false));
 		fromConnector.createPartialJsonIndex(SESSION_INDEX, fields, filterSelector);
+
+		filterSelector.clear();
+		filterSelector.put("type", "skill_question");
+		fromConnector.createPartialJsonIndex(SKILLQUESTION_INDEX, new ArrayList<>(), filterSelector);
+		fields.clear();
+		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("sessionId", false));
+		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("questionVariant", false));
+		fromConnector.createPartialJsonIndex(SKILLQUESTION_INDEX, fields, filterSelector);
 
 		filterSelector.clear();
 		filterSelector.put("type", "motd");
@@ -425,6 +437,64 @@ public class V2ToV3Migration implements Migration {
 			}
 
 			toConnector.executeBulk(contentsV3);
+		}
+	}
+
+	private void migrateContentGroups() throws InterruptedException {
+		waitForV2Index(SKILLQUESTION_INDEX);
+		final Map<String, Object> queryOptions = new HashMap<>();
+		queryOptions.put("type", "skill_question");
+		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
+		query.setFields(Arrays.asList("sessionId", "questionVariant", "_id"));
+		final ArrayList<MangoCouchDbConnector.MangoQuery.Sort> sort = new ArrayList<>();
+		sort.add(new MangoCouchDbConnector.MangoQuery.Sort("sessionId", false));
+		sort.add(new MangoCouchDbConnector.MangoQuery.Sort("questionVariant", false));
+		query.setSort(sort);
+		query.setIndexDocument(SKILLQUESTION_INDEX);
+		query.setLimit(LIMIT);
+		String bookmark = null;
+
+		final Map<String, Set<String>> groups = new HashMap<>();
+		String roomId = "";
+		for (int skip = 0;; skip += LIMIT) {
+			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
+			query.setBookmark(bookmark);
+			final PagedMangoResponse<de.thm.arsnova.model.migration.v2.Content> response =
+					fromConnector.queryForPage(query, de.thm.arsnova.model.migration.v2.Content.class);
+			final List<de.thm.arsnova.model.migration.v2.Content> contentsV2 = response.getEntities();
+			bookmark = response.getBookmark();
+			if (contentsV2.size() == 0) {
+				break;
+			}
+			for (final de.thm.arsnova.model.migration.v2.Content contentV2 : contentsV2) {
+				if (!contentRepository.existsById(contentV2.getId())) {
+					continue;
+				}
+				if (!contentV2.getSession().equals(roomId)) {
+					createContentGroups(roomId, groups);
+					roomId = contentV2.getSessionId();
+				}
+				final Set<String> contentIds = groups.getOrDefault(contentV2.getQuestionVariant(), new HashSet<>());
+				groups.put(contentV2.getQuestionVariant(), contentIds);
+				contentIds.add(contentV2.getId());
+			}
+		}
+		createContentGroups(roomId, groups);
+	}
+
+	private void createContentGroups(final String roomId, final Map<String, Set<String>> groups) {
+		if (!groups.isEmpty()) {
+			final List<ContentGroup> contentGroups = new ArrayList<>();
+			for (final String name : groups.keySet()) {
+				final ContentGroup group = new ContentGroup();
+				group.setRoomId(roomId);
+				group.setName(name);
+				group.setAutoSort(true);
+				group.setContentIds(groups.get(name));
+				contentGroups.add(group);
+			}
+			toConnector.executeBulk(contentGroups);
+			groups.clear();
 		}
 	}
 
