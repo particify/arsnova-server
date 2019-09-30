@@ -26,14 +26,14 @@ import org.springframework.security.core.GrantedAuthority;
 import de.thm.arsnova.security.User;
 
 /**
- * Authentication token implementation for OAuth.
+ * Authentication token implementation for Pac4j SSO.
  *
  * @author Daniel Gerhardt
  */
-public class OAuthToken extends AbstractAuthenticationToken {
+public class SsoAuthenticationToken extends AbstractAuthenticationToken {
 	private User principal;
 
-	public OAuthToken(final User principal, final CommonProfile profile,
+	public SsoAuthenticationToken(final User principal, final CommonProfile profile,
 			final Collection<? extends GrantedAuthority> grantedAuthorities) {
 		super(grantedAuthorities);
 		this.principal = principal;

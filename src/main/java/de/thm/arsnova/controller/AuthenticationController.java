@@ -26,7 +26,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.pac4j.core.context.J2EContext;
 import org.pac4j.oidc.client.OidcClient;
+import org.pac4j.saml.client.SAML2Client;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,12 +47,14 @@ import de.thm.arsnova.model.LoginCredentials;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.security.LoginAuthenticationSucessHandler;
 import de.thm.arsnova.service.UserService;
+import de.thm.arsnova.web.exceptions.NotImplementedException;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthenticationController {
 	private UserService userService;
 	private OidcClient oidcClient;
+	private SAML2Client saml2Client;
 	private CasAuthenticationEntryPoint casEntryPoint;
 
 	public AuthenticationController(final UserService userService) {
@@ -60,6 +64,11 @@ public class AuthenticationController {
 	@Autowired(required = false)
 	public void setOidcClient(final OidcClient oidcClient) {
 		this.oidcClient = oidcClient;
+	}
+
+	@Autowired(required = false)
+	public void setSaml2Client(final SAML2Client saml2Client) {
+		this.saml2Client = saml2Client;
 	}
 
 	@Autowired(required = false)
@@ -129,6 +138,12 @@ public class AuthenticationController {
 				}
 				return new RedirectView(
 						oidcClient.getRedirectAction(new J2EContext(request, response)).getLocation());
+			case SecurityConfig.SAML_PROVIDER_ID:
+				if (saml2Client == null) {
+					throw new IllegalArgumentException("Invalid provider ID.");
+				}
+				return new RedirectView(
+					saml2Client.getRedirectAction(new J2EContext(request, response)).getLocation());
 			case SecurityConfig.CAS_PROVIDER_ID:
 				if (casEntryPoint == null) {
 					throw new IllegalArgumentException("Invalid provider ID.");
@@ -138,5 +153,14 @@ public class AuthenticationController {
 			default:
 				throw new IllegalArgumentException("Invalid provider ID.");
 		}
+	}
+
+	@GetMapping(value = "/config/saml/sp-metadata.xml", produces = MediaType.APPLICATION_XML_VALUE)
+	public String samlSpMetadata() throws IOException {
+		if (saml2Client == null) {
+			throw new NotImplementedException("SAML authentication is disabled.");
+		}
+
+		return saml2Client.getServiceProviderMetadataResolver().getMetadata();
 	}
 }

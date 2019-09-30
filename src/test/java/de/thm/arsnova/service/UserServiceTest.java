@@ -51,7 +51,7 @@ import de.thm.arsnova.config.WebSocketConfig;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.security.User;
-import de.thm.arsnova.security.pac4j.OAuthToken;
+import de.thm.arsnova.security.pac4j.SsoAuthenticationToken;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -80,7 +80,7 @@ public class UserServiceTest {
 		final UserProfile userProfile = new UserProfile(UserProfile.AuthProvider.GOOGLE, "ptsr00");
 		userProfile.setId(UUID.randomUUID().toString());
 		final User user = new User(userProfile, Collections.emptyList());
-		final OAuthToken token = new OAuthToken(user, profile, Collections.emptyList());
+		final SsoAuthenticationToken token = new SsoAuthenticationToken(user, profile, Collections.emptyList());
 		socketid2user.put(UUID.randomUUID(), new ClientAuthentication(token));
 
 		final List<GrantedAuthority> authorities = new ArrayList<>();

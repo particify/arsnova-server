@@ -28,29 +28,29 @@ import org.springframework.stereotype.Component;
 import de.thm.arsnova.security.User;
 
 /**
- * Sets up the SecurityContext OAuth users.
+ * Sets up the SecurityContext Pac4j SSO users.
  *
  * @author Daniel Gerhardt
  */
 @Component
-public class OauthAuthenticationProvider implements AuthenticationProvider {
-	private OauthUserDetailsService oauthUserDetailsService;
+public class SsoAuthenticationProvider implements AuthenticationProvider {
+	private SsoUserDetailsService ssoUserDetailsService;
 
 	@Override
 	public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
-		final OAuthToken oauthToken = (OAuthToken) authentication;
-		final User user = oauthUserDetailsService.loadUserDetails(oauthToken);
+		final SsoAuthenticationToken ssoAuthenticationToken = (SsoAuthenticationToken) authentication;
+		final User user = ssoUserDetailsService.loadUserDetails(ssoAuthenticationToken);
 
-		return new OAuthToken(user, (CommonProfile) oauthToken.getDetails(), user.getAuthorities());
+		return new SsoAuthenticationToken(user, (CommonProfile) ssoAuthenticationToken.getDetails(), user.getAuthorities());
 	}
 
 	@Override
 	public boolean supports(final Class<?> authentication) {
-		return authentication.isAssignableFrom(OAuthToken.class);
+		return authentication.isAssignableFrom(SsoAuthenticationToken.class);
 	}
 
 	@Autowired
-	public void setOauthUserDetailsService(final OauthUserDetailsService oauthUserDetailsService) {
-		this.oauthUserDetailsService = oauthUserDetailsService;
+	public void setSsoUserDetailsService(final SsoUserDetailsService ssoUserDetailsService) {
+		this.ssoUserDetailsService = ssoUserDetailsService;
 	}
 }

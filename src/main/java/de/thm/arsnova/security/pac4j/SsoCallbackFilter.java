@@ -42,17 +42,17 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
- * Handles callback requests by login redirects from OAuth providers.
+ * Handles callback requests by login redirects from Pac4j SSO providers.
  *
  * @author Daniel Gerhardt
  */
-public class OauthCallbackFilter extends AbstractAuthenticationProcessingFilter {
-	private static final Logger logger = LoggerFactory.getLogger(OauthCallbackFilter.class);
+public class SsoCallbackFilter extends AbstractAuthenticationProcessingFilter {
+	private static final Logger logger = LoggerFactory.getLogger(SsoCallbackFilter.class);
 	private final ClientFinder clientFinder = new DefaultCallbackClientFinder();
 	private Config config;
 
-	public OauthCallbackFilter(final Config pac4jConfig, final String callbackPath) {
-		super(new AntPathRequestMatcher("/**" + callbackPath + "/**"));
+	public SsoCallbackFilter(final Config pac4jConfig, final String callbackPath) {
+		super(new AntPathRequestMatcher("/**" + callbackPath));
 		this.config = pac4jConfig;
 	}
 
@@ -61,7 +61,7 @@ public class OauthCallbackFilter extends AbstractAuthenticationProcessingFilter 
 			final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
 			throws AuthenticationException {
 		final CommonProfile profile = retrieveProfile(new J2EContext(httpServletRequest, httpServletResponse), null);
-		return getAuthenticationManager().authenticate(new OAuthToken(null, profile, Collections.emptyList()));
+		return getAuthenticationManager().authenticate(new SsoAuthenticationToken(null, profile, Collections.emptyList()));
 	}
 
 	private CommonProfile retrieveProfile(final J2EContext context, final String clientName)
