@@ -100,8 +100,8 @@ import de.thm.arsnova.security.LoginAuthenticationSucessHandler;
 import de.thm.arsnova.security.RegisteredUserDetailsService;
 import de.thm.arsnova.security.jwt.JwtAuthenticationProvider;
 import de.thm.arsnova.security.jwt.JwtTokenFilter;
-import de.thm.arsnova.security.pac4j.OauthAuthenticationProvider;
-import de.thm.arsnova.security.pac4j.OauthCallbackFilter;
+import de.thm.arsnova.security.pac4j.SsoAuthenticationProvider;
+import de.thm.arsnova.security.pac4j.SsoCallbackFilter;
 
 /**
  * Loads property file and configures components used for authentication.
@@ -299,7 +299,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			}
 		}
 		if (oauthOrOidcProvider) {
-			auth.authenticationProvider(oauthAuthenticationProvider());
+			auth.authenticationProvider(ssoAuthenticationProvider());
 		}
 		logger.info("Enabled authentication providers: {}", providers);
 	}
@@ -582,8 +582,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			name = "saml.enabled",
 			prefix = AuthenticationProviderProperties.PREFIX,
 			havingValue = "true")
-	public OauthCallbackFilter samlCallbackFilter() throws Exception {
-		final OauthCallbackFilter callbackFilter = new OauthCallbackFilter(samlConfig(), SAML_CALLBACK_PATH);
+	public SsoCallbackFilter samlCallbackFilter() throws Exception {
+		final SsoCallbackFilter callbackFilter = new SsoCallbackFilter(samlConfig(), SAML_CALLBACK_PATH);
 		callbackFilter.setAuthenticationManager(authenticationManager());
 		callbackFilter.setAuthenticationSuccessHandler(successHandler());
 		callbackFilter.setAuthenticationFailureHandler(failureHandler());
@@ -651,8 +651,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public OauthCallbackFilter oauthCallbackFilter() throws Exception {
-		final OauthCallbackFilter callbackFilter = new OauthCallbackFilter(oauthConfig(), OAUTH_CALLBACK_PATH + "/**");
+	public SsoCallbackFilter oauthCallbackFilter() throws Exception {
+		final SsoCallbackFilter callbackFilter = new SsoCallbackFilter(oauthConfig(), OAUTH_CALLBACK_PATH + "/**");
 		callbackFilter.setAuthenticationManager(authenticationManager());
 		callbackFilter.setAuthenticationSuccessHandler(successHandler());
 		callbackFilter.setAuthenticationFailureHandler(failureHandler());
@@ -661,8 +661,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public OauthAuthenticationProvider oauthAuthenticationProvider() {
-		return new OauthAuthenticationProvider();
+	public SsoAuthenticationProvider ssoAuthenticationProvider() {
+		return new SsoAuthenticationProvider();
 	}
 
 	@Bean

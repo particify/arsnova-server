@@ -38,18 +38,18 @@ import de.thm.arsnova.security.User;
 import de.thm.arsnova.service.UserService;
 
 /**
- * Loads UserDetails for an OAuth user (e.g. {@link UserProfile.AuthProvider#GOOGLE}) based on an unique identifier
- * extracted from the OAuth profile.
+ * Loads UserDetails for an Pac4j SSO user (e.g. {@link UserProfile.AuthProvider#GOOGLE}) based on an unique identifier
+ * extracted from the Pac4j profile.
  *
  * @author Daniel Gerhardt
  */
 @Service
-public class OauthUserDetailsService implements AuthenticationUserDetailsService<OAuthToken> {
+public class SsoUserDetailsService implements AuthenticationUserDetailsService<SsoAuthenticationToken> {
 	private final UserService userService;
 	private final AuthenticationProviderProperties.Saml samlProperties;
 	protected final Collection<GrantedAuthority> grantedAuthorities;
 
-	public OauthUserDetailsService(final UserService userService,
+	public SsoUserDetailsService(final UserService userService,
 			final AuthenticationProviderProperties authenticationProviderProperties) {
 		this.userService = userService;
 		this.samlProperties = authenticationProviderProperties.getSaml();
@@ -58,7 +58,7 @@ public class OauthUserDetailsService implements AuthenticationUserDetailsService
 		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_OAUTH_USER"));
 	}
 
-	public User loadUserDetails(final OAuthToken token)
+	public User loadUserDetails(final SsoAuthenticationToken token)
 			throws UsernameNotFoundException {
 		final User user;
 		if (token.getDetails() instanceof GoogleOidcProfile) {
