@@ -399,7 +399,7 @@ public class Room extends Entity {
 	private Settings settings;
 	private Author author;
 	private PoolProperties poolProperties;
-	private Map<String, Map<String, ?>> extensions;
+	private Map<String, Map<String, Object>> extensions;
 	private Map<String, String> attachments;
 	private RoomStatistics statistics;
 
@@ -512,12 +512,12 @@ public class Room extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public Map<String, Map<String, ?>> getExtensions() {
+	public Map<String, Map<String, Object>> getExtensions() {
 		return extensions;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setExtensions(final Map<String, Map<String, ?>> extensions) {
+	public void setExtensions(final Map<String, Map<String, Object>> extensions) {
 		this.extensions = extensions;
 	}
 

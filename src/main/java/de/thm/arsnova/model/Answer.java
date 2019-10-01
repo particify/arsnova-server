@@ -54,7 +54,7 @@ public class Answer extends Entity {
 	@Positive
 	private int round = 1;
 
-	private Map<String, Map<String, ?>> extensions;
+	private Map<String, Map<String, Object>> extensions;
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getContentId() {
@@ -106,12 +106,12 @@ public class Answer extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public Map<String, Map<String, ?>> getExtensions() {
+	public Map<String, Map<String, Object>> getExtensions() {
 		return extensions;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setExtensions(final Map<String, Map<String, ?>> extensions) {
+	public void setExtensions(final Map<String, Map<String, Object>> extensions) {
 		this.extensions = extensions;
 	}
 
