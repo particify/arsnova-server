@@ -57,6 +57,8 @@ public class FromV2Migrator {
 	static final String V2_TYPE_SCHOOL = "school";
 	static final String V2_TYPE_YESNO = "yesno";
 	static final String V2_TYPE_FREETEXT = "freetext";
+	static final String V2_TYPE_SLIDE = "slide";
+	static final String V2_TYPE_FLASHCARD = "flashcard";
 	static final String V2_TYPE_GRID = "grid";
 	private static final Map<String, de.thm.arsnova.model.Content.Format> formatMapping;
 
@@ -71,6 +73,8 @@ public class FromV2Migrator {
 		formatMapping.put(V2_TYPE_SCHOOL, de.thm.arsnova.model.Content.Format.SCALE);
 		formatMapping.put(V2_TYPE_YESNO, de.thm.arsnova.model.Content.Format.BINARY);
 		formatMapping.put(V2_TYPE_FREETEXT, de.thm.arsnova.model.Content.Format.TEXT);
+		formatMapping.put(V2_TYPE_SLIDE, de.thm.arsnova.model.Content.Format.TEXT);
+		formatMapping.put(V2_TYPE_FLASHCARD, de.thm.arsnova.model.Content.Format.TEXT);
 		formatMapping.put(V2_TYPE_GRID, de.thm.arsnova.model.Content.Format.GRID);
 	}
 
@@ -190,6 +194,8 @@ public class FromV2Migrator {
 
 	public de.thm.arsnova.model.Content migrate(final Content from) {
 		final de.thm.arsnova.model.Content to;
+		final Map<String, Map<String, Object>> extensions;
+		final Map<String, Object> v2;
 		switch (from.getQuestionType()) {
 			case V2_TYPE_ABCD:
 			case V2_TYPE_SC:
@@ -216,6 +222,31 @@ public class FromV2Migrator {
 			case V2_TYPE_FREETEXT:
 				to = new de.thm.arsnova.model.Content();
 				to.setFormat(de.thm.arsnova.model.Content.Format.TEXT);
+
+				break;
+			case V2_TYPE_SLIDE:
+				to = new de.thm.arsnova.model.Content();
+				to.setFormat(de.thm.arsnova.model.Content.Format.TEXT);
+				extensions = new HashMap<>();
+				to.setExtensions(extensions);
+				v2 = new HashMap<>();
+				extensions.put("v2", v2);
+				v2.put("format", V2_TYPE_SLIDE);
+
+				break;
+			case V2_TYPE_FLASHCARD:
+				to = new de.thm.arsnova.model.Content();
+				to.setFormat(de.thm.arsnova.model.Content.Format.TEXT);
+				extensions = new HashMap<>();
+				to.setExtensions(extensions);
+				v2 = new HashMap<>();
+				extensions.put("v2", v2);
+				v2.put("format", V2_TYPE_FLASHCARD);
+				if (!from.getPossibleAnswers().isEmpty()) {
+					to.setAdditionalText(from.getPossibleAnswers().get(0).getText());
+					to.setAdditionalTextTitle("Back");
+				}
+
 				break;
 			default:
 				throw new IllegalArgumentException("Unsupported content format.");
