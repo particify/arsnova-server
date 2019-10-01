@@ -228,11 +228,18 @@ public class FromV2Migrator {
 		to.setBody(from.getText());
 		to.setAbstentionsAllowed(from.isAbstention());
 		to.setAbstentionsAllowed(from.isAbstention());
+		if (from.getSolution() != null) {
+			to.setAdditionalText(from.getSolution());
+			to.setAdditionalTextTitle("Solution");
+		} else if (from.getHint() != null) {
+			to.setAdditionalText(from.getHint());
+			to.setAdditionalTextTitle("Hint");
+		}
 		final de.thm.arsnova.model.Content.State state = to.getState();
 		state.setRound(from.getPiRound());
 		state.setVisible(from.isActive());
 		state.setResponsesVisible(from.isShowStatistic());
-		state.setSolutionVisible(from.isShowAnswer());
+		state.setAdditionalTextVisible(from.isShowAnswer());
 		state.setResponsesEnabled(!from.isVotingDisabled());
 
 		return to;

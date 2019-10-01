@@ -140,7 +140,7 @@ public class TimerServiceImpl implements TimerService {
 		}
 
 		content.getState().setVisible(true);
-		content.getState().setSolutionVisible(false);
+		content.getState().setAdditionalTextVisible(false);
 		content.getState().setResponsesVisible(false);
 		content.getState().setResponsesEnabled(true);
 		content.getState().setRoundEndTimestamp(end);
@@ -154,7 +154,7 @@ public class TimerServiceImpl implements TimerService {
 	}
 
 	private void resetRoundManagementState(final Content content) {
-		content.getState().setSolutionVisible(false);
+		content.getState().setAdditionalTextVisible(false);
 		content.getState().setResponsesVisible(false);
 		content.getState().setResponsesEnabled(false);
 		content.getState().setRoundEndTimestamp(null);

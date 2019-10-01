@@ -163,6 +163,11 @@ public class ToV2Migrator {
 		to.setSubject(from.getSubject());
 		to.setText(from.getBody());
 		to.setAbstention(from.isAbstentionsAllowed());
+		if (!from.getState().isAdditionalTextVisible() || "Solution".equals(from.getAdditionalTextTitle())) {
+			to.setSolution(from.getAdditionalText());
+		} else if (from.getAdditionalText() != null) {
+			to.setHint(from.getAdditionalText());
+		}
 
 		if (from instanceof ChoiceQuestionContent) {
 			final ChoiceQuestionContent fromChoiceQuestionContent = (ChoiceQuestionContent) from;
@@ -215,7 +220,7 @@ public class ToV2Migrator {
 		to.setPiRound(state.getRound());
 		to.setActive(state.isVisible());
 		to.setShowStatistic(state.isResponsesVisible());
-		to.setShowAnswer(state.isSolutionVisible());
+		to.setShowAnswer(state.isAdditionalTextVisible());
 		to.setVotingDisabled(!state.isResponsesEnabled());
 		if (from.getGroups().size() == 1) {
 			to.setQuestionVariant(from.getGroups().iterator().next());
