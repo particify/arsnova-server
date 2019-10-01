@@ -258,10 +258,10 @@ public class FromV2Migrator {
 		to.setBody(from.getText());
 		to.setAbstentionsAllowed(from.isAbstention());
 		to.setAbstentionsAllowed(from.isAbstention());
-		if (from.getSolution() != null) {
+		if (from.getSolution() != null && !from.getSolution().isEmpty()) {
 			to.setAdditionalText(from.getSolution());
 			to.setAdditionalTextTitle("Solution");
-		} else if (from.getHint() != null) {
+		} else if (from.getHint() != null && !from.getHint().isEmpty()) {
 			to.setAdditionalText(from.getHint());
 			to.setAdditionalTextTitle("Hint");
 		}
