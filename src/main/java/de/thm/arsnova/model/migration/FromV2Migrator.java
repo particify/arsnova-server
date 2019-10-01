@@ -57,6 +57,8 @@ public class FromV2Migrator {
 	static final String V2_TYPE_SCHOOL = "school";
 	static final String V2_TYPE_YESNO = "yesno";
 	static final String V2_TYPE_FREETEXT = "freetext";
+	static final String V2_TYPE_SLIDE = "slide";
+	static final String V2_TYPE_FLASHCARD = "flashcard";
 	static final String V2_TYPE_GRID = "grid";
 	private static final Map<String, de.thm.arsnova.model.Content.Format> formatMapping;
 
@@ -71,6 +73,8 @@ public class FromV2Migrator {
 		formatMapping.put(V2_TYPE_SCHOOL, de.thm.arsnova.model.Content.Format.SCALE);
 		formatMapping.put(V2_TYPE_YESNO, de.thm.arsnova.model.Content.Format.BINARY);
 		formatMapping.put(V2_TYPE_FREETEXT, de.thm.arsnova.model.Content.Format.TEXT);
+		formatMapping.put(V2_TYPE_SLIDE, de.thm.arsnova.model.Content.Format.TEXT);
+		formatMapping.put(V2_TYPE_FLASHCARD, de.thm.arsnova.model.Content.Format.TEXT);
 		formatMapping.put(V2_TYPE_GRID, de.thm.arsnova.model.Content.Format.GRID);
 	}
 
@@ -108,8 +112,7 @@ public class FromV2Migrator {
 		if (loggedIn != null) {
 			if (dbUser == null) {
 				copyCommonProperties(loggedIn, profile);
-				profile.setLoginId(loggedIn.getUser());
-				profile.setAuthProvider(detectAuthProvider(profile.getLoginId()));
+				updateProfileFromLoginId(profile, loggedIn.getUser());
 				profile.setCreationTimestamp(new Date());
 			}
 			profile.setLastLoginTimestamp(new Date(loggedIn.getTimestamp()));
@@ -191,6 +194,8 @@ public class FromV2Migrator {
 
 	public de.thm.arsnova.model.Content migrate(final Content from) {
 		final de.thm.arsnova.model.Content to;
+		final Map<String, Map<String, Object>> extensions;
+		final Map<String, Object> v2;
 		switch (from.getQuestionType()) {
 			case V2_TYPE_ABCD:
 			case V2_TYPE_SC:
@@ -217,6 +222,31 @@ public class FromV2Migrator {
 			case V2_TYPE_FREETEXT:
 				to = new de.thm.arsnova.model.Content();
 				to.setFormat(de.thm.arsnova.model.Content.Format.TEXT);
+
+				break;
+			case V2_TYPE_SLIDE:
+				to = new de.thm.arsnova.model.Content();
+				to.setFormat(de.thm.arsnova.model.Content.Format.TEXT);
+				extensions = new HashMap<>();
+				to.setExtensions(extensions);
+				v2 = new HashMap<>();
+				extensions.put("v2", v2);
+				v2.put("format", V2_TYPE_SLIDE);
+
+				break;
+			case V2_TYPE_FLASHCARD:
+				to = new de.thm.arsnova.model.Content();
+				to.setFormat(de.thm.arsnova.model.Content.Format.TEXT);
+				extensions = new HashMap<>();
+				to.setExtensions(extensions);
+				v2 = new HashMap<>();
+				extensions.put("v2", v2);
+				v2.put("format", V2_TYPE_FLASHCARD);
+				if (!from.getPossibleAnswers().isEmpty()) {
+					to.setAdditionalText(from.getPossibleAnswers().get(0).getText());
+					to.setAdditionalTextTitle("Back");
+				}
+
 				break;
 			default:
 				throw new IllegalArgumentException("Unsupported content format.");
@@ -228,10 +258,10 @@ public class FromV2Migrator {
 		to.setBody(from.getText());
 		to.setAbstentionsAllowed(from.isAbstention());
 		to.setAbstentionsAllowed(from.isAbstention());
-		if (from.getSolution() != null) {
+		if (from.getSolution() != null && !from.getSolution().isEmpty()) {
 			to.setAdditionalText(from.getSolution());
 			to.setAdditionalTextTitle("Solution");
-		} else if (from.getHint() != null) {
+		} else if (from.getHint() != null && !from.getHint().isEmpty()) {
 			to.setAdditionalText(from.getHint());
 			to.setAdditionalTextTitle("Hint");
 		}
@@ -365,18 +395,31 @@ public class FromV2Migrator {
 		return to;
 	}
 
-	private UserProfile.AuthProvider detectAuthProvider(final String loginId) {
+	private void updateProfileFromLoginId(final UserProfile profile, final String loginId) {
 		if (loginId.length() == 15 && loginId.startsWith("Guest")) {
-			return UserProfile.AuthProvider.ARSNOVA_GUEST;
+			profile.setAuthProvider(UserProfile.AuthProvider.ARSNOVA_GUEST);
+			profile.setLoginId(loginId);
+		} else if (loginId.startsWith("$")) {
+			profile.setAuthProvider(UserProfile.AuthProvider.ANONYMIZED);
+			/* Remove redundant prefix and shorten ID to 10 chars */
+			profile.setLoginId(loginId.substring(loginId.lastIndexOf("$") + 1).substring(0, 10));
+		} else if (loginId.startsWith("oidc:")) {
+			profile.setAuthProvider(UserProfile.AuthProvider.OIDC);
+			profile.setLoginId(loginId.substring(5));
+		} else if (loginId.startsWith("saml:")) {
+			profile.setAuthProvider(UserProfile.AuthProvider.SAML);
+			profile.setLoginId(loginId.substring(5));
+		} else if (loginId.startsWith("https://www.facebook.com/") || loginId.startsWith("http://www.facebook.com/")) {
+			profile.setAuthProvider(UserProfile.AuthProvider.FACEBOOK);
+			/* Extract ID from URL */
+			profile.setLoginId(loginId.substring(loginId.indexOf("/", 23) + 1, loginId.length() - 1));
+		} else if (loginId.contains("@")) {
+			profile.setAuthProvider(UserProfile.AuthProvider.GOOGLE);
+			profile.setLoginId(loginId);
+		} else {
+			profile.setAuthProvider(UserProfile.AuthProvider.UNKNOWN);
+			profile.setLoginId(loginId);
 		}
-		if (loginId.startsWith("https://www.facebook.com/") || loginId.startsWith("http://www.facebook.com/")) {
-			return UserProfile.AuthProvider.FACEBOOK;
-		}
-		if (loginId.contains("@")) {
-			return UserProfile.AuthProvider.GOOGLE;
-		}
-
-		return UserProfile.AuthProvider.UNKNOWN;
 	}
 
 	public void setIgnoreRevision(final boolean ignoreRevision) {

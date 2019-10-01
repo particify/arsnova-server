@@ -19,14 +19,17 @@
 package de.thm.arsnova.model.migration;
 
 import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_ABCD;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_FLASHCARD;
 import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_FREETEXT;
 import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_GRID;
 import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_MC;
 import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_SCHOOL;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_SLIDE;
 import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_VOTE;
 import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_YESNO;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -210,7 +213,24 @@ public class ToV2Migrator {
 					to.setQuestionType(V2_TYPE_FREETEXT);
 					break;
 				case TEXT:
-					to.setQuestionType(V2_TYPE_FREETEXT);
+					final String legacyType = (String) from.getExtensions()
+							.getOrDefault("v2", Collections.emptyMap()).getOrDefault("format", "");
+					switch (legacyType) {
+						case V2_TYPE_SLIDE:
+							to.setQuestionType(V2_TYPE_SLIDE);
+							break;
+						case V2_TYPE_FLASHCARD:
+							to.setQuestionType(V2_TYPE_FLASHCARD);
+							final AnswerOption back = new AnswerOption();
+							back.setText(from.getAdditionalText());
+							back.setCorrect(true);
+							to.setPossibleAnswers(Collections.singletonList(back));
+
+							break;
+						default:
+							to.setQuestionType(V2_TYPE_FREETEXT);
+							break;
+					}
 					break;
 				default:
 					throw new IllegalArgumentException("Unsupported content format.");
