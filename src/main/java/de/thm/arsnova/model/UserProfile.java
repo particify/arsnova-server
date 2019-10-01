@@ -194,7 +194,7 @@ public class UserProfile extends Entity {
 	 * -> Map but custom serialization to array? */
 	private Set<RoomHistoryEntry> roomHistory = new HashSet<>();
 	private Set<String> acknowledgedMotds = new HashSet<>();
-	private Map<String, Map<String, ?>> extensions;
+	private Map<String, Map<String, Object>> extensions;
 
 	public UserProfile() {
 
@@ -266,12 +266,12 @@ public class UserProfile extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Owner.class})
-	public Map<String, Map<String, ?>> getExtensions() {
+	public Map<String, Map<String, Object>> getExtensions() {
 		return extensions;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setExtensions(final Map<String, Map<String, ?>> extensions) {
+	public void setExtensions(final Map<String, Map<String, Object>> extensions) {
 		this.extensions = extensions;
 	}
 

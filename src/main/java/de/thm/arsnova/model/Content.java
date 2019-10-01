@@ -176,7 +176,7 @@ public class Content extends Entity {
 	private Date timestamp;
 	private String additionalText;
 	private String additionalTextTitle;
-	private Map<String, Map<String, ?>> extensions;
+	private Map<String, Map<String, Object>> extensions;
 	private Map<String, String> attachments;
 
 	@JsonView({View.Persistence.class, View.Public.class})
@@ -279,12 +279,12 @@ public class Content extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public Map<String, Map<String, ?>> getExtensions() {
+	public Map<String, Map<String, Object>> getExtensions() {
 		return extensions;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setExtensions(final Map<String, Map<String, ?>> extensions) {
+	public void setExtensions(final Map<String, Map<String, Object>> extensions) {
 		this.extensions = extensions;
 	}
 

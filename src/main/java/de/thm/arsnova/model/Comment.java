@@ -46,7 +46,7 @@ public class Comment extends Entity {
 	private Date timestamp;
 
 	private boolean read;
-	private Map<String, Map<String, ?>> extensions;
+	private Map<String, Map<String, Object>> extensions;
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getRoomId() {
@@ -109,12 +109,12 @@ public class Comment extends Entity {
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public Map<String, Map<String, ?>> getExtensions() {
+	public Map<String, Map<String, Object>> getExtensions() {
 		return extensions;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
-	public void setExtensions(final Map<String, Map<String, ?>> extensions) {
+	public void setExtensions(final Map<String, Map<String, Object>> extensions) {
 		this.extensions = extensions;
 	}
 
