@@ -32,9 +32,10 @@ import org.ektorp.DocumentNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Conditional;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
+import de.thm.arsnova.config.properties.CouchDbProperties;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.Content;
@@ -57,8 +58,10 @@ import de.thm.arsnova.persistence.couchdb.support.PagedMangoResponse;
  *
  * @author Daniel Gerhardt
  */
-@Conditional(MigrateFromLegacyCondition.class)
 @Service
+@ConditionalOnProperty(
+		name = "migrate-from",
+		prefix = CouchDbProperties.PREFIX)
 public class V2ToV3Migration implements Migration {
 	private static final String ID = "20170914131300";
 	private static final int LIMIT = 200;
