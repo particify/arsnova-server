@@ -58,7 +58,7 @@ public class Content extends Entity {
 
 		private Date roundEndTimestamp;
 		private boolean visible = true;
-		private boolean solutionVisible = false;
+		private boolean additionalTextVisible = true;
 		private boolean responsesEnabled = true;
 		private boolean responsesVisible = false;
 
@@ -88,13 +88,13 @@ public class Content extends Entity {
 		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
-		public boolean isSolutionVisible() {
-			return solutionVisible;
+		public boolean isAdditionalTextVisible() {
+			return additionalTextVisible;
 		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
-		public void setSolutionVisible(final boolean solutionVisible) {
-			this.solutionVisible = solutionVisible;
+		public void setAdditionalTextVisible(final boolean additionalTextVisible) {
+			this.additionalTextVisible = additionalTextVisible;
 		}
 
 		@JsonView({View.Persistence.class, View.Public.class})
@@ -124,7 +124,7 @@ public class Content extends Entity {
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(round, roundEndTimestamp, visible, solutionVisible, responsesEnabled, responsesVisible);
+			return Objects.hash(round, roundEndTimestamp, visible, additionalTextVisible, responsesEnabled, responsesVisible);
 		}
 
 		@Override
@@ -139,7 +139,7 @@ public class Content extends Entity {
 
 			return round == state.round
 					&& visible == state.visible
-					&& solutionVisible == state.solutionVisible
+					&& additionalTextVisible == state.additionalTextVisible
 					&& responsesEnabled == state.responsesEnabled
 					&& responsesVisible == state.responsesVisible
 					&& Objects.equals(roundEndTimestamp, state.roundEndTimestamp);
@@ -151,7 +151,7 @@ public class Content extends Entity {
 					.append("round", round)
 					.append("roundEndTimestamp", roundEndTimestamp)
 					.append("visible", visible)
-					.append("solutionVisible", solutionVisible)
+					.append("solutionVisible", additionalTextVisible)
 					.append("responsesEnabled", responsesEnabled)
 					.append("responsesVisible", responsesVisible)
 					.toString();
@@ -174,6 +174,8 @@ public class Content extends Entity {
 	private boolean abstentionsAllowed;
 	private State state;
 	private Date timestamp;
+	private String additionalText;
+	private String additionalTextTitle;
 	private Map<String, Map<String, ?>> extensions;
 	private Map<String, String> attachments;
 
@@ -256,6 +258,26 @@ public class Content extends Entity {
 		this.timestamp = timestamp;
 	}
 
+	@JsonView({View.Persistence.class, View.Owner.class})
+	public String getAdditionalText() {
+		return additionalText;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setAdditionalText(final String additionalText) {
+		this.additionalText = additionalText;
+	}
+
+	@JsonView({View.Persistence.class, View.Owner.class})
+	public String getAdditionalTextTitle() {
+		return additionalTextTitle;
+	}
+
+	@JsonView({View.Persistence.class, View.Public.class})
+	public void setAdditionalTextTitle(final String additionalTextTitle) {
+		this.additionalTextTitle = additionalTextTitle;
+	}
+
 	@JsonView({View.Persistence.class, View.Public.class})
 	public Map<String, Map<String, ?>> getExtensions() {
 		return extensions;
@@ -328,6 +350,8 @@ public class Content extends Entity {
 				.append("groups", groups)
 				.append("abstentionsAllowed", abstentionsAllowed)
 				.append("state", state)
+				.append("additionalText", additionalText)
+				.append("additionalTextTitle", additionalTextTitle)
 				.append("timestamp", timestamp)
 				.append("attachments", attachments);
 	}

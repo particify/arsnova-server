@@ -315,7 +315,7 @@ public class ContentController extends PaginationController {
 		final de.thm.arsnova.model.Content contentV3 = fromV2Migrator.migrate(content);
 		boolean p = showCorrectAnswer;
 		if (content != null) {
-			p = contentV3.getState().isSolutionVisible();
+			p = contentV3.getState().isAdditionalTextVisible();
 		}
 		contentService.patch(contentV3, Collections.singletonMap("solutionVisible", p),
 				de.thm.arsnova.model.Content::getState);
