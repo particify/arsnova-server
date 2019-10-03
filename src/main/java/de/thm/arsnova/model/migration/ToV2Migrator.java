@@ -213,8 +213,10 @@ public class ToV2Migrator {
 					to.setQuestionType(V2_TYPE_FREETEXT);
 					break;
 				case TEXT:
-					final String legacyType = (String) from.getExtensions()
-							.getOrDefault("v2", Collections.emptyMap()).getOrDefault("format", "");
+					final String legacyType = from.getExtensions() != null
+							? (String) from.getExtensions()
+								.getOrDefault("v2", Collections.emptyMap()).getOrDefault("format", "")
+							: "";
 					switch (legacyType) {
 						case V2_TYPE_SLIDE:
 							to.setQuestionType(V2_TYPE_SLIDE);
