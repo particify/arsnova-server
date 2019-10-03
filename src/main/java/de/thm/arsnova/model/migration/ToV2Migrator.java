@@ -18,6 +18,15 @@
 
 package de.thm.arsnova.model.migration;
 
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_GRID_CONTAINER_SIZE;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_GRID_DEFAULT_TYPE;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_GRID_FIELD_COUNT;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_GRID_IMAGE_ABSOLUTE_X;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_GRID_IMAGE_ABSOLUTE_Y;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_GRID_MODERATION_DOT_LIMIT;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_GRID_SCALE_FACTOR;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_GRID_TYPE;
 import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_ABCD;
 import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_FLASHCARD;
 import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_FREETEXT;
@@ -38,6 +47,7 @@ import java.util.stream.Collectors;
 
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.ChoiceQuestionContent;
+import de.thm.arsnova.model.GridImageContent;
 import de.thm.arsnova.model.RoomStatistics;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.model.migration.v2.Answer;
@@ -233,6 +243,51 @@ public class ToV2Migrator {
 							to.setQuestionType(V2_TYPE_FREETEXT);
 							break;
 					}
+					break;
+				case GRID:
+					final GridImageContent fromGridImageContent = (GridImageContent) from;
+					final GridImageContent.Grid grid = fromGridImageContent.getGrid();
+					final GridImageContent.Image image = fromGridImageContent.getImage();
+					to.setQuestionType(V2_TYPE_GRID);
+					to.setGridSizeX(grid.getColumns());
+					to.setGridSizeY(grid.getRows());
+					to.setGridOffsetX((int) (Math.round(grid.getNormalizedX() * V2_GRID_CONTAINER_SIZE)));
+					to.setGridOffsetY((int) (Math.round(grid.getNormalizedY() * V2_GRID_CONTAINER_SIZE)));
+					/* v3 normalized field size = v2 scale factor ^ v2 zoom level / v2 grid size */
+					to.setGridSize(V2_GRID_FIELD_COUNT);
+					to.setGridScaleFactor(String.valueOf(V2_GRID_SCALE_FACTOR));
+					to.setGridZoomLvl((int) Math.round(
+							Math.log(grid.getNormalizedFieldSize() * V2_GRID_FIELD_COUNT)
+								/ Math.log(V2_GRID_SCALE_FACTOR)));
+					to.setGridIsHidden(!grid.isVisible());
+					to.setImage(image.getUrl());
+					to.setImgRotation(image.getRotation() / 90 % 4);
+					to.setScaleFactor(String.valueOf(V2_GRID_SCALE_FACTOR));
+					to.setZoomLvl((int) Math.round(
+							Math.log(image.getScaleFactor()) / Math.log(V2_GRID_SCALE_FACTOR)));
+					to.setPossibleAnswers(
+							fromGridImageContent.getCorrectOptionIndexes().stream()
+									.map(i -> {
+										final int x = i % fromGridImageContent.getGrid().getColumns();
+										final int y = i / fromGridImageContent.getGrid().getColumns();
+										final AnswerOption answerOption = new AnswerOption();
+										answerOption.setText(x + ";" + y);
+										answerOption.setCorrect(true);
+
+										return answerOption;
+									})
+									.collect(Collectors.toList()));
+					if (fromGridImageContent.getExtensions() != null) {
+						final Map<String, Object> v2 = fromGridImageContent.getExtensions()
+								.getOrDefault(V2, Collections.emptyMap());
+						to.setGridType((String) v2.getOrDefault(V2_GRID_TYPE, V2_GRID_DEFAULT_TYPE));
+						to.setOffsetX((int) v2.getOrDefault(V2_GRID_IMAGE_ABSOLUTE_X, 0));
+						to.setOffsetY((int) v2.getOrDefault(V2_GRID_IMAGE_ABSOLUTE_Y, 0));
+						to.setNumberOfDots((int) v2.getOrDefault(V2_GRID_MODERATION_DOT_LIMIT, 0));
+					} else {
+						to.setGridType(V2_GRID_DEFAULT_TYPE);
+					}
+
 					break;
 				default:
 					throw new IllegalArgumentException("Unsupported content format.");
