@@ -50,6 +50,7 @@ import de.thm.arsnova.controller.PaginationController;
 import de.thm.arsnova.model.ChoiceAnswer;
 import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.ContentGroup;
+import de.thm.arsnova.model.GridImageContent;
 import de.thm.arsnova.model.TextAnswer;
 import de.thm.arsnova.model.migration.FromV2Migrator;
 import de.thm.arsnova.model.migration.ToV2Migrator;
@@ -469,7 +470,7 @@ public class ContentController extends PaginationController {
 		if (content.getFormat().equals(de.thm.arsnova.model.Content.Format.TEXT)) {
 			return toV2Migrator.migrate((TextAnswer) answer);
 		} else {
-			return toV2Migrator.migrate((ChoiceAnswer) answer, (ChoiceQuestionContent) content);
+			return toV2Migrator.migrate((ChoiceAnswer) answer, content);
 		}
 	}
 
@@ -496,9 +497,9 @@ public class ContentController extends PaginationController {
 			@RequestParam(value = "all", required = false, defaultValue = "false") final Boolean allAnswers,
 			final HttpServletResponse response) {
 		final de.thm.arsnova.model.Content content = contentService.get(contentId);
-		if (content instanceof ChoiceQuestionContent) {
+		if (content instanceof ChoiceQuestionContent || content instanceof GridImageContent) {
 			return toV2Migrator.migrate(answerService.getAllStatistics(contentId),
-					(ChoiceQuestionContent) content, content.getState().getRound());
+					content, content.getState().getRound());
 		} else {
 			final List<de.thm.arsnova.model.TextAnswer> answers;
 			if (allAnswers) {
@@ -539,7 +540,7 @@ public class ContentController extends PaginationController {
 		if (answerV3 instanceof TextAnswer) {
 			return toV2Migrator.migrate((TextAnswer) answerService.create(answerV3));
 		} else {
-			return  toV2Migrator.migrate((ChoiceAnswer) answerService.create(answerV3), (ChoiceQuestionContent) content);
+			return  toV2Migrator.migrate((ChoiceAnswer) answerService.create(answerV3), content);
 		}
 	}
 
@@ -557,7 +558,7 @@ public class ContentController extends PaginationController {
 		if (answerV3 instanceof TextAnswer) {
 			return toV2Migrator.migrate((TextAnswer) answerService.update(answerV3));
 		} else {
-			return  toV2Migrator.migrate((ChoiceAnswer) answerService.update(answerV3), (ChoiceQuestionContent) content);
+			return  toV2Migrator.migrate((ChoiceAnswer) answerService.update(answerV3), content);
 		}
 	}
 
@@ -679,7 +680,7 @@ public class ContentController extends PaginationController {
 				.map(a -> {
 					if (a instanceof ChoiceAnswer) {
 						return toV2Migrator.migrate(
-								(ChoiceAnswer) a, (ChoiceQuestionContent) contentService.get(a.getContentId()));
+								(ChoiceAnswer) a, contentService.get(a.getContentId()));
 					} else {
 						return toV2Migrator.migrate((TextAnswer) a);
 					}

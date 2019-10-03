@@ -335,55 +335,14 @@ public class FromV2Migrator {
 
 	public de.thm.arsnova.model.Answer migrate(final Answer from, final de.thm.arsnova.model.Content content) {
 		final de.thm.arsnova.model.Answer answer;
-		if (content instanceof ChoiceQuestionContent) {
-			final ChoiceQuestionContent choiceQuestionContent = (ChoiceQuestionContent) content;
-			answer = migrate(from, choiceQuestionContent.getOptions(), choiceQuestionContent.isMultiple());
+		if (content instanceof ChoiceQuestionContent || content instanceof GridImageContent) {
+			answer = migrateChoice(from, content);
 		} else {
 			answer = migrate(from);
 		}
 		answer.setFormat(content.getFormat());
 
 		return answer;
-	}
-
-	public ChoiceAnswer migrate(
-			final Answer from, final List<ChoiceQuestionContent.AnswerOption> options, final boolean multiple) {
-		final ChoiceAnswer to = new ChoiceAnswer();
-		copyCommonProperties(from, to);
-		to.setContentId(from.getQuestionId());
-		to.setRoomId(from.getSessionId());
-		to.setRound(from.getPiRound());
-		final List<Integer> selectedChoiceIndexes = new ArrayList<>();
-		to.setSelectedChoiceIndexes(selectedChoiceIndexes);
-
-		if (!from.isAbstention()) {
-			if (multiple) {
-				final List<Boolean> flags = Arrays.stream(from.getAnswerText().split(","))
-						.map("1"::equals).collect(Collectors.toList());
-				if (flags.size() != options.size()) {
-					throw new IndexOutOfBoundsException(
-							"Number of answer's choice flags does not match number of content's answer options");
-				}
-				int i = 0;
-				for (final boolean flag : flags) {
-					if (flag) {
-						selectedChoiceIndexes.add(i);
-					}
-					i++;
-				}
-			} else {
-				int i = 0;
-				for (final ChoiceQuestionContent.AnswerOption option : options) {
-					if (option.getLabel().equals(from.getAnswerText())) {
-						selectedChoiceIndexes.add(i);
-						break;
-					}
-					i++;
-				}
-			}
-		}
-
-		return to;
 	}
 
 	public TextAnswer migrate(final Answer from) {
@@ -451,6 +410,74 @@ public class FromV2Migrator {
 		to.setRoomId(from.getSessionId());
 
 		return to;
+	}
+
+	private ChoiceAnswer migrateChoice(final Answer from, final de.thm.arsnova.model.Content content) {
+		final ChoiceAnswer to = new ChoiceAnswer();
+		copyCommonProperties(from, to);
+		to.setContentId(from.getQuestionId());
+		to.setRoomId(from.getSessionId());
+		to.setRound(from.getPiRound());
+
+		if (from.isAbstention()) {
+			return to;
+		}
+
+		if (content instanceof ChoiceQuestionContent) {
+			final List<Integer> selectedChoiceIndexes = new ArrayList<>();
+			to.setSelectedChoiceIndexes(selectedChoiceIndexes);
+			final ChoiceQuestionContent choiceQuestionContent = (ChoiceQuestionContent) content;
+			if (choiceQuestionContent.isMultiple()) {
+				final List<Boolean> flags = Arrays.stream(from.getAnswerText().split(","))
+						.map("1"::equals).collect(Collectors.toList());
+				if (flags.size() != choiceQuestionContent.getOptions().size()) {
+					throw new IndexOutOfBoundsException(
+							"Number of answer's choice flags does not match number of content's answer options");
+				}
+				int i = 0;
+				for (final boolean flag : flags) {
+					if (flag) {
+						selectedChoiceIndexes.add(i);
+					}
+					i++;
+				}
+			} else {
+				int i = 0;
+				for (final ChoiceQuestionContent.AnswerOption option : choiceQuestionContent.getOptions()) {
+					if (option.getLabel().equals(from.getAnswerText())) {
+						selectedChoiceIndexes.add(i);
+						break;
+					}
+					i++;
+				}
+			}
+		} else if (content instanceof GridImageContent) {
+			final GridImageContent gridImageContent = (GridImageContent) content;
+			to.setSelectedChoiceIndexes(migrateChoice(from.getAnswerText(), gridImageContent.getGrid()));
+		} else {
+			throw new IllegalArgumentException(
+					"Content expected to be an instance of ChoiceQuestionContent or GridImageContent");
+		}
+
+		return to;
+	}
+
+	private List<Integer> migrateChoice(final String choice, final GridImageContent.Grid grid) {
+		return Arrays.stream(choice.split(","))
+			.map(c -> {
+				try {
+					final String[] coords = c.split(";");
+					return coords.length == 2
+							? Integer.valueOf(coords[0])
+							+ Integer.valueOf(coords[1]) * grid.getColumns()
+							: -1;
+				} catch (final NumberFormatException e) {
+					return -1;
+				}
+			})
+			.filter(i -> i >= 0
+				&& i < grid.getColumns() * grid.getRows())
+			.collect(Collectors.toList());
 	}
 
 	private void updateProfileFromLoginId(final UserProfile profile, final String loginId) {
