@@ -40,6 +40,7 @@ import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.ContentGroup;
+import de.thm.arsnova.model.MigrationState;
 import de.thm.arsnova.model.Motd;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.UserProfile;
@@ -83,6 +84,7 @@ public class V2ToV3Migration implements Migration {
 	private RoomRepository roomRepository;
 	private ContentRepository contentRepository;
 	private long referenceTimestamp = System.currentTimeMillis();
+	private MigrationState.Migration state;
 
 	public V2ToV3Migration(
 			final FromV2Migrator migrator,
@@ -103,18 +105,44 @@ public class V2ToV3Migration implements Migration {
 		return ID;
 	}
 
-	public void migrate() {
+	public int getStepCount() {
+		return 8;
+	}
+
+	@Override
+	public void migrate(final MigrationState.Migration state) {
+		this.state = state;
 		createV2Index();
 		migrator.setIgnoreRevision(true);
 		try {
-			migrateUsers();
-			migrateUnregisteredUsers();
-			migrateRooms();
-			migrateMotds();
-			migrateComments();
-			migrateContents();
-			migrateContentGroups();
-			migrateAnswers();
+			switch (state.getStep()) {
+				case 0:
+					migrateUsers();
+					break;
+				case 1:
+					migrateUnregisteredUsers();
+					break;
+				case 2:
+					migrateRooms();
+					break;
+				case 3:
+					migrateMotds();
+					break;
+				case 4:
+					migrateComments();
+					break;
+				case 5:
+					migrateContents();
+					break;
+				case 6:
+					migrateContentGroups();
+					break;
+				case 7:
+					migrateAnswers();
+					break;
+				default:
+					throw new IllegalStateException("Invalid migration step:" + state.getStep() + ".");
+			}
 		} catch (final InterruptedException e) {
 			throw new DbAccessException(e);
 		}
@@ -195,7 +223,7 @@ public class V2ToV3Migration implements Migration {
 		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(USER_INDEX);
 		query.setLimit(LIMIT);
-		String bookmark = null;
+		String bookmark = (String) state.getState();
 
 		for (int skip = 0;; skip += LIMIT) {
 			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
@@ -225,7 +253,9 @@ public class V2ToV3Migration implements Migration {
 			}
 
 			toConnector.executeBulk(profilesV3);
+			state.setState(bookmark);
 		}
+		state.setState(null);
 	}
 
 	private void migrateUnregisteredUsers() throws InterruptedException {
@@ -253,7 +283,7 @@ public class V2ToV3Migration implements Migration {
 		query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(LOGGEDIN_INDEX);
 		query.setLimit(LIMIT);
-		String bookmark = null;
+		String bookmark = (String) state.getState();
 		for (int skip = 0;; skip += LIMIT) {
 			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
 			query.setBookmark(bookmark);
@@ -276,7 +306,9 @@ public class V2ToV3Migration implements Migration {
 				profilesV3.add(profileV3);
 			}
 			toConnector.executeBulk(profilesV3);
+			state.setState(bookmark);
 		}
+		state.setState(null);
 	}
 
 	private void migrateRooms() throws InterruptedException {
@@ -286,7 +318,7 @@ public class V2ToV3Migration implements Migration {
 		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(SESSION_INDEX);
 		query.setLimit(LIMIT);
-		String bookmark = null;
+		String bookmark = (String) state.getState();
 
 		for (int skip = 0;; skip += LIMIT) {
 			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
@@ -311,7 +343,9 @@ public class V2ToV3Migration implements Migration {
 			}
 
 			toConnector.executeBulk(roomsV3);
+			state.setState(bookmark);
 		}
+		state.setState(null);
 	}
 
 	private void migrateMotds() throws InterruptedException {
@@ -325,7 +359,7 @@ public class V2ToV3Migration implements Migration {
 		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(MOTD_INDEX);
 		query.setLimit(LIMIT);
-		String bookmark = null;
+		String bookmark = (String) state.getState();
 
 		for (int skip = 0;; skip += LIMIT) {
 			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
@@ -354,7 +388,9 @@ public class V2ToV3Migration implements Migration {
 			}
 
 			toConnector.executeBulk(motdsV3);
+			state.setState(bookmark);
 		}
+		state.setState(null);
 	}
 
 	private void migrateComments() throws InterruptedException {
@@ -364,7 +400,7 @@ public class V2ToV3Migration implements Migration {
 		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(FULL_INDEX_BY_TYPE);
 		query.setLimit(LIMIT);
-		String bookmark = null;
+		String bookmark = (String) state.getState();
 
 		for (int skip = 0;; skip += LIMIT) {
 			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
@@ -402,7 +438,9 @@ public class V2ToV3Migration implements Migration {
 			}
 
 			toConnector.executeBulk(commentsV3);
+			state.setState(bookmark);
 		}
+		state.setState(null);
 	}
 
 	private void migrateContents() throws InterruptedException {
@@ -412,7 +450,7 @@ public class V2ToV3Migration implements Migration {
 		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(FULL_INDEX_BY_TYPE);
 		query.setLimit(LIMIT);
-		String bookmark = null;
+		String bookmark = (String) state.getState();
 
 		for (int skip = 0;; skip += LIMIT) {
 			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
@@ -440,7 +478,9 @@ public class V2ToV3Migration implements Migration {
 			}
 
 			toConnector.executeBulk(contentsV3);
+			state.setState(bookmark);
 		}
+		state.setState(null);
 	}
 
 	private void migrateContentGroups() throws InterruptedException {
@@ -455,7 +495,7 @@ public class V2ToV3Migration implements Migration {
 		query.setSort(sort);
 		query.setIndexDocument(SKILLQUESTION_INDEX);
 		query.setLimit(LIMIT);
-		String bookmark = null;
+		String bookmark = (String) state.getState();
 
 		final Map<String, Set<String>> groups = new HashMap<>();
 		String roomId = "";
@@ -481,8 +521,10 @@ public class V2ToV3Migration implements Migration {
 				groups.put(contentV2.getQuestionVariant(), contentIds);
 				contentIds.add(contentV2.getId());
 			}
+			state.setState(bookmark);
 		}
 		createContentGroups(roomId, groups);
+		state.setState(null);
 	}
 
 	private void createContentGroups(final String roomId, final Map<String, Set<String>> groups) {
@@ -508,7 +550,7 @@ public class V2ToV3Migration implements Migration {
 		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(FULL_INDEX_BY_TYPE);
 		query.setLimit(LIMIT);
-		String bookmark = null;
+		String bookmark = (String) state.getState();
 
 		for (int skip = 0;; skip += LIMIT) {
 			logger.debug("Migration progress: {}, bookmark: {}", skip, bookmark);
@@ -541,7 +583,9 @@ public class V2ToV3Migration implements Migration {
 			}
 
 			toConnector.executeBulk(answersV3);
+			state.setState(bookmark);
 		}
+		state.setState(null);
 	}
 
 	private HashSet<String> migrateMotdIds(final Set<String> oldIds) throws InterruptedException {

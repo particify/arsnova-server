@@ -132,8 +132,8 @@ public class CouchDbInitializer implements ResourceLoaderAware {
 	}
 
 	protected void migrate(final MigrationState state) {
-		if (migrationExecutor != null && migrationExecutor.runMigrations(state)) {
-			connector.update(state);
+		if (migrationExecutor != null) {
+			migrationExecutor.runMigrations(state, () -> connector.update(state));
 		}
 	}
 
@@ -158,8 +158,8 @@ public class CouchDbInitializer implements ResourceLoaderAware {
 			migrate(state);
 			statusService.removeMaintenanceReason(this.getClass());
 		} catch (final DbAccessException e) {
-			logger.error("Database is invalid.", e);
-			statusService.putMaintenanceReason(this.getClass(), "Invalid database");
+			logger.error("Database initialization failed.", e);
+			statusService.putMaintenanceReason(this.getClass(), "Invalid database state");
 		}
 	}
 
