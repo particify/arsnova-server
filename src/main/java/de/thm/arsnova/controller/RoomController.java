@@ -108,7 +108,7 @@ public class RoomController extends AbstractEntityController<Room> {
 		roomStatistics.setGroupStats(contentGroups.stream()
 				.map(cg ->  new RoomStatistics.ContentGroupStatistics(cg)).collect(Collectors.toList()));
 		roomStatistics.setContentCount(contentGroups.stream()
-				.mapToInt(cg -> cg.getContentIds().size()).reduce((a, b) -> a + b).getAsInt());
+				.mapToInt(cg -> cg.getContentIds().size()).reduce((a, b) -> a + b).orElse(0));
 
 		return roomStatistics;
 	}
