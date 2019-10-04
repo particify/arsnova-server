@@ -101,6 +101,12 @@ public class RoomController extends AbstractEntityController<Room> {
 		contentGroupService.addContentToGroup(id, groupName, contentId);
 	}
 
+	@PutMapping(CONTENTGROUP_MAPPING)
+	public void updateGroup(@PathVariable final String id, @PathVariable final String groupName,
+			@RequestBody final ContentGroup contentGroup) {
+		contentGroupService.updateContentGroup(contentGroup);
+	}
+
 	@GetMapping(STATS_MAPPING)
 	public RoomStatistics getStats(@PathVariable final String id) {
 		final RoomStatistics roomStatistics = new RoomStatistics();
