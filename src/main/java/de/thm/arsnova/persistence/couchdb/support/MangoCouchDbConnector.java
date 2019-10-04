@@ -318,7 +318,8 @@ public class MangoCouchDbConnector extends StdCouchDbConnector {
 		} catch (final JsonProcessingException e) {
 			throw new DbAccessException(e);
 		}
-		restTemplate.postUncached(dbURI.append("_index").toString(), queryString);
+		final HttpResponse response = restTemplate.postUncached(dbURI.append("_index").toString(), queryString);
+		response.releaseConnection();
 	}
 
 	public void createJsonIndex(final String name, final List<MangoQuery.Sort> fields) {
