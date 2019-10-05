@@ -48,22 +48,43 @@ public class MigrationExecutor {
 		logger.debug("Initialized {} migration(s).", this.migrations.size());
 	}
 
-	public boolean runMigrations(@NonNull final MigrationState migrationState) {
+	public boolean runMigrations(@NonNull final MigrationState migrationState, final Runnable stateUpdateHandler) {
+		final Thread shutdownHook = new Thread(stateUpdateHandler);
+		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		final List<Migration> pendingMigrations = migrations.stream()
 				.filter(m -> !migrationState.getCompleted().contains(m.getId())).collect(Collectors.toList());
 		boolean stateChange = false;
-		if (migrationState.getActive() != null) {
-			throw new IllegalStateException("An migration is already active: " + migrationState.getActive());
-		}
-		logger.debug("Pending migrations: " + pendingMigrations.stream()
+		logger.info("Pending migrations: " + pendingMigrations.stream()
 				.map(Migration::getId).collect(Collectors.joining()));
 		for (final Migration migration : pendingMigrations) {
+			if (migrationState.getActive() != null) {
+				logger.info("Trying to continue from aborted migration: " + migrationState.getActive());
+				if (pendingMigrations.isEmpty()
+						|| migrationState.getActive().getId().equals(pendingMigrations.get(0))) {
+					throw new IllegalStateException("Migration state does not match next pending migration.");
+				}
+			} else {
+				migrationState.setActive(migration.getId(), new Date());
+			}
 			stateChange = true;
-			migrationState.setActive(migration.getId(), new Date());
-			migration.migrate();
+			final int initialStep = migrationState.getActive() != null ? migrationState.getActive().getStep() : 0;
+			for (int i = initialStep; i < migration.getStepCount(); i++) {
+				logger.info("Performing migration {} step {}...", migration.getId(), i);
+				try {
+					migration.migrate(migrationState.getActive());
+				} catch (final Exception e) {
+					logger.info("Current migration state: {}", migrationState);
+					stateUpdateHandler.run();
+					throw e;
+				}
+				migrationState.getActive().setStep(i + 1);
+				logger.info("Completed migration {} step {}.", migration.getId(), i);
+				stateUpdateHandler.run();
+			}
 			migrationState.getCompleted().add(migration.getId());
 			migrationState.setActive(null);
 		}
+		Runtime.getRuntime().removeShutdownHook(shutdownHook);
 
 		return stateChange;
 	}

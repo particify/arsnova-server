@@ -18,8 +18,12 @@
 
 package de.thm.arsnova.persistence.couchdb.migrations;
 
+import de.thm.arsnova.model.MigrationState;
+
 public interface Migration {
 	String getId();
 
-	void migrate();
+	int getStepCount();
+
+	void migrate(MigrationState.Migration state);
 }

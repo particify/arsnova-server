@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
 
@@ -30,6 +31,8 @@ public class MigrationState extends Entity {
 	public static class Migration {
 		private String id;
 		private Date start;
+		private int step;
+		private Object state;
 
 		public Migration() {
 
@@ -50,9 +53,34 @@ public class MigrationState extends Entity {
 			return start;
 		}
 
+		@JsonView({View.Persistence.class, View.Public.class})
+		public int getStep() {
+			return step;
+		}
+
+		@JsonView(View.Persistence.class)
+		public void setStep(final int step) {
+			this.step = step;
+		}
+
+		@JsonView({View.Persistence.class, View.Public.class})
+		public Object getState() {
+			return state;
+		}
+
+		@JsonView(View.Persistence.class)
+		public void setState(final Object state) {
+			this.state = state;
+		}
+
 		@Override
 		public String toString() {
-			return "Migration " + id + " started at " + start;
+			return new ToStringCreator(this)
+					.append("id", id)
+					.append("start", start)
+					.append("step", step)
+					.append("state", state)
+					.toString();
 		}
 	}
 
@@ -133,5 +161,12 @@ public class MigrationState extends Entity {
 
 		return Objects.equals(active, that.active)
 				&& Objects.equals(completed, that.completed);
+	}
+
+	@Override
+	protected ToStringCreator buildToString() {
+		return super.buildToString()
+				.append("active", active)
+				.append("completed", completed);
 	}
 }
