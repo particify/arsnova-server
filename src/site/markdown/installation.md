@@ -187,6 +187,7 @@ Add the following lines to the `VirtualHost` section of the file:
 
 To enable the required Apache HTTP Server modules, simply type:
 
+	# a2enmod headers
 	# a2enmod proxy
 	# a2enmod proxy_http
 	# a2enmod proxy_wstunnel
