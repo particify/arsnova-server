@@ -20,6 +20,7 @@ package de.thm.arsnova.persistence.couchdb.support;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,8 +78,13 @@ public class MangoQueryResultParser<T> {
 		while (jp.nextValue() != JsonToken.END_OBJECT) {
 			final String currentName = jp.getCurrentName();
 			if (DOCS_FIELD_NAME.equals(currentName)) {
-				docs = new ArrayList<T>();
-				parseDocs(jp);
+				docs = new ArrayList<>();
+				try {
+					parseDocs(jp);
+				} catch (final JsonMappingException e) {
+					logger.error("Failed to map document at index {}.", docs.size());
+					throw e;
+				}
 			} else if (BOOKMARK_FIELD_NAME.equals(currentName)) {
 				bookmark = jp.getText();
 			} else if (WARNING_FIELD_NAME.equals(currentName)) {
