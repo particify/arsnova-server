@@ -19,6 +19,7 @@
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.springframework.core.style.ToStringCreator;
@@ -71,6 +72,10 @@ public class AnswerStatistics {
 
 		@JsonView(View.Public.class)
 		public List<Integer> getIndependentCounts() {
+			if (independentCounts == null) {
+				independentCounts = new ArrayList<>();
+			}
+
 			return independentCounts;
 		}
 
@@ -80,6 +85,10 @@ public class AnswerStatistics {
 
 		@JsonView(View.Public.class)
 		public Collection<Combination> getCombinatedCounts() {
+			if (combinatedCounts == null) {
+				combinatedCounts = new ArrayList<>();
+			}
+
 			return combinatedCounts;
 		}
 
