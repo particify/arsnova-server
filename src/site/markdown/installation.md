@@ -178,7 +178,7 @@ Add the following lines to the `VirtualHost` section of the file:
 		ProxyPass http://localhost:8080/api/
 		ProxyPassReverse http://localhost:8080/api/
 		ProxyPreserveHost On
-		RequestHeader set X-Forwarded-Proto %{REQUEST_SCHEME}
+		RequestHeader set X-Forwarded-Proto %{REQUEST_SCHEME}e
 	</Location>
 	<Location /socket.io/>
 		ProxyPass ws://localhost:8090/socket.io/
