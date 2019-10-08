@@ -45,6 +45,7 @@ import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.Content;
+import de.thm.arsnova.model.GridImageContent;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.TextAnswer;
 import de.thm.arsnova.persistence.AnswerRepository;
@@ -158,15 +159,26 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public AnswerStatistics getStatistics(final String contentId, final int round) {
-		final ChoiceQuestionContent content = (ChoiceQuestionContent) contentService.get(contentId);
+		final Content content = contentService.get(contentId);
 		if (content == null) {
 			throw new NotFoundException();
 		}
+		final int optionCount;
+		if (content instanceof ChoiceQuestionContent) {
+			optionCount = ((ChoiceQuestionContent) content).getOptions().size();
+		} else if (content instanceof GridImageContent) {
+			final GridImageContent.Grid grid = ((GridImageContent) content).getGrid();
+			optionCount = grid.getColumns() * grid.getRows();
+		} else {
+			throw new IllegalStateException(
+					"Content expected to be an instance of ChoiceQuestionContent or GridImageContent");
+		}
+
 		final AnswerStatistics stats = answerRepository.findByContentIdRound(
-				content.getId(), round, content.getOptions().size());
+				content.getId(), round, optionCount);
 		/* Fill list with zeros to prevent IndexOutOfBoundsExceptions */
 		final List<Integer> independentCounts = stats.getRoundStatistics().get(round - 1).getIndependentCounts();
-		while (independentCounts.size() < content.getOptions().size()) {
+		while (independentCounts.size() < optionCount) {
 			independentCounts.add(0);
 		}
 

@@ -27,6 +27,7 @@ import java.io.IOException;
 
 import de.thm.arsnova.model.ChoiceQuestionContent;
 import de.thm.arsnova.model.Content;
+import de.thm.arsnova.model.GridImageContent;
 
 public class FormatContentTypeIdResolver extends TypeIdResolverBase {
 	@Override
@@ -57,6 +58,8 @@ public class FormatContentTypeIdResolver extends TypeIdResolverBase {
 				return TypeFactory.defaultInstance().constructType(ChoiceQuestionContent.class);
 			case TEXT:
 				return TypeFactory.defaultInstance().constructType(Content.class);
+			case GRID:
+				return TypeFactory.defaultInstance().constructType(GridImageContent.class);
 			default:
 				throw new IllegalArgumentException("Unsupported type ID.");
 		}

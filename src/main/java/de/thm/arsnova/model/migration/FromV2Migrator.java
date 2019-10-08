@@ -31,6 +31,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import de.thm.arsnova.model.ChoiceAnswer;
 import de.thm.arsnova.model.ChoiceQuestionContent;
+import de.thm.arsnova.model.GridImageContent;
 import de.thm.arsnova.model.TextAnswer;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.model.migration.v2.Answer;
@@ -50,6 +51,7 @@ import de.thm.arsnova.model.migration.v2.RoomFeature;
  * @author Daniel Gerhardt
  */
 public class FromV2Migrator {
+	static final String V2 = "v2";
 	static final String V2_TYPE_ABCD = "abcd";
 	static final String V2_TYPE_SC = "sc";
 	static final String V2_TYPE_MC = "mc";
@@ -60,6 +62,14 @@ public class FromV2Migrator {
 	static final String V2_TYPE_SLIDE = "slide";
 	static final String V2_TYPE_FLASHCARD = "flashcard";
 	static final String V2_TYPE_GRID = "grid";
+	static final String V2_GRID_DEFAULT_TYPE = "image";
+	static final String V2_GRID_TYPE = "gridType";
+	static final String V2_GRID_IMAGE_ABSOLUTE_X = "gridImageAbsoluteX";
+	static final String V2_GRID_IMAGE_ABSOLUTE_Y = "gridImageAbsoluteY";
+	static final String V2_GRID_MODERATION_DOT_LIMIT = "gridModerationDotLimit";
+	static final int V2_GRID_CONTAINER_SIZE = 400;
+	static final int V2_GRID_FIELD_COUNT = 16;
+	static final double V2_GRID_SCALE_FACTOR = 1.05;
 	private static final Map<String, de.thm.arsnova.model.Content.Format> formatMapping;
 
 	private boolean ignoreRevision = false;
@@ -248,6 +258,54 @@ public class FromV2Migrator {
 				}
 
 				break;
+			case V2_TYPE_GRID:
+				final GridImageContent gridImageContent = new GridImageContent();
+				to = gridImageContent;
+				to.setFormat(de.thm.arsnova.model.Content.Format.GRID);
+				final GridImageContent.Grid grid = gridImageContent.getGrid();
+				grid.setColumns(from.getGridSizeX());
+				grid.setRows(from.getGridSizeY());
+				grid.setNormalizedX(1.0 * from.getGridOffsetX() / V2_GRID_CONTAINER_SIZE);
+				grid.setNormalizedY(1.0 * from.getGridOffsetY() / V2_GRID_CONTAINER_SIZE);
+				/* v3 normalized field size = v2 scale factor ^ v2 zoom level / v2 grid size */
+				grid.setNormalizedFieldSize(Math.pow(Double.valueOf(from.getGridScaleFactor()), from.getGridZoomLvl())
+						/ from.getGridSize());
+				grid.setVisible(!from.getGridIsHidden());
+				final GridImageContent.Image image = gridImageContent.getImage();
+				image.setUrl(from.getImage());
+				image.setRotation(from.getImgRotation() * 90 % 360);
+				image.setScaleFactor(Math.pow(Double.valueOf(from.getScaleFactor()), from.getZoomLvl()));
+				gridImageContent.setCorrectOptionIndexes(from.getPossibleAnswers().stream()
+						.filter(o -> o.isCorrect())
+						.map(o -> {
+							try {
+								final String[] coords = (o.getText() != null ? o.getText() : "").split(";");
+								return coords.length == 2
+										? Integer.valueOf(coords[0]) + Integer.valueOf(coords[1]) * from.getGridSizeX()
+										: -1;
+							} catch (final NumberFormatException e) {
+								return -1;
+							}
+						})
+						.filter(i -> i >= 0 && i < grid.getColumns() * grid.getRows())
+						.collect(Collectors.toList()));
+				extensions = new HashMap<>();
+				to.setExtensions(extensions);
+				v2 = new HashMap<>();
+				extensions.put(V2, v2);
+				v2.put(V2_GRID_TYPE, from.getGridType());
+				/* It is not possible to migrate legacy image offsets to normalized values. */
+				if (from.getOffsetX() != 0) {
+					v2.put(V2_GRID_IMAGE_ABSOLUTE_X, from.getOffsetX());
+				}
+				if (from.getOffsetY() != 0) {
+					v2.put(V2_GRID_IMAGE_ABSOLUTE_Y, from.getOffsetY());
+				}
+				if (from.getNumberOfDots() != 0) {
+					v2.put(V2_GRID_MODERATION_DOT_LIMIT, from.getNumberOfDots());
+				}
+
+				break;
 			default:
 				throw new IllegalArgumentException("Unsupported content format.");
 		}
@@ -277,55 +335,14 @@ public class FromV2Migrator {
 
 	public de.thm.arsnova.model.Answer migrate(final Answer from, final de.thm.arsnova.model.Content content) {
 		final de.thm.arsnova.model.Answer answer;
-		if (content instanceof ChoiceQuestionContent) {
-			final ChoiceQuestionContent choiceQuestionContent = (ChoiceQuestionContent) content;
-			answer = migrate(from, choiceQuestionContent.getOptions(), choiceQuestionContent.isMultiple());
+		if (content instanceof ChoiceQuestionContent || content instanceof GridImageContent) {
+			answer = migrateChoice(from, content);
 		} else {
 			answer = migrate(from);
 		}
 		answer.setFormat(content.getFormat());
 
 		return answer;
-	}
-
-	public ChoiceAnswer migrate(
-			final Answer from, final List<ChoiceQuestionContent.AnswerOption> options, final boolean multiple) {
-		final ChoiceAnswer to = new ChoiceAnswer();
-		copyCommonProperties(from, to);
-		to.setContentId(from.getQuestionId());
-		to.setRoomId(from.getSessionId());
-		to.setRound(from.getPiRound());
-		final List<Integer> selectedChoiceIndexes = new ArrayList<>();
-		to.setSelectedChoiceIndexes(selectedChoiceIndexes);
-
-		if (!from.isAbstention()) {
-			if (multiple) {
-				final List<Boolean> flags = Arrays.stream(from.getAnswerText().split(","))
-						.map("1"::equals).collect(Collectors.toList());
-				if (flags.size() != options.size()) {
-					throw new IndexOutOfBoundsException(
-							"Number of answer's choice flags does not match number of content's answer options");
-				}
-				int i = 0;
-				for (final boolean flag : flags) {
-					if (flag) {
-						selectedChoiceIndexes.add(i);
-					}
-					i++;
-				}
-			} else {
-				int i = 0;
-				for (final ChoiceQuestionContent.AnswerOption option : options) {
-					if (option.getLabel().equals(from.getAnswerText())) {
-						selectedChoiceIndexes.add(i);
-						break;
-					}
-					i++;
-				}
-			}
-		}
-
-		return to;
 	}
 
 	public TextAnswer migrate(final Answer from) {
@@ -393,6 +410,74 @@ public class FromV2Migrator {
 		to.setRoomId(from.getSessionId());
 
 		return to;
+	}
+
+	private ChoiceAnswer migrateChoice(final Answer from, final de.thm.arsnova.model.Content content) {
+		final ChoiceAnswer to = new ChoiceAnswer();
+		copyCommonProperties(from, to);
+		to.setContentId(from.getQuestionId());
+		to.setRoomId(from.getSessionId());
+		to.setRound(from.getPiRound());
+
+		if (from.isAbstention()) {
+			return to;
+		}
+
+		if (content instanceof ChoiceQuestionContent) {
+			final List<Integer> selectedChoiceIndexes = new ArrayList<>();
+			to.setSelectedChoiceIndexes(selectedChoiceIndexes);
+			final ChoiceQuestionContent choiceQuestionContent = (ChoiceQuestionContent) content;
+			if (choiceQuestionContent.isMultiple()) {
+				final List<Boolean> flags = Arrays.stream(from.getAnswerText().split(","))
+						.map("1"::equals).collect(Collectors.toList());
+				if (flags.size() != choiceQuestionContent.getOptions().size()) {
+					throw new IndexOutOfBoundsException(
+							"Number of answer's choice flags does not match number of content's answer options");
+				}
+				int i = 0;
+				for (final boolean flag : flags) {
+					if (flag) {
+						selectedChoiceIndexes.add(i);
+					}
+					i++;
+				}
+			} else {
+				int i = 0;
+				for (final ChoiceQuestionContent.AnswerOption option : choiceQuestionContent.getOptions()) {
+					if (option.getLabel().equals(from.getAnswerText())) {
+						selectedChoiceIndexes.add(i);
+						break;
+					}
+					i++;
+				}
+			}
+		} else if (content instanceof GridImageContent) {
+			final GridImageContent gridImageContent = (GridImageContent) content;
+			to.setSelectedChoiceIndexes(migrateChoice(from.getAnswerText(), gridImageContent.getGrid()));
+		} else {
+			throw new IllegalArgumentException(
+					"Content expected to be an instance of ChoiceQuestionContent or GridImageContent");
+		}
+
+		return to;
+	}
+
+	private List<Integer> migrateChoice(final String choice, final GridImageContent.Grid grid) {
+		return Arrays.stream(choice.split(","))
+			.map(c -> {
+				try {
+					final String[] coords = c.split(";");
+					return coords.length == 2
+							? Integer.valueOf(coords[0])
+							+ Integer.valueOf(coords[1]) * grid.getColumns()
+							: -1;
+				} catch (final NumberFormatException e) {
+					return -1;
+				}
+			})
+			.filter(i -> i >= 0
+				&& i < grid.getColumns() * grid.getRows())
+			.collect(Collectors.toList());
 	}
 
 	private void updateProfileFromLoginId(final UserProfile profile, final String loginId) {

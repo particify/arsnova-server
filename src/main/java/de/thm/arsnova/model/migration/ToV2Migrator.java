@@ -18,6 +18,15 @@
 
 package de.thm.arsnova.model.migration;
 
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_GRID_CONTAINER_SIZE;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_GRID_DEFAULT_TYPE;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_GRID_FIELD_COUNT;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_GRID_IMAGE_ABSOLUTE_X;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_GRID_IMAGE_ABSOLUTE_Y;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_GRID_MODERATION_DOT_LIMIT;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_GRID_SCALE_FACTOR;
+import static de.thm.arsnova.model.migration.FromV2Migrator.V2_GRID_TYPE;
 import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_ABCD;
 import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_FLASHCARD;
 import static de.thm.arsnova.model.migration.FromV2Migrator.V2_TYPE_FREETEXT;
@@ -38,6 +47,7 @@ import java.util.stream.Collectors;
 
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.ChoiceQuestionContent;
+import de.thm.arsnova.model.GridImageContent;
 import de.thm.arsnova.model.RoomStatistics;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.model.migration.v2.Answer;
@@ -234,6 +244,51 @@ public class ToV2Migrator {
 							break;
 					}
 					break;
+				case GRID:
+					final GridImageContent fromGridImageContent = (GridImageContent) from;
+					final GridImageContent.Grid grid = fromGridImageContent.getGrid();
+					final GridImageContent.Image image = fromGridImageContent.getImage();
+					to.setQuestionType(V2_TYPE_GRID);
+					to.setGridSizeX(grid.getColumns());
+					to.setGridSizeY(grid.getRows());
+					to.setGridOffsetX((int) (Math.round(grid.getNormalizedX() * V2_GRID_CONTAINER_SIZE)));
+					to.setGridOffsetY((int) (Math.round(grid.getNormalizedY() * V2_GRID_CONTAINER_SIZE)));
+					/* v3 normalized field size = v2 scale factor ^ v2 zoom level / v2 grid size */
+					to.setGridSize(V2_GRID_FIELD_COUNT);
+					to.setGridScaleFactor(String.valueOf(V2_GRID_SCALE_FACTOR));
+					to.setGridZoomLvl((int) Math.round(
+							Math.log(grid.getNormalizedFieldSize() * V2_GRID_FIELD_COUNT)
+								/ Math.log(V2_GRID_SCALE_FACTOR)));
+					to.setGridIsHidden(!grid.isVisible());
+					to.setImage(image.getUrl());
+					to.setImgRotation(image.getRotation() / 90 % 4);
+					to.setScaleFactor(String.valueOf(V2_GRID_SCALE_FACTOR));
+					to.setZoomLvl((int) Math.round(
+							Math.log(image.getScaleFactor()) / Math.log(V2_GRID_SCALE_FACTOR)));
+					to.setPossibleAnswers(
+							fromGridImageContent.getCorrectOptionIndexes().stream()
+									.map(i -> {
+										final int x = i % fromGridImageContent.getGrid().getColumns();
+										final int y = i / fromGridImageContent.getGrid().getColumns();
+										final AnswerOption answerOption = new AnswerOption();
+										answerOption.setText(x + ";" + y);
+										answerOption.setCorrect(true);
+
+										return answerOption;
+									})
+									.collect(Collectors.toList()));
+					if (fromGridImageContent.getExtensions() != null) {
+						final Map<String, Object> v2 = fromGridImageContent.getExtensions()
+								.getOrDefault(V2, Collections.emptyMap());
+						to.setGridType((String) v2.getOrDefault(V2_GRID_TYPE, V2_GRID_DEFAULT_TYPE));
+						to.setOffsetX((int) v2.getOrDefault(V2_GRID_IMAGE_ABSOLUTE_X, 0));
+						to.setOffsetY((int) v2.getOrDefault(V2_GRID_IMAGE_ABSOLUTE_Y, 0));
+						to.setNumberOfDots((int) v2.getOrDefault(V2_GRID_MODERATION_DOT_LIMIT, 0));
+					} else {
+						to.setGridType(V2_GRID_DEFAULT_TYPE);
+					}
+
+					break;
 				default:
 					throw new IllegalArgumentException("Unsupported content format.");
 			}
@@ -252,7 +307,7 @@ public class ToV2Migrator {
 	}
 
 	public Answer migrate(final de.thm.arsnova.model.ChoiceAnswer from,
-			final de.thm.arsnova.model.ChoiceQuestionContent content, final Optional<UserProfile> creator) {
+			final de.thm.arsnova.model.Content content, final Optional<UserProfile> creator) {
 		final Answer to = new Answer();
 		copyCommonProperties(from, to);
 		to.setQuestionId(from.getContentId());
@@ -264,11 +319,21 @@ public class ToV2Migrator {
 		if (from.getSelectedChoiceIndexes().isEmpty()) {
 			to.setAbstention(true);
 		} else {
-			if (content.isMultiple()) {
-				to.setAnswerText(migrateChoice(from.getSelectedChoiceIndexes(), content.getOptions()));
+			if (content instanceof ChoiceQuestionContent) {
+				final ChoiceQuestionContent choiceQuestionContent = (ChoiceQuestionContent) content;
+				if (choiceQuestionContent.isMultiple()) {
+					to.setAnswerText(migrateChoice(from.getSelectedChoiceIndexes(),
+							choiceQuestionContent.getOptions()));
+				} else {
+					final int index = from.getSelectedChoiceIndexes().get(0);
+					to.setAnswerText(choiceQuestionContent.getOptions().get(index).getLabel());
+				}
+			} else if (content instanceof GridImageContent) {
+				final GridImageContent gridImageContent = (GridImageContent) content;
+				to.setAnswerText(migrateChoice(from.getSelectedChoiceIndexes(), gridImageContent.getGrid()));
 			} else {
-				final int index = from.getSelectedChoiceIndexes().get(0);
-				to.setAnswerText(content.getOptions().get(index).getLabel());
+				throw new IllegalArgumentException(
+						"Content expected to be an instance of ChoiceQuestionContent or GridImageContent");
 			}
 		}
 
@@ -276,7 +341,7 @@ public class ToV2Migrator {
 	}
 
 	public Answer migrate(final de.thm.arsnova.model.ChoiceAnswer from,
-			final de.thm.arsnova.model.ChoiceQuestionContent content) {
+			final de.thm.arsnova.model.Content content) {
 		return migrate(from, content, Optional.empty());
 	}
 
@@ -351,7 +416,7 @@ public class ToV2Migrator {
 	}
 
 	public List<Answer> migrate(final AnswerStatistics from,
-			final de.thm.arsnova.model.ChoiceQuestionContent content, final int round) {
+			final de.thm.arsnova.model.Content content, final int round) {
 		if (round < 1 || round > content.getState().getRound()) {
 			throw new IllegalArgumentException("Invalid value for round");
 		}
@@ -368,22 +433,34 @@ public class ToV2Migrator {
 		}
 
 		final Map<String, Integer> choices;
-		if (content.isMultiple()) {
-			/* Map selected choice indexes -> answer count */
+		if (content instanceof ChoiceQuestionContent) {
+			final ChoiceQuestionContent choiceQuestionContent = (ChoiceQuestionContent) content;
+			if (choiceQuestionContent.isMultiple()) {
+				/* Map selected choice indexes -> answer count */
+				choices = stats.getCombinatedCounts().stream().collect(Collectors.toMap(
+						c -> migrateChoice(c.getSelectedChoiceIndexes(), choiceQuestionContent.getOptions()),
+						c -> c.getCount(),
+						(u, v) -> {
+							throw new IllegalStateException(String.format("Duplicate key %s", u));
+						},
+						LinkedHashMap::new));
+			} else {
+				choices = new LinkedHashMap<>();
+				int i = 0;
+				for (final ChoiceQuestionContent.AnswerOption option : choiceQuestionContent.getOptions()) {
+					choices.put(option.getLabel(), stats.getIndependentCounts().get(i));
+					i++;
+				}
+			}
+		} else {
+			final GridImageContent gridImageContent = (GridImageContent) content;
 			choices = stats.getCombinatedCounts().stream().collect(Collectors.toMap(
-					c -> migrateChoice(c.getSelectedChoiceIndexes(), content.getOptions()),
+					c -> migrateChoice(c.getSelectedChoiceIndexes(), gridImageContent.getGrid()),
 					c -> c.getCount(),
 					(u, v) -> {
 						throw new IllegalStateException(String.format("Duplicate key %s", u));
 					},
 					LinkedHashMap::new));
-		} else {
-			choices = new LinkedHashMap<>();
-			int i = 0;
-			for (final ChoiceQuestionContent.AnswerOption option : content.getOptions()) {
-				choices.put(option.getLabel(), stats.getIndependentCounts().get(i));
-				i++;
-			}
 		}
 
 		for (final Map.Entry<String, Integer> choice : choices.entrySet()) {
@@ -432,7 +509,7 @@ public class ToV2Migrator {
 		return to;
 	}
 
-	public String migrateChoice(final List<Integer> selectedChoiceIndexes,
+	private String migrateChoice(final List<Integer> selectedChoiceIndexes,
 			final List<ChoiceQuestionContent.AnswerOption> options) {
 		final List<String> answers = new ArrayList<>();
 		for (int i = 0; i < options.size(); i++) {
@@ -440,5 +517,15 @@ public class ToV2Migrator {
 		}
 
 		return answers.stream().collect(Collectors.joining(","));
+	}
+
+	private String migrateChoice(final List<Integer> selectedChoiceIndexes, final GridImageContent.Grid grid) {
+		return selectedChoiceIndexes.stream()
+				.map(i -> {
+					final int x = i % grid.getColumns();
+					final int y = i / grid.getColumns();
+					return x + ";" + y;
+				})
+				.collect(Collectors.joining(","));
 	}
 }
