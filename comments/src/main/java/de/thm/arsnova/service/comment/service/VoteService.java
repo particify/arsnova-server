@@ -76,7 +76,7 @@ public class VoteService {
         List<Vote> voteList = new ArrayList<>();
 
         commentIds.forEach((id) -> {
-            Vote tmp = repository.findById(new VotePK(id, userId)).orElse(null);
+            Vote tmp = repository.findById(new VotePK(userId, id)).orElse(null);
             if (tmp != null) {
                 voteList.add(tmp);
             }
