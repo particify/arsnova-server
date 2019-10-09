@@ -5,6 +5,12 @@ arsnova:
         base-path: /management
         exposure:
           include: "*"
+    endpoint:
+      health:
+        show-details: when-authorized
+        roles:
+          - ADMIN
+          - MONITORING
     metrics:
       web:
         server:

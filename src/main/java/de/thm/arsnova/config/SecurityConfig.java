@@ -241,7 +241,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		protected void configure(final HttpSecurity http) throws Exception {
 			super.configure(http);
 			http.antMatcher(managementPath + "/**");
-			http.authorizeRequests().anyRequest().hasRole("ADMIN");
+			http.authorizeRequests()
+					.antMatchers(managementPath + "/health", managementPath + "/info").permitAll()
+					.antMatchers(
+						managementPath + "/health/**",
+						managementPath + "/metrics",
+						managementPath + "/metrics/**",
+						managementPath + "/prometheus",
+						managementPath + "/stats"
+					).hasAnyRole("ADMIN", "MONITORING")
+					.anyRequest().hasRole("ADMIN");
 			http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		}
 	}
