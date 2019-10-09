@@ -396,6 +396,7 @@ public class Room extends Entity {
 	private String description;
 	private boolean closed;
 	private Set<Moderator> moderators;
+	private boolean moderatorsInitialized;
 	private Settings settings;
 	private Author author;
 	private PoolProperties poolProperties;
@@ -475,6 +476,11 @@ public class Room extends Entity {
 	@JsonView(View.Persistence.class)
 	public void setModerators(final Set<Moderator> moderators) {
 		this.moderators = moderators;
+		moderatorsInitialized = true;
+	}
+
+	public boolean isModeratorsInitialized() {
+		return moderatorsInitialized;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
