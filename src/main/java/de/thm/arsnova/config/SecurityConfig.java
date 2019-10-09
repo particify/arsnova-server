@@ -51,6 +51,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.access.intercept.RunAsManager;
 import org.springframework.security.access.intercept.RunAsManagerImpl;
@@ -465,6 +466,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		logger.debug("ldapUserIdAttr: {}", ldapProperties.getUserIdAttribute());
 
 		return new CustomLdapUserDetailsMapper(ldapProperties.getUserIdAttribute());
+	}
+
+	@Bean
+	@ConditionalOnProperty(
+			name = "ldap[0].enabled",
+			prefix = AuthenticationProviderProperties.PREFIX,
+			havingValue = "true")
+	public LdapTemplate ldapTemplate() {
+		return new LdapTemplate(ldapContextSource());
 	}
 
 	// CAS Authentication Configuration
