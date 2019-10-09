@@ -21,7 +21,6 @@ arsnova:
       db-name: arsnova3
       username: admin
       password: ""
-      migrate-from: ""
 
     # Mail server
     mail:
