@@ -45,6 +45,7 @@ import org.springframework.validation.Validator;
 import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.event.BeforeDeletionEvent;
+import de.thm.arsnova.event.BeforeFullUpdateEvent;
 import de.thm.arsnova.event.FlipFlashcardsEvent;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.UserProfile;
@@ -150,6 +151,13 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Autowired(required = false)
 	public void setConnectorClient(final ConnectorClient connectorClient) {
 		this.connectorClient = connectorClient;
+	}
+
+	@EventListener
+	public void handleRoomUpdate(final BeforeFullUpdateEvent<Room> event) {
+		if (!event.getEntity().isModeratorsInitialized()) {
+			event.getEntity().setModerators(event.getOldEntity().getModerators());
+		}
 	}
 
 	@EventListener
