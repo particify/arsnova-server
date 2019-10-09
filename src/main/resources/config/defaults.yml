@@ -159,6 +159,8 @@ arsnova:
           # Configure the LDAP manager user if anonymous binding is not allowed
           manager-user-dn: cn=arsnova-manager,dc=example,dc=com
           manager-password: arsnova
+          # Timeout for establishing a connection in milliseconds
+          connect-timeout: 5000
 
       # SAML authentication
       saml:

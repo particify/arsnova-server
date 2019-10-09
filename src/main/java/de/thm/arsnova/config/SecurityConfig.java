@@ -19,6 +19,7 @@
 package de.thm.arsnova.config;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
@@ -412,6 +413,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		final AuthenticationProviderProperties.Ldap ldapProperties = providerProperties.getLdap().get(0);
 		final DefaultSpringSecurityContextSource contextSource =
 				new DefaultSpringSecurityContextSource(ldapProperties.getHostUrl());
+		contextSource.setBaseEnvironmentProperties(Collections.singletonMap(
+				"com.sun.jndi.ldap.connect.timeout", String.valueOf(ldapProperties.getConnectTimeout())));
 		/* TODO: implement support for LDAP bind using manager credentials */
 		if (!"".equals(ldapProperties.getManagerUserDn()) && !"".equals(ldapProperties.getManagerPassword())) {
 			logger.debug("ldapManagerUserDn: {}", ldapProperties.getManagerUserDn());
