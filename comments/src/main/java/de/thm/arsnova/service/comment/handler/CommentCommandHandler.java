@@ -1,6 +1,8 @@
 package de.thm.arsnova.service.comment.handler;
 
+import de.thm.arsnova.service.comment.model.BonusToken;
 import de.thm.arsnova.service.comment.model.Settings;
+import de.thm.arsnova.service.comment.service.BonusTokenService;
 import de.thm.arsnova.service.comment.service.CommentService;
 import de.thm.arsnova.service.comment.model.Comment;
 import de.thm.arsnova.service.comment.model.command.*;
@@ -22,16 +24,19 @@ public class CommentCommandHandler {
 
     private final AmqpTemplate messagingTemplate;
     private final CommentService service;
+    private final BonusTokenService bonusTokenService;
     private final SettingsService settingsService;
 
     @Autowired
     public CommentCommandHandler(
             AmqpTemplate messagingTemplate,
             CommentService service,
+            BonusTokenService bonusTokenService,
             SettingsService settingsService
     ) {
         this.messagingTemplate = messagingTemplate;
         this.service = service;
+        this.bonusTokenService = bonusTokenService;
         this.settingsService = settingsService;
     }
 
@@ -85,12 +90,23 @@ public class CommentCommandHandler {
         Comment c = this.service.get(p.getId());
 
         boolean wasAck = c.isAck();
+        boolean wasFavorited = c.isFavorite();
 
         if (c.getId() != null) {
             Comment patched = this.service.patch(c, p.getChanges());
 
             CommentPatchedPayload payload = new CommentPatchedPayload(patched.getId(), p.getChanges());
             CommentPatched event = new CommentPatched(payload, patched.getRoomId());
+
+            if (!wasFavorited && patched.isFavorite()) {
+                BonusToken bt = new BonusToken();
+                bt.setRoomId(patched.getRoomId());
+                bt.setUserId(patched.getCreatorId());
+                bonusTokenService.create(bt);
+
+            } else if (wasFavorited && !patched.isFavorite()) {
+                bonusTokenService.deleteByRoomIdAndUserId(patched.getRoomId(), patched.getCreatorId());
+            }
 
             if (!wasAck && patched.isAck()) {
                 CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(patched);

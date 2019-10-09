@@ -6,6 +6,7 @@ import de.thm.arsnova.service.comment.model.command.DeleteComment;
 import de.thm.arsnova.service.comment.model.command.DeleteCommentPayload;
 import de.thm.arsnova.service.comment.model.event.CommentDeleted;
 import de.thm.arsnova.service.comment.model.event.CommentDeletedPayload;
+import de.thm.arsnova.service.comment.service.BonusTokenService;
 import de.thm.arsnova.service.comment.service.CommentService;
 import de.thm.arsnova.service.comment.service.SettingsService;
 import org.junit.Before;
@@ -31,13 +32,16 @@ public class CommentCommandHandlerTest {
     private CommentService commentService;
 
     @Mock
+    private BonusTokenService bonusTokenService;
+
+    @Mock
     private SettingsService settingsService;
 
     private CommentCommandHandler commandHandler;
 
     @Before
     public void setup() {
-        commandHandler = new CommentCommandHandler(messagingTemplate, commentService, settingsService);
+        commandHandler = new CommentCommandHandler(messagingTemplate, commentService, bonusTokenService, settingsService);
     }
 
     /*
