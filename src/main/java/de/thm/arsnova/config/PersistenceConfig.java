@@ -20,6 +20,7 @@ package de.thm.arsnova.config;
 
 import org.ektorp.impl.StdCouchDbInstance;
 import org.ektorp.spring.HttpClientFactoryBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -73,10 +74,10 @@ public class PersistenceConfig {
 	}
 
 	@Bean
+	@ConditionalOnProperty(
+			name = "migrate-from",
+			prefix = CouchDbProperties.PREFIX)
 	public MangoCouchDbConnector couchDbMigrationConnector() throws Exception {
-		if (properties.getMigrateFrom().isEmpty()) {
-			return null;
-		}
 		return new MangoCouchDbConnector(properties.getMigrateFrom(), couchDbInstance(), couchDbObjectMapperFactory());
 	}
 
@@ -86,6 +87,9 @@ public class PersistenceConfig {
 	}
 
 	@Bean
+	@ConditionalOnProperty(
+			name = "migrate-from",
+			prefix = CouchDbProperties.PREFIX)
 	public StdCouchDbInstance couchDbMigrationInstance() throws Exception {
 		return new StdCouchDbInstance(couchDbMigrationHttpClientFactory().getObject());
 	}
@@ -104,6 +108,9 @@ public class PersistenceConfig {
 	}
 
 	@Bean
+	@ConditionalOnProperty(
+			name = "migrate-from",
+			prefix = CouchDbProperties.PREFIX)
 	public HttpClientFactoryBean couchDbMigrationHttpClientFactory() throws Exception {
 		final HttpClientFactoryBean factory = couchDbHttpClientFactory();
 		factory.setSocketTimeout(MIGRATION_SOCKET_TIMEOUT);
