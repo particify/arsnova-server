@@ -132,6 +132,7 @@ public class AuthenticationProviderProperties {
 		private String userSearchBase;
 		private String managerUserDn;
 		private String managerPassword;
+		private int connectTimeout;
 
 		public String getHostUrl() {
 			return hostUrl;
@@ -187,6 +188,14 @@ public class AuthenticationProviderProperties {
 
 		public void setManagerPassword(final String managerPassword) {
 			this.managerPassword = managerPassword;
+		}
+
+		public int getConnectTimeout() {
+			return connectTimeout;
+		}
+
+		public void setConnectTimeout(final int connectTimeout) {
+			this.connectTimeout = connectTimeout;
 		}
 	}
 
