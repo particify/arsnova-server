@@ -21,6 +21,7 @@ package de.thm.arsnova.controller;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -72,7 +73,7 @@ public class RoomController extends AbstractEntityController<Room> {
 
 	@PutMapping(MODERATOR_MAPPING)
 	public void putModerator(@PathVariable final String id, @PathVariable final String userId,
-			@RequestBody final Room.Moderator moderator) {
+			@RequestBody final Room.Moderator moderator, final HttpServletResponse httpServletResponse) {
 		final Room room = roomService.get(id);
 		moderator.setUserId(userId);
 		if (moderator.getRoles().isEmpty()) {
@@ -81,13 +82,18 @@ public class RoomController extends AbstractEntityController<Room> {
 		room.getModerators().removeIf(m -> m.getUserId().equals(userId));
 		room.getModerators().add(moderator);
 		roomService.update(room);
+		httpServletResponse.setHeader(ENTITY_ID_HEADER, room.getId());
+		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, room.getRevision());
 	}
 
 	@DeleteMapping(MODERATOR_MAPPING)
-	public void deleteModerator(@PathVariable final String id, @PathVariable final String userId) {
+	public void deleteModerator(@PathVariable final String id, @PathVariable final String userId,
+			final HttpServletResponse httpServletResponse) {
 		final Room room = roomService.get(id);
 		room.getModerators().removeIf(m -> m.getUserId().equals(userId));
 		roomService.update(room);
+		httpServletResponse.setHeader(ENTITY_ID_HEADER, room.getId());
+		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, room.getRevision());
 	}
 
 	@GetMapping(CONTENTGROUP_MAPPING)
