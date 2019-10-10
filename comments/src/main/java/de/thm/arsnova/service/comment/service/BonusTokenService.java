@@ -45,8 +45,8 @@ public class BonusTokenService {
         repository.delete(b);
     }
 
-    public void deleteByRoomIdAndUserId(String roomId, String userId) {
-        BonusToken bt = repository.findById(new BonusTokenPK(roomId, userId)).orElse(null);
+    public void deleteByPK(String roomId, String commentId, String userId) {
+        BonusToken bt = repository.findById(new BonusTokenPK(roomId, commentId, userId)).orElse(null);
         repository.delete(bt);
     }
 

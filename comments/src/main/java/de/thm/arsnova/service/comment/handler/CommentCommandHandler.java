@@ -101,11 +101,12 @@ public class CommentCommandHandler {
             if (!wasFavorited && patched.isFavorite()) {
                 BonusToken bt = new BonusToken();
                 bt.setRoomId(patched.getRoomId());
+                bt.setCommentId(patched.getId());
                 bt.setUserId(patched.getCreatorId());
                 bonusTokenService.create(bt);
 
             } else if (wasFavorited && !patched.isFavorite()) {
-                bonusTokenService.deleteByRoomIdAndUserId(patched.getRoomId(), patched.getCreatorId());
+                bonusTokenService.deleteByPK(patched.getRoomId(), patched.getId(), patched.getCreatorId());
             }
 
             if (!wasAck && patched.isAck()) {

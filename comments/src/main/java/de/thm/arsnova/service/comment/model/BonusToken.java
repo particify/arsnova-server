@@ -11,14 +11,17 @@ public class BonusToken {
     @Id
     private String roomId;
     @Id
+    private String commentId;
+    @Id
     private String userId;
     private String token;
 
     public BonusToken() {
     }
 
-    public BonusToken(String roomId, String userId, String token) {
+    public BonusToken(String roomId, String commentId, String userId, String token) {
         this.roomId = roomId;
+        this.commentId = commentId;
         this.userId = userId;
         this.token = token;
     }
@@ -29,6 +32,14 @@ public class BonusToken {
 
     public void setRoomId(String roomId) {
         this.roomId = roomId;
+    }
+
+    public String getCommentId() {
+        return commentId;
+    }
+
+    public void setCommentId(String commentId) {
+        this.commentId = commentId;
     }
 
     public String getUserId() {
@@ -51,6 +62,7 @@ public class BonusToken {
     public String toString() {
         return "BonusToken{" +
                 "roomId='" + roomId + '\'' +
+                ", commentId='" + commentId + '\'' +
                 ", userId='" + userId + '\'' +
                 ", token='" + token + '\'' +
                 '}';
@@ -62,12 +74,13 @@ public class BonusToken {
         if (o == null || getClass() != o.getClass()) return false;
         BonusToken that = (BonusToken) o;
         return Objects.equals(roomId, that.roomId) &&
+                Objects.equals(commentId, that.commentId) &&
                 Objects.equals(userId, that.userId) &&
                 Objects.equals(token, that.token);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(roomId, userId, token);
+        return Objects.hash(roomId, commentId, userId, token);
     }
 }

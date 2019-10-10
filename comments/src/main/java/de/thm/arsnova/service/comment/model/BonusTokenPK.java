@@ -5,13 +5,15 @@ import java.util.Objects;
 
 public class BonusTokenPK implements Serializable {
     protected String roomId;
+    protected String commentId;
     protected String userId;
 
     public BonusTokenPK() {
     }
 
-    public BonusTokenPK(String roomId, String userId) {
+    public BonusTokenPK(String roomId, String commentId, String userId) {
         this.roomId = roomId;
+        this.commentId = commentId;
         this.userId = userId;
     }
 
@@ -31,10 +33,19 @@ public class BonusTokenPK implements Serializable {
         this.userId = userId;
     }
 
+    public String getCommentId() {
+        return commentId;
+    }
+
+    public void setCommentId(String commentId) {
+        this.commentId = commentId;
+    }
+
     @Override
     public String toString() {
         return "BonusTokenPK{" +
                 "roomId='" + roomId + '\'' +
+                ", commentId='" + commentId + '\'' +
                 ", userId='" + userId + '\'' +
                 '}';
     }
@@ -45,11 +56,12 @@ public class BonusTokenPK implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         BonusTokenPK that = (BonusTokenPK) o;
         return Objects.equals(roomId, that.roomId) &&
+                Objects.equals(commentId, that.commentId) &&
                 Objects.equals(userId, that.userId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(roomId, userId);
+        return Objects.hash(roomId, commentId, userId);
     }
 }

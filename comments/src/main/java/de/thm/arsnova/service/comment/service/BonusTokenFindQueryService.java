@@ -25,12 +25,12 @@ public class BonusTokenFindQueryService {
         if (findQuery.getProperties().getRoomId() != null) {
             List<BonusToken> bonusTokenList = bonusTokenService.getByRoomId(findQuery.getProperties().getRoomId());
             for (BonusToken bt : bonusTokenList) {
-                bonusTokenIds.add(new BonusTokenPK(bt.getRoomId(), bt.getUserId()));
+                bonusTokenIds.add(new BonusTokenPK(bt.getRoomId(), bt.getCommentId(), bt.getUserId()));
             }
         } else if (findQuery.getProperties().getUserId() != null) {
             List<BonusToken> bonusTokenList = bonusTokenService.getByUserId(findQuery.getProperties().getUserId());
             for (BonusToken bt : bonusTokenList) {
-                bonusTokenIds.add(new BonusTokenPK(bt.getRoomId(), bt.getUserId()));
+                bonusTokenIds.add(new BonusTokenPK(bt.getRoomId(), bt.getCommentId(), bt.getUserId()));
             }
         }
         return bonusTokenIds;
