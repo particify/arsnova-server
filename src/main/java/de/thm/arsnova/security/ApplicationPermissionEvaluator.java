@@ -94,7 +94,8 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 		return isSystemAccess(authentication) || hasAdminRole(userId)
 				|| (targetDomainObject instanceof UserProfile
-						&& hasUserProfilePermission(userId, ((UserProfile) targetDomainObject), permission.toString()))
+						&& (isAccountManagementAccess(authentication)
+						|| hasUserProfilePermission(userId, ((UserProfile) targetDomainObject), permission.toString())))
 				|| (targetDomainObject instanceof Room
 						&& hasRoomPermission(userId, ((Room) targetDomainObject), permission.toString()))
 				|| (targetDomainObject instanceof Content
@@ -130,7 +131,8 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			case "userprofile":
 				final UserProfile targetUserProfile = new UserProfile();
 				targetUserProfile.setId(targetId.toString());
-				return hasUserProfilePermission(userId, targetUserProfile, permission.toString());
+				return isAccountManagementAccess(authentication)
+						|| hasUserProfilePermission(userId, targetUserProfile, permission.toString());
 			case "room":
 				final Room targetRoom = roomRepository.findOne(targetId.toString());
 				return targetRoom != null && hasRoomPermission(userId, targetRoom, permission.toString());
@@ -369,5 +371,11 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	private boolean isSystemAccess(final Authentication auth) {
 		return auth instanceof RunAsUserToken
 				&& auth.getAuthorities().stream().anyMatch(ga -> ga.getAuthority().equals("ROLE_RUN_AS_SYSTEM"));
+	}
+
+	private boolean isAccountManagementAccess(final Authentication auth) {
+		return auth instanceof RunAsUserToken
+				&& auth.getAuthorities().stream()
+					.anyMatch(ga -> ga.getAuthority().equals("ROLE_RUN_AS_ACCOUNT_MANAGEMENT"));
 	}
 }

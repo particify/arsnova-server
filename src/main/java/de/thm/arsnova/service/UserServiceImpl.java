@@ -37,6 +37,7 @@ import javax.mail.internet.MimeMessage;
 import org.apache.commons.lang.CharEncoding;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
+import org.ektorp.DbAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,12 +48,12 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -79,7 +80,6 @@ import de.thm.arsnova.security.jwt.JwtService;
 import de.thm.arsnova.security.jwt.JwtToken;
 import de.thm.arsnova.web.exceptions.BadRequestException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
-import de.thm.arsnova.web.exceptions.UnauthorizedException;
 
 /**
  * Performs all user related operations.
@@ -375,8 +375,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		if (userProfile == null) {
 			if (autoCreate) {
 				userProfile = new UserProfile(authProvider, loginId);
-				/* Repository is accessed directly without EntityService to skip permission check */
-				userRepository.save(userProfile);
+				create(userProfile);
 			} else {
 				throw new UsernameNotFoundException("User does not exist.");
 			}
@@ -389,7 +388,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	public User loadUser(final String userId, final Collection<GrantedAuthority> grantedAuthorities)
 			throws UsernameNotFoundException {
 		logger.debug("Load user: UserId: {}", userId);
-		final UserProfile userProfile = userRepository.findOne(userId);
+		final UserProfile userProfile = get(userId, true);
 		if (userProfile == null) {
 			throw new UsernameNotFoundException("User does not exist.");
 		}
@@ -445,8 +444,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		account.setActivationKey(RandomStringUtils.randomAlphanumeric(8));
 		userProfile.setCreationTimestamp(new Date());
 
-		/* Repository is accessed directly without EntityService to skip permission check */
-		final UserProfile result = userRepository.save(userProfile);
+		final UserProfile result = create(userProfile);
 		if (null != result) {
 			sendActivationEmail(result);
 		} else {
@@ -495,29 +493,12 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
-	public UserProfile update(final UserProfile userProfile) {
-		if (null != userProfile.getId()) {
-			return userRepository.save(userProfile);
-		}
-
-		return null;
-	}
-
-	@Override
 	public UserProfile deleteByUsername(final String username) {
-		final User user = getCurrentUser();
-		if (!user.getUsername().equals(username.toLowerCase())
-				&& !SecurityContextHolder.getContext().getAuthentication().getAuthorities()
-						.contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
-			throw new UnauthorizedException();
-		}
-
 		final UserProfile userProfile = getByUsername(username);
 		if (null == userProfile) {
 			throw new NotFoundException();
 		}
-
-		userRepository.delete(userProfile);
+		delete(userProfile);
 
 		return userProfile;
 	}
@@ -542,6 +523,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		}
 	}
 
+	@Secured({"ROLE_ANONYMOUS", "ROLE_USER", "RUN_AS_ACCOUNT_MANAGEMENT"})
 	public boolean activateAccount(final String id, final String key, final String clientAddress) {
 		if (isBannedFromLogin(clientAddress)) {
 			return false;
@@ -559,6 +541,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
+	@Secured({"ROLE_ANONYMOUS", "ROLE_USER", "RUN_AS_ACCOUNT_MANAGEMENT"})
 	public void initiatePasswordReset(final String username) {
 		final UserProfile userProfile = getByUsername(username);
 		if (null == userProfile) {
@@ -579,9 +562,11 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 		account.setPasswordResetKey(RandomStringUtils.randomAlphanumeric(8));
 		account.setPasswordResetTime(new Date());
-
-		if (null == userRepository.save(userProfile)) {
+		try {
+			update(userProfile);
+		} catch (final DbAccessException e) {
 			logger.error("Password reset failed. {} could not be updated.", username);
+			throw e;
 		}
 
 		sendEmail(userProfile, registeredProperties.getResetPasswordMailSubject(), MessageFormat.format(
@@ -589,6 +574,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
+	@Secured({"ROLE_ANONYMOUS", "ROLE_USER", "RUN_AS_ACCOUNT_MANAGEMENT"})
 	public boolean resetPassword(final UserProfile userProfile, final String key, final String password) {
 		final UserProfile.Account account = userProfile.getAccount();
 		if (null == key || "".equals(key) || !key.equals(account.getPasswordResetKey())) {
@@ -608,8 +594,11 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 		account.setPassword(encodePassword(password));
 		account.setPasswordResetKey(null);
-		if (null == update(userProfile)) {
+		try {
+			update(userProfile);
+		} catch (final DbAccessException e) {
 			logger.error("Password reset failed. {} could not be updated.", userProfile.getLoginId());
+			throw e;
 		}
 
 		return true;
