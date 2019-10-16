@@ -25,6 +25,7 @@ public class BonusTokenController extends AbstractEntityController {
     private static final Logger logger = LoggerFactory.getLogger(BonusTokenController.class);
 
     protected static final String REQUEST_MAPPING = "/bonustoken";
+    protected static final String DELETE_MAPPING = "/deleteby";
 
     private final BonusTokenService service;
     private final BonusTokenFindQueryService findQueryService;
@@ -38,7 +39,7 @@ public class BonusTokenController extends AbstractEntityController {
         this.findQueryService = findQueryService;
     }
 
-    @DeleteMapping(REQUEST_MAPPING)
+    @DeleteMapping(DELETE_MAPPING)
     public void delete(
             @RequestParam("roomid") final String roomId,
             @RequestParam("commentid") final String commentId,
