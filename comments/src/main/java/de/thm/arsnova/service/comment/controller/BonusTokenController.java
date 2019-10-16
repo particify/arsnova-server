@@ -8,9 +8,11 @@ import de.thm.arsnova.service.comment.service.FindQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -34,6 +36,17 @@ public class BonusTokenController extends AbstractEntityController {
     ) {
         this.service = service;
         this.findQueryService = findQueryService;
+    }
+
+    @DeleteMapping(REQUEST_MAPPING)
+    public void delete(
+            @RequestParam("roomid") final String roomId,
+            @RequestParam("commentid") final String commentId,
+            @RequestParam("userid") final String userId
+    ) {
+        logger.debug("Searching for and deleting bonus token, roomId = {}, commentId = {}", roomId, commentId);
+
+        service.deleteByPK(roomId, commentId, userId);
     }
 
     @PostMapping(FIND_MAPPING)
