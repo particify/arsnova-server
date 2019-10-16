@@ -42,12 +42,21 @@ public class BonusTokenController extends AbstractEntityController {
     @DeleteMapping(DELETE_MAPPING)
     public void delete(
             @RequestParam("roomid") final String roomId,
-            @RequestParam("commentid") final String commentId,
-            @RequestParam("userid") final String userId
+            @RequestParam(value = "commentid", required = false) final String commentId,
+            @RequestParam(value = "userid", required = false) final String userId
     ) {
-        logger.debug("Searching for and deleting bonus token, roomId = {}, commentId = {}", roomId, commentId);
+        if (commentId != null && userId != null) {
+            logger.debug("Searching for and deleting bonus token, roomId = {}, commentId = {}", roomId, commentId);
 
-        service.deleteByPK(roomId, commentId, userId);
+            service.deleteByPK(roomId, commentId, userId);
+        } else {
+            logger.debug("Searching for bonus tokens with roomId = {}", roomId);
+            List<BonusToken> list = service.getByRoomId(roomId);
+            for (BonusToken t : list) {
+                logger.debug("Deleting BonusToken = {}", t.toString());
+                service.delete(t);
+            }
+        }
     }
 
     @PostMapping(FIND_MAPPING)
