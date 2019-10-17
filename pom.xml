@@ -7,13 +7,13 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<spring-boot-version>2.1.8.RELEASE</spring-boot-version>
+		<spring-boot-version>2.2.0.RELEASE</spring-boot-version>
 		<commons-lang-version>2.6</commons-lang-version>
 		<guava-version>28.1-jre</guava-version>
 		<directory-server-version>1.5.5</directory-server-version>
 		<io.netty-version>4.1.39.Final</io.netty-version>
 		<org.aspectj-version>1.9.4</org.aspectj-version>
-		<javax-jaxb.version>2.3.1</javax-jaxb.version>
+		<jakarta-xml-bind.version>2.3.2</jakarta-xml-bind.version>
 		<graalvm.version>19.2.0</graalvm.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
@@ -151,8 +151,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>javax.annotation-api</artifactId>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>commons-lang</groupId>
@@ -239,7 +239,7 @@
 			<groupId>org.hibernate.validator</groupId>
 			<artifactId>hibernate-validator-annotation-processor</artifactId>
 		</dependency>
-		<!-- A javax.el (Unified Expression Language) implementation is needed for bean validation. -->
+		<!-- A jakarta.el-api (Unified Expression Language) implementation is needed for bean validation. -->
 		<dependency>
 			<groupId>org.mortbay.jasper</groupId>
 			<artifactId>apache-el</artifactId>
@@ -276,13 +276,13 @@
 			<version>1.5.0</version>
 		</dependency>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.mail</groupId>
-			<artifactId>javax.mail</artifactId>
+			<artifactId>jakarta.mail</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -297,7 +297,6 @@
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
-			<version>3.13.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -334,12 +333,6 @@
 			<groupId>com.corundumstudio.socketio</groupId>
 			<artifactId>netty-socketio</artifactId>
 			<version>1.7.17</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.inject</groupId>
-			<artifactId>javax.inject</artifactId>
-			<version>1</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -406,9 +399,8 @@
 			<version>2.11.0</version>
 		</dependency>
 		<dependency>
-			<groupId>javax.websocket</groupId>
-			<artifactId>javax.websocket-api</artifactId>
-			<version>1.1</version>
+			<groupId>jakarta.websocket</groupId>
+			<artifactId>jakarta.websocket-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
@@ -629,9 +621,9 @@
 				</executions>
 				<dependencies>
 					<dependency>
-						<groupId>javax.xml.bind</groupId>
-						<artifactId>jaxb-api</artifactId>
-						<version>${javax-jaxb.version}</version>
+						<groupId>jakarta.xml.bind</groupId>
+						<artifactId>jakarta.xml.bind-api</artifactId>
+						<version>${jakarta-xml-bind.version}</version>
 					</dependency>
 				</dependencies>
 			</plugin>
@@ -652,8 +644,8 @@
 		<!-- Workaround for JDK 11 support. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=539791 -->
 		<extensions>
 			<extension>
-				<groupId>javax.annotation</groupId>
-				<artifactId>javax.annotation-api</artifactId>
+				<groupId>jakarta.annotation</groupId>
+				<artifactId>jakarta.annotation-api</artifactId>
 			</extension>
 			<extension>
 				<groupId>javax.annotation</groupId>
