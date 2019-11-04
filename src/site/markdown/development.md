@@ -11,12 +11,11 @@ And additionally if you want to run ARSnova locally:
 
 * Apache CouchDB 1.x
 * Python 2.7
-* [ARSnova Setup Tool](https://github.com/thm-projects/arsnova-setuptool)
 
 Next, you need to setup an ARSnova configuration file.
-Create a copy of [arsnova.properties.example](../../main/resources/arsnova.properties.example) at `/etc/arsnova/arsnova.properties`.
-Afterwards, initialize the database by running the `tool.py` python script from the Setup Tool.
-
+Create a copy of [defaults.yml](../../main/resources/config/defaults.yml) in a directory like `/etc/arsnova`, then rename
+the copied file to `application.yml`. The directory is defined by the property `arsnova.config-dir` and needs to be
+supplied to ARSnova during startup, see section "Running" below.
 
 ## Building
 
@@ -33,7 +32,7 @@ You can create a web archive (`.war` file) by running a single command:
 ARSnova builds are setup up to automatically download the Java Servlet container Jetty for development.
 Run the following command to download the dependencies, and startup the backend with Jetty:
 
-	$ mvn jetty:run
+	$ mvn jetty:run -D arsnova.config-dir=/etc/arsnova
 
 After a few seconds the ARSnova API will be accessible at <http://localhost:8080/>.
 
