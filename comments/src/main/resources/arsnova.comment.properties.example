@@ -10,7 +10,11 @@ spring.datasource.platform=postgres
 spring.datasource.username=arsnovacomment
 spring.datasource.password=arsnovacomment
 
-spring.jpa.hibernate.ddl-auto=update
+# validate: validate the schema, makes no changes to the database.
+# update: update the schema.
+# create: creates the schema, destroying previous data.
+# create-drop: drop the schema at the end of the session.
+spring.jpa.hibernate.ddl-auto=create-drop
 spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.PostgreSQLDialect
 # Disable feature detection by this undocumented parameter.
 # Check the org.hibernate.engine.jdbc.internal.JdbcServiceImpl.configure method for more details.
