@@ -24,7 +24,10 @@ This configuration would support up to 500 users.
 
 ## Configuration
 
-You will need to do some configuration work upfront:
+You will need to do some configuration work upfront, which differs based on which release you are setting up.
+
+### Version 2.7 and below
+
 Create a copy of
 [src/main/resources/arsnova.properties.example](../../main/resources/arsnova.properties.example)
 at `/etc/arsnova/arsnova.properties`.
@@ -42,6 +45,20 @@ The property file's path is hard coded in
 and in the "Setup Tool" (see "Database Setup").
 You want to change the paths to make them match your environment.
 
+### Version 3 and above
+
+Create a copy of
+[src/main/resources/config/defaults.yml](../../main/resources/config/defaults.yml)
+at a folder of your choosing (eg. `/etc/arsnova`) and rename the new file as `application.yml`.
+Then change the settings to match your environment.
+
+You need to change at least the following configuration properties:
+
+* `root-url`: The public URL (without backend path) at which ARSnova will be accessible to clients.
+* `user` and `password` inside the `couchdb` section: These credentials will be used later when the database is setup.
+
+You will later need to supply the directory in which you copied the `application.yml` to `arsnova-backend`,
+for example, via the directive `-D arsnova.config-dir=/etc/arsnova`.
 
 ## Server Software
 
