@@ -10,6 +10,7 @@ public class CreateCommentPayload implements WebSocketPayload {
     private String roomId;
     private String creatorId;
     private String body;
+    private String tag;
 
     public CreateCommentPayload() {
     }
@@ -18,6 +19,7 @@ public class CreateCommentPayload implements WebSocketPayload {
         this.creatorId = c.getCreatorId();
         this.roomId = c.getRoomId();
         this.body = c.getBody();
+        this.tag = c.getTag();
     }
 
     @JsonProperty("roomId")
@@ -50,12 +52,23 @@ public class CreateCommentPayload implements WebSocketPayload {
         this.body = body;
     }
 
+    @JsonProperty("tag")
+    public String getTag() {
+        return tag;
+    }
+
+    @JsonProperty("tag")
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
     @Override
     public String toString() {
         return "CreateCommentPayload{" +
                 "creatorId='" + creatorId + '\'' +
                 ", roomId='" + roomId + '\'' +
                 ", body='" + body + '\'' +
+                ", tag='" + tag + '\'' +
                 '}';
     }
 
@@ -66,11 +79,12 @@ public class CreateCommentPayload implements WebSocketPayload {
         CreateCommentPayload that = (CreateCommentPayload) o;
         return Objects.equals(roomId, that.roomId) &&
                 Objects.equals(creatorId, that.creatorId) &&
-                Objects.equals(body, that.body);
+                Objects.equals(body, that.body) &&
+                Objects.equals(tag, that.tag);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(roomId, creatorId, body);
+        return Objects.hash(roomId, creatorId, body, tag);
     }
 }
