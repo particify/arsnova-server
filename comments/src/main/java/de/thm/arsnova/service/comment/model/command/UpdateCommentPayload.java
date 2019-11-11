@@ -12,6 +12,7 @@ public class UpdateCommentPayload implements WebSocketPayload {
     private boolean read;
     private boolean favorite;
     private int correct;
+    private String tag;
 
     public UpdateCommentPayload() {
     }
@@ -82,6 +83,16 @@ public class UpdateCommentPayload implements WebSocketPayload {
         this.correct = correct;
     }
 
+    @JsonProperty("tag")
+    public String getTag() {
+        return tag;
+    }
+
+    @JsonProperty("tag")
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
     @Override
     public String toString() {
         return "UpdateCommentPayload{" +
@@ -90,6 +101,7 @@ public class UpdateCommentPayload implements WebSocketPayload {
                 ", read=" + read +
                 ", favorite=" + favorite +
                 ", correct=" + correct +
+                ", tag=" + tag +
                 '}';
     }
 
@@ -102,11 +114,12 @@ public class UpdateCommentPayload implements WebSocketPayload {
                 favorite == that.favorite &&
                 correct == that.correct &&
                 Objects.equals(id, that.id) &&
-                Objects.equals(body, that.body);
+                Objects.equals(body, that.body) &&
+                Objects.equals(tag, that.tag);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, body, read, favorite, correct);
+        return Objects.hash(id, body, read, favorite, correct, tag);
     }
 }
