@@ -53,6 +53,7 @@ public class CommentCommandHandler {
         newComment.setRoomId(payload.getRoomId());
         newComment.setCreatorId(payload.getCreatorId());
         newComment.setBody(payload.getBody());
+        newComment.setTag(payload.getTag());
         newComment.setTimestamp(now);
         newComment.setRead(false);
         newComment.setCorrect(0);
@@ -151,6 +152,7 @@ public class CommentCommandHandler {
         old.setRead(p.isRead());
         old.setFavorite(p.isFavorite());
         old.setCorrect(p.getCorrect());
+        old.setTag(p.getTag());
 
         Comment updated = this.service.update(old);
 
