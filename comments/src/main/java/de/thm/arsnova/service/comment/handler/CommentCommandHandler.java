@@ -153,6 +153,7 @@ public class CommentCommandHandler {
         old.setFavorite(p.isFavorite());
         old.setCorrect(p.getCorrect());
         old.setTag(p.getTag());
+        old.setAnswer(p.getAnswer());
 
         Comment updated = this.service.update(old);
 

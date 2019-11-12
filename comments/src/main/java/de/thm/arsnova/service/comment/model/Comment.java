@@ -20,6 +20,7 @@ public class Comment {
     @Transient
     private int score;
     private String tag;
+    private String answer;
 
     public String getId() {
         return id;
@@ -109,6 +110,14 @@ public class Comment {
         this.tag = tag;
     }
 
+    public String getAnswer() {
+        return answer;
+    }
+
+    public void setAnswer(String answer) {
+        this.answer = answer;
+    }
+
     @Override
     public String toString() {
         return "Comment{" +
@@ -123,6 +132,7 @@ public class Comment {
                 ", ack=" + ack +
                 ", score=" + score +
                 ", tag=" + tag +
+                ", answer=" + answer +
                 '}';
     }
 }
