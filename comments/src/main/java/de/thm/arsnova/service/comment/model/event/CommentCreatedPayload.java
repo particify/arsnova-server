@@ -10,6 +10,7 @@ import java.util.Objects;
 public class CommentCreatedPayload implements WebSocketPayload {
     private String id;
     private String body;
+    private String tag;
     private Date timestamp;
 
     public CommentCreatedPayload() {}
@@ -18,6 +19,7 @@ public class CommentCreatedPayload implements WebSocketPayload {
         if (c != null) {
             id = c.getId();
             body = c.getBody();
+            tag = c.getTag();
         }
     }
 
@@ -39,6 +41,16 @@ public class CommentCreatedPayload implements WebSocketPayload {
     @JsonProperty("body")
     public void setBody(String body) {
         this.body = body;
+    }
+
+    @JsonProperty("tag")
+    public String getTag() {
+        return tag;
+    }
+
+    @JsonProperty("tag")
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     @JsonProperty("timestamp")
