@@ -103,7 +103,7 @@ public class RoomController extends AbstractEntityController<Room> {
 
 	@PostMapping(CONTENTGROUP_ADD_MAPPING)
 	public void addContentToGroup(@PathVariable final String id, @PathVariable final String groupName,
-			@RequestBody final String contentId) {
+			@PathVariable final String contentId) {
 		contentGroupService.addContentToGroup(id, groupName, contentId);
 	}
 
