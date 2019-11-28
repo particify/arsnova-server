@@ -58,7 +58,7 @@ public class FeedbackCommandHandlerTest {
 	@Test
 	public void sendFeedback() {
 		final String roomId = "12345678";
-		final CreateFeedbackPayload createFeedbackPayload = new CreateFeedbackPayload(1);
+		final CreateFeedbackPayload createFeedbackPayload = new CreateFeedbackPayload("1", 1);
 		createFeedbackPayload.setValue(1);
 		final CreateFeedback createFeedback = new CreateFeedback();
 		createFeedback.setPayload(createFeedbackPayload);
