@@ -59,9 +59,17 @@ public class StubUserService extends UserServiceImpl {
 	}
 
 	public void setUserAuthenticated(final boolean isAuthenticated, final String username) {
+		setUserAuthenticated(isAuthenticated, username, "");
+	}
+
+	public void setUserAuthenticated(final boolean isAuthenticated, final String username, final String userId) {
 		if (isAuthenticated) {
 			final UserProfile userProfile = new UserProfile(UserProfile.AuthProvider.ARSNOVA, username);
-			userProfile.setId(UUID.randomUUID().toString());
+			if (userId == null || userId.isEmpty()) {
+				userProfile.setId(UUID.randomUUID().toString());
+			} else {
+				userProfile.setId(userId);
+			}
 			stubUser = new User(userProfile, grantedAuthorities);
 		} else {
 			stubUser = null;
