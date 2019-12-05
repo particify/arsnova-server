@@ -19,6 +19,10 @@
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
 		<checkstyle.missing-javadoc.severity>warning</checkstyle.missing-javadoc.severity>
+		<docker.registry>local-dev</docker.registry>
+		<docker.image>arsnova/${project.artifactId}</docker.image>
+		<docker.tag>latest</docker.tag>
+		<docker.time>EPOCH</docker.time>
 	</properties>
 
 	<developers>
@@ -638,6 +642,20 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.google.cloud.tools</groupId>
+				<artifactId>jib-maven-plugin</artifactId>
+				<version>1.8.0</version>
+				<configuration>
+					<to>
+						<image>${docker.registry}/${docker.image}:${docker.tag}</image>
+					</to>
+					<container>
+						<creationTime>${docker.time}</creationTime>
+						<ports>8080</ports>
+					</container>
+				</configuration>
 			</plugin>
 		</plugins>
 
