@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
+import de.thm.arsnova.service.FeedbackStorageService;
+import de.thm.arsnova.service.RoomService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,11 +26,17 @@ public class FeedbackCommandHandlerTest {
 	@MockBean
 	private SimpMessagingTemplate messagingTemplate;
 
+	@MockBean
+	private FeedbackStorageService feedbackStorage;
+
+	@MockBean
+	private RoomService roomService;
+
 	private FeedbackCommandHandler commandHandler;
 
 	@Before
 	public void setUp() {
-		this.commandHandler = new FeedbackCommandHandler(messagingTemplate);
+		this.commandHandler = new FeedbackCommandHandler(messagingTemplate, feedbackStorage, roomService);
 	}
 
 	@Test

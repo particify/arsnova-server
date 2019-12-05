@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import de.thm.arsnova.model.Feedback;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.service.FeedbackStorageService;
+import de.thm.arsnova.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
@@ -25,62 +29,21 @@ import de.thm.arsnova.websocket.message.StopFeedback;
 
 @Component
 public class FeedbackCommandHandler {
-
-	private static class UserFeedback {
-		private String userId;
-		private int value;
-
-		UserFeedback(final String userId, final int value) {
-			this.userId = userId;
-			this.value = value;
-		}
-
-		public String getUserId() {
-			return userId;
-		}
-
-		public void setUserId(final String userId) {
-			this.userId = userId;
-		}
-
-		public int getValue() {
-			return value;
-		}
-
-		public void setValue(final int value) {
-			this.value = value;
-		}
-	}
-
-	HashMap<String, List<UserFeedback>> roomValues = new HashMap<>();
 	List<String> closedRooms = new ArrayList<>();
 
 	private final SimpMessagingTemplate messagingTemplate;
+	private final FeedbackStorageService feedbackStorage;
+	private final RoomService roomService;
 
 	@Autowired
-	public FeedbackCommandHandler(final SimpMessagingTemplate messagingTemplate) {
+	public FeedbackCommandHandler(
+		final SimpMessagingTemplate messagingTemplate,
+		final FeedbackStorageService feedbackStorage,
+		final RoomService roomService
+	) {
 		this.messagingTemplate = messagingTemplate;
-	}
-
-	private synchronized void updateFeedbackForRoom(final String roomId, final UserFeedback userFeedback) {
-		final List<UserFeedback> values = roomValues.getOrDefault(roomId, new ArrayList<>());
-		values.removeIf(o -> (o.userId.equals(userFeedback.getUserId())));
-		values.add(userFeedback);
-		roomValues.put(roomId, values);
-	}
-
-	private synchronized void resetFeedbackForRoom(final String roomId) {
-		roomValues.put(roomId, new ArrayList<>());
-	}
-
-	// This function is not threadsafe since others can update the feedback while this is computing it non-atomic.
-	private int[] getFeedbackForRoom(final String roomId) {
-		final List<UserFeedback> values = roomValues.getOrDefault(roomId, new ArrayList<>());
-		final int[] retVal = new int[4];
-		for (final UserFeedback f : values) {
-			retVal[f.getValue()]++;
-		}
-		return retVal;
+		this.feedbackStorage = feedbackStorage;
+		this.roomService = roomService;
 	}
 
 	public void handle(final GetFeedbackStatusCommand command) {
@@ -118,12 +81,14 @@ public class FeedbackCommandHandler {
 	}
 
 	public void handle(final CreateFeedbackCommand command) {
-		if (!closedRooms.contains(command.getRoomId())) {
+		final String roomId = command.getRoomId();
+		if (!closedRooms.contains(roomId)) {
 			final CreateFeedbackPayload p = command.getPayload().getPayload();
-			final UserFeedback userFeedback = new UserFeedback(p.getUserId(), p.getValue());
+			final Room room = roomService.get(roomId, true);
 
-			updateFeedbackForRoom(command.getRoomId(), userFeedback);
-			final int[] newVals = getFeedbackForRoom(command.getRoomId());
+			feedbackStorage.save(room, p.getValue(), p.getUserId());
+			Feedback feedback = feedbackStorage.getByRoom(room);
+			final int[] newVals = feedback.getValues().stream().mapToInt(i->i).toArray();
 
 			final FeedbackChanged feedbackChanged = new FeedbackChanged();
 			final FeedbackChangedPayload feedbackChangedPayload = new FeedbackChangedPayload();
@@ -138,7 +103,10 @@ public class FeedbackCommandHandler {
 	}
 
 	public void handle(final GetFeedbackCommand command) {
-		final int[] currentVals = getFeedbackForRoom(command.getRoomId());
+		final String roomId = command.getRoomId();
+		final Room room = roomService.get(roomId, true);
+		Feedback feedback = feedbackStorage.getByRoom(room);
+		final int[] currentVals = feedback.getValues().stream().mapToInt(i->i).toArray();
 
 		final FeedbackChanged feedbackChanged = new FeedbackChanged();
 		final FeedbackChangedPayload feedbackChangedPayload = new FeedbackChangedPayload();
@@ -146,18 +114,20 @@ public class FeedbackCommandHandler {
 		feedbackChanged.setPayload(feedbackChangedPayload);
 
 		messagingTemplate.convertAndSend(
-				"/topic/" + command.getRoomId() + ".feedback.stream",
+				"/topic/" + roomId + ".feedback.stream",
 				feedbackChanged
 		);
 	}
 
 	public void handle(final ResetFeedbackCommand command) {
-		resetFeedbackForRoom(command.getRoomId());
+		final String roomId = command.getRoomId();
+		final Room room = roomService.get(roomId, true);
+		feedbackStorage.cleanVotesByRoom(room, 0);
 
 		final FeedbackReset event = new FeedbackReset();
 
 		messagingTemplate.convertAndSend(
-				"/topic/" + command.getRoomId() + ".feedback.stream",
+				"/topic/" + roomId + ".feedback.stream",
 				event
 		);
 	}
