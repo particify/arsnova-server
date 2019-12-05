@@ -8,7 +8,7 @@ stages:
   - deploy
 
 .maven: &maven
-  image: maven:3-jdk-11-slim
+  image: maven:3-jdk-11
   variables:
     MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss.SSS -Djava.awt.headless=true"
     MAVEN_CLI_OPTS: "--batch-mode --fail-at-end --show-version"
@@ -63,6 +63,25 @@ package:
       - $WAR_FILE
   script:
     - mvn $MAVEN_CLI_OPTS war:war
+
+docker_image:
+  <<: *maven
+  stage: deploy
+  only:
+    - master
+  variables:
+    DOCKER_IMAGE_NAME: $CI_PROJECT_PATH
+  dependencies:
+    - package
+  script:
+    - "echo Creation time for image: `git log -1 --format=%cI`"
+    - mvn $MAVEN_CLI_OPTS jib:build
+      -Djib.to.auth.username="$CI_REGISTRY_USER"
+      -Djib.to.auth.password="$CI_REGISTRY_PASSWORD"
+      -Ddocker.registry="$CI_REGISTRY"
+      -Ddocker.image="$DOCKER_IMAGE_NAME"
+      -Ddocker.tag="$CI_COMMIT_REF_SLUG"
+      -Ddocker.time="`git log -1 --format=%cI`"
 
 .deploy: &deploy
   stage: deploy
