@@ -12,12 +12,14 @@ import de.thm.arsnova.websocket.message.CreateFeedback;
 import de.thm.arsnova.websocket.message.CreateFeedbackPayload;
 import de.thm.arsnova.websocket.message.FeedbackChanged;
 import de.thm.arsnova.websocket.message.FeedbackChangedPayload;
+import de.thm.arsnova.websocket.message.FeedbackReset;
 import de.thm.arsnova.websocket.message.FeedbackStarted;
 import de.thm.arsnova.websocket.message.FeedbackStatus;
 import de.thm.arsnova.websocket.message.FeedbackStatusPayload;
 import de.thm.arsnova.websocket.message.FeedbackStopped;
 import de.thm.arsnova.websocket.message.GetFeedback;
 import de.thm.arsnova.websocket.message.GetFeedbackStatus;
+import de.thm.arsnova.websocket.message.ResetFeedback;
 import de.thm.arsnova.websocket.message.StartFeedback;
 import de.thm.arsnova.websocket.message.StopFeedback;
 
@@ -65,6 +67,10 @@ public class FeedbackCommandHandler {
 		values.removeIf(o -> (o.userId.equals(userFeedback.getUserId())));
 		values.add(userFeedback);
 		roomValues.put(roomId, values);
+	}
+
+	private synchronized void resetFeedbackForRoom(final String roomId) {
+		roomValues.put(roomId, new ArrayList<>());
 	}
 
 	// This function is not threadsafe since others can update the feedback while this is computing it non-atomic.
@@ -142,6 +148,17 @@ public class FeedbackCommandHandler {
 		messagingTemplate.convertAndSend(
 				"/topic/" + command.getRoomId() + ".feedback.stream",
 				feedbackChanged
+		);
+	}
+
+	public void handle(final ResetFeedbackCommand command) {
+		resetFeedbackForRoom(command.getRoomId());
+
+		final FeedbackReset event = new FeedbackReset();
+
+		messagingTemplate.convertAndSend(
+				"/topic/" + command.getRoomId() + ".feedback.stream",
+				event
 		);
 	}
 
@@ -233,6 +250,25 @@ public class FeedbackCommandHandler {
 		}
 
 		public GetFeedback getPayload() {
+			return payload;
+		}
+
+		public String getRoomId() {
+			return roomId;
+		}
+	}
+
+	public static class ResetFeedbackCommand {
+
+		private String roomId;
+		private ResetFeedback payload;
+
+		public ResetFeedbackCommand(final String roomId, final ResetFeedback payload) {
+			this.roomId = roomId;
+			this.payload = payload;
+		}
+
+		public ResetFeedback getPayload() {
 			return payload;
 		}
 
