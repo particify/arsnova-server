@@ -7,14 +7,14 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<spring-boot-version>2.2.0.RELEASE</spring-boot-version>
+		<spring-boot-version>2.2.2.RELEASE</spring-boot-version>
 		<commons-lang-version>2.6</commons-lang-version>
 		<guava-version>28.1-jre</guava-version>
 		<directory-server-version>1.5.5</directory-server-version>
 		<io.netty-version>4.1.43.Final</io.netty-version>
-		<org.aspectj-version>1.9.4</org.aspectj-version>
+		<org.aspectj-version>1.9.5</org.aspectj-version>
 		<jakarta-xml-bind.version>2.3.2</jakarta-xml-bind.version>
-		<graalvm.version>19.2.0</graalvm.version>
+		<graalvm.version>19.3.0</graalvm.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
@@ -316,7 +316,7 @@
 		<dependency>
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
-			<version>3.8.2</version>
+			<version>3.8.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.pac4j</groupId>
