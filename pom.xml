@@ -10,7 +10,6 @@
 		<spring-boot-version>2.2.2.RELEASE</spring-boot-version>
 		<commons-lang-version>2.6</commons-lang-version>
 		<guava-version>28.1-jre</guava-version>
-		<directory-server-version>1.5.5</directory-server-version>
 		<io.netty-version>4.1.43.Final</io.netty-version>
 		<org.aspectj-version>1.9.5</org.aspectj-version>
 		<jakarta-xml-bind.version>2.3.2</jakarta-xml-bind.version>
