@@ -4,9 +4,12 @@ import java.util.Collections;
 import net.spy.memcached.compat.log.Logger;
 import net.spy.memcached.compat.log.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
+import de.thm.arsnova.event.AfterPatchEvent;
+import de.thm.arsnova.event.StateChangeEvent;
 import de.thm.arsnova.model.Feedback;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.service.FeedbackStorageService;
@@ -44,6 +47,50 @@ public class FeedbackCommandHandler {
 		this.messagingTemplate = messagingTemplate;
 		this.feedbackStorage = feedbackStorage;
 		this.roomService = roomService;
+	}
+
+	@EventListener
+	public void handleLockFeedback(final AfterPatchEvent<Room> event) {
+		if (event.getChanges().containsKey("settings")) {
+			final String roomId = event.getEntity().getId();
+			final Room.Settings settings = event.getEntity().getSettings();
+			if (settings.isFeedbackLocked()) {
+				final FeedbackStopped stompEvent = new FeedbackStopped();
+
+				messagingTemplate.convertAndSend(
+						"/topic/" + roomId + ".feedback.stream",
+						stompEvent
+				);
+
+			} else {
+				final FeedbackStarted stompEvent = new FeedbackStarted();
+
+				messagingTemplate.convertAndSend(
+						"/topic/" + roomId + ".feedback.stream",
+						stompEvent
+				);
+			}
+		}
+	}
+
+	@EventListener(condition = "#event.stateName == 'settings'")
+	public void handleLockFeedback(final StateChangeEvent<Room, Room.Settings> event) {
+		final String roomId = event.getEntity().getId();
+		if (event.getEntity().getSettings().isFeedbackLocked()) {
+			final FeedbackStopped stompEvent = new FeedbackStopped();
+
+			messagingTemplate.convertAndSend(
+					"/topic/" + roomId + ".feedback.stream",
+					stompEvent
+			);
+		} else {
+			final FeedbackStarted stompEvent = new FeedbackStarted();
+
+			messagingTemplate.convertAndSend(
+					"/topic/" + roomId + ".feedback.stream",
+					stompEvent
+			);
+		}
 	}
 
 	public void handle(final GetFeedbackStatusCommand command) {
