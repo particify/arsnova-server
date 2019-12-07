@@ -195,7 +195,7 @@ Add the following lines to the `VirtualHost` section of the file:
 		ProxyPass http://localhost:8080/api/
 		ProxyPassReverse http://localhost:8080/api/
 		ProxyPreserveHost On
-		RequestHeader set X-Forwarded-Proto %{REQUEST_SCHEME}
+		RequestHeader set X-Forwarded-Proto %{REQUEST_SCHEME}e
 	</Location>
 	<Location /socket.io/>
 		ProxyPass ws://localhost:8090/socket.io/
@@ -204,6 +204,7 @@ Add the following lines to the `VirtualHost` section of the file:
 
 To enable the required Apache HTTP Server modules, simply type:
 
+	# a2enmod headers
 	# a2enmod proxy
 	# a2enmod proxy_http
 	# a2enmod proxy_wstunnel
