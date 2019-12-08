@@ -1,86 +1,108 @@
 package de.thm.arsnova.websocket.handler;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
+import java.util.Collections;
+import net.spy.memcached.compat.log.Logger;
+import net.spy.memcached.compat.log.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
+
+import de.thm.arsnova.event.AfterPatchEvent;
+import de.thm.arsnova.model.Feedback;
+import de.thm.arsnova.model.Room;
+import de.thm.arsnova.service.FeedbackStorageService;
+import de.thm.arsnova.service.RoomService;
 
 import de.thm.arsnova.websocket.message.CreateFeedback;
 import de.thm.arsnova.websocket.message.CreateFeedbackPayload;
 import de.thm.arsnova.websocket.message.FeedbackChanged;
 import de.thm.arsnova.websocket.message.FeedbackChangedPayload;
+import de.thm.arsnova.websocket.message.FeedbackReset;
 import de.thm.arsnova.websocket.message.FeedbackStarted;
 import de.thm.arsnova.websocket.message.FeedbackStatus;
 import de.thm.arsnova.websocket.message.FeedbackStatusPayload;
 import de.thm.arsnova.websocket.message.FeedbackStopped;
 import de.thm.arsnova.websocket.message.GetFeedback;
 import de.thm.arsnova.websocket.message.GetFeedbackStatus;
+import de.thm.arsnova.websocket.message.ResetFeedback;
 import de.thm.arsnova.websocket.message.StartFeedback;
 import de.thm.arsnova.websocket.message.StopFeedback;
 
 @Component
 public class FeedbackCommandHandler {
-
-	private static class UserFeedback {
-		private String userId;
-		private int value;
-
-		UserFeedback(final String userId, final int value) {
-			this.userId = userId;
-			this.value = value;
-		}
-
-		public String getUserId() {
-			return userId;
-		}
-
-		public void setUserId(final String userId) {
-			this.userId = userId;
-		}
-
-		public int getValue() {
-			return value;
-		}
-
-		public void setValue(final int value) {
-			this.value = value;
-		}
-	}
-
-	HashMap<String, List<UserFeedback>> roomValues = new HashMap<>();
-	List<String> closedRooms = new ArrayList<>();
+	private static final Logger logger = LoggerFactory.getLogger(FeedbackCommandHandler.class);
 
 	private final SimpMessagingTemplate messagingTemplate;
+	private final FeedbackStorageService feedbackStorage;
+	private final RoomService roomService;
 
 	@Autowired
-	public FeedbackCommandHandler(final SimpMessagingTemplate messagingTemplate) {
+	public FeedbackCommandHandler(
+			final SimpMessagingTemplate messagingTemplate,
+			final FeedbackStorageService feedbackStorage,
+			final RoomService roomService
+	) {
 		this.messagingTemplate = messagingTemplate;
+		this.feedbackStorage = feedbackStorage;
+		this.roomService = roomService;
 	}
 
-	private synchronized void updateFeedbackForRoom(final String roomId, final UserFeedback userFeedback) {
-		final List<UserFeedback> values = roomValues.getOrDefault(roomId, new ArrayList<>());
-		values.removeIf(o -> (o.userId.equals(userFeedback.getUserId())));
-		values.add(userFeedback);
-		roomValues.put(roomId, values);
-	}
+	@EventListener
+	public void handleLockFeedback(final AfterPatchEvent<Room> event) {
+		if (event.getChanges().containsKey("settings")) {
+			final String roomId = event.getEntity().getId();
+			final Room.Settings settings = event.getEntity().getSettings();
+			if (settings.isFeedbackLocked()) {
+				final FeedbackStopped stompEvent = new FeedbackStopped();
 
-	// This function is not threadsafe since others can update the feedback while this is computing it non-atomic.
-	private int[] getFeedbackForRoom(final String roomId) {
-		final List<UserFeedback> values = roomValues.getOrDefault(roomId, new ArrayList<>());
-		final int[] retVal = new int[4];
-		for (final UserFeedback f : values) {
-			retVal[f.getValue()]++;
+				messagingTemplate.convertAndSend(
+						"/topic/" + roomId + ".feedback.stream",
+						stompEvent
+				);
+
+			} else {
+				final FeedbackStarted stompEvent = new FeedbackStarted();
+
+				messagingTemplate.convertAndSend(
+						"/topic/" + roomId + ".feedback.stream",
+						stompEvent
+				);
+			}
 		}
-		return retVal;
 	}
+
+	/*
+	ToDo: Listen to a more specific event
+	If feedback is getting locked for a room via HTTP PATCH, the specific event is currently not fired
+
+	@EventListener(condition = "#event.stateName == 'settings'")
+	public void handleLockFeedback(final StateChangeEvent<Room, Room.Settings> event) {
+		final String roomId = event.getEntity().getId();
+		if (event.getEntity().getSettings().isFeedbackLocked()) {
+			final FeedbackStopped stompEvent = new FeedbackStopped();
+
+			messagingTemplate.convertAndSend(
+					"/topic/" + roomId + ".feedback.stream",
+					stompEvent
+			);
+		} else {
+			final FeedbackStarted stompEvent = new FeedbackStarted();
+
+			messagingTemplate.convertAndSend(
+					"/topic/" + roomId + ".feedback.stream",
+					stompEvent
+			);
+		}
+	}*/
 
 	public void handle(final GetFeedbackStatusCommand command) {
+		final String roomId = command.getRoomId();
+		final Room room = roomService.get(roomId, true);
+
 		final FeedbackStatus event = new FeedbackStatus();
 		final FeedbackStatusPayload payload = new FeedbackStatusPayload();
-		payload.setClosed(closedRooms.contains(command.getRoomId()));
+		payload.setClosed(room.getSettings().isFeedbackLocked());
 		event.setPayload(payload);
 
 		messagingTemplate.convertAndSend(
@@ -90,34 +112,52 @@ public class FeedbackCommandHandler {
 	}
 
 	public void handle(final StartFeedbackCommand command) {
-		closedRooms.remove(command.getRoomId());
+		final String roomId = command.getRoomId();
+		final Room room = roomService.get(roomId, true);
 
-		final FeedbackStarted event = new FeedbackStarted();
+		room.getSettings().setFeedbackLocked(false);
 
-		messagingTemplate.convertAndSend(
-				"/topic/" + command.getRoomId() + ".feedback.stream",
-				event
-		);
+		try {
+			roomService.patch(room, Collections.singletonMap("feedbackLocked", false), Room::getSettings);
+			final FeedbackStarted event = new FeedbackStarted();
+
+			messagingTemplate.convertAndSend(
+					"/topic/" + command.getRoomId() + ".feedback.stream",
+					event
+			);
+		} catch (final Exception e) {
+			logger.error("Error on starting feedback for room: {}, command: {}", room, command);
+		}
+
 	}
 
 	public void handle(final StopFeedbackCommand command) {
-		closedRooms.add(command.getRoomId());
+		final String roomId = command.getRoomId();
+		final Room room = roomService.get(roomId, true);
+		try {
+			roomService.patch(room, Collections.singletonMap("feedbackLocked", true), Room::getSettings);
+			final FeedbackStopped event = new FeedbackStopped();
 
-		final FeedbackStopped event = new FeedbackStopped();
+			messagingTemplate.convertAndSend(
+					"/topic/" + command.getRoomId() + ".feedback.stream",
+					event
+			);
+		} catch (final Exception e) {
+			logger.error("Error on stopping feedback for room: {}, command: {}", room, command);
+		}
 
-		messagingTemplate.convertAndSend(
-				"/topic/" + command.getRoomId() + ".feedback.stream",
-				event
-		);
+
 	}
 
 	public void handle(final CreateFeedbackCommand command) {
-		if (!closedRooms.contains(command.getRoomId())) {
+		final String roomId = command.getRoomId();
+		final Room room = roomService.get(roomId, true);
+		if (!room.getSettings().isFeedbackLocked()) {
 			final CreateFeedbackPayload p = command.getPayload().getPayload();
-			final UserFeedback userFeedback = new UserFeedback(p.getUserId(), p.getValue());
 
-			updateFeedbackForRoom(command.getRoomId(), userFeedback);
-			final int[] newVals = getFeedbackForRoom(command.getRoomId());
+			feedbackStorage.save(room, p.getValue(), p.getUserId());
+			final Feedback feedback = feedbackStorage.getByRoom(room);
+			final int[] newVals = feedback.getValues().stream().mapToInt(i -> i).toArray();
 
 			final FeedbackChanged feedbackChanged = new FeedbackChanged();
 			final FeedbackChangedPayload feedbackChangedPayload = new FeedbackChangedPayload();
@@ -132,7 +172,10 @@ public class FeedbackCommandHandler {
 	}
 
 	public void handle(final GetFeedbackCommand command) {
-		final int[] currentVals = getFeedbackForRoom(command.getRoomId());
+		final String roomId = command.getRoomId();
+		final Room room = roomService.get(roomId, true);
+		final Feedback feedback = feedbackStorage.getByRoom(room);
+		final int[] currentVals = feedback.getValues().stream().mapToInt(i -> i).toArray();
 
 		final FeedbackChanged feedbackChanged = new FeedbackChanged();
 		final FeedbackChangedPayload feedbackChangedPayload = new FeedbackChangedPayload();
@@ -140,8 +183,21 @@ public class FeedbackCommandHandler {
 		feedbackChanged.setPayload(feedbackChangedPayload);
 
 		messagingTemplate.convertAndSend(
-				"/topic/" + command.getRoomId() + ".feedback.stream",
+				"/topic/" + roomId + ".feedback.stream",
 				feedbackChanged
+		);
+	}
+
+	public void handle(final ResetFeedbackCommand command) {
+		final String roomId = command.getRoomId();
+		final Room room = roomService.get(roomId, true);
+		feedbackStorage.cleanVotesByRoom(room, 0);
+
+		final FeedbackReset event = new FeedbackReset();
+
+		messagingTemplate.convertAndSend(
+				"/topic/" + roomId + ".feedback.stream",
+				event
 		);
 	}
 
@@ -233,6 +289,25 @@ public class FeedbackCommandHandler {
 		}
 
 		public GetFeedback getPayload() {
+			return payload;
+		}
+
+		public String getRoomId() {
+			return roomId;
+		}
+	}
+
+	public static class ResetFeedbackCommand {
+
+		private String roomId;
+		private ResetFeedback payload;
+
+		public ResetFeedbackCommand(final String roomId, final ResetFeedback payload) {
+			this.roomId = roomId;
+			this.payload = payload;
+		}
+
+		public ResetFeedback getPayload() {
 			return payload;
 		}
 
