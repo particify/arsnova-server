@@ -50,6 +50,7 @@ import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.TextAnswer;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.security.User;
+import de.thm.arsnova.web.exceptions.ForbiddenException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 import de.thm.arsnova.web.exceptions.UnauthorizedException;
 
@@ -346,11 +347,20 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 
 	@Override
 	protected void prepareCreate(final Answer answer) {
-		/* TODO: prevent multiple answers from one user */
 		final User user = userService.getCurrentUser();
 		final Content content = contentService.get(answer.getContentId());
 		if (content == null) {
 			throw new NotFoundException();
+		}
+
+		final Answer maybeExistingAnswer = answerRepository.findByContentIdUserIdPiRound(
+				content.getId(),
+				Answer.class,
+				user.getId(),
+				content.getState().getRound());
+
+		if (maybeExistingAnswer != null) {
+			throw new ForbiddenException();
 		}
 
 		answer.setCreatorId(user.getId());
