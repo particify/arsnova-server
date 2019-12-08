@@ -37,8 +37,6 @@ public interface RoomService extends EntityService<Room> {
 
 	Room getForAdmin(String id);
 
-	Room getInternal(String id, String userId);
-
 	boolean isShortIdAvailable(String shortId);
 
 	String generateShortId();
