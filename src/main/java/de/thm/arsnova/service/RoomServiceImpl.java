@@ -59,7 +59,6 @@ import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.service.score.ScoreCalculator;
 import de.thm.arsnova.service.score.ScoreCalculatorFactory;
-import de.thm.arsnova.web.exceptions.ForbiddenException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 
 /**
@@ -209,8 +208,7 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Override
 	@PreAuthorize("isAuthenticated()")
 	public Room getByShortId(final String shortId) {
-		final User user = userService.getCurrentUser();
-		return this.getInternal(getIdByShortId(shortId), user.getId());
+		return get(getIdByShortId(shortId));
 	}
 
 	@Override
@@ -232,19 +230,9 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		return get(id);
 	}
 
-	/*
-	 * The "internal" suffix means it is called by internal services that have no authentication!
-	 * TODO: Find a better way of doing this...
-	 */
 	@Override
-	public Room getInternal(final String id, final String userId) {
-		final Room room = get(id, true);
-		if (room == null) {
-			throw new NotFoundException();
-		}
-		if (room.isClosed() && !room.getOwnerId().equals(userId)) {
-			throw new ForbiddenException("User is not room creator.");
-		}
+	public Room get(final String id) {
+		final Room room = super.get(id);
 
 		/* FIXME: migrate LMS course support
 		if (connectorClient != null && room.isCourseSession()) {

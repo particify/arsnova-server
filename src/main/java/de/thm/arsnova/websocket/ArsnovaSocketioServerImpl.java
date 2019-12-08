@@ -187,7 +187,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 					return;
 				}
 				final String roomId = userService.getRoomIdByUserId(userId);
-				final de.thm.arsnova.model.Room room = roomService.getInternal(roomId, userId);
+				final de.thm.arsnova.model.Room room = roomService.get(roomId);
 
 				if (room.getSettings().isFeedbackLocked()) {
 					logger.debug("Feedback ignored: User: {}, Room Id: {}, Feedback: {}", userId, roomId, data.getValue());
@@ -398,7 +398,7 @@ public class ArsnovaSocketioServerImpl implements ArsnovaSocketioServer {
 	 * relevant Socket.IO data, the client needs to know after joining a session.
 	 */
 	public void reportRoomDataToClient(final String roomId, final String userId, final SocketIOClient client) {
-		final de.thm.arsnova.model.Room room = roomService.getInternal(roomId, userId);
+		final de.thm.arsnova.model.Room room = roomService.get(roomId);
 		final de.thm.arsnova.model.Room.Settings settings = room.getSettings();
 
 		client.sendEvent(UNANSWERED_LECTURE_CONTENTS_EVENTNAME,
