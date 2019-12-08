@@ -9,7 +9,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 import de.thm.arsnova.event.AfterPatchEvent;
-import de.thm.arsnova.event.StateChangeEvent;
 import de.thm.arsnova.model.Feedback;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.service.FeedbackStorageService;
@@ -73,6 +72,10 @@ public class FeedbackCommandHandler {
 		}
 	}
 
+	/*
+	ToDo: Listen to a more specific event
+	If feedback is getting locked for a room via HTTP PATCH, the specific event is currently not fired
+
 	@EventListener(condition = "#event.stateName == 'settings'")
 	public void handleLockFeedback(final StateChangeEvent<Room, Room.Settings> event) {
 		final String roomId = event.getEntity().getId();
@@ -91,7 +94,7 @@ public class FeedbackCommandHandler {
 					stompEvent
 			);
 		}
-	}
+	}*/
 
 	public void handle(final GetFeedbackStatusCommand command) {
 		final String roomId = command.getRoomId();
