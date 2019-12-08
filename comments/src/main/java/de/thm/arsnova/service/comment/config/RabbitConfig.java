@@ -9,6 +9,7 @@ import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistrar;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
@@ -17,16 +18,21 @@ import org.springframework.messaging.handler.annotation.support.DefaultMessageHa
 
 @Configuration
 public class RabbitConfig implements RabbitListenerConfigurer {
+    @Value("${spring.rabbitmq.host}") private String rabbitmqHost;
+    @Value("${spring.rabbitmq.port}") private int rabbitmqPort;
+    @Value("${spring.rabbitmq.username}") private String rabbitmqUsername;
+    @Value("${spring.rabbitmq.password}") private String rabbitmqPassword;
+    @Value("${spring.rabbitmq.vhost}") private String rabbitmqVhost;
     @Bean
     @Autowired
     public ConnectionFactory connectionFactory(
             @TaskExecutorConfig.RabbitConnectionExecutor TaskExecutor executor
     ) {
-        final CachingConnectionFactory connectionFactory = new CachingConnectionFactory("localhost", 5672);
-        connectionFactory.setUsername("arsnova");
-        connectionFactory.setPassword("arsnova");
+        final CachingConnectionFactory connectionFactory = new CachingConnectionFactory(rabbitmqHost, rabbitmqPort);
+        connectionFactory.setUsername(rabbitmqUsername);
+        connectionFactory.setPassword(rabbitmqPassword);
+        connectionFactory.setVirtualHost(rabbitmqVhost);
         connectionFactory.setExecutor(executor);
-        connectionFactory.setVirtualHost("/");
         return connectionFactory;
     }
 

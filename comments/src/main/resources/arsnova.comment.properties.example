@@ -1,7 +1,9 @@
 server.port=8088
 
+spring.rabbitmq.host=localhost
 spring.rabbitmq.username=arsnova
 spring.rabbitmq.password=arsnova
+spring.rabbitmq.vhost=/
 spring.rabbitmq.port=5672
 
 spring.datasource.url=jdbc:postgresql://localhost:5432/arsnovacomment
