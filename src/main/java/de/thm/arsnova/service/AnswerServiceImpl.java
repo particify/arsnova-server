@@ -301,6 +301,19 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	public Answer getAnswerByContentIdAndUserIdAndCurrentRound(final String contentId, final String userId) {
+		final Content content = contentService.get(contentId);
+		if (content == null) {
+			throw new NotFoundException();
+		}
+
+		final int piRound = content.getState().getRound();
+
+		return answerRepository.findByContentIdUserIdPiRound(contentId, Answer.class, userId, piRound);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
 	public List<Answer> getMyAnswersByRoomId(final String roomId) {
 		// Load contents first because we are only interested in answers of the latest piRound.
 		final List<Content> contents = contentService.getByRoomId(roomId);

@@ -76,7 +76,7 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 	public <T extends Answer> T findByContentIdUserIdPiRound(
 			final String contentId, final Class<T> type, final String userId, final int piRound) {
 		final List<T> answerList = db.queryView(createQuery("by_contentid_creatorid_round")
-				.key(ComplexKey.of(contentId, userId, piRound)), type);
+				.key(ComplexKey.of(contentId, userId, piRound)).includeDocs(true), type);
 		return answerList.isEmpty() ? null : answerList.get(0);
 	}
 

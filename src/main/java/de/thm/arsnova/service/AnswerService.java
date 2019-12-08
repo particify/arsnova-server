@@ -48,6 +48,8 @@ public interface AnswerService extends EntityService<Answer> {
 
 	List<TextAnswer> getTextAnswersByContentId(String contentId, int offset, int limit);
 
+	Answer getAnswerByContentIdAndUserIdAndCurrentRound(String contentId, String userId);
+
 	List<Answer> getMyAnswersByRoomId(String roomId);
 
 	int countTotalAnswersByRoomId(String roomId);
