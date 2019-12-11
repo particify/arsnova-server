@@ -70,7 +70,13 @@ public class PersistenceConfig {
 	@Bean
 	@Primary
 	public MangoCouchDbConnector couchDbConnector() throws Exception {
-		return new MangoCouchDbConnector(properties.getDbName(), couchDbInstance(), couchDbObjectMapperFactory());
+		final MangoCouchDbConnector connector = new MangoCouchDbConnector(
+				properties.getDbName(), couchDbInstance(), couchDbObjectMapperFactory());
+		if (properties.isCreateDb()) {
+			connector.createDatabaseIfNotExists();
+		}
+
+		return connector;
 	}
 
 	@Bean
