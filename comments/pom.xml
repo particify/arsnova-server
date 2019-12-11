@@ -15,6 +15,10 @@
 		<java.version>1.8</java.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+		<docker.registry>local-dev</docker.registry>
+		<docker.image>arsnova/${project.artifactId}</docker.image>
+		<docker.tag>latest</docker.tag>
+		<docker.time>EPOCH</docker.time>
     </properties>
 
 	<dependencyManagement>
@@ -146,6 +150,20 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.google.cloud.tools</groupId>
+				<artifactId>jib-maven-plugin</artifactId>
+				<version>1.8.0</version>
+				<configuration>
+					<to>
+						<image>${docker.registry}/${docker.image}:${docker.tag}</image>
+					</to>
+					<container>
+						<creationTime>${docker.time}</creationTime>
+						<ports>8080</ports>
+					</container>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
