@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +34,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DbAccessException;
+import org.ektorp.DbInfo;
 import org.ektorp.DocumentNotFoundException;
 import org.ektorp.impl.ObjectMapperFactory;
 import org.slf4j.Logger;
@@ -62,7 +64,7 @@ public class CouchDbInitializer implements ResourceLoaderAware {
 	private CouchDbConnector connector;
 	private ObjectMapper objectMapper;
 	private StatusService statusService;
-	private boolean migrationStarted = false;
+	private boolean initEventHandled = false;
 
 	public CouchDbInitializer(final CouchDbConnector couchDbConnector, final ObjectMapperFactory objectMapperFactory,
 			final StatusService statusService) {
@@ -137,6 +139,27 @@ public class CouchDbInitializer implements ResourceLoaderAware {
 		}
 	}
 
+	protected void waitForDb() {
+		DbInfo info = null;
+		logger.info("Waiting for database...");
+		do {
+			try {
+				info = connector.getDbInfo();
+				logger.info("Database ready.");
+			} catch (final DbAccessException e1) {
+				/* Break out of loop if the exception is not related to connection issues. */
+				if (e1.getCause() == null || e1.getCause().getClass() != ConnectException.class) {
+					throw e1;
+				}
+				try {
+					Thread.sleep(10000);
+				} catch (final InterruptedException e2) {
+					logger.warn("Database waiting loop was interrupted.", e2);
+				}
+			}
+		} while (info == null);
+	}
+
 	@PostConstruct
 	private void init() {
 		statusService.putMaintenanceReason(this.getClass(), "Database not initialized");
@@ -145,10 +168,12 @@ public class CouchDbInitializer implements ResourceLoaderAware {
 	@EventListener
 	private void onApplicationEvent(final ContextRefreshedEvent event) throws IOException, ScriptException {
 		/* Event is triggered more than once */
-		if (migrationStarted) {
+		if (initEventHandled) {
 			return;
 		}
-		migrationStarted = true;
+		initEventHandled = true;
+
+		waitForDb();
 
 		try {
 			final MigrationState state = checkMigrationState();
