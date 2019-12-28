@@ -67,12 +67,17 @@ package:
 docker_image:
   <<: *maven
   stage: deploy
-  only:
-    - master
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "master"'
+      when: on_success
+    - if: '$CI_COMMIT_REF_NAME == "latest" || $CI_COMMIT_REF_NAME =~ /^v[0-9]+/ || $CI_COMMIT_REF_NAME =~ /^[0-9]+\.[0-9]+$/'
+      when: never
+    - when: manual
   variables:
     DOCKER_IMAGE_NAME: $CI_PROJECT_PATH
   dependencies:
     - package
+  allow_failure: true
   script:
     - "echo Creation time for image: `git log -1 --format=%cI`"
     - mvn $MAVEN_CLI_OPTS jib:build
