@@ -47,6 +47,8 @@ unit_test:
   artifacts:
     paths:
       - $OUTPUT_DIR
+    reports:
+      junit: $OUTPUT_DIR/surefire-reports/TEST-*.xml
   coverage: '/Code coverage: \d+\.\d+/'
   script:
     - mvn $MAVEN_CLI_OPTS jacoco:prepare-agent surefire:test jacoco:report
