@@ -19,6 +19,7 @@ arsnova:
       host: localhost
       port: 5984
       db-name: arsnova3
+      create-db: false
       username: admin
       password: ""
 

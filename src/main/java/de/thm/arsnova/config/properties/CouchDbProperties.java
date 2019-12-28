@@ -26,6 +26,7 @@ public class CouchDbProperties {
 	private String host;
 	private int port;
 	private String dbName;
+	private boolean createDb;
 	private String username;
 	private String password;
 	private String migrateFrom;
@@ -52,6 +53,14 @@ public class CouchDbProperties {
 
 	public void setDbName(final String dbName) {
 		this.dbName = dbName;
+	}
+
+	public boolean isCreateDb() {
+		return createDb;
+	}
+
+	public void setCreateDb(final boolean createDb) {
+		this.createDb = createDb;
 	}
 
 	public String getUsername() {
