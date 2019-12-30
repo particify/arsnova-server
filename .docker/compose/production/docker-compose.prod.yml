@@ -1,0 +1,20 @@
+version: "3"
+services:
+  couchdb:
+    restart: unless-stopped
+  postgresql:
+    restart: unless-stopped
+  rabbitmq:
+    restart: unless-stopped
+  arsnova-backend-core:
+    restart: unless-stopped
+  arsnova-comment-service:
+    restart: unless-stopped
+  arsnova-web:
+    restart: unless-stopped
+  arsnova-web-legacy:
+    restart: unless-stopped
+  arsnova-proxy:
+    ports:
+      - $PORT:80
+    restart: unless-stopped

@@ -1,0 +1,32 @@
+version: "3"
+services:
+  couchdb:
+    ports:
+      - 127.0.0.1:5984:5984
+  postgresql:
+    ports:
+      - 127.0.0.1:5432:5432
+  rabbitmq:
+    #build: ./rabbitmq-stomp
+    ports:
+      - 127.0.0.1:5672:5672
+      - 127.0.0.1:61613:61613
+  arsnova-backend-core:
+    ports:
+      - 127.0.0.1:8080:8080
+      - 127.0.0.1:8090:8090
+  arsnova-comment-service:
+    ports:
+      - 127.0.0.1:8088:8088
+  arsnova-web:
+    ports:
+      - 127.0.0.1:8081:80
+  arsnova-web-legacy:
+    ports:
+      - 127.0.0.1:8082:80
+  arsnova-proxy:
+    #image: nginx:stable
+    ports:
+      - 127.0.0.1:$PORT:80
+    #volumes:
+    #  - ./nginx-proxy/conf.d:/etc/nginx/conf.d
