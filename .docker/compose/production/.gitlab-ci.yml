@@ -15,13 +15,11 @@ build_docker_images:
   parallel: 3
   script:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - export NAME_VAR=IMAGE${CI_NODE_INDEX}_NAME
-    - export BASETAG_VAR=IMAGE${CI_NODE_INDEX}_BASETAG
-    - export VERSION_VAR=IMAGE${CI_NODE_INDEX}_VERSION
-    - export IMAGE_NAME=${!NAME_VAR}
-    - export IMAGE_BASETAG=${!BASETAG_VAR}
-    - export VERSION=${!VERSION_VAR}
+    - eval export IMAGE_NAME=\$IMAGE${CI_NODE_INDEX}_NAME
+    - eval export IMAGE_BASETAG=\$IMAGE${CI_NODE_INDEX}_BASETAG
+    - eval export VERSION=\$IMAGE${CI_NODE_INDEX}_VERSION
     - export KANIKO_CONTEXT=$CI_PROJECT_DIR/$IMAGE_NAME
     - export KANIKO_DOCKERFILE=$KANIKO_CONTEXT/Dockerfile
     - export KANIKO_DESTINATION=$CI_REGISTRY/$CI_PROJECT_PATH/$IMAGE_NAME:$VERSION
+    - env | grep -E 'IMAGE|KANIKO'
     - /kaniko/executor --context "$KANIKO_CONTEXT" --dockerfile "$KANIKO_DOCKERFILE" --destination "$KANIKO_DESTINATION" --build-arg "IMAGE_BASETAG=$IMAGE_BASETAG" --build-arg "VERSION=$VERSION"
