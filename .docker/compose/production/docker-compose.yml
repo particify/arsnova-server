@@ -26,6 +26,8 @@ services:
       - couchdb
       - rabbitmq
     environment:
+      SYSTEM_API_PROXYPATH: /api
+      SYSTEM_SOCKETIO_BINDADDRESS: 0.0.0.0
       SYSTEM_COUCHDB_HOST: couchdb
       SYSTEM_COUCHDB_USERNAME: arsnova
       SYSTEM_COUCHDB_PASSWORD: arsnova
