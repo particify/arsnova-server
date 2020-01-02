@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -206,6 +207,7 @@ public class FromV2Migrator {
 		final de.thm.arsnova.model.Content to;
 		final Map<String, Map<String, Object>> extensions;
 		final Map<String, Object> v2;
+		final Pattern prefixedLabelPattern = Pattern.compile("^[A-Z]: .+");
 		switch (from.getQuestionType()) {
 			case V2_TYPE_ABCD:
 			case V2_TYPE_SC:
@@ -217,10 +219,12 @@ public class FromV2Migrator {
 				to = choiceQuestionContent;
 				to.setFormat(formatMapping.get(from.getQuestionType()));
 				choiceQuestionContent.setMultiple(V2_TYPE_MC.equals(from.getQuestionType()));
+				final boolean prefixedLabels = from.getPossibleAnswers().stream()
+						.allMatch(a -> prefixedLabelPattern.matcher(a.getText()).matches());
 				for (int i = 0; i < from.getPossibleAnswers().size(); i++) {
 					final de.thm.arsnova.model.migration.v2.AnswerOption fromOption = from.getPossibleAnswers().get(i);
 					final ChoiceQuestionContent.AnswerOption toOption = new ChoiceQuestionContent.AnswerOption();
-					toOption.setLabel(fromOption.getText());
+					toOption.setLabel(prefixedLabels ? fromOption.getText().substring(3) : fromOption.getText());
 					toOption.setPoints(fromOption.getValue());
 					choiceQuestionContent.getOptions().add(toOption);
 					if (fromOption.isCorrect()) {
