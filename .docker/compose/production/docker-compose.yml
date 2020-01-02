@@ -38,6 +38,7 @@ services:
       SYSTEM_MESSAGE_BROKER_RELAY_PASSWORD: guest
       SECURITY_JWT_SECRET: secret
       UI_SLOGAN: powered by particify.de
+    command: /jetty/start.jar --module=http-forwarded
   arsnova-comment-service:
     image: registry.gitlab.com/arsnova/arsnova-comment-service:master
     depends_on:
@@ -48,6 +49,7 @@ services:
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
+    command: /jetty/start.jar --module=http-forwarded
   arsnova-web:
     #image: registry.gitlab.com/arsnova/arsnova-webclient:master
     image: registry.gitlab.com/arsnova/arsnova-webclient:dev-use-ws-proxy
