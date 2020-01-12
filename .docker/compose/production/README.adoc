@@ -1,0 +1,24 @@
+= Particify Docker Orchestration
+
+This repository contains files to integrate all of the Particify services and service dependencies using Docker:
+
+* Configuration for Docker Compose
+* Dockerfiles (and additional assets) to create modified versions of thirdparty images
+
+== Usage
+
+=== Preparations
+
+. Create a GitLab
+  https://gitlab.com/profile/personal_access_tokens[Personal Access Token]
+  with `read_registry` scope.
+. Authenticate the Docker environment with the GitLab registry:
+  `docker login registry.gitlab.com`
+. Clone this repository.
+. Inside the repositories root directory run `./set-env.sh <env>`. env can be `prod` or `dev`.
+
+=== Running
+
+. Run `PORT=<port> docker-compose up`. Append `-d` to run in detached mode for production.
+. Run `docker-compose down` stop and remove the containers.
+. Run `docker-compose pull` to update the images.
