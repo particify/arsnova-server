@@ -155,4 +155,9 @@ public class ScoreBasedScoreCalculatorTest {
 		assertEquals(10, numerator);
 		assertEquals(20, denominator);
 	}
+
+	@Test
+	public void shouldNotDivideByZeroInNumerator() {
+		assertEquals(0, lp.getCourseProgress(null).getNumerator());
+	}
 }
