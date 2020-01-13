@@ -51,8 +51,7 @@ services:
       SPRING_RABBITMQ_PASSWORD: guest
     command: /jetty/start.jar --module=http-forwarded
   arsnova-web:
-    #image: registry.gitlab.com/arsnova/arsnova-webclient:master
-    image: registry.gitlab.com/arsnova/arsnova-webclient:dev-use-ws-proxy
+    image: registry.gitlab.com/arsnova/arsnova-webclient:master
   arsnova-web-legacy:
     image: registry.gitlab.com/particify/devops/docker-orchestration/arsnova-mobile:2.7.1
   arsnova-proxy:
