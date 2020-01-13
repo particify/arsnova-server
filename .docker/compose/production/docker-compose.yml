@@ -21,7 +21,7 @@ services:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
   arsnova-backend-core:
-    image: registry.gitlab.com/arsnova/arsnova-backend:master
+    image: registry.gitlab.com/arsnova/arsnova-backend:$CORE_TAG
     depends_on:
       - couchdb
       - rabbitmq
@@ -40,7 +40,7 @@ services:
       UI_SLOGAN: powered by particify.de
     command: /jetty/start.jar --module=http-forwarded
   arsnova-comment-service:
-    image: registry.gitlab.com/arsnova/arsnova-comment-service:master
+    image: registry.gitlab.com/arsnova/arsnova-comment-service:$COMMENT_TAG
     depends_on:
       - postgresql
       - rabbitmq
@@ -51,9 +51,9 @@ services:
       SPRING_RABBITMQ_PASSWORD: guest
     command: /jetty/start.jar --module=http-forwarded
   arsnova-web:
-    image: registry.gitlab.com/arsnova/arsnova-webclient:master
+    image: registry.gitlab.com/arsnova/arsnova-webclient:$WEB_TAG
   arsnova-web-legacy:
-    image: registry.gitlab.com/particify/devops/docker-orchestration/arsnova-mobile:2.7.1
+    image: registry.gitlab.com/particify/devops/docker-orchestration/arsnova-mobile:$WEB_LEGACY_TAG
   arsnova-proxy:
     image: registry.gitlab.com/particify/devops/docker-orchestration/nginx-proxy:stable
     depends_on:

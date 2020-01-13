@@ -22,3 +22,18 @@ This repository contains files to integrate all of the Particify services and se
 . Run `PORT=<port> docker-compose up`. Append `-d` to run in detached mode for production.
 . Run `docker-compose down` stop and remove the containers.
 . Run `docker-compose pull` to update the images.
+
+=== Configuration
+
+The default configuration can be adjusted via environment variables:
+
+|=======
+|Variable |Default value |Description
+|PORT |80 |Port used for the frontend proxy
+|CORE_TAG |master |Docker tag (repository branch) for Core Backend
+|COMMENT_TAG |master |Docker tag (repository branch) for Comment Service
+|WEB_TAG |master |Docker tag (repository branch) for Webclient
+|WEB_LEGACY_TAG |master |Docker tag (repository branch) for Webclient (legacy)
+|=======
+
+Example: `PORT=8100 WEB_TAG=my-dev-branch docker-compose up`
