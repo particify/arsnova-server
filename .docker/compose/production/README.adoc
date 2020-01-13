@@ -37,3 +37,6 @@ The default configuration can be adjusted via environment variables:
 |=======
 
 Example: `PORT=8100 WEB_TAG=my-dev-branch docker-compose up`
+
+NOTE: Docker images are not automatically created for development branches.
+Make sure to trigger the `docker_image_dev` job in GitLab's pipeline view and delete the image from the registry once it is no longer needed.
