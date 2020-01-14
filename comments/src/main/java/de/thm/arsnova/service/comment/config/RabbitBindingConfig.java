@@ -1,5 +1,7 @@
 package de.thm.arsnova.service.comment.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
@@ -13,6 +15,7 @@ import java.util.Map;
 
 @Configuration
 public class RabbitBindingConfig {
+    private static final Logger log = LoggerFactory.getLogger(RabbitBindingConfig.class);
 
     static final String commandExchangeName = "comment.command";
     static final String createCommandQueueName = "comment.command.create";
@@ -36,7 +39,11 @@ public class RabbitBindingConfig {
     public Exchange exchange(RabbitAdmin rabbitAdmin) {
         final Exchange exchange = new FanoutExchange(commandExchangeName, true, false);
 
-        rabbitAdmin.declareExchange(exchange);
+        try {
+            rabbitAdmin.declareExchange(exchange);
+        } catch (Exception e) {
+            log.error(e.toString());
+        }
 
         return exchange;
     }
@@ -46,7 +53,11 @@ public class RabbitBindingConfig {
     public Queue createCommandQueueName(RabbitAdmin rabbitAdmin) {
         final Queue queue = new Queue(createCommandQueueName, true, false, false);
 
-        rabbitAdmin.declareQueue(queue);
+        try {
+            rabbitAdmin.declareQueue(queue);
+        } catch (Exception e) {
+            log.error(e.toString());
+        }
 
         return queue;
     }
@@ -56,7 +67,11 @@ public class RabbitBindingConfig {
     public Queue patchCommandQueueName(RabbitAdmin rabbitAdmin) {
         final Queue queue = new Queue(patchCommandQueueName, true, false, false);
 
-        rabbitAdmin.declareQueue(queue);
+        try {
+            rabbitAdmin.declareQueue(queue);
+        } catch (Exception e) {
+            log.error(e.toString());
+        }
 
         return queue;
     }
@@ -66,7 +81,11 @@ public class RabbitBindingConfig {
     public Queue updateCommandQueueName(RabbitAdmin rabbitAdmin) {
         final Queue queue = new Queue(updateCommandQueueName, true, false, false);
 
-        rabbitAdmin.declareQueue(queue);
+        try {
+            rabbitAdmin.declareQueue(queue);
+        } catch (Exception e) {
+            log.error(e.toString());
+        }
 
         return queue;
     }
@@ -76,7 +95,11 @@ public class RabbitBindingConfig {
     public Queue deleteCommandQueueName(RabbitAdmin rabbitAdmin) {
         final Queue queue = new Queue(deleteCommandQueueName, true, false, false);
 
-        rabbitAdmin.declareQueue(queue);
+        try {
+            rabbitAdmin.declareQueue(queue);
+        } catch (Exception e) {
+            log.error(e.toString());
+        }
 
         return queue;
     }
@@ -86,7 +109,11 @@ public class RabbitBindingConfig {
     public Queue highlightCommandQueueName(RabbitAdmin rabbitAdmin) {
         final Queue queue = new Queue(highlightCommandQueueName, true, false, false);
 
-        rabbitAdmin.declareQueue(queue);
+        try {
+            rabbitAdmin.declareQueue(queue);
+        } catch (Exception e) {
+            log.error(e.toString());
+        }
 
         return queue;
     }
@@ -96,7 +123,11 @@ public class RabbitBindingConfig {
     public Queue upvoteQueueName(RabbitAdmin rabbitAdmin) {
         final Queue queue = new Queue(upvoteQueueName, true, false, false);
 
-        rabbitAdmin.declareQueue(queue);
+        try {
+            rabbitAdmin.declareQueue(queue);
+        } catch (Exception e) {
+            log.error(e.toString());
+        }
 
         return queue;
     }
@@ -106,7 +137,11 @@ public class RabbitBindingConfig {
     public Queue resetVoteQueueName(RabbitAdmin rabbitAdmin) {
         final Queue queue = new Queue(resetVoteQueueName, true, false, false);
 
-        rabbitAdmin.declareQueue(queue);
+        try {
+            rabbitAdmin.declareQueue(queue);
+        } catch (Exception e) {
+            log.error(e.toString());
+        }
 
         return queue;
     }
@@ -116,7 +151,11 @@ public class RabbitBindingConfig {
     public Queue downvoteQueueName(RabbitAdmin rabbitAdmin) {
         final Queue queue = new Queue(downvoteQueueName, true, false, false);
 
-        rabbitAdmin.declareQueue(queue);
+        try {
+            rabbitAdmin.declareQueue(queue);
+        } catch (Exception e) {
+            log.error(e.toString());
+        }
 
         return queue;
     }
