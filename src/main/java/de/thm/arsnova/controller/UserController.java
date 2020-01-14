@@ -41,6 +41,7 @@ public class UserController extends AbstractEntityController<UserProfile> {
 	protected static final String REQUEST_MAPPING = "/user";
 	private static final String REGISTER_MAPPING = "/register";
 	private static final String ACTIVATE_MAPPING = DEFAULT_ID_MAPPING + "/activate";
+	private static final String RESET_ACTIVATE_MAPPING = DEFAULT_ID_MAPPING + "/resetactivation";
 	private static final String RESET_PASSWORD_MAPPING = DEFAULT_ID_MAPPING + "/resetpassword";
 	private static final String ROOM_HISTORY_MAPPING = DEFAULT_ID_MAPPING + "/roomHistory";
 
@@ -109,6 +110,13 @@ public class UserController extends AbstractEntityController<UserProfile> {
 		if (!userService.activateAccount(id, key, request.getRemoteAddr())) {
 			throw new BadRequestException();
 		}
+	}
+
+	@PostMapping(RESET_ACTIVATE_MAPPING)
+	public void resetActivation(
+			@PathVariable final String id,
+			final HttpServletRequest request) {
+		userService.resetActivation(id, request.getRemoteAddr());
 	}
 
 	@PostMapping(RESET_PASSWORD_MAPPING)

@@ -45,7 +45,11 @@ public interface UserService extends EntityService<UserProfile> {
 
 	boolean isBannedFromLogin(String addr);
 
+	boolean isBannedFromSendingActivationMail(String addr);
+
 	void increaseFailedLoginCount(String addr);
+
+	void increaseSentMailCount(String addr);
 
 	String getUserIdToSocketId(UUID socketId);
 
@@ -100,4 +104,6 @@ public interface UserService extends EntityService<UserProfile> {
 	void addWsSessionToJwtMapping(String wsSessionId, String jwt);
 
 	User getAuthenticatedUserByWsSession(String wsSessionId);
+
+	UserProfile resetActivation(String id, String clientAddress);
 }

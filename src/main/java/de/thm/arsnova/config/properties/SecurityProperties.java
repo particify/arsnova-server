@@ -63,6 +63,7 @@ public class SecurityProperties {
 	private Jwt jwt;
 	private List<String> adminAccounts;
 	private int loginTryLimit;
+	private int resendMailLimit;
 	private List<String> corsOrigins;
 
 	public Jwt getJwt() {
@@ -87,6 +88,14 @@ public class SecurityProperties {
 
 	public void setLoginTryLimit(final int loginTryLimit) {
 		this.loginTryLimit = loginTryLimit;
+	}
+
+	public int getResendMailLimit() {
+		return resendMailLimit;
+	}
+
+	public void setResendMailLimit(final int resendMailLimit) {
+		this.resendMailLimit = resendMailLimit;
 	}
 
 	public List<String> getCorsOrigins() {
