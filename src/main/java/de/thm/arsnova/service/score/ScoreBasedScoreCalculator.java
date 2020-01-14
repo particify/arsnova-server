@@ -36,7 +36,11 @@ public class ScoreBasedScoreCalculator extends VariantScoreCalculator {
 		lpv.setCourseProgress(coursePercentage());
 		lpv.setNumQuestions(courseScore.getQuestionCount());
 		lpv.setNumUsers(courseScore.getTotalUserCount());
-		lpv.setNumerator(courseScore.getTotalUserScore() / courseScore.getTotalUserCount());
+		if (courseScore.getTotalUserCount() == 0) {
+			lpv.setNumerator(0);
+		} else {
+			lpv.setNumerator(courseScore.getTotalUserScore() / courseScore.getTotalUserCount());
+		}
 		lpv.setDenominator(courseScore.getMaximumScore());
 		return lpv;
 	}
