@@ -18,20 +18,55 @@
 package de.thm.arsnova.domain;
 
 import de.thm.arsnova.dao.IDatabaseDao;
+import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
 
 /**
  * Calculates learning progress based on a question's value.
  */
-public class PointBasedLearningProgress extends VariantLearningProgress {
+public class PointBasedLearningProgress implements LearningProgress {
+
+	private CourseScore courseScore;
+
+	private String questionVariant;
+
+	private final IDatabaseDao databaseDao;
 
 	public PointBasedLearningProgress(IDatabaseDao dao) {
-		super(dao);
+		this.databaseDao = dao;
+	}
+
+	private void loadProgress(final Session session) {
+		this.courseScore = databaseDao.getLearningProgress(session);
+	}
+
+	public void setQuestionVariant(final String variant) {
+		this.questionVariant = variant;
 	}
 
 	@Override
-	protected LearningProgressValues createCourseProgress() {
+	public LearningProgressValues getCourseProgress(Session session) {
+		this.loadProgress(session);
+		this.filterVariant();
+		return this.createCourseProgress();
+	}
+
+
+	@Override
+	public LearningProgressValues getMyProgress(Session session, User user) {
+		this.loadProgress(session);
+		this.filterVariant();
+		return this.createMyProgress(user);
+	}
+
+	private void filterVariant() {
+		if (questionVariant != null && !questionVariant.isEmpty()) {
+			this.courseScore = this.courseScore.filterVariant(questionVariant);
+		}
+	}
+
+	private LearningProgressValues createCourseProgress() {
 		LearningProgressValues lpv = new LearningProgressValues();
 		lpv.setCourseProgress(coursePercentage());
 		lpv.setNumQuestions(courseScore.getQuestionCount());
@@ -57,8 +92,7 @@ public class PointBasedLearningProgress extends VariantLearningProgress {
 		return (int) Math.min(100, Math.round(courseProgress * 100));
 	}
 
-	@Override
-	protected LearningProgressValues createMyProgress(User user) {
+	private LearningProgressValues createMyProgress(User user) {
 		LearningProgressValues lpv = new LearningProgressValues();
 		lpv.setCourseProgress(coursePercentage());
 		lpv.setNumQuestions(courseScore.getQuestionCount());

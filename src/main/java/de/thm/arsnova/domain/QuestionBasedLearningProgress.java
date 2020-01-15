@@ -18,92 +18,128 @@
 package de.thm.arsnova.domain;
 
 import de.thm.arsnova.dao.IDatabaseDao;
+import de.thm.arsnova.entities.Answer;
+import de.thm.arsnova.entities.Question;
+import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
- * Calculates learning progress based on overall correctness of an answer. A question is answered correctly if and
- * only if the maximum question value possible has been achieved.
+ * Calculates learning progress based on correctness of an answer.
  */
-public class QuestionBasedLearningProgress extends VariantLearningProgress {
+public class QuestionBasedLearningProgress implements LearningProgress {
+
+	private final IDatabaseDao databaseDao;
+
+	private String questionVariant = "lecture";
 
 	public QuestionBasedLearningProgress(IDatabaseDao dao) {
-		super(dao);
+		this.databaseDao = dao;
 	}
 
 	@Override
-	protected LearningProgressValues createCourseProgress() {
-		final int courseProgress = calculateCourseProgress();
-		final int numerator = courseScore.getQuestionCount() * courseProgress / 100;
-		final int denominator = courseScore.getQuestionCount();
-		LearningProgressValues lpv = new LearningProgressValues();
-		lpv.setCourseProgress(courseProgress);
-		lpv.setNumQuestions(courseScore.getQuestionCount());
-		lpv.setNumUsers(courseScore.getTotalUserCount());
-		lpv.setNumerator(numerator);
-		lpv.setDenominator(denominator);
-		return lpv;
-	}
-
-	private int calculateCourseProgress() {
-		double ratio = 0;
-		for (QuestionScore questionScore : courseScore) {
-			if (!questionScore.hasScores()) {
-				continue;
-			}
-			int numAnswers = questionScore.getUserCount();
-			if (numAnswers != 0) {
-				ratio += (double) countCorrectAnswers(questionScore) / (numAnswers * courseScore.getQuestionCount());
-			}
-		}
-		return (int) Math.min(100, Math.round(ratio * 100));
-	}
-
-	private int countCorrectAnswers(QuestionScore questionScore) {
-		int requiredScore = questionScore.getMaximum();
-		int numAnswersCorrect = 0;
-		for (UserScore userScore : questionScore) {
-			if (userScore.hasScore(requiredScore)) {
-				numAnswersCorrect++;
-			}
-		}
-		return numAnswersCorrect;
+	public LearningProgressValues getCourseProgress(Session session) {
+		List<Question> eligibleQuestions = getQuestionsForVariant(session, questionVariant);
+		return createCourseProgress(eligibleQuestions);
 	}
 
 	@Override
-	protected LearningProgressValues createMyProgress(User user) {
-		final int numerator = numQuestionsCorrectForUser(user);
-		final int denominator = courseScore.getQuestionCount();
+	public LearningProgressValues getMyProgress(Session session, User user) {
+		List<Question> eligibleQuestions = getQuestionsForVariant(session, questionVariant);
+		return createMyProgress(eligibleQuestions, user);
+	}
+
+	public void setQuestionVariant(String questionVariant) {
+		this.questionVariant = questionVariant;
+	}
+
+	private LearningProgressValues createMyProgress(List<Question> questions, User user) {
+		int numMyCorrectAnswers = 0;
+		int numAllCorrectAnswers = 0;
+		List<Answer> allAnswers = new ArrayList<>();
+		for (Question q : questions) {
+			List<Answer> answers = databaseDao.getAnswers(q, q.getPiRound());
+			allAnswers.addAll(answers);
+			List<Answer> myAnswers = answers.stream().filter(a -> a.getUser().equals(user.getUsername())).collect(Collectors.toList());
+			numMyCorrectAnswers += countCorrectAnswers(q, myAnswers);
+			numAllCorrectAnswers += countCorrectAnswers(q, answers);
+		}
+		int numUsers = countUsers(allAnswers);
 		LearningProgressValues lpv = new LearningProgressValues();
-		lpv.setCourseProgress(calculateCourseProgress());
-		lpv.setMyProgress(myPercentage(numerator, denominator));
-		lpv.setNumQuestions(courseScore.getQuestionCount());
-		lpv.setNumUsers(courseScore.getTotalUserCount());
-		lpv.setNumerator(numerator);
-		lpv.setDenominator(denominator);
+		lpv.setNumerator(numMyCorrectAnswers);
+		lpv.setDenominator(questions.size());
+		lpv.setNumQuestions(questions.size());
+		lpv.setNumUsers(numUsers);
+		lpv.setMyProgress(myPercentage(numMyCorrectAnswers, questions.size()));
+		if (numUsers != 0 && questions.size() != 0) {
+			lpv.setCourseProgress((int)(100 * (numAllCorrectAnswers / ((double)(numUsers * questions.size())))));
+		} else {
+			lpv.setCourseProgress(0);
+		}
 		return lpv;
 	}
 
-	private int numQuestionsCorrectForUser(User user) {
-		int numQuestionsCorrect = 0;
-		for (QuestionScore questionScore : courseScore) {
-			numQuestionsCorrect += countCorrectAnswersForUser(user, questionScore);
+	private List<Question> getQuestionsForVariant(Session session, String questionVariant) {
+		List<Question> eligibleQuestions;
+		if (questionVariant == null || questionVariant.isEmpty()) {
+			List<Question> questions = databaseDao.getLectureQuestionsForTeachers(session);
+			questions.addAll(databaseDao.getPreparationQuestionsForTeachers(session));
+			eligibleQuestions = filterIrrelevantQuestions(questions);
+		} else if (questionVariant.equals("lecture")) {
+			eligibleQuestions = filterIrrelevantQuestions(databaseDao.getLectureQuestionsForTeachers(session));
+		} else if (questionVariant.equals("preparation")) {
+			eligibleQuestions = filterIrrelevantQuestions(databaseDao.getPreparationQuestionsForTeachers(session));
+		} else {
+			throw new RuntimeException("Unknown question variant: " + questionVariant);
 		}
-		return numQuestionsCorrect;
+		return eligibleQuestions;
 	}
 
-	private int countCorrectAnswersForUser(User user, QuestionScore questionScore) {
-		int numQuestionsCorrect = 0;
-		int requiredScore = questionScore.getMaximum();
-		for (UserScore userScore : questionScore) {
-			if (!userScore.isUser(user)) {
-				continue;
-			}
-			if (userScore.hasScore(requiredScore)) {
-				numQuestionsCorrect++;
-			}
+	private LearningProgressValues createCourseProgress(List<Question> questions) {
+		int numCorrectAnswers = 0;
+		List<Answer> allAnswers = new ArrayList<>();
+		for (Question q : questions) {
+			List<Answer> answers = databaseDao.getAnswers(q, q.getPiRound());
+			allAnswers.addAll(answers);
+			numCorrectAnswers += countCorrectAnswers(q, answers);
 		}
-		return numQuestionsCorrect;
+		int numUsers = countUsers(allAnswers);
+		LearningProgressValues lpv = new LearningProgressValues();
+		lpv.setNumerator(numCorrectAnswers);
+		lpv.setDenominator(questions.size() * numUsers);
+		lpv.setNumQuestions(questions.size());
+		lpv.setNumUsers(numUsers);
+		if (numUsers != 0 && questions.size() != 0) {
+			lpv.setCourseProgress((int)(100 * (numCorrectAnswers / ((double)(numUsers * questions.size())))));
+		} else {
+			lpv.setCourseProgress(0);
+		}
+		return lpv;
+	}
+
+	private int countUsers(List<Answer> answers) {
+		Set<String> usernames = new HashSet<>();
+		for (Answer a : answers) {
+			usernames.add(a.getUser());
+		}
+		return usernames.size();
+	}
+
+	private int countCorrectAnswers(Question q, List<Answer> answers) {
+		return answers.stream().filter(a -> a.isCorrect(q)).collect(Collectors.toList()).size();
+	}
+
+	private List<Question> filterIrrelevantQuestions(List<Question> questions) {
+		return questions.stream()
+				.filter(q -> q.isActive() && !q.isNoCorrect())
+				.filter(q -> q.getPossibleAnswers() != null && !q.getPossibleAnswers().isEmpty())
+				.collect(Collectors.toList());
 	}
 
 	private int myPercentage(int numQuestionsCorrect, int questionCount) {

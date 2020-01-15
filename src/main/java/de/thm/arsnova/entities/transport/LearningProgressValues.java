@@ -125,4 +125,16 @@ public class LearningProgressValues {
 		}
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "LearningProgressValues{" +
+				"courseProgress=" + courseProgress +
+				", myProgress=" + myProgress +
+				", numQuestions=" + numQuestions +
+				", numerator=" + numerator +
+				", denominator=" + denominator +
+				", numUsers=" + numUsers +
+				'}';
+	}
 }

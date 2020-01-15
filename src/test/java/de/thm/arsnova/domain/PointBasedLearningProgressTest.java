@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 public class PointBasedLearningProgressTest {
 
 	private CourseScore courseScore;
-	private VariantLearningProgress lp;
+	private PointBasedLearningProgress lp;
 
 	private int id = 1;
 

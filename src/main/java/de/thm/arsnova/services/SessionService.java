@@ -23,11 +23,8 @@ import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.domain.ILearningProgressFactory;
 import de.thm.arsnova.domain.LearningProgress;
-import de.thm.arsnova.entities.LearningProgressOptions;
-import de.thm.arsnova.entities.Session;
-import de.thm.arsnova.entities.SessionFeature;
-import de.thm.arsnova.entities.SessionInfo;
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.domain.QuestionBasedLearningProgress;
+import de.thm.arsnova.entities.*;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
 import de.thm.arsnova.events.DeleteSessionEvent;
@@ -52,9 +49,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Performs all session related operations.
