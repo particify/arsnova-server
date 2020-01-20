@@ -20,6 +20,8 @@ package de.thm.arsnova.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,6 +46,7 @@ public class UserController extends AbstractEntityController<UserProfile> {
 	private static final String RESET_ACTIVATE_MAPPING = DEFAULT_ID_MAPPING + "/resetactivation";
 	private static final String RESET_PASSWORD_MAPPING = DEFAULT_ID_MAPPING + "/resetpassword";
 	private static final String ROOM_HISTORY_MAPPING = DEFAULT_ID_MAPPING + "/roomHistory";
+	private static final String ROOM_HISTORY_DELETE_MAPPING = ROOM_HISTORY_MAPPING + "/{roomId}";
 
 	private UserService userService;
 	private RoomService roomService;
@@ -141,6 +144,13 @@ public class UserController extends AbstractEntityController<UserProfile> {
 	public void postRoomHistoryEntry(@PathVariable final String id,
 			@RequestBody final UserProfile.RoomHistoryEntry roomHistoryEntry) {
 		userService.addRoomToHistory(userService.get(id), roomService.get(roomHistoryEntry.getRoomId()));
+	}
+
+	@DeleteMapping(ROOM_HISTORY_DELETE_MAPPING)
+	public void deleteRoomHistoryEntry(
+			@PathVariable final String id,
+			@PathVariable final String roomId) {
+		userService.deleteRoomFromHistory(userService.get(id), roomService.get(roomId));
 	}
 
 	@Override

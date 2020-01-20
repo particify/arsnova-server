@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import org.apache.commons.lang.CharEncoding;
@@ -567,6 +568,25 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		if (!roomHistory.contains(entry)) {
 			roomHistory.add(entry);
 			final Map<String, Object> changes = Collections.singletonMap("roomHistory", roomHistory);
+			try {
+				super.patch(userProfile, changes);
+			} catch (final IOException e) {
+				logger.error("Could not patch RoomHistory");
+			}
+		}
+	}
+
+	@Override
+	@PreAuthorize("hasPermission(#userProfile, 'update')")
+	public void deleteRoomFromHistory(final UserProfile userProfile, final Room room) {
+		final Set<UserProfile.RoomHistoryEntry> roomHistory = userProfile.getRoomHistory();
+
+		final Set<UserProfile.RoomHistoryEntry> filteredRoomHistory = roomHistory.stream()
+				.filter(r -> !r.getRoomId().equals(room.getId()))
+				.collect(Collectors.toSet());
+
+		if (filteredRoomHistory.size() < roomHistory.size()) {
+			final Map<String, Object> changes = Collections.singletonMap("roomHistory", filteredRoomHistory);
 			try {
 				super.patch(userProfile, changes);
 			} catch (final IOException e) {
