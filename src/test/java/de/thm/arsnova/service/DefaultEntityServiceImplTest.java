@@ -52,6 +52,7 @@ import de.thm.arsnova.config.TestPersistanceConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
 import de.thm.arsnova.config.WebSocketConfig;
 import de.thm.arsnova.model.Room;
+import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.test.context.support.WithMockUser;
 
@@ -112,7 +113,7 @@ public class DefaultEntityServiceImplTest {
 		patchedValues.put("closed", patchedActive);
 		patchedValues.put("ownerId", "Should not be changeable.");
 
-		entityService.patch(room, patchedValues);
+		entityService.patch(room, patchedValues, View.Public.class);
 
 		assertEquals(originalId, room.getId());
 		assertEquals(patchedName, room.getName());
@@ -161,7 +162,7 @@ public class DefaultEntityServiceImplTest {
 		patchedValues.put("closed", patchedClosed);
 		patchedValues.put("ownerId", "Should not be changeable.");
 
-		entityService.patch(sessions, patchedValues);
+		entityService.patch(sessions, patchedValues, View.Public.class);
 
 		assertEquals(originalId1, room1.getId());
 		assertEquals(patchedName, room1.getName());

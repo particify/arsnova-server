@@ -183,15 +183,26 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 
 	@Override
 	public T patch(final T entity, final Map<String, Object> changes) throws IOException {
-		return patch(entity, changes, Function.identity());
+		return patch(entity, changes, Function.identity(), View.Persistence.class);
+	}
+
+	@Override
+	public T patch(final T entity, final Map<String, Object> changes, final Class<?> view) throws IOException {
+		return patch(entity, changes, Function.identity(), view);
+	}
+
+	@Override
+	public T patch(final T entity, final Map<String, Object> changes,
+			final Function<T, ? extends Object> propertyGetter) throws IOException {
+		return patch(entity, changes, propertyGetter, View.Persistence.class);
 	}
 
 	@Override
 	@PreAuthorize("hasPermission(#entity, 'update')")
 	public T patch(final T entity, final Map<String, Object> changes,
-			final Function<T, ? extends Object> propertyGetter) throws IOException {
+			final Function<T, ? extends Object> propertyGetter, final Class<?> view) throws IOException {
 		final Object obj = propertyGetter.apply(entity);
-		final ObjectReader reader = objectMapper.readerForUpdating(obj).withView(View.Public.class);
+		final ObjectReader reader = objectMapper.readerForUpdating(obj).withView(view);
 		final JsonNode tree = objectMapper.valueToTree(changes);
 		reader.readValue(tree);
 		entity.setUpdateTimestamp(new Date());
@@ -207,17 +218,29 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 
 	@Override
 	public Iterable<T> patch(final Iterable<T> entities, final Map<String, Object> changes) throws IOException {
-		return patch(entities, changes, Function.identity());
+		return patch(entities, changes, Function.identity(), View.Persistence.class);
+	}
+
+	@Override
+	public Iterable<T> patch(final Iterable<T> entities, final Map<String, Object> changes, final Class<?> view)
+			throws IOException {
+		return patch(entities, changes, Function.identity(), view);
+	}
+
+	@Override
+	public Iterable<T> patch(final Iterable<T> entities, final Map<String, Object> changes,
+			final Function<T, ? extends Object> propertyGetter) throws IOException {
+		return patch(entities, changes, propertyGetter, View.Persistence.class);
 	}
 
 	@Override
 	@PreFilter(value = "hasPermission(filterObject, 'update')", filterTarget = "entities")
 	public Iterable<T> patch(final Iterable<T> entities, final Map<String, Object> changes,
-			final Function<T, ? extends Object> propertyGetter) throws IOException {
+			final Function<T, ? extends Object> propertyGetter, final Class<?> view) throws IOException {
 		final JsonNode tree = objectMapper.valueToTree(changes);
 		for (final T entity : entities) {
 			final Object obj = propertyGetter.apply(entity);
-			final ObjectReader reader = objectMapper.readerForUpdating(obj).withView(View.Public.class);
+			final ObjectReader reader = objectMapper.readerForUpdating(obj).withView(view);
 			reader.readValue(tree);
 			entity.setUpdateTimestamp(new Date());
 			preparePatch(entity);
