@@ -95,6 +95,8 @@ public interface UserService extends EntityService<UserProfile> {
 
 	void addRoomToHistory(UserProfile userProfile, Room room);
 
+	void deleteRoomFromHistory(UserProfile userProfile, Room room);
+
 	boolean activateAccount(String id, String key, String clientAddress);
 
 	void initiatePasswordReset(String username);
