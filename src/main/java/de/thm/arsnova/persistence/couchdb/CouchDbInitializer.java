@@ -22,7 +22,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.ConnectException;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +33,7 @@ import javax.annotation.PostConstruct;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import org.apache.http.NoHttpResponseException;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DbAccessException;
 import org.ektorp.DbInfo;
@@ -142,14 +144,23 @@ public class CouchDbInitializer implements ResourceLoaderAware {
 	protected void waitForDb() {
 		DbInfo info = null;
 		logger.info("Waiting for database...");
+		boolean firstTry = true;
 		do {
 			try {
 				info = connector.getDbInfo();
 				logger.info("Database ready.");
 			} catch (final DbAccessException e1) {
 				/* Break out of loop if the exception is not related to connection issues. */
-				if (e1.getCause() == null || e1.getCause().getClass() != ConnectException.class) {
+				if (e1.getCause() == null
+						|| (e1.getCause().getClass() != NoHttpResponseException.class
+						&& e1.getCause().getClass() != UnknownHostException.class
+						&& !SocketException.class.isAssignableFrom(e1.getCause().getClass()))) {
 					throw e1;
+				}
+				if (firstTry) {
+					logger.error("Database not ready.", e1);
+					logger.info("Retrying...");
+					firstTry = false;
 				}
 				try {
 					Thread.sleep(10000);
