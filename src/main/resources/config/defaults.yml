@@ -37,6 +37,35 @@ arsnova:
         port: 61613
         username: arsnova
         password: arsnova
+      rabbitmq:
+        enabled: false
+        host: localhost
+        port: 5672
+        username: arsnova
+        password: arsnova
+        virtual-host: /
+        manage-declarations: true
+      published-events:
+        - entity-type: UserProfile
+          event-type: AfterCreation
+          included-properties:
+            - id
+        - entity-type: UserProfile
+          event-type: AfterDeletion
+          included-properties:
+            - id
+        - entity-type: Room
+          event-type: AfterCreation
+          included-properties:
+            - id
+            - shortId
+            - ownerId
+        - entity-type: Room
+          event-type: AfterDeletion
+          included-properties:
+            - id
+            - shortId
+            - ownerId
 
     # LMS connector service
     lms-connector:
