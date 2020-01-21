@@ -64,6 +64,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	protected CrudRepository<T, String> repository;
 	protected ApplicationEventPublisher eventPublisher;
 	private ObjectMapper objectMapper;
+	private ObjectMapper objectMapperForPatchTree;
 	private Validator validator;
 
 	public DefaultEntityServiceImpl(
@@ -75,6 +76,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		this.repository = repository;
 		this.objectMapper = objectMapper;
 		this.validator = validator;
+		objectMapperForPatchTree = new ObjectMapper();
 	}
 
 	@Override
@@ -203,7 +205,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 			final Function<T, ? extends Object> propertyGetter, final Class<?> view) throws IOException {
 		final Object obj = propertyGetter.apply(entity);
 		final ObjectReader reader = objectMapper.readerForUpdating(obj).withView(view);
-		final JsonNode tree = objectMapper.valueToTree(changes);
+		final JsonNode tree = objectMapperForPatchTree.valueToTree(changes);
 		reader.readValue(tree);
 		entity.setUpdateTimestamp(new Date());
 		preparePatch(entity);
@@ -237,7 +239,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	@PreFilter(value = "hasPermission(filterObject, 'update')", filterTarget = "entities")
 	public Iterable<T> patch(final Iterable<T> entities, final Map<String, Object> changes,
 			final Function<T, ? extends Object> propertyGetter, final Class<?> view) throws IOException {
-		final JsonNode tree = objectMapper.valueToTree(changes);
+		final JsonNode tree = objectMapperForPatchTree.valueToTree(changes);
 		for (final T entity : entities) {
 			final Object obj = propertyGetter.apply(entity);
 			final ObjectReader reader = objectMapper.readerForUpdating(obj).withView(view);
