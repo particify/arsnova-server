@@ -45,6 +45,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import de.thm.arsnova.model.Entity;
 import de.thm.arsnova.model.FindQuery;
+import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.service.EntityService;
 import de.thm.arsnova.service.FindQueryService;
 import de.thm.arsnova.web.exceptions.NotFoundException;
@@ -135,7 +136,7 @@ public abstract class AbstractEntityController<E extends Entity> {
 	public E patch(@PathVariable final String id, @RequestBody final Map<String, Object> changes,
 			final HttpServletResponse httpServletResponse) throws IOException {
 		final E entity = entityService.get(id);
-		entityService.patch(entity, changes);
+		entityService.patch(entity, changes, View.Public.class);
 		httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
 		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
 

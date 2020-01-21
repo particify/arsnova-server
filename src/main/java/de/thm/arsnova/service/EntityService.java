@@ -51,15 +51,29 @@ public interface EntityService<T extends Entity> {
 
 	T patch(T entity, Map<String, Object> changes) throws IOException;
 
+	T patch(T entity, Map<String, Object> changes, Class<?> view) throws IOException;
+
+	T patch(T entity, Map<String, Object> changes, Function<T, ? extends Object> propertyGetter) throws IOException;
+
 	@PreAuthorize("hasPermission(#entity, 'update')")
-	T patch(T entity, Map<String, Object> changes, Function<T, ? extends Object> propertyGetter)
+	T patch(T entity, Map<String, Object> changes, Function<T, ? extends Object> propertyGetter, Class<?> view)
 			throws IOException;
 
 	Iterable<T> patch(Iterable<T> entities, Map<String, Object> changes) throws IOException;
 
+	Iterable<T> patch(Iterable<T> entities, Map<String, Object> changes, Class<?> view) throws IOException;
+
+	Iterable<T> patch(
+			Iterable<T> entities,
+			Map<String, Object> changes,
+			Function<T, ? extends Object> propertyGetter) throws IOException;
+
 	@PreFilter(value = "hasPermission(filterObject, 'update')", filterTarget = "entities")
-	Iterable<T> patch(Iterable<T> entities, Map<String, Object> changes, Function<T, ? extends Object> propertyGetter)
-			throws IOException;
+	Iterable<T> patch(
+			Iterable<T> entities,
+			Map<String, Object> changes,
+			Function<T, ? extends Object> propertyGetter,
+			Class<?> view) throws IOException;
 
 	@PreAuthorize("hasPermission(#entity, 'delete')")
 	void delete(T entity);
