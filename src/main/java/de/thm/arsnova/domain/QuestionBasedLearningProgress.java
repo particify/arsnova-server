@@ -64,7 +64,7 @@ public class QuestionBasedLearningProgress implements LearningProgress {
 		int numAllCorrectAnswers = 0;
 		List<Answer> allAnswers = new ArrayList<>();
 		for (Question q : questions) {
-			List<Answer> answers = databaseDao.getAnswers(q, q.getPiRound());
+			List<Answer> answers = databaseDao.getFullAllAnswers(q, q.getPiRound());
 			allAnswers.addAll(answers);
 			List<Answer> myAnswers = answers.stream().filter(a -> a.getUser().equals(user.getUsername())).collect(Collectors.toList());
 			numMyCorrectAnswers += countCorrectAnswers(q, myAnswers);
@@ -105,7 +105,7 @@ public class QuestionBasedLearningProgress implements LearningProgress {
 		int numCorrectAnswers = 0;
 		List<Answer> allAnswers = new ArrayList<>();
 		for (Question q : questions) {
-			List<Answer> answers = databaseDao.getAnswers(q, q.getPiRound());
+			List<Answer> answers = databaseDao.getFullAllAnswers(q, q.getPiRound());
 			allAnswers.addAll(answers);
 			numCorrectAnswers += countCorrectAnswers(q, answers);
 		}
