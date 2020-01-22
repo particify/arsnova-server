@@ -109,17 +109,22 @@ public class QuestionBasedLearningProgress implements LearningProgress {
 			allAnswers.addAll(answers);
 			numCorrectAnswers += countCorrectAnswers(q, answers);
 		}
+		int courseProgress = 0;
 		int numUsers = countUsers(allAnswers);
+		if (numUsers != 0 && questions.size() != 0) {
+			courseProgress = (int)(100 * (numCorrectAnswers / ((double)(numUsers * questions.size()))));
+		}
+		int numerator = 0;
+		if (numUsers != 0) {
+			numerator = numCorrectAnswers / numUsers;
+		}
+		final int denominator = questions.size();
 		LearningProgressValues lpv = new LearningProgressValues();
-		lpv.setNumerator(numCorrectAnswers);
-		lpv.setDenominator(questions.size() * numUsers);
+		lpv.setNumerator(numerator);
+		lpv.setDenominator(denominator);
 		lpv.setNumQuestions(questions.size());
 		lpv.setNumUsers(numUsers);
-		if (numUsers != 0 && questions.size() != 0) {
-			lpv.setCourseProgress((int)(100 * (numCorrectAnswers / ((double)(numUsers * questions.size())))));
-		} else {
-			lpv.setCourseProgress(0);
-		}
+		lpv.setCourseProgress(courseProgress);
 		return lpv;
 	}
 
