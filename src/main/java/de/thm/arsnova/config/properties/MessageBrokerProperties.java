@@ -18,13 +18,16 @@
 
 package de.thm.arsnova.config.properties;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(MessageBrokerProperties.PREFIX)
 public class MessageBrokerProperties {
 	public static final String PREFIX = SystemProperties.PREFIX + ".message-broker";
 
-	public static class Relay {
+	public abstract static class Server {
 		private boolean enabled;
 		private String host;
 		private int port;
@@ -72,7 +75,63 @@ public class MessageBrokerProperties {
 		}
 	}
 
+	public static class Relay extends Server {
+	}
+
+	public static class Rabbitmq extends Server {
+		private String virtualHost;
+		private boolean manageDeclarations;
+
+		public String getVirtualHost() {
+			return virtualHost;
+		}
+
+		public void setVirtualHost(final String virtualHost) {
+			this.virtualHost = virtualHost;
+		}
+
+		public boolean isManageDeclarations() {
+			return manageDeclarations;
+		}
+
+		public void setManageDeclarations(final boolean manageDeclarations) {
+			this.manageDeclarations = manageDeclarations;
+		}
+	}
+
+	public static class PublishedEvent {
+		public String entityType;
+		public String eventType;
+		public Set<String> includedProperties = new HashSet<>();
+
+		public String getEntityType() {
+			return entityType;
+		}
+
+		public void setEntityType(final String entityType) {
+			this.entityType = entityType;
+		}
+
+		public String getEventType() {
+			return eventType;
+		}
+
+		public void setEventType(final String eventType) {
+			this.eventType = eventType;
+		}
+
+		public Set<String> getIncludedProperties() {
+			return includedProperties;
+		}
+
+		public void setIncludedProperties(final Set<String> includedProperties) {
+			this.includedProperties = includedProperties;
+		}
+	}
+
 	private Relay relay;
+	private Rabbitmq rabbitmq;
+	private List<PublishedEvent> publishedEvents;
 
 	public Relay getRelay() {
 		return relay;
@@ -80,5 +139,21 @@ public class MessageBrokerProperties {
 
 	public void setRelay(final Relay relay) {
 		this.relay = relay;
+	}
+
+	public Rabbitmq getRabbitmq() {
+		return rabbitmq;
+	}
+
+	public void setRabbitmq(final Rabbitmq rabbitmq) {
+		this.rabbitmq = rabbitmq;
+	}
+
+	public List<PublishedEvent> getPublishedEvents() {
+		return publishedEvents;
+	}
+
+	public void setPublishedEvents(final List<PublishedEvent> publishedEvents) {
+		this.publishedEvents = publishedEvents;
 	}
 }

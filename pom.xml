@@ -199,6 +199,16 @@
 			<groupId>org.springframework.integration</groupId>
 			<artifactId>spring-integration-mail</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.amqp</groupId>
+			<artifactId>spring-rabbit</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>http-client</artifactId>
+					<groupId>com.rabbitmq</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 
 		<!-- Spring Security -->
 		<dependency>
