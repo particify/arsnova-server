@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -37,6 +38,7 @@ public class AmqpEventDispatcher {
 
 	private final RabbitTemplate messagingTemplate;
 	private final Map<String, Set> eventConfig;
+	private final Map<String, ObjectMapper> objectMappers = new HashMap<>();
 
 	@Autowired
 	public AmqpEventDispatcher(
@@ -63,12 +65,8 @@ public class AmqpEventDispatcher {
 
 		if (!properties.isEmpty()) {
 			final String exchangeName = makeQueueName(entityType, eventType);
-			final ObjectMapper mapper = new ObjectMapper();
-			final SimpleFilterProvider filterProvider = new SimpleFilterProvider();
-			filterProvider.addFilter("amqpPropertyFilter", SimpleBeanPropertyFilter.filterOutAllExcept(properties));
-			mapper.setFilterProvider(filterProvider);
-			mapper.addMixIn(Entity.class, AmqpPropertyFilter.class);
 			try {
+				final ObjectMapper mapper = createOrGetObjectMapper(exchangeName, properties);
 				final String jsonPayload = mapper.writeValueAsString(event.getEntity());
 				logger.debug("AMQP event payload: {}", jsonPayload);
 				messagingTemplate.convertAndSend(exchangeName, "", jsonPayload);
@@ -78,5 +76,20 @@ public class AmqpEventDispatcher {
 				logger.error("Could not send event to broker.", e);
 			}
 		}
+	}
+
+	private ObjectMapper createOrGetObjectMapper(final String exchangeName, final Set<String> properties) {
+		if (objectMappers.keySet().contains(exchangeName)) {
+			return objectMappers.get(exchangeName);
+		}
+
+		final ObjectMapper mapper = new ObjectMapper();
+		final SimpleFilterProvider filterProvider = new SimpleFilterProvider();
+		filterProvider.addFilter("amqpPropertyFilter", SimpleBeanPropertyFilter.filterOutAllExcept(properties));
+		mapper.setFilterProvider(filterProvider);
+		mapper.addMixIn(Entity.class, AmqpPropertyFilter.class);
+		objectMappers.put(exchangeName, mapper);
+
+		return mapper;
 	}
 }
