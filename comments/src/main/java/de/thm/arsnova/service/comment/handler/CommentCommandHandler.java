@@ -101,9 +101,11 @@ public class CommentCommandHandler {
 
             if (!wasFavorited && patched.isFavorite()) {
                 BonusToken bt = new BonusToken();
+                Date now = new Date();
                 bt.setRoomId(patched.getRoomId());
                 bt.setCommentId(patched.getId());
                 bt.setUserId(patched.getCreatorId());
+                bt.setTimestamp(now);
                 bonusTokenService.create(bt);
 
             } else if (wasFavorited && !patched.isFavorite()) {
