@@ -2,8 +2,14 @@ package de.thm.arsnova.config;
 
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Declarables;
 import org.springframework.amqp.core.FanoutExchange;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -13,6 +19,7 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
@@ -22,9 +29,16 @@ import de.thm.arsnova.config.properties.MessageBrokerProperties;
 import de.thm.arsnova.event.AmqpEventDispatcher;
 
 @Configuration
+@EnableRabbit
+@ComponentScan(basePackages = "de.thm.arsnova.websocket.handler")
 public class RabbitConfig {
+	private static final Logger log = LoggerFactory.getLogger(RabbitConfig.class);
+
 	private static final String RABBIT_ENABLED = "rabbitmq.enabled";
 	private static final String RABBIT_MANAGE_DECLARATIONS = "rabbitmq.manage-declarations";
+
+	static final String createFeedbackCommandQueueName = "feedback.command";
+	static final String queryFeedbackCommandQueueName = "feedback.query";
 
 	@Bean
 	@Autowired
@@ -45,6 +59,42 @@ public class RabbitConfig {
 		connectionFactory.setExecutor(executor);
 
 		return connectionFactory;
+	}
+
+	@Bean
+	@Autowired
+	@ConditionalOnProperty(
+			name = RABBIT_ENABLED,
+			prefix = MessageBrokerProperties.PREFIX,
+			havingValue = "true")
+	public Queue createFeedbackCommandQueue(final RabbitAdmin rabbitAdmin) {
+		final Queue queue = new Queue(createFeedbackCommandQueueName, true, false, false);
+
+		try {
+			rabbitAdmin.declareQueue(queue);
+		} catch (final Exception e) {
+			log.error(e.toString());
+		}
+
+		return queue;
+	}
+
+	@Bean
+	@Autowired
+	@ConditionalOnProperty(
+			name = RABBIT_ENABLED,
+			prefix = MessageBrokerProperties.PREFIX,
+			havingValue = "true")
+	public Queue queryFeedbackCommandQueue(final RabbitAdmin rabbitAdmin) {
+		final Queue queue = new Queue(queryFeedbackCommandQueueName, true, false, false);
+
+		try {
+			rabbitAdmin.declareQueue(queue);
+		} catch (final Exception e) {
+			log.error(e.toString());
+		}
+
+		return queue;
 	}
 
 	@Bean
@@ -123,6 +173,22 @@ public class RabbitConfig {
 	public DefaultMessageHandlerMethodFactory defaultMessageHandlerMethodFactory() {
 		final DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
 		factory.setMessageConverter(mappingJackson2MessageConverter());
+		return factory;
+	}
+
+	@Bean
+	@ConditionalOnProperty(
+			name = RABBIT_ENABLED,
+			prefix = MessageBrokerProperties.PREFIX,
+			havingValue = "true")
+	public SimpleRabbitListenerContainerFactory myRabbitListenerContainerFactory(
+			@TaskExecutorConfig.RabbitConnectionExecutor final TaskExecutor executor,
+			final MessageBrokerProperties messageBrokerProperties
+	) {
+		final SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+		factory.setConnectionFactory(connectionFactory(executor, messageBrokerProperties));
+		factory.setMessageConverter(jsonMessageConverter());
+		factory.setMaxConcurrentConsumers(5);
 		return factory;
 	}
 }

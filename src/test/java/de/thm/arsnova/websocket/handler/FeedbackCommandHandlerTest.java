@@ -13,8 +13,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import de.thm.arsnova.websocket.message.CreateFeedback;
@@ -27,7 +27,7 @@ import de.thm.arsnova.websocket.message.GetFeedback;
 public class FeedbackCommandHandlerTest {
 
 	@MockBean
-	private SimpMessagingTemplate messagingTemplate;
+	private RabbitTemplate messagingTemplate;
 
 	@MockBean
 	private FeedbackStorageService feedbackStorage;
@@ -58,10 +58,8 @@ public class FeedbackCommandHandlerTest {
 		Mockito.when(feedbackStorage.getByRoom(r)).thenReturn(new Feedback(0, 0, 0, 0));
 
 		final GetFeedback getFeedback = new GetFeedback();
-		final FeedbackCommandHandler.GetFeedbackCommand getFeedbackCommand =
-				new FeedbackCommandHandler.GetFeedbackCommand(roomId, getFeedback);
 
-		commandHandler.handle(getFeedbackCommand);
+		commandHandler.handle(getFeedback);
 
 		final FeedbackChangedPayload feedbackChangedPayload = new FeedbackChangedPayload();
 		final int[] expectedVals = new int[]{0, 0, 0, 0};
@@ -86,14 +84,12 @@ public class FeedbackCommandHandlerTest {
 		Mockito.when(roomService.get(roomId, true)).thenReturn(r);
 		Mockito.when(feedbackStorage.getByRoom(r)).thenReturn(new Feedback(0, 1, 0, 0));
 
-		final CreateFeedbackPayload createFeedbackPayload = new CreateFeedbackPayload("1", 1);
+		final CreateFeedbackPayload createFeedbackPayload = new CreateFeedbackPayload(roomId, "1", 1);
 		createFeedbackPayload.setValue(1);
 		final CreateFeedback createFeedback = new CreateFeedback();
 		createFeedback.setPayload(createFeedbackPayload);
-		final FeedbackCommandHandler.CreateFeedbackCommand createFeedbackCommand =
-				new FeedbackCommandHandler.CreateFeedbackCommand(roomId, createFeedback);
 
-		commandHandler.handle(createFeedbackCommand);
+		commandHandler.handle(createFeedback);
 
 		final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(messagingTemplate).convertAndSend(captor.capture(), any(FeedbackChanged.class));
