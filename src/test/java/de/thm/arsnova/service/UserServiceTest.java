@@ -47,7 +47,6 @@ import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.config.TestAppConfig;
 import de.thm.arsnova.config.TestPersistanceConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
-import de.thm.arsnova.config.WebSocketConfig;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.security.User;
@@ -59,8 +58,7 @@ import de.thm.arsnova.security.pac4j.SsoAuthenticationToken;
 		AppConfig.class,
 		TestAppConfig.class,
 		TestPersistanceConfig.class,
-		TestSecurityConfig.class,
-		WebSocketConfig.class})
+		TestSecurityConfig.class})
 @ActiveProfiles("test")
 public class UserServiceTest {
 

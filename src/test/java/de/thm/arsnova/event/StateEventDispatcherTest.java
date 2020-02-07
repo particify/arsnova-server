@@ -48,7 +48,6 @@ import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.config.TestAppConfig;
 import de.thm.arsnova.config.TestPersistanceConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
-import de.thm.arsnova.config.WebSocketConfig;
 import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.persistence.ContentRepository;
@@ -62,8 +61,7 @@ import de.thm.arsnova.test.context.support.WithMockUser;
 		AppConfig.class,
 		TestAppConfig.class,
 		TestPersistanceConfig.class,
-		TestSecurityConfig.class,
-		WebSocketConfig.class})
+		TestSecurityConfig.class})
 @ActiveProfiles("test")
 public class StateEventDispatcherTest {
 	private static final String SOME_TEXT = "SomeText";

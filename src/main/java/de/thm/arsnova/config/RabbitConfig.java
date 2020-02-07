@@ -18,6 +18,7 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +32,7 @@ import de.thm.arsnova.event.AmqpEventDispatcher;
 @Configuration
 @EnableRabbit
 @ComponentScan(basePackages = "de.thm.arsnova.websocket.handler")
+@EnableConfigurationProperties(MessageBrokerProperties.class)
 public class RabbitConfig {
 	private static final Logger log = LoggerFactory.getLogger(RabbitConfig.class);
 
