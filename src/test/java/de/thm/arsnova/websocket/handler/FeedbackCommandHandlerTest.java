@@ -8,6 +8,7 @@ import de.thm.arsnova.model.Feedback;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.service.FeedbackStorageService;
 import de.thm.arsnova.service.RoomService;
+import de.thm.arsnova.websocket.message.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,12 +17,6 @@ import org.mockito.Mockito;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import de.thm.arsnova.websocket.message.CreateFeedback;
-import de.thm.arsnova.websocket.message.CreateFeedbackPayload;
-import de.thm.arsnova.websocket.message.FeedbackChanged;
-import de.thm.arsnova.websocket.message.FeedbackChangedPayload;
-import de.thm.arsnova.websocket.message.GetFeedback;
 
 @RunWith(SpringRunner.class)
 public class FeedbackCommandHandlerTest {
@@ -57,7 +52,9 @@ public class FeedbackCommandHandlerTest {
 		Mockito.when(roomService.get(roomId, true)).thenReturn(r);
 		Mockito.when(feedbackStorage.getByRoom(r)).thenReturn(new Feedback(0, 0, 0, 0));
 
+		final GetFeedbackPayload getFeedbackPayload = new GetFeedbackPayload(roomId);
 		final GetFeedback getFeedback = new GetFeedback();
+		getFeedback.setPayload(getFeedbackPayload);
 
 		commandHandler.handle(getFeedback);
 
@@ -68,11 +65,13 @@ public class FeedbackCommandHandlerTest {
 		feedbackChanged.setPayload(feedbackChangedPayload);
 
 		final ArgumentCaptor<String> topicCaptor = ArgumentCaptor.forClass(String.class);
+		final ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
 		final ArgumentCaptor<FeedbackChanged> messageCaptor =
 				ArgumentCaptor.forClass(FeedbackChanged.class);
 
-		verify(messagingTemplate).convertAndSend(topicCaptor.capture(), messageCaptor.capture());
-		assertThat(topicCaptor.getValue()).isEqualTo("/topic/" + roomId + ".feedback.stream");
+		verify(messagingTemplate).convertAndSend(topicCaptor.capture(), keyCaptor.capture(), messageCaptor.capture());
+		assertThat(topicCaptor.getValue()).isEqualTo("amq.topic");
+		assertThat(keyCaptor.getValue()).isEqualTo(roomId + ".feedback.stream");
 		assertThat(messageCaptor.getValue()).isEqualTo(feedbackChanged);
 	}
 
@@ -91,9 +90,11 @@ public class FeedbackCommandHandlerTest {
 
 		commandHandler.handle(createFeedback);
 
-		final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-		verify(messagingTemplate).convertAndSend(captor.capture(), any(FeedbackChanged.class));
-		assertThat(captor.getValue()).isEqualTo("/topic/" + roomId + ".feedback.stream");
+		final ArgumentCaptor<String> topicCaptor = ArgumentCaptor.forClass(String.class);
+		final ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
+		verify(messagingTemplate).convertAndSend(topicCaptor.capture(), keyCaptor.capture(), any(FeedbackChanged.class));
+		assertThat(topicCaptor.getValue()).isEqualTo("amq.topic");
+		assertThat(keyCaptor.getValue()).isEqualTo(roomId + ".feedback.stream");
 	}
 }
 

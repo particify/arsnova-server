@@ -125,7 +125,7 @@ public class MessageBrokerProperties {
 			this.includedProperties = includedProperties;
 		}
 	}
-	
+
 	private Rabbitmq rabbitmq;
 	private List<PublishedEvent> publishedEvents;
 
