@@ -55,6 +55,7 @@ services:
       - rabbitmq
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql:5432/arsnovacomment
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
