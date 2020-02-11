@@ -17,6 +17,9 @@ services:
     ports:
       - 127.0.0.1:8080:8080
       - 127.0.0.1:8090:8090
+  arsnova-ws-gateway:
+    ports:
+      - 127.0.0.1:8099:8080
   arsnova-comment-service:
     ports:
       - 127.0.0.1:8088:8088

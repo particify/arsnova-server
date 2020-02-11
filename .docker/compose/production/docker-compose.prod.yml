@@ -8,6 +8,8 @@ services:
     restart: unless-stopped
   arsnova-backend-core:
     restart: unless-stopped
+  arsnova-ws-gateway:
+    restart: unless-stopped
   arsnova-comment-service:
     restart: unless-stopped
   arsnova-web:
