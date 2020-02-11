@@ -54,6 +54,7 @@ services:
       - postgresql
       - rabbitmq
     environment:
+      SERVER_PORT: 8080
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql:5432/arsnovacomment
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_RABBITMQ_HOST: rabbitmq
