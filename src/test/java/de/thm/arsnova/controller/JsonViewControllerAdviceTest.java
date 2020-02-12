@@ -22,7 +22,6 @@ import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.config.TestAppConfig;
 import de.thm.arsnova.config.TestPersistanceConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
-import de.thm.arsnova.config.WebSocketConfig;
 import de.thm.arsnova.model.Entity;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.service.EntityService;
@@ -65,8 +64,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 		AppConfig.class,
 		TestAppConfig.class,
 		TestPersistanceConfig.class,
-		TestSecurityConfig.class,
-		WebSocketConfig.class})
+		TestSecurityConfig.class})
 @ActiveProfiles("test")
 public class JsonViewControllerAdviceTest {
 	private static final Logger logger = LoggerFactory.getLogger(JsonViewControllerAdviceTest.class);

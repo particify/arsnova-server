@@ -75,9 +75,6 @@ public class MessageBrokerProperties {
 		}
 	}
 
-	public static class Relay extends Server {
-	}
-
 	public static class Rabbitmq extends Server {
 		private String virtualHost;
 		private boolean manageDeclarations;
@@ -129,17 +126,8 @@ public class MessageBrokerProperties {
 		}
 	}
 
-	private Relay relay;
 	private Rabbitmq rabbitmq;
 	private List<PublishedEvent> publishedEvents;
-
-	public Relay getRelay() {
-		return relay;
-	}
-
-	public void setRelay(final Relay relay) {
-		this.relay = relay;
-	}
 
 	public Rabbitmq getRabbitmq() {
 		return rabbitmq;

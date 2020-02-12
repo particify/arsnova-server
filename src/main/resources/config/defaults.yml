@@ -31,12 +31,6 @@ arsnova:
 
     # Message broker for internal service communication
     message-broker:
-      relay:
-        enabled: false
-        host: localhost
-        port: 61613
-        username: arsnova
-        password: arsnova
       rabbitmq:
         enabled: false
         host: localhost

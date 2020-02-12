@@ -31,7 +31,6 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
 				AppConfig.class,
 				PersistenceConfig.class,
 				SecurityConfig.class,
-				WebSocketConfig.class,
 				RabbitConfig.class,
 				TaskExecutorConfig.class,
 		};

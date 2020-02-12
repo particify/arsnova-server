@@ -36,7 +36,6 @@ import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.config.TestAppConfig;
 import de.thm.arsnova.config.TestPersistanceConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
-import de.thm.arsnova.config.WebSocketConfig;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -44,8 +43,7 @@ import de.thm.arsnova.config.WebSocketConfig;
 		AppConfig.class,
 		TestAppConfig.class,
 		TestPersistanceConfig.class,
-		TestSecurityConfig.class,
-		WebSocketConfig.class})
+		TestSecurityConfig.class})
 @ActiveProfiles("test")
 public class ImageUtilsTest {
 

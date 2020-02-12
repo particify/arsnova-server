@@ -45,8 +45,7 @@ import static org.junit.Assert.assertEquals;
 		AppConfig.class,
 		TestAppConfig.class,
 		TestPersistanceConfig.class,
-		TestSecurityConfig.class,
-		WebSocketConfig.class})
+		TestSecurityConfig.class})
 @ActiveProfiles("test")
 public class AppConfigTest extends AbstractJUnit4SpringContextTests {
 	@Autowired
