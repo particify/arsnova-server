@@ -32,10 +32,11 @@ services:
       SYSTEM_COUCHDB_USERNAME: arsnova
       SYSTEM_COUCHDB_PASSWORD: arsnova
       SYSTEM_COUCHDB_CREATEDB: "true"
-      SYSTEM_MESSAGE_BROKER_RELAY_ENABLED: "true"
-      SYSTEM_MESSAGE_BROKER_RELAY_HOST: rabbitmq
-      SYSTEM_MESSAGE_BROKER_RELAY_USERNAME: guest
-      SYSTEM_MESSAGE_BROKER_RELAY_PASSWORD: guest
+      SYSTEM_MESSAGE_BROKER_RABBITMQ_ENABLED: "true"
+      SYSTEM_MESSAGE_BROKER_RABBITMQ_HOST: rabbitmq
+      SYSTEM_MESSAGE_BROKER_RABBITMQ_USERNAME: guest
+      SYSTEM_MESSAGE_BROKER_RABBITMQ_PASSWORD: guest
+      SYSTEM_MESSAGE_BROKER_RABBITMQ_VIRTUAL_HOST: /
       SECURITY_JWT_SECRET: secret
       UI_SLOGAN: powered by particify.de
     command: /jetty/start.jar --module=http-forwarded
@@ -44,6 +45,7 @@ services:
     depends_on:
       - rabbitmq
     environment:
+      SERVER_PORT: 8080
       STOMP_RELAY_HOST: rabbitmq
       STOMP_RELAY_USER: guest
       STOMP_RELAY_PASSWORD: guest
