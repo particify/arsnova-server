@@ -50,6 +50,7 @@ public class FeedbackCommandHandlerTest {
 		final String roomId = r.getId();
 
 		Mockito.when(roomService.get(roomId, true)).thenReturn(r);
+		Mockito.when(feedbackStorage.findByRoomId(roomId)).thenReturn(r);
 		Mockito.when(feedbackStorage.getByRoom(r)).thenReturn(new Feedback(0, 0, 0, 0));
 
 		final GetFeedbackPayload getFeedbackPayload = new GetFeedbackPayload(roomId);

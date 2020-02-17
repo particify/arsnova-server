@@ -23,8 +23,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -168,5 +170,12 @@ public class FeedbackStorageServiceImpl implements FeedbackStorageService {
 			}
 		}
 		return affectedUsers;
+	}
+
+	@Override
+	public Room findByRoomId(final String id) {
+		final Optional<Room> room = data.keySet().stream().filter(r -> r.getId().equals(id)).findFirst();
+
+		return room.orElse(null);
 	}
 }

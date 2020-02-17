@@ -34,4 +34,6 @@ public interface FeedbackStorageService {
 	Map<Room, List<String>> cleanVotes(int cleanupFeedbackDelay);
 
 	List<String> cleanVotesByRoom(Room room, int cleanupFeedbackDelayInMins);
+
+	Room findByRoomId(String id);
 }

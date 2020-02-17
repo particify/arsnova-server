@@ -117,20 +117,24 @@ public class FeedbackCommandHandler {
 
 	public void handle(final GetFeedback command) {
 		final String roomId = command.getPayload().getRoomId();
-		final Room room = roomService.get(roomId, true);
-		final Feedback feedback = feedbackStorage.getByRoom(room);
-		final int[] currentVals = feedback.getValues().stream().mapToInt(i -> i).toArray();
+		final Room room = feedbackStorage.findByRoomId(roomId);
 
-		final FeedbackChanged feedbackChanged = new FeedbackChanged();
-		final FeedbackChangedPayload feedbackChangedPayload = new FeedbackChangedPayload();
-		feedbackChangedPayload.setValues(currentVals);
-		feedbackChanged.setPayload(feedbackChangedPayload);
+		if (room != null) {
 
-		messagingTemplate.convertAndSend(
-				"amq.topic",
-				roomId + ".feedback.stream",
-				feedbackChanged
-		);
+			final Feedback feedback = feedbackStorage.getByRoom(room);
+			final int[] currentVals = feedback.getValues().stream().mapToInt(i -> i).toArray();
+
+			final FeedbackChanged feedbackChanged = new FeedbackChanged();
+			final FeedbackChangedPayload feedbackChangedPayload = new FeedbackChangedPayload();
+			feedbackChangedPayload.setValues(currentVals);
+			feedbackChanged.setPayload(feedbackChangedPayload);
+
+			messagingTemplate.convertAndSend(
+					"amq.topic",
+					roomId + ".feedback.stream",
+					feedbackChanged
+			);
+		}
 	}
 
 	public void handle(final ResetFeedback command) {
