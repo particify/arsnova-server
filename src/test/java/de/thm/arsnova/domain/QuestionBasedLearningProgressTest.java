@@ -149,8 +149,17 @@ public class QuestionBasedLearningProgressTest {
 	}
 
 	@Test
-	public void shouldIgnoreInactiveQuestions() {
+	public void shouldIncludeInactiveQuestionsWithAnswers() {
 		creator.addQuestion("lecture").setInactive().withCorrectAnswers(1);
+
+		int expected = 100;
+		int actual = lp.getCourseProgress(null).getCourseProgress();
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void shouldIgnoreInactiveQuestionsWithoutAnswers() {
+		creator.addQuestion("lecture").setInactive();
 
 		int expected = 0;
 		int actual = lp.getCourseProgress(null).getCourseProgress();

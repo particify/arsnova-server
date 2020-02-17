@@ -63,8 +63,12 @@ public class QuestionBasedLearningProgress implements LearningProgress {
 		int numMyCorrectAnswers = 0;
 		int numAllCorrectAnswers = 0;
 		List<Answer> allAnswers = new ArrayList<>();
-		for (Question q : questions) {
+		for (Question q : new ArrayList<>(questions)) {
 			List<Answer> answers = databaseDao.getFullAllAnswers(q, q.getPiRound());
+			if (!q.isActive() && answers.size() == 0) {
+				// Ignore this question: It's not active and does not have any answers, so it's irrelevant.
+				questions.remove(q);
+			}
 			allAnswers.addAll(answers);
 			List<Answer> myAnswers = answers.stream().filter(a -> a.getUser().equals(user.getUsername())).collect(Collectors.toList());
 			numMyCorrectAnswers += countCorrectAnswers(q, myAnswers);
@@ -104,8 +108,12 @@ public class QuestionBasedLearningProgress implements LearningProgress {
 	private LearningProgressValues createCourseProgress(List<Question> questions) {
 		int numCorrectAnswers = 0;
 		List<Answer> allAnswers = new ArrayList<>();
-		for (Question q : questions) {
+		for (Question q : new ArrayList<>(questions)) {
 			List<Answer> answers = databaseDao.getFullAllAnswers(q, q.getPiRound());
+			if (!q.isActive() && answers.size() == 0) {
+				// Ignore this question: It's not active and does not have any answers, so it's irrelevant.
+				questions.remove(q);
+			}
 			allAnswers.addAll(answers);
 			numCorrectAnswers += countCorrectAnswers(q, answers);
 		}
@@ -137,12 +145,12 @@ public class QuestionBasedLearningProgress implements LearningProgress {
 	}
 
 	private int countCorrectAnswers(Question q, List<Answer> answers) {
-		return answers.stream().filter(a -> a.isCorrect(q)).collect(Collectors.toList()).size();
+		return (int) answers.stream().filter(a -> a.isCorrect(q)).count();
 	}
 
 	private List<Question> filterIrrelevantQuestions(List<Question> questions) {
 		return questions.stream()
-				.filter(q -> q.isActive() && !q.isNoCorrect())
+				.filter(q -> !q.isNoCorrect())
 				.filter(q -> q.getPossibleAnswers() != null && !q.getPossibleAnswers().isEmpty())
 				.collect(Collectors.toList());
 	}
