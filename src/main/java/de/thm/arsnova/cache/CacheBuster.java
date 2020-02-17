@@ -19,6 +19,7 @@ package de.thm.arsnova.cache;
 
 import de.thm.arsnova.events.*;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 /**
@@ -51,7 +52,10 @@ public class CacheBuster implements ICacheBuster, NovaEventVisitor {
 	@Override
 	public void visit(LockQuestionsEvent lockQuestionsEvent) { }
 
-	@CacheEvict(value = "answers", key = "#event.Question")
+	@Caching(evict = {
+			@CacheEvict(value = "fullAnswers", key = "new org.springframework.cache.interceptor.SimpleKey(#event.Question, #event.Question.piRound)"),
+			@CacheEvict(value = "answers", key = "#event.Question")
+	})
 	@Override
 	public void visit(NewAnswerEvent event) { }
 

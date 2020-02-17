@@ -1103,6 +1103,7 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return answers;
 	}
 
+	@Cacheable("fullAnswers")
 	@Override
 	public List<Answer> getFullAllAnswers(final Question question, final int piround) {
 		final String questionId = question.get_id();
