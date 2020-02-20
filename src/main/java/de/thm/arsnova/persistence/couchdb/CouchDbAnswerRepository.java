@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.ektorp.ComplexKey;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.ViewResult;
@@ -70,6 +71,13 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 	@Override
 	public Iterable<Answer> findStubsByContentIds(final Collection<String> contentIds) {
 		return createEntityStubs(db.queryView(createQuery("by_contentid").reduce(false).keys(contentIds)));
+	}
+
+	@Override
+	public List<String> findIdsByContentId(final String contentId) {
+		final ViewResult result = db.queryView(createQuery("by_contentid").reduce(false).key(contentId));
+
+		return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
 	}
 
 	@Override
