@@ -290,6 +290,12 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 
 	@Override
 	@PreAuthorize("isAuthenticated()")
+	public List<String> getAnswerIdsByContentId(final String contentId) {
+		return answerRepository.findIdsByContentId(contentId);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
 	public List<TextAnswer> getTextAnswersByContentId(final String contentId, final int offset, final int limit) {
 		final List<TextAnswer> answers = answerRepository.findByContentId(contentId, TextAnswer.class, offset, limit);
 		if (answers == null) {

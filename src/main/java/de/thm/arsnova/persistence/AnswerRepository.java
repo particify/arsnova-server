@@ -43,5 +43,7 @@ public interface AnswerRepository extends CrudRepository<Answer, String> {
 
 	Iterable<Answer> findStubsByContentIds(Collection<String> contentId);
 
+	List<String> findIdsByContentId(String contentId);
+
 	int countByRoomId(String roomId);
 }

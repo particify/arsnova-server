@@ -36,6 +36,8 @@ public interface AnswerService extends EntityService<Answer> {
 
 	AnswerStatistics getAllStatistics(String contentId);
 
+	List<String> getAnswerIdsByContentId(String contentId);
+
 	List<TextAnswer> getTextAnswers(String contentId, int piRound, int offset, int limit);
 
 	List<TextAnswer> getTextAnswers(String contentId, int offset, int limit);

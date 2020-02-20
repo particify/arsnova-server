@@ -27,6 +27,8 @@ public class AnswerFindQueryService implements FindQueryService<Answer> {
 			if (answer != null) {
 				ids.add(answer.getId());
 			}
+		} else if (properties.getContentId() != null) {
+			ids.addAll(answerService.getAnswerIdsByContentId(properties.getContentId()));
 		}
 
 		return ids;
