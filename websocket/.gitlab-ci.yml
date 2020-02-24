@@ -26,20 +26,20 @@ compile:
   script:
     - mvn $MAVEN_CLI_OPTS test-compile
 
-unit_test:
-  <<: *maven
-  stage: post-build
-  dependencies:
-    - compile
-  artifacts:
-    paths:
-      - $OUTPUT_DIR
-    reports:
-      junit: $OUTPUT_DIR/surefire-reports/TEST-*.xml
-  coverage: '/Code coverage: \d+\.\d+/'
-  script:
-    - mvn $MAVEN_CLI_OPTS jacoco:prepare-agent surefire:test jacoco:report
-    - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print "Instructions covered:", covered, "/", instructions; print "Code coverage:", 100 * covered / instructions "%" }' "$OUTPUT_DIR/site/jacoco/jacoco.csv"
+#unit_test:
+#  <<: *maven
+#  stage: post-build
+#  dependencies:
+#    - compile
+#  artifacts:
+#    paths:
+#      - $OUTPUT_DIR
+#    reports:
+#      junit: $OUTPUT_DIR/surefire-reports/TEST-*.xml
+#  coverage: '/Code coverage: \d+\.\d+/'
+#  script:
+#    - mvn $MAVEN_CLI_OPTS jacoco:prepare-agent surefire:test jacoco:report
+#    - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print "Instructions covered:", covered, "/", instructions; print "Code coverage:", 100 * covered / instructions "%" }' "$OUTPUT_DIR/site/jacoco/jacoco.csv"
 
 package:
   <<: *maven
