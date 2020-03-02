@@ -1,5 +1,6 @@
 package de.thm.arsnova.service.wsgateway.config
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.messaging.simp.config.MessageBrokerRegistry
@@ -8,6 +9,8 @@ import org.springframework.web.socket.config.annotation.*
 @Configuration
 @EnableWebSocketMessageBroker
 class WebSocketConfig : WebSocketMessageBrokerConfigurer {
+	private val logger = LoggerFactory.getLogger(javaClass)
+
 	@Value("\${messaging.prefix}")
 	private lateinit var messagingPrefix: String
 	@Value("\${stomp.destination.prefix}")
