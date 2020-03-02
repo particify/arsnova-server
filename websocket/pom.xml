@@ -172,7 +172,7 @@
 					</to>
 					<container>
 						<creationTime>${docker.time}</creationTime>
-						<ports>8077</ports>
+						<ports>8080</ports>
 					</container>
 				</configuration>
 			</plugin>
