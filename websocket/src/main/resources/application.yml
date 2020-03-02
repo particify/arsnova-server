@@ -1,0 +1,14 @@
+server-port: 8077
+messaging-prefix: /backend
+stomp:
+  relay:
+    host: localhost
+    port: 61613
+    user: arsnova
+    password: arsnova
+  destination-prefix:
+    - /exchange
+    - /topic
+    - /queue
+  user-registry-broadcast: /topic/log-user-registry
+  user-destination-broadcast: /queue/log-unresolved-user
