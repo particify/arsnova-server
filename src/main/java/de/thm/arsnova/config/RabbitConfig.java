@@ -36,16 +36,18 @@ import de.thm.arsnova.event.AmqpEventDispatcher;
 public class RabbitConfig {
 	private static final Logger log = LoggerFactory.getLogger(RabbitConfig.class);
 
-	private static final String RABBIT_ENABLED = "rabbitmq.enabled";
-	private static final String RABBIT_MANAGE_DECLARATIONS = "rabbitmq.manage-declarations";
-
 	static final String createFeedbackCommandQueueName = "feedback.command";
 	static final String queryFeedbackCommandQueueName = "feedback.query";
+
+	public static class RabbitConfigProperties {
+		public static final String RABBIT_ENABLED = "rabbitmq.enabled";
+		private static final String RABBIT_MANAGE_DECLARATIONS = "rabbitmq.manage-declarations";
+	}
 
 	@Bean
 	@Autowired
 	@ConditionalOnProperty(
-			name = RABBIT_ENABLED,
+			name = RabbitConfigProperties.RABBIT_ENABLED,
 			prefix = MessageBrokerProperties.PREFIX,
 			havingValue = "true")
 	public ConnectionFactory connectionFactory(
@@ -66,7 +68,7 @@ public class RabbitConfig {
 	@Bean
 	@Autowired
 	@ConditionalOnProperty(
-			name = RABBIT_ENABLED,
+			name = RabbitConfigProperties.RABBIT_ENABLED,
 			prefix = MessageBrokerProperties.PREFIX,
 			havingValue = "true")
 	public Queue createFeedbackCommandQueue(final RabbitAdmin rabbitAdmin) {
@@ -84,7 +86,7 @@ public class RabbitConfig {
 	@Bean
 	@Autowired
 	@ConditionalOnProperty(
-			name = RABBIT_ENABLED,
+			name = RabbitConfigProperties.RABBIT_ENABLED,
 			prefix = MessageBrokerProperties.PREFIX,
 			havingValue = "true")
 	public Queue queryFeedbackCommandQueue(final RabbitAdmin rabbitAdmin) {
@@ -102,7 +104,7 @@ public class RabbitConfig {
 	@Bean
 	@Autowired
 	@ConditionalOnProperty(
-			name = {RABBIT_ENABLED, RABBIT_MANAGE_DECLARATIONS},
+			name = {RabbitConfigProperties.RABBIT_ENABLED, RabbitConfigProperties.RABBIT_MANAGE_DECLARATIONS},
 			prefix = MessageBrokerProperties.PREFIX,
 			havingValue = "true")
 	public Declarables declarables(
@@ -116,7 +118,7 @@ public class RabbitConfig {
 	@Bean
 	@Autowired
 	@ConditionalOnProperty(
-			name = RABBIT_ENABLED,
+			name = RabbitConfigProperties.RABBIT_ENABLED,
 			prefix = MessageBrokerProperties.PREFIX,
 			havingValue = "true")
 	public RabbitTemplate rabbitTemplate(
@@ -130,7 +132,7 @@ public class RabbitConfig {
 	@Bean
 	@Autowired
 	@ConditionalOnProperty(
-			name = RABBIT_ENABLED,
+			name = RabbitConfigProperties.RABBIT_ENABLED,
 			prefix = MessageBrokerProperties.PREFIX,
 			havingValue = "true")
 	public RabbitAdmin rabbitAdmin(final ConnectionFactory connectionFactory) {
@@ -139,7 +141,7 @@ public class RabbitConfig {
 
 	@Bean
 	@ConditionalOnProperty(
-			name = RABBIT_ENABLED,
+			name = RabbitConfigProperties.RABBIT_ENABLED,
 			prefix = MessageBrokerProperties.PREFIX,
 			havingValue = "true")
 	public AmqpEventDispatcher eventToTopicPublisher(
@@ -150,7 +152,7 @@ public class RabbitConfig {
 
 	@Bean
 	@ConditionalOnProperty(
-			name = RABBIT_ENABLED,
+			name = RabbitConfigProperties.RABBIT_ENABLED,
 			prefix = MessageBrokerProperties.PREFIX,
 			havingValue = "true")
 	public MessageConverter jsonMessageConverter() {
@@ -159,7 +161,7 @@ public class RabbitConfig {
 
 	@Bean
 	@ConditionalOnProperty(
-			name = RABBIT_ENABLED,
+			name = RabbitConfigProperties.RABBIT_ENABLED,
 			prefix = MessageBrokerProperties.PREFIX,
 			havingValue = "true")
 	public MappingJackson2MessageConverter mappingJackson2MessageConverter() {
@@ -169,7 +171,7 @@ public class RabbitConfig {
 
 	@Bean
 	@ConditionalOnProperty(
-			name = RABBIT_ENABLED,
+			name = RabbitConfigProperties.RABBIT_ENABLED,
 			prefix = MessageBrokerProperties.PREFIX,
 			havingValue = "true")
 	public DefaultMessageHandlerMethodFactory defaultMessageHandlerMethodFactory() {
@@ -180,7 +182,7 @@ public class RabbitConfig {
 
 	@Bean
 	@ConditionalOnProperty(
-			name = RABBIT_ENABLED,
+			name = RabbitConfigProperties.RABBIT_ENABLED,
 			prefix = MessageBrokerProperties.PREFIX,
 			havingValue = "true")
 	public SimpleRabbitListenerContainerFactory myRabbitListenerContainerFactory(

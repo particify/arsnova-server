@@ -2,12 +2,21 @@ package de.thm.arsnova.websocket.handler;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 
+import de.thm.arsnova.config.RabbitConfig;
+import de.thm.arsnova.config.properties.MessageBrokerProperties;
 import de.thm.arsnova.websocket.message.CreateFeedback;
 import de.thm.arsnova.websocket.message.GetFeedback;
 
 @Service
+@EnableConfigurationProperties(MessageBrokerProperties.class)
+@ConditionalOnProperty(
+		name = RabbitConfig.RabbitConfigProperties.RABBIT_ENABLED,
+		prefix = MessageBrokerProperties.PREFIX,
+		havingValue = "true")
 public class FeedbackHandler {
 	private final FeedbackCommandHandler commandHandler;
 
