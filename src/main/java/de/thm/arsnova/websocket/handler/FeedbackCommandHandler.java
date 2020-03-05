@@ -4,9 +4,13 @@ import net.spy.memcached.compat.log.Logger;
 import net.spy.memcached.compat.log.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import de.thm.arsnova.config.RabbitConfig;
+import de.thm.arsnova.config.properties.MessageBrokerProperties;
 import de.thm.arsnova.event.AfterPatchEvent;
 import de.thm.arsnova.model.Feedback;
 import de.thm.arsnova.model.Room;
@@ -24,6 +28,11 @@ import de.thm.arsnova.websocket.message.GetFeedback;
 import de.thm.arsnova.websocket.message.ResetFeedback;
 
 @Component
+@EnableConfigurationProperties(MessageBrokerProperties.class)
+@ConditionalOnProperty(
+		name = RabbitConfig.RabbitConfigProperties.RABBIT_ENABLED,
+		prefix = MessageBrokerProperties.PREFIX,
+		havingValue = "true")
 public class FeedbackCommandHandler {
 	private static final Logger logger = LoggerFactory.getLogger(FeedbackCommandHandler.class);
 
