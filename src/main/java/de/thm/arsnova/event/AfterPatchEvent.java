@@ -27,9 +27,10 @@ public class AfterPatchEvent<E extends Entity> extends AfterUpdateEvent<E> {
 	private final Function<E, ? extends Object> propertyGetter;
 	private final Map<String, Object> changes;
 
-	public AfterPatchEvent(final Object source, final E entity, final Function<E, ? extends Object> propertyGetter,
+	public AfterPatchEvent(final Object source, final E entity, final E oldEntity,
+			final Function<E, ? extends Object> propertyGetter,
 			final Map<String, Object> changes) {
-		super(source, entity);
+		super(source, entity, oldEntity);
 		this.propertyGetter = propertyGetter;
 		this.changes = changes;
 	}

@@ -33,12 +33,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.validation.ValidationException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -50,6 +53,8 @@ import de.thm.arsnova.config.AppConfig;
 import de.thm.arsnova.config.TestAppConfig;
 import de.thm.arsnova.config.TestPersistanceConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
+import de.thm.arsnova.event.AfterUpdateEvent;
+import de.thm.arsnova.event.BeforeUpdateEvent;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.persistence.RoomRepository;
@@ -82,6 +87,14 @@ public class DefaultEntityServiceImplTest {
 
 	@Autowired
 	private RoomRepository roomRepository;
+
+	@Autowired
+	private EventListenerConfig eventListenerConfig;
+
+	@Before
+	public void prepare() {
+		eventListenerConfig.resetEvents();
+	}
 
 	@Test
 	@WithMockUser("TestUser")
@@ -117,6 +130,11 @@ public class DefaultEntityServiceImplTest {
 		assertEquals(patchedName, room.getName());
 		assertEquals(patchedActive, room.isClosed());
 		assertEquals(originalOwnerId, room.getOwnerId());
+
+		assertEquals(originalName, eventListenerConfig.getRoomBeforeUpdateEvents().get(0).getOldEntity().getName());
+		assertEquals(originalName, eventListenerConfig.getRoomAfterUpdateEvents().get(0).getOldEntity().getName());
+		assertEquals(room.getName(), eventListenerConfig.getRoomBeforeUpdateEvents().get(0).getEntity().getName());
+		assertEquals(room.getName(), eventListenerConfig.getRoomAfterUpdateEvents().get(0).getEntity().getName());
 	}
 
 	@Test
@@ -170,6 +188,15 @@ public class DefaultEntityServiceImplTest {
 		assertEquals(patchedName, room2.getName());
 		assertEquals(patchedClosed, room2.isClosed());
 		assertEquals(originalOwnerId2, room2.getOwnerId());
+
+		assertEquals(originalName1, eventListenerConfig.getRoomBeforeUpdateEvents().get(0).getOldEntity().getName());
+		assertEquals(originalName1, eventListenerConfig.getRoomAfterUpdateEvents().get(0).getOldEntity().getName());
+		assertEquals(room1.getName(), eventListenerConfig.getRoomBeforeUpdateEvents().get(0).getEntity().getName());
+		assertEquals(room1.getName(), eventListenerConfig.getRoomAfterUpdateEvents().get(0).getEntity().getName());
+		assertEquals(originalName2, eventListenerConfig.getRoomBeforeUpdateEvents().get(1).getOldEntity().getName());
+		assertEquals(originalName2, eventListenerConfig.getRoomAfterUpdateEvents().get(1).getOldEntity().getName());
+		assertEquals(room2.getName(), eventListenerConfig.getRoomBeforeUpdateEvents().get(1).getEntity().getName());
+		assertEquals(room2.getName(), eventListenerConfig.getRoomAfterUpdateEvents().get(1).getEntity().getName());
 	}
 
 	@Test
@@ -234,5 +261,34 @@ public class DefaultEntityServiceImplTest {
 		room.setName(SOME_TEXT);
 		room.setAbbreviation(SOME_TEXT);
 		room.setShortId("12345678");
+	}
+
+	@Configuration
+	public static class EventListenerConfig {
+		private final List<BeforeUpdateEvent<Room>> roomBeforeUpdateEvents = new ArrayList<>();
+		private final List<AfterUpdateEvent<Room>> roomAfterUpdateEvents = new ArrayList<>();
+
+		@EventListener
+		public void handleContentStateChangeEvent(final BeforeUpdateEvent<Room> event) {
+			roomBeforeUpdateEvents.add(event);
+		}
+
+		@EventListener
+		public void handleContentStateChangeEvent(final AfterUpdateEvent<Room> event) {
+			roomAfterUpdateEvents.add(event);
+		}
+
+		public List<BeforeUpdateEvent<Room>> getRoomBeforeUpdateEvents() {
+			return roomBeforeUpdateEvents;
+		}
+
+		public List<AfterUpdateEvent<Room>> getRoomAfterUpdateEvents() {
+			return roomAfterUpdateEvents;
+		}
+
+		public void resetEvents() {
+			roomBeforeUpdateEvents.clear();
+			roomAfterUpdateEvents.clear();
+		}
 	}
 }

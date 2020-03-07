@@ -18,11 +18,13 @@
 
 package de.thm.arsnova.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import org.springframework.cache.annotation.CacheEvict;
@@ -203,16 +205,17 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	@PreAuthorize("hasPermission(#entity, 'update')")
 	public T patch(final T entity, final Map<String, Object> changes,
 			final Function<T, ? extends Object> propertyGetter, final Class<?> view) throws IOException {
+		final T oldEntity = cloneEntity(entity);
 		final Object obj = propertyGetter.apply(entity);
 		final ObjectReader reader = objectMapper.readerForUpdating(obj).withView(view);
 		final JsonNode tree = objectMapperForPatchTree.valueToTree(changes);
 		reader.readValue(tree);
 		entity.setUpdateTimestamp(new Date());
 		preparePatch(entity);
-		eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity, propertyGetter, changes));
+		eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity, oldEntity, propertyGetter, changes));
 		validate(entity);
 		final T patchedEntity = repository.save(entity);
-		eventPublisher.publishEvent(new AfterPatchEvent<>(this, patchedEntity, propertyGetter, changes));
+		eventPublisher.publishEvent(new AfterPatchEvent<>(this, patchedEntity, oldEntity, propertyGetter, changes));
 		modifyRetrieved(patchedEntity);
 
 		return patchedEntity;
@@ -240,19 +243,23 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	public Iterable<T> patch(final Iterable<T> entities, final Map<String, Object> changes,
 			final Function<T, ? extends Object> propertyGetter, final Class<?> view) throws IOException {
 		final JsonNode tree = objectMapperForPatchTree.valueToTree(changes);
+		final Map<String, T> oldEntities = new HashMap<>();
 		for (final T entity : entities) {
+			final T oldEntity = cloneEntity(entity);
+			oldEntities.put(entity.getId(), oldEntity);
 			final Object obj = propertyGetter.apply(entity);
 			final ObjectReader reader = objectMapper.readerForUpdating(obj).withView(view);
 			reader.readValue(tree);
 			entity.setUpdateTimestamp(new Date());
 			preparePatch(entity);
-			eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity, propertyGetter, changes));
+			eventPublisher.publishEvent(new BeforePatchEvent<>(this, entity, oldEntity, propertyGetter, changes));
 			validate(entity);
 		}
 
 		final Iterable<T> patchedEntities = repository.saveAll(entities);
 		patchedEntities.forEach((e) -> {
-			eventPublisher.publishEvent(new AfterPatchEvent<>(this, e, propertyGetter, changes));
+			eventPublisher.publishEvent(new AfterPatchEvent<>(
+					this, e, oldEntities.get(e.getId()), propertyGetter, changes));
 			modifyRetrieved(e);
 		});
 
@@ -316,6 +323,12 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		if (errors.hasErrors()) {
 			throw new EntityValidationException(errors, entity);
 		}
+	}
+
+	private T cloneEntity(final T entity) throws JsonProcessingException {
+		return objectMapper.readerFor(entity.getClass()).withView(View.Persistence.class).readValue(
+				objectMapper.writerWithView(View.Persistence.class)
+				.writeValueAsString(entity));
 	}
 
 	public String getTypeName() {

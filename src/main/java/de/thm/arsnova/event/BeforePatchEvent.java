@@ -27,9 +27,10 @@ public class BeforePatchEvent<E extends Entity> extends BeforeUpdateEvent<E> {
 	private final Function<E, ? extends Object> propertyGetter;
 	private final Map<String, Object> changes;
 
-	public BeforePatchEvent(final Object source, final E entity, final Function<E, ? extends Object> propertyGetter,
+	public BeforePatchEvent(final Object source, final E entity, final E oldEntity,
+			final Function<E, ? extends Object> propertyGetter,
 			final Map<String, Object> changes) {
-		super(source, entity);
+		super(source, entity, oldEntity);
 		this.propertyGetter = propertyGetter;
 		this.changes = changes;
 	}

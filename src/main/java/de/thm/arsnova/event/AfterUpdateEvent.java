@@ -21,7 +21,14 @@ package de.thm.arsnova.event;
 import de.thm.arsnova.model.Entity;
 
 public abstract class AfterUpdateEvent<E extends Entity> extends CrudEvent<E> {
-	public AfterUpdateEvent(final Object source, final E entity) {
+	private final E oldEntity;
+
+	public AfterUpdateEvent(final Object source, final E entity, final E oldEntity) {
 		super(source, entity);
+		this.oldEntity = oldEntity;
+	}
+
+	public E getOldEntity() {
+		return oldEntity;
 	}
 }
