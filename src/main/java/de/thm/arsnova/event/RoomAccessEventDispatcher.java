@@ -27,8 +27,8 @@ public class RoomAccessEventDispatcher {
 	private static final String EDITING_MODERATOR_ROLE_STRING = Room.Moderator.Role.EDITING_MODERATOR.name();
 	private static final String EXECUTIVE_MODERATOR_ROLE_STRING = Room.Moderator.Role.EXECUTIVE_MODERATOR.name();
 
-	private static final String ROOM_ACCESS_GRANTED_QUEUE_NAME = "backend.event.room.access.granted";
-	private static final String ROOM_ACCESS_REVOKED_QUEUE_NAME = "backend.event.room.access.revoked";
+	public static final String ROOM_ACCESS_GRANTED_QUEUE_NAME = "backend.event.room.access.granted";
+	public static final String ROOM_ACCESS_REVOKED_QUEUE_NAME = "backend.event.room.access.revoked";
 
 	private final RabbitTemplate messagingTemplate;
 

@@ -1,10 +1,12 @@
 package de.thm.arsnova.config;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.Declarable;
 import org.springframework.amqp.core.Declarables;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
@@ -28,6 +30,7 @@ import org.springframework.messaging.handler.annotation.support.DefaultMessageHa
 
 import de.thm.arsnova.config.properties.MessageBrokerProperties;
 import de.thm.arsnova.event.AmqpEventDispatcher;
+import de.thm.arsnova.event.RoomAccessEventDispatcher;
 
 @Configuration
 @EnableRabbit
@@ -111,8 +114,14 @@ public class RabbitConfig {
 			final MessageBrokerProperties messageBrokerProperties) {
 		final Set<String> eventExchanges = messageBrokerProperties.getPublishedEvents().stream()
 				.map(c -> AmqpEventDispatcher.makeQueueName(c.entityType, c.eventType)).collect(Collectors.toSet());
-		return new Declarables(eventExchanges.stream()
-				.map(FanoutExchange::new).collect(Collectors.toList()));
+
+		final List<Declarable> declarables = eventExchanges.stream()
+				.map(FanoutExchange::new).collect(Collectors.toList());
+
+		declarables.add(new Queue(RoomAccessEventDispatcher.ROOM_ACCESS_GRANTED_QUEUE_NAME, true));
+		declarables.add(new Queue(RoomAccessEventDispatcher.ROOM_ACCESS_REVOKED_QUEUE_NAME, true));
+
+		return new Declarables(declarables);
 	}
 
 	@Bean
