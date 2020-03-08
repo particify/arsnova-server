@@ -64,6 +64,14 @@ public class Room extends Entity {
 		public void setRoles(final Set<Role> roles) {
 			this.roles = roles;
 		}
+
+		@Override
+		public String toString() {
+			return new ToStringCreator(this)
+					.append("userId", userId)
+					.append("roles", roles)
+					.toString();
+		}
 	}
 
 	public static class Settings {
@@ -582,6 +590,7 @@ public class Room extends Entity {
 				.append("abbreviation", abbreviation)
 				.append("description", description)
 				.append("closed", closed)
+				.append("moderators", moderators)
 				.append("settings", settings)
 				.append("author", author)
 				.append("poolProperties", poolProperties)
