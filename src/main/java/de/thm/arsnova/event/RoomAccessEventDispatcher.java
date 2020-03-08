@@ -7,6 +7,7 @@ import net.spy.memcached.compat.log.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 
 import de.thm.arsnova.model.Room;
 
@@ -19,6 +20,7 @@ import de.thm.arsnova.model.Room;
  *
  * @author Tom Käsler
  */
+@Component
 public class RoomAccessEventDispatcher {
 	private static final Logger logger = LoggerFactory.getLogger(RoomAccessEventDispatcher.class);
 
