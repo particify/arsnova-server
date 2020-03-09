@@ -7,7 +7,8 @@ import org.springframework.stereotype.Component
 @ConfigurationProperties
 class AuthServiceProperties (
         var server: Server? = null,
-        var rabbitmq: Rabbitmq? = null
+        var rabbitmq: Rabbitmq? = null,
+        var spring: Spring? = null
 )
 
 data class Server (
@@ -20,4 +21,25 @@ data class Rabbitmq (
         var username: String = "",
         var password: String = "",
         var virtualHost: String = ""
+)
+
+data class Spring (
+        var datasource: Datasource? = null,
+        var hibernate: Hibernate? = null
+)
+
+data class Datasource (
+        var url: String = "",
+        var driverClassName: String = "",
+        var platform: String = "",
+        var username: String = "",
+        var password: String = ""
+)
+
+data class Jpa (
+        var hibernate: Hibernate? = null
+)
+
+data class Hibernate (
+        var ddlAuto: String = ""
 )

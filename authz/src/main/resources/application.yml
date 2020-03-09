@@ -1,8 +1,19 @@
 server:
-  port: 8085
+  port: 8080
 rabbitmq:
   host: localhost
   port: 5672
   username: arsnova
   password: arsnova
   virtual-host: /
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/arsnovaauth
+    driver-class-name: org.postgresql.Driver
+    platform: postgres
+    username: arsnovaauth
+    password: arsnovaauth
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties.hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
