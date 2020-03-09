@@ -6,8 +6,12 @@ import net.spy.memcached.compat.log.Logger;
 import net.spy.memcached.compat.log.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 
+import de.thm.arsnova.config.RabbitConfig;
+import de.thm.arsnova.config.properties.MessageBrokerProperties;
 import de.thm.arsnova.model.Room;
 
 /**
@@ -19,6 +23,11 @@ import de.thm.arsnova.model.Room;
  *
  * @author Tom Käsler
  */
+@Component
+@ConditionalOnProperty(
+		name = RabbitConfig.RabbitConfigProperties.RABBIT_ENABLED,
+		prefix = MessageBrokerProperties.PREFIX,
+		havingValue = "true")
 public class RoomAccessEventDispatcher {
 	private static final Logger logger = LoggerFactory.getLogger(RoomAccessEventDispatcher.class);
 
