@@ -8,7 +8,7 @@ stages:
   - package
   - deploy
 
-.maven: &maven
+.maven:
   image: maven:3-jdk-11
   variables:
     MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss.SSS -Djava.awt.headless=true"
@@ -19,7 +19,7 @@ stages:
       - .m2/repository
 
 compile:
-  <<: *maven
+  extends: .maven
   stage: build
   artifacts:
     paths:
@@ -28,14 +28,14 @@ compile:
     - mvn $MAVEN_CLI_OPTS test-compile
 
 checkstyle:
-  <<: *maven
+  extends: .maven
   stage: test
   needs: []
   script:
     - mvn $MAVEN_CLI_OPTS checkstyle:check -Dcheckstyle.missing-javadoc.severity=info
 
 checkstyle_javadoc:
-  <<: *maven
+  extends: .maven
   stage: test
   needs: []
   allow_failure: true
@@ -43,7 +43,7 @@ checkstyle_javadoc:
     - mvn $MAVEN_CLI_OPTS checkstyle:check -Dcheckstyle.missing-javadoc.severity=warning
 
 unit_test:
-  <<: *maven
+  extends: .maven
   stage: test
   needs:
     - compile
@@ -58,7 +58,7 @@ unit_test:
     - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print "Instructions covered:", covered, "/", instructions; print "Code coverage:", 100 * covered / instructions "%" }' "$OUTPUT_DIR/site/jacoco/jacoco.csv"
 
 package:
-  <<: *maven
+  extends: .maven
   stage: package
   needs:
     - compile
@@ -70,7 +70,7 @@ package:
     - mvn $MAVEN_CLI_OPTS war:war
 
 docker_image:
-  <<: *maven
+  extends: .maven
   stage: deploy
   rules:
     - if: $CI_MERGE_REQUEST_ID
