@@ -6,14 +6,14 @@ import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 
 @SpringBootApplication
-class AuthServiceApplication : SpringBootServletInitializer() {
+class ArsnovaAuthServiceApplication : SpringBootServletInitializer() {
 
 	override fun configure(application: SpringApplicationBuilder): SpringApplicationBuilder {
-		return application.sources(AuthServiceApplication::class.java!!)
+		return application.sources(ArsnovaAuthServiceApplication::class.java!!)
 	}
 
 }
 
 fun main(args: Array<String>) {
-	SpringApplication.run(AuthServiceApplication::class.java, *args)
+	SpringApplication.run(ArsnovaAuthServiceApplication::class.java, *args)
 }
