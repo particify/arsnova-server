@@ -1103,9 +1103,9 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return answers;
 	}
 
-	@Cacheable("fullAnswers")
+	@Cacheable("answerTextAndUser")
 	@Override
-	public List<Answer> getFullAllAnswers(final Question question, final int piround) {
+	public List<Answer> getAnswerTextAndUser(final Question question, final int piround) {
 		final String questionId = question.get_id();
 		final NovaView view = new NovaView("answer/by_questionid_piround");
 		view.setStartKey(questionId, piround);

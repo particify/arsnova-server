@@ -21,7 +21,6 @@ import de.thm.arsnova.dao.IDatabaseDao;
 import de.thm.arsnova.entities.*;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.*;
@@ -195,7 +194,7 @@ public class QuestionBasedLearningProgressTest {
 		IDatabaseDao db = mock(IDatabaseDao.class);
 		when(db.getLectureQuestionsForTeachers(any(Session.class))).then(invocationOnMock -> this.creator.returnLectureQuestions());
 		when(db.getPreparationQuestionsForTeachers(any(Session.class))).then(invocationOnMock -> this.creator.returnPreparationQuestions());
-		when(db.getFullAllAnswers(any(Question.class), anyInt())).then(invocationOnMock -> this.creator.returnAnswersForQuestion(invocationOnMock.getArgumentAt(0, Question.class)));
+		when(db.getAnswerTextAndUser(any(Question.class), anyInt())).then(invocationOnMock -> this.creator.returnAnswersForQuestion(invocationOnMock.getArgumentAt(0, Question.class)));
 		this.lp = new QuestionBasedLearningProgress(db);
 		this.lp.setQuestionVariant("lecture");
 	}

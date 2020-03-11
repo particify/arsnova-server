@@ -53,7 +53,7 @@ public class CacheBuster implements ICacheBuster, NovaEventVisitor {
 	public void visit(LockQuestionsEvent lockQuestionsEvent) { }
 
 	@Caching(evict = {
-			@CacheEvict(value = "fullAnswers", key = "new org.springframework.cache.interceptor.SimpleKey(#event.Question, #event.Question.piRound)"),
+			@CacheEvict(value = "answerTextAndUser", key = "new org.springframework.cache.interceptor.SimpleKey(#event.Question, #event.Question.piRound)"),
 			@CacheEvict(value = "answers", key = "#event.Question")
 	})
 	@Override

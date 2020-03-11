@@ -251,7 +251,7 @@ public class Answer implements Serializable {
 		if (Arrays.asList("mc", "grid").contains(question.getQuestionType())) {
 			List<Integer> answerIndexes = new ArrayList<>();
 			if (question.getQuestionType().equals("mc")) {
-				List<Integer> selectedAnswerOptions = Arrays.asList(this.getAnswerText().split(",")).stream()
+				List<Integer> selectedAnswerOptions = Arrays.stream(this.getAnswerText().split(","))
 						.map(Integer::parseInt)
 						.collect(Collectors.toList());
 
@@ -262,12 +262,11 @@ public class Answer implements Serializable {
 					}
 				}
 			} else if (question.getQuestionType().equals("grid")) {
-				List<String> selectedFields = Arrays.asList(this.getAnswerText().split(",")).stream().collect(Collectors.toList());
+				List<String> selectedFields = new ArrayList<>(Arrays.asList(this.getAnswerText().split(",")));
 				// Translate the selected answers into actual indexes of the possibleAnswer array
 				List<Integer> indexes = selectedFields.stream().map(f -> {
 					List<Integer> coords = Arrays.stream(f.split(";")).map(Integer::parseInt).collect(Collectors.toList());
-					int index = coords.get(0) * (question.getPossibleAnswers().size() / 2) + coords.get(1);
-					return index;
+					return coords.get(0) * (question.getPossibleAnswers().size() / 2) + coords.get(1);
 				}).collect(Collectors.toList());
 				answerIndexes.addAll(indexes);
 			}

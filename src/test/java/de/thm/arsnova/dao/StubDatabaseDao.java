@@ -614,7 +614,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Answer> getFullAllAnswers(Question question, int piround) {
+	public List<Answer> getAnswerTextAndUser(Question question, int piround) {
 		return null;
 	}
 

@@ -64,7 +64,7 @@ public class QuestionBasedLearningProgress implements LearningProgress {
 		int numAllCorrectAnswers = 0;
 		List<Answer> allAnswers = new ArrayList<>();
 		for (Question q : new ArrayList<>(questions)) {
-			List<Answer> answers = databaseDao.getFullAllAnswers(q, q.getPiRound());
+			List<Answer> answers = databaseDao.getAnswerTextAndUser(q, q.getPiRound());
 			if (!q.isActive() && answers.size() == 0) {
 				// Ignore this question: It's not active and does not have any answers, so it's irrelevant.
 				questions.remove(q);
@@ -109,7 +109,7 @@ public class QuestionBasedLearningProgress implements LearningProgress {
 		int numCorrectAnswers = 0;
 		List<Answer> allAnswers = new ArrayList<>();
 		for (Question q : new ArrayList<>(questions)) {
-			List<Answer> answers = databaseDao.getFullAllAnswers(q, q.getPiRound());
+			List<Answer> answers = databaseDao.getAnswerTextAndUser(q, q.getPiRound());
 			if (!q.isActive() && answers.size() == 0) {
 				// Ignore this question: It's not active and does not have any answers, so it's irrelevant.
 				questions.remove(q);
