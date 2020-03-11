@@ -29,7 +29,7 @@ public class VoteCommandHandler {
     }
 
     public Vote handle(Upvote vote) {
-        logger.trace("got new command: " + vote.toString());
+        logger.debug("Got new command: {}", vote);
 
         VotePayload p = vote.getPayload();
         Vote v = new Vote();
@@ -45,7 +45,7 @@ public class VoteCommandHandler {
     }
 
     public Vote handle(Downvote vote) {
-        logger.trace("got new command: " + vote.toString());
+        logger.debug("Got new command: {}", vote);
 
         VotePayload p = vote.getPayload();
         Vote v = new Vote();
@@ -61,14 +61,15 @@ public class VoteCommandHandler {
     }
 
     public void handle(ResetVote vote) {
-        logger.trace("got new command: " + vote.toString());
+        logger.debug("Got new command: {}", vote);
 
         VotePayload p = vote.getPayload();
         Vote v = service.resetVote(p.getCommentId(), p.getUserId());
 
         if (v == null) {
-            logger.info("No vote to reset");
+            logger.trace("No vote to reset");
         } else {
+            logger.trace("Initialize sending the new score");
             eventer.ScoreChanged(p.getCommentId());
         }
     }
