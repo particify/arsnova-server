@@ -4,7 +4,8 @@ variables:
 
 stages:
   - build
-  - post-build
+  - test
+  - package
   - deploy
 
 .maven: &maven
@@ -17,19 +18,6 @@ stages:
     paths:
       - .m2/repository
 
-checkstyle:
-  <<: *maven
-  stage: build
-  script:
-    - mvn $MAVEN_CLI_OPTS checkstyle:check -Dcheckstyle.missing-javadoc.severity=info
-
-checkstyle_javadoc:
-  <<: *maven
-  stage: build
-  allow_failure: true
-  script:
-    - mvn $MAVEN_CLI_OPTS checkstyle:check -Dcheckstyle.missing-javadoc.severity=warning
-
 compile:
   <<: *maven
   stage: build
@@ -39,10 +27,25 @@ compile:
   script:
     - mvn $MAVEN_CLI_OPTS test-compile
 
+checkstyle:
+  <<: *maven
+  stage: test
+  needs: []
+  script:
+    - mvn $MAVEN_CLI_OPTS checkstyle:check -Dcheckstyle.missing-javadoc.severity=info
+
+checkstyle_javadoc:
+  <<: *maven
+  stage: test
+  needs: []
+  allow_failure: true
+  script:
+    - mvn $MAVEN_CLI_OPTS checkstyle:check -Dcheckstyle.missing-javadoc.severity=warning
+
 unit_test:
   <<: *maven
-  stage: post-build
-  dependencies:
+  stage: test
+  needs:
     - compile
   artifacts:
     paths:
@@ -56,8 +59,8 @@ unit_test:
 
 package:
   <<: *maven
-  stage: post-build
-  dependencies:
+  stage: package
+  needs:
     - compile
   artifacts:
     name: package
