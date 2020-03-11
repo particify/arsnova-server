@@ -3,9 +3,12 @@ services:
   couchdb:
     ports:
       - 127.0.0.1:5984:5984
-  postgresql:
+  postgresql_auth:
     ports:
       - 127.0.0.1:5432:5432
+  postgresql_comment:
+    ports:
+      - 127.0.0.1:5433:5432
   rabbitmq:
     #build: ./rabbitmq-stomp
     image: registry.gitlab.com/particify/devops/docker-orchestration/rabbitmq-stomp:3.8-management
@@ -20,6 +23,9 @@ services:
   arsnova-ws-gateway:
     ports:
       - 127.0.0.1:8099:8080
+  arsnova-auth-service:
+    ports:
+      - 127.0.0.1:8092:8080
   arsnova-comment-service:
     ports:
       - 127.0.0.1:8088:8080

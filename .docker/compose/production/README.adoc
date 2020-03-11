@@ -32,6 +32,7 @@ The default configuration can be adjusted via environment variables:
 |PORT |80 |Port used for the frontend proxy
 |CORE_TAG |master |Docker tag (repository branch) for Core Backend
 |WSGW_TAG |master |Docker tag (repository branch) for WebSocket Gateway
+|AUTH_TAG |master |Docker tag (repository branch) for Auth Service
 |COMMENT_TAG |master |Docker tag (repository branch) for Comment Service
 |WEB_TAG |master |Docker tag (repository branch) for Webclient
 |WEB_LEGACY_TAG |master |Docker tag (repository branch) for Webclient (legacy)

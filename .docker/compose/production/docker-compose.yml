@@ -7,14 +7,22 @@ services:
       COUCHDB_PASSWORD: arsnova
     volumes:
       - couchdb_data:/opt/couchdb/data
-  postgresql:
+  postgresql_auth:
+    image: postgres:12.1
+    environment:
+      POSTGRES_DB: arsnovaauth
+      POSTGRES_USER: arsnovaauth
+      POSTGRES_PASSWORD: arsnovaauth
+    volumes:
+      - postgresql_data_auth:/var/lib/postgresql/data
+  postgresql_comment:
     image: postgres:12.1
     environment:
       POSTGRES_DB: arsnovacomment
       POSTGRES_USER: arsnovacomment
       POSTGRES_PASSWORD: arsnovacomment
     volumes:
-      - postgresql_data:/var/lib/postgresql/data
+      - postgresql_data_comment:/var/lib/postgresql/data
   rabbitmq:
     image: registry.gitlab.com/particify/devops/docker-orchestration/rabbitmq-stomp:3.8
     environment:
@@ -50,14 +58,27 @@ services:
       STOMP_RELAY_USER: guest
       STOMP_RELAY_PASSWORD: guest
     command: /jetty/start.jar --module=http-forwarded
-  arsnova-comment-service:
-    image: registry.gitlab.com/arsnova/arsnova-comment-service:$COMMENT_TAG
+  arsnova-auth-service:
+    image: registry.gitlab.com/arsnova/arsnova-auth-service:$AUTH_TAG
     depends_on:
-      - postgresql
+      - postgresql_auth
       - rabbitmq
     environment:
       SERVER_PORT: 8080
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql:5432/arsnovacomment
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql_auth:5432/arsnovaauth
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
+    command: /jetty/start.jar --module=http-forwarded
+  arsnova-comment-service:
+    image: registry.gitlab.com/arsnova/arsnova-comment-service:$COMMENT_TAG
+    depends_on:
+      - postgresql_comment
+      - rabbitmq
+    environment:
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql_comment:5432/arsnovacomment
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_USERNAME: guest
@@ -71,8 +92,11 @@ services:
     image: registry.gitlab.com/particify/devops/docker-orchestration/nginx-proxy:stable
     depends_on:
       - arsnova-backend-core
+      - arsnova-auth-service
+      - arsnova-ws-gateway
       - arsnova-comment-service
       - arsnova-web
 volumes:
   couchdb_data:
-  postgresql_data:
+  postgresql_data_auth:
+  postgresql_data_comment:
