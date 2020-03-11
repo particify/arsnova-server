@@ -41,7 +41,7 @@ public class CommentCommandHandler {
     }
 
     public Comment handle(CreateComment command) {
-        logger.trace("got new command: " + command.toString());
+        logger.debug("Got new command: {}", command);
 
         Date now = new Date();
 
@@ -68,12 +68,15 @@ public class CommentCommandHandler {
         CommentCreated event = new CommentCreated(commentCreatedPayload, payload.getRoomId());
 
         if (settings.getDirectSend()) {
+            logger.debug("Sending event to comment stream: {}", event);
+
             messagingTemplate.convertAndSend(
                     "amq.topic",
                     payload.getRoomId() + ".comment.stream",
                     event
             );
         } else {
+            logger.debug("Sending event to moderated stream: {}", event);
             messagingTemplate.convertAndSend(
                     "amq.topic",
                     payload.getRoomId() + ".comment.moderator.stream",
@@ -85,7 +88,7 @@ public class CommentCommandHandler {
     }
 
     public Comment handle(PatchComment command) throws IOException {
-        logger.trace("got new command: " + command.toString());
+        logger.debug("Got new command: {}", command);
 
         PatchCommentPayload p = command.getPayload();
         Comment c = this.service.get(p.getId());
@@ -94,59 +97,74 @@ public class CommentCommandHandler {
         boolean wasFavorited = c.isFavorite();
 
         if (c.getId() != null) {
-            Comment patched = this.service.patch(c, p.getChanges());
+            try {
+                Comment patched = this.service.patch(c, p.getChanges());
 
-            CommentPatchedPayload payload = new CommentPatchedPayload(patched.getId(), p.getChanges());
-            CommentPatched event = new CommentPatched(payload, patched.getRoomId());
+                CommentPatchedPayload payload = new CommentPatchedPayload(patched.getId(), p.getChanges());
+                CommentPatched event = new CommentPatched(payload, patched.getRoomId());
 
-            if (!wasFavorited && patched.isFavorite()) {
-                BonusToken bt = new BonusToken();
-                Date now = new Date();
-                bt.setRoomId(patched.getRoomId());
-                bt.setCommentId(patched.getId());
-                bt.setUserId(patched.getCreatorId());
-                bt.setTimestamp(now);
-                bonusTokenService.create(bt);
+                if (!wasFavorited && patched.isFavorite()) {
+                    BonusToken bt = new BonusToken();
+                    Date now = new Date();
+                    bt.setRoomId(patched.getRoomId());
+                    bt.setCommentId(patched.getId());
+                    bt.setUserId(patched.getCreatorId());
+                    bt.setTimestamp(now);
 
-            } else if (wasFavorited && !patched.isFavorite()) {
-                bonusTokenService.deleteByPK(patched.getRoomId(), patched.getId(), patched.getCreatorId());
-            }
+                    logger.debug("Creating token as a side effect: {}", bt);
 
-            if (!wasAck && patched.isAck()) {
-                CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(patched);
-                commentCreatedPayload.setTimestamp(new Date());
-                CommentCreated quoteOnQuoteNew = new CommentCreated(commentCreatedPayload, patched.getRoomId());
+                    bonusTokenService.create(bt);
+
+                } else if (wasFavorited && !patched.isFavorite()) {
+                    bonusTokenService.deleteByPK(patched.getRoomId(), patched.getId(), patched.getCreatorId());
+                }
+
+                if (!wasAck && patched.isAck()) {
+                    CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(patched);
+                    commentCreatedPayload.setTimestamp(new Date());
+                    CommentCreated quoteOnQuoteNew = new CommentCreated(commentCreatedPayload, patched.getRoomId());
+
+                    logger.debug("Sending event to comment stream: {}", quoteOnQuoteNew);
+
+                    messagingTemplate.convertAndSend(
+                            "amq.topic",
+                            c.getRoomId() + ".comment.stream",
+                            quoteOnQuoteNew
+                    );
+                } else if (wasAck && !patched.isAck()) {
+                    CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(patched);
+                    commentCreatedPayload.setTimestamp(new Date());
+                    CommentCreated quoteOnQuoteNew = new CommentCreated(commentCreatedPayload, patched.getRoomId());
+
+                    logger.debug("Sending event to moderated stream: {}", quoteOnQuoteNew);
+
+                    messagingTemplate.convertAndSend(
+                            "amq.topic",
+                            c.getRoomId() + ".comment.moderator.stream",
+                            quoteOnQuoteNew
+                    );
+                }
+
+                logger.debug("Sending event to moderated stream: {}", event);
+
                 messagingTemplate.convertAndSend(
                         "amq.topic",
                         c.getRoomId() + ".comment.stream",
-                        quoteOnQuoteNew
+                        event
                 );
-            } else if (wasAck && !patched.isAck()) {
-                CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(patched);
-                commentCreatedPayload.setTimestamp(new Date());
-                CommentCreated quoteOnQuoteNew = new CommentCreated(commentCreatedPayload, patched.getRoomId());
-                messagingTemplate.convertAndSend(
-                        "amq.topic",
-                        c.getRoomId() + ".comment.moderator.stream",
-                        quoteOnQuoteNew
-                );
+
+                return patched;
+            } catch (IOException e) {
+                logger.error("Patching of comment {} failed.", c.getId(), e);
             }
-
-            messagingTemplate.convertAndSend(
-                    "amq.topic",
-                    c.getRoomId() + ".comment.stream",
-                    event
-            );
-
-            return patched;
         } else {
-            // ToDo: Error handling
-            return c;
+            logger.debug("No comment found for patch command {}", command);
         }
+        return c;
     }
 
     public Comment handle(UpdateComment command) {
-        logger.trace("got new command: " + command.toString());
+        logger.debug("Got new command: {}", command);
 
         UpdateCommentPayload p = command.getPayload();
         Comment old = this.service.get(p.getId());
@@ -162,11 +180,13 @@ public class CommentCommandHandler {
         CommentUpdatedPayload payload = new CommentUpdatedPayload(updated);
         CommentUpdated event = new CommentUpdated(payload, updated.getRoomId());
 
-
         if (!old.isAck() && updated.isAck()) {
             CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(updated);
             commentCreatedPayload.setTimestamp(new Date());
             CommentCreated quoteOnQuoteNew = new CommentCreated(commentCreatedPayload, updated.getRoomId());
+
+            logger.debug("Sending event to comment stream: {}", quoteOnQuoteNew);
+
             messagingTemplate.convertAndSend(
                     "amq.topic",
                     old.getRoomId() + ".comment.stream",
@@ -176,12 +196,17 @@ public class CommentCommandHandler {
             CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(updated);
             commentCreatedPayload.setTimestamp(new Date());
             CommentCreated quoteOnQuoteNew = new CommentCreated(commentCreatedPayload, updated.getRoomId());
+
+            logger.debug("Sending event to moderated stream: {}", quoteOnQuoteNew);
+
             messagingTemplate.convertAndSend(
                     "amq.topic",
                     old.getRoomId() + ".comment.moderator.stream",
                     quoteOnQuoteNew
             );
         }
+
+        logger.debug("Sending event to comment stream: {}", event);
 
         messagingTemplate.convertAndSend(
                 "amq.topic",
@@ -193,7 +218,7 @@ public class CommentCommandHandler {
     }
 
     public void handle(DeleteComment command) {
-        logger.trace("got new command: " + command.toString());
+        logger.debug("Got new command: {}", command);
 
         String id = command.getPayload().getId();
         Comment c = service.get(id);
@@ -204,6 +229,8 @@ public class CommentCommandHandler {
             p.setId(c.getId());
             CommentDeleted event = new CommentDeleted(p, c.getRoomId());
 
+            logger.debug("Sending event to comment stream: {}", event);
+
             messagingTemplate.convertAndSend(
                     "amq.topic",
                     c.getRoomId() + ".comment.stream",
@@ -213,13 +240,16 @@ public class CommentCommandHandler {
     }
 
     public void handle(HighlightComment command) {
-        logger.trace("got new command: " + command.toString());
+        logger.debug("Got new command: {}", command);
 
         String id = command.getPayload().getId();
         Comment c = service.get(id);
         if (c.getId() != null) {
             CommentHighlightedPayload p = new CommentHighlightedPayload(c, command.getPayload().getLights());
             CommentHighlighted event = new CommentHighlighted(p, c.getRoomId());
+
+            logger.debug("Sending event to comment stream: {}", event);
+
             messagingTemplate.convertAndSend(
                     "amq.topic",
                     c.getRoomId() + ".comment.stream",
@@ -229,7 +259,7 @@ public class CommentCommandHandler {
     }
 
     public void handle(DeleteCommentsByRoom command) {
-        logger.trace("got new command: " + command.toString());
+        logger.debug("Got new command: {}", command);
 
         String roomId = command.getPayload().getRoomId();
         List<Comment> deletedComments = service.deleteByRoomId(roomId);
@@ -237,6 +267,8 @@ public class CommentCommandHandler {
             CommentDeletedPayload p = new CommentDeletedPayload();
             p.setId(c.getId());
             CommentDeleted event = new CommentDeleted(p, c.getRoomId());
+
+            logger.debug("Sending event to comment stream: {}", event);
 
             messagingTemplate.convertAndSend(
                     "amq.topic",

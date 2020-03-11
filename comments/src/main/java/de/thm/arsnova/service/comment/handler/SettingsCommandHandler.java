@@ -23,7 +23,7 @@ public class SettingsCommandHandler {
     }
 
     public Settings handle(CreateSettings command) {
-        logger.trace("got new command: " + command.toString());
+        logger.debug("Got new command: {}", command);
 
         CreateSettingsPayload payload = command.getPayload();
 
@@ -37,7 +37,7 @@ public class SettingsCommandHandler {
     }
 
     public Settings handle(UpdateSettings command) {
-        logger.trace("got new command: " + command.toString());
+        logger.debug("Got new command: {}", command);
 
         UpdateSettingsPayload payload = command.getPayload();
         Settings settings = service.get(payload.getRoomId());
