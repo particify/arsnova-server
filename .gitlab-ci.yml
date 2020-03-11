@@ -4,10 +4,11 @@ variables:
 
 stages:
   - build
-  - post-build
+  - test
+  - package
   - deploy
 
-.maven: &maven
+.maven:
   image: maven:3-jdk-11
   variables:
     MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss.SSS -Djava.awt.headless=true"
@@ -17,21 +18,8 @@ stages:
     paths:
       - .m2/repository
 
-checkstyle:
-  <<: *maven
-  stage: build
-  script:
-    - mvn $MAVEN_CLI_OPTS checkstyle:check -Dcheckstyle.missing-javadoc.severity=info
-
-checkstyle_javadoc:
-  <<: *maven
-  stage: build
-  allow_failure: true
-  script:
-    - mvn $MAVEN_CLI_OPTS checkstyle:check -Dcheckstyle.missing-javadoc.severity=warning
-
 compile:
-  <<: *maven
+  extends: .maven
   stage: build
   artifacts:
     paths:
@@ -39,10 +27,25 @@ compile:
   script:
     - mvn $MAVEN_CLI_OPTS test-compile
 
+checkstyle:
+  extends: .maven
+  stage: test
+  needs: []
+  script:
+    - mvn $MAVEN_CLI_OPTS checkstyle:check -Dcheckstyle.missing-javadoc.severity=info
+
+checkstyle_javadoc:
+  extends: .maven
+  stage: test
+  needs: []
+  allow_failure: true
+  script:
+    - mvn $MAVEN_CLI_OPTS checkstyle:check -Dcheckstyle.missing-javadoc.severity=warning
+
 unit_test:
-  <<: *maven
-  stage: post-build
-  dependencies:
+  extends: .maven
+  stage: test
+  needs:
     - compile
   artifacts:
     paths:
@@ -55,9 +58,9 @@ unit_test:
     - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print "Instructions covered:", covered, "/", instructions; print "Code coverage:", 100 * covered / instructions "%" }' "$OUTPUT_DIR/site/jacoco/jacoco.csv"
 
 package:
-  <<: *maven
-  stage: post-build
-  dependencies:
+  extends: .maven
+  stage: package
+  needs:
     - compile
   artifacts:
     name: package
@@ -66,16 +69,17 @@ package:
   script:
     - mvn $MAVEN_CLI_OPTS war:war
 
-.docker_image: &docker_image
-  <<: *maven
+docker_image:
+  extends: .maven
   stage: deploy
-  # Disabled for now. See https://gitlab.com/gitlab-org/gitlab/issues/34756.
-  #rules:
-  #  - if: '$CI_COMMIT_REF_NAME == "master"'
-  #    when: on_success
-  #  - if: '$CI_COMMIT_REF_NAME == "latest" || $CI_COMMIT_REF_NAME =~ /^v[0-9]+/ || $CI_COMMIT_REF_NAME =~ /^[0-9]+\.[0-9]+$/'
-  #    when: never
-  #  - when: manual
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      when: never
+    - if: $CI_COMMIT_REF_NAME == "master"
+      when: on_success
+    - if: $CI_COMMIT_REF_NAME == "latest" || $CI_COMMIT_REF_NAME =~ /^v[0-9]+/ || $CI_COMMIT_REF_NAME =~ /^[0-9]+\.[0-9]+$/
+      when: never
+    - when: manual
   variables:
     DOCKER_IMAGE_NAME: $CI_PROJECT_PATH
   dependencies:
@@ -91,78 +95,3 @@ package:
       -Ddocker.tag="$CI_COMMIT_REF_SLUG"
       -Ddocker.time="`git log -1 --format=%cI`"
 
-# Temporary workaround until GitLab bug is fixed
-docker_image:
-  <<: *docker_image
-  only:
-    - master
-
-docker_image_dev:
-  <<: *docker_image
-  except:
-    - master
-    - latest
-    - /^v[0-9]+/
-    - /^[0-9]+\.[0-9]+$/
-  when: manual
-
-.deploy: &deploy
-  stage: deploy
-  image: python:3
-  when: manual
-  variables:
-    DEPLOY_CONTEXT: api
-    GIT_STRATEGY: none
-  dependencies:
-    - package
-  script:
-    # Do some variable magic to access host-specific variables
-    - PREFIX=$(echo $CI_ENVIRONMENT_NAME | tr '.:/-' '_')
-    - HOST_VAR=${PREFIX}__HOST TOMCAT_PASSWORD_VAR=${PREFIX}__TOMCAT_PASSWORD TOMCAT_USER_VAR=${PREFIX}__TOMCAT_USER
-    - "[ -z \"${!HOST_VAR}\" ] && echo \"No configuration for $DEPLOY_HOST found.\" && exit 1"
-    # Abort if there are too many users online
-    - USER_COUNT=$(curl -fsSL ${CI_ENVIRONMENT_URL}statistics | python -c "import sys, json; data=json.loads(sys.stdin.read()); print(data['activeUsers']);")
-    - "[ \"$USER_COUNT\" -ge 10 ] && [ -z \"$FORCE\" ] && echo \"Too many users ($USER_COUNT) online.\" && exit 1"
-    # Deploy .war file to Tomcat
-    - curl -fsS --upload-file $WAR_FILE "https://${!TOMCAT_USER_VAR}:${!TOMCAT_PASSWORD_VAR}@${!HOST_VAR}/manager/text/deploy?path=%2F${DEPLOY_CONTEXT}&update=true"
-
-tomcat_production:
-  <<: *deploy
-  environment:
-    name: production/$PROD_DEPLOY_HOST
-    url: https://$PROD_DEPLOY_HOST/$DEPLOY_CONTEXT/
-  only:
-    variables:
-      - $PROD_DEPLOY_HOST
-      # GitLab 11.0+
-      #- $PROD_DEPLOY_HOST =~ /^([a-z0-9-]+\.)*[a-z0-9-]+(:[0-9]+)?$/
-    refs:
-      - /^v[0-9]+/
-      - /^[0-9]+\.[0-9]+$/
-  before_script:
-    - DEPLOY_HOST=$PROD_DEPLOY_HOST
-
-tomcat_development:
-  <<: *deploy
-  environment:
-    name: development/$DEV_DEPLOY_HOST
-    url: https://$DEV_DEPLOY_HOST/api/
-  only:
-    variables:
-      - $DEV_DEPLOY_HOST
-      # GitLab 11.0+
-      #- $DEV_DEPLOY_HOST =~ /^([a-z0-9-]+\.)*[a-z0-9-]+(:[0-9]+)?$/
-  before_script:
-    - DEPLOY_HOST=$DEV_DEPLOY_HOST
-
-sonarqube:
-  <<: *maven
-  stage: deploy
-  only:
-    - master
-  dependencies:
-    - compile
-    - unit_test
-  allow_failure: true
-  script:
-    - mvn $MAVEN_CLI_OPTS sonar:sonar
