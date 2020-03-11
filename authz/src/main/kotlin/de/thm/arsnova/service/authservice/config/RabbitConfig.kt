@@ -1,5 +1,7 @@
 package de.thm.arsnova.service.authservice.config
 
+import org.springframework.amqp.core.Declarables
+import org.springframework.amqp.core.Queue
 import org.springframework.amqp.rabbit.annotation.RabbitListenerConfigurer
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
@@ -21,6 +23,12 @@ import org.springframework.messaging.handler.annotation.support.DefaultMessageHa
 class RabbitConfig (
         private var authServiceProperties: AuthServiceProperties
 ) : RabbitListenerConfigurer {
+
+    companion object {
+        const val roomAccessGrantedQueueName: String = "backend.event.room.access.granted"
+        const val roomAccessRevokedQueueName: String = "backend.event.room.access.revoked"
+    }
+
     @Bean
     @Autowired
     fun connectionFactory(
@@ -49,6 +57,14 @@ class RabbitConfig (
     @Autowired
     fun rabbitAdmin(connectionFactory: ConnectionFactory?): RabbitAdmin? {
         return RabbitAdmin(connectionFactory!!)
+    }
+
+    @Bean
+    fun declarables(): Declarables {
+        return Declarables(listOf(
+                Queue(roomAccessGrantedQueueName, true),
+                Queue(roomAccessRevokedQueueName, true)
+        ))
     }
 
     @Bean

@@ -1,5 +1,6 @@
 package de.thm.arsnova.service.authservice.listener
 
+import de.thm.arsnova.service.authservice.config.RabbitConfig
 import de.thm.arsnova.service.authservice.handler.RoomAccessHandler
 import de.thm.arsnova.service.authservice.model.command.CreateRoomAccessCommand
 import de.thm.arsnova.service.authservice.model.command.DeleteRoomAccessCommand
@@ -16,13 +17,13 @@ class RoomAccessListener (
 ) {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    @RabbitListener(queues = ["backend.event.room.access.granted"])
+    @RabbitListener(queues = [RabbitConfig.roomAccessGrantedQueueName])
     fun receiveRoomAccessGrantedEvent(event: RoomAccessGrantedEvent) {
         logger.debug("Got event on room access granted queue: {}", event)
         handler.handleCreateRoomAccessCommand(CreateRoomAccessCommand(event.roomId, event.userId, event.role))
     }
 
-    @RabbitListener(queues = ["backend.event.room.access.revoked"])
+    @RabbitListener(queues = [RabbitConfig.roomAccessRevokedQueueName])
     fun receiveRoomAccessRevokedEvent(event: RoomAccessRevokedEvent) {
         logger.debug("Got event on room access revoked queue: {}", event)
         handler.handleDeleteRoomAccessCommand(DeleteRoomAccessCommand(event.roomId, event.userId))
