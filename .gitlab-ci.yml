@@ -66,16 +66,17 @@ package:
   script:
     - mvn $MAVEN_CLI_OPTS war:war
 
-.docker_image: &docker_image
+docker_image:
   <<: *maven
   stage: deploy
-  # Disabled for now. See https://gitlab.com/gitlab-org/gitlab/issues/34756.
-  #rules:
-  #  - if: '$CI_COMMIT_REF_NAME == "master"'
-  #    when: on_success
-  #  - if: '$CI_COMMIT_REF_NAME == "latest" || $CI_COMMIT_REF_NAME =~ /^v[0-9]+/ || $CI_COMMIT_REF_NAME =~ /^[0-9]+\.[0-9]+$/'
-  #    when: never
-  #  - when: manual
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      when: never
+    - if: $CI_COMMIT_REF_NAME == "master"
+      when: on_success
+    - if: $CI_COMMIT_REF_NAME == "latest" || $CI_COMMIT_REF_NAME =~ /^v[0-9]+/ || $CI_COMMIT_REF_NAME =~ /^[0-9]+\.[0-9]+$/
+      when: never
+    - when: manual
   variables:
     DOCKER_IMAGE_NAME: $CI_PROJECT_PATH
   dependencies:
@@ -91,17 +92,3 @@ package:
       -Ddocker.tag="$CI_COMMIT_REF_SLUG"
       -Ddocker.time="`git log -1 --format=%cI`"
 
-# Temporary workaround until GitLab bug is fixed
-docker_image:
-  <<: *docker_image
-  only:
-    - master
-
-docker_image_dev:
-  <<: *docker_image
-  except:
-    - master
-    - latest
-    - /^v[0-9]+/
-    - /^[0-9]+\.[0-9]+$/
-  when: manual
