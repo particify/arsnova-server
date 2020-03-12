@@ -121,6 +121,8 @@ public interface IDatabaseDao {
 
 	List<Answer> getAnswers(Question question, int piRound);
 
+	List<Answer> getAnswerTextAndUser(Question question, int piround);
+
 	List<Answer> getAnswers(Question question);
 
 	List<Answer> getAllAnswers(Question question);

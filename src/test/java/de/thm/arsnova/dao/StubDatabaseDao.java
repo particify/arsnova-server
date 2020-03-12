@@ -614,6 +614,11 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
+	public List<Answer> getAnswerTextAndUser(Question question, int piround) {
+		return null;
+	}
+
+	@Override
 	public List<Answer> getAnswers(Question question) {
 		// TODO Auto-generated method stub
 		return null;

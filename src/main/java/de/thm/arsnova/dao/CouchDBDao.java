@@ -1103,6 +1103,22 @@ public class CouchDBDao implements IDatabaseDao, ApplicationEventPublisherAware 
 		return answers;
 	}
 
+	@Cacheable("answerTextAndUser")
+	@Override
+	public List<Answer> getAnswerTextAndUser(final Question question, final int piround) {
+		final String questionId = question.get_id();
+		final NovaView view = new NovaView("answer/by_questionid_piround");
+		view.setStartKey(questionId, piround);
+		view.setEndKey(questionId, piround);
+		final ViewResults results = getDatabase().view(view);
+		final List<Answer> answers = new ArrayList<>();
+		for (final Document d : results.getResults()) {
+			final Answer a = (Answer) JSONObject.toBean(d.getJSONObject().getJSONObject("value"), Answer.class);
+			answers.add(a);
+		}
+		return answers;
+	}
+
 	@Cacheable("answers")
 	@Override
 	public List<Answer> getAnswers(final Question question) {

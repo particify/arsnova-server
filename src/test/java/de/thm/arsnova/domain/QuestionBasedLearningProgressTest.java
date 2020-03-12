@@ -18,76 +18,42 @@
 package de.thm.arsnova.domain;
 
 import de.thm.arsnova.dao.IDatabaseDao;
-import de.thm.arsnova.entities.TestUser;
-import de.thm.arsnova.entities.User;
+import de.thm.arsnova.entities.*;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class QuestionBasedLearningProgressTest {
 
-	private CourseScore courseScore;
-	private VariantLearningProgress lp;
+	private QuestionBasedLearningProgress lp;
 
-	private int id = 1;
+	private FixtureCreator creator;
 
-	private String addQuestion(String questionVariant, int points) {
-		final String questionId = "question" + (id++);
-		final int piRound = 1;
-		courseScore.addQuestion(questionId, questionVariant, piRound, points);
-		return questionId;
-	}
-
-	private void addAnswer(String questionId, User user, int points) {
-		final int piRound = 1;
-		courseScore.addAnswer(questionId, piRound, user.getUsername(), points);
-	}
-
-	@Before
-	public void setUp() {
-		this.courseScore = new CourseScore();
-		IDatabaseDao db = mock(IDatabaseDao.class);
-		when(db.getLearningProgress(null)).thenReturn(courseScore);
-		this.lp = new QuestionBasedLearningProgress(db);
-	}
-
-	/**
-	 * Questions without "correct" answers should have a value of zero
-	 */
 	@Test
-	public void shouldIgnoreQuestionsWithoutCorrectAnswers() {
-		final int questionMaxValue = 0;
-		final int userScore = 0;
-		User user = new TestUser("username");
-		String questionId = this.addQuestion("lecture", questionMaxValue);
-		this.addAnswer(questionId, user, userScore);
+	public void correctAnswersShouldResultInPerfectScore() {
+		creator.addQuestion("lecture").withCorrectAnswers(100);
 
-		LearningProgressValues expected = new LearningProgressValues();
-		expected.setCourseProgress(0);
-		expected.setMyProgress(0);
-		expected.setNumQuestions(0);
-		LearningProgressValues actual = lp.getMyProgress(null, user);
+		int expected = 100;
+		int actual = lp.getCourseProgress(null).getCourseProgress();
 
 		assertEquals(expected, actual);
 	}
 
 	@Test
-	public void shouldIgnoreQuestionsWithoutCorrectAnswersInQuestionCount() {
-		User user = new TestUser("username");
-		courseScore.addQuestion("question-without-correct-answers", "lecture", 1, 0);
-		courseScore.addQuestion("question-with-correct-answers", "lecture", 1, 50);
-		courseScore.addAnswer("question-without-correct-answers", 1, user.getUsername(), 0);
-		courseScore.addAnswer("question-with-correct-answers", 1, user.getUsername(), 50);
+	public void inCorrectAnswersShouldResultInZeroScore() {
+		creator.addQuestion("lecture").withWrongAnswers(100);
 
-		LearningProgressValues expected = new LearningProgressValues();
-		expected.setCourseProgress(100);
-		expected.setMyProgress(100);
-		expected.setNumQuestions(1);
-		LearningProgressValues actual = lp.getMyProgress(null, user);
+		int expected = 0;
+		int actual = lp.getCourseProgress(null).getCourseProgress();
 
 		assertEquals(expected, actual);
 	}
@@ -97,11 +63,7 @@ public class QuestionBasedLearningProgressTest {
 	 */
 	@Test
 	public void shouldCalculatePercentageOfOneQuestionWithSomeWrongAnswers() {
-		String questionId = this.addQuestion("lecture", 10);
-		for (int i = 0; i < 99; i++) {
-			this.addAnswer(questionId, new TestUser("user"+i), 10);
-		}
-		this.addAnswer(questionId, new TestUser("user-with-a-wrong-answer"), 0);
+		creator.addQuestion("lecture").withCorrectAnswers(99).withWrongAnswers(1);
 
 		int expected = 99;
 		int actual = lp.getCourseProgress(null).getCourseProgress();
@@ -113,20 +75,18 @@ public class QuestionBasedLearningProgressTest {
 	 * Given two users and two questions: the first question is answered correctly by both users, while the second
 	 * is only answered correctly by one user. The first question should receive 100%, the second 50%. This should
 	 * result in an overall score of 75%.
+	 *
+	 * Formula:		(Correct Answers) / (Questions * Users)
+	 * 	==> 3/(2*2)
+	 * 	==> 3/4
+	 * 	==> 75%
 	 */
 	@Test
 	public void shouldCalculatePercentageOfMultipleQuestionsAndAnswers() {
-		// two questions
-		String q1 = this.addQuestion("lecture", 10);
-		String q2 = this.addQuestion("lecture", 10);
-		// two users
-		User u1 = new TestUser("user1");
-		User u2 = new TestUser("user2");
-		// four answers, last one is wrong
-		this.addAnswer(q1, u1, 10);
-		this.addAnswer(q1, u2, 10);
-		this.addAnswer(q2, u1, 10);
-		this.addAnswer(q2, u2, 0);
+		creator.addQuestion("lecture").withCorrectAnswers(2).forUsers("user1", "user2");
+		creator.addQuestion("lecture")
+				.withCorrectAnswers(1).forUser("user1")
+				.withWrongAnswers(1).forUser("user2");
 
 		int expected = 75;
 		int actual = lp.getCourseProgress(null).getCourseProgress();
@@ -135,16 +95,10 @@ public class QuestionBasedLearningProgressTest {
 	}
 
 	@Test
-	public void shouldNotBeBiasedByPointsOrAnswerCount() {
-		// two questions
-		String q1 = this.addQuestion("lecture", 1000);
-		String q2 = this.addQuestion("lecture", 1);
-		// first question has many answers, all of them correct
-		for (int i = 0; i < 100; i++) {
-			this.addAnswer(q1, new TestUser("user"+i), 1000);
-		}
-		// second question has one wrong answer
-		this.addAnswer(q2,  new TestUser("another-user"), 0);
+	public void shouldNotBeBiasedByAnswerCount() {
+		// (999+1) correct answers / (2 questions * 1000 users) ==> 1000/2000 ==> 50%
+		creator.addQuestion("lecture").withCorrectAnswers(999).withCorrectAnswers(1).forUser("user1");
+		creator.addQuestion("lecture").withWrongAnswers(1).forUser("user1");
 
 		int expected = 50;
 		int actual = lp.getCourseProgress(null).getCourseProgress();
@@ -154,44 +108,37 @@ public class QuestionBasedLearningProgressTest {
 
 	@Test
 	public void shouldFilterBasedOnQuestionVariant() {
-		String q1 = this.addQuestion("lecture", 100);
-		String q2 = this.addQuestion("preparation", 100);
-		User u1 = new TestUser("user1");
-		User u2 = new TestUser("user2");
-		// first question is answered correctly, second one is not
-		this.addAnswer(q1, u1, 100);
-		this.addAnswer(q1, u2, 100);
-		this.addAnswer(q2, u1, 0);
-		this.addAnswer(q2, u2, 0);
+		creator.addQuestion("lecture").withCorrectAnswers(2).forUsers("user1", "user2");
+		creator.addQuestion("preparation").withWrongAnswers(2).forUsers("user1", "user2");
 
 		lp.setQuestionVariant("lecture");
 		LearningProgressValues lectureProgress = lp.getCourseProgress(null);
-		LearningProgressValues myLectureProgress = lp.getMyProgress(null, u1);
+		LearningProgressValues myLectureProgress = lp.getMyProgress(null, new TestUser("user1"));
 		lp.setQuestionVariant("preparation");
 		LearningProgressValues prepProgress = lp.getCourseProgress(null);
-		LearningProgressValues myPrepProgress = lp.getMyProgress(null, u1);
+		LearningProgressValues myPrepProgress = lp.getMyProgress(null, new TestUser("user1"));
+		lp.setQuestionVariant("");
+		LearningProgressValues allProgress = lp.getCourseProgress(null);
+		LearningProgressValues allMyProgress = lp.getMyProgress(null, new TestUser("user1"));
 
 		assertEquals(100, lectureProgress.getCourseProgress());
 		assertEquals(100, myLectureProgress.getMyProgress());
 		assertEquals(0, prepProgress.getCourseProgress());
 		assertEquals(0, myPrepProgress.getMyProgress());
+		assertEquals(50, allProgress.getCourseProgress());
+		assertEquals(50, allMyProgress.getMyProgress());
 	}
 
 	@Test
-	public void shouldConsiderAnswersOfSamePiRound() {
-		User u1 = new TestUser("user1");
-		User u2 = new TestUser("user2");
-		// question is in round 2
-		courseScore.addQuestion("q1", "lecture", 2, 100);
-		// 25 points in round 1, 75 points in round two for the first user
-		courseScore.addAnswer("q1", 1, u1.getUsername(), 25);
-		courseScore.addAnswer("q1", 2, u1.getUsername(), 100);
-		// 75 points in round 1, 25 points in round two for the second user
-		courseScore.addAnswer("q1", 1, u2.getUsername(), 100);
-		courseScore.addAnswer("q1", 2, u2.getUsername(), 25);
+	public void shouldConsiderOnlyAnswersForCurrentPiRound() {
+		creator.addQuestion("lecture").forRound(2)
+				.withWrongAnswers(1).inRound(1).forUser("user1")
+				.withCorrectAnswers(1).inRound(1).forUser("user2")
+				.withCorrectAnswers(1).inRound(2).forUser("user1")
+				.withWrongAnswers(1).inRound(2).forUser("user2");
 
-		LearningProgressValues u1Progress = lp.getMyProgress(null, u1);
-		LearningProgressValues u2Progress = lp.getMyProgress(null, u2);
+		LearningProgressValues u1Progress = lp.getMyProgress(null, new TestUser("user1"));
+		LearningProgressValues u2Progress = lp.getMyProgress(null, new TestUser("user2"));
 
 		// only the answer for round 2 should be considered
 		assertEquals(50, u1Progress.getCourseProgress());
@@ -201,29 +148,200 @@ public class QuestionBasedLearningProgressTest {
 	}
 
 	@Test
-	public void shouldIncludeNominatorAndDenominatorOfResultExcludingStudentCount() {
-		// two questions
-		String q1 = this.addQuestion("lecture", 10);
-		String q2 = this.addQuestion("lecture", 10);
-		// three users
-		User u1 = new TestUser("user1");
-		User u2 = new TestUser("user2");
-		User u3 = new TestUser("user3");
-		// six answers
-		this.addAnswer(q1, u1, 10);
-		this.addAnswer(q2, u1, -100);
-		this.addAnswer(q1, u2, -100);
-		this.addAnswer(q2, u2, -100);
-		this.addAnswer(q1, u3, -100);
-		this.addAnswer(q2, u3, -100);
+	public void shouldIncludeInactiveQuestionsWithAnswers() {
+		creator.addQuestion("lecture").setInactive().withCorrectAnswers(1);
 
-		int numerator = lp.getCourseProgress(null).getNumerator();
-		int denominator = lp.getCourseProgress(null).getDenominator();
-
-		// If the percentage is wrong, then we need to adapt this test case!
-		assertEquals("Precondition failed -- The underlying calculation has changed", 17, lp.getCourseProgress(null).getCourseProgress());
-		assertEquals(0, numerator);
-		assertEquals(2, denominator);
+		int expected = 100;
+		int actual = lp.getCourseProgress(null).getCourseProgress();
+		assertEquals(expected, actual);
 	}
 
+	@Test
+	public void shouldIgnoreInactiveQuestionsWithoutAnswers() {
+		creator.addQuestion("lecture").setInactive();
+
+		int expected = 0;
+		int actual = lp.getCourseProgress(null).getCourseProgress();
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void shouldIgnoreQuestionsWithoutCorrectAnswers() {
+		creator.addQuestion("lecture").setNoCorrect().withAnswers(1);
+
+		LearningProgressValues expected = new LearningProgressValues();
+		expected.setCourseProgress(0);
+		expected.setMyProgress(0);
+		expected.setNumQuestions(0);
+		LearningProgressValues actual = lp.getMyProgress(null, new TestUser("TestUser"));
+
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void shouldIgnoreQuestionsWithoutPossibleAnswers() {
+		creator.addQuestion("lecture").withoutPossibleAnswers(); // this question should get ignored!
+		creator.addQuestion("lecture").withCorrectAnswers(1);
+
+		int expected = 100;
+		int actual = lp.getCourseProgress(null).getCourseProgress();
+		assertEquals(expected, actual);
+	}
+
+	@Before
+	public void setUp() {
+		this.creator = new FixtureCreator();
+		IDatabaseDao db = mock(IDatabaseDao.class);
+		when(db.getLectureQuestionsForTeachers(any(Session.class))).then(invocationOnMock -> this.creator.returnLectureQuestions());
+		when(db.getPreparationQuestionsForTeachers(any(Session.class))).then(invocationOnMock -> this.creator.returnPreparationQuestions());
+		when(db.getAnswerTextAndUser(any(Question.class), anyInt())).then(invocationOnMock -> this.creator.returnAnswersForQuestion(invocationOnMock.getArgumentAt(0, Question.class)));
+		this.lp = new QuestionBasedLearningProgress(db);
+		this.lp.setQuestionVariant("lecture");
+	}
+
+	private static class FixtureCreator {
+		List<Question> questions = new ArrayList<>();
+		Map<Integer, List<Answer>> answersForQuestion = new HashMap<>();
+		private int questionId = 0;
+		private int last_id = 0;
+
+		public FixtureCreator addQuestion(String variant) {
+			last_id = questionId;
+			Question q = createVariantQuestion(variant);
+			questions.add(q);
+			return this;
+		}
+
+		private Question createVariantQuestion(String variant) {
+			Question q = new Question();
+			q.set_id(""+(questionId++));
+			q.setQuestionType("sc");
+			q.setQuestionVariant(variant);
+			q.setActive(true);
+			q.setNoCorrect(false);
+			q.setPossibleAnswers(new ArrayList<>());
+			PossibleAnswer pa1 = new PossibleAnswer();
+			pa1.setText("a correct answer");
+			pa1.setCorrect(true);
+			q.getPossibleAnswers().add(pa1);
+			PossibleAnswer pa2 = new PossibleAnswer();
+			pa2.setText("a wrong answer");
+			pa2.setCorrect(false);
+			q.getPossibleAnswers().add(pa2);
+			return q;
+		}
+
+		private Question getLastQuestion() {
+			return questions.get(last_id);
+		}
+
+		public FixtureCreator setInactive() {
+			getLastQuestion().setActive(false);
+			return this;
+		}
+
+		public FixtureCreator setNoCorrect() {
+			Question q = getLastQuestion();
+			q.setNoCorrect(true);
+			for (PossibleAnswer pa : q.getPossibleAnswers()) {
+				pa.setCorrect(false);
+			}
+			return this;
+		}
+
+		public FixtureCreator withoutPossibleAnswers() {
+			Question q = getLastQuestion();
+			q.setPossibleAnswers(new ArrayList<>());
+			return this;
+		}
+
+		public FixtureCreator withAnswers(int count) {
+			List<Answer> answers = answersForQuestion.get(last_id);
+			if (answers == null) answers = new ArrayList<>();
+			for (int i = 0; i < count; i++) {
+				Answer a = new Answer();
+				a.setQuestionId("" + last_id);
+				a.setAnswerText("a random answer");
+				a.setUser(UUID.randomUUID().toString());
+				answers.add(a);
+			}
+			answersForQuestion.put(last_id, answers);
+			return this;
+		}
+
+		public FixtureCreator withWrongAnswers(int count) {
+			List<Answer> answers = answersForQuestion.get(last_id);
+			if (answers == null) answers = new ArrayList<>();
+			for (int i = 0; i < count; i++) {
+				Answer a = new Answer();
+				a.setQuestionId("" + last_id);
+				a.setAnswerText("a wrong answer");
+				a.setUser(UUID.randomUUID().toString());
+				answers.add(a);
+			}
+			answersForQuestion.put(last_id, answers);
+			return this;
+		}
+
+		public FixtureCreator withCorrectAnswers(int count) {
+			List<Answer> answers = answersForQuestion.get(last_id);
+			if (answers == null) answers = new ArrayList<>();
+			for (int i = 0; i < count; i++) {
+				Answer a = new Answer();
+				a.setQuestionId("" + last_id);
+				a.setAnswerText("a correct answer");
+				a.setUser(UUID.randomUUID().toString());
+				answers.add(a);
+			}
+			answersForQuestion.put(last_id, answers);
+			return this;
+		}
+
+		public FixtureCreator forUsers(String... users) {
+			List<Answer> answers = answersForQuestion.get(last_id);
+			Iterator<String> userIter = Arrays.asList(users).iterator();
+			for (Answer a : answers) {
+				a.setUser(userIter.next());
+			}
+			return this;
+		}
+
+		public FixtureCreator forUser(String user) {
+			Answer a = getLastAnswer();
+			a.setUser(user);
+			return this;
+		}
+
+		private Answer getLastAnswer() {
+			List<Answer> answers = answersForQuestion.get(last_id);
+			return answers.get(answers.size()-1);
+		}
+
+		public FixtureCreator forRound(int round) {
+			Question q = getLastQuestion();
+			q.setPiRound(round);
+			return this;
+		}
+
+		public FixtureCreator inRound(int round) {
+			Answer a = getLastAnswer();
+			a.setPiRound(round);
+			return this;
+		}
+
+		public List<Answer> returnAnswersForQuestion(Question q) {
+			List<Answer> answers = this.answersForQuestion.get(Integer.parseInt(q.get_id()));
+			if (answers == null) return new ArrayList<>();
+
+			return answers.stream().filter(a -> a.getPiRound() == q.getPiRound()).collect(Collectors.toList());
+		}
+
+		public List<Question> returnLectureQuestions() {
+			return this.questions.stream().filter(q -> q.getQuestionVariant().equals("lecture")).collect(Collectors.toList());
+		}
+
+		public List<Question> returnPreparationQuestions() {
+			return this.questions.stream().filter(q -> q.getQuestionVariant().equals("preparation")).collect(Collectors.toList());
+		}
+	}
 }

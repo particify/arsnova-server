@@ -22,6 +22,10 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Both a regular (single choice, evaluation, etc.) as well as a freetext answer.
@@ -237,6 +241,53 @@ public class Answer implements Serializable {
 
 	public void setQuestionValue(int questionValue) {
 		this.questionValue = questionValue;
+	}
+
+	public boolean isCorrect(Question question) {
+		if (this.getAnswerText() == null || this.getAnswerText().isEmpty()) {
+			return false;
+		}
+
+		if (Arrays.asList("mc", "grid").contains(question.getQuestionType())) {
+			List<Integer> answerIndexes = new ArrayList<>();
+			if (question.getQuestionType().equals("mc")) {
+				List<Integer> selectedAnswerOptions = Arrays.stream(this.getAnswerText().split(","))
+						.map(Integer::parseInt)
+						.collect(Collectors.toList());
+
+				// Translate the selected answers into actual indexes of the possibleAnswer array
+				for (int i = 0; i < selectedAnswerOptions.size(); i++) {
+					if (selectedAnswerOptions.get(i) != 0) {
+						answerIndexes.add(i);
+					}
+				}
+			} else if (question.getQuestionType().equals("grid")) {
+				List<String> selectedFields = new ArrayList<>(Arrays.asList(this.getAnswerText().split(",")));
+				// Translate the selected answers into actual indexes of the possibleAnswer array
+				List<Integer> indexes = selectedFields.stream().map(f -> {
+					List<Integer> coords = Arrays.stream(f.split(";")).map(Integer::parseInt).collect(Collectors.toList());
+					return coords.get(0) * (question.getPossibleAnswers().size() / 2) + coords.get(1);
+				}).collect(Collectors.toList());
+				answerIndexes.addAll(indexes);
+			}
+			for (int i = 0; i < question.getPossibleAnswers().size(); i++) {
+				PossibleAnswer pa = question.getPossibleAnswers().get(i);
+				if (!answerIndexes.contains(i) && pa.isCorrect()) {
+					return false;
+				} else if (answerIndexes.contains(i) && !pa.isCorrect()) {
+					return false;
+				}
+			}
+			return true;
+		} else {
+			// All other question types
+			for (PossibleAnswer pa : question.getPossibleAnswers()) {
+				if (pa.isCorrect() && pa.getText().equals(this.getAnswerText())) {
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 
 	@Override
