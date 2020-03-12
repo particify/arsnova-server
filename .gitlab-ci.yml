@@ -1,0 +1,4 @@
+include:
+  - project: arsnova/arsnova-backend
+    ref: 2.x
+    file: .gitlab/ci/2.x_no-cov.yml
