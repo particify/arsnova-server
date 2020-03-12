@@ -1,0 +1,8 @@
+include:
+  - project: arsnova/arsnova-backend
+    ref: 2.x
+    file: .gitlab/ci/2.x.yml
+
+unit_test:
+  script:
+    - mvn $MAVEN_CLI_OPTS surefire:test
