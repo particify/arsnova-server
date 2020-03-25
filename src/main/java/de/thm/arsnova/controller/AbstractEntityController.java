@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -41,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import de.thm.arsnova.model.Entity;
@@ -65,7 +67,7 @@ public abstract class AbstractEntityController<E extends Entity> {
 	protected static final String DEFAULT_ID_MAPPING = "/{id:[^~].*}";
 	protected static final String DEFAULT_ALIAS_MAPPING = "/~{alias}";
 	protected static final String DEFAULT_FIND_MAPPING = "/find";
-	protected static final String ALIAS_SUBPATH = "/{subPath:.+}";
+	protected static final String ALIAS_SUBPATH = "/**";
 	protected static final String GET_MAPPING = DEFAULT_ID_MAPPING;
 	protected static final String GET_MULTIPLE_MAPPING = DEFAULT_ROOT_MAPPING;
 	protected static final String PUT_MAPPING = DEFAULT_ID_MAPPING;
@@ -163,9 +165,12 @@ public abstract class AbstractEntityController<E extends Entity> {
 	}
 
 	@RequestMapping(value = {DEFAULT_ALIAS_MAPPING, DEFAULT_ALIAS_MAPPING + ALIAS_SUBPATH})
-	public void forwardAlias(@PathVariable final String alias, @PathVariable(required = false) final String subPath,
+	public void forwardAlias(@PathVariable final String alias,
 			final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
 			throws ServletException, IOException {
+		final String subPath = new AntPathMatcher().extractPathWithinPattern(
+				(String) httpServletRequest.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE),
+				(String) httpServletRequest.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
 		final String targetPath = String.format(
 				"%s/%s%s", getMapping(), resolveAlias(alias), subPath != null ? "/" + subPath : "");
 		logger.debug("Forwarding alias request to {}", targetPath);
