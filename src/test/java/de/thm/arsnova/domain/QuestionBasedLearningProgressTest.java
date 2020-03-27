@@ -43,7 +43,7 @@ public class QuestionBasedLearningProgressTest {
 		creator.addQuestion("lecture").withCorrectAnswers(100);
 
 		int expected = 100;
-		int actual = lp.getCourseProgress(null).getCourseProgress();
+		int actual = lp.getCourseProgress(creator.returnSession()).getCourseProgress();
 
 		assertEquals(expected, actual);
 	}
@@ -53,7 +53,7 @@ public class QuestionBasedLearningProgressTest {
 		creator.addQuestion("lecture").withWrongAnswers(100);
 
 		int expected = 0;
-		int actual = lp.getCourseProgress(null).getCourseProgress();
+		int actual = lp.getCourseProgress(creator.returnSession()).getCourseProgress();
 
 		assertEquals(expected, actual);
 	}
@@ -66,7 +66,7 @@ public class QuestionBasedLearningProgressTest {
 		creator.addQuestion("lecture").withCorrectAnswers(99).withWrongAnswers(1);
 
 		int expected = 99;
-		int actual = lp.getCourseProgress(null).getCourseProgress();
+		int actual = lp.getCourseProgress(creator.returnSession()).getCourseProgress();
 
 		assertEquals(expected, actual);
 	}
@@ -89,7 +89,7 @@ public class QuestionBasedLearningProgressTest {
 				.withWrongAnswers(1).forUser("user2");
 
 		int expected = 75;
-		int actual = lp.getCourseProgress(null).getCourseProgress();
+		int actual = lp.getCourseProgress(creator.returnSession()).getCourseProgress();
 
 		assertEquals(expected, actual);
 	}
@@ -101,7 +101,7 @@ public class QuestionBasedLearningProgressTest {
 		creator.addQuestion("lecture").withWrongAnswers(1).forUser("user1");
 
 		int expected = 50;
-		int actual = lp.getCourseProgress(null).getCourseProgress();
+		int actual = lp.getCourseProgress(creator.returnSession()).getCourseProgress();
 
 		assertEquals(expected, actual);
 	}
@@ -112,14 +112,14 @@ public class QuestionBasedLearningProgressTest {
 		creator.addQuestion("preparation").withWrongAnswers(2).forUsers("user1", "user2");
 
 		lp.setQuestionVariant("lecture");
-		LearningProgressValues lectureProgress = lp.getCourseProgress(null);
-		LearningProgressValues myLectureProgress = lp.getMyProgress(null, new TestUser("user1"));
+		LearningProgressValues lectureProgress = lp.getCourseProgress(creator.returnSession());
+		LearningProgressValues myLectureProgress = lp.getMyProgress(creator.returnSession(), new TestUser("user1"));
 		lp.setQuestionVariant("preparation");
-		LearningProgressValues prepProgress = lp.getCourseProgress(null);
-		LearningProgressValues myPrepProgress = lp.getMyProgress(null, new TestUser("user1"));
+		LearningProgressValues prepProgress = lp.getCourseProgress(creator.returnSession());
+		LearningProgressValues myPrepProgress = lp.getMyProgress(creator.returnSession(), new TestUser("user1"));
 		lp.setQuestionVariant("");
-		LearningProgressValues allProgress = lp.getCourseProgress(null);
-		LearningProgressValues allMyProgress = lp.getMyProgress(null, new TestUser("user1"));
+		LearningProgressValues allProgress = lp.getCourseProgress(creator.returnSession());
+		LearningProgressValues allMyProgress = lp.getMyProgress(creator.returnSession(), new TestUser("user1"));
 
 		assertEquals(100, lectureProgress.getCourseProgress());
 		assertEquals(100, myLectureProgress.getMyProgress());
@@ -137,8 +137,8 @@ public class QuestionBasedLearningProgressTest {
 				.withCorrectAnswers(1).inRound(2).forUser("user1")
 				.withWrongAnswers(1).inRound(2).forUser("user2");
 
-		LearningProgressValues u1Progress = lp.getMyProgress(null, new TestUser("user1"));
-		LearningProgressValues u2Progress = lp.getMyProgress(null, new TestUser("user2"));
+		LearningProgressValues u1Progress = lp.getMyProgress(creator.returnSession(), new TestUser("user1"));
+		LearningProgressValues u2Progress = lp.getMyProgress(creator.returnSession(), new TestUser("user2"));
 
 		// only the answer for round 2 should be considered
 		assertEquals(50, u1Progress.getCourseProgress());
@@ -152,7 +152,7 @@ public class QuestionBasedLearningProgressTest {
 		creator.addQuestion("lecture").setInactive().withCorrectAnswers(1);
 
 		int expected = 100;
-		int actual = lp.getCourseProgress(null).getCourseProgress();
+		int actual = lp.getCourseProgress(creator.returnSession()).getCourseProgress();
 		assertEquals(expected, actual);
 	}
 
@@ -161,7 +161,7 @@ public class QuestionBasedLearningProgressTest {
 		creator.addQuestion("lecture").setInactive();
 
 		int expected = 0;
-		int actual = lp.getCourseProgress(null).getCourseProgress();
+		int actual = lp.getCourseProgress(creator.returnSession()).getCourseProgress();
 		assertEquals(expected, actual);
 	}
 
@@ -173,7 +173,7 @@ public class QuestionBasedLearningProgressTest {
 		expected.setCourseProgress(0);
 		expected.setMyProgress(0);
 		expected.setNumQuestions(0);
-		LearningProgressValues actual = lp.getMyProgress(null, new TestUser("TestUser"));
+		LearningProgressValues actual = lp.getMyProgress(creator.returnSession(), new TestUser("TestUser"));
 
 		assertEquals(expected, actual);
 	}
@@ -184,7 +184,7 @@ public class QuestionBasedLearningProgressTest {
 		creator.addQuestion("lecture").withCorrectAnswers(1);
 
 		int expected = 100;
-		int actual = lp.getCourseProgress(null).getCourseProgress();
+		int actual = lp.getCourseProgress(creator.returnSession()).getCourseProgress();
 		assertEquals(expected, actual);
 	}
 
@@ -200,8 +200,9 @@ public class QuestionBasedLearningProgressTest {
 	}
 
 	private static class FixtureCreator {
-		List<Question> questions = new ArrayList<>();
-		Map<Integer, List<Answer>> answersForQuestion = new HashMap<>();
+		private Session session;
+		private List<Question> questions = new ArrayList<>();
+		private Map<Integer, List<Answer>> answersForQuestion = new HashMap<>();
 		private int questionId = 0;
 		private int last_id = 0;
 
@@ -327,6 +328,14 @@ public class QuestionBasedLearningProgressTest {
 			Answer a = getLastAnswer();
 			a.setPiRound(round);
 			return this;
+		}
+
+		public Session returnSession() {
+			if (session == null) {
+				session = new Session();
+			}
+
+			return session;
 		}
 
 		public List<Answer> returnAnswersForQuestion(Question q) {
