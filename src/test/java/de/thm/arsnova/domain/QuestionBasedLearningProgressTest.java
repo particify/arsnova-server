@@ -194,7 +194,7 @@ public class QuestionBasedLearningProgressTest {
 		IDatabaseDao db = mock(IDatabaseDao.class);
 		when(db.getLectureQuestionsForTeachers(any(Session.class))).then(invocationOnMock -> this.creator.returnLectureQuestions());
 		when(db.getPreparationQuestionsForTeachers(any(Session.class))).then(invocationOnMock -> this.creator.returnPreparationQuestions());
-		when(db.getAnswerTextAndUser(any(Question.class), anyInt())).then(invocationOnMock -> this.creator.returnAnswersForQuestion(invocationOnMock.getArgumentAt(0, Question.class)));
+		when(db.getAnswerTextAndUser(any(Question.class), anyInt())).then(invocationOnMock -> this.creator.returnAnswersForQuestion(invocationOnMock.getArgument(0)));
 		this.lp = new QuestionBasedLearningProgress(db);
 		this.lp.setQuestionVariant("lecture");
 	}

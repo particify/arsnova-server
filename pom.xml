@@ -7,7 +7,7 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<spring-boot-version>1.5.22.RELEASE</spring-boot-version>
+		<spring-boot-version>2.2.6.RELEASE</spring-boot-version>
 		<io.netty-version>4.1.43.Final</io.netty-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>

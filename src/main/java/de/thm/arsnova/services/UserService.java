@@ -429,22 +429,13 @@ public class UserService implements IUserService {
 	}
 
 	private void sendActivationEmail(DbUser dbUser) {
-		String activationUrl;
-		try {
-			activationUrl = MessageFormat.format(
+		String activationUrl = MessageFormat.format(
 				"{0}{1}/{2}?action=activate&username={3}&key={4}",
 				rootUrl,
 				customizationPath,
 				activationPath,
 				UriUtils.encodeQueryParam(dbUser.getUsername(), "UTF-8"),
-				dbUser.getActivationKey()
-			);
-		} catch (UnsupportedEncodingException e) {
-			logger.error("Sending of activation mail failed.", e);
-
-			return;
-		}
-
+				dbUser.getActivationKey());
 		sendEmail(dbUser, regMailSubject, MessageFormat.format(regMailBody, activationUrl));
 	}
 
@@ -520,22 +511,13 @@ public class UserService implements IUserService {
 			logger.error("Password reset failed. {} could not be updated.", username);
 		}
 
-		String resetPasswordUrl;
-		try {
-			resetPasswordUrl = MessageFormat.format(
+		String resetPasswordUrl = MessageFormat.format(
 				"{0}{1}/{2}?action=resetpassword&username={3}&key={4}",
 				rootUrl,
 				customizationPath,
 				resetPasswordPath,
 				UriUtils.encodeQueryParam(dbUser.getUsername(), "UTF-8"),
-				dbUser.getPasswordResetKey()
-			);
-		} catch (UnsupportedEncodingException e) {
-			logger.error("Sending of password reset mail failed.", e);
-
-			return;
-		}
-
+				dbUser.getPasswordResetKey());
 		sendEmail(dbUser, resetPasswordMailSubject, MessageFormat.format(resetPasswordMailBody, resetPasswordUrl));
 	}
 
