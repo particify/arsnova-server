@@ -24,7 +24,6 @@ import com.fourspaces.couchdb.RowResult;
 import com.fourspaces.couchdb.View;
 import com.fourspaces.couchdb.ViewResults;
 import com.google.common.collect.Lists;
-import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.*;
 import de.thm.arsnova.entities.transport.AnswerQueueElement;
@@ -33,6 +32,7 @@ import de.thm.arsnova.entities.transport.ImportExportSession.ImportExportQuestio
 import de.thm.arsnova.events.NewAnswerEvent;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.services.ISessionService;
+import net.particify.arsnova.connector.model.Course;
 import net.sf.ezmorph.Morpher;
 import net.sf.ezmorph.MorpherRegistry;
 import net.sf.ezmorph.bean.BeanMorpher;

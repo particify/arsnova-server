@@ -17,10 +17,10 @@
  */
 package de.thm.arsnova.dao;
 
-import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.*;
 import de.thm.arsnova.entities.transport.ImportExportSession;
+import net.particify.arsnova.connector.model.Course;
 
 import java.util.List;
 import java.util.Map;

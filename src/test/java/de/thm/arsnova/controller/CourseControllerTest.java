@@ -17,8 +17,8 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.services.StubUserService;
+import net.particify.arsnova.connector.client.ConnectorClient;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -17,7 +17,6 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionFeature;
 import de.thm.arsnova.entities.SessionInfo;
@@ -37,6 +36,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import net.particify.arsnova.connector.model.Course;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;

@@ -18,11 +18,11 @@
 package de.thm.arsnova.config;
 
 import de.thm.arsnova.ImageUtils;
-import de.thm.arsnova.connector.client.ConnectorClient;
-import de.thm.arsnova.connector.client.ConnectorClientImpl;
 import de.thm.arsnova.socket.ARSnovaSocket;
 import de.thm.arsnova.socket.ARSnovaSocketIOServer;
 import de.thm.arsnova.web.CorsFilter;
+import net.particify.arsnova.connector.client.ConnectorClient;
+import net.particify.arsnova.connector.client.ConnectorClientImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

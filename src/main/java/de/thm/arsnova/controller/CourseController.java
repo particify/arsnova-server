@@ -17,14 +17,14 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.connector.client.ConnectorClient;
-import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.connector.model.UserRole;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.NotImplementedException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.IUserService;
 import io.swagger.annotations.ApiParam;
+import net.particify.arsnova.connector.client.ConnectorClient;
+import net.particify.arsnova.connector.model.Course;
+import net.particify.arsnova.connector.model.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

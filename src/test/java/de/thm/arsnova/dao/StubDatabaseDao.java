@@ -17,12 +17,12 @@
  */
 package de.thm.arsnova.dao;
 
-import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.domain.CourseScore;
 import de.thm.arsnova.entities.*;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.exceptions.NoContentException;
 import de.thm.arsnova.exceptions.NotFoundException;
+import net.particify.arsnova.connector.model.Course;
 
 import java.util.ArrayList;
 import java.util.List;
