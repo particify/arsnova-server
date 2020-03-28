@@ -8,7 +8,7 @@
 
 	<properties>
 		<spring-boot-version>1.5.22.RELEASE</spring-boot-version>
-		<io.netty-version>4.1.43.Final</io.netty-version>
+		<io.netty-version>4.1.48.Final</io.netty-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
@@ -251,7 +251,7 @@
 		<dependency>
 			<groupId>com.corundumstudio.socketio</groupId>
 			<artifactId>netty-socketio</artifactId>
-			<version>1.7.17</version>
+			<version>1.7.18</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.inject</groupId>
@@ -363,7 +363,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.4.24.v20191120</version>
+				<version>9.4.27.v20200227</version>
 				<configuration>
 					<scanIntervalSeconds>0</scanIntervalSeconds>
 					<webApp>
