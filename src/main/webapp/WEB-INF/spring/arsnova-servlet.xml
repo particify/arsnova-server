@@ -31,8 +31,8 @@
 	<!-- Enables swgger ui-->
 	<mvc:resources mapping="swagger.json" location="classpath:/"/>
 
-	<bean id="propertyPlaceholderConfigurer"
-		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+	<bean id="propertySourcesPlaceholderConfigurer"
+		class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer"
 		p:ignoreUnresolvablePlaceholders="false" p:ignoreResourceNotFound="true">
 		<property name="locations">
 			<list>
@@ -62,9 +62,7 @@
 
 	<!-- -->
 	<bean
-		class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
-	<bean
-		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
 		<property name="messageConverters">
 			<list>
 				<bean
