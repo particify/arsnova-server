@@ -23,6 +23,7 @@ public class RoomAccessEventDispatcherTest {
 	private static final String SOME_TEXT = "SomeText";
 	private static final String SOME_ROOM_SHORT_ID = "87878787";
 	private static final String SOME_ROOM_ID = "2da635c77f114dc48ff9179731a7782e";
+	private static final String SOME_ROOM_REV = "1-2da635c77f114dc48ff9179731a7782e";
 	private static final String SOME_MODERATOR_ID_1 = "eea635c77f114dc48ff9179731a778ee";
 	private static final String SOME_MODERATOR_ID_2 = "ffa635c77f114dc48ff9179731a778ff";
 
@@ -39,6 +40,7 @@ public class RoomAccessEventDispatcherTest {
 		room.setName(SOME_TEXT);
 		room.setAbbreviation(SOME_TEXT);
 		room.setId(SOME_ROOM_ID);
+		room.setRevision(SOME_ROOM_REV);
 		room.setShortId(SOME_ROOM_SHORT_ID);
 		room.setOwnerId(TEST_USER_ID);
 		return room;
@@ -84,6 +86,7 @@ public class RoomAccessEventDispatcherTest {
 
 		final RoomAccessGrantedEvent expectedEvent = new RoomAccessGrantedEvent(
 			"1",
+			SOME_ROOM_REV,
 			SOME_ROOM_ID,
 			TEST_USER_ID,
 			"CREATOR"
@@ -137,12 +140,14 @@ public class RoomAccessEventDispatcherTest {
 
 		final RoomAccessRevokedEvent roomAccessRevokedForOwnerEvent = new RoomAccessRevokedEvent(
 				"1",
+				SOME_ROOM_REV,
 				SOME_ROOM_ID,
 				TEST_USER_ID
 		);
 
 		final RoomAccessRevokedEvent roomAccessRevokedForModeratorEvent = new RoomAccessRevokedEvent(
 				"1",
+				SOME_ROOM_REV,
 				SOME_ROOM_ID,
 				SOME_MODERATOR_ID_1
 		);

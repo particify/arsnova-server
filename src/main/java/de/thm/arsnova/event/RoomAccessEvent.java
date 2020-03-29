@@ -5,6 +5,7 @@ import org.springframework.core.style.ToStringCreator;
 
 public abstract class RoomAccessEvent {
 	private String version;
+	private String rev;
 	private String roomId;
 	private String userId;
 
@@ -13,10 +14,12 @@ public abstract class RoomAccessEvent {
 
 	public RoomAccessEvent(
 			final String version,
+			final String rev,
 			final String roomId,
 			final String userId
 	) {
 		this.version = version;
+		this.rev = rev;
 		this.roomId = roomId;
 		this.userId = userId;
 	}
@@ -27,6 +30,14 @@ public abstract class RoomAccessEvent {
 
 	public void setVersion(final String version) {
 		this.version = version;
+	}
+
+	public String getRev() {
+		return rev;
+	}
+
+	public void setRev(final String rev) {
+		this.rev = rev;
 	}
 
 	public String getRoomId() {
@@ -55,13 +66,14 @@ public abstract class RoomAccessEvent {
 		}
 		final RoomAccessEvent that = (RoomAccessEvent) o;
 		return Objects.equals(version, that.version)
+				&& Objects.equals(rev, that.rev)
 				&& Objects.equals(roomId, that.roomId)
 				&& Objects.equals(userId, that.userId);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(version, roomId, userId);
+		return Objects.hash(version, rev, roomId, userId);
 	}
 
 	/**
@@ -74,6 +86,7 @@ public abstract class RoomAccessEvent {
 		final ToStringCreator toStringCreator = new ToStringCreator(this);
 		toStringCreator
 				.append("version", version)
+				.append("rev", rev)
 				.append("roomId", roomId)
 				.append("userId", userId);
 

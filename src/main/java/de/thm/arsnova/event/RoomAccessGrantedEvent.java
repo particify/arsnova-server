@@ -11,11 +11,12 @@ public class RoomAccessGrantedEvent extends RoomAccessEvent {
 
 	public RoomAccessGrantedEvent(
 			final String version,
+			final String rev,
 			final String roomId,
 			final String userId,
 			final String role
 	) {
-		super(version, roomId, userId);
+		super(version, rev, roomId, userId);
 		this.role = role;
 	}
 
