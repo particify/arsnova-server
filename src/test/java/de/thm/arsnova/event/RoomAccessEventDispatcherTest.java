@@ -16,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import de.thm.arsnova.model.Room;
+import de.thm.arsnova.service.RoomService;
 
 @RunWith(SpringRunner.class)
 public class RoomAccessEventDispatcherTest {
@@ -32,6 +33,9 @@ public class RoomAccessEventDispatcherTest {
 
 	@MockBean
 	private RabbitTemplate messagingTemplate;
+
+	@MockBean
+	private RoomService roomService;
 
 	private RoomAccessEventDispatcher roomAccessEventDispatcher;
 
@@ -70,7 +74,7 @@ public class RoomAccessEventDispatcherTest {
 
 	@Before
 	public void setUp() {
-		this.roomAccessEventDispatcher = new RoomAccessEventDispatcher(messagingTemplate);
+		this.roomAccessEventDispatcher = new RoomAccessEventDispatcher(messagingTemplate, roomService);
 	}
 
 	@Test

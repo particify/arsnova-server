@@ -120,6 +120,8 @@ public class RabbitConfig {
 
 		declarables.add(new Queue(RoomAccessEventDispatcher.ROOM_ACCESS_GRANTED_QUEUE_NAME, true));
 		declarables.add(new Queue(RoomAccessEventDispatcher.ROOM_ACCESS_REVOKED_QUEUE_NAME, true));
+		declarables.add(new Queue(RoomAccessEventDispatcher.ROOM_ACCESS_SYNC_REQUEST_QUEUE_NAME, true));
+		declarables.add(new Queue(RoomAccessEventDispatcher.ROOM_ACCESS_SYNC_RESPONSE_QUEUE_NAME, true));
 
 		return new Declarables(declarables);
 	}
