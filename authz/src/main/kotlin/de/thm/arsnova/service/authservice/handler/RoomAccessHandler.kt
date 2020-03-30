@@ -20,7 +20,7 @@ class RoomAccessHandler (
     fun handleCreateRoomAccessCommand(command: CreateRoomAccessCommand) {
         logger.debug("Handling command: {}", command)
         try {
-            repository.save(RoomAccess(command.roomId, command.userId, command.role))
+            repository.save(RoomAccess(command.roomId, command.userId, command.rev, command.role))
         } catch (e: Exception) {
             logger.error(e.toString())
         }
