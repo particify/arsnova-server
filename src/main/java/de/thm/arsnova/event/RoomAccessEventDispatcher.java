@@ -55,6 +55,7 @@ public class RoomAccessEventDispatcher {
 		final Room room = event.getEntity();
 		final RoomAccessGrantedEvent roomAccessGrantedForCreatorEvent = new RoomAccessGrantedEvent(
 				EVENT_VERSION,
+				room.getRevision(),
 				room.getId(),
 				room.getOwnerId(),
 				CREATOR_ROLE_STRING
@@ -70,6 +71,7 @@ public class RoomAccessEventDispatcher {
 		for (final Room.Moderator removedModerator : room.getModerators()) {
 			final RoomAccessGrantedEvent roomAccessGrantedForModeratorEvent = new RoomAccessGrantedEvent(
 					EVENT_VERSION,
+					room.getRevision(),
 					room.getId(),
 					removedModerator.getUserId(),
 					EXECUTIVE_MODERATOR_ROLE_STRING
@@ -96,6 +98,7 @@ public class RoomAccessEventDispatcher {
 		if (!oldRoom.getOwnerId().equals(newRoom.getOwnerId())) {
 			final RoomAccessRevokedEvent roomAccessRevokedEvent = new RoomAccessRevokedEvent(
 					EVENT_VERSION,
+					oldRoom.getRevision(),
 					oldRoom.getId(),
 					oldRoom.getOwnerId()
 			);
@@ -109,6 +112,7 @@ public class RoomAccessEventDispatcher {
 
 			final RoomAccessGrantedEvent roomAccessGrantedEvent = new RoomAccessGrantedEvent(
 					EVENT_VERSION,
+					newRoom.getRevision(),
 					newRoom.getId(),
 					newRoom.getOwnerId(),
 					CREATOR_ROLE_STRING
@@ -130,6 +134,7 @@ public class RoomAccessEventDispatcher {
 		for (final Room.Moderator removedModerator : deletedModerators) {
 			final RoomAccessRevokedEvent roomAccessRevokedEvent = new RoomAccessRevokedEvent(
 					EVENT_VERSION,
+					oldRoom.getRevision(),
 					oldRoom.getId(),
 					removedModerator.getUserId()
 			);
@@ -147,6 +152,7 @@ public class RoomAccessEventDispatcher {
 		for (final Room.Moderator newModerator : addedModerators) {
 			final RoomAccessGrantedEvent roomAccessGrantedEvent = new RoomAccessGrantedEvent(
 					EVENT_VERSION,
+					newRoom.getRevision(),
 					newRoom.getId(),
 					newModerator.getUserId(),
 					EXECUTIVE_MODERATOR_ROLE_STRING
@@ -170,6 +176,7 @@ public class RoomAccessEventDispatcher {
 		final Room room = event.getEntity();
 		final RoomAccessRevokedEvent roomAccessRevokedEvent = new RoomAccessRevokedEvent(
 				EVENT_VERSION,
+				room.getRevision(),
 				room.getId(),
 				room.getOwnerId()
 		);
@@ -184,6 +191,7 @@ public class RoomAccessEventDispatcher {
 		for (final Room.Moderator moderator : room.getModerators()) {
 			final RoomAccessRevokedEvent roomAccessRevokedForModeratorEvent = new RoomAccessRevokedEvent(
 					EVENT_VERSION,
+					room.getRevision(),
 					room.getId(),
 					moderator.getUserId()
 			);
