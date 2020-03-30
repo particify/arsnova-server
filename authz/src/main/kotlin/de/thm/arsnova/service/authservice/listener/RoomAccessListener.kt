@@ -20,12 +20,12 @@ class RoomAccessListener (
     @RabbitListener(queues = [RabbitConfig.roomAccessGrantedQueueName])
     fun receiveRoomAccessGrantedEvent(event: RoomAccessGrantedEvent) {
         logger.debug("Got event on room access granted queue: {}", event)
-        handler.handleCreateRoomAccessCommand(CreateRoomAccessCommand(event.roomId, event.userId, event.role))
+        handler.handleCreateRoomAccessCommand(CreateRoomAccessCommand(event.rev, event.roomId, event.userId, event.role))
     }
 
     @RabbitListener(queues = [RabbitConfig.roomAccessRevokedQueueName])
     fun receiveRoomAccessRevokedEvent(event: RoomAccessRevokedEvent) {
         logger.debug("Got event on room access revoked queue: {}", event)
-        handler.handleDeleteRoomAccessCommand(DeleteRoomAccessCommand(event.roomId, event.userId))
+        handler.handleDeleteRoomAccessCommand(DeleteRoomAccessCommand(event.rev, event.roomId, event.userId))
     }
 }

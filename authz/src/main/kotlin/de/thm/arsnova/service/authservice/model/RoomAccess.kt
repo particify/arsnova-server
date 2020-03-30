@@ -11,5 +11,6 @@ class RoomAccess (
         var roomId: String? = "",
         @Id
         var userId: String? = "",
+        val rev: String = "",
         var role: String? = ""
 )
