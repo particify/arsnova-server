@@ -13,7 +13,10 @@ spring:
     platform: h2
     username: arsnovaauth
     password: arsnovaauth
+  flyway:
+    user: arsnovaauth
+    password: arsnovaauth
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     properties.hibernate.dialect: org.hibernate.dialect.H2Dialect
