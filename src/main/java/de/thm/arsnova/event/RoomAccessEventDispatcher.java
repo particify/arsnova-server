@@ -1,18 +1,23 @@
 package de.thm.arsnova.event;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import net.spy.memcached.compat.log.Logger;
-import net.spy.memcached.compat.log.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.event.EventListener;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Component;
 
 import de.thm.arsnova.config.RabbitConfig;
 import de.thm.arsnova.config.properties.MessageBrokerProperties;
 import de.thm.arsnova.model.Room;
+import de.thm.arsnova.service.RoomService;
 
 /**
  * AuthorizationEventDispatcher has the responsibility to send events containing access information to the broker.
@@ -38,14 +43,19 @@ public class RoomAccessEventDispatcher {
 
 	public static final String ROOM_ACCESS_GRANTED_QUEUE_NAME = "backend.event.room.access.granted";
 	public static final String ROOM_ACCESS_REVOKED_QUEUE_NAME = "backend.event.room.access.revoked";
+	public static final String ROOM_ACCESS_SYNC_REQUEST_QUEUE_NAME = "backend.event.room.access.sync.request";
+	public static final String ROOM_ACCESS_SYNC_RESPONSE_QUEUE_NAME = "backend.event.room.access.sync.response";
 
 	private final RabbitTemplate messagingTemplate;
+	private final RoomService roomService;
 
 	@Autowired
 	public RoomAccessEventDispatcher(
-			final RabbitTemplate rabbitTemplate
+			final RabbitTemplate rabbitTemplate,
+			final RoomService roomService
 	) {
 		messagingTemplate = rabbitTemplate;
+		this.roomService = roomService;
 	}
 
 	@EventListener
@@ -205,6 +215,39 @@ public class RoomAccessEventDispatcher {
 		}
 
 		logger.trace("Finished handling event: {}", event);
+	}
+
+	@RabbitListener(containerFactory = "myRabbitListenerContainerFactory", queues = ROOM_ACCESS_SYNC_REQUEST_QUEUE_NAME)
+	@SendTo(ROOM_ACCESS_SYNC_RESPONSE_QUEUE_NAME)
+	public RoomAccessSyncEvent answerRoomAccessSyncRequest(final RoomAccessSyncRequest request) {
+		logger.debug("Handling request: {}", request);
+		final Room room = roomService.get(request.getRoomId(), true);
+
+		logger.trace("Preparing to send room access sync event for room: {}", room);
+
+		final List<RoomAccessSyncEvent.RoomAccessEntry> accessEntries = new ArrayList<>();
+
+		accessEntries.add(new RoomAccessSyncEvent.RoomAccessEntry(room.getOwnerId(), CREATOR_ROLE_STRING));
+		final List<RoomAccessSyncEvent.RoomAccessEntry> modEntries = room.getModerators().stream()
+				.map(moderator ->
+					new RoomAccessSyncEvent.RoomAccessEntry(
+							moderator.getUserId(),
+							EXECUTIVE_MODERATOR_ROLE_STRING))
+				.collect(Collectors.toList()
+		);
+
+		accessEntries.addAll(modEntries);
+
+		final RoomAccessSyncEvent roomAccessSyncEvent = new RoomAccessSyncEvent(
+				EVENT_VERSION,
+				room.getRevision(),
+				room.getId(),
+				accessEntries
+		);
+
+		logger.debug("Answering with event: {}", roomAccessSyncEvent);
+
+		return roomAccessSyncEvent;
 	}
 
 	private Set<Room.Moderator> getNewMembers(final Set<Room.Moderator> a, final Set<Room.Moderator> b) {

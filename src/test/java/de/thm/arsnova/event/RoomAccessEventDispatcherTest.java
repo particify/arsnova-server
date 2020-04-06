@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,11 +12,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import de.thm.arsnova.model.Room;
+import de.thm.arsnova.service.RoomService;
 
 @RunWith(SpringRunner.class)
 public class RoomAccessEventDispatcherTest {
@@ -32,6 +35,9 @@ public class RoomAccessEventDispatcherTest {
 
 	@MockBean
 	private RabbitTemplate messagingTemplate;
+
+	@MockBean
+	private RoomService roomService;
 
 	private RoomAccessEventDispatcher roomAccessEventDispatcher;
 
@@ -70,7 +76,7 @@ public class RoomAccessEventDispatcherTest {
 
 	@Before
 	public void setUp() {
-		this.roomAccessEventDispatcher = new RoomAccessEventDispatcher(messagingTemplate);
+		this.roomAccessEventDispatcher = new RoomAccessEventDispatcher(messagingTemplate, roomService);
 	}
 
 	@Test
@@ -168,5 +174,24 @@ public class RoomAccessEventDispatcherTest {
 
 		assertThat(events.get(0)).isEqualTo(roomAccessRevokedForOwnerEvent);
 		assertThat(events.get(1)).isEqualTo(roomAccessRevokedForModeratorEvent);
+	}
+
+	@Test
+	public void testRespondToSyncRequest() {
+		final Room testRoom = getTestRoom();
+		final RoomAccessSyncRequest request = new RoomAccessSyncRequest(testRoom.getId());
+
+		Mockito.when(roomService.get(testRoom.getId(), true)).thenReturn(testRoom);
+
+		final RoomAccessSyncEvent expectedResponse = new RoomAccessSyncEvent(
+				"1",
+				testRoom.getRevision(),
+				testRoom.getId(),
+				Arrays.asList(new RoomAccessSyncEvent.RoomAccessEntry(testRoom.getOwnerId(), "CREATOR"))
+		);
+
+		final RoomAccessSyncEvent response = roomAccessEventDispatcher.answerRoomAccessSyncRequest(request);
+
+		assertThat(response).isEqualTo(expectedResponse);
 	}
 }
