@@ -4,8 +4,10 @@ import de.thm.arsnova.service.authservice.config.RabbitConfig
 import de.thm.arsnova.service.authservice.handler.RoomAccessHandler
 import de.thm.arsnova.service.authservice.model.command.CreateRoomAccessCommand
 import de.thm.arsnova.service.authservice.model.command.DeleteRoomAccessCommand
+import de.thm.arsnova.service.authservice.model.command.SyncRoomAccessCommand
 import de.thm.arsnova.service.authservice.model.event.RoomAccessGrantedEvent
 import de.thm.arsnova.service.authservice.model.event.RoomAccessRevokedEvent
+import de.thm.arsnova.service.authservice.model.event.RoomAccessSyncEvent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.rabbit.annotation.RabbitListener
@@ -27,5 +29,11 @@ class RoomAccessListener (
     fun receiveRoomAccessRevokedEvent(event: RoomAccessRevokedEvent) {
         logger.debug("Got event on room access revoked queue: {}", event)
         handler.handleDeleteRoomAccessCommand(DeleteRoomAccessCommand(event.rev, event.roomId, event.userId))
+    }
+
+    @RabbitListener(queues = [RabbitConfig.roomAccessSyncResponseQueueName])
+    fun receiveRoomAccessSyncResponseEvent(event: RoomAccessSyncEvent) {
+        logger.debug("Got event on room access sync response queue: {}", event)
+        handler.handleSyncRoomAccessCommand(SyncRoomAccessCommand(event.rev, event.roomId, event.access))
     }
 }
