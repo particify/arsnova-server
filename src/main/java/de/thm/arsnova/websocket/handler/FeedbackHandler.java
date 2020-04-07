@@ -10,6 +10,7 @@ import de.thm.arsnova.config.RabbitConfig;
 import de.thm.arsnova.config.properties.MessageBrokerProperties;
 import de.thm.arsnova.websocket.message.CreateFeedback;
 import de.thm.arsnova.websocket.message.GetFeedback;
+import de.thm.arsnova.websocket.message.ResetFeedback;
 
 @Service
 @EnableConfigurationProperties(MessageBrokerProperties.class)
@@ -28,6 +29,17 @@ public class FeedbackHandler {
 	@RabbitListener(containerFactory = "myRabbitListenerContainerFactory", queues = "feedback.command")
 	public void receiveMessage(
 			final CreateFeedback value
+	) throws Exception {
+
+		commandHandler.handle(
+				value
+		);
+
+	}
+
+	@RabbitListener(containerFactory = "myRabbitListenerContainerFactory", queues = "feedback.command.reset")
+	public void receiveMessage(
+			final ResetFeedback value
 	) throws Exception {
 
 		commandHandler.handle(

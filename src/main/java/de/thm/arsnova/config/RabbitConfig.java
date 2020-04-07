@@ -40,6 +40,7 @@ public class RabbitConfig {
 	private static final Logger log = LoggerFactory.getLogger(RabbitConfig.class);
 
 	static final String createFeedbackCommandQueueName = "feedback.command";
+	static final String createFeedbackResetCommandQueueName = "feedback.command.reset";
 	static final String queryFeedbackCommandQueueName = "feedback.query";
 
 	public static class RabbitConfigProperties {
@@ -94,6 +95,24 @@ public class RabbitConfig {
 			havingValue = "true")
 	public Queue queryFeedbackCommandQueue(final RabbitAdmin rabbitAdmin) {
 		final Queue queue = new Queue(queryFeedbackCommandQueueName, true, false, false);
+
+		try {
+			rabbitAdmin.declareQueue(queue);
+		} catch (final Exception e) {
+			log.error(e.toString());
+		}
+
+		return queue;
+	}
+
+	@Bean
+	@Autowired
+	@ConditionalOnProperty(
+			name = RabbitConfigProperties.RABBIT_ENABLED,
+			prefix = MessageBrokerProperties.PREFIX,
+			havingValue = "true")
+	public Queue queryFeedbackResetCommandQueue(final RabbitAdmin rabbitAdmin) {
+		final Queue queue = new Queue(createFeedbackResetCommandQueueName, true, false, false);
 
 		try {
 			rabbitAdmin.declareQueue(queue);

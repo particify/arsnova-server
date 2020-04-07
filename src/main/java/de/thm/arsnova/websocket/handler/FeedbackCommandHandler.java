@@ -154,6 +154,7 @@ public class FeedbackCommandHandler {
 		final FeedbackReset event = new FeedbackReset();
 
 		messagingTemplate.convertAndSend(
+				"amq.topic",
 				roomId + ".feedback.stream",
 				event
 		);
