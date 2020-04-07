@@ -19,6 +19,10 @@ import de.thm.arsnova.websocket.message.ResetFeedback;
 		prefix = MessageBrokerProperties.PREFIX,
 		havingValue = "true")
 public class FeedbackHandler {
+	public static final String CREATE_FEEDBACK_COMMAND_QUEUE_NAME = "feedback.command";
+	public static final String CREATE_FEEDBACK_RESET_COMMAND_QUEUE_NAME = "feedback.command.reset";
+	public static final String QUERY_FEEDBACK_COMMAND_QUEUE_NAME = "feedback.query";
+
 	private final FeedbackCommandHandler commandHandler;
 
 	@Autowired
@@ -26,7 +30,9 @@ public class FeedbackHandler {
 		this.commandHandler = commandHandler;
 	}
 
-	@RabbitListener(containerFactory = "myRabbitListenerContainerFactory", queues = "feedback.command")
+	@RabbitListener(
+			containerFactory = "myRabbitListenerContainerFactory",
+			queues = CREATE_FEEDBACK_COMMAND_QUEUE_NAME)
 	public void receiveMessage(
 			final CreateFeedback value
 	) throws Exception {
@@ -37,7 +43,9 @@ public class FeedbackHandler {
 
 	}
 
-	@RabbitListener(containerFactory = "myRabbitListenerContainerFactory", queues = "feedback.command.reset")
+	@RabbitListener(
+			containerFactory = "myRabbitListenerContainerFactory",
+			queues = CREATE_FEEDBACK_RESET_COMMAND_QUEUE_NAME)
 	public void receiveMessage(
 			final ResetFeedback value
 	) throws Exception {
@@ -48,7 +56,9 @@ public class FeedbackHandler {
 
 	}
 
-	@RabbitListener(containerFactory = "myRabbitListenerContainerFactory", queues = "feedback.query")
+	@RabbitListener(
+			containerFactory = "myRabbitListenerContainerFactory",
+			queues = QUERY_FEEDBACK_COMMAND_QUEUE_NAME)
 	public void receiveMessage(
 			final GetFeedback value
 	) throws Exception {

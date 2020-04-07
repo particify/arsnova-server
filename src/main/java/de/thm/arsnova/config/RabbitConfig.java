@@ -31,6 +31,7 @@ import org.springframework.messaging.handler.annotation.support.DefaultMessageHa
 import de.thm.arsnova.config.properties.MessageBrokerProperties;
 import de.thm.arsnova.event.AmqpEventDispatcher;
 import de.thm.arsnova.event.RoomAccessEventDispatcher;
+import de.thm.arsnova.websocket.handler.FeedbackHandler;
 
 @Configuration
 @EnableRabbit
@@ -38,10 +39,6 @@ import de.thm.arsnova.event.RoomAccessEventDispatcher;
 @EnableConfigurationProperties(MessageBrokerProperties.class)
 public class RabbitConfig {
 	private static final Logger log = LoggerFactory.getLogger(RabbitConfig.class);
-
-	static final String createFeedbackCommandQueueName = "feedback.command";
-	static final String createFeedbackResetCommandQueueName = "feedback.command.reset";
-	static final String queryFeedbackCommandQueueName = "feedback.query";
 
 	public static class RabbitConfigProperties {
 		public static final String RABBIT_ENABLED = "rabbitmq.enabled";
@@ -72,60 +69,6 @@ public class RabbitConfig {
 	@Bean
 	@Autowired
 	@ConditionalOnProperty(
-			name = RabbitConfigProperties.RABBIT_ENABLED,
-			prefix = MessageBrokerProperties.PREFIX,
-			havingValue = "true")
-	public Queue createFeedbackCommandQueue(final RabbitAdmin rabbitAdmin) {
-		final Queue queue = new Queue(createFeedbackCommandQueueName, true, false, false);
-
-		try {
-			rabbitAdmin.declareQueue(queue);
-		} catch (final Exception e) {
-			log.error(e.toString());
-		}
-
-		return queue;
-	}
-
-	@Bean
-	@Autowired
-	@ConditionalOnProperty(
-			name = RabbitConfigProperties.RABBIT_ENABLED,
-			prefix = MessageBrokerProperties.PREFIX,
-			havingValue = "true")
-	public Queue queryFeedbackCommandQueue(final RabbitAdmin rabbitAdmin) {
-		final Queue queue = new Queue(queryFeedbackCommandQueueName, true, false, false);
-
-		try {
-			rabbitAdmin.declareQueue(queue);
-		} catch (final Exception e) {
-			log.error(e.toString());
-		}
-
-		return queue;
-	}
-
-	@Bean
-	@Autowired
-	@ConditionalOnProperty(
-			name = RabbitConfigProperties.RABBIT_ENABLED,
-			prefix = MessageBrokerProperties.PREFIX,
-			havingValue = "true")
-	public Queue queryFeedbackResetCommandQueue(final RabbitAdmin rabbitAdmin) {
-		final Queue queue = new Queue(createFeedbackResetCommandQueueName, true, false, false);
-
-		try {
-			rabbitAdmin.declareQueue(queue);
-		} catch (final Exception e) {
-			log.error(e.toString());
-		}
-
-		return queue;
-	}
-
-	@Bean
-	@Autowired
-	@ConditionalOnProperty(
 			name = {RabbitConfigProperties.RABBIT_ENABLED, RabbitConfigProperties.RABBIT_MANAGE_DECLARATIONS},
 			prefix = MessageBrokerProperties.PREFIX,
 			havingValue = "true")
@@ -141,6 +84,9 @@ public class RabbitConfig {
 		declarables.add(new Queue(RoomAccessEventDispatcher.ROOM_ACCESS_REVOKED_QUEUE_NAME, true));
 		declarables.add(new Queue(RoomAccessEventDispatcher.ROOM_ACCESS_SYNC_REQUEST_QUEUE_NAME, true));
 		declarables.add(new Queue(RoomAccessEventDispatcher.ROOM_ACCESS_SYNC_RESPONSE_QUEUE_NAME, true));
+		declarables.add(new Queue(FeedbackHandler.CREATE_FEEDBACK_COMMAND_QUEUE_NAME, true));
+		declarables.add(new Queue(FeedbackHandler.CREATE_FEEDBACK_RESET_COMMAND_QUEUE_NAME, true));
+		declarables.add(new Queue(FeedbackHandler.QUERY_FEEDBACK_COMMAND_QUEUE_NAME, true));
 
 		return new Declarables(declarables);
 	}
