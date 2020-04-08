@@ -84,7 +84,7 @@ public class Room extends Entity {
 		private boolean scoreEnabled = true;
 		private boolean multipleRoundsEnabled = true;
 		private boolean timerEnabled = true;
-		private boolean feedbackLocked = false;
+		private boolean feedbackLocked = true;
 
 		@JsonView({View.Persistence.class, View.Public.class})
 		public boolean isQuestionsEnabled() {
