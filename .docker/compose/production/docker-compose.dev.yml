@@ -11,7 +11,7 @@ services:
       - 127.0.0.1:5433:5432
   rabbitmq:
     #build: ./rabbitmq-stomp
-    image: registry.gitlab.com/particify/devops/docker-orchestration/rabbitmq-stomp:3.8-management
+    image: registry.gitlab.com/particify/dev/devops/docker-orchestration/rabbitmq-stomp:3.8-management
     ports:
       - 127.0.0.1:5672:5672
       - 127.0.0.1:15672:15672
