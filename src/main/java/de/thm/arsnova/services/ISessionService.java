@@ -74,9 +74,15 @@ public interface ISessionService {
 
 	List<SessionInfo> getMySessionsInfo(int offset, int limit);
 
+	List<SessionInfo> getMyCourseSessionsInfo(int offset, int limit);
+
+	List<Session> getMyCourseSessions(int offset, int limit);
+
 	List<SessionInfo> getPublicPoolSessionsInfo();
 
 	List<SessionInfo> getMyPublicPoolSessionsInfo();
+
+	List<Session> getCourseSessions(User user, int offset, int limit);
 
 	List<SessionInfo> getMyVisitedSessionsInfo(int offset, int limit);
 

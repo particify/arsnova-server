@@ -171,7 +171,7 @@ public interface IDatabaseDao {
 
 	void deleteInterposedQuestion(InterposedQuestion question);
 
-	List<Session> getCourseSessions(List<Course> courses);
+	List<Session> getCourseSessions(List<Course> courses, final int start, final int limit);
 
 	Session updateSession(Session session);
 

@@ -37,6 +37,8 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import net.particify.arsnova.connector.model.Course;
+
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
@@ -186,7 +188,11 @@ public class SessionController extends PaginationController {
 				if (ownedOnly && !visitedOnly) {
 					sessions = sessionService.getMySessions(offset, limit);
 				} else if (visitedOnly && !ownedOnly) {
-					sessions = sessionService.getMyVisitedSessions(offset, limit);
+					sessions = sessionService.getMyVisitedSessions(-1, -1);
+					List<Session> courseSessions = sessionService.getMyCourseSessions(-1 ,-1);
+					sessions.addAll(courseSessions.stream()
+							.filter(cs -> sessions.stream().noneMatch(s -> s.getKeyword().equals(cs.getKeyword())))
+							.collect(Collectors.toList()));
 				} else {
 					response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
 					return null;
@@ -229,7 +235,11 @@ public class SessionController extends PaginationController {
 		if (!visitedOnly) {
 			sessions = sessionService.getMySessionsInfo(offset, limit);
 		} else {
-			sessions = sessionService.getMyVisitedSessionsInfo(offset, limit);
+			sessions = sessionService.getMyVisitedSessionsInfo(-1, -1);
+			List<SessionInfo> courseSessions = sessionService.getMyCourseSessionsInfo(-1 ,-1);
+			sessions.addAll(courseSessions.stream()
+					.filter(cs -> sessions.stream().noneMatch(s -> s.getKeyword().equals(cs.getKeyword())))
+					.collect(Collectors.toList()));
 		}
 
 		if (sessions == null || sessions.isEmpty()) {

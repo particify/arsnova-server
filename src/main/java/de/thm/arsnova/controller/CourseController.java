@@ -17,9 +17,11 @@
  */
 package de.thm.arsnova.controller;
 
+import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.NotImplementedException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
+import de.thm.arsnova.services.ISessionService;
 import de.thm.arsnova.services.IUserService;
 import io.swagger.annotations.ApiParam;
 import net.particify.arsnova.connector.client.ConnectorClient;
@@ -40,12 +42,15 @@ import java.util.List;
  * Provides access to a user's courses in an LMS such as Moodle.
  */
 @RestController
-public class CourseController extends AbstractController {
+public class CourseController extends PaginationController {
 	@Autowired(required = false)
 	private ConnectorClient connectorClient;
 
 	@Autowired
 	private IUserService userService;
+
+	@Autowired
+	private ISessionService sessionService;
 
 	@RequestMapping(value = "/mycourses", method = RequestMethod.GET)
 	public List<Course> myCourses(
@@ -98,5 +103,16 @@ public class CourseController extends AbstractController {
 		}
 
 		return result;
+	}
+
+	@RequestMapping(value = "/mycoursesessions", method = RequestMethod.GET)
+	public final List<Session> myCourseSessions() {
+		final User currentUser = userService.getCurrentUser();
+
+		if (currentUser == null || currentUser.getUsername() == null) {
+			throw new UnauthorizedException();
+		}
+
+		return sessionService.getCourseSessions(currentUser, offset, limit);
 	}
 }

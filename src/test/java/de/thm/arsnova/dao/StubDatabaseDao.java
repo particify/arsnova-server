@@ -340,7 +340,7 @@ public class StubDatabaseDao implements IDatabaseDao {
 	}
 
 	@Override
-	public List<Session> getCourseSessions(List<Course> courses) {
+	public List<Session> getCourseSessions(List<Course> courses, final int start, final int limit) {
 		return null;
 	}
 
