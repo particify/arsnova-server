@@ -47,7 +47,7 @@ You want to change the paths to make them match your environment.
 
 In order to build up a full featured server installation you have to install at least the following software:
 
-* Oracle Java SE 8 or OpenJDK 8
+* OpenJDK 8/11 (JRE)
 * Apache Tomcat 8 (or newer)
 * Apache CouchDB 1.x (1.2 or newer recommended)
 * One of the following webservers acting as a reverse proxy:
