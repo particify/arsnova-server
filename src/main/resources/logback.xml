@@ -53,8 +53,10 @@
 	<logger name="com.corundumstudio.socketio" level="WARN" />
 	<logger name="com.corundumstudio.socketio.handler.AuthorizeHandler" level="OFF" />
 	<logger name="com.corundumstudio.socketio.handler.WrongUrlHandler" level="ERROR" />
+	<logger name="com.fourspaces.couchdb" level="ERROR" />
 	<logger name="io.netty" level="WARN" />
 	<logger name="io.netty.channel.DefaultChannelPipeline" level="ERROR" />
+	<logger name="net.sf.json" level="WARN" />
 	<logger name="org.pac4j.oauth.profile" level="WARN" />
 	<logger name="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" level="WARN" />
 	<logger name="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" level="WARN" />
