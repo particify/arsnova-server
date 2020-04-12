@@ -17,7 +17,7 @@
  */
 package de.thm.arsnova.config;
 
-import de.thm.arsnova.connector.client.ConnectorClient;
+import net.particify.arsnova.connector.client.ConnectorClient;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

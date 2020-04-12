@@ -17,13 +17,13 @@
  */
 package de.thm.arsnova.services;
 
-import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.entities.Session;
 import de.thm.arsnova.entities.SessionFeature;
 import de.thm.arsnova.entities.SessionInfo;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.entities.transport.ImportExportSession;
 import de.thm.arsnova.entities.transport.LearningProgressValues;
+import net.particify.arsnova.connector.model.Course;
 
 import java.util.List;
 import java.util.UUID;

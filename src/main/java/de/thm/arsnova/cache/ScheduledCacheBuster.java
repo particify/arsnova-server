@@ -17,6 +17,7 @@
  */
 package de.thm.arsnova.cache;
 
+import net.particify.arsnova.connector.client.ConnectorClientImpl;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -65,5 +66,13 @@ public class ScheduledCacheBuster {
 	@CacheEvict(value = "learningprogress", allEntries = true)
 	@Scheduled(initialDelay = 1000 * 200, fixedRate = 1000 * 60 * 15)
 	public void clearLearningProgressCache() { }
+
+	@CacheEvict(value = ConnectorClientImpl.COURSES_CACHE, allEntries = true)
+	@Scheduled(initialDelay = 1000 * 225, fixedRate = 1000 * 60 * 5)
+	public void clearLmsCourseCache() { }
+
+	@CacheEvict(value = ConnectorClientImpl.MEMBERSHIPS_CACHE, allEntries = true)
+	@Scheduled(initialDelay = 1000 * 250, fixedRate = 1000 * 60 * 5)
+	public void clearLmsMembershipsCache() { }
 
 }

@@ -17,21 +17,20 @@
  */
 package de.thm.arsnova.controller;
 
-import de.thm.arsnova.connector.client.ConnectorClient;
-import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.connector.model.UserRole;
 import de.thm.arsnova.entities.User;
 import de.thm.arsnova.exceptions.NotImplementedException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
 import de.thm.arsnova.services.IUserService;
 import io.swagger.annotations.ApiParam;
+import net.particify.arsnova.connector.client.ConnectorClient;
+import net.particify.arsnova.connector.model.Course;
+import net.particify.arsnova.connector.model.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -51,7 +50,7 @@ public class CourseController extends AbstractController {
 	@RequestMapping(value = "/mycourses", method = RequestMethod.GET)
 	public List<Course> myCourses(
 			@ApiParam(value = "sort my courses by name", required = true)
-			@RequestParam(value = "sortby", defaultValue = "name") final String sortby
+			@RequestParam(value = "sortby", defaultValue = "startdate") final String sortby
 			) {
 
 		final User currentUser = userService.getCurrentUser();
@@ -75,30 +74,29 @@ public class CourseController extends AbstractController {
 			}
 		}
 
-		if ("shortname".equals(sortby)) {
-			Collections.sort(result, new CourseShortNameComperator());
-		} else {
-			Collections.sort(result, new CourseNameComperator());
+		switch (sortby) {
+			case "name":
+				Collections.sort(result, Comparator
+						.comparing(Course::getFullname)
+						.thenComparing(Course::getStartdate, Comparator.nullsFirst(Comparator.reverseOrder())));
+				break;
+			case "shortname":
+				Collections.sort(result, Comparator
+						.comparing(Course::getShortname)
+						.thenComparing(Course::getStartdate, Comparator.nullsFirst(Comparator.reverseOrder())));
+				break;
+			case "enddate":
+				Collections.sort(result, Comparator
+						.comparing(Course::getEnddate, Comparator.nullsFirst(Comparator.reverseOrder()))
+						.thenComparing(Course::getFullname));
+				break;
+			default:
+				Collections.sort(result, Comparator
+						.comparing(Course::getStartdate, Comparator.nullsFirst(Comparator.reverseOrder()))
+						.thenComparing(Course::getFullname));
+				break;
 		}
 
 		return result;
-	}
-
-	private static class CourseNameComperator implements Comparator<Course>, Serializable {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public int compare(final Course course1, final Course course2) {
-			return course1.getFullname().compareToIgnoreCase(course2.getFullname());
-		}
-	}
-
-	private static class CourseShortNameComperator implements Comparator<Course>, Serializable {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public int compare(final Course course1, final Course course2) {
-			return course1.getShortname().compareToIgnoreCase(course2.getShortname());
-		}
 	}
 }

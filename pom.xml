@@ -13,6 +13,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
+		<gitlab.host>gitlab.com</gitlab.host>
 	</properties>
 
 	<developers>
@@ -78,6 +79,11 @@
 	</reporting>
 
 	<repositories>
+		<repository>
+			<id>gitlab-particify</id>
+			<name>Particify Repository @ ${gitlab.host}</name>
+			<url>https://${gitlab.host}/api/v4/groups/particify/-/packages/maven</url>
+		</repository>
 		<repository>
 			<id>thm-releases</id>
 			<name>THM Maven Release Repository</name>
@@ -273,6 +279,10 @@
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aop</artifactId>
 		</dependency>
@@ -295,9 +305,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>de.thm.arsnova.connector</groupId>
+			<groupId>net.particify.arsnova.integrations</groupId>
 			<artifactId>connector-client</artifactId>
-			<version>0.73.0</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jayway.jsonpath</groupId>
