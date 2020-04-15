@@ -382,7 +382,9 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 			throw new ForbiddenException();
 		}
 
-		answer.setCreatorId(user.getId());
+		if (answer.getCreatorId() == null) {
+			answer.setCreatorId(user.getId());
+		}
 		answer.setRoomId(content.getRoomId());
 
 		/* FIXME: migrate

@@ -63,8 +63,8 @@ import de.thm.arsnova.web.exceptions.NotFoundException;
 public abstract class AbstractEntityController<E extends Entity> {
 	public static final String MEDIATYPE_EMPTY = "application/x-empty";
 	private static final Logger logger = LoggerFactory.getLogger(AbstractEntityController.class);
-	protected static final String ENTITY_ID_HEADER = "Arsnova-Entity-Id";
-	protected static final String ENTITY_REVISION_HEADER = "Arsnova-Entity-Revision";
+	public static final String ENTITY_ID_HEADER = "Arsnova-Entity-Id";
+	public static final String ENTITY_REVISION_HEADER = "Arsnova-Entity-Revision";
 	protected static final String DEFAULT_ROOT_MAPPING = "/";
 	protected static final String DEFAULT_ID_MAPPING = "/{id:[^~].*}";
 	protected static final String DEFAULT_ALIAS_MAPPING = "/~{alias}";
