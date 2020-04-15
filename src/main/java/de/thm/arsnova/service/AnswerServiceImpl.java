@@ -59,7 +59,7 @@ import de.thm.arsnova.web.exceptions.UnauthorizedException;
  */
 @Service
 public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implements AnswerService {
-	private static final Logger logger = LoggerFactory.getLogger(ContentServiceImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(AnswerServiceImpl.class);
 
 	private final Queue<Answer> answerQueue = new ConcurrentLinkedQueue<>();
 
