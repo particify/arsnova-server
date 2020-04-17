@@ -19,6 +19,7 @@
 package de.thm.arsnova.controller;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -44,6 +45,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
 import de.thm.arsnova.model.Entity;
 import de.thm.arsnova.model.FindQuery;
@@ -168,9 +170,11 @@ public abstract class AbstractEntityController<E extends Entity> {
 	public void forwardAlias(@PathVariable final String alias,
 			final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
 			throws ServletException, IOException {
-		final String subPath = new AntPathMatcher().extractPathWithinPattern(
+		final String subPath = UriUtils.encodePath(
+				new AntPathMatcher().extractPathWithinPattern(
 				(String) httpServletRequest.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE),
-				(String) httpServletRequest.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
+				(String) httpServletRequest.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)),
+				StandardCharsets.UTF_8);
 		final String targetPath = String.format(
 				"%s/%s%s", getMapping(), resolveAlias(alias), subPath != null ? "/" + subPath : "");
 		logger.debug("Forwarding alias request to {}", targetPath);
