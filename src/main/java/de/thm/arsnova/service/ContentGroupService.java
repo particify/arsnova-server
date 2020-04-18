@@ -35,6 +35,7 @@ import de.thm.arsnova.model.Content;
 import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.persistence.ContentGroupRepository;
+import de.thm.arsnova.web.exceptions.BadRequestException;
 
 @Service
 public class ContentGroupService extends DefaultEntityServiceImpl<ContentGroup> {
@@ -53,6 +54,24 @@ public class ContentGroupService extends DefaultEntityServiceImpl<ContentGroup> 
 	@Autowired
 	public void setContentService(final ContentService contentService) {
 		this.contentService = contentService;
+	}
+
+	@Override
+	public void prepareCreate(final ContentGroup contentGroup) {
+		if (this.getByRoomIdAndName(contentGroup.getRoomId(), contentGroup.getName()) != null) {
+			throw new BadRequestException();
+		}
+	}
+
+	@Override
+	public void prepareUpdate(final ContentGroup contentGroup) {
+		final ContentGroup oldContentGroup = this.get(contentGroup.getId());
+		if (oldContentGroup != null) {
+			// Disallow changing the name of a content group for now
+			if (!oldContentGroup.getName().equals(contentGroup.getName())) {
+				throw new BadRequestException();
+			}
+		}
 	}
 
 	public ContentGroup getByRoomIdAndName(final String roomId, final String name) {
@@ -75,15 +94,19 @@ public class ContentGroupService extends DefaultEntityServiceImpl<ContentGroup> 
 		}
 	}
 
-	public void updateContentGroup(final ContentGroup contentGroup) {
-		if (contentGroup.getContentIds().isEmpty()) {
+	public void createOrUpdateContentGroup(final ContentGroup contentGroup) {
+		if (contentGroup.getContentIds().isEmpty() && contentGroup.getId() != null) {
 			delete(contentGroup);
-		} else {
+		} else if (!contentGroup.getContentIds().isEmpty()) {
 			final Set<String> contentIds = StreamSupport.stream(
 					contentService.get(contentGroup.getContentIds()).spliterator(), false)
 						.filter(c -> c.getRoomId().equals(contentGroup.getRoomId()))
 						.map(Content::getId).collect(Collectors.toSet());
-			update(contentGroup);
+			if (contentGroup.getId() != null) {
+				update(contentGroup);
+			} else {
+				create(contentGroup);
+			}
 		}
 	}
 

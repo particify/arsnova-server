@@ -292,6 +292,7 @@ public class RoomControllerTest {
 		when(roomRepository.findOne(room.getId())).thenReturn(room);
 
 		final ContentGroup contentGroup = new ContentGroup();
+		contentGroup.setId("SOME_ID");
 		contentGroup.setName("Test-ContentGroupName");
 		contentGroup.setRoomId(room.getId());
 		contentGroup.setContentIds(new HashSet<>()); // empty list of contents
