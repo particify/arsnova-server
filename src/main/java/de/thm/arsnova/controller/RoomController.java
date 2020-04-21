@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,7 +31,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.Room;
@@ -96,6 +100,23 @@ public class RoomController extends AbstractEntityController<Room> {
 		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, room.getRevision());
 	}
 
+	@PostMapping(CONTENTGROUP_MAPPING)
+	@ResponseStatus(HttpStatus.CREATED)
+	public ContentGroup postContentGroup(
+			@PathVariable final String id,
+			@PathVariable final String groupName,
+			@RequestBody final ContentGroup entity,
+			final HttpServletResponse httpServletResponse) {
+		contentGroupService.createOrUpdateContentGroup(entity);
+		final String uri = UriComponentsBuilder.fromPath(getMapping()).path(CONTENTGROUP_MAPPING)
+				.buildAndExpand(entity.getRoomId(), entity.getName()).toUriString();
+		httpServletResponse.setHeader(HttpHeaders.LOCATION, uri);
+		httpServletResponse.setHeader(ENTITY_ID_HEADER, entity.getId());
+		httpServletResponse.setHeader(ENTITY_REVISION_HEADER, entity.getRevision());
+
+		return entity;
+	}
+
 	@GetMapping(CONTENTGROUP_MAPPING)
 	public ContentGroup getContentGroup(@PathVariable final String id, @PathVariable final String groupName) {
 		return contentGroupService.getByRoomIdAndName(id, groupName);
@@ -110,7 +131,7 @@ public class RoomController extends AbstractEntityController<Room> {
 	@PutMapping(CONTENTGROUP_MAPPING)
 	public void updateGroup(@PathVariable final String id, @PathVariable final String groupName,
 			@RequestBody final ContentGroup contentGroup) {
-		contentGroupService.updateContentGroup(contentGroup);
+		contentGroupService.createOrUpdateContentGroup(contentGroup);
 	}
 
 	@GetMapping(STATS_MAPPING)
