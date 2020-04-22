@@ -507,6 +507,13 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		return result;
 	}
 
+	@Override
+	public UserProfile createAnonymizedGuestUser() {
+		final UserProfile userProfile = new UserProfile(UserProfile.AuthProvider.ANONYMIZED, generateGuestId());
+		create(userProfile);
+		return userProfile;
+	}
+
 	private String encodePassword(final String password) {
 		if (null == encoder) {
 			encoder = new BCryptPasswordEncoder(12);

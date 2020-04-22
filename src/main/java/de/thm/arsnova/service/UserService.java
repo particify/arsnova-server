@@ -89,6 +89,8 @@ public interface UserService extends EntityService<UserProfile> {
 
 	UserProfile create(String username, String password);
 
+	UserProfile createAnonymizedGuestUser();
+
 	UserProfile update(UserProfile userProfile);
 
 	UserProfile deleteByUsername(String username);
