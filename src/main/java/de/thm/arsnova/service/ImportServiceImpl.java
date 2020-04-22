@@ -58,7 +58,7 @@ public class ImportServiceImpl implements ImportService {
 	}
 
 	@Override
-	@Secured({"ROLE_USER", "RUN_AS_SYSTEM"})
+	@Secured({"ROLE_ADMIN", "RUN_AS_SYSTEM"})
 	public Room importFromV2(final ImportExportContainer container) {
 		final User user = userService.getCurrentUser();
 		logger.debug("Starting import for: {}, triggered by: {}", container.getSession().getName(), user);
