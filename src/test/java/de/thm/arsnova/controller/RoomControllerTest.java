@@ -37,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -264,13 +265,14 @@ public class RoomControllerTest {
 	@Test
 	@WithMockUser(value = "TestUser", userId = "1234")
 	public void shouldUpdateContentGroupWhenContentIdsAreNotEmpty() throws Exception {
+		final String contentId = "ID-Content-1";
 		final Room room = this.getRoomForUserWithDatabaseDetails(user);
 		final Content content = new Content();
+		content.setId(contentId);
 		content.setRoomId(room.getId());
 		when(roomRepository.findOne(room.getId())).thenReturn(room);
 		when(contentRepository.findOne(any())).thenReturn(content);
-
-		final String contentId = "ID-Content-1";
+		when(contentRepository.findAllById(any())).thenReturn(Collections.singletonList(content));
 
 		final ContentGroup contentGroup = createContentGroupWithRoomIdAndContentIds(room.getId(), contentId);
 

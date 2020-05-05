@@ -18,6 +18,7 @@
 
 package de.thm.arsnova.service;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -101,7 +102,8 @@ public class ContentGroupService extends DefaultEntityServiceImpl<ContentGroup> 
 			final Set<String> contentIds = StreamSupport.stream(
 					contentService.get(contentGroup.getContentIds()).spliterator(), false)
 						.filter(c -> c.getRoomId().equals(contentGroup.getRoomId()))
-						.map(Content::getId).collect(Collectors.toSet());
+						.map(Content::getId).collect(Collectors.toCollection(LinkedHashSet::new));
+			contentGroup.setContentIds(contentIds);
 			if (contentGroup.getId() != null) {
 				update(contentGroup);
 			} else {
