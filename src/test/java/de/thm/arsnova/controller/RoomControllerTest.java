@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -295,7 +296,7 @@ public class RoomControllerTest {
 		contentGroup.setId("SOME_ID");
 		contentGroup.setName("Test-ContentGroupName");
 		contentGroup.setRoomId(room.getId());
-		contentGroup.setContentIds(new HashSet<>()); // empty list of contents
+		contentGroup.setContentIds(new LinkedHashSet<>()); // empty list of contents
 
 		mockMvc.perform(put("/room/" + room.getId() + "/contentgroup/" + contentGroup.getName())
 				.with(csrf())
@@ -334,7 +335,7 @@ public class RoomControllerTest {
 		contentGroup.setId("Test-ContentGroupId");
 		contentGroup.setRevision("Test-ContentGroupRev");
 		contentGroup.setName("Test-ContentGroupName");
-		contentGroup.setContentIds(new HashSet<>(Arrays.asList(contentIds)));
+		contentGroup.setContentIds(new LinkedHashSet<>(Arrays.asList(contentIds)));
 		contentGroup.setRoomId(roomId);
 		return contentGroup;
 	}
@@ -347,7 +348,7 @@ public class RoomControllerTest {
 			contentGroup.setName("ContentGroupNameTest-" + (i + 1));
 			contentGroup.setRoomId(roomId);
 			contentGroup.setRevision("ContentGroupRevID");
-			final Set<String> listOfContentsGroups = new HashSet<>();
+			final Set<String> listOfContentsGroups = new LinkedHashSet<>();
 			for (int ii = 0; ii < numberOfContents; ii++) {
 				listOfContentsGroups.add("ID-Content-" + UUID.randomUUID());
 			}
