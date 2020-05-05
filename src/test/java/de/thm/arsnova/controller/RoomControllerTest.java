@@ -282,9 +282,9 @@ public class RoomControllerTest {
 		mockMvc.perform(put("/room/" + room.getId() + "/contentgroup/" + contentGroup.getName())
 				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(new ObjectMapper().writeValueAsString(contentGroup)))
-				.andExpect(status().isOk())
-				.andExpect(content().string(emptyString()));
+				.content(new ObjectMapper().writeValueAsString(contentGroup))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
 		verify(contentGroupRepository).save(argThat(containsContentGroupWithRoomIdAndContentIds(room.getId(), contentId)));
 	}
 
@@ -303,9 +303,9 @@ public class RoomControllerTest {
 		mockMvc.perform(put("/room/" + room.getId() + "/contentgroup/" + contentGroup.getName())
 				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(new ObjectMapper().writeValueAsString(contentGroup)))
-				.andExpect(status().isOk())
-				.andExpect(content().string(emptyString()));
+				.content(new ObjectMapper().writeValueAsString(contentGroup))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
 		verify(contentGroupRepository).delete(contentGroup);
 	}
 

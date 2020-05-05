@@ -129,9 +129,20 @@ public class RoomController extends AbstractEntityController<Room> {
 	}
 
 	@PutMapping(CONTENTGROUP_MAPPING)
-	public void updateGroup(@PathVariable final String id, @PathVariable final String groupName,
-			@RequestBody final ContentGroup contentGroup) {
-		contentGroupService.createOrUpdateContentGroup(contentGroup);
+	public ContentGroup updateGroup(@PathVariable final String id, @PathVariable final String groupName,
+			@RequestBody final ContentGroup contentGroup,
+			final HttpServletResponse httpServletResponse) {
+		final ContentGroup updatedContentGroup = contentGroupService.createOrUpdateContentGroup(contentGroup);
+
+		if (updatedContentGroup.getId() != null) {
+			final String uri = UriComponentsBuilder.fromPath(getMapping()).path(CONTENTGROUP_MAPPING)
+					.buildAndExpand(contentGroup.getRoomId(), contentGroup.getName()).toUriString();
+			httpServletResponse.setHeader(HttpHeaders.LOCATION, uri);
+			httpServletResponse.setHeader(ENTITY_ID_HEADER, contentGroup.getId());
+			httpServletResponse.setHeader(ENTITY_REVISION_HEADER, contentGroup.getRevision());
+		}
+
+		return updatedContentGroup;
 	}
 
 	@GetMapping(STATS_MAPPING)
