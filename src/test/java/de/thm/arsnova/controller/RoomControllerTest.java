@@ -37,9 +37,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -263,13 +265,14 @@ public class RoomControllerTest {
 	@Test
 	@WithMockUser(value = "TestUser", userId = "1234")
 	public void shouldUpdateContentGroupWhenContentIdsAreNotEmpty() throws Exception {
+		final String contentId = "ID-Content-1";
 		final Room room = this.getRoomForUserWithDatabaseDetails(user);
 		final Content content = new Content();
+		content.setId(contentId);
 		content.setRoomId(room.getId());
 		when(roomRepository.findOne(room.getId())).thenReturn(room);
 		when(contentRepository.findOne(any())).thenReturn(content);
-
-		final String contentId = "ID-Content-1";
+		when(contentRepository.findAllById(any())).thenReturn(Collections.singletonList(content));
 
 		final ContentGroup contentGroup = createContentGroupWithRoomIdAndContentIds(room.getId(), contentId);
 
@@ -279,9 +282,9 @@ public class RoomControllerTest {
 		mockMvc.perform(put("/room/" + room.getId() + "/contentgroup/" + contentGroup.getName())
 				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(new ObjectMapper().writeValueAsString(contentGroup)))
-				.andExpect(status().isOk())
-				.andExpect(content().string(emptyString()));
+				.content(new ObjectMapper().writeValueAsString(contentGroup))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
 		verify(contentGroupRepository).save(argThat(containsContentGroupWithRoomIdAndContentIds(room.getId(), contentId)));
 	}
 
@@ -295,14 +298,14 @@ public class RoomControllerTest {
 		contentGroup.setId("SOME_ID");
 		contentGroup.setName("Test-ContentGroupName");
 		contentGroup.setRoomId(room.getId());
-		contentGroup.setContentIds(new HashSet<>()); // empty list of contents
+		contentGroup.setContentIds(new LinkedHashSet<>()); // empty list of contents
 
 		mockMvc.perform(put("/room/" + room.getId() + "/contentgroup/" + contentGroup.getName())
 				.with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(new ObjectMapper().writeValueAsString(contentGroup)))
-				.andExpect(status().isOk())
-				.andExpect(content().string(emptyString()));
+				.content(new ObjectMapper().writeValueAsString(contentGroup))
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
 		verify(contentGroupRepository).delete(contentGroup);
 	}
 
@@ -334,7 +337,7 @@ public class RoomControllerTest {
 		contentGroup.setId("Test-ContentGroupId");
 		contentGroup.setRevision("Test-ContentGroupRev");
 		contentGroup.setName("Test-ContentGroupName");
-		contentGroup.setContentIds(new HashSet<>(Arrays.asList(contentIds)));
+		contentGroup.setContentIds(new LinkedHashSet<>(Arrays.asList(contentIds)));
 		contentGroup.setRoomId(roomId);
 		return contentGroup;
 	}
@@ -347,7 +350,7 @@ public class RoomControllerTest {
 			contentGroup.setName("ContentGroupNameTest-" + (i + 1));
 			contentGroup.setRoomId(roomId);
 			contentGroup.setRevision("ContentGroupRevID");
-			final Set<String> listOfContentsGroups = new HashSet<>();
+			final Set<String> listOfContentsGroups = new LinkedHashSet<>();
 			for (int ii = 0; ii < numberOfContents; ii++) {
 				listOfContentsGroups.add("ID-Content-" + UUID.randomUUID());
 			}

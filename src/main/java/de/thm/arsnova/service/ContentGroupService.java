@@ -18,6 +18,7 @@
 
 package de.thm.arsnova.service;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -94,18 +95,23 @@ public class ContentGroupService extends DefaultEntityServiceImpl<ContentGroup> 
 		}
 	}
 
-	public void createOrUpdateContentGroup(final ContentGroup contentGroup) {
-		if (contentGroup.getContentIds().isEmpty() && contentGroup.getId() != null) {
-			delete(contentGroup);
-		} else if (!contentGroup.getContentIds().isEmpty()) {
+	public ContentGroup createOrUpdateContentGroup(final ContentGroup contentGroup) {
+		if (contentGroup.getContentIds().isEmpty()) {
+			if (contentGroup.getId() != null) {
+				delete(contentGroup);
+			}
+
+			return new ContentGroup();
+		} else {
 			final Set<String> contentIds = StreamSupport.stream(
 					contentService.get(contentGroup.getContentIds()).spliterator(), false)
 						.filter(c -> c.getRoomId().equals(contentGroup.getRoomId()))
-						.map(Content::getId).collect(Collectors.toSet());
+						.map(Content::getId).collect(Collectors.toCollection(LinkedHashSet::new));
+			contentGroup.setContentIds(contentIds);
 			if (contentGroup.getId() != null) {
-				update(contentGroup);
+				return update(contentGroup);
 			} else {
-				create(contentGroup);
+				return create(contentGroup);
 			}
 		}
 	}

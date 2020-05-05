@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -517,7 +518,7 @@ public class V2ToV3Migration implements Migration {
 					createContentGroups(roomId, groups);
 					roomId = contentV2.getSessionId();
 				}
-				final Set<String> contentIds = groups.getOrDefault(contentV2.getQuestionVariant(), new HashSet<>());
+				final Set<String> contentIds = groups.getOrDefault(contentV2.getQuestionVariant(), new LinkedHashSet<>());
 				groups.put(contentV2.getQuestionVariant(), contentIds);
 				contentIds.add(contentV2.getId());
 			}

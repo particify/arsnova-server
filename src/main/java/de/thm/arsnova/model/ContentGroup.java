@@ -19,7 +19,8 @@
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import java.util.HashSet;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 import javax.validation.constraints.NotBlank;
@@ -70,13 +71,14 @@ public class ContentGroup extends Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public Set<String> getContentIds() {
 		if (contentIds == null) {
-			contentIds = new HashSet<>();
+			contentIds = new LinkedHashSet<>();
 		}
 
 		return contentIds;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
+	@JsonDeserialize(as = LinkedHashSet.class)
 	public void setContentIds(final Set<String> contentIds) {
 		this.contentIds = contentIds;
 	}
