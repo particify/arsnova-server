@@ -88,7 +88,11 @@ public class AuthenticationController {
 			response.addCookie(cookie);
 		}
 
-		return userService.getCurrentClientAuthentication(refresh);
+		final ClientAuthentication authentication = userService.getCurrentClientAuthentication(false);
+		if (authentication == null) {
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+		}
+		return authentication;
 	}
 
 	@PostMapping("/login/guest")
