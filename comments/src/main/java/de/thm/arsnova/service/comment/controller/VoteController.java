@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +33,7 @@ public class VoteController extends AbstractEntityController {
     private static final Logger logger = LoggerFactory.getLogger(VoteController.class);
 
     protected static final String REQUEST_MAPPING = "/vote";
+    protected static final String DELETE_MAPPING = "/{commentId}/{userId}";
 
     private final VoteCommandHandler commandHandler;
     private final VoteService service;
@@ -83,6 +86,15 @@ public class VoteController extends AbstractEntityController {
             logger.warn("Vote is neither up- nor downvote: " + vote.toString());
             throw new HttpMessageNotReadableException("Invalid request");
         }
+    }
+
+    @DeleteMapping(DELETE_MAPPING)
+    public void delete(
+            @PathVariable final String commentId,
+            @PathVariable final String userId
+    ) {
+        logger.debug("Resolving delete request with commentId: {}, userId: {}", commentId, userId);
+        service.delete(commentId, userId);
     }
 
     @PostMapping(FIND_MAPPING)
