@@ -154,7 +154,9 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	@EventListener
 	public void handleRoomUpdate(final BeforeFullUpdateEvent<Room> event) {
-		if (!event.getEntity().isModeratorsInitialized()) {
+		// Check if event is result of a full update from API or from adding/removing a moderator
+		if (!event.getEntity().isModeratorsInitialized() && event.getEntity().getModerators().isEmpty()) {
+			// When it's a result from a full update from the API, the moderators need to be loaded from the old entity
 			event.getEntity().setModerators(event.getOldEntity().getModerators());
 		}
 	}
