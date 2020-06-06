@@ -139,9 +139,10 @@ public class RoomAccessEventDispatcher {
 		final Set<Room.Moderator> oldRoomModerators = oldRoom.getModerators();
 		final Set<Room.Moderator> newRoomModerators = newRoom.getModerators();
 
-		final Set<Room.Moderator> deletedModerators = getNewMembers(newRoomModerators, oldRoomModerators);
+		final Set<Room.Moderator> deletedModerators = getNewMembers(oldRoomModerators, newRoomModerators);
 
 		for (final Room.Moderator removedModerator : deletedModerators) {
+			logger.debug("Removed moderator: {}", removedModerator.toString());
 			final RoomAccessRevokedEvent roomAccessRevokedEvent = new RoomAccessRevokedEvent(
 					EVENT_VERSION,
 					oldRoom.getRevision(),
@@ -157,9 +158,10 @@ public class RoomAccessEventDispatcher {
 			);
 		}
 
-		final Set<Room.Moderator> addedModerators = getNewMembers(oldRoomModerators, newRoomModerators);
+		final Set<Room.Moderator> addedModerators = getNewMembers(newRoomModerators, oldRoomModerators);
 
 		for (final Room.Moderator newModerator : addedModerators) {
+			logger.debug("Added moderator: {}", newModerator.toString());
 			final RoomAccessGrantedEvent roomAccessGrantedEvent = new RoomAccessGrantedEvent(
 					EVENT_VERSION,
 					newRoom.getRevision(),
@@ -250,8 +252,8 @@ public class RoomAccessEventDispatcher {
 		return roomAccessSyncEvent;
 	}
 
-	private Set<Room.Moderator> getNewMembers(final Set<Room.Moderator> a, final Set<Room.Moderator> b) {
-		final Set<Room.Moderator> r = a.stream().filter(i -> !b.contains(i)).collect(Collectors.toSet());
+	private Set<Room.Moderator> getNewMembers(final Set<Room.Moderator> check, final Set<Room.Moderator> in) {
+		final Set<Room.Moderator> r = check.stream().filter(i -> !in.contains(i)).collect(Collectors.toSet());
 
 		return r;
 	}
