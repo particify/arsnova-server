@@ -713,8 +713,11 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 			logger.info("Sending mail \"{}\" from \"{}\" to \"{}\"", subject, msg.getFrom(), userProfile.getLoginId());
 			mailSender.send(msg);
-		} catch (final MailException | MessagingException e) {
+		} catch (final MailException e) {
 			logger.warn("Mail \"{}\" could not be sent.", subject, e);
+			throw e;
+		} catch (final MessagingException e) {
+			logger.warn("Mail \"{}\" could not be sent because of MessagingException.", subject, e);
 		}
 	}
 
