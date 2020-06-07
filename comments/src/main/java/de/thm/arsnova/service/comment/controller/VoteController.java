@@ -1,6 +1,7 @@
 package de.thm.arsnova.service.comment.controller;
 
 import de.thm.arsnova.service.comment.model.VotePK;
+import de.thm.arsnova.service.comment.model.command.ResetVote;
 import de.thm.arsnova.service.comment.service.FindQuery;
 import de.thm.arsnova.service.comment.handler.VoteCommandHandler;
 import de.thm.arsnova.service.comment.service.VoteFindQueryService;
@@ -94,7 +95,9 @@ public class VoteController extends AbstractEntityController {
             @PathVariable final String userId
     ) {
         logger.debug("Resolving delete request with commentId: {}, userId: {}", commentId, userId);
-        service.delete(commentId, userId);
+        final VotePayload payload = new VotePayload(userId, commentId);
+        final ResetVote resetVote = new ResetVote(payload);
+        commandHandler.handle(resetVote);
     }
 
     @PostMapping(FIND_MAPPING)
