@@ -590,6 +590,7 @@ public class Room extends Entity {
 				.append("abbreviation", abbreviation)
 				.append("description", description)
 				.append("closed", closed)
+				.append("moderatorsInitialized", moderatorsInitialized)
 				.append("moderators", moderators)
 				.append("settings", settings)
 				.append("author", author)
