@@ -1,18 +1,24 @@
 package de.thm.arsnova.service.comment.service;
 
 import de.thm.arsnova.service.comment.model.Comment;
+import de.thm.arsnova.service.comment.model.Vote;
 import de.thm.arsnova.service.comment.service.CommentService;
 import de.thm.arsnova.service.comment.service.persistence.CommentRepository;
 import de.thm.arsnova.service.comment.service.persistence.VoteRepository;
+
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
@@ -70,6 +76,29 @@ public class CommentServiceTest {
         assertEquals(roomId, comment.getRoomId());
         assertEquals(creatorId, comment.getCreatorId());
         assertNotNull(comment.getScore());
+    }
+
+    @Test
+    public void testShouldDelete() {
+        String id = "52f08e8314aba247c50faacef60025ff";
+
+        Vote v1 = new Vote();
+        Vote v2 = new Vote();
+        List<Vote> voteList = new ArrayList<>();
+        voteList.add(v1);
+        voteList.add(v2);
+
+        when(voteRepository.findByCommentId(id)).thenReturn(voteList);
+
+        service.delete(id);
+
+        @SuppressWarnings("unchecked")
+        Class<ArrayList<Vote>> listClass =
+                (Class<ArrayList<Vote>>)(Class)ArrayList.class;
+        ArgumentCaptor<List<Vote>> voteListCaptor = ArgumentCaptor.forClass(listClass);
+
+        verify(voteRepository, times(1)).deleteAll(voteListCaptor.capture());
+        assertThat(voteListCaptor.getValue()).isEqualTo(voteList);
     }
 
 }
