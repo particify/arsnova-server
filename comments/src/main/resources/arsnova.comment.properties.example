@@ -1,8 +1,8 @@
-server.port=8088
+server.port=8080
 
 spring.rabbitmq.host=localhost
-spring.rabbitmq.username=arsnova
-spring.rabbitmq.password=arsnova
+spring.rabbitmq.username=guest
+spring.rabbitmq.password=guest
 spring.rabbitmq.vhost=/
 spring.rabbitmq.port=5672
 
@@ -24,3 +24,5 @@ spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults=false
 
 # Because detection is disabled you have to set correct dialect by hand.
 spring.jpa.database-platform=org.hibernate.dialect.PostgreSQL9Dialect
+
+jwt.secret=secret
