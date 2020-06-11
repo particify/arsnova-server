@@ -2,13 +2,23 @@ package de.thm.arsnova.service.comment;
 
 import de.thm.arsnova.service.comment.handler.CommentCommandHandler;
 import de.thm.arsnova.service.comment.model.Comment;
+import de.thm.arsnova.service.comment.model.Settings;
 import de.thm.arsnova.service.comment.model.command.DeleteComment;
 import de.thm.arsnova.service.comment.model.command.DeleteCommentPayload;
+import de.thm.arsnova.service.comment.model.command.DeleteCommentsByRoom;
+import de.thm.arsnova.service.comment.model.command.DeleteCommentsByRoomPayload;
+import de.thm.arsnova.service.comment.model.command.HighlightComment;
+import de.thm.arsnova.service.comment.model.command.HighlightCommentPayload;
 import de.thm.arsnova.service.comment.model.event.CommentDeleted;
 import de.thm.arsnova.service.comment.model.event.CommentDeletedPayload;
+import de.thm.arsnova.service.comment.model.event.CommentHighlighted;
+import de.thm.arsnova.service.comment.model.event.CommentHighlightedPayload;
 import de.thm.arsnova.service.comment.service.BonusTokenService;
 import de.thm.arsnova.service.comment.service.CommentService;
 import de.thm.arsnova.service.comment.service.SettingsService;
+
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +54,6 @@ public class CommentCommandHandlerTest {
         commandHandler = new CommentCommandHandler(messagingTemplate, commentService, bonusTokenService, settingsService);
     }
 
-    /*
     @Test
     public void testShouldHandleCreateComment() {
 
@@ -64,15 +73,56 @@ public class CommentCommandHandlerTest {
                 ArgumentCaptor.forClass(CreateComment.class);
         ArgumentCaptor<Comment> commentCaptor = ArgumentCaptor.forClass(Comment.class);
 
+        Settings settings = new Settings();
+        settings.setRoomId(roomId);
+        settings.setDirectSend(true);
+
+        when(settingsService.get(roomId)).thenReturn(settings);
+        when(commentService.create(any())).thenReturn(newComment);
+
         // Act
         commandHandler.handle(command);
 
         //Assert
         verify(commentService, times(1)).create(commentCaptor.capture());
-        verify(messagingTemplate, times(1)).convertAndSend(topicCaptor.capture(), topicCaptor.capture(), messageCaptor.capture());
+        verify(messagingTemplate, times(1)).convertAndSend(keyCaptor.capture(), topicCaptor.capture(), messageCaptor.capture());
         assertThat(topicCaptor.getValue()).isEqualTo(roomId + ".comment.stream");
     }
-    */
+
+    @Test
+    public void testShouldHandleCreateCommentForNonDirectSend() {
+
+        // Arrange
+        String roomId = "52f08e8314aba247c50faacef600254c";
+        String creatorId = "52f08e8314aba247c50faacef600254c";
+        Comment newComment = new Comment();
+        newComment.setCreatorId(creatorId);
+        newComment.setRoomId(roomId);
+        newComment.setBody("body");
+        CreateCommentPayload payload = new CreateCommentPayload(newComment);
+        CreateComment command = new CreateComment(payload);
+
+        ArgumentCaptor<String> topicCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<CreateComment> messageCaptor =
+                ArgumentCaptor.forClass(CreateComment.class);
+        ArgumentCaptor<Comment> commentCaptor = ArgumentCaptor.forClass(Comment.class);
+
+        Settings settings = new Settings();
+        settings.setRoomId(roomId);
+        settings.setDirectSend(false);
+
+        when(settingsService.get(roomId)).thenReturn(settings);
+        when(commentService.create(any())).thenReturn(newComment);
+
+        // Act
+        commandHandler.handle(command);
+
+        //Assert
+        verify(commentService, times(1)).create(commentCaptor.capture());
+        verify(messagingTemplate, times(1)).convertAndSend(keyCaptor.capture(), topicCaptor.capture(), messageCaptor.capture());
+        assertThat(topicCaptor.getValue()).isEqualTo(roomId + ".comment.moderator.stream");
+    }
 
     @Test
     public void testShouldHandleDeleteComment() {
@@ -99,13 +149,95 @@ public class CommentCommandHandlerTest {
         verify(commentService, times(1)).get(id);
         verify(commentService, times(1)).delete(id);
         verify(messagingTemplate, times(1)).convertAndSend(
-                topicCaptor.capture(),
                 keyCaptor.capture(),
+                topicCaptor.capture(),
                 eventCaptor.capture()
         );
 
-        assertThat(keyCaptor.getValue()).isEqualTo(roomId + ".comment.stream");
+        assertThat(topicCaptor.getValue()).isEqualTo(roomId + ".comment.stream");
         assertThat(eventCaptor.getValue()).isEqualTo(expectedEvent);
+    }
+
+    @Test
+    public void testShouldHandleHighlightComment() {
+        String id = "52f08e8314aba247c50faacef60025ff";
+        String roomId = "52f08e8314aba247c50faacef600254c";
+        Comment c = new Comment();
+        c.setId(id);
+        c.setRoomId(roomId);
+        HighlightCommentPayload payload = new HighlightCommentPayload();
+        payload.setLights(true);
+        payload.setId(id);
+        HighlightComment command = new HighlightComment(payload);
+
+        ArgumentCaptor<String> topicCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<CommentHighlighted> eventCaptor =
+                ArgumentCaptor.forClass(CommentHighlighted.class);
+
+        when(commentService.get(id)).thenReturn(c);
+
+        commandHandler.handle(command);
+
+        CommentHighlightedPayload p = new CommentHighlightedPayload(c, true);
+        CommentHighlighted expectedEvent = new CommentHighlighted(p, roomId);
+
+        verify(messagingTemplate, times(1)).convertAndSend(
+                keyCaptor.capture(),
+                topicCaptor.capture(),
+                eventCaptor.capture()
+        );
+
+        assertThat(topicCaptor.getValue()).isEqualTo(roomId + ".comment.stream");
+        assertThat(eventCaptor.getValue()).isEqualTo(expectedEvent);
+    }
+
+    @Test
+    public void handleDeleteCommentsByRoom() {
+        String roomId = "52f08e8314aba247c50faacef600254c";
+        String firstCommentId = "52f08e8314aba247c50faacef60025ff";
+        String secondCommentId = "52f08e8314aba247c50faacef60025fe";
+        DeleteCommentsByRoomPayload payload = new DeleteCommentsByRoomPayload(roomId);
+        DeleteCommentsByRoom command = new DeleteCommentsByRoom(payload);
+        List<Comment> commentList = new ArrayList<>();
+        Comment one = new Comment();
+        one.setId(firstCommentId);
+        one.setRoomId(roomId);
+        Comment two = new Comment();
+        two.setId(secondCommentId);
+        two.setRoomId(roomId);
+        commentList.add(one);
+        commentList.add(two);
+
+        ArgumentCaptor<String> topicCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<CommentDeleted> eventCaptor =
+                ArgumentCaptor.forClass(CommentDeleted.class);
+
+        when(commentService.deleteByRoomId(roomId)).thenReturn(commentList);
+
+        commandHandler.handle(command);
+
+        CommentDeletedPayload p1 = new CommentDeletedPayload();
+        p1.setId(one.getId());
+        CommentDeleted e1 = new CommentDeleted(p1, roomId);
+        CommentDeletedPayload p2 = new CommentDeletedPayload();
+        p2.setId(two.getId());
+        CommentDeleted e2 = new CommentDeleted(p2, roomId);
+
+
+        verify(messagingTemplate, times(2)).convertAndSend(
+                keyCaptor.capture(),
+                topicCaptor.capture(),
+                eventCaptor.capture()
+        );
+
+        List<String> capturedTopics = topicCaptor.getAllValues();
+        assertThat(capturedTopics.get(0)).isEqualTo(roomId + ".comment.stream");
+        assertThat(capturedTopics.get(1)).isEqualTo(roomId + ".comment.stream");
+        List<CommentDeleted> capturedEvents = eventCaptor.getAllValues();
+        assertThat(capturedEvents.get(0)).isEqualTo(e1);
+        assertThat(capturedEvents.get(1)).isEqualTo(e2);
     }
 
 }
