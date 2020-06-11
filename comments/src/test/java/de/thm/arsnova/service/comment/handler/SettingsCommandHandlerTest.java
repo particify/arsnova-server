@@ -1,4 +1,4 @@
-package de.thm.arsnova.service.comment;
+package de.thm.arsnova.service.comment.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;

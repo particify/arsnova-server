@@ -1,4 +1,4 @@
-package de.thm.arsnova.service.comment;
+package de.thm.arsnova.service.comment.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -14,6 +14,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import de.thm.arsnova.service.comment.CommentEventSource;
 import de.thm.arsnova.service.comment.handler.VoteCommandHandler;
 import de.thm.arsnova.service.comment.model.Vote;
 import de.thm.arsnova.service.comment.model.command.Downvote;

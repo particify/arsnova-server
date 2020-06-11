@@ -1,4 +1,4 @@
-package de.thm.arsnova.service.comment;
+package de.thm.arsnova.service.comment.service;
 
 import de.thm.arsnova.service.comment.model.Comment;
 import de.thm.arsnova.service.comment.service.CommentService;
