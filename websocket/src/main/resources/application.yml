@@ -1,14 +1,20 @@
-server-port: 8080
+server:
+  port: 8080
 messaging-prefix: /backend
 stomp:
   relay:
     host: localhost
     port: 61613
-    user: arsnova
-    password: arsnova
+    user: guest
+    password: guest
   destination-prefix:
     - /exchange
     - /topic
     - /queue
   user-registry-broadcast: /topic/log-user-registry
   user-destination-broadcast: /queue/log-unresolved-user
+security:
+  jwt:
+    secret: "secret"
+http-client:
+  auth-service: "http://127.0.0.1:8092"

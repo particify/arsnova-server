@@ -8,7 +8,9 @@ import org.springframework.stereotype.Component
 class WebSocketProperties (
 	var serverPort: Int = 0,
 	var messagingPrefix: String = "",
-	var stomp: Stomp? = null
+	var stomp: Stomp? = null,
+	var security: Security? = null,
+	var httpClient: HttpClient? = null
 )
 data class Relay (
 	var host: String = "",
@@ -21,4 +23,13 @@ data class Stomp (
 	var destinationPrefix: Array<String> = emptyArray(),
 	var userRegistryBroadcast: String = "",
 	var userDestinationBroadcast: String = ""
+)
+data class Security (
+	var jwt: Jwt? = null
+)
+data class Jwt (
+	var secret: String = ""
+)
+data class HttpClient (
+	var authService: String = ""
 )
