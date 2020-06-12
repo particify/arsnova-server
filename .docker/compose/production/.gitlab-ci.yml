@@ -2,6 +2,8 @@ build_docker_images:
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
+  only:
+    - master
   variables:
     IMAGE1_NAME: nginx-proxy
     IMAGE1_BASETAG: stable
