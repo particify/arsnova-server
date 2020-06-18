@@ -123,6 +123,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.auth0</groupId>
+			<artifactId>java-jwt</artifactId>
+			<version>3.8.3</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
@@ -162,6 +168,7 @@
 					<compilerPlugins>
 						<plugin>spring</plugin>
 					</compilerPlugins>
+					<jvmTarget>1.8</jvmTarget>
 				</configuration>
 				<executions>
 					<execution>
