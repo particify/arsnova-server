@@ -63,6 +63,8 @@ public interface RoomService extends EntityService<Room> {
 
 	Room updateCreator(String id, String newCreator);
 
+	Room transferOwnership(Room room, String newOwnerId);
+
 	ScoreStatistics getLearningProgress(String id, String type, String questionVariant);
 
 	ScoreStatistics getMyLearningProgress(String id, String type, String questionVariant);

@@ -413,6 +413,13 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	}
 
 	@Override
+	@PreAuthorize("hasRole('ADMIN')")
+	public Room transferOwnership(final Room room, final String newOwnerId) {
+		room.setOwnerId(newOwnerId);
+		return update(room);
+	}
+
+	@Override
 	@PreAuthorize("hasPermission(#id, 'room', 'read')")
 	public ScoreStatistics getLearningProgress(final String id, final String type, final String questionVariant) {
 		final Room room = get(id);

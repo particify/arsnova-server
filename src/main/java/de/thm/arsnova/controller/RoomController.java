@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -50,6 +51,7 @@ public class RoomController extends AbstractEntityController<Room> {
 	private static final String CONTENTGROUP_MAPPING = DEFAULT_ID_MAPPING + "/contentgroup/{groupName}";
 	private static final String CONTENTGROUP_ADD_MAPPING = CONTENTGROUP_MAPPING + "/{contentId}";
 	private static final String STATS_MAPPING = DEFAULT_ID_MAPPING + "/stats";
+	private static final String TRANSFER_MAPPING = DEFAULT_ID_MAPPING + "/transfer";
 
 	private RoomService roomService;
 	private ContentGroupService contentGroupService;
@@ -155,5 +157,11 @@ public class RoomController extends AbstractEntityController<Room> {
 				.mapToInt(cg -> cg.getContentIds().size()).reduce((a, b) -> a + b).orElse(0));
 
 		return roomStatistics;
+	}
+
+	@PostMapping(TRANSFER_MAPPING)
+	public Room transferOwnership(@PathVariable final String id, @RequestParam final String newOwnerId) {
+		final Room room = roomService.get(id);
+		return roomService.transferOwnership(room, newOwnerId);
 	}
 }
