@@ -96,7 +96,7 @@ public class JsonViewControllerAdviceTest {
 	}
 
 	@Test
-	@WithMockUser("TestAdmin")
+	@WithMockUser(value = "TestAdmin", roles = {"USER", "ADMIN"})
 	public void testShouldSerializeAdminViewForAdmin() throws Exception {
 		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1?view=admin").accept(MediaType.APPLICATION_JSON))
@@ -105,7 +105,7 @@ public class JsonViewControllerAdviceTest {
 	}
 
 	@Test
-	@WithMockUser("TestAdmin")
+	@WithMockUser(value = "TestAdmin", roles = {"USER", "ADMIN"})
 	public void testShouldSerializeOwnerViewForAdmin() throws Exception {
 		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1?view=owner").accept(MediaType.APPLICATION_JSON))
@@ -114,7 +114,7 @@ public class JsonViewControllerAdviceTest {
 	}
 
 	@Test
-	@WithMockUser("TestAdmin")
+	@WithMockUser(value = "TestAdmin", roles = {"USER", "ADMIN"})
 	public void testAdminViewShouldContainAdminProperties() throws Exception {
 		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1?view=admin").accept(MediaType.APPLICATION_JSON))
@@ -125,7 +125,7 @@ public class JsonViewControllerAdviceTest {
 	}
 
 	@Test
-	@WithMockUser("TestAdmin")
+	@WithMockUser(value = "TestAdmin", roles = {"USER", "ADMIN"})
 	public void testOwnerViewShouldContainOwnerProperties() throws Exception {
 		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1?view=owner").accept(MediaType.APPLICATION_JSON))
@@ -136,7 +136,7 @@ public class JsonViewControllerAdviceTest {
 	}
 
 	@Test
-	@WithMockUser("TestAdmin")
+	@WithMockUser(value = "TestAdmin", roles = {"USER", "ADMIN"})
 	public void testDefaultViewShouldContainPublicProperties() throws Exception {
 		logger.info("Auth: {}", SecurityContextHolder.getContext().getAuthentication());
 		mockMvc.perform(get("/dummy/1").accept(MediaType.APPLICATION_JSON))

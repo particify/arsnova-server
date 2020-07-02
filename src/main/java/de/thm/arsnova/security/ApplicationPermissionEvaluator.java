@@ -92,7 +92,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 
 		final String userId = getUserId(authentication);
 
-		return isSystemAccess(authentication) || hasAdminRole(userId)
+		return isSystemAccess(authentication) || isAdminAccess(authentication)
 				|| (targetDomainObject instanceof UserProfile
 						&& (isAccountManagementAccess(authentication)
 						|| hasUserProfilePermission(userId, ((UserProfile) targetDomainObject), permission.toString())))
@@ -123,7 +123,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		}
 
 		final String userId = getUserId(authentication);
-		if (hasAdminRole(userId)) {
+		if (isAdminAccess(authentication)) {
 			return true;
 		}
 
@@ -353,11 +353,6 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				.anyMatch(m -> m.getRoles().contains(role));
 	}
 
-	private boolean hasAdminRole(final String username) {
-		/* TODO: only allow accounts from arsnova db */
-		return adminAccounts.contains(username);
-	}
-
 	private String getUserId(final Authentication authentication) {
 		if (authentication == null || authentication instanceof AnonymousAuthenticationToken
 				|| !(authentication.getPrincipal() instanceof User)) {
@@ -366,6 +361,11 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		final User user = (User) authentication.getPrincipal();
 
 		return user.getId();
+	}
+
+	private boolean isAdminAccess(final Authentication auth) {
+		/* TODO: only allow accounts from arsnova db */
+		return auth.getAuthorities().stream().anyMatch(ga -> ga.getAuthority().equals("ROLE_ADMIN"));
 	}
 
 	private boolean isSystemAccess(final Authentication auth) {
