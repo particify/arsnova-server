@@ -340,7 +340,9 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		room.setSettings(sf);
 
 		room.setShortId(generateShortId());
-		room.setOwnerId(userService.getCurrentUser().getId());
+		if (room.getOwnerId() == null) {
+			room.setOwnerId(userService.getCurrentUser().getId());
+		}
 		room.setClosed(false);
 
 		/* FIXME: event */
@@ -397,7 +399,9 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	//@CachePut(value = "rooms", key = "#room")
 	protected void prepareUpdate(final Room room) {
 		final Room existingRoom = get(room.getId());
-		room.setOwnerId(existingRoom.getOwnerId());
+		if (room.getOwnerId() == null) {
+			room.setOwnerId(existingRoom.getOwnerId());
+		}
 		handleLogo(room);
 
 		/* TODO: only publish event when feedback has changed */
