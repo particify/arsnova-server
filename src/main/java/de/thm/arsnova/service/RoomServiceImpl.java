@@ -58,6 +58,7 @@ import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.security.User;
+import de.thm.arsnova.security.jwt.JwtService;
 import de.thm.arsnova.service.score.ScoreCalculator;
 import de.thm.arsnova.service.score.ScoreCalculatorFactory;
 import de.thm.arsnova.web.exceptions.BadRequestException;
@@ -90,6 +91,8 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	private ConnectorClient connectorClient;
 
+	private JwtService jwtService;
+
 	@Value("${system.inactivity-thresholds.delete-inactive-guest-rooms:0}")
 	private int guestRoomInactivityThresholdDays;
 
@@ -103,12 +106,14 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 			final ScoreCalculatorFactory scoreCalculatorFactory,
 			@Qualifier("defaultJsonMessageConverter")
 			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
-			final Validator validator) {
+			final Validator validator,
+			final JwtService jwtService) {
 		super(Room.class, repository, jackson2HttpMessageConverter.getObjectMapper(), validator);
 		this.roomRepository = repository;
 		this.dbLogger = dbLogger;
 		this.userService = userService;
 		this.scoreCalculatorFactory = scoreCalculatorFactory;
+		this.jwtService = jwtService;
 	}
 
 	@Autowired
@@ -429,6 +434,14 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		}
 		room.setOwnerId(newOwner.getId());
 
+		return update(room);
+	}
+
+	@Override
+	@PreAuthorize("hasPermission(#room, 'owner')")
+	public Room transferOwnershipThroughToken(final Room room, final String targetUserToken) {
+		final User user = jwtService.verifyToken(targetUserToken);
+		room.setOwnerId(user.getId());
 		return update(room);
 	}
 
