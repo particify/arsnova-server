@@ -10,6 +10,7 @@ import java.time.temporal.TemporalAmount
 class HttpGatewayProperties {
     var security: Security? = null
     var httpClient: HttpClient? = null
+    var routing: Routing? = null
 }
 data class Security (
     var jwt: Jwt? = null
@@ -22,4 +23,12 @@ data class Jwt (
 )
 data class HttpClient (
         var authService: String = ""
+)
+
+data class Routing (
+        var endpoints: Endpoints? = null
+)
+data class Endpoints (
+        var core: String = "",
+        var commentService: String = ""
 )
