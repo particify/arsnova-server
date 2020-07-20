@@ -1,17 +1,10 @@
 server:
   port: 9090
 ---
-spring:
-  cloud:
-    gateway:
-      routes:
-        - id: test
-          uri: http://localhost:8088/
-          predicates:
-            - Path=/{roomId}/comment/**
-          filters:
-            - name: AuthFilter
-            - name: RoomIdFilter
+routing:
+  endpoints:
+    core: "http://localhost:8080/"
+    comment-service: "http://localhost:8088/"
 ---
 security:
   jwt:
