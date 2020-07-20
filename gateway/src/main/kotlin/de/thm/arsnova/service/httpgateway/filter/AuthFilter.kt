@@ -49,7 +49,9 @@ class AuthFilter (
                     .flatMap {
                         roomAccessService.getRoomAccess(roomId, userId)
                     }
-                    .switchIfEmpty(Mono.just(RoomAccess(roomId, userId, "GUEST")))
+                    .onErrorResume {
+                        Mono.just(RoomAccess(roomId, userId, "GUEST"))
+                    }
                     .map { roomAccess: RoomAccess ->
                         logger.trace("Working with room access: {}", roomAccess)
                         jwtTokenUtil.createSignedToken(roomAccess)
