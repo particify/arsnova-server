@@ -1,5 +1,6 @@
 package de.thm.arsnova.service.authservice.controller
 
+import de.thm.arsnova.service.authservice.exception.NotFoundException
 import de.thm.arsnova.service.authservice.handler.RoomAccessHandler
 import de.thm.arsnova.service.authservice.model.RoomAccess
 import de.thm.arsnova.service.authservice.model.RoomAccessSyncTracker
@@ -21,7 +22,8 @@ class RoomAccessController (
             @PathVariable roomId: String,
             @PathVariable userId: String
     ): Mono<RoomAccess> {
-        return Mono.just(handler.getByRoomIdAndUserId(roomId, userId).orElseGet(null))
+        return Mono.just(handler.getByRoomIdAndUserId(roomId, userId).orElse(null))
+                .switchIfEmpty(Mono.error(NotFoundException()))
     }
 
     @PostMapping(path = ["/roomaccess/sync/{roomId}/{revNumber}"])
