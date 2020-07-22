@@ -82,6 +82,15 @@ public abstract class Entity {
 		return getClass();
 	}
 
+	public Class<? extends Entity> getSupertype() {
+		Class<? extends Entity> clazz = getClass();
+		while (!clazz.getSuperclass().equals(Entity.class)) {
+			clazz = (Class<? extends Entity>) clazz.getSuperclass();
+		}
+
+		return clazz;
+	}
+
 	public boolean isInternal() {
 		return internal;
 	}
