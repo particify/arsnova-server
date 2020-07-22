@@ -26,6 +26,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.ektorp.DocumentNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,7 @@ import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.service.score.ScoreCalculator;
 import de.thm.arsnova.service.score.ScoreCalculatorFactory;
+import de.thm.arsnova.web.exceptions.BadRequestException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 
 /**
@@ -419,7 +421,14 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	@Override
 	@PreAuthorize("hasRole('ADMIN')")
 	public Room transferOwnership(final Room room, final String newOwnerId) {
-		room.setOwnerId(newOwnerId);
+		final UserProfile newOwner;
+		try {
+			newOwner = userService.get(newOwnerId);
+		} catch (final DocumentNotFoundException e) {
+			throw new BadRequestException("Invalid user ID.", e);
+		}
+		room.setOwnerId(newOwner.getId());
+
 		return update(room);
 	}
 
