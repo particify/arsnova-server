@@ -23,7 +23,7 @@ class GatewayConfig (
         return builder.routes()
                 .route("core") { p ->
                     p
-                            .path("/room/**", "/auth/**", "/content/**", "/user/**", "/configuration/**", "/answer/**")
+                            .path("/room/**", "/auth/**", "/content/**", "/user/**", "/configuration/**", "/answer/**", "/management/**")
                             .uri(httpGatewayProperties.routing?.endpoints?.core)
                 }
                 .route("comment-service") { p ->
