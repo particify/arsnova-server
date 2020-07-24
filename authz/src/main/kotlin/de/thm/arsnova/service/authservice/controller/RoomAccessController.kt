@@ -22,8 +22,11 @@ class RoomAccessController (
             @PathVariable roomId: String,
             @PathVariable userId: String
     ): Mono<RoomAccess> {
-        return Mono.just(handler.getByRoomIdAndUserId(roomId, userId).orElse(null))
-                .switchIfEmpty(Mono.error(NotFoundException()))
+        return Mono.just(handler.getByRoomIdAndUserId(roomId, userId))
+            .flatMap { optional ->
+                Mono.justOrEmpty(optional)
+            }
+            .switchIfEmpty(Mono.error(NotFoundException()))
     }
 
     @PostMapping(path = ["/roomaccess/sync/{roomId}/{revNumber}"])
