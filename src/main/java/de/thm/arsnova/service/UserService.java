@@ -101,6 +101,8 @@ public interface UserService extends EntityService<UserProfile> {
 
 	boolean activateAccount(String id, String key, String clientAddress);
 
+	void activateAccount(String id);
+
 	void initiatePasswordReset(String username);
 
 	boolean resetPassword(UserProfile userProfile, String key, String password);

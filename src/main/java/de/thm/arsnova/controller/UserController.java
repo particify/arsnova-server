@@ -108,10 +108,14 @@ public class UserController extends AbstractEntityController<UserProfile> {
 	@PostMapping(ACTIVATE_MAPPING)
 	public void activate(
 			@PathVariable final String id,
-			@RequestParam final String key,
+			@RequestParam(required = false) final String key,
 			final HttpServletRequest request) {
-		if (!userService.activateAccount(id, key, request.getRemoteAddr())) {
-			throw new BadRequestException();
+		if (key != null) {
+			if (!userService.activateAccount(id, key, request.getRemoteAddr())) {
+				throw new BadRequestException();
+			}
+		} else {
+			userService.activateAccount(id);
 		}
 	}
 
