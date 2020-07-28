@@ -83,7 +83,7 @@ public class UserProfile extends Entity {
 			this.passwordResetKey = passwordResetKey;
 		}
 
-		@JsonView(View.Persistence.class)
+		@JsonView({View.Persistence.class, View.Admin.class})
 		public Date getPasswordResetTime() {
 			return passwordResetTime;
 		}
@@ -91,6 +91,11 @@ public class UserProfile extends Entity {
 		@JsonView(View.Persistence.class)
 		public void setPasswordResetTime(final Date passwordResetTime) {
 			this.passwordResetTime = passwordResetTime;
+		}
+
+		@JsonView(View.Admin.class)
+		public boolean isActivated() {
+			return this.activationKey == null;
 		}
 
 		@Override
@@ -236,7 +241,7 @@ public class UserProfile extends Entity {
 		this.lastLoginTimestamp = lastLoginTimestamp;
 	}
 
-	@JsonView(View.Persistence.class)
+	@JsonView({View.Persistence.class, View.Admin.class})
 	public Account getAccount() {
 		return account;
 	}

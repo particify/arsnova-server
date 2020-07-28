@@ -422,7 +422,7 @@ public class Room extends Entity {
 		this.shortId = shortId;
 	}
 
-	@JsonView(View.Persistence.class)
+	@JsonView({View.Persistence.class, View.Admin.class})
 	public String getOwnerId() {
 		return ownerId;
 	}
@@ -472,7 +472,7 @@ public class Room extends Entity {
 		this.closed = closed;
 	}
 
-	@JsonView(View.Persistence.class)
+	@JsonView({View.Persistence.class, View.Admin.class})
 	public Set<Moderator> getModerators() {
 		if (moderators == null) {
 			moderators = new HashSet<>();
