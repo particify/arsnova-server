@@ -639,6 +639,14 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
+	@Secured("ROLE_ADMIN")
+	public void activateAccount(final String id) {
+		final UserProfile userProfile = get(id, true);
+		userProfile.getAccount().setActivationKey(null);
+		update(userProfile);
+	}
+
+	@Override
 	@Secured({"ROLE_ANONYMOUS", "ROLE_USER", "RUN_AS_ACCOUNT_MANAGEMENT"})
 	public void initiatePasswordReset(final String username) {
 		final UserProfile userProfile = getByUsername(username);
