@@ -50,6 +50,7 @@ import de.thm.arsnova.persistence.RoomRepository;
 @Component
 public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	public static final String READ_PERMISSION = "read";
+	public static final String READ_EXTENDED_PERMISSION = "read-extended";
 	public static final String CREATE_PERMISSION = "create";
 	public static final String UPDATE_PERMISSION = "update";
 	public static final String DELETE_PERMISSION = "delete";
@@ -185,6 +186,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		switch (permission) {
 			case READ_PERMISSION:
 				return !targetRoom.isClosed() || hasUserIdRoomModeratingPermission(targetRoom, userId);
+			case READ_EXTENDED_PERMISSION:
+				return targetRoom.getOwnerId().equals(userId)
+						|| hasUserIdRoomModeratingPermission(targetRoom, userId);
 			case CREATE_PERMISSION:
 				return !userId.isEmpty();
 			case UPDATE_PERMISSION:
@@ -210,6 +214,9 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		switch (permission) {
 			case READ_PERMISSION:
 				return !room.isClosed() || hasUserIdRoomModeratingPermission(room, userId);
+			case READ_EXTENDED_PERMISSION:
+				return room.getOwnerId().equals(userId)
+						|| hasUserIdRoomModeratingPermission(room, userId);
 			case CREATE_PERMISSION:
 			case UPDATE_PERMISSION:
 			case DELETE_PERMISSION:

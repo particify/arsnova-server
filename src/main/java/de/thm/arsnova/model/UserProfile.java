@@ -143,7 +143,7 @@ public class UserProfile extends Entity {
 			this.lastVisit = lastVisit;
 		}
 
-		@JsonView(View.Persistence.class)
+		@JsonView({View.Persistence.class, View.Owner.class})
 		public String getRoomId() {
 			return roomId;
 		}
@@ -153,7 +153,7 @@ public class UserProfile extends Entity {
 			this.roomId = roomId;
 		}
 
-		@JsonView(View.Persistence.class)
+		@JsonView({View.Persistence.class, View.Owner.class})
 		public Date getLastVisit() {
 			return lastVisit;
 		}

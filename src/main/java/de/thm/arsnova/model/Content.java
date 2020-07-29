@@ -259,7 +259,7 @@ public class Content extends Entity {
 		this.timestamp = timestamp;
 	}
 
-	@JsonView({View.Persistence.class, View.Owner.class})
+	@JsonView({View.Persistence.class, View.Extended.class})
 	public String getAdditionalText() {
 		return additionalText;
 	}
@@ -269,7 +269,7 @@ public class Content extends Entity {
 		this.additionalText = additionalText;
 	}
 
-	@JsonView({View.Persistence.class, View.Owner.class})
+	@JsonView({View.Persistence.class, View.Extended.class})
 	public String getAdditionalTextTitle() {
 		return additionalTextTitle;
 	}
