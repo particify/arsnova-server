@@ -26,6 +26,11 @@ class GatewayConfig (
                             .path("/room/**", "/auth/**", "/content/**", "/user/**", "/configuration/**", "/answer/**", "/management/**")
                             .uri(httpGatewayProperties.routing?.endpoints?.core)
                 }
+                .route("roomaccess") {p ->
+                    p
+                        .path("/roomaccess/**")
+                        .uri(httpGatewayProperties.routing?.endpoints?.roomaccessService)
+                }
                 .route("comment-service") { p ->
                     p
                             .path("/{roomId}/comment/**")
