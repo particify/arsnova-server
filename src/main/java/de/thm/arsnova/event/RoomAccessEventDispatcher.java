@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.ektorp.DocumentNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -223,33 +224,39 @@ public class RoomAccessEventDispatcher {
 	@SendTo(ROOM_ACCESS_SYNC_RESPONSE_QUEUE_NAME)
 	public RoomAccessSyncEvent answerRoomAccessSyncRequest(final RoomAccessSyncRequest request) {
 		logger.debug("Handling request: {}", request);
-		final Room room = roomService.get(request.getRoomId(), true);
+		try {
+			final Room room = roomService.get(request.getRoomId(), true);
 
-		logger.trace("Preparing to send room access sync event for room: {}", room);
+			logger.trace("Preparing to send room access sync event for room: {}", room);
 
-		final List<RoomAccessSyncEvent.RoomAccessEntry> accessEntries = new ArrayList<>();
+			final List<RoomAccessSyncEvent.RoomAccessEntry> accessEntries = new ArrayList<>();
 
-		accessEntries.add(new RoomAccessSyncEvent.RoomAccessEntry(room.getOwnerId(), CREATOR_ROLE_STRING));
-		final List<RoomAccessSyncEvent.RoomAccessEntry> modEntries = room.getModerators().stream()
-				.map(moderator ->
-					new RoomAccessSyncEvent.RoomAccessEntry(
-							moderator.getUserId(),
-							EXECUTIVE_MODERATOR_ROLE_STRING))
-				.collect(Collectors.toList()
-		);
+			accessEntries.add(new RoomAccessSyncEvent.RoomAccessEntry(room.getOwnerId(), CREATOR_ROLE_STRING));
+			final List<RoomAccessSyncEvent.RoomAccessEntry> modEntries = room.getModerators().stream()
+					.map(moderator ->
+							new RoomAccessSyncEvent.RoomAccessEntry(
+									moderator.getUserId(),
+									EXECUTIVE_MODERATOR_ROLE_STRING))
+					.collect(Collectors.toList()
+					);
 
-		accessEntries.addAll(modEntries);
+			accessEntries.addAll(modEntries);
 
-		final RoomAccessSyncEvent roomAccessSyncEvent = new RoomAccessSyncEvent(
-				EVENT_VERSION,
-				room.getRevision(),
-				room.getId(),
-				accessEntries
-		);
+			final RoomAccessSyncEvent roomAccessSyncEvent = new RoomAccessSyncEvent(
+					EVENT_VERSION,
+					room.getRevision(),
+					room.getId(),
+					accessEntries
+			);
 
-		logger.debug("Answering with event: {}", roomAccessSyncEvent);
+			logger.debug("Answering with event: {}", roomAccessSyncEvent);
 
-		return roomAccessSyncEvent;
+			return roomAccessSyncEvent;
+		} catch (final DocumentNotFoundException e) {
+			logger.warn("Got sync request for non-existing room: {}", request);
+
+			return null;
+		}
 	}
 
 	private Set<Room.Moderator> getNewMembers(final Set<Room.Moderator> check, final Set<Room.Moderator> in) {
