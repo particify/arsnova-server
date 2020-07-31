@@ -30,5 +30,6 @@ data class Routing (
 )
 data class Endpoints (
         var core: String = "",
-        var commentService: String = ""
+        var commentService: String = "",
+        var roomaccessService: String = ""
 )

@@ -5,6 +5,7 @@ routing:
   endpoints:
     core: "http://localhost:8080/"
     comment-service: "http://localhost:8088/"
+    roomaccess-service: "http://localhost:8092/"
 ---
 security:
   jwt:
