@@ -49,7 +49,8 @@ public class Content extends Entity {
 		SCALE,
 		NUMBER,
 		TEXT,
-		GRID
+		GRID,
+		SLIDE
 	}
 
 	public static class State {
