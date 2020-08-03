@@ -22,7 +22,8 @@ data class Jwt (
     var validityPeriod: TemporalAmount? = Duration.ofMinutes(5)
 )
 data class HttpClient (
-        var authService: String = ""
+        var authService: String = "",
+        var core: String = ""
 )
 
 data class Routing (

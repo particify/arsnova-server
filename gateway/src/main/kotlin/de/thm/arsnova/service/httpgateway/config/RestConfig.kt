@@ -17,9 +17,7 @@ class RestConfig(
     fun authServiceWebClient(): WebClient? {
         return WebClient
                 .builder()
-                .baseUrl(httpGatewayProperties.httpClient!!.authService)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .defaultUriVariables(Collections.singletonMap("url", "http://localhost:8080"))
                 .build();
     }
 }

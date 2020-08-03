@@ -15,6 +15,7 @@ security:
 ---
 http-client:
   auth-service: "http://127.0.0.1:8092"
+  core: "http://127.0.0.1:8080"
 ---
 logging:
   level:
