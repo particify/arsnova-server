@@ -147,6 +147,13 @@ class RoomAccessHandler (
         }
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    fun getByUserId(userId: String): Iterable<RoomAccess> {
+        logger.debug("Handling room access request by userId: {}", userId)
+        return roomAccessRepository.findByUserId(userId)
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     fun getByPK(pk: RoomAccessPK): Optional<RoomAccess> {
         return roomAccessRepository.findById(pk)
     }
