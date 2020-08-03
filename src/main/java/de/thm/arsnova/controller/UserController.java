@@ -19,9 +19,11 @@
 package de.thm.arsnova.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -142,6 +144,11 @@ public class UserController extends AbstractEntityController<UserProfile> {
 		} else {
 			userService.initiatePasswordReset(id);
 		}
+	}
+
+	@GetMapping(ROOM_HISTORY_MAPPING)
+	public Set<UserProfile.RoomHistoryEntry> getRoomHistory(@PathVariable final String id) {
+		return userService.getRoomHistory(userService.get(id));
 	}
 
 	@PostMapping(ROOM_HISTORY_MAPPING)

@@ -564,6 +564,13 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	}
 
 	@Override
+	public Set<UserProfile.RoomHistoryEntry> getRoomHistory(final UserProfile userProfile) {
+		final Set<UserProfile.RoomHistoryEntry> roomHistory = userProfile.getRoomHistory();
+
+		return roomHistory;
+	}
+
+	@Override
 	@PreAuthorize("hasPermission(#userProfile, 'update')")
 	public void addRoomToHistory(final UserProfile userProfile, final Room room) {
 		if (userProfile.getId().equals(room.getOwnerId())) {
