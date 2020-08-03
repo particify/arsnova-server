@@ -59,6 +59,7 @@ services:
       ROUTING_ENDPOINTS_COMMENT_SERVICE: http://arsnova-comment-service:8080
       ROUTING_ENDPOINTS_ROOMACCESS_SERVICE: http://arsnova-auth-service:8080
       HTTP_CLIENT_AUTH_SERVICE: http://arsnova-auth-service:8080
+      HTTP_CLIENT_CORE: http://arsnova-backend-core:8080
       SECURITY_JWT_PUBLIC_SECRET: secret
       SECURITY_JWT_INTERNAL_SECRET: secret
     command: /jetty/start.jar --module=http-forwarded
