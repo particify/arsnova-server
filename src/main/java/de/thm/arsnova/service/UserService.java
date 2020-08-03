@@ -95,6 +95,8 @@ public interface UserService extends EntityService<UserProfile> {
 
 	UserProfile deleteByUsername(String username);
 
+	Set<UserProfile.RoomHistoryEntry> getRoomHistory(UserProfile userProfile);
+
 	void addRoomToHistory(UserProfile userProfile, Room room);
 
 	void deleteRoomFromHistory(UserProfile userProfile, Room room);
