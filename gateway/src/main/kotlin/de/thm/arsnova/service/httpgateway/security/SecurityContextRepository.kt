@@ -21,7 +21,7 @@ class SecurityContextRepository: ServerSecurityContextRepository {
     }
 
     override fun load(serverWebExchange: ServerWebExchange): Mono<SecurityContext?>? {
-        val token = serverWebExchange.request.headers.getFirst("Authorization")
+        val token = serverWebExchange.request.headers.getFirst("Authorization") ?: "token"
         val authentication: Authentication = AnonymousAuthenticationToken(
             "user-jwt",
             token,
