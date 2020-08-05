@@ -23,6 +23,7 @@ data class Jwt (
 )
 data class HttpClient (
         var authService: String = "",
+        var commentService: String = "",
         var core: String = ""
 )
 
