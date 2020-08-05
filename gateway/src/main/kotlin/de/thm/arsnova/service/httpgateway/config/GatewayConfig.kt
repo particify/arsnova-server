@@ -3,6 +3,7 @@ package de.thm.arsnova.service.httpgateway.config
 import de.thm.arsnova.service.httpgateway.filter.AuthFilter
 import de.thm.arsnova.service.httpgateway.filter.RoomIdFilter
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.cloud.gateway.filter.factory.StripPrefixGatewayFilterFactory
 import org.springframework.cloud.gateway.route.RouteLocator
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder
 import org.springframework.context.annotation.Bean
@@ -44,6 +45,15 @@ class GatewayConfig (
                     p
                             .path("/bonustoken/**", "/vote/**", "/settings/**")
                             .uri(httpGatewayProperties.routing?.endpoints?.commentService)
+                }
+                .route("formatting-service") { p ->
+                    p
+                            .path("/formatting/render")
+                            .filters { f ->
+                                f.filter(StripPrefixGatewayFilterFactory()
+                                        .apply(StripPrefixGatewayFilterFactory.Config().apply { parts = 1 }))
+                            }
+                            .uri(httpGatewayProperties.routing?.endpoints?.formattingService)
                 }
                 .build()
     }

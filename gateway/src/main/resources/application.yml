@@ -6,6 +6,7 @@ routing:
     core: "http://localhost:8080/"
     comment-service: "http://localhost:8088/"
     roomaccess-service: "http://localhost:8092/"
+    formatting-service: "http://localhost:3020/"
 ---
 security:
   jwt:
