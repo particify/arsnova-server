@@ -107,6 +107,10 @@ public class CommentService {
         return repository.findByRoomId(roomId);
     }
 
+    public long countByRoomIdAndAck(String roomId, Boolean ack) {
+        return repository.countByRoomIdAndAck(roomId, ack);
+    }
+
     public void delete(String id) {
         List<Vote> voteList = voteRepository.findByCommentId(id);
         voteRepository.deleteAll(voteList);

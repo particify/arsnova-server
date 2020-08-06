@@ -10,4 +10,5 @@ public interface CommentRepository extends CrudRepository<Comment, String> {
     List<Comment> findByRoomId(String roomId);
     @Transactional
     List<Comment> deleteByRoomId(String roomId);
+    long countByRoomIdAndAck(String roomId, Boolean ack);
 }
