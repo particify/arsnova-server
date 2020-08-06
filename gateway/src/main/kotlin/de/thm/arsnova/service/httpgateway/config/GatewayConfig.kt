@@ -15,6 +15,10 @@ import org.springframework.context.annotation.Configuration
 class GatewayConfig (
         private val httpGatewayProperties: HttpGatewayProperties
 ) {
+    companion object {
+        const val UTIL_PREFIX = "/_util"
+    }
+
     @Bean
     fun myRoutes(
             builder: RouteLocatorBuilder,
@@ -48,10 +52,9 @@ class GatewayConfig (
                 }
                 .route("formatting-service") { p ->
                     p
-                            .path("/formatting/render")
+                            .path("${UTIL_PREFIX}/formatting/render")
                             .filters { f ->
-                                f.filter(StripPrefixGatewayFilterFactory()
-                                        .apply(StripPrefixGatewayFilterFactory.Config().apply { parts = 1 }))
+                                f.rewritePath("^${UTIL_PREFIX}/formatting", "")
                             }
                             .uri(httpGatewayProperties.routing?.endpoints?.formattingService)
                 }
