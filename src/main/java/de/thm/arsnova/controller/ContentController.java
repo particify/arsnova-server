@@ -18,10 +18,13 @@
 
 package de.thm.arsnova.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.model.AnswerStatistics;
@@ -35,6 +38,7 @@ public class ContentController extends AbstractEntityController<Content> {
 	protected static final String REQUEST_MAPPING = "/content";
 	private static final String GET_ANSWER_STATISTICS_MAPPING = DEFAULT_ID_MAPPING + "/stats";
 	private static final String DELETE_ANSWERS_MAPPING = DEFAULT_ID_MAPPING + "/answer";
+	private static final String CONTENT_COUNT_MAPPING = NO_ID_MAPPING + "/count";
 
 	private ContentService contentService;
 	private AnswerService answerService;
@@ -58,5 +62,12 @@ public class ContentController extends AbstractEntityController<Content> {
 	@DeleteMapping(DELETE_ANSWERS_MAPPING)
 	public void deleteAnswers(@PathVariable final String id) {
 		answerService.deleteAnswers(id);
+	}
+
+	@GetMapping(CONTENT_COUNT_MAPPING)
+	public List<Integer> getCounts(
+			@RequestParam final List<String> roomIds
+	) {
+		return roomIds.stream().map(roomId -> contentService.countByRoomId(roomId)).collect(Collectors.toList());
 	}
 }
