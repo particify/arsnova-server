@@ -16,7 +16,7 @@ class RoomService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun get(roomId: String): Mono<Room> {
-        val url = "${httpGatewayProperties.httpClient!!.core}/$roomId"
+        val url = "${httpGatewayProperties.httpClient!!.core}/room/$roomId"
         logger.trace("Querying core for room with url: {}", url)
         return webClient.get().uri(url)
             .retrieve().bodyToMono(Room::class.java).cache()
