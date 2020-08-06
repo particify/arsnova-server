@@ -2,11 +2,11 @@
   "name": "formatting-service",
   "version": "1.0.0",
   "description": "Particify/ARSnova service which handles Markdown and LaTeX formatting.",
-  "main": "index.js",
+  "main": "lib/index.js",
   "author": "Particify - Gerhardt, Mauß, Käsler GbR",
   "private": true,
   "scripts": {
-    "start": "node index.js"
+    "start": "node lib/index.js"
   },
   "dependencies": {
     "@iktakahiro/markdown-it-katex": "^4.0.0",
