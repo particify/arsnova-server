@@ -58,6 +58,7 @@ services:
       ROUTING_ENDPOINTS_CORE: http://arsnova-backend-core:8080
       ROUTING_ENDPOINTS_COMMENT_SERVICE: http://arsnova-comment-service:8080
       ROUTING_ENDPOINTS_ROOMACCESS_SERVICE: http://arsnova-auth-service:8080
+      ROUTING_ENDPOINTS_FORMATTING_SERVICE: http://arsnova-formatting-service:3000
       HTTP_CLIENT_AUTH_SERVICE: http://arsnova-auth-service:8080
       HTTP_CLIENT_CORE: http://arsnova-backend-core:8080
       SECURITY_JWT_PUBLIC_SECRET: secret
@@ -106,6 +107,10 @@ services:
     image: registry.gitlab.com/arsnova/arsnova-webclient:$WEB_TAG
   arsnova-web-legacy:
     image: registry.gitlab.com/particify/dev/devops/docker-orchestration/arsnova-mobile:$WEB_LEGACY_TAG
+  arsnova-formatting-service:
+    image: registry.gitlab.com/particify/dev/extras/formatting-service:$FORMATTING_TAG
+    environment:
+      SERVER_PORT: 3000
   arsnova-proxy:
     image: registry.gitlab.com/particify/dev/devops/docker-orchestration/nginx-proxy:stable
     depends_on:

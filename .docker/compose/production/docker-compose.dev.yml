@@ -38,6 +38,9 @@ services:
   arsnova-web-legacy:
     ports:
       - 127.0.0.1:8082:80
+  arsnova-formatting-service:
+    ports:
+      - 127.0.0.1:3020:3000
   arsnova-proxy:
     #image: nginx:stable
     ports:
