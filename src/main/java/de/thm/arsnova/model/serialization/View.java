@@ -23,7 +23,9 @@ public class View {
 
 	public interface Public {}
 
-	public interface Owner extends Public {}
+	public interface Extended extends Public {}
+
+	public interface Owner extends Extended {}
 
 	public interface Admin extends Owner {}
 }

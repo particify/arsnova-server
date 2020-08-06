@@ -68,12 +68,17 @@ public class JsonViewControllerAdvice extends AbstractMappingJacksonResponseBody
 		if (bodyContainer.getValue() instanceof Collection) {
 			logger.warn("'{}' parameter is currently not supported for listing endpoints.", VIEW_PARAMETER);
 		}
-		tryAccess(bodyContainer.getValue(), view);
 		switch (view) {
+			case "extended":
+				tryAccess(bodyContainer.getValue(), "read-extended");
+				bodyContainer.setSerializationView(View.Extended.class);
+				break;
 			case "owner":
+				tryAccess(bodyContainer.getValue(), "owner");
 				bodyContainer.setSerializationView(View.Owner.class);
 				break;
 			case "admin":
+				tryAccess(bodyContainer.getValue(), "admin");
 				bodyContainer.setSerializationView(View.Admin.class);
 				break;
 			default:
