@@ -65,8 +65,9 @@ public abstract class AbstractEntityController<E extends Entity> {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractEntityController.class);
 	public static final String ENTITY_ID_HEADER = "Arsnova-Entity-Id";
 	public static final String ENTITY_REVISION_HEADER = "Arsnova-Entity-Revision";
+	protected static final String NO_ID_MAPPING = "/-";
 	protected static final String DEFAULT_ROOT_MAPPING = "/";
-	protected static final String DEFAULT_ID_MAPPING = "/{id:[^~].*}";
+	protected static final String DEFAULT_ID_MAPPING = "/{id:[^~-].*}";
 	protected static final String DEFAULT_ALIAS_MAPPING = "/~{alias}";
 	protected static final String DEFAULT_FIND_MAPPING = "/find";
 	protected static final String ALIAS_SUBPATH = "/**";
