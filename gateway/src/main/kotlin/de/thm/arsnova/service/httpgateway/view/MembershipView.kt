@@ -39,7 +39,7 @@ class MembershipView(
                         Membership(
                             entry.roomId,
                             "shortId",
-                            listOf("GUEST"),
+                            listOf("PARTICIPANT"),
                             entry.lastVisit
                         )
                     }
