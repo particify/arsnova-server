@@ -17,7 +17,7 @@ class CommentService(
 
     fun getStats(roomIds: List<String>, jwt: String): Flux<CommentStats> {
         val url = "${httpGatewayProperties.httpClient!!.commentService}/comment/stats?roomIds=${roomIds.joinToString(",")}"
-        logger.trace("Querying comment service for stats with url: {}", url)
+        logger.trace("Querying comment service for comment stats with url: {}", url)
         return webClient.get()
                 .uri(url)
                 .header("Authorization", jwt)
