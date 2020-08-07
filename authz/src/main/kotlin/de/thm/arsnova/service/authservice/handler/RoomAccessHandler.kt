@@ -52,7 +52,7 @@ class RoomAccessHandler (
         val syncTracker = roomAccessSyncTrackerRepository.findById(command.roomId)
                 .orElse(RoomAccessSyncTracker(command.roomId, "0"))
         // Migration step: Always make sure to not interfere with running synchronisations and unordered events
-        if (syncTracker.rev.substringBefore("-").toInt() < command.rev.substringBefore("-").toInt()) {
+        if (syncTracker.rev.substringBefore("-").toInt() - 1 < command.rev.substringBefore("-").toInt()) {
             // newer information
             try {
                 roomAccessRepository.deleteById(RoomAccessPK(command.roomId, command.userId))
