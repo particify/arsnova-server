@@ -1,6 +1,7 @@
 package de.thm.arsnova.service.comment.handler;
 
 import de.thm.arsnova.service.comment.model.BonusToken;
+import de.thm.arsnova.service.comment.model.CommentStats;
 import de.thm.arsnova.service.comment.model.Settings;
 import de.thm.arsnova.service.comment.service.BonusTokenService;
 import de.thm.arsnova.service.comment.service.CommentService;
@@ -8,6 +9,8 @@ import de.thm.arsnova.service.comment.model.Comment;
 import de.thm.arsnova.service.comment.model.command.*;
 import de.thm.arsnova.service.comment.model.event.*;
 import de.thm.arsnova.service.comment.service.SettingsService;
+
+import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -276,6 +279,26 @@ public class CommentCommandHandler {
                     event
             );
         }
+    }
+
+    public List<CommentStats> handle(CalculateStats command) {
+        logger.debug("Got new command: {}", command);
+
+        final List<String> roomIds = command.getPayload().getRoomIds();
+        final List<CommentStats> stats = new ArrayList<>();
+
+        for (final String roomId : roomIds) {
+            CommentStats roomStatistics = new CommentStats();
+            int ackCommentcount = (int) service.countByRoomIdAndAck(roomId, true);
+            // ToDo: Implement view to show unacknowledge counter to owner / moderators
+            // int unackCommentcount = (int) service.countByRoomIdAndAck(roomId, false);
+            // roomStatistics.setUnackCommentCount(unackCommentcount);
+            roomStatistics.setRoomId(roomId);
+            roomStatistics.setAckCommentCount(ackCommentcount);
+            stats.add(roomStatistics);
+        }
+
+        return stats;
     }
 
 }
