@@ -65,10 +65,11 @@ public abstract class AbstractEntityController<E extends Entity> {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractEntityController.class);
 	public static final String ENTITY_ID_HEADER = "Arsnova-Entity-Id";
 	public static final String ENTITY_REVISION_HEADER = "Arsnova-Entity-Revision";
+	protected static final String NO_ID_MAPPING = "/-";
 	protected static final String DEFAULT_ROOT_MAPPING = "/";
-	protected static final String DEFAULT_ID_MAPPING = "/{id:[^~].*}";
+	protected static final String DEFAULT_ID_MAPPING = "/{id:[^~-].*}";
 	protected static final String DEFAULT_ALIAS_MAPPING = "/~{alias}";
-	protected static final String DEFAULT_FIND_MAPPING = "/find";
+	protected static final String DEFAULT_FIND_MAPPING = NO_ID_MAPPING + "/find";
 	protected static final String ALIAS_SUBPATH = "/**";
 	protected static final String GET_MAPPING = DEFAULT_ID_MAPPING;
 	protected static final String GET_MULTIPLE_MAPPING = DEFAULT_ROOT_MAPPING;
@@ -77,6 +78,7 @@ public abstract class AbstractEntityController<E extends Entity> {
 	protected static final String PATCH_MAPPING = DEFAULT_ID_MAPPING;
 	protected static final String DELETE_MAPPING = DEFAULT_ID_MAPPING;
 	protected static final String FIND_MAPPING = DEFAULT_FIND_MAPPING;
+	protected static final String LEGACY_FIND_MAPPING = "/find";
 	protected final EntityService<E> entityService;
 	protected FindQueryService<E> findQueryService;
 
@@ -153,7 +155,7 @@ public abstract class AbstractEntityController<E extends Entity> {
 		entityService.delete(entity);
 	}
 
-	@PostMapping(FIND_MAPPING)
+	@PostMapping({FIND_MAPPING, LEGACY_FIND_MAPPING})
 	public Iterable<E> find(@RequestBody final FindQuery<E> findQuery) throws OperationNotSupportedException {
 		if (findQueryService != null) {
 			logger.debug("Resolving find query: {}", findQuery);
