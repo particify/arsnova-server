@@ -15,12 +15,13 @@ class CommentService(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun getStats(roomIds: List<String>): Flux<CommentStats> {
-        return Flux
-            .fromIterable(roomIds)
-            .map { roomId ->
-                CommentStats(roomId)
-            }
+    fun getStats(roomIds: List<String>, jwt: String): Flux<CommentStats> {
+        val url = "${httpGatewayProperties.httpClient!!.commentService}/comment/stats?roomIds=${roomIds.joinToString(",")}"
+        logger.trace("Querying comment service for stats with url: {}", url)
+        return webClient.get()
+                .uri(url)
+                .header("Authorization", jwt)
+                .retrieve().bodyToFlux(CommentStats::class.java).cache()
     }
 
     fun getAckCount(roomId: String): Mono<Int> {
