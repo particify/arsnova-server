@@ -59,7 +59,7 @@ public class UserController extends AbstractEntityController<UserProfile> {
 		this.roomService = roomService;
 	}
 
-	class Activation {
+	static class Activation {
 		private String key;
 
 		public String getKey() {
@@ -72,7 +72,7 @@ public class UserController extends AbstractEntityController<UserProfile> {
 		}
 	}
 
-	class PasswordReset {
+	static class PasswordReset {
 		private String key;
 		private String password;
 
@@ -142,7 +142,7 @@ public class UserController extends AbstractEntityController<UserProfile> {
 				throw new ForbiddenException();
 			}
 		} else {
-			userService.initiatePasswordReset(id);
+			userService.initiatePasswordReset(userProfile);
 		}
 	}
 
