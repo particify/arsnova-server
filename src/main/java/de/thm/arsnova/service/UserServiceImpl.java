@@ -499,6 +499,9 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 		final UserProfile result = create(userProfile);
 		if (null != result) {
+			logger.debug("Activation key for user '{}': {}",
+					userProfile.getLoginId(),
+					account.getActivationKey());
 			sendActivationEmail(result);
 		} else {
 			logger.error("User registration failed. {} could not be created.", lcUsername);
@@ -676,6 +679,9 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		account.setPasswordResetTime(new Date());
 		try {
 			update(userProfile);
+			logger.debug("Password reset key for user '{}': {}",
+					userProfile.getLoginId(),
+					account.getPasswordResetKey());
 		} catch (final DbAccessException e) {
 			logger.error("Password reset failed. {} could not be updated.", userProfile.getLoginId());
 			throw e;
