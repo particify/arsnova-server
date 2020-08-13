@@ -655,10 +655,9 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 	@Override
 	@Secured({"ROLE_ANONYMOUS", "ROLE_USER", "RUN_AS_ACCOUNT_MANAGEMENT"})
-	public void initiatePasswordReset(final String username) {
-		final UserProfile userProfile = getByUsername(username);
+	public void initiatePasswordReset(final UserProfile userProfile) {
 		if (null == userProfile) {
-			logger.info("Password reset failed. User {} does not exist.", username);
+			logger.info("Password reset failed. User does not exist.");
 
 			throw new NotFoundException();
 		}
@@ -668,7 +667,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 				&& (System.currentTimeMillis()
 						< account.getPasswordResetTime().getTime() + REPEATED_PASSWORD_RESET_DELAY_MS)) {
 
-			logger.info("Password reset failed. The reset delay for User {} is still active.", username);
+			logger.info("Password reset failed. The reset delay for User {} is still active.", userProfile.getLoginId());
 
 			throw new BadRequestException();
 		}
@@ -678,7 +677,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		try {
 			update(userProfile);
 		} catch (final DbAccessException e) {
-			logger.error("Password reset failed. {} could not be updated.", username);
+			logger.error("Password reset failed. {} could not be updated.", userProfile.getLoginId());
 			throw e;
 		}
 

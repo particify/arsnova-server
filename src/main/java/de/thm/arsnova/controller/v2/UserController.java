@@ -98,7 +98,7 @@ public class UserController extends AbstractController {
 				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 			}
 		} else {
-			userService.initiatePasswordReset(username);
+			userService.initiatePasswordReset(userProfile);
 		}
 	}
 }
