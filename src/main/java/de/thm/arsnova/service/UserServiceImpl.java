@@ -528,8 +528,11 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	private void sendActivationEmail(final UserProfile userProfile) {
 		final String activationKey = userProfile.getAccount().getActivationKey();
 
-		sendEmail(userProfile, registeredProperties.getRegistrationMailSubject(),
-				MessageFormat.format(registeredProperties.getRegistrationMailBody(), activationKey, rootUrl));
+		sendEmail(userProfile,
+				MessageFormat.format(
+						registeredProperties.getRegistrationMailSubject(), activationKey),
+				MessageFormat.format(
+						registeredProperties.getRegistrationMailBody(), activationKey, rootUrl));
 	}
 
 	private void parseMailAddressPattern() {
@@ -687,8 +690,11 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 			throw e;
 		}
 
-		sendEmail(userProfile, registeredProperties.getResetPasswordMailSubject(), MessageFormat.format(
-				registeredProperties.getResetPasswordMailBody(), account.getPasswordResetKey(), rootUrl));
+		sendEmail(userProfile,
+				MessageFormat.format(
+						registeredProperties.getResetPasswordMailSubject(), account.getPasswordResetKey()),
+				MessageFormat.format(
+						registeredProperties.getResetPasswordMailBody(), account.getPasswordResetKey(), rootUrl));
 	}
 
 	@Override
