@@ -17,7 +17,7 @@ class RoomAccessService(
 
 	private val logger = LoggerFactory.getLogger(RoomAccessService::class.java)
 
-	private var roomAccessGetEndpoint = "${webSocketProperties.httpClient!!.authService}/$roomAccessString"
+	private var roomAccessGetEndpoint = "${webSocketProperties.httpClient.authService}/$roomAccessString"
 
 	fun getRoomAccess(roomId: String, userId: String): RoomAccess? {
 		val url = "$roomAccessGetEndpoint/$roomId/$userId"

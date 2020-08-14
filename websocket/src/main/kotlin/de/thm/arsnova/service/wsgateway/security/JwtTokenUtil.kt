@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
 class JwtTokenUtil(
 		private val webSocketProperties: WebSocketProperties
 ) {
-	private val algorithm = Algorithm.HMAC256(webSocketProperties.security?.jwt?.secret)
+	private val algorithm = Algorithm.HMAC256(webSocketProperties.security.jwt.secret)
 	private val verifier: JWTVerifier = JWT.require(algorithm).build()
 
 	@Throws(JWTVerificationException::class)
