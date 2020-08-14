@@ -6,11 +6,15 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConfigurationProperties
 @ConstructorBinding
 data class WebSocketProperties(
-		val serverPort: Int,
+		val server: Server,
 		val messagingPrefix: String,
 		val stomp: Stomp,
 		val security: Security,
 		val httpClient: HttpClient
+)
+
+data class Server(
+		val port: Int
 )
 
 data class Relay(
