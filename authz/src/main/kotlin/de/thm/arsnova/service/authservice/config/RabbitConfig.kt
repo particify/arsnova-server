@@ -43,12 +43,12 @@ class RabbitConfig (
             @TaskExecutorConfig.RabbitConnectionExecutor executor: TaskExecutor?
     ): ConnectionFactory? {
         val connectionFactory = CachingConnectionFactory(
-                authServiceProperties.rabbitmq?.host,
-                authServiceProperties.rabbitmq?.port!!
+                authServiceProperties.rabbitmq.host,
+                authServiceProperties.rabbitmq.port
         )
-        connectionFactory.username = authServiceProperties.rabbitmq?.username.orEmpty()
-        connectionFactory.setPassword(authServiceProperties.rabbitmq?.password.orEmpty())
-        connectionFactory.virtualHost = authServiceProperties.rabbitmq?.virtualHost.orEmpty()
+        connectionFactory.username = authServiceProperties.rabbitmq.username
+        connectionFactory.setPassword(authServiceProperties.rabbitmq.password)
+        connectionFactory.virtualHost = authServiceProperties.rabbitmq.virtualHost
         connectionFactory.setExecutor(executor!!)
         return connectionFactory
     }
