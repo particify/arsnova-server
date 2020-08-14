@@ -25,7 +25,7 @@ data class Rabbitmq(
 
 data class Spring(
         val datasource: Datasource,
-        val hibernate: Hibernate
+        val jpa: Jpa
 )
 
 data class Datasource(
