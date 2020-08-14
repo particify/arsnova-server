@@ -39,7 +39,7 @@ public class InternalEntityAspect {
 	public void prohibitInternalEntitySerialization(final Entity entity) {
 		logger.debug("Executing InternalEntityAspect for entity: {}", entity);
 
-		if (entity.isInternal()) {
+		if (entity != null && entity.isInternal()) {
 			throw new SecurityException("Serialization of internal entities is not allowed.");
 		}
 	}
