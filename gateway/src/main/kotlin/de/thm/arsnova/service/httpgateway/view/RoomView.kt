@@ -12,6 +12,7 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.util.Optional
 
 @Component
 class RoomView(
@@ -19,7 +20,7 @@ class RoomView(
     private val contentService: ContentService,
     private val commentService: CommentService
 ) {
-    fun getSummaries(roomIds: List<String>): Flux<RoomSummary> {
+    fun getSummaries(roomIds: List<String>): Flux<Optional<RoomSummary>> {
         return ReactiveSecurityContextHolder.getContext()
                 .map { securityContext ->
                     securityContext.authentication.credentials
@@ -40,12 +41,16 @@ class RoomView(
                 }
                 .zipWith(roomService.get(roomIds))
                 .map { tuple2 ->
-                    RoomSummary(
-                            tuple2.t2.id,
-                            tuple2.t2.shortId,
-                            tuple2.t2.name,
-                            tuple2.t1
-                    )
+                    tuple2.t2
+                            .map { room ->
+                                Optional.of(RoomSummary(
+                                        room.id,
+                                        room.shortId,
+                                        room.name,
+                                        tuple2.t1
+                                ))
+                            }
+                            .orElse(Optional.empty())
                 }
     }
 }

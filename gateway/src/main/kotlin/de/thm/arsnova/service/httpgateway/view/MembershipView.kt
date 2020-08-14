@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.util.Optional
 
 @Component
 class MembershipView(
@@ -58,28 +59,34 @@ class MembershipView(
                             roomService.get(list.map { entry -> entry.roomId })
                         )
                         .map { t2 ->
-                            Membership(
-                                t2.t1.roomId,
-                                t2.t2.shortId,
-                                t2.t1.roles,
-                                t2.t1.lastVisit
-                            )
+                            t2.t2
+                                    .map { room ->
+                                        Mono.just(Membership(
+                                                t2.t1.roomId,
+                                                room.shortId,
+                                                t2.t1.roles,
+                                                t2.t1.lastVisit))
+                                    }
+                                    .orElse(Mono.empty())
                         }
                 }
-                .flatMapMany { list: Flux<Membership> ->
+                .flatMapMany { list: Flux<Mono<Membership>> ->
+                    list
+                }
+                .flatMap { list: Mono<Membership> ->
                     list
                 }
                 .concatWith(roomAccessService.getRoomAccessByUser(userId).flatMap { roomAccess ->
                     Flux
                         .zip(
                             Mono.just(roomAccess),
-                            roomService.get(roomAccess.roomId!!)
+                            roomService.get(roomAccess.roomId)
                         )
                         .map { t2 ->
                             Membership(
-                                t2.t1.roomId!!,
+                                t2.t1.roomId,
                                 t2.t2.shortId,
-                                listOf(t2.t1.role!!),
+                                listOf(t2.t1.role),
                                 "lastVisit"
                             )
                         }

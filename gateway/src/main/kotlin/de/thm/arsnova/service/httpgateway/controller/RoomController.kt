@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import reactor.core.publisher.Flux
+import java.util.Optional
 
 @Controller
 class RoomController(
@@ -25,7 +26,7 @@ class RoomController(
     @ResponseBody
     fun getRoomSummaries(
         @RequestParam ids: List<String>
-    ) : Flux<RoomSummary> {
+    ) : Flux<Optional<RoomSummary>> {
         return roomView.getSummaries(ids)
     }
 }

@@ -1,3 +1,7 @@
+spring:
+  jackson:
+    default-property-inclusion: NON_NULL
+---
 server:
   port: 9090
 ---
