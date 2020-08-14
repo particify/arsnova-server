@@ -19,6 +19,7 @@
 package de.thm.arsnova.service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,7 +40,7 @@ public interface EntityService<T extends Entity> {
 	T get(String id, boolean internal);
 
 	@PreFilter(value = "hasPermission(filterObject, #this.this.getTypeName(), 'read')", filterTarget = "ids")
-	Iterable<T> get(Iterable<String> ids);
+	List<T> get(Iterable<String> ids);
 
 	@PreAuthorize("hasPermission(#entity, 'create')")
 	T create(T entity);
@@ -59,17 +60,17 @@ public interface EntityService<T extends Entity> {
 	T patch(T entity, Map<String, Object> changes, Function<T, ? extends Object> propertyGetter, Class<?> view)
 			throws IOException;
 
-	Iterable<T> patch(Iterable<T> entities, Map<String, Object> changes) throws IOException;
+	List<T> patch(Iterable<T> entities, Map<String, Object> changes) throws IOException;
 
-	Iterable<T> patch(Iterable<T> entities, Map<String, Object> changes, Class<?> view) throws IOException;
+	List<T> patch(Iterable<T> entities, Map<String, Object> changes, Class<?> view) throws IOException;
 
-	Iterable<T> patch(
+	List<T> patch(
 			Iterable<T> entities,
 			Map<String, Object> changes,
 			Function<T, ? extends Object> propertyGetter) throws IOException;
 
 	@PreFilter(value = "hasPermission(filterObject, 'update')", filterTarget = "entities")
-	Iterable<T> patch(
+	List<T> patch(
 			Iterable<T> entities,
 			Map<String, Object> changes,
 			Function<T, ? extends Object> propertyGetter,

@@ -74,13 +74,14 @@ abstract class CouchDbCrudRepository<T extends Entity>
 	}
 
 	@Override
-	public <S extends T> Iterable<S> saveAll(final Iterable<S> entities) {
-		if (!(entities instanceof Collection)) {
-			throw new IllegalArgumentException("Implementation only supports Collections.");
+	public <S extends T> List<S> saveAll(final Iterable<S> entities) {
+		if (!(entities instanceof List)) {
+			throw new IllegalArgumentException("Implementation only supports Lists.");
 		}
-		db.executeBulk((Collection<S>) entities);
+		final List<S> entityList = (List<S>) entities;
+		db.executeBulk(entityList);
 
-		return entities;
+		return entityList;
 	}
 
 	@Override
@@ -99,12 +100,12 @@ abstract class CouchDbCrudRepository<T extends Entity>
 	}
 
 	@Override
-	public Iterable<T> findAll() {
+	public List<T> findAll() {
 		return db.queryView(createQuery(countableAllViewName).includeDocs(true).reduce(false), type);
 	}
 
 	@Override
-	public Iterable<T> findAllById(final Iterable<String> strings) {
+	public List<T> findAllById(final Iterable<String> strings) {
 		if (!(strings instanceof Collection)) {
 			throw new IllegalArgumentException("Implementation only supports Collections.");
 		}
@@ -159,7 +160,7 @@ abstract class CouchDbCrudRepository<T extends Entity>
 	 *     key.
 	 * @return Entity stubs
 	 */
-	protected Iterable<T> createEntityStubs(final ViewResult viewResult, final BiConsumer<T, String> keyPropertySetter) {
+	protected List<T> createEntityStubs(final ViewResult viewResult, final BiConsumer<T, String> keyPropertySetter) {
 		return viewResult.getRows().stream().map(row -> {
 			final T stub;
 			try {

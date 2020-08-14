@@ -18,6 +18,8 @@
 
 package de.thm.arsnova.persistence;
 
+import java.util.List;
+
 /**
  * This is a temporary extension to {@link org.springframework.data.repository.CrudRepository} which simplifies the
  * migration to Spring Data 2.0.
@@ -36,4 +38,10 @@ public interface CrudRepository<T, I> extends org.springframework.data.repositor
 	 */
 	@Deprecated
 	T findOne(I id);
+
+	<S extends T> List<S> saveAll(Iterable<S> var1);
+
+	List<T> findAll();
+
+	List<T> findAllById(Iterable<I> var1);
 }

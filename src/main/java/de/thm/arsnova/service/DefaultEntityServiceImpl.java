@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import org.springframework.cache.annotation.CacheEvict;
@@ -102,8 +103,8 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 
 	@Override
 	@PreFilter(value = "hasPermission(filterObject, #this.this.getTypeName(), 'read')", filterTarget = "ids")
-	public Iterable<T> get(final Iterable<String> ids) {
-		final Iterable<T> entities = repository.findAllById(ids);
+	public List<T> get(final Iterable<String> ids) {
+		final List<T> entities = repository.findAllById(ids);
 		entities.forEach(this::modifyRetrieved);
 
 		return entities;
@@ -222,25 +223,25 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 	}
 
 	@Override
-	public Iterable<T> patch(final Iterable<T> entities, final Map<String, Object> changes) throws IOException {
+	public List<T> patch(final Iterable<T> entities, final Map<String, Object> changes) throws IOException {
 		return patch(entities, changes, Function.identity(), View.Persistence.class);
 	}
 
 	@Override
-	public Iterable<T> patch(final Iterable<T> entities, final Map<String, Object> changes, final Class<?> view)
+	public List<T> patch(final Iterable<T> entities, final Map<String, Object> changes, final Class<?> view)
 			throws IOException {
 		return patch(entities, changes, Function.identity(), view);
 	}
 
 	@Override
-	public Iterable<T> patch(final Iterable<T> entities, final Map<String, Object> changes,
+	public List<T> patch(final Iterable<T> entities, final Map<String, Object> changes,
 			final Function<T, ? extends Object> propertyGetter) throws IOException {
 		return patch(entities, changes, propertyGetter, View.Persistence.class);
 	}
 
 	@Override
 	@PreFilter(value = "hasPermission(filterObject, 'update')", filterTarget = "entities")
-	public Iterable<T> patch(final Iterable<T> entities, final Map<String, Object> changes,
+	public List<T> patch(final Iterable<T> entities, final Map<String, Object> changes,
 			final Function<T, ? extends Object> propertyGetter, final Class<?> view) throws IOException {
 		final JsonNode tree = objectMapperForPatchTree.valueToTree(changes);
 		final Map<String, T> oldEntities = new HashMap<>();
@@ -256,7 +257,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 			validate(entity);
 		}
 
-		final Iterable<T> patchedEntities = repository.saveAll(entities);
+		final List<T> patchedEntities = repository.saveAll(entities);
 		patchedEntities.forEach((e) -> {
 			eventPublisher.publishEvent(new AfterPatchEvent<>(
 					this, e, oldEntities.get(e.getId()), propertyGetter, changes));
