@@ -16,14 +16,14 @@ class RoomAccessService(
     private val logger = LoggerFactory.getLogger(RoomAccessService::class.java)
 
     fun getRoomAccess(roomId: String, userId: String): Mono<RoomAccess> {
-        val url = "${httpGatewayProperties.httpClient!!.authService}/roomaccess/$roomId/$userId"
+        val url = "${httpGatewayProperties.httpClient.authService}/roomaccess/$roomId/$userId"
         logger.trace("Querying auth service for room access with url: {}", url)
         return webClient.get().uri(url)
                 .retrieve().bodyToMono(RoomAccess::class.java).cache()
     }
 
     fun getRoomAccessByUser(userId: String): Flux<RoomAccess> {
-        val url = "${httpGatewayProperties.httpClient!!.authService}/roomaccess/by-user/$userId"
+        val url = "${httpGatewayProperties.httpClient.authService}/roomaccess/by-user/$userId"
         logger.trace("Querying auth service for room access with url: {}", url)
         return webClient.get().uri(url)
                 .retrieve().bodyToFlux(RoomAccess::class.java).cache()

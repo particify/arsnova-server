@@ -20,10 +20,10 @@ class JwtTokenUtil(
         val claimName = "roles"
     }
 
-    private val algorithm = Algorithm.HMAC256(httpGatewayProperties.security?.jwt?.publicSecret!!)
-    private val interServiceAlgorithm = Algorithm.HMAC256(httpGatewayProperties.security?.jwt?.internalSecret!!)
-    private val defaultValidityPeriod: TemporalAmount = httpGatewayProperties.security?.jwt?.validityPeriod!!
-    private val serverId: String = httpGatewayProperties.security?.jwt?.serverId!!
+    private val algorithm = Algorithm.HMAC256(httpGatewayProperties.security.jwt.publicSecret)
+    private val interServiceAlgorithm = Algorithm.HMAC256(httpGatewayProperties.security.jwt.internalSecret)
+    private val defaultValidityPeriod: TemporalAmount = httpGatewayProperties.security.jwt.validityPeriod
+    private val serverId: String = httpGatewayProperties.security.jwt.serverId
     private val verifier: JWTVerifier = JWT.require(algorithm).build()
 
     @Throws(JWTVerificationException::class)

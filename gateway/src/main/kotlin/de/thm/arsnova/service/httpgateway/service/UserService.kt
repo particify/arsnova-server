@@ -17,7 +17,7 @@ class UserService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun get(userId: String, jwt: String): Mono<User> {
-        val url = "${httpGatewayProperties.httpClient!!.core}/user/$userId?view=owner"
+        val url = "${httpGatewayProperties.httpClient.core}/user/$userId?view=owner"
         logger.trace("Querying core for user with url: {}", url)
         return webClient.get()
             .uri(url)
@@ -26,7 +26,7 @@ class UserService(
     }
 
     fun getRoomHistory(userId: String, jwt: String): Flux<RoomHistoryEntry> {
-        val url = "${httpGatewayProperties.httpClient!!.core}/user/$userId/roomHistory"
+        val url = "${httpGatewayProperties.httpClient.core}/user/$userId/roomHistory"
         logger.trace("Querying core for room history with url: {}", url)
         return webClient.get()
             .uri(url)

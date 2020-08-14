@@ -29,12 +29,12 @@ class GatewayConfig (
                 .route("core") { p ->
                     p
                             .path("/room/**", "/auth/**", "/content/**", "/user/**", "/configuration/**", "/answer/**", "/management/**")
-                            .uri(httpGatewayProperties.routing?.endpoints?.core)
+                            .uri(httpGatewayProperties.routing.endpoints.core)
                 }
                 .route("roomaccess") {p ->
                     p
                         .path("/roomaccess/**")
-                        .uri(httpGatewayProperties.routing?.endpoints?.roomaccessService)
+                        .uri(httpGatewayProperties.routing.endpoints.roomaccessService)
                 }
                 .route("comment-service") { p ->
                     p
@@ -43,12 +43,12 @@ class GatewayConfig (
                                 f.filter(authFilter.apply(AuthFilter.Config()))
                                 f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
                             }
-                            .uri(httpGatewayProperties.routing?.endpoints?.commentService)
+                            .uri(httpGatewayProperties.routing.endpoints.commentService)
                 }
                 .route("comment-service-todo") { p ->
                     p
                             .path("/bonustoken/**", "/vote/**", "/settings/**")
-                            .uri(httpGatewayProperties.routing?.endpoints?.commentService)
+                            .uri(httpGatewayProperties.routing.endpoints.commentService)
                 }
                 .route("formatting-service") { p ->
                     p
@@ -56,7 +56,7 @@ class GatewayConfig (
                             .filters { f ->
                                 f.rewritePath("^${UTIL_PREFIX}/formatting", "")
                             }
-                            .uri(httpGatewayProperties.routing?.endpoints?.formattingService)
+                            .uri(httpGatewayProperties.routing.endpoints.formattingService)
                 }
                 .build()
     }

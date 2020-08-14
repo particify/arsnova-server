@@ -15,7 +15,7 @@ class ContentService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun getStats(roomIds: List<String>, jwt: String): Flux<Int> {
-        val url = "${httpGatewayProperties.httpClient!!.core}/content/-/count?roomIds=${roomIds.joinToString(",")}"
+        val url = "${httpGatewayProperties.httpClient.core}/content/-/count?roomIds=${roomIds.joinToString(",")}"
         logger.trace("Querying core for content stats with url: {}", url)
         return webClient.get()
                 .uri(url)
