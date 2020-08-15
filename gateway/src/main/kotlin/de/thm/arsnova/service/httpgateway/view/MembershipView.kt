@@ -1,5 +1,7 @@
 package de.thm.arsnova.service.httpgateway.view
 
+import de.thm.arsnova.service.httpgateway.exception.ForbiddenException
+import de.thm.arsnova.service.httpgateway.exception.UnauthorizedException
 import de.thm.arsnova.service.httpgateway.model.Membership
 import de.thm.arsnova.service.httpgateway.model.Room
 import de.thm.arsnova.service.httpgateway.model.RoomAccess
@@ -25,10 +27,15 @@ class MembershipView(
     fun getByUser(userId: String): Flux<Membership> {
         return ReactiveSecurityContextHolder.getContext()
                 .map { securityContext ->
-                    securityContext.authentication.principal
+                    securityContext.authentication
                 }
-                .cast(String::class.java)
-                .flatMap { jwt ->
+                .switchIfEmpty(Mono.error(UnauthorizedException()))
+                .filter { authentication ->
+                    authentication.principal == userId
+                }
+                .switchIfEmpty(Mono.error(ForbiddenException()))
+                .flatMap { authentication ->
+                    val jwt = authentication.credentials.toString()
                     userService.get(userId, jwt)
                 }
                 .map { user: User ->

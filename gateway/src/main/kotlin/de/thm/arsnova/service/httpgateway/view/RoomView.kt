@@ -20,7 +20,7 @@ class RoomView(
     fun getSummaries(roomIds: List<String>): Flux<RoomSummary> {
         return ReactiveSecurityContextHolder.getContext()
                 .map { securityContext ->
-                    securityContext.authentication.principal
+                    securityContext.authentication.credentials
                 }
                 .cast(String::class.java)
                 .flatMapMany { jwt: String ->

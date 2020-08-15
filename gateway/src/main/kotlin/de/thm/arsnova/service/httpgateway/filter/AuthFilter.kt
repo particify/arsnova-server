@@ -37,14 +37,14 @@ class AuthFilter (
 
             if (bearer != null) {
                 val jwt = bearer[0].removePrefix("Bearer ")
-                val userId = jwtTokenUtil.getUserId(jwt)
+                val userId = jwtTokenUtil.getUserIdFromPublicToken(jwt)
                 val uriVariables = ServerWebExchangeUtils.getUriTemplateVariables(exchange)
                 val roomId = uriVariables["roomId"]
                 if (!roomId!!.matches(RoomIdFilter.roomIdRegex)) {
                     logger.debug("Didn't get a valid roomId out of the uri variables: {}", uriVariables)
                     throw ResponseStatusException(HttpStatus.BAD_REQUEST)
                 }
-                Mono.just(jwtTokenUtil.getUserId(jwt))
+                Mono.just(jwtTokenUtil.getUserIdFromPublicToken(jwt))
                     .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.BAD_REQUEST)))
                     .flatMap {
                         roomAccessService.getRoomAccess(roomId, userId)
@@ -54,7 +54,7 @@ class AuthFilter (
                     }
                     .map { roomAccess: RoomAccess ->
                         logger.trace("Working with room access: {}", roomAccess)
-                        jwtTokenUtil.createSignedToken(roomAccess)
+                        jwtTokenUtil.createSignedInternalToken(roomAccess)
                     }
                     .map { token ->
                         logger.trace("new token: {}", token)
