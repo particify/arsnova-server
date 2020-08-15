@@ -1,45 +1,45 @@
 package de.thm.arsnova.service.authservice.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.stereotype.Component
+import org.springframework.boot.context.properties.ConstructorBinding
 
-@Component
 @ConfigurationProperties
-class AuthServiceProperties (
-        var server: Server? = null,
-        var rabbitmq: Rabbitmq? = null,
-        var spring: Spring? = null
+@ConstructorBinding
+data class AuthServiceProperties(
+        val server: Server,
+        val rabbitmq: Rabbitmq,
+        val spring: Spring
 )
 
-data class Server (
-        var port: Int = 0
+data class Server(
+        val port: Int
 )
 
-data class Rabbitmq (
-        var host: String = "",
-        var port: Int = 0,
-        var username: String = "",
-        var password: String = "",
-        var virtualHost: String = ""
+data class Rabbitmq(
+        val host: String,
+        val port: Int,
+        val username: String,
+        val password: String,
+        val virtualHost: String
 )
 
-data class Spring (
-        var datasource: Datasource? = null,
-        var hibernate: Hibernate? = null
+data class Spring(
+        val datasource: Datasource,
+        val jpa: Jpa
 )
 
-data class Datasource (
-        var url: String = "",
-        var driverClassName: String = "",
-        var platform: String = "",
-        var username: String = "",
-        var password: String = ""
+data class Datasource(
+        val url: String,
+        val driverClassName: String,
+        val platform: String,
+        val username: String,
+        val password: String
 )
 
-data class Jpa (
-        var hibernate: Hibernate? = null
+data class Jpa(
+        val hibernate: Hibernate
 )
 
-data class Hibernate (
-        var ddlAuto: String = ""
+data class Hibernate(
+        val ddlAuto: String
 )
