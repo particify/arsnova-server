@@ -21,6 +21,7 @@ package de.thm.arsnova.controller;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.naming.OperationNotSupportedException;
@@ -94,7 +95,7 @@ public abstract class AbstractEntityController<E extends Entity> {
 	}
 
 	@GetMapping(GET_MULTIPLE_MAPPING)
-	public Iterable<E> getMultiple(@RequestParam final Collection<String> ids) {
+	public List<E> getMultiple(@RequestParam final Collection<String> ids) {
 		return entityService.get(ids);
 	}
 
@@ -156,7 +157,7 @@ public abstract class AbstractEntityController<E extends Entity> {
 	}
 
 	@PostMapping({FIND_MAPPING, LEGACY_FIND_MAPPING})
-	public Iterable<E> find(@RequestBody final FindQuery<E> findQuery) throws OperationNotSupportedException {
+	public List<E> find(@RequestBody final FindQuery<E> findQuery) throws OperationNotSupportedException {
 		if (findQueryService != null) {
 			logger.debug("Resolving find query: {}", findQuery);
 			final Set<String> ids = findQueryService.resolveQuery(findQuery);
