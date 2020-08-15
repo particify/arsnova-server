@@ -27,6 +27,11 @@ class AuthChannelInterceptorAdapter(
 		val roomIdRegex: Regex = Regex("[0-9a-f]{$topicRoomIdLength}")
 
 		val moderatorString = "moderator"
+
+		val participantRoleString = "PARTICIPANT"
+		val creatorRoleString = "CREATOR"
+		val executiveModeratorRoleString = "EXECUTIVE_MODERATOR"
+		val editingModeratorRoleString = "EDITING_MODERATOR"
 	}
 
 	private val logger = LoggerFactory.getLogger(AuthChannelInterceptorAdapter::class.java)
@@ -76,9 +81,9 @@ class AuthChannelInterceptorAdapter(
 				logger.trace("Extracted roomId from subscribe message: {}", roomId)
 				if (moderatorString in destination) {
 					logger.trace("Noticed a moderator role in topic, checking for auth")
-					// For now, if there is auth information stored, it's either moderator or owner. No need to check specifically
 					val userRoomAccess = roomAccessService.getRoomAccess(roomId, userId)
-					if (userRoomAccess == null) {
+					val allowedRoles = listOf(creatorRoleString, executiveModeratorRoleString, editingModeratorRoleString)
+					if (!allowedRoles.contains(userRoomAccess.role)) {
 						logger.debug("User doesn't have any auth information, dropping the message")
 						return null
 					}
