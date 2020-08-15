@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.naming.OperationNotSupportedException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -95,8 +96,25 @@ public abstract class AbstractEntityController<E extends Entity> {
 	}
 
 	@GetMapping(GET_MULTIPLE_MAPPING)
-	public List<E> getMultiple(@RequestParam final Collection<String> ids) {
-		return entityService.get(ids);
+	public List<E> getMultiple(
+			@RequestParam final Collection<String> ids,
+			@RequestParam(defaultValue = "true") final boolean skipMissing
+	) {
+		/* We need to keep a copy of the original list because it might be
+		 * modified in meantime. */
+		final List<String> requestedIds = List.copyOf(ids);
+		final List<E> entities = entityService.get(ids);
+		if (skipMissing || entities.size() == requestedIds.size()) {
+			return entities;
+		}
+
+		/* Add nulls for missing entities (not found or no read permission). */
+		final Map<String, E> idEntityMappings = entities.stream().collect(Collectors.toMap(
+				e -> e.getId(),
+				e -> e
+		));
+
+		return requestedIds.stream().map(id -> idEntityMappings.get(id)).collect(Collectors.toList());
 	}
 
 	@PutMapping(value = PUT_MAPPING, produces = MEDIATYPE_EMPTY)
