@@ -1,38 +1,41 @@
 package de.thm.arsnova.service.httpgateway.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.stereotype.Component
+import org.springframework.boot.context.properties.ConstructorBinding
 import java.time.Duration
-import java.time.temporal.TemporalAmount
 
-@Component
 @ConfigurationProperties
-class HttpGatewayProperties {
-    var security: Security? = null
-    var httpClient: HttpClient? = null
-    var routing: Routing? = null
-}
-data class Security (
-    var jwt: Jwt? = null
-)
-data class Jwt (
-    var publicSecret: String? = "",
-    var internalSecret: String? = "",
-    var serverId: String? = "",
-    var validityPeriod: TemporalAmount? = Duration.ofMinutes(5)
-)
-data class HttpClient (
-        var authService: String = "",
-        var commentService: String = "",
-        var core: String = ""
+@ConstructorBinding
+data class HttpGatewayProperties(
+        val security: Security,
+        val httpClient: HttpClient,
+        val routing: Routing
 )
 
-data class Routing (
-        var endpoints: Endpoints? = null
+data class Security(
+        val jwt: Jwt
 )
-data class Endpoints (
-        var core: String = "",
-        var commentService: String = "",
-        var roomaccessService: String = "",
-        var formattingService: String = ""
+
+data class Jwt(
+        val publicSecret: String,
+        val internalSecret: String,
+        val serverId: String,
+        val validityPeriod: Duration
+)
+
+data class HttpClient(
+        val authService: String,
+        val commentService: String,
+        val core: String
+)
+
+data class Routing(
+        val endpoints: Endpoints
+)
+
+data class Endpoints(
+        val core: String,
+        val commentService: String,
+        val roomaccessService: String,
+        val formattingService: String
 )

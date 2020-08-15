@@ -13,6 +13,7 @@ security:
     public-secret: "secret"
     internal-secret: "secret"
     serverId: arsnova.gateway.v3:com.example
+    validity-period: 5m
 ---
 http-client:
   auth-service: "http://127.0.0.1:8092"
