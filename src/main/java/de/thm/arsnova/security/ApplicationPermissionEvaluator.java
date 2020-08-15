@@ -20,6 +20,7 @@ package de.thm.arsnova.security;
 
 import java.io.Serializable;
 import java.util.List;
+import org.ektorp.DocumentNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -128,33 +129,38 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			return true;
 		}
 
-		switch (targetType) {
-			case "userprofile":
-				final UserProfile targetUserProfile = new UserProfile();
-				targetUserProfile.setId(targetId.toString());
-				return isAccountManagementAccess(authentication)
-						|| hasUserProfilePermission(userId, targetUserProfile, permission.toString());
-			case "room":
-				final Room targetRoom = roomRepository.findOne(targetId.toString());
-				return targetRoom != null && hasRoomPermission(userId, targetRoom, permission.toString());
-			case "content":
-				final Content targetContent = contentRepository.findOne(targetId.toString());
-				return targetContent != null && hasContentPermission(userId, targetContent, permission.toString());
-			case "contentgroup":
-				final ContentGroup targetContentGroup = contentGroupRepository.findOne(targetId.toString());
-				return targetContentGroup != null
-						&& hasContentGroupPermission(userId, targetContentGroup, permission.toString());
-			case "answer":
-				final Answer targetAnswer = answerRepository.findOne(targetId.toString());
-				return targetAnswer != null && hasAnswerPermission(userId, targetAnswer, permission.toString());
-			case "comment":
-				final Comment targetComment = commentRepository.findOne(targetId.toString());
-				return targetComment != null && hasCommentPermission(userId, targetComment, permission.toString());
-			case "motd":
-				final Motd targetMotd = motdRepository.findOne(targetId.toString());
-				return targetMotd != null && hasMotdPermission(userId, targetMotd, permission.toString());
-			default:
-				return false;
+		try {
+			switch (targetType) {
+				case "userprofile":
+					final UserProfile targetUserProfile = new UserProfile();
+					targetUserProfile.setId(targetId.toString());
+					return isAccountManagementAccess(authentication)
+							|| hasUserProfilePermission(userId, targetUserProfile, permission.toString());
+				case "room":
+					final Room targetRoom = roomRepository.findOne(targetId.toString());
+					return targetRoom != null && hasRoomPermission(userId, targetRoom, permission.toString());
+				case "content":
+					final Content targetContent = contentRepository.findOne(targetId.toString());
+					return targetContent != null && hasContentPermission(userId, targetContent, permission.toString());
+				case "contentgroup":
+					final ContentGroup targetContentGroup = contentGroupRepository.findOne(targetId.toString());
+					return targetContentGroup != null
+							&& hasContentGroupPermission(userId, targetContentGroup, permission.toString());
+				case "answer":
+					final Answer targetAnswer = answerRepository.findOne(targetId.toString());
+					return targetAnswer != null && hasAnswerPermission(userId, targetAnswer, permission.toString());
+				case "comment":
+					final Comment targetComment = commentRepository.findOne(targetId.toString());
+					return targetComment != null && hasCommentPermission(userId, targetComment, permission.toString());
+				case "motd":
+					final Motd targetMotd = motdRepository.findOne(targetId.toString());
+					return targetMotd != null && hasMotdPermission(userId, targetMotd, permission.toString());
+				default:
+					return false;
+			}
+		} catch (final DocumentNotFoundException e) {
+			logger.debug("Denying access for non-existent {} with ID {}.", targetType, targetId);
+			return false;
 		}
 	}
 
