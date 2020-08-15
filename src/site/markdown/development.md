@@ -4,7 +4,7 @@
 
 Before you can get started developing ARSnova you need to make sure the following software is installed to build ARSnova Backend:
 
-* Java 8 JDK
+* Java 11 JDK
 * Apache Maven 3.x
 
 And additionally if you want to run ARSnova locally:
