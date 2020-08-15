@@ -20,19 +20,20 @@ class JwtTokenUtil(
         val claimName = "roles"
     }
 
-    private val algorithm = Algorithm.HMAC256(httpGatewayProperties.security.jwt.publicSecret)
-    private val interServiceAlgorithm = Algorithm.HMAC256(httpGatewayProperties.security.jwt.internalSecret)
+    private val publicAlgorithm = Algorithm.HMAC256(httpGatewayProperties.security.jwt.publicSecret)
+    private val internalAlgorithm = Algorithm.HMAC256(httpGatewayProperties.security.jwt.internalSecret)
     private val defaultValidityPeriod: TemporalAmount = httpGatewayProperties.security.jwt.validityPeriod
     private val serverId: String = httpGatewayProperties.security.jwt.serverId
-    private val verifier: JWTVerifier = JWT.require(algorithm).build()
+    private val publicVerifier: JWTVerifier = JWT.require(publicAlgorithm).build()
+    private val internalVerifier: JWTVerifier = JWT.require(internalAlgorithm).build()
 
     @Throws(JWTVerificationException::class)
-    fun getUserId(token: String): String {
-        val decodedJwt = verifier.verify(token)
+    fun getUserIdFromPublicToken(token: String): String {
+        val decodedJwt = publicVerifier.verify(token)
         return decodedJwt.subject
     }
 
-    fun createSignedToken(roomAccess: RoomAccess): String {
+    fun createSignedInternalToken(roomAccess: RoomAccess): String {
         val roles = arrayOf("${roomAccess.role}-${roomAccess.roomId}")
         return JWT.create()
             .withIssuer(serverId)
@@ -45,6 +46,6 @@ class JwtTokenUtil(
             )
             .withSubject(roomAccess.userId)
             .withArrayClaim(claimName, roles)
-            .sign(interServiceAlgorithm)
+            .sign(internalAlgorithm)
     }
 }
