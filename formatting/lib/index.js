@@ -76,7 +76,7 @@ app.post('/render', (req, res) => {
     }
   }
 
-  res.send(html);
+  res.send({html: html});
 });
 
 app.listen(port, () => {
