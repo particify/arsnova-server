@@ -14,6 +14,10 @@ const markdown = markdownIt('zero', markdownOpts);
 const markdownLatex = markdownIt('zero', markdownOpts);
 const defaultMdFeatureset = 'simple';
 const markdownFeaturesets = {
+  minimum: [
+    'newline',
+    'entity'
+  ],
   simple: [
     'newline',
     'entity',
@@ -40,7 +44,11 @@ const markdownFeaturesets = {
     'table',
     'code',
     'fence',
-    'escape'
+    'escape',
+  ],
+  math: [
+    'math_inline',
+    'math_block'
   ]
 };
 
@@ -66,14 +74,13 @@ app.post('/render', (req, res) => {
 
   if (options) {
     const mdFeatureset = options.markdownFeatureset || defaultMdFeatureset;
-    const mdFeatures = markdownFeaturesets[mdFeatureset] || markdownFeaturesets[defaultMdFeatureset];
-    if (options.markdown && options.latex) {
-      html = configureMarkdown(markdownLatex, markdownOpts, mdFeatures).render(html);
-    } else if (options.markdown) {
-      html = configureMarkdown(markdown, markdownOpts, mdFeatures).render(html);
-    } else if (options.latex) {
-      html = katex.renderToString(req.body.text);
+    let mdFeatures = options.markdown
+        ? markdownFeaturesets[mdFeatureset] || markdownFeaturesets[defaultMdFeatureset]
+        : markdownFeaturesets.minimum;
+    if (options.latex) {
+      mdFeatures = mdFeatures.concat(markdownFeaturesets.math);
     }
+    html = configureMarkdown(markdownLatex, markdownOpts, mdFeatures).render(html);
   }
 
   res.send({html: html});
