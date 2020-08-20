@@ -47,7 +47,7 @@ class MembershipView(
                         Membership(
                             entry.roomId,
                             "shortId",
-                            listOf("PARTICIPANT"),
+                            setOf("PARTICIPANT"),
                             entry.lastVisit
                         )
                     }
@@ -86,10 +86,22 @@ class MembershipView(
                             Membership(
                                 t2.t1.roomId,
                                 t2.t2.shortId,
-                                listOf(t2.t1.role),
+                                setOf(t2.t1.role),
                                 "lastVisit"
                             )
                         }
                 })
+                .groupBy { membership ->
+                    Membership(membership.roomId, membership.roomShortId, setOf(), "")
+                }
+                .flatMap { groupedMemberships ->
+                    groupedMemberships.reduce(groupedMemberships.key()!!.copy(), { acc: Membership, m: Membership ->
+                        acc.roles = acc.roles.union(m.roles)
+                        if (acc.lastVisit < m.lastVisit) {
+                            acc.lastVisit = m.lastVisit
+                        }
+                        acc
+                    })
+                }
     }
 }
