@@ -6,6 +6,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 data class Membership (
     var roomId: String = "",
     var roomShortId: String = "",
-    var roles: List<String> = listOf(),
+    var roles: Set<String> = setOf(),
     var lastVisit: String
 )
