@@ -143,20 +143,20 @@ arsnova:
         order: 0
         allowed-email-domains:
           - '*'
-        registration-mail-subject: ARSnova Registration
+        registration-mail-subject: "{0} is your ARSnova verification code"
         registration-mail-body: |-
           Welcome to ARSnova!
 
-          Here is the activation code you need for your first login to ARSnova:
+          Here is the verification code you need for your first login to ARSnova:
 
               {0}
 
           {1}
-        reset-password-mail-subject: ARSnova Password Reset
+        reset-password-mail-subject: "{0} is your ARSnova verification code"
         reset-password-mail-body: |-
           You requested to reset your password.
 
-          Here is the confirmation code you need to set a new password:
+          Here is the verification code you need to set a new password:
 
               {0}
 
