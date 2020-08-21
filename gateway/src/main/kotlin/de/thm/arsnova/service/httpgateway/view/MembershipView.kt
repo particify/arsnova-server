@@ -1,17 +1,16 @@
 package de.thm.arsnova.service.httpgateway.view
 
 import de.thm.arsnova.service.httpgateway.exception.ForbiddenException
-import de.thm.arsnova.service.httpgateway.exception.UnauthorizedException
 import de.thm.arsnova.service.httpgateway.model.Membership
 import de.thm.arsnova.service.httpgateway.model.Room
 import de.thm.arsnova.service.httpgateway.model.RoomAccess
 import de.thm.arsnova.service.httpgateway.model.RoomHistoryEntry
 import de.thm.arsnova.service.httpgateway.model.User
+import de.thm.arsnova.service.httpgateway.security.AuthProcessor
 import de.thm.arsnova.service.httpgateway.service.RoomAccessService
 import de.thm.arsnova.service.httpgateway.service.RoomService
 import de.thm.arsnova.service.httpgateway.service.UserService
 import kotlinx.coroutines.reactive.awaitFirst
-import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
@@ -21,16 +20,13 @@ import java.util.Optional
 
 @Component
 class MembershipView(
+    private val authProcessor: AuthProcessor,
     private val roomAccessService: RoomAccessService,
     private val roomService: RoomService,
     private val userService: UserService
 ) {
     fun getByUser(userId: String): Flux<Membership> {
-        return ReactiveSecurityContextHolder.getContext()
-                .map { securityContext ->
-                    securityContext.authentication
-                }
-                .switchIfEmpty(Mono.error(UnauthorizedException()))
+        return authProcessor.getAuthentication()
                 .filter { authentication ->
                     authentication.principal == userId
                 }
