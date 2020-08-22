@@ -48,6 +48,9 @@ class MembershipView(
                         )
                     }
                 }
+                .filter { list ->
+                    list.isNotEmpty()
+                }
                 .map { list: List<Membership> ->
                     Flux
                         .zip(
