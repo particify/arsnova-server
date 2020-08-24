@@ -50,7 +50,7 @@ class AuthFilter (
                         roomAccessService.getRoomAccess(roomId, userId)
                     }
                     .onErrorResume {
-                        Mono.just(RoomAccess(roomId, userId, "GUEST"))
+                        Mono.just(RoomAccess(roomId, userId, "", "PARTICIPANT"))
                     }
                     .map { roomAccess: RoomAccess ->
                         logger.trace("Working with room access: {}", roomAccess)
