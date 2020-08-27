@@ -5,11 +5,18 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import java.util.Collection;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 @Service
 public class JwtService {
+    private static final String ROLE_PREFIX = "ROLE_";
+    private static final String ROLES_CLAIM_NAME = "roles";
+
     private Algorithm algorithm;
     private JWTVerifier verifier;
     @Value("${jwt.secret:secret}") private String jwtSecret;
@@ -21,9 +28,13 @@ public class JwtService {
                 .build();
     }
 
-    public String verifyToken(final String token) {
+    public AuthenticatedUser verifyToken(final String token) {
         final DecodedJWT decodedJwt = verifier.verify(token);
+        String userId = decodedJwt.getSubject();
 
-        return token;
+        final Collection<GrantedAuthority> authorities = decodedJwt.getClaim(ROLES_CLAIM_NAME).asList(String.class).stream()
+                .map(role -> new SimpleGrantedAuthority(ROLE_PREFIX + role)).collect(Collectors.toList());
+
+        return new AuthenticatedUser(userId, authorities, token);
     }
 }
