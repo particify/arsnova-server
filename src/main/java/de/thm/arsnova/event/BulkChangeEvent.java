@@ -28,7 +28,7 @@ public class BulkChangeEvent<E extends Entity> extends ApplicationEvent implemen
 	private Iterable<E> entities;
 	private Class<E> clazz;
 
-	public BulkChangeEvent(final Object source, Class<E> clazz, final Iterable<E> entities) {
+	public BulkChangeEvent(final Object source, final Class<E> clazz, final Iterable<E> entities) {
 		super(source);
 		this.clazz = clazz;
 		this.entities = entities;
