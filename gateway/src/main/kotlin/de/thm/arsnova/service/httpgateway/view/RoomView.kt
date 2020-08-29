@@ -8,9 +8,11 @@ import de.thm.arsnova.service.httpgateway.security.AuthProcessor
 import de.thm.arsnova.service.httpgateway.service.CommentService
 import de.thm.arsnova.service.httpgateway.service.ContentService
 import de.thm.arsnova.service.httpgateway.service.RoomService
+import de.thm.arsnova.service.httpgateway.service.WsGatewayService
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.util.function.Tuple3
 import java.util.Optional
 
 @Component
@@ -18,7 +20,8 @@ class RoomView(
     private val authProcessor: AuthProcessor,
     private val roomService: RoomService,
     private val contentService: ContentService,
-    private val commentService: CommentService
+    private val commentService: CommentService,
+    private val wsGatewayService: WsGatewayService
 ) {
     fun getSummaries(roomIds: List<String>): Flux<Optional<RoomSummary>> {
         return authProcessor.getAuthentication()
@@ -29,12 +32,22 @@ class RoomView(
                 .flatMapMany { jwt: String ->
                     Flux.zip(
                             commentService.getStats(roomIds, jwt),
-                            contentService.getStats(roomIds, jwt)
+                            contentService.getStats(roomIds, jwt),
+                            wsGatewayService.getUsercount(roomIds)
                     )
-                            .map { tuple2 ->
-                                RoomStats(
-                                        tuple2.t2,
-                                        tuple2.t1.ackCommentCount
+                            .map { tuple3: Tuple3<CommentStats, Int, Optional<Int>> ->
+                                tuple3.t3.map { userCount ->
+                                    RoomStats(
+                                            tuple3.t2,
+                                            tuple3.t1.ackCommentCount,
+                                            userCount
+                                    )
+                                }.orElse(
+                                        RoomStats(
+                                                tuple3.t2,
+                                                tuple3.t1.ackCommentCount,
+                                                null
+                                        )
                                 )
                             }
                 }

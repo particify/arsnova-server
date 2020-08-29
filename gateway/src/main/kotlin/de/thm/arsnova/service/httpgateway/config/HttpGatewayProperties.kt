@@ -26,7 +26,8 @@ data class Jwt(
 data class HttpClient(
         val authService: String,
         val commentService: String,
-        val core: String
+        val core: String,
+        val wsGateway: String
 )
 
 data class Routing(

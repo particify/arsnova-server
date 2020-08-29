@@ -12,5 +12,6 @@ class RoomSummary (
 
 data class RoomStats (
     var contentCount: Int,
-    var ackCommentCount: Int?
+    var ackCommentCount: Int?,
+    var roomUserCount: Int?
 )
