@@ -7,6 +7,7 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConstructorBinding
 data class WebSocketProperties(
 		val server: Server,
+		val rabbitmq: Rabbitmq,
 		val messagingPrefix: String,
 		val stomp: Stomp,
 		val security: Security,
@@ -15,6 +16,14 @@ data class WebSocketProperties(
 
 data class Server(
 		val port: Int
+)
+
+data class Rabbitmq(
+		val host: String,
+		val port: Int,
+		val username: String,
+		val password: String,
+		val virtualHost: String
 )
 
 data class Relay(

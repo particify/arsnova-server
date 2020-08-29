@@ -1,5 +1,11 @@
 server:
   port: 8099
+rabbitmq:
+  host: localhost
+  port: 5672
+  username: guest
+  password: guest
+  virtual-host: /
 messaging-prefix: /backend
 stomp:
   relay:
