@@ -10,12 +10,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import de.thm.arsnova.service.comment.handler.SettingsCommandHandler;
 import de.thm.arsnova.service.comment.model.Settings;
 import de.thm.arsnova.service.comment.model.command.CreateSettings;
 import de.thm.arsnova.service.comment.model.command.CreateSettingsPayload;
 import de.thm.arsnova.service.comment.model.command.UpdateSettings;
 import de.thm.arsnova.service.comment.model.command.UpdateSettingsPayload;
+import de.thm.arsnova.service.comment.security.PermissionEvaluator;
 import de.thm.arsnova.service.comment.service.SettingsService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -23,11 +23,14 @@ public class SettingsCommandHandlerTest {
     @Mock
     private SettingsService settingsService;
 
+    @Mock
+    private PermissionEvaluator permissionEvaluator;
+
     SettingsCommandHandler commandHandler;
 
     @Before
     public void setup() {
-        this.commandHandler = new SettingsCommandHandler(settingsService);
+        this.commandHandler = new SettingsCommandHandler(settingsService, permissionEvaluator);
     }
 
     @Test
@@ -43,6 +46,7 @@ public class SettingsCommandHandlerTest {
         expectedSettings.setDirectSend(true);
 
         when(settingsService.create(any())).thenReturn(expectedSettings);
+        when(permissionEvaluator.isOwnerOrAnyTypeOfModeratorForRoom(any())).thenReturn(true);
 
         Settings savedSettings = commandHandler.handle(command);
 
@@ -63,6 +67,7 @@ public class SettingsCommandHandlerTest {
 
         when(settingsService.get(roomId)).thenReturn(expectedSettings);
         when(settingsService.update(any())).thenReturn(expectedSettings);
+        when(permissionEvaluator.isOwnerOrAnyTypeOfModeratorForRoom(any())).thenReturn(true);
 
         Settings savedSettings = commandHandler.handle(command);
 

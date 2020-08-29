@@ -1,6 +1,5 @@
 package de.thm.arsnova.service.comment.handler;
 
-import de.thm.arsnova.service.comment.handler.CommentCommandHandler;
 import de.thm.arsnova.service.comment.model.Comment;
 import de.thm.arsnova.service.comment.model.Settings;
 import de.thm.arsnova.service.comment.model.command.DeleteComment;
@@ -13,6 +12,7 @@ import de.thm.arsnova.service.comment.model.event.CommentDeleted;
 import de.thm.arsnova.service.comment.model.event.CommentDeletedPayload;
 import de.thm.arsnova.service.comment.model.event.CommentHighlighted;
 import de.thm.arsnova.service.comment.model.event.CommentHighlightedPayload;
+import de.thm.arsnova.service.comment.security.PermissionEvaluator;
 import de.thm.arsnova.service.comment.service.BonusTokenService;
 import de.thm.arsnova.service.comment.service.CommentService;
 import de.thm.arsnova.service.comment.service.SettingsService;
@@ -47,11 +47,20 @@ public class CommentCommandHandlerTest {
     @Mock
     private SettingsService settingsService;
 
+    @Mock
+    private PermissionEvaluator permissionEvaluator;
+
     private CommentCommandHandler commandHandler;
 
     @Before
     public void setup() {
-        commandHandler = new CommentCommandHandler(messagingTemplate, commentService, bonusTokenService, settingsService);
+        commandHandler = new CommentCommandHandler(
+                messagingTemplate,
+                commentService,
+                bonusTokenService,
+                settingsService,
+                permissionEvaluator
+        );
     }
 
     @Test
@@ -79,6 +88,7 @@ public class CommentCommandHandlerTest {
 
         when(settingsService.get(roomId)).thenReturn(settings);
         when(commentService.create(any())).thenReturn(newComment);
+        when(permissionEvaluator.checkCommentOwnerPermission(any())).thenReturn(true);
 
         // Act
         commandHandler.handle(command);
@@ -114,6 +124,7 @@ public class CommentCommandHandlerTest {
 
         when(settingsService.get(roomId)).thenReturn(settings);
         when(commentService.create(any())).thenReturn(newComment);
+        when(permissionEvaluator.checkCommentOwnerPermission(any())).thenReturn(true);
 
         // Act
         commandHandler.handle(command);
@@ -132,6 +143,7 @@ public class CommentCommandHandlerTest {
         c.setId(id);
         c.setRoomId(roomId);
         when(commentService.get(id)).thenReturn(c);
+        when(permissionEvaluator.checkCommentDeletePermission(any())).thenReturn(true);
         DeleteCommentPayload payload = new DeleteCommentPayload(id);
         DeleteComment command = new DeleteComment(payload);
 
@@ -176,6 +188,7 @@ public class CommentCommandHandlerTest {
                 ArgumentCaptor.forClass(CommentHighlighted.class);
 
         when(commentService.get(id)).thenReturn(c);
+        when(permissionEvaluator.isOwnerOrAnyTypeOfModeratorForRoom(any())).thenReturn(true);
 
         commandHandler.handle(command);
 
@@ -215,6 +228,7 @@ public class CommentCommandHandlerTest {
                 ArgumentCaptor.forClass(CommentDeleted.class);
 
         when(commentService.deleteByRoomId(roomId)).thenReturn(commentList);
+        when(permissionEvaluator.isOwnerOrEditingModeratorForRoom(any())).thenReturn(true);
 
         commandHandler.handle(command);
 

@@ -1,8 +1,11 @@
 package de.thm.arsnova.service.comment.handler;
 
+import de.thm.arsnova.service.comment.exception.BadRequestException;
+import de.thm.arsnova.service.comment.exception.ForbiddenException;
 import de.thm.arsnova.service.comment.model.BonusToken;
 import de.thm.arsnova.service.comment.model.CommentStats;
 import de.thm.arsnova.service.comment.model.Settings;
+import de.thm.arsnova.service.comment.security.PermissionEvaluator;
 import de.thm.arsnova.service.comment.service.BonusTokenService;
 import de.thm.arsnova.service.comment.service.CommentService;
 import de.thm.arsnova.service.comment.model.Comment;
@@ -29,18 +32,21 @@ public class CommentCommandHandler {
     private final CommentService service;
     private final BonusTokenService bonusTokenService;
     private final SettingsService settingsService;
+    private final PermissionEvaluator permissionEvaluator;
 
     @Autowired
     public CommentCommandHandler(
             AmqpTemplate messagingTemplate,
             CommentService service,
             BonusTokenService bonusTokenService,
-            SettingsService settingsService
+            SettingsService settingsService,
+            PermissionEvaluator permissionEvaluator
     ) {
         this.messagingTemplate = messagingTemplate;
         this.service = service;
         this.bonusTokenService = bonusTokenService;
         this.settingsService = settingsService;
+        this.permissionEvaluator = permissionEvaluator;
     }
 
     public Comment handle(CreateComment command) {
@@ -62,6 +68,10 @@ public class CommentCommandHandler {
         newComment.setCorrect(0);
         newComment.setFavorite(false);
         newComment.setAck(settings.getDirectSend());
+
+        if (!permissionEvaluator.checkCommentOwnerPermission(newComment)) {
+            throw new BadRequestException();
+        }
 
         Comment saved = service.create(newComment);
 
@@ -95,6 +105,10 @@ public class CommentCommandHandler {
 
         PatchCommentPayload p = command.getPayload();
         Comment c = this.service.get(p.getId());
+
+        if (!permissionEvaluator.checkCommentPatchPermission(c, p.getChanges())) {
+            throw new ForbiddenException();
+        }
 
         boolean wasAck = c.isAck();
         boolean wasFavorited = c.isFavorite();
@@ -171,14 +185,19 @@ public class CommentCommandHandler {
 
         UpdateCommentPayload p = command.getPayload();
         Comment old = this.service.get(p.getId());
-        old.setBody(p.getBody());
-        old.setRead(p.isRead());
-        old.setFavorite(p.isFavorite());
-        old.setCorrect(p.getCorrect());
-        old.setTag(p.getTag());
-        old.setAnswer(p.getAnswer());
+        Comment newComment = this.service.get(p.getId());
+        newComment.setBody(p.getBody());
+        newComment.setRead(p.isRead());
+        newComment.setFavorite(p.isFavorite());
+        newComment.setCorrect(p.getCorrect());
+        newComment.setTag(p.getTag());
+        newComment.setAnswer(p.getAnswer());
 
-        Comment updated = this.service.update(old);
+        if (!permissionEvaluator.checkCommentUpdatePermission(newComment, old)) {
+            throw new ForbiddenException();
+        }
+
+        Comment updated = this.service.update(newComment);
 
         CommentUpdatedPayload payload = new CommentUpdatedPayload(updated);
         CommentUpdated event = new CommentUpdated(payload, updated.getRoomId());
@@ -225,6 +244,11 @@ public class CommentCommandHandler {
 
         String id = command.getPayload().getId();
         Comment c = service.get(id);
+
+        if (!permissionEvaluator.checkCommentDeletePermission(c)) {
+            throw new ForbiddenException();
+        }
+
         if (c.getId() != null) {
             service.delete(id);
 
@@ -247,6 +271,11 @@ public class CommentCommandHandler {
 
         String id = command.getPayload().getId();
         Comment c = service.get(id);
+
+        if (!permissionEvaluator.isOwnerOrAnyTypeOfModeratorForRoom(c.getRoomId())) {
+            throw new ForbiddenException();
+        }
+
         if (c.getId() != null) {
             CommentHighlightedPayload p = new CommentHighlightedPayload(c, command.getPayload().getLights());
             CommentHighlighted event = new CommentHighlighted(p, c.getRoomId());
@@ -265,6 +294,11 @@ public class CommentCommandHandler {
         logger.debug("Got new command: {}", command);
 
         String roomId = command.getPayload().getRoomId();
+
+        if (!permissionEvaluator.isOwnerOrEditingModeratorForRoom(roomId)) {
+            throw new ForbiddenException();
+        }
+
         List<Comment> deletedComments = service.deleteByRoomId(roomId);
         for (Comment c : deletedComments) {
             CommentDeletedPayload p = new CommentDeletedPayload();

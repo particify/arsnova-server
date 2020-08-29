@@ -21,6 +21,7 @@ import de.thm.arsnova.service.comment.model.command.Downvote;
 import de.thm.arsnova.service.comment.model.command.ResetVote;
 import de.thm.arsnova.service.comment.model.command.Upvote;
 import de.thm.arsnova.service.comment.model.command.VotePayload;
+import de.thm.arsnova.service.comment.security.PermissionEvaluator;
 import de.thm.arsnova.service.comment.service.VoteService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -31,11 +32,14 @@ public class VoteCommandHandlerTest {
     @Mock
     private CommentEventSource commentEventSource;
 
+    @Mock
+    private PermissionEvaluator permissionEvaluator;
+
     private VoteCommandHandler commandHandler;
 
     @Before
     public void setup() {
-        this.commandHandler = new VoteCommandHandler(voteService, commentEventSource);
+        this.commandHandler = new VoteCommandHandler(voteService, commentEventSource, permissionEvaluator);
     }
 
     @Test
@@ -50,6 +54,7 @@ public class VoteCommandHandlerTest {
         expectedVote.setVote(1);
 
         when(voteService.create(any())).thenReturn(expectedVote);
+        when(permissionEvaluator.checkVoteOwnerPermission(any())).thenReturn(true);
 
         Vote returned = commandHandler.handle(command);
 
@@ -72,6 +77,7 @@ public class VoteCommandHandlerTest {
         expectedVote.setVote(-1);
 
         when(voteService.create(any())).thenReturn(expectedVote);
+        when(permissionEvaluator.checkVoteOwnerPermission(any())).thenReturn(true);
 
         Vote returned = commandHandler.handle(command);
 
@@ -94,6 +100,7 @@ public class VoteCommandHandlerTest {
         currentVote.setVote(-1);
 
         when(voteService.resetVote(commentId, creatorId)).thenReturn(currentVote);
+        when(permissionEvaluator.checkVoteOwnerPermission(any())).thenReturn(true);
 
         commandHandler.handle(command);
 
@@ -111,6 +118,7 @@ public class VoteCommandHandlerTest {
         ResetVote command = new ResetVote(payload);
 
         when(voteService.resetVote(commentId, creatorId)).thenReturn(null);
+        when(permissionEvaluator.checkVoteOwnerPermission(any())).thenReturn(true);
 
         commandHandler.handle(command);
 
