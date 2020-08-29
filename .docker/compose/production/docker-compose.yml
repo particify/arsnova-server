@@ -61,6 +61,7 @@ services:
       ROUTING_ENDPOINTS_FORMATTING_SERVICE: http://arsnova-formatting-service:3000
       HTTP_CLIENT_AUTH_SERVICE: http://arsnova-auth-service:8080
       HTTP_CLIENT_CORE: http://arsnova-backend-core:8080
+      HTTP_CLIENT_WS_GATEWAY: http://arsnova-ws-gateway:8080
       HTTP_CLIENT_COMMENT_SERVICE: http://arsnova-comment-service:8080
       SECURITY_JWT_PUBLIC_SECRET: secret
       SECURITY_JWT_INTERNAL_SECRET: secret
