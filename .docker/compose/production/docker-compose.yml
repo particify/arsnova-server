@@ -78,6 +78,9 @@ services:
       STOMP_RELAY_PASSWORD: guest
       HTTP_CLIENT_AUTH_SERVICE: http://arsnova-auth-service:8080
       SECURITY_JWT_SECRET: secret
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
     command: /jetty/start.jar --module=http-forwarded
   arsnova-auth-service:
     image: registry.gitlab.com/arsnova/arsnova-auth-service:$AUTH_TAG
