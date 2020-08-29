@@ -31,6 +31,9 @@ public class CommentController extends AbstractEntityController {
     private static final String BULK_DELETE_MAPPING = POST_MAPPING + "bulkdelete";
     private static final String DELETE_BY_ROOM_MAPPING = POST_MAPPING + "byRoom";
     private static final String STATS_BY_ROOMS_MAPPING = "/stats";
+    private static final String COMMAND_MAPPING = DEFAULT_ID_MAPPING + "/_command";
+    private static final String HIGHLIGHT_COMMAND_MAPPING = COMMAND_MAPPING + "/highlight";
+    private static final String LOWLIGHT_COMMAND_MAPPING = COMMAND_MAPPING + "/lowlight";
 
     private final CommentCommandHandler commandHandler;
     private final CommentService service;
@@ -157,6 +160,28 @@ public class CommentController extends AbstractEntityController {
         CalculateStats command = new CalculateStats(p);
 
         return commandHandler.handle(command);
+    }
+
+    @PostMapping(HIGHLIGHT_COMMAND_MAPPING)
+    public void highlight(
+            @PathVariable final String id
+    ) {
+        HighlightCommentPayload p = new HighlightCommentPayload(id);
+        p.setLights(true);
+        HighlightComment command = new HighlightComment(p);
+
+        commandHandler.handle(command);
+    }
+
+    @PostMapping(LOWLIGHT_COMMAND_MAPPING)
+    public void lowlight(
+            @PathVariable final String id
+    ) {
+        HighlightCommentPayload p = new HighlightCommentPayload(id);
+        p.setLights(false);
+        HighlightComment command = new HighlightComment(p);
+
+        commandHandler.handle(command);
     }
 
 }
