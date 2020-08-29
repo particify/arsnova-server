@@ -23,6 +23,7 @@ http-client:
   auth-service: "http://127.0.0.1:8092"
   comment-service: "http://127.0.0.1:8088"
   core: "http://127.0.0.1:8080"
+  ws-gateway: "http://127.0.0.1:8099"
 ---
 logging:
   level:
