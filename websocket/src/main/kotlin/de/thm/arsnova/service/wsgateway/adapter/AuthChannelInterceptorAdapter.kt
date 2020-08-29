@@ -17,7 +17,8 @@ import java.util.concurrent.ConcurrentHashMap
 @Component
 class AuthChannelInterceptorAdapter(
 		private val jwtTokenUtil: JwtTokenUtil,
-		private val roomAccessService: RoomAccessService
+		private val roomAccessService: RoomAccessService,
+		private val roomSubscriptionService: RoomSubscriptionService
 ) : ChannelInterceptor {
 
 	companion object {
@@ -107,16 +108,16 @@ class AuthChannelInterceptorAdapter(
 						// Basic room topic, count subscribers
 						logger.debug("User is subscribing to the basic room topic, roomId: {}, userId: {}", roomId, userId)
 						wsUserRoomTopicSubscription.put(userId, accessor.getFirstNativeHeader("id")!!)
-						RoomSubscriptionService.addUser(roomId, userId)
+						roomSubscriptionService.addUser(roomId, userId)
 					}
 				}
 			} else if (accessor.command != null && accessor.command == StompCommand.DISCONNECT) {
 				logger.debug("User disconnected, removing him from subscription service, userId: {}", userId)
-				RoomSubscriptionService.removeUser(userId)
+				roomSubscriptionService.removeUser(userId)
 			} else if (accessor.command != null && accessor.command == StompCommand.UNSUBSCRIBE) {
 				if (wsUserRoomTopicSubscription.getOrDefault(userId, "") == accessor.getFirstNativeHeader("id")!!) {
 					logger.debug("User unsubscribed from basic room topic, userId: {}", userId)
-					RoomSubscriptionService.removeUser(userId)
+					roomSubscriptionService.removeUser(userId)
 				}
 			}
 		}

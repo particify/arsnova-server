@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController("RoomSubscriptionController")
-class RoomSubscriptionController {
+class RoomSubscriptionController(
+		private val roomSubscriptionService: RoomSubscriptionService
+) {
 	companion object {
 		const val ROOM_SUBSCRIPTION_MAPPING = "/roomsubscription"
 		const val GET_USER_COUNT_SUBSCRIPTION = "${ROOM_SUBSCRIPTION_MAPPING}/usercount"
@@ -20,6 +22,6 @@ class RoomSubscriptionController {
 	fun getUserCount(
 			@RequestParam ids: List<String>
 	): List<Int?> {
-		return ids.map { id -> RoomSubscriptionService.getUserCount(id) }
+		return ids.map { id -> roomSubscriptionService.getUserCount(id) }
 	}
 }
