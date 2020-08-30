@@ -80,7 +80,7 @@ class AuthChannelInterceptorAdapter(
 				return null
 			}
 
-			if (accessor.destination != null) {
+			if (accessor.destination != null && accessor.command != null && accessor.command == StompCommand.SUBSCRIBE) {
 				val destination: String = accessor.destination!!
 				val roomId = destination.substring(topicIndexBeforeRoomId, topicIndexBeforeRoomId + topicRoomIdLength)
 				if (!roomId.matches(roomIdRegex)) {
@@ -89,27 +89,24 @@ class AuthChannelInterceptorAdapter(
 				}
 				logger.trace("Extracted roomId from subscribe message: {}", roomId)
 
-				if (accessor.command != null && accessor.command == StompCommand.SUBSCRIBE) {
-
-					logger.info("Incoming message is a subscribe command")
-					if (moderatorString in destination) {
-						logger.trace("Noticed a moderator role in topic, checking for auth")
-						val userRoomAccess = roomAccessService.getRoomAccess(roomId, userId)
-						val allowedRoles = listOf(creatorRoleString, executiveModeratorRoleString, editingModeratorRoleString)
-						if (!allowedRoles.contains(userRoomAccess.role)) {
-							logger.debug("User doesn't have any auth information, dropping the message")
-							return null
-						}
-						logger.debug("Got room access info: {}", userRoomAccess)
+				logger.info("Incoming message is a subscribe command")
+				if (moderatorString in destination) {
+					logger.trace("Noticed a moderator role in topic, checking for auth")
+					val userRoomAccess = roomAccessService.getRoomAccess(roomId, userId)
+					val allowedRoles = listOf(creatorRoleString, executiveModeratorRoleString, editingModeratorRoleString)
+					if (!allowedRoles.contains(userRoomAccess.role)) {
+						logger.debug("User doesn't have any auth information, dropping the message")
+						return null
 					}
+					logger.debug("Got room access info: {}", userRoomAccess)
+				}
 
-					val endingOfTopic = destination.substring(topicIndexBeforeRoomId + topicRoomIdLength)
-					if (endingOfTopic == ".stream") {
-						// Basic room topic, count subscribers
-						logger.debug("User is subscribing to the basic room topic, roomId: {}, userId: {}", roomId, userId)
-						wsUserRoomTopicSubscription.put(userId, accessor.getFirstNativeHeader("id")!!)
-						roomSubscriptionService.addUser(roomId, userId)
-					}
+				val endingOfTopic = destination.substring(topicIndexBeforeRoomId + topicRoomIdLength)
+				if (endingOfTopic == ".stream") {
+					// Basic room topic, count subscribers
+					logger.debug("User is subscribing to the basic room topic, roomId: {}, userId: {}", roomId, userId)
+					wsUserRoomTopicSubscription.put(userId, accessor.getFirstNativeHeader("id")!!)
+					roomSubscriptionService.addUser(roomId, userId)
 				}
 			} else if (accessor.command != null && accessor.command == StompCommand.DISCONNECT) {
 				logger.debug("User disconnected, removing him from subscription service, userId: {}", userId)
