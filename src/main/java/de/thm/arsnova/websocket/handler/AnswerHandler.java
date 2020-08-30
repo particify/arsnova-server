@@ -36,6 +36,9 @@ import de.thm.arsnova.config.RabbitConfig;
 import de.thm.arsnova.config.properties.MessageBrokerProperties;
 import de.thm.arsnova.event.BulkChangeEvent;
 import de.thm.arsnova.model.Answer;
+import de.thm.arsnova.model.AnswerStatistics;
+import de.thm.arsnova.model.Content;
+import de.thm.arsnova.service.AnswerService;
 import de.thm.arsnova.websocket.message.AnswersChanged;
 
 @Component
@@ -48,10 +51,13 @@ public class AnswerHandler {
 	private static final Logger logger = LoggerFactory.getLogger(AnswerHandler.class);
 
 	private final RabbitTemplate messagingTemplate;
+	private final AnswerService answerService;
 
 	@Autowired
-	public AnswerHandler(final RabbitTemplate messagingTemplate) {
+	public AnswerHandler(final RabbitTemplate messagingTemplate,
+			final AnswerService answerService) {
 		this.messagingTemplate = messagingTemplate;
+		this.answerService = answerService;
 	}
 
 	@EventListener
@@ -62,10 +68,15 @@ public class AnswerHandler {
 		final Set<String> ids = groupedAnswers.keySet();
 		logger.debug("Sending events to topic with key answers-changed for contents: {}", ids);
 		for (final String contentId : ids) {
-			final String roomId = groupedAnswers.get(contentId).get(0).getRoomId();
+			final Answer anyAnswer = groupedAnswers.get(contentId).get(0);
+			final String roomId = anyAnswer.getRoomId();
 			final List<String> answerIds = groupedAnswers.get(contentId).stream()
 					.map(Answer::getId).collect(Collectors.toList());
-			final AnswersChanged stompEvent = new AnswersChanged(answerIds);
+			final AnswerStatistics stats =
+					anyAnswer.getFormat() == Content.Format.CHOICE || anyAnswer.getFormat() == Content.Format.SCALE
+							? answerService.getStatistics(contentId)
+							: null;
+			final AnswersChanged stompEvent = new AnswersChanged(answerIds, stats);
 			messagingTemplate.convertAndSend(
 					"amq.topic",
 					roomId + ".content-" + contentId + ".answers-changed.stream",

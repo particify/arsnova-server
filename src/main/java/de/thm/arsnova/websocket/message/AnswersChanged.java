@@ -20,9 +20,13 @@ package de.thm.arsnova.websocket.message;
 
 import java.util.List;
 
+import de.thm.arsnova.model.AnswerStatistics;
+
 public class AnswersChanged extends WebSocketMessage<AnswersChanged.AnswersChangedPayload> {
+
 	public static class AnswersChangedPayload implements WebSocketPayload {
 		private List<String> ids;
+		private AnswerStatistics stats;
 
 		public List<String> getIds() {
 			return ids;
@@ -31,12 +35,21 @@ public class AnswersChanged extends WebSocketMessage<AnswersChanged.AnswersChang
 		public void setIds(final List<String> ids) {
 			this.ids = ids;
 		}
+
+		public AnswerStatistics getStats() {
+			return stats;
+		}
+
+		public void setStats(final AnswerStatistics stats) {
+			this.stats = stats;
+		}
 	}
 
-	public AnswersChanged(final List<String> ids) {
+	public AnswersChanged(final List<String> ids, final AnswerStatistics stats) {
 		super(AnswersChanged.class.getSimpleName());
 		final AnswersChangedPayload payload = new AnswersChangedPayload();
 		payload.ids = ids;
+		payload.stats = stats;
 		this.setPayload(payload);
 	}
 }
