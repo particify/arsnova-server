@@ -6,6 +6,7 @@
 	</weaver>
 
 	<aspects>
+		<aspect name="de.thm.arsnova.security.SystemAuthenticationAspect"/>
 		<aspect name="de.thm.arsnova.web.RangeAspect"/>
 		<aspect name="de.thm.arsnova.web.InternalEntityAspect"/>
 		<aspect name="de.thm.arsnova.websocket.WebsocketAuthenticationAspect"/>
