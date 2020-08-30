@@ -50,6 +50,7 @@ import de.thm.arsnova.event.BeforeCreationEvent;
 import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.event.BeforeFullUpdateEvent;
 import de.thm.arsnova.event.BeforePatchEvent;
+import de.thm.arsnova.event.BulkChangeEvent;
 import de.thm.arsnova.model.Entity;
 import de.thm.arsnova.model.EntityValidationException;
 import de.thm.arsnova.model.serialization.View;
@@ -263,6 +264,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 					this, e, oldEntities.get(e.getId()), propertyGetter, changes));
 			modifyRetrieved(e);
 		});
+		eventPublisher.publishEvent(new BulkChangeEvent<>(this, this.type, entities));
 
 		return patchedEntities;
 	}
@@ -297,6 +299,7 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 		for (final T entity : entities) {
 			eventPublisher.publishEvent(new AfterDeletionEvent<>(this, entity));
 		}
+		eventPublisher.publishEvent(new BulkChangeEvent<>(this, this.type, entities));
 	}
 
 	/**

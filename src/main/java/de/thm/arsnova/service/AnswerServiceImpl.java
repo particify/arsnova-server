@@ -41,6 +41,7 @@ import org.springframework.validation.Validator;
 import de.thm.arsnova.event.AfterCreationEvent;
 import de.thm.arsnova.event.BeforeCreationEvent;
 import de.thm.arsnova.event.BeforeDeletionEvent;
+import de.thm.arsnova.event.BulkChangeEvent;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.AnswerStatistics;
 import de.thm.arsnova.model.ChoiceQuestionContent;
@@ -112,6 +113,7 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 			for (final Answer e : answers) {
 				this.eventPublisher.publishEvent(new AfterCreationEvent<>(this, e));
 			}
+			this.eventPublisher.publishEvent(new BulkChangeEvent<>(this, Answer.class, answers));
 		} catch (final DbAccessException e) {
 			logger.error("Could not bulk save answers from queue.", e);
 		}
