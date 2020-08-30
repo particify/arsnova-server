@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.access.intercept.RunAsUserToken;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -125,7 +126,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		}
 
 		final String userId = getUserId(authentication);
-		if (isAdminAccess(authentication)) {
+		if (isSystemAccess(authentication) || isAdminAccess(authentication)) {
 			return true;
 		}
 
@@ -382,8 +383,11 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	}
 
 	private boolean isSystemAccess(final Authentication auth) {
-		return auth instanceof RunAsUserToken
-				&& auth.getAuthorities().stream().anyMatch(ga -> ga.getAuthority().equals("ROLE_RUN_AS_SYSTEM"));
+		return (auth instanceof UsernamePasswordAuthenticationToken
+				&& auth.getAuthorities().stream().anyMatch(ga -> ga.getAuthority().equals("ROLE_SYSTEM"))
+				) || (
+				auth instanceof RunAsUserToken
+				&& auth.getAuthorities().stream().anyMatch(ga -> ga.getAuthority().equals("ROLE_RUN_AS_SYSTEM")));
 	}
 
 	private boolean isAccountManagementAccess(final Authentication auth) {
