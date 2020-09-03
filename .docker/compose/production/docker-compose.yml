@@ -125,6 +125,8 @@ services:
       - arsnova-http-gateway
       - arsnova-comment-service
       - arsnova-web
+    environment:
+      ARSNOVA_HOSTNAME: $ARSNOVA_HOSTNAME
 volumes:
   couchdb_data:
   postgresql_data_auth:

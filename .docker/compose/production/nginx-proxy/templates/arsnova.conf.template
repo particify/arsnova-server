@@ -21,7 +21,7 @@ upstream http-gateway {
 server {
   listen 80 default_server;
   listen [::]:80 default_server;
-  server_name localhost _;
+  server_name $ARSNOVA_HOSTNAME _;
 
   # Modern client
   location / {
