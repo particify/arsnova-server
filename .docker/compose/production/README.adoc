@@ -30,6 +30,7 @@ The default configuration can be adjusted via environment variables:
 |=======
 |Variable |Default value |Description
 |PORT |80 |Port used for the frontend proxy
+|ARSNOVA_HOSTNAME |app.particify.de |Hostname for the application
 |CORE_TAG |master |Docker tag (repository branch) for Core Backend
 |WSGW_TAG |master |Docker tag (repository branch) for WebSocket Gateway
 |HTTPGW_TAG |master |Docker tag (repository branch) for HTTP Gateway

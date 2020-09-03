@@ -45,5 +45,7 @@ services:
     #image: nginx:stable
     ports:
       - 127.0.0.1:$PORT:80
-    #volumes:
-    #  - ./nginx-proxy/conf.d:/etc/nginx/conf.d
+    environment:
+      ARSNOVA_HOSTNAME: localhost
+    volumes:
+      - ./nginx-proxy/templates:/etc/nginx/templates
