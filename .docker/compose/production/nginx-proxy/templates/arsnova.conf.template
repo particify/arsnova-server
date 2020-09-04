@@ -19,9 +19,10 @@ upstream http-gateway {
 }
 
 server {
-  listen 80 default_server;
-  listen [::]:80 default_server;
+  listen $NGINX_LISTEN default_server;
+  listen [::]:$NGINX_LISTEN default_server;
   server_name $ARSNOVA_HOSTNAME _;
+  $NGINX_TLS_INCLUDE conf.d/${ARSNOVA_HOSTNAME}_tls.conf.include;
 
   # Modern client
   location / {
