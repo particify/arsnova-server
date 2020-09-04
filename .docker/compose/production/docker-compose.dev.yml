@@ -46,6 +46,8 @@ services:
     ports:
       - 127.0.0.1:$PORT:80
     environment:
+      NGINX_LISTEN: "80"
+      NGINX_TLS_INCLUDE: "#include"
       ARSNOVA_HOSTNAME: localhost
     volumes:
       - ./nginx-proxy/templates:/etc/nginx/templates
