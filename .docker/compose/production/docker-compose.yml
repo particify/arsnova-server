@@ -28,6 +28,8 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
   arsnova-backend-core:
     image: registry.gitlab.com/arsnova/arsnova-backend:$CORE_TAG
     depends_on:
@@ -131,3 +133,4 @@ volumes:
   couchdb_data:
   postgresql_data_auth:
   postgresql_data_comment:
+  rabbitmq_data:
