@@ -1,9 +1,9 @@
 #!/bin/sh
-KEY_EXT=key
+KEY_EXT=_key.pem
 if [ -d /mnt/tls-certs ]; then
-  CERT_FILES=$(ls -1 /mnt/tls-certs/*.$KEY_EXT)
+  CERT_FILES=$(ls -1 /mnt/tls-certs/*$KEY_EXT)
   for f in $CERT_FILES; do
-    export HOSTNAME=`basename $f .$KEY_EXT`
+    export HOSTNAME=`basename $f $KEY_EXT`
     echo $0: Creating HTTPS config for $HOSTNAME
     envsubst '$HOSTNAME' < /etc/nginx/tls.conf.include > /etc/nginx/conf.d/${HOSTNAME}_tls.conf.include
   done

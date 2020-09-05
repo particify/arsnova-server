@@ -1,5 +1,5 @@
-ssl_certificate /mnt/tls-certs/$HOSTNAME.crt;
-ssl_certificate_key /mnt/tls-certs/$HOSTNAME.key;
+ssl_certificate /mnt/tls-certs/${HOSTNAME}_cer.pem;
+ssl_certificate_key /mnt/tls-certs/${HOSTNAME}_key.pem;
 ssl_session_timeout 1d;
 ssl_session_cache shared:MozSSL:10m;  # about 40000 sessions
 ssl_session_tickets off;
@@ -20,7 +20,7 @@ ssl_stapling on;
 ssl_stapling_verify on;
 
 # verify chain of trust of OCSP response using Root CA and Intermediate certs
-ssl_trusted_certificate /path/to/root_CA_cert_plus_intermediates;
+ssl_trusted_certificate /mnt/tls-certs/${HOSTNAME}_ca.pem;
 
 # replace with the IP address of your resolver
 resolver 127.0.0.1;
