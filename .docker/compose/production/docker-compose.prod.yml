@@ -27,6 +27,7 @@ services:
   arsnova-proxy:
     ports:
       - $PORT:80
+      - $HTTPS_PORT:443
     volumes:
       - tls-certs:/mnt/tls-certs:ro
     restart: unless-stopped
