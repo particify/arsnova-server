@@ -28,6 +28,7 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_NODENAME: rabbit@localhost
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
   arsnova-backend-core:
