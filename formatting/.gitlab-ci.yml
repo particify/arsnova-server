@@ -1,6 +1,7 @@
 variables:
   BUILD_DIR: lib
   NODE_VERSION: "12.18"
+  IMAGE_VARIANT: buster
   YARN_CACHE_FOLDER: .yarn-cache
 
 stages:
@@ -10,7 +11,7 @@ stages:
   - deploy
 
 default:
-  image: node:$NODE_VERSION-buster
+  image: node:$NODE_VERSION-$IMAGE_VARIANT
   before_script:
     - export PATH="`pwd`/node_modules/.bin:$PATH"
     - date
@@ -79,7 +80,7 @@ yarn_install:
   script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --context "$KANIKO_CONTEXT" --dockerfile "$KANIKO_DOCKERFILE" --destination "$KANIKO_DESTINATION" --build-arg "BUILD_DIR=`echo $BUILD_DIR`"
+    - /kaniko/executor --context "$KANIKO_CONTEXT" --dockerfile "$KANIKO_DOCKERFILE" --destination "$KANIKO_DESTINATION" --build-arg "BUILD_DIR=`echo $BUILD_DIR`" --build-arg "IMAGE_BASETAG=`echo $NODE_VERSION-$IMAGE_VARIANT`"
 
 # Temporary workaround until GitLab bug is fixed
 docker_image:
