@@ -1,4 +1,5 @@
-FROM node:$NODE_VERSION
+ARG IMAGE_BASETAG=lts-alpine
+FROM node:$IMAGE_BASETAG
 
 ENV BUILD_DIR=lib
 ENV NODE_ENV=production
