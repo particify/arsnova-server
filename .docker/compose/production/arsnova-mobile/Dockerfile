@@ -6,8 +6,7 @@ ARG VERSION=2.7.1
 COPY conf.d /etc/nginx/conf.d
 
 RUN \
-  apt-get update -q && \
-  apt-get install -y --no-install-recommends \
+  apk add --no-cache --virtual .build-deps \
     ca-certificates \
     curl \
     unzip \
@@ -18,10 +17,4 @@ RUN \
   unzip arsnova-mobile-$VERSION.war -d mobile && \
   rm arsnova-mobile-$VERSION.war && \
   rm /etc/nginx/conf.d/default.conf && \
-  apt-get purge -y \
-    ca-certificates \
-    curl \
-    unzip \
-    && \
-  apt-get clean && \
-  rm -rf /var/lib/apt/lists/*
+  apk del .build-deps
