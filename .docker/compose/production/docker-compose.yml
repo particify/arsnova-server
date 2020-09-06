@@ -8,7 +8,7 @@ services:
     volumes:
       - couchdb_data:/opt/couchdb/data
   postgresql_auth:
-    image: postgres:12.1
+    image: postgres:12.1-alpine
     environment:
       POSTGRES_DB: arsnovaauth
       POSTGRES_USER: arsnovaauth
@@ -16,7 +16,7 @@ services:
     volumes:
       - postgresql_data_auth:/var/lib/postgresql/data
   postgresql_comment:
-    image: postgres:12.1
+    image: postgres:12.1-alpine
     environment:
       POSTGRES_DB: arsnovacomment
       POSTGRES_USER: arsnovacomment
@@ -24,7 +24,7 @@ services:
     volumes:
       - postgresql_data_comment:/var/lib/postgresql/data
   rabbitmq:
-    image: registry.gitlab.com/particify/dev/devops/docker-orchestration/rabbitmq-stomp:3.8
+    image: registry.gitlab.com/particify/dev/devops/docker-orchestration/rabbitmq-stomp:3.8-alpine
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
@@ -120,7 +120,7 @@ services:
     environment:
       SERVER_PORT: 3000
   arsnova-proxy:
-    image: registry.gitlab.com/particify/dev/devops/docker-orchestration/nginx-proxy:stable
+    image: registry.gitlab.com/particify/dev/devops/docker-orchestration/nginx-proxy:stable-alpine
     depends_on:
       - arsnova-backend-core
       - arsnova-auth-service
