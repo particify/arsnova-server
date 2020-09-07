@@ -49,8 +49,19 @@ public class Motd extends Entity {
 	@NotBlank
 	private String body;
 
+	private String renderedBody;
+
 	@NotNull
 	private Audience audience;
+
+	{
+		final TextRenderingOptions options = new TextRenderingOptions();
+		options.setMarkdownFeatureset(TextRenderingOptions.MarkdownFeatureset.EXTENDED);
+		this.addRenderingMapping(
+				this::getBody,
+				this::setRenderedBody,
+				options);
+	}
 
 	@Override
 	@JsonView(View.Persistence.class)
@@ -112,6 +123,15 @@ public class Motd extends Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setBody(final String body) {
 		this.body = body;
+	}
+
+	@JsonView(View.Public.class)
+	public String getRenderedBody() {
+		return renderedBody;
+	}
+
+	public void setRenderedBody(final String renderedBody) {
+		this.renderedBody = renderedBody;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})

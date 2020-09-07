@@ -402,6 +402,7 @@ public class Room extends Entity {
 	private String abbreviation;
 
 	private String description;
+	private String renderedDescription;
 	private boolean closed;
 	private Set<Moderator> moderators;
 	private boolean moderatorsInitialized;
@@ -411,6 +412,15 @@ public class Room extends Entity {
 	private Map<String, Map<String, Object>> extensions;
 	private Map<String, String> attachments;
 	private RoomStatistics statistics;
+
+	{
+		final TextRenderingOptions options = new TextRenderingOptions();
+		options.setMarkdownFeatureset(TextRenderingOptions.MarkdownFeatureset.EXTENDED);
+		this.addRenderingMapping(
+				this::getDescription,
+				this::setRenderedDescription,
+				options);
+	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getShortId() {
@@ -460,6 +470,15 @@ public class Room extends Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setDescription(final String description) {
 		this.description = description;
+	}
+
+	@JsonView(View.Public.class)
+	public String getRenderedDescription() {
+		return renderedDescription;
+	}
+
+	public void setRenderedDescription(final String renderedDescription) {
+		this.renderedDescription = renderedDescription;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
