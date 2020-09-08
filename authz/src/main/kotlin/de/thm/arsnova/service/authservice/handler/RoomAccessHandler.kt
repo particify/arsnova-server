@@ -14,7 +14,10 @@ import de.thm.arsnova.service.authservice.persistence.RoomAccessSyncTrackerRepos
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
+import org.springframework.dao.CannotAcquireLockException
 import org.springframework.dao.EmptyResultDataAccessException
+import org.springframework.retry.annotation.Backoff
+import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
@@ -29,6 +32,7 @@ class RoomAccessHandler (
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun handleCreateRoomAccessCommand(command: CreateRoomAccessCommand) {
         logger.debug("Handling command: {}", command)
         val syncTracker = roomAccessSyncTrackerRepository.findById(command.roomId)
@@ -47,6 +51,7 @@ class RoomAccessHandler (
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun handleDeleteRoomAccessCommand(command: DeleteRoomAccessCommand) {
         logger.debug("Handling command: {}", command)
         val syncTracker = roomAccessSyncTrackerRepository.findById(command.roomId)
@@ -67,6 +72,7 @@ class RoomAccessHandler (
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun handleRequestRoomAccessSyncCommand(command: RequestRoomAccessSyncCommand): RoomAccessSyncTracker {
         logger.debug("Handling request: {}", command)
         val syncTracker = roomAccessSyncTrackerRepository.findById(command.roomId)
@@ -90,6 +96,7 @@ class RoomAccessHandler (
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun handleSyncRoomAccessCommand(command: SyncRoomAccessCommand) {
         logger.debug("Handling event: {}", command)
         val syncTracker = roomAccessSyncTrackerRepository.findById(command.roomId)
@@ -126,6 +133,7 @@ class RoomAccessHandler (
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun getByRoomIdAndUserId(roomId: String, userId: String): Optional<RoomAccess> {
         logger.debug("Handling room access request with roomId: {} and userId: {}", roomId, userId)
         val syncTracker = roomAccessSyncTrackerRepository.findById(roomId)
@@ -148,12 +156,14 @@ class RoomAccessHandler (
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun getByUserId(userId: String): Iterable<RoomAccess> {
         logger.debug("Handling room access request by userId: {}", userId)
         return roomAccessRepository.findByUserId(userId)
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun getByPK(pk: RoomAccessPK): Optional<RoomAccess> {
         return roomAccessRepository.findById(pk)
     }
