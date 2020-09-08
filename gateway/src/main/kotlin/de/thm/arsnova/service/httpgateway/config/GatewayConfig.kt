@@ -38,7 +38,7 @@ class GatewayConfig (
                 }
                 .route("comment-service") { p ->
                     p
-                            .path("/{roomId}/comment/**")
+                            .path("/{roomId}/comment/**", "/{roomId}/settings/**")
                             .filters { f ->
                                 f.filter(authFilter.apply(AuthFilter.Config()))
                                 f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
