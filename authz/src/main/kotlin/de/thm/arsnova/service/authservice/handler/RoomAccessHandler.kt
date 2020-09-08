@@ -155,14 +155,14 @@ class RoomAccessHandler (
         }
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun getByUserId(userId: String): Iterable<RoomAccess> {
         logger.debug("Handling room access request by userId: {}", userId)
         return roomAccessRepository.findByUserId(userId)
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun getByPK(pk: RoomAccessPK): Optional<RoomAccess> {
         return roomAccessRepository.findById(pk)
