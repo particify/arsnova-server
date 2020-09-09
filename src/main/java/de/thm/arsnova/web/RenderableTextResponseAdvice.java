@@ -1,6 +1,7 @@
 package de.thm.arsnova.web;
 
 import java.io.IOException;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
@@ -32,21 +33,40 @@ public class RenderableTextResponseAdvice extends AbstractMappingJacksonResponse
 			final MethodParameter methodParameter,
 			final ServerHttpRequest serverHttpRequest,
 			final ServerHttpResponse serverHttpResponse) {
-		if (!(mappingJacksonValue.getValue() instanceof Entity)) {
+		final Object value = mappingJacksonValue.getValue();
+
+		if (value instanceof List) {
+			final List<?> list = ((List<?>) value);
+			if (list.size() == 0) {
+				return;
+			}
+			if (!(list.get(0) instanceof Entity)) {
+				return;
+			}
+			for (final Entity entity : ((List<? extends Entity>) list)) {
+				addRenderedTextToEntity(entity);
+			}
 			return;
 		}
-		final Entity entity = (Entity) mappingJacksonValue.getValue();
 
-		if (entity != null && !entity.getRenderingMapping().isEmpty()) {
-			logger.debug("Rendering mappings: {}", entity.getRenderingMapping());
-			for (final EntityRenderingMapping mapping : entity.getRenderingMapping()) {
-				final String unrenderedText = mapping.getRawValueSupplier().get();
-				try {
-					final String renderedText = textRenderingService.renderText(unrenderedText, mapping.getOptions());
-					mapping.getRenderedValueConsumer().accept(renderedText);
-				} catch (final IOException e) {
-					logger.error("Failed to render text value.");
-				}
+		if (mappingJacksonValue.getValue() instanceof Entity) {
+			final Entity entity = (Entity) mappingJacksonValue.getValue();
+
+			if (entity != null && !entity.getRenderingMapping().isEmpty()) {
+				addRenderedTextToEntity(entity);
+			}
+		}
+	}
+
+	public void addRenderedTextToEntity(final Entity entity) {
+		logger.trace("Renderable fields for entity {}: {}", entity.getId(), entity.getRenderingMapping().size());
+		for (final EntityRenderingMapping mapping : entity.getRenderingMapping()) {
+			final String unrenderedText = mapping.getRawValueSupplier().get();
+			try {
+				final String renderedText = textRenderingService.renderText(unrenderedText, mapping.getOptions());
+				mapping.getRenderedValueConsumer().accept(renderedText);
+			} catch (final IOException e) {
+				logger.error("Failed to render text value.");
 			}
 		}
 	}
