@@ -1,14 +1,14 @@
 version: "3"
 services:
   couchdb:
-    image: couchdb:2.3
+    image: couchdb:3.1
     environment:
       COUCHDB_USER: arsnova
       COUCHDB_PASSWORD: arsnova
     volumes:
       - couchdb_data:/opt/couchdb/data
   postgresql_auth:
-    image: postgres:12.1-alpine
+    image: postgres:12.4-alpine
     environment:
       POSTGRES_DB: arsnovaauth
       POSTGRES_USER: arsnovaauth
@@ -16,7 +16,7 @@ services:
     volumes:
       - postgresql_data_auth:/var/lib/postgresql/data
   postgresql_comment:
-    image: postgres:12.1-alpine
+    image: postgres:12.4-alpine
     environment:
       POSTGRES_DB: arsnovacomment
       POSTGRES_USER: arsnovacomment
