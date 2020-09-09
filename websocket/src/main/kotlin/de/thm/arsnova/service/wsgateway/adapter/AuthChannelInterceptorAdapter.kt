@@ -44,7 +44,7 @@ class AuthChannelInterceptorAdapter(
 	private val wsUserRoomTopicSubscription = ConcurrentHashMap<String, String>()
 
 	override fun preSend(message: Message<*>, channel: MessageChannel): Message<*>? {
-		logger.info("Inspecting incoming message: {}", message)
+		logger.debug("Inspecting incoming message: {}", message)
 
 		val accessor = StompHeaderAccessor.wrap(message)
 		val wsSessionId = accessor.sessionId!!
@@ -69,7 +69,7 @@ class AuthChannelInterceptorAdapter(
 				}
 			} else {
 				// no token given -> auth failed
-				logger.info("no auth token given, dropping connection attempt")
+				logger.debug("no auth token given, dropping connection attempt")
 				return null;
 			}
 		} else {
@@ -89,7 +89,7 @@ class AuthChannelInterceptorAdapter(
 				}
 				logger.trace("Extracted roomId from subscribe message: {}", roomId)
 
-				logger.info("Incoming message is a subscribe command")
+				logger.debug("Incoming message is a subscribe command")
 				if (moderatorString in destination) {
 					logger.trace("Noticed a moderator role in topic, checking for auth")
 					val userRoomAccess = roomAccessService.getRoomAccess(roomId, userId)
