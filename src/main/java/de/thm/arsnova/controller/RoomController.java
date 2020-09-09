@@ -159,9 +159,15 @@ public class RoomController extends AbstractEntityController<Room> {
 		return roomStatistics;
 	}
 
-	@PostMapping(TRANSFER_MAPPING)
+	@PostMapping(value = TRANSFER_MAPPING, params = "newOwnerId")
 	public Room transferOwnership(@PathVariable final String id, @RequestParam final String newOwnerId) {
 		final Room room = roomService.get(id);
 		return roomService.transferOwnership(room, newOwnerId);
+	}
+
+	@PostMapping(value = TRANSFER_MAPPING, params = "newOwnerToken")
+	public Room transferOwnershipThroughToken(@PathVariable final String id, @RequestParam final String newOwnerToken) {
+		final Room room = roomService.get(id);
+		return roomService.transferOwnershipThroughToken(room, newOwnerToken);
 	}
 }
