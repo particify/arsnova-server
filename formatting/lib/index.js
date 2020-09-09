@@ -73,7 +73,7 @@ app.post('/render', (req, res) => {
   let options = req.body.options;
 
   if (options) {
-    const mdFeatureset = options.markdownFeatureset || defaultMdFeatureset;
+    const mdFeatureset = (options.markdownFeatureset || defaultMdFeatureset).toLowerCase();
     let mdFeatures = options.markdown
         ? markdownFeaturesets[mdFeatureset] || markdownFeaturesets[defaultMdFeatureset]
         : markdownFeaturesets.minimum;
