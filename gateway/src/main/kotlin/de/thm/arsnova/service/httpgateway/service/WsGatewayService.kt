@@ -30,7 +30,8 @@ class WsGatewayService(
                         }
                     })
                 }
-                .onErrorResume {
+                .onErrorResume { exception ->
+                    logger.debug("Exception on getting room subscription user count from ws gw", exception)
                     Flux.fromIterable(roomIds.map { id ->
                         // using a local var for this is needed because otherwise type can't be interfered
                         val h: Optional<Int> = Optional.empty()
