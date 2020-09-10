@@ -182,12 +182,14 @@ public class Content extends Entity {
 	private Map<String, Map<String, Object>> extensions;
 	private Map<String, String> attachments;
 
+	private TextRenderingOptions bodyRenderingOptions;
+
 	{
-		final TextRenderingOptions options = new TextRenderingOptions();
+		this.bodyRenderingOptions = new TextRenderingOptions();
 		this.addRenderingMapping(
 				this::getBody,
 				this::setRenderedBody,
-				options);
+				this.bodyRenderingOptions);
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
@@ -237,6 +239,10 @@ public class Content extends Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setFormat(final Format format) {
 		this.format = format;
+		this.bodyRenderingOptions.setMarkdownFeatureset(
+				format == Format.SLIDE
+				? TextRenderingOptions.MarkdownFeatureset.EXTENDED
+				: TextRenderingOptions.MarkdownFeatureset.SIMPLE);
 	}
 
 	@JsonView(View.Public.class)
