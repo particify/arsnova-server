@@ -1,5 +1,6 @@
 package de.thm.arsnova.service.httpgateway.security
 
+import org.slf4j.LoggerFactory
 import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.AuthorityUtils
@@ -17,6 +18,8 @@ class SecurityContextRepository(
     companion object {
         val TOKEN_PREFIX = "Bearer "
     }
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun save(
         swe: ServerWebExchange?,
@@ -38,7 +41,10 @@ class SecurityContextRepository(
                 .map { token ->
                     Pair(jwtTokenUtil.getUserIdFromPublicToken(token), token)
                 }
-                .onErrorResume { Mono.empty() }
+                .onErrorResume { exception ->
+                    logger.debug("Exception on getting user id from public jwt", exception)
+                    Mono.empty()
+                }
                 .map { authPair ->
                     UsernamePasswordAuthenticationToken(
                             authPair.first,

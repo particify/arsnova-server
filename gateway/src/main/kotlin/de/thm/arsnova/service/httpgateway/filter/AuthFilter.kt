@@ -49,7 +49,8 @@ class AuthFilter (
                     .flatMap {
                         roomAccessService.getRoomAccess(roomId, userId)
                     }
-                    .onErrorResume {
+                    .onErrorResume { exception ->
+                        logger.trace("Auth service didn't give specific role", exception)
                         Mono.just(RoomAccess(roomId, userId, "", "PARTICIPANT"))
                     }
                     .map { roomAccess: RoomAccess ->
