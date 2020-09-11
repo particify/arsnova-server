@@ -48,6 +48,7 @@ services:
       SYSTEM_MESSAGE_BROKER_RABBITMQ_USERNAME: guest
       SYSTEM_MESSAGE_BROKER_RABBITMQ_PASSWORD: guest
       SYSTEM_MESSAGE_BROKER_RABBITMQ_VIRTUAL_HOST: /
+      SYSTEM_FORMATTING_SERVICE_HOST_URL: http://arsnova-formatting-service:3000
       SECURITY_JWT_SECRET: secret
       UI_SLOGAN: powered by particify.de
     command: /jetty/start.jar --module=http-forwarded
