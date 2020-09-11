@@ -52,6 +52,7 @@ public class UserProfile extends Entity {
 		private String activationKey;
 		private String passwordResetKey;
 		private Date passwordResetTime;
+		private int failedVerifications;
 
 		@JsonView(View.Persistence.class)
 		public String getPassword() {
@@ -91,6 +92,16 @@ public class UserProfile extends Entity {
 		@JsonView(View.Persistence.class)
 		public void setPasswordResetTime(final Date passwordResetTime) {
 			this.passwordResetTime = passwordResetTime;
+		}
+
+		@JsonView(View.Persistence.class)
+		public int getFailedVerifications() {
+			return failedVerifications;
+		}
+
+		@JsonView(View.Persistence.class)
+		public void setFailedVerifications(final int failedVerifications) {
+			this.failedVerifications = failedVerifications;
 		}
 
 		@JsonView(View.Admin.class)
