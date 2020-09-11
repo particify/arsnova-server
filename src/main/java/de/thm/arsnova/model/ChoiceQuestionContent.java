@@ -32,6 +32,8 @@ public class ChoiceQuestionContent extends Content {
 		@NotBlank
 		private String label;
 
+		private String renderedLabel;
+
 		private int points;
 
 		@JsonView({View.Persistence.class, View.Public.class})
@@ -42,6 +44,15 @@ public class ChoiceQuestionContent extends Content {
 		@JsonView({View.Persistence.class, View.Public.class})
 		public void setLabel(final String label) {
 			this.label = label;
+		}
+
+		@JsonView(View.Public.class)
+		public String getRenderedLabel() {
+			return renderedLabel;
+		}
+
+		public void setRenderedLabel(final String renderedLabel) {
+			this.renderedLabel = renderedLabel;
 		}
 
 		@JsonView({View.Persistence.class, View.Public.class})

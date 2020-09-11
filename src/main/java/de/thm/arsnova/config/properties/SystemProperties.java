@@ -84,6 +84,27 @@ public class SystemProperties {
 		}
 	}
 
+	public static class FormattingService {
+		private boolean enabled;
+		private String hostUrl;
+
+		public boolean isEnabled() {
+			return enabled;
+		}
+
+		public void setEnabled(final boolean enabled) {
+			this.enabled = enabled;
+		}
+
+		public String getHostUrl() {
+			return hostUrl;
+		}
+
+		public void setHostUrl(final String hostUrl) {
+			this.hostUrl = hostUrl;
+		}
+	}
+
 	public static class LmsConnector {
 		private boolean enabled;
 		private String hostUrl;
@@ -156,6 +177,7 @@ public class SystemProperties {
 	private String rootUrl;
 	private Api api;
 	private Mail mail;
+	private FormattingService formattingService;
 	private LmsConnector lmsConnector;
 	private Socketio socketio;
 
@@ -181,6 +203,14 @@ public class SystemProperties {
 
 	public void setMail(final Mail mail) {
 		this.mail = mail;
+	}
+
+	public FormattingService getFormattingService() {
+		return formattingService;
+	}
+
+	public void setFormattingService(final FormattingService formattingService) {
+		this.formattingService = formattingService;
 	}
 
 	public LmsConnector getLmsConnector() {

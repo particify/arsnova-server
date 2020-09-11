@@ -61,6 +61,11 @@ arsnova:
             - shortId
             - ownerId
 
+    # Formatting service
+    formatting-service:
+      enabled: true
+      host-url: http://localhost:3020
+
     # LMS connector service
     lms-connector:
       enabled: false

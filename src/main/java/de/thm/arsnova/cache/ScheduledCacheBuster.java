@@ -86,4 +86,10 @@ public class ScheduledCacheBuster {
 		/* Implementation provided by caching aspect. */
 	}
 
+	@CacheEvict(value = "rendered-texts", allEntries = true)
+	@Scheduled(initialDelay = 1000 * 225, fixedRate = 1000 * 60 * 30)
+	private void clearRenderedTextCache() {
+		/* Implementation provided by caching aspect. */
+	}
+
 }

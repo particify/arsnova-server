@@ -18,9 +18,14 @@
 
 package de.thm.arsnova.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import org.springframework.core.style.ToStringCreator;
 
 import de.thm.arsnova.model.serialization.View;
@@ -36,6 +41,7 @@ public abstract class Entity {
 	protected Date creationTimestamp;
 	protected Date updateTimestamp;
 	private boolean internal;
+	private List<EntityRenderingMapping> renderingMapping;
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getId() {
@@ -89,6 +95,27 @@ public abstract class Entity {
 		}
 
 		return clazz;
+	}
+
+	@JsonIgnore
+	public List<EntityRenderingMapping> getRenderingMapping() {
+		if (this.renderingMapping == null) {
+			this.renderingMapping = new ArrayList<>();
+		}
+
+		return renderingMapping;
+	}
+
+	public void addRenderingMapping(
+			final Supplier<String> rawValueSupplier,
+			final Consumer<String> renderedValueConsumer,
+			final TextRenderingOptions textRenderingOptions) {
+		final EntityRenderingMapping mapping = new EntityRenderingMapping(
+				rawValueSupplier,
+				renderedValueConsumer,
+				textRenderingOptions
+		);
+		this.getRenderingMapping().add(mapping);
 	}
 
 	public boolean isInternal() {

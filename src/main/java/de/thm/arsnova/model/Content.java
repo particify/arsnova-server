@@ -168,6 +168,8 @@ public class Content extends Entity {
 	@NotBlank
 	private String body;
 
+	private String renderedBody;
+
 	@NotNull
 	private Format format;
 
@@ -179,6 +181,16 @@ public class Content extends Entity {
 	private String additionalTextTitle;
 	private Map<String, Map<String, Object>> extensions;
 	private Map<String, String> attachments;
+
+	private TextRenderingOptions bodyRenderingOptions;
+
+	{
+		this.bodyRenderingOptions = new TextRenderingOptions();
+		this.addRenderingMapping(
+				this::getBody,
+				this::setRenderedBody,
+				this.bodyRenderingOptions);
+	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getRoomId() {
@@ -210,6 +222,15 @@ public class Content extends Entity {
 		this.body = body;
 	}
 
+	@JsonView(View.Public.class)
+	public String getRenderedBody() {
+		return renderedBody;
+	}
+
+	public void setRenderedBody(final String renderedBody) {
+		this.renderedBody = renderedBody;
+	}
+
 	@JsonView({View.Persistence.class, View.Public.class})
 	public Format getFormat() {
 		return format;
@@ -218,6 +239,10 @@ public class Content extends Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setFormat(final Format format) {
 		this.format = format;
+		this.bodyRenderingOptions.setMarkdownFeatureset(
+				format == Format.SLIDE
+				? TextRenderingOptions.MarkdownFeatureset.EXTENDED
+				: TextRenderingOptions.MarkdownFeatureset.SIMPLE);
 	}
 
 	@JsonView(View.Public.class)
