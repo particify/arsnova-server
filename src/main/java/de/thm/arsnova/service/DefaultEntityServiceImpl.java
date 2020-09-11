@@ -346,21 +346,30 @@ public class DefaultEntityServiceImpl<T extends Entity> implements EntityService
 
 	@Component
 	public static class EntityCacheHandler {
-		@CachePut(cacheNames = "entity",
-				key = "#event.entity.supertype.simpleName.toLowerCase() + '-' + #event.entity.id")
+		@CachePut(
+				cacheNames = "entity",
+				key = "#event.entity.supertype.simpleName.toLowerCase() + '-' + #event.entity.id",
+				condition = "#event.entity.internal == false")
 		@EventListener
 		public Entity handleCreate(final AfterCreationEvent event) {
 			return event.getEntity();
 		}
 
-		@CachePut(cacheNames = "entity",
-				key = "#event.entity.supertype.simpleName.toLowerCase() + '-' + #event.entity.id")
+		@CachePut(
+				cacheNames = "entity",
+				key = "#event.entity.supertype.simpleName.toLowerCase() + '-' + #event.entity.id",
+				condition = "#event.entity.internal == false")
+		@CacheEvict(
+				cacheNames = "entity",
+				key = "#event.entity.supertype.simpleName.toLowerCase() + '-' + #event.entity.id",
+				condition = "#event.entity.internal == true")
 		@EventListener
 		public Entity handleUpdate(final AfterUpdateEvent event) {
 			return event.getEntity();
 		}
 
-		@CacheEvict(cacheNames = "entity",
+		@CacheEvict(
+				cacheNames = "entity",
 				key = "#event.entity.supertype.simpleName.toLowerCase() + '-' + #event.entity.id")
 		@EventListener
 		public void handleDelete(final AfterDeletionEvent event) {
