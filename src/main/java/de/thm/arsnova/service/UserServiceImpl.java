@@ -19,6 +19,7 @@
 package de.thm.arsnova.service;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,7 +37,6 @@ import java.util.stream.Collectors;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import org.apache.commons.lang.CharEncoding;
-import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.ektorp.DbAccessException;
 import org.slf4j.Logger;
@@ -105,6 +105,10 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	private static final long ACTIVATION_KEY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
 	private static final long ACTIVATION_KEY_DURABILITY_MS = 6 * 60 * 60 * 1000L;
 
+	private static final int MAX_VERIFICATION_CODE = 999999;
+	private static final int MAX_VERIFICATION_CODE_ATTEMPTS = 10;
+	private static final String VERIFICATION_CODE_FORMAT = "%06d";
+
 	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
 	private static final ConcurrentHashMap<UUID, String> socketIdToUserId = new ConcurrentHashMap<>();
@@ -141,6 +145,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 	private Pattern mailPattern;
 	private BytesKeyGenerator keygen;
+	private SecureRandom secureRandom;
 	private BCryptPasswordEncoder encoder;
 	private ConcurrentHashMap<String, Byte> loginTries;
 	private Set<String> loginBans;
@@ -171,6 +176,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		this.rootUrl = systemProperties.getRootUrl();
 		this.mailSenderAddress = systemProperties.getMail().getSenderAddress();
 		this.mailSenderName = systemProperties.getMail().getSenderName();
+		this.secureRandom = new SecureRandom();
 	}
 
 	@Scheduled(fixedDelay = LOGIN_TRY_RESET_DELAY_MS)
@@ -468,10 +474,6 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	public UserProfile create(final String username, final String password) {
 		final String lcUsername = username.toLowerCase();
 
-		if (null == keygen) {
-			keygen = KeyGenerators.secureRandom(16);
-		}
-
 		if (null == mailPattern) {
 			parseMailAddressPattern();
 		}
@@ -494,7 +496,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		userProfile.setAuthProvider(UserProfile.AuthProvider.ARSNOVA);
 		userProfile.setLoginId(lcUsername);
 		account.setPassword(encodePassword(password));
-		account.setActivationKey(RandomStringUtils.randomAlphanumeric(8));
+		account.setActivationKey(generateVerificationCode());
 		userProfile.setCreationTimestamp(new Date());
 
 		final UserProfile result = create(userProfile);
@@ -642,10 +644,24 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		final UserProfile userProfile = get(id, true);
 		if (userProfile == null || !key.equals(userProfile.getAccount().getActivationKey())) {
 			increaseSentMailCount(clientAddress);
+
+			if (userProfile != null) {
+				final int failedVerifications = userProfile.getAccount().getFailedVerifications() + 1;
+				userProfile.getAccount().setFailedVerifications(failedVerifications);
+				if (failedVerifications >= MAX_VERIFICATION_CODE_ATTEMPTS) {
+					logger.info("Resetting activation verification code because of too many failed attempts for {}.",
+							userProfile.getLoginId());
+					userProfile.getAccount().setActivationKey(generateVerificationCode());
+					userProfile.getAccount().setFailedVerifications(0);
+				}
+				update(userProfile);
+			}
+
 			return false;
 		}
 
 		userProfile.getAccount().setActivationKey(null);
+		userProfile.getAccount().setFailedVerifications(0);
 		update(userProfile);
 
 		return true;
@@ -656,6 +672,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	public void activateAccount(final String id) {
 		final UserProfile userProfile = get(id, true);
 		userProfile.getAccount().setActivationKey(null);
+		userProfile.getAccount().setFailedVerifications(0);
 		update(userProfile);
 	}
 
@@ -678,8 +695,9 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 			throw new BadRequestException();
 		}
 
-		account.setPasswordResetKey(RandomStringUtils.randomAlphanumeric(8));
+		account.setPasswordResetKey(generateVerificationCode());
 		account.setPasswordResetTime(new Date());
+		account.setFailedVerifications(0);
 		try {
 			update(userProfile);
 			logger.debug("Password reset key for user '{}': {}",
@@ -704,6 +722,20 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		if (null == key || "".equals(key) || !key.equals(account.getPasswordResetKey())) {
 			logger.info("Password reset failed. Invalid key provided for User {}.", userProfile.getLoginId());
 
+			if (key != null && !key.equals(account.getPasswordResetKey())) {
+				final int failedVerifications = userProfile.getAccount().getFailedVerifications() + 1;
+				userProfile.getAccount().setFailedVerifications(failedVerifications);
+				if (failedVerifications >= MAX_VERIFICATION_CODE_ATTEMPTS) {
+					logger.info(
+							"Resetting password reset verification code because of too many failed attempts for {}.",
+							userProfile.getLoginId());
+					userProfile.getAccount().setPasswordResetKey(null);
+					account.setPasswordResetTime(new Date(0));
+					account.setFailedVerifications(0);
+				}
+				update(userProfile);
+			}
+
 			return false;
 		}
 		if (System.currentTimeMillis() > account.getPasswordResetTime().getTime() + PASSWORD_RESET_KEY_DURABILITY_MS) {
@@ -711,6 +743,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 
 			account.setPasswordResetKey(null);
 			account.setPasswordResetTime(new Date(0));
+			account.setFailedVerifications(0);
 			update(userProfile);
 
 			return false;
@@ -753,6 +786,11 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 		}
 
 		return new String(Hex.encode(keygen.generateKey()));
+	}
+
+	private String generateVerificationCode() {
+		final int code = secureRandom.nextInt(MAX_VERIFICATION_CODE);
+		return String.format(VERIFICATION_CODE_FORMAT, code);
 	}
 
 	@Autowired
