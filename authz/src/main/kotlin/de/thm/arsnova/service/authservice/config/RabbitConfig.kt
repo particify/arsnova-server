@@ -70,9 +70,45 @@ class RabbitConfig (
     @Bean
     fun declarables(): Declarables {
         return Declarables(listOf(
-                Queue(roomAccessGrantedQueueName, true),
-                Queue(roomAccessRevokedQueueName, true),
-                Queue(roomAccessSyncResponseQueueName, true),
+                Queue(
+                        roomAccessGrantedQueueName,
+                        true,
+                        false,
+                        false,
+                        mapOf(
+                                "x-dead-letter-exchange" to "",
+                                "x-dead-letter-routing-key" to "${roomAccessGrantedQueueName}.dlq"
+                        )
+                ),
+                Queue(
+                        "${roomAccessGrantedQueueName}.dlq"
+                ),
+                Queue(
+                        roomAccessRevokedQueueName,
+                        true,
+                        false,
+                        false,
+                        mapOf(
+                                "x-dead-letter-exchange" to "",
+                                "x-dead-letter-routing-key" to "${roomAccessRevokedQueueName}.dlq"
+                        )
+                ),
+                Queue(
+                        "${roomAccessRevokedQueueName}.dlq"
+                ),
+                Queue(
+                        roomAccessSyncResponseQueueName,
+                        true,
+                        false,
+                        false,
+                        mapOf(
+                                "x-dead-letter-exchange" to "",
+                                "x-dead-letter-routing-key" to "${roomAccessSyncResponseQueueName}.dlq"
+                        )
+                ),
+                Queue(
+                        "${roomAccessSyncResponseQueueName}.dlq"
+                ),
                 DirectExchange(roomAccessSyncRequestQueueName)
         ))
     }
