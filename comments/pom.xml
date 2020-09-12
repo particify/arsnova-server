@@ -9,9 +9,9 @@
 	<packaging>jar</packaging>
 
     <properties>
-        <spring-boot-version>2.1.8.RELEASE</spring-boot-version>
+        <spring-boot-version>2.3.3.RELEASE</spring-boot-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<io.netty-version>4.1.33.Final</io.netty-version>
+		<io.netty-version>4.1.52.Final</io.netty-version>
 		<java.version>1.8</java.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -75,17 +75,14 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
-			<version>2.9.6</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
-			<version>2.9.6</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.9.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -104,7 +101,6 @@
 		<dependency>
 			<groupId>io.projectreactor.netty</groupId>
 			<artifactId>reactor-netty</artifactId>
-			<version>0.8.12.RELEASE</version>
 		</dependency>
 
 		<dependency>
@@ -114,7 +110,7 @@
 		<dependency>
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
-			<version>3.8.3</version>
+			<version>3.10.3</version>
 		</dependency>
 
 		<!-- LogBack dependencies -->
