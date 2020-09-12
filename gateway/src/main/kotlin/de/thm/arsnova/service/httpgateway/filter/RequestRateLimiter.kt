@@ -45,6 +45,10 @@ class RequestRateLimiter(
         val ipAddr = id.split(",")[1]
         val isQuery = queryMethods.any { it == httpMethod }
 
+        if (ipAddr in httpGatewayProperties.gateway.rateLimit.whitelistedIps) {
+            return Mono.just(RateLimiter.Response(true, mapOf("RateLimit-Remaining" to "infinite")))
+        }
+
         val bucket: Bucket = if (isQuery) {
             ipBucketMap.computeIfAbsent(QUERY_BUCKET_PREFIX + ipAddr) { _: String ->
                 val refill: Refill = Refill.intervally(routeConfig.queryTokensPerTimeframe, routeConfig.duration)

@@ -51,5 +51,6 @@ data class RateLimit(
         val queryTokensPerTimeframe: Long,
         val queryBurstCapacity: Long,
         val commandTokensPerTimeframe: Long,
-        val commandBurstCapacity: Long
+        val commandBurstCapacity: Long,
+        val whitelistedIps: List<String>
 )

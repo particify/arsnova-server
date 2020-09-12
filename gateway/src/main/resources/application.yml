@@ -36,3 +36,5 @@ gateway:
     query-burst-capacity: 30
     command-tokens-per-timeframe: 10
     command-burst-capacity: 10
+    whitelisted-ips:
+      - 172.18.0.18
