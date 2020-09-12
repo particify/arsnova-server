@@ -8,14 +8,14 @@
 
 	<properties>
 		<!-- Maven dependency/plugin versions -->
-		<spring-boot.version>2.2.2.RELEASE</spring-boot.version>
+		<spring-boot.version>2.2.9.RELEASE</spring-boot.version>
 		<commons-lang.version>2.6</commons-lang.version>
-		<guava.version>28.1-jre</guava.version>
-		<netty.version>4.1.43.Final</netty.version>
-		<aspectj.version>1.9.5</aspectj.version>
-		<jakarta-xml-bind.version>2.3.2</jakarta-xml-bind.version>
+		<guava.version>29.0-jre</guava.version>
+		<netty.version>4.1.52.Final</netty.version>
+		<aspectj.version>1.9.6</aspectj.version>
+		<jakarta-xml-bind.version>2.3.3</jakarta-xml-bind.version>
 		<pac4j.version>3.8.3</pac4j.version>
-		<graalvm.version>19.3.0</graalvm.version>
+		<graalvm.version>20.2.0</graalvm.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
@@ -309,7 +309,7 @@
 		<dependency>
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
-			<version>3.8.3</version>
+			<version>3.10.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.pac4j</groupId>
@@ -329,7 +329,7 @@
 		<dependency>
 			<groupId>com.corundumstudio.socketio</groupId>
 			<artifactId>netty-socketio</artifactId>
-			<version>1.7.17</version>
+			<version>1.7.18</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ektorp</groupId>
@@ -359,12 +359,12 @@
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-annotations</artifactId>
-			<version>1.6.0</version>
+			<version>1.6.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.checkerframework</groupId>
 			<artifactId>checker-qual</artifactId>
-			<version>3.0.1</version>
+			<version>3.6.1</version>
 		</dependency>
 
 		<!-- Provided -->
@@ -447,7 +447,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>3.2.3</version>
+				<version>3.3.1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -457,7 +457,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.1.1</version>
 				<dependencies>
 					<dependency>
 						<groupId>com.puppycrawl.tools</groupId>
@@ -476,7 +476,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
-				<version>3.8.2</version>
+				<version>3.9.1</version>
 				<configuration>
 					<locales>en</locales>
 				</configuration>
@@ -484,7 +484,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.4.24.v20191120</version>
+				<version>9.4.31.v20200723</version>
 				<configuration>
 					<scanIntervalSeconds>0</scanIntervalSeconds>
 					<webApp>
@@ -602,7 +602,7 @@
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
 				<artifactId>git-commit-id-plugin</artifactId>
-				<version>4.0.0</version>
+				<version>4.0.2</version>
 				<executions>
 					<execution>
 						<goals>
@@ -683,7 +683,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.1.1</version>
 				<configuration>
 					<dependencyDetailsEnabled>false</dependencyDetailsEnabled>
 				</configuration>
@@ -691,7 +691,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.1.1</version>
+				<version>3.2.0</version>
 				<configuration></configuration>
 			</plugin>
 		</plugins>
