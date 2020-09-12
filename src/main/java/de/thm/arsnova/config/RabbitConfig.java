@@ -1,6 +1,7 @@
 package de.thm.arsnova.config;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -80,10 +81,50 @@ public class RabbitConfig {
 		final List<Declarable> declarables = eventExchanges.stream()
 				.map(FanoutExchange::new).collect(Collectors.toList());
 
-		declarables.add(new Queue(RoomAccessEventDispatcher.ROOM_ACCESS_GRANTED_QUEUE_NAME, true));
-		declarables.add(new Queue(RoomAccessEventDispatcher.ROOM_ACCESS_REVOKED_QUEUE_NAME, true));
-		declarables.add(new Queue(RoomAccessEventDispatcher.ROOM_ACCESS_SYNC_REQUEST_QUEUE_NAME, true));
-		declarables.add(new Queue(RoomAccessEventDispatcher.ROOM_ACCESS_SYNC_RESPONSE_QUEUE_NAME, true));
+		declarables.add(new Queue(
+				RoomAccessEventDispatcher.ROOM_ACCESS_GRANTED_QUEUE_NAME,
+				true,
+				false,
+				false,
+				Map.of(
+						"x-dead-letter-exchange", "",
+						"x-dead-letter-routing-key", RoomAccessEventDispatcher.ROOM_ACCESS_GRANTED_QUEUE_NAME + ".dlq"
+				)
+		));
+		declarables.add(new Queue(RoomAccessEventDispatcher.ROOM_ACCESS_GRANTED_QUEUE_NAME + ".dlq"));
+		declarables.add(new Queue(
+				RoomAccessEventDispatcher.ROOM_ACCESS_REVOKED_QUEUE_NAME,
+				true,
+				false,
+				false,
+				Map.of(
+						"x-dead-letter-exchange", "",
+						"x-dead-letter-routing-key", RoomAccessEventDispatcher.ROOM_ACCESS_REVOKED_QUEUE_NAME + ".dlq"
+				)
+		));
+		declarables.add(new Queue(RoomAccessEventDispatcher.ROOM_ACCESS_REVOKED_QUEUE_NAME + ".dlq"));
+		declarables.add(new Queue(
+				RoomAccessEventDispatcher.ROOM_ACCESS_SYNC_REQUEST_QUEUE_NAME,
+				true,
+				false,
+				false,
+				Map.of(
+						"x-dead-letter-exchange", "",
+						"x-dead-letter-routing-key", RoomAccessEventDispatcher.ROOM_ACCESS_SYNC_REQUEST_QUEUE_NAME + ".dlq"
+				)
+		));
+		declarables.add(new Queue(RoomAccessEventDispatcher.ROOM_ACCESS_SYNC_REQUEST_QUEUE_NAME + ".dlq"));
+		declarables.add(new Queue(
+				RoomAccessEventDispatcher.ROOM_ACCESS_SYNC_RESPONSE_QUEUE_NAME,
+				true,
+				false,
+				false,
+				Map.of(
+						"x-dead-letter-exchange", "",
+						"x-dead-letter-routing-key", RoomAccessEventDispatcher.ROOM_ACCESS_SYNC_RESPONSE_QUEUE_NAME + ".dlq"
+				)
+		));
+		declarables.add(new Queue(RoomAccessEventDispatcher.ROOM_ACCESS_SYNC_RESPONSE_QUEUE_NAME + ".dlq"));
 		declarables.add(new Queue(FeedbackHandler.CREATE_FEEDBACK_COMMAND_QUEUE_NAME, true));
 		declarables.add(new Queue(FeedbackHandler.CREATE_FEEDBACK_RESET_COMMAND_QUEUE_NAME, true));
 		declarables.add(new Queue(FeedbackHandler.QUERY_FEEDBACK_COMMAND_QUEUE_NAME, true));
