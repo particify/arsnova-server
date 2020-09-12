@@ -9,7 +9,8 @@ import java.time.Duration
 data class HttpGatewayProperties(
         val security: Security,
         val httpClient: HttpClient,
-        val routing: Routing
+        val routing: Routing,
+        val gateway: Gateway
 )
 
 data class Security(
@@ -39,4 +40,16 @@ data class Endpoints(
         val commentService: String,
         val roomaccessService: String,
         val formattingService: String
+)
+
+data class Gateway(
+        val rateLimit: RateLimit
+)
+
+data class RateLimit(
+        val duration: Duration,
+        val queryTokensPerTimeframe: Long,
+        val queryBurstCapacity: Long,
+        val commandTokensPerTimeframe: Long,
+        val commandBurstCapacity: Long
 )

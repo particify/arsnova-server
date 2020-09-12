@@ -6,7 +6,6 @@ import de.thm.arsnova.service.httpgateway.filter.RoomIdFilter
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.gateway.filter.factory.StripPrefixGatewayFilterFactory
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver
-import org.springframework.cloud.gateway.filter.ratelimit.RateLimiter
 import org.springframework.cloud.gateway.route.RouteLocator
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder
 import org.springframework.context.annotation.Bean
@@ -26,7 +25,15 @@ class GatewayConfig (
 
     @Bean
     fun ipKeyResolver(): KeyResolver {
-        return KeyResolver { exchange -> Mono.just(exchange.request.remoteAddress?.hostName.toString()) }
+        return KeyResolver { exchange ->
+            Mono.just(
+                    listOf(
+                            exchange.request.method.toString(),
+                            exchange.request.remoteAddress?.hostName.toString()
+                    )
+                            .joinToString(",")
+            )
+        }
     }
 
     @Bean
