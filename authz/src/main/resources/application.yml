@@ -20,3 +20,12 @@ spring:
     hibernate:
       ddl-auto: validate
     properties.hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+  rabbitmq:
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 3s
+          max-attempts: 3
+          max-interval: 10s
+          multiplier: 2
