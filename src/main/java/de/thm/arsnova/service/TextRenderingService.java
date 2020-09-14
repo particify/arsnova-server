@@ -29,7 +29,7 @@ public class TextRenderingService {
 	@Cacheable(value = "rendered-texts", unless = "#result == null")
 	public String renderText(final String unrenderedText, final TextRenderingOptions textRenderingOptions)
 			throws IOException {
-		if (!enabled || unrenderedText == null) {
+		if (!enabled || unrenderedText == null || unrenderedText.isBlank()) {
 			return null;
 		}
 
