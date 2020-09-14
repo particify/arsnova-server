@@ -2,8 +2,10 @@ package de.thm.arsnova.service.authservice.config
 
 import de.thm.arsnova.service.authservice.model.event.RoomAccessSyncEvent
 import de.thm.arsnova.service.authservice.model.event.RoomAccessSyncRequest
+import org.springframework.amqp.core.BindingBuilder.bind
 import org.springframework.amqp.core.Declarables
 import org.springframework.amqp.core.DirectExchange
+import org.springframework.amqp.core.FanoutExchange
 import org.springframework.amqp.core.Queue
 import org.springframework.amqp.rabbit.annotation.RabbitListenerConfigurer
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory
@@ -31,10 +33,12 @@ class RabbitConfig (
 ) : RabbitListenerConfigurer {
 
     companion object {
-        const val roomAccessGrantedQueueName: String = "backend.event.room.access.granted"
-        const val roomAccessRevokedQueueName: String = "backend.event.room.access.revoked"
         const val roomAccessSyncResponseQueueName: String = "backend.event.room.access.sync.response"
         const val roomAccessSyncRequestQueueName: String = "backend.event.room.access.sync.request"
+        const val roomCreatedExchangeName: String = "backend.event.room.aftercreation"
+        const val roomDeletedExchangeName: String = "backend.event.room.afterdeletion"
+        const val roomCreatedQueueName: String = "backend.event.room.aftercreation.consumer.auth-service"
+        const val roomDeletedQueueName: String = "backend.event.room.aftercreation.consumer.auth-service"
     }
 
     @Bean
@@ -69,47 +73,55 @@ class RabbitConfig (
 
     @Bean
     fun declarables(): Declarables {
+        val roomCreatedFanoutExchange = FanoutExchange(roomCreatedExchangeName)
+        val roomDeletedFanoutExchange = FanoutExchange(roomDeletedExchangeName)
+        val roomCreatedQueue = Queue(
+            roomCreatedQueueName,
+            true,
+            true,
+            false,
+            mapOf(
+                "x-dead-letter-exchange" to "",
+                "x-dead-letter-routing-key" to "${roomCreatedQueueName}.dlq"
+            )
+        )
+        val roomDeletedQueue = Queue(
+            roomDeletedQueueName,
+            true,
+            true,
+            false,
+            mapOf(
+                "x-dead-letter-exchange" to "",
+                "x-dead-letter-routing-key" to "${roomDeletedQueueName}.dlq"
+            )
+        )
+        val roomCreatedDlq = Queue("${roomCreatedQueueName}.dlq")
+        val roomDeletedDlq = Queue("${roomDeletedQueueName}.dlq")
+        val roomAccessSyncResponseQueue = Queue(
+            roomAccessSyncResponseQueueName,
+            true,
+            false,
+            false,
+            mapOf(
+                "x-dead-letter-exchange" to "",
+                "x-dead-letter-routing-key" to "${roomAccessSyncResponseQueueName}.dlq"
+            )
+        )
+        val roomAccessSyncResponseDlq = Queue("${roomAccessSyncResponseQueueName}.dlq")
+        val roomAccessSyncRequestExchange = DirectExchange(roomAccessSyncRequestQueueName)
+
         return Declarables(listOf(
-                Queue(
-                        roomAccessGrantedQueueName,
-                        true,
-                        false,
-                        false,
-                        mapOf(
-                                "x-dead-letter-exchange" to "",
-                                "x-dead-letter-routing-key" to "${roomAccessGrantedQueueName}.dlq"
-                        )
-                ),
-                Queue(
-                        "${roomAccessGrantedQueueName}.dlq"
-                ),
-                Queue(
-                        roomAccessRevokedQueueName,
-                        true,
-                        false,
-                        false,
-                        mapOf(
-                                "x-dead-letter-exchange" to "",
-                                "x-dead-letter-routing-key" to "${roomAccessRevokedQueueName}.dlq"
-                        )
-                ),
-                Queue(
-                        "${roomAccessRevokedQueueName}.dlq"
-                ),
-                Queue(
-                        roomAccessSyncResponseQueueName,
-                        true,
-                        false,
-                        false,
-                        mapOf(
-                                "x-dead-letter-exchange" to "",
-                                "x-dead-letter-routing-key" to "${roomAccessSyncResponseQueueName}.dlq"
-                        )
-                ),
-                Queue(
-                        "${roomAccessSyncResponseQueueName}.dlq"
-                ),
-                DirectExchange(roomAccessSyncRequestQueueName)
+                roomCreatedFanoutExchange,
+                roomDeletedFanoutExchange,
+                roomCreatedQueue,
+                roomCreatedDlq,
+                roomDeletedQueue,
+                roomDeletedDlq,
+                bind(roomCreatedQueue).to(roomCreatedFanoutExchange),
+                bind(roomDeletedQueue).to(roomDeletedFanoutExchange),
+                roomAccessSyncResponseQueue,
+                roomAccessSyncResponseDlq,
+                roomAccessSyncRequestExchange
         ))
     }
 

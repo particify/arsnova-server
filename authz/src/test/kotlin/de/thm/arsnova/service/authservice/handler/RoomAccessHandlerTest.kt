@@ -48,55 +48,6 @@ class RoomAccessHandlerTest {
     }
 
     @Test
-    fun testHandleCreateRoomAccessCommand() {
-        val command = CreateRoomAccessCommand(
-                SOME_REV,
-                SOME_ROOM_ID,
-                SOME_USER_ID,
-                CREATOR_STRING
-        )
-        val expected = RoomAccess(
-                SOME_ROOM_ID,
-                SOME_USER_ID,
-                SOME_REV,
-                CREATOR_STRING
-        )
-
-        Mockito.`when`(roomAccessSyncTrackerRepository.findById(command.roomId))
-                .thenReturn(Optional.of(RoomAccessSyncTracker(
-                        SOME_ROOM_ID,
-                        "0"
-                )))
-
-        roomAccessHandler.handleCreateRoomAccessCommand(command)
-
-        verify(roomAccessRepository, times(1)).save(expected)
-    }
-
-    @Test
-    fun testHandleDeleteRoomAccessCommand() {
-        val command = DeleteRoomAccessCommand(
-                SOME_REV,
-                SOME_ROOM_ID,
-                SOME_USER_ID
-        )
-        val expected = RoomAccessPK(
-                SOME_ROOM_ID,
-                SOME_USER_ID
-        )
-
-        Mockito.`when`(roomAccessSyncTrackerRepository.findById(command.roomId))
-                .thenReturn(Optional.of(RoomAccessSyncTracker(
-                        SOME_ROOM_ID,
-                        "0"
-                )))
-
-        roomAccessHandler.handleDeleteRoomAccessCommand(command)
-
-        verify(roomAccessRepository, times(1)).deleteById(expected)
-    }
-
-    @Test
     fun testStartSyncOnCommand() {
         val command = RequestRoomAccessSyncCommand(
                 SOME_ROOM_ID,
@@ -196,34 +147,8 @@ class RoomAccessHandlerTest {
                 SOME_USER_ID
         )
 
-        Mockito.`when`(roomAccessSyncTrackerRepository.findById(SOME_ROOM_ID))
-                .thenReturn(Optional.of(RoomAccessSyncTracker(
-                        SOME_ROOM_ID,
-                        SOME_REV
-                )))
-
         roomAccessHandler.getByRoomIdAndUserId(SOME_ROOM_ID, SOME_USER_ID)
 
         verify(roomAccessRepository, times(1)).findById(expectedPK)
-    }
-
-    @Test
-    fun startSyncOnRequestAndMissingTracker() {
-        val expected = RoomAccessSyncRequest(
-                SOME_ROOM_ID
-        )
-
-        Mockito.`when`(roomAccessSyncTrackerRepository.findById(SOME_ROOM_ID))
-                .thenReturn(Optional.empty())
-
-        val keyCaptor = ArgumentCaptor.forClass(String::class.java)
-        val eventCaptor = ArgumentCaptor.forClass(RoomAccessSyncRequest::class.java)
-
-        roomAccessHandler.getByRoomIdAndUserId(SOME_ROOM_ID, SOME_USER_ID)
-
-        verify(rabbitTemplate, times(1))
-                .convertAndSend(keyCaptor.capture(), eventCaptor.capture())
-        assertEquals(keyCaptor.value, "backend.event.room.access.sync.request")
-        assertEquals(eventCaptor.value, expected)
     }
 }

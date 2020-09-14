@@ -7,12 +7,16 @@ import de.thm.arsnova.service.authservice.model.RoomAccessSyncTracker
 import de.thm.arsnova.service.authservice.model.command.RequestRoomAccessSyncCommand
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.annotation.ResponseStatus
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.util.Optional
@@ -66,5 +70,30 @@ class RoomAccessController (
             @PathVariable revNumber: Int
     ): Mono<RoomAccessSyncTracker> {
         return Mono.just(handler.handleRequestRoomAccessSyncCommand(RequestRoomAccessSyncCommand(roomId, revNumber)))
+    }
+
+    @PostMapping(path = ["/roomaccess/"])
+    @ResponseBody
+    fun create(
+        @RequestBody roomAccess: RoomAccess
+    ): Mono<RoomAccess> {
+        return Mono.just(handler.create(roomAccess))
+    }
+
+    @DeleteMapping(path = ["/roomaccess/{roomId}/{userId}"])
+    @ResponseBody
+    fun delete(
+        @PathVariable roomId: String,
+        @PathVariable userId: String
+    ): Mono<Unit> {
+        return Mono.just(handler.delete(roomId, userId))
+    }
+
+    @DeleteMapping(path = ["/roomaccess/{roomId}"])
+    @ResponseBody
+    fun deleteByRoomId(
+        @PathVariable roomId: String
+    ): Flux<RoomAccess> {
+        return Flux.fromIterable(handler.deleteByRoomId(roomId))
     }
 }

@@ -4,8 +4,6 @@ import de.thm.arsnova.service.authservice.config.RabbitConfig
 import de.thm.arsnova.service.authservice.model.RoomAccess
 import de.thm.arsnova.service.authservice.model.RoomAccessPK
 import de.thm.arsnova.service.authservice.model.RoomAccessSyncTracker
-import de.thm.arsnova.service.authservice.model.command.CreateRoomAccessCommand
-import de.thm.arsnova.service.authservice.model.command.DeleteRoomAccessCommand
 import de.thm.arsnova.service.authservice.model.command.RequestRoomAccessSyncCommand
 import de.thm.arsnova.service.authservice.model.command.SyncRoomAccessCommand
 import de.thm.arsnova.service.authservice.model.event.RoomAccessSyncRequest
@@ -15,7 +13,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.dao.CannotAcquireLockException
-import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
@@ -34,46 +31,6 @@ class RoomAccessHandler (
     }
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
-
-    @Transactional(isolation = Isolation.SERIALIZABLE)
-    @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
-    fun handleCreateRoomAccessCommand(command: CreateRoomAccessCommand) {
-        logger.debug("Handling command: {}", command)
-        val syncTracker = roomAccessSyncTrackerRepository.findById(command.roomId)
-                .orElse(RoomAccessSyncTracker(command.roomId, "0"))
-        // Migration step: Always make sure to not interfere with running synchronisations and unordered events
-        if (syncTracker.rev.substringBefore("-").toInt() < command.rev.substringBefore("-").toInt()) {
-            // newer information
-            try {
-                roomAccessRepository.save(RoomAccess(command.roomId, command.userId, command.rev, command.role))
-            } catch (e: Exception) {
-                logger.error(e.toString())
-            }
-        } else {
-            logger.info("Got older information, command rev: {}, tracker rev: {}", command.rev, syncTracker.rev)
-        }
-    }
-
-    @Transactional(isolation = Isolation.SERIALIZABLE)
-    @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
-    fun handleDeleteRoomAccessCommand(command: DeleteRoomAccessCommand) {
-        logger.debug("Handling command: {}", command)
-        val syncTracker = roomAccessSyncTrackerRepository.findById(command.roomId)
-                .orElse(RoomAccessSyncTracker(command.roomId, "0"))
-        // Migration step: Always make sure to not interfere with running synchronisations and unordered events
-        if (syncTracker.rev.substringBefore("-").toInt() - 1 < command.rev.substringBefore("-").toInt()) {
-            // newer information
-            try {
-                roomAccessRepository.deleteById(RoomAccessPK(command.roomId, command.userId))
-            } catch (emptyResultDataAccessException: EmptyResultDataAccessException) {
-                logger.debug("No room access entry found for: {}", RoomAccessPK(command.roomId, command.userId))
-            } catch (e: Exception) {
-                logger.error(e.toString())
-            }
-        } else {
-            logger.info("Got older information, command rev: {}, tracker rev: {}", command.rev, syncTracker.rev)
-        }
-    }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
@@ -136,68 +93,24 @@ class RoomAccessHandler (
         }
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun getByRoomIdAndUserId(roomId: String, userId: String): Optional<RoomAccess> {
         logger.debug("Handling room access request with roomId: {} and userId: {}", roomId, userId)
-        val syncTracker = roomAccessSyncTrackerRepository.findById(roomId)
-        // Migration step: always synchronise at least once
-        if (!syncTracker.isPresent) {
-            logger.trace("Starting room sync for roomId: {}", roomId)
-            val newTracker = RoomAccessSyncTracker(roomId, "0");
-            logger.debug("Saving tracker to indicate sync process: {}", newTracker)
-            roomAccessSyncTrackerRepository.save(newTracker)
-            val event = RoomAccessSyncRequest(roomId)
-            logger.debug("Sending room access sync request: {}", event)
-            rabbitTemplate.convertAndSend(
-                    RabbitConfig.roomAccessSyncRequestQueueName,
-                    event
-            )
-            return Optional.empty()
-        } else {
-            return roomAccessRepository.findById(RoomAccessPK(roomId, userId))
-        }
+        return roomAccessRepository.findById(RoomAccessPK(roomId, userId))
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun getByRoomId(roomId: String): List<RoomAccess> {
         logger.debug("Handling room access request with roomId: {}", roomId)
-        val syncTracker = roomAccessSyncTrackerRepository.findById(roomId)
-        // Migration step: always synchronise at least once
-        if (!syncTracker.isPresent) {
-            logger.trace("Starting room sync for roomId: {}", roomId)
-            val newTracker = RoomAccessSyncTracker(roomId, "0");
-            logger.debug("Saving tracker to indicate sync process: {}", newTracker)
-            roomAccessSyncTrackerRepository.save(newTracker)
-            val event = RoomAccessSyncRequest(roomId)
-            logger.debug("Sending room access sync request: {}", event)
-            rabbitTemplate.convertAndSend(
-                RabbitConfig.roomAccessSyncRequestQueueName,
-                event
-            )
-        }
         return roomAccessRepository.findByRoomId(roomId).toList()
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun getOwnerRoomAccessByRoomId(roomId: String): RoomAccess? {
         logger.debug("Handling room access request with roomId: {}", roomId)
-        val syncTracker = roomAccessSyncTrackerRepository.findById(roomId)
-        // Migration step: always synchronise at least once
-        if (!syncTracker.isPresent) {
-            logger.trace("Starting room sync for roomId: {}", roomId)
-            val newTracker = RoomAccessSyncTracker(roomId, "0");
-            logger.debug("Saving tracker to indicate sync process: {}", newTracker)
-            roomAccessSyncTrackerRepository.save(newTracker)
-            val event = RoomAccessSyncRequest(roomId)
-            logger.debug("Sending room access sync request: {}", event)
-            rabbitTemplate.convertAndSend(
-                RabbitConfig.roomAccessSyncRequestQueueName,
-                event
-            )
-        }
         return roomAccessRepository.findByRoomIdAndRole(roomId, ROLE_CREATOR_STRING).firstOrNull()
     }
 
@@ -212,5 +125,36 @@ class RoomAccessHandler (
     @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
     fun getByPK(pk: RoomAccessPK): Optional<RoomAccess> {
         return roomAccessRepository.findById(pk)
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+    fun create(roomAccess: RoomAccess): RoomAccess {
+        if (roomAccess.role == ROLE_CREATOR_STRING) {
+            return roomAccessRepository.createOrUpdateAccess(
+                roomAccess.roomId!!,
+                roomAccess.userId!!,
+                roomAccess.rev,
+                roomAccess.role!!,
+                roomAccess.role!!
+            )
+        } else {
+            return roomAccessRepository.createAccess(
+                roomAccess.roomId!!,
+                roomAccess.userId!!,
+                roomAccess.rev,
+                roomAccess.role!!
+            )
+        }
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    fun delete(roomId: String, userId: String): Unit {
+        roomAccessRepository.deleteByRoomIdAndUserIdWithoutChecking(roomId, userId)
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    fun deleteByRoomId(roomId: String): List<RoomAccess> {
+        return roomAccessRepository.deleteByRoomIdWithoutChecking(roomId).toList()
     }
 }
