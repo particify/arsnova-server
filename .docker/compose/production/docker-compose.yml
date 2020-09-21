@@ -32,7 +32,7 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
   arsnova-backend-core:
-    image: registry.gitlab.com/arsnova/arsnova-backend:$CORE_TAG
+    image: registry.gitlab.com/particify/dev/foss/arsnova-backend:$CORE_TAG
     depends_on:
       - couchdb
       - rabbitmq
@@ -53,7 +53,7 @@ services:
       UI_SLOGAN: powered by particify.de
     command: /jetty/start.jar --module=http-forwarded
   arsnova-http-gateway:
-    image: registry.gitlab.com/arsnova/arsnova-http-gateway:$HTTPGW_TAG
+    image: registry.gitlab.com/particify/dev/foss/arsnova-http-gateway:$HTTPGW_TAG
     depends_on:
       - rabbitmq
       - arsnova-auth-service
@@ -71,7 +71,7 @@ services:
       SECURITY_JWT_INTERNAL_SECRET: secret
     command: /jetty/start.jar --module=http-forwarded
   arsnova-ws-gateway:
-    image: registry.gitlab.com/arsnova/arsnova-ws-gateway:$WSGW_TAG
+    image: registry.gitlab.com/particify/dev/foss/arsnova-ws-gateway:$WSGW_TAG
     depends_on:
       - rabbitmq
       - arsnova-auth-service
@@ -87,7 +87,7 @@ services:
       RABBITMQ_PASSWORD: guest
     command: /jetty/start.jar --module=http-forwarded
   arsnova-auth-service:
-    image: registry.gitlab.com/arsnova/arsnova-auth-service:$AUTH_TAG
+    image: registry.gitlab.com/particify/dev/foss/arsnova-auth-service:$AUTH_TAG
     depends_on:
       - postgresql_auth
       - rabbitmq
@@ -100,7 +100,7 @@ services:
       RABBITMQ_PASSWORD: guest
     command: /jetty/start.jar --module=http-forwarded
   arsnova-comment-service:
-    image: registry.gitlab.com/arsnova/arsnova-comment-service:$COMMENT_TAG
+    image: registry.gitlab.com/particify/dev/foss/arsnova-comment-service:$COMMENT_TAG
     depends_on:
       - postgresql_comment
       - rabbitmq
@@ -113,7 +113,7 @@ services:
       SPRING_RABBITMQ_PASSWORD: guest
     command: /jetty/start.jar --module=http-forwarded
   arsnova-web:
-    image: registry.gitlab.com/arsnova/arsnova-webclient:$WEB_TAG
+    image: registry.gitlab.com/particify/dev/foss/arsnova-webclient:$WEB_TAG
   arsnova-web-legacy:
     image: registry.gitlab.com/particify/dev/devops/docker-orchestration/arsnova-mobile:$WEB_LEGACY_TAG
   arsnova-formatting-service:
