@@ -6,3 +6,4 @@ if [ ! -f "$ENV_FILE" ]; then
   exit 1
 fi
 ln -sf docker-compose.$ENV.yml docker-compose.override.yml
+ln -sf .$ENV.env .env
