@@ -7,9 +7,9 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<spring-boot-version>2.2.6.RELEASE</spring-boot-version>
-		<io.netty-version>4.1.48.Final</io.netty-version>
-		<jakarta-xml-bind.version>2.3.2</jakarta-xml-bind.version>
+		<spring-boot-version>2.3.4.RELEASE</spring-boot-version>
+		<io.netty-version>4.1.52.Final</io.netty-version>
+		<jakarta-xml-bind.version>2.3.3</jakarta-xml-bind.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
@@ -64,7 +64,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.1.1</version>
 				<configuration>
 					<dependencyDetailsEnabled>false</dependencyDetailsEnabled>
 				</configuration>
@@ -199,7 +199,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>28.2-jre</version>
+			<version>29.0-jre</version>
 		</dependency>
 		<dependency>
 			<groupId>cglib</groupId>
@@ -329,7 +329,7 @@
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-annotations</artifactId>
-			<version>1.6.0</version>
+			<version>1.6.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.codahale.metrics</groupId>
@@ -339,7 +339,7 @@
 		<dependency>
 			<groupId>org.checkerframework</groupId>
 			<artifactId>checker-qual</artifactId>
-			<version>3.2.0</version>
+			<version>3.6.1</version>
 		</dependency>
 	</dependencies>
 
@@ -374,7 +374,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.4.27.v20200227</version>
+				<version>9.4.31.v20200723</version>
 				<configuration>
 					<scanIntervalSeconds>0</scanIntervalSeconds>
 					<webApp>
@@ -391,7 +391,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
-				<version>3.8.2</version>
+				<version>3.9.1</version>
 				<configuration>
 					<locales>en</locales>
 				</configuration>
@@ -409,7 +409,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.5</version>
+				<version>0.8.6</version>
 				<executions>
 					<execution>
 						<id>default-prepare-agent</id>
@@ -447,7 +447,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>3.2.3</version>
+				<version>3.3.1</version>
 			</plugin>
 			<plugin>
 				<groupId>com.github.kongchen</groupId>
@@ -498,7 +498,7 @@
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
 				<artifactId>git-commit-id-plugin</artifactId>
-				<version>4.0.0</version>
+				<version>4.0.2</version>
 				<executions>
 					<execution>
 						<goals>
