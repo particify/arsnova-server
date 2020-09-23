@@ -1,5 +1,5 @@
 include:
-  - project: arsnova/arsnova-backend
+  - project: particify/dev/foss/arsnova-backend
     ref: 2.x
     file: .gitlab/ci/2.x.yml
 
