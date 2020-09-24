@@ -1,5 +1,6 @@
 package de.thm.arsnova.service.httpgateway.filter
 
+import de.thm.arsnova.service.httpgateway.exception.UnauthorizedException
 import de.thm.arsnova.service.httpgateway.model.RoomAccess
 import de.thm.arsnova.service.httpgateway.security.JwtTokenUtil
 import de.thm.arsnova.service.httpgateway.service.RoomAccessService
@@ -37,7 +38,6 @@ class AuthFilter (
 
             if (bearer != null) {
                 val jwt = bearer[0].removePrefix("Bearer ")
-                val userId = jwtTokenUtil.getUserIdFromPublicToken(jwt)
                 val uriVariables = ServerWebExchangeUtils.getUriTemplateVariables(exchange)
                 val roomId = uriVariables["roomId"]
                 if (!roomId!!.matches(RoomIdFilter.roomIdRegex)) {
@@ -45,13 +45,16 @@ class AuthFilter (
                     throw ResponseStatusException(HttpStatus.BAD_REQUEST)
                 }
                 Mono.just(jwtTokenUtil.getUserIdFromPublicToken(jwt))
-                    .switchIfEmpty(Mono.error(ResponseStatusException(HttpStatus.BAD_REQUEST)))
-                    .flatMap {
-                        roomAccessService.getRoomAccess(roomId, userId)
-                    }
                     .onErrorResume { exception ->
-                        logger.trace("Auth service didn't give specific role", exception)
-                        Mono.just(RoomAccess(roomId, userId, "", "PARTICIPANT"))
+                        logger.debug("Exception on verifying JWT and obtaining userId", exception)
+                        Mono.error(UnauthorizedException())
+                    }
+                    .flatMap { userId ->
+                        roomAccessService.getRoomAccess(roomId, userId)
+                            .onErrorResume { exception ->
+                                logger.trace("Auth service didn't give specific role", exception)
+                                Mono.just(RoomAccess(roomId, userId, "", "PARTICIPANT"))
+                            }
                     }
                     .map { roomAccess: RoomAccess ->
                         logger.trace("Working with room access: {}", roomAccess)

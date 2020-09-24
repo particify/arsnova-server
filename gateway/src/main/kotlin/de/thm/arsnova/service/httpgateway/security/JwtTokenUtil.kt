@@ -4,7 +4,9 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
+import com.auth0.jwt.exceptions.TokenExpiredException
 import de.thm.arsnova.service.httpgateway.config.HttpGatewayProperties
+import de.thm.arsnova.service.httpgateway.exception.UnauthorizedException
 import de.thm.arsnova.service.httpgateway.model.RoomAccess
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
@@ -27,10 +29,15 @@ class JwtTokenUtil(
     private val publicVerifier: JWTVerifier = JWT.require(publicAlgorithm).build()
     private val internalVerifier: JWTVerifier = JWT.require(internalAlgorithm).build()
 
-    @Throws(JWTVerificationException::class)
     fun getUserIdFromPublicToken(token: String): String {
-        val decodedJwt = publicVerifier.verify(token)
-        return decodedJwt.subject
+        try {
+            val decodedJwt = publicVerifier.verify(token)
+            return decodedJwt.subject
+        } catch (e: JWTVerificationException) {
+            throw UnauthorizedException()
+        } catch (e: TokenExpiredException) {
+            throw UnauthorizedException()
+        }
     }
 
     fun createSignedInternalToken(roomAccess: RoomAccess): String {
