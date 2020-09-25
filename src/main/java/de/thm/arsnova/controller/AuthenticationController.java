@@ -88,7 +88,7 @@ public class AuthenticationController {
 			response.addCookie(cookie);
 		}
 
-		final ClientAuthentication authentication = userService.getCurrentClientAuthentication(false);
+		final ClientAuthentication authentication = userService.getCurrentClientAuthentication(refresh);
 		if (authentication == null) {
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		}
