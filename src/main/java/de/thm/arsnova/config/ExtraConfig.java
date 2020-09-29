@@ -33,6 +33,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
@@ -51,6 +52,7 @@ import java.util.Properties;
  */
 @EnableWebMvc
 @Configuration
+@EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableCaching
 public class ExtraConfig extends WebMvcConfigurerAdapter {
 	private static final Logger logger = LoggerFactory.getLogger(ExtraConfig.class);
