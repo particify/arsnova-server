@@ -72,6 +72,24 @@ public class Room extends Entity {
 					.append("roles", roles)
 					.toString();
 		}
+
+		@Override
+		public boolean equals(final Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
+			final Moderator moderator = (Moderator) o;
+			return Objects.equals(userId, moderator.userId)
+					&& Objects.equals(roles, moderator.roles);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(userId, roles);
+		}
 	}
 
 	public static class Settings {
