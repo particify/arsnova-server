@@ -56,6 +56,8 @@ public class FormatContentTypeIdResolver extends TypeIdResolverBase {
 				return TypeFactory.defaultInstance().constructType(ChoiceQuestionContent.class);
 			case SCALE:
 				return TypeFactory.defaultInstance().constructType(ChoiceQuestionContent.class);
+			case SORT:
+				return TypeFactory.defaultInstance().constructType(ChoiceQuestionContent.class);
 			case TEXT:
 				return TypeFactory.defaultInstance().constructType(Content.class);
 			case SLIDE:

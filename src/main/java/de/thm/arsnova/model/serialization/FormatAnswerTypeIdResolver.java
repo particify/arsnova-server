@@ -61,6 +61,8 @@ public class FormatAnswerTypeIdResolver extends TypeIdResolverBase {
 				return TypeFactory.defaultInstance().constructType(TextAnswer.class);
 			case GRID:
 				return TypeFactory.defaultInstance().constructType(ChoiceAnswer.class);
+			case SORT:
+				return TypeFactory.defaultInstance().constructType(ChoiceAnswer.class);
 			default:
 				throw new IllegalArgumentException("Unsupported type ID.");
 		}
