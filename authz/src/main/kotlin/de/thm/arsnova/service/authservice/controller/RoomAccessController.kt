@@ -11,9 +11,11 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.util.Optional
 
 @Controller
 class RoomAccessController (
@@ -27,6 +29,21 @@ class RoomAccessController (
             @PathVariable userId: String
     ): Flux<RoomAccess> {
         return Flux.fromIterable(handler.getByUserId(userId))
+    }
+
+    @GetMapping(path = ["/roomaccess/owner/by-room"])
+    @ResponseBody
+    fun getOwnerByRoomIds(
+            @RequestParam ids: List<String>
+    ): Flux<Optional<RoomAccess>> {
+        return Flux.fromIterable(ids.map { id ->
+            val maybeAccess = handler.getOwnerRoomAccessByRoomId(id)
+            if (maybeAccess != null) {
+                Optional.of(maybeAccess)
+            } else {
+                Optional.empty()
+            }
+        })
     }
 
     @GetMapping(path = ["/roomaccess/{roomId}/{userId}"])
