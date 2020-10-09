@@ -1,6 +1,7 @@
 package de.thm.arsnova.service.httpgateway.service
 
 import de.thm.arsnova.service.httpgateway.config.HttpGatewayProperties
+import de.thm.arsnova.service.httpgateway.model.CommentServiceStats
 import de.thm.arsnova.service.httpgateway.model.CommentStats
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -31,6 +32,14 @@ class CommentService(
                         )
                     })
                 }
+    }
+
+    fun getServiceStats(): Mono<CommentServiceStats> {
+        val url = "${httpGatewayProperties.httpClient.commentService}/stats"
+        logger.trace("Querying comment service for stats with url: {}", url)
+        return webClient.get()
+            .uri(url)
+            .retrieve().bodyToMono(CommentServiceStats::class.java)
     }
 
     fun getAckCount(roomId: String): Mono<Int> {

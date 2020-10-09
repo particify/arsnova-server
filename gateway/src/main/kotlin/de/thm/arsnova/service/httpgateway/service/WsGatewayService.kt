@@ -1,11 +1,13 @@
 package de.thm.arsnova.service.httpgateway.service
 
 import de.thm.arsnova.service.httpgateway.config.HttpGatewayProperties
+import de.thm.arsnova.service.httpgateway.model.WsGatewayStats
 import org.slf4j.LoggerFactory
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 import java.util.Optional
 
 @Service
@@ -38,5 +40,13 @@ class WsGatewayService(
                         h
                     })
                 }
+    }
+
+    fun getGatewayStats(): Mono<WsGatewayStats> {
+        val url = "${httpGatewayProperties.httpClient.wsGateway}/stats"
+        logger.trace("Querying ws gateway for stats with url: {}", url)
+        return webClient.get()
+            .uri(url)
+            .retrieve().bodyToMono(WsGatewayStats::class.java)
     }
 }
