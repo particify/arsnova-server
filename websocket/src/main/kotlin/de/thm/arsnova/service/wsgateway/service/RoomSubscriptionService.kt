@@ -59,4 +59,8 @@ class RoomSubscriptionService(
 	fun getUserCount(roomId: String): Int? {
 		return roomUsers.get(roomId)?.count()
 	}
+
+	fun getUserCount(): Int {
+		return userInRoom.size
+	}
 }
