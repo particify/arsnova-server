@@ -19,189 +19,204 @@
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.thm.arsnova.model.serialization.View;
 
-/**
- * Collection of several statistics about ARSnova.
- */
-@ApiModel(value = "statistics", description = "the statistic entity")
+@JsonView(View.Admin.class)
 public class Statistics {
+	@JsonView(View.Admin.class)
+	public static class UserProfileStats {
+		private int totalCount;
+		private Map<String, Integer> countByAuthProvider = new HashMap<>();
+		private int activationsPending;
 
-	private int answers;
-	private int lectureQuestions;
-	private int preparationQuestions;
-	private int openSessions;
-	private int closedSessions;
-	private int creators;
-	private int activeUsers;
-	private int activeStudents;
-	private int loggedinUsers;
-	private int interposedQuestions;
-	private int conceptQuestions;
-	private int flashcards;
-
-	@ApiModelProperty(required = true, value = "the number of answers")
-	@JsonView(View.Public.class)
-	public int getAnswers() {
-		return answers;
-	}
-
-	public void setAnswers(final int answers) {
-		this.answers = answers;
-	}
-
-	@ApiModelProperty(required = true, value = "the number of lecture questions")
-	@JsonView(View.Public.class)
-	public int getLectureQuestions() {
-		return lectureQuestions;
-	}
-
-	public void setLectureQuestions(final int questions) {
-		this.lectureQuestions = questions;
-	}
-
-	@ApiModelProperty(required = true, value = "the number of prepartion uestions")
-	@JsonView(View.Public.class)
-	public int getPreparationQuestions() {
-		return preparationQuestions;
-	}
-
-	public void setPreparationQuestions(final int questions) {
-		this.preparationQuestions = questions;
-	}
-
-	@ApiModelProperty(required = true, value = "the total number of questions")
-	@JsonView(View.Public.class)
-	public int getQuestions() {
-		return getLectureQuestions() + getPreparationQuestions();
-	}
-
-	@ApiModelProperty(required = true, value = "the number of open sessions")
-	@JsonView(View.Public.class)
-	public int getOpenSessions() {
-		return openSessions;
-	}
-
-	public void setOpenSessions(final int openSessions) {
-		this.openSessions = openSessions;
-	}
-
-	@ApiModelProperty(required = true, value = "the number of closed Sessions")
-	@JsonView(View.Public.class)
-	public int getClosedSessions() {
-		return closedSessions;
-	}
-
-	public void setClosedSessions(final int closedSessions) {
-		this.closedSessions = closedSessions;
-	}
-
-	@ApiModelProperty(required = true, value = "the total number of Sessions")
-	@JsonView(View.Public.class)
-	public int getSessions() {
-		return getOpenSessions() + getClosedSessions();
-	}
-
-	@ApiModelProperty(required = true, value = "used to display Active Users")
-	@JsonView(View.Public.class)
-	public int getActiveUsers() {
-		return activeUsers;
-	}
-
-	public void setActiveUsers(final int activeUsers) {
-		this.activeUsers = activeUsers;
-	}
-
-	@ApiModelProperty(required = true, value = "the number of users that are logged")
-	@JsonView(View.Public.class)
-	public int getLoggedinUsers() {
-		return loggedinUsers;
-	}
-
-	public void setLoggedinUsers(final int loggedinUsers) {
-		this.loggedinUsers = loggedinUsers;
-	}
-
-	@ApiModelProperty(required = true, value = "the number of interposed Questions")
-	@JsonView(View.Public.class)
-	public int getInterposedQuestions() {
-		return interposedQuestions;
-	}
-
-	public void setInterposedQuestions(final int interposedQuestions) {
-		this.interposedQuestions = interposedQuestions;
-	}
-
-	@ApiModelProperty(required = true, value = "the number of flashcards")
-	@JsonView(View.Public.class)
-	public int getFlashcards() {
-		return flashcards;
-	}
-
-	public void setFlashcards(final int flashcards) {
-		this.flashcards = flashcards;
-	}
-
-	@ApiModelProperty(required = true, value = "the number of creators")
-	@JsonView(View.Public.class)
-	public int getCreators() {
-		return creators;
-	}
-
-	public void setCreators(final int creators) {
-		this.creators = creators;
-	}
-
-	@ApiModelProperty(required = true, value = "the number of concept Questions")
-	@JsonView(View.Public.class)
-	public int getConceptQuestions() {
-		return conceptQuestions;
-	}
-
-	public void setConceptQuestions(final int conceptQuestions) {
-		this.conceptQuestions = conceptQuestions;
-	}
-
-	@ApiModelProperty(required = true, value = "the number of active Students")
-	@JsonView(View.Public.class)
-	public int getActiveStudents() {
-		return activeStudents;
-	}
-
-	public void setActiveStudents(final int activeStudents) {
-		this.activeStudents = activeStudents;
-	}
-
-	@Override
-	public int hashCode() {
-		return (this.getClass().getName()
-				+ activeUsers
-				+ answers
-				+ closedSessions
-				+ openSessions
-				+ lectureQuestions
-				+ preparationQuestions
-				+ interposedQuestions
-				+ loggedinUsers
-				+ conceptQuestions
-				).hashCode();
-	}
-
-	@Override
-	public boolean equals(final Object obj) {
-		if (obj == null) {
-			return false;
+		public int getTotalCount() {
+			return totalCount;
 		}
-		if (obj == this) {
-			return true;
+
+		public void setTotalCount(final int totalCount) {
+			this.totalCount = totalCount;
 		}
-		if (obj instanceof Statistics) {
-			final Statistics other = (Statistics) obj;
-			return hashCode() == other.hashCode();
+
+		public Map<String, Integer> getCountByAuthProvider() {
+			return countByAuthProvider;
 		}
-		return false;
+
+		public void setCountByAuthProvider(final Map<String, Integer> countByAuthProvider) {
+			this.countByAuthProvider = countByAuthProvider;
+		}
+
+		public int getActivationsPending() {
+			return activationsPending;
+		}
+
+		public void setActivationsPending(final int activationsPending) {
+			this.activationsPending = activationsPending;
+		}
+	}
+
+	@JsonView(View.Admin.class)
+	public static class RoomStats {
+		private int totalCount;
+		private int closed;
+		private int moderated;
+		private int moderators;
+
+		public int getTotalCount() {
+			return totalCount;
+		}
+
+		public void setTotalCount(final int totalCount) {
+			this.totalCount = totalCount;
+		}
+
+		public int getClosed() {
+			return closed;
+		}
+
+		public void setClosed(final int closed) {
+			this.closed = closed;
+		}
+
+		public int getModerated() {
+			return moderated;
+		}
+
+		public void setModerated(final int moderated) {
+			this.moderated = moderated;
+		}
+
+		public int getModerators() {
+			return moderators;
+		}
+
+		public void setModerators(final int moderators) {
+			this.moderators = moderators;
+		}
+	}
+
+	@JsonView(View.Admin.class)
+	public static class ContentStats {
+		private int totalCount;
+		private Map<String, Integer> countByFormat = new HashMap<>();
+
+		public int getTotalCount() {
+			return totalCount;
+		}
+
+		public void setTotalCount(final int totalCount) {
+			this.totalCount = totalCount;
+		}
+
+		public Map<String, Integer> getCountByFormat() {
+			return countByFormat;
+		}
+
+		public void setCountByFormat(final Map<String, Integer> countByFormat) {
+			this.countByFormat = countByFormat;
+		}
+	}
+
+	@JsonView(View.Admin.class)
+	public static class AnswerStats {
+		private int totalCount;
+		private Map<String, Integer> countByFormat = new HashMap<>();
+
+		public int getTotalCount() {
+			return totalCount;
+		}
+
+		public void setTotalCount(final int totalCount) {
+			this.totalCount = totalCount;
+		}
+
+		public Map<String, Integer> getCountByFormat() {
+			return countByFormat;
+		}
+
+		public void setCountByFormat(final Map<String, Integer> countByFormat) {
+			this.countByFormat = countByFormat;
+		}
+	}
+
+	@JsonView(View.Admin.class)
+	public static class CommentStats {
+		private int totalCount;
+
+		public int getTotalCount() {
+			return totalCount;
+		}
+
+		public void setTotalCount(final int totalCount) {
+			this.totalCount = totalCount;
+		}
+	}
+
+	private UserProfileStats userProfile;
+	private RoomStats room;
+	private ContentStats content;
+	private AnswerStats answer;
+	private CommentStats comment;
+
+	public Statistics() {
+		this.userProfile = new UserProfileStats();
+		this.room = new RoomStats();
+		this.content = new ContentStats();
+		this.answer = new AnswerStats();
+		this.comment = new CommentStats();
+	}
+
+	public Statistics(
+			final UserProfileStats userProfile,
+			final RoomStats room,
+			final ContentStats content,
+			final AnswerStats answer, final CommentStats comment) {
+		this.userProfile = userProfile;
+		this.room = room;
+		this.content = content;
+		this.answer = answer;
+		this.comment = comment;
+	}
+
+	public UserProfileStats getUserProfile() {
+		return userProfile;
+	}
+
+	public void setUserProfile(final UserProfileStats userProfile) {
+		this.userProfile = userProfile;
+	}
+
+	public RoomStats getRoom() {
+		return room;
+	}
+
+	public void setRoom(final RoomStats room) {
+		this.room = room;
+	}
+
+	public ContentStats getContent() {
+		return content;
+	}
+
+	public void setContent(final ContentStats content) {
+		this.content = content;
+	}
+
+	public AnswerStats getAnswer() {
+		return answer;
+	}
+
+	public void setAnswer(final AnswerStats answer) {
+		this.answer = answer;
+	}
+
+	public CommentStats getComment() {
+		return comment;
+	}
+
+	public void setComment(final CommentStats comment) {
+		this.comment = comment;
 	}
 }

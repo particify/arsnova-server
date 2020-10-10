@@ -27,8 +27,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.thm.arsnova.controller.AbstractController;
-import de.thm.arsnova.model.Statistics;
+import de.thm.arsnova.model.migration.v2.Statistics;
 import de.thm.arsnova.service.StatisticsService;
+import de.thm.arsnova.service.UserService;
 import de.thm.arsnova.web.CacheControl;
 import de.thm.arsnova.web.DeprecatedApi;
 
@@ -43,12 +44,15 @@ public class StatisticsController extends AbstractController {
 	@Autowired
 	private StatisticsService statisticsService;
 
+	@Autowired
+	private UserService userService;
+
 	@ApiOperation(value = "Retrieves global statistics",
 			nickname = "getStatistics")
 	@GetMapping("/")
 	@CacheControl(maxAge = 60, policy = CacheControl.Policy.PUBLIC)
 	public Statistics getStatistics() {
-		return statisticsService.getStatistics();
+		return new Statistics(statisticsService.getStatistics());
 	}
 
 	@ApiOperation(value = "Retrieves the amount of all active users",
@@ -57,7 +61,7 @@ public class StatisticsController extends AbstractController {
 	@Deprecated
 	@GetMapping(value = "/activeusercount", produces = MediaType.TEXT_PLAIN_VALUE)
 	public String countActiveUsers() {
-		return String.valueOf(statisticsService.getStatistics().getActiveUsers());
+		return String.valueOf(userService.loggedInUsers());
 	}
 
 	@ApiOperation(value = "Retrieves the amount of all currently logged in users",
@@ -66,7 +70,7 @@ public class StatisticsController extends AbstractController {
 	@Deprecated
 	@GetMapping(value = "/loggedinusercount", produces = MediaType.TEXT_PLAIN_VALUE)
 	public String countLoggedInUsers() {
-		return String.valueOf(statisticsService.getStatistics().getLoggedinUsers());
+		return String.valueOf(userService.loggedInUsers());
 	}
 
 	@ApiOperation(value = "Retrieves the total amount of all sessions",
@@ -75,7 +79,6 @@ public class StatisticsController extends AbstractController {
 	@Deprecated
 	@GetMapping(value = "/sessioncount", produces = MediaType.TEXT_PLAIN_VALUE)
 	public String countSessions() {
-		return String.valueOf(statisticsService.getStatistics().getOpenSessions()
-				+ statisticsService.getStatistics().getClosedSessions());
+		return String.valueOf(statisticsService.getStatistics().getRoom().getTotalCount());
 	}
 }
