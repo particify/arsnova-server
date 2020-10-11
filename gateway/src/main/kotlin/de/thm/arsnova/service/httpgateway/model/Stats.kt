@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 data class Stats (
     var wsGatewayStats: WsGatewayStats,
+    var coreServiceStats: Map<String, Any>,
     var commentServiceStats: CommentServiceStats
 )
 
