@@ -56,7 +56,6 @@ public class StatisticsServiceImpl implements StatisticsService {
 
 	@Override
 	public Statistics getStatistics() {
-		statistics.setActiveUsers(userService.loggedInUsers());
 		return statistics;
 	}
 }

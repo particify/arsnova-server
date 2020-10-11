@@ -18,8 +18,7 @@
 
 package de.thm.arsnova.persistence.couchdb;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.DbAccessException;
 import org.ektorp.ViewResult;
@@ -40,62 +39,98 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
 	@Override
 	public Statistics getStatistics() {
 		final Statistics stats = new Statistics();
+		final Statistics.UserProfileStats userProfileStats = stats.getUserProfile();
+		final Statistics.RoomStats roomStats = stats.getRoom();
+		final Statistics.ContentStats contentStats = stats.getContent();
+		final Statistics.AnswerStats answerStats = stats.getAnswer();
+		final Statistics.CommentStats commentStats = stats.getComment();
+
 		try {
 			final ViewResult statsResult = db.queryView(createQuery("statistics").group(true));
-			final ViewResult creatorResult = db.queryView(createQuery("unique_session_creators").group(true));
-			final ViewResult studentUserResult = db.queryView(createQuery("active_student_users").group(true));
 
 			if (!statsResult.isEmpty()) {
 				for (final ViewResult.Row row: statsResult.getRows()) {
+					final JsonNode key = row.getKeyAsNode();
 					final int value = row.getValueAsInt();
-					switch (row.getKey()) {
-						case "openSessions":
-							stats.setOpenSessions(stats.getOpenSessions() + value);
+					if (!key.isArray()) {
+						throw new DbAccessException("Invalid key for statistics item.");
+					}
+					switch (key.get(0).asText()) {
+						case "UserProfile":
+							if (key.size() == 1) {
+								userProfileStats.setTotalCount(value);
+							} else if (key.size() > 1) {
+								switch (key.get(1).asText()) {
+									case "activationPending":
+										userProfileStats.setActivationsPending(value);
+										break;
+									case "authProvider":
+										logger.info("UserProfile {} {} {}", key.get(0).asText(), key.get(1).asText(), key.get(2).asText());
+										userProfileStats.getCountByAuthProvider().put(key.get(2).asText(), value);
+										break;
+									default:
+										break;
+								}
+							}
 							break;
-						case "closedSessions":
-							stats.setClosedSessions(stats.getClosedSessions() + value);
+						case "Room":
+							if (key.size() == 1) {
+								roomStats.setTotalCount(value);
+							} else if (key.size() > 1) {
+								switch (key.get(1).asText()) {
+									case "closed":
+										roomStats.setClosed(value);
+										break;
+									case "moderated":
+										roomStats.setModerated(value);
+										break;
+									case "moderators":
+										roomStats.setModerators(value);
+										break;
+									default:
+										break;
+								}
+							}
 							break;
-						case "deletedSessions":
-							/* Deleted sessions are not exposed separately for now. */
-							stats.setClosedSessions(stats.getClosedSessions() + value);
+						case "Content":
+							if (key.size() == 1) {
+								contentStats.setTotalCount(value);
+							} else if (key.size() > 1) {
+								switch (key.get(1).asText()) {
+									case "format":
+										logger.info("Content {} {} {}", key.get(0).asText(), key.get(1).asText(), key.get(2).asText());
+										contentStats.getCountByFormat().put(key.get(2).asText(), value);
+										break;
+									default:
+										break;
+								}
+							}
 							break;
-						case "answers":
-							stats.setAnswers(stats.getAnswers() + value);
+						case "Answer":
+							if (key.size() == 1) {
+								answerStats.setTotalCount(value);
+							} else if (key.size() > 1) {
+								switch (key.get(1).asText()) {
+									case "format":
+										logger.info("Answer {} {} {}", key.get(0).asText(), key.get(1).asText(), key.get(2).asText());
+										answerStats.getCountByFormat().put(key.get(2).asText(), value);
+										break;
+									default:
+										break;
+								}
+							}
 							break;
-						case "lectureQuestions":
-							stats.setLectureQuestions(stats.getLectureQuestions() + value);
-							break;
-						case "preparationQuestions":
-							stats.setPreparationQuestions(stats.getPreparationQuestions() + value);
-							break;
-						case "interposedQuestions":
-							stats.setInterposedQuestions(stats.getInterposedQuestions() + value);
-							break;
-						case "conceptQuestions":
-							stats.setConceptQuestions(stats.getConceptQuestions() + value);
-							break;
-						case "flashcards":
-							stats.setFlashcards(stats.getFlashcards() + value);
+						case "Comment":
+							if (key.size() == 1) {
+								commentStats.setTotalCount(value);
+							}
 							break;
 						default:
 							break;
 					}
 				}
 			}
-			if (!creatorResult.isEmpty()) {
-				final Set<String> creators = new HashSet<>();
-				for (final ViewResult.Row row: statsResult.getRows()) {
-					creators.add(row.getKey());
-				}
-				stats.setCreators(creators.size());
-			}
-			if (!studentUserResult.isEmpty()) {
-				final Set<String> students = new HashSet<>();
-				for (final ViewResult.Row row: statsResult.getRows()) {
-					students.add(row.getKey());
-				}
-				stats.setActiveStudents(students.size());
-			}
+
 			return stats;
 		} catch (final DbAccessException e) {
 			logger.error("Could not retrieve statistics.", e);

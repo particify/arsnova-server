@@ -2,61 +2,48 @@ var designDoc = {
 	"_id": "_design/statistics",
 	"language": "javascript",
 	"views": {
-		"active_student_users": {
-			"map": function (doc) {
-				if (doc.type === "Answer") {
-					emit(doc.user, 1);
-				}
-			},
-			"reduce": "_count"
-		},
 		"statistics": {
 			"map": function (doc) {
+				emit([doc.type], 1);
 				switch (doc.type) {
+				case "UserProfile":
+					emit([doc.type, "authProvider", doc.authProvider], 1);
+					if (doc.account && doc.account.activationKey) {
+						emit([doc.type, "activationPending"], 1);
+					}
+					break;
 				case "Room":
-					if (doc.active) {
-						emit("openSessions", 1);
-					} else {
-						emit("closedSessions", 1);
+					if (doc.closed) {
+						emit([doc.type, "closed"], 1);
+					}
+					if (doc.moderators && doc.moderators.length > 0) {
+						emit([doc.type, "moderated"], 1);
+						emit([doc.type, "moderators"], doc.moderators.length);
 					}
 					break;
 				case "Content":
-					if (doc.questionType === "flashcard") {
-						emit("flashcards", 1);
-					} else {
-						if (doc.questionVariant === "lecture") {
-							emit("lectureQuestions", 1);
-						} else if (doc.questionVariant === "preparation") {
-							emit("preparationQuestions", 1);
-						}
-						if (doc.piRound === 2) {
-							emit("conceptQuestions", 1);
-						}
-					}
+					emit([doc.type, "format", doc.format], 1);
 					break;
 				case "Answer":
-					emit("answers", 1);
-					break;
-				case "Comment":
-					emit ("interposedQuestions", 1);
+					emit([doc.type, "format", doc.format], 1);
 					break;
 				case "LogEntry":
 					if (doc.event === "delete") {
 						switch (doc.payload.type) {
-						case "session":
-							emit("deletedSessions", doc.payload.sessionCount || 1);
+						case "UserProfile":
+							emit([doc.payload.type, "deleted"], 1);
 							break;
-						case "question":
-							emit("deletedQuestions", doc.payload.questionCount || 1);
+						case "Room":
+							emit([doc.payload.type, "deleted"], doc.payload.roomCount || 1);
 							break;
-						case "answer":
-							emit("deletedAnswers", doc.payload.answerCount || 1);
+						case "Content":
+							emit([doc.payload.type, "deleted"], doc.payload.contentCount || 1);
 							break;
-						case "comment":
-							emit("deletedComments", doc.payload.commentCount || 1);
+						case "Answer":
+							emit([doc.payload.type, "deleted"], doc.payload.answerCount || 1);
 							break;
-						case "user":
-							emit("deletedUsers", 1);
+						case "Comment":
+							emit([doc.payload.type, "deleted"], doc.payload.commentCount || 1);
 							break;
 						}
 					}
@@ -65,10 +52,10 @@ var designDoc = {
 			},
 			"reduce": "_sum"
 		},
-		"unique_session_creators": {
+		"unique_room_owners": {
 			"map": function (doc) {
 				if (doc.type === "Room") {
-					emit(doc.creator, 1);
+					emit(doc.ownerId, 1);
 				}
 			},
 			"reduce": "_count"
