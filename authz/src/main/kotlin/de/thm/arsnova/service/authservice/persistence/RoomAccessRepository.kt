@@ -8,5 +8,6 @@ import org.springframework.stereotype.Repository
 @Repository
 interface RoomAccessRepository : CrudRepository<RoomAccess, RoomAccessPK> {
     fun findByRoomId(roomId: String): Iterable<RoomAccess>
+    fun findByRoomIdAndRole(roomId: String, role: String): Iterable<RoomAccess>
     fun findByUserId(userId: String): Iterable<RoomAccess>
 }

@@ -29,6 +29,10 @@ class RoomAccessHandler (
         private val roomAccessRepository: RoomAccessRepository,
         private val roomAccessSyncTrackerRepository: RoomAccessSyncTrackerRepository
 ) {
+    companion object {
+        const val ROLE_CREATOR_STRING = "CREATOR"
+    }
+
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -153,6 +157,48 @@ class RoomAccessHandler (
         } else {
             return roomAccessRepository.findById(RoomAccessPK(roomId, userId))
         }
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+    fun getByRoomId(roomId: String): List<RoomAccess> {
+        logger.debug("Handling room access request with roomId: {}", roomId)
+        val syncTracker = roomAccessSyncTrackerRepository.findById(roomId)
+        // Migration step: always synchronise at least once
+        if (!syncTracker.isPresent) {
+            logger.trace("Starting room sync for roomId: {}", roomId)
+            val newTracker = RoomAccessSyncTracker(roomId, "0");
+            logger.debug("Saving tracker to indicate sync process: {}", newTracker)
+            roomAccessSyncTrackerRepository.save(newTracker)
+            val event = RoomAccessSyncRequest(roomId)
+            logger.debug("Sending room access sync request: {}", event)
+            rabbitTemplate.convertAndSend(
+                RabbitConfig.roomAccessSyncRequestQueueName,
+                event
+            )
+        }
+        return roomAccessRepository.findByRoomId(roomId).toList()
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Retryable(value = [CannotAcquireLockException::class], maxAttempts = 3, backoff = Backoff(delay = 1000))
+    fun getOwnerRoomAccessByRoomId(roomId: String): RoomAccess? {
+        logger.debug("Handling room access request with roomId: {}", roomId)
+        val syncTracker = roomAccessSyncTrackerRepository.findById(roomId)
+        // Migration step: always synchronise at least once
+        if (!syncTracker.isPresent) {
+            logger.trace("Starting room sync for roomId: {}", roomId)
+            val newTracker = RoomAccessSyncTracker(roomId, "0");
+            logger.debug("Saving tracker to indicate sync process: {}", newTracker)
+            roomAccessSyncTrackerRepository.save(newTracker)
+            val event = RoomAccessSyncRequest(roomId)
+            logger.debug("Sending room access sync request: {}", event)
+            rabbitTemplate.convertAndSend(
+                RabbitConfig.roomAccessSyncRequestQueueName,
+                event
+            )
+        }
+        return roomAccessRepository.findByRoomIdAndRole(roomId, ROLE_CREATOR_STRING).firstOrNull()
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
