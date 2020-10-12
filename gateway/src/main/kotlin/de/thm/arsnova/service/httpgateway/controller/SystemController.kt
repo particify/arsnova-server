@@ -1,6 +1,7 @@
 package de.thm.arsnova.service.httpgateway.controller
 
 import de.thm.arsnova.service.httpgateway.model.Stats
+import de.thm.arsnova.service.httpgateway.model.SummarizedStats
 import de.thm.arsnova.service.httpgateway.view.SystemView
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Controller
@@ -15,14 +16,22 @@ class SystemController(
     companion object {
         const val baseMapping = "/_system"
         const val serviceStatsMapping = "$baseMapping/servicestats"
+        const val summarizedStatsMapping = "$baseMapping/summarizedstats"
     }
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     @GetMapping(path = [serviceStatsMapping])
     @ResponseBody
-    fun getStats() : Mono<Stats> {
+    fun getServiceStats() : Mono<Stats> {
         logger.trace("Getting stats")
         return systemView.getServiceStats()
+    }
+
+    @GetMapping(path = [summarizedStatsMapping])
+    @ResponseBody
+    fun getSummarizedStats() : Mono<SummarizedStats> {
+        logger.trace("Getting summarized stats")
+        return systemView.getSummarizedStats()
     }
 }
