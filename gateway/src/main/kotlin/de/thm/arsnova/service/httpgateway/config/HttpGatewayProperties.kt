@@ -40,7 +40,8 @@ data class Endpoints(
         val commentService: String,
         val roomaccessService: String,
         val importService: String,
-        val formattingService: String
+        val formattingService: String,
+        val attachmentService: String?
 )
 
 data class Gateway(

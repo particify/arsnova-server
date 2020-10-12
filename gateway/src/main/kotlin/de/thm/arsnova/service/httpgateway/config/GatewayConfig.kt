@@ -11,6 +11,8 @@ import org.springframework.cloud.gateway.route.RouteLocator
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpStatus
+import org.springframework.web.client.HttpServerErrorException
 import reactor.core.publisher.Mono
 
 
@@ -117,6 +119,29 @@ class GatewayConfig (
                                 }
                             }
                             .uri(httpGatewayProperties.routing.endpoints.formattingService)
+                }
+                .route("attachment-service") { p ->
+                    if (httpGatewayProperties.routing.endpoints.attachmentService != null) {
+                        p
+                                .path(
+                                        "/room/{roomId}/filemetadata/**",
+                                        "/room/{roomId}/file/**"
+                                )
+                                .filters { f ->
+                                    f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
+                                    f.requestRateLimiter { r ->
+                                        r.rateLimiter = requestRateLimiter
+                                    }
+                                }
+                                .uri(httpGatewayProperties.routing.endpoints.attachmentService)
+                    } else {
+                        p
+                                .path("/room/{roomId}/filemetadata/**")
+                                .filters { f ->
+                                    f.setStatus(HttpStatus.NOT_IMPLEMENTED)
+                                }
+                                .uri("")
+                    }
                 }
                 .route("core") { p ->
                     p
