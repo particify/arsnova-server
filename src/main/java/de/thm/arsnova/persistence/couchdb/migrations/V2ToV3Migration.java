@@ -36,7 +36,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
-import de.thm.arsnova.config.properties.CouchDbProperties;
+import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.Content;
@@ -62,8 +62,8 @@ import de.thm.arsnova.persistence.couchdb.support.PagedMangoResponse;
  */
 @Service
 @ConditionalOnProperty(
-		name = "migrate-from",
-		prefix = CouchDbProperties.PREFIX)
+		name = "enabled",
+		prefix = CouchDbMigrationProperties.PREFIX)
 public class V2ToV3Migration implements Migration {
 	private static final String ID = "20170914131300";
 	private static final int LIMIT = 200;

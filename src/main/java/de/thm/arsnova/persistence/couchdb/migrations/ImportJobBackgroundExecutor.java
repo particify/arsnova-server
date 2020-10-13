@@ -33,7 +33,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
-import de.thm.arsnova.config.properties.CouchDbProperties;
+import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
 import de.thm.arsnova.model.MigrationState;
 import de.thm.arsnova.model.serialization.View;
 import de.thm.arsnova.persistence.couchdb.support.MangoCouchDbConnector;
@@ -41,8 +41,8 @@ import de.thm.arsnova.persistence.couchdb.support.PagedMangoResponse;
 
 @Service
 @ConditionalOnProperty(
-		name = "migrate-from",
-		prefix = CouchDbProperties.PREFIX)
+		name = "enabled",
+		prefix = CouchDbMigrationProperties.PREFIX)
 public class ImportJobBackgroundExecutor {
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	@JsonView(View.Persistence.class)
