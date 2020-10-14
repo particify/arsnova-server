@@ -18,6 +18,7 @@
 
 package de.thm.arsnova.model.migration.v2;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import de.thm.arsnova.model.serialization.View;
@@ -30,6 +31,11 @@ public interface Entity {
 	String getRevision();
 
 	void setRevision(String rev);
+
+	@JsonIgnore
+	default void setImportJobId(final String importJobId) {
+		/* Ignore this property during deserialization. */
+	}
 
 	@JsonView(View.Persistence.class)
 	default Class<? extends Entity> getType() {
