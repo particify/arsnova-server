@@ -21,6 +21,7 @@ package de.thm.arsnova.persistence.couchdb.migrations;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -355,6 +356,15 @@ public class V2ToV3Migration implements Migration {
 	private void migrateRooms(
 			final MigrationState.Migration state,
 			final ImportJobBackgroundExecutor.ImportJob importJob) throws InterruptedException {
+		final Room.ImportMetadata metadata = new Room.ImportMetadata();
+		if (importJob != null) {
+			metadata.setSource("V2_IMPORT");
+			metadata.setJobId(importJob.getId());
+		} else {
+			metadata.setSource("V2_FULL_MIGRATION");
+		}
+		metadata.setTimestamp(new Date());
+
 		waitForV2Index(SESSION_INDEX);
 		final Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "session");
@@ -395,6 +405,7 @@ public class V2ToV3Migration implements Migration {
 					}
 				}
 				roomsV3.add(migrator.migrate(roomV2, profile, true));
+				roomsV3.stream().forEach(room -> room.setImportMetadata(metadata));
 			}
 
 			toConnector.executeBulk(roomsV3);
