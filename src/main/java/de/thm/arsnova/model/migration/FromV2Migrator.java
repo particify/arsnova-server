@@ -143,9 +143,12 @@ public class FromV2Migrator {
 		return Arrays.stream(motdList.getMotdkeys().split(",")).collect(Collectors.toSet());
 	}
 
-	public de.thm.arsnova.model.Room migrate(final Room from, final Optional<UserProfile> owner) {
+	public de.thm.arsnova.model.Room migrate(
+			final Room from,
+			final Optional<UserProfile> owner,
+			final boolean overrideOwner) {
 		if (!owner.isPresent() && from.getCreator() != null
-				|| owner.isPresent() && !owner.get().getLoginId().equals(from.getCreator())) {
+				|| owner.isPresent() && !overrideOwner && !owner.get().getLoginId().equals(from.getCreator())) {
 			throw new IllegalArgumentException("Username of owner object does not match session creator.");
 		}
 		final de.thm.arsnova.model.Room to = new de.thm.arsnova.model.Room();
@@ -182,7 +185,7 @@ public class FromV2Migrator {
 	}
 
 	public de.thm.arsnova.model.Room migrate(final Room from) {
-		return migrate(from, Optional.empty());
+		return migrate(from, Optional.empty(), false);
 	}
 
 	public de.thm.arsnova.model.Room.Settings migrate(final RoomFeature feature) {

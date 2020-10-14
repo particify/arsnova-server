@@ -389,7 +389,7 @@ public class V2ToV3Migration implements Migration {
 						continue;
 					}
 				}
-				roomsV3.add(migrator.migrate(roomV2, profile));
+				roomsV3.add(migrator.migrate(roomV2, profile, true));
 			}
 
 			toConnector.executeBulk(roomsV3);
