@@ -96,6 +96,17 @@ public class FromV2Migrator {
 		}
 	}
 
+	private Date migrateDate(final long unixDate) {
+		/* Set new timestamp if existing one is too long in the past (format inconsistency). */
+		if (unixDate == 0) {
+			return new Date();
+		} else if (unixDate < 1000000000000L) {
+			return new Date(unixDate * 1000);
+		} else {
+			return new Date(unixDate);
+		}
+	}
+
 	public UserProfile migrate(final DbUser dbUser, final LoggedIn loggedIn, final MotdList motdList) {
 		if (dbUser != null && loggedIn != null && !loggedIn.getUser().equals(dbUser.getUsername())) {
 			throw new IllegalArgumentException("Username of loggedIn object does not match.");
@@ -107,11 +118,12 @@ public class FromV2Migrator {
 			throw new IllegalArgumentException("Usernames of loggedIn and motdList objects do not match.");
 		}
 		final UserProfile profile = new UserProfile();
+		profile.setUpdateTimestamp(new Date());
 		if (dbUser != null) {
 			copyCommonProperties(dbUser, profile);
 			profile.setLoginId(dbUser.getUsername());
 			profile.setAuthProvider(UserProfile.AuthProvider.ARSNOVA);
-			profile.setCreationTimestamp(new Date(dbUser.getCreation()));
+			profile.setCreationTimestamp(migrateDate(dbUser.getCreation()));
 			profile.setUpdateTimestamp(new Date());
 			final UserProfile.Account account = new UserProfile.Account();
 			profile.setAccount(account);
@@ -153,7 +165,7 @@ public class FromV2Migrator {
 		}
 		final de.thm.arsnova.model.Room to = new de.thm.arsnova.model.Room();
 		copyCommonProperties(from, to);
-		to.setCreationTimestamp(new Date(from.getCreationTime()));
+		to.setCreationTimestamp(migrateDate(from.getCreationTime()));
 		to.setUpdateTimestamp(new Date());
 		to.setShortId(from.getKeyword());
 		if (owner.isPresent()) {
@@ -317,6 +329,8 @@ public class FromV2Migrator {
 				throw new IllegalArgumentException("Unsupported content format.");
 		}
 		copyCommonProperties(from, to);
+		to.setCreationTimestamp(migrateDate(from.getTimestamp()));
+		to.setUpdateTimestamp(new Date());
 		to.setRoomId(from.getSessionId());
 		to.getGroups().add(from.getQuestionVariant());
 		to.setSubject(from.getSubject());
@@ -347,6 +361,8 @@ public class FromV2Migrator {
 		} else {
 			answer = migrate(from);
 		}
+		answer.setCreationTimestamp(migrateDate(from.getTimestamp()));
+		answer.setUpdateTimestamp(new Date());
 		answer.setFormat(content.getFormat());
 
 		return answer;
@@ -371,13 +387,15 @@ public class FromV2Migrator {
 		}
 		final de.thm.arsnova.model.Comment to = new de.thm.arsnova.model.Comment();
 		copyCommonProperties(from, to);
+		to.setCreationTimestamp(migrateDate(from.getTimestamp()));
+		to.setUpdateTimestamp(new Date());
 		to.setRoomId(from.getSessionId());
 		if (creator != null) {
 			to.setCreatorId(creator.getId());
 		}
 		to.setSubject(from.getSubject());
 		to.setBody(from.getText());
-		to.setTimestamp(new Date(from.getTimestamp()));
+		to.setTimestamp(to.getCreationTimestamp());
 		to.setRead(from.isRead());
 
 		return to;
