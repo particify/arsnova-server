@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import javax.annotation.PostConstruct;
 import org.ektorp.DbAccessException;
 import org.ektorp.DocumentNotFoundException;
 import org.slf4j.Logger;
@@ -101,6 +102,11 @@ public class V2ToV3Migration implements Migration {
 		this.contentRepository = contentRepository;
 	}
 
+	@PostConstruct
+	public void init() {
+		createV2Index();
+	}
+
 	public String getId() {
 		return ID;
 	}
@@ -111,7 +117,6 @@ public class V2ToV3Migration implements Migration {
 
 	@Override
 	public void migrate(final MigrationState.Migration state) {
-		createV2Index();
 		migrator.setIgnoreRevision(true);
 		try {
 			switch (state.getStep()) {
