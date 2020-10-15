@@ -28,7 +28,8 @@ data class HttpClient(
         val authService: String,
         val commentService: String,
         val core: String,
-        val wsGateway: String
+        val wsGateway: String,
+        val subscriptionService: String?
 )
 
 data class Routing(

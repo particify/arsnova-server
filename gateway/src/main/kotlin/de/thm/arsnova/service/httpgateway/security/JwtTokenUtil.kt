@@ -5,14 +5,12 @@ import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.exceptions.TokenExpiredException
-import com.auth0.jwt.interfaces.Claim
-import com.auth0.jwt.interfaces.DecodedJWT
 import de.thm.arsnova.service.httpgateway.config.HttpGatewayProperties
 import de.thm.arsnova.service.httpgateway.exception.UnauthorizedException
 import de.thm.arsnova.service.httpgateway.model.RoomAccess
+import de.thm.arsnova.service.httpgateway.model.RoomFeatures
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Component
-import reactor.util.function.Tuple2
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.temporal.TemporalAmount
@@ -24,7 +22,8 @@ class JwtTokenUtil(
 ) {
     companion object {
         const val ROLE_AUTHORITY_PREFIX = "ROLE_"
-        val claimName = "roles"
+        val rolesClaimName = "roles"
+        val roomFeaturesClaimName = "features"
     }
 
     private val publicAlgorithm = Algorithm.HMAC256(httpGatewayProperties.security.jwt.publicSecret)
@@ -72,11 +71,13 @@ class JwtTokenUtil(
 
     fun createSignedInternalToken(
             roomAccess: RoomAccess,
+            roomFeatures: RoomFeatures,
             clientAuthorities: List<String>
     ): String {
         val roomRole = "${roomAccess.role}-${roomAccess.roomId}"
         val generatedRoles = arrayOf(roomRole)
-        val roles = generatedRoles + clientAuthorities.map { authority -> authority.removePrefix(ROLE_AUTHORITY_PREFIX) }
+        val roles = generatedRoles + clientAuthorities
+        val roomFeaturesArray = roomFeatures.features.toTypedArray()
         return JWT.create()
             .withIssuer(serverId)
             .withAudience(serverId)
@@ -87,7 +88,8 @@ class JwtTokenUtil(
                 )
             )
             .withSubject(roomAccess.userId)
-            .withArrayClaim(claimName, roles)
+            .withArrayClaim(rolesClaimName, roles)
+            .withArrayClaim(roomFeaturesClaimName, roomFeaturesArray)
             .sign(internalAlgorithm)
     }
 }

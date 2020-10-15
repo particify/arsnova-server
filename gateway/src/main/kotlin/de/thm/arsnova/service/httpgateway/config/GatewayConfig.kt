@@ -55,6 +55,7 @@ class GatewayConfig (
                     "/room/{roomId}/answer/**"
                 )
                 .filters { f ->
+                    f.filter(authFilter.apply(AuthFilter.Config()))
                     f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
                     f.requestRateLimiter { r ->
                         r.rateLimiter = requestRateLimiter
@@ -95,6 +96,7 @@ class GatewayConfig (
                     "/room/{roomId}/settings/**"
                 )
                 .filters { f ->
+                    f.filter(authFilter.apply(AuthFilter.Config()))
                     f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
                     f.requestRateLimiter { r ->
                         r.rateLimiter = requestRateLimiter
@@ -137,6 +139,7 @@ class GatewayConfig (
                         "/room/{roomId}/file/**"
                     )
                     .filters { f ->
+                        f.filter(authFilter.apply(AuthFilter.Config()))
                         f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
                         f.requestRateLimiter { r ->
                             r.rateLimiter = requestRateLimiter
