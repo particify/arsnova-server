@@ -13,9 +13,12 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
+import org.springframework.http.MediaType;
 
 import de.thm.arsnova.config.properties.MessageBrokerProperties;
 import de.thm.arsnova.model.Entity;
@@ -67,9 +70,13 @@ public class AmqpEventDispatcher {
 			final String exchangeName = makeQueueName(entityType, eventType);
 			try {
 				final ObjectMapper mapper = createOrGetObjectMapper(exchangeName, properties);
-				final String jsonPayload = mapper.writeValueAsString(event.getEntity());
-				logger.debug("AMQP event payload: {}", jsonPayload);
-				messagingTemplate.convertAndSend(exchangeName, "", jsonPayload);
+				final byte[] jsonPayload = mapper.writeValueAsBytes(event.getEntity());
+				logger.debug("AMQP event payload: {}", new String(jsonPayload));
+				final Message message = MessageBuilder
+						.withBody(jsonPayload)
+						.setContentType(MediaType.APPLICATION_JSON_VALUE)
+						.build();
+				messagingTemplate.send(exchangeName, "", message);
 			} catch (final JsonProcessingException e) {
 				logger.error("Event serialization failed.", e);
 			} catch (final AmqpException e) {
