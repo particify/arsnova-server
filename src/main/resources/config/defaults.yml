@@ -68,6 +68,14 @@ arsnova:
             - id
             - shortId
             - ownerId
+        - entity-type: Comment
+          event-type: BeforeCreation
+          included-properties:
+            - roomId
+            - creatorId
+            - body
+            - timestamp
+            - read
 
     # Formatting service
     formatting-service:

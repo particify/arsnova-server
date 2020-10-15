@@ -36,9 +36,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
+import de.thm.arsnova.event.BeforeCreationEvent;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.Content;
@@ -66,7 +69,7 @@ import de.thm.arsnova.persistence.couchdb.support.PagedMangoResponse;
 @ConditionalOnProperty(
 		name = "enabled",
 		prefix = CouchDbMigrationProperties.PREFIX)
-public class V2ToV3Migration implements Migration {
+public class V2ToV3Migration implements ApplicationEventPublisherAware, Migration {
 	private static final String ID = "20170914131300";
 	private static final int LIMIT = 200;
 	private static final long OUTDATED_AFTER = 1000L * 3600 * 24 * 30 * 6;
@@ -77,6 +80,7 @@ public class V2ToV3Migration implements Migration {
 	private static final String SKILLQUESTION_INDEX = "skillquestion-index";
 	private static final String MOTD_INDEX = "motd-index";
 	private static final String MOTDLIST_INDEX = "motdlist-index";
+	private static final boolean COMMENTS_PUBLISH_ONLY = true;
 
 	private static final Logger logger = LoggerFactory.getLogger(V2ToV3Migration.class);
 
@@ -87,6 +91,7 @@ public class V2ToV3Migration implements Migration {
 	private RoomRepository roomRepository;
 	private ContentRepository contentRepository;
 	private long referenceTimestamp = System.currentTimeMillis();
+	private ApplicationEventPublisher applicationEventPublisher;
 
 	public V2ToV3Migration(
 			final FromV2Migrator migrator,
@@ -114,6 +119,11 @@ public class V2ToV3Migration implements Migration {
 
 	public int getStepCount() {
 		return 8;
+	}
+
+	@Override
+	public void setApplicationEventPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+		this.applicationEventPublisher = applicationEventPublisher;
 	}
 
 	@Override
@@ -509,7 +519,14 @@ public class V2ToV3Migration implements Migration {
 				}
 			}
 
-			toConnector.executeBulk(commentsV3);
+			if (COMMENTS_PUBLISH_ONLY) {
+				commentsV3.stream().forEach(comment -> {
+					final BeforeCreationEvent<Comment> event = new BeforeCreationEvent<>(this, comment);
+					this.applicationEventPublisher.publishEvent(event);
+				});
+			} else {
+				toConnector.executeBulk(commentsV3);
+			}
 			state.setState(bookmark);
 		}
 		state.setState(null);
