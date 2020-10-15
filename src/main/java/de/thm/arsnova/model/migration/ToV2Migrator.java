@@ -373,7 +373,7 @@ public class ToV2Migrator {
 		if (creator.isPresent()) {
 			to.setCreator(creator.get().getLoginId());
 		}
-		to.setSubject(from.getSubject());
+		to.setSubject(from.getBody().substring(0, 20) + ((from.getBody().length() > 20) ? "…" : ""));
 		to.setText(from.getBody());
 		to.setTimestamp(from.getTimestamp().getTime());
 		to.setRead(from.isRead());

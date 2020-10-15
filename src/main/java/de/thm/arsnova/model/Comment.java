@@ -37,9 +37,6 @@ public class Comment extends Entity {
 	private String creatorId;
 
 	@NotBlank
-	private String subject;
-
-	@NotBlank
 	private String body;
 
 	@NotNull
@@ -66,16 +63,6 @@ public class Comment extends Entity {
 	@JsonView(View.Persistence.class)
 	public void setCreatorId(final String creatorId) {
 		this.creatorId = creatorId;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public String getSubject() {
-		return subject;
-	}
-
-	@JsonView({View.Persistence.class, View.Public.class})
-	public void setSubject(final String subject) {
-		this.subject = subject;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
@@ -139,7 +126,6 @@ public class Comment extends Entity {
 		return read == comment.read
 				&& Objects.equals(roomId, comment.roomId)
 				&& Objects.equals(creatorId, comment.creatorId)
-				&& Objects.equals(subject, comment.subject)
 				&& Objects.equals(body, comment.body)
 				&& Objects.equals(timestamp, comment.timestamp)
 				&& Objects.equals(extensions, comment.extensions);
@@ -150,7 +136,6 @@ public class Comment extends Entity {
 		return super.buildToString()
 				.append("roomId", roomId)
 				.append("creatorId", creatorId)
-				.append("subject", subject)
 				.append("body", body)
 				.append("timestamp", timestamp)
 				.append("read", read);

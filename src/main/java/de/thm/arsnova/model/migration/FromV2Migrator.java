@@ -393,8 +393,11 @@ public class FromV2Migrator {
 		if (creator != null) {
 			to.setCreatorId(creator.getId());
 		}
-		to.setSubject(from.getSubject());
-		to.setBody(from.getText());
+		if (!from.getSubject().isBlank()) {
+			to.setBody(from.getSubject() + ": " + from.getText());
+		} else {
+			to.setBody(from.getText());
+		}
 		to.setTimestamp(to.getCreationTimestamp());
 		to.setRead(from.isRead());
 
