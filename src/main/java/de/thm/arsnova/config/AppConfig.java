@@ -68,8 +68,6 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import de.thm.arsnova.config.properties.FeatureProperties;
 import de.thm.arsnova.config.properties.SecurityProperties;
 import de.thm.arsnova.config.properties.SystemProperties;
-import de.thm.arsnova.connector.client.ConnectorClient;
-import de.thm.arsnova.connector.client.ConnectorClientImpl;
 import de.thm.arsnova.model.migration.FromV2Migrator;
 import de.thm.arsnova.model.migration.ToV2Migrator;
 import de.thm.arsnova.model.serialization.CouchDbDocumentModule;
@@ -82,6 +80,8 @@ import de.thm.arsnova.web.PathBasedContentNegotiationStrategy;
 import de.thm.arsnova.web.ResponseInterceptorHandler;
 import de.thm.arsnova.websocket.ArsnovaSocketioServer;
 import de.thm.arsnova.websocket.ArsnovaSocketioServerImpl;
+import net.particify.arsnova.connector.client.ConnectorClient;
+import net.particify.arsnova.connector.client.ConnectorClientImpl;
 
 /**
  * Loads property file and configures non-security related beans and components.

@@ -31,9 +31,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import de.thm.arsnova.connector.client.ConnectorClient;
 import de.thm.arsnova.controller.AbstractControllerTest;
 import de.thm.arsnova.service.StubUserService;
+import net.particify.arsnova.connector.client.ConnectorClient;
 
 public class CourseControllerTest extends AbstractControllerTest {
 

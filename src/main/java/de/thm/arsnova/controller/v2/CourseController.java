@@ -29,14 +29,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import de.thm.arsnova.connector.client.ConnectorClient;
-import de.thm.arsnova.connector.model.Course;
-import de.thm.arsnova.connector.model.UserRole;
 import de.thm.arsnova.controller.AbstractController;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.service.UserService;
 import de.thm.arsnova.web.exceptions.NotImplementedException;
 import de.thm.arsnova.web.exceptions.UnauthorizedException;
+import net.particify.arsnova.connector.client.ConnectorClient;
+import net.particify.arsnova.connector.model.Course;
+import net.particify.arsnova.connector.model.UserRole;
 
 /**
  * Provides access to a user's courses in an LMS such as Moodle.

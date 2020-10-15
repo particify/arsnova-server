@@ -20,10 +20,10 @@ package de.thm.arsnova.persistence;
 
 import java.util.List;
 
-import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.migration.v2.ClientAuthentication;
 import de.thm.arsnova.model.transport.ImportExportContainer;
+import net.particify.arsnova.connector.model.Course;
 
 public interface RoomRepository extends CrudRepository<Room, String> {
 	Room findByShortId(String shortId);
