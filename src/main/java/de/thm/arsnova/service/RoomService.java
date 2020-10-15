@@ -22,10 +22,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.transport.ImportExportContainer;
 import de.thm.arsnova.model.transport.ScoreStatistics;
+import net.particify.arsnova.connector.model.Course;
 
 /**
  * The functionality the session service should provide.

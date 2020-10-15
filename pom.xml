@@ -21,6 +21,7 @@
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<sonar.language>java</sonar.language>
 		<checkstyle.missing-javadoc.severity>warning</checkstyle.missing-javadoc.severity>
+		<gitlab.host>gitlab.com</gitlab.host>
 		<docker.registry>local-dev</docker.registry>
 		<docker.image>arsnova/${project.artifactId}</docker.image>
 		<docker.tag>latest</docker.tag>
@@ -84,37 +85,9 @@
 
 	<repositories>
 		<repository>
-			<id>thm-releases</id>
-			<name>THM Maven Release Repository</name>
-			<url>https://repo.mni.thm.de/repository/releases</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>thm-snapshots</id>
-			<name>THM Maven Snapshot Repository</name>
-			<url>https://repo.mni.thm.de/repository/snapshots</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>thm-mirror</id>
-			<name>THM Maven Mirror</name>
-			<url>https://repo.mni.thm.de/repository/maven-public</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
+			<id>gitlab-particify</id>
+			<name>Particify Repository @ ${gitlab.host}</name>
+			<url>https://${gitlab.host}/api/v4/groups/particify/-/packages/maven</url>
 		</repository>
 	</repositories>
 
@@ -352,9 +325,9 @@
 			<version>${graalvm.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>de.thm.arsnova.connector</groupId>
+			<groupId>net.particify.arsnova.integrations</groupId>
 			<artifactId>connector-client</artifactId>
-			<version>0.73.0</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.swagger</groupId>

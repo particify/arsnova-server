@@ -34,10 +34,11 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.util.Arrays;
 
 import de.thm.arsnova.config.properties.SecurityProperties;
-import de.thm.arsnova.connector.client.ConnectorClient;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+
+import net.particify.arsnova.connector.client.ConnectorClient;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration

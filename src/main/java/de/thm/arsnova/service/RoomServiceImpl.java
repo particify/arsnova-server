@@ -43,8 +43,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.Validator;
 
-import de.thm.arsnova.connector.client.ConnectorClient;
-import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.event.BeforeDeletionEvent;
 import de.thm.arsnova.event.BeforeFullUpdateEvent;
 import de.thm.arsnova.event.FlipFlashcardsEvent;
@@ -63,6 +61,8 @@ import de.thm.arsnova.service.score.ScoreCalculator;
 import de.thm.arsnova.service.score.ScoreCalculatorFactory;
 import de.thm.arsnova.web.exceptions.BadRequestException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
+import net.particify.arsnova.connector.client.ConnectorClient;
+import net.particify.arsnova.connector.model.Course;
 
 /**
  * Performs all room related operations.

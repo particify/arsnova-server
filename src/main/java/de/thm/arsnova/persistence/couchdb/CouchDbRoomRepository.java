@@ -35,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import de.thm.arsnova.connector.model.Course;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.RoomStatistics;
 import de.thm.arsnova.model.migration.v2.ClientAuthentication;
@@ -43,6 +42,7 @@ import de.thm.arsnova.model.transport.ImportExportContainer;
 import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.persistence.MotdRepository;
 import de.thm.arsnova.persistence.RoomRepository;
+import net.particify.arsnova.connector.model.Course;
 
 public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implements RoomRepository {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbRoomRepository.class);

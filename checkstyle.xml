@@ -209,7 +209,7 @@
 			<property name="sortImportsInGroupAlphabetically" value="true"/>
 			<property name="separateLineBetweenGroups" value="true"/>
 			<property name="customImportOrderRules" value="STATIC###THIRD_PARTY_PACKAGE###SPECIAL_IMPORTS"/>
-			<property name="specialImportsRegExp" value="^de\.thm\.arsnova"/>
+			<property name="specialImportsRegExp" value="^(de\.thm\.arsnova|net\.particify\.arsnova)"/>
 		</module>
 		<module name="MethodParamPad"/>
 		<module name="NoWhitespaceBefore">
