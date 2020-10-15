@@ -26,16 +26,22 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
+import de.thm.arsnova.event.AfterCreationEvent;
 import de.thm.arsnova.model.MigrationState;
+import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.serialization.View;
+import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.persistence.couchdb.support.MangoCouchDbConnector;
 import de.thm.arsnova.persistence.couchdb.support.PagedMangoResponse;
 
@@ -43,7 +49,7 @@ import de.thm.arsnova.persistence.couchdb.support.PagedMangoResponse;
 @ConditionalOnProperty(
 		name = "enabled",
 		prefix = CouchDbMigrationProperties.PREFIX)
-public class ImportJobBackgroundExecutor {
+public class ImportJobBackgroundExecutor implements ApplicationEventPublisherAware {
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	@JsonView(View.Persistence.class)
 	static class ImportJob {
@@ -153,12 +159,16 @@ public class ImportJobBackgroundExecutor {
 	private static final String IMPORTJOB_INDEX = "importjob-index";
 	private V2ToV3Migration v2ToV3Migration;
 	private MangoCouchDbConnector connector;
+	private RoomRepository roomRepository;
+	private ApplicationEventPublisher applicationEventPublisher;
 
 	public ImportJobBackgroundExecutor(
 			final V2ToV3Migration v2ToV3Migration,
-			@Qualifier("couchDbMigrationConnector") final MangoCouchDbConnector connector) {
+			@Qualifier("couchDbMigrationConnector") final MangoCouchDbConnector connector,
+			final RoomRepository roomRepository) {
 		this.v2ToV3Migration = v2ToV3Migration;
 		this.connector = connector;
+		this.roomRepository = roomRepository;
 	}
 
 	@PostConstruct
@@ -166,6 +176,11 @@ public class ImportJobBackgroundExecutor {
 		createImportJobIndex();
 		new Thread(() -> runPendingImportJobs()).start();
 		logger.info("Started background migration loop to handle import jobs.");
+	}
+
+	@Override
+	public void setApplicationEventPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+		this.applicationEventPublisher = applicationEventPublisher;
 	}
 
 	public void runPendingImportJobs() {
@@ -209,9 +224,18 @@ public class ImportJobBackgroundExecutor {
 							importJob.setMigration(state);
 							connector.update(importJob);
 						}
-						importJob.setMigrationState(ImportMigrationState.FINISHED);
+						final Optional<Room> room = roomRepository.findById(importJob.getSessionId());
+						room.ifPresentOrElse(
+								r -> {
+									importJob.setMigrationState(ImportMigrationState.FINISHED);
+									applicationEventPublisher.publishEvent(new AfterCreationEvent<>(this, r));
+									logger.info("Finished import job ID {}.", importJob.id, importJob.userId);
+								},
+								() -> {
+									importJob.setMigrationState(ImportMigrationState.FAILED);
+									logger.info("Data migration for job ID {} failed.", importJob.id);
+								});
 						connector.update(importJob);
-						logger.info("Finished import job ID {}.", importJob.id, importJob.userId);
 					}
 				}
 				Thread.sleep(1000 * 10);
