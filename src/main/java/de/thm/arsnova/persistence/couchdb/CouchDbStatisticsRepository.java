@@ -65,7 +65,6 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
 										userProfileStats.setActivationsPending(value);
 										break;
 									case "authProvider":
-										logger.info("UserProfile {} {} {}", key.get(0).asText(), key.get(1).asText(), key.get(2).asText());
 										userProfileStats.getCountByAuthProvider().put(key.get(2).asText(), value);
 										break;
 									default:
@@ -98,7 +97,6 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
 							} else if (key.size() > 1) {
 								switch (key.get(1).asText()) {
 									case "format":
-										logger.info("Content {} {} {}", key.get(0).asText(), key.get(1).asText(), key.get(2).asText());
 										contentStats.getCountByFormat().put(key.get(2).asText(), value);
 										break;
 									default:
@@ -112,7 +110,6 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
 							} else if (key.size() > 1) {
 								switch (key.get(1).asText()) {
 									case "format":
-										logger.info("Answer {} {} {}", key.get(0).asText(), key.get(1).asText(), key.get(2).asText());
 										answerStats.getCountByFormat().put(key.get(2).asText(), value);
 										break;
 									default:
