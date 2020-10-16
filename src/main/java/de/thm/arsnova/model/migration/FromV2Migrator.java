@@ -84,7 +84,7 @@ public class FromV2Migrator {
 		formatMapping.put(V2_TYPE_SCHOOL, de.thm.arsnova.model.Content.Format.SCALE);
 		formatMapping.put(V2_TYPE_YESNO, de.thm.arsnova.model.Content.Format.BINARY);
 		formatMapping.put(V2_TYPE_FREETEXT, de.thm.arsnova.model.Content.Format.TEXT);
-		formatMapping.put(V2_TYPE_SLIDE, de.thm.arsnova.model.Content.Format.TEXT);
+		formatMapping.put(V2_TYPE_SLIDE, de.thm.arsnova.model.Content.Format.SLIDE);
 		formatMapping.put(V2_TYPE_FLASHCARD, de.thm.arsnova.model.Content.Format.TEXT);
 		formatMapping.put(V2_TYPE_GRID, de.thm.arsnova.model.Content.Format.GRID);
 	}
