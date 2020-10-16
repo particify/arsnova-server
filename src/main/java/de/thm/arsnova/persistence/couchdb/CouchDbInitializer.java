@@ -42,6 +42,8 @@ import org.ektorp.impl.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -52,15 +54,17 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
 
+import de.thm.arsnova.event.DatabaseInitializedEvent;
 import de.thm.arsnova.model.MigrationState;
 import de.thm.arsnova.persistence.couchdb.migrations.MigrationExecutor;
 import de.thm.arsnova.service.StatusService;
 
 @Component
-public class CouchDbInitializer implements ResourceLoaderAware {
+public class CouchDbInitializer implements ApplicationEventPublisherAware, ResourceLoaderAware {
 	private static final Logger logger = LoggerFactory.getLogger(CouchDbInitializer.class);
 	private final List<Map<String, Object>> docs = new ArrayList<>();
 
+	private ApplicationEventPublisher applicationEventPublisher;
 	private ResourceLoader resourceLoader;
 	private MigrationExecutor migrationExecutor;
 	private CouchDbConnector connector;
@@ -73,6 +77,11 @@ public class CouchDbInitializer implements ResourceLoaderAware {
 		connector = couchDbConnector;
 		objectMapper = objectMapperFactory.createObjectMapper(couchDbConnector);
 		this.statusService = statusService;
+	}
+
+	@Override
+	public void setApplicationEventPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+		this.applicationEventPublisher = applicationEventPublisher;
 	}
 
 	protected void loadDesignDocFiles() throws IOException, ScriptException {
@@ -193,6 +202,8 @@ public class CouchDbInitializer implements ResourceLoaderAware {
 			createDesignDocs();
 			migrate(state);
 			statusService.removeMaintenanceReason(this.getClass());
+			logger.info("Database initialization completed.");
+			this.applicationEventPublisher.publishEvent(new DatabaseInitializedEvent(this));
 		} catch (final DbAccessException e) {
 			logger.error("Database initialization failed.", e);
 			statusService.putMaintenanceReason(this.getClass(), "Invalid database state");

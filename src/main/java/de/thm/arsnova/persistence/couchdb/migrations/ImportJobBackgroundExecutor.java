@@ -27,17 +27,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
 import de.thm.arsnova.event.AfterCreationEvent;
+import de.thm.arsnova.event.DatabaseInitializedEvent;
 import de.thm.arsnova.model.MigrationState;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.serialization.View;
@@ -171,8 +172,8 @@ public class ImportJobBackgroundExecutor implements ApplicationEventPublisherAwa
 		this.roomRepository = roomRepository;
 	}
 
-	@PostConstruct
-	public void init() {
+	@EventListener
+	public void init(final DatabaseInitializedEvent event) {
 		createImportJobIndex();
 		new Thread(() -> runPendingImportJobs()).start();
 		logger.info("Started background migration loop to handle import jobs.");
@@ -185,7 +186,6 @@ public class ImportJobBackgroundExecutor implements ApplicationEventPublisherAwa
 
 	public void runPendingImportJobs() {
 		try {
-			Thread.sleep(1000 * 15);
 			while (true) {
 				final Map<String, Object> queryOptions = new HashMap<>();
 				queryOptions.put("type", "ImportJob");
