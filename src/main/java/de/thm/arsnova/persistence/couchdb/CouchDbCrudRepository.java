@@ -26,6 +26,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import org.ektorp.BulkDeleteDocument;
 import org.ektorp.CouchDbConnector;
+import org.ektorp.DocumentNotFoundException;
 import org.ektorp.ViewResult;
 import org.ektorp.support.CouchDbRepositorySupport;
 import org.springframework.data.repository.NoRepositoryBean;
@@ -86,7 +87,11 @@ abstract class CouchDbCrudRepository<T extends Entity>
 
 	@Override
 	public Optional<T> findById(final String id) {
-		return Optional.ofNullable(get(id));
+		try {
+			return Optional.of(get(id));
+		} catch (final DocumentNotFoundException e) {
+			return Optional.empty();
+		}
 	}
 
 	@Override
