@@ -31,6 +31,8 @@ public class SecurityProperties {
 	public static class Jwt {
 		private String serverId;
 		private String secret;
+		private String legacyServerId;
+		private String legacySecret;
 
 		@DurationUnit(ChronoUnit.MINUTES)
 		private Duration validityPeriod;
@@ -57,6 +59,22 @@ public class SecurityProperties {
 
 		public void setValidityPeriod(final Duration validityPeriod) {
 			this.validityPeriod = validityPeriod;
+		}
+
+		public String getLegacyServerId() {
+			return legacyServerId;
+		}
+
+		public void setLegacyServerId(final String legacyServerId) {
+			this.legacyServerId = legacyServerId;
+		}
+
+		public String getLegacySecret() {
+			return legacySecret;
+		}
+
+		public void setLegacySecret(final String legacySecret) {
+			this.legacySecret = legacySecret;
 		}
 	}
 
