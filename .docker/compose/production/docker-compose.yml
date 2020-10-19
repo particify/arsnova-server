@@ -69,6 +69,7 @@ services:
       HTTP_CLIENT_COMMENT_SERVICE: http://arsnova-comment-service:8080
       SECURITY_JWT_PUBLIC_SECRET: secret
       SECURITY_JWT_INTERNAL_SECRET: secret
+      SECURITY_JWT_SERVER_ID: arsnova.backend.v3:com.example
     command: /jetty/start.jar --module=http-forwarded
   arsnova-ws-gateway:
     image: registry.gitlab.com/particify/dev/foss/arsnova-ws-gateway:$WSGW_TAG
@@ -111,6 +112,7 @@ services:
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
+      JWT_SECRET: secret
     command: /jetty/start.jar --module=http-forwarded
   arsnova-web:
     image: registry.gitlab.com/particify/dev/foss/arsnova-webclient:$WEB_TAG
