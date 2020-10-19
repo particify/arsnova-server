@@ -25,7 +25,10 @@ const markdownFeaturesets = {
     'strikethrough',
     'backticks',
     'blockquote',
-    'list'
+    'list',
+    'linkify',
+    'link',
+    'image'
   ],
   extended: [
     'newline',
@@ -35,10 +38,10 @@ const markdownFeaturesets = {
     'backticks',
     'blockquote',
     'list',
-
     'linkify',
     'link',
     'image',
+
     'heading',
     'hr',
     'table',
