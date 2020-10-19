@@ -49,6 +49,34 @@ public class CommentCommandHandler {
         this.permissionEvaluator = permissionEvaluator;
     }
 
+    private Comment createOrImportComment(Comment comment, Settings settings) {
+        Comment saved = service.create(comment);
+
+        CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(saved);
+        commentCreatedPayload.setTimestamp(comment.getTimestamp());
+
+        CommentCreated event = new CommentCreated(commentCreatedPayload, comment.getRoomId());
+
+        if (settings.getDirectSend()) {
+            logger.debug("Sending event to comment stream: {}", event);
+
+            messagingTemplate.convertAndSend(
+                    "amq.topic",
+                    comment.getRoomId() + ".comment.stream",
+                    event
+            );
+        } else {
+            logger.debug("Sending event to moderated stream: {}", event);
+            messagingTemplate.convertAndSend(
+                    "amq.topic",
+                    comment.getRoomId() + ".comment.moderator.stream",
+                    event
+            );
+        }
+
+        return saved;
+    }
+
     public Comment handle(CreateComment command) {
         logger.debug("Got new command: {}", command);
 
@@ -73,31 +101,28 @@ public class CommentCommandHandler {
             throw new BadRequestException();
         }
 
-        Comment saved = service.create(newComment);
+        return createOrImportComment(newComment, settings);
+    }
 
-        CommentCreatedPayload commentCreatedPayload = new CommentCreatedPayload(saved);
-        commentCreatedPayload.setTimestamp(now);
+    public Comment handle(ImportComment command) {
+        logger.debug("Got new command: {}", command);
 
-        CommentCreated event = new CommentCreated(commentCreatedPayload, payload.getRoomId());
+        Comment newComment = new Comment();
+        ImportCommentPayload payload = command.getPayload();
 
-        if (settings.getDirectSend()) {
-            logger.debug("Sending event to comment stream: {}", event);
+        Settings settings = settingsService.get(payload.getRoomId());
 
-            messagingTemplate.convertAndSend(
-                    "amq.topic",
-                    payload.getRoomId() + ".comment.stream",
-                    event
-            );
-        } else {
-            logger.debug("Sending event to moderated stream: {}", event);
-            messagingTemplate.convertAndSend(
-                    "amq.topic",
-                    payload.getRoomId() + ".comment.moderator.stream",
-                    event
-            );
-        }
+        newComment.setRoomId(payload.getRoomId());
+        newComment.setCreatorId(payload.getCreatorId());
+        newComment.setBody(payload.getBody());
+        newComment.setTag(payload.getTag());
+        newComment.setTimestamp(payload.getTimestamp());
+        newComment.setRead(payload.isRead());
+        newComment.setCorrect(0);
+        newComment.setFavorite(false);
+        newComment.setAck(settings.getDirectSend());
 
-        return saved;
+        return createOrImportComment(newComment, settings);
     }
 
     public Comment handle(PatchComment command) throws IOException {
