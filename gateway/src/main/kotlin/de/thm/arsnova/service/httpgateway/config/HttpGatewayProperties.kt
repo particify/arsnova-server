@@ -39,6 +39,7 @@ data class Endpoints(
         val core: String,
         val commentService: String,
         val roomaccessService: String,
+        val importService: String,
         val formattingService: String
 )
 

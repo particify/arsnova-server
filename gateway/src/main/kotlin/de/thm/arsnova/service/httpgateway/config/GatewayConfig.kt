@@ -1,6 +1,7 @@
 package de.thm.arsnova.service.httpgateway.config
 
 import de.thm.arsnova.service.httpgateway.filter.AuthFilter
+import de.thm.arsnova.service.httpgateway.filter.JwtUserIdFilter
 import de.thm.arsnova.service.httpgateway.filter.RequestRateLimiter
 import de.thm.arsnova.service.httpgateway.filter.RoomIdFilter
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -40,7 +41,8 @@ class GatewayConfig (
     fun myRoutes(
             builder: RouteLocatorBuilder,
             authFilter: AuthFilter,
-            roomIdFilter: RoomIdFilter
+            roomIdFilter: RoomIdFilter,
+            jwtUserIdFilter: JwtUserIdFilter
     ): RouteLocator? {
         return builder.routes()
                 .route("core") { p ->
@@ -84,6 +86,17 @@ class GatewayConfig (
                                 }
                             }
                             .uri(httpGatewayProperties.routing.endpoints.commentService)
+                }
+                .route("import-service") { p ->
+                    p
+                            .path("/import/**")
+                            .filters { f ->
+                                f.filter(jwtUserIdFilter.apply(JwtUserIdFilter.Config()))
+                                f.requestRateLimiter { r ->
+                                    r.rateLimiter = requestRateLimiter
+                                }
+                            }
+                            .uri(httpGatewayProperties.routing.endpoints.importService)
                 }
                 .route("formatting-service") { p ->
                     p
