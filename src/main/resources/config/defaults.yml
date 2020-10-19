@@ -110,7 +110,7 @@ arsnova:
 
     # JSON Web Tokens
     jwt:
-      serverId: arsnova.backend.v3:com.example
+      server-id: arsnova.backend.v3:com.example
       secret: ""
       validity-period: 6H
 
