@@ -25,4 +25,4 @@ spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults=false
 # Because detection is disabled you have to set correct dialect by hand.
 spring.jpa.database-platform=org.hibernate.dialect.PostgreSQL9Dialect
 
-jwt.secret=secret
+security.jwt.secret=secret
