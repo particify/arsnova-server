@@ -1,6 +1,8 @@
 package de.thm.arsnova.service.comment.config;
 
+import de.thm.arsnova.service.comment.config.properties.SecurityProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -15,6 +17,7 @@ import de.thm.arsnova.service.comment.security.JwtTokenFilter;
 
 @Configuration
 @EnableWebSecurity
+@EnableConfigurationProperties(SecurityProperties.class)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private JwtTokenFilter jwtTokenFilter;
