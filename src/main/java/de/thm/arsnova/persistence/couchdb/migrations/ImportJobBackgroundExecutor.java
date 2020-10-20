@@ -34,6 +34,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.style.ToStringCreator;
 import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
@@ -145,6 +146,20 @@ public class ImportJobBackgroundExecutor implements ApplicationEventPublisherAwa
 		public String getType() {
 			return TYPE;
 		}
+
+		@Override
+		public String toString() {
+			return new ToStringCreator(this)
+					.append("id", id)
+					.append("rev", rev)
+					.append("userId", userId)
+					.append("sessionId", sessionId)
+					.append("state", state)
+					.append("migrationState", migrationState)
+					.append("migration", migration)
+					.append("creationTimestamp", creationTimestamp)
+					.toString();
+		}
 	}
 
 	enum ImportMigrationState {
@@ -224,7 +239,15 @@ public class ImportJobBackgroundExecutor implements ApplicationEventPublisherAwa
 							importJob.setMigration(state);
 							connector.update(importJob);
 						}
-						final Optional<Room> room = roomRepository.findById(importJob.getSessionId());
+						Optional<Room> room;
+						try {
+							room = roomRepository.findById(importJob.getSessionId());
+						} catch (final NullPointerException e) {
+							/* A NPE might be thrown because of an incompatibility of Ektorp with newer versions of
+							 * HttpClient. See https://gitlab.com/particify/dev/foss/arsnova-backend/-/issues/81 */
+							logger.error("Could not retrieve imported room.", e);
+							room = Optional.empty();
+						}
 						room.ifPresentOrElse(
 								r -> {
 									importJob.setMigrationState(ImportMigrationState.FINISHED);
@@ -233,7 +256,7 @@ public class ImportJobBackgroundExecutor implements ApplicationEventPublisherAwa
 								},
 								() -> {
 									importJob.setMigrationState(ImportMigrationState.FAILED);
-									logger.info("Data migration for job ID {} failed.", importJob.id);
+									logger.error("Data migration for import job failed: {}", importJob);
 								});
 						connector.update(importJob);
 					}
