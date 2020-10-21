@@ -85,23 +85,6 @@ public class CouchDbRoomRepository extends CouchDbCrudRepository<Room> implement
 				ComplexKey.of(courses.stream().map(Course::getId).collect(Collectors.toList())));
 	}
 
-	@Override
-	public List<Room> findInactiveGuestRoomsMetadata(final long lastActivityBefore) {
-		final ViewResult result = db.queryView(
-				createQuery("by_lastactivity_for_guests").endKey(lastActivityBefore));
-		final int[] count = new int[3];
-
-		final List<Room> rooms = new ArrayList<>();
-		for (final ViewResult.Row row : result.getRows()) {
-			final Room s = new Room();
-			s.setId(row.getId());
-			s.setRevision(row.getValueAsNode().get("_rev").asText());
-			rooms.add(s);
-		}
-
-		return rooms;
-	}
-
 	/* TODO: Move to service layer. */
 	@Override
 	public Room importRoom(final String userId, final ImportExportContainer importRoom) {

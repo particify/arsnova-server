@@ -40,13 +40,6 @@ var designDoc = {
 				}
 			}
 		},
-		"by_lastactivity_for_guests": { /* needs rewrite */
-			"map": function (doc) {
-				if (doc.type === "Room" && !doc.poolProperties && doc.creator.indexOf("Guest") === 0) {
-					emit(doc.lastOwnerActivity || doc.creationTimestamp, {_rev: doc._rev});
-				}
-			}
-		},
 		"partial_by_pool_ownerid_name": {
 			"map": function (doc) {
 				if (doc.type === "Room") {

@@ -405,7 +405,7 @@ public class RoomController extends PaginationController {
 			@RequestParam(value = "questionVariant", required = false)
 			final String questionVariant,
 			final HttpServletResponse response) {
-		return roomService.getLearningProgress(roomService.getIdByShortId(shortId), type, questionVariant);
+		throw new NotImplementedException();
 	}
 
 	@ApiOperation(value = "retrieves a value for the learning progress for the current user",
@@ -416,7 +416,7 @@ public class RoomController extends PaginationController {
 			@RequestParam(value = "type", defaultValue = "questions") final String type,
 			@RequestParam(value = "questionVariant", required = false) final String questionVariant,
 			final HttpServletResponse response) {
-		return roomService.getMyLearningProgress(roomService.getIdByShortId(shortId), type, questionVariant);
+		throw new NotImplementedException();
 	}
 
 	@ApiOperation(value = "retrieves all Room features",

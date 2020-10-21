@@ -24,7 +24,6 @@ import java.util.UUID;
 
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.transport.ImportExportContainer;
-import de.thm.arsnova.model.transport.ScoreStatistics;
 import net.particify.arsnova.connector.model.Course;
 
 /**
@@ -67,10 +66,6 @@ public interface RoomService extends EntityService<Room> {
 
 	Room transferOwnershipThroughToken(Room room, String targetUserToken);
 
-	ScoreStatistics getLearningProgress(String id, String type, String questionVariant);
-
-	ScoreStatistics getMyLearningProgress(String id, String type, String questionVariant);
-
 	List<Room> getMyRoomsInfo(int offset, int limit);
 
 	List<Room> getPublicPoolRoomsInfo();
@@ -92,6 +87,4 @@ public interface RoomService extends EntityService<Room> {
 	boolean lockFeedbackInput(String id, Boolean lock) throws IOException;
 
 	boolean flipFlashcards(String id, Boolean flip);
-
-	void deleteInactiveRooms();
 }
