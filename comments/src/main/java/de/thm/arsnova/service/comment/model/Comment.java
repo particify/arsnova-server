@@ -1,5 +1,6 @@
 package de.thm.arsnova.service.comment.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Transient;
@@ -7,10 +8,14 @@ import java.util.Date;
 
 @Entity
 public class Comment {
+    public static final int MAX_BODY_LENGTH = 500;
+    public static final int MAX_ANSWER_LENGTH = 500;
+
     @Id
     private String id;
     private String roomId;
     private String creatorId;
+    @Column(columnDefinition = "TEXT")
     private String body;
     private Date timestamp;
     private boolean read;
@@ -20,6 +25,7 @@ public class Comment {
     @Transient
     private int score;
     private String tag;
+    @Column(columnDefinition = "TEXT")
     private String answer;
 
     public String getId() {
@@ -51,7 +57,7 @@ public class Comment {
     }
 
     public void setBody(String body) {
-        this.body = body;
+        this.body = body.length() > MAX_BODY_LENGTH ? body.substring(0, MAX_BODY_LENGTH) : body;
     }
 
     public Date getTimestamp() {
@@ -115,7 +121,7 @@ public class Comment {
     }
 
     public void setAnswer(String answer) {
-        this.answer = answer;
+        this.answer = answer.length() > MAX_ANSWER_LENGTH ? answer.substring(0, MAX_ANSWER_LENGTH) : answer;
     }
 
     @Override
