@@ -28,8 +28,6 @@ import net.particify.arsnova.connector.model.Course;
 public interface RoomRepository extends CrudRepository<Room, String> {
 	Room findByShortId(String shortId);
 
-	List<Room> findInactiveGuestRoomsMetadata(long lastActivityBefore);
-
 	List<Room> findByOwner(ClientAuthentication owner, int start, int limit);
 
 	List<Room> findByOwnerId(String ownerId, int start, int limit);

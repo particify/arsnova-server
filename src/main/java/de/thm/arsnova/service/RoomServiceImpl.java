@@ -37,7 +37,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -49,7 +48,6 @@ import de.thm.arsnova.event.FlipFlashcardsEvent;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.model.transport.ImportExportContainer;
-import de.thm.arsnova.model.transport.ScoreStatistics;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.CommentRepository;
 import de.thm.arsnova.persistence.ContentRepository;
@@ -57,8 +55,6 @@ import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.persistence.RoomRepository;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.security.jwt.JwtService;
-import de.thm.arsnova.service.score.ScoreCalculator;
-import de.thm.arsnova.service.score.ScoreCalculatorFactory;
 import de.thm.arsnova.web.exceptions.BadRequestException;
 import de.thm.arsnova.web.exceptions.NotFoundException;
 import net.particify.arsnova.connector.client.ConnectorClient;
@@ -87,8 +83,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 
 	private FeedbackService feedbackService;
 
-	private ScoreCalculatorFactory scoreCalculatorFactory;
-
 	private ConnectorClient connectorClient;
 
 	private JwtService jwtService;
@@ -103,7 +97,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 			final RoomRepository repository,
 			final LogEntryRepository dbLogger,
 			final UserService userService,
-			final ScoreCalculatorFactory scoreCalculatorFactory,
 			@Qualifier("defaultJsonMessageConverter")
 			final MappingJackson2HttpMessageConverter jackson2HttpMessageConverter,
 			final Validator validator,
@@ -112,7 +105,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		this.roomRepository = repository;
 		this.dbLogger = dbLogger;
 		this.userService = userService;
-		this.scoreCalculatorFactory = scoreCalculatorFactory;
 		this.jwtService = jwtService;
 	}
 
@@ -173,22 +165,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 	public void handleUserDeletion(final BeforeDeletionEvent<UserProfile> event) {
 		final Iterable<Room> rooms = roomRepository.findByOwnerId(event.getEntity().getId(), -1, -1);
 		delete(rooms);
-	}
-
-	@Scheduled(fixedDelay = ROOM_INACTIVITY_CHECK_INTERVAL_MS)
-	public void deleteInactiveRooms() {
-		if (guestRoomInactivityThresholdDays > 0) {
-			logger.info("Delete inactive rooms.");
-			final long unixTime = System.currentTimeMillis();
-			final long lastActivityBefore = unixTime - guestRoomInactivityThresholdDays * 24 * 60 * 60 * 1000L;
-			final int[] totalCount = new int[] {0, 0, 0};
-			final List<Room> inactiveRooms = roomRepository.findInactiveGuestRoomsMetadata(lastActivityBefore);
-			delete(inactiveRooms);
-
-			if (!inactiveRooms.isEmpty()) {
-				logger.info("Deleted {} inactive guest rooms.", inactiveRooms.size());
-			}
-		}
 	}
 
 	@Override
@@ -443,23 +419,6 @@ public class RoomServiceImpl extends DefaultEntityServiceImpl<Room> implements R
 		final User user = jwtService.verifyToken(targetUserToken);
 		room.setOwnerId(user.getId());
 		return update(room);
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#id, 'room', 'read')")
-	public ScoreStatistics getLearningProgress(final String id, final String type, final String questionVariant) {
-		final Room room = get(id);
-		final ScoreCalculator scoreCalculator = scoreCalculatorFactory.create(type, questionVariant);
-		return scoreCalculator.getCourseProgress(room);
-	}
-
-	@Override
-	@PreAuthorize("hasPermission(#id, 'room', 'read')")
-	public ScoreStatistics getMyLearningProgress(final String id, final String type, final String questionVariant) {
-		final Room room = get(id);
-		final User user = userService.getCurrentUser();
-		final ScoreCalculator scoreCalculator = scoreCalculatorFactory.create(type, questionVariant);
-		return scoreCalculator.getMyProgress(room, user.getId());
 	}
 
 	@Override

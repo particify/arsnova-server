@@ -37,7 +37,6 @@ import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.persistence.MotdRepository;
 import de.thm.arsnova.persistence.RoomRepository;
-import de.thm.arsnova.persistence.SessionStatisticsRepository;
 import de.thm.arsnova.persistence.StatisticsRepository;
 import de.thm.arsnova.persistence.UserRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbAnswerRepository;
@@ -47,7 +46,6 @@ import de.thm.arsnova.persistence.couchdb.CouchDbContentRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbLogEntryRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbMotdRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbRoomRepository;
-import de.thm.arsnova.persistence.couchdb.CouchDbSessionStatisticsRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbStatisticsRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbUserRepository;
 import de.thm.arsnova.persistence.couchdb.support.MangoCouchDbConnector;
@@ -172,10 +170,5 @@ public class PersistenceConfig {
 	@Bean
 	public StatisticsRepository statisticsRepository() throws Exception {
 		return new CouchDbStatisticsRepository(couchDbConnector(), false);
-	}
-
-	@Bean
-	public SessionStatisticsRepository sessionStatisticsRepository() throws Exception {
-		return new CouchDbSessionStatisticsRepository(couchDbConnector(), false);
 	}
 }

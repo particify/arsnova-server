@@ -31,7 +31,6 @@ import de.thm.arsnova.persistence.ContentRepository;
 import de.thm.arsnova.persistence.LogEntryRepository;
 import de.thm.arsnova.persistence.MotdRepository;
 import de.thm.arsnova.persistence.RoomRepository;
-import de.thm.arsnova.persistence.SessionStatisticsRepository;
 import de.thm.arsnova.persistence.StatisticsRepository;
 import de.thm.arsnova.persistence.UserRepository;
 
@@ -86,10 +85,5 @@ public class TestPersistanceConfig {
 	@Bean
 	public StatisticsRepository statisticsRepository() {
 		return Mockito.mock(StatisticsRepository.class);
-	}
-
-	@Bean
-	public SessionStatisticsRepository sessionStatisticsRepository() {
-		return Mockito.mock(SessionStatisticsRepository.class);
 	}
 }
