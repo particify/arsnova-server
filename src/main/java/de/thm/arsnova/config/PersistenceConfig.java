@@ -50,6 +50,7 @@ import de.thm.arsnova.persistence.couchdb.CouchDbRoomRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbStatisticsRepository;
 import de.thm.arsnova.persistence.couchdb.CouchDbUserRepository;
 import de.thm.arsnova.persistence.couchdb.support.MangoCouchDbConnector;
+import de.thm.arsnova.persistence.couchdb.support.http.PatchedHttpClientFactoryBean;
 
 @ComponentScan({
 		"de.thm.arsnova.persistence.couchdb"
@@ -111,7 +112,7 @@ public class PersistenceConfig {
 
 	@Bean
 	public HttpClientFactoryBean couchDbHttpClientFactory() throws Exception {
-		final HttpClientFactoryBean factory = new HttpClientFactoryBean();
+		final HttpClientFactoryBean factory = new PatchedHttpClientFactoryBean();
 		factory.setHost(properties.getHost());
 		factory.setPort(properties.getPort());
 		if (!properties.getUsername().isEmpty()) {
@@ -127,7 +128,7 @@ public class PersistenceConfig {
 			name = "enabled",
 			prefix = CouchDbMigrationProperties.PREFIX)
 	public HttpClientFactoryBean couchDbMigrationHttpClientFactory() throws Exception {
-		final HttpClientFactoryBean factory = new HttpClientFactoryBean();
+		final HttpClientFactoryBean factory = new PatchedHttpClientFactoryBean();
 		factory.setHost(migrationProperties.getHost());
 		factory.setPort(migrationProperties.getPort());
 		if (!migrationProperties.getUsername().isEmpty()) {
