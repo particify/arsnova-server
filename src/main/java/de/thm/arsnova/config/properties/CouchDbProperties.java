@@ -18,18 +18,12 @@
 
 package de.thm.arsnova.config.properties;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
-@ConfigurationProperties(CouchDbProperties.PREFIX)
-public class CouchDbProperties {
-	public static final String PREFIX = SystemProperties.PREFIX + ".couchdb";
+abstract class CouchDbProperties {
 	private String host;
 	private int port;
 	private String dbName;
-	private boolean createDb;
 	private String username;
 	private String password;
-	private String migrateFrom;
 
 	public String getHost() {
 		return host;
@@ -55,14 +49,6 @@ public class CouchDbProperties {
 		this.dbName = dbName;
 	}
 
-	public boolean isCreateDb() {
-		return createDb;
-	}
-
-	public void setCreateDb(final boolean createDb) {
-		this.createDb = createDb;
-	}
-
 	public String getUsername() {
 		return username;
 	}
@@ -77,13 +63,5 @@ public class CouchDbProperties {
 
 	public void setPassword(final String password) {
 		this.password = password;
-	}
-
-	public String getMigrateFrom() {
-		return migrateFrom;
-	}
-
-	public void setMigrateFrom(final String migrateFrom) {
-		this.migrateFrom = migrateFrom;
 	}
 }

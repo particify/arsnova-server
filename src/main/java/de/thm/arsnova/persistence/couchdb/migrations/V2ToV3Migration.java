@@ -21,6 +21,7 @@ package de.thm.arsnova.persistence.couchdb.migrations;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -28,15 +29,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import javax.annotation.PostConstruct;
 import org.ektorp.DbAccessException;
 import org.ektorp.DocumentNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Service;
 
-import de.thm.arsnova.config.properties.CouchDbProperties;
+import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
+import de.thm.arsnova.event.BeforeCreationEvent;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Comment;
 import de.thm.arsnova.model.Content;
@@ -62,19 +67,20 @@ import de.thm.arsnova.persistence.couchdb.support.PagedMangoResponse;
  */
 @Service
 @ConditionalOnProperty(
-		name = "migrate-from",
-		prefix = CouchDbProperties.PREFIX)
-public class V2ToV3Migration implements Migration {
+		name = "enabled",
+		prefix = CouchDbMigrationProperties.PREFIX)
+public class V2ToV3Migration implements ApplicationEventPublisherAware, Migration {
 	private static final String ID = "20170914131300";
 	private static final int LIMIT = 200;
 	private static final long OUTDATED_AFTER = 1000L * 3600 * 24 * 30 * 6;
-	private static final String FULL_INDEX_BY_TYPE = "full-index-by-type";
+	static final String FULL_INDEX_BY_TYPE = "full-index-by-type";
 	private static final String USER_INDEX = "user-index";
 	private static final String LOGGEDIN_INDEX = "loggedin-index";
 	private static final String SESSION_INDEX = "session-index";
 	private static final String SKILLQUESTION_INDEX = "skillquestion-index";
 	private static final String MOTD_INDEX = "motd-index";
 	private static final String MOTDLIST_INDEX = "motdlist-index";
+	private static final boolean COMMENTS_PUBLISH_ONLY = true;
 
 	private static final Logger logger = LoggerFactory.getLogger(V2ToV3Migration.class);
 
@@ -85,7 +91,7 @@ public class V2ToV3Migration implements Migration {
 	private RoomRepository roomRepository;
 	private ContentRepository contentRepository;
 	private long referenceTimestamp = System.currentTimeMillis();
-	private MigrationState.Migration state;
+	private ApplicationEventPublisher applicationEventPublisher;
 
 	public V2ToV3Migration(
 			final FromV2Migrator migrator,
@@ -102,6 +108,11 @@ public class V2ToV3Migration implements Migration {
 		this.contentRepository = contentRepository;
 	}
 
+	@PostConstruct
+	public void init() {
+		createV2Index();
+	}
+
 	public String getId() {
 		return ID;
 	}
@@ -111,35 +122,71 @@ public class V2ToV3Migration implements Migration {
 	}
 
 	@Override
+	public void setApplicationEventPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+		this.applicationEventPublisher = applicationEventPublisher;
+	}
+
+	@Override
 	public void migrate(final MigrationState.Migration state) {
-		this.state = state;
-		createV2Index();
 		migrator.setIgnoreRevision(true);
 		try {
 			switch (state.getStep()) {
 				case 0:
-					migrateUsers();
+					migrateUsers(state);
 					break;
 				case 1:
-					migrateUnregisteredUsers();
+					migrateUnregisteredUsers(state);
 					break;
 				case 2:
-					migrateRooms();
+					migrateRooms(state, null);
 					break;
 				case 3:
-					migrateMotds();
+					migrateMotds(state, null);
 					break;
 				case 4:
-					migrateComments();
+					migrateComments(state, null);
 					break;
 				case 5:
-					migrateContents();
+					migrateContents(state, null);
 					break;
 				case 6:
-					migrateContentGroups();
+					migrateContentGroups(state, null);
 					break;
 				case 7:
-					migrateAnswers();
+					migrateAnswers(state, null);
+					break;
+				default:
+					throw new IllegalStateException("Invalid migration step:" + state.getStep() + ".");
+			}
+		} catch (final InterruptedException e) {
+			throw new DbAccessException(e);
+		}
+		migrator.setIgnoreRevision(false);
+	}
+
+	public void migrateForImport(
+			final MigrationState.Migration state,
+			final ImportJobBackgroundExecutor.ImportJob importJob) {
+		migrator.setIgnoreRevision(true);
+		try {
+			switch (state.getStep()) {
+				case 0:
+					migrateRooms(state, importJob);
+					break;
+				case 1:
+					migrateMotds(state, importJob);
+					break;
+				case 2:
+					migrateComments(state, importJob);
+					break;
+				case 3:
+					migrateContents(state, importJob);
+					break;
+				case 4:
+					migrateContentGroups(state, importJob);
+					break;
+				case 5:
+					migrateAnswers(state, importJob);
 					break;
 				default:
 					throw new IllegalStateException("Invalid migration step:" + state.getStep() + ".");
@@ -157,6 +204,7 @@ public class V2ToV3Migration implements Migration {
 
 		fields = new ArrayList<>();
 		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("type", false));
+		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("importJobId", false));
 		fromConnector.createJsonIndex(FULL_INDEX_BY_TYPE, fields);
 
 		filterSelector = new HashMap<>();
@@ -181,6 +229,7 @@ public class V2ToV3Migration implements Migration {
 		filterSelector.put("type", "session");
 		fromConnector.createPartialJsonIndex(SESSION_INDEX, new ArrayList<>(), filterSelector);
 		fields.clear();
+		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("importJobId", false));
 		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("keyword", false));
 		fromConnector.createPartialJsonIndex(SESSION_INDEX, fields, filterSelector);
 
@@ -188,6 +237,7 @@ public class V2ToV3Migration implements Migration {
 		filterSelector.put("type", "skill_question");
 		fromConnector.createPartialJsonIndex(SKILLQUESTION_INDEX, new ArrayList<>(), filterSelector);
 		fields.clear();
+		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("importJobId", false));
 		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("sessionId", false));
 		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("questionVariant", false));
 		fromConnector.createPartialJsonIndex(SKILLQUESTION_INDEX, fields, filterSelector);
@@ -196,6 +246,7 @@ public class V2ToV3Migration implements Migration {
 		filterSelector.put("type", "motd");
 		fromConnector.createPartialJsonIndex(MOTD_INDEX, new ArrayList<>(), filterSelector);
 		fields.clear();
+		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("importJobId", false));
 		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("motdkey", false));
 		fromConnector.createPartialJsonIndex(MOTD_INDEX, fields, filterSelector);
 
@@ -216,7 +267,7 @@ public class V2ToV3Migration implements Migration {
 		}
 	}
 
-	private void migrateUsers() throws InterruptedException {
+	private void migrateUsers(final MigrationState.Migration state) throws InterruptedException {
 		waitForV2Index(USER_INDEX);
 		waitForV2Index(LOGGEDIN_INDEX);
 		final Map<String, Object> queryOptions = new HashMap<>();
@@ -259,7 +310,7 @@ public class V2ToV3Migration implements Migration {
 		state.setState(null);
 	}
 
-	private void migrateUnregisteredUsers() throws InterruptedException {
+	private void migrateUnregisteredUsers(final MigrationState.Migration state) throws InterruptedException {
 		waitForV2Index(USER_INDEX);
 		waitForV2Index(LOGGEDIN_INDEX);
 		/* Load registered usernames to exclude them later */
@@ -312,10 +363,22 @@ public class V2ToV3Migration implements Migration {
 		state.setState(null);
 	}
 
-	private void migrateRooms() throws InterruptedException {
+	private void migrateRooms(
+			final MigrationState.Migration state,
+			final ImportJobBackgroundExecutor.ImportJob importJob) throws InterruptedException {
+		final Room.ImportMetadata metadata = new Room.ImportMetadata();
+		if (importJob != null) {
+			metadata.setSource("V2_IMPORT");
+			metadata.setJobId(importJob.getId());
+		} else {
+			metadata.setSource("V2_FULL_MIGRATION");
+		}
+		metadata.setTimestamp(new Date());
+
 		waitForV2Index(SESSION_INDEX);
 		final Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "session");
+		queryOptions.put("importJobId", importJob != null ? importJob.getId() : null);
 		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(SESSION_INDEX);
 		query.setLimit(LIMIT);
@@ -334,13 +397,25 @@ public class V2ToV3Migration implements Migration {
 			}
 
 			for (final de.thm.arsnova.model.migration.v2.Room roomV2 : roomsV2) {
-				final List<UserProfile> profiles = userRepository.findByLoginId(roomV2.getCreator());
-				if (profiles.size() == 0) {
-					logger.warn("Skipping migration of Room {}. Creator {} does not exist.",
-							roomV2.getId(), roomV2.getCreator());
-					continue;
+				final Optional<UserProfile> profile;
+				if (importJob == null) {
+					final List<UserProfile> profiles = userRepository.findByLoginId(roomV2.getCreator());
+					if (profiles.size() == 0) {
+						logger.warn("Skipping migration of Room {}. Creator {} does not exist.",
+								roomV2.getId(), roomV2.getCreator());
+						continue;
+					}
+					profile = Optional.of(profiles.get(0));
+				} else {
+					profile = userRepository.findById(importJob.getUserId());
+					if (profile.isEmpty()) {
+						logger.warn("Skipping migration of Room {}. Creator {} does not exist.",
+								roomV2.getId(), roomV2.getCreator());
+						continue;
+					}
 				}
-				roomsV3.add(migrator.migrate(roomV2, Optional.of(profiles.get(0))));
+				roomsV3.add(migrator.migrate(roomV2, profile, true));
+				roomsV3.stream().forEach(room -> room.setImportMetadata(metadata));
 			}
 
 			toConnector.executeBulk(roomsV3);
@@ -349,10 +424,13 @@ public class V2ToV3Migration implements Migration {
 		state.setState(null);
 	}
 
-	private void migrateMotds() throws InterruptedException {
+	private void migrateMotds(
+			final MigrationState.Migration state,
+			final ImportJobBackgroundExecutor.ImportJob importJob) throws InterruptedException {
 		waitForV2Index(MOTD_INDEX);
 		final Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "motd");
+		queryOptions.put("importJobId", importJob != null ? importJob.getId() : null);
 		/* Exclude outdated MotDs */
 		final HashMap<String, String> subQuery = new HashMap<>();
 		subQuery.put("$gt", String.valueOf(referenceTimestamp - OUTDATED_AFTER));
@@ -394,10 +472,13 @@ public class V2ToV3Migration implements Migration {
 		state.setState(null);
 	}
 
-	private void migrateComments() throws InterruptedException {
+	private void migrateComments(
+			final MigrationState.Migration state,
+			final ImportJobBackgroundExecutor.ImportJob importJob) throws InterruptedException {
 		waitForV2Index(FULL_INDEX_BY_TYPE);
 		final Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "interposed_question");
+		queryOptions.put("importJobId", importJob != null ? importJob.getId() : null);
 		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(FULL_INDEX_BY_TYPE);
 		query.setLimit(LIMIT);
@@ -438,16 +519,26 @@ public class V2ToV3Migration implements Migration {
 				}
 			}
 
-			toConnector.executeBulk(commentsV3);
+			if (COMMENTS_PUBLISH_ONLY) {
+				commentsV3.stream().forEach(comment -> {
+					final BeforeCreationEvent<Comment> event = new BeforeCreationEvent<>(this, comment);
+					this.applicationEventPublisher.publishEvent(event);
+				});
+			} else {
+				toConnector.executeBulk(commentsV3);
+			}
 			state.setState(bookmark);
 		}
 		state.setState(null);
 	}
 
-	private void migrateContents() throws InterruptedException {
+	private void migrateContents(
+			final MigrationState.Migration state,
+			final ImportJobBackgroundExecutor.ImportJob importJob) throws InterruptedException {
 		waitForV2Index(FULL_INDEX_BY_TYPE);
 		final Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "skill_question");
+		queryOptions.put("importJobId", importJob != null ? importJob.getId() : null);
 		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(FULL_INDEX_BY_TYPE);
 		query.setLimit(LIMIT);
@@ -484,10 +575,13 @@ public class V2ToV3Migration implements Migration {
 		state.setState(null);
 	}
 
-	private void migrateContentGroups() throws InterruptedException {
+	private void migrateContentGroups(
+			final MigrationState.Migration state,
+			final ImportJobBackgroundExecutor.ImportJob importJob) throws InterruptedException {
 		waitForV2Index(SKILLQUESTION_INDEX);
 		final Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "skill_question");
+		queryOptions.put("importJobId", importJob != null ? importJob.getId() : null);
 		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setFields(Arrays.asList("sessionId", "questionVariant", "_id"));
 		final ArrayList<MangoCouchDbConnector.MangoQuery.Sort> sort = new ArrayList<>();
@@ -544,10 +638,13 @@ public class V2ToV3Migration implements Migration {
 		}
 	}
 
-	private void migrateAnswers() throws InterruptedException {
+	private void migrateAnswers(
+			final MigrationState.Migration state,
+			final ImportJobBackgroundExecutor.ImportJob importJob) throws InterruptedException {
 		waitForV2Index(FULL_INDEX_BY_TYPE);
 		final Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "skill_question_answer");
+		queryOptions.put("importJobId", importJob != null ? importJob.getId() : null);
 		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(FULL_INDEX_BY_TYPE);
 		query.setLimit(LIMIT);
@@ -598,6 +695,7 @@ public class V2ToV3Migration implements Migration {
 		final Map<String, Set<String>> subQuery1 = new HashMap<>();
 		subQuery1.put("$in", oldIds);
 		queryOptions.put("type", "motd");
+		queryOptions.put("importJobId", null);
 		queryOptions.put("motdkey", subQuery1);
 		/* Exclude outdated MotDs */
 		final HashMap<String, String> subQuery2 = new HashMap<>();

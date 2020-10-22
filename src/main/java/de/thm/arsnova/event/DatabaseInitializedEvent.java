@@ -1,6 +1,6 @@
 /*
  * This file is part of ARSnova Backend.
- * Copyright (C) 2012-2017 The ARSnova Team
+ * Copyright (C) 2012-2019 The ARSnova Team and Contributors
  *
  * ARSnova Backend is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,29 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.thm.arsnova.model.migration.v2;
+package de.thm.arsnova.event;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonView;
+import org.springframework.context.ApplicationEvent;
 
-import de.thm.arsnova.model.serialization.View;
-
-public interface Entity {
-	String getId();
-
-	void setId(String id);
-
-	String getRevision();
-
-	void setRevision(String rev);
-
-	@JsonIgnore
-	default void setImportJobId(final String importJobId) {
-		/* Ignore this property during deserialization. */
-	}
-
-	@JsonView(View.Persistence.class)
-	default Class<? extends Entity> getType() {
-		return getClass();
+public class DatabaseInitializedEvent extends ApplicationEvent {
+	public DatabaseInitializedEvent(final Object source) {
+		super(source);
 	}
 }

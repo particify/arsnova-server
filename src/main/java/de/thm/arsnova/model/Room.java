@@ -19,6 +19,7 @@
 package de.thm.arsnova.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -407,6 +408,37 @@ public class Room extends Entity {
 		}
 	}
 
+	@JsonView(View.Persistence.class)
+	public static class ImportMetadata {
+		private String source;
+		private Date timestamp;
+		private String jobId;
+
+		public String getSource() {
+			return source;
+		}
+
+		public void setSource(final String source) {
+			this.source = source;
+		}
+
+		public Date getTimestamp() {
+			return timestamp;
+		}
+
+		public void setTimestamp(final Date timestamp) {
+			this.timestamp = timestamp;
+		}
+
+		public String getJobId() {
+			return jobId;
+		}
+
+		public void setJobId(final String jobId) {
+			this.jobId = jobId;
+		}
+	}
+
 	@NotEmpty
 	private String shortId;
 
@@ -427,6 +459,7 @@ public class Room extends Entity {
 	private Settings settings;
 	private Author author;
 	private PoolProperties poolProperties;
+	private ImportMetadata importMetadata;
 	private Map<String, Map<String, Object>> extensions;
 	private Map<String, String> attachments;
 	private RoomStatistics statistics;
@@ -560,6 +593,16 @@ public class Room extends Entity {
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setPoolProperties(final PoolProperties poolProperties) {
 		this.poolProperties = poolProperties;
+	}
+
+	@JsonView(View.Persistence.class)
+	public ImportMetadata getImportMetadata() {
+		return importMetadata;
+	}
+
+	@JsonView(View.Persistence.class)
+	public void setImportMetadata(final ImportMetadata importMetadata) {
+		this.importMetadata = importMetadata;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})

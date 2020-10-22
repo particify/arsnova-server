@@ -23,6 +23,14 @@ arsnova:
       username: admin
       password: ""
 
+      migration:
+        enabled: false
+        host: localhost
+        port: 5984
+        db-name: arsnova2
+        username: admin
+        password: ""
+
     # Mail server
     mail:
       host: ""
@@ -60,6 +68,14 @@ arsnova:
             - id
             - shortId
             - ownerId
+        - entity-type: Comment
+          event-type: BeforeCreation
+          included-properties:
+            - roomId
+            - creatorId
+            - body
+            - timestamp
+            - read
 
     # Formatting service
     formatting-service:
