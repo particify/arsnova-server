@@ -159,11 +159,13 @@ public class Content extends Entity {
 		}
 	}
 
+	private static final String SUBJECT_LEGACY_PLACEHOLDER = "Subject";
+
 	@NotEmpty
 	private String roomId;
 
-	@NotBlank
-	private String subject;
+	@NotNull
+	private String subject = "";
 
 	@NotBlank
 	private String body;
@@ -204,17 +206,19 @@ public class Content extends Entity {
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getSubject() {
-		return subject;
+		return "";
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public void setSubject(final String subject) {
-		this.subject = subject;
+		this.subject = subject != null ? subject : "";
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getBody() {
-		return body;
+		return (!subject.isBlank() && !subject.equals(SUBJECT_LEGACY_PLACEHOLDER) && !body.startsWith(subject))
+				? "**" + subject + "**\n\n" + body
+				: body;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
