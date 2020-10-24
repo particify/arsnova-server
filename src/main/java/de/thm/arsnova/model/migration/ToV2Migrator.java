@@ -173,8 +173,14 @@ public class ToV2Migrator {
 		final Content to = new Content();
 		copyCommonProperties(from, to);
 		to.setSessionId(from.getRoomId());
-		to.setSubject(from.getSubject());
-		to.setText(from.getBody());
+		if (from.getSubject().equals("") && from.getBody().contains("\n\n")) {
+			final String[] subjectAndBody = from.getBody().split("\n\n", 2);
+			to.setSubject(subjectAndBody[0]);
+			to.setText(subjectAndBody[1]);
+		} else {
+			to.setSubject(from.getSubject());
+			to.setText(from.getBody());
+		}
 		to.setAbstention(from.isAbstentionsAllowed());
 		if (!from.getState().isAdditionalTextVisible() || "Solution".equals(from.getAdditionalTextTitle())) {
 			to.setSolution(from.getAdditionalText());
