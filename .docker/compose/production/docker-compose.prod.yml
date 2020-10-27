@@ -26,6 +26,8 @@ services:
     ports:
       - $PORT:80
       - $HTTPS_PORT:443
+    environment:
+      ARSNOVA_HOSTNAME_ALIASES: $ARSNOVA_HOSTNAME_ALIASES
     volumes:
       - tls-certs:/mnt/tls-certs:ro
     restart: unless-stopped

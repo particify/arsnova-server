@@ -5,7 +5,7 @@ ENV NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates
 
 COPY nginx.conf /etc/nginx/
 COPY templates $NGINX_ENVSUBST_TEMPLATE_DIR
-COPY dhparam tls.conf.include tls_redirect.conf /etc/nginx/
+COPY dhparam domain_redirect.conf.template tls.conf.include tls_redirect.conf /etc/nginx/
 COPY legacy_redirect.conf.include /etc/nginx/conf.d/
 COPY docker-entrypoint.d/* /docker-entrypoint.d/
 
