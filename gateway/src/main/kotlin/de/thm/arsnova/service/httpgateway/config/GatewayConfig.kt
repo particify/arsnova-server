@@ -47,8 +47,12 @@ class GatewayConfig (
         return builder.routes()
                 .route("core") { p ->
                     p
-                            .path("/room/**", "/auth/**", "/content/**", "/user/**", "/configuration/**", "/answer/**", "/management/**")
+                            .path(
+                                    "/room/{roomId}/content/**",
+                                    "/room/{roomId}/answer/**"
+                            )
                             .filters { f ->
+                                f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
                                 f.requestRateLimiter { r ->
                                     r.rateLimiter = requestRateLimiter
                                 }
@@ -67,7 +71,7 @@ class GatewayConfig (
                 }
                 .route("comment-service") { p ->
                     p
-                            .path("/{roomId}/comment/**", "/{roomId}/settings/**")
+                            .path("/room/{roomId}/comment/**", "/room/{roomId}/settings/**")
                             .filters { f ->
                                 f.filter(authFilter.apply(AuthFilter.Config()))
                                 f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
@@ -79,8 +83,13 @@ class GatewayConfig (
                 }
                 .route("comment-service-todo") { p ->
                     p
-                            .path("/bonustoken/**", "/vote/**", "/settings/**")
+                            .path(
+                                    "/room/{roomId}/bonustoken/**",
+                                    "/room/{roomId}/vote/**",
+                                    "/room/{roomId}/settings/**"
+                            )
                             .filters { f ->
+                                f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
                                 f.requestRateLimiter { r ->
                                     r.rateLimiter = requestRateLimiter
                                 }
@@ -108,6 +117,22 @@ class GatewayConfig (
                                 }
                             }
                             .uri(httpGatewayProperties.routing.endpoints.formattingService)
+                }
+                .route("core") { p ->
+                    p
+                            .path(
+                                    "/room/**",
+                                    "/auth/**",
+                                    "/user/**",
+                                    "/configuration/**",
+                                    "/management/**"
+                            )
+                            .filters { f ->
+                                f.requestRateLimiter { r ->
+                                    r.rateLimiter = requestRateLimiter
+                                }
+                            }
+                            .uri(httpGatewayProperties.routing.endpoints.core)
                 }
                 .build()
     }
