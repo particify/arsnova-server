@@ -1,7 +1,7 @@
 version: "3"
 services:
   couchdb:
-    image: registry.gitlab.com/particify/dev/devops/docker-orchestration/couchdb:3.1
+    image: registry.gitlab.com/particify/dev/foss/docker-orchestration/couchdb:3.1
     environment:
       COUCHDB_USER: arsnova
       COUCHDB_PASSWORD: arsnova
@@ -24,7 +24,7 @@ services:
     volumes:
       - postgresql_data_comment:/var/lib/postgresql/data
   rabbitmq:
-    image: registry.gitlab.com/particify/dev/devops/docker-orchestration/rabbitmq-stomp:3.8-alpine
+    image: registry.gitlab.com/particify/dev/foss/docker-orchestration/rabbitmq-stomp:3.8-alpine
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
@@ -117,13 +117,13 @@ services:
   arsnova-web:
     image: registry.gitlab.com/particify/dev/foss/arsnova-webclient:$WEB_TAG
   arsnova-web-legacy:
-    image: registry.gitlab.com/particify/dev/devops/docker-orchestration/arsnova-mobile:$WEB_LEGACY_TAG
+    image: registry.gitlab.com/particify/dev/foss/docker-orchestration/arsnova-mobile:$WEB_LEGACY_TAG
   arsnova-formatting-service:
     image: registry.gitlab.com/particify/dev/extras/formatting-service:$FORMATTING_TAG
     environment:
       SERVER_PORT: 3000
   arsnova-proxy:
-    image: registry.gitlab.com/particify/dev/devops/docker-orchestration/nginx-proxy:stable-alpine
+    image: registry.gitlab.com/particify/dev/foss/docker-orchestration/nginx-proxy:stable-alpine
     depends_on:
       - arsnova-backend-core
       - arsnova-auth-service
