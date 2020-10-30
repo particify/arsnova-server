@@ -1,7 +1,7 @@
 version: "3"
 services:
   couchdb:
-    image: couchdb:3.1
+    image: registry.gitlab.com/particify/dev/devops/docker-orchestration/couchdb:3.1
     environment:
       COUCHDB_USER: arsnova
       COUCHDB_PASSWORD: arsnova

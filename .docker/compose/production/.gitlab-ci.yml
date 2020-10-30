@@ -14,10 +14,13 @@ build_docker_images:
     IMAGE3_NAME: rabbitmq-stomp
     IMAGE3_BASETAG: "3.8-management-alpine"
     IMAGE3_VERSION: $IMAGE3_BASETAG
-    IMAGE4_NAME: arsnova-mobile
-    IMAGE4_BASETAG: stable-alpine
-    IMAGE4_VERSION: 2.7.1
-  parallel: 4
+    IMAGE4_NAME: couchdb
+    IMAGE4_BASETAG: "3.1"
+    IMAGE4_VERSION: "3.1"
+    IMAGE5_NAME: arsnova-mobile
+    IMAGE5_BASETAG: stable-alpine
+    IMAGE5_VERSION: 2.7.1
+  parallel: 5
   script:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - eval export IMAGE_NAME=\$IMAGE${CI_NODE_INDEX}_NAME
