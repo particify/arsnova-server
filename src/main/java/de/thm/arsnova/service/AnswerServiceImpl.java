@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.ektorp.DbAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -294,6 +296,27 @@ public class AnswerServiceImpl extends DefaultEntityServiceImpl<Answer> implemen
 	@PreAuthorize("isAuthenticated()")
 	public List<String> getAnswerIdsByContentId(final String contentId) {
 		return answerRepository.findIdsByContentId(contentId);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public List<String> getAnswerIdsByCreatorIdRoomId(final String creatorId, final String roomId) {
+		return answerRepository.findIdsByCreatorIdRoomId(creatorId, roomId);
+	}
+
+	@Override
+	@PreAuthorize("isAuthenticated()")
+	public List<String> getAnswerIdsByCreatorIdContentIdsRound(
+			final String creatorId, final List<String> contentIds, final int round) {
+		final List<String> ids = new ArrayList<>();
+		return Stream.concat(
+				/* TODO:
+				 *   Currently round 0 is always added because of text answers.
+				 *   It might be better to always use round 1 for text or allow multiple rounds.
+				 *   This would require refactoring in other parts of the application. */
+				answerRepository.findIdsByCreatorIdContentIdsRound(creatorId, contentIds, 0).stream(),
+				answerRepository.findIdsByCreatorIdContentIdsRound(creatorId, contentIds, round).stream()
+		).collect(Collectors.toList());
 	}
 
 	@Override
