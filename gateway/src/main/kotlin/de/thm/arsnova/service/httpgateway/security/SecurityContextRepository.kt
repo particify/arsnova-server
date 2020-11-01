@@ -28,6 +28,7 @@ class SecurityContextRepository(
     }
 
     override fun load(serverWebExchange: ServerWebExchange): Mono<SecurityContext?>? {
+        logger.trace("Trying to parse user's authorities from JWT.")
         val authHeader = serverWebExchange.request.headers.getFirst("Authorization")
 
         return Mono.justOrEmpty(authHeader)
@@ -46,6 +47,7 @@ class SecurityContextRepository(
                 }
                 .map { authPair ->
                     val roles = jwtTokenUtil.getAuthoritiesFromPublicToken(authPair.second)
+                    logger.trace("User's granted authorities: {}", roles)
                     UsernamePasswordAuthenticationToken(
                             authPair.first,
                             TOKEN_PREFIX + authPair.second,
@@ -53,6 +55,7 @@ class SecurityContextRepository(
                     )
                 }
                 .map { authentication ->
+                    logger.trace("User's authentication: {}", authentication)
                     SecurityContextImpl(authentication)
                 }
     }
