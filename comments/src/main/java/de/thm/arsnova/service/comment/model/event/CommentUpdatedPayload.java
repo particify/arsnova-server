@@ -13,6 +13,7 @@ public class CommentUpdatedPayload implements WebSocketPayload {
     private boolean favorite;
     private int correct;
     private boolean ack;
+    private String answer;
 
     public CommentUpdatedPayload() {
     }
@@ -24,6 +25,7 @@ public class CommentUpdatedPayload implements WebSocketPayload {
         this.favorite = c.isFavorite();
         this.correct = c.getCorrect();
         this.ack = c.isAck();
+        this.answer = c.getAnswer();
     }
 
     @JsonProperty("roomId")
@@ -76,12 +78,24 @@ public class CommentUpdatedPayload implements WebSocketPayload {
         this.correct = correct;
     }
 
+    @JsonProperty("ack")
     public boolean isAck() {
         return ack;
     }
 
+    @JsonProperty("ack")
     public void setAck(boolean ack) {
         this.ack = ack;
+    }
+
+    @JsonProperty("answer")
+    public String getAnswer() {
+        return answer;
+    }
+
+    @JsonProperty("answer")
+    public void setAnswer(final String answer) {
+        this.answer = answer;
     }
 
     @Override
@@ -93,23 +107,26 @@ public class CommentUpdatedPayload implements WebSocketPayload {
                 ", favorite=" + favorite +
                 ", correct=" + correct +
                 ", ack=" + ack +
+                ", answer='" + answer + '\'' +
                 '}';
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        CommentUpdatedPayload that = (CommentUpdatedPayload) o;
+        final CommentUpdatedPayload that = (CommentUpdatedPayload) o;
         return read == that.read &&
                 favorite == that.favorite &&
                 correct == that.correct &&
+                ack == that.ack &&
                 Objects.equals(id, that.id) &&
-                Objects.equals(body, that.body);
+                Objects.equals(body, that.body) &&
+                Objects.equals(answer, that.answer);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, body, read, favorite, correct);
+        return Objects.hash(id, body, read, favorite, correct, ack, answer);
     }
 }

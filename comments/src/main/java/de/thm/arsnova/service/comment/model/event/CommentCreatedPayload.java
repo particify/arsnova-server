@@ -12,6 +12,10 @@ public class CommentCreatedPayload implements WebSocketPayload {
     private String body;
     private String tag;
     private Date timestamp;
+    private String answer;
+    private boolean favorite;
+    private int correct;
+    private boolean read;
 
     public CommentCreatedPayload() {}
 
@@ -20,6 +24,10 @@ public class CommentCreatedPayload implements WebSocketPayload {
             id = c.getId();
             body = c.getBody();
             tag = c.getTag();
+            answer = c.getAnswer();
+            favorite = c.isFavorite();
+            correct = c.getCorrect();
+            read = c.isRead();
         }
     }
 
@@ -63,28 +71,77 @@ public class CommentCreatedPayload implements WebSocketPayload {
         this.timestamp = timestamp;
     }
 
+    @JsonProperty("answer")
+    public String getAnswer() {
+        return answer;
+    }
+
+    @JsonProperty("answer")
+    public void setAnswer(final String answer) {
+        this.answer = answer;
+    }
+
+    @JsonProperty("favorite")
+    public boolean isFavorite() {
+        return favorite;
+    }
+
+    @JsonProperty("favorite")
+    public void setFavorite(final boolean favorite) {
+        this.favorite = favorite;
+    }
+
+    @JsonProperty("correct")
+    public int getCorrect() {
+        return correct;
+    }
+
+    @JsonProperty("correct")
+    public void setCorrect(final int correct) {
+        this.correct = correct;
+    }
+
+    @JsonProperty("read")
+    public boolean isRead() {
+        return read;
+    }
+
+    @JsonProperty("read")
+    public void setRead(final boolean read) {
+        this.read = read;
+    }
+
     @Override
     public String toString() {
         return "CommentCreatedPayload{" +
                 "id='" + id + '\'' +
                 ", body='" + body + '\'' +
+                ", tag='" + tag + '\'' +
                 ", timestamp=" + timestamp +
+                ", answer='" + answer + '\'' +
+                ", favorite=" + favorite +
+                ", correct=" + correct +
+                ", read=" + read +
                 '}';
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        CommentCreatedPayload that = (CommentCreatedPayload) o;
-        return Objects.equals(id, that.id) &&
+        final CommentCreatedPayload that = (CommentCreatedPayload) o;
+        return favorite == that.favorite &&
+                correct == that.correct &&
+                read == that.read &&
+                Objects.equals(id, that.id) &&
                 Objects.equals(body, that.body) &&
-                Objects.equals(timestamp, that.timestamp);
+                Objects.equals(tag, that.tag) &&
+                Objects.equals(timestamp, that.timestamp) &&
+                Objects.equals(answer, that.answer);
     }
 
     @Override
     public int hashCode() {
-
-        return Objects.hash(id, body, timestamp);
+        return Objects.hash(id, body, tag, timestamp, answer, favorite, correct, read);
     }
 }
