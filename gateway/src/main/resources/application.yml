@@ -5,6 +5,25 @@ spring:
 server:
   port: 9090
 ---
+management:
+  endpoints:
+    web:
+      base-path: /management-gw
+      exposure:
+        include:
+          - health
+          - prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+      roles:
+        - ADMIN
+        - MONITORING
+  metrics:
+    web:
+      server:
+        auto-time-requests: true
+---
 routing:
   endpoints:
     core: "http://localhost:8080/"
