@@ -1,6 +1,7 @@
 package de.thm.arsnova.service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,18 @@ public class AnswerFindQueryService implements FindQueryService<Answer> {
 			}
 		} else if (properties.getContentId() != null) {
 			ids.addAll(answerService.getAnswerIdsByContentId(properties.getContentId()));
+		} else if (properties.getCreatorId() != null) {
+			if (findQuery.getExternalFilters().get("contentIds") instanceof List) {
+				final int round = properties.getRound() > 0 ? properties.getRound() : 1;
+				ids.addAll(answerService.getAnswerIdsByCreatorIdContentIdsRound(
+						properties.getCreatorId(),
+						(List) findQuery.getExternalFilters().get("contentIds"),
+						round));
+			} else if (properties.getRoomId() != null) {
+				ids.addAll(answerService.getAnswerIdsByCreatorIdRoomId(
+						properties.getCreatorId(),
+						properties.getRoomId()));
+			}
 		}
 
 		return ids;

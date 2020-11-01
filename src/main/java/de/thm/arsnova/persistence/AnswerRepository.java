@@ -45,5 +45,9 @@ public interface AnswerRepository extends CrudRepository<Answer, String> {
 
 	List<String> findIdsByContentId(String contentId);
 
+	List<String> findIdsByCreatorIdRoomId(String creatorId, String roomId);
+
+	List<String> findIdsByCreatorIdContentIdsRound(String creatorId, List<String> contentIds, int round);
+
 	int countByRoomId(String roomId);
 }

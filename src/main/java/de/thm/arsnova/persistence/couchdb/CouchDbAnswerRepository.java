@@ -81,6 +81,27 @@ public class CouchDbAnswerRepository extends CouchDbCrudRepository<Answer>
 	}
 
 	@Override
+	public List<String> findIdsByCreatorIdRoomId(final String creatorId, final String roomId) {
+		final ViewResult result = db.queryView(createQuery("by_creatorid_roomid")
+				.reduce(false)
+				.key(ComplexKey.of(creatorId, roomId)));
+
+		return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<String> findIdsByCreatorIdContentIdsRound(
+			final String creatorId, final List<String> contentIds, final int round) {
+		final ViewResult result =  db.queryView(
+				createQuery("by_contentid_creatorid_round")
+						.keys(contentIds.stream()
+								.map(contentId -> ComplexKey.of(contentId, creatorId, round))
+								.collect(Collectors.toList())));
+
+		return result.getRows().stream().map(ViewResult.Row::getId).collect(Collectors.toList());
+	}
+
+	@Override
 	public <T extends Answer> T findByContentIdUserIdPiRound(
 			final String contentId, final Class<T> type, final String userId, final int piRound) {
 		final List<T> answerList = db.queryView(createQuery("by_contentid_creatorid_round")

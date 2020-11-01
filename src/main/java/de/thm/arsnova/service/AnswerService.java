@@ -38,6 +38,10 @@ public interface AnswerService extends EntityService<Answer> {
 
 	List<String> getAnswerIdsByContentId(String contentId);
 
+	List<String> getAnswerIdsByCreatorIdRoomId(String creatorId, String roomId);
+
+	List<String> getAnswerIdsByCreatorIdContentIdsRound(String creatorId, List<String> contentIds, int round);
+
 	List<TextAnswer> getTextAnswers(String contentId, int piRound, int offset, int limit);
 
 	List<TextAnswer> getTextAnswers(String contentId, int offset, int limit);
