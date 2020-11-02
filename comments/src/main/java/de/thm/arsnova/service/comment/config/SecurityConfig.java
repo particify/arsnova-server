@@ -2,6 +2,7 @@ package de.thm.arsnova.service.comment.config;
 
 import de.thm.arsnova.service.comment.config.properties.SecurityProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,8 +20,12 @@ import de.thm.arsnova.service.comment.security.JwtTokenFilter;
 @EnableWebSecurity
 @EnableConfigurationProperties(SecurityProperties.class)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
     private JwtTokenFilter jwtTokenFilter;
+    private String managementPath;
+
+    SecurityConfig(final WebEndpointProperties webEndpointProperties) {
+        this.managementPath = webEndpointProperties.getBasePath();
+    }
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
@@ -30,6 +35,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         // Add a filter to validate the tokens with every request
         httpSecurity.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.authorizeRequests()
+                .antMatchers(managementPath + "/**").hasAnyRole("ADMIN", "MONITORING");
     }
 
     @Override
