@@ -1,5 +1,10 @@
 server.port=8088
 
+management.endpoints.web.base-path=/management
+management.endpoints.web.exposure.include=health,prometheus
+management.endpoint.health.show-details=always
+management.metrics.web.server.auto-time-requests=true
+
 spring.rabbitmq.host=localhost
 spring.rabbitmq.username=guest
 spring.rabbitmq.password=guest
