@@ -44,7 +44,9 @@ public class RenderableTextResponseAdvice extends AbstractMappingJacksonResponse
 				return;
 			}
 			for (final Entity entity : ((List<? extends Entity>) list)) {
-				addRenderedTextToEntity(entity);
+				if (entity != null && !entity.getRenderingMapping().isEmpty()) {
+					addRenderedTextToEntity(entity);
+				}
 			}
 			return;
 		}
