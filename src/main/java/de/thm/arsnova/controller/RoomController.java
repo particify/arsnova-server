@@ -49,7 +49,8 @@ public class RoomController extends AbstractEntityController<Room> {
 	private static final String GET_MODERATORS_MAPPING = DEFAULT_ID_MAPPING + "/moderator";
 	private static final String MODERATOR_MAPPING = DEFAULT_ID_MAPPING + "/moderator/{userId}";
 	private static final String CONTENTGROUP_MAPPING = DEFAULT_ID_MAPPING + "/contentgroup/{groupName}";
-	private static final String CONTENTGROUP_ADD_MAPPING = CONTENTGROUP_MAPPING + "/{contentId}";
+	private static final String CONTENTGROUP_ADD_CONTENT_MAPPING = CONTENTGROUP_MAPPING + "/{contentId}";
+	private static final String CONTENTGROUP_REMOVE_CONTENT_MAPPING = CONTENTGROUP_MAPPING + "/{contentId}";
 	private static final String STATS_MAPPING = DEFAULT_ID_MAPPING + "/stats";
 	private static final String TRANSFER_MAPPING = DEFAULT_ID_MAPPING + "/transfer";
 
@@ -124,10 +125,16 @@ public class RoomController extends AbstractEntityController<Room> {
 		return contentGroupService.getByRoomIdAndName(id, groupName);
 	}
 
-	@PostMapping(CONTENTGROUP_ADD_MAPPING)
+	@PostMapping(CONTENTGROUP_ADD_CONTENT_MAPPING)
 	public void addContentToGroup(@PathVariable final String id, @PathVariable final String groupName,
 			@PathVariable final String contentId) {
 		contentGroupService.addContentToGroup(id, groupName, contentId);
+	}
+
+	@DeleteMapping(CONTENTGROUP_REMOVE_CONTENT_MAPPING)
+	public void removeContentFromGroup(@PathVariable final String id, @PathVariable("groupName") final String groupId,
+			@PathVariable final String contentId) {
+		contentGroupService.removeContentFromGroup(id, groupId, contentId);
 	}
 
 	@PutMapping(CONTENTGROUP_MAPPING)

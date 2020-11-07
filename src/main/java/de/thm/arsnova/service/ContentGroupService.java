@@ -20,6 +20,7 @@ package de.thm.arsnova.service;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -37,6 +38,7 @@ import de.thm.arsnova.model.ContentGroup;
 import de.thm.arsnova.model.Room;
 import de.thm.arsnova.persistence.ContentGroupRepository;
 import de.thm.arsnova.web.exceptions.BadRequestException;
+import de.thm.arsnova.web.exceptions.NotFoundException;
 
 @Service
 public class ContentGroupService extends DefaultEntityServiceImpl<ContentGroup> {
@@ -93,6 +95,25 @@ public class ContentGroupService extends DefaultEntityServiceImpl<ContentGroup> 
 			contentGroup.getContentIds().add(contentId);
 			update(contentGroup);
 		}
+	}
+
+	public void removeContentFromGroup(final String roomId, final String groupId, final String contentId) {
+		final Optional<ContentGroup> contentGroup = contentGroupRepository.findById(groupId);
+		contentGroup.ifPresentOrElse(
+				cg -> {
+					if (!cg.getRoomId().equals(roomId)) {
+						throw new BadRequestException("Room ID does not match.");
+					}
+					cg.setContentIds(cg.getContentIds().stream()
+							.filter(id -> !id.equals(contentId)).collect(Collectors.toSet()));
+					if (!cg.getContentIds().isEmpty()) {
+						update(cg);
+					} else {
+						delete(cg);
+					}
+				}, () -> {
+					throw new NotFoundException("ContentGroup does not exist.");
+				});
 	}
 
 	public ContentGroup createOrUpdateContentGroup(final ContentGroup contentGroup) {
