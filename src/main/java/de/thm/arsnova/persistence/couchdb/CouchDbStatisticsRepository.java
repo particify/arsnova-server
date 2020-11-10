@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.thm.arsnova.model.Statistics;
+import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.persistence.StatisticsRepository;
 
 public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implements StatisticsRepository {
@@ -126,6 +127,11 @@ public class CouchDbStatisticsRepository extends CouchDbRepositorySupport implem
 							break;
 					}
 				}
+				userProfileStats.setAccountCount(
+						userProfileStats.getTotalCount()
+								- userProfileStats.getCountByAuthProvider()
+								.getOrDefault(UserProfile.AuthProvider.ARSNOVA_GUEST.toString(), 0)
+								- userProfileStats.getActivationsPending());
 			}
 
 			return stats;
