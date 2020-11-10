@@ -29,7 +29,7 @@ var designDoc = {
 		"by_roomid_creatorid_creationtimestamp": {
 			"map": function (doc) {
 				if (doc.type === "Comment") {
-					emit([doc.roomId, doc.creatorId, doc.creationTimestamp], {_rev: doc._rev});
+					emit([doc.roomId, doc.creatorId, new Date(doc.creationTimestamp).getTime()], {_rev: doc._rev});
 				}
 			}
 		},
@@ -44,7 +44,7 @@ var designDoc = {
 		"by_roomid_creationtimestamp": {
 			"map": function (doc) {
 				if (doc.type === "Comment") {
-					emit([doc.roomId, doc.creationTimestamp], {_rev: doc._rev});
+					emit([doc.roomId, new Date(doc.creationTimestamp).getTime()], {_rev: doc._rev});
 				}
 			}
 		}
