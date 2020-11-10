@@ -82,7 +82,8 @@ public class CouchDbUserRepository extends CouchDbCrudRepository<UserProfile> im
 		for (final List<ViewResult.Row> partition: partitions) {
 			final List<BulkDeleteDocument> newDocs = new ArrayList<>();
 			for (final ViewResult.Row oldDoc : partition) {
-				final BulkDeleteDocument newDoc = new BulkDeleteDocument(oldDoc.getId(), oldDoc.getValue());
+				final BulkDeleteDocument newDoc =
+						new BulkDeleteDocument(oldDoc.getId(), oldDoc.getValueAsNode().get("_rev").asText());
 				newDocs.add(newDoc);
 				logger.debug("Marked user document {} for deletion.", oldDoc.getId());
 			}
