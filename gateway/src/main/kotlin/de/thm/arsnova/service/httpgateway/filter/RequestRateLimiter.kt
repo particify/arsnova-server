@@ -6,6 +6,8 @@ import io.github.bucket4j.Bucket
 import io.github.bucket4j.Bucket4j
 import io.github.bucket4j.ConsumptionProbe
 import io.github.bucket4j.Refill
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.cloud.gateway.filter.ratelimit.AbstractRateLimiter
 import org.springframework.cloud.gateway.filter.ratelimit.RateLimiter
 import org.springframework.cloud.gateway.support.ConfigurationService
@@ -27,6 +29,7 @@ class RequestRateLimiter(
         private val queryMethods = arrayOf("GET", "OPTIONS")
     }
 
+    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
     private val defaultConfig = Config(httpGatewayProperties)
     private val ipBucketMap: MutableMap<String, Bucket> = ConcurrentHashMap()
 
@@ -36,6 +39,8 @@ class RequestRateLimiter(
     Example: GET,172.18.0.18
      */
     override fun isAllowed(routeId: String, id: String): Mono<RateLimiter.Response> {
+        logger.trace("Checking rate limit for {} from {}.", routeId, id)
+
         var routeConfig: Config? = config[routeId]
         if (routeConfig == null) {
             routeConfig = defaultConfig
@@ -63,6 +68,10 @@ class RequestRateLimiter(
             }
         }
 
+        if (bucket.availableTokens in 1..10) {
+            // Check early so logs don't get spammed
+            logger.info("Rate limit nearly exceeded for {} by {}.", routeId, id)
+        }
         // tryConsume returns false immediately if no tokens available with the bucket
         val probe: ConsumptionProbe = bucket.tryConsumeAndReturnRemaining(1)
         return if (probe.isConsumed) {
