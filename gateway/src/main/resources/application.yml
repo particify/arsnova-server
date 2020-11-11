@@ -4,6 +4,8 @@ spring:
 ---
 server:
   port: 9090
+  use-forward-headers: true
+  forward-headers-strategy: NATIVE
 ---
 management:
   endpoints:
