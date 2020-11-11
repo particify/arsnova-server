@@ -29,6 +29,7 @@ public class Statistics {
 	@JsonView(View.Admin.class)
 	public static class UserProfileStats {
 		private int totalCount;
+		private int accountCount;
 		private Map<String, Integer> countByAuthProvider = new HashMap<>();
 		private int activationsPending;
 
@@ -38,6 +39,14 @@ public class Statistics {
 
 		public void setTotalCount(final int totalCount) {
 			this.totalCount = totalCount;
+		}
+
+		public int getAccountCount() {
+			return accountCount;
+		}
+
+		public void setAccountCount(final int accountCount) {
+			this.accountCount = accountCount;
 		}
 
 		public Map<String, Integer> getCountByAuthProvider() {
