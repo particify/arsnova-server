@@ -13,7 +13,7 @@ var designDoc = {
 		"by_creationtimestamp_for_inactive": {
 			"map": function (doc) {
 				if (doc.type === "UserProfile" && doc.authProvider === "ARSNOVA" && doc.account.activationKey) {
-					emit(doc.creationTimestamp, {_rev: doc._rev});
+					emit(new Date(doc.creationTimestamp).getTime(), {_rev: doc._rev});
 				}
 			}
 		},

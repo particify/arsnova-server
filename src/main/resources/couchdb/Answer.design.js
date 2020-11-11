@@ -37,7 +37,7 @@ var designDoc = {
 		"by_contentid_creationtimestamp": {
 			"map": function (doc) {
 				if (doc.type === "Answer") {
-					emit([doc.contentId, doc.creationTimestamp], {_rev: doc._rev});
+					emit([doc.contentId, new Date(doc.creationTimestamp).getTime()], {_rev: doc._rev});
 				}
 			}
 		},
