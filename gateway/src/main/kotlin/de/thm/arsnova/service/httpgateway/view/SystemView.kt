@@ -63,7 +63,8 @@ class SystemView(
                             .map { tuple3: Tuple3<WsGatewayStats, CoreStats, CommentServiceStats> ->
                                 SummarizedStats(
                                         connectedUsers = tuple3.t1.webSocketUserCount,
-                                        users = tuple3.t2.userProfile.totalCount,
+                                        users = tuple3.t2.userProfile.accountCount,
+                                        activationsPending = tuple3.t2.userProfile.activationsPending,
                                         rooms = tuple3.t2.room.totalCount,
                                         contents = tuple3.t2.content.totalCount,
                                         answers = tuple3.t2.answer.totalCount,
