@@ -103,7 +103,7 @@ public class UserServiceImpl extends DefaultEntityServiceImpl<UserProfile> imple
 	private static final int PASSWORD_RESET_KEY_DURABILITY_MS = 2 * 60 * 60 * 1000;
 
 	private static final long ACTIVATION_KEY_CHECK_INTERVAL_MS = 30 * 60 * 1000L;
-	private static final long ACTIVATION_KEY_DURABILITY_MS = 6 * 60 * 60 * 1000L;
+	private static final long ACTIVATION_KEY_DURABILITY_MS = 5 * 24 * 60 * 60 * 1000L;
 
 	private static final int MAX_VERIFICATION_CODE = 999999;
 	private static final int MAX_VERIFICATION_CODE_ATTEMPTS = 10;
