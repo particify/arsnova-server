@@ -23,6 +23,7 @@ class JwtTokenUtil(
         private val httpGatewayProperties: HttpGatewayProperties
 ) {
     companion object {
+        const val ROLE_AUTHORITY_PREFIX = "ROLE_"
         val claimName = "roles"
     }
 
@@ -48,7 +49,7 @@ class JwtTokenUtil(
         try {
             val decodedJwt = publicVerifier.verify(token)
             return decodedJwt.getClaim("roles").asList(String::class.java).map { role ->
-                SimpleGrantedAuthority(role)
+                SimpleGrantedAuthority(ROLE_AUTHORITY_PREFIX + role)
             }
         } catch (e: JWTVerificationException) {
             throw UnauthorizedException()
@@ -57,8 +58,25 @@ class JwtTokenUtil(
         }
     }
 
-    fun createSignedInternalToken(roomAccess: RoomAccess): String {
-        val roles = arrayOf("${roomAccess.role}-${roomAccess.roomId}")
+    fun getUserIdAndClientRolesFromPublicToken(token: String): Pair<String, List<String>> {
+        try {
+            val decodedJwt = publicVerifier.verify(token)
+            val authorities = decodedJwt.getClaim("roles").asList(String::class.java)
+            return Pair(decodedJwt.subject, authorities)
+        } catch (e: JWTVerificationException) {
+            throw UnauthorizedException()
+        } catch (e: TokenExpiredException) {
+            throw UnauthorizedException()
+        }
+    }
+
+    fun createSignedInternalToken(
+            roomAccess: RoomAccess,
+            clientAuthorities: List<String>
+    ): String {
+        val roomRole = "${roomAccess.role}-${roomAccess.roomId}"
+        val generatedRoles = arrayOf(roomRole)
+        val roles = generatedRoles + clientAuthorities.map { authority -> authority.removePrefix(ROLE_AUTHORITY_PREFIX) }
         return JWT.create()
             .withIssuer(serverId)
             .withAudience(serverId)

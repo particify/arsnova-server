@@ -10,8 +10,8 @@ import reactor.core.publisher.Mono
 @Component
 class AuthProcessor {
     companion object {
-        const val JWT_MONITORING_ROLE_STRING = "MONITORING"
-        const val JWT_ADMIN_ROLE_STRING = "ADMIN"
+        const val JWT_MONITORING_AUTHORITY_STRING = JwtTokenUtil.ROLE_AUTHORITY_PREFIX + "MONITORING"
+        const val JWT_ADMIN_AUTHORITY_STRING = JwtTokenUtil.ROLE_AUTHORITY_PREFIX + "ADMIN"
     }
 
     fun getAuthentication(): Mono<Authentication> {
@@ -24,8 +24,8 @@ class AuthProcessor {
 
     fun isAdminOrMonitoring(authentication: Authentication): Boolean {
         return authentication.authorities.toList().any { ga ->
-            ga == (SimpleGrantedAuthority(JWT_MONITORING_ROLE_STRING))
-                    || ga == (SimpleGrantedAuthority(JWT_ADMIN_ROLE_STRING))
+            ga == (SimpleGrantedAuthority(JWT_MONITORING_AUTHORITY_STRING))
+                    || ga == (SimpleGrantedAuthority(JWT_ADMIN_AUTHORITY_STRING))
         }
     }
 }
