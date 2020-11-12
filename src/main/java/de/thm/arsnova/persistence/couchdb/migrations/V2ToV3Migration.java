@@ -81,6 +81,7 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 	private static final String MOTD_INDEX = "motd-index";
 	private static final String MOTDLIST_INDEX = "motdlist-index";
 	private static final boolean COMMENTS_PUBLISH_ONLY = true;
+	private static final Map<String, Boolean> notExistsSelector = Map.of("$exists", false);
 
 	private static final Logger logger = LoggerFactory.getLogger(V2ToV3Migration.class);
 
@@ -378,7 +379,7 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 		waitForV2Index(SESSION_INDEX);
 		final Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "session");
-		queryOptions.put("importJobId", importJob != null ? importJob.getId() : null);
+		queryOptions.put("importJobId", importJob != null ? importJob.getId() : notExistsSelector);
 		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(SESSION_INDEX);
 		query.setLimit(LIMIT);
@@ -430,7 +431,7 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 		waitForV2Index(MOTD_INDEX);
 		final Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "motd");
-		queryOptions.put("importJobId", importJob != null ? importJob.getId() : null);
+		queryOptions.put("importJobId", importJob != null ? importJob.getId() : notExistsSelector);
 		/* Exclude outdated MotDs */
 		final HashMap<String, String> subQuery = new HashMap<>();
 		subQuery.put("$gt", String.valueOf(referenceTimestamp - OUTDATED_AFTER));
@@ -478,7 +479,7 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 		waitForV2Index(FULL_INDEX_BY_TYPE);
 		final Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "interposed_question");
-		queryOptions.put("importJobId", importJob != null ? importJob.getId() : null);
+		queryOptions.put("importJobId", importJob != null ? importJob.getId() : notExistsSelector);
 		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(FULL_INDEX_BY_TYPE);
 		query.setLimit(LIMIT);
@@ -538,7 +539,7 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 		waitForV2Index(FULL_INDEX_BY_TYPE);
 		final Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "skill_question");
-		queryOptions.put("importJobId", importJob != null ? importJob.getId() : null);
+		queryOptions.put("importJobId", importJob != null ? importJob.getId() : notExistsSelector);
 		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(FULL_INDEX_BY_TYPE);
 		query.setLimit(LIMIT);
@@ -581,10 +582,11 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 		waitForV2Index(SKILLQUESTION_INDEX);
 		final Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "skill_question");
-		queryOptions.put("importJobId", importJob != null ? importJob.getId() : null);
+		queryOptions.put("importJobId", importJob != null ? importJob.getId() : notExistsSelector);
 		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setFields(Arrays.asList("sessionId", "questionVariant", "_id"));
 		final ArrayList<MangoCouchDbConnector.MangoQuery.Sort> sort = new ArrayList<>();
+		sort.add(new MangoCouchDbConnector.MangoQuery.Sort("importJobId", false));
 		sort.add(new MangoCouchDbConnector.MangoQuery.Sort("sessionId", false));
 		sort.add(new MangoCouchDbConnector.MangoQuery.Sort("questionVariant", false));
 		query.setSort(sort);
@@ -644,7 +646,7 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 		waitForV2Index(FULL_INDEX_BY_TYPE);
 		final Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "skill_question_answer");
-		queryOptions.put("importJobId", importJob != null ? importJob.getId() : null);
+		queryOptions.put("importJobId", importJob != null ? importJob.getId() : notExistsSelector);
 		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setIndexDocument(FULL_INDEX_BY_TYPE);
 		query.setLimit(LIMIT);
@@ -695,7 +697,7 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 		final Map<String, Set<String>> subQuery1 = new HashMap<>();
 		subQuery1.put("$in", oldIds);
 		queryOptions.put("type", "motd");
-		queryOptions.put("importJobId", null);
+		queryOptions.put("importJobId", notExistsSelector);
 		queryOptions.put("motdkey", subQuery1);
 		/* Exclude outdated MotDs */
 		final HashMap<String, String> subQuery2 = new HashMap<>();
