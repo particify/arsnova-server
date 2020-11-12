@@ -2,7 +2,6 @@ package de.thm.arsnova.service.httpgateway.security
 
 import org.slf4j.LoggerFactory
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.authority.AuthorityUtils
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextImpl
 import org.springframework.security.web.server.context.ServerSecurityContextRepository
@@ -46,12 +45,12 @@ class SecurityContextRepository(
                     Mono.empty()
                 }
                 .map { authPair ->
-                    val roles = jwtTokenUtil.getAuthoritiesFromPublicToken(authPair.second)
-                    logger.trace("User's granted authorities: {}", roles)
+                    val authorities = jwtTokenUtil.getAuthoritiesFromPublicToken(authPair.second)
+                    logger.trace("User's granted authorities: {}", authorities)
                     UsernamePasswordAuthenticationToken(
                             authPair.first,
                             TOKEN_PREFIX + authPair.second,
-                            roles
+                            authorities
                     )
                 }
                 .map { authentication ->

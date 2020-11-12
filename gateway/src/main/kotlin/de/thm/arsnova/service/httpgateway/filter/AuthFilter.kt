@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
+import reactor.util.function.Tuple2
 
 /**
  * This filter is responsible for replacing the JWT from the user with an inter service JWT.
@@ -44,21 +45,26 @@ class AuthFilter (
                     logger.debug("Didn't get a valid roomId out of the uri variables: {}", uriVariables)
                     throw ResponseStatusException(HttpStatus.BAD_REQUEST)
                 }
-                Mono.just(jwtTokenUtil.getUserIdFromPublicToken(jwt))
+                Mono.just(jwtTokenUtil.getUserIdAndClientRolesFromPublicToken(jwt))
                     .onErrorResume { exception ->
                         logger.debug("Exception on verifying JWT and obtaining userId", exception)
                         Mono.error(UnauthorizedException())
                     }
-                    .flatMap { userId ->
-                        roomAccessService.getRoomAccess(roomId, userId)
-                            .onErrorResume { exception ->
-                                logger.trace("Auth service didn't give specific role", exception)
-                                Mono.just(RoomAccess(roomId, userId, "", "PARTICIPANT"))
-                            }
+                    .flatMap { pair: Pair<String, List<String>> ->
+                        val userId = pair.first
+                        val authorities = pair.second
+                        Mono.zip(
+                                roomAccessService.getRoomAccess(roomId, userId)
+                                    .onErrorResume { exception ->
+                                        logger.trace("Auth service didn't give specific role", exception)
+                                        Mono.just(RoomAccess(roomId, userId, "", "PARTICIPANT"))
+                                    },
+                                Mono.just(authorities)
+                        )
                     }
-                    .map { roomAccess: RoomAccess ->
-                        logger.trace("Working with room access: {}", roomAccess)
-                        jwtTokenUtil.createSignedInternalToken(roomAccess)
+                    .map { tuple2: Tuple2<RoomAccess, List<String>> ->
+                        logger.trace("Working with user information: {}", tuple2)
+                        jwtTokenUtil.createSignedInternalToken(tuple2.t1, tuple2.t2)
                     }
                     .map { token ->
                         logger.trace("new token: {}", token)
