@@ -37,6 +37,7 @@ data class Routing(
 
 data class Endpoints(
         val core: String,
+        val wsGateway: String,
         val commentService: String,
         val roomaccessService: String,
         val importService: String,

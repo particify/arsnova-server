@@ -10,7 +10,7 @@ server:
 management:
   endpoints:
     web:
-      base-path: /management-gw
+      base-path: /management/http-gateway
       exposure:
         include:
           - health
@@ -29,6 +29,7 @@ management:
 routing:
   endpoints:
     core: "http://localhost:8080/"
+    ws-gateway: "http://localhost:8099"
     comment-service: "http://localhost:8088/"
     roomaccess-service: "http://localhost:8092/"
     import-service: "http://localhost:8070/"

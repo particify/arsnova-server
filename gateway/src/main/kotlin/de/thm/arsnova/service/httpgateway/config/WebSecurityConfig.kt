@@ -2,7 +2,6 @@ package de.thm.arsnova.service.httpgateway.config
 
 import de.thm.arsnova.service.httpgateway.security.SecurityContextRepository
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties
-import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -37,8 +36,7 @@ class WebSecurityConfig(
             .securityContextRepository(securityContextRepository)
             .authorizeExchange()
             .pathMatchers(HttpMethod.OPTIONS).permitAll()
-            /* TODO: Check for roles (.hasAnyRole("ADMIN", "MONITORING")), requires AuthenticationManager. */
-            .pathMatchers(webEndpointProperties.basePath + "/**").permitAll()
+            .pathMatchers(webEndpointProperties.basePath + "/**").hasAnyRole("ADMIN", "MONITORING")
             .pathMatchers("/**").permitAll()
             .anyExchange().authenticated()
             .and().build()

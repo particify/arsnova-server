@@ -47,7 +47,7 @@ class GatewayConfig (
         return builder.routes()
                 .route("core") { p ->
                     p
-                            .path("/room/**", "/auth/**", "/content/**", "/user/**", "/configuration/**", "/answer/**", "/management/**")
+                            .path("/room/**", "/auth/**", "/content/**", "/user/**", "/configuration/**", "/answer/**")
                             .filters { f ->
                                 f.requestRateLimiter { r ->
                                     r.rateLimiter = requestRateLimiter
@@ -108,6 +108,46 @@ class GatewayConfig (
                                 }
                             }
                             .uri(httpGatewayProperties.routing.endpoints.formattingService)
+                }
+                .route("management-core") { p ->
+                    p
+                            .path(
+                                    "/management/core/**"
+                            )
+                            .filters { f ->
+                                f.rewritePath("^/management/core", "/management")
+                            }
+                            .uri(httpGatewayProperties.routing.endpoints.core)
+                }
+                .route("management-ws-gateway") { p ->
+                    p
+                            .path(
+                                    "/management/ws-gateway/**"
+                            )
+                            .filters { f ->
+                                f.rewritePath("^/management/ws-gateway", "/management")
+                            }
+                            .uri(httpGatewayProperties.routing.endpoints.wsGateway)
+                }
+                .route("management-comment-service") { p ->
+                    p
+                            .path(
+                                    "/management/comment-service/**"
+                            )
+                            .filters { f ->
+                                f.rewritePath("^/management/comment-service", "/management")
+                            }
+                            .uri(httpGatewayProperties.routing.endpoints.commentService)
+                }
+                .route("management-auth-service") { p ->
+                    p
+                            .path(
+                                    "/management/auth-service/**"
+                            )
+                            .filters { f ->
+                                f.rewritePath("^/management/auth-service", "/management")
+                            }
+                            .uri(httpGatewayProperties.routing.endpoints.roomaccessService)
                 }
                 .build()
     }
