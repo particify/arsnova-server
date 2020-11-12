@@ -103,8 +103,10 @@ public class FeedbackCommandHandler {
 
 	public void handle(final CreateFeedback command) {
 		final String roomId = command.getPayload().getRoomId();
-		final Room room = roomService.get(roomId, true);
-		if (!room.getSettings().isFeedbackLocked()) {
+		final Room loadedRoom = roomService.get(roomId, true);
+		final Room room = new Room();
+		room.setId(roomId);
+		if (!loadedRoom.getSettings().isFeedbackLocked()) {
 			final CreateFeedbackPayload p = command.getPayload();
 
 			feedbackStorage.save(room, p.getValue(), p.getUserId());
@@ -126,29 +128,28 @@ public class FeedbackCommandHandler {
 
 	public void handle(final GetFeedback command) {
 		final String roomId = command.getPayload().getRoomId();
-		final Room room = feedbackStorage.findByRoomId(roomId);
+		final Room room = new Room();
+		room.setId(roomId);
 
-		if (room != null) {
+		final Feedback feedback = feedbackStorage.getByRoom(room);
+		final int[] currentVals = feedback.getValues().stream().mapToInt(i -> i).toArray();
 
-			final Feedback feedback = feedbackStorage.getByRoom(room);
-			final int[] currentVals = feedback.getValues().stream().mapToInt(i -> i).toArray();
+		final FeedbackChanged feedbackChanged = new FeedbackChanged();
+		final FeedbackChangedPayload feedbackChangedPayload = new FeedbackChangedPayload();
+		feedbackChangedPayload.setValues(currentVals);
+		feedbackChanged.setPayload(feedbackChangedPayload);
 
-			final FeedbackChanged feedbackChanged = new FeedbackChanged();
-			final FeedbackChangedPayload feedbackChangedPayload = new FeedbackChangedPayload();
-			feedbackChangedPayload.setValues(currentVals);
-			feedbackChanged.setPayload(feedbackChangedPayload);
-
-			messagingTemplate.convertAndSend(
-					"amq.topic",
-					roomId + ".feedback.stream",
-					feedbackChanged
-			);
-		}
+		messagingTemplate.convertAndSend(
+				"amq.topic",
+				roomId + ".feedback.stream",
+				feedbackChanged
+		);
 	}
 
 	public void handle(final ResetFeedback command) {
 		final String roomId = command.getPayload().getRoomId();
-		final Room room = roomService.get(roomId, true);
+		final Room room = new Room();
+		room.setId(roomId);
 		feedbackStorage.cleanVotesByRoom(room, 0);
 
 		final FeedbackReset event = new FeedbackReset();
