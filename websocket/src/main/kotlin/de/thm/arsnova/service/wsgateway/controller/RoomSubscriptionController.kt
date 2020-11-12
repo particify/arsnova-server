@@ -16,7 +16,7 @@ class RoomSubscriptionController(
 		const val GET_USER_COUNT_SUBSCRIPTION = "${ROOM_SUBSCRIPTION_MAPPING}/usercount"
 	}
 
-	private val logger = LoggerFactory.getLogger(AuthChannelInterceptorAdapter::class.java)
+	private val logger = LoggerFactory.getLogger(RoomSubscriptionController::class.java)
 
 	@GetMapping(GET_USER_COUNT_SUBSCRIPTION)
 	fun getUserCount(
