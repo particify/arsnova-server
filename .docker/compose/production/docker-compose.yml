@@ -60,6 +60,7 @@ services:
     environment:
       SERVER_PORT: 8080
       ROUTING_ENDPOINTS_CORE: http://arsnova-backend-core:8080
+      ROUTING_ENDPOINTS_WS_GATEWAY: http://arsnova-ws-gateway:8080
       ROUTING_ENDPOINTS_COMMENT_SERVICE: http://arsnova-comment-service:8080
       ROUTING_ENDPOINTS_ROOMACCESS_SERVICE: http://arsnova-auth-service:8080
       ROUTING_ENDPOINTS_FORMATTING_SERVICE: http://arsnova-formatting-service:3000
