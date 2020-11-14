@@ -133,6 +133,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
 	private ServletContext servletContext;
+	private SystemProperties systemProperties;
 	private AuthenticationProviderProperties providerProperties;
 	private String rootUrl;
 	private String apiPath;
@@ -141,6 +142,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			final SystemProperties systemProperties,
 			final AuthenticationProviderProperties authenticationProviderProperties,
 			final ServletContext servletContext) {
+		this.systemProperties = systemProperties;
 		this.providerProperties = authenticationProviderProperties;
 		this.rootUrl = systemProperties.getRootUrl();
 		this.apiPath = systemProperties.getApi().getProxyPath();
@@ -360,7 +362,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	LoginAuthenticationSucessHandler successHandler() {
-		final LoginAuthenticationSucessHandler successHandler = new LoginAuthenticationSucessHandler();
+		final LoginAuthenticationSucessHandler successHandler =
+				new LoginAuthenticationSucessHandler(systemProperties, servletContext);
 		successHandler.setTargetUrl(rootUrl);
 
 		return successHandler;
