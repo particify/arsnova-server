@@ -265,7 +265,7 @@ public class FromV2Migrator {
 				break;
 			case V2_TYPE_FLASHCARD:
 				to = new de.thm.arsnova.model.Content();
-				to.setFormat(de.thm.arsnova.model.Content.Format.TEXT);
+				to.setFormat(de.thm.arsnova.model.Content.Format.SLIDE);
 				extensions = new HashMap<>();
 				to.setExtensions(extensions);
 				v2 = new HashMap<>();
