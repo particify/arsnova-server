@@ -20,6 +20,7 @@ package de.thm.arsnova.controller;
 
 import java.io.IOException;
 import java.util.Arrays;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +43,7 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
 import de.thm.arsnova.config.SecurityConfig;
+import de.thm.arsnova.config.properties.SystemProperties;
 import de.thm.arsnova.model.ClientAuthentication;
 import de.thm.arsnova.model.LoginCredentials;
 import de.thm.arsnova.model.UserProfile;
@@ -56,9 +58,15 @@ public class AuthenticationController {
 	private OidcClient oidcClient;
 	private SAML2Client saml2Client;
 	private CasAuthenticationEntryPoint casEntryPoint;
+	private String apiPath;
 
-	public AuthenticationController(final UserService userService) {
+	public AuthenticationController(
+			final UserService userService,
+			final SystemProperties systemProperties,
+			final ServletContext servletContext) {
 		this.userService = userService;
+		final String proxyPath = systemProperties.getApi().getProxyPath();
+		this.apiPath = proxyPath != null && !proxyPath.isEmpty() ? proxyPath : servletContext.getContextPath();
 	}
 
 	@Autowired(required = false)
@@ -83,7 +91,7 @@ public class AuthenticationController {
 				.anyMatch(c -> c.getName().equalsIgnoreCase(LoginAuthenticationSucessHandler.AUTH_COOKIE_NAME))) {
 			/* Delete cookie */
 			final Cookie cookie = new Cookie(LoginAuthenticationSucessHandler.AUTH_COOKIE_NAME, null);
-			cookie.setPath(request.getContextPath());
+			cookie.setPath(apiPath);
 			cookie.setMaxAge(0);
 			response.addCookie(cookie);
 		}

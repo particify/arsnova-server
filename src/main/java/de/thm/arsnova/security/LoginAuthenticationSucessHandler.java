@@ -19,6 +19,7 @@
 package de.thm.arsnova.security;
 
 import java.io.IOException;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -29,6 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
+import de.thm.arsnova.config.properties.SystemProperties;
 import de.thm.arsnova.security.jwt.JwtService;
 
 /**
@@ -41,6 +43,14 @@ public class LoginAuthenticationSucessHandler extends
 
 	private JwtService jwtService;
 	private String targetUrl;
+	private String apiPath;
+
+	public LoginAuthenticationSucessHandler(
+			final SystemProperties systemProperties,
+			final ServletContext servletContext) {
+		final String proxyPath = systemProperties.getApi().getProxyPath();
+		this.apiPath = proxyPath != null && !proxyPath.isEmpty() ? proxyPath : servletContext.getContextPath();
+	}
 
 	@Autowired
 	public void setJwtService(final JwtService jwtService) {
@@ -65,7 +75,7 @@ public class LoginAuthenticationSucessHandler extends
 		if (session == null || session.getAttribute(URL_ATTRIBUTE) == null) {
 			final String token = jwtService.createSignedToken((User) authentication.getPrincipal(), true);
 			final Cookie cookie = new Cookie(AUTH_COOKIE_NAME, token);
-			cookie.setPath(request.getContextPath());
+			cookie.setPath(apiPath);
 			cookie.setSecure(request.isSecure());
 			cookie.setHttpOnly(true);
 			response.addCookie(cookie);
