@@ -65,9 +65,11 @@ import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
+import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
 import de.thm.arsnova.config.properties.FeatureProperties;
 import de.thm.arsnova.config.properties.SecurityProperties;
 import de.thm.arsnova.config.properties.SystemProperties;
+import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.model.migration.FromV2Migrator;
 import de.thm.arsnova.model.migration.ToV2Migrator;
 import de.thm.arsnova.model.serialization.CouchDbDocumentModule;
@@ -340,8 +342,11 @@ public class AppConfig implements WebMvcConfigurer {
 	}
 
 	@Bean
-	public FromV2Migrator fromV2Migrator() {
-		return new FromV2Migrator();
+	public FromV2Migrator fromV2Migrator(final CouchDbMigrationProperties couchDbMigrationProperties) {
+		final UserProfile.AuthProvider authProviderFallback = couchDbMigrationProperties.isEnabled()
+				? couchDbMigrationProperties.getAuthenticationProviderFallback()
+				: UserProfile.AuthProvider.UNKNOWN;
+		return new FromV2Migrator(authProviderFallback);
 	}
 
 	@Bean

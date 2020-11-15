@@ -74,6 +74,7 @@ public class FromV2Migrator {
 	private static final Map<String, de.thm.arsnova.model.Content.Format> formatMapping;
 
 	private boolean ignoreRevision = false;
+	private UserProfile.AuthProvider authProviderFallback;
 
 	static {
 		formatMapping = new HashMap<>();
@@ -87,6 +88,10 @@ public class FromV2Migrator {
 		formatMapping.put(V2_TYPE_SLIDE, de.thm.arsnova.model.Content.Format.SLIDE);
 		formatMapping.put(V2_TYPE_FLASHCARD, de.thm.arsnova.model.Content.Format.SLIDE);
 		formatMapping.put(V2_TYPE_GRID, de.thm.arsnova.model.Content.Format.GRID);
+	}
+
+	public FromV2Migrator(final UserProfile.AuthProvider authProviderFallback) {
+		this.authProviderFallback = authProviderFallback;
 	}
 
 	private void copyCommonProperties(final Entity from, final de.thm.arsnova.model.Entity to) {
@@ -530,7 +535,7 @@ public class FromV2Migrator {
 			profile.setAuthProvider(UserProfile.AuthProvider.GOOGLE);
 			profile.setLoginId(loginId);
 		} else {
-			profile.setAuthProvider(UserProfile.AuthProvider.UNKNOWN);
+			profile.setAuthProvider(authProviderFallback);
 			profile.setLoginId(loginId);
 		}
 	}

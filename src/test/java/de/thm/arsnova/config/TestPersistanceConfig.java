@@ -19,10 +19,13 @@
 package de.thm.arsnova.config;
 
 import org.mockito.Mockito;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
+import de.thm.arsnova.config.properties.MessageBrokerProperties;
 import de.thm.arsnova.persistence.AnswerRepository;
 import de.thm.arsnova.persistence.AttachmentRepository;
 import de.thm.arsnova.persistence.CommentRepository;
@@ -36,6 +39,7 @@ import de.thm.arsnova.persistence.UserRepository;
 
 @Profile("test")
 @Configuration
+@EnableConfigurationProperties(CouchDbMigrationProperties.class)
 public class TestPersistanceConfig {
 	@Bean
 	public LogEntryRepository logEntryRepository() {
