@@ -41,6 +41,7 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Service;
 
 import de.thm.arsnova.config.properties.CouchDbMigrationProperties;
+import de.thm.arsnova.event.AfterCreationEvent;
 import de.thm.arsnova.event.BeforeCreationEvent;
 import de.thm.arsnova.model.Answer;
 import de.thm.arsnova.model.Comment;
@@ -420,6 +421,13 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 			}
 
 			toConnector.executeBulk(roomsV3);
+			if (importJob == null) {
+				/* Only publish the event for full database migrations. Events
+				 * for ImportJobs are published when all data of a room has been
+				 * migrated. */
+				roomsV3.stream().forEach(room ->
+						applicationEventPublisher.publishEvent(new AfterCreationEvent<>(this, room)));
+			}
 			state.setState(bookmark);
 		}
 		state.setState(null);
