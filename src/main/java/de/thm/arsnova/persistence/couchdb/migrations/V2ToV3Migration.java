@@ -94,6 +94,7 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 	private ContentRepository contentRepository;
 	private long referenceTimestamp = System.currentTimeMillis();
 	private ApplicationEventPublisher applicationEventPublisher;
+	private Map<String, String> contentGroupNames;
 
 	public V2ToV3Migration(
 			final FromV2Migrator migrator,
@@ -101,13 +102,15 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 			@Qualifier("couchDbMigrationConnector") final MangoCouchDbConnector fromConnector,
 			final UserRepository userRepository,
 			final RoomRepository roomRepository,
-			final ContentRepository contentRepository) {
+			final ContentRepository contentRepository,
+			final CouchDbMigrationProperties couchDbMigrationProperties) {
 		this.migrator = migrator;
 		this.toConnector = toConnector;
 		this.fromConnector = fromConnector;
 		this.userRepository = userRepository;
 		this.roomRepository = roomRepository;
 		this.contentRepository = contentRepository;
+		this.contentGroupNames = couchDbMigrationProperties.getContentGroupNames();
 	}
 
 	@PostConstruct
@@ -615,6 +618,8 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 				break;
 			}
 			for (final de.thm.arsnova.model.migration.v2.Content contentV2 : contentsV2) {
+				final String groupName = contentGroupNames.getOrDefault(
+						contentV2.getQuestionVariant(), contentV2.getQuestionVariant());
 				if (!contentRepository.existsById(contentV2.getId())) {
 					continue;
 				}
@@ -622,8 +627,8 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 					createContentGroups(roomId, groups);
 					roomId = contentV2.getSessionId();
 				}
-				final Set<String> contentIds = groups.getOrDefault(contentV2.getQuestionVariant(), new LinkedHashSet<>());
-				groups.put(contentV2.getQuestionVariant(), contentIds);
+				final Set<String> contentIds = groups.getOrDefault(groupName, new LinkedHashSet<>());
+				groups.put(groupName, contentIds);
 				contentIds.add(contentV2.getId());
 			}
 			state.setState(bookmark);

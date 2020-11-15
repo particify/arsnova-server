@@ -1,5 +1,6 @@
 package de.thm.arsnova.config.properties;
 
+import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import de.thm.arsnova.model.UserProfile;
@@ -10,6 +11,7 @@ public class CouchDbMigrationProperties extends CouchDbProperties {
 
 	private boolean enabled;
 	private UserProfile.AuthProvider authenticationProviderFallback;
+	private Map<String, String> contentGroupNames;
 
 	public boolean isEnabled() {
 		return enabled;
@@ -25,5 +27,13 @@ public class CouchDbMigrationProperties extends CouchDbProperties {
 
 	public void setAuthenticationProviderFallback(final UserProfile.AuthProvider authenticationProviderFallback) {
 		this.authenticationProviderFallback = authenticationProviderFallback;
+	}
+
+	public Map<String, String> getContentGroupNames() {
+		return contentGroupNames;
+	}
+
+	public void setContentGroupNames(final Map<String, String> contentGroupNames) {
+		this.contentGroupNames = contentGroupNames;
 	}
 }

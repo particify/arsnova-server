@@ -75,6 +75,7 @@ public class FromV2Migrator {
 
 	private boolean ignoreRevision = false;
 	private UserProfile.AuthProvider authProviderFallback;
+	private Map<String, String> contentGroupNames;
 
 	static {
 		formatMapping = new HashMap<>();
@@ -90,8 +91,11 @@ public class FromV2Migrator {
 		formatMapping.put(V2_TYPE_GRID, de.thm.arsnova.model.Content.Format.GRID);
 	}
 
-	public FromV2Migrator(final UserProfile.AuthProvider authProviderFallback) {
+	public FromV2Migrator(
+			final UserProfile.AuthProvider authProviderFallback,
+			final Map<String, String> contentGroupNames) {
 		this.authProviderFallback = authProviderFallback;
+		this.contentGroupNames = contentGroupNames;
 	}
 
 	private void copyCommonProperties(final Entity from, final de.thm.arsnova.model.Entity to) {
@@ -337,7 +341,7 @@ public class FromV2Migrator {
 		to.setCreationTimestamp(migrateDate(from.getTimestamp()));
 		to.setUpdateTimestamp(new Date());
 		to.setRoomId(from.getSessionId());
-		to.getGroups().add(from.getQuestionVariant());
+		to.getGroups().add(migrateGroupName(from.getQuestionVariant()));
 		to.setSubject(from.getSubject());
 		to.setBody(from.getText());
 		to.setAbstentionsAllowed(from.isAbstention());
@@ -511,6 +515,10 @@ public class FromV2Migrator {
 			.filter(i -> i >= 0
 				&& i < grid.getColumns() * grid.getRows())
 			.collect(Collectors.toList());
+	}
+
+	private String migrateGroupName(final String variantName) {
+		return contentGroupNames.getOrDefault(variantName, variantName);
 	}
 
 	private void updateProfileFromLoginId(final UserProfile profile, final String loginId) {
