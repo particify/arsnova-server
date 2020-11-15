@@ -149,6 +149,16 @@ class GatewayConfig (
                             }
                             .uri(httpGatewayProperties.routing.endpoints.roomaccessService)
                 }
+                .route("management-import-service") { p ->
+                    p
+                            .path(
+                                    "/management/import-service/**"
+                            )
+                            .filters { f ->
+                                f.rewritePath("^/management/import-service", "/management")
+                            }
+                            .uri(httpGatewayProperties.routing.endpoints.roomaccessService)
+                }
                 .build()
     }
 }
