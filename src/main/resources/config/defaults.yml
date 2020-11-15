@@ -30,6 +30,7 @@ arsnova:
         db-name: arsnova2
         username: admin
         password: ""
+        authentication-provider-fallback: UNKNOWN
 
     # Mail server
     mail:
