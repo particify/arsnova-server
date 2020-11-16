@@ -49,7 +49,8 @@ services:
       SYSTEM_MESSAGE_BROKER_RABBITMQ_PASSWORD: guest
       SYSTEM_MESSAGE_BROKER_RABBITMQ_VIRTUAL_HOST: /
       SYSTEM_FORMATTING_SERVICE_HOST_URL: http://arsnova-formatting-service:3000
-      SECURITY_JWT_SECRET: secret
+      SECURITY_JWT_SECRET: $JWT_SECRET
+      SECURITY_JWT_SERVER_ID: arsnova.backend.v3:$JWT_DOMAIN
       UI_SLOGAN: powered by particify.de
     command: /jetty/start.jar --module=http-forwarded
   arsnova-http-gateway:
@@ -68,9 +69,9 @@ services:
       HTTP_CLIENT_CORE: http://arsnova-backend-core:8080
       HTTP_CLIENT_WS_GATEWAY: http://arsnova-ws-gateway:8080
       HTTP_CLIENT_COMMENT_SERVICE: http://arsnova-comment-service:8080
-      SECURITY_JWT_PUBLIC_SECRET: secret
-      SECURITY_JWT_INTERNAL_SECRET: secret
-      SECURITY_JWT_SERVER_ID: arsnova.backend.v3:com.example
+      SECURITY_JWT_PUBLIC_SECRET: $JWT_SECRET
+      SECURITY_JWT_INTERNAL_SECRET: $JWT_SECRET
+      SECURITY_JWT_SERVER_ID: arsnova.backend.v3:$JWT_DOMAIN
     command: /jetty/start.jar --module=http-forwarded
   arsnova-ws-gateway:
     image: registry.gitlab.com/particify/dev/foss/arsnova-ws-gateway:$WSGW_TAG
@@ -83,7 +84,7 @@ services:
       STOMP_RELAY_USER: guest
       STOMP_RELAY_PASSWORD: guest
       HTTP_CLIENT_AUTH_SERVICE: http://arsnova-auth-service:8080
-      SECURITY_JWT_SECRET: secret
+      SECURITY_JWT_SECRET: $JWT_SECRET
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_USERNAME: guest
       RABBITMQ_PASSWORD: guest
@@ -113,7 +114,7 @@ services:
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
-      JWT_SECRET: secret
+      SECURITY_JWT_SECRET: $JWT_SECRET
     command: /jetty/start.jar --module=http-forwarded
   arsnova-web:
     image: registry.gitlab.com/particify/dev/foss/arsnova-webclient:$WEB_TAG
