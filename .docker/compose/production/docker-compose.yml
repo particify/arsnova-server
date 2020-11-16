@@ -120,7 +120,7 @@ services:
   arsnova-web-legacy:
     image: registry.gitlab.com/particify/dev/foss/docker-orchestration/arsnova-mobile:$WEB_LEGACY_TAG
   arsnova-formatting-service:
-    image: registry.gitlab.com/particify/dev/extras/formatting-service:$FORMATTING_TAG
+    image: registry.gitlab.com/particify/dev/foss/formatting-service:$FORMATTING_TAG
     environment:
       SERVER_PORT: 3000
   arsnova-proxy:
