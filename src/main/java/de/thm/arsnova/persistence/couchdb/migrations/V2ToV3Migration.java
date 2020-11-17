@@ -82,6 +82,7 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 	private static final String MOTD_INDEX = "motd-index";
 	private static final String MOTDLIST_INDEX = "motdlist-index";
 	private static final boolean COMMENTS_PUBLISH_ONLY = true;
+	private static final Map<String, Boolean> existsSelector = Map.of("$exists", true);
 	private static final Map<String, Boolean> notExistsSelector = Map.of("$exists", false);
 
 	private static final Logger logger = LoggerFactory.getLogger(V2ToV3Migration.class);
@@ -238,8 +239,20 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("keyword", false));
 		fromConnector.createPartialJsonIndex(SESSION_INDEX, fields, filterSelector);
 
+		/* Index (skill_question) for migration */
 		filterSelector.clear();
 		filterSelector.put("type", "skill_question");
+		filterSelector.put("importJobId", notExistsSelector);
+		fromConnector.createPartialJsonIndex(SKILLQUESTION_INDEX, new ArrayList<>(), filterSelector);
+		fields.clear();
+		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("sessionId", false));
+		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("questionVariant", false));
+		fromConnector.createPartialJsonIndex(SKILLQUESTION_INDEX, fields, filterSelector);
+
+		/* Index (skill_question) for import */
+		filterSelector.clear();
+		filterSelector.put("type", "skill_question");
+		filterSelector.put("importJobId", existsSelector);
 		fromConnector.createPartialJsonIndex(SKILLQUESTION_INDEX, new ArrayList<>(), filterSelector);
 		fields.clear();
 		fields.add(new MangoCouchDbConnector.MangoQuery.Sort("importJobId", false));
@@ -593,11 +606,15 @@ public class V2ToV3Migration implements ApplicationEventPublisherAware, Migratio
 		waitForV2Index(SKILLQUESTION_INDEX);
 		final Map<String, Object> queryOptions = new HashMap<>();
 		queryOptions.put("type", "skill_question");
-		queryOptions.put("importJobId", importJob != null ? importJob.getId() : notExistsSelector);
+		if (importJob != null) {
+			queryOptions.put("importJobId", importJob.getId());
+		}
 		final MangoCouchDbConnector.MangoQuery query = new MangoCouchDbConnector.MangoQuery(queryOptions);
 		query.setFields(Arrays.asList("sessionId", "questionVariant", "_id"));
 		final ArrayList<MangoCouchDbConnector.MangoQuery.Sort> sort = new ArrayList<>();
-		sort.add(new MangoCouchDbConnector.MangoQuery.Sort("importJobId", false));
+		if (importJob != null) {
+			sort.add(new MangoCouchDbConnector.MangoQuery.Sort("importJobId", false));
+		}
 		sort.add(new MangoCouchDbConnector.MangoQuery.Sort("sessionId", false));
 		sort.add(new MangoCouchDbConnector.MangoQuery.Sort("questionVariant", false));
 		query.setSort(sort);
