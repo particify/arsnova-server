@@ -31,6 +31,10 @@ arsnova:
         username: admin
         password: ""
         authentication-provider-fallback: UNKNOWN
+        content-group-names:
+          lecture: Lecture
+          preparation: Preparation
+          flashcard: Flashcards
 
     # Mail server
     mail:

@@ -69,6 +69,12 @@ import de.thm.arsnova.model.migration.v2.VisitedRoom;
  * @author Daniel Gerhardt
  */
 public class ToV2Migrator {
+	private Map<String, String> contentGroupNames;
+
+	public ToV2Migrator(final Map<String, String> contentGroupNames) {
+		this.contentGroupNames = contentGroupNames.entrySet().stream()
+				.collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+	}
 
 	private void copyCommonProperties(final de.thm.arsnova.model.Entity from, final Entity to) {
 		to.setId(from.getId());
@@ -306,7 +312,7 @@ public class ToV2Migrator {
 		to.setShowAnswer(state.isAdditionalTextVisible());
 		to.setVotingDisabled(!state.isResponsesEnabled());
 		if (from.getGroups().size() == 1) {
-			to.setQuestionVariant(from.getGroups().iterator().next());
+			to.setQuestionVariant(migrateGroupName(from.getGroups().iterator().next()));
 		}
 
 		return to;
@@ -533,5 +539,9 @@ public class ToV2Migrator {
 					return x + ";" + y;
 				})
 				.collect(Collectors.joining(","));
+	}
+
+	private String migrateGroupName(final String groupName) {
+		return contentGroupNames.getOrDefault(groupName, groupName);
 	}
 }

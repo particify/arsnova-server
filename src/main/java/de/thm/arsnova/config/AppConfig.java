@@ -346,11 +346,11 @@ public class AppConfig implements WebMvcConfigurer {
 		final UserProfile.AuthProvider authProviderFallback = couchDbMigrationProperties.isEnabled()
 				? couchDbMigrationProperties.getAuthenticationProviderFallback()
 				: UserProfile.AuthProvider.UNKNOWN;
-		return new FromV2Migrator(authProviderFallback);
+		return new FromV2Migrator(authProviderFallback, couchDbMigrationProperties.getContentGroupNames());
 	}
 
 	@Bean
-	public ToV2Migrator toV2Migrator() {
-		return new ToV2Migrator();
+	public ToV2Migrator toV2Migrator(final CouchDbMigrationProperties couchDbMigrationProperties) {
+		return new ToV2Migrator(couchDbMigrationProperties.getContentGroupNames());
 	}
 }
