@@ -368,8 +368,12 @@ public class ToV2Migrator {
 			to.setUser(creator.get().getLoginId());
 		}
 
-		to.setAnswerSubject(from.getSubject());
-		to.setAnswerText(from.getBody());
+		if (from.getBody() == null) {
+			to.setAbstention(true);
+		} else {
+			to.setAnswerSubject(from.getBody().substring(0, 20) + ((from.getBody().length() > 20) ? "…" : ""));
+			to.setAnswerText(from.getBody());
+		}
 
 		return to;
 	}

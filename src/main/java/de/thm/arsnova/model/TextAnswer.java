@@ -26,7 +26,6 @@ import org.springframework.core.style.ToStringCreator;
 import de.thm.arsnova.model.serialization.View;
 
 public class TextAnswer extends Answer {
-	@NotBlank
 	private String subject;
 
 	@NotBlank
@@ -36,7 +35,7 @@ public class TextAnswer extends Answer {
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getSubject() {
-		return subject;
+		return null;
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
@@ -46,7 +45,11 @@ public class TextAnswer extends Answer {
 
 	@JsonView({View.Persistence.class, View.Public.class})
 	public String getBody() {
-		return body;
+		if (subject != null && !subject.isBlank()) {
+			return subject + ": " + body;
+		} else {
+			return body;
+		}
 	}
 
 	@JsonView({View.Persistence.class, View.Public.class})
