@@ -385,8 +385,11 @@ public class FromV2Migrator {
 		to.setContentId(from.getQuestionId());
 		to.setRoomId(from.getSessionId());
 		to.setRound(from.getPiRound());
-		to.setSubject(from.getAnswerSubject());
-		to.setBody(from.getAnswerText());
+		if (from.getAnswerSubject() != null && !from.getAnswerSubject().isBlank()) {
+			to.setBody(from.getAnswerSubject() + ": " + from.getAnswerText());
+		} else {
+			to.setBody(from.getAnswerText());
+		}
 
 		return to;
 	}
