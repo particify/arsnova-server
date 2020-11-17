@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -72,6 +73,8 @@ public class FromV2Migrator {
 	static final int V2_GRID_FIELD_COUNT = 16;
 	static final double V2_GRID_SCALE_FACTOR = 1.05;
 	private static final Map<String, de.thm.arsnova.model.Content.Format> formatMapping;
+	private static final Pattern prefixedLabelPattern = Pattern.compile("^[A-Z]: .+");
+	private static final Pattern labelPattern = Pattern.compile("^([A-Z]: )?(.+)");
 
 	private boolean ignoreRevision = false;
 	private UserProfile.AuthProvider authProviderFallback;
@@ -231,7 +234,6 @@ public class FromV2Migrator {
 		final de.thm.arsnova.model.Content to;
 		final Map<String, Map<String, Object>> extensions;
 		final Map<String, Object> v2;
-		final Pattern prefixedLabelPattern = Pattern.compile("^[A-Z]: .+");
 		switch (from.getQuestionType()) {
 			case V2_TYPE_ABCD:
 			case V2_TYPE_SC:
@@ -481,7 +483,8 @@ public class FromV2Migrator {
 			} else {
 				int i = 0;
 				for (final ChoiceQuestionContent.AnswerOption option : choiceQuestionContent.getOptions()) {
-					if (option.getLabel().equals(from.getAnswerText())) {
+					final Matcher labelMatcher = labelPattern.matcher(from.getAnswerText());
+					if (labelMatcher.matches() && option.getLabel().equals(labelMatcher.group(2))) {
 						selectedChoiceIndexes.add(i);
 						break;
 					}
