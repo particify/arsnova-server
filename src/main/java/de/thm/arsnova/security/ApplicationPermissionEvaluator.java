@@ -194,16 +194,16 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			case READ_PERMISSION:
 				return !targetRoom.isClosed() || hasUserIdRoomModeratingPermission(targetRoom, userId);
 			case READ_EXTENDED_PERMISSION:
-				return targetRoom.getOwnerId().equals(userId)
+				return userId.equals(targetRoom.getOwnerId())
 						|| hasUserIdRoomModeratingPermission(targetRoom, userId);
 			case CREATE_PERMISSION:
 				return !userId.isEmpty();
 			case UPDATE_PERMISSION:
-				return targetRoom.getOwnerId().equals(userId)
+				return userId.equals(targetRoom.getOwnerId())
 						|| hasUserIdRoomModeratorRole(targetRoom, userId, Room.Moderator.Role.EDITING_MODERATOR);
 			case OWNER_PERMISSION:
 			case DELETE_PERMISSION:
-				return targetRoom.getOwnerId().equals(userId);
+				return userId.equals(targetRoom.getOwnerId());
 			default:
 				return false;
 		}
@@ -222,14 +222,14 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			case READ_PERMISSION:
 				return !room.isClosed() || hasUserIdRoomModeratingPermission(room, userId);
 			case READ_EXTENDED_PERMISSION:
-				return room.getOwnerId().equals(userId)
+				return userId.equals(room.getOwnerId())
 						|| hasUserIdRoomModeratingPermission(room, userId);
 			case CREATE_PERMISSION:
 			case UPDATE_PERMISSION:
 			case DELETE_PERMISSION:
 			case OWNER_PERMISSION:
 				/* TODO: Remove owner permission for content. Use create/update/delete instead. */
-				return room.getOwnerId().equals(userId)
+				return userId.equals(room.getOwnerId())
 						|| hasUserIdRoomModeratorRole(room, userId, Room.Moderator.Role.EDITING_MODERATOR);
 			default:
 				return false;
@@ -251,7 +251,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			case "create":
 			case "update":
 			case "delete":
-				return room.getOwnerId().equals(userId)
+				return userId.equals(room.getOwnerId())
 						|| hasUserIdRoomModeratorRole(room, userId, Room.Moderator.Role.EDITING_MODERATOR);
 			default:
 				return false;
@@ -269,7 +269,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 		final Room room;
 		switch (permission) {
 			case READ_PERMISSION:
-				if (targetAnswer.getCreatorId().equals(userId) || content.getState().isResponsesVisible()) {
+				if (content.getState().isResponsesVisible() || userId.equals(targetAnswer.getCreatorId())) {
 					return true;
 				}
 				room = roomRepository.findOne(targetAnswer.getRoomId());
@@ -277,7 +277,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 			case CREATE_PERMISSION:
 				return content.getState().isResponsesEnabled();
 			case OWNER_PERMISSION:
-				return targetAnswer.getCreatorId().equals(userId);
+				return userId.equals(targetAnswer.getCreatorId());
 			case UPDATE_PERMISSION:
 				/* TODO */
 				return false;
@@ -298,10 +298,10 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 				return !userId.isEmpty() && !roomRepository.findOne(targetComment.getRoomId()).isClosed();
 			case OWNER_PERMISSION:
 			case UPDATE_PERMISSION:
-				return targetComment.getCreatorId() != null && targetComment.getCreatorId().equals(userId);
+				return userId.equals(targetComment.getCreatorId());
 			case READ_PERMISSION:
 			case DELETE_PERMISSION:
-				if (targetComment.getCreatorId() != null && targetComment.getCreatorId().equals(userId)) {
+				if (userId.equals(targetComment.getCreatorId())) {
 					return true;
 				}
 
@@ -349,7 +349,7 @@ public class ApplicationPermissionEvaluator implements PermissionEvaluator {
 	 * Checks if the user is owner or has any moderating role for the room.
 	 */
 	private boolean hasUserIdRoomModeratingPermission(final Room room, final String userId) {
-		return room.getOwnerId().equals(userId) || room.getModerators().stream()
+		return userId.equals(room.getOwnerId()) || room.getModerators().stream()
 				.anyMatch(m -> m.getUserId().equals(userId));
 	}
 
