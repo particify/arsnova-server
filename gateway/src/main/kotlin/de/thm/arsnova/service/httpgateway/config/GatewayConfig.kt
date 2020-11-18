@@ -11,6 +11,7 @@ import org.springframework.cloud.gateway.route.RouteLocator
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpStatus
 import reactor.core.publisher.Mono
 
 
@@ -148,6 +149,25 @@ class GatewayConfig (
                                 f.rewritePath("^/management/auth-service", "/management")
                             }
                             .uri(httpGatewayProperties.routing.endpoints.roomaccessService)
+                }
+                .route("management-proxy") { p ->
+                    if (httpGatewayProperties.routing.endpoints.proxyMetrics != null) {
+                        p
+                                .path(
+                                        "/management/proxy/"
+                                )
+                                .filters { f ->
+                                    f.rewritePath("^/management/proxy", "")
+                                }
+                                .uri(httpGatewayProperties.routing.endpoints.proxyMetrics)
+                    } else {
+                        p
+                                .path("/management/proxy/")
+                                .filters { f ->
+                                    f.setStatus(HttpStatus.NOT_IMPLEMENTED)
+                                }
+                                .uri("")
+                    }
                 }
                 .route("management-import-service") { p ->
                     p

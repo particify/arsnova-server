@@ -41,7 +41,8 @@ data class Endpoints(
         val commentService: String,
         val roomaccessService: String,
         val importService: String,
-        val formattingService: String
+        val formattingService: String,
+        val proxyMetrics: String?
 )
 
 data class Gateway(
