@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import de.thm.arsnova.config.RabbitConfig;
 import de.thm.arsnova.config.properties.MessageBrokerProperties;
 import de.thm.arsnova.websocket.message.CreateFeedback;
-import de.thm.arsnova.websocket.message.GetFeedback;
 import de.thm.arsnova.websocket.message.ResetFeedback;
 
 @Service
@@ -48,19 +47,6 @@ public class FeedbackHandler {
 			queues = CREATE_FEEDBACK_RESET_COMMAND_QUEUE_NAME)
 	public void receiveMessage(
 			final ResetFeedback value
-	) throws Exception {
-
-		commandHandler.handle(
-				value
-		);
-
-	}
-
-	@RabbitListener(
-			containerFactory = "myRabbitListenerContainerFactory",
-			queues = QUERY_FEEDBACK_COMMAND_QUEUE_NAME)
-	public void receiveMessage(
-			final GetFeedback value
 	) throws Exception {
 
 		commandHandler.handle(

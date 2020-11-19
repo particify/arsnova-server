@@ -45,38 +45,6 @@ public class FeedbackCommandHandlerTest {
 	}
 
 	@Test
-	public void getFeedback() {
-		Room r = getTestRoom();
-		final String roomId = r.getId();
-
-		Mockito.when(roomService.get(roomId, true)).thenReturn(r);
-		Mockito.when(feedbackStorage.findByRoomId(roomId)).thenReturn(r);
-		Mockito.when(feedbackStorage.getByRoom(r)).thenReturn(new Feedback(0, 0, 0, 0));
-
-		final GetFeedbackPayload getFeedbackPayload = new GetFeedbackPayload(roomId);
-		final GetFeedback getFeedback = new GetFeedback();
-		getFeedback.setPayload(getFeedbackPayload);
-
-		commandHandler.handle(getFeedback);
-
-		final FeedbackChangedPayload feedbackChangedPayload = new FeedbackChangedPayload();
-		final int[] expectedVals = new int[]{0, 0, 0, 0};
-		feedbackChangedPayload.setValues(expectedVals);
-		final FeedbackChanged feedbackChanged = new FeedbackChanged();
-		feedbackChanged.setPayload(feedbackChangedPayload);
-
-		final ArgumentCaptor<String> topicCaptor = ArgumentCaptor.forClass(String.class);
-		final ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
-		final ArgumentCaptor<FeedbackChanged> messageCaptor =
-				ArgumentCaptor.forClass(FeedbackChanged.class);
-
-		verify(messagingTemplate).convertAndSend(topicCaptor.capture(), keyCaptor.capture(), messageCaptor.capture());
-		assertThat(topicCaptor.getValue()).isEqualTo("amq.topic");
-		assertThat(keyCaptor.getValue()).isEqualTo(roomId + ".feedback.stream");
-		assertThat(messageCaptor.getValue()).isEqualTo(feedbackChanged);
-	}
-
-	@Test
 	public void sendFeedback() {
 		Room r = getTestRoom();
 		final String roomId = r.getId();
