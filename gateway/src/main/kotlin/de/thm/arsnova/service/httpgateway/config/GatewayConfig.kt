@@ -46,158 +46,164 @@ class GatewayConfig (
             roomIdFilter: RoomIdFilter,
             jwtUserIdFilter: JwtUserIdFilter
     ): RouteLocator? {
-        return builder.routes()
-                .route("core") { p ->
-                    p
-                            .path(
-                                    "/room/{roomId}/content/**",
-                                    "/room/{roomId}/answer/**"
-                            )
-                            .filters { f ->
-                                f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
-                                f.requestRateLimiter { r ->
-                                    r.rateLimiter = requestRateLimiter
-                                }
-                            }
-                            .uri(httpGatewayProperties.routing.endpoints.core)
-                }
-                .route("roomaccess") {p ->
-                    p
-                            .path("/roomaccess/**")
-                            .filters { f ->
-                                f.requestRateLimiter { r ->
-                                    r.rateLimiter = requestRateLimiter
-                                }
-                            }
-                            .uri(httpGatewayProperties.routing.endpoints.roomaccessService)
-                }
-                .route("comment-service") { p ->
-                    p
-                            .path("/room/{roomId}/comment/**", "/room/{roomId}/settings/**")
-                            .filters { f ->
-                                f.filter(authFilter.apply(AuthFilter.Config()))
-                                f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
-                                f.requestRateLimiter { r ->
-                                    r.rateLimiter = requestRateLimiter
-                                }
-                            }
-                            .uri(httpGatewayProperties.routing.endpoints.commentService)
-                }
-                .route("comment-service-todo") { p ->
-                    p
-                            .path(
-                                    "/room/{roomId}/bonustoken/**",
-                                    "/room/{roomId}/vote/**",
-                                    "/room/{roomId}/settings/**"
-                            )
-                            .filters { f ->
-                                f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
-                                f.requestRateLimiter { r ->
-                                    r.rateLimiter = requestRateLimiter
-                                }
-                            }
-                            .uri(httpGatewayProperties.routing.endpoints.commentService)
-                }
-                .route("import-service") { p ->
-                    p
-                            .path("/import/**")
-                            .filters { f ->
-                                f.filter(jwtUserIdFilter.apply(JwtUserIdFilter.Config()))
-                                f.requestRateLimiter { r ->
-                                    r.rateLimiter = requestRateLimiter
-                                }
-                            }
-                            .uri(httpGatewayProperties.routing.endpoints.importService)
-                }
-                .route("formatting-service") { p ->
-                    p
-                            .path("${UTIL_PREFIX}/formatting/render")
-                            .filters { f ->
-                                f.rewritePath("^${UTIL_PREFIX}/formatting", "")
-                                f.requestRateLimiter { r ->
-                                    r.rateLimiter = requestRateLimiter
-                                }
-                            }
-                            .uri(httpGatewayProperties.routing.endpoints.formattingService)
-                }
-                .route("attachment-service") { p ->
-                    if (httpGatewayProperties.routing.endpoints.attachmentService != null) {
-                        p
-                                .path(
-                                        "/room/{roomId}/filemetadata/**",
-                                        "/room/{roomId}/file/**"
-                                )
-                                .filters { f ->
-                                    f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
-                                    f.requestRateLimiter { r ->
-                                        r.rateLimiter = requestRateLimiter
-                                    }
-                                }
-                                .uri(httpGatewayProperties.routing.endpoints.attachmentService)
-                    } else {
-                        p
-                                .path("/room/{roomId}/filemetadata/**")
-                                .filters { f ->
-                                    f.setStatus(HttpStatus.NOT_IMPLEMENTED)
-                                }
-                                .uri("")
+        val routes = builder.routes()
+
+        routes.route("core") { p ->
+            p
+                .path(
+                    "/room/{roomId}/content/**",
+                    "/room/{roomId}/answer/**"
+                )
+                .filters { f ->
+                    f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
+                    f.requestRateLimiter { r ->
+                        r.rateLimiter = requestRateLimiter
                     }
                 }
-                .route("management-core") { p ->
-                    p
-                            .path(
-                                    "/management/core/**"
-                            )
-                            .filters { f ->
-                                f.rewritePath("^/management/core", "/management")
-                            }
-                            .uri(httpGatewayProperties.routing.endpoints.core)
+                .uri(httpGatewayProperties.routing.endpoints.core)
+        }
+
+        routes.route("roomaccess") {p ->
+            p
+                .path("/roomaccess/**")
+                .filters { f ->
+                    f.requestRateLimiter { r ->
+                        r.rateLimiter = requestRateLimiter
+                    }
                 }
-                .route("management-ws-gateway") { p ->
-                    p
-                            .path(
-                                    "/management/ws-gateway/**"
-                            )
-                            .filters { f ->
-                                f.rewritePath("^/management/ws-gateway", "/management")
-                            }
-                            .uri(httpGatewayProperties.routing.endpoints.wsGateway)
+                .uri(httpGatewayProperties.routing.endpoints.roomaccessService)
+        }
+
+        routes.route("comment-service") { p ->
+            p
+                .path("/room/{roomId}/comment/**", "/room/{roomId}/settings/**")
+                .filters { f ->
+                    f.filter(authFilter.apply(AuthFilter.Config()))
+                    f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
+                    f.requestRateLimiter { r ->
+                        r.rateLimiter = requestRateLimiter
+                    }
                 }
-                .route("management-comment-service") { p ->
-                    p
-                            .path(
-                                    "/management/comment-service/**"
-                            )
-                            .filters { f ->
-                                f.rewritePath("^/management/comment-service", "/management")
-                            }
-                            .uri(httpGatewayProperties.routing.endpoints.commentService)
+                .uri(httpGatewayProperties.routing.endpoints.commentService)
+        }
+
+        routes.route("comment-service-todo") { p ->
+            p
+                .path(
+                    "/room/{roomId}/bonustoken/**",
+                    "/room/{roomId}/vote/**",
+                    "/room/{roomId}/settings/**"
+                )
+                .filters { f ->
+                    f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
+                    f.requestRateLimiter { r ->
+                        r.rateLimiter = requestRateLimiter
+                    }
                 }
-                .route("management-auth-service") { p ->
-                    p
-                            .path(
-                                    "/management/auth-service/**"
-                            )
-                            .filters { f ->
-                                f.rewritePath("^/management/auth-service", "/management")
-                            }
-                            .uri(httpGatewayProperties.routing.endpoints.roomaccessService)
+                .uri(httpGatewayProperties.routing.endpoints.commentService)
+        }
+
+        routes.route("import-service") { p ->
+            p
+                .path("/import/**")
+                .filters { f ->
+                    f.filter(jwtUserIdFilter.apply(JwtUserIdFilter.Config()))
+                    f.requestRateLimiter { r ->
+                        r.rateLimiter = requestRateLimiter
+                    }
                 }
-                .route("core") { p ->
-                    p
-                            .path(
-                                    "/room/**",
-                                    "/auth/**",
-                                    "/user/**",
-                                    "/configuration/**"
-                            )
-                            .filters { f ->
-                                f.requestRateLimiter { r ->
-                                    r.rateLimiter = requestRateLimiter
-                                }
-                            }
-                            .uri(httpGatewayProperties.routing.endpoints.core)
+                .uri(httpGatewayProperties.routing.endpoints.importService)
+        }
+
+        routes.route("formatting-service") { p ->
+            p
+                .path("${UTIL_PREFIX}/formatting/render")
+                .filters { f ->
+                    f.rewritePath("^${UTIL_PREFIX}/formatting", "")
+                    f.requestRateLimiter { r ->
+                        r.rateLimiter = requestRateLimiter
+                    }
                 }
-                .build()
+                .uri(httpGatewayProperties.routing.endpoints.formattingService)
+        }
+
+        if (httpGatewayProperties.routing.endpoints.attachmentService != null) {
+            routes.route("attachment-service") { p ->
+                p
+                    .path(
+                        "/room/{roomId}/filemetadata/**",
+                        "/room/{roomId}/file/**"
+                    )
+                    .filters { f ->
+                        f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
+                        f.requestRateLimiter { r ->
+                            r.rateLimiter = requestRateLimiter
+                        }
+                    }
+                    .uri(httpGatewayProperties.routing.endpoints.attachmentService)
+            }
+        }
+
+        routes.route("management-core") { p ->
+            p
+                .path(
+                    "/management/core/**"
+                )
+                .filters { f ->
+                    f.rewritePath("^/management/core", "/management")
+                }
+                .uri(httpGatewayProperties.routing.endpoints.core)
+        }
+
+        routes.route("management-ws-gateway") { p ->
+            p
+                .path(
+                    "/management/ws-gateway/**"
+                )
+                .filters { f ->
+                    f.rewritePath("^/management/ws-gateway", "/management")
+                }
+                .uri(httpGatewayProperties.routing.endpoints.wsGateway)
+        }
+
+        routes.route("management-comment-service") { p ->
+            p
+                .path(
+                    "/management/comment-service/**"
+                )
+                .filters { f ->
+                    f.rewritePath("^/management/comment-service", "/management")
+                }
+                .uri(httpGatewayProperties.routing.endpoints.commentService)
+        }
+
+        routes.route("management-auth-service") { p ->
+            p
+                .path(
+                    "/management/auth-service/**"
+                )
+                .filters { f ->
+                    f.rewritePath("^/management/auth-service", "/management")
+                }
+                .uri(httpGatewayProperties.routing.endpoints.roomaccessService)
+        }
+
+        routes.route("core") { p ->
+            p
+                .path(
+                    "/room/**",
+                    "/auth/**",
+                    "/user/**",
+                    "/configuration/**"
+                )
+                .filters { f ->
+                    f.requestRateLimiter { r ->
+                        r.rateLimiter = requestRateLimiter
+                    }
+                }
+                .uri(httpGatewayProperties.routing.endpoints.core)
+        }
+
+        return routes.build()
     }
 }
