@@ -2,6 +2,7 @@ package de.thm.arsnova.service.wsgateway.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding
+import java.time.Duration
 
 @ConfigurationProperties
 @ConstructorBinding
@@ -11,7 +12,8 @@ data class WebSocketProperties(
 		val messagingPrefix: String,
 		val stomp: Stomp,
 		val security: Security,
-		val httpClient: HttpClient
+		val httpClient: HttpClient,
+		val gateway: Gateway
 )
 
 data class Server(
@@ -50,4 +52,15 @@ data class Jwt(
 
 data class HttpClient(
 		val authService: String
+)
+
+data class Gateway(
+		val eventRateLimit: EventRateLimit
+)
+
+data class EventRateLimit(
+		val threshold: Long,
+		val duration: Duration,
+		val tokensPerTimeframe: Long,
+		val burstCapacity: Long
 )

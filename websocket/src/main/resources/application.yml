@@ -39,3 +39,10 @@ security:
     secret: "secret"
 http-client:
   auth-service: "http://127.0.0.1:8092"
+gateway:
+  event-rate-limit:
+    # If threshold is exceeded, rate limiting applies
+    threshold: 30
+    duration: 2s
+    tokens-per-timeframe: 4
+    burst-capacity: 4

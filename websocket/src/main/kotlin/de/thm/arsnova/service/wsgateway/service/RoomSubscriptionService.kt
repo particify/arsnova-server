@@ -1,6 +1,11 @@
 package de.thm.arsnova.service.wsgateway.service
 
+import de.thm.arsnova.service.wsgateway.config.WebSocketProperties
 import de.thm.arsnova.service.wsgateway.event.UserCountChanged
+import io.github.bucket4j.Bandwidth
+import io.github.bucket4j.Bucket
+import io.github.bucket4j.Bucket4j
+import io.github.bucket4j.Refill
 import kotlinx.coroutines.GlobalScope
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.launch
@@ -10,7 +15,8 @@ import org.springframework.stereotype.Service
 
 @Service
 class RoomSubscriptionService(
-		private val rabbitTemplate: RabbitTemplate
+		private val rabbitTemplate: RabbitTemplate,
+		private val webSocketProperties: WebSocketProperties
 ) {
 	private val logger = LoggerFactory.getLogger(RoomSubscriptionService::class.java)
 
@@ -20,6 +26,13 @@ class RoomSubscriptionService(
 	// used for reverse lookup when user leaves room
 	private val userInRoom = ConcurrentHashMap<String, String>()
 
+	private val threshold = webSocketProperties.gateway.eventRateLimit.threshold
+	private val duration = webSocketProperties.gateway.eventRateLimit.duration
+	private val tokensPerTimeframe = webSocketProperties.gateway.eventRateLimit.tokensPerTimeframe
+	private val burstCapacity = webSocketProperties.gateway.eventRateLimit.burstCapacity
+
+	private val eventBucketMap: MutableMap<String, Bucket> = ConcurrentHashMap()
+
 	fun addUser(roomId: String, userId: String) = GlobalScope.launch {
 		var currentUsers: MutableSet<String>
 		synchronized(roomUsers) {
@@ -28,11 +41,7 @@ class RoomSubscriptionService(
 			roomUsers[roomId] = currentUsers
 			userInRoom[userId] = roomId
 		}
-		rabbitTemplate.convertAndSend(
-				"amq.topic",
-				"${roomId}.stream",
-				UserCountChanged(currentUsers.count())
-		)
+		sendUserCountChangedEvent(roomId, currentUsers.count())
 	}
 
 	fun removeUser(userId: String) = GlobalScope.launch {
@@ -48,11 +57,7 @@ class RoomSubscriptionService(
 			}
 		}
 		if (roomId != null) {
-			rabbitTemplate.convertAndSend(
-					"amq.topic",
-					"${roomId}.stream",
-					UserCountChanged(currentUsers.count())
-			)
+			sendUserCountChangedEvent(roomId!!, currentUsers.count())
 		}
 	}
 
@@ -62,5 +67,27 @@ class RoomSubscriptionService(
 
 	fun getUserCount(): Int {
 		return userInRoom.size
+	}
+
+	fun sendUserCountChangedEvent(roomId: String, currentUserCount: Int) {
+		var canSend = true
+		if (currentUserCount > threshold) {
+			val bucket: Bucket = eventBucketMap.computeIfAbsent(roomId) {
+				val refill: Refill = Refill.intervally(tokensPerTimeframe, duration)
+				val limit: Bandwidth = Bandwidth.classic(burstCapacity, refill)
+				Bucket4j.builder().addLimit(limit).build()
+			}
+			val probe = bucket.tryConsumeAndReturnRemaining(1)
+			if (!probe.isConsumed) {
+				canSend = false
+			}
+		}
+		if (canSend) {
+			rabbitTemplate.convertAndSend(
+				"amq.topic",
+				"${roomId}.stream",
+				UserCountChanged(currentUserCount)
+			)
+		}
 	}
 }
