@@ -150,25 +150,6 @@ class GatewayConfig (
                             }
                             .uri(httpGatewayProperties.routing.endpoints.roomaccessService)
                 }
-                .route("management-proxy") { p ->
-                    if (httpGatewayProperties.routing.endpoints.proxyMetrics != null) {
-                        p
-                                .path(
-                                        "/management/proxy/"
-                                )
-                                .filters { f ->
-                                    f.rewritePath("^/management/proxy", "")
-                                }
-                                .uri(httpGatewayProperties.routing.endpoints.proxyMetrics)
-                    } else {
-                        p
-                                .path("/management/proxy/")
-                                .filters { f ->
-                                    f.setStatus(HttpStatus.NOT_IMPLEMENTED)
-                                }
-                                .uri("")
-                    }
-                }
                 .route("management-import-service") { p ->
                     p
                             .path(
@@ -177,7 +158,17 @@ class GatewayConfig (
                             .filters { f ->
                                 f.rewritePath("^/management/import-service", "/management")
                             }
-                            .uri(httpGatewayProperties.routing.endpoints.roomaccessService)
+                            .uri(httpGatewayProperties.routing.endpoints.importService)
+                }
+                .route("metrics-proxy") { p ->
+                    p
+                            .path(
+                                    "/management/proxy/prometheus"
+                            )
+                            .filters { f ->
+                                f.rewritePath("^/management/proxy", "")
+                            }
+                            .uri(httpGatewayProperties.routing.endpoints.proxyMetrics)
                 }
                 .build()
     }

@@ -34,6 +34,7 @@ routing:
     roomaccess-service: "http://localhost:8092/"
     import-service: "http://localhost:8070/"
     formatting-service: "http://localhost:3020/"
+    proxy-metrics: "http://localhost:9113/"
 ---
 security:
   jwt:
