@@ -24,7 +24,6 @@ import de.thm.arsnova.websocket.message.FeedbackChangedPayload;
 import de.thm.arsnova.websocket.message.FeedbackReset;
 import de.thm.arsnova.websocket.message.FeedbackStarted;
 import de.thm.arsnova.websocket.message.FeedbackStopped;
-import de.thm.arsnova.websocket.message.GetFeedback;
 import de.thm.arsnova.websocket.message.ResetFeedback;
 
 @Component
@@ -124,26 +123,6 @@ public class FeedbackCommandHandler {
 					feedbackChanged
 			);
 		}
-	}
-
-	public void handle(final GetFeedback command) {
-		final String roomId = command.getPayload().getRoomId();
-		final Room room = new Room();
-		room.setId(roomId);
-
-		final Feedback feedback = feedbackStorage.getByRoom(room);
-		final int[] currentVals = feedback.getValues().stream().mapToInt(i -> i).toArray();
-
-		final FeedbackChanged feedbackChanged = new FeedbackChanged();
-		final FeedbackChangedPayload feedbackChangedPayload = new FeedbackChangedPayload();
-		feedbackChangedPayload.setValues(currentVals);
-		feedbackChanged.setPayload(feedbackChangedPayload);
-
-		messagingTemplate.convertAndSend(
-				"amq.topic",
-				roomId + ".feedback.stream",
-				feedbackChanged
-		);
 	}
 
 	public void handle(final ResetFeedback command) {
