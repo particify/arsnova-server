@@ -1,7 +1,6 @@
 package de.thm.arsnova.service.httpgateway.config
 
 import de.thm.arsnova.service.httpgateway.security.SecurityContextRepository
-import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -17,8 +16,7 @@ import reactor.core.publisher.Mono
 @Configuration
 @EnableWebFluxSecurity
 class WebSecurityConfig(
-    private val securityContextRepository: SecurityContextRepository,
-    private val webEndpointProperties: WebEndpointProperties
+    private val securityContextRepository: SecurityContextRepository
 ) {
 
     @Bean
@@ -36,7 +34,7 @@ class WebSecurityConfig(
             .securityContextRepository(securityContextRepository)
             .authorizeExchange()
             .pathMatchers(HttpMethod.OPTIONS).permitAll()
-            .pathMatchers(webEndpointProperties.basePath + "/**").hasAnyRole("ADMIN", "MONITORING")
+            .pathMatchers("/management" + "/**").hasAnyRole("ADMIN", "MONITORING")
             .pathMatchers("/**").permitAll()
             .anyExchange().authenticated()
             .and().build()
