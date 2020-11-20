@@ -42,7 +42,8 @@ data class Endpoints(
         val roomaccessService: String,
         val importService: String?,
         val formattingService: String,
-        val attachmentService: String?
+        val attachmentService: String?,
+        val proxyMetrics: String?
 )
 
 data class Gateway(

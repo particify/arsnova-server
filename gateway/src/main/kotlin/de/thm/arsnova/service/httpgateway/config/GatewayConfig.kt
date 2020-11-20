@@ -190,6 +190,32 @@ class GatewayConfig (
                 .uri(httpGatewayProperties.routing.endpoints.roomaccessService)
         }
 
+        if (httpGatewayProperties.routing.endpoints.importService != null) {
+            routes.route("management-import-service") { p ->
+                p
+                        .path(
+                                "/management/import-service/**"
+                        )
+                        .filters { f ->
+                            f.rewritePath("^/management/import-service", "/management")
+                        }
+                        .uri(httpGatewayProperties.routing.endpoints.importService)
+            }
+        }
+
+        if (httpGatewayProperties.routing.endpoints.proxyMetrics != null) {
+            routes.route("metrics-proxy") { p ->
+                p
+                        .path(
+                                "/management/proxy/prometheus"
+                        )
+                        .filters { f ->
+                            f.rewritePath("^/management/proxy", "")
+                        }
+                        .uri(httpGatewayProperties.routing.endpoints.proxyMetrics)
+            }
+        }
+
         routes.route("core") { p ->
             p
                 .path(
