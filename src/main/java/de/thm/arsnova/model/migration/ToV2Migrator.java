@@ -234,6 +234,9 @@ public class ToV2Migrator {
 				case NUMBER:
 					to.setQuestionType(V2_TYPE_FREETEXT);
 					break;
+				case SLIDE:
+					to.setQuestionType(V2_TYPE_SLIDE);
+					break;
 				case TEXT:
 					final String legacyType = from.getExtensions() != null
 							? (String) from.getExtensions()
