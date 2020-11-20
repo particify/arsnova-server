@@ -103,16 +103,18 @@ class GatewayConfig (
                 .uri(httpGatewayProperties.routing.endpoints.commentService)
         }
 
-        routes.route("import-service") { p ->
-            p
-                .path("/import/**")
-                .filters { f ->
-                    f.filter(jwtUserIdFilter.apply(JwtUserIdFilter.Config()))
-                    f.requestRateLimiter { r ->
-                        r.rateLimiter = requestRateLimiter
-                    }
-                }
-                .uri(httpGatewayProperties.routing.endpoints.importService)
+        if (httpGatewayProperties.routing.endpoints.importService != null) {
+            routes.route("import-service") { p ->
+                p
+                        .path("/import/**")
+                        .filters { f ->
+                            f.filter(jwtUserIdFilter.apply(JwtUserIdFilter.Config()))
+                            f.requestRateLimiter { r ->
+                                r.rateLimiter = requestRateLimiter
+                            }
+                        }
+                        .uri(httpGatewayProperties.routing.endpoints.importService)
+            }
         }
 
         routes.route("formatting-service") { p ->
@@ -186,6 +188,32 @@ class GatewayConfig (
                     f.rewritePath("^/management/auth-service", "/management")
                 }
                 .uri(httpGatewayProperties.routing.endpoints.roomaccessService)
+        }
+
+        if (httpGatewayProperties.routing.endpoints.importService != null) {
+            routes.route("management-import-service") { p ->
+                p
+                        .path(
+                                "/management/import-service/**"
+                        )
+                        .filters { f ->
+                            f.rewritePath("^/management/import-service", "/management")
+                        }
+                        .uri(httpGatewayProperties.routing.endpoints.importService)
+            }
+        }
+
+        if (httpGatewayProperties.routing.endpoints.proxyMetrics != null) {
+            routes.route("metrics-proxy") { p ->
+                p
+                        .path(
+                                "/management/proxy/prometheus"
+                        )
+                        .filters { f ->
+                            f.rewritePath("^/management/proxy", "")
+                        }
+                        .uri(httpGatewayProperties.routing.endpoints.proxyMetrics)
+            }
         }
 
         routes.route("core") { p ->

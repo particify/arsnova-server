@@ -32,7 +32,6 @@ routing:
     ws-gateway: "http://localhost:8099"
     comment-service: "http://localhost:8088/"
     roomaccess-service: "http://localhost:8092/"
-    import-service: "http://localhost:8070/"
     formatting-service: "http://localhost:3020/"
     attachment-service: "http://localhost:3030/"
 ---

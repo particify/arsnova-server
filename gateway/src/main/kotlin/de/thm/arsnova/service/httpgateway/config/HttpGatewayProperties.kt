@@ -40,9 +40,10 @@ data class Endpoints(
         val wsGateway: String,
         val commentService: String,
         val roomaccessService: String,
-        val importService: String,
+        val importService: String?,
         val formattingService: String,
-        val attachmentService: String?
+        val attachmentService: String?,
+        val proxyMetrics: String?
 )
 
 data class Gateway(
