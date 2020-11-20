@@ -103,16 +103,18 @@ class GatewayConfig (
                 .uri(httpGatewayProperties.routing.endpoints.commentService)
         }
 
-        routes.route("import-service") { p ->
-            p
-                .path("/import/**")
-                .filters { f ->
-                    f.filter(jwtUserIdFilter.apply(JwtUserIdFilter.Config()))
-                    f.requestRateLimiter { r ->
-                        r.rateLimiter = requestRateLimiter
-                    }
-                }
-                .uri(httpGatewayProperties.routing.endpoints.importService)
+        if (httpGatewayProperties.routing.endpoints.importService != null) {
+            routes.route("import-service") { p ->
+                p
+                        .path("/import/**")
+                        .filters { f ->
+                            f.filter(jwtUserIdFilter.apply(JwtUserIdFilter.Config()))
+                            f.requestRateLimiter { r ->
+                                r.rateLimiter = requestRateLimiter
+                            }
+                        }
+                        .uri(httpGatewayProperties.routing.endpoints.importService)
+            }
         }
 
         routes.route("formatting-service") { p ->
