@@ -41,6 +41,7 @@ import de.thm.arsnova.model.Room;
 import de.thm.arsnova.model.RoomStatistics;
 import de.thm.arsnova.service.ContentGroupService;
 import de.thm.arsnova.service.RoomService;
+import de.thm.arsnova.web.exceptions.BadRequestException;
 
 @RestController
 @RequestMapping(RoomController.REQUEST_MAPPING)
@@ -82,6 +83,9 @@ public class RoomController extends AbstractEntityController<Room> {
 	public void putModerator(@PathVariable final String id, @PathVariable final String userId,
 			@RequestBody final Room.Moderator moderator, final HttpServletResponse httpServletResponse) {
 		final Room room = roomService.get(id);
+		if (room.getOwnerId().equals(userId)) {
+			throw new BadRequestException("Room owner cannot be added as moderator.");
+		}
 		moderator.setUserId(userId);
 		if (moderator.getRoles().isEmpty()) {
 			moderator.getRoles().add(Room.Moderator.Role.EXECUTIVE_MODERATOR);
