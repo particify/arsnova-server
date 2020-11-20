@@ -57,8 +57,8 @@ gateway:
   rate-limit:
     duration: 5s
     query-tokens-per-timeframe: 50
-    query-burst-capacity: 30
-    command-tokens-per-timeframe: 10
-    command-burst-capacity: 10
+    query-burst-capacity: 250
+    command-tokens-per-timeframe: 15
+    command-burst-capacity: 75
     whitelisted-ips:
       - 172.18.0.18
