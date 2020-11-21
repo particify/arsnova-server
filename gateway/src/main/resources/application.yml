@@ -39,7 +39,7 @@ security:
   jwt:
     public-secret: "secret"
     internal-secret: "secret"
-    serverId: arsnova.gateway.v3:com.example
+    serverId: arsnova.backend.v3:example.com
     validity-period: 5m
 ---
 http-client:
