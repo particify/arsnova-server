@@ -104,13 +104,18 @@ public class AuthenticationController {
 	}
 
 	@PostMapping("/login/guest")
-	public ClientAuthentication loginGuest(final HttpServletRequest request) {
-		final ClientAuthentication currentAuthentication = userService.getCurrentClientAuthentication(false);
-		if (currentAuthentication != null
-				&& currentAuthentication.getAuthProvider() == UserProfile.AuthProvider.ARSNOVA_GUEST) {
-			return currentAuthentication;
+	public ClientAuthentication loginGuest(
+			final HttpServletRequest request,
+			@RequestBody(required = false) final LoginCredentials loginCredentials) {
+		final String guestId = loginCredentials != null ? loginCredentials.getLoginId() : null;
+		if (guestId == null) {
+			final ClientAuthentication currentAuthentication = userService.getCurrentClientAuthentication(false);
+			if (currentAuthentication != null
+					&& currentAuthentication.getAuthProvider() == UserProfile.AuthProvider.ARSNOVA_GUEST) {
+				return currentAuthentication;
+			}
 		}
-		userService.authenticate(new UsernamePasswordAuthenticationToken(null, null),
+		userService.authenticate(new UsernamePasswordAuthenticationToken(guestId, null),
 				UserProfile.AuthProvider.ARSNOVA_GUEST, request.getRemoteAddr());
 
 		return userService.getCurrentClientAuthentication(false);
