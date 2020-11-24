@@ -7,8 +7,8 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<spring-boot-version>2.3.4.RELEASE</spring-boot-version>
-		<io.netty-version>4.1.52.Final</io.netty-version>
+		<spring-boot-version>2.4.0</spring-boot-version>
+		<io.netty-version>4.1.54.Final</io.netty-version>
 		<jakarta-xml-bind.version>2.3.3</jakarta-xml-bind.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<timestamp>${maven.build.timestamp}</timestamp>
@@ -199,7 +199,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>29.0-jre</version>
+			<version>30.0-jre</version>
 		</dependency>
 		<dependency>
 			<groupId>cglib</groupId>
@@ -249,12 +249,12 @@
 		<dependency>
 			<groupId>org.pac4j</groupId>
 			<artifactId>pac4j-oauth</artifactId>
-			<version>3.8.3</version>
+			<version>3.9.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.pac4j</groupId>
 			<artifactId>pac4j-oidc</artifactId>
-			<version>3.8.3</version>
+			<version>3.9.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.pac4j</groupId>
@@ -339,7 +339,7 @@
 		<dependency>
 			<groupId>org.checkerframework</groupId>
 			<artifactId>checker-qual</artifactId>
-			<version>3.6.1</version>
+			<version>3.7.1</version>
 		</dependency>
 	</dependencies>
 
@@ -374,7 +374,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.4.31.v20200723</version>
+				<version>9.4.35.v20201120</version>
 				<configuration>
 					<scanIntervalSeconds>0</scanIntervalSeconds>
 					<webApp>
@@ -498,7 +498,7 @@
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
 				<artifactId>git-commit-id-plugin</artifactId>
-				<version>4.0.2</version>
+				<version>4.0.3</version>
 				<executions>
 					<execution>
 						<goals>
