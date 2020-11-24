@@ -34,6 +34,7 @@ routing:
     roomaccess-service: "http://localhost:8092/"
     formatting-service: "http://localhost:3020/"
     attachment-service: "http://localhost:3030/"
+    subscription-service: "http://localhost:3010/"
 ---
 security:
   jwt:

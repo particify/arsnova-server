@@ -44,6 +44,7 @@ data class Endpoints(
         val importService: String?,
         val formattingService: String,
         val attachmentService: String?,
+        val subscriptionService: String?,
         val proxyMetrics: String?
 )
 

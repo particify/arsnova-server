@@ -149,6 +149,21 @@ class GatewayConfig (
             }
         }
 
+        if (httpGatewayProperties.routing.endpoints.subscriptionService != null) {
+            routes.route("subscription-service") { p ->
+                p
+                    .path(
+                        "/feature/**"
+                    )
+                    .filters { f ->
+                        f.requestRateLimiter { r ->
+                            r.rateLimiter = requestRateLimiter
+                        }
+                    }
+                    .uri(httpGatewayProperties.routing.endpoints.subscriptionService)
+            }
+        }
+
         routes.route("management-core") { p ->
             p
                 .path(
