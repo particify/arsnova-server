@@ -34,6 +34,7 @@ routing:
     roomaccess-service: "http://localhost:8092/"
     formatting-service: "http://localhost:3020/"
     attachment-service: "http://localhost:3030/"
+    subscription-service: "http://localhost:3010/"
 ---
 security:
   jwt:
@@ -47,6 +48,7 @@ http-client:
   comment-service: "http://127.0.0.1:8088"
   core: "http://127.0.0.1:8080"
   ws-gateway: "http://127.0.0.1:8099"
+  subscription-service: "http://localhost:3010"
 ---
 logging:
   level:

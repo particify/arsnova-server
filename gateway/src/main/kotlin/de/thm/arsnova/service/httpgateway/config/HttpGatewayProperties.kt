@@ -28,7 +28,8 @@ data class HttpClient(
         val authService: String,
         val commentService: String,
         val core: String,
-        val wsGateway: String
+        val wsGateway: String,
+        val subscriptionService: String?
 )
 
 data class Routing(
@@ -43,6 +44,7 @@ data class Endpoints(
         val importService: String?,
         val formattingService: String,
         val attachmentService: String?,
+        val subscriptionService: String?,
         val proxyMetrics: String?
 )
 

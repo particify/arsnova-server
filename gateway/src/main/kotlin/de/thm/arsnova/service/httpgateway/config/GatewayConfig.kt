@@ -55,6 +55,7 @@ class GatewayConfig (
                     "/room/{roomId}/answer/**"
                 )
                 .filters { f ->
+                    f.filter(authFilter.apply(AuthFilter.Config()))
                     f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
                     f.requestRateLimiter { r ->
                         r.rateLimiter = requestRateLimiter
@@ -95,6 +96,7 @@ class GatewayConfig (
                     "/room/{roomId}/settings/**"
                 )
                 .filters { f ->
+                    f.filter(authFilter.apply(AuthFilter.Config()))
                     f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
                     f.requestRateLimiter { r ->
                         r.rateLimiter = requestRateLimiter
@@ -137,12 +139,28 @@ class GatewayConfig (
                         "/room/{roomId}/file/**"
                     )
                     .filters { f ->
+                        f.filter(authFilter.apply(AuthFilter.Config()))
                         f.filter(roomIdFilter.apply(RoomIdFilter.Config()))
                         f.requestRateLimiter { r ->
                             r.rateLimiter = requestRateLimiter
                         }
                     }
                     .uri(httpGatewayProperties.routing.endpoints.attachmentService)
+            }
+        }
+
+        if (httpGatewayProperties.routing.endpoints.subscriptionService != null) {
+            routes.route("subscription-service") { p ->
+                p
+                    .path(
+                        "/feature/**"
+                    )
+                    .filters { f ->
+                        f.requestRateLimiter { r ->
+                            r.rateLimiter = requestRateLimiter
+                        }
+                    }
+                    .uri(httpGatewayProperties.routing.endpoints.subscriptionService)
             }
         }
 
