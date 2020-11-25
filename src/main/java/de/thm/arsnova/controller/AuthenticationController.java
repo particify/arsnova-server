@@ -20,12 +20,14 @@ package de.thm.arsnova.controller;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Optional;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.pac4j.core.context.J2EContext;
+import org.pac4j.core.client.IndirectClient;
+import org.pac4j.core.context.JEEContext;
+import org.pac4j.core.exception.http.WithLocationAction;
 import org.pac4j.oidc.client.OidcClient;
 import org.pac4j.saml.client.SAML2Client;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,20 +149,19 @@ public class AuthenticationController {
 
 	@GetMapping("/sso/{providerId}")
 	public View redirectToSso(@PathVariable final String providerId,
-			final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
+			final HttpServletRequest request, final HttpServletResponse response)
+			throws IOException {
 		switch (providerId) {
 			case SecurityConfig.OIDC_PROVIDER_ID:
 				if (oidcClient == null) {
 					throw new IllegalArgumentException("Invalid provider ID.");
 				}
-				return new RedirectView(
-						oidcClient.getRedirectAction(new J2EContext(request, response)).getLocation());
+				return buildSsoRedirectView(oidcClient, request, response);
 			case SecurityConfig.SAML_PROVIDER_ID:
 				if (saml2Client == null) {
 					throw new IllegalArgumentException("Invalid provider ID.");
 				}
-				return new RedirectView(
-					saml2Client.getRedirectAction(new J2EContext(request, response)).getLocation());
+				return buildSsoRedirectView(saml2Client, request, response);
 			case SecurityConfig.CAS_PROVIDER_ID:
 				if (casEntryPoint == null) {
 					throw new IllegalArgumentException("Invalid provider ID.");
@@ -170,6 +171,22 @@ public class AuthenticationController {
 			default:
 				throw new IllegalArgumentException("Invalid provider ID.");
 		}
+	}
+
+	private RedirectView buildSsoRedirectView(
+			final IndirectClient client,
+			final HttpServletRequest request,
+			final HttpServletResponse response) {
+		final JEEContext context = new JEEContext(request, response);
+		final Optional<RedirectView> view = client.getRedirectionAction(context).map(action -> {
+			if (action instanceof WithLocationAction) {
+				return new RedirectView(((WithLocationAction) action).getLocation());
+			}
+			return null;
+		});
+		return view.orElseThrow(() -> {
+			throw new IllegalStateException("No URL for redirect found.");
+		});
 	}
 
 	@GetMapping(value = "/config/saml/sp-metadata.xml", produces = MediaType.APPLICATION_XML_VALUE)

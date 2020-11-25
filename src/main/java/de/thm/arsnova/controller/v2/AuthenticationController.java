@@ -24,13 +24,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.pac4j.core.context.J2EContext;
-import org.pac4j.core.exception.HttpAction;
+import org.pac4j.core.client.IndirectClient;
+import org.pac4j.core.context.JEEContext;
+import org.pac4j.core.exception.http.WithLocationAction;
 import org.pac4j.oauth.client.FacebookClient;
 import org.pac4j.oauth.client.TwitterClient;
 import org.pac4j.oidc.client.GoogleOidcClient;
@@ -189,9 +191,7 @@ public class AuthenticationController extends AbstractController {
 			@RequestParam(value = "failureurl", defaultValue = "/") String failureUrl,
 			final HttpServletRequest request,
 			final HttpServletResponse response
-	) throws HttpAction, IOException, ServletException {
-		View result = null;
-
+	) throws IOException, ServletException {
 		/* Use URLs from a request parameters for redirection as long as the
 		 * URL is not absolute (to prevent abuse of the redirection). */
 		if (UrlUtils.isAbsoluteUrl(successUrl)) {
@@ -222,27 +222,38 @@ public class AuthenticationController extends AbstractController {
 		if (casProperties.isEnabled() && "cas".equals(type)) {
 			casEntryPoint.commence(request, response, null);
 		} else if (saml2Client != null && "saml".equals(type)) {
-			result = new RedirectView(
-					saml2Client.getRedirectAction(new J2EContext(request, response)).getLocation());
+			return buildSsoRedirectView(saml2Client, request, response);
 		} else if (oidcProperties.stream().anyMatch(p -> p.isEnabled()) && "oidc".equals(type)) {
-			result = new RedirectView(
-					oidcClient.getRedirectAction(new J2EContext(request, response)).getLocation());
+			return buildSsoRedirectView(oidcClient, request, response);
 		} else if (twitterClient != null && "twitter".equals(type)) {
-			result = new RedirectView(
-					twitterClient.getRedirectAction(new J2EContext(request, response)).getLocation());
+			return buildSsoRedirectView(twitterClient, request, response);
 		} else if (facebookClient != null && "facebook".equals(type)) {
 			facebookClient.setFields("id");
 			facebookClient.setScope("");
-			result = new RedirectView(
-					facebookClient.getRedirectAction(new J2EContext(request, response)).getLocation());
+			return buildSsoRedirectView(facebookClient, request, response);
 		} else if (googleOidcClient != null && "google".equals(type)) {
-			result = new RedirectView(
-					googleOidcClient.getRedirectAction(new J2EContext(request, response)).getLocation());
+			return buildSsoRedirectView(googleOidcClient, request, response);
 		} else {
 			response.setStatus(HttpStatus.BAD_REQUEST.value());
 		}
 
-		return result;
+		return null;
+	}
+
+	private RedirectView buildSsoRedirectView(
+			final IndirectClient client,
+			final HttpServletRequest request,
+			final HttpServletResponse response) {
+		final JEEContext context = new JEEContext(request, response);
+		final Optional<RedirectView> view = client.getRedirectionAction(context).map(action -> {
+			if (action instanceof WithLocationAction) {
+				return new RedirectView(((WithLocationAction) action).getLocation());
+			}
+			return null;
+		});
+		return view.orElseThrow(() -> {
+			throw new IllegalStateException("No URL for redirect found.");
+		});
 	}
 
 	@GetMapping({ "/", "/whoami" })
