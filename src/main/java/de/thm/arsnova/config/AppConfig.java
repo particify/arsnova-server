@@ -192,7 +192,7 @@ public class AppConfig implements WebMvcConfigurer {
 			final MeterRegistry registry, final WebMvcTagsProvider tagsProvider) {
 		final MetricsProperties.Web.Server serverProperties = new MetricsProperties.Web.Server();
 		return new WebMvcMetricsFilter(registry, tagsProvider,
-				serverProperties.getRequestsMetricName(), serverProperties.isAutoTimeRequests());
+				serverProperties.getRequest().getMetricName(), serverProperties.getRequest().getAutotime());
 	}
 
 	@Bean

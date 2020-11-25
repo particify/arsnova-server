@@ -8,7 +8,7 @@
 
 	<properties>
 		<!-- Maven dependency/plugin versions -->
-		<spring-boot.version>2.2.11.RELEASE</spring-boot.version>
+		<spring-boot.version>2.4.0</spring-boot.version>
 		<commons-lang.version>2.6</commons-lang.version>
 		<guava.version>30.0-jre</guava.version>
 		<netty.version>4.1.54.Final</netty.version>
@@ -267,8 +267,8 @@
 		</dependency>
 		<!-- A jakarta.el-api (Unified Expression Language) implementation is needed for bean validation. -->
 		<dependency>
-			<groupId>org.mortbay.jasper</groupId>
-			<artifactId>apache-el</artifactId>
+			<groupId>org.glassfish</groupId>
+			<artifactId>jakarta.el</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.mail</groupId>

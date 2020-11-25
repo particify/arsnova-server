@@ -39,7 +39,9 @@ public class ActuatorAutoConfigurationFilter implements AutoConfigurationImportF
 			final AutoConfigurationMetadata autoConfigurationMetadata) {
 		final boolean[] results = new boolean[autoConfigurationClasses.length];
 		for (int i = 0; i < results.length; i++) {
-			results[i] = autoConfigurationClasses[i] != null && checkPrefix(autoConfigurationClasses[i]);
+			results[i] = autoConfigurationClasses[i] != null
+					&& (!autoConfigurationClasses[i].startsWith("org.springframework.boot")
+					|| checkPrefix(autoConfigurationClasses[i]));
 		}
 
 		return results;
