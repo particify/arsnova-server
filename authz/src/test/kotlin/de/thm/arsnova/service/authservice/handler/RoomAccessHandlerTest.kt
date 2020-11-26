@@ -11,22 +11,20 @@ import de.thm.arsnova.service.authservice.model.command.SyncRoomAccessCommand
 import de.thm.arsnova.service.authservice.model.event.RoomAccessSyncRequest
 import de.thm.arsnova.service.authservice.persistence.RoomAccessRepository
 import de.thm.arsnova.service.authservice.persistence.RoomAccessSyncTrackerRepository
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.amqp.rabbit.core.RabbitTemplate
-import java.util.ArrayList
 import java.util.Optional
 
-
-@RunWith(MockitoJUnitRunner::class)
+@ExtendWith(MockitoExtension::class)
 class RoomAccessHandlerTest {
     @Mock private lateinit var rabbitTemplate: RabbitTemplate
     @Mock private lateinit var roomAccessRepository: RoomAccessRepository
@@ -43,7 +41,7 @@ class RoomAccessHandlerTest {
     val CREATOR_STRING = "CREATOR"
     val EXECUTIVE_MODERATOR_STRING = "EXECUTIVE_MODERATOR"
 
-    @Before
+    @BeforeEach
     fun setUp() {
         roomAccessHandler =
                 RoomAccessHandler(rabbitTemplate, roomAccessRepository, roomAccessSyncTrackerRepository)
