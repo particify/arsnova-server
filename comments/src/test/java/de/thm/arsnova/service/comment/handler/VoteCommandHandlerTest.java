@@ -7,15 +7,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import de.thm.arsnova.service.comment.CommentEventSource;
-import de.thm.arsnova.service.comment.handler.VoteCommandHandler;
 import de.thm.arsnova.service.comment.model.Vote;
 import de.thm.arsnova.service.comment.model.command.Downvote;
 import de.thm.arsnova.service.comment.model.command.ResetVote;
@@ -24,7 +23,7 @@ import de.thm.arsnova.service.comment.model.command.VotePayload;
 import de.thm.arsnova.service.comment.security.PermissionEvaluator;
 import de.thm.arsnova.service.comment.service.VoteService;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class VoteCommandHandlerTest {
     @Mock
     private VoteService voteService;
@@ -37,7 +36,7 @@ public class VoteCommandHandlerTest {
 
     private VoteCommandHandler commandHandler;
 
-    @Before
+    @BeforeEach
     public void setup() {
         this.commandHandler = new VoteCommandHandler(voteService, commentEventSource, permissionEvaluator);
     }

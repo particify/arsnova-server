@@ -4,11 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import de.thm.arsnova.service.comment.model.Settings;
 import de.thm.arsnova.service.comment.model.command.CreateSettings;
@@ -18,7 +18,7 @@ import de.thm.arsnova.service.comment.model.command.UpdateSettingsPayload;
 import de.thm.arsnova.service.comment.security.PermissionEvaluator;
 import de.thm.arsnova.service.comment.service.SettingsService;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SettingsCommandHandlerTest {
     @Mock
     private SettingsService settingsService;
@@ -28,7 +28,7 @@ public class SettingsCommandHandlerTest {
 
     SettingsCommandHandler commandHandler;
 
-    @Before
+    @BeforeEach
     public void setup() {
         this.commandHandler = new SettingsCommandHandler(settingsService, permissionEvaluator);
     }
