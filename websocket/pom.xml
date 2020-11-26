@@ -11,10 +11,10 @@
 	<packaging>jar</packaging>
 
 	<properties>
-		<spring-boot-version>2.3.3.RELEASE</spring-boot-version>
-		<io.netty-version>4.1.52.Final</io.netty-version>
+		<spring-boot-version>2.4.0</spring-boot-version>
+		<io.netty-version>4.1.54.Final</io.netty-version>
 		<java.version>1.8</java.version>
-		<kotlin.version>1.4.10</kotlin.version>
+		<kotlin.version>1.4.20</kotlin.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -112,7 +112,7 @@
 		<dependency>
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
-			<version>3.10.3</version>
+			<version>3.11.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.micrometer</groupId>
@@ -200,7 +200,7 @@
 			<plugin>
 				<groupId>com.google.cloud.tools</groupId>
 				<artifactId>jib-maven-plugin</artifactId>
-				<version>1.8.0</version>
+				<version>2.6.0</version>
 				<configuration>
 					<to>
 						<image>${docker.registry}/${docker.image}:${docker.tag}</image>
@@ -214,7 +214,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.5</version>
+				<version>0.8.6</version>
 				<executions>
 					<execution>
 						<id>default-prepare-agent</id>
