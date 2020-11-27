@@ -1,7 +1,25 @@
 package de.thm.arsnova.service.comment.handler;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.amqp.core.AmqpTemplate;
+
 import de.thm.arsnova.service.comment.model.Comment;
 import de.thm.arsnova.service.comment.model.Settings;
+import de.thm.arsnova.service.comment.model.command.CreateComment;
+import de.thm.arsnova.service.comment.model.command.CreateCommentPayload;
 import de.thm.arsnova.service.comment.model.command.DeleteComment;
 import de.thm.arsnova.service.comment.model.command.DeleteCommentPayload;
 import de.thm.arsnova.service.comment.model.command.DeleteCommentsByRoom;
@@ -17,22 +35,7 @@ import de.thm.arsnova.service.comment.service.BonusTokenService;
 import de.thm.arsnova.service.comment.service.CommentService;
 import de.thm.arsnova.service.comment.service.SettingsService;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import de.thm.arsnova.service.comment.model.command.CreateComment;
-import de.thm.arsnova.service.comment.model.command.CreateCommentPayload;
-import org.springframework.amqp.core.AmqpTemplate;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CommentCommandHandlerTest {
 
     @Mock
@@ -52,7 +55,7 @@ public class CommentCommandHandlerTest {
 
     private CommentCommandHandler commandHandler;
 
-    @Before
+    @BeforeEach
     public void setup() {
         commandHandler = new CommentCommandHandler(
                 messagingTemplate,
