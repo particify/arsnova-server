@@ -14,7 +14,7 @@
 		<netty.version>4.1.54.Final</netty.version>
 		<aspectj.version>1.9.6</aspectj.version>
 		<jakarta-xml-bind.version>2.3.3</jakarta-xml-bind.version>
-		<pac4j.version>3.9.0</pac4j.version>
+		<pac4j.version>4.2.0</pac4j.version>
 		<graalvm.version>20.3.0</graalvm.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

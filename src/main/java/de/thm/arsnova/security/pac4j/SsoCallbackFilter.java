@@ -20,6 +20,7 @@ package de.thm.arsnova.security.pac4j;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.pac4j.core.client.Client;
@@ -28,10 +29,9 @@ import org.pac4j.core.client.IndirectClient;
 import org.pac4j.core.client.finder.ClientFinder;
 import org.pac4j.core.client.finder.DefaultCallbackClientFinder;
 import org.pac4j.core.config.Config;
-import org.pac4j.core.context.J2EContext;
+import org.pac4j.core.context.JEEContext;
 import org.pac4j.core.credentials.Credentials;
-import org.pac4j.core.exception.HttpAction;
-import org.pac4j.core.profile.CommonProfile;
+import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.util.CommonHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,16 +60,16 @@ public class SsoCallbackFilter extends AbstractAuthenticationProcessingFilter {
 	public Authentication attemptAuthentication(
 			final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
 			throws AuthenticationException {
-		final CommonProfile profile = retrieveProfile(new J2EContext(httpServletRequest, httpServletResponse), null);
+		final UserProfile profile = retrieveProfile(new JEEContext(httpServletRequest, httpServletResponse), null);
 		return getAuthenticationManager().authenticate(new SsoAuthenticationToken(null, profile, Collections.emptyList()));
 	}
 
-	private CommonProfile retrieveProfile(final J2EContext context, final String clientName)
+	private UserProfile retrieveProfile(final JEEContext context, final String clientName)
 			throws AuthenticationServiceException {
 		/* Adapted from Pac4j: org.pac4j.core.engine.DefaultCallbackLogic.perform */
 		final Clients clients = config.getClients();
 		CommonHelper.assertNotNull("clients", clients);
-		final List<Client> foundClients = clientFinder.find(clients, context, clientName);
+		final List<Client<? extends Credentials>> foundClients = clientFinder.find(clients, context, clientName);
 		CommonHelper.assertTrue(foundClients != null && foundClients.size() == 1,
 				"unable to find one indirect client for the callback:"
 						+ " check the callback URL for a client name parameter or suffix path"
@@ -80,15 +80,11 @@ public class SsoCallbackFilter extends AbstractAuthenticationProcessingFilter {
 		CommonHelper.assertTrue(foundClient instanceof IndirectClient,
 				"only indirect clients are allowed on the callback url");
 
-		try {
-			final Credentials credentials = foundClient.getCredentials(context);
-			logger.debug("credentials: {}", credentials);
-			final CommonProfile profile = foundClient.getUserProfile(credentials, context);
-			logger.debug("profile: {}", profile);
+		final Optional<Credentials> credentials = foundClient.getCredentials(context);
+		logger.debug("credentials: {}", credentials);
+		final Optional<UserProfile> profile = foundClient.getUserProfile(credentials.orElse(null), context);
+		logger.debug("profile: {}", profile);
 
-			return profile;
-		} catch (final HttpAction e) {
-			throw new AuthenticationServiceException(e.getMessage());
-		}
+		return profile.orElseThrow(() -> new AuthenticationServiceException("No user profile found."));
 	}
 }

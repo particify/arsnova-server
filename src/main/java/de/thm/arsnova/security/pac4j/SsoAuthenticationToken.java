@@ -19,7 +19,7 @@
 package de.thm.arsnova.security.pac4j;
 
 import java.util.Collection;
-import org.pac4j.core.profile.CommonProfile;
+import org.pac4j.core.profile.UserProfile;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -33,7 +33,7 @@ import de.thm.arsnova.security.User;
 public class SsoAuthenticationToken extends AbstractAuthenticationToken {
 	private User principal;
 
-	public SsoAuthenticationToken(final User principal, final CommonProfile profile,
+	public SsoAuthenticationToken(final User principal, final UserProfile profile,
 			final Collection<? extends GrantedAuthority> grantedAuthorities) {
 		super(grantedAuthorities);
 		this.principal = principal;
