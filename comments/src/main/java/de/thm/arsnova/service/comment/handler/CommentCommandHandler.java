@@ -1,5 +1,6 @@
 package de.thm.arsnova.service.comment.handler;
 
+import de.thm.arsnova.service.comment.config.RabbitConfig;
 import de.thm.arsnova.service.comment.exception.BadRequestException;
 import de.thm.arsnova.service.comment.exception.ForbiddenException;
 import de.thm.arsnova.service.comment.model.BonusToken;
@@ -288,6 +289,12 @@ public class CommentCommandHandler {
                     c.getRoomId() + ".comment.stream",
                     event
             );
+
+            messagingTemplate.convertAndSend(
+                    RabbitConfig.COMMENT_SERVICE_COMMENT_DELETE_FANOUT_NAME,
+                    "",
+                    event
+            );
         }
     }
 
@@ -335,6 +342,12 @@ public class CommentCommandHandler {
             messagingTemplate.convertAndSend(
                     "amq.topic",
                     c.getRoomId() + ".comment.stream",
+                    event
+            );
+
+            messagingTemplate.convertAndSend(
+                    RabbitConfig.COMMENT_SERVICE_COMMENT_DELETE_FANOUT_NAME,
+                    "",
                     event
             );
         }
