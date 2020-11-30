@@ -34,16 +34,6 @@ server {
     add_header X-Frame-Options sameorigin always;
   }
 
-  # Legacy client
-  location /mobile/ {
-    proxy_pass http://arsnova-web-legacy/;
-    proxy_http_version 1.1;
-    gzip on;
-    gzip_types application/javascript text/css image/svg+xml;
-    gzip_vary on;
-    add_header X-Frame-Options sameorigin always;
-  }
-
   # Public REST API
   location /api/ {
     proxy_pass http://http-gateway/;
@@ -66,20 +56,8 @@ server {
     proxy_set_header X-Forwarded-Port $forwarded_port;
   }
 
-  # Legacy WebSocket server
-  location /socket.io/ {
-    proxy_pass http://core-ws;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
-    proxy_set_header Host $host;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $forwarded_scheme;
-    proxy_set_header X-Forwarded-Port $forwarded_port;
-  }
-
-  # Legacy configuration endpoint
-  location = /arsnova-config { proxy_pass http://core/v2/configuration/; }
+  # Include legacy config if it exists
+  include conf.d/legacy_${LEGACY_INCLUDE}.conf.include*;
 }
 
 # Set server's scheme as fallback if request was not already forwarded.

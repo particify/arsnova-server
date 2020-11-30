@@ -135,6 +135,7 @@ services:
       - arsnova-web
     environment:
       ARSNOVA_HOSTNAME: $ARSNOVA_HOSTNAME
+      LEGACY_INCLUDE: redirect
 volumes:
   couchdb_data:
   postgresql_data_auth:
