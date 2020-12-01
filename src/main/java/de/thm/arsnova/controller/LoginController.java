@@ -308,7 +308,7 @@ public class LoginController extends AbstractController {
 		return result;
 	}
 
-	@RequestMapping(value = { "/auth/", "/whoami" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/auth/", "/whoami", "/whoami.json" }, method = RequestMethod.GET)
 	@ResponseBody
 	public User whoami() {
 		userSessionService.setUser(userService.getCurrentUser());
