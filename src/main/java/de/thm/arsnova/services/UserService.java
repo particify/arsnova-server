@@ -28,6 +28,8 @@ import de.thm.arsnova.exceptions.BadRequestException;
 import de.thm.arsnova.exceptions.ForbiddenException;
 import de.thm.arsnova.exceptions.NotFoundException;
 import de.thm.arsnova.exceptions.UnauthorizedException;
+import java.util.Collection;
+import javax.servlet.http.HttpSession;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.pac4j.oauth.profile.facebook.FacebookProfile;
@@ -42,19 +44,25 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.intercept.RunAsUserToken;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.keygen.BytesKeyGenerator;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.util.UriUtils;
 import org.stagemonitor.core.metrics.MonitorGauges;
 
@@ -237,6 +245,9 @@ public class UserService implements IUserService {
 			} else if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_DB_USER"))) {
 				user.setType(User.ARSNOVA);
 			}
+		} else if (authentication instanceof RunAsUserToken) {
+			final RunAsUserToken token = (RunAsUserToken) authentication;
+			user = new User(token);
 		}
 
 		if (user == null || "anonymous".equals(user.getUsername())) {
@@ -588,6 +599,20 @@ public class UserService implements IUserService {
 	@Override
 	public LoggedIn getLoggedInFromUser(User user) {
 		return databaseDao.getLoggedInByUser(user);
+	}
+
+	@Override
+	@PreAuthorize("hasRole('ADMIN')")
+	public void impersonateUser(final String username, final Collection<? extends GrantedAuthority> authorities) {
+		final Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
+		final Authentication impersonationAuth = new RunAsUserToken(
+				"AdminImpersonation", username, null, authorities, currentAuth.getClass());
+		SecurityContextHolder.getContext().setAuthentication(impersonationAuth);
+		final HttpSession session = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+				.getRequest().getSession(true);
+		session.setAttribute(
+				HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+				SecurityContextHolder.getContext());
 	}
 
 	private void sendEmail(DbUser dbUser, String subject, String body) {

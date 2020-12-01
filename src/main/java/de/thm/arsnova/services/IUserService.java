@@ -21,9 +21,11 @@ import de.thm.arsnova.entities.DbUser;
 import de.thm.arsnova.entities.LoggedIn;
 import de.thm.arsnova.entities.User;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.security.core.GrantedAuthority;
 
 /**
  * The functionality the user service should provide.
@@ -74,6 +76,8 @@ public interface IUserService {
 	void deleteUserContent(LoggedIn user);
 
 	void anonymizeUser(LoggedIn username);
+
+	void impersonateUser(String username, Collection<? extends GrantedAuthority> authorities);
 
 	LoggedIn getLoggedInFromUser(User user);
 }

@@ -23,6 +23,7 @@ import org.pac4j.oauth.profile.facebook.FacebookProfile;
 import org.pac4j.oauth.profile.twitter.TwitterProfile;
 import org.pac4j.oidc.profile.OidcProfile;
 import org.pac4j.oidc.profile.google.GoogleOidcProfile;
+import org.springframework.security.access.intercept.RunAsUserToken;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
@@ -41,6 +42,7 @@ public class User implements Serializable {
 	public static final String ARSNOVA = "arsnova";
 	public static final String ANONYMOUS = "anonymous";
 	public static final String GUEST = "guest";
+	public static final String IMPERSONATED = "impersonated";
 
 	public static final String FACEBOOK_LINK_PATTERN = "https://www.facebook.com/app_scoped_user_id/%s/";
 
@@ -87,6 +89,11 @@ public class User implements Serializable {
 	public User(UsernamePasswordAuthenticationToken token) {
 		setUsername(token.getName());
 		setType(LDAP);
+	}
+
+	public User(RunAsUserToken token) {
+		setUsername(token.getName());
+		setType(IMPERSONATED);
 	}
 
 	public User(String username) {

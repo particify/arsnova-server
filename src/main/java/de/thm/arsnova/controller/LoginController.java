@@ -46,6 +46,7 @@ import org.springframework.security.ldap.authentication.LdapAuthenticationProvid
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -439,6 +440,12 @@ public class LoginController extends AbstractController {
 		}
 
 		return services;
+	}
+
+	@PostMapping("/auth/impersonate")
+	@ResponseBody
+	public void impersonateUser(@RequestParam final String username) {
+		userService.impersonateUser(username, getAuthorities(false));
 	}
 
 	private Collection<GrantedAuthority> getAuthorities(final boolean admin) {
