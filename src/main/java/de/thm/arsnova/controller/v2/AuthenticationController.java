@@ -256,7 +256,7 @@ public class AuthenticationController extends AbstractController {
 		});
 	}
 
-	@GetMapping({ "/", "/whoami" })
+	@GetMapping({ "/", "/whoami", "/whoami.json" })
 	@ResponseBody
 	public ClientAuthentication whoami(@AuthenticationPrincipal final User user) {
 		if (user == null) {
