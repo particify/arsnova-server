@@ -57,6 +57,14 @@ yarn_install:
     - umask 0000
     - yarn --frozen-lockfile
 
+eslint:
+  stage: test
+  needs:
+    - yarn_install
+  allow_failure: false
+  script:
+    - yarn eslint --config eslint.json .
+
 .docker_image: &docker_image
   stage: deploy
   needs:

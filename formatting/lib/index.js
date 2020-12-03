@@ -8,8 +8,8 @@ const markdownItKatex = require('@iktakahiro/markdown-it-katex');
 const app = express();
 const appName = 'Particify Formatting Service for ARSnova';
 const port = process.env.SERVER_PORT || 3020;
-const markdownOpts = {breaks: true, linkify: true};
-const linkOpts = {attrs: {target: '_blank', rel: 'noopener'}};
+const markdownOpts = { breaks: true, linkify: true };
+const linkOpts = { attrs: { target: '_blank', rel: 'noopener' } };
 const markdown = markdownIt('zero', markdownOpts);
 const markdownLatex = markdownIt('zero', markdownOpts);
 const defaultMdFeatureset = 'simple';
@@ -47,7 +47,7 @@ const markdownFeaturesets = {
     'table',
     'code',
     'fence',
-    'escape',
+    'escape'
   ],
   math: [
     'math_inline',
@@ -59,34 +59,34 @@ app.use(bodyParser.json())
 markdown.use(markdownItLinkAttributes, linkOpts);
 markdownLatex.use(markdownItLinkAttributes, linkOpts);
 markdownLatex.use(markdownItKatex);
-markdown.linkify.set({target: '_blank'});
-markdownLatex.linkify.set({target: '_blank'});
+markdown.linkify.set({ target: '_blank' });
+markdownLatex.linkify.set({ target: '_blank' });
 
 app.get('/', (req, res) => {
-  res.send($appName);
+  res.send(appName);
 });
 
 app.post('/render', (req, res) => {
   if (!req.body || !req.body.text) {
-    res.status(400).send({error: 'Value for \'text\' is missing.'});
+    res.status(400).send({ error: 'Value for \'text\' is missing.' });
 
     return;
   }
   let html = req.body.text;
-  let options = req.body.options;
+  const options = req.body.options;
 
   if (options) {
     const mdFeatureset = (options.markdownFeatureset || defaultMdFeatureset).toLowerCase();
     let mdFeatures = options.markdown
-        ? markdownFeaturesets[mdFeatureset] || markdownFeaturesets[defaultMdFeatureset]
-        : markdownFeaturesets.minimum;
+      ? markdownFeaturesets[mdFeatureset] || markdownFeaturesets[defaultMdFeatureset]
+      : markdownFeaturesets.minimum;
     if (options.latex) {
       mdFeatures = mdFeatures.concat(markdownFeaturesets.math);
     }
     html = configureMarkdown(markdownLatex, markdownOpts, mdFeatures).render(html);
   }
 
-  res.send({html: html});
+  res.send({ html: html });
 });
 
 app.listen(port, () => {
