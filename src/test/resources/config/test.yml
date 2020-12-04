@@ -1,4 +1,6 @@
 # Configuration overrides for test environment
 arsnova:
   security:
-    admin-accounts: "TestAdmin"
+    admin-accounts:
+      - login-id: TestAdmin
+        auth-provider: ARSNOVA

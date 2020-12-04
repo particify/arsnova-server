@@ -21,8 +21,12 @@ package de.thm.arsnova.config.properties;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConstructorBinding;
 import org.springframework.boot.convert.DurationUnit;
+
+import de.thm.arsnova.model.UserProfile;
 
 @ConfigurationProperties(SecurityProperties.PREFIX)
 public class SecurityProperties {
@@ -78,8 +82,46 @@ public class SecurityProperties {
 		}
 	}
 
+	@ConstructorBinding
+	public static class AdminAccount {
+		private String loginId;
+		private UserProfile.AuthProvider authProvider;
+
+		public AdminAccount(final String loginId, final UserProfile.AuthProvider authProvider) {
+			this.loginId = loginId;
+			this.authProvider = authProvider;
+		}
+
+		public String getLoginId() {
+			return loginId;
+		}
+
+		public UserProfile.AuthProvider getAuthProvider() {
+			return authProvider;
+		}
+
+		@Override
+		public boolean equals(final Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
+			final AdminAccount that = (AdminAccount) o;
+
+			return Objects.equals(loginId, that.loginId)
+					&& authProvider == that.authProvider;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(loginId, authProvider);
+		}
+	}
+
 	private Jwt jwt;
-	private List<String> adminAccounts;
+	private List<AdminAccount> adminAccounts;
 	private int loginTryLimit;
 	private int resendMailLimit;
 	private List<String> corsOrigins;
@@ -92,11 +134,11 @@ public class SecurityProperties {
 		this.jwt = jwt;
 	}
 
-	public List<String> getAdminAccounts() {
+	public List<AdminAccount> getAdminAccounts() {
 		return adminAccounts;
 	}
 
-	public void setAdminAccounts(final List<String> adminAccounts) {
+	public void setAdminAccounts(final List<AdminAccount> adminAccounts) {
 		this.adminAccounts = adminAccounts;
 	}
 

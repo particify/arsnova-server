@@ -19,6 +19,7 @@
 package de.thm.arsnova.security.pac4j;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.pac4j.oauth.profile.facebook.FacebookProfile;
@@ -63,25 +64,29 @@ public class SsoUserDetailsService implements AuthenticationUserDetailsService<S
 	public User loadUserDetails(final SsoAuthenticationToken token)
 			throws UsernameNotFoundException {
 		final User user;
+		final Set<GrantedAuthority> grantedAuthorities = new HashSet<>(defaultGrantedAuthorities);
 		if (token.getDetails() instanceof GoogleOidcProfile) {
 			final GoogleOidcProfile profile = (GoogleOidcProfile) token.getDetails();
 			if (!profile.getEmailVerified()) {
 				throw new IllegalArgumentException("Email is not verified.");
 			}
 			user = userService.loadUser(UserProfile.AuthProvider.GOOGLE, profile.getEmail(),
-					defaultGrantedAuthorities, true);
+					grantedAuthorities, true);
 		} else if (token.getDetails() instanceof TwitterProfile) {
 			final TwitterProfile profile = (TwitterProfile) token.getDetails();
 			user = userService.loadUser(UserProfile.AuthProvider.TWITTER, profile.getUsername(),
-					defaultGrantedAuthorities, true);
+					grantedAuthorities, true);
 		} else if (token.getDetails() instanceof FacebookProfile) {
 			final FacebookProfile profile = (FacebookProfile) token.getDetails();
 			user = userService.loadUser(UserProfile.AuthProvider.FACEBOOK, profile.getId(),
-					defaultGrantedAuthorities, true);
+					grantedAuthorities, true);
 		} else if (token.getDetails() instanceof OidcProfile) {
 			final OidcProfile profile = (OidcProfile) token.getDetails();
+			if (userService.isAdmin(profile.getId(), UserProfile.AuthProvider.OIDC)) {
+				grantedAuthorities.add(User.ROLE_ADMIN);
+			}
 			user = userService.loadUser(UserProfile.AuthProvider.OIDC, profile.getId(),
-					defaultGrantedAuthorities, true);
+					grantedAuthorities, true);
 		} else if (token.getDetails() instanceof SAML2Profile) {
 			final SAML2Profile profile = (SAML2Profile) token.getDetails();
 			final String uidAttr = samlProperties.getUserIdAttribute();
@@ -91,8 +96,11 @@ public class SsoUserDetailsService implements AuthenticationUserDetailsService<S
 			} else {
 				uid = profile.getAttribute(uidAttr, List.class).get(0).toString();
 			}
+			if (userService.isAdmin(uid, UserProfile.AuthProvider.SAML)) {
+				grantedAuthorities.add(User.ROLE_ADMIN);
+			}
 			user = userService.loadUser(UserProfile.AuthProvider.SAML, uid,
-					defaultGrantedAuthorities, true);
+					grantedAuthorities, true);
 		} else {
 			throw new IllegalArgumentException("AuthenticationToken not supported");
 		}

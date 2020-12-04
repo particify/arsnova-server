@@ -49,7 +49,7 @@ public class CasUserDetailsService extends AbstractCasAssertionUserDetailsServic
 	protected UserDetails loadUserDetails(final Assertion assertion) {
 		final String uid = assertion.getPrincipal().getName();
 		final Set<GrantedAuthority> grantedAuthorities = new HashSet<>(defaultGrantedAuthorities);
-		if (userService.isAdmin(uid)) {
+		if (userService.isAdmin(uid, UserProfile.AuthProvider.CAS)) {
 			grantedAuthorities.add(User.ROLE_ADMIN);
 		}
 
