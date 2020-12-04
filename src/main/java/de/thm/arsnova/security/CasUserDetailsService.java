@@ -34,17 +34,19 @@ import de.thm.arsnova.service.UserService;
  * Class to load a user based on the results from CAS.
  */
 public class CasUserDetailsService extends AbstractCasAssertionUserDetailsService {
+	public static final GrantedAuthority ROLE_CAS_USER = new SimpleGrantedAuthority("ROLE_CAS_USER");
+
 	@Autowired
 	private UserService userService;
 
 	@Override
 	protected UserDetails loadUserDetails(final Assertion assertion) {
 		final Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
-		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_CAS_USER"));
+		grantedAuthorities.add(User.ROLE_USER);
+		grantedAuthorities.add(ROLE_CAS_USER);
 		final String uid = assertion.getPrincipal().getName();
 		if (userService.isAdmin(uid)) {
-			grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+			grantedAuthorities.add(User.ROLE_ADMIN);
 		}
 
 		return userService.loadUser(UserProfile.AuthProvider.CAS, assertion.getPrincipal().getName(),

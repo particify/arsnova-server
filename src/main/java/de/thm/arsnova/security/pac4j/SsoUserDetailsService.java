@@ -45,6 +45,8 @@ import de.thm.arsnova.service.UserService;
  */
 @Service
 public class SsoUserDetailsService implements AuthenticationUserDetailsService<SsoAuthenticationToken> {
+	public static final GrantedAuthority ROLE_OAUTH_USER = new SimpleGrantedAuthority("ROLE_OAUTH_USER");
+
 	private final UserService userService;
 	private final AuthenticationProviderProperties.Saml samlProperties;
 	protected final Collection<GrantedAuthority> grantedAuthorities;
@@ -54,8 +56,8 @@ public class SsoUserDetailsService implements AuthenticationUserDetailsService<S
 		this.userService = userService;
 		this.samlProperties = authenticationProviderProperties.getSaml();
 		grantedAuthorities = new HashSet<>();
-		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_OAUTH_USER"));
+		grantedAuthorities.add(User.ROLE_USER);
+		grantedAuthorities.add(ROLE_OAUTH_USER);
 	}
 
 	public User loadUserDetails(final SsoAuthenticationToken token)

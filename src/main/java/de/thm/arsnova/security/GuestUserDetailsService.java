@@ -38,14 +38,16 @@ import de.thm.arsnova.service.UserService;
  */
 @Service
 public class GuestUserDetailsService implements UserDetailsService {
+	public static final GrantedAuthority ROLE_GUEST_USER = new SimpleGrantedAuthority("ROLE_GUEST_USER");
+
 	private final UserService userService;
 	private final Collection<GrantedAuthority> grantedAuthorities;
 
 	public GuestUserDetailsService(final UserService userService) {
 		this.userService = userService;
 		grantedAuthorities = new HashSet<>();
-		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_GUEST_USER"));
+		grantedAuthorities.add(User.ROLE_USER);
+		grantedAuthorities.add(ROLE_GUEST_USER);
 	}
 
 	@Override

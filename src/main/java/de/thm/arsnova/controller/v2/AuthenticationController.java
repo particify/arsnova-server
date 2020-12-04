@@ -21,7 +21,6 @@ package de.thm.arsnova.controller.v2;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -48,9 +47,7 @@ import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.stereotype.Controller;
@@ -391,15 +388,5 @@ public class AuthenticationController extends AbstractController {
 		}
 
 		return services;
-	}
-
-	private Collection<GrantedAuthority> getAuthorities(final boolean admin) {
-		final List<GrantedAuthority> authList = new ArrayList<>();
-		authList.add(new SimpleGrantedAuthority("ROLE_USER"));
-		if (admin) {
-			authList.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-		}
-
-		return authList;
 	}
 }

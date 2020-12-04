@@ -39,13 +39,15 @@ import de.thm.arsnova.service.UserService;
  */
 @Service
 public class RegisteredUserDetailsService implements UserDetailsService {
+	public static final GrantedAuthority ROLE_REGISTERED_USER = new SimpleGrantedAuthority("ROLE_REGISTERED_USER");
+
 	private UserService userService;
 	private final Collection<GrantedAuthority> grantedAuthorities;
 
 	public RegisteredUserDetailsService() {
 		grantedAuthorities = new HashSet<>();
-		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_REGISTERED_USER"));
+		grantedAuthorities.add(User.ROLE_USER);
+		grantedAuthorities.add(ROLE_REGISTERED_USER);
 	}
 
 	@Override
@@ -54,7 +56,7 @@ public class RegisteredUserDetailsService implements UserDetailsService {
 		Collection<GrantedAuthority> ga = grantedAuthorities;
 		if (userService.isAdmin(loginId)) {
 			ga = new ArrayList<>(grantedAuthorities);
-			ga.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+			ga.add(User.ROLE_ADMIN);
 		}
 		return userService.loadUser(UserProfile.AuthProvider.ARSNOVA, loginId,
 				ga, false);

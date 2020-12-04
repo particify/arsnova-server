@@ -37,6 +37,8 @@ import de.thm.arsnova.service.UserService;
  * to get a consistent ID despite case insensitivity.
  */
 public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
+	public static final GrantedAuthority ROLE_LDAP_USER = new SimpleGrantedAuthority("ROLE_LDAP_USER");
+
 	private static final Logger logger = LoggerFactory.getLogger(CustomLdapUserDetailsMapper.class);
 
 	private String userIdAttr;
@@ -60,8 +62,8 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
 
 		final Collection<GrantedAuthority> grantedAuthorities = (Collection<GrantedAuthority>) authorities;
 		final Collection<GrantedAuthority> additionalAuthorities = new HashSet<>();
-		additionalAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-		additionalAuthorities.add(new SimpleGrantedAuthority("ROLE_LDAP_USER"));
+		additionalAuthorities.add(User.ROLE_USER);
+		additionalAuthorities.add(ROLE_LDAP_USER);
 		grantedAuthorities.addAll(additionalAuthorities);
 
 		return userService.loadUser(UserProfile.AuthProvider.LDAP, ldapUsername,

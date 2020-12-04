@@ -49,6 +49,7 @@ import de.thm.arsnova.config.TestPersistanceConfig;
 import de.thm.arsnova.config.TestSecurityConfig;
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.model.migration.v2.ClientAuthentication;
+import de.thm.arsnova.security.GuestUserDetailsService;
 import de.thm.arsnova.security.User;
 import de.thm.arsnova.security.pac4j.SsoAuthenticationToken;
 
@@ -82,7 +83,7 @@ public class UserServiceTest {
 		socketid2user.put(UUID.randomUUID(), new ClientAuthentication(token));
 
 		final List<GrantedAuthority> authorities = new ArrayList<>();
-		authorities.add(new SimpleGrantedAuthority("ROLE_GUEST"));
+		authorities.add(GuestUserDetailsService.ROLE_GUEST_USER);
 		socketid2user.put(UUID.randomUUID(), new ClientAuthentication(
 				new AnonymousAuthenticationToken("ptsr00", UUID.randomUUID(), authorities)));
 
