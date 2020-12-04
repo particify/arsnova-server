@@ -19,7 +19,7 @@
 package de.thm.arsnova.security;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Set;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -40,14 +40,14 @@ import de.thm.arsnova.service.UserService;
 public class GuestUserDetailsService implements UserDetailsService {
 	public static final GrantedAuthority ROLE_GUEST_USER = new SimpleGrantedAuthority("ROLE_GUEST_USER");
 
+	private final Collection<GrantedAuthority> defaultGrantedAuthorities = Set.of(
+			User.ROLE_USER,
+			ROLE_GUEST_USER
+	);
 	private final UserService userService;
-	private final Collection<GrantedAuthority> grantedAuthorities;
 
 	public GuestUserDetailsService(final UserService userService) {
 		this.userService = userService;
-		grantedAuthorities = new HashSet<>();
-		grantedAuthorities.add(User.ROLE_USER);
-		grantedAuthorities.add(ROLE_GUEST_USER);
 	}
 
 	@Override
@@ -57,6 +57,6 @@ public class GuestUserDetailsService implements UserDetailsService {
 
 	public UserDetails loadUserByUsername(final String loginId, final boolean autoCreate) {
 		return userService.loadUser(UserProfile.AuthProvider.ARSNOVA_GUEST, loginId,
-				grantedAuthorities, autoCreate);
+				defaultGrantedAuthorities, autoCreate);
 	}
 }

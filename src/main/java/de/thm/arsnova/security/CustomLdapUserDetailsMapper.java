@@ -20,6 +20,7 @@ package de.thm.arsnova.security;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,10 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
 	private static final Logger logger = LoggerFactory.getLogger(CustomLdapUserDetailsMapper.class);
 
 	private String userIdAttr;
+	private final Collection<GrantedAuthority> defaultGrantedAuthorities = Set.of(
+			User.ROLE_USER,
+			ROLE_LDAP_USER
+	);
 
 	@Autowired
 	private UserService userService;
@@ -60,11 +65,8 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
 			ldapUsername = username.toLowerCase();
 		}
 
-		final Collection<GrantedAuthority> grantedAuthorities = (Collection<GrantedAuthority>) authorities;
-		final Collection<GrantedAuthority> additionalAuthorities = new HashSet<>();
-		additionalAuthorities.add(User.ROLE_USER);
-		additionalAuthorities.add(ROLE_LDAP_USER);
-		grantedAuthorities.addAll(additionalAuthorities);
+		final Collection<GrantedAuthority> grantedAuthorities = new HashSet<>(defaultGrantedAuthorities);
+		grantedAuthorities.addAll(authorities);
 
 		return userService.loadUser(UserProfile.AuthProvider.LDAP, ldapUsername,
 				grantedAuthorities, true);

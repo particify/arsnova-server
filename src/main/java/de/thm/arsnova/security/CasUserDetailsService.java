@@ -18,6 +18,7 @@
 
 package de.thm.arsnova.security;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import org.jasig.cas.client.validation.Assertion;
@@ -36,15 +37,18 @@ import de.thm.arsnova.service.UserService;
 public class CasUserDetailsService extends AbstractCasAssertionUserDetailsService {
 	public static final GrantedAuthority ROLE_CAS_USER = new SimpleGrantedAuthority("ROLE_CAS_USER");
 
+	private final Collection<GrantedAuthority> defaultGrantedAuthorities = Set.of(
+			User.ROLE_USER,
+			ROLE_CAS_USER
+	);
+
 	@Autowired
 	private UserService userService;
 
 	@Override
 	protected UserDetails loadUserDetails(final Assertion assertion) {
-		final Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
-		grantedAuthorities.add(User.ROLE_USER);
-		grantedAuthorities.add(ROLE_CAS_USER);
 		final String uid = assertion.getPrincipal().getName();
+		final Set<GrantedAuthority> grantedAuthorities = new HashSet<>(defaultGrantedAuthorities);
 		if (userService.isAdmin(uid)) {
 			grantedAuthorities.add(User.ROLE_ADMIN);
 		}
