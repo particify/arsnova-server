@@ -51,7 +51,7 @@ public class StubUserService extends UserServiceImpl {
 		super(repository, systemProperties, securityProperties, authenticationProviderProperties,
 				mailSender, jackson2HttpMessageConverter, validator);
 		grantedAuthorities = new HashSet<>();
-		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+		grantedAuthorities.add(User.ROLE_USER);
 	}
 
 	public void setUserAuthenticated(final boolean isAuthenticated) {

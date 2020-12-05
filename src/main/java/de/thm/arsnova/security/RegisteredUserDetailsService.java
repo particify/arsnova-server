@@ -18,9 +18,9 @@
 
 package de.thm.arsnova.security;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -39,25 +39,23 @@ import de.thm.arsnova.service.UserService;
  */
 @Service
 public class RegisteredUserDetailsService implements UserDetailsService {
-	private UserService userService;
-	private final Collection<GrantedAuthority> grantedAuthorities;
+	public static final GrantedAuthority ROLE_REGISTERED_USER = new SimpleGrantedAuthority("ROLE_REGISTERED_USER");
 
-	public RegisteredUserDetailsService() {
-		grantedAuthorities = new HashSet<>();
-		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-		grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_REGISTERED_USER"));
-	}
+	private final Collection<GrantedAuthority> defaultGrantedAuthorities = Set.of(
+			User.ROLE_USER,
+			ROLE_REGISTERED_USER
+	);
+	private UserService userService;
 
 	@Override
 	public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
 		final String loginId = username.toLowerCase();
-		Collection<GrantedAuthority> ga = grantedAuthorities;
+		final Collection<GrantedAuthority> grantedAuthorities = new HashSet<>(defaultGrantedAuthorities);
 		if (userService.isAdmin(loginId)) {
-			ga = new ArrayList<>(grantedAuthorities);
-			ga.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+			grantedAuthorities.add(User.ROLE_ADMIN);
 		}
 		return userService.loadUser(UserProfile.AuthProvider.ARSNOVA, loginId,
-				ga, false);
+				grantedAuthorities, false);
 	}
 
 	@Autowired

@@ -20,6 +20,7 @@ package de.thm.arsnova.security;
 
 import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import de.thm.arsnova.model.UserProfile;
 import de.thm.arsnova.model.migration.v2.ClientAuthentication;
@@ -30,6 +31,9 @@ import de.thm.arsnova.model.migration.v2.ClientAuthentication;
  * @author Daniel Gerhardt
  */
 public class User implements org.springframework.security.core.userdetails.UserDetails {
+	public static final GrantedAuthority ROLE_USER = new SimpleGrantedAuthority("ROLE_USER");
+	public static final GrantedAuthority ROLE_ADMIN = new SimpleGrantedAuthority("ROLE_ADMIN");
+
 	private static final long serialVersionUID = 1L;
 
 	private String id;
