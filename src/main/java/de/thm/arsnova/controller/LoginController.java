@@ -347,10 +347,13 @@ public class LoginController extends AbstractController {
 		}
 
 		if (customLoginEnabled && !"".equals(customLoginDialog)) {
+			final String url = customLoginDialog.startsWith("/") || UrlUtils.isAbsoluteUrl(customLoginDialog)
+					? customLoginDialog
+					: customizationPath + "/" + customLoginDialog;
 			ServiceDescription sdesc = new ServiceDescription(
 				"custom",
 				customLoginTitle,
-				customizationPath + "/" + customLoginDialog + "?redirect={0}",
+				url + "?redirect={0}",
 				customLoginRoles,
 				customLoginImage
 			);
@@ -359,10 +362,13 @@ public class LoginController extends AbstractController {
 		}
 
 		if (dbAuthEnabled && !"".equals(dbAuthDialog)) {
+			final String url = dbAuthDialog.startsWith("/") || UrlUtils.isAbsoluteUrl(dbAuthDialog)
+					? dbAuthDialog
+					: customizationPath + "/" + dbAuthDialog;
 			ServiceDescription sdesc = new ServiceDescription(
 				"arsnova",
 				dbAuthTitle,
-				customizationPath + "/" + dbAuthDialog + "?redirect={0}",
+				url + "?redirect={0}",
 				dbAuthRoles,
 				dbAuthImage
 			);
@@ -371,10 +377,13 @@ public class LoginController extends AbstractController {
 		}
 
 		if (ldapEnabled && !"".equals(ldapDialog)) {
+			final String url = ldapDialog.startsWith("/") || UrlUtils.isAbsoluteUrl(ldapDialog)
+					? ldapDialog
+					: customizationPath + "/" + ldapDialog;
 			ServiceDescription sdesc = new ServiceDescription(
 				"ldap",
 				ldapTitle,
-				customizationPath + "/" + ldapDialog + "?redirect={0}",
+				url + "?redirect={0}",
 				ldapRoles,
 				ldapImage
 			);
